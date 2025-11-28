@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020009F0 RID: 2544
 public class ParticleCollisionListener : MonoBehaviour
 {
-	// Token: 0x060040CF RID: 16591 RVA: 0x0015A704 File Offset: 0x00158904
+	// Token: 0x060040CF RID: 16591 RVA: 0x0015A6E4 File Offset: 0x001588E4
 	private void Awake()
 	{
 		this._events = new List<ParticleCollisionEvent>();
@@ -16,7 +16,7 @@ public class ParticleCollisionListener : MonoBehaviour
 	{
 	}
 
-	// Token: 0x060040D1 RID: 16593 RVA: 0x0015A714 File Offset: 0x00158914
+	// Token: 0x060040D1 RID: 16593 RVA: 0x0015A6F4 File Offset: 0x001588F4
 	public void OnParticleCollision(GameObject other)
 	{
 		int collisionEvents = ParticlePhysicsExtensions.GetCollisionEvents(this.target, other, this._events);

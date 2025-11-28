@@ -6,7 +6,7 @@ using UnityEngine.Events;
 // Token: 0x02000553 RID: 1363
 public class MonkeBallResetGame : MonoBehaviourTick
 {
-	// Token: 0x0600227A RID: 8826 RVA: 0x000B4958 File Offset: 0x000B2B58
+	// Token: 0x0600227A RID: 8826 RVA: 0x000B4938 File Offset: 0x000B2B38
 	private void Awake()
 	{
 		this._resetButton.onPressButton.AddListener(new UnityAction(this.OnSelect));
@@ -16,7 +16,7 @@ public class MonkeBallResetGame : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600227B RID: 8827 RVA: 0x000B49A5 File Offset: 0x000B2BA5
+	// Token: 0x0600227B RID: 8827 RVA: 0x000B4985 File Offset: 0x000B2B85
 	public override void Tick()
 	{
 		if (this._cooldown)
@@ -30,7 +30,7 @@ public class MonkeBallResetGame : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600227C RID: 8828 RVA: 0x000B49E0 File Offset: 0x000B2BE0
+	// Token: 0x0600227C RID: 8828 RVA: 0x000B49C0 File Offset: 0x000B2BC0
 	public void ToggleReset(bool toggle, int teamId, bool force = false)
 	{
 		if (teamId < -1 || teamId >= this.teamMaterials.Length)
@@ -52,7 +52,7 @@ public class MonkeBallResetGame : MonoBehaviourTick
 		this._cooldownTimer = 3f;
 	}
 
-	// Token: 0x0600227D RID: 8829 RVA: 0x000B4A30 File Offset: 0x000B2C30
+	// Token: 0x0600227D RID: 8829 RVA: 0x000B4A10 File Offset: 0x000B2C10
 	private void ToggleButton(bool toggle, int teamId)
 	{
 		this._resetButton.enabled = toggle;
@@ -65,7 +65,7 @@ public class MonkeBallResetGame : MonoBehaviourTick
 		this.button.sharedMaterial = this.teamMaterials[teamId];
 	}
 
-	// Token: 0x0600227E RID: 8830 RVA: 0x000B4A7C File Offset: 0x000B2C7C
+	// Token: 0x0600227E RID: 8830 RVA: 0x000B4A5C File Offset: 0x000B2C5C
 	private void OnSelect()
 	{
 		MonkeBallGame.Instance.RequestResetGame();

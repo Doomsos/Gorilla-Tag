@@ -6,14 +6,14 @@ namespace GorillaLocomotion
 	// Token: 0x02000F86 RID: 3974
 	public sealed class Playspace : MonoBehaviour
 	{
-		// Token: 0x060063CA RID: 25546 RVA: 0x00206F0A File Offset: 0x0020510A
+		// Token: 0x060063CA RID: 25546 RVA: 0x00206EEA File Offset: 0x002050EA
 		private void Awake()
 		{
 			this._sqrSphereRadius = this._sphereRadius * this._sphereRadius;
 			this._sqrSnapToThreshold = this._snapToThreshold * this._snapToThreshold;
 		}
 
-		// Token: 0x060063CB RID: 25547 RVA: 0x00206F34 File Offset: 0x00205134
+		// Token: 0x060063CB RID: 25547 RVA: 0x00206F14 File Offset: 0x00205114
 		private void Update()
 		{
 			Vector3 vector = this._localGorillaHead.transform.position - base.transform.position;
@@ -32,13 +32,13 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x060063CC RID: 25548 RVA: 0x0020705F File Offset: 0x0020525F
+		// Token: 0x060063CC RID: 25548 RVA: 0x0020703F File Offset: 0x0020523F
 		private float GetChaseSpeed()
 		{
 			return this._defaultChaseSpeed;
 		}
 
-		// Token: 0x060063CD RID: 25549 RVA: 0x00207067 File Offset: 0x00205267
+		// Token: 0x060063CD RID: 25549 RVA: 0x00207047 File Offset: 0x00205247
 		private void OnDrawGizmosSelected()
 		{
 			Gizmos.DrawWireSphere(base.transform.position, this._sphereRadius);

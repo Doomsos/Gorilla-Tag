@@ -6,8 +6,8 @@ using Fusion;
 public class TagGameModeData : FusionGameModeData
 {
 	// Token: 0x17000388 RID: 904
-	// (get) Token: 0x0600212E RID: 8494 RVA: 0x000AEEA4 File Offset: 0x000AD0A4
-	// (set) Token: 0x0600212F RID: 8495 RVA: 0x000AEEB1 File Offset: 0x000AD0B1
+	// (get) Token: 0x0600212E RID: 8494 RVA: 0x000AEE84 File Offset: 0x000AD084
+	// (set) Token: 0x0600212F RID: 8495 RVA: 0x000AEE91 File Offset: 0x000AD091
 	public override object Data
 	{
 		get
@@ -21,8 +21,8 @@ public class TagGameModeData : FusionGameModeData
 	}
 
 	// Token: 0x17000389 RID: 905
-	// (get) Token: 0x06002130 RID: 8496 RVA: 0x000AEEBF File Offset: 0x000AD0BF
-	// (set) Token: 0x06002131 RID: 8497 RVA: 0x000AEEE9 File Offset: 0x000AD0E9
+	// (get) Token: 0x06002130 RID: 8496 RVA: 0x000AEE9F File Offset: 0x000AD09F
+	// (set) Token: 0x06002131 RID: 8497 RVA: 0x000AEEC9 File Offset: 0x000AD0C9
 	[Networked]
 	[NetworkedWeaved(0, 12)]
 	private unsafe TagData tagData
@@ -45,7 +45,7 @@ public class TagGameModeData : FusionGameModeData
 		}
 	}
 
-	// Token: 0x06002133 RID: 8499 RVA: 0x000AEF14 File Offset: 0x000AD114
+	// Token: 0x06002133 RID: 8499 RVA: 0x000AEEF4 File Offset: 0x000AD0F4
 	[WeaverGenerated]
 	public override void CopyBackingFieldsToState(bool A_1)
 	{
@@ -53,7 +53,7 @@ public class TagGameModeData : FusionGameModeData
 		this.tagData = this._tagData;
 	}
 
-	// Token: 0x06002134 RID: 8500 RVA: 0x000AEF2C File Offset: 0x000AD12C
+	// Token: 0x06002134 RID: 8500 RVA: 0x000AEF0C File Offset: 0x000AD10C
 	[WeaverGenerated]
 	public override void CopyStateToBackingFields()
 	{

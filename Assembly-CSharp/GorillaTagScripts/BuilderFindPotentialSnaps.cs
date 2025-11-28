@@ -11,7 +11,7 @@ namespace GorillaTagScripts
 	[BurstCompile]
 	public struct BuilderFindPotentialSnaps : IJobParallelFor
 	{
-		// Token: 0x06005790 RID: 22416 RVA: 0x001BE62C File Offset: 0x001BC82C
+		// Token: 0x06005790 RID: 22416 RVA: 0x001BE60C File Offset: 0x001BC80C
 		public void Execute(int index)
 		{
 			BuilderGridPlaneData builderGridPlaneData = this.gridPlanes[index];
@@ -26,7 +26,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005791 RID: 22417 RVA: 0x001BE68C File Offset: 0x001BC88C
+		// Token: 0x06005791 RID: 22417 RVA: 0x001BE66C File Offset: 0x001BC86C
 		public bool TryPlaceGridPlaneOnGridPlane(ref BuilderGridPlaneData gridPlane, ref BuilderGridPlaneData checkGridPlane, ref BuilderPotentialPlacementData potentialPlacement)
 		{
 			if (checkGridPlane.male == gridPlane.male)
@@ -185,19 +185,19 @@ namespace GorillaTagScripts
 			return true;
 		}
 
-		// Token: 0x06005792 RID: 22418 RVA: 0x001BA3EE File Offset: 0x001B85EE
+		// Token: 0x06005792 RID: 22418 RVA: 0x001BA3CE File Offset: 0x001B85CE
 		private Vector2Int Rotate90(Vector2Int v, int offsetX, int offsetY)
 		{
 			return new Vector2Int(v.y * -1 + offsetY, v.x);
 		}
 
-		// Token: 0x06005793 RID: 22419 RVA: 0x001BA407 File Offset: 0x001B8607
+		// Token: 0x06005793 RID: 22419 RVA: 0x001BA3E7 File Offset: 0x001B85E7
 		private Vector2Int Rotate270(Vector2Int v, int offsetX, int offsetY)
 		{
 			return new Vector2Int(v.y, v.x * -1 + offsetX);
 		}
 
-		// Token: 0x06005794 RID: 22420 RVA: 0x001BA420 File Offset: 0x001B8620
+		// Token: 0x06005794 RID: 22420 RVA: 0x001BA400 File Offset: 0x001B8600
 		private Vector2Int Rotate180(Vector2Int v, int offsetX, int offsetY)
 		{
 			return new Vector2Int(v.x * -1 + offsetX, v.y * -1 + offsetY);

@@ -10,17 +10,17 @@ using UnityEngine;
 public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabPool, ITickSystemPre
 {
 	// Token: 0x17000446 RID: 1094
-	// (get) Token: 0x060030CA RID: 12490 RVA: 0x0010A252 File Offset: 0x00108452
-	// (set) Token: 0x060030CB RID: 12491 RVA: 0x0010A25A File Offset: 0x0010845A
+	// (get) Token: 0x060030CA RID: 12490 RVA: 0x0010A232 File Offset: 0x00108432
+	// (set) Token: 0x060030CB RID: 12491 RVA: 0x0010A23A File Offset: 0x0010843A
 	bool ITickSystemPre.PreTickRunning { get; set; }
 
-	// Token: 0x060030CC RID: 12492 RVA: 0x0010A263 File Offset: 0x00108463
+	// Token: 0x060030CC RID: 12492 RVA: 0x0010A243 File Offset: 0x00108443
 	private void Awake()
 	{
 		RoomSystem.LeftRoomEvent += new Action(this.OnLeftRoom);
 	}
 
-	// Token: 0x060030CD RID: 12493 RVA: 0x0010A280 File Offset: 0x00108480
+	// Token: 0x060030CD RID: 12493 RVA: 0x0010A260 File Offset: 0x00108460
 	private void Start()
 	{
 		PhotonNetwork.PrefabPool = this;
@@ -40,7 +40,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		}
 	}
 
-	// Token: 0x060030CE RID: 12494 RVA: 0x0010A30C File Offset: 0x0010850C
+	// Token: 0x060030CE RID: 12494 RVA: 0x0010A2EC File Offset: 0x001084EC
 	bool IPunPrefabPoolVerify.VerifyInstantiation(Player sender, string prefabName, Vector3 position, Quaternion rotation, int[] viewIDs, out GameObject prefab)
 	{
 		prefab = null;
@@ -90,7 +90,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		return false;
 	}
 
-	// Token: 0x060030CF RID: 12495 RVA: 0x0010A3EC File Offset: 0x001085EC
+	// Token: 0x060030CF RID: 12495 RVA: 0x0010A3CC File Offset: 0x001085CC
 	GameObject IPunPrefabPoolVerify.Instantiate(GameObject prefabInstance, Vector3 position, Quaternion rotation)
 	{
 		bool activeSelf = prefabInstance.activeSelf;
@@ -107,7 +107,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		return gameObject;
 	}
 
-	// Token: 0x060030D0 RID: 12496 RVA: 0x0010A42C File Offset: 0x0010862C
+	// Token: 0x060030D0 RID: 12496 RVA: 0x0010A40C File Offset: 0x0010860C
 	GameObject IPunPrefabPool.Instantiate(string prefabId, Vector3 position, Quaternion rotation)
 	{
 		PrefabType prefabType;
@@ -118,7 +118,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		return this.Instantiate(prefabType.prefab, position, rotation);
 	}
 
-	// Token: 0x060030D1 RID: 12497 RVA: 0x0010A45C File Offset: 0x0010865C
+	// Token: 0x060030D1 RID: 12497 RVA: 0x0010A43C File Offset: 0x0010863C
 	void IPunPrefabPool.Destroy(GameObject netObj)
 	{
 		if (netObj.IsNull())
@@ -161,7 +161,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		}
 	}
 
-	// Token: 0x060030D2 RID: 12498 RVA: 0x0010A51C File Offset: 0x0010871C
+	// Token: 0x060030D2 RID: 12498 RVA: 0x0010A4FC File Offset: 0x001086FC
 	void ITickSystemPre.PreTick()
 	{
 		if (this.waiting)
@@ -195,7 +195,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		this.waiting = true;
 	}
 
-	// Token: 0x060030D3 RID: 12499 RVA: 0x0010A5E0 File Offset: 0x001087E0
+	// Token: 0x060030D3 RID: 12499 RVA: 0x0010A5C0 File Offset: 0x001087C0
 	private void OnLeftRoom()
 	{
 		foreach (GameObject gameObject in this.m_invalidCreatePool)
@@ -209,7 +209,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		this.m_m_invalidCreatePoolLookup.Clear();
 	}
 
-	// Token: 0x060030D4 RID: 12500 RVA: 0x0010A650 File Offset: 0x00108850
+	// Token: 0x060030D4 RID: 12500 RVA: 0x0010A630 File Offset: 0x00108830
 	private void CheckVOIPSettings(RemoteVoiceLink voiceLink)
 	{
 		try

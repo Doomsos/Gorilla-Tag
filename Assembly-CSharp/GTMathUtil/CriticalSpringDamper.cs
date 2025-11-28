@@ -5,19 +5,19 @@ namespace GTMathUtil
 	// Token: 0x02000D93 RID: 3475
 	internal class CriticalSpringDamper
 	{
-		// Token: 0x06005549 RID: 21833 RVA: 0x001AB082 File Offset: 0x001A9282
+		// Token: 0x06005549 RID: 21833 RVA: 0x001AB062 File Offset: 0x001A9262
 		private static float halflife_to_damping(float halflife, float eps = 1E-05f)
 		{
 			return 2.7725887f / (halflife + eps);
 		}
 
-		// Token: 0x0600554A RID: 21834 RVA: 0x001AADA9 File Offset: 0x001A8FA9
+		// Token: 0x0600554A RID: 21834 RVA: 0x001AAD89 File Offset: 0x001A8F89
 		private static float fast_negexp(float x)
 		{
 			return 1f / (1f + x + 0.48f * x * x + 0.235f * x * x * x);
 		}
 
-		// Token: 0x0600554B RID: 21835 RVA: 0x001AD848 File Offset: 0x001ABA48
+		// Token: 0x0600554B RID: 21835 RVA: 0x001AD828 File Offset: 0x001ABA28
 		public float Update(float dt)
 		{
 			float num = CriticalSpringDamper.halflife_to_damping(this.halfLife, 1E-05f) / 2f;

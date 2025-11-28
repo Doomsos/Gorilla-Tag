@@ -8,7 +8,7 @@ namespace CosmeticRoom
 	// Token: 0x02000EA2 RID: 3746
 	public class FittingRoom : MonoBehaviour
 	{
-		// Token: 0x06005DAE RID: 23982 RVA: 0x001E141C File Offset: 0x001DF61C
+		// Token: 0x06005DAE RID: 23982 RVA: 0x001E13FC File Offset: 0x001DF5FC
 		public void InitializeForCustomMap(bool useCustomConsoleMesh = true)
 		{
 			GameObject gameObject = this.consoleMesh;
@@ -19,7 +19,7 @@ namespace CosmeticRoom
 			CosmeticsController.instance.AddFittingRoom(this);
 		}
 
-		// Token: 0x06005DAF RID: 23983 RVA: 0x001E1440 File Offset: 0x001DF640
+		// Token: 0x06005DAF RID: 23983 RVA: 0x001E1420 File Offset: 0x001DF620
 		public void UpdateFromCart(List<CosmeticsController.CosmeticItem> currentCart, CosmeticsController.CosmeticSet tryOnSet)
 		{
 			this.iterator = 0;

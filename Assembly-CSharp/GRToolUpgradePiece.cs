@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000735 RID: 1845
 public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 {
-	// Token: 0x06002F81 RID: 12161 RVA: 0x00102560 File Offset: 0x00100760
+	// Token: 0x06002F81 RID: 12161 RVA: 0x00102540 File Offset: 0x00100740
 	private void Start()
 	{
 		MeshFilter componentInChildren = base.GetComponentInChildren<MeshFilter>();
@@ -16,7 +16,7 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002F82 RID: 12162 RVA: 0x00102590 File Offset: 0x00100790
+	// Token: 0x06002F82 RID: 12162 RVA: 0x00102570 File Offset: 0x00100770
 	private void EnableProcAnimLoop()
 	{
 		GameEntity gameEntity = this.gameEntity;
@@ -28,7 +28,7 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002F83 RID: 12163 RVA: 0x001025EC File Offset: 0x001007EC
+	// Token: 0x06002F83 RID: 12163 RVA: 0x001025CC File Offset: 0x001007CC
 	private void DisableProcAnimLoop()
 	{
 		GameEntity gameEntity = this.gameEntity;
@@ -44,13 +44,13 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002F84 RID: 12164 RVA: 0x0010267B File Offset: 0x0010087B
+	// Token: 0x06002F84 RID: 12164 RVA: 0x0010265B File Offset: 0x0010085B
 	private void SwitchMagnetizedTarget(GameEntity entity)
 	{
 		this.currentMagnetizingTool = entity;
 	}
 
-	// Token: 0x06002F85 RID: 12165 RVA: 0x00102684 File Offset: 0x00100884
+	// Token: 0x06002F85 RID: 12165 RVA: 0x00102664 File Offset: 0x00100864
 	private void Tick()
 	{
 		Vector3 position = base.transform.position;
@@ -159,7 +159,7 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002F86 RID: 12166 RVA: 0x00102B34 File Offset: 0x00100D34
+	// Token: 0x06002F86 RID: 12166 RVA: 0x00102B14 File Offset: 0x00100D14
 	private void OnEnable()
 	{
 		GameEntity gameEntity = this.gameEntity;
@@ -168,7 +168,7 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 		gameEntity2.OnReleased = (Action)Delegate.Combine(gameEntity2.OnReleased, new Action(this.ReleasedByPlayer));
 	}
 
-	// Token: 0x06002F87 RID: 12167 RVA: 0x00102B90 File Offset: 0x00100D90
+	// Token: 0x06002F87 RID: 12167 RVA: 0x00102B70 File Offset: 0x00100D70
 	private void OnDisable()
 	{
 		GameEntity gameEntity = this.gameEntity;
@@ -177,7 +177,7 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 		gameEntity2.OnReleased = (Action)Delegate.Remove(gameEntity2.OnReleased, new Action(this.ReleasedByPlayer));
 	}
 
-	// Token: 0x06002F88 RID: 12168 RVA: 0x00102BEC File Offset: 0x00100DEC
+	// Token: 0x06002F88 RID: 12168 RVA: 0x00102BCC File Offset: 0x00100DCC
 	public void GrabbedByPlayer()
 	{
 		if (this.gameEntity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
@@ -191,13 +191,13 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 		this.EnableProcAnimLoop();
 	}
 
-	// Token: 0x06002F89 RID: 12169 RVA: 0x00102C4D File Offset: 0x00100E4D
+	// Token: 0x06002F89 RID: 12169 RVA: 0x00102C2D File Offset: 0x00100E2D
 	public void ReleasedByPlayer()
 	{
 		this.DisableProcAnimLoop();
 	}
 
-	// Token: 0x06002F8A RID: 12170 RVA: 0x00102C58 File Offset: 0x00100E58
+	// Token: 0x06002F8A RID: 12170 RVA: 0x00102C38 File Offset: 0x00100E38
 	public void OnEntityInit()
 	{
 		GhostReactor.ToolEntityCreateData toolEntityCreateData = GhostReactor.ToolEntityCreateData.Unpack(this.gameEntity.createData);

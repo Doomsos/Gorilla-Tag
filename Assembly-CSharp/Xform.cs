@@ -8,7 +8,7 @@ using UnityEngine;
 public class Xform : MonoBehaviour
 {
 	// Token: 0x17000611 RID: 1553
-	// (get) Token: 0x06004177 RID: 16759 RVA: 0x0015BFB7 File Offset: 0x0015A1B7
+	// (get) Token: 0x06004177 RID: 16759 RVA: 0x0015BF97 File Offset: 0x0015A197
 	public float3 localExtents
 	{
 		get
@@ -17,13 +17,13 @@ public class Xform : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004178 RID: 16760 RVA: 0x0015BFC9 File Offset: 0x0015A1C9
+	// Token: 0x06004178 RID: 16760 RVA: 0x0015BFA9 File Offset: 0x0015A1A9
 	public Matrix4x4 LocalTRS()
 	{
 		return Matrix4x4.TRS(this.localPosition, this.localRotation, this.localScale);
 	}
 
-	// Token: 0x06004179 RID: 16761 RVA: 0x0015BFEC File Offset: 0x0015A1EC
+	// Token: 0x06004179 RID: 16761 RVA: 0x0015BFCC File Offset: 0x0015A1CC
 	public Matrix4x4 TRS()
 	{
 		if (this.parent.AsNull<Transform>() == null)
@@ -33,7 +33,7 @@ public class Xform : MonoBehaviour
 		return this.parent.localToWorldMatrix * this.LocalTRS();
 	}
 
-	// Token: 0x0600417A RID: 16762 RVA: 0x0015C020 File Offset: 0x0015A220
+	// Token: 0x0600417A RID: 16762 RVA: 0x0015C000 File Offset: 0x0015A200
 	private unsafe void Update()
 	{
 		Matrix4x4 matrix4x = this.TRS();

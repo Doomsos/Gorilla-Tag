@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010FC RID: 4348
 	public class GlowBugsInJar : MonoBehaviour
 	{
-		// Token: 0x06006CE1 RID: 27873 RVA: 0x0023C0F0 File Offset: 0x0023A2F0
+		// Token: 0x06006CE1 RID: 27873 RVA: 0x0023C0D0 File Offset: 0x0023A2D0
 		private void OnEnable()
 		{
 			this.shakeStarted = false;
@@ -28,7 +28,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CE2 RID: 27874 RVA: 0x0023C1C8 File Offset: 0x0023A3C8
+		// Token: 0x06006CE2 RID: 27874 RVA: 0x0023C1A8 File Offset: 0x0023A3A8
 		private void OnDisable()
 		{
 			if (this._events != null)
@@ -39,7 +39,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CE3 RID: 27875 RVA: 0x0023C218 File Offset: 0x0023A418
+		// Token: 0x06006CE3 RID: 27875 RVA: 0x0023C1F8 File Offset: 0x0023A3F8
 		private void OnShakeEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -68,7 +68,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CE4 RID: 27876 RVA: 0x0023C278 File Offset: 0x0023A478
+		// Token: 0x06006CE4 RID: 27876 RVA: 0x0023C258 File Offset: 0x0023A458
 		public void HandleOnShakeStart()
 		{
 			if (PhotonNetwork.InRoom && this._events != null && this._events.Activate != null)
@@ -81,7 +81,7 @@ namespace GorillaTag.Cosmetics
 			this.ShakeStartLocal();
 		}
 
-		// Token: 0x06006CE5 RID: 27877 RVA: 0x0023C2D2 File Offset: 0x0023A4D2
+		// Token: 0x06006CE5 RID: 27877 RVA: 0x0023C2B2 File Offset: 0x0023A4B2
 		private void ShakeStartLocal()
 		{
 			this.currentGlowAmount = 0f;
@@ -89,7 +89,7 @@ namespace GorillaTag.Cosmetics
 			this.shakeTimer = 0f;
 		}
 
-		// Token: 0x06006CE6 RID: 27878 RVA: 0x0023C2F4 File Offset: 0x0023A4F4
+		// Token: 0x06006CE6 RID: 27878 RVA: 0x0023C2D4 File Offset: 0x0023A4D4
 		public void HandleOnShakeEnd()
 		{
 			if (PhotonNetwork.InRoom && this._events != null && this._events.Activate != null)
@@ -102,14 +102,14 @@ namespace GorillaTag.Cosmetics
 			this.ShakeEndLocal();
 		}
 
-		// Token: 0x06006CE7 RID: 27879 RVA: 0x0023C34E File Offset: 0x0023A54E
+		// Token: 0x06006CE7 RID: 27879 RVA: 0x0023C32E File Offset: 0x0023A52E
 		private void ShakeEndLocal()
 		{
 			this.shakeStarted = false;
 			this.shakeTimer = 0f;
 		}
 
-		// Token: 0x06006CE8 RID: 27880 RVA: 0x0023C364 File Offset: 0x0023A564
+		// Token: 0x06006CE8 RID: 27880 RVA: 0x0023C344 File Offset: 0x0023A544
 		public void Update()
 		{
 			if (this.shakeStarted)
@@ -135,7 +135,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CE9 RID: 27881 RVA: 0x0023C430 File Offset: 0x0023A630
+		// Token: 0x06006CE9 RID: 27881 RVA: 0x0023C410 File Offset: 0x0023A610
 		private void UpdateGlow(float value)
 		{
 			if (this.renderers.Length != 0)

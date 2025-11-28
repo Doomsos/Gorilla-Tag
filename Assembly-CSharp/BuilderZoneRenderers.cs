@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000568 RID: 1384
 public class BuilderZoneRenderers : MonoBehaviour
 {
-	// Token: 0x060022D8 RID: 8920 RVA: 0x000B60C0 File Offset: 0x000B42C0
+	// Token: 0x060022D8 RID: 8920 RVA: 0x000B60A0 File Offset: 0x000B42A0
 	private void Start()
 	{
 		this.allRenderers.Clear();
@@ -20,7 +20,7 @@ public class BuilderZoneRenderers : MonoBehaviour
 		this.OnZoneChanged();
 	}
 
-	// Token: 0x060022D9 RID: 8921 RVA: 0x000B6170 File Offset: 0x000B4370
+	// Token: 0x060022D9 RID: 8921 RVA: 0x000B6150 File Offset: 0x000B4350
 	private void OnDestroy()
 	{
 		if (ZoneManagement.instance != null)
@@ -30,7 +30,7 @@ public class BuilderZoneRenderers : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060022DA RID: 8922 RVA: 0x000B61A8 File Offset: 0x000B43A8
+	// Token: 0x060022DA RID: 8922 RVA: 0x000B6188 File Offset: 0x000B4388
 	private void OnZoneChanged()
 	{
 		bool flag = ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocks);

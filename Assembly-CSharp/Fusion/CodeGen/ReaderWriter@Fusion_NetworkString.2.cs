@@ -7,7 +7,7 @@ namespace Fusion.CodeGen
 	[WeaverGenerated]
 	internal struct ReaderWriter@Fusion_NetworkString : IElementReaderWriter<NetworkString<_128>>
 	{
-		// Token: 0x06007319 RID: 29465 RVA: 0x0025AB04 File Offset: 0x00258D04
+		// Token: 0x06007319 RID: 29465 RVA: 0x0025AAE4 File Offset: 0x00258CE4
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe NetworkString<_128> Read(byte* data, int index)
@@ -15,7 +15,7 @@ namespace Fusion.CodeGen
 			return *(NetworkString<_128>*)(data + index * 516);
 		}
 
-		// Token: 0x0600731A RID: 29466 RVA: 0x0025AB14 File Offset: 0x00258D14
+		// Token: 0x0600731A RID: 29466 RVA: 0x0025AAF4 File Offset: 0x00258CF4
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe ref NetworkString<_128> ReadRef(byte* data, int index)
@@ -23,7 +23,7 @@ namespace Fusion.CodeGen
 			return ref *(NetworkString<_128>*)(data + index * 516);
 		}
 
-		// Token: 0x0600731B RID: 29467 RVA: 0x0025AB1F File Offset: 0x00258D1F
+		// Token: 0x0600731B RID: 29467 RVA: 0x0025AAFF File Offset: 0x00258CFF
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe void Write(byte* data, int index, NetworkString<_128> val)
@@ -31,7 +31,7 @@ namespace Fusion.CodeGen
 			*(NetworkString<_128>*)(data + index * 516) = val;
 		}
 
-		// Token: 0x0600731C RID: 29468 RVA: 0x0025AB30 File Offset: 0x00258D30
+		// Token: 0x0600731C RID: 29468 RVA: 0x0025AB10 File Offset: 0x00258D10
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementWordCount()
@@ -39,7 +39,7 @@ namespace Fusion.CodeGen
 			return 129;
 		}
 
-		// Token: 0x0600731D RID: 29469 RVA: 0x0025AB38 File Offset: 0x00258D38
+		// Token: 0x0600731D RID: 29469 RVA: 0x0025AB18 File Offset: 0x00258D18
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementHashCode(NetworkString<_128> val)
@@ -47,7 +47,7 @@ namespace Fusion.CodeGen
 			return val.GetHashCode();
 		}
 
-		// Token: 0x0600731E RID: 29470 RVA: 0x0025AB54 File Offset: 0x00258D54
+		// Token: 0x0600731E RID: 29470 RVA: 0x0025AB34 File Offset: 0x00258D34
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public static IElementReaderWriter<NetworkString<_128>> GetInstance()

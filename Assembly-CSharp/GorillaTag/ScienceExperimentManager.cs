@@ -22,7 +22,7 @@ namespace GorillaTag
 	public class ScienceExperimentManager : NetworkComponent, ITickSystemTick
 	{
 		// Token: 0x170009B2 RID: 2482
-		// (get) Token: 0x0600675D RID: 26461 RVA: 0x0021A270 File Offset: 0x00218470
+		// (get) Token: 0x0600675D RID: 26461 RVA: 0x0021A250 File Offset: 0x00218450
 		private bool RefreshWaterAvailable
 		{
 			get
@@ -32,7 +32,7 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009B3 RID: 2483
-		// (get) Token: 0x0600675E RID: 26462 RVA: 0x0021A2D4 File Offset: 0x002184D4
+		// (get) Token: 0x0600675E RID: 26462 RVA: 0x0021A2B4 File Offset: 0x002184B4
 		public ScienceExperimentManager.RisingLiquidState GameState
 		{
 			get
@@ -42,7 +42,7 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009B4 RID: 2484
-		// (get) Token: 0x0600675F RID: 26463 RVA: 0x0021A2E1 File Offset: 0x002184E1
+		// (get) Token: 0x0600675F RID: 26463 RVA: 0x0021A2C1 File Offset: 0x002184C1
 		public float RiseProgress
 		{
 			get
@@ -52,7 +52,7 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009B5 RID: 2485
-		// (get) Token: 0x06006760 RID: 26464 RVA: 0x0021A2E9 File Offset: 0x002184E9
+		// (get) Token: 0x06006760 RID: 26464 RVA: 0x0021A2C9 File Offset: 0x002184C9
 		public float RiseProgressLinear
 		{
 			get
@@ -62,7 +62,7 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009B6 RID: 2486
-		// (get) Token: 0x06006761 RID: 26465 RVA: 0x0021A2F4 File Offset: 0x002184F4
+		// (get) Token: 0x06006761 RID: 26465 RVA: 0x0021A2D4 File Offset: 0x002184D4
 		private int PlayerCount
 		{
 			get
@@ -77,7 +77,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006762 RID: 26466 RVA: 0x0021A324 File Offset: 0x00218524
+		// Token: 0x06006762 RID: 26466 RVA: 0x0021A304 File Offset: 0x00218504
 		protected override void Awake()
 		{
 			base.Awake();
@@ -147,7 +147,7 @@ namespace GorillaTag
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006765 RID: 26469 RVA: 0x0021A5C4 File Offset: 0x002187C4
+		// Token: 0x06006765 RID: 26469 RVA: 0x0021A5A4 File Offset: 0x002187A4
 		private void OnDestroy()
 		{
 			NetworkBehaviourUtils.InternalOnDestroy(this);
@@ -183,7 +183,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006766 RID: 26470 RVA: 0x0021A73C File Offset: 0x0021893C
+		// Token: 0x06006766 RID: 26470 RVA: 0x0021A71C File Offset: 0x0021891C
 		public void InitElements(ScienceExperimentSceneElements elements)
 		{
 			this.elements = elements;
@@ -193,13 +193,13 @@ namespace GorillaTag
 			RoomSystem.LeftRoomEvent += new Action(this.OnLeftRoom);
 		}
 
-		// Token: 0x06006767 RID: 26471 RVA: 0x0021A79E File Offset: 0x0021899E
+		// Token: 0x06006767 RID: 26471 RVA: 0x0021A77E File Offset: 0x0021897E
 		public void DeInitElements()
 		{
 			this.elements = null;
 		}
 
-		// Token: 0x06006768 RID: 26472 RVA: 0x0021A7A8 File Offset: 0x002189A8
+		// Token: 0x06006768 RID: 26472 RVA: 0x0021A788 File Offset: 0x00218988
 		public Transform GetElement(ScienceExperimentElementID elementID)
 		{
 			switch (elementID)
@@ -229,11 +229,11 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009B7 RID: 2487
-		// (get) Token: 0x06006769 RID: 26473 RVA: 0x0021A86D File Offset: 0x00218A6D
-		// (set) Token: 0x0600676A RID: 26474 RVA: 0x0021A875 File Offset: 0x00218A75
+		// (get) Token: 0x06006769 RID: 26473 RVA: 0x0021A84D File Offset: 0x00218A4D
+		// (set) Token: 0x0600676A RID: 26474 RVA: 0x0021A855 File Offset: 0x00218A55
 		bool ITickSystemTick.TickRunning { get; set; }
 
-		// Token: 0x0600676B RID: 26475 RVA: 0x0021A880 File Offset: 0x00218A80
+		// Token: 0x0600676B RID: 26475 RVA: 0x0021A860 File Offset: 0x00218A60
 		void ITickSystemTick.Tick()
 		{
 			this.prevTime = this.currentTime;
@@ -279,7 +279,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600676C RID: 26476 RVA: 0x0021AAA0 File Offset: 0x00218CA0
+		// Token: 0x0600676C RID: 26476 RVA: 0x0021AA80 File Offset: 0x00218C80
 		private void InfrequentUpdate()
 		{
 			this.allPlayersInRoom = RoomSystem.PlayersInRoom.ToArray();
@@ -331,7 +331,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600676D RID: 26477 RVA: 0x0021ABEC File Offset: 0x00218DEC
+		// Token: 0x0600676D RID: 26477 RVA: 0x0021ABCC File Offset: 0x00218DCC
 		private bool PlayerInGame(Player player)
 		{
 			for (int i = 0; i < this.inGamePlayerCount; i++)
@@ -344,7 +344,7 @@ namespace GorillaTag
 			return false;
 		}
 
-		// Token: 0x0600676E RID: 26478 RVA: 0x0021AC28 File Offset: 0x00218E28
+		// Token: 0x0600676E RID: 26478 RVA: 0x0021AC08 File Offset: 0x00218E08
 		private void UpdateReliableState(double currentTime, ref ScienceExperimentManager.SyncData syncData)
 		{
 			if (currentTime < syncData.stateStartTime)
@@ -436,7 +436,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600676F RID: 26479 RVA: 0x0021AF04 File Offset: 0x00219104
+		// Token: 0x0600676F RID: 26479 RVA: 0x0021AEE4 File Offset: 0x002190E4
 		private void UpdateLocalState(double currentTime, ScienceExperimentManager.SyncData syncData)
 		{
 			switch (syncData.state)
@@ -480,7 +480,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006770 RID: 26480 RVA: 0x0021B070 File Offset: 0x00219270
+		// Token: 0x06006770 RID: 26480 RVA: 0x0021B050 File Offset: 0x00219250
 		private void UpdateLiquid(float fillProgress)
 		{
 			float num = Mathf.Lerp(this.minScale, this.maxScale, fillProgress);
@@ -516,7 +516,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006771 RID: 26481 RVA: 0x0021B294 File Offset: 0x00219494
+		// Token: 0x06006771 RID: 26481 RVA: 0x0021B274 File Offset: 0x00219474
 		private void UpdateRotatingRings(float rotationProgress)
 		{
 			for (int i = 0; i < this.rotatingRings.Length; i++)
@@ -526,7 +526,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006772 RID: 26482 RVA: 0x0021B300 File Offset: 0x00219500
+		// Token: 0x06006772 RID: 26482 RVA: 0x0021B2E0 File Offset: 0x002194E0
 		private void UpdateDrainBlocker(double currentTime)
 		{
 			if (this.reliableState.state != ScienceExperimentManager.RisingLiquidState.Draining)
@@ -544,7 +544,7 @@ namespace GorillaTag
 			this.drainBlocker.position = Vector3.MoveTowards(this.drainBlocker.position, this.drainBlockerOpenPosition.position, this.drainBlockerSlideSpeed * Time.deltaTime);
 		}
 
-		// Token: 0x06006773 RID: 26483 RVA: 0x0021B3D4 File Offset: 0x002195D4
+		// Token: 0x06006773 RID: 26483 RVA: 0x0021B3B4 File Offset: 0x002195B4
 		private void UpdateEffects()
 		{
 			switch (this.reliableState.state)
@@ -623,7 +623,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006774 RID: 26484 RVA: 0x0021B670 File Offset: 0x00219870
+		// Token: 0x06006774 RID: 26484 RVA: 0x0021B650 File Offset: 0x00219850
 		private void DisableObjectsInContactWithLava(float lavaScale)
 		{
 			if (this.elements == null)
@@ -655,7 +655,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006775 RID: 26485 RVA: 0x0021B7DC File Offset: 0x002199DC
+		// Token: 0x06006775 RID: 26485 RVA: 0x0021B7BC File Offset: 0x002199BC
 		private void UpdateWinner()
 		{
 			float num = -1f;
@@ -675,7 +675,7 @@ namespace GorillaTag
 			this.RefreshWinnerName();
 		}
 
-		// Token: 0x06006776 RID: 26486 RVA: 0x0021B870 File Offset: 0x00219A70
+		// Token: 0x06006776 RID: 26486 RVA: 0x0021B850 File Offset: 0x00219A50
 		private void RefreshWinnerName()
 		{
 			NetPlayer playerFromId = this.GetPlayerFromId(this.lastWinnerId);
@@ -687,7 +687,7 @@ namespace GorillaTag
 			this.lastWinnerName = "None";
 		}
 
-		// Token: 0x06006777 RID: 26487 RVA: 0x0021B8A5 File Offset: 0x00219AA5
+		// Token: 0x06006777 RID: 26487 RVA: 0x0021B885 File Offset: 0x00219A85
 		private NetPlayer GetPlayerFromId(int id)
 		{
 			if (NetworkSystem.Instance.InRoom)
@@ -701,7 +701,7 @@ namespace GorillaTag
 			return null;
 		}
 
-		// Token: 0x06006778 RID: 26488 RVA: 0x0021B8E0 File Offset: 0x00219AE0
+		// Token: 0x06006778 RID: 26488 RVA: 0x0021B8C0 File Offset: 0x00219AC0
 		private void UpdateRefreshWater()
 		{
 			if (this.refreshWaterVolume != null)
@@ -718,7 +718,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006779 RID: 26489 RVA: 0x0021B954 File Offset: 0x00219B54
+		// Token: 0x06006779 RID: 26489 RVA: 0x0021B934 File Offset: 0x00219B34
 		private void ResetGame()
 		{
 			for (int i = 0; i < this.inGamePlayerCount; i++)
@@ -730,7 +730,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600677A RID: 26490 RVA: 0x0021B9A0 File Offset: 0x00219BA0
+		// Token: 0x0600677A RID: 26490 RVA: 0x0021B980 File Offset: 0x00219B80
 		public void RestartGame()
 		{
 			if (base.IsMine)
@@ -744,7 +744,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600677B RID: 26491 RVA: 0x0021BA28 File Offset: 0x00219C28
+		// Token: 0x0600677B RID: 26491 RVA: 0x0021BA08 File Offset: 0x00219C08
 		public void DebugErupt()
 		{
 			if (base.IsMine)
@@ -757,7 +757,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600677C RID: 26492 RVA: 0x0021BAAC File Offset: 0x00219CAC
+		// Token: 0x0600677C RID: 26492 RVA: 0x0021BA8C File Offset: 0x00219C8C
 		public void RandomizeRings()
 		{
 			for (int i = 0; i < this.rotatingRings.Length; i++)
@@ -780,7 +780,7 @@ namespace GorillaTag
 			this.rotateRingsCoroutine = base.StartCoroutine(this.RotateRingsCoroutine());
 		}
 
-		// Token: 0x0600677D RID: 26493 RVA: 0x0021BB9E File Offset: 0x00219D9E
+		// Token: 0x0600677D RID: 26493 RVA: 0x0021BB7E File Offset: 0x00219D7E
 		private IEnumerator RotateRingsCoroutine()
 		{
 			if (this.debugRotateRingsTime > 0.01f)
@@ -799,7 +799,7 @@ namespace GorillaTag
 			yield break;
 		}
 
-		// Token: 0x0600677E RID: 26494 RVA: 0x0021BBB0 File Offset: 0x00219DB0
+		// Token: 0x0600677E RID: 26494 RVA: 0x0021BB90 File Offset: 0x00219D90
 		public bool GetMaterialIfPlayerInGame(int playerActorNumber, out int materialIndex)
 		{
 			int i = 0;
@@ -824,7 +824,7 @@ namespace GorillaTag
 			return false;
 		}
 
-		// Token: 0x0600677F RID: 26495 RVA: 0x0021BC04 File Offset: 0x00219E04
+		// Token: 0x0600677F RID: 26495 RVA: 0x0021BBE4 File Offset: 0x00219DE4
 		private void OnPlayerTagged(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
 		{
 			if (base.IsMine)
@@ -879,7 +879,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006780 RID: 26496 RVA: 0x0021BD48 File Offset: 0x00219F48
+		// Token: 0x06006780 RID: 26496 RVA: 0x0021BD28 File Offset: 0x00219F28
 		private void OnColliderEnteredVolume(Collider collider)
 		{
 			VRRig component = collider.attachedRigidbody.gameObject.GetComponent<VRRig>();
@@ -889,7 +889,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006781 RID: 26497 RVA: 0x0021BD88 File Offset: 0x00219F88
+		// Token: 0x06006781 RID: 26497 RVA: 0x0021BD68 File Offset: 0x00219F68
 		private void OnColliderExitedVolume(Collider collider)
 		{
 			VRRig component = collider.attachedRigidbody.gameObject.GetComponent<VRRig>();
@@ -899,7 +899,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006782 RID: 26498 RVA: 0x0021BDC8 File Offset: 0x00219FC8
+		// Token: 0x06006782 RID: 26498 RVA: 0x0021BDA8 File Offset: 0x00219FA8
 		private void OnColliderEnteredSoda(WaterVolume volume, Collider collider)
 		{
 			if (collider == GTPlayer.Instance.bodyCollider)
@@ -918,7 +918,7 @@ namespace GorillaTag
 		{
 		}
 
-		// Token: 0x06006784 RID: 26500 RVA: 0x0021BE1C File Offset: 0x0021A01C
+		// Token: 0x06006784 RID: 26500 RVA: 0x0021BDFC File Offset: 0x00219FFC
 		private void OnColliderEnteredRefreshWater(WaterVolume volume, Collider collider)
 		{
 			if (collider == GTPlayer.Instance.bodyCollider)
@@ -937,7 +937,7 @@ namespace GorillaTag
 		{
 		}
 
-		// Token: 0x06006786 RID: 26502 RVA: 0x0021BE6F File Offset: 0x0021A06F
+		// Token: 0x06006786 RID: 26502 RVA: 0x0021BE4F File Offset: 0x0021A04F
 		private void OnProjectileEnteredSodaWater(SlingshotProjectile projectile, Collider collider)
 		{
 			if (projectile.gameObject.CompareTag(this.mentoProjectileTag))
@@ -946,7 +946,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006787 RID: 26503 RVA: 0x0021BE98 File Offset: 0x0021A098
+		// Token: 0x06006787 RID: 26503 RVA: 0x0021BE78 File Offset: 0x0021A078
 		private void AddLavaRock(int playerId)
 		{
 			if (base.IsMine && this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Drained)
@@ -968,7 +968,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006788 RID: 26504 RVA: 0x0021BF0C File Offset: 0x0021A10C
+		// Token: 0x06006788 RID: 26504 RVA: 0x0021BEEC File Offset: 0x0021A0EC
 		public void OnWaterBalloonHitPlayer(NetPlayer hitPlayer)
 		{
 			bool flag = false;
@@ -994,8 +994,8 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009B8 RID: 2488
-		// (get) Token: 0x06006789 RID: 26505 RVA: 0x0021BF89 File Offset: 0x0021A189
-		// (set) Token: 0x0600678A RID: 26506 RVA: 0x0021BFB3 File Offset: 0x0021A1B3
+		// (get) Token: 0x06006789 RID: 26505 RVA: 0x0021BF69 File Offset: 0x0021A169
+		// (set) Token: 0x0600678A RID: 26506 RVA: 0x0021BF93 File Offset: 0x0021A193
 		[Networked]
 		[NetworkedWeaved(0, 76)]
 		private unsafe ScienceExperimentManager.ScienceManagerData Data
@@ -1018,14 +1018,14 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600678B RID: 26507 RVA: 0x0021BFE0 File Offset: 0x0021A1E0
+		// Token: 0x0600678B RID: 26507 RVA: 0x0021BFC0 File Offset: 0x0021A1C0
 		public override void WriteDataFusion()
 		{
 			ScienceExperimentManager.ScienceManagerData data = new ScienceExperimentManager.ScienceManagerData((int)this.reliableState.state, this.reliableState.stateStartTime, this.reliableState.stateStartLiquidProgressLinear, this.reliableState.activationProgress, (int)this.nextRoundRiseSpeed, this.riseTime, this.lastWinnerId, this.inGamePlayerCount, this.inGamePlayerStates, this.rotatingRings);
 			this.Data = data;
 		}
 
-		// Token: 0x0600678C RID: 26508 RVA: 0x0021C04C File Offset: 0x0021A24C
+		// Token: 0x0600678C RID: 26508 RVA: 0x0021C02C File Offset: 0x0021A22C
 		public override void ReadDataFusion()
 		{
 			int num = this.lastWinnerId;
@@ -1058,7 +1058,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600678D RID: 26509 RVA: 0x0021C274 File Offset: 0x0021A474
+		// Token: 0x0600678D RID: 26509 RVA: 0x0021C254 File Offset: 0x0021A454
 		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			stream.SendNext((int)this.reliableState.state);
@@ -1082,7 +1082,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600678E RID: 26510 RVA: 0x0021C3CC File Offset: 0x0021A5CC
+		// Token: 0x0600678E RID: 26510 RVA: 0x0021C3AC File Offset: 0x0021A5AC
 		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			int num = this.lastWinnerId;
@@ -1116,7 +1116,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600678F RID: 26511 RVA: 0x0021C5B4 File Offset: 0x0021A7B4
+		// Token: 0x0600678F RID: 26511 RVA: 0x0021C594 File Offset: 0x0021A794
 		private void PlayerEnteredGameArea(int pId)
 		{
 			if (base.IsMine)
@@ -1148,7 +1148,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006790 RID: 26512 RVA: 0x0021C658 File Offset: 0x0021A858
+		// Token: 0x06006790 RID: 26512 RVA: 0x0021C638 File Offset: 0x0021A838
 		private void PlayerExitedGameArea(int playerId)
 		{
 			if (base.IsMine)
@@ -1175,7 +1175,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006791 RID: 26513 RVA: 0x0021C6CE File Offset: 0x0021A8CE
+		// Token: 0x06006791 RID: 26513 RVA: 0x0021C6AE File Offset: 0x0021A8AE
 		[PunRPC]
 		public void PlayerTouchedLavaRPC(PhotonMessageInfo info)
 		{
@@ -1183,7 +1183,7 @@ namespace GorillaTag
 			this.PlayerTouchedLava(info.Sender.ActorNumber);
 		}
 
-		// Token: 0x06006792 RID: 26514 RVA: 0x0021C6EC File Offset: 0x0021A8EC
+		// Token: 0x06006792 RID: 26514 RVA: 0x0021C6CC File Offset: 0x0021A8CC
 		[Rpc(7, 1)]
 		public unsafe void RPC_PlayerTouchedLava(RpcInfo info = default(RpcInfo))
 		{
@@ -1231,7 +1231,7 @@ namespace GorillaTag
 			this.PlayerTouchedLava(photonMessageInfoWrapped.Sender.ActorNumber);
 		}
 
-		// Token: 0x06006793 RID: 26515 RVA: 0x0021C850 File Offset: 0x0021AA50
+		// Token: 0x06006793 RID: 26515 RVA: 0x0021C830 File Offset: 0x0021AA30
 		private void PlayerTouchedLava(int playerId)
 		{
 			if (base.IsMine)
@@ -1253,7 +1253,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006794 RID: 26516 RVA: 0x0021C8C2 File Offset: 0x0021AAC2
+		// Token: 0x06006794 RID: 26516 RVA: 0x0021C8A2 File Offset: 0x0021AAA2
 		[PunRPC]
 		private void PlayerTouchedRefreshWaterRPC(PhotonMessageInfo info)
 		{
@@ -1261,7 +1261,7 @@ namespace GorillaTag
 			this.PlayerTouchedRefreshWater(info.Sender.ActorNumber);
 		}
 
-		// Token: 0x06006795 RID: 26517 RVA: 0x0021C8E0 File Offset: 0x0021AAE0
+		// Token: 0x06006795 RID: 26517 RVA: 0x0021C8C0 File Offset: 0x0021AAC0
 		[Rpc(7, 1)]
 		private unsafe void RPC_PlayerTouchedRefreshWater(RpcInfo info = default(RpcInfo))
 		{
@@ -1309,7 +1309,7 @@ namespace GorillaTag
 			this.PlayerTouchedRefreshWater(photonMessageInfoWrapped.Sender.ActorNumber);
 		}
 
-		// Token: 0x06006796 RID: 26518 RVA: 0x0021CA44 File Offset: 0x0021AC44
+		// Token: 0x06006796 RID: 26518 RVA: 0x0021CA24 File Offset: 0x0021AC24
 		private void PlayerTouchedRefreshWater(int playerId)
 		{
 			if (base.IsMine && this.RefreshWaterAvailable)
@@ -1328,7 +1328,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006797 RID: 26519 RVA: 0x0021CAB5 File Offset: 0x0021ACB5
+		// Token: 0x06006797 RID: 26519 RVA: 0x0021CA95 File Offset: 0x0021AC95
 		[PunRPC]
 		private void ValidateLocalPlayerWaterBalloonHitRPC(int playerId, PhotonMessageInfo info)
 		{
@@ -1339,7 +1339,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006798 RID: 26520 RVA: 0x0021CADC File Offset: 0x0021ACDC
+		// Token: 0x06006798 RID: 26520 RVA: 0x0021CABC File Offset: 0x0021ACBC
 		[Rpc(InvokeLocal = false)]
 		private unsafe void RPC_ValidateLocalPlayerWaterBalloonHit(int playerId, RpcInfo info = default(RpcInfo))
 		{
@@ -1384,7 +1384,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006799 RID: 26521 RVA: 0x0021CC38 File Offset: 0x0021AE38
+		// Token: 0x06006799 RID: 26521 RVA: 0x0021CC18 File Offset: 0x0021AE18
 		private void ValidateLocalPlayerWaterBalloonHit(int playerId)
 		{
 			if (playerId == NetworkSystem.Instance.LocalPlayer.ActorNumber && !GTPlayer.Instance.InWater)
@@ -1401,7 +1401,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600679A RID: 26522 RVA: 0x0021CCAA File Offset: 0x0021AEAA
+		// Token: 0x0600679A RID: 26522 RVA: 0x0021CC8A File Offset: 0x0021AE8A
 		[PunRPC]
 		private void PlayerHitByWaterBalloonRPC(int playerId, PhotonMessageInfo info)
 		{
@@ -1409,7 +1409,7 @@ namespace GorillaTag
 			this.PlayerHitByWaterBalloon(playerId);
 		}
 
-		// Token: 0x0600679B RID: 26523 RVA: 0x0021CCC0 File Offset: 0x0021AEC0
+		// Token: 0x0600679B RID: 26523 RVA: 0x0021CCA0 File Offset: 0x0021AEA0
 		[Rpc(7, 1)]
 		private unsafe void RPC_PlayerHitByWaterBalloon(int playerId, RpcInfo info = default(RpcInfo))
 		{
@@ -1459,7 +1459,7 @@ namespace GorillaTag
 			this.PlayerHitByWaterBalloon(playerId);
 		}
 
-		// Token: 0x0600679C RID: 26524 RVA: 0x0021CE38 File Offset: 0x0021B038
+		// Token: 0x0600679C RID: 26524 RVA: 0x0021CE18 File Offset: 0x0021B018
 		private void PlayerHitByWaterBalloon(int playerId)
 		{
 			if (base.IsMine)
@@ -1478,13 +1478,13 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600679D RID: 26525 RVA: 0x0021CEA1 File Offset: 0x0021B0A1
+		// Token: 0x0600679D RID: 26525 RVA: 0x0021CE81 File Offset: 0x0021B081
 		public void OnPlayerLeftRoom(NetPlayer otherPlayer)
 		{
 			this.PlayerExitedGameArea(otherPlayer.ActorNumber);
 		}
 
-		// Token: 0x0600679E RID: 26526 RVA: 0x0021CEB0 File Offset: 0x0021B0B0
+		// Token: 0x0600679E RID: 26526 RVA: 0x0021CE90 File Offset: 0x0021B090
 		public void OnLeftRoom()
 		{
 			this.inGamePlayerCount = 0;
@@ -1499,7 +1499,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600679F RID: 26527 RVA: 0x0021CF18 File Offset: 0x0021B118
+		// Token: 0x0600679F RID: 26527 RVA: 0x0021CEF8 File Offset: 0x0021B0F8
 		protected override void OnOwnerSwitched(NetPlayer newOwningPlayer)
 		{
 			base.OnOwnerSwitched(newOwningPlayer);
@@ -1518,7 +1518,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067A1 RID: 26529 RVA: 0x0021D194 File Offset: 0x0021B394
+		// Token: 0x060067A1 RID: 26529 RVA: 0x0021D174 File Offset: 0x0021B374
 		[CompilerGenerated]
 		private int <UpdateReliableState>g__GetAlivePlayerCount|105_0()
 		{
@@ -1533,7 +1533,7 @@ namespace GorillaTag
 			return num;
 		}
 
-		// Token: 0x060067A2 RID: 26530 RVA: 0x0021D1CC File Offset: 0x0021B3CC
+		// Token: 0x060067A2 RID: 26530 RVA: 0x0021D1AC File Offset: 0x0021B3AC
 		[WeaverGenerated]
 		public override void CopyBackingFieldsToState(bool A_1)
 		{
@@ -1541,7 +1541,7 @@ namespace GorillaTag
 			this.Data = this._Data;
 		}
 
-		// Token: 0x060067A3 RID: 26531 RVA: 0x0021D1E4 File Offset: 0x0021B3E4
+		// Token: 0x060067A3 RID: 26531 RVA: 0x0021D1C4 File Offset: 0x0021B3C4
 		[WeaverGenerated]
 		public override void CopyStateToBackingFields()
 		{
@@ -1549,7 +1549,7 @@ namespace GorillaTag
 			this._Data = this.Data;
 		}
 
-		// Token: 0x060067A4 RID: 26532 RVA: 0x0021D1F8 File Offset: 0x0021B3F8
+		// Token: 0x060067A4 RID: 26532 RVA: 0x0021D1D8 File Offset: 0x0021B3D8
 		[NetworkRpcWeavedInvoker(1, 7, 1)]
 		[Preserve]
 		[WeaverGenerated]
@@ -1561,7 +1561,7 @@ namespace GorillaTag
 			((ScienceExperimentManager)behaviour).RPC_PlayerTouchedLava(info);
 		}
 
-		// Token: 0x060067A5 RID: 26533 RVA: 0x0021D23C File Offset: 0x0021B43C
+		// Token: 0x060067A5 RID: 26533 RVA: 0x0021D21C File Offset: 0x0021B41C
 		[NetworkRpcWeavedInvoker(2, 7, 1)]
 		[Preserve]
 		[WeaverGenerated]
@@ -1573,7 +1573,7 @@ namespace GorillaTag
 			((ScienceExperimentManager)behaviour).RPC_PlayerTouchedRefreshWater(info);
 		}
 
-		// Token: 0x060067A6 RID: 26534 RVA: 0x0021D280 File Offset: 0x0021B480
+		// Token: 0x060067A6 RID: 26534 RVA: 0x0021D260 File Offset: 0x0021B460
 		[NetworkRpcWeavedInvoker(3, 7, 7)]
 		[Preserve]
 		[WeaverGenerated]
@@ -1589,7 +1589,7 @@ namespace GorillaTag
 			((ScienceExperimentManager)behaviour).RPC_ValidateLocalPlayerWaterBalloonHit(playerId, info);
 		}
 
-		// Token: 0x060067A7 RID: 26535 RVA: 0x0021D2E0 File Offset: 0x0021B4E0
+		// Token: 0x060067A7 RID: 26535 RVA: 0x0021D2C0 File Offset: 0x0021B4C0
 		[NetworkRpcWeavedInvoker(4, 7, 1)]
 		[Preserve]
 		[WeaverGenerated]
@@ -1976,7 +1976,7 @@ namespace GorillaTag
 		private struct ScienceManagerData : INetworkStruct
 		{
 			// Token: 0x170009B9 RID: 2489
-			// (get) Token: 0x060067A8 RID: 26536 RVA: 0x0021D340 File Offset: 0x0021B540
+			// (get) Token: 0x060067A8 RID: 26536 RVA: 0x0021D320 File Offset: 0x0021B520
 			[Networked]
 			[Capacity(10)]
 			[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterInt32))]
@@ -1990,7 +1990,7 @@ namespace GorillaTag
 			}
 
 			// Token: 0x170009BA RID: 2490
-			// (get) Token: 0x060067A9 RID: 26537 RVA: 0x0021D368 File Offset: 0x0021B568
+			// (get) Token: 0x060067A9 RID: 26537 RVA: 0x0021D348 File Offset: 0x0021B548
 			[Networked]
 			[Capacity(10)]
 			[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterBoolean))]
@@ -2004,7 +2004,7 @@ namespace GorillaTag
 			}
 
 			// Token: 0x170009BB RID: 2491
-			// (get) Token: 0x060067AA RID: 26538 RVA: 0x0021D390 File Offset: 0x0021B590
+			// (get) Token: 0x060067AA RID: 26538 RVA: 0x0021D370 File Offset: 0x0021B570
 			[Networked]
 			[Capacity(10)]
 			[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterSingle))]
@@ -2018,7 +2018,7 @@ namespace GorillaTag
 			}
 
 			// Token: 0x170009BC RID: 2492
-			// (get) Token: 0x060067AB RID: 26539 RVA: 0x0021D3B8 File Offset: 0x0021B5B8
+			// (get) Token: 0x060067AB RID: 26539 RVA: 0x0021D398 File Offset: 0x0021B598
 			[Networked]
 			[Capacity(5)]
 			[NetworkedWeavedLinkedList(5, 1, typeof(ElementReaderWriterSingle))]
@@ -2032,7 +2032,7 @@ namespace GorillaTag
 			}
 
 			// Token: 0x170009BD RID: 2493
-			// (get) Token: 0x060067AC RID: 26540 RVA: 0x0021D3DC File Offset: 0x0021B5DC
+			// (get) Token: 0x060067AC RID: 26540 RVA: 0x0021D3BC File Offset: 0x0021B5BC
 			[Networked]
 			[Capacity(5)]
 			[NetworkedWeavedLinkedList(5, 1, typeof(ElementReaderWriterSingle))]
@@ -2045,7 +2045,7 @@ namespace GorillaTag
 				}
 			}
 
-			// Token: 0x060067AD RID: 26541 RVA: 0x0021D400 File Offset: 0x0021B600
+			// Token: 0x060067AD RID: 26541 RVA: 0x0021D3E0 File Offset: 0x0021B5E0
 			public ScienceManagerData(int reliableState, double stateStartTime, float stateStartLiquidProgressLinear, double activationProgress, int nextRoundRiseSpeed, float riseTime, int lastWinnerId, int inGamePlayerCount, ScienceExperimentManager.PlayerGameState[] playerStates, ScienceExperimentManager.RotatingRingState[] rings)
 			{
 				this.reliableState = reliableState;

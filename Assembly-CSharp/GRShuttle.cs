@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x02000709 RID: 1801
 public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06002E1A RID: 11802 RVA: 0x000FABB4 File Offset: 0x000F8DB4
+	// Token: 0x06002E1A RID: 11802 RVA: 0x000FAB94 File Offset: 0x000F8D94
 	public void Awake()
 	{
 		this.shuttleUI.Setup(null, null);
@@ -37,33 +37,33 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06002E1D RID: 11805 RVA: 0x000FAC21 File Offset: 0x000F8E21
+	// Token: 0x06002E1D RID: 11805 RVA: 0x000FAC01 File Offset: 0x000F8E01
 	public void Init(int shuttleId)
 	{
 		this.shuttleId = shuttleId;
 		this.StopMoveFx();
 	}
 
-	// Token: 0x06002E1E RID: 11806 RVA: 0x000FAC30 File Offset: 0x000F8E30
+	// Token: 0x06002E1E RID: 11806 RVA: 0x000FAC10 File Offset: 0x000F8E10
 	public void SetBay(GRBay bay)
 	{
 		this.shuttleBay = bay;
 	}
 
-	// Token: 0x06002E1F RID: 11807 RVA: 0x000FAC39 File Offset: 0x000F8E39
+	// Token: 0x06002E1F RID: 11807 RVA: 0x000FAC19 File Offset: 0x000F8E19
 	public void SetReactor(GhostReactor reactor)
 	{
 		this.reactor = reactor;
 	}
 
-	// Token: 0x06002E20 RID: 11808 RVA: 0x000FAC42 File Offset: 0x000F8E42
+	// Token: 0x06002E20 RID: 11808 RVA: 0x000FAC22 File Offset: 0x000F8E22
 	public void SetLocation(GRShuttleGroupLoc location)
 	{
 		this.location = location;
 		this.targetSection = this.ClampTargetSection(this.targetSection);
 	}
 
-	// Token: 0x06002E21 RID: 11809 RVA: 0x000FAC5D File Offset: 0x000F8E5D
+	// Token: 0x06002E21 RID: 11809 RVA: 0x000FAC3D File Offset: 0x000F8E3D
 	public void Setup(GhostReactor reactor, GRShuttleGroupLoc location, int employeeIndex)
 	{
 		this.reactor = reactor;
@@ -73,7 +73,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		this.targetSection = this.ClampTargetSection(this.targetSection);
 	}
 
-	// Token: 0x06002E22 RID: 11810 RVA: 0x000FAC90 File Offset: 0x000F8E90
+	// Token: 0x06002E22 RID: 11810 RVA: 0x000FAC70 File Offset: 0x000F8E70
 	public int GetTargetFloor()
 	{
 		if (this.specificDestinationShuttle != null)
@@ -87,19 +87,19 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		return GRShuttle.sectionFloors[this.targetSection];
 	}
 
-	// Token: 0x06002E23 RID: 11811 RVA: 0x000FACDD File Offset: 0x000F8EDD
+	// Token: 0x06002E23 RID: 11811 RVA: 0x000FACBD File Offset: 0x000F8EBD
 	public GRShuttleState GetState()
 	{
 		return this.state;
 	}
 
-	// Token: 0x06002E24 RID: 11812 RVA: 0x000FACE5 File Offset: 0x000F8EE5
+	// Token: 0x06002E24 RID: 11812 RVA: 0x000FACC5 File Offset: 0x000F8EC5
 	public NetPlayer GetOwner()
 	{
 		return this.shuttleOwner;
 	}
 
-	// Token: 0x06002E25 RID: 11813 RVA: 0x000FACF0 File Offset: 0x000F8EF0
+	// Token: 0x06002E25 RID: 11813 RVA: 0x000FACD0 File Offset: 0x000F8ED0
 	public void SetOwner(NetPlayer player)
 	{
 		this.shuttleOwner = player;
@@ -112,13 +112,13 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E26 RID: 11814 RVA: 0x000FAD47 File Offset: 0x000F8F47
+	// Token: 0x06002E26 RID: 11814 RVA: 0x000FAD27 File Offset: 0x000F8F27
 	public void SliceUpdate()
 	{
 		this.UpdateState();
 	}
 
-	// Token: 0x06002E27 RID: 11815 RVA: 0x000FAD4F File Offset: 0x000F8F4F
+	// Token: 0x06002E27 RID: 11815 RVA: 0x000FAD2F File Offset: 0x000F8F2F
 	public void Refresh()
 	{
 		this.shuttleUI.RefreshUI();
@@ -129,7 +129,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 	{
 	}
 
-	// Token: 0x06002E29 RID: 11817 RVA: 0x000FAD5C File Offset: 0x000F8F5C
+	// Token: 0x06002E29 RID: 11817 RVA: 0x000FAD3C File Offset: 0x000F8F3C
 	public static void TeleportLocalPlayer(GRShuttle sourceShuttle, GRShuttle destShuttle)
 	{
 		sourceShuttle.friendCollider.RefreshPlayersInSphere();
@@ -151,7 +151,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		instance.InitializeValues();
 	}
 
-	// Token: 0x06002E2A RID: 11818 RVA: 0x000FAE98 File Offset: 0x000F9098
+	// Token: 0x06002E2A RID: 11818 RVA: 0x000FAE78 File Offset: 0x000F9078
 	public void SetState(GRShuttleState newState, bool force = false)
 	{
 		if (this.state == newState && !force)
@@ -219,7 +219,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E2B RID: 11819 RVA: 0x000FB00C File Offset: 0x000F920C
+	// Token: 0x06002E2B RID: 11819 RVA: 0x000FAFEC File Offset: 0x000F91EC
 	private void UpdateState()
 	{
 		double timeAsDouble = Time.timeAsDouble;
@@ -264,13 +264,13 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E2C RID: 11820 RVA: 0x000FB0CE File Offset: 0x000F92CE
+	// Token: 0x06002E2C RID: 11820 RVA: 0x000FB0AE File Offset: 0x000F92AE
 	public void RequestArrival()
 	{
 		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleArrive, this.shuttleId);
 	}
 
-	// Token: 0x06002E2D RID: 11821 RVA: 0x000FB0E8 File Offset: 0x000F92E8
+	// Token: 0x06002E2D RID: 11821 RVA: 0x000FB0C8 File Offset: 0x000F92C8
 	private void StartMoveFx()
 	{
 		if (this.windowFx != null)
@@ -287,7 +287,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E2E RID: 11822 RVA: 0x000FB160 File Offset: 0x000F9360
+	// Token: 0x06002E2E RID: 11822 RVA: 0x000FB140 File Offset: 0x000F9340
 	private void StopMoveFx()
 	{
 		if (this.windowFx != null)
@@ -304,7 +304,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E2F RID: 11823 RVA: 0x000FB1D8 File Offset: 0x000F93D8
+	// Token: 0x06002E2F RID: 11823 RVA: 0x000FB1B8 File Offset: 0x000F93B8
 	public bool IsPodUnlocked()
 	{
 		if (this.specificDestinationShuttle != null)
@@ -319,7 +319,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		return !(grplayer == null) && grplayer.IsDropPodUnlocked();
 	}
 
-	// Token: 0x06002E30 RID: 11824 RVA: 0x000FB21C File Offset: 0x000F941C
+	// Token: 0x06002E30 RID: 11824 RVA: 0x000FB1FC File Offset: 0x000F93FC
 	public int GetMaxDropFloor()
 	{
 		if (this.shuttleOwner == null)
@@ -334,7 +334,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		return grplayer.GetMaxDropFloor();
 	}
 
-	// Token: 0x06002E31 RID: 11825 RVA: 0x000FB250 File Offset: 0x000F9450
+	// Token: 0x06002E31 RID: 11825 RVA: 0x000FB230 File Offset: 0x000F9430
 	public void OnShuttleMove()
 	{
 		if (this.state != GRShuttleState.Docked)
@@ -344,7 +344,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleLaunch, this.shuttleId);
 	}
 
-	// Token: 0x06002E32 RID: 11826 RVA: 0x000FB274 File Offset: 0x000F9474
+	// Token: 0x06002E32 RID: 11826 RVA: 0x000FB254 File Offset: 0x000F9454
 	public void OnShuttleMoveActorNr(int actorNr)
 	{
 		if (this.state != GRShuttleState.Docked || actorNr != this.shuttleOwner.ActorNumber || this.GetTargetFloor() > this.GetMaxDropFloor())
@@ -356,7 +356,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleLaunch, this.shuttleId);
 	}
 
-	// Token: 0x06002E33 RID: 11827 RVA: 0x000FB2DE File Offset: 0x000F94DE
+	// Token: 0x06002E33 RID: 11827 RVA: 0x000FB2BE File Offset: 0x000F94BE
 	public void TargetLevelUp()
 	{
 		if (this.state != GRShuttleState.Docked)
@@ -366,7 +366,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleTargetLevelUp, this.shuttleId);
 	}
 
-	// Token: 0x06002E34 RID: 11828 RVA: 0x000FB301 File Offset: 0x000F9501
+	// Token: 0x06002E34 RID: 11828 RVA: 0x000FB2E1 File Offset: 0x000F94E1
 	public void TargetLevelDown()
 	{
 		if (this.state != GRShuttleState.Docked)
@@ -376,7 +376,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		this.reactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.ShuttleTargetLevelDown, this.shuttleId);
 	}
 
-	// Token: 0x06002E35 RID: 11829 RVA: 0x000FB324 File Offset: 0x000F9524
+	// Token: 0x06002E35 RID: 11829 RVA: 0x000FB304 File Offset: 0x000F9504
 	private GRShuttle GetTargetShuttle()
 	{
 		if (this.specificDestinationShuttle != null)
@@ -396,13 +396,13 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		return stagingShuttleForPlayer;
 	}
 
-	// Token: 0x06002E36 RID: 11830 RVA: 0x000FB388 File Offset: 0x000F9588
+	// Token: 0x06002E36 RID: 11830 RVA: 0x000FB368 File Offset: 0x000F9568
 	public bool IsPlayerOwner(GRPlayer player)
 	{
 		return GRPlayer.Get(this.GetOwner()) == player;
 	}
 
-	// Token: 0x06002E37 RID: 11831 RVA: 0x000FB39C File Offset: 0x000F959C
+	// Token: 0x06002E37 RID: 11831 RVA: 0x000FB37C File Offset: 0x000F957C
 	public bool IsShuttleInteractableByPlayer(GRPlayer player, bool ignoreOwnership)
 	{
 		if (!ignoreOwnership && !this.IsPlayerOwner(player) && this.specificDestinationShuttle == null)
@@ -422,13 +422,13 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		return flag || flag2;
 	}
 
-	// Token: 0x06002E38 RID: 11832 RVA: 0x000FB42C File Offset: 0x000F962C
+	// Token: 0x06002E38 RID: 11832 RVA: 0x000FB40C File Offset: 0x000F960C
 	public bool IsPlayerOwner(NetPlayer player)
 	{
 		return this.GetOwner() == player;
 	}
 
-	// Token: 0x06002E39 RID: 11833 RVA: 0x000FB438 File Offset: 0x000F9638
+	// Token: 0x06002E39 RID: 11833 RVA: 0x000FB418 File Offset: 0x000F9618
 	public void ToggleDoor()
 	{
 		if (this.state != GRShuttleState.Docked)
@@ -451,7 +451,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E3A RID: 11834 RVA: 0x000FB4BC File Offset: 0x000F96BC
+	// Token: 0x06002E3A RID: 11834 RVA: 0x000FB49C File Offset: 0x000F969C
 	public void ToggleDoorActorNr(int actorNr)
 	{
 		if (this.state == GRShuttleState.Docked && this.GetOwner() != null && this.GetOwner().ActorNumber == actorNr && GRPlayer.Get(this.shuttleOwner).IsDropPodUnlocked())
@@ -472,7 +472,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		idcardScanner2.onFailed.Invoke();
 	}
 
-	// Token: 0x06002E3B RID: 11835 RVA: 0x000FB52C File Offset: 0x000F972C
+	// Token: 0x06002E3B RID: 11835 RVA: 0x000FB50C File Offset: 0x000F970C
 	public void EmergencyOpenDoor()
 	{
 		if (this.state == GRShuttleState.Docked)
@@ -486,7 +486,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E3C RID: 11836 RVA: 0x000FB55C File Offset: 0x000F975C
+	// Token: 0x06002E3C RID: 11836 RVA: 0x000FB53C File Offset: 0x000F973C
 	public void OnOpenDoor()
 	{
 		if (this.entryDoor.doorState == GRDoor.DoorState.Closed && this.entryCardScanner != null)
@@ -496,7 +496,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		this.OpenDoorLocal();
 	}
 
-	// Token: 0x06002E3D RID: 11837 RVA: 0x000FB58F File Offset: 0x000F978F
+	// Token: 0x06002E3D RID: 11837 RVA: 0x000FB56F File Offset: 0x000F976F
 	public void OpenDoorLocal()
 	{
 		if (this.entryDoor != null && this.entryDoor.doorState == GRDoor.DoorState.Closed)
@@ -509,7 +509,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E3E RID: 11838 RVA: 0x000FB5CC File Offset: 0x000F97CC
+	// Token: 0x06002E3E RID: 11838 RVA: 0x000FB5AC File Offset: 0x000F97AC
 	public void CloseDoorLocal()
 	{
 		if (this.entryDoor != null && this.entryDoor.doorState == GRDoor.DoorState.Open)
@@ -518,7 +518,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E3F RID: 11839 RVA: 0x000FB5F0 File Offset: 0x000F97F0
+	// Token: 0x06002E3F RID: 11839 RVA: 0x000FB5D0 File Offset: 0x000F97D0
 	public void OnCloseDoor()
 	{
 		if (this.entryDoor.doorState == GRDoor.DoorState.Open && this.entryCardScanner != null)
@@ -528,7 +528,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		this.CloseDoorLocal();
 	}
 
-	// Token: 0x06002E40 RID: 11840 RVA: 0x000FB624 File Offset: 0x000F9824
+	// Token: 0x06002E40 RID: 11840 RVA: 0x000FB604 File Offset: 0x000F9804
 	public void OnLaunch()
 	{
 		if (this.GetTargetFloor() > this.GetMaxDropFloor())
@@ -542,13 +542,13 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E41 RID: 11841 RVA: 0x000FB660 File Offset: 0x000F9860
+	// Token: 0x06002E41 RID: 11841 RVA: 0x000FB640 File Offset: 0x000F9840
 	public void OnArrive()
 	{
 		this.SetState(GRShuttleState.Arriving, false);
 	}
 
-	// Token: 0x06002E42 RID: 11842 RVA: 0x000FB66A File Offset: 0x000F986A
+	// Token: 0x06002E42 RID: 11842 RVA: 0x000FB64A File Offset: 0x000F984A
 	public void OnTargetLevelUp()
 	{
 		this.targetSection = this.ClampTargetSection(this.targetSection - 1);
@@ -558,7 +558,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E43 RID: 11843 RVA: 0x000FB693 File Offset: 0x000F9893
+	// Token: 0x06002E43 RID: 11843 RVA: 0x000FB673 File Offset: 0x000F9873
 	public void OnTargetLevelDown()
 	{
 		this.targetSection = this.ClampTargetSection(this.targetSection + 1);
@@ -568,7 +568,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E44 RID: 11844 RVA: 0x000FB6BC File Offset: 0x000F98BC
+	// Token: 0x06002E44 RID: 11844 RVA: 0x000FB69C File Offset: 0x000F989C
 	private int ClampTargetSection(int newTargetSection)
 	{
 		if (this.location == GRShuttleGroupLoc.Staging)
@@ -582,7 +582,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		return newTargetSection;
 	}
 
-	// Token: 0x06002E45 RID: 11845 RVA: 0x000FB6E0 File Offset: 0x000F98E0
+	// Token: 0x06002E45 RID: 11845 RVA: 0x000FB6C0 File Offset: 0x000F98C0
 	public static void TryStartLocalPlayerShuttleMove(int currShuttleId, NetPlayer shuttleOwner)
 	{
 		GRPlayer local = GRPlayer.GetLocal();
@@ -613,7 +613,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		GRShuttle.SetPlayerShuttleState(local, GRPlayer.ShuttleState.Moving);
 	}
 
-	// Token: 0x06002E46 RID: 11846 RVA: 0x000FB798 File Offset: 0x000F9998
+	// Token: 0x06002E46 RID: 11846 RVA: 0x000FB778 File Offset: 0x000F9978
 	public static void UpdateGRPlayerShuttle(GRPlayer player)
 	{
 		if (player == null)
@@ -707,7 +707,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002E47 RID: 11847 RVA: 0x000FB988 File Offset: 0x000F9B88
+	// Token: 0x06002E47 RID: 11847 RVA: 0x000FB968 File Offset: 0x000F9B68
 	public static int CalcTargetShuttleId(int currShuttleId, string ownerUserId)
 	{
 		GRShuttle shuttle = GRElevatorManager.GetShuttle(currShuttleId);
@@ -728,7 +728,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		return -1;
 	}
 
-	// Token: 0x06002E48 RID: 11848 RVA: 0x000FB9EC File Offset: 0x000F9BEC
+	// Token: 0x06002E48 RID: 11848 RVA: 0x000FB9CC File Offset: 0x000F9BCC
 	public static void CancelPlayerShuttle(GRPlayer player)
 	{
 		GRPlayer.ShuttleState shuttleState = player.shuttleData.state;
@@ -754,7 +754,7 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		GRShuttle.SetPlayerShuttleState(player, GRPlayer.ShuttleState.Idle);
 	}
 
-	// Token: 0x06002E49 RID: 11849 RVA: 0x000FBA5C File Offset: 0x000F9C5C
+	// Token: 0x06002E49 RID: 11849 RVA: 0x000FBA3C File Offset: 0x000F9C3C
 	public static void SetPlayerShuttleState(GRPlayer player, GRPlayer.ShuttleState newState)
 	{
 		GRPlayer.ShuttleData shuttleData = player.shuttleData;

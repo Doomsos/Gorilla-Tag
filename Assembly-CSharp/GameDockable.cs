@@ -10,7 +10,7 @@ public class GameDockable : MonoBehaviour
 	{
 	}
 
-	// Token: 0x060026C9 RID: 9929 RVA: 0x000CE284 File Offset: 0x000CC484
+	// Token: 0x060026C9 RID: 9929 RVA: 0x000CE264 File Offset: 0x000CC464
 	public GameEntityId BestDock()
 	{
 		int heldByHandIndex = this.gameEntity.heldByHandIndex;
@@ -76,7 +76,7 @@ public class GameDockable : MonoBehaviour
 		return gameDock.gameEntity.id;
 	}
 
-	// Token: 0x060026CA RID: 9930 RVA: 0x000CE48F File Offset: 0x000CC68F
+	// Token: 0x060026CA RID: 9930 RVA: 0x000CE46F File Offset: 0x000CC66F
 	public Transform GetDockablePoint()
 	{
 		if (!(this.dockablePoint == null))

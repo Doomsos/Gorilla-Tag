@@ -6,13 +6,13 @@ using UnityEngine;
 [AttributeUsage(256)]
 public class OnEnterPlay_Set : OnEnterPlay_Attribute
 {
-	// Token: 0x06004DA6 RID: 19878 RVA: 0x001922EE File Offset: 0x001904EE
+	// Token: 0x06004DA6 RID: 19878 RVA: 0x001922CE File Offset: 0x001904CE
 	public OnEnterPlay_Set(object value)
 	{
 		this.value = value;
 	}
 
-	// Token: 0x06004DA7 RID: 19879 RVA: 0x00192300 File Offset: 0x00190500
+	// Token: 0x06004DA7 RID: 19879 RVA: 0x001922E0 File Offset: 0x001904E0
 	public override void OnEnterPlay(FieldInfo field)
 	{
 		if (!field.IsStatic)

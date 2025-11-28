@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000989 RID: 2441
 public class ModIOTermsOfUse_v1 : MonoBehaviour
 {
-	// Token: 0x06003E29 RID: 15913 RVA: 0x0014B311 File Offset: 0x00149511
+	// Token: 0x06003E29 RID: 15913 RVA: 0x0014B2F1 File Offset: 0x001494F1
 	private void OnEnable()
 	{
 		if (ControllerBehaviour.Instance)
@@ -16,7 +16,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003E2A RID: 15914 RVA: 0x0014B335 File Offset: 0x00149535
+	// Token: 0x06003E2A RID: 15914 RVA: 0x0014B315 File Offset: 0x00149515
 	private void OnDisable()
 	{
 		if (ControllerBehaviour.Instance)
@@ -25,7 +25,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003E2B RID: 15915 RVA: 0x0014B359 File Offset: 0x00149559
+	// Token: 0x06003E2B RID: 15915 RVA: 0x0014B339 File Offset: 0x00149539
 	private void PostUpdate()
 	{
 		if (ControllerBehaviour.Instance.IsLeftStick)
@@ -42,7 +42,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003E2C RID: 15916 RVA: 0x0014B39C File Offset: 0x0014959C
+	// Token: 0x06003E2C RID: 15916 RVA: 0x0014B37C File Offset: 0x0014957C
 	private void Start()
 	{
 		ModIOTermsOfUse_v1.<Start>d__19 <Start>d__;
@@ -52,7 +52,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		<Start>d__.<>t__builder.Start<ModIOTermsOfUse_v1.<Start>d__19>(ref <Start>d__);
 	}
 
-	// Token: 0x06003E2D RID: 15917 RVA: 0x0014B3D4 File Offset: 0x001495D4
+	// Token: 0x06003E2D RID: 15917 RVA: 0x0014B3B4 File Offset: 0x001495B4
 	private Task<bool> UpdateTextFromTerms()
 	{
 		ModIOTermsOfUse_v1.<UpdateTextFromTerms>d__20 <UpdateTextFromTerms>d__;
@@ -63,7 +63,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		return <UpdateTextFromTerms>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003E2E RID: 15918 RVA: 0x0014B418 File Offset: 0x00149618
+	// Token: 0x06003E2E RID: 15918 RVA: 0x0014B3F8 File Offset: 0x001495F8
 	public Task<bool> UpdateTextWithFullTerms()
 	{
 		ModIOTermsOfUse_v1.<UpdateTextWithFullTerms>d__21 <UpdateTextWithFullTerms>d__;
@@ -73,7 +73,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		return <UpdateTextWithFullTerms>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003E2F RID: 15919 RVA: 0x0014B454 File Offset: 0x00149654
+	// Token: 0x06003E2F RID: 15919 RVA: 0x0014B434 File Offset: 0x00149634
 	private string GetStringForListItemIdx_LowerAlpha(int idx)
 	{
 		switch (idx)
@@ -135,7 +135,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003E30 RID: 15920 RVA: 0x0014B578 File Offset: 0x00149778
+	// Token: 0x06003E30 RID: 15920 RVA: 0x0014B558 File Offset: 0x00149758
 	private Task WaitForAcknowledgement()
 	{
 		ModIOTermsOfUse_v1.<WaitForAcknowledgement>d__23 <WaitForAcknowledgement>d__;
@@ -146,7 +146,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		return <WaitForAcknowledgement>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003E31 RID: 15921 RVA: 0x0014B5BC File Offset: 0x001497BC
+	// Token: 0x06003E31 RID: 15921 RVA: 0x0014B59C File Offset: 0x0014979C
 	public void TurnPage(int i)
 	{
 		this.tmpBody.pageToDisplay = Mathf.Clamp(this.tmpBody.pageToDisplay + i, 1, this.tmpBody.textInfo.pageCount);
@@ -156,7 +156,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		this.ActivateAcceptButtonGroup();
 	}
 
-	// Token: 0x06003E32 RID: 15922 RVA: 0x0014B678 File Offset: 0x00149878
+	// Token: 0x06003E32 RID: 15922 RVA: 0x0014B658 File Offset: 0x00149858
 	private void ActivateAcceptButtonGroup()
 	{
 		bool active = this.tmpBody.pageToDisplay == this.tmpBody.textInfo.pageCount;
@@ -164,7 +164,7 @@ public class ModIOTermsOfUse_v1 : MonoBehaviour
 		this.waitingForAcknowledge = active;
 	}
 
-	// Token: 0x06003E33 RID: 15923 RVA: 0x0014B6B6 File Offset: 0x001498B6
+	// Token: 0x06003E33 RID: 15923 RVA: 0x0014B696 File Offset: 0x00149896
 	public void Acknowledge(bool didAccept)
 	{
 		this.accepted = didAccept;

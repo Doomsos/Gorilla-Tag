@@ -5,16 +5,16 @@ using UnityEngine;
 public class FreeHoverboardInstance : MonoBehaviour
 {
 	// Token: 0x170004CF RID: 1231
-	// (get) Token: 0x06003622 RID: 13858 RVA: 0x00125AFC File Offset: 0x00123CFC
-	// (set) Token: 0x06003623 RID: 13859 RVA: 0x00125B04 File Offset: 0x00123D04
+	// (get) Token: 0x06003622 RID: 13858 RVA: 0x00125ADC File Offset: 0x00123CDC
+	// (set) Token: 0x06003623 RID: 13859 RVA: 0x00125AE4 File Offset: 0x00123CE4
 	public Rigidbody Rigidbody { get; private set; }
 
 	// Token: 0x170004D0 RID: 1232
-	// (get) Token: 0x06003624 RID: 13860 RVA: 0x00125B0D File Offset: 0x00123D0D
-	// (set) Token: 0x06003625 RID: 13861 RVA: 0x00125B15 File Offset: 0x00123D15
+	// (get) Token: 0x06003624 RID: 13860 RVA: 0x00125AED File Offset: 0x00123CED
+	// (set) Token: 0x06003625 RID: 13861 RVA: 0x00125AF5 File Offset: 0x00123CF5
 	public Color boardColor { get; private set; }
 
-	// Token: 0x06003626 RID: 13862 RVA: 0x00125B20 File Offset: 0x00123D20
+	// Token: 0x06003626 RID: 13862 RVA: 0x00125B00 File Offset: 0x00123D00
 	private void Awake()
 	{
 		this.Rigidbody = base.GetComponent<Rigidbody>();
@@ -24,14 +24,14 @@ public class FreeHoverboardInstance : MonoBehaviour
 		this.boardMesh.sharedMaterials = sharedMaterials;
 	}
 
-	// Token: 0x06003627 RID: 13863 RVA: 0x00125B68 File Offset: 0x00123D68
+	// Token: 0x06003627 RID: 13863 RVA: 0x00125B48 File Offset: 0x00123D48
 	public void SetColor(Color col)
 	{
 		this.colorMaterial.color = col;
 		this.boardColor = col;
 	}
 
-	// Token: 0x06003628 RID: 13864 RVA: 0x00125B80 File Offset: 0x00123D80
+	// Token: 0x06003628 RID: 13864 RVA: 0x00125B60 File Offset: 0x00123D60
 	private void Update()
 	{
 		RaycastHit raycastHit;
@@ -45,7 +45,7 @@ public class FreeHoverboardInstance : MonoBehaviour
 		this.hasHoverPoint = false;
 	}
 
-	// Token: 0x06003629 RID: 13865 RVA: 0x00125BFC File Offset: 0x00123DFC
+	// Token: 0x06003629 RID: 13865 RVA: 0x00125BDC File Offset: 0x00123DDC
 	private void FixedUpdate()
 	{
 		if (this.hasHoverPoint)

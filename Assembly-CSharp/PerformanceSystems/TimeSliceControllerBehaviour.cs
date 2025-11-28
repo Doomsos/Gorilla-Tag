@@ -6,13 +6,13 @@ namespace PerformanceSystems
 	// Token: 0x02000D86 RID: 3462
 	public class TimeSliceControllerBehaviour : MonoBehaviour
 	{
-		// Token: 0x060054D9 RID: 21721 RVA: 0x001ABBF4 File Offset: 0x001A9DF4
+		// Token: 0x060054D9 RID: 21721 RVA: 0x001ABBD4 File Offset: 0x001A9DD4
 		private void Awake()
 		{
 			this._timeSliceControllerAsset.InitializeReferenceTransformWithMainCam();
 		}
 
-		// Token: 0x060054DA RID: 21722 RVA: 0x001ABC01 File Offset: 0x001A9E01
+		// Token: 0x060054DA RID: 21722 RVA: 0x001ABBE1 File Offset: 0x001A9DE1
 		private void Update()
 		{
 			this._timeSliceControllerAsset.Update();

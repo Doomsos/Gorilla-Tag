@@ -6,7 +6,7 @@ using UnityEngine;
 public struct OrientedBounds
 {
 	// Token: 0x17000601 RID: 1537
-	// (get) Token: 0x060040CA RID: 16586 RVA: 0x0015A664 File Offset: 0x00158864
+	// (get) Token: 0x060040CA RID: 16586 RVA: 0x0015A644 File Offset: 0x00158844
 	public static OrientedBounds Empty { get; } = new OrientedBounds
 	{
 		size = Vector3.zero,
@@ -15,7 +15,7 @@ public struct OrientedBounds
 	};
 
 	// Token: 0x17000602 RID: 1538
-	// (get) Token: 0x060040CB RID: 16587 RVA: 0x0015A66B File Offset: 0x0015886B
+	// (get) Token: 0x060040CB RID: 16587 RVA: 0x0015A64B File Offset: 0x0015884B
 	public static OrientedBounds Identity { get; } = new OrientedBounds
 	{
 		size = Vector3.one,
@@ -23,7 +23,7 @@ public struct OrientedBounds
 		rotation = Quaternion.identity
 	};
 
-	// Token: 0x060040CC RID: 16588 RVA: 0x0015A672 File Offset: 0x00158872
+	// Token: 0x060040CC RID: 16588 RVA: 0x0015A652 File Offset: 0x00158852
 	public Matrix4x4 TRS()
 	{
 		return Matrix4x4.TRS(this.center, this.rotation, this.size);

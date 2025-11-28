@@ -11,16 +11,16 @@ using UnityEngine.Events;
 public class HandHold : MonoBehaviour, IGorillaGrabable
 {
 	// Token: 0x14000060 RID: 96
-	// (add) Token: 0x060035BD RID: 13757 RVA: 0x00123AE0 File Offset: 0x00121CE0
-	// (remove) Token: 0x060035BE RID: 13758 RVA: 0x00123B14 File Offset: 0x00121D14
+	// (add) Token: 0x060035BD RID: 13757 RVA: 0x00123AC0 File Offset: 0x00121CC0
+	// (remove) Token: 0x060035BE RID: 13758 RVA: 0x00123AF4 File Offset: 0x00121CF4
 	public static event HandHold.HandHoldPositionEvent HandPositionRequestOverride;
 
 	// Token: 0x14000061 RID: 97
-	// (add) Token: 0x060035BF RID: 13759 RVA: 0x00123B48 File Offset: 0x00121D48
-	// (remove) Token: 0x060035C0 RID: 13760 RVA: 0x00123B7C File Offset: 0x00121D7C
+	// (add) Token: 0x060035BF RID: 13759 RVA: 0x00123B28 File Offset: 0x00121D28
+	// (remove) Token: 0x060035C0 RID: 13760 RVA: 0x00123B5C File Offset: 0x00121D5C
 	public static event HandHold.HandHoldEvent HandPositionReleaseOverride;
 
-	// Token: 0x060035C1 RID: 13761 RVA: 0x00123BB0 File Offset: 0x00121DB0
+	// Token: 0x060035C1 RID: 13761 RVA: 0x00123B90 File Offset: 0x00121D90
 	public void OnDisable()
 	{
 		for (int i = 0; i < this.currentGrabbers.Count; i++)
@@ -32,7 +32,7 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 		}
 	}
 
-	// Token: 0x060035C2 RID: 13762 RVA: 0x00123BF8 File Offset: 0x00121DF8
+	// Token: 0x060035C2 RID: 13762 RVA: 0x00123BD8 File Offset: 0x00121DD8
 	private void Initialize()
 	{
 		if (this.initialized)
@@ -50,7 +50,7 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 		return true;
 	}
 
-	// Token: 0x060035C4 RID: 13764 RVA: 0x00123C24 File Offset: 0x00121E24
+	// Token: 0x060035C4 RID: 13764 RVA: 0x00123C04 File Offset: 0x00121E04
 	void IGorillaGrabable.OnGrabbed(GorillaGrabber g, out Transform grabbedTransform, out Vector3 localGrabbedPosition)
 	{
 		this.Initialize();
@@ -85,7 +85,7 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 		}
 	}
 
-	// Token: 0x060035C5 RID: 13765 RVA: 0x00123D0C File Offset: 0x00121F0C
+	// Token: 0x060035C5 RID: 13765 RVA: 0x00123CEC File Offset: 0x00121EEC
 	void IGorillaGrabable.OnGrabReleased(GorillaGrabber g)
 	{
 		this.Initialize();
@@ -111,7 +111,7 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 		}
 	}
 
-	// Token: 0x060035C6 RID: 13766 RVA: 0x00123D9C File Offset: 0x00121F9C
+	// Token: 0x060035C6 RID: 13766 RVA: 0x00123D7C File Offset: 0x00121F7C
 	private Vector3 CalculateOffset(Vector3 position)
 	{
 		switch (this.handSnapMethod)
@@ -138,13 +138,13 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 		}
 	}
 
-	// Token: 0x060035C7 RID: 13767 RVA: 0x00123EDA File Offset: 0x001220DA
+	// Token: 0x060035C7 RID: 13767 RVA: 0x00123EBA File Offset: 0x001220BA
 	public bool MomentaryGrabOnly()
 	{
 		return this.forceMomentary;
 	}
 
-	// Token: 0x060035C8 RID: 13768 RVA: 0x00123EE2 File Offset: 0x001220E2
+	// Token: 0x060035C8 RID: 13768 RVA: 0x00123EC2 File Offset: 0x001220C2
 	public void CopyProperties(HandHoldSettings handHoldSettings)
 	{
 		this.handSnapMethod = handHoldSettings.handSnapMethod;

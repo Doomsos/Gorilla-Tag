@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020009CA RID: 2506
 public class DistanceMeasure : MonoBehaviour
 {
-	// Token: 0x06004009 RID: 16393 RVA: 0x001581FF File Offset: 0x001563FF
+	// Token: 0x06004009 RID: 16393 RVA: 0x001581DF File Offset: 0x001563DF
 	private void Awake()
 	{
 		if (this.from == null)

@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020008E7 RID: 2279
 public class SportScoreboardVisuals : MonoBehaviour
 {
-	// Token: 0x06003A5B RID: 14939 RVA: 0x0013413C File Offset: 0x0013233C
+	// Token: 0x06003A5B RID: 14939 RVA: 0x0013411C File Offset: 0x0013231C
 	private void Awake()
 	{
 		SportScoreboard.Instance.RegisterTeamVisual(this.TeamIndex, this);

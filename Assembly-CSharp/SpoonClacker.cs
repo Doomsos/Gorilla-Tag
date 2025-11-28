@@ -6,13 +6,13 @@ using UnityEngine.Serialization;
 // Token: 0x020008E6 RID: 2278
 public class SpoonClacker : MonoBehaviour
 {
-	// Token: 0x06003A57 RID: 14935 RVA: 0x00133F8A File Offset: 0x0013218A
+	// Token: 0x06003A57 RID: 14935 RVA: 0x00133F6A File Offset: 0x0013216A
 	private void Awake()
 	{
 		this.Setup();
 	}
 
-	// Token: 0x06003A58 RID: 14936 RVA: 0x00133F94 File Offset: 0x00132194
+	// Token: 0x06003A58 RID: 14936 RVA: 0x00133F74 File Offset: 0x00132174
 	private void Setup()
 	{
 		JointLimits limits = this.hingeJoint.limits;
@@ -20,7 +20,7 @@ public class SpoonClacker : MonoBehaviour
 		this.hingeMax = limits.max;
 	}
 
-	// Token: 0x06003A59 RID: 14937 RVA: 0x00133FC8 File Offset: 0x001321C8
+	// Token: 0x06003A59 RID: 14937 RVA: 0x00133FA8 File Offset: 0x001321A8
 	private void Update()
 	{
 		if (!this.transferObject)

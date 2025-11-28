@@ -9,19 +9,19 @@ using UnityEngine.Splines;
 // Token: 0x0200056E RID: 1390
 public class BuilderConveyor : MonoBehaviour
 {
-	// Token: 0x060022F1 RID: 8945 RVA: 0x000B67CC File Offset: 0x000B49CC
+	// Token: 0x060022F1 RID: 8945 RVA: 0x000B67AC File Offset: 0x000B49AC
 	private void Start()
 	{
 		this.InitIfNeeded();
 	}
 
-	// Token: 0x060022F2 RID: 8946 RVA: 0x000B67CC File Offset: 0x000B49CC
+	// Token: 0x060022F2 RID: 8946 RVA: 0x000B67AC File Offset: 0x000B49AC
 	public void Setup()
 	{
 		this.InitIfNeeded();
 	}
 
-	// Token: 0x060022F3 RID: 8947 RVA: 0x000B67D4 File Offset: 0x000B49D4
+	// Token: 0x060022F3 RID: 8947 RVA: 0x000B67B4 File Offset: 0x000B49B4
 	private void InitIfNeeded()
 	{
 		if (this.initialized)
@@ -50,19 +50,19 @@ public class BuilderConveyor : MonoBehaviour
 		this.nativeSpline = new NativeSpline(this.spline.Splines[0], this.spline.transform.localToWorldMatrix, 4);
 	}
 
-	// Token: 0x060022F4 RID: 8948 RVA: 0x000B6948 File Offset: 0x000B4B48
+	// Token: 0x060022F4 RID: 8948 RVA: 0x000B6928 File Offset: 0x000B4B28
 	public int GetMaxItemsOnConveyor()
 	{
 		return Mathf.RoundToInt(this.splineLength / (this.conveyorMoveSpeed * this.spawnDelay)) + 5;
 	}
 
-	// Token: 0x060022F5 RID: 8949 RVA: 0x000B6965 File Offset: 0x000B4B65
+	// Token: 0x060022F5 RID: 8949 RVA: 0x000B6945 File Offset: 0x000B4B45
 	public float GetFrameMovement()
 	{
 		return this.conveyorMoveSpeed / this.splineLength;
 	}
 
-	// Token: 0x060022F6 RID: 8950 RVA: 0x000B6974 File Offset: 0x000B4B74
+	// Token: 0x060022F6 RID: 8950 RVA: 0x000B6954 File Offset: 0x000B4B54
 	private void OnDestroy()
 	{
 		if (this.setSelector != null)
@@ -72,7 +72,7 @@ public class BuilderConveyor : MonoBehaviour
 		this.nativeSpline.Dispose();
 	}
 
-	// Token: 0x060022F7 RID: 8951 RVA: 0x000B69AB File Offset: 0x000B4BAB
+	// Token: 0x060022F7 RID: 8951 RVA: 0x000B698B File Offset: 0x000B4B8B
 	public void OnSelectedSetChange(int displayGroupID)
 	{
 		if (this.table.GetTableState() != BuilderTable.TableState.Ready)
@@ -82,7 +82,7 @@ public class BuilderConveyor : MonoBehaviour
 		this.table.RequestShelfSelection(this.shelfID, displayGroupID, true);
 	}
 
-	// Token: 0x060022F8 RID: 8952 RVA: 0x000B69D0 File Offset: 0x000B4BD0
+	// Token: 0x060022F8 RID: 8952 RVA: 0x000B69B0 File Offset: 0x000B4BB0
 	public void SetSelection(int displayGroupID)
 	{
 		this.setSelector.SetSelection(displayGroupID);
@@ -99,13 +99,13 @@ public class BuilderConveyor : MonoBehaviour
 		this.loopCount = 0;
 	}
 
-	// Token: 0x060022F9 RID: 8953 RVA: 0x000B6A7C File Offset: 0x000B4C7C
+	// Token: 0x060022F9 RID: 8953 RVA: 0x000B6A5C File Offset: 0x000B4C5C
 	public int GetSelectedDisplayGroupID()
 	{
 		return this.setSelector.GetSelectedGroup().GetDisplayGroupIdentifier();
 	}
 
-	// Token: 0x060022FA RID: 8954 RVA: 0x000B6A90 File Offset: 0x000B4C90
+	// Token: 0x060022FA RID: 8954 RVA: 0x000B6A70 File Offset: 0x000B4C70
 	public void UpdateConveyor()
 	{
 		if (!this.initialized)
@@ -129,7 +129,7 @@ public class BuilderConveyor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060022FB RID: 8955 RVA: 0x000B6B34 File Offset: 0x000B4D34
+	// Token: 0x060022FB RID: 8955 RVA: 0x000B6B14 File Offset: 0x000B4D14
 	public void RemovePieceFromConveyor(Transform pieceTransform)
 	{
 		foreach (BuilderPiece builderPiece in this.piecesOnConveyor)
@@ -144,7 +144,7 @@ public class BuilderConveyor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060022FC RID: 8956 RVA: 0x000B6BB4 File Offset: 0x000B4DB4
+	// Token: 0x060022FC RID: 8956 RVA: 0x000B6B94 File Offset: 0x000B4D94
 	private Vector3 EvaluateSpline(float t)
 	{
 		float num;
@@ -152,7 +152,7 @@ public class BuilderConveyor : MonoBehaviour
 		return CurveUtility.EvaluatePosition(this._evaluateCurve, num);
 	}
 
-	// Token: 0x060022FD RID: 8957 RVA: 0x000B6BF4 File Offset: 0x000B4DF4
+	// Token: 0x060022FD RID: 8957 RVA: 0x000B6BD4 File Offset: 0x000B4DD4
 	public void UpdateShelfSliced()
 	{
 		if (!PhotonNetwork.LocalPlayer.IsMasterClient)
@@ -184,25 +184,25 @@ public class BuilderConveyor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060022FE RID: 8958 RVA: 0x000B6C84 File Offset: 0x000B4E84
+	// Token: 0x060022FE RID: 8958 RVA: 0x000B6C64 File Offset: 0x000B4E64
 	public void VerifySetSelection()
 	{
 		this.shouldVerifySetSelection = true;
 	}
 
-	// Token: 0x060022FF RID: 8959 RVA: 0x000B6C8D File Offset: 0x000B4E8D
+	// Token: 0x060022FF RID: 8959 RVA: 0x000B6C6D File Offset: 0x000B4E6D
 	public void OnAvailableResourcesChange()
 	{
 		this.waitForResourceChange = false;
 	}
 
-	// Token: 0x06002300 RID: 8960 RVA: 0x000B6C96 File Offset: 0x000B4E96
+	// Token: 0x06002300 RID: 8960 RVA: 0x000B6C76 File Offset: 0x000B4E76
 	public Transform GetSpawnTransform()
 	{
 		return this.spawnTransform;
 	}
 
-	// Token: 0x06002301 RID: 8961 RVA: 0x000B6CA0 File Offset: 0x000B4EA0
+	// Token: 0x06002301 RID: 8961 RVA: 0x000B6C80 File Offset: 0x000B4E80
 	public void OnShelfPieceCreated(BuilderPiece piece, float timeOffset)
 	{
 		float num = timeOffset * this.conveyorMoveSpeed / this.splineLength;
@@ -227,7 +227,7 @@ public class BuilderConveyor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002302 RID: 8962 RVA: 0x000B6D81 File Offset: 0x000B4F81
+	// Token: 0x06002302 RID: 8962 RVA: 0x000B6D61 File Offset: 0x000B4F61
 	public void OnShelfPieceRecycled(BuilderPiece piece)
 	{
 		this.piecesOnConveyor.Remove(piece);
@@ -237,7 +237,7 @@ public class BuilderConveyor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002303 RID: 8963 RVA: 0x000B6DAA File Offset: 0x000B4FAA
+	// Token: 0x06002303 RID: 8963 RVA: 0x000B6D8A File Offset: 0x000B4F8A
 	public void OnClearTable()
 	{
 		this.piecesOnConveyor.Clear();
@@ -245,7 +245,7 @@ public class BuilderConveyor : MonoBehaviour
 		this.grabbedPieceMaterials.Clear();
 	}
 
-	// Token: 0x06002304 RID: 8964 RVA: 0x000B6DD0 File Offset: 0x000B4FD0
+	// Token: 0x06002304 RID: 8964 RVA: 0x000B6DB0 File Offset: 0x000B4FB0
 	public void ResetConveyorState()
 	{
 		for (int i = this.piecesOnConveyor.Count - 1; i >= 0; i--)
@@ -269,7 +269,7 @@ public class BuilderConveyor : MonoBehaviour
 		this.OnClearTable();
 	}
 
-	// Token: 0x06002305 RID: 8965 RVA: 0x000B6E88 File Offset: 0x000B5088
+	// Token: 0x06002305 RID: 8965 RVA: 0x000B6E68 File Offset: 0x000B5068
 	private void SpawnNextPiece()
 	{
 		int num;
@@ -282,7 +282,7 @@ public class BuilderConveyor : MonoBehaviour
 		this.table.RequestCreateConveyorPiece(num, materialType, this.shelfID);
 	}
 
-	// Token: 0x06002306 RID: 8966 RVA: 0x000B6EB8 File Offset: 0x000B50B8
+	// Token: 0x06002306 RID: 8966 RVA: 0x000B6E98 File Offset: 0x000B5098
 	private void FindNextAffordablePieceType(out int pieceType, out int materialType)
 	{
 		if (this.grabbedPieceTypes.Count > 0)
@@ -329,7 +329,7 @@ public class BuilderConveyor : MonoBehaviour
 		this.waitForResourceChange = true;
 	}
 
-	// Token: 0x06002307 RID: 8967 RVA: 0x000B703C File Offset: 0x000B523C
+	// Token: 0x06002307 RID: 8967 RVA: 0x000B701C File Offset: 0x000B521C
 	private int GetMaterialType(BuilderPieceSet.PieceInfo info)
 	{
 		if (info.piecePrefab.materialOptions != null && info.overrideSetMaterial && info.pieceMaterialTypes.Length != 0)

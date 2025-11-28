@@ -11,7 +11,7 @@ namespace GorillaTagScripts
 	[NetworkBehaviourWeaved(1)]
 	public class ChristmasTree : NetworkComponent
 	{
-		// Token: 0x060057F0 RID: 22512 RVA: 0x001C1C18 File Offset: 0x001BFE18
+		// Token: 0x060057F0 RID: 22512 RVA: 0x001C1BF8 File Offset: 0x001BFDF8
 		protected override void Awake()
 		{
 			base.Awake();
@@ -31,7 +31,7 @@ namespace GorillaTagScripts
 			this.isActive = false;
 		}
 
-		// Token: 0x060057F1 RID: 22513 RVA: 0x001C1CB9 File Offset: 0x001BFEB9
+		// Token: 0x060057F1 RID: 22513 RVA: 0x001C1C99 File Offset: 0x001BFE99
 		private void Update()
 		{
 			if (this.spinTheTop && this.topOrnament)
@@ -40,7 +40,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060057F2 RID: 22514 RVA: 0x001C1CF8 File Offset: 0x001BFEF8
+		// Token: 0x060057F2 RID: 22514 RVA: 0x001C1CD8 File Offset: 0x001BFED8
 		private void OnDestroy()
 		{
 			NetworkBehaviourUtils.InternalOnDestroy(this);
@@ -51,7 +51,7 @@ namespace GorillaTagScripts
 			this.attachPointsList.Clear();
 		}
 
-		// Token: 0x060057F3 RID: 22515 RVA: 0x001C1D78 File Offset: 0x001BFF78
+		// Token: 0x060057F3 RID: 22515 RVA: 0x001C1D58 File Offset: 0x001BFF58
 		private void UpdateHangers()
 		{
 			if (this.attachPointsList.Count == 0)
@@ -78,7 +78,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060057F4 RID: 22516 RVA: 0x001C1DF8 File Offset: 0x001BFFF8
+		// Token: 0x060057F4 RID: 22516 RVA: 0x001C1DD8 File Offset: 0x001BFFD8
 		private void updateLight(bool enable)
 		{
 			this.isActive = enable;
@@ -90,8 +90,8 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x1700083E RID: 2110
-		// (get) Token: 0x060057F5 RID: 22517 RVA: 0x001C1E4F File Offset: 0x001C004F
-		// (set) Token: 0x060057F6 RID: 22518 RVA: 0x001C1E79 File Offset: 0x001C0079
+		// (get) Token: 0x060057F5 RID: 22517 RVA: 0x001C1E2F File Offset: 0x001C002F
+		// (set) Token: 0x060057F6 RID: 22518 RVA: 0x001C1E59 File Offset: 0x001C0059
 		[Networked]
 		[NetworkedWeaved(0, 1)]
 		private unsafe NetworkBool Data
@@ -114,13 +114,13 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060057F7 RID: 22519 RVA: 0x001C1EA4 File Offset: 0x001C00A4
+		// Token: 0x060057F7 RID: 22519 RVA: 0x001C1E84 File Offset: 0x001C0084
 		public override void WriteDataFusion()
 		{
 			this.Data = this.isActive;
 		}
 
-		// Token: 0x060057F8 RID: 22520 RVA: 0x001C1EB7 File Offset: 0x001C00B7
+		// Token: 0x060057F8 RID: 22520 RVA: 0x001C1E97 File Offset: 0x001C0097
 		public override void ReadDataFusion()
 		{
 			this.wasActive = this.isActive;
@@ -131,7 +131,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060057F9 RID: 22521 RVA: 0x001C1EF0 File Offset: 0x001C00F0
+		// Token: 0x060057F9 RID: 22521 RVA: 0x001C1ED0 File Offset: 0x001C00D0
 		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (!info.Sender.IsMasterClient)
@@ -141,7 +141,7 @@ namespace GorillaTagScripts
 			stream.SendNext(this.isActive);
 		}
 
-		// Token: 0x060057FA RID: 22522 RVA: 0x001C1F14 File Offset: 0x001C0114
+		// Token: 0x060057FA RID: 22522 RVA: 0x001C1EF4 File Offset: 0x001C00F4
 		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (!info.Sender.IsMasterClient)
@@ -156,7 +156,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060057FC RID: 22524 RVA: 0x001C1F84 File Offset: 0x001C0184
+		// Token: 0x060057FC RID: 22524 RVA: 0x001C1F64 File Offset: 0x001C0164
 		[WeaverGenerated]
 		public override void CopyBackingFieldsToState(bool A_1)
 		{
@@ -164,7 +164,7 @@ namespace GorillaTagScripts
 			this.Data = this._Data;
 		}
 
-		// Token: 0x060057FD RID: 22525 RVA: 0x001C1F9C File Offset: 0x001C019C
+		// Token: 0x060057FD RID: 22525 RVA: 0x001C1F7C File Offset: 0x001C017C
 		[WeaverGenerated]
 		public override void CopyStateToBackingFields()
 		{

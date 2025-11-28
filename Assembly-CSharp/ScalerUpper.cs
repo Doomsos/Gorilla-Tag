@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200043F RID: 1087
 public class ScalerUpper : MonoBehaviour
 {
-	// Token: 0x06001ABF RID: 6847 RVA: 0x0008D4E8 File Offset: 0x0008B6E8
+	// Token: 0x06001ABF RID: 6847 RVA: 0x0008D4C8 File Offset: 0x0008B6C8
 	private void Update()
 	{
 		for (int i = 0; i < this.target.Length; i++)
@@ -14,13 +14,13 @@ public class ScalerUpper : MonoBehaviour
 		this.t += Time.deltaTime;
 	}
 
-	// Token: 0x06001AC0 RID: 6848 RVA: 0x0008D547 File Offset: 0x0008B747
+	// Token: 0x06001AC0 RID: 6848 RVA: 0x0008D527 File Offset: 0x0008B727
 	private void OnEnable()
 	{
 		this.t = 0f;
 	}
 
-	// Token: 0x06001AC1 RID: 6849 RVA: 0x0008D554 File Offset: 0x0008B754
+	// Token: 0x06001AC1 RID: 6849 RVA: 0x0008D534 File Offset: 0x0008B734
 	private void OnDisable()
 	{
 		for (int i = 0; i < this.target.Length; i++)

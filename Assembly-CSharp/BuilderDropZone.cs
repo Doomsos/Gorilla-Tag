@@ -7,13 +7,13 @@ using UnityEngine;
 // Token: 0x02000572 RID: 1394
 public class BuilderDropZone : MonoBehaviour
 {
-	// Token: 0x0600232E RID: 9006 RVA: 0x000B8176 File Offset: 0x000B6376
+	// Token: 0x0600232E RID: 9006 RVA: 0x000B8156 File Offset: 0x000B6356
 	private void Awake()
 	{
 		this.repelDirectionWorld = base.transform.TransformDirection(this.repelDirectionLocal.normalized);
 	}
 
-	// Token: 0x0600232F RID: 9007 RVA: 0x000B8194 File Offset: 0x000B6394
+	// Token: 0x0600232F RID: 9007 RVA: 0x000B8174 File Offset: 0x000B6374
 	private void OnTriggerEnter(Collider other)
 	{
 		if (!this.onEnter)
@@ -51,13 +51,13 @@ public class BuilderDropZone : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002330 RID: 9008 RVA: 0x000B827E File Offset: 0x000B647E
+	// Token: 0x06002330 RID: 9008 RVA: 0x000B825E File Offset: 0x000B645E
 	public Vector3 GetRepelDirectionWorld()
 	{
 		return this.repelDirectionWorld;
 	}
 
-	// Token: 0x06002331 RID: 9009 RVA: 0x000B8288 File Offset: 0x000B6488
+	// Token: 0x06002331 RID: 9009 RVA: 0x000B8268 File Offset: 0x000B6468
 	public void PlayEffect()
 	{
 		if (this.vfxRoot != null && !this.playingEffect)
@@ -72,7 +72,7 @@ public class BuilderDropZone : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002332 RID: 9010 RVA: 0x000B8301 File Offset: 0x000B6501
+	// Token: 0x06002332 RID: 9010 RVA: 0x000B82E1 File Offset: 0x000B64E1
 	private IEnumerator DelayedStopEffect()
 	{
 		yield return new WaitForSeconds(this.effectDuration);
@@ -81,7 +81,7 @@ public class BuilderDropZone : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06002333 RID: 9011 RVA: 0x000B8310 File Offset: 0x000B6510
+	// Token: 0x06002333 RID: 9011 RVA: 0x000B82F0 File Offset: 0x000B64F0
 	private void OnTriggerExit(Collider other)
 	{
 		if (this.onEnter)

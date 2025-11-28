@@ -7,26 +7,26 @@ using UnityEngine.UI;
 // Token: 0x0200091F RID: 2335
 public class GorillaScoreboardSpawner : MonoBehaviour
 {
-	// Token: 0x06003BAD RID: 15277 RVA: 0x0013B6A7 File Offset: 0x001398A7
+	// Token: 0x06003BAD RID: 15277 RVA: 0x0013B687 File Offset: 0x00139887
 	public void Awake()
 	{
 		base.StartCoroutine(this.UpdateBoard());
 	}
 
-	// Token: 0x06003BAE RID: 15278 RVA: 0x0013B6B6 File Offset: 0x001398B6
+	// Token: 0x06003BAE RID: 15278 RVA: 0x0013B696 File Offset: 0x00139896
 	private void Start()
 	{
 		RoomSystem.JoinedRoomEvent += new Action(this.OnJoinedRoom);
 		RoomSystem.LeftRoomEvent += new Action(this.OnLeftRoom);
 	}
 
-	// Token: 0x06003BAF RID: 15279 RVA: 0x0013B6EE File Offset: 0x001398EE
+	// Token: 0x06003BAF RID: 15279 RVA: 0x0013B6CE File Offset: 0x001398CE
 	public bool IsCurrentScoreboard()
 	{
 		return base.gameObject.activeInHierarchy;
 	}
 
-	// Token: 0x06003BB0 RID: 15280 RVA: 0x0013B6FC File Offset: 0x001398FC
+	// Token: 0x06003BB0 RID: 15280 RVA: 0x0013B6DC File Offset: 0x001398DC
 	public void OnJoinedRoom()
 	{
 		Debug.Log("SCOREBOARD JOIN ROOM");
@@ -43,7 +43,7 @@ public class GorillaScoreboardSpawner : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003BB1 RID: 15281 RVA: 0x0013B78C File Offset: 0x0013998C
+	// Token: 0x06003BB1 RID: 15281 RVA: 0x0013B76C File Offset: 0x0013996C
 	public bool IsVisible()
 	{
 		if (!this.forOverlay)
@@ -53,7 +53,7 @@ public class GorillaScoreboardSpawner : MonoBehaviour
 		return GTPlayer.Instance.inOverlay;
 	}
 
-	// Token: 0x06003BB2 RID: 15282 RVA: 0x0013B7AC File Offset: 0x001399AC
+	// Token: 0x06003BB2 RID: 15282 RVA: 0x0013B78C File Offset: 0x0013998C
 	private IEnumerator UpdateBoard()
 	{
 		for (;;)
@@ -88,7 +88,7 @@ public class GorillaScoreboardSpawner : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003BB3 RID: 15283 RVA: 0x0013B7BB File Offset: 0x001399BB
+	// Token: 0x06003BB3 RID: 15283 RVA: 0x0013B79B File Offset: 0x0013999B
 	public void OnLeftRoom()
 	{
 		this.Cleanup();
@@ -98,7 +98,7 @@ public class GorillaScoreboardSpawner : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003BB4 RID: 15284 RVA: 0x0013B7DC File Offset: 0x001399DC
+	// Token: 0x06003BB4 RID: 15284 RVA: 0x0013B7BC File Offset: 0x001399BC
 	public void Cleanup()
 	{
 		if (this.currentScoreboard != null)

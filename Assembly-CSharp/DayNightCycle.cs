@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000905 RID: 2309
 public class DayNightCycle : MonoBehaviour
 {
-	// Token: 0x06003B0E RID: 15118 RVA: 0x00138284 File Offset: 0x00136484
+	// Token: 0x06003B0E RID: 15118 RVA: 0x00138264 File Offset: 0x00136464
 	public void Awake()
 	{
 		this.fromMap = new Texture2D(this._sunriseMap.width, this._sunriseMap.height);
@@ -29,7 +29,7 @@ public class DayNightCycle : MonoBehaviour
 		this.finishedCoroutine = false;
 	}
 
-	// Token: 0x06003B0F RID: 15119 RVA: 0x00138408 File Offset: 0x00136608
+	// Token: 0x06003B0F RID: 15119 RVA: 0x001383E8 File Offset: 0x001365E8
 	public void Update()
 	{
 		if (this.startJob)
@@ -79,7 +79,7 @@ public class DayNightCycle : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B10 RID: 15120 RVA: 0x001385F6 File Offset: 0x001367F6
+	// Token: 0x06003B10 RID: 15120 RVA: 0x001385D6 File Offset: 0x001367D6
 	public IEnumerator UpdateWork()
 	{
 		yield return 0;
@@ -233,7 +233,7 @@ public class DayNightCycle : MonoBehaviour
 	// Token: 0x02000906 RID: 2310
 	public struct LerpBakedLightingJob : IJob
 	{
-		// Token: 0x06003B12 RID: 15122 RVA: 0x00138618 File Offset: 0x00136818
+		// Token: 0x06003B12 RID: 15122 RVA: 0x001385F8 File Offset: 0x001367F8
 		public void Execute()
 		{
 			for (int i = 0; i < this.fromPixels.Length; i++)

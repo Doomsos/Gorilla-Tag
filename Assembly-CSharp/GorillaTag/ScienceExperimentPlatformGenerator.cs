@@ -11,14 +11,14 @@ namespace GorillaTag
 	// Token: 0x02001003 RID: 4099
 	public class ScienceExperimentPlatformGenerator : MonoBehaviourPun, ITickSystemPost, IGuidedRefReceiverMono, IGuidedRefMonoBehaviour, IGuidedRefObject
 	{
-		// Token: 0x060067B4 RID: 26548 RVA: 0x0021D5EF File Offset: 0x0021B7EF
+		// Token: 0x060067B4 RID: 26548 RVA: 0x0021D5CF File Offset: 0x0021B7CF
 		private void Awake()
 		{
 			((IGuidedRefObject)this).GuidedRefInitialize();
 			this.scienceExperimentManager = base.GetComponent<ScienceExperimentManager>();
 		}
 
-		// Token: 0x060067B5 RID: 26549 RVA: 0x0021D603 File Offset: 0x0021B803
+		// Token: 0x060067B5 RID: 26549 RVA: 0x0021D5E3 File Offset: 0x0021B7E3
 		private void OnEnable()
 		{
 			if (((IGuidedRefReceiverMono)this).GuidedRefsWaitingToResolveCount > 0)
@@ -28,18 +28,18 @@ namespace GorillaTag
 			TickSystem<object>.AddPostTickCallback(this);
 		}
 
-		// Token: 0x060067B6 RID: 26550 RVA: 0x001338F3 File Offset: 0x00131AF3
+		// Token: 0x060067B6 RID: 26550 RVA: 0x001338D3 File Offset: 0x00131AD3
 		protected void OnDisable()
 		{
 			TickSystem<object>.RemovePostTickCallback(this);
 		}
 
 		// Token: 0x170009C0 RID: 2496
-		// (get) Token: 0x060067B7 RID: 26551 RVA: 0x0021D615 File Offset: 0x0021B815
-		// (set) Token: 0x060067B8 RID: 26552 RVA: 0x0021D61D File Offset: 0x0021B81D
+		// (get) Token: 0x060067B7 RID: 26551 RVA: 0x0021D5F5 File Offset: 0x0021B7F5
+		// (set) Token: 0x060067B8 RID: 26552 RVA: 0x0021D5FD File Offset: 0x0021B7FD
 		bool ITickSystemPost.PostTickRunning { get; set; }
 
-		// Token: 0x060067B9 RID: 26553 RVA: 0x0021D628 File Offset: 0x0021B828
+		// Token: 0x060067B9 RID: 26553 RVA: 0x0021D608 File Offset: 0x0021B808
 		void ITickSystemPost.PostTick()
 		{
 			double currentTime = PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.unscaledTimeAsDouble;
@@ -49,7 +49,7 @@ namespace GorillaTag
 			this.UpdateActiveBubbles(currentTime);
 		}
 
-		// Token: 0x060067BA RID: 26554 RVA: 0x0021D668 File Offset: 0x0021B868
+		// Token: 0x060067BA RID: 26554 RVA: 0x0021D648 File Offset: 0x0021B848
 		private void RemoveExpiredBubbles(double currentTime)
 		{
 			for (int i = this.activeBubbles.Count - 1; i >= 0; i--)
@@ -62,7 +62,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067BB RID: 26555 RVA: 0x0021D6E4 File Offset: 0x0021B8E4
+		// Token: 0x060067BB RID: 26555 RVA: 0x0021D6C4 File Offset: 0x0021B8C4
 		private void SpawnNewBubbles(double currentTime)
 		{
 			if (base.photonView.IsMine && this.scienceExperimentManager.GameState == ScienceExperimentManager.RisingLiquidState.Rising)
@@ -78,7 +78,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067BC RID: 26556 RVA: 0x0021D774 File Offset: 0x0021B974
+		// Token: 0x060067BC RID: 26556 RVA: 0x0021D754 File Offset: 0x0021B954
 		private void UpdateActiveBubbles(double currentTime)
 		{
 			if (this.liquidSurfacePlane == null)
@@ -105,7 +105,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067BD RID: 26557 RVA: 0x0021D8DC File Offset: 0x0021BADC
+		// Token: 0x060067BD RID: 26557 RVA: 0x0021D8BC File Offset: 0x0021BABC
 		private void UpdateTrails(double currentTime)
 		{
 			if (base.photonView.IsMine)
@@ -175,7 +175,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067BE RID: 26558 RVA: 0x0021DC74 File Offset: 0x0021BE74
+		// Token: 0x060067BE RID: 26558 RVA: 0x0021DC54 File Offset: 0x0021BE54
 		private void SpawnRockAuthority(double currentTime, float lavaProgress)
 		{
 			if (base.photonView.IsMine)
@@ -198,7 +198,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067BF RID: 26559 RVA: 0x0021DDAC File Offset: 0x0021BFAC
+		// Token: 0x060067BF RID: 26559 RVA: 0x0021DD8C File Offset: 0x0021BF8C
 		private void SpawnTrailAuthority(double currentTime, float lavaProgress)
 		{
 			if (base.photonView.IsMine)
@@ -219,7 +219,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067C0 RID: 26560 RVA: 0x0021DEB4 File Offset: 0x0021C0B4
+		// Token: 0x060067C0 RID: 26560 RVA: 0x0021DE94 File Offset: 0x0021C094
 		private void SpawnSodaBubbleLocal(Vector2 surfacePosLocal, float spawnSize, float lifetime, double spawnTime, bool addAsTrail = false, Vector3 direction = default(Vector3))
 		{
 			if (this.activeBubbles.Count < this.maxBubbleCount)
@@ -244,7 +244,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067C1 RID: 26561 RVA: 0x0021DF9C File Offset: 0x0021C19C
+		// Token: 0x060067C1 RID: 26561 RVA: 0x0021DF7C File Offset: 0x0021C17C
 		[PunRPC]
 		public void SpawnSodaBubbleRPC(Vector2 surfacePosLocal, float spawnSize, float lifetime, double spawnTime, PhotonMessageInfo info)
 		{
@@ -265,7 +265,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067C2 RID: 26562 RVA: 0x0021E09C File Offset: 0x0021C29C
+		// Token: 0x060067C2 RID: 26562 RVA: 0x0021E07C File Offset: 0x0021C27C
 		private Vector2 GetSpawnPositionWithClearance(Vector2 inputPosition, float inputSize, float maxDistance, Vector3 lavaSurfaceOrigin)
 		{
 			Vector2 vector = inputPosition;
@@ -297,7 +297,7 @@ namespace GorillaTag
 			return vector;
 		}
 
-		// Token: 0x060067C3 RID: 26563 RVA: 0x0021E1AF File Offset: 0x0021C3AF
+		// Token: 0x060067C3 RID: 26563 RVA: 0x0021E18F File Offset: 0x0021C38F
 		void IGuidedRefObject.GuidedRefInitialize()
 		{
 			GuidedRefHub.RegisterReceiverField<ScienceExperimentPlatformGenerator>(this, "liquidSurfacePlane", ref this.liquidSurfacePlane_gRef);
@@ -305,17 +305,17 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009C1 RID: 2497
-		// (get) Token: 0x060067C4 RID: 26564 RVA: 0x0021E1C8 File Offset: 0x0021C3C8
-		// (set) Token: 0x060067C5 RID: 26565 RVA: 0x0021E1D0 File Offset: 0x0021C3D0
+		// (get) Token: 0x060067C4 RID: 26564 RVA: 0x0021E1A8 File Offset: 0x0021C3A8
+		// (set) Token: 0x060067C5 RID: 26565 RVA: 0x0021E1B0 File Offset: 0x0021C3B0
 		int IGuidedRefReceiverMono.GuidedRefsWaitingToResolveCount { get; set; }
 
-		// Token: 0x060067C6 RID: 26566 RVA: 0x0021E1D9 File Offset: 0x0021C3D9
+		// Token: 0x060067C6 RID: 26566 RVA: 0x0021E1B9 File Offset: 0x0021C3B9
 		bool IGuidedRefReceiverMono.GuidedRefTryResolveReference(GuidedRefTryResolveInfo target)
 		{
 			return GuidedRefHub.TryResolveField<ScienceExperimentPlatformGenerator, Transform>(this, ref this.liquidSurfacePlane, this.liquidSurfacePlane_gRef, target);
 		}
 
-		// Token: 0x060067C7 RID: 26567 RVA: 0x0021E1EE File Offset: 0x0021C3EE
+		// Token: 0x060067C7 RID: 26567 RVA: 0x0021E1CE File Offset: 0x0021C3CE
 		void IGuidedRefReceiverMono.OnAllGuidedRefsResolved()
 		{
 			if (!base.enabled)
@@ -325,7 +325,7 @@ namespace GorillaTag
 			TickSystem<object>.AddPostTickCallback(this);
 		}
 
-		// Token: 0x060067C8 RID: 26568 RVA: 0x001338F3 File Offset: 0x00131AF3
+		// Token: 0x060067C8 RID: 26568 RVA: 0x001338D3 File Offset: 0x00131AD3
 		void IGuidedRefReceiverMono.OnGuidedRefTargetDestroyed(int fieldId)
 		{
 			TickSystem<object>.RemovePostTickCallback(this);

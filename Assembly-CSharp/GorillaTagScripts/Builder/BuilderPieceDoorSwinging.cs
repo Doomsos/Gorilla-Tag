@@ -9,7 +9,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E50 RID: 3664
 	public class BuilderPieceDoorSwinging : MonoBehaviour, IBuilderPieceComponent, IBuilderPieceFunctional
 	{
-		// Token: 0x06005B6D RID: 23405 RVA: 0x001D5898 File Offset: 0x001D3A98
+		// Token: 0x06005B6D RID: 23405 RVA: 0x001D5878 File Offset: 0x001D3A78
 		private void Awake()
 		{
 			foreach (BuilderSmallMonkeTrigger builderSmallMonkeTrigger in this.doorHoldTriggers)
@@ -21,7 +21,7 @@ namespace GorillaTagScripts.Builder
 			this.backTrigger.TriggeredEvent.AddListener(new UnityAction(this.OnBackTriggerEntered));
 		}
 
-		// Token: 0x06005B6E RID: 23406 RVA: 0x001D5918 File Offset: 0x001D3B18
+		// Token: 0x06005B6E RID: 23406 RVA: 0x001D58F8 File Offset: 0x001D3AF8
 		private void OnDestroy()
 		{
 			foreach (BuilderSmallMonkeTrigger builderSmallMonkeTrigger in this.doorHoldTriggers)
@@ -33,7 +33,7 @@ namespace GorillaTagScripts.Builder
 			this.backTrigger.TriggeredEvent.RemoveListener(new UnityAction(this.OnBackTriggerEntered));
 		}
 
-		// Token: 0x06005B6F RID: 23407 RVA: 0x001D5998 File Offset: 0x001D3B98
+		// Token: 0x06005B6F RID: 23407 RVA: 0x001D5978 File Offset: 0x001D3B78
 		private void OnFrontTriggerEntered()
 		{
 			if (this.currentState == BuilderPieceDoorSwinging.SwingingDoorState.Closed)
@@ -47,7 +47,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B70 RID: 23408 RVA: 0x001D5A0C File Offset: 0x001D3C0C
+		// Token: 0x06005B70 RID: 23408 RVA: 0x001D59EC File Offset: 0x001D3BEC
 		private void OnBackTriggerEntered()
 		{
 			if (this.currentState == BuilderPieceDoorSwinging.SwingingDoorState.Closed)
@@ -61,7 +61,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B71 RID: 23409 RVA: 0x001D5A80 File Offset: 0x001D3C80
+		// Token: 0x06005B71 RID: 23409 RVA: 0x001D5A60 File Offset: 0x001D3C60
 		private void OnHoldTriggerEntered()
 		{
 			this.peopleInHoldOpenVolume = true;
@@ -87,7 +87,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B72 RID: 23410 RVA: 0x001D5B30 File Offset: 0x001D3D30
+		// Token: 0x06005B72 RID: 23410 RVA: 0x001D5B10 File Offset: 0x001D3D10
 		private void OnHoldTriggerExited()
 		{
 			this.peopleInHoldOpenVolume = false;
@@ -115,7 +115,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B73 RID: 23411 RVA: 0x001D5C04 File Offset: 0x001D3E04
+		// Token: 0x06005B73 RID: 23411 RVA: 0x001D5BE4 File Offset: 0x001D3DE4
 		private void SetDoorState(BuilderPieceDoorSwinging.SwingingDoorState value)
 		{
 			bool flag = this.currentState == BuilderPieceDoorSwinging.SwingingDoorState.Closed;
@@ -142,7 +142,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B74 RID: 23412 RVA: 0x001D5C8C File Offset: 0x001D3E8C
+		// Token: 0x06005B74 RID: 23412 RVA: 0x001D5C6C File Offset: 0x001D3E6C
 		private void UpdateDoorStateMaster()
 		{
 			switch (this.currentState)
@@ -222,7 +222,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B75 RID: 23413 RVA: 0x001D5ED4 File Offset: 0x001D40D4
+		// Token: 0x06005B75 RID: 23413 RVA: 0x001D5EB4 File Offset: 0x001D40B4
 		private void UpdateDoorState()
 		{
 			switch (this.currentState)
@@ -257,7 +257,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B76 RID: 23414 RVA: 0x001D5F84 File Offset: 0x001D4184
+		// Token: 0x06005B76 RID: 23414 RVA: 0x001D5F64 File Offset: 0x001D4164
 		private void CloseDoor()
 		{
 			switch (this.currentState)
@@ -281,7 +281,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B77 RID: 23415 RVA: 0x001D5FE2 File Offset: 0x001D41E2
+		// Token: 0x06005B77 RID: 23415 RVA: 0x001D5FC2 File Offset: 0x001D41C2
 		private void OpenDoor(bool openIn)
 		{
 			if (this.currentState == BuilderPieceDoorSwinging.SwingingDoorState.Closed)
@@ -292,7 +292,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B78 RID: 23416 RVA: 0x001D6010 File Offset: 0x001D4210
+		// Token: 0x06005B78 RID: 23416 RVA: 0x001D5FF0 File Offset: 0x001D41F0
 		private void UpdateDoorAnimation()
 		{
 			switch (this.currentState)
@@ -328,7 +328,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B79 RID: 23417 RVA: 0x001D6200 File Offset: 0x001D4400
+		// Token: 0x06005B79 RID: 23417 RVA: 0x001D61E0 File Offset: 0x001D43E0
 		public void OnPieceCreate(int pieceType, int pieceId)
 		{
 			this.tLastOpened = 0f;
@@ -351,7 +351,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005B7C RID: 23420 RVA: 0x001D6248 File Offset: 0x001D4448
+		// Token: 0x06005B7C RID: 23420 RVA: 0x001D6228 File Offset: 0x001D4428
 		public void OnPieceActivate()
 		{
 			Collider[] array = this.triggerVolumes;
@@ -361,7 +361,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B7D RID: 23421 RVA: 0x001D6274 File Offset: 0x001D4474
+		// Token: 0x06005B7D RID: 23421 RVA: 0x001D6254 File Offset: 0x001D4454
 		public void OnPieceDeactivate()
 		{
 			Collider[] array = this.triggerVolumes;
@@ -379,7 +379,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B7E RID: 23422 RVA: 0x001D6320 File Offset: 0x001D4520
+		// Token: 0x06005B7E RID: 23422 RVA: 0x001D6300 File Offset: 0x001D4500
 		public void OnStateChanged(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!this.IsStateValid(newState))
@@ -428,7 +428,7 @@ namespace GorillaTagScripts.Builder
 			this.SetDoorState((BuilderPieceDoorSwinging.SwingingDoorState)newState);
 		}
 
-		// Token: 0x06005B7F RID: 23423 RVA: 0x001D63F0 File Offset: 0x001D45F0
+		// Token: 0x06005B7F RID: 23423 RVA: 0x001D63D0 File Offset: 0x001D45D0
 		public void OnStateRequest(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!NetworkSystem.Instance.IsMasterClient)
@@ -441,13 +441,13 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B80 RID: 23424 RVA: 0x001D644E File Offset: 0x001D464E
+		// Token: 0x06005B80 RID: 23424 RVA: 0x001D642E File Offset: 0x001D462E
 		public bool IsStateValid(byte state)
 		{
 			return state <= 8;
 		}
 
-		// Token: 0x06005B81 RID: 23425 RVA: 0x001D6458 File Offset: 0x001D4658
+		// Token: 0x06005B81 RID: 23425 RVA: 0x001D6438 File Offset: 0x001D4638
 		public void FunctionalPieceUpdate()
 		{
 			if (this.myPiece != null && this.myPiece.state == BuilderPiece.State.AttachedAndPlaced)

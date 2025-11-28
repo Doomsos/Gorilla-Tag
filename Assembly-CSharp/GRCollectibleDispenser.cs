@@ -6,7 +6,7 @@ using UnityEngine;
 public class GRCollectibleDispenser : MonoBehaviour, IGameEntityComponent
 {
 	// Token: 0x17000406 RID: 1030
-	// (get) Token: 0x06002AF1 RID: 10993 RVA: 0x000E7092 File Offset: 0x000E5292
+	// (get) Token: 0x06002AF1 RID: 10993 RVA: 0x000E7072 File Offset: 0x000E5272
 	public bool CollectibleAlreadySpawned
 	{
 		get
@@ -16,7 +16,7 @@ public class GRCollectibleDispenser : MonoBehaviour, IGameEntityComponent
 	}
 
 	// Token: 0x17000407 RID: 1031
-	// (get) Token: 0x06002AF2 RID: 10994 RVA: 0x000E70A0 File Offset: 0x000E52A0
+	// (get) Token: 0x06002AF2 RID: 10994 RVA: 0x000E7080 File Offset: 0x000E5280
 	public bool ReadyToDispenseNewCollectible
 	{
 		get
@@ -27,7 +27,7 @@ public class GRCollectibleDispenser : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002AF3 RID: 10995 RVA: 0x000E710C File Offset: 0x000E530C
+	// Token: 0x06002AF3 RID: 10995 RVA: 0x000E70EC File Offset: 0x000E52EC
 	public void OnEntityInit()
 	{
 		GhostReactor reactor = GhostReactorManager.Get(this.gameEntity).reactor;
@@ -37,7 +37,7 @@ public class GRCollectibleDispenser : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002AF4 RID: 10996 RVA: 0x000E7140 File Offset: 0x000E5340
+	// Token: 0x06002AF4 RID: 10996 RVA: 0x000E7120 File Offset: 0x000E5320
 	public void OnEntityDestroy()
 	{
 		GhostReactorManager ghostReactorManager = GhostReactorManager.Get(this.gameEntity);
@@ -47,7 +47,7 @@ public class GRCollectibleDispenser : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002AF5 RID: 10997 RVA: 0x000E7184 File Offset: 0x000E5384
+	// Token: 0x06002AF5 RID: 10997 RVA: 0x000E7164 File Offset: 0x000E5364
 	public void OnEntityStateChange(long prevState, long nextState)
 	{
 		uint num = this.collectiblesDispensed;
@@ -69,7 +69,7 @@ public class GRCollectibleDispenser : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002AF6 RID: 10998 RVA: 0x000E7210 File Offset: 0x000E5410
+	// Token: 0x06002AF6 RID: 10998 RVA: 0x000E71F0 File Offset: 0x000E53F0
 	public void RequestDispenseCollectible()
 	{
 		if (this.ReadyToDispenseNewCollectible && this.gameEntity.IsAuthority())
@@ -84,7 +84,7 @@ public class GRCollectibleDispenser : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002AF7 RID: 10999 RVA: 0x000E72D0 File Offset: 0x000E54D0
+	// Token: 0x06002AF7 RID: 10999 RVA: 0x000E72B0 File Offset: 0x000E54B0
 	public void OnCollectibleConsumed()
 	{
 		if (this.currentCollectible != null && this.currentCollectible.IsNotNull())
@@ -116,7 +116,7 @@ public class GRCollectibleDispenser : MonoBehaviour, IGameEntityComponent
 		this.audioSource.PlayOneShot(this.collectibleTakenClip, this.collectibleTakenVolume);
 	}
 
-	// Token: 0x06002AF8 RID: 11000 RVA: 0x000E741C File Offset: 0x000E561C
+	// Token: 0x06002AF8 RID: 11000 RVA: 0x000E73FC File Offset: 0x000E55FC
 	public void GetSpawnedCollectible(GRCollectible collectible)
 	{
 		this.currentCollectible = collectible;

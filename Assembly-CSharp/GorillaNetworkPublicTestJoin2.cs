@@ -13,7 +13,7 @@ public class GorillaNetworkPublicTestJoin2 : GorillaTriggerBox
 	{
 	}
 
-	// Token: 0x0600491A RID: 18714 RVA: 0x001804F0 File Offset: 0x0017E6F0
+	// Token: 0x0600491A RID: 18714 RVA: 0x001804D0 File Offset: 0x0017E6D0
 	public void LateUpdate()
 	{
 		try
@@ -37,7 +37,7 @@ public class GorillaNetworkPublicTestJoin2 : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x0600491B RID: 18715 RVA: 0x00180624 File Offset: 0x0017E824
+	// Token: 0x0600491B RID: 18715 RVA: 0x00180604 File Offset: 0x0017E804
 	private IEnumerator GracePeriod()
 	{
 		this.waiting = true;

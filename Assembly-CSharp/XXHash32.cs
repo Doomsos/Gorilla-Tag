@@ -7,14 +7,14 @@ using System.Text;
 // Token: 0x02000C9C RID: 3228
 public static class XXHash32
 {
-	// Token: 0x06004EE0 RID: 20192 RVA: 0x00197E6F File Offset: 0x0019606F
+	// Token: 0x06004EE0 RID: 20192 RVA: 0x00197E4F File Offset: 0x0019604F
 	[MethodImpl(256)]
 	public static int Compute(string s, uint seed = 0U)
 	{
 		return (int)XXHash32.Compute(Encoding.Unicode.GetBytes(s), seed);
 	}
 
-	// Token: 0x06004EE1 RID: 20193 RVA: 0x00197E88 File Offset: 0x00196088
+	// Token: 0x06004EE1 RID: 20193 RVA: 0x00197E68 File Offset: 0x00196068
 	[MethodImpl(256)]
 	public unsafe static uint Compute(ReadOnlySpan<byte> input, uint seed = 0U)
 	{

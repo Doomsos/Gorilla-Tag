@@ -6,7 +6,7 @@ using UnityEngine.AI;
 // Token: 0x020006CA RID: 1738
 public class GRGuide : MonoBehaviourTick
 {
-	// Token: 0x06002CA3 RID: 11427 RVA: 0x000F1D90 File Offset: 0x000EFF90
+	// Token: 0x06002CA3 RID: 11427 RVA: 0x000F1D70 File Offset: 0x000EFF70
 	private void Awake()
 	{
 		this.path = new NavMeshPath();
@@ -21,7 +21,7 @@ public class GRGuide : MonoBehaviourTick
 		this.connectorCorners = new List<Vector3>(64);
 	}
 
-	// Token: 0x06002CA4 RID: 11428 RVA: 0x000F1E04 File Offset: 0x000F0004
+	// Token: 0x06002CA4 RID: 11428 RVA: 0x000F1DE4 File Offset: 0x000EFFE4
 	public override void Tick()
 	{
 		bool flag = GRPlayer.Get(VRRig.LocalRig).State == GRPlayer.GRPlayerState.Ghost;
@@ -94,7 +94,7 @@ public class GRGuide : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002CA5 RID: 11429 RVA: 0x000F2090 File Offset: 0x000F0290
+	// Token: 0x06002CA5 RID: 11429 RVA: 0x000F2070 File Offset: 0x000F0270
 	private static Vector3 GetClosestPointOnPath(Vector3 pos, Vector3[] pathCorners, int numPathCorners, out int nextCorner)
 	{
 		nextCorner = 0;
@@ -124,7 +124,7 @@ public class GRGuide : MonoBehaviourTick
 		return result;
 	}
 
-	// Token: 0x06002CA6 RID: 11430 RVA: 0x000F210C File Offset: 0x000F030C
+	// Token: 0x06002CA6 RID: 11430 RVA: 0x000F20EC File Offset: 0x000F02EC
 	public static Vector3 ClosestPointOnLine(Vector3 vA, Vector3 vB, Vector3 vPoint)
 	{
 		Vector3 vector = vPoint - vA;

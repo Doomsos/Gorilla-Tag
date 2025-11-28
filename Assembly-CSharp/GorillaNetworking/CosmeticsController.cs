@@ -30,33 +30,33 @@ namespace GorillaNetworking
 	public class CosmeticsController : MonoBehaviour, IGorillaSliceableSimple, IBuildValidation
 	{
 		// Token: 0x170008B9 RID: 2233
-		// (get) Token: 0x06005E0B RID: 24075 RVA: 0x001E2244 File Offset: 0x001E0444
-		// (set) Token: 0x06005E0C RID: 24076 RVA: 0x001E224C File Offset: 0x001E044C
+		// (get) Token: 0x06005E0B RID: 24075 RVA: 0x001E2224 File Offset: 0x001E0424
+		// (set) Token: 0x06005E0C RID: 24076 RVA: 0x001E222C File Offset: 0x001E042C
 		public CosmeticInfoV2[] v2_allCosmetics { get; private set; }
 
 		// Token: 0x170008BA RID: 2234
-		// (get) Token: 0x06005E0D RID: 24077 RVA: 0x001E2255 File Offset: 0x001E0455
-		// (set) Token: 0x06005E0E RID: 24078 RVA: 0x001E225D File Offset: 0x001E045D
+		// (get) Token: 0x06005E0D RID: 24077 RVA: 0x001E2235 File Offset: 0x001E0435
+		// (set) Token: 0x06005E0E RID: 24078 RVA: 0x001E223D File Offset: 0x001E043D
 		public bool v2_allCosmeticsInfoAssetRef_isLoaded { get; private set; }
 
 		// Token: 0x170008BB RID: 2235
-		// (get) Token: 0x06005E0F RID: 24079 RVA: 0x001E2266 File Offset: 0x001E0466
-		// (set) Token: 0x06005E10 RID: 24080 RVA: 0x001E226E File Offset: 0x001E046E
+		// (get) Token: 0x06005E0F RID: 24079 RVA: 0x001E2246 File Offset: 0x001E0446
+		// (set) Token: 0x06005E10 RID: 24080 RVA: 0x001E224E File Offset: 0x001E044E
 		public bool v2_isGetCosmeticsPlayCatalogDataWaitingForCallback { get; private set; }
 
 		// Token: 0x170008BC RID: 2236
-		// (get) Token: 0x06005E11 RID: 24081 RVA: 0x001E2277 File Offset: 0x001E0477
-		// (set) Token: 0x06005E12 RID: 24082 RVA: 0x001E227F File Offset: 0x001E047F
+		// (get) Token: 0x06005E11 RID: 24081 RVA: 0x001E2257 File Offset: 0x001E0457
+		// (set) Token: 0x06005E12 RID: 24082 RVA: 0x001E225F File Offset: 0x001E045F
 		public bool v2_isCosmeticPlayFabCatalogDataLoaded { get; private set; }
 
-		// Token: 0x06005E13 RID: 24083 RVA: 0x001E2288 File Offset: 0x001E0488
+		// Token: 0x06005E13 RID: 24083 RVA: 0x001E2268 File Offset: 0x001E0468
 		private void V2Awake()
 		{
 			this._allCosmetics = null;
 			base.StartCoroutine(this.V2_allCosmeticsInfoAssetRefSO_LoadCoroutine());
 		}
 
-		// Token: 0x06005E14 RID: 24084 RVA: 0x001E229E File Offset: 0x001E049E
+		// Token: 0x06005E14 RID: 24084 RVA: 0x001E227E File Offset: 0x001E047E
 		private IEnumerator V2_allCosmeticsInfoAssetRefSO_LoadCoroutine()
 		{
 			while (!PlayFabAuthenticator.instance)
@@ -113,7 +113,7 @@ namespace GorillaNetworking
 			yield break;
 		}
 
-		// Token: 0x06005E15 RID: 24085 RVA: 0x001E22B0 File Offset: 0x001E04B0
+		// Token: 0x06005E15 RID: 24085 RVA: 0x001E2290 File Offset: 0x001E0490
 		private void V2_allCosmeticsInfoAssetRef_LoadSucceeded(AllCosmeticsArraySO allCosmeticsSO)
 		{
 			this.v2_allCosmetics = new CosmeticInfoV2[allCosmeticsSO.sturdyAssetRefs.Length];
@@ -149,13 +149,13 @@ namespace GorillaNetworking
 			v2_allCosmeticsInfoAssetRef_OnPostLoad.Invoke();
 		}
 
-		// Token: 0x06005E16 RID: 24086 RVA: 0x001E23E1 File Offset: 0x001E05E1
+		// Token: 0x06005E16 RID: 24086 RVA: 0x001E23C1 File Offset: 0x001E05C1
 		public bool TryGetCosmeticInfoV2(string playFabId, out CosmeticInfoV2 cosmeticInfo)
 		{
 			return this._allCosmeticsDictV2.TryGetValue(playFabId, ref cosmeticInfo);
 		}
 
-		// Token: 0x06005E17 RID: 24087 RVA: 0x001E23F0 File Offset: 0x001E05F0
+		// Token: 0x06005E17 RID: 24087 RVA: 0x001E23D0 File Offset: 0x001E05D0
 		private void V2_ConformCosmeticItemV1DisplayName(ref CosmeticsController.CosmeticItem cosmetic)
 		{
 			if (cosmetic.itemName == cosmetic.displayName)
@@ -166,7 +166,7 @@ namespace GorillaNetworking
 			cosmetic.displayName = cosmetic.itemName;
 		}
 
-		// Token: 0x06005E18 RID: 24088 RVA: 0x001E2420 File Offset: 0x001E0620
+		// Token: 0x06005E18 RID: 24088 RVA: 0x001E2400 File Offset: 0x001E0600
 		internal void InitializeCosmeticStands()
 		{
 			foreach (CosmeticStand cosmeticStand in this.cosmeticStands)
@@ -179,13 +179,13 @@ namespace GorillaNetworking
 		}
 
 		// Token: 0x170008BD RID: 2237
-		// (get) Token: 0x06005E19 RID: 24089 RVA: 0x001E2455 File Offset: 0x001E0655
-		// (set) Token: 0x06005E1A RID: 24090 RVA: 0x001E245C File Offset: 0x001E065C
+		// (get) Token: 0x06005E19 RID: 24089 RVA: 0x001E2435 File Offset: 0x001E0635
+		// (set) Token: 0x06005E1A RID: 24090 RVA: 0x001E243C File Offset: 0x001E063C
 		public static bool hasInstance { get; private set; }
 
 		// Token: 0x170008BE RID: 2238
-		// (get) Token: 0x06005E1B RID: 24091 RVA: 0x001E2464 File Offset: 0x001E0664
-		// (set) Token: 0x06005E1C RID: 24092 RVA: 0x001E246C File Offset: 0x001E066C
+		// (get) Token: 0x06005E1B RID: 24091 RVA: 0x001E2444 File Offset: 0x001E0644
+		// (set) Token: 0x06005E1C RID: 24092 RVA: 0x001E244C File Offset: 0x001E064C
 		public List<CosmeticsController.CosmeticItem> allCosmetics
 		{
 			get
@@ -199,12 +199,12 @@ namespace GorillaNetworking
 		}
 
 		// Token: 0x170008BF RID: 2239
-		// (get) Token: 0x06005E1D RID: 24093 RVA: 0x001E2475 File Offset: 0x001E0675
-		// (set) Token: 0x06005E1E RID: 24094 RVA: 0x001E247D File Offset: 0x001E067D
+		// (get) Token: 0x06005E1D RID: 24093 RVA: 0x001E2455 File Offset: 0x001E0655
+		// (set) Token: 0x06005E1E RID: 24094 RVA: 0x001E245D File Offset: 0x001E065D
 		public bool allCosmeticsDict_isInitialized { get; private set; }
 
 		// Token: 0x170008C0 RID: 2240
-		// (get) Token: 0x06005E1F RID: 24095 RVA: 0x001E2486 File Offset: 0x001E0686
+		// (get) Token: 0x06005E1F RID: 24095 RVA: 0x001E2466 File Offset: 0x001E0666
 		public Dictionary<string, CosmeticsController.CosmeticItem> allCosmeticsDict
 		{
 			get
@@ -214,12 +214,12 @@ namespace GorillaNetworking
 		}
 
 		// Token: 0x170008C1 RID: 2241
-		// (get) Token: 0x06005E20 RID: 24096 RVA: 0x001E248E File Offset: 0x001E068E
-		// (set) Token: 0x06005E21 RID: 24097 RVA: 0x001E2496 File Offset: 0x001E0696
+		// (get) Token: 0x06005E20 RID: 24096 RVA: 0x001E246E File Offset: 0x001E066E
+		// (set) Token: 0x06005E21 RID: 24097 RVA: 0x001E2476 File Offset: 0x001E0676
 		public bool allCosmeticsItemIDsfromDisplayNamesDict_isInitialized { get; private set; }
 
 		// Token: 0x170008C2 RID: 2242
-		// (get) Token: 0x06005E22 RID: 24098 RVA: 0x001E249F File Offset: 0x001E069F
+		// (get) Token: 0x06005E22 RID: 24098 RVA: 0x001E247F File Offset: 0x001E067F
 		public Dictionary<string, string> allCosmeticsItemIDsfromDisplayNamesDict
 		{
 			get
@@ -229,7 +229,7 @@ namespace GorillaNetworking
 		}
 
 		// Token: 0x170008C3 RID: 2243
-		// (get) Token: 0x06005E23 RID: 24099 RVA: 0x001E24A7 File Offset: 0x001E06A7
+		// (get) Token: 0x06005E23 RID: 24099 RVA: 0x001E2487 File Offset: 0x001E0687
 		public CosmeticAnchorAntiIntersectOffsets defaultClipOffsets
 		{
 			get
@@ -239,11 +239,11 @@ namespace GorillaNetworking
 		}
 
 		// Token: 0x170008C4 RID: 2244
-		// (get) Token: 0x06005E24 RID: 24100 RVA: 0x001E24AE File Offset: 0x001E06AE
-		// (set) Token: 0x06005E25 RID: 24101 RVA: 0x001E24B6 File Offset: 0x001E06B6
+		// (get) Token: 0x06005E24 RID: 24100 RVA: 0x001E248E File Offset: 0x001E068E
+		// (set) Token: 0x06005E25 RID: 24101 RVA: 0x001E2496 File Offset: 0x001E0696
 		public bool isHidingCosmeticsFromRemotePlayers { get; private set; }
 
-		// Token: 0x06005E26 RID: 24102 RVA: 0x001E24BF File Offset: 0x001E06BF
+		// Token: 0x06005E26 RID: 24102 RVA: 0x001E249F File Offset: 0x001E069F
 		public void AddWardrobeInstance(WardrobeInstance instance)
 		{
 			this.wardrobes.Add(instance);
@@ -253,14 +253,14 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E27 RID: 24103 RVA: 0x001E24DA File Offset: 0x001E06DA
+		// Token: 0x06005E27 RID: 24103 RVA: 0x001E24BA File Offset: 0x001E06BA
 		public void RemoveWardrobeInstance(WardrobeInstance instance)
 		{
 			this.wardrobes.Remove(instance);
 		}
 
 		// Token: 0x170008C5 RID: 2245
-		// (get) Token: 0x06005E28 RID: 24104 RVA: 0x001E24E9 File Offset: 0x001E06E9
+		// (get) Token: 0x06005E28 RID: 24104 RVA: 0x001E24C9 File Offset: 0x001E06C9
 		public int CurrencyBalance
 		{
 			get
@@ -269,7 +269,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E29 RID: 24105 RVA: 0x001E24F4 File Offset: 0x001E06F4
+		// Token: 0x06005E29 RID: 24105 RVA: 0x001E24D4 File Offset: 0x001E06D4
 		public void Awake()
 		{
 			if (CosmeticsController.instance == null)
@@ -336,7 +336,7 @@ namespace GorillaNetworking
 			CreatorCodes.Initialize();
 		}
 
-		// Token: 0x06005E2A RID: 24106 RVA: 0x001E27D0 File Offset: 0x001E09D0
+		// Token: 0x06005E2A RID: 24106 RVA: 0x001E27B0 File Offset: 0x001E09B0
 		public void Start()
 		{
 			PlayFabTitleDataCache.Instance.GetTitleData("BundleData", delegate(string data)
@@ -349,7 +349,7 @@ namespace GorillaNetworking
 			this.anchorOverrides = GorillaTagger.Instance.offlineVRRig.GetComponent<VRRigAnchorOverrides>();
 		}
 
-		// Token: 0x06005E2B RID: 24107 RVA: 0x001E282D File Offset: 0x001E0A2D
+		// Token: 0x06005E2B RID: 24107 RVA: 0x001E280D File Offset: 0x001E0A0D
 		public void OnEnable()
 		{
 			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
@@ -359,7 +359,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E2C RID: 24108 RVA: 0x001E285C File Offset: 0x001E0A5C
+		// Token: 0x06005E2C RID: 24108 RVA: 0x001E283C File Offset: 0x001E0A3C
 		public void OnDisable()
 		{
 			Callback<MicroTxnAuthorizationResponse_t> steamMicroTransactionAuthorizationResponse = this._steamMicroTransactionAuthorizationResponse;
@@ -375,7 +375,7 @@ namespace GorillaNetworking
 		{
 		}
 
-		// Token: 0x06005E2E RID: 24110 RVA: 0x001E2878 File Offset: 0x001E0A78
+		// Token: 0x06005E2E RID: 24110 RVA: 0x001E2858 File Offset: 0x001E0A58
 		public static bool CompareCategoryToSavedCosmeticSlots(CosmeticsController.CosmeticCategory category, CosmeticsController.CosmeticSlots slot)
 		{
 			switch (category)
@@ -407,7 +407,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E2F RID: 24111 RVA: 0x001E290C File Offset: 0x001E0B0C
+		// Token: 0x06005E2F RID: 24111 RVA: 0x001E28EC File Offset: 0x001E0AEC
 		public static CosmeticsController.CosmeticSlots CategoryToNonTransferrableSlot(CosmeticsController.CosmeticCategory category)
 		{
 			switch (category)
@@ -439,7 +439,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E30 RID: 24112 RVA: 0x001E296E File Offset: 0x001E0B6E
+		// Token: 0x06005E30 RID: 24112 RVA: 0x001E294E File Offset: 0x001E0B4E
 		private CosmeticsController.CosmeticSlots DropPositionToCosmeticSlot(BodyDockPositions.DropPositions pos)
 		{
 			switch (pos)
@@ -466,7 +466,7 @@ namespace GorillaNetworking
 			return CosmeticsController.CosmeticSlots.Count;
 		}
 
-		// Token: 0x06005E31 RID: 24113 RVA: 0x001E29A0 File Offset: 0x001E0BA0
+		// Token: 0x06005E31 RID: 24113 RVA: 0x001E2980 File Offset: 0x001E0B80
 		private static BodyDockPositions.DropPositions CosmeticSlotToDropPosition(CosmeticsController.CosmeticSlots slot)
 		{
 			switch (slot)
@@ -485,7 +485,7 @@ namespace GorillaNetworking
 			return BodyDockPositions.DropPositions.None;
 		}
 
-		// Token: 0x06005E32 RID: 24114 RVA: 0x001E29D4 File Offset: 0x001E0BD4
+		// Token: 0x06005E32 RID: 24114 RVA: 0x001E29B4 File Offset: 0x001E0BB4
 		public void AddItemCheckout(ItemCheckout newItemCheckout)
 		{
 			if (this.itemCheckouts.Contains(newItemCheckout))
@@ -501,13 +501,13 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E33 RID: 24115 RVA: 0x001E2A39 File Offset: 0x001E0C39
+		// Token: 0x06005E33 RID: 24115 RVA: 0x001E2A19 File Offset: 0x001E0C19
 		public void RemoveItemCheckout(ItemCheckout checkoutToRemove)
 		{
 			this.itemCheckouts.Remove(checkoutToRemove);
 		}
 
-		// Token: 0x06005E34 RID: 24116 RVA: 0x001E2A48 File Offset: 0x001E0C48
+		// Token: 0x06005E34 RID: 24116 RVA: 0x001E2A28 File Offset: 0x001E0C28
 		public void AddFittingRoom(FittingRoom newFittingRoom)
 		{
 			if (this.fittingRooms.Contains(newFittingRoom))
@@ -518,20 +518,20 @@ namespace GorillaNetworking
 			this.UpdateShoppingCart();
 		}
 
-		// Token: 0x06005E35 RID: 24117 RVA: 0x001E2A6B File Offset: 0x001E0C6B
+		// Token: 0x06005E35 RID: 24117 RVA: 0x001E2A4B File Offset: 0x001E0C4B
 		public void RemoveFittingRoom(FittingRoom fittingRoomToRemove)
 		{
 			this.fittingRooms.Remove(fittingRoomToRemove);
 		}
 
-		// Token: 0x06005E36 RID: 24118 RVA: 0x001E2A7A File Offset: 0x001E0C7A
+		// Token: 0x06005E36 RID: 24118 RVA: 0x001E2A5A File Offset: 0x001E0C5A
 		private void SaveItemPreference(CosmeticsController.CosmeticSlots slot, int slotIdx, CosmeticsController.CosmeticItem newItem)
 		{
 			PlayerPrefs.SetString(CosmeticsController.CosmeticSet.SlotPlayerPreferenceName(slot), newItem.itemName);
 			PlayerPrefs.Save();
 		}
 
-		// Token: 0x06005E37 RID: 24119 RVA: 0x001E2A94 File Offset: 0x001E0C94
+		// Token: 0x06005E37 RID: 24119 RVA: 0x001E2A74 File Offset: 0x001E0C74
 		public void SaveCurrentItemPreferences()
 		{
 			for (int i = 0; i < 16; i++)
@@ -541,7 +541,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E38 RID: 24120 RVA: 0x001E2ACC File Offset: 0x001E0CCC
+		// Token: 0x06005E38 RID: 24120 RVA: 0x001E2AAC File Offset: 0x001E0CAC
 		private void ApplyCosmeticToSet(CosmeticsController.CosmeticSet set, CosmeticsController.CosmeticItem newItem, int slotIdx, CosmeticsController.CosmeticSlots slot, bool applyToPlayerPrefs, List<CosmeticsController.CosmeticSlots> appliedSlots)
 		{
 			CosmeticsController.CosmeticItem cosmeticItem = (set.items[slotIdx].itemName == newItem.itemName) ? this.nullItem : newItem;
@@ -553,7 +553,7 @@ namespace GorillaNetworking
 			appliedSlots.Add(slot);
 		}
 
-		// Token: 0x06005E39 RID: 24121 RVA: 0x001E2B28 File Offset: 0x001E0D28
+		// Token: 0x06005E39 RID: 24121 RVA: 0x001E2B08 File Offset: 0x001E0D08
 		private void PrivApplyCosmeticItemToSet(CosmeticsController.CosmeticSet set, CosmeticsController.CosmeticItem newItem, bool isLeftHand, bool applyToPlayerPrefs, List<CosmeticsController.CosmeticSlots> appliedSlots)
 		{
 			if (newItem.isNullItem)
@@ -626,13 +626,13 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E3A RID: 24122 RVA: 0x001E2D2C File Offset: 0x001E0F2C
+		// Token: 0x06005E3A RID: 24122 RVA: 0x001E2D0C File Offset: 0x001E0F0C
 		public void ApplyCosmeticItemToSet(CosmeticsController.CosmeticSet set, CosmeticsController.CosmeticItem newItem, bool isLeftHand, bool applyToPlayerPrefs)
 		{
 			this.ApplyCosmeticItemToSet(set, newItem, isLeftHand, applyToPlayerPrefs, CosmeticsController._g_default_outAppliedSlotsList_for_applyCosmeticItemToSet);
 		}
 
-		// Token: 0x06005E3B RID: 24123 RVA: 0x001E2D40 File Offset: 0x001E0F40
+		// Token: 0x06005E3B RID: 24123 RVA: 0x001E2D20 File Offset: 0x001E0F20
 		public void ApplyCosmeticItemToSet(CosmeticsController.CosmeticSet set, CosmeticsController.CosmeticItem newItem, bool isLeftHand, bool applyToPlayerPrefs, List<CosmeticsController.CosmeticSlots> outAppliedSlotsList)
 		{
 			outAppliedSlotsList.Clear();
@@ -676,7 +676,7 @@ namespace GorillaNetworking
 			this.PrivApplyCosmeticItemToSet(set, newItem, isLeftHand, applyToPlayerPrefs, outAppliedSlotsList);
 		}
 
-		// Token: 0x06005E3C RID: 24124 RVA: 0x001E2E2C File Offset: 0x001E102C
+		// Token: 0x06005E3C RID: 24124 RVA: 0x001E2E0C File Offset: 0x001E100C
 		public void RemoveCosmeticItemFromSet(CosmeticsController.CosmeticSet set, string itemName, bool applyToPlayerPrefs)
 		{
 			this.cachedSet.CopyItems(set);
@@ -696,7 +696,7 @@ namespace GorillaNetworking
 			set.ActivateCosmetics(this.cachedSet, offlineVRRig, component, offlineVRRig.cosmeticsObjectRegistry);
 		}
 
-		// Token: 0x06005E3D RID: 24125 RVA: 0x001E2EB4 File Offset: 0x001E10B4
+		// Token: 0x06005E3D RID: 24125 RVA: 0x001E2E94 File Offset: 0x001E1094
 		public void PressFittingRoomButton(FittingRoomButton pressedFittingRoomButton, bool isLeftHand)
 		{
 			BundleManager.instance._tryOnBundlesStand.ClearSelectedBundle();
@@ -705,7 +705,7 @@ namespace GorillaNetworking
 			this.UpdateWornCosmetics(true);
 		}
 
-		// Token: 0x06005E3E RID: 24126 RVA: 0x001E2EE8 File Offset: 0x001E10E8
+		// Token: 0x06005E3E RID: 24126 RVA: 0x001E2EC8 File Offset: 0x001E10C8
 		public CosmeticsController.EWearingCosmeticSet CheckIfCosmeticSetMatchesItemSet(CosmeticsController.CosmeticSet set, string itemName)
 		{
 			CosmeticsController.EWearingCosmeticSet ewearingCosmeticSet = CosmeticsController.EWearingCosmeticSet.NotASet;
@@ -738,7 +738,7 @@ namespace GorillaNetworking
 			return ewearingCosmeticSet;
 		}
 
-		// Token: 0x06005E3F RID: 24127 RVA: 0x001E2F5C File Offset: 0x001E115C
+		// Token: 0x06005E3F RID: 24127 RVA: 0x001E2F3C File Offset: 0x001E113C
 		public void PressCosmeticStandButton(CosmeticStand pressedStand)
 		{
 			this.searchIndex = this.currentCart.IndexOf(pressedStand.thisCosmeticItem);
@@ -778,7 +778,7 @@ namespace GorillaNetworking
 			this.UpdateShoppingCart();
 		}
 
-		// Token: 0x06005E40 RID: 24128 RVA: 0x001E30C0 File Offset: 0x001E12C0
+		// Token: 0x06005E40 RID: 24128 RVA: 0x001E30A0 File Offset: 0x001E12A0
 		public void PressWardrobeItemButton(CosmeticsController.CosmeticItem cosmeticItem, bool isLeftHand, bool isTempCosm)
 		{
 			if (cosmeticItem.isNullItem)
@@ -803,7 +803,7 @@ namespace GorillaNetworking
 			onCosmeticsUpdated.Invoke();
 		}
 
-		// Token: 0x06005E41 RID: 24129 RVA: 0x001E3110 File Offset: 0x001E1310
+		// Token: 0x06005E41 RID: 24129 RVA: 0x001E30F0 File Offset: 0x001E12F0
 		private void PressWardrobeItemButton(CosmeticsController.CosmeticItem item, bool isLeftHand)
 		{
 			List<CosmeticsController.CosmeticSlots> list = CollectionPool<List<CosmeticsController.CosmeticSlots>, CosmeticsController.CosmeticSlots>.Get();
@@ -820,13 +820,13 @@ namespace GorillaNetworking
 			this.UpdateShoppingCart();
 		}
 
-		// Token: 0x06005E42 RID: 24130 RVA: 0x001E31A4 File Offset: 0x001E13A4
+		// Token: 0x06005E42 RID: 24130 RVA: 0x001E3184 File Offset: 0x001E1384
 		private void PressTemporaryWardrobeItemButton(CosmeticsController.CosmeticItem item, bool isLeftHand)
 		{
 			this.ApplyCosmeticItemToSet(this.tempUnlockedSet, item, isLeftHand, false);
 		}
 
-		// Token: 0x06005E43 RID: 24131 RVA: 0x001E31B8 File Offset: 0x001E13B8
+		// Token: 0x06005E43 RID: 24131 RVA: 0x001E3198 File Offset: 0x001E1398
 		public void PressWardrobeFunctionButton(string function)
 		{
 			uint num = <PrivateImplementationDetails>.ComputeStringHash(function);
@@ -994,7 +994,7 @@ namespace GorillaNetworking
 			onCosmeticsUpdated.Invoke();
 		}
 
-		// Token: 0x06005E44 RID: 24132 RVA: 0x001E3544 File Offset: 0x001E1744
+		// Token: 0x06005E44 RID: 24132 RVA: 0x001E3524 File Offset: 0x001E1724
 		public void ClearCheckout(bool sendEvent)
 		{
 			if (sendEvent)
@@ -1007,7 +1007,7 @@ namespace GorillaNetworking
 			this.ProcessPurchaseItemState(null, false);
 		}
 
-		// Token: 0x06005E45 RID: 24133 RVA: 0x001E3580 File Offset: 0x001E1780
+		// Token: 0x06005E45 RID: 24133 RVA: 0x001E3560 File Offset: 0x001E1760
 		public bool RemoveItemFromCart(CosmeticsController.CosmeticItem cosmeticItem)
 		{
 			this.searchIndex = this.currentCart.IndexOf(cosmeticItem);
@@ -1026,7 +1026,7 @@ namespace GorillaNetworking
 			return false;
 		}
 
-		// Token: 0x06005E46 RID: 24134 RVA: 0x001E3603 File Offset: 0x001E1803
+		// Token: 0x06005E46 RID: 24134 RVA: 0x001E35E3 File Offset: 0x001E17E3
 		public void ClearCheckoutAndCart(bool sendEvent)
 		{
 			this.currentCart.Clear();
@@ -1034,7 +1034,7 @@ namespace GorillaNetworking
 			this.ClearCheckout(sendEvent);
 		}
 
-		// Token: 0x06005E47 RID: 24135 RVA: 0x001E3628 File Offset: 0x001E1828
+		// Token: 0x06005E47 RID: 24135 RVA: 0x001E3608 File Offset: 0x001E1808
 		public void PressCheckoutCartButton(CheckoutCartButton pressedCheckoutCartButton, bool isLeftHand)
 		{
 			if (this.currentPurchaseItemStage != CosmeticsController.PurchaseItemStages.Buying)
@@ -1057,7 +1057,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E48 RID: 24136 RVA: 0x001E36B0 File Offset: 0x001E18B0
+		// Token: 0x06005E48 RID: 24136 RVA: 0x001E3690 File Offset: 0x001E1890
 		private void RefreshItemToBuyPreview()
 		{
 			if (this.itemToBuy.bundledItems != null && this.itemToBuy.bundledItems.Length != 0)
@@ -1094,13 +1094,13 @@ namespace GorillaNetworking
 			this.UpdateWornCosmetics(true);
 		}
 
-		// Token: 0x06005E49 RID: 24137 RVA: 0x001E3819 File Offset: 0x001E1A19
+		// Token: 0x06005E49 RID: 24137 RVA: 0x001E37F9 File Offset: 0x001E19F9
 		public void PressPurchaseItemButton(PurchaseItemButton pressedPurchaseItemButton, bool isLeftHand)
 		{
 			this.ProcessPurchaseItemState(pressedPurchaseItemButton.buttonSide, isLeftHand);
 		}
 
-		// Token: 0x06005E4A RID: 24138 RVA: 0x001E3828 File Offset: 0x001E1A28
+		// Token: 0x06005E4A RID: 24138 RVA: 0x001E3808 File Offset: 0x001E1A08
 		public void PurchaseBundle(StoreBundle bundleToPurchase, ICreatorCodeProvider ccp)
 		{
 			CosmeticsController.<PurchaseBundle>d__183 <PurchaseBundle>d__;
@@ -1112,13 +1112,13 @@ namespace GorillaNetworking
 			<PurchaseBundle>d__.<>t__builder.Start<CosmeticsController.<PurchaseBundle>d__183>(ref <PurchaseBundle>d__);
 		}
 
-		// Token: 0x06005E4B RID: 24139 RVA: 0x001E386F File Offset: 0x001E1A6F
+		// Token: 0x06005E4B RID: 24139 RVA: 0x001E384F File Offset: 0x001E1A4F
 		private void OnCreatorCodeFailure()
 		{
 			this.buyingBundle = false;
 		}
 
-		// Token: 0x06005E4C RID: 24140 RVA: 0x001E3878 File Offset: 0x001E1A78
+		// Token: 0x06005E4C RID: 24140 RVA: 0x001E3858 File Offset: 0x001E1A58
 		private void OnCreatorCodeValid(NexusGroupId id, string creatorCode)
 		{
 			if (this.buyingBundle)
@@ -1132,7 +1132,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E4D RID: 24141 RVA: 0x001E38A4 File Offset: 0x001E1AA4
+		// Token: 0x06005E4D RID: 24141 RVA: 0x001E3884 File Offset: 0x001E1A84
 		public void PressEarlyAccessButton()
 		{
 			this.currentPurchaseItemStage = CosmeticsController.PurchaseItemStages.Start;
@@ -1143,7 +1143,7 @@ namespace GorillaNetworking
 			this.SteamPurchase();
 		}
 
-		// Token: 0x06005E4E RID: 24142 RVA: 0x001E38F0 File Offset: 0x001E1AF0
+		// Token: 0x06005E4E RID: 24142 RVA: 0x001E38D0 File Offset: 0x001E1AD0
 		public void ProcessPurchaseItemState(string buttonSide, bool isLeftHand)
 		{
 			switch (this.currentPurchaseItemStage)
@@ -1233,7 +1233,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E4F RID: 24143 RVA: 0x001E3B80 File Offset: 0x001E1D80
+		// Token: 0x06005E4F RID: 24143 RVA: 0x001E3B60 File Offset: 0x001E1D60
 		public void FormattedPurchaseText(string finalLineVar, string leftPurchaseButtonText = null, string rightPurchaseButtonText = null, bool leftButtonOn = false, bool rightButtonOn = false)
 		{
 			this.finalLine = finalLineVar;
@@ -1269,7 +1269,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E50 RID: 24144 RVA: 0x001E3C7C File Offset: 0x001E1E7C
+		// Token: 0x06005E50 RID: 24144 RVA: 0x001E3C5C File Offset: 0x001E1E5C
 		public void PurchaseItem()
 		{
 			PlayFabClientAPI.PurchaseItem(new PurchaseItemRequest
@@ -1318,7 +1318,7 @@ namespace GorillaNetworking
 			}, null, null);
 		}
 
-		// Token: 0x06005E51 RID: 24145 RVA: 0x001E3CE8 File Offset: 0x001E1EE8
+		// Token: 0x06005E51 RID: 24145 RVA: 0x001E3CC8 File Offset: 0x001E1EC8
 		private void UnlockItem(string itemIdToUnlock, bool relock = false)
 		{
 			int num = this.allCosmetics.FindIndex((CosmeticsController.CosmeticItem x) => itemIdToUnlock == x.itemName);
@@ -1387,7 +1387,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E52 RID: 24146 RVA: 0x001E3EC4 File Offset: 0x001E20C4
+		// Token: 0x06005E52 RID: 24146 RVA: 0x001E3EA4 File Offset: 0x001E20A4
 		private void ModifyUnlockList(List<CosmeticsController.CosmeticItem> list, int index, bool relock)
 		{
 			if (!relock && !list.Contains(this.allCosmetics[index]))
@@ -1401,7 +1401,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E53 RID: 24147 RVA: 0x001E3F25 File Offset: 0x001E2125
+		// Token: 0x06005E53 RID: 24147 RVA: 0x001E3F05 File Offset: 0x001E2105
 		private IEnumerator CheckIfMyCosmeticsUpdated(string itemToBuyID)
 		{
 			Debug.Log("Cosmetic updated check!");
@@ -1490,7 +1490,7 @@ namespace GorillaNetworking
 			yield break;
 		}
 
-		// Token: 0x06005E54 RID: 24148 RVA: 0x001E3F3C File Offset: 0x001E213C
+		// Token: 0x06005E54 RID: 24148 RVA: 0x001E3F1C File Offset: 0x001E211C
 		public void UpdateWardrobeModelsAndButtons()
 		{
 			if (!CosmeticsV2Spawner_Dirty.allPartsInstantiated)
@@ -1517,7 +1517,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E55 RID: 24149 RVA: 0x001E41BC File Offset: 0x001E23BC
+		// Token: 0x06005E55 RID: 24149 RVA: 0x001E419C File Offset: 0x001E239C
 		public int GetCategorySize(CosmeticsController.CosmeticCategory category)
 		{
 			int indexForCategory = this.GetIndexForCategory(category);
@@ -1528,7 +1528,7 @@ namespace GorillaNetworking
 			return 0;
 		}
 
-		// Token: 0x06005E56 RID: 24150 RVA: 0x001E41E4 File Offset: 0x001E23E4
+		// Token: 0x06005E56 RID: 24150 RVA: 0x001E41C4 File Offset: 0x001E23C4
 		public CosmeticsController.CosmeticItem GetCosmetic(int category, int cosmeticIndex)
 		{
 			if (cosmeticIndex >= this.itemLists[category].Count || cosmeticIndex < 0)
@@ -1538,13 +1538,13 @@ namespace GorillaNetworking
 			return this.itemLists[category][cosmeticIndex];
 		}
 
-		// Token: 0x06005E57 RID: 24151 RVA: 0x001E420F File Offset: 0x001E240F
+		// Token: 0x06005E57 RID: 24151 RVA: 0x001E41EF File Offset: 0x001E23EF
 		public CosmeticsController.CosmeticItem GetCosmetic(CosmeticsController.CosmeticCategory category, int cosmeticIndex)
 		{
 			return this.GetCosmetic(this.GetIndexForCategory(category), cosmeticIndex);
 		}
 
-		// Token: 0x06005E58 RID: 24152 RVA: 0x001E4220 File Offset: 0x001E2420
+		// Token: 0x06005E58 RID: 24152 RVA: 0x001E4200 File Offset: 0x001E2400
 		private int GetIndexForCategory(CosmeticsController.CosmeticCategory category)
 		{
 			switch (category)
@@ -1576,13 +1576,13 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E59 RID: 24153 RVA: 0x001E427C File Offset: 0x001E247C
+		// Token: 0x06005E59 RID: 24153 RVA: 0x001E425C File Offset: 0x001E245C
 		public bool IsCosmeticEquipped(CosmeticsController.CosmeticItem cosmetic)
 		{
 			return this.AnyMatch(this.currentWornSet, cosmetic);
 		}
 
-		// Token: 0x06005E5A RID: 24154 RVA: 0x001E428B File Offset: 0x001E248B
+		// Token: 0x06005E5A RID: 24154 RVA: 0x001E426B File Offset: 0x001E246B
 		public bool IsCosmeticEquipped(CosmeticsController.CosmeticItem cosmetic, bool tempSet)
 		{
 			if (!tempSet)
@@ -1592,13 +1592,13 @@ namespace GorillaNetworking
 			return this.IsTemporaryCosmeticEquipped(cosmetic);
 		}
 
-		// Token: 0x06005E5B RID: 24155 RVA: 0x001E429F File Offset: 0x001E249F
+		// Token: 0x06005E5B RID: 24155 RVA: 0x001E427F File Offset: 0x001E247F
 		public bool IsTemporaryCosmeticEquipped(CosmeticsController.CosmeticItem cosmetic)
 		{
 			return this.AnyMatch(this.tempUnlockedSet, cosmetic);
 		}
 
-		// Token: 0x06005E5C RID: 24156 RVA: 0x001E42B0 File Offset: 0x001E24B0
+		// Token: 0x06005E5C RID: 24156 RVA: 0x001E4290 File Offset: 0x001E2490
 		public CosmeticsController.CosmeticItem GetSlotItem(CosmeticsController.CosmeticSlots slot, bool checkOpposite = true, bool tempSet = false)
 		{
 			int num = (int)slot;
@@ -1613,7 +1613,7 @@ namespace GorillaNetworking
 			return this.tempUnlockedSet.items[num];
 		}
 
-		// Token: 0x06005E5D RID: 24157 RVA: 0x001E42EF File Offset: 0x001E24EF
+		// Token: 0x06005E5D RID: 24157 RVA: 0x001E42CF File Offset: 0x001E24CF
 		public string[] GetCurrentlyWornCosmetics(bool tempSet = false)
 		{
 			if (!tempSet)
@@ -1623,7 +1623,7 @@ namespace GorillaNetworking
 			return this.tempUnlockedSet.ToDisplayNameArray();
 		}
 
-		// Token: 0x06005E5E RID: 24158 RVA: 0x001E430B File Offset: 0x001E250B
+		// Token: 0x06005E5E RID: 24158 RVA: 0x001E42EB File Offset: 0x001E24EB
 		public bool[] GetCurrentRightEquippedSided(bool tempSet = false)
 		{
 			if (!tempSet)
@@ -1633,7 +1633,7 @@ namespace GorillaNetworking
 			return this.tempUnlockedSet.ToOnRightSideArray();
 		}
 
-		// Token: 0x06005E5F RID: 24159 RVA: 0x001E4328 File Offset: 0x001E2528
+		// Token: 0x06005E5F RID: 24159 RVA: 0x001E4308 File Offset: 0x001E2508
 		public void UpdateShoppingCart()
 		{
 			this.iterator = 0;
@@ -1660,19 +1660,19 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E60 RID: 24160 RVA: 0x001E440A File Offset: 0x001E260A
+		// Token: 0x06005E60 RID: 24160 RVA: 0x001E43EA File Offset: 0x001E25EA
 		public void UpdateWornCosmetics()
 		{
 			this.UpdateWornCosmetics(false, false);
 		}
 
-		// Token: 0x06005E61 RID: 24161 RVA: 0x001E4414 File Offset: 0x001E2614
+		// Token: 0x06005E61 RID: 24161 RVA: 0x001E43F4 File Offset: 0x001E25F4
 		public void UpdateWornCosmetics(bool sync)
 		{
 			this.UpdateWornCosmetics(sync, false);
 		}
 
-		// Token: 0x06005E62 RID: 24162 RVA: 0x001E4420 File Offset: 0x001E2620
+		// Token: 0x06005E62 RID: 24162 RVA: 0x001E4400 File Offset: 0x001E2600
 		public void UpdateWornCosmetics(bool sync, bool playfx)
 		{
 			VRRig localRig = VRRig.LocalRig;
@@ -1696,7 +1696,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E63 RID: 24163 RVA: 0x001E44F9 File Offset: 0x001E26F9
+		// Token: 0x06005E63 RID: 24163 RVA: 0x001E44D9 File Offset: 0x001E26D9
 		public CosmeticsController.CosmeticItem GetItemFromDict(string itemID)
 		{
 			if (!this.allCosmeticsDict.TryGetValue(itemID, ref this.cosmeticItemVar))
@@ -1706,7 +1706,7 @@ namespace GorillaNetworking
 			return this.cosmeticItemVar;
 		}
 
-		// Token: 0x06005E64 RID: 24164 RVA: 0x001E451C File Offset: 0x001E271C
+		// Token: 0x06005E64 RID: 24164 RVA: 0x001E44FC File Offset: 0x001E26FC
 		public string GetItemNameFromDisplayName(string displayName)
 		{
 			if (!this.allCosmeticsItemIDsfromDisplayNamesDict.TryGetValue(displayName, ref this.returnString))
@@ -1716,7 +1716,7 @@ namespace GorillaNetworking
 			return this.returnString;
 		}
 
-		// Token: 0x06005E65 RID: 24165 RVA: 0x001E4540 File Offset: 0x001E2740
+		// Token: 0x06005E65 RID: 24165 RVA: 0x001E4520 File Offset: 0x001E2720
 		public CosmeticSO GetCosmeticSOFromDisplayName(string displayName)
 		{
 			string itemNameFromDisplayName = this.GetItemNameFromDisplayName(displayName);
@@ -1739,7 +1739,7 @@ namespace GorillaNetworking
 			return null;
 		}
 
-		// Token: 0x06005E66 RID: 24166 RVA: 0x001E45B0 File Offset: 0x001E27B0
+		// Token: 0x06005E66 RID: 24166 RVA: 0x001E4590 File Offset: 0x001E2790
 		public CosmeticAnchorAntiIntersectOffsets GetClipOffsetsFromDisplayName(string displayName)
 		{
 			string itemNameFromDisplayName = this.GetItemNameFromDisplayName(displayName);
@@ -1762,7 +1762,7 @@ namespace GorillaNetworking
 			return this.defaultClipOffsets;
 		}
 
-		// Token: 0x06005E67 RID: 24167 RVA: 0x001E463C File Offset: 0x001E283C
+		// Token: 0x06005E67 RID: 24167 RVA: 0x001E461C File Offset: 0x001E281C
 		public bool AnyMatch(CosmeticsController.CosmeticSet set, CosmeticsController.CosmeticItem item)
 		{
 			if (item.itemCategory != CosmeticsController.CosmeticCategory.Set)
@@ -1780,7 +1780,7 @@ namespace GorillaNetworking
 			return item.bundledItems.Length >= 3 && (this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[0])) || this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[1])) || this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[2])));
 		}
 
-		// Token: 0x06005E68 RID: 24168 RVA: 0x001E4710 File Offset: 0x001E2910
+		// Token: 0x06005E68 RID: 24168 RVA: 0x001E46F0 File Offset: 0x001E28F0
 		public void Initialize()
 		{
 			if (!base.gameObject.activeSelf || this.v2_isCosmeticPlayFabCatalogDataLoaded || this.v2_isGetCosmeticsPlayCatalogDataWaitingForCallback)
@@ -1796,7 +1796,7 @@ namespace GorillaNetworking
 			this.V2_allCosmeticsInfoAssetRef_OnPostLoad = (Action)Delegate.Combine(this.V2_allCosmeticsInfoAssetRef_OnPostLoad, new Action(this.GetCosmeticsPlayFabCatalogData));
 		}
 
-		// Token: 0x06005E69 RID: 24169 RVA: 0x001E4773 File Offset: 0x001E2973
+		// Token: 0x06005E69 RID: 24169 RVA: 0x001E4753 File Offset: 0x001E2953
 		public void GetLastDailyLogin()
 		{
 			PlayFabClientAPI.GetUserReadOnlyData(new GetUserDataRequest(), delegate(GetUserDataResult result)
@@ -1833,7 +1833,7 @@ namespace GorillaNetworking
 			}, null, null);
 		}
 
-		// Token: 0x06005E6A RID: 24170 RVA: 0x001E4799 File Offset: 0x001E2999
+		// Token: 0x06005E6A RID: 24170 RVA: 0x001E4779 File Offset: 0x001E2979
 		private IEnumerator CheckCanGetDaily()
 		{
 			while (!KIDManager.InitialisationComplete)
@@ -1877,7 +1877,7 @@ namespace GorillaNetworking
 			yield break;
 		}
 
-		// Token: 0x06005E6B RID: 24171 RVA: 0x001E47A8 File Offset: 0x001E29A8
+		// Token: 0x06005E6B RID: 24171 RVA: 0x001E4788 File Offset: 0x001E2988
 		private IEnumerator GetMyDaily()
 		{
 			yield return new WaitForSeconds(10f);
@@ -1908,7 +1908,7 @@ namespace GorillaNetworking
 			yield break;
 		}
 
-		// Token: 0x06005E6C RID: 24172 RVA: 0x001E47B7 File Offset: 0x001E29B7
+		// Token: 0x06005E6C RID: 24172 RVA: 0x001E4797 File Offset: 0x001E2997
 		public void GetCosmeticsPlayFabCatalogData()
 		{
 			this.v2_isGetCosmeticsPlayCatalogDataWaitingForCallback = false;
@@ -2248,7 +2248,7 @@ namespace GorillaNetworking
 			}, null, null);
 		}
 
-		// Token: 0x06005E6D RID: 24173 RVA: 0x001E47F8 File Offset: 0x001E29F8
+		// Token: 0x06005E6D RID: 24173 RVA: 0x001E47D8 File Offset: 0x001E29D8
 		public void SteamPurchase()
 		{
 			if (string.IsNullOrEmpty(this.itemToPurchase))
@@ -2260,7 +2260,7 @@ namespace GorillaNetworking
 			PlayFabClientAPI.StartPurchase(this.GetStartPurchaseRequest(), new Action<StartPurchaseResult>(this.ProcessStartPurchaseResponse), new Action<PlayFabError>(this.ProcessSteamPurchaseError), null, null);
 		}
 
-		// Token: 0x06005E6E RID: 24174 RVA: 0x001E485C File Offset: 0x001E2A5C
+		// Token: 0x06005E6E RID: 24174 RVA: 0x001E483C File Offset: 0x001E2A3C
 		private StartPurchaseRequest GetStartPurchaseRequest()
 		{
 			StartPurchaseRequest startPurchaseRequest = new StartPurchaseRequest();
@@ -2276,7 +2276,7 @@ namespace GorillaNetworking
 			return startPurchaseRequest;
 		}
 
-		// Token: 0x06005E6F RID: 24175 RVA: 0x001E48B0 File Offset: 0x001E2AB0
+		// Token: 0x06005E6F RID: 24175 RVA: 0x001E4890 File Offset: 0x001E2A90
 		private void ProcessStartPurchaseResponse(StartPurchaseResult result)
 		{
 			Debug.Log("successfully started purchase. attempted to pay for purchase through steam");
@@ -2284,7 +2284,7 @@ namespace GorillaNetworking
 			PlayFabClientAPI.PayForPurchase(CosmeticsController.GetPayForPurchaseRequest(this.currentPurchaseID), new Action<PayForPurchaseResult>(CosmeticsController.ProcessPayForPurchaseResult), new Action<PlayFabError>(this.ProcessSteamPurchaseError), null, null);
 		}
 
-		// Token: 0x06005E70 RID: 24176 RVA: 0x001E48FD File Offset: 0x001E2AFD
+		// Token: 0x06005E70 RID: 24176 RVA: 0x001E48DD File Offset: 0x001E2ADD
 		private static PayForPurchaseRequest GetPayForPurchaseRequest(string orderId)
 		{
 			return new PayForPurchaseRequest
@@ -2295,13 +2295,13 @@ namespace GorillaNetworking
 			};
 		}
 
-		// Token: 0x06005E71 RID: 24177 RVA: 0x001E4921 File Offset: 0x001E2B21
+		// Token: 0x06005E71 RID: 24177 RVA: 0x001E4901 File Offset: 0x001E2B01
 		private static void ProcessPayForPurchaseResult(PayForPurchaseResult result)
 		{
 			Debug.Log("succeeded on sending request for paying with steam! waiting for response");
 		}
 
-		// Token: 0x06005E72 RID: 24178 RVA: 0x001E4930 File Offset: 0x001E2B30
+		// Token: 0x06005E72 RID: 24178 RVA: 0x001E4910 File Offset: 0x001E2B10
 		private void ProcessSteamCallback(MicroTxnAuthorizationResponse_t callBackResponse)
 		{
 			Debug.Log("Steam has called back that the user has finished the payment interaction");
@@ -2323,7 +2323,7 @@ namespace GorillaNetworking
 			}, new Action<PlayFabError>(this.ProcessConfirmPurchaseError), null, null);
 		}
 
-		// Token: 0x06005E73 RID: 24179 RVA: 0x001E49AC File Offset: 0x001E2BAC
+		// Token: 0x06005E73 RID: 24179 RVA: 0x001E498C File Offset: 0x001E2B8C
 		private ConfirmPurchaseRequest GetConfirmBundlePurchaseRequest()
 		{
 			Dictionary<string, string> dictionary = new Dictionary<string, string>();
@@ -2343,7 +2343,7 @@ namespace GorillaNetworking
 			};
 		}
 
-		// Token: 0x06005E74 RID: 24180 RVA: 0x001E4A5C File Offset: 0x001E2C5C
+		// Token: 0x06005E74 RID: 24180 RVA: 0x001E4A3C File Offset: 0x001E2C3C
 		private ConfirmPurchaseRequest GetConfirmATMPurchaseRequest()
 		{
 			Dictionary<string, string> dictionary = new Dictionary<string, string>();
@@ -2363,7 +2363,7 @@ namespace GorillaNetworking
 			};
 		}
 
-		// Token: 0x06005E75 RID: 24181 RVA: 0x001E4B0C File Offset: 0x001E2D0C
+		// Token: 0x06005E75 RID: 24181 RVA: 0x001E4AEC File Offset: 0x001E2CEC
 		private void ProcessConfirmPurchaseSuccess()
 		{
 			if (this.buyingBundle)
@@ -2386,7 +2386,7 @@ namespace GorillaNetworking
 			GorillaTagger.Instance.offlineVRRig.GetCosmeticsPlayFabCatalogData();
 		}
 
-		// Token: 0x06005E76 RID: 24182 RVA: 0x001E4B87 File Offset: 0x001E2D87
+		// Token: 0x06005E76 RID: 24182 RVA: 0x001E4B67 File Offset: 0x001E2D67
 		private void ProcessConfirmPurchaseError(PlayFabError error)
 		{
 			this.ProcessSteamPurchaseError(error);
@@ -2394,7 +2394,7 @@ namespace GorillaNetworking
 			this.UpdateCurrencyBoards();
 		}
 
-		// Token: 0x06005E77 RID: 24183 RVA: 0x001E4BA4 File Offset: 0x001E2DA4
+		// Token: 0x06005E77 RID: 24183 RVA: 0x001E4B84 File Offset: 0x001E2D84
 		private void ProcessSteamPurchaseError(PlayFabError error)
 		{
 			PlayFabErrorCode error2 = error.Error;
@@ -2482,7 +2482,7 @@ namespace GorillaNetworking
 			ATM_Manager.instance.SwitchToStage(ATM_Manager.ATMStages.Failure);
 		}
 
-		// Token: 0x06005E78 RID: 24184 RVA: 0x001E4D60 File Offset: 0x001E2F60
+		// Token: 0x06005E78 RID: 24184 RVA: 0x001E4D40 File Offset: 0x001E2F40
 		public void UpdateCurrencyBoards()
 		{
 			this.FormattedPurchaseText(this.finalLine, null, null, false, false);
@@ -2497,7 +2497,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E79 RID: 24185 RVA: 0x001E4DED File Offset: 0x001E2FED
+		// Token: 0x06005E79 RID: 24185 RVA: 0x001E4DCD File Offset: 0x001E2FCD
 		public void AddCurrencyBoard(CurrencyBoard newCurrencyBoard)
 		{
 			if (this.currencyBoards.Contains(newCurrencyBoard))
@@ -2508,13 +2508,13 @@ namespace GorillaNetworking
 			newCurrencyBoard.UpdateCurrencyBoard(this.checkedDaily, this.gotMyDaily, this.currencyBalance, this.secondsUntilTomorrow);
 		}
 
-		// Token: 0x06005E7A RID: 24186 RVA: 0x001E4E28 File Offset: 0x001E3028
+		// Token: 0x06005E7A RID: 24186 RVA: 0x001E4E08 File Offset: 0x001E3008
 		public void RemoveCurrencyBoard(CurrencyBoard currencyBoardToRemove)
 		{
 			this.currencyBoards.Remove(currencyBoardToRemove);
 		}
 
-		// Token: 0x06005E7B RID: 24187 RVA: 0x001E4E37 File Offset: 0x001E3037
+		// Token: 0x06005E7B RID: 24187 RVA: 0x001E4E17 File Offset: 0x001E3017
 		public void GetCurrencyBalance()
 		{
 			PlayFabClientAPI.GetUserInventory(new GetUserInventoryRequest(), delegate(GetUserInventoryResult result)
@@ -2549,7 +2549,7 @@ namespace GorillaNetworking
 			}, null, null);
 		}
 
-		// Token: 0x06005E7C RID: 24188 RVA: 0x001E4E70 File Offset: 0x001E3070
+		// Token: 0x06005E7C RID: 24188 RVA: 0x001E4E50 File Offset: 0x001E3050
 		public string GetItemDisplayName(CosmeticsController.CosmeticItem item)
 		{
 			if (item.overrideDisplayName != null && item.overrideDisplayName != "")
@@ -2559,7 +2559,7 @@ namespace GorillaNetworking
 			return item.displayName;
 		}
 
-		// Token: 0x06005E7D RID: 24189 RVA: 0x001E4E9C File Offset: 0x001E309C
+		// Token: 0x06005E7D RID: 24189 RVA: 0x001E4E7C File Offset: 0x001E307C
 		public void UpdateMyCosmetics()
 		{
 			if (NetworkSystem.Instance.InRoom)
@@ -2580,7 +2580,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E7E RID: 24190 RVA: 0x001E4F21 File Offset: 0x001E3121
+		// Token: 0x06005E7E RID: 24190 RVA: 0x001E4F01 File Offset: 0x001E3101
 		private void UpdateMyCosmeticsNotInRoom()
 		{
 			if (GorillaServer.Instance != null)
@@ -2589,7 +2589,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E7F RID: 24191 RVA: 0x001E4F40 File Offset: 0x001E3140
+		// Token: 0x06005E7F RID: 24191 RVA: 0x001E4F20 File Offset: 0x001E3120
 		private void UpdateMyCosmeticsForRoom(bool shouldSetSharedGroupData)
 		{
 			byte b = 9;
@@ -2604,7 +2604,7 @@ namespace GorillaNetworking
 			PhotonNetwork.RaiseEvent(b, array, raiseEventOptions, SendOptions.SendReliable);
 		}
 
-		// Token: 0x06005E80 RID: 24192 RVA: 0x001E4F80 File Offset: 0x001E3180
+		// Token: 0x06005E80 RID: 24192 RVA: 0x001E4F60 File Offset: 0x001E3160
 		private void AlreadyOwnAllBundleButtons()
 		{
 			EarlyAccessButton[] array = this.earlyAccessButtons;
@@ -2614,13 +2614,13 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E81 RID: 24193 RVA: 0x001E4FAA File Offset: 0x001E31AA
+		// Token: 0x06005E81 RID: 24193 RVA: 0x001E4F8A File Offset: 0x001E318A
 		private bool UseNewCosmeticsPath()
 		{
 			return GorillaServer.Instance != null && GorillaServer.Instance.NewCosmeticsPathShouldReadSharedGroupData();
 		}
 
-		// Token: 0x06005E82 RID: 24194 RVA: 0x001E4FC9 File Offset: 0x001E31C9
+		// Token: 0x06005E82 RID: 24194 RVA: 0x001E4FA9 File Offset: 0x001E31A9
 		public void CheckCosmeticsSharedGroup()
 		{
 			this.updateCosmeticsRetries++;
@@ -2630,7 +2630,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E83 RID: 24195 RVA: 0x001E4FF4 File Offset: 0x001E31F4
+		// Token: 0x06005E83 RID: 24195 RVA: 0x001E4FD4 File Offset: 0x001E31D4
 		private IEnumerator WaitForNextCosmeticsAttempt()
 		{
 			int num = (int)Mathf.Pow(3f, (float)(this.updateCosmeticsRetries + 1));
@@ -2639,7 +2639,7 @@ namespace GorillaNetworking
 			yield break;
 		}
 
-		// Token: 0x06005E84 RID: 24196 RVA: 0x001E5004 File Offset: 0x001E3204
+		// Token: 0x06005E84 RID: 24196 RVA: 0x001E4FE4 File Offset: 0x001E31E4
 		private void ConfirmIndividualCosmeticsSharedGroup(GetUserInventoryResult inventory)
 		{
 			Debug.Log("confirming individual cosmetics with shared group");
@@ -2684,7 +2684,7 @@ namespace GorillaNetworking
 			}, null, null);
 		}
 
-		// Token: 0x06005E85 RID: 24197 RVA: 0x001E50A0 File Offset: 0x001E32A0
+		// Token: 0x06005E85 RID: 24197 RVA: 0x001E5080 File Offset: 0x001E3280
 		public void ReauthOrBan(PlayFabError error)
 		{
 			if (error.Error == 1074)
@@ -2706,7 +2706,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E86 RID: 24198 RVA: 0x001E5114 File Offset: 0x001E3314
+		// Token: 0x06005E86 RID: 24198 RVA: 0x001E50F4 File Offset: 0x001E32F4
 		public void ProcessExternalUnlock(string itemID, bool autoEquip, bool isLeftHand)
 		{
 			this.UnlockItem(itemID, false);
@@ -2739,7 +2739,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E87 RID: 24199 RVA: 0x001E5208 File Offset: 0x001E3408
+		// Token: 0x06005E87 RID: 24199 RVA: 0x001E51E8 File Offset: 0x001E33E8
 		public void AddTempUnlockToWardrobe(string cosmeticID)
 		{
 			int num = this.allCosmetics.FindIndex((CosmeticsController.CosmeticItem x) => cosmeticID == x.itemName);
@@ -2804,7 +2804,7 @@ namespace GorillaNetworking
 			onCosmeticsUpdated.Invoke();
 		}
 
-		// Token: 0x06005E88 RID: 24200 RVA: 0x001E53BC File Offset: 0x001E35BC
+		// Token: 0x06005E88 RID: 24200 RVA: 0x001E539C File Offset: 0x001E359C
 		public void RemoveTempUnlockFromWardrobe(string cosmeticID)
 		{
 			int num = this.allCosmetics.FindIndex((CosmeticsController.CosmeticItem x) => cosmeticID == x.itemName);
@@ -2869,7 +2869,7 @@ namespace GorillaNetworking
 			onCosmeticsUpdated.Invoke();
 		}
 
-		// Token: 0x06005E89 RID: 24201 RVA: 0x001E5570 File Offset: 0x001E3770
+		// Token: 0x06005E89 RID: 24201 RVA: 0x001E5550 File Offset: 0x001E3750
 		public bool BuildValidationCheck()
 		{
 			if (this.m_earlyAccessSupporterPackCosmeticSO == null)
@@ -2880,7 +2880,7 @@ namespace GorillaNetworking
 			return true;
 		}
 
-		// Token: 0x06005E8A RID: 24202 RVA: 0x001E558D File Offset: 0x001E378D
+		// Token: 0x06005E8A RID: 24202 RVA: 0x001E556D File Offset: 0x001E376D
 		public void SetHideCosmeticsFromRemotePlayers(bool hideCosmetics)
 		{
 			if (hideCosmetics == this.isHidingCosmeticsFromRemotePlayers)
@@ -2892,7 +2892,7 @@ namespace GorillaNetworking
 			this.UpdateWornCosmetics(true);
 		}
 
-		// Token: 0x06005E8B RID: 24203 RVA: 0x001E55BC File Offset: 0x001E37BC
+		// Token: 0x06005E8B RID: 24203 RVA: 0x001E559C File Offset: 0x001E379C
 		public bool ValidatePackedItems(int[] packed)
 		{
 			if (packed.Length == 0)
@@ -2911,14 +2911,14 @@ namespace GorillaNetworking
 			return packed.Length == num + 1;
 		}
 
-		// Token: 0x06005E8C RID: 24204 RVA: 0x001E55F8 File Offset: 0x001E37F8
+		// Token: 0x06005E8C RID: 24204 RVA: 0x001E55D8 File Offset: 0x001E37D8
 		public void SetValidatedCreatorCode(NexusManager.MemberCode memberCode)
 		{
 			this.validatedCreatorCode = memberCode;
 		}
 
 		// Token: 0x170008C6 RID: 2246
-		// (get) Token: 0x06005E8D RID: 24205 RVA: 0x001E5601 File Offset: 0x001E3801
+		// (get) Token: 0x06005E8D RID: 24205 RVA: 0x001E55E1 File Offset: 0x001E37E1
 		public static int SelectedOutfit
 		{
 			get
@@ -2927,13 +2927,13 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E8E RID: 24206 RVA: 0x001E5608 File Offset: 0x001E3808
+		// Token: 0x06005E8E RID: 24206 RVA: 0x001E55E8 File Offset: 0x001E37E8
 		public static bool CanScrollOutfits()
 		{
 			return CosmeticsController.loadedSavedOutfits && !CosmeticsController.saveOutfitInProgress;
 		}
 
-		// Token: 0x06005E8F RID: 24207 RVA: 0x001E561C File Offset: 0x001E381C
+		// Token: 0x06005E8F RID: 24207 RVA: 0x001E55FC File Offset: 0x001E37FC
 		public void PressWardrobeScrollOutfit(bool forward)
 		{
 			int num = CosmeticsController.selectedOutfit;
@@ -2952,7 +2952,7 @@ namespace GorillaNetworking
 			this.LoadSavedOutfit(num);
 		}
 
-		// Token: 0x06005E90 RID: 24208 RVA: 0x001E5664 File Offset: 0x001E3864
+		// Token: 0x06005E90 RID: 24208 RVA: 0x001E5644 File Offset: 0x001E3844
 		public void LoadSavedOutfit(int newOutfitIndex)
 		{
 			if (!CosmeticsController.CanScrollOutfits() || newOutfitIndex == CosmeticsController.selectedOutfit || newOutfitIndex < 0 || newOutfitIndex >= this.outfitSystemConfig.maxOutfits)
@@ -2988,7 +2988,7 @@ namespace GorillaNetworking
 			onCosmeticsUpdated.Invoke();
 		}
 
-		// Token: 0x06005E91 RID: 24209 RVA: 0x001E578C File Offset: 0x001E398C
+		// Token: 0x06005E91 RID: 24209 RVA: 0x001E576C File Offset: 0x001E396C
 		private void ApplyNewItem(CosmeticsController.CosmeticSet outfit, int i)
 		{
 			this.currentWornSet.items[i] = outfit.items[i];
@@ -2998,7 +2998,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E92 RID: 24210 RVA: 0x001E57E0 File Offset: 0x001E39E0
+		// Token: 0x06005E92 RID: 24210 RVA: 0x001E57C0 File Offset: 0x001E39C0
 		private void LoadSavedOutfits()
 		{
 			if (CosmeticsController.loadedSavedOutfits || CosmeticsController.loadOutfitsInProgress)
@@ -3023,7 +3023,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E93 RID: 24211 RVA: 0x001E588C File Offset: 0x001E3A8C
+		// Token: 0x06005E93 RID: 24211 RVA: 0x001E586C File Offset: 0x001E3A6C
 		private void GetSavedOutfitsSuccess(MothershipUserData response)
 		{
 			if (response != null && response.value != null && response.value.Length > 0)
@@ -3047,7 +3047,7 @@ namespace GorillaNetworking
 			this.GetSavedOutfitsComplete();
 		}
 
-		// Token: 0x06005E94 RID: 24212 RVA: 0x001E5920 File Offset: 0x001E3B20
+		// Token: 0x06005E94 RID: 24212 RVA: 0x001E5900 File Offset: 0x001E3B00
 		private void GetSavedOutfitsFail(MothershipError error, int status)
 		{
 			GTDev.LogError<string>(string.Format("CosmeticsController GetSavedOutfitsFail {0} {1}", status, error.Message), null);
@@ -3055,7 +3055,7 @@ namespace GorillaNetworking
 			this.GetSavedOutfitsComplete();
 		}
 
-		// Token: 0x06005E95 RID: 24213 RVA: 0x001E594C File Offset: 0x001E3B4C
+		// Token: 0x06005E95 RID: 24213 RVA: 0x001E592C File Offset: 0x001E3B2C
 		private void GetSavedOutfitsComplete()
 		{
 			int num = PlayerPrefs.GetInt(this.outfitSystemConfig.selectedOutfitPref, 0);
@@ -3092,7 +3092,7 @@ namespace GorillaNetworking
 			onOutfitsUpdated.Invoke();
 		}
 
-		// Token: 0x06005E96 RID: 24214 RVA: 0x001E5A58 File Offset: 0x001E3C58
+		// Token: 0x06005E96 RID: 24214 RVA: 0x001E5A38 File Offset: 0x001E3C38
 		private void UpdateMonkeColor(Vector3 col, bool saveToPrefs)
 		{
 			float num = Mathf.Clamp(col.x, 0f, 1f);
@@ -3122,7 +3122,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E97 RID: 24215 RVA: 0x001E5B44 File Offset: 0x001E3D44
+		// Token: 0x06005E97 RID: 24215 RVA: 0x001E5B24 File Offset: 0x001E3D24
 		private void SaveOutfitsToMothership()
 		{
 			if (!CosmeticsController.loadedSavedOutfits || CosmeticsController.saveOutfitInProgress)
@@ -3143,7 +3143,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E98 RID: 24216 RVA: 0x001E5BCE File Offset: 0x001E3DCE
+		// Token: 0x06005E98 RID: 24216 RVA: 0x001E5BAE File Offset: 0x001E3DAE
 		private void SaveOutfitsToMothershipSuccess(SetUserDataResponse response)
 		{
 			this.outfitStringMothership = this.outfitStringPendingSave;
@@ -3156,14 +3156,14 @@ namespace GorillaNetworking
 			response.Dispose();
 		}
 
-		// Token: 0x06005E99 RID: 24217 RVA: 0x001E5BF9 File Offset: 0x001E3DF9
+		// Token: 0x06005E99 RID: 24217 RVA: 0x001E5BD9 File Offset: 0x001E3DD9
 		private void SaveOutfitsToMothershipFail(MothershipError error, int status)
 		{
 			GTDev.LogError<string>(string.Format("CosmeticsController SaveOutfitsToMothershipFail {0} ", status) + error.Message, null);
 			CosmeticsController.saveOutfitInProgress = false;
 		}
 
-		// Token: 0x06005E9A RID: 24218 RVA: 0x001E5C24 File Offset: 0x001E3E24
+		// Token: 0x06005E9A RID: 24218 RVA: 0x001E5C04 File Offset: 0x001E3E04
 		private string OutfitsToString()
 		{
 			if (!CosmeticsController.loadedSavedOutfits)
@@ -3195,7 +3195,7 @@ namespace GorillaNetworking
 			return this.sb.ToString();
 		}
 
-		// Token: 0x06005E9B RID: 24219 RVA: 0x001E5D40 File Offset: 0x001E3F40
+		// Token: 0x06005E9B RID: 24219 RVA: 0x001E5D20 File Offset: 0x001E3F20
 		private void ClearOutfits()
 		{
 			for (int i = 0; i < this.savedOutfits.Length; i++)
@@ -3206,7 +3206,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E9C RID: 24220 RVA: 0x001E5D94 File Offset: 0x001E3F94
+		// Token: 0x06005E9C RID: 24220 RVA: 0x001E5D74 File Offset: 0x001E3F74
 		private void StringToOutfits(string response)
 		{
 			if (response.IsNullOrEmpty())
@@ -3677,11 +3677,11 @@ namespace GorillaNetworking
 		public class CosmeticSet
 		{
 			// Token: 0x140000AD RID: 173
-			// (add) Token: 0x06005EAC RID: 24236 RVA: 0x001E64F4 File Offset: 0x001E46F4
-			// (remove) Token: 0x06005EAD RID: 24237 RVA: 0x001E652C File Offset: 0x001E472C
+			// (add) Token: 0x06005EAC RID: 24236 RVA: 0x001E64D4 File Offset: 0x001E46D4
+			// (remove) Token: 0x06005EAD RID: 24237 RVA: 0x001E650C File Offset: 0x001E470C
 			public event CosmeticsController.CosmeticSet.OnSetActivatedHandler onSetActivatedEvent;
 
-			// Token: 0x06005EAE RID: 24238 RVA: 0x001E6561 File Offset: 0x001E4761
+			// Token: 0x06005EAE RID: 24238 RVA: 0x001E6541 File Offset: 0x001E4741
 			protected void OnSetActivated(CosmeticsController.CosmeticSet prevSet, CosmeticsController.CosmeticSet currentSet, NetPlayer netPlayer)
 			{
 				if (this.onSetActivatedEvent != null)
@@ -3691,7 +3691,7 @@ namespace GorillaNetworking
 			}
 
 			// Token: 0x170008C7 RID: 2247
-			// (get) Token: 0x06005EAF RID: 24239 RVA: 0x001E657C File Offset: 0x001E477C
+			// (get) Token: 0x06005EAF RID: 24239 RVA: 0x001E655C File Offset: 0x001E475C
 			public static CosmeticsController.CosmeticSet EmptySet
 			{
 				get
@@ -3709,13 +3709,13 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EB0 RID: 24240 RVA: 0x001E65C5 File Offset: 0x001E47C5
+			// Token: 0x06005EB0 RID: 24240 RVA: 0x001E65A5 File Offset: 0x001E47A5
 			public CosmeticSet()
 			{
 				this.items = new CosmeticsController.CosmeticItem[16];
 			}
 
-			// Token: 0x06005EB1 RID: 24241 RVA: 0x001E65E8 File Offset: 0x001E47E8
+			// Token: 0x06005EB1 RID: 24241 RVA: 0x001E65C8 File Offset: 0x001E47C8
 			public CosmeticSet(string[] itemNames, CosmeticsController controller)
 			{
 				this.items = new CosmeticsController.CosmeticItem[16];
@@ -3727,7 +3727,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EB2 RID: 24242 RVA: 0x001E6644 File Offset: 0x001E4844
+			// Token: 0x06005EB2 RID: 24242 RVA: 0x001E6624 File Offset: 0x001E4824
 			public CosmeticSet(int[] itemNamesPacked, CosmeticsController controller)
 			{
 				this.items = new CosmeticsController.CosmeticItem[16];
@@ -3754,7 +3754,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EB3 RID: 24243 RVA: 0x001E674C File Offset: 0x001E494C
+			// Token: 0x06005EB3 RID: 24243 RVA: 0x001E672C File Offset: 0x001E492C
 			public void CopyItems(CosmeticsController.CosmeticSet other)
 			{
 				for (int i = 0; i < this.items.Length; i++)
@@ -3763,7 +3763,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EB4 RID: 24244 RVA: 0x001E6784 File Offset: 0x001E4984
+			// Token: 0x06005EB4 RID: 24244 RVA: 0x001E6764 File Offset: 0x001E4964
 			public void MergeSets(CosmeticsController.CosmeticSet tryOn, CosmeticsController.CosmeticSet current)
 			{
 				for (int i = 0; i < 16; i++)
@@ -3779,7 +3779,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EB5 RID: 24245 RVA: 0x001E67F4 File Offset: 0x001E49F4
+			// Token: 0x06005EB5 RID: 24245 RVA: 0x001E67D4 File Offset: 0x001E49D4
 			public void MergeInSets(CosmeticsController.CosmeticSet playerPref, CosmeticsController.CosmeticSet tempOverrideSet, Predicate<string> predicate)
 			{
 				int num = 16;
@@ -3790,7 +3790,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EB6 RID: 24246 RVA: 0x001E6854 File Offset: 0x001E4A54
+			// Token: 0x06005EB6 RID: 24246 RVA: 0x001E6834 File Offset: 0x001E4A34
 			public void ClearSet(CosmeticsController.CosmeticItem nullItem)
 			{
 				for (int i = 0; i < 16; i++)
@@ -3799,7 +3799,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EB7 RID: 24247 RVA: 0x001E687C File Offset: 0x001E4A7C
+			// Token: 0x06005EB7 RID: 24247 RVA: 0x001E685C File Offset: 0x001E4A5C
 			public bool IsActive(string name)
 			{
 				int num = 16;
@@ -3813,7 +3813,7 @@ namespace GorillaNetworking
 				return false;
 			}
 
-			// Token: 0x06005EB8 RID: 24248 RVA: 0x001E68B4 File Offset: 0x001E4AB4
+			// Token: 0x06005EB8 RID: 24248 RVA: 0x001E6894 File Offset: 0x001E4A94
 			public bool HasItemOfCategory(CosmeticsController.CosmeticCategory category)
 			{
 				int num = 16;
@@ -3827,7 +3827,7 @@ namespace GorillaNetworking
 				return false;
 			}
 
-			// Token: 0x06005EB9 RID: 24249 RVA: 0x001E68FC File Offset: 0x001E4AFC
+			// Token: 0x06005EB9 RID: 24249 RVA: 0x001E68DC File Offset: 0x001E4ADC
 			public bool HasItem(string name)
 			{
 				int num = 16;
@@ -3841,7 +3841,7 @@ namespace GorillaNetworking
 				return false;
 			}
 
-			// Token: 0x06005EBA RID: 24250 RVA: 0x001E6948 File Offset: 0x001E4B48
+			// Token: 0x06005EBA RID: 24250 RVA: 0x001E6928 File Offset: 0x001E4B28
 			public bool HasAnyItems()
 			{
 				if (this.items == null || this.items.Length < 1)
@@ -3858,25 +3858,25 @@ namespace GorillaNetworking
 				return false;
 			}
 
-			// Token: 0x06005EBB RID: 24251 RVA: 0x001E6993 File Offset: 0x001E4B93
+			// Token: 0x06005EBB RID: 24251 RVA: 0x001E6973 File Offset: 0x001E4B73
 			public static bool IsSlotLeftHanded(CosmeticsController.CosmeticSlots slot)
 			{
 				return slot == CosmeticsController.CosmeticSlots.ArmLeft || slot == CosmeticsController.CosmeticSlots.BackLeft || slot == CosmeticsController.CosmeticSlots.HandLeft;
 			}
 
-			// Token: 0x06005EBC RID: 24252 RVA: 0x001E69A3 File Offset: 0x001E4BA3
+			// Token: 0x06005EBC RID: 24252 RVA: 0x001E6983 File Offset: 0x001E4B83
 			public static bool IsSlotRightHanded(CosmeticsController.CosmeticSlots slot)
 			{
 				return slot == CosmeticsController.CosmeticSlots.ArmRight || slot == CosmeticsController.CosmeticSlots.BackRight || slot == CosmeticsController.CosmeticSlots.HandRight;
 			}
 
-			// Token: 0x06005EBD RID: 24253 RVA: 0x001E69B3 File Offset: 0x001E4BB3
+			// Token: 0x06005EBD RID: 24253 RVA: 0x001E6993 File Offset: 0x001E4B93
 			public static bool IsHoldable(CosmeticsController.CosmeticItem item)
 			{
 				return item.isHoldable;
 			}
 
-			// Token: 0x06005EBE RID: 24254 RVA: 0x001E69BC File Offset: 0x001E4BBC
+			// Token: 0x06005EBE RID: 24254 RVA: 0x001E699C File Offset: 0x001E4B9C
 			public static CosmeticsController.CosmeticSlots OppositeSlot(CosmeticsController.CosmeticSlots slot)
 			{
 				switch (slot)
@@ -3918,13 +3918,13 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EBF RID: 24255 RVA: 0x001E6A3A File Offset: 0x001E4C3A
+			// Token: 0x06005EBF RID: 24255 RVA: 0x001E6A1A File Offset: 0x001E4C1A
 			public static string SlotPlayerPreferenceName(CosmeticsController.CosmeticSlots slot)
 			{
 				return "slot_" + slot.ToString();
 			}
 
-			// Token: 0x06005EC0 RID: 24256 RVA: 0x001E6A54 File Offset: 0x001E4C54
+			// Token: 0x06005EC0 RID: 24256 RVA: 0x001E6A34 File Offset: 0x001E4C34
 			private void ActivateCosmetic(CosmeticsController.CosmeticSet prevSet, VRRig rig, int slotIndex, CosmeticItemRegistry cosmeticsObjectRegistry, BodyDockPositions bDock)
 			{
 				CosmeticsController.CosmeticItem cosmeticItem = prevSet.items[slotIndex];
@@ -3988,7 +3988,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EC1 RID: 24257 RVA: 0x001E6BA8 File Offset: 0x001E4DA8
+			// Token: 0x06005EC1 RID: 24257 RVA: 0x001E6B88 File Offset: 0x001E4D88
 			public void ActivateCosmetics(CosmeticsController.CosmeticSet prevSet, VRRig rig, BodyDockPositions bDock, CosmeticItemRegistry cosmeticsObjectRegistry)
 			{
 				int num = 16;
@@ -3999,7 +3999,7 @@ namespace GorillaNetworking
 				this.OnSetActivated(prevSet, this, rig.creator);
 			}
 
-			// Token: 0x06005EC2 RID: 24258 RVA: 0x001E6BE0 File Offset: 0x001E4DE0
+			// Token: 0x06005EC2 RID: 24258 RVA: 0x001E6BC0 File Offset: 0x001E4DC0
 			public void DeactivateAllCosmetcs(BodyDockPositions bDock, CosmeticsController.CosmeticItem nullItem, CosmeticItemRegistry cosmeticObjectRegistry)
 			{
 				bDock.DisableAllTransferableItems();
@@ -4020,7 +4020,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EC3 RID: 24259 RVA: 0x001E6C40 File Offset: 0x001E4E40
+			// Token: 0x06005EC3 RID: 24259 RVA: 0x001E6C20 File Offset: 0x001E4E20
 			public void LoadFromPlayerPreferences(CosmeticsController controller)
 			{
 				int num = 16;
@@ -4056,7 +4056,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EC4 RID: 24260 RVA: 0x001E6D5C File Offset: 0x001E4F5C
+			// Token: 0x06005EC4 RID: 24260 RVA: 0x001E6D3C File Offset: 0x001E4F3C
 			public void ParseSetFromString(CosmeticsController controller, string setString, out Vector3 color)
 			{
 				color = CosmeticsController.defaultColor;
@@ -4130,7 +4130,7 @@ namespace GorillaNetworking
 				}
 			}
 
-			// Token: 0x06005EC5 RID: 24261 RVA: 0x001E6FBC File Offset: 0x001E51BC
+			// Token: 0x06005EC5 RID: 24261 RVA: 0x001E6F9C File Offset: 0x001E519C
 			public string[] ToDisplayNameArray()
 			{
 				int num = 16;
@@ -4141,7 +4141,7 @@ namespace GorillaNetworking
 				return this.returnArray;
 			}
 
-			// Token: 0x06005EC6 RID: 24262 RVA: 0x001E7018 File Offset: 0x001E5218
+			// Token: 0x06005EC6 RID: 24262 RVA: 0x001E6FF8 File Offset: 0x001E51F8
 			public int[] ToPackedIDArray()
 			{
 				int num = 0;
@@ -4174,7 +4174,7 @@ namespace GorillaNetworking
 				return array;
 			}
 
-			// Token: 0x06005EC7 RID: 24263 RVA: 0x001E7118 File Offset: 0x001E5318
+			// Token: 0x06005EC7 RID: 24263 RVA: 0x001E70F8 File Offset: 0x001E52F8
 			public string[] HoldableDisplayNames(bool leftHoldables)
 			{
 				int num = 16;
@@ -4218,7 +4218,7 @@ namespace GorillaNetworking
 				return array;
 			}
 
-			// Token: 0x06005EC8 RID: 24264 RVA: 0x001E722C File Offset: 0x001E542C
+			// Token: 0x06005EC8 RID: 24264 RVA: 0x001E720C File Offset: 0x001E540C
 			public bool[] ToOnRightSideArray()
 			{
 				int num = 16;
@@ -4402,7 +4402,7 @@ namespace GorillaNetworking
 		// Token: 0x02000EC8 RID: 3784
 		public class OutfitData
 		{
-			// Token: 0x06005ED3 RID: 24275 RVA: 0x001E73C4 File Offset: 0x001E55C4
+			// Token: 0x06005ED3 RID: 24275 RVA: 0x001E73A4 File Offset: 0x001E55A4
 			public OutfitData()
 			{
 				this.version = 1;
@@ -4410,7 +4410,7 @@ namespace GorillaNetworking
 				this.color = CosmeticsController.defaultColor;
 			}
 
-			// Token: 0x06005ED4 RID: 24276 RVA: 0x001E73EB File Offset: 0x001E55EB
+			// Token: 0x06005ED4 RID: 24276 RVA: 0x001E73CB File Offset: 0x001E55CB
 			public void Clear()
 			{
 				this.itemIDs.Clear();

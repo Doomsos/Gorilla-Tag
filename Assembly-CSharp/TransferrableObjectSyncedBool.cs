@@ -5,7 +5,7 @@ using UnityEngine.Events;
 // Token: 0x020004AA RID: 1194
 public class TransferrableObjectSyncedBool : TransferrableObject
 {
-	// Token: 0x06001EDC RID: 7900 RVA: 0x000A3BB7 File Offset: 0x000A1DB7
+	// Token: 0x06001EDC RID: 7900 RVA: 0x000A3B97 File Offset: 0x000A1D97
 	internal override void OnEnable()
 	{
 		base.OnEnable();
@@ -13,7 +13,7 @@ public class TransferrableObjectSyncedBool : TransferrableObject
 		this.OnItemStateBoolTrue.AddListener(new UnityAction(this.OnItemStateChanged));
 	}
 
-	// Token: 0x06001EDD RID: 7901 RVA: 0x000A3BED File Offset: 0x000A1DED
+	// Token: 0x06001EDD RID: 7901 RVA: 0x000A3BCD File Offset: 0x000A1DCD
 	internal override void OnDisable()
 	{
 		base.OnDisable();
@@ -21,19 +21,19 @@ public class TransferrableObjectSyncedBool : TransferrableObject
 		this.OnItemStateBoolTrue.RemoveListener(new UnityAction(this.OnItemStateChanged));
 	}
 
-	// Token: 0x06001EDE RID: 7902 RVA: 0x000A3C24 File Offset: 0x000A1E24
+	// Token: 0x06001EDE RID: 7902 RVA: 0x000A3C04 File Offset: 0x000A1E04
 	public void SetItemState(bool state)
 	{
 		base.SetItemStateBool(state);
 	}
 
-	// Token: 0x06001EDF RID: 7903 RVA: 0x000A3C38 File Offset: 0x000A1E38
+	// Token: 0x06001EDF RID: 7903 RVA: 0x000A3C18 File Offset: 0x000A1E18
 	public void ToggleItemState()
 	{
 		base.ToggleNetworkedItemStateBool();
 	}
 
-	// Token: 0x06001EE0 RID: 7904 RVA: 0x000A3C4B File Offset: 0x000A1E4B
+	// Token: 0x06001EE0 RID: 7904 RVA: 0x000A3C2B File Offset: 0x000A1E2B
 	private void OnItemStateChanged()
 	{
 		if (this.itemState == TransferrableObject.ItemStates.State0)

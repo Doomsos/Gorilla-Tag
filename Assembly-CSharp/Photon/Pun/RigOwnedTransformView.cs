@@ -9,17 +9,17 @@ namespace Photon.Pun
 	public class RigOwnedTransformView : MonoBehaviourPun, IPunObservable
 	{
 		// Token: 0x17000819 RID: 2073
-		// (get) Token: 0x0600553D RID: 21821 RVA: 0x001AD30A File Offset: 0x001AB50A
-		// (set) Token: 0x0600553E RID: 21822 RVA: 0x001AD312 File Offset: 0x001AB512
+		// (get) Token: 0x0600553D RID: 21821 RVA: 0x001AD2EA File Offset: 0x001AB4EA
+		// (set) Token: 0x0600553E RID: 21822 RVA: 0x001AD2F2 File Offset: 0x001AB4F2
 		public bool IsMine { get; private set; }
 
-		// Token: 0x0600553F RID: 21823 RVA: 0x001AD31B File Offset: 0x001AB51B
+		// Token: 0x0600553F RID: 21823 RVA: 0x001AD2FB File Offset: 0x001AB4FB
 		public void SetIsMine(bool isMine)
 		{
 			this.IsMine = isMine;
 		}
 
-		// Token: 0x06005540 RID: 21824 RVA: 0x001AD324 File Offset: 0x001AB524
+		// Token: 0x06005540 RID: 21824 RVA: 0x001AD304 File Offset: 0x001AB504
 		public void Awake()
 		{
 			this.m_StoredPosition = base.transform.localPosition;
@@ -28,19 +28,19 @@ namespace Photon.Pun
 			this.m_NetworkRotation = Quaternion.identity;
 		}
 
-		// Token: 0x06005541 RID: 21825 RVA: 0x001AD358 File Offset: 0x001AB558
+		// Token: 0x06005541 RID: 21825 RVA: 0x001AD338 File Offset: 0x001AB538
 		private void Reset()
 		{
 			this.m_UseLocal = true;
 		}
 
-		// Token: 0x06005542 RID: 21826 RVA: 0x001AD361 File Offset: 0x001AB561
+		// Token: 0x06005542 RID: 21826 RVA: 0x001AD341 File Offset: 0x001AB541
 		private void OnEnable()
 		{
 			this.m_firstTake = true;
 		}
 
-		// Token: 0x06005543 RID: 21827 RVA: 0x001AD36C File Offset: 0x001AB56C
+		// Token: 0x06005543 RID: 21827 RVA: 0x001AD34C File Offset: 0x001AB54C
 		public void Update()
 		{
 			Transform transform = base.transform;
@@ -57,19 +57,19 @@ namespace Photon.Pun
 			}
 		}
 
-		// Token: 0x06005544 RID: 21828 RVA: 0x001AD460 File Offset: 0x001AB660
+		// Token: 0x06005544 RID: 21828 RVA: 0x001AD440 File Offset: 0x001AB640
 		private bool IsValid(Vector3 v)
 		{
 			return !float.IsNaN(v.x) && !float.IsNaN(v.y) && !float.IsNaN(v.z) && !float.IsInfinity(v.x) && !float.IsInfinity(v.y) && !float.IsInfinity(v.z);
 		}
 
-		// Token: 0x06005545 RID: 21829 RVA: 0x001AD4C0 File Offset: 0x001AB6C0
+		// Token: 0x06005545 RID: 21829 RVA: 0x001AD4A0 File Offset: 0x001AB6A0
 		private bool IsValid(Quaternion q)
 		{
 			return !float.IsNaN(q.x) && !float.IsNaN(q.y) && !float.IsNaN(q.z) && !float.IsNaN(q.w) && !float.IsInfinity(q.x) && !float.IsInfinity(q.y) && !float.IsInfinity(q.z) && !float.IsInfinity(q.w);
 		}
 
-		// Token: 0x06005546 RID: 21830 RVA: 0x001AD538 File Offset: 0x001AB738
+		// Token: 0x06005546 RID: 21830 RVA: 0x001AD518 File Offset: 0x001AB718
 		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (info.Sender != info.photonView.Owner)
@@ -190,7 +190,7 @@ namespace Photon.Pun
 			}
 		}
 
-		// Token: 0x06005547 RID: 21831 RVA: 0x001AD361 File Offset: 0x001AB561
+		// Token: 0x06005547 RID: 21831 RVA: 0x001AD341 File Offset: 0x001AB541
 		public void GTAddition_DoTeleport()
 		{
 			this.m_firstTake = true;

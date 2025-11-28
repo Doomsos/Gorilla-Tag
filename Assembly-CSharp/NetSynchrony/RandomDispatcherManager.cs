@@ -7,7 +7,7 @@ namespace NetSynchrony
 	// Token: 0x02000F58 RID: 3928
 	public class RandomDispatcherManager : MonoBehaviour
 	{
-		// Token: 0x06006275 RID: 25205 RVA: 0x001FB288 File Offset: 0x001F9488
+		// Token: 0x06006275 RID: 25205 RVA: 0x001FB268 File Offset: 0x001F9468
 		private void OnDisable()
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -21,7 +21,7 @@ namespace NetSynchrony
 			}
 		}
 
-		// Token: 0x06006276 RID: 25206 RVA: 0x001FB2D4 File Offset: 0x001F94D4
+		// Token: 0x06006276 RID: 25206 RVA: 0x001FB2B4 File Offset: 0x001F94B4
 		private void OnTimeChanged()
 		{
 			this.AdjustedServerTime();
@@ -31,7 +31,7 @@ namespace NetSynchrony
 			}
 		}
 
-		// Token: 0x06006277 RID: 25207 RVA: 0x001FB310 File Offset: 0x001F9510
+		// Token: 0x06006277 RID: 25207 RVA: 0x001FB2F0 File Offset: 0x001F94F0
 		private void AdjustedServerTime()
 		{
 			DateTime dateTime;
@@ -40,7 +40,7 @@ namespace NetSynchrony
 			this.serverTime = (double)((float)num / 10000000f);
 		}
 
-		// Token: 0x06006278 RID: 25208 RVA: 0x001FB358 File Offset: 0x001F9558
+		// Token: 0x06006278 RID: 25208 RVA: 0x001FB338 File Offset: 0x001F9538
 		private void Start()
 		{
 			GorillaComputer instance = GorillaComputer.instance;
@@ -51,7 +51,7 @@ namespace NetSynchrony
 			}
 		}
 
-		// Token: 0x06006279 RID: 25209 RVA: 0x001FB3B4 File Offset: 0x001F95B4
+		// Token: 0x06006279 RID: 25209 RVA: 0x001FB394 File Offset: 0x001F9594
 		private void Update()
 		{
 			for (int i = 0; i < this.randomDispatchers.Length; i++)

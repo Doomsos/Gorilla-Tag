@@ -9,18 +9,18 @@ using UnityEngine;
 public class TappableGuardianIdol : Tappable
 {
 	// Token: 0x17000565 RID: 1381
-	// (get) Token: 0x06003A8B RID: 14987 RVA: 0x0013569B File Offset: 0x0013389B
-	// (set) Token: 0x06003A8C RID: 14988 RVA: 0x001356A3 File Offset: 0x001338A3
+	// (get) Token: 0x06003A8B RID: 14987 RVA: 0x0013567B File Offset: 0x0013387B
+	// (set) Token: 0x06003A8C RID: 14988 RVA: 0x00135683 File Offset: 0x00133883
 	public bool isChangingPositions { get; private set; }
 
-	// Token: 0x06003A8D RID: 14989 RVA: 0x001356AC File Offset: 0x001338AC
+	// Token: 0x06003A8D RID: 14989 RVA: 0x0013568C File Offset: 0x0013388C
 	protected override void OnEnable()
 	{
 		base.OnEnable();
 		this._colliderBaseRadius = this.tapCollision.radius;
 	}
 
-	// Token: 0x06003A8E RID: 14990 RVA: 0x001356C5 File Offset: 0x001338C5
+	// Token: 0x06003A8E RID: 14990 RVA: 0x001356A5 File Offset: 0x001338A5
 	protected override void OnDisable()
 	{
 		base.OnDisable();
@@ -30,14 +30,14 @@ public class TappableGuardianIdol : Tappable
 		this.tapCollision.radius = this._colliderBaseRadius;
 	}
 
-	// Token: 0x06003A8F RID: 14991 RVA: 0x001356F3 File Offset: 0x001338F3
+	// Token: 0x06003A8F RID: 14991 RVA: 0x001356D3 File Offset: 0x001338D3
 	public void OnZoneActiveStateChanged(bool zoneActive)
 	{
 		this._zoneIsActive = zoneActive;
 		this.idolVisualRoot.SetActive(this._zoneIsActive);
 	}
 
-	// Token: 0x06003A90 RID: 14992 RVA: 0x00135710 File Offset: 0x00133910
+	// Token: 0x06003A90 RID: 14992 RVA: 0x001356F0 File Offset: 0x001338F0
 	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
 	{
 		if (info.Sender.IsLocal)
@@ -66,7 +66,7 @@ public class TappableGuardianIdol : Tappable
 		}
 	}
 
-	// Token: 0x06003A91 RID: 14993 RVA: 0x001357D8 File Offset: 0x001339D8
+	// Token: 0x06003A91 RID: 14993 RVA: 0x001357B8 File Offset: 0x001339B8
 	public void SetPosition(Vector3 position)
 	{
 		base.transform.position = position + new Vector3(0f, this.activeHeight, 0f);
@@ -75,7 +75,7 @@ public class TappableGuardianIdol : Tappable
 		base.StartCoroutine(this.<SetPosition>g__Unshrink|49_0());
 	}
 
-	// Token: 0x06003A92 RID: 14994 RVA: 0x0013583A File Offset: 0x00133A3A
+	// Token: 0x06003A92 RID: 14994 RVA: 0x0013581A File Offset: 0x00133A1A
 	public void MovePositions(Vector3 finalPosition)
 	{
 		if (this.isChangingPositions)
@@ -87,7 +87,7 @@ public class TappableGuardianIdol : Tappable
 		base.StartCoroutine(this.TransitionToNextIdol());
 	}
 
-	// Token: 0x06003A93 RID: 14995 RVA: 0x0013586C File Offset: 0x00133A6C
+	// Token: 0x06003A93 RID: 14995 RVA: 0x0013584C File Offset: 0x00133A4C
 	public void UpdateActivationProgress(float rawProgress, bool progressing)
 	{
 		this.isActivationReady = !progressing;
@@ -127,7 +127,7 @@ public class TappableGuardianIdol : Tappable
 		this._audio.GTPlay();
 	}
 
-	// Token: 0x06003A94 RID: 14996 RVA: 0x00135983 File Offset: 0x00133B83
+	// Token: 0x06003A94 RID: 14996 RVA: 0x00135963 File Offset: 0x00133B63
 	public void StartLookingAround()
 	{
 		if (this._lookRoutine != null)
@@ -137,7 +137,7 @@ public class TappableGuardianIdol : Tappable
 		this._lookRoutine = base.StartCoroutine(this.DoLookingAround());
 	}
 
-	// Token: 0x06003A95 RID: 14997 RVA: 0x001359AB File Offset: 0x00133BAB
+	// Token: 0x06003A95 RID: 14997 RVA: 0x0013598B File Offset: 0x00133B8B
 	public void StopLookingAround()
 	{
 		if (this._lookRoutine == null)
@@ -149,7 +149,7 @@ public class TappableGuardianIdol : Tappable
 		this._lookRoutine = null;
 	}
 
-	// Token: 0x06003A96 RID: 14998 RVA: 0x001359D9 File Offset: 0x00133BD9
+	// Token: 0x06003A96 RID: 14998 RVA: 0x001359B9 File Offset: 0x00133BB9
 	private IEnumerator DoLookingAround()
 	{
 		TappableGuardianIdol.<>c__DisplayClass54_0 CS$<>8__locals1;
@@ -169,7 +169,7 @@ public class TappableGuardianIdol : Tappable
 		yield break;
 	}
 
-	// Token: 0x06003A97 RID: 14999 RVA: 0x001359E8 File Offset: 0x00133BE8
+	// Token: 0x06003A97 RID: 14999 RVA: 0x001359C8 File Offset: 0x00133BC8
 	private void UpdateStageActivatedObjects()
 	{
 		foreach (TappableGuardianIdol.StageActivatedObject stageActivatedObject in this._stageActivatedObjects)
@@ -178,7 +178,7 @@ public class TappableGuardianIdol : Tappable
 		}
 	}
 
-	// Token: 0x06003A98 RID: 15000 RVA: 0x00135A1F File Offset: 0x00133C1F
+	// Token: 0x06003A98 RID: 15000 RVA: 0x001359FF File Offset: 0x00133BFF
 	private IEnumerator ShowActivationEffect()
 	{
 		float bulgeDuration = 1f;
@@ -195,7 +195,7 @@ public class TappableGuardianIdol : Tappable
 		yield break;
 	}
 
-	// Token: 0x06003A99 RID: 15001 RVA: 0x00135A2E File Offset: 0x00133C2E
+	// Token: 0x06003A99 RID: 15001 RVA: 0x00135A0E File Offset: 0x00133C0E
 	private IEnumerator TransitionToNextIdol()
 	{
 		this.isChangingPositions = true;
@@ -264,7 +264,7 @@ public class TappableGuardianIdol : Tappable
 		yield break;
 	}
 
-	// Token: 0x06003A9A RID: 15002 RVA: 0x00135A3D File Offset: 0x00133C3D
+	// Token: 0x06003A9A RID: 15002 RVA: 0x00135A1D File Offset: 0x00133C1D
 	private float EaseInOut(float input)
 	{
 		if (input >= 0.5f)
@@ -274,7 +274,7 @@ public class TappableGuardianIdol : Tappable
 		return 4f * input * input * input;
 	}
 
-	// Token: 0x06003A9C RID: 15004 RVA: 0x00135B74 File Offset: 0x00133D74
+	// Token: 0x06003A9C RID: 15004 RVA: 0x00135B54 File Offset: 0x00133D54
 	[CompilerGenerated]
 	private IEnumerator <SetPosition>g__Unshrink|49_0()
 	{
@@ -291,7 +291,7 @@ public class TappableGuardianIdol : Tappable
 		yield break;
 	}
 
-	// Token: 0x06003A9D RID: 15005 RVA: 0x00135B84 File Offset: 0x00133D84
+	// Token: 0x06003A9D RID: 15005 RVA: 0x00135B64 File Offset: 0x00133D64
 	[CompilerGenerated]
 	private void <DoLookingAround>g__PickLookTarget|54_0(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
 	{
@@ -300,14 +300,14 @@ public class TappableGuardianIdol : Tappable
 		this.<DoLookingAround>g__SetLookTime|54_1(ref A_1);
 	}
 
-	// Token: 0x06003A9E RID: 15006 RVA: 0x00135C02 File Offset: 0x00133E02
+	// Token: 0x06003A9E RID: 15006 RVA: 0x00135BE2 File Offset: 0x00133DE2
 	[CompilerGenerated]
 	private void <DoLookingAround>g__SetLookTime|54_1(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
 	{
 		A_1.nextLookTime = Time.time + this._lookInterval / (float)this._activationState * 0.5f + Random.value;
 	}
 
-	// Token: 0x06003A9F RID: 15007 RVA: 0x00135C2C File Offset: 0x00133E2C
+	// Token: 0x06003A9F RID: 15007 RVA: 0x00135C0C File Offset: 0x00133E0C
 	[CompilerGenerated]
 	private Transform <DoLookingAround>g__GetClosestPlayerPosition|54_2(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
 	{
@@ -502,7 +502,7 @@ public class TappableGuardianIdol : Tappable
 	[Serializable]
 	public struct StageActivatedObject
 	{
-		// Token: 0x06003AA0 RID: 15008 RVA: 0x00135CF8 File Offset: 0x00133EF8
+		// Token: 0x06003AA0 RID: 15008 RVA: 0x00135CD8 File Offset: 0x00133ED8
 		public void UpdateActiveState(int stage)
 		{
 			bool active = stage >= this.min && stage <= this.max;

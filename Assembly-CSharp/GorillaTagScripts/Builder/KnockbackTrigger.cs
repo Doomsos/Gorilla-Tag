@@ -9,7 +9,7 @@ namespace GorillaTagScripts.Builder
 	public class KnockbackTrigger : MonoBehaviour
 	{
 		// Token: 0x17000887 RID: 2183
-		// (get) Token: 0x06005C46 RID: 23622 RVA: 0x001DA3B2 File Offset: 0x001D85B2
+		// (get) Token: 0x06005C46 RID: 23622 RVA: 0x001DA392 File Offset: 0x001D8592
 		public bool TriggeredThisFrame
 		{
 			get
@@ -18,7 +18,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C47 RID: 23623 RVA: 0x001DA3C4 File Offset: 0x001D85C4
+		// Token: 0x06005C47 RID: 23623 RVA: 0x001DA3A4 File Offset: 0x001D85A4
 		private void CheckZone()
 		{
 			if (!this.hasCheckedZone)
@@ -32,7 +32,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C48 RID: 23624 RVA: 0x001DA414 File Offset: 0x001D8614
+		// Token: 0x06005C48 RID: 23624 RVA: 0x001DA3F4 File Offset: 0x001D85F4
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!other.gameObject.IsOnLayer(UnityLayer.GorillaBodyCollider) && !other.gameObject.IsOnLayer(UnityLayer.GorillaHead) && !other.gameObject.IsOnLayer(UnityLayer.GorillaHand))
@@ -69,7 +69,7 @@ namespace GorillaTagScripts.Builder
 			this.lastTriggeredFrame = Time.frameCount;
 		}
 
-		// Token: 0x06005C49 RID: 23625 RVA: 0x001DA5B6 File Offset: 0x001D87B6
+		// Token: 0x06005C49 RID: 23625 RVA: 0x001DA596 File Offset: 0x001D8796
 		private void OnTriggerExit(Collider other)
 		{
 			if (!other.gameObject.IsOnLayer(UnityLayer.GorillaBodyCollider) && !other.gameObject.IsOnLayer(UnityLayer.GorillaHead) && !other.gameObject.IsOnLayer(UnityLayer.GorillaHand))
@@ -79,7 +79,7 @@ namespace GorillaTagScripts.Builder
 			this.collidersEntered.Remove(other);
 		}
 
-		// Token: 0x06005C4A RID: 23626 RVA: 0x001DA5F2 File Offset: 0x001D87F2
+		// Token: 0x06005C4A RID: 23626 RVA: 0x001DA5D2 File Offset: 0x001D87D2
 		private void OnDisable()
 		{
 			this.collidersEntered.Clear();

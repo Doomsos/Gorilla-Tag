@@ -9,8 +9,8 @@ namespace Fusion.CodeGen
 	internal class UnityDictionarySurrogate@ElementReaderWriterInt32@ElementReaderWriterInt32 : UnityDictionarySurrogate<int, ElementReaderWriterInt32, int, ElementReaderWriterInt32>
 	{
 		// Token: 0x17000AC5 RID: 2757
-		// (get) Token: 0x06007322 RID: 29474 RVA: 0x0025AB99 File Offset: 0x00258D99
-		// (set) Token: 0x06007323 RID: 29475 RVA: 0x0025ABA1 File Offset: 0x00258DA1
+		// (get) Token: 0x06007322 RID: 29474 RVA: 0x0025AB79 File Offset: 0x00258D79
+		// (set) Token: 0x06007323 RID: 29475 RVA: 0x0025AB81 File Offset: 0x00258D81
 		[WeaverGenerated]
 		public override SerializableDictionary<int, int> DataProperty
 		{
@@ -26,7 +26,7 @@ namespace Fusion.CodeGen
 			}
 		}
 
-		// Token: 0x06007324 RID: 29476 RVA: 0x0025ABAA File Offset: 0x00258DAA
+		// Token: 0x06007324 RID: 29476 RVA: 0x0025AB8A File Offset: 0x00258D8A
 		[WeaverGenerated]
 		public UnityDictionarySurrogate@ElementReaderWriterInt32@ElementReaderWriterInt32()
 		{

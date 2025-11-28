@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020008E2 RID: 2274
 public class SlowCameraUpdate : MonoBehaviour
 {
-	// Token: 0x06003A3A RID: 14906 RVA: 0x00133A0B File Offset: 0x00131C0B
+	// Token: 0x06003A3A RID: 14906 RVA: 0x001339EB File Offset: 0x00131BEB
 	public void Awake()
 	{
 		this.frameRate = 30f;
@@ -13,7 +13,7 @@ public class SlowCameraUpdate : MonoBehaviour
 		this.myCamera = base.GetComponent<Camera>();
 	}
 
-	// Token: 0x06003A3B RID: 14907 RVA: 0x00133A36 File Offset: 0x00131C36
+	// Token: 0x06003A3B RID: 14907 RVA: 0x00133A16 File Offset: 0x00131C16
 	public void OnEnable()
 	{
 		base.StartCoroutine(this.UpdateMirror());
@@ -25,7 +25,7 @@ public class SlowCameraUpdate : MonoBehaviour
 		base.StopAllCoroutines();
 	}
 
-	// Token: 0x06003A3D RID: 14909 RVA: 0x00133A45 File Offset: 0x00131C45
+	// Token: 0x06003A3D RID: 14909 RVA: 0x00133A25 File Offset: 0x00131C25
 	public IEnumerator UpdateMirror()
 	{
 		for (;;)

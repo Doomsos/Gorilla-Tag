@@ -9,7 +9,7 @@ using UnityEngine;
 public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 {
 	// Token: 0x1700042E RID: 1070
-	// (get) Token: 0x06002DF0 RID: 11760 RVA: 0x00094550 File Offset: 0x00092750
+	// (get) Token: 0x06002DF0 RID: 11760 RVA: 0x00094530 File Offset: 0x00092730
 	public Vector3 Position
 	{
 		get
@@ -19,7 +19,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 	}
 
 	// Token: 0x1700042F RID: 1071
-	// (get) Token: 0x06002DF1 RID: 11761 RVA: 0x000F97E6 File Offset: 0x000F79E6
+	// (get) Token: 0x06002DF1 RID: 11761 RVA: 0x000F97C6 File Offset: 0x000F79C6
 	public float WakeUpRadius
 	{
 		get
@@ -28,7 +28,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		}
 	}
 
-	// Token: 0x06002DF2 RID: 11762 RVA: 0x000F97F0 File Offset: 0x000F79F0
+	// Token: 0x06002DF2 RID: 11762 RVA: 0x000F97D0 File Offset: 0x000F79D0
 	private void Start()
 	{
 		this.rb = base.GetComponent<Rigidbody>();
@@ -45,7 +45,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		this.Sleep();
 	}
 
-	// Token: 0x06002DF3 RID: 11763 RVA: 0x000F98D4 File Offset: 0x000F7AD4
+	// Token: 0x06002DF3 RID: 11763 RVA: 0x000F98B4 File Offset: 0x000F7AB4
 	private void OnDestroy()
 	{
 		if (GhostReactor.instance != null)
@@ -66,13 +66,13 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		}
 	}
 
-	// Token: 0x06002DF4 RID: 11764 RVA: 0x000F99C3 File Offset: 0x000F7BC3
+	// Token: 0x06002DF4 RID: 11764 RVA: 0x000F99A3 File Offset: 0x000F7BA3
 	public bool IsSleeping()
 	{
 		return this.gameEntity.GetState() == 0L;
 	}
 
-	// Token: 0x06002DF5 RID: 11765 RVA: 0x000F99D4 File Offset: 0x000F7BD4
+	// Token: 0x06002DF5 RID: 11765 RVA: 0x000F99B4 File Offset: 0x000F7BB4
 	public void WakeUp()
 	{
 		if (this.gameEntity.IsAuthority() && this.IsSleeping())
@@ -88,13 +88,13 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		base.enabled = true;
 	}
 
-	// Token: 0x06002DF6 RID: 11766 RVA: 0x000F9A36 File Offset: 0x000F7C36
+	// Token: 0x06002DF6 RID: 11766 RVA: 0x000F9A16 File Offset: 0x000F7C16
 	public void Sleep()
 	{
 		this.sleepRequested = true;
 	}
 
-	// Token: 0x06002DF7 RID: 11767 RVA: 0x000F9A3F File Offset: 0x000F7C3F
+	// Token: 0x06002DF7 RID: 11767 RVA: 0x000F9A1F File Offset: 0x000F7C1F
 	private void OnStateChanged(long prevState, long nextState)
 	{
 		if ((int)nextState == 0)
@@ -108,7 +108,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		this.SetState((GRSentientCore.SentientCoreState)nextState);
 	}
 
-	// Token: 0x06002DF8 RID: 11768 RVA: 0x000F9A64 File Offset: 0x000F7C64
+	// Token: 0x06002DF8 RID: 11768 RVA: 0x000F9A44 File Offset: 0x000F7C44
 	private void OnGrabbed()
 	{
 		this.WakeUp();
@@ -116,25 +116,25 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		this.timeUntilNextAlert = Mathf.Min(this.timeUntilFirstAlert, this.timeUntilNextAlert);
 	}
 
-	// Token: 0x06002DF9 RID: 11769 RVA: 0x000F9A8A File Offset: 0x000F7C8A
+	// Token: 0x06002DF9 RID: 11769 RVA: 0x000F9A6A File Offset: 0x000F7C6A
 	private void OnReleased()
 	{
 		this.SetState(GRSentientCore.SentientCoreState.Dropped);
 	}
 
-	// Token: 0x06002DFA RID: 11770 RVA: 0x000F9A93 File Offset: 0x000F7C93
+	// Token: 0x06002DFA RID: 11770 RVA: 0x000F9A73 File Offset: 0x000F7C73
 	private void OnSnapped()
 	{
 		this.SetState(GRSentientCore.SentientCoreState.AttachedToPlayer);
 	}
 
-	// Token: 0x06002DFB RID: 11771 RVA: 0x000F9A8A File Offset: 0x000F7C8A
+	// Token: 0x06002DFB RID: 11771 RVA: 0x000F9A6A File Offset: 0x000F7C6A
 	private void OnDetached()
 	{
 		this.SetState(GRSentientCore.SentientCoreState.Dropped);
 	}
 
-	// Token: 0x06002DFC RID: 11772 RVA: 0x000F9A9C File Offset: 0x000F7C9C
+	// Token: 0x06002DFC RID: 11772 RVA: 0x000F9A7C File Offset: 0x000F7C7C
 	private void Update()
 	{
 		if (this.debugDraw)
@@ -148,7 +148,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		this.SharedUpdate();
 	}
 
-	// Token: 0x06002DFD RID: 11773 RVA: 0x000F9AEC File Offset: 0x000F7CEC
+	// Token: 0x06002DFD RID: 11773 RVA: 0x000F9ACC File Offset: 0x000F7CCC
 	private void AuthorityUpdate()
 	{
 		if (this.trailFX != null)
@@ -221,7 +221,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		}
 	}
 
-	// Token: 0x06002DFE RID: 11774 RVA: 0x000F9CB0 File Offset: 0x000F7EB0
+	// Token: 0x06002DFE RID: 11774 RVA: 0x000F9C90 File Offset: 0x000F7E90
 	private void SharedUpdate()
 	{
 		switch (this.localState)
@@ -344,7 +344,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		}
 	}
 
-	// Token: 0x06002DFF RID: 11775 RVA: 0x000FA1CC File Offset: 0x000F83CC
+	// Token: 0x06002DFF RID: 11775 RVA: 0x000FA1AC File Offset: 0x000F83AC
 	private void SetState(GRSentientCore.SentientCoreState nextState)
 	{
 		if (this.localState != nextState)
@@ -358,7 +358,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		}
 	}
 
-	// Token: 0x06002E00 RID: 11776 RVA: 0x000FA21C File Offset: 0x000F841C
+	// Token: 0x06002E00 RID: 11776 RVA: 0x000FA1FC File Offset: 0x000F83FC
 	public void PerformJump(Vector3 startPos, Vector3 normal, Vector3 direction, double jumpNetworkTime)
 	{
 		if (!PhotonNetwork.InRoom)
@@ -380,7 +380,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		this.SetState(GRSentientCore.SentientCoreState.JumpAnticipation);
 	}
 
-	// Token: 0x06002E01 RID: 11777 RVA: 0x000FA2B8 File Offset: 0x000F84B8
+	// Token: 0x06002E01 RID: 11777 RVA: 0x000FA298 File Offset: 0x000F8498
 	private void DrawJumpPath(Color pathColor)
 	{
 		DebugUtil.DrawLine(this.jumpStartPosition, this.jumpStartPosition + this.surfaceNormal * 0.15f, Color.cyan, true);
@@ -408,7 +408,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		}
 	}
 
-	// Token: 0x06002E02 RID: 11778 RVA: 0x000FA414 File Offset: 0x000F8614
+	// Token: 0x06002E02 RID: 11778 RVA: 0x000FA3F4 File Offset: 0x000F85F4
 	public void AuthorityInitiateJump()
 	{
 		if (!this.gameEntity.IsAuthority())

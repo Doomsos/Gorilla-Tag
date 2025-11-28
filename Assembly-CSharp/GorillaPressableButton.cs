@@ -10,8 +10,8 @@ using UnityEngine.UI;
 public class GorillaPressableButton : MonoBehaviour, IClickable
 {
 	// Token: 0x14000077 RID: 119
-	// (add) Token: 0x06003B95 RID: 15253 RVA: 0x0013AF2C File Offset: 0x0013912C
-	// (remove) Token: 0x06003B96 RID: 15254 RVA: 0x0013AF64 File Offset: 0x00139164
+	// (add) Token: 0x06003B95 RID: 15253 RVA: 0x0013AF0C File Offset: 0x0013910C
+	// (remove) Token: 0x06003B96 RID: 15254 RVA: 0x0013AF44 File Offset: 0x00139144
 	public event Action<GorillaPressableButton, bool> onPressed;
 
 	// Token: 0x06003B97 RID: 15255 RVA: 0x00002789 File Offset: 0x00000989
@@ -19,20 +19,20 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 	{
 	}
 
-	// Token: 0x06003B98 RID: 15256 RVA: 0x0013AF99 File Offset: 0x00139199
+	// Token: 0x06003B98 RID: 15256 RVA: 0x0013AF79 File Offset: 0x00139179
 	protected virtual void OnEnable()
 	{
 		LocalisationManager.RegisterOnLanguageChanged(new Action(this.RefreshText));
 		this.RefreshText();
 	}
 
-	// Token: 0x06003B99 RID: 15257 RVA: 0x0013AFB3 File Offset: 0x001391B3
+	// Token: 0x06003B99 RID: 15257 RVA: 0x0013AF93 File Offset: 0x00139193
 	protected virtual void OnDisable()
 	{
 		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.RefreshText));
 	}
 
-	// Token: 0x06003B9A RID: 15258 RVA: 0x0013AFC8 File Offset: 0x001391C8
+	// Token: 0x06003B9A RID: 15258 RVA: 0x0013AFA8 File Offset: 0x001391A8
 	protected virtual void RefreshText()
 	{
 		if (this._offLocalizedText == null || this._offLocalizedText.IsEmpty || this._onLocalizedText == null || this._onLocalizedText.IsEmpty)
@@ -78,7 +78,7 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 		}
 	}
 
-	// Token: 0x06003B9B RID: 15259 RVA: 0x0013B0D8 File Offset: 0x001392D8
+	// Token: 0x06003B9B RID: 15259 RVA: 0x0013B0B8 File Offset: 0x001392B8
 	protected virtual void SetOffText(bool setMyText, bool setMyTmpText = false, bool setMyTmpText2 = false)
 	{
 		if (!this._useOnOffText)
@@ -112,7 +112,7 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 		}
 	}
 
-	// Token: 0x06003B9C RID: 15260 RVA: 0x0013B174 File Offset: 0x00139374
+	// Token: 0x06003B9C RID: 15260 RVA: 0x0013B154 File Offset: 0x00139354
 	protected virtual void SetOnText(bool setMyText, bool setMyTmpText = false, bool setMyTmpText2 = false)
 	{
 		if (!this._useOnOffText)
@@ -146,7 +146,7 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 		}
 	}
 
-	// Token: 0x06003B9D RID: 15261 RVA: 0x0013B210 File Offset: 0x00139410
+	// Token: 0x06003B9D RID: 15261 RVA: 0x0013B1F0 File Offset: 0x001393F0
 	protected void OnTriggerEnter(Collider collider)
 	{
 		if (!base.enabled)
@@ -165,7 +165,7 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 		this.PressButton(component.isLeftHand);
 	}
 
-	// Token: 0x06003B9E RID: 15262 RVA: 0x0013B25C File Offset: 0x0013945C
+	// Token: 0x06003B9E RID: 15262 RVA: 0x0013B23C File Offset: 0x0013943C
 	private void PressButton(bool isLeftHand)
 	{
 		this.touchTime = Time.time;
@@ -194,19 +194,19 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 		}
 	}
 
-	// Token: 0x06003B9F RID: 15263 RVA: 0x0013B33E File Offset: 0x0013953E
+	// Token: 0x06003B9F RID: 15263 RVA: 0x0013B31E File Offset: 0x0013951E
 	public void Click(bool leftHand = false)
 	{
 		this.PressButton(leftHand);
 	}
 
-	// Token: 0x06003BA0 RID: 15264 RVA: 0x0013B347 File Offset: 0x00139547
+	// Token: 0x06003BA0 RID: 15264 RVA: 0x0013B327 File Offset: 0x00139527
 	public virtual void UpdateColor()
 	{
 		this.UpdateColorWithState(this.isOn);
 	}
 
-	// Token: 0x06003BA1 RID: 15265 RVA: 0x0013B358 File Offset: 0x00139558
+	// Token: 0x06003BA1 RID: 15265 RVA: 0x0013B338 File Offset: 0x00139538
 	protected void UpdateColorWithState(bool state)
 	{
 		if (state)
@@ -229,14 +229,14 @@ public class GorillaPressableButton : MonoBehaviour, IClickable
 	{
 	}
 
-	// Token: 0x06003BA4 RID: 15268 RVA: 0x0013B3D9 File Offset: 0x001395D9
+	// Token: 0x06003BA4 RID: 15268 RVA: 0x0013B3B9 File Offset: 0x001395B9
 	public virtual void ResetState()
 	{
 		this.isOn = false;
 		this.UpdateColor();
 	}
 
-	// Token: 0x06003BA5 RID: 15269 RVA: 0x0013B3E8 File Offset: 0x001395E8
+	// Token: 0x06003BA5 RID: 15269 RVA: 0x0013B3C8 File Offset: 0x001395C8
 	public void SetText(string newText)
 	{
 		if (this.myTmpText != null)

@@ -8,8 +8,8 @@ using UnityEngine;
 public class SlotTransformOverride
 {
 	// Token: 0x1700033B RID: 827
-	// (get) Token: 0x06001E41 RID: 7745 RVA: 0x0009FE1B File Offset: 0x0009E01B
-	// (set) Token: 0x06001E42 RID: 7746 RVA: 0x0009FE28 File Offset: 0x0009E028
+	// (get) Token: 0x06001E41 RID: 7745 RVA: 0x0009FDFB File Offset: 0x0009DFFB
+	// (set) Token: 0x06001E42 RID: 7746 RVA: 0x0009FE08 File Offset: 0x0009E008
 	private XformOffset _EdXformOffsetRepresenationOf_overrideTransformMatrix
 	{
 		get
@@ -22,7 +22,7 @@ public class SlotTransformOverride
 		}
 	}
 
-	// Token: 0x06001E43 RID: 7747 RVA: 0x0009FE48 File Offset: 0x0009E048
+	// Token: 0x06001E43 RID: 7747 RVA: 0x0009FE28 File Offset: 0x0009E028
 	public void Initialize(Component component, Transform anchor)
 	{
 		if (!this.useAdvancedGrab)
@@ -41,13 +41,13 @@ public class SlotTransformOverride
 		}
 	}
 
-	// Token: 0x06001E44 RID: 7748 RVA: 0x0009FEF4 File Offset: 0x0009E0F4
+	// Token: 0x06001E44 RID: 7748 RVA: 0x0009FED4 File Offset: 0x0009E0D4
 	public void AddLineButton()
 	{
 		this.multiPoints.Add(new SubLineGrabPoint());
 	}
 
-	// Token: 0x06001E45 RID: 7749 RVA: 0x0009FF08 File Offset: 0x0009E108
+	// Token: 0x06001E45 RID: 7749 RVA: 0x0009FEE8 File Offset: 0x0009E0E8
 	public void AddSubGrabPoint(TransferrableObjectGripPosition togp)
 	{
 		SubGrabPoint subGrabPoint = togp.CreateSubGrabPoint(this);

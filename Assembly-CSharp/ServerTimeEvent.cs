@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x02000CB1 RID: 3249
 public class ServerTimeEvent : TimeEvent
 {
-	// Token: 0x06004F5F RID: 20319 RVA: 0x00199249 File Offset: 0x00197449
+	// Token: 0x06004F5F RID: 20319 RVA: 0x00199229 File Offset: 0x00197429
 	private void Awake()
 	{
 		this.eventTimes = new HashSet<ServerTimeEvent.EventTime>(this.times);
 	}
 
-	// Token: 0x06004F60 RID: 20320 RVA: 0x0019925C File Offset: 0x0019745C
+	// Token: 0x06004F60 RID: 20320 RVA: 0x0019923C File Offset: 0x0019743C
 	private void Update()
 	{
 		if (GorillaComputer.instance == null || Time.time - this.lastQueryTime < this.queryTime)
@@ -50,7 +50,7 @@ public class ServerTimeEvent : TimeEvent
 	[Serializable]
 	public struct EventTime
 	{
-		// Token: 0x06004F62 RID: 20322 RVA: 0x0019930B File Offset: 0x0019750B
+		// Token: 0x06004F62 RID: 20322 RVA: 0x001992EB File Offset: 0x001974EB
 		public EventTime(int h, int m)
 		{
 			this.hour = h;

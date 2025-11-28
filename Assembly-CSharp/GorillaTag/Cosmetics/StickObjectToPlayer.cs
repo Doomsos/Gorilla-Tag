@@ -9,11 +9,11 @@ namespace GorillaTag.Cosmetics
 	public class StickObjectToPlayer : MonoBehaviour, ITickSystemTick
 	{
 		// Token: 0x17000A0F RID: 2575
-		// (get) Token: 0x06006B19 RID: 27417 RVA: 0x00231EDE File Offset: 0x002300DE
-		// (set) Token: 0x06006B1A RID: 27418 RVA: 0x00231EE6 File Offset: 0x002300E6
+		// (get) Token: 0x06006B19 RID: 27417 RVA: 0x00231EBE File Offset: 0x002300BE
+		// (set) Token: 0x06006B1A RID: 27418 RVA: 0x00231EC6 File Offset: 0x002300C6
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006B1B RID: 27419 RVA: 0x00231EEF File Offset: 0x002300EF
+		// Token: 0x06006B1B RID: 27419 RVA: 0x00231ECF File Offset: 0x002300CF
 		public void Tick()
 		{
 			if (!this.canSpawn && Time.time - this.lastSpawnedTime >= this.cooldown)
@@ -22,7 +22,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B1C RID: 27420 RVA: 0x00231F14 File Offset: 0x00230114
+		// Token: 0x06006B1C RID: 27420 RVA: 0x00231EF4 File Offset: 0x002300F4
 		private void OnEnable()
 		{
 			TickSystem<object>.AddTickCallback(this);
@@ -35,13 +35,13 @@ namespace GorillaTag.Cosmetics
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006B1E RID: 27422 RVA: 0x00231F23 File Offset: 0x00230123
+		// Token: 0x06006B1E RID: 27422 RVA: 0x00231F03 File Offset: 0x00230103
 		public void SetOwner(NetPlayer player)
 		{
 			this.ownerPlayer = player;
 		}
 
-		// Token: 0x06006B1F RID: 27423 RVA: 0x00231F2C File Offset: 0x0023012C
+		// Token: 0x06006B1F RID: 27423 RVA: 0x00231F0C File Offset: 0x0023010C
 		private Transform MakeOrGetStickyContainer(Transform parent)
 		{
 			Transform transform = parent;
@@ -64,7 +64,7 @@ namespace GorillaTag.Cosmetics
 			return gameObject.transform;
 		}
 
-		// Token: 0x06006B20 RID: 27424 RVA: 0x00231FB8 File Offset: 0x002301B8
+		// Token: 0x06006B20 RID: 27424 RVA: 0x00231F98 File Offset: 0x00230198
 		public void Stick(bool leftHand, Collider other)
 		{
 			if (!this.canSpawn || other == null || !base.enabled)
@@ -135,7 +135,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B21 RID: 27425 RVA: 0x00232164 File Offset: 0x00230364
+		// Token: 0x06006B21 RID: 27425 RVA: 0x00232144 File Offset: 0x00230344
 		private void StickFirstPersonView()
 		{
 			Transform cosmeticsHeadTarget = GTPlayer.Instance.CosmeticsHeadTarget;
@@ -144,7 +144,7 @@ namespace GorillaTag.Cosmetics
 			this.StickTo(parent, position, this.FPVlocalEulerAngles);
 		}
 
-		// Token: 0x06006B22 RID: 27426 RVA: 0x002321A0 File Offset: 0x002303A0
+		// Token: 0x06006B22 RID: 27426 RVA: 0x00232180 File Offset: 0x00230380
 		private void StickTo(Transform parent, Vector3 position, Vector3 eulerAngle)
 		{
 			int num = 0;
@@ -171,7 +171,7 @@ namespace GorillaTag.Cosmetics
 			this.canSpawn = false;
 		}
 
-		// Token: 0x06006B23 RID: 27427 RVA: 0x00232250 File Offset: 0x00230450
+		// Token: 0x06006B23 RID: 27427 RVA: 0x00232230 File Offset: 0x00230430
 		private Transform GetSpawnPosition(StickObjectToPlayer.SpawnLocation spawnType, VRRig hitRig)
 		{
 			switch (spawnType)
@@ -187,14 +187,14 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B24 RID: 27428 RVA: 0x002322A8 File Offset: 0x002304A8
+		// Token: 0x06006B24 RID: 27428 RVA: 0x00232288 File Offset: 0x00230488
 		public void Debug_StickToLocalPlayer()
 		{
 			Vector3 position = this.GetSpawnPosition(this.spawnLocation, VRRig.LocalRig).TransformPoint(this.positionOffset);
 			this.StickTo(VRRig.LocalRig.transform, position, this.localEulerAngles);
 		}
 
-		// Token: 0x06006B25 RID: 27429 RVA: 0x002322E9 File Offset: 0x002304E9
+		// Token: 0x06006B25 RID: 27429 RVA: 0x002322C9 File Offset: 0x002304C9
 		public void Debug_StickToLocalPlayerFPV()
 		{
 			this.StickFirstPersonView();

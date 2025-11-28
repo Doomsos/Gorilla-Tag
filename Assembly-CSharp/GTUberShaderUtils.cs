@@ -6,28 +6,28 @@ using UnityEngine.Rendering;
 // Token: 0x02000CE5 RID: 3301
 public static class GTUberShaderUtils
 {
-	// Token: 0x0600504E RID: 20558 RVA: 0x0019CBEA File Offset: 0x0019ADEA
+	// Token: 0x0600504E RID: 20558 RVA: 0x0019CBCA File Offset: 0x0019ADCA
 	[MethodImpl(256)]
 	public static void SetStencilComparison(this Material m, GTShaderStencilCompare cmp)
 	{
 		m.SetFloat(GTUberShaderUtils._StencilComparison, (float)cmp);
 	}
 
-	// Token: 0x0600504F RID: 20559 RVA: 0x0019CBFE File Offset: 0x0019ADFE
+	// Token: 0x0600504F RID: 20559 RVA: 0x0019CBDE File Offset: 0x0019ADDE
 	[MethodImpl(256)]
 	public static void SetStencilPassFrontOp(this Material m, GTShaderStencilOp op)
 	{
 		m.SetFloat(GTUberShaderUtils._StencilPassFront, (float)op);
 	}
 
-	// Token: 0x06005050 RID: 20560 RVA: 0x0019CC12 File Offset: 0x0019AE12
+	// Token: 0x06005050 RID: 20560 RVA: 0x0019CBF2 File Offset: 0x0019ADF2
 	[MethodImpl(256)]
 	public static void SetStencilReferenceValue(this Material m, int value)
 	{
 		m.SetFloat(GTUberShaderUtils._StencilReference, (float)value);
 	}
 
-	// Token: 0x06005051 RID: 20561 RVA: 0x0019CC28 File Offset: 0x0019AE28
+	// Token: 0x06005051 RID: 20561 RVA: 0x0019CC08 File Offset: 0x0019AE08
 	public static void SetVisibleToXRay(this Material m, bool visible, bool saveToDisk = false)
 	{
 		GTShaderStencilCompare cmp = visible ? GTShaderStencilCompare.Equal : GTShaderStencilCompare.NotEqual;
@@ -37,7 +37,7 @@ public static class GTUberShaderUtils
 		m.SetStencilReferenceValue(7);
 	}
 
-	// Token: 0x06005052 RID: 20562 RVA: 0x0019CC5C File Offset: 0x0019AE5C
+	// Token: 0x06005052 RID: 20562 RVA: 0x0019CC3C File Offset: 0x0019AE3C
 	public static void SetRevealsXRay(this Material m, bool reveals, bool changeQueue = true, bool saveToDisk = false)
 	{
 		m.SetFloat(GTUberShaderUtils._ZWrite, (float)(reveals ? 0 : 1));
@@ -52,7 +52,7 @@ public static class GTUberShaderUtils
 		}
 	}
 
-	// Token: 0x06005053 RID: 20563 RVA: 0x0019CCD4 File Offset: 0x0019AED4
+	// Token: 0x06005053 RID: 20563 RVA: 0x0019CCB4 File Offset: 0x0019AEB4
 	public static int GetNearestRenderQueue(this Material m, out RenderQueue queue)
 	{
 		int renderQueue = m.renderQueue;
@@ -72,7 +72,7 @@ public static class GTUberShaderUtils
 		return num;
 	}
 
-	// Token: 0x06005054 RID: 20564 RVA: 0x0019CD25 File Offset: 0x0019AF25
+	// Token: 0x06005054 RID: 20564 RVA: 0x0019CD05 File Offset: 0x0019AF05
 	[RuntimeInitializeOnLoadMethod(1)]
 	private static void InitOnLoad()
 	{

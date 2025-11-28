@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 [Obsolete("replaced with ThrowableSetDressing.cs")]
 public class MagicIngredient : TransferrableObject
 {
-	// Token: 0x060036AF RID: 13999 RVA: 0x00127D10 File Offset: 0x00125F10
+	// Token: 0x060036AF RID: 13999 RVA: 0x00127CF0 File Offset: 0x00125EF0
 	public override void OnSpawn(VRRig rig)
 	{
 		base.OnSpawn(rig);
@@ -14,7 +14,7 @@ public class MagicIngredient : TransferrableObject
 		this.grabPtInitParent = this.anchor.transform.parent;
 	}
 
-	// Token: 0x060036B0 RID: 14000 RVA: 0x00127D3C File Offset: 0x00125F3C
+	// Token: 0x060036B0 RID: 14000 RVA: 0x00127D1C File Offset: 0x00125F1C
 	private void ReParent()
 	{
 		Transform transform = this.anchor.transform;
@@ -22,7 +22,7 @@ public class MagicIngredient : TransferrableObject
 		transform.parent = this.grabPtInitParent;
 	}
 
-	// Token: 0x060036B1 RID: 14001 RVA: 0x00127D72 File Offset: 0x00125F72
+	// Token: 0x060036B1 RID: 14001 RVA: 0x00127D52 File Offset: 0x00125F52
 	public void Disable()
 	{
 		this.DropItem();

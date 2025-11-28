@@ -6,7 +6,7 @@ namespace GorillaNetworking.Store
 	// Token: 0x02000F49 RID: 3913
 	public class StoreDepartment : MonoBehaviour
 	{
-		// Token: 0x0600620E RID: 25102 RVA: 0x001F99F4 File Offset: 0x001F7BF4
+		// Token: 0x0600620E RID: 25102 RVA: 0x001F99D4 File Offset: 0x001F7BD4
 		private void FindAllDisplays()
 		{
 			this.Displays = base.GetComponentsInChildren<StoreDisplay>();

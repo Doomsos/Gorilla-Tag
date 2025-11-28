@@ -9,7 +9,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DB5 RID: 3509
 	public class BuilderItemReliableState : MonoBehaviour, IPunObservable
 	{
-		// Token: 0x06005661 RID: 22113 RVA: 0x001B29F4 File Offset: 0x001B0BF4
+		// Token: 0x06005661 RID: 22113 RVA: 0x001B29D4 File Offset: 0x001B0BD4
 		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (stream.IsWriting)

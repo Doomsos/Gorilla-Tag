@@ -8,7 +8,7 @@ namespace GorillaNetworking.Store
 	// Token: 0x02000F46 RID: 3910
 	public class StandImport
 	{
-		// Token: 0x06006207 RID: 25095 RVA: 0x001F9738 File Offset: 0x001F7938
+		// Token: 0x06006207 RID: 25095 RVA: 0x001F9718 File Offset: 0x001F7918
 		public void DecomposeFromTitleDataString(string data)
 		{
 			string[] array = data.Split("\\n", 0);
@@ -18,7 +18,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006208 RID: 25096 RVA: 0x001F976C File Offset: 0x001F796C
+		// Token: 0x06006208 RID: 25096 RVA: 0x001F974C File Offset: 0x001F794C
 		public void DecomposeStandDataTitleData(string dataString)
 		{
 			string[] array = dataString.Split("\\t", 0);
@@ -40,13 +40,13 @@ namespace GorillaNetworking.Store
 			Debug.LogError("Store Importer Data String is not valid : " + text);
 		}
 
-		// Token: 0x06006209 RID: 25097 RVA: 0x001F97EF File Offset: 0x001F79EF
+		// Token: 0x06006209 RID: 25097 RVA: 0x001F97CF File Offset: 0x001F79CF
 		public void DeserializeFromJSON(string JSONString)
 		{
 			this.standData = JsonConvert.DeserializeObject<List<StandTypeData>>(JSONString);
 		}
 
-		// Token: 0x0600620A RID: 25098 RVA: 0x001F9800 File Offset: 0x001F7A00
+		// Token: 0x0600620A RID: 25098 RVA: 0x001F97E0 File Offset: 0x001F79E0
 		public void DecomposeStandData(string dataString)
 		{
 			string[] array = dataString.Split('\t', 0);

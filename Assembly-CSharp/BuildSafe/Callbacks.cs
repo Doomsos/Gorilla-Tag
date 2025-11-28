@@ -10,7 +10,7 @@ namespace BuildSafe
 		[Conditional("UNITY_EDITOR")]
 		public class DidReloadScripts : Attribute
 		{
-			// Token: 0x06005DBE RID: 23998 RVA: 0x001E16FD File Offset: 0x001DF8FD
+			// Token: 0x06005DBE RID: 23998 RVA: 0x001E16DD File Offset: 0x001DF8DD
 			public DidReloadScripts(bool activeOnly = false)
 			{
 				this.activeOnly = activeOnly;

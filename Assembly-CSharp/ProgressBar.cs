@@ -5,7 +5,7 @@ using UnityEngine.UI;
 // Token: 0x0200085D RID: 2141
 public class ProgressBar : MonoBehaviour
 {
-	// Token: 0x06003862 RID: 14434 RVA: 0x0012D840 File Offset: 0x0012BA40
+	// Token: 0x06003862 RID: 14434 RVA: 0x0012D820 File Offset: 0x0012BA20
 	public void UpdateProgress(float newFill)
 	{
 		bool flag = newFill > 1f;

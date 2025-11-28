@@ -6,7 +6,7 @@ using UnityEngine;
 public class BSPZoneData : MonoBehaviour
 {
 	// Token: 0x17000782 RID: 1922
-	// (get) Token: 0x060050CB RID: 20683 RVA: 0x001A167D File Offset: 0x0019F87D
+	// (get) Token: 0x060050CB RID: 20683 RVA: 0x001A165D File Offset: 0x0019F85D
 	public int Priority
 	{
 		get
@@ -16,7 +16,7 @@ public class BSPZoneData : MonoBehaviour
 	}
 
 	// Token: 0x17000783 RID: 1923
-	// (get) Token: 0x060050CC RID: 20684 RVA: 0x001A1685 File Offset: 0x0019F885
+	// (get) Token: 0x060050CC RID: 20684 RVA: 0x001A1665 File Offset: 0x0019F865
 	public string ZoneName
 	{
 		get

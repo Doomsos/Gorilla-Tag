@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x02000808 RID: 2056
 public class FreeHoverboardHandle : HoldableObject
 {
-	// Token: 0x0600361C RID: 13852 RVA: 0x00125988 File Offset: 0x00123B88
+	// Token: 0x0600361C RID: 13852 RVA: 0x00125968 File Offset: 0x00123B68
 	private void Awake()
 	{
 		this.hasParentBoard = (this.parentFreeBoard != null);
 	}
 
-	// Token: 0x0600361D RID: 13853 RVA: 0x0012599C File Offset: 0x00123B9C
+	// Token: 0x0600361D RID: 13853 RVA: 0x0012597C File Offset: 0x00123B7C
 	public override void OnHover(InteractionPoint pointHovered, GameObject hoveringHand)
 	{
 		if (!GTPlayer.Instance.isHoverAllowed)
@@ -26,7 +26,7 @@ public class FreeHoverboardHandle : HoldableObject
 		this.noHapticsUntilFrame = Time.frameCount + 1;
 	}
 
-	// Token: 0x0600361E RID: 13854 RVA: 0x00125A0C File Offset: 0x00123C0C
+	// Token: 0x0600361E RID: 13854 RVA: 0x001259EC File Offset: 0x00123BEC
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		if (!GTPlayer.Instance.isHoverAllowed)

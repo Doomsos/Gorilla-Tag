@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x020005AD RID: 1453
 public class BuilderShelf : MonoBehaviour
 {
-	// Token: 0x060024A9 RID: 9385 RVA: 0x000C5780 File Offset: 0x000C3980
+	// Token: 0x060024A9 RID: 9385 RVA: 0x000C5760 File Offset: 0x000C3960
 	public void Init()
 	{
 		this.shelfSlot = 0;
@@ -23,13 +23,13 @@ public class BuilderShelf : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060024AA RID: 9386 RVA: 0x000C581B File Offset: 0x000C3A1B
+	// Token: 0x060024AA RID: 9386 RVA: 0x000C57FB File Offset: 0x000C39FB
 	public bool HasOpenSlot()
 	{
 		return this.shelfSlot < this.count;
 	}
 
-	// Token: 0x060024AB RID: 9387 RVA: 0x000C582C File Offset: 0x000C3A2C
+	// Token: 0x060024AB RID: 9387 RVA: 0x000C580C File Offset: 0x000C3A0C
 	public void BuildNextPiece(BuilderTable table)
 	{
 		if (!this.HasOpenSlot())
@@ -70,7 +70,7 @@ public class BuilderShelf : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060024AC RID: 9388 RVA: 0x000C59A8 File Offset: 0x000C3BA8
+	// Token: 0x060024AC RID: 9388 RVA: 0x000C5988 File Offset: 0x000C3B88
 	public void InitCount()
 	{
 		this.count = 0;
@@ -80,7 +80,7 @@ public class BuilderShelf : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060024AD RID: 9389 RVA: 0x000C59F0 File Offset: 0x000C3BF0
+	// Token: 0x060024AD RID: 9389 RVA: 0x000C59D0 File Offset: 0x000C3BD0
 	public void BuildItems(BuilderTable table)
 	{
 		int num = 0;
@@ -107,7 +107,7 @@ public class BuilderShelf : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060024AE RID: 9390 RVA: 0x000C5ABC File Offset: 0x000C3CBC
+	// Token: 0x060024AE RID: 9390 RVA: 0x000C5A9C File Offset: 0x000C3C9C
 	public void GetSpawnLocation(int slot, BuilderShelf.BuildPieceSpawn spawn, out Vector3 spawnPosition, out Quaternion spawnRotation)
 	{
 		if (this.center == null)

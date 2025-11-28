@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200092A RID: 2346
 public class GorillaTurnSlider : MonoBehaviour
 {
-	// Token: 0x06003BF4 RID: 15348 RVA: 0x0013C97D File Offset: 0x0013AB7D
+	// Token: 0x06003BF4 RID: 15348 RVA: 0x0013C95D File Offset: 0x0013AB5D
 	private void Awake()
 	{
 		this.startingLocation = base.transform.position;
@@ -16,7 +16,7 @@ public class GorillaTurnSlider : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06003BF6 RID: 15350 RVA: 0x0013C9A4 File Offset: 0x0013ABA4
+	// Token: 0x06003BF6 RID: 15350 RVA: 0x0013C984 File Offset: 0x0013AB84
 	public void SetPosition(float speed)
 	{
 		float num = this.startingLocation.x - this.zRange / 2f;
@@ -25,7 +25,7 @@ public class GorillaTurnSlider : MonoBehaviour
 		base.transform.position = new Vector3(num3, this.startingLocation.y, this.startingLocation.z);
 	}
 
-	// Token: 0x06003BF7 RID: 15351 RVA: 0x0013CA28 File Offset: 0x0013AC28
+	// Token: 0x06003BF7 RID: 15351 RVA: 0x0013CA08 File Offset: 0x0013AC08
 	public float InterpolateValue(float value)
 	{
 		float num = this.startingLocation.x - this.zRange / 2f;
@@ -33,7 +33,7 @@ public class GorillaTurnSlider : MonoBehaviour
 		return (value - num) / (num2 - num) * (this.maxValue - this.minValue) + this.minValue;
 	}
 
-	// Token: 0x06003BF8 RID: 15352 RVA: 0x0013CA84 File Offset: 0x0013AC84
+	// Token: 0x06003BF8 RID: 15352 RVA: 0x0013CA64 File Offset: 0x0013AC64
 	public void OnSliderRelease()
 	{
 		if (this.zRange != 0f && (base.transform.position - this.startingLocation).magnitude > this.zRange / 2f)

@@ -10,7 +10,7 @@ using UnityEngine;
 public class LuauHud : MonoBehaviour
 {
 	// Token: 0x17000692 RID: 1682
-	// (get) Token: 0x060047B6 RID: 18358 RVA: 0x00178FA4 File Offset: 0x001771A4
+	// (get) Token: 0x060047B6 RID: 18358 RVA: 0x00178F84 File Offset: 0x00177184
 	public static LuauHud Instance
 	{
 		get
@@ -19,7 +19,7 @@ public class LuauHud : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060047B7 RID: 18359 RVA: 0x00178FAC File Offset: 0x001771AC
+	// Token: 0x060047B7 RID: 18359 RVA: 0x00178F8C File Offset: 0x0017718C
 	private void Awake()
 	{
 		if (LuauHud._instance != null && LuauHud._instance != this)
@@ -33,7 +33,7 @@ public class LuauHud : MonoBehaviour
 		this.path = Path.Combine(Application.persistentDataPath, "script.luau");
 	}
 
-	// Token: 0x060047B8 RID: 18360 RVA: 0x00178FFB File Offset: 0x001771FB
+	// Token: 0x060047B8 RID: 18360 RVA: 0x00178FDB File Offset: 0x001771DB
 	private void OnDestroy()
 	{
 		if (LuauHud._instance == this)
@@ -42,7 +42,7 @@ public class LuauHud : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060047B9 RID: 18361 RVA: 0x00179010 File Offset: 0x00177210
+	// Token: 0x060047B9 RID: 18361 RVA: 0x00178FF0 File Offset: 0x001771F0
 	private void Start()
 	{
 		this.useLuauHud = true;
@@ -54,7 +54,7 @@ public class LuauHud : MonoBehaviour
 		this.builder = new StringBuilder(50);
 	}
 
-	// Token: 0x060047BA RID: 18362 RVA: 0x00179068 File Offset: 0x00177268
+	// Token: 0x060047BA RID: 18362 RVA: 0x00179048 File Offset: 0x00177248
 	private void Update()
 	{
 		if (!CustomMapLoader.IsDevModeEnabled())
@@ -126,7 +126,7 @@ public class LuauHud : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060047BB RID: 18363 RVA: 0x00179220 File Offset: 0x00177420
+	// Token: 0x060047BB RID: 18363 RVA: 0x00179200 File Offset: 0x00177400
 	public void RestartLuauScript()
 	{
 		this.LuauLog("Restarting Luau Script");
@@ -145,7 +145,7 @@ public class LuauHud : MonoBehaviour
 		CustomGameMode.LuaStart();
 	}
 
-	// Token: 0x060047BC RID: 18364 RVA: 0x001792AC File Offset: 0x001774AC
+	// Token: 0x060047BC RID: 18364 RVA: 0x0017928C File Offset: 0x0017748C
 	public string LoadLocalScript()
 	{
 		string result = "";
@@ -156,7 +156,7 @@ public class LuauHud : MonoBehaviour
 		return result;
 	}
 
-	// Token: 0x060047BD RID: 18365 RVA: 0x001792D9 File Offset: 0x001774D9
+	// Token: 0x060047BD RID: 18365 RVA: 0x001792B9 File Offset: 0x001774B9
 	public void LuauLog(string log)
 	{
 		Debug.Log(log);

@@ -6,7 +6,7 @@ using UnityEngine;
 [DefaultExecutionOrder(2000)]
 public class ChestObjectHysteresisManager : MonoBehaviourTick
 {
-	// Token: 0x06001CF1 RID: 7409 RVA: 0x000992EA File Offset: 0x000974EA
+	// Token: 0x06001CF1 RID: 7409 RVA: 0x000992CA File Offset: 0x000974CA
 	protected void Awake()
 	{
 		if (ChestObjectHysteresisManager.hasInstance && ChestObjectHysteresisManager.instance != this)
@@ -17,13 +17,13 @@ public class ChestObjectHysteresisManager : MonoBehaviourTick
 		ChestObjectHysteresisManager.SetInstance(this);
 	}
 
-	// Token: 0x06001CF2 RID: 7410 RVA: 0x0009930D File Offset: 0x0009750D
+	// Token: 0x06001CF2 RID: 7410 RVA: 0x000992ED File Offset: 0x000974ED
 	public static void CreateManager()
 	{
 		ChestObjectHysteresisManager.SetInstance(new GameObject("ChestObjectHysteresisManager").AddComponent<ChestObjectHysteresisManager>());
 	}
 
-	// Token: 0x06001CF3 RID: 7411 RVA: 0x00099323 File Offset: 0x00097523
+	// Token: 0x06001CF3 RID: 7411 RVA: 0x00099303 File Offset: 0x00097503
 	private static void SetInstance(ChestObjectHysteresisManager manager)
 	{
 		ChestObjectHysteresisManager.instance = manager;
@@ -34,7 +34,7 @@ public class ChestObjectHysteresisManager : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06001CF4 RID: 7412 RVA: 0x0009933E File Offset: 0x0009753E
+	// Token: 0x06001CF4 RID: 7412 RVA: 0x0009931E File Offset: 0x0009751E
 	public static void RegisterCH(ChestObjectHysteresis cOH)
 	{
 		if (!ChestObjectHysteresisManager.hasInstance)
@@ -47,7 +47,7 @@ public class ChestObjectHysteresisManager : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06001CF5 RID: 7413 RVA: 0x00099364 File Offset: 0x00097564
+	// Token: 0x06001CF5 RID: 7413 RVA: 0x00099344 File Offset: 0x00097544
 	public static void UnregisterCH(ChestObjectHysteresis cOH)
 	{
 		if (!ChestObjectHysteresisManager.hasInstance)
@@ -60,7 +60,7 @@ public class ChestObjectHysteresisManager : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06001CF6 RID: 7414 RVA: 0x0009938C File Offset: 0x0009758C
+	// Token: 0x06001CF6 RID: 7414 RVA: 0x0009936C File Offset: 0x0009756C
 	public override void Tick()
 	{
 		for (int i = 0; i < ChestObjectHysteresisManager.allChests.Count; i++)

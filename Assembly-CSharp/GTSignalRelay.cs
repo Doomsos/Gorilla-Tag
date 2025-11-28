@@ -10,7 +10,7 @@ using UnityEngine.Events;
 public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallback
 {
 	// Token: 0x170004C6 RID: 1222
-	// (get) Token: 0x06003593 RID: 13715 RVA: 0x00122626 File Offset: 0x00120826
+	// (get) Token: 0x06003593 RID: 13715 RVA: 0x00122606 File Offset: 0x00120806
 	public static IReadOnlyList<GTSignalListener> ActiveListeners
 	{
 		get
@@ -19,7 +19,7 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 		}
 	}
 
-	// Token: 0x06003594 RID: 13716 RVA: 0x0012262D File Offset: 0x0012082D
+	// Token: 0x06003594 RID: 13716 RVA: 0x0012260D File Offset: 0x0012080D
 	private void OnEnable()
 	{
 		if (Application.isPlaying)
@@ -28,7 +28,7 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 		}
 	}
 
-	// Token: 0x06003595 RID: 13717 RVA: 0x0012263C File Offset: 0x0012083C
+	// Token: 0x06003595 RID: 13717 RVA: 0x0012261C File Offset: 0x0012081C
 	private void OnDisable()
 	{
 		if (Application.isPlaying)
@@ -37,7 +37,7 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 		}
 	}
 
-	// Token: 0x06003596 RID: 13718 RVA: 0x0012264C File Offset: 0x0012084C
+	// Token: 0x06003596 RID: 13718 RVA: 0x0012262C File Offset: 0x0012082C
 	public static void Register(GTSignalListener listener)
 	{
 		if (listener == null)
@@ -63,7 +63,7 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 		list.Add(listener);
 	}
 
-	// Token: 0x06003597 RID: 13719 RVA: 0x001226B8 File Offset: 0x001208B8
+	// Token: 0x06003597 RID: 13719 RVA: 0x00122698 File Offset: 0x00120898
 	public static void Unregister(GTSignalListener listener)
 	{
 		if (listener == null)
@@ -79,14 +79,14 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 		}
 	}
 
-	// Token: 0x06003598 RID: 13720 RVA: 0x00122708 File Offset: 0x00120908
+	// Token: 0x06003598 RID: 13720 RVA: 0x001226E8 File Offset: 0x001208E8
 	[RuntimeInitializeOnLoadMethod(1)]
 	private static void InitializeOnLoad()
 	{
 		Object.DontDestroyOnLoad(new GameObject("GTSignalRelay").AddComponent<GTSignalRelay>());
 	}
 
-	// Token: 0x06003599 RID: 13721 RVA: 0x00122720 File Offset: 0x00120920
+	// Token: 0x06003599 RID: 13721 RVA: 0x00122700 File Offset: 0x00120900
 	void IOnEventCallback.OnEvent(EventData eventData)
 	{
 		if (eventData.Code != 186)

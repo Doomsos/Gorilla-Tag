@@ -4,14 +4,14 @@ using UnityEngine;
 // Token: 0x0200070B RID: 1803
 public class GRSpringMovement
 {
-	// Token: 0x06002E4F RID: 11855 RVA: 0x000FBD0C File Offset: 0x000F9F0C
+	// Token: 0x06002E4F RID: 11855 RVA: 0x000FBCEC File Offset: 0x000F9EEC
 	public GRSpringMovement(float _tension, float _dampening)
 	{
 		this.tension = _tension;
 		this.dampening = _dampening;
 	}
 
-	// Token: 0x06002E50 RID: 11856 RVA: 0x000FBD3F File Offset: 0x000F9F3F
+	// Token: 0x06002E50 RID: 11856 RVA: 0x000FBD1F File Offset: 0x000F9F1F
 	public void Reset()
 	{
 		this.pos = 0f;
@@ -20,7 +20,7 @@ public class GRSpringMovement
 		this.wasAlreadyAtTargetLastUpdate = false;
 	}
 
-	// Token: 0x06002E51 RID: 11857 RVA: 0x000FBD69 File Offset: 0x000F9F69
+	// Token: 0x06002E51 RID: 11857 RVA: 0x000FBD49 File Offset: 0x000F9F49
 	public void SetHardStopAtTarget(bool _hardStopAtTarget)
 	{
 		if (this.hardStopAtTarget == _hardStopAtTarget)
@@ -31,7 +31,7 @@ public class GRSpringMovement
 		this.speed = 0f;
 	}
 
-	// Token: 0x06002E52 RID: 11858 RVA: 0x000FBD88 File Offset: 0x000F9F88
+	// Token: 0x06002E52 RID: 11858 RVA: 0x000FBD68 File Offset: 0x000F9F68
 	public void Update()
 	{
 		this.wasAlreadyAtTargetLastUpdate = (this.pos == this.target && this.speed == 0f);
@@ -58,13 +58,13 @@ public class GRSpringMovement
 		}
 	}
 
-	// Token: 0x06002E53 RID: 11859 RVA: 0x000FBEB9 File Offset: 0x000FA0B9
+	// Token: 0x06002E53 RID: 11859 RVA: 0x000FBE99 File Offset: 0x000FA099
 	public bool HitTargetLastUpdate()
 	{
 		return this.IsAtTarget() && !this.wasAlreadyAtTargetLastUpdate;
 	}
 
-	// Token: 0x06002E54 RID: 11860 RVA: 0x000FBECE File Offset: 0x000FA0CE
+	// Token: 0x06002E54 RID: 11860 RVA: 0x000FBEAE File Offset: 0x000FA0AE
 	public bool IsAtTarget()
 	{
 		return this.pos == this.target && this.speed == 0f;

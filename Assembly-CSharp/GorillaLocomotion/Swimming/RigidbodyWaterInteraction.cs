@@ -9,7 +9,7 @@ namespace GorillaLocomotion.Swimming
 	[RequireComponent(typeof(Rigidbody))]
 	public class RigidbodyWaterInteraction : MonoBehaviour
 	{
-		// Token: 0x060063D1 RID: 25553 RVA: 0x002072B2 File Offset: 0x002054B2
+		// Token: 0x060063D1 RID: 25553 RVA: 0x00207292 File Offset: 0x00205492
 		protected void Awake()
 		{
 			this.rb = base.GetComponent<Rigidbody>();
@@ -17,27 +17,27 @@ namespace GorillaLocomotion.Swimming
 			RigidbodyWaterInteractionManager.RegisterRBWI(this);
 		}
 
-		// Token: 0x060063D2 RID: 25554 RVA: 0x002072D7 File Offset: 0x002054D7
+		// Token: 0x060063D2 RID: 25554 RVA: 0x002072B7 File Offset: 0x002054B7
 		protected void OnEnable()
 		{
 			this.overlappingWaterVolumes.Clear();
 			RigidbodyWaterInteractionManager.RegisterRBWI(this);
 		}
 
-		// Token: 0x060063D3 RID: 25555 RVA: 0x002072EA File Offset: 0x002054EA
+		// Token: 0x060063D3 RID: 25555 RVA: 0x002072CA File Offset: 0x002054CA
 		protected void OnDisable()
 		{
 			this.overlappingWaterVolumes.Clear();
 			RigidbodyWaterInteractionManager.UnregisterRBWI(this);
 		}
 
-		// Token: 0x060063D4 RID: 25556 RVA: 0x002072FD File Offset: 0x002054FD
+		// Token: 0x060063D4 RID: 25556 RVA: 0x002072DD File Offset: 0x002054DD
 		private void OnDestroy()
 		{
 			RigidbodyWaterInteractionManager.UnregisterRBWI(this);
 		}
 
-		// Token: 0x060063D5 RID: 25557 RVA: 0x00207308 File Offset: 0x00205508
+		// Token: 0x060063D5 RID: 25557 RVA: 0x002072E8 File Offset: 0x002054E8
 		public void InvokeFixedUpdate()
 		{
 			if (this.rb.isKinematic)
@@ -176,7 +176,7 @@ namespace GorillaLocomotion.Swimming
 			this.rb.angularDamping = this.baseAngularDrag;
 		}
 
-		// Token: 0x060063D6 RID: 25558 RVA: 0x00207848 File Offset: 0x00205A48
+		// Token: 0x060063D6 RID: 25558 RVA: 0x00207828 File Offset: 0x00205A28
 		protected void OnTriggerEnter(Collider other)
 		{
 			WaterVolume component = other.GetComponent<WaterVolume>();
@@ -186,7 +186,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x060063D7 RID: 25559 RVA: 0x00207880 File Offset: 0x00205A80
+		// Token: 0x060063D7 RID: 25559 RVA: 0x00207860 File Offset: 0x00205A60
 		protected void OnTriggerExit(Collider other)
 		{
 			WaterVolume component = other.GetComponent<WaterVolume>();

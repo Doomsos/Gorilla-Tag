@@ -17,7 +17,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005B85 RID: 23429 RVA: 0x001D6530 File Offset: 0x001D4730
+		// Token: 0x06005B85 RID: 23429 RVA: 0x001D6510 File Offset: 0x001D4710
 		public void OnPiecePlacementDeserialized()
 		{
 			if (this.alwaysFaceUp != null)
@@ -29,7 +29,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B86 RID: 23430 RVA: 0x001D6578 File Offset: 0x001D4778
+		// Token: 0x06005B86 RID: 23430 RVA: 0x001D6558 File Offset: 0x001D4758
 		public void OnPieceActivate()
 		{
 			if (this.alwaysFaceUp != null)

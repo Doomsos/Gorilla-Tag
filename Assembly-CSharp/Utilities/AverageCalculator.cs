@@ -7,7 +7,7 @@ namespace Utilities
 	public abstract class AverageCalculator<T> where T : struct
 	{
 		// Token: 0x17000805 RID: 2053
-		// (get) Token: 0x060054A1 RID: 21665 RVA: 0x001AB63E File Offset: 0x001A983E
+		// (get) Token: 0x060054A1 RID: 21665 RVA: 0x001AB61E File Offset: 0x001A981E
 		public T Average
 		{
 			get
@@ -16,13 +16,13 @@ namespace Utilities
 			}
 		}
 
-		// Token: 0x060054A2 RID: 21666 RVA: 0x001AB646 File Offset: 0x001A9846
+		// Token: 0x060054A2 RID: 21666 RVA: 0x001AB626 File Offset: 0x001A9826
 		public AverageCalculator(int sampleCount)
 		{
 			this.m_samples = new T[sampleCount];
 		}
 
-		// Token: 0x060054A3 RID: 21667 RVA: 0x001AB65C File Offset: 0x001A985C
+		// Token: 0x060054A3 RID: 21667 RVA: 0x001AB63C File Offset: 0x001A983C
 		public virtual void AddSample(T sample)
 		{
 			T sample2 = this.m_samples[this.m_index];
@@ -35,7 +35,7 @@ namespace Utilities
 			this.m_index = num % this.m_samples.Length;
 		}
 
-		// Token: 0x060054A4 RID: 21668 RVA: 0x001AB6F0 File Offset: 0x001A98F0
+		// Token: 0x060054A4 RID: 21668 RVA: 0x001AB6D0 File Offset: 0x001A98D0
 		public virtual void Reset()
 		{
 			T t = this.DefaultTypeValue();
@@ -48,7 +48,7 @@ namespace Utilities
 			this.m_total = this.Multiply(t, this.m_samples.Length);
 		}
 
-		// Token: 0x060054A5 RID: 21669 RVA: 0x001AB748 File Offset: 0x001A9948
+		// Token: 0x060054A5 RID: 21669 RVA: 0x001AB728 File Offset: 0x001A9928
 		[MethodImpl(256)]
 		protected virtual T DefaultTypeValue()
 		{

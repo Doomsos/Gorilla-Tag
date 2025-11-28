@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public struct ShaderGroup
 {
-	// Token: 0x0600505B RID: 20571 RVA: 0x0019D7CC File Offset: 0x0019B9CC
+	// Token: 0x0600505B RID: 20571 RVA: 0x0019D7AC File Offset: 0x0019B9AC
 	public ShaderGroup(Material material, Shader original, Shader gameplay, Shader baking)
 	{
 		this.material = material;

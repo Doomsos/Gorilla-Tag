@@ -9,17 +9,17 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 	public sealed class SoakTaskHitEnemy : IGhostReactorSoakTask
 	{
 		// Token: 0x1700087E RID: 2174
-		// (get) Token: 0x06005AF7 RID: 23287 RVA: 0x001D2261 File Offset: 0x001D0461
-		// (set) Token: 0x06005AF8 RID: 23288 RVA: 0x001D2269 File Offset: 0x001D0469
+		// (get) Token: 0x06005AF7 RID: 23287 RVA: 0x001D2241 File Offset: 0x001D0441
+		// (set) Token: 0x06005AF8 RID: 23288 RVA: 0x001D2249 File Offset: 0x001D0449
 		public bool Complete { get; private set; }
 
-		// Token: 0x06005AF9 RID: 23289 RVA: 0x001D2272 File Offset: 0x001D0472
+		// Token: 0x06005AF9 RID: 23289 RVA: 0x001D2252 File Offset: 0x001D0452
 		public SoakTaskHitEnemy(GRPlayer grPlayer)
 		{
 			this._grPlayer = grPlayer;
 		}
 
-		// Token: 0x06005AFA RID: 23290 RVA: 0x001D2284 File Offset: 0x001D0484
+		// Token: 0x06005AFA RID: 23290 RVA: 0x001D2264 File Offset: 0x001D0464
 		public bool Update()
 		{
 			GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this._grPlayer.gamePlayer.rig.zoneEntity.currentZone);
@@ -76,7 +76,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 			return true;
 		}
 
-		// Token: 0x06005AFB RID: 23291 RVA: 0x001D24A4 File Offset: 0x001D06A4
+		// Token: 0x06005AFB RID: 23291 RVA: 0x001D2484 File Offset: 0x001D0684
 		public void Reset()
 		{
 			this._enemy = null;
@@ -84,7 +84,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 			this.Complete = false;
 		}
 
-		// Token: 0x06005AFC RID: 23292 RVA: 0x001D24C0 File Offset: 0x001D06C0
+		// Token: 0x06005AFC RID: 23292 RVA: 0x001D24A0 File Offset: 0x001D06A0
 		private GameEntity GetRandomTool()
 		{
 			GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this._grPlayer.gamePlayer.rig.zoneEntity.currentZone);
@@ -110,13 +110,13 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 			return null;
 		}
 
-		// Token: 0x06005AFD RID: 23293 RVA: 0x001D256C File Offset: 0x001D076C
+		// Token: 0x06005AFD RID: 23293 RVA: 0x001D254C File Offset: 0x001D074C
 		private static bool IsEnemy(GameEntity entity)
 		{
 			return entity.GetComponent<GREnemyChaser>() != null || entity.GetComponent<GREnemyPest>() != null || entity.GetComponent<GREnemyRanged>() != null || entity.GetComponent<GREnemySummoner>() != null;
 		}
 
-		// Token: 0x06005AFE RID: 23294 RVA: 0x001D25A8 File Offset: 0x001D07A8
+		// Token: 0x06005AFE RID: 23294 RVA: 0x001D2588 File Offset: 0x001D0788
 		private static bool IsLivingEnemy(GameEntity entity)
 		{
 			if (SoakTaskHitEnemy.IsEnemy(entity))

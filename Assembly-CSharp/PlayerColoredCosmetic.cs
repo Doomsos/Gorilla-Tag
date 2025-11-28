@@ -6,7 +6,7 @@ using UnityEngine.Pool;
 // Token: 0x020004E5 RID: 1253
 public class PlayerColoredCosmetic : MonoBehaviour
 {
-	// Token: 0x06002044 RID: 8260 RVA: 0x000AB324 File Offset: 0x000A9524
+	// Token: 0x06002044 RID: 8260 RVA: 0x000AB304 File Offset: 0x000A9504
 	public void Awake()
 	{
 		for (int i = 0; i < this.coloringRules.Length; i++)
@@ -15,7 +15,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002045 RID: 8261 RVA: 0x000AB358 File Offset: 0x000A9558
+	// Token: 0x06002045 RID: 8261 RVA: 0x000AB338 File Offset: 0x000A9538
 	private void InitIfNeeded()
 	{
 		if (!this.didInit)
@@ -34,7 +34,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002046 RID: 8262 RVA: 0x000AB3EA File Offset: 0x000A95EA
+	// Token: 0x06002046 RID: 8262 RVA: 0x000AB3CA File Offset: 0x000A95CA
 	private void OnEnable()
 	{
 		this.InitIfNeeded();
@@ -45,7 +45,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002047 RID: 8263 RVA: 0x000AB428 File Offset: 0x000A9628
+	// Token: 0x06002047 RID: 8263 RVA: 0x000AB408 File Offset: 0x000A9608
 	private void OnDisable()
 	{
 		if (this.rig != null)
@@ -54,7 +54,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002048 RID: 8264 RVA: 0x000AB450 File Offset: 0x000A9650
+	// Token: 0x06002048 RID: 8264 RVA: 0x000AB430 File Offset: 0x000A9630
 	public void UpdateColor(Color color)
 	{
 		this.InitIfNeeded();
@@ -99,7 +99,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 	[Serializable]
 	private struct ColoringRule
 	{
-		// Token: 0x0600204A RID: 8266 RVA: 0x000AB4D8 File Offset: 0x000A96D8
+		// Token: 0x0600204A RID: 8266 RVA: 0x000AB4B8 File Offset: 0x000A96B8
 		public void Init()
 		{
 			this.hashId = Shader.PropertyToID(this.shaderColorProperty);
@@ -114,7 +114,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 			}
 		}
 
-		// Token: 0x0600204B RID: 8267 RVA: 0x000AB574 File Offset: 0x000A9774
+		// Token: 0x0600204B RID: 8267 RVA: 0x000AB554 File Offset: 0x000A9754
 		public void Apply(Color color)
 		{
 			this.instancedMaterial.SetColor(this.hashId, color);

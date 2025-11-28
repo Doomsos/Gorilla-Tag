@@ -6,14 +6,14 @@ using UnityEngine;
 // Token: 0x02000A76 RID: 2678
 internal class UGCPermissionManager : MonoBehaviour
 {
-	// Token: 0x06004356 RID: 17238 RVA: 0x00165C8A File Offset: 0x00163E8A
+	// Token: 0x06004356 RID: 17238 RVA: 0x00165C6A File Offset: 0x00163E6A
 	public static void UsePlayFabSafety()
 	{
 		UGCPermissionManager.permissions = new UGCPermissionManager.PlayFabPermissions(new Action<bool>(UGCPermissionManager.SetUGCEnabled));
 		UGCPermissionManager.permissions.Initialize();
 	}
 
-	// Token: 0x06004357 RID: 17239 RVA: 0x00165CAC File Offset: 0x00163EAC
+	// Token: 0x06004357 RID: 17239 RVA: 0x00165C8C File Offset: 0x00163E8C
 	public static void UseKID()
 	{
 		UGCPermissionManager.permissions = new UGCPermissionManager.KIDPermissions(new Action<bool>(UGCPermissionManager.SetUGCEnabled));
@@ -21,7 +21,7 @@ internal class UGCPermissionManager : MonoBehaviour
 	}
 
 	// Token: 0x17000660 RID: 1632
-	// (get) Token: 0x06004358 RID: 17240 RVA: 0x00165CCE File Offset: 0x00163ECE
+	// (get) Token: 0x06004358 RID: 17240 RVA: 0x00165CAE File Offset: 0x00163EAE
 	public static bool IsUGCDisabled
 	{
 		get
@@ -30,7 +30,7 @@ internal class UGCPermissionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004359 RID: 17241 RVA: 0x00165CDD File Offset: 0x00163EDD
+	// Token: 0x06004359 RID: 17241 RVA: 0x00165CBD File Offset: 0x00163EBD
 	public static void CheckPermissions()
 	{
 		UGCPermissionManager.IUGCPermissions iugcpermissions = UGCPermissionManager.permissions;
@@ -41,31 +41,31 @@ internal class UGCPermissionManager : MonoBehaviour
 		iugcpermissions.CheckPermissions();
 	}
 
-	// Token: 0x0600435A RID: 17242 RVA: 0x00165CEE File Offset: 0x00163EEE
+	// Token: 0x0600435A RID: 17242 RVA: 0x00165CCE File Offset: 0x00163ECE
 	public static void SubscribeToUGCEnabled(Action callback)
 	{
 		UGCPermissionManager.onUGCEnabled = (Action)Delegate.Combine(UGCPermissionManager.onUGCEnabled, callback);
 	}
 
-	// Token: 0x0600435B RID: 17243 RVA: 0x00165D05 File Offset: 0x00163F05
+	// Token: 0x0600435B RID: 17243 RVA: 0x00165CE5 File Offset: 0x00163EE5
 	public static void UnsubscribeFromUGCEnabled(Action callback)
 	{
 		UGCPermissionManager.onUGCEnabled = (Action)Delegate.Remove(UGCPermissionManager.onUGCEnabled, callback);
 	}
 
-	// Token: 0x0600435C RID: 17244 RVA: 0x00165D1C File Offset: 0x00163F1C
+	// Token: 0x0600435C RID: 17244 RVA: 0x00165CFC File Offset: 0x00163EFC
 	public static void SubscribeToUGCDisabled(Action callback)
 	{
 		UGCPermissionManager.onUGCDisabled = (Action)Delegate.Combine(UGCPermissionManager.onUGCDisabled, callback);
 	}
 
-	// Token: 0x0600435D RID: 17245 RVA: 0x00165D33 File Offset: 0x00163F33
+	// Token: 0x0600435D RID: 17245 RVA: 0x00165D13 File Offset: 0x00163F13
 	public static void UnsubscribeFromUGCDisabled(Action callback)
 	{
 		UGCPermissionManager.onUGCDisabled = (Action)Delegate.Remove(UGCPermissionManager.onUGCDisabled, callback);
 	}
 
-	// Token: 0x0600435E RID: 17246 RVA: 0x00165D4C File Offset: 0x00163F4C
+	// Token: 0x0600435E RID: 17246 RVA: 0x00165D2C File Offset: 0x00163F2C
 	private static void SetUGCEnabled(bool enabled)
 	{
 		bool? flag = UGCPermissionManager.isUGCEnabled;
@@ -128,13 +128,13 @@ internal class UGCPermissionManager : MonoBehaviour
 	// Token: 0x02000A78 RID: 2680
 	private class PlayFabPermissions : UGCPermissionManager.IUGCPermissions
 	{
-		// Token: 0x06004362 RID: 17250 RVA: 0x00165DD6 File Offset: 0x00163FD6
+		// Token: 0x06004362 RID: 17250 RVA: 0x00165DB6 File Offset: 0x00163FB6
 		public PlayFabPermissions(Action<bool> setUGCEnabled)
 		{
 			this.setUGCEnabled = setUGCEnabled;
 		}
 
-		// Token: 0x06004363 RID: 17251 RVA: 0x00165DE8 File Offset: 0x00163FE8
+		// Token: 0x06004363 RID: 17251 RVA: 0x00165DC8 File Offset: 0x00163FC8
 		public void Initialize()
 		{
 			bool safety = PlayFabAuthenticator.instance.GetSafety();
@@ -162,13 +162,13 @@ internal class UGCPermissionManager : MonoBehaviour
 	// Token: 0x02000A79 RID: 2681
 	private class KIDPermissions : UGCPermissionManager.IUGCPermissions
 	{
-		// Token: 0x06004365 RID: 17253 RVA: 0x00165E38 File Offset: 0x00164038
+		// Token: 0x06004365 RID: 17253 RVA: 0x00165E18 File Offset: 0x00164018
 		public KIDPermissions(Action<bool> setUGCEnabled)
 		{
 			this.setUGCEnabled = setUGCEnabled;
 		}
 
-		// Token: 0x06004366 RID: 17254 RVA: 0x00165E47 File Offset: 0x00164047
+		// Token: 0x06004366 RID: 17254 RVA: 0x00165E27 File Offset: 0x00164027
 		private void SetUGCEnabled(bool enabled)
 		{
 			Action<bool> action = this.setUGCEnabled;
@@ -179,7 +179,7 @@ internal class UGCPermissionManager : MonoBehaviour
 			action.Invoke(enabled);
 		}
 
-		// Token: 0x06004367 RID: 17255 RVA: 0x00165E5A File Offset: 0x0016405A
+		// Token: 0x06004367 RID: 17255 RVA: 0x00165E3A File Offset: 0x0016403A
 		public void Initialize()
 		{
 			Debug.Log("[UGCPermissionManager][KID] Initializing with KID");
@@ -187,7 +187,7 @@ internal class UGCPermissionManager : MonoBehaviour
 			KIDManager.RegisterSessionUpdatedCallback_UGC(new Action<bool, Permission.ManagedByEnum>(this.OnKIDSessionUpdate));
 		}
 
-		// Token: 0x06004368 RID: 17256 RVA: 0x00165E80 File Offset: 0x00164080
+		// Token: 0x06004368 RID: 17256 RVA: 0x00165E60 File Offset: 0x00164060
 		public void CheckPermissions()
 		{
 			Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Mods);
@@ -195,7 +195,7 @@ internal class UGCPermissionManager : MonoBehaviour
 			this.ProcessPermissionKID(item, permissionDataByFeature.Enabled, permissionDataByFeature.ManagedBy);
 		}
 
-		// Token: 0x06004369 RID: 17257 RVA: 0x00165EB4 File Offset: 0x001640B4
+		// Token: 0x06004369 RID: 17257 RVA: 0x00165E94 File Offset: 0x00164094
 		private void OnKIDSessionUpdate(bool isEnabled, Permission.ManagedByEnum managedBy)
 		{
 			Debug.Log("[UGCPermissionManager][KID] KID session update.");
@@ -203,7 +203,7 @@ internal class UGCPermissionManager : MonoBehaviour
 			this.ProcessPermissionKID(item, isEnabled, managedBy);
 		}
 
-		// Token: 0x0600436A RID: 17258 RVA: 0x00165EE4 File Offset: 0x001640E4
+		// Token: 0x0600436A RID: 17258 RVA: 0x00165EC4 File Offset: 0x001640C4
 		private void ProcessPermissionKID(bool hasOptedIn, bool isEnabled, Permission.ManagedByEnum managedBy)
 		{
 			Debug.LogFormat("[UGCPermissionManager][KID] Process KID permissions - opted in: [{0}], enabled: [{1}], managedBy: [{2}].", new object[]

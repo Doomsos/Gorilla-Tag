@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000AAC RID: 2732
 public class KIDUI_DebugScreen : MonoBehaviour
 {
-	// Token: 0x0600447B RID: 17531 RVA: 0x0016AC5E File Offset: 0x00168E5E
+	// Token: 0x0600447B RID: 17531 RVA: 0x0016AC3E File Offset: 0x00168E3E
 	private void Awake()
 	{
 		Object.DestroyImmediate(base.gameObject);

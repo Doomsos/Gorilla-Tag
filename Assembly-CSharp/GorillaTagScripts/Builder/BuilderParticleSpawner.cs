@@ -6,14 +6,14 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E4A RID: 3658
 	public class BuilderParticleSpawner : MonoBehaviour
 	{
-		// Token: 0x06005B37 RID: 23351 RVA: 0x001D3B28 File Offset: 0x001D1D28
+		// Token: 0x06005B37 RID: 23351 RVA: 0x001D3B08 File Offset: 0x001D1D08
 		private void Start()
 		{
 			this.spawnTrigger.onTriggerFirstEntered += new Action(this.OnEnter);
 			this.spawnTrigger.onTriggerLastExited += new Action(this.OnExit);
 		}
 
-		// Token: 0x06005B38 RID: 23352 RVA: 0x001D3B58 File Offset: 0x001D1D58
+		// Token: 0x06005B38 RID: 23352 RVA: 0x001D3B38 File Offset: 0x001D1D38
 		private void OnDestroy()
 		{
 			if (this.spawnTrigger != null)
@@ -23,7 +23,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B39 RID: 23353 RVA: 0x001D3B98 File Offset: 0x001D1D98
+		// Token: 0x06005B39 RID: 23353 RVA: 0x001D3B78 File Offset: 0x001D1D78
 		public void TrySpawning()
 		{
 			if (Time.time > this.lastSpawnTime + this.cooldown)
@@ -33,7 +33,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B3A RID: 23354 RVA: 0x001D3BF7 File Offset: 0x001D1DF7
+		// Token: 0x06005B3A RID: 23354 RVA: 0x001D3BD7 File Offset: 0x001D1DD7
 		private void OnEnter()
 		{
 			if (this.spawnOnEnter)
@@ -42,7 +42,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B3B RID: 23355 RVA: 0x001D3C07 File Offset: 0x001D1E07
+		// Token: 0x06005B3B RID: 23355 RVA: 0x001D3BE7 File Offset: 0x001D1DE7
 		private void OnExit()
 		{
 			if (this.spawnOnExit)

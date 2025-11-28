@@ -11,7 +11,7 @@ namespace GorillaLocomotion.Gameplay
 	[BurstCompile(3, 3)]
 	public struct VectorizedSolveRopeJob : IJob
 	{
-		// Token: 0x060064C3 RID: 25795 RVA: 0x0020E278 File Offset: 0x0020C478
+		// Token: 0x060064C3 RID: 25795 RVA: 0x0020E258 File Offset: 0x0020C458
 		public void Execute()
 		{
 			this.Simulate();
@@ -25,7 +25,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x060064C4 RID: 25796 RVA: 0x0020E2BC File Offset: 0x0020C4BC
+		// Token: 0x060064C4 RID: 25796 RVA: 0x0020E29C File Offset: 0x0020C49C
 		private void Simulate()
 		{
 			for (int i = 0; i < this.data.posX.Length; i++)
@@ -46,14 +46,14 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x060064C5 RID: 25797 RVA: 0x0020E50C File Offset: 0x0020C70C
+		// Token: 0x060064C5 RID: 25797 RVA: 0x0020E4EC File Offset: 0x0020C6EC
 		[MethodImpl(256)]
 		private static void dot4(ref float4 ax, ref float4 ay, ref float4 az, ref float4 bx, ref float4 by, ref float4 bz, ref float4 output)
 		{
 			output = ax * bx + ay * by + az * bz;
 		}
 
-		// Token: 0x060064C6 RID: 25798 RVA: 0x0020E560 File Offset: 0x0020C760
+		// Token: 0x060064C6 RID: 25798 RVA: 0x0020E540 File Offset: 0x0020C740
 		[MethodImpl(256)]
 		private static void length4(ref float4 xVals, ref float4 yVals, ref float4 zVals, ref float4 output)
 		{
@@ -63,7 +63,7 @@ namespace GorillaLocomotion.Gameplay
 			output = math.sqrt(@float);
 		}
 
-		// Token: 0x060064C7 RID: 25799 RVA: 0x0020E594 File Offset: 0x0020C794
+		// Token: 0x060064C7 RID: 25799 RVA: 0x0020E574 File Offset: 0x0020C774
 		private void ConstrainRoots()
 		{
 			int num = 0;
@@ -85,7 +85,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x060064C8 RID: 25800 RVA: 0x0020E6A8 File Offset: 0x0020C8A8
+		// Token: 0x060064C8 RID: 25800 RVA: 0x0020E688 File Offset: 0x0020C888
 		private void ApplyConstraint()
 		{
 			this.ConstrainRoots();
@@ -139,7 +139,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x060064C9 RID: 25801 RVA: 0x0020EA44 File Offset: 0x0020CC44
+		// Token: 0x060064C9 RID: 25801 RVA: 0x0020EA24 File Offset: 0x0020CC24
 		private void FinalPass()
 		{
 			this.ConstrainRoots();

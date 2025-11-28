@@ -17,7 +17,7 @@ public class AutomaticAdjustIPD : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x060021B3 RID: 8627 RVA: 0x000B0258 File Offset: 0x000AE458
+	// Token: 0x060021B3 RID: 8627 RVA: 0x000B0238 File Offset: 0x000AE438
 	public void SliceUpdate()
 	{
 		if (!this.headset.isValid)

@@ -13,12 +13,12 @@ namespace GorillaTagScripts.ObstacleCourse
 	public struct ObstacleCourseData : INetworkStruct
 	{
 		// Token: 0x17000877 RID: 2167
-		// (get) Token: 0x06005ABF RID: 23231 RVA: 0x001D14E1 File Offset: 0x001CF6E1
-		// (set) Token: 0x06005AC0 RID: 23232 RVA: 0x001D14E9 File Offset: 0x001CF6E9
+		// (get) Token: 0x06005ABF RID: 23231 RVA: 0x001D14C1 File Offset: 0x001CF6C1
+		// (set) Token: 0x06005AC0 RID: 23232 RVA: 0x001D14C9 File Offset: 0x001CF6C9
 		public int ObstacleCourseCount { readonly get; set; }
 
 		// Token: 0x17000878 RID: 2168
-		// (get) Token: 0x06005AC1 RID: 23233 RVA: 0x001D14F4 File Offset: 0x001CF6F4
+		// (get) Token: 0x06005AC1 RID: 23233 RVA: 0x001D14D4 File Offset: 0x001CF6D4
 		[Networked]
 		[Capacity(4)]
 		[NetworkedWeavedArray(4, 1, typeof(ElementReaderWriterInt32))]
@@ -32,7 +32,7 @@ namespace GorillaTagScripts.ObstacleCourse
 		}
 
 		// Token: 0x17000879 RID: 2169
-		// (get) Token: 0x06005AC2 RID: 23234 RVA: 0x001D1518 File Offset: 0x001CF718
+		// (get) Token: 0x06005AC2 RID: 23234 RVA: 0x001D14F8 File Offset: 0x001CF6F8
 		[Networked]
 		[Capacity(4)]
 		[NetworkedWeavedArray(4, 1, typeof(ElementReaderWriterInt32))]
@@ -45,7 +45,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			}
 		}
 
-		// Token: 0x06005AC3 RID: 23235 RVA: 0x001D153C File Offset: 0x001CF73C
+		// Token: 0x06005AC3 RID: 23235 RVA: 0x001D151C File Offset: 0x001CF71C
 		public ObstacleCourseData(List<ObstacleCourse> courses)
 		{
 			this.ObstacleCourseCount = courses.Count;

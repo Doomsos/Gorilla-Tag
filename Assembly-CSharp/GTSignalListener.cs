@@ -7,17 +7,17 @@ using UnityEngine.Serialization;
 public class GTSignalListener : MonoBehaviour
 {
 	// Token: 0x170004C5 RID: 1221
-	// (get) Token: 0x06003587 RID: 13703 RVA: 0x0012256F File Offset: 0x0012076F
-	// (set) Token: 0x06003588 RID: 13704 RVA: 0x00122577 File Offset: 0x00120777
+	// (get) Token: 0x06003587 RID: 13703 RVA: 0x0012254F File Offset: 0x0012074F
+	// (set) Token: 0x06003588 RID: 13704 RVA: 0x00122557 File Offset: 0x00120757
 	public int rigActorID { get; private set; } = -1;
 
-	// Token: 0x06003589 RID: 13705 RVA: 0x00122580 File Offset: 0x00120780
+	// Token: 0x06003589 RID: 13705 RVA: 0x00122560 File Offset: 0x00120760
 	private void Awake()
 	{
 		this.OnListenerAwake();
 	}
 
-	// Token: 0x0600358A RID: 13706 RVA: 0x00122588 File Offset: 0x00120788
+	// Token: 0x0600358A RID: 13706 RVA: 0x00122568 File Offset: 0x00120768
 	private void OnEnable()
 	{
 		this.RefreshActorID();
@@ -25,14 +25,14 @@ public class GTSignalListener : MonoBehaviour
 		GTSignalRelay.Register(this);
 	}
 
-	// Token: 0x0600358B RID: 13707 RVA: 0x0012259C File Offset: 0x0012079C
+	// Token: 0x0600358B RID: 13707 RVA: 0x0012257C File Offset: 0x0012077C
 	private void OnDisable()
 	{
 		GTSignalRelay.Unregister(this);
 		this.OnListenerDisable();
 	}
 
-	// Token: 0x0600358C RID: 13708 RVA: 0x001225AA File Offset: 0x001207AA
+	// Token: 0x0600358C RID: 13708 RVA: 0x0012258A File Offset: 0x0012078A
 	private void RefreshActorID()
 	{
 		this.rig = base.GetComponentInParent<VRRig>(true);
@@ -49,7 +49,7 @@ public class GTSignalListener : MonoBehaviour
 		this.rigActorID = rigActorID;
 	}
 
-	// Token: 0x0600358D RID: 13709 RVA: 0x001225E7 File Offset: 0x001207E7
+	// Token: 0x0600358D RID: 13709 RVA: 0x001225C7 File Offset: 0x001207C7
 	public virtual bool IsReady()
 	{
 		return this._callLimits.CheckCallTime(Time.time);

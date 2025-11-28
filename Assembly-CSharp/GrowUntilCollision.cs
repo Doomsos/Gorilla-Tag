@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000CB9 RID: 3257
 public class GrowUntilCollision : MonoBehaviour
 {
-	// Token: 0x06004F82 RID: 20354 RVA: 0x00199790 File Offset: 0x00197990
+	// Token: 0x06004F82 RID: 20354 RVA: 0x00199770 File Offset: 0x00197970
 	private void Start()
 	{
 		this.audioSource = base.GetComponent<AudioSource>();
@@ -16,7 +16,7 @@ public class GrowUntilCollision : MonoBehaviour
 		this.zero();
 	}
 
-	// Token: 0x06004F83 RID: 20355 RVA: 0x001997E0 File Offset: 0x001979E0
+	// Token: 0x06004F83 RID: 20355 RVA: 0x001997C0 File Offset: 0x001979C0
 	private void zero()
 	{
 		base.transform.localScale = Vector3.one * this.initialRadius;
@@ -28,31 +28,31 @@ public class GrowUntilCollision : MonoBehaviour
 		this.timeSinceTrigger = 0f;
 	}
 
-	// Token: 0x06004F84 RID: 20356 RVA: 0x00199841 File Offset: 0x00197A41
+	// Token: 0x06004F84 RID: 20356 RVA: 0x00199821 File Offset: 0x00197A21
 	private void OnTriggerEnter(Collider other)
 	{
 		this.tryToTrigger(base.transform.position, other.transform.position);
 	}
 
-	// Token: 0x06004F85 RID: 20357 RVA: 0x00199841 File Offset: 0x00197A41
+	// Token: 0x06004F85 RID: 20357 RVA: 0x00199821 File Offset: 0x00197A21
 	private void OnTriggerExit(Collider other)
 	{
 		this.tryToTrigger(base.transform.position, other.transform.position);
 	}
 
-	// Token: 0x06004F86 RID: 20358 RVA: 0x00199860 File Offset: 0x00197A60
+	// Token: 0x06004F86 RID: 20358 RVA: 0x00199840 File Offset: 0x00197A40
 	private void OnCollisionEnter(Collision collision)
 	{
 		this.tryToTrigger(base.transform.position, collision.GetContact(0).point);
 	}
 
-	// Token: 0x06004F87 RID: 20359 RVA: 0x00199890 File Offset: 0x00197A90
+	// Token: 0x06004F87 RID: 20359 RVA: 0x00199870 File Offset: 0x00197A70
 	private void OnCollisionExit(Collision collision)
 	{
 		this.tryToTrigger(base.transform.position, collision.GetContact(0).point);
 	}
 
-	// Token: 0x06004F88 RID: 20360 RVA: 0x001998BD File Offset: 0x00197ABD
+	// Token: 0x06004F88 RID: 20360 RVA: 0x0019989D File Offset: 0x00197A9D
 	private void tryToTrigger(Vector3 p1, Vector3 p2)
 	{
 		if (this.timeSinceTrigger > this.minRetriggerTime)
@@ -65,7 +65,7 @@ public class GrowUntilCollision : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004F89 RID: 20361 RVA: 0x001998E8 File Offset: 0x00197AE8
+	// Token: 0x06004F89 RID: 20361 RVA: 0x001998C8 File Offset: 0x00197AC8
 	private void Update()
 	{
 		float num = Mathf.Max(new float[]

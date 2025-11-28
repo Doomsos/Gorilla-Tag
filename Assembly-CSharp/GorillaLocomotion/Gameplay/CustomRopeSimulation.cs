@@ -9,7 +9,7 @@ namespace GorillaLocomotion.Gameplay
 	// Token: 0x02000F96 RID: 3990
 	public class CustomRopeSimulation : MonoBehaviour
 	{
-		// Token: 0x0600642D RID: 25645 RVA: 0x0020AAF8 File Offset: 0x00208CF8
+		// Token: 0x0600642D RID: 25645 RVA: 0x0020AAD8 File Offset: 0x00208CD8
 		private void Start()
 		{
 			Vector3 position = base.transform.position;
@@ -25,13 +25,13 @@ namespace GorillaLocomotion.Gameplay
 			this.burstNodes = new NativeArray<BurstRopeNode>(this.nodes.Count, 4, 1);
 		}
 
-		// Token: 0x0600642E RID: 25646 RVA: 0x0020ABA8 File Offset: 0x00208DA8
+		// Token: 0x0600642E RID: 25646 RVA: 0x0020AB88 File Offset: 0x00208D88
 		private void OnDestroy()
 		{
 			this.burstNodes.Dispose();
 		}
 
-		// Token: 0x0600642F RID: 25647 RVA: 0x0020ABB8 File Offset: 0x00208DB8
+		// Token: 0x0600642F RID: 25647 RVA: 0x0020AB98 File Offset: 0x00208D98
 		private void Update()
 		{
 			IJobExtensions.Run<SolveRopeJob>(new SolveRopeJob

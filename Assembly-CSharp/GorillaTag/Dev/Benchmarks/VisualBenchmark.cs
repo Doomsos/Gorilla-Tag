@@ -10,7 +10,7 @@ namespace GorillaTag.Dev.Benchmarks
 	// Token: 0x0200104E RID: 4174
 	public class VisualBenchmark : MonoBehaviour
 	{
-		// Token: 0x06006936 RID: 26934 RVA: 0x002239CC File Offset: 0x00221BCC
+		// Token: 0x06006936 RID: 26934 RVA: 0x002239AC File Offset: 0x00221BAC
 		protected void Awake()
 		{
 			Application.quitting += delegate()
@@ -46,7 +46,7 @@ namespace GorillaTag.Dev.Benchmarks
 			this.benchmarkLocations = list3.ToArray();
 		}
 
-		// Token: 0x06006937 RID: 26935 RVA: 0x00223B30 File Offset: 0x00221D30
+		// Token: 0x06006937 RID: 26935 RVA: 0x00223B10 File Offset: 0x00221D10
 		protected void OnEnable()
 		{
 			this.renderStatsRecorders = new ProfilerRecorder[this.availableRenderStats.Length];
@@ -57,7 +57,7 @@ namespace GorillaTag.Dev.Benchmarks
 			this.state = VisualBenchmark.EState.Setup;
 		}
 
-		// Token: 0x06006938 RID: 26936 RVA: 0x00223B94 File Offset: 0x00221D94
+		// Token: 0x06006938 RID: 26936 RVA: 0x00223B74 File Offset: 0x00221D74
 		protected void OnDisable()
 		{
 			foreach (ProfilerRecorder profilerRecorder in this.renderStatsRecorders)
@@ -66,7 +66,7 @@ namespace GorillaTag.Dev.Benchmarks
 			}
 		}
 
-		// Token: 0x06006939 RID: 26937 RVA: 0x00223BC8 File Offset: 0x00221DC8
+		// Token: 0x06006939 RID: 26937 RVA: 0x00223BA8 File Offset: 0x00221DA8
 		protected void LateUpdate()
 		{
 			if (VisualBenchmark.isQuitting)
@@ -122,7 +122,7 @@ namespace GorillaTag.Dev.Benchmarks
 			}
 		}
 
-		// Token: 0x0600693A RID: 26938 RVA: 0x00223D48 File Offset: 0x00221F48
+		// Token: 0x0600693A RID: 26938 RVA: 0x00223D28 File Offset: 0x00221F28
 		private void RecordLocationStats(Transform xform)
 		{
 			this.sb.Append("Location: ");

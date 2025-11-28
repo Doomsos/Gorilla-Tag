@@ -5,14 +5,14 @@ using UnityEngine;
 [Serializable]
 public class VelocityHelper
 {
-	// Token: 0x0600416B RID: 16747 RVA: 0x0015BB09 File Offset: 0x00159D09
+	// Token: 0x0600416B RID: 16747 RVA: 0x0015BAE9 File Offset: 0x00159CE9
 	public VelocityHelper(int historySize = 12)
 	{
 		this._size = historySize;
 		this._samples = new float[historySize * 4];
 	}
 
-	// Token: 0x0600416C RID: 16748 RVA: 0x0015BB28 File Offset: 0x00159D28
+	// Token: 0x0600416C RID: 16748 RVA: 0x0015BB08 File Offset: 0x00159D08
 	public void SamplePosition(Transform target, float dt)
 	{
 		Vector3 position = target.position;
@@ -24,7 +24,7 @@ public class VelocityHelper
 		this._latest = (this._latest + 1) % this._size;
 	}
 
-	// Token: 0x0600416D RID: 16749 RVA: 0x0015BB70 File Offset: 0x00159D70
+	// Token: 0x0600416D RID: 16749 RVA: 0x0015BB50 File Offset: 0x00159D50
 	private void _InitSamples(Vector3 position, float dt)
 	{
 		for (int i = 0; i < this._size; i++)
@@ -34,7 +34,7 @@ public class VelocityHelper
 		this._initialized = true;
 	}
 
-	// Token: 0x0600416E RID: 16750 RVA: 0x0015BB9E File Offset: 0x00159D9E
+	// Token: 0x0600416E RID: 16750 RVA: 0x0015BB7E File Offset: 0x00159D7E
 	private void _SetSample(int i, Vector3 position, float dt)
 	{
 		this._samples[i] = position.x;

@@ -20,7 +20,7 @@ public class GREnemy : MonoBehaviour, IGameEntityComponent
 	{
 	}
 
-	// Token: 0x06002BB1 RID: 11185 RVA: 0x000EAAE0 File Offset: 0x000E8CE0
+	// Token: 0x06002BB1 RID: 11185 RVA: 0x000EAAC0 File Offset: 0x000E8CC0
 	public static void HideRenderers(List<Renderer> renderers, bool hide)
 	{
 		if (renderers == null)
@@ -36,7 +36,7 @@ public class GREnemy : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002BB2 RID: 11186 RVA: 0x000EAB24 File Offset: 0x000E8D24
+	// Token: 0x06002BB2 RID: 11186 RVA: 0x000EAB04 File Offset: 0x000E8D04
 	public static void HideObjects(List<GameObject> objects, bool hide)
 	{
 		if (objects == null)

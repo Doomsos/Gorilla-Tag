@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000636 RID: 1590
 public class SuperInfectionSnapPoint : MonoBehaviour
 {
-	// Token: 0x06002887 RID: 10375 RVA: 0x000D7A64 File Offset: 0x000D5C64
+	// Token: 0x06002887 RID: 10375 RVA: 0x000D7A44 File Offset: 0x000D5C44
 	public void Initialize()
 	{
 		VRRig componentInParent = base.GetComponentInParent<VRRig>(true);
@@ -38,13 +38,13 @@ public class SuperInfectionSnapPoint : MonoBehaviour
 		base.transform.localEulerAngles = localEulerAngles;
 	}
 
-	// Token: 0x06002888 RID: 10376 RVA: 0x000D7B67 File Offset: 0x000D5D67
+	// Token: 0x06002888 RID: 10376 RVA: 0x000D7B47 File Offset: 0x000D5D47
 	public void Clear()
 	{
 		this.Unsnapped();
 	}
 
-	// Token: 0x06002889 RID: 10377 RVA: 0x000D7B70 File Offset: 0x000D5D70
+	// Token: 0x06002889 RID: 10377 RVA: 0x000D7B50 File Offset: 0x000D5D50
 	public void Snapped(GameEntity entity)
 	{
 		this.snappedEntity = entity;
@@ -57,7 +57,7 @@ public class SuperInfectionSnapPoint : MonoBehaviour
 		Debug.LogError(string.Format("Snapped: entity {0} has no GameSnappable!?", this.snappedEntity));
 	}
 
-	// Token: 0x0600288A RID: 10378 RVA: 0x000D7BB0 File Offset: 0x000D5DB0
+	// Token: 0x0600288A RID: 10378 RVA: 0x000D7B90 File Offset: 0x000D5D90
 	public void Unsnapped()
 	{
 		GameSnappable gameSnappable;
@@ -72,13 +72,13 @@ public class SuperInfectionSnapPoint : MonoBehaviour
 		this.snappedEntity = null;
 	}
 
-	// Token: 0x0600288B RID: 10379 RVA: 0x000D7BF1 File Offset: 0x000D5DF1
+	// Token: 0x0600288B RID: 10379 RVA: 0x000D7BD1 File Offset: 0x000D5DD1
 	public bool HasSnapped()
 	{
 		return this.snappedEntity != null;
 	}
 
-	// Token: 0x0600288C RID: 10380 RVA: 0x000D7BFF File Offset: 0x000D5DFF
+	// Token: 0x0600288C RID: 10380 RVA: 0x000D7BDF File Offset: 0x000D5DDF
 	public GameEntity GetSnappedEntity()
 	{
 		return this.snappedEntity;

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200052C RID: 1324
 public class GorillaWalkingGrab : MonoBehaviour
 {
-	// Token: 0x06002174 RID: 8564 RVA: 0x000AF7D1 File Offset: 0x000AD9D1
+	// Token: 0x06002174 RID: 8564 RVA: 0x000AF7B1 File Offset: 0x000AD9B1
 	private void Start()
 	{
 		this.thisRigidbody = base.gameObject.GetComponent<Rigidbody>();
@@ -12,7 +12,7 @@ public class GorillaWalkingGrab : MonoBehaviour
 		this.historyIndex = 0;
 	}
 
-	// Token: 0x06002175 RID: 8565 RVA: 0x000AF7FC File Offset: 0x000AD9FC
+	// Token: 0x06002175 RID: 8565 RVA: 0x000AF7DC File Offset: 0x000AD9DC
 	private void FixedUpdate()
 	{
 		this.historyIndex++;
@@ -31,7 +31,7 @@ public class GorillaWalkingGrab : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06002177 RID: 8567 RVA: 0x000AF884 File Offset: 0x000ADA84
+	// Token: 0x06002177 RID: 8567 RVA: 0x000AF864 File Offset: 0x000ADA64
 	private void OnCollisionStay(Collision collision)
 	{
 		if (!this.MakeJump())

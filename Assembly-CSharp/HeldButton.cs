@@ -6,7 +6,7 @@ using UnityEngine.UI;
 // Token: 0x02000806 RID: 2054
 public class HeldButton : MonoBehaviour
 {
-	// Token: 0x0600360C RID: 13836 RVA: 0x001253A4 File Offset: 0x001235A4
+	// Token: 0x0600360C RID: 13836 RVA: 0x00125384 File Offset: 0x00123584
 	private void OnTriggerEnter(Collider other)
 	{
 		if (!base.enabled)
@@ -38,7 +38,7 @@ public class HeldButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600360D RID: 13837 RVA: 0x00125464 File Offset: 0x00123664
+	// Token: 0x0600360D RID: 13837 RVA: 0x00125444 File Offset: 0x00123644
 	private void LateUpdate()
 	{
 		if (!this.pendingPress)
@@ -84,7 +84,7 @@ public class HeldButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600360E RID: 13838 RVA: 0x001255C3 File Offset: 0x001237C3
+	// Token: 0x0600360E RID: 13838 RVA: 0x001255A3 File Offset: 0x001237A3
 	private void OnTriggerExit(Collider other)
 	{
 		if (this.pendingPress && this.pendingPressCollider == other)
@@ -99,7 +99,7 @@ public class HeldButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600360F RID: 13839 RVA: 0x001255F8 File Offset: 0x001237F8
+	// Token: 0x0600360F RID: 13839 RVA: 0x001255D8 File Offset: 0x001237D8
 	public void SetOn(bool inOn)
 	{
 		if (inOn == this.isOn)

@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 [Serializable]
 public class UberShaderProperty
 {
-	// Token: 0x06003AD4 RID: 15060 RVA: 0x00136FA0 File Offset: 0x001351A0
+	// Token: 0x06003AD4 RID: 15060 RVA: 0x00136F80 File Offset: 0x00135180
 	public T GetValue<T>(Material target)
 	{
 		switch (this.type)
@@ -28,7 +28,7 @@ public class UberShaderProperty
 		}
 	}
 
-	// Token: 0x06003AD5 RID: 15061 RVA: 0x00137038 File Offset: 0x00135238
+	// Token: 0x06003AD5 RID: 15061 RVA: 0x00137018 File Offset: 0x00135218
 	public void SetValue<T>(Material target, T value)
 	{
 		switch (this.type)
@@ -75,7 +75,7 @@ public class UberShaderProperty
 		target.DisableKeyword(this.keyword);
 	}
 
-	// Token: 0x06003AD6 RID: 15062 RVA: 0x00137124 File Offset: 0x00135324
+	// Token: 0x06003AD6 RID: 15062 RVA: 0x00137104 File Offset: 0x00135304
 	public void Enable(Material target)
 	{
 		ShaderPropertyType shaderPropertyType = this.type;
@@ -96,7 +96,7 @@ public class UberShaderProperty
 		}
 	}
 
-	// Token: 0x06003AD7 RID: 15063 RVA: 0x00137174 File Offset: 0x00135374
+	// Token: 0x06003AD7 RID: 15063 RVA: 0x00137154 File Offset: 0x00135354
 	public void Disable(Material target)
 	{
 		ShaderPropertyType shaderPropertyType = this.type;
@@ -117,7 +117,7 @@ public class UberShaderProperty
 		}
 	}
 
-	// Token: 0x06003AD8 RID: 15064 RVA: 0x001371C4 File Offset: 0x001353C4
+	// Token: 0x06003AD8 RID: 15064 RVA: 0x001371A4 File Offset: 0x001353A4
 	public bool TryGetKeywordState(Material target, out bool enabled)
 	{
 		enabled = false;
@@ -129,7 +129,7 @@ public class UberShaderProperty
 		return true;
 	}
 
-	// Token: 0x06003AD9 RID: 15065 RVA: 0x001371E2 File Offset: 0x001353E2
+	// Token: 0x06003AD9 RID: 15065 RVA: 0x001371C2 File Offset: 0x001353C2
 	[MethodImpl(256)]
 	private unsafe static TOut ValueAs<TIn, TOut>(TIn value)
 	{

@@ -7,7 +7,7 @@ namespace Cosmetics
 	// Token: 0x02000FC5 RID: 4037
 	public class CosmeticsLocalHandReactor : MonoBehaviour
 	{
-		// Token: 0x06006657 RID: 26199 RVA: 0x00215CE0 File Offset: 0x00213EE0
+		// Token: 0x06006657 RID: 26199 RVA: 0x00215CC0 File Offset: 0x00213EC0
 		protected void Awake()
 		{
 			this.ownerRig = base.GetComponentInParent<VRRig>();
@@ -28,7 +28,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x06006658 RID: 26200 RVA: 0x00215D58 File Offset: 0x00213F58
+		// Token: 0x06006658 RID: 26200 RVA: 0x00215D38 File Offset: 0x00213F38
 		protected void LateUpdate()
 		{
 			if (this.ownerIsLocal)

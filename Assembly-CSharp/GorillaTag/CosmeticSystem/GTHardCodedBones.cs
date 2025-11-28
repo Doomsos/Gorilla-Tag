@@ -9,14 +9,14 @@ namespace GorillaTag.CosmeticSystem
 	// Token: 0x0200105F RID: 4191
 	public static class GTHardCodedBones
 	{
-		// Token: 0x06006953 RID: 26963 RVA: 0x0022436D File Offset: 0x0022256D
+		// Token: 0x06006953 RID: 26963 RVA: 0x0022434D File Offset: 0x0022254D
 		[RuntimeInitializeOnLoadMethod(1)]
 		private static void HandleRuntimeInitialize_OnBeforeSceneLoad()
 		{
 			VRRigCache.OnPostInitialize += new Action(GTHardCodedBones.HandleVRRigCache_OnPostInitialize);
 		}
 
-		// Token: 0x06006954 RID: 26964 RVA: 0x00224380 File Offset: 0x00222580
+		// Token: 0x06006954 RID: 26964 RVA: 0x00224360 File Offset: 0x00222560
 		private static void HandleVRRigCache_OnPostInitialize()
 		{
 			VRRigCache.OnPostInitialize -= new Action(GTHardCodedBones.HandleVRRigCache_OnPostInitialize);
@@ -24,7 +24,7 @@ namespace GorillaTag.CosmeticSystem
 			VRRigCache.OnPostSpawnRig += new Action(GTHardCodedBones.HandleVRRigCache_OnPostSpawnRig);
 		}
 
-		// Token: 0x06006955 RID: 26965 RVA: 0x002243A9 File Offset: 0x002225A9
+		// Token: 0x06006955 RID: 26965 RVA: 0x00224389 File Offset: 0x00222589
 		private static void HandleVRRigCache_OnPostSpawnRig()
 		{
 			if (VRRigCache.isInitialized)
@@ -40,7 +40,7 @@ namespace GorillaTag.CosmeticSystem
 			return (int)bone;
 		}
 
-		// Token: 0x06006957 RID: 26967 RVA: 0x002243B8 File Offset: 0x002225B8
+		// Token: 0x06006957 RID: 26967 RVA: 0x00224398 File Offset: 0x00222598
 		[MethodImpl(256)]
 		public static int GetBoneIndex(string name)
 		{
@@ -54,7 +54,7 @@ namespace GorillaTag.CosmeticSystem
 			return 0;
 		}
 
-		// Token: 0x06006958 RID: 26968 RVA: 0x002243EC File Offset: 0x002225EC
+		// Token: 0x06006958 RID: 26968 RVA: 0x002243CC File Offset: 0x002225CC
 		[MethodImpl(256)]
 		public static bool TryGetBoneIndexByName(string name, out int out_index)
 		{
@@ -70,14 +70,14 @@ namespace GorillaTag.CosmeticSystem
 			return false;
 		}
 
-		// Token: 0x06006959 RID: 26969 RVA: 0x00224423 File Offset: 0x00222623
+		// Token: 0x06006959 RID: 26969 RVA: 0x00224403 File Offset: 0x00222603
 		[MethodImpl(256)]
 		public static GTHardCodedBones.EBone GetBone(string name)
 		{
 			return (GTHardCodedBones.EBone)GTHardCodedBones.GetBoneIndex(name);
 		}
 
-		// Token: 0x0600695A RID: 26970 RVA: 0x0022442C File Offset: 0x0022262C
+		// Token: 0x0600695A RID: 26970 RVA: 0x0022440C File Offset: 0x0022260C
 		[MethodImpl(256)]
 		public static bool TryGetBoneByName(string name, out GTHardCodedBones.EBone out_eBone)
 		{
@@ -91,14 +91,14 @@ namespace GorillaTag.CosmeticSystem
 			return false;
 		}
 
-		// Token: 0x0600695B RID: 26971 RVA: 0x0022444C File Offset: 0x0022264C
+		// Token: 0x0600695B RID: 26971 RVA: 0x0022442C File Offset: 0x0022262C
 		[MethodImpl(256)]
 		public static string GetBoneName(int boneIndex)
 		{
 			return GTHardCodedBones.kBoneNames[boneIndex];
 		}
 
-		// Token: 0x0600695C RID: 26972 RVA: 0x00224455 File Offset: 0x00222655
+		// Token: 0x0600695C RID: 26972 RVA: 0x00224435 File Offset: 0x00222635
 		[MethodImpl(256)]
 		public static bool TryGetBoneName(int boneIndex, out string out_name)
 		{
@@ -111,21 +111,21 @@ namespace GorillaTag.CosmeticSystem
 			return false;
 		}
 
-		// Token: 0x0600695D RID: 26973 RVA: 0x00224478 File Offset: 0x00222678
+		// Token: 0x0600695D RID: 26973 RVA: 0x00224458 File Offset: 0x00222658
 		[MethodImpl(256)]
 		public static string GetBoneName(GTHardCodedBones.EBone bone)
 		{
 			return GTHardCodedBones.GetBoneName((int)bone);
 		}
 
-		// Token: 0x0600695E RID: 26974 RVA: 0x00224480 File Offset: 0x00222680
+		// Token: 0x0600695E RID: 26974 RVA: 0x00224460 File Offset: 0x00222660
 		[MethodImpl(256)]
 		public static bool TryGetBoneName(GTHardCodedBones.EBone bone, out string out_name)
 		{
 			return GTHardCodedBones.TryGetBoneName((int)bone, out out_name);
 		}
 
-		// Token: 0x0600695F RID: 26975 RVA: 0x0022448C File Offset: 0x0022268C
+		// Token: 0x0600695F RID: 26975 RVA: 0x0022446C File Offset: 0x0022266C
 		[MethodImpl(256)]
 		public static long GetBoneBitFlag(string name)
 		{
@@ -143,7 +143,7 @@ namespace GorillaTag.CosmeticSystem
 			return 0L;
 		}
 
-		// Token: 0x06006960 RID: 26976 RVA: 0x002244D6 File Offset: 0x002226D6
+		// Token: 0x06006960 RID: 26976 RVA: 0x002244B6 File Offset: 0x002226B6
 		[MethodImpl(256)]
 		public static long GetBoneBitFlag(GTHardCodedBones.EBone bone)
 		{
@@ -154,7 +154,7 @@ namespace GorillaTag.CosmeticSystem
 			return 1L << bone - GTHardCodedBones.EBone.rig;
 		}
 
-		// Token: 0x06006961 RID: 26977 RVA: 0x002244E7 File Offset: 0x002226E7
+		// Token: 0x06006961 RID: 26977 RVA: 0x002244C7 File Offset: 0x002226C7
 		[MethodImpl(256)]
 		public static EHandedness GetHandednessFromBone(GTHardCodedBones.EBone bone)
 		{
@@ -169,7 +169,7 @@ namespace GorillaTag.CosmeticSystem
 			return EHandedness.Right;
 		}
 
-		// Token: 0x06006962 RID: 26978 RVA: 0x00224514 File Offset: 0x00222714
+		// Token: 0x06006962 RID: 26978 RVA: 0x002244F4 File Offset: 0x002226F4
 		public static bool TryGetBoneXforms(VRRig vrRig, out Transform[] outBoneXforms, out string outErrorMsg)
 		{
 			outErrorMsg = string.Empty;
@@ -202,7 +202,7 @@ namespace GorillaTag.CosmeticSystem
 			return true;
 		}
 
-		// Token: 0x06006963 RID: 26979 RVA: 0x002245E0 File Offset: 0x002227E0
+		// Token: 0x06006963 RID: 26979 RVA: 0x002245C0 File Offset: 0x002227C0
 		public static bool TryGetSlotAnchorXforms(VRRig vrRig, out Transform[] outSlotXforms, out string outErrorMsg)
 		{
 			outErrorMsg = string.Empty;
@@ -236,7 +236,7 @@ namespace GorillaTag.CosmeticSystem
 			return true;
 		}
 
-		// Token: 0x06006964 RID: 26980 RVA: 0x00224698 File Offset: 0x00222898
+		// Token: 0x06006964 RID: 26980 RVA: 0x00224678 File Offset: 0x00222878
 		public static bool TryGetBoneXforms(SkinnedMeshRenderer skinnedMeshRenderer, out Transform[] outBoneXforms, out string outErrorMsg)
 		{
 			outErrorMsg = string.Empty;
@@ -364,7 +364,7 @@ namespace GorillaTag.CosmeticSystem
 			return true;
 		}
 
-		// Token: 0x06006965 RID: 26981 RVA: 0x00224A38 File Offset: 0x00222C38
+		// Token: 0x06006965 RID: 26981 RVA: 0x00224A18 File Offset: 0x00222C18
 		[MethodImpl(256)]
 		public static bool TryGetBoneXform(Transform[] boneXforms, string boneName, out Transform boneXform)
 		{
@@ -372,7 +372,7 @@ namespace GorillaTag.CosmeticSystem
 			return boneXform != null;
 		}
 
-		// Token: 0x06006966 RID: 26982 RVA: 0x00224A4C File Offset: 0x00222C4C
+		// Token: 0x06006966 RID: 26982 RVA: 0x00224A2C File Offset: 0x00222C2C
 		[MethodImpl(256)]
 		public static bool TryGetBoneXform(Transform[] boneXforms, GTHardCodedBones.EBone eBone, out Transform boneXform)
 		{
@@ -380,7 +380,7 @@ namespace GorillaTag.CosmeticSystem
 			return boneXform != null;
 		}
 
-		// Token: 0x06006967 RID: 26983 RVA: 0x00224A60 File Offset: 0x00222C60
+		// Token: 0x06006967 RID: 26983 RVA: 0x00224A40 File Offset: 0x00222C40
 		[MethodImpl(256)]
 		public static bool TryGetFirstBoneInParents(Transform transform, out GTHardCodedBones.EBone eBone, out Transform boneXform)
 		{
@@ -444,7 +444,7 @@ namespace GorillaTag.CosmeticSystem
 			return false;
 		}
 
-		// Token: 0x06006968 RID: 26984 RVA: 0x00224B50 File Offset: 0x00222D50
+		// Token: 0x06006968 RID: 26984 RVA: 0x00224B30 File Offset: 0x00222D30
 		[MethodImpl(256)]
 		public static GTHardCodedBones.EBone GetBoneEnumOfCosmeticPosStateFlag(TransferrableObject.PositionState positionState)
 		{
@@ -495,7 +495,7 @@ namespace GorillaTag.CosmeticSystem
 			throw new ArgumentOutOfRangeException(positionState.ToString());
 		}
 
-		// Token: 0x06006969 RID: 26985 RVA: 0x00224BD0 File Offset: 0x00222DD0
+		// Token: 0x06006969 RID: 26985 RVA: 0x00224BB0 File Offset: 0x00222DB0
 		[MethodImpl(256)]
 		public static List<GTHardCodedBones.EBone> GetBoneEnumsFromCosmeticBodyDockDropPosFlags(BodyDockPositions.DropPositions enumFlags)
 		{
@@ -511,7 +511,7 @@ namespace GorillaTag.CosmeticSystem
 			return list;
 		}
 
-		// Token: 0x0600696A RID: 26986 RVA: 0x00224C28 File Offset: 0x00222E28
+		// Token: 0x0600696A RID: 26986 RVA: 0x00224C08 File Offset: 0x00222E08
 		[MethodImpl(256)]
 		public static List<GTHardCodedBones.EBone> GetBoneEnumsFromCosmeticTransferrablePosStateFlags(TransferrableObject.PositionState enumFlags)
 		{
@@ -527,14 +527,14 @@ namespace GorillaTag.CosmeticSystem
 			return list;
 		}
 
-		// Token: 0x0600696B RID: 26987 RVA: 0x00224C7C File Offset: 0x00222E7C
+		// Token: 0x0600696B RID: 26987 RVA: 0x00224C5C File Offset: 0x00222E5C
 		[MethodImpl(256)]
 		public static bool TryGetTransferrablePosStateFromBoneEnum(GTHardCodedBones.EBone eBone, out TransferrableObject.PositionState outPosState)
 		{
 			return GTHardCodedBones._k_eBone_to_transferrablePosState.TryGetValue(eBone, ref outPosState);
 		}
 
-		// Token: 0x0600696C RID: 26988 RVA: 0x00224C8C File Offset: 0x00222E8C
+		// Token: 0x0600696C RID: 26988 RVA: 0x00224C6C File Offset: 0x00222E6C
 		[MethodImpl(256)]
 		public static Transform GetBoneXformOfCosmeticPosStateFlag(TransferrableObject.PositionState anchorPosState, Transform[] bones)
 		{
@@ -550,7 +550,7 @@ namespace GorillaTag.CosmeticSystem
 			return null;
 		}
 
-		// Token: 0x0600696D RID: 26989 RVA: 0x00224CE8 File Offset: 0x00222EE8
+		// Token: 0x0600696D RID: 26989 RVA: 0x00224CC8 File Offset: 0x00222EC8
 		// Note: this type is marked as 'beforefieldinit'.
 		static GTHardCodedBones()
 		{
@@ -870,8 +870,8 @@ namespace GorillaTag.CosmeticSystem
 		public struct SturdyEBone : ISerializationCallbackReceiver
 		{
 			// Token: 0x170009EE RID: 2542
-			// (get) Token: 0x0600696E RID: 26990 RVA: 0x00224FE8 File Offset: 0x002231E8
-			// (set) Token: 0x0600696F RID: 26991 RVA: 0x00224FF0 File Offset: 0x002231F0
+			// (get) Token: 0x0600696E RID: 26990 RVA: 0x00224FC8 File Offset: 0x002231C8
+			// (set) Token: 0x0600696F RID: 26991 RVA: 0x00224FD0 File Offset: 0x002231D0
 			public GTHardCodedBones.EBone Bone
 			{
 				get
@@ -885,39 +885,39 @@ namespace GorillaTag.CosmeticSystem
 				}
 			}
 
-			// Token: 0x06006970 RID: 26992 RVA: 0x0022500A File Offset: 0x0022320A
+			// Token: 0x06006970 RID: 26992 RVA: 0x00224FEA File Offset: 0x002231EA
 			public SturdyEBone(GTHardCodedBones.EBone bone)
 			{
 				this._bone = bone;
 				this._boneName = null;
 			}
 
-			// Token: 0x06006971 RID: 26993 RVA: 0x0022501A File Offset: 0x0022321A
+			// Token: 0x06006971 RID: 26993 RVA: 0x00224FFA File Offset: 0x002231FA
 			public SturdyEBone(string boneName)
 			{
 				this._bone = GTHardCodedBones.GetBone(boneName);
 				this._boneName = null;
 			}
 
-			// Token: 0x06006972 RID: 26994 RVA: 0x0022502F File Offset: 0x0022322F
+			// Token: 0x06006972 RID: 26994 RVA: 0x0022500F File Offset: 0x0022320F
 			public static implicit operator GTHardCodedBones.EBone(GTHardCodedBones.SturdyEBone sturdyBone)
 			{
 				return sturdyBone.Bone;
 			}
 
-			// Token: 0x06006973 RID: 26995 RVA: 0x00225038 File Offset: 0x00223238
+			// Token: 0x06006973 RID: 26995 RVA: 0x00225018 File Offset: 0x00223218
 			public static implicit operator GTHardCodedBones.SturdyEBone(GTHardCodedBones.EBone bone)
 			{
 				return new GTHardCodedBones.SturdyEBone(bone);
 			}
 
-			// Token: 0x06006974 RID: 26996 RVA: 0x0022502F File Offset: 0x0022322F
+			// Token: 0x06006974 RID: 26996 RVA: 0x0022500F File Offset: 0x0022320F
 			public static explicit operator int(GTHardCodedBones.SturdyEBone sturdyBone)
 			{
 				return (int)sturdyBone.Bone;
 			}
 
-			// Token: 0x06006975 RID: 26997 RVA: 0x00225040 File Offset: 0x00223240
+			// Token: 0x06006975 RID: 26997 RVA: 0x00225020 File Offset: 0x00223220
 			public override string ToString()
 			{
 				return this._boneName;
@@ -928,7 +928,7 @@ namespace GorillaTag.CosmeticSystem
 			{
 			}
 
-			// Token: 0x06006977 RID: 26999 RVA: 0x00225048 File Offset: 0x00223248
+			// Token: 0x06006977 RID: 26999 RVA: 0x00225028 File Offset: 0x00223228
 			void ISerializationCallbackReceiver.OnAfterDeserialize()
 			{
 				if (string.IsNullOrEmpty(this._boneName))

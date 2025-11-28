@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020006D7 RID: 1751
 public struct GameNoiseEvent
 {
-	// Token: 0x06002CD6 RID: 11478 RVA: 0x000F2F02 File Offset: 0x000F1102
+	// Token: 0x06002CD6 RID: 11478 RVA: 0x000F2EE2 File Offset: 0x000F10E2
 	public bool IsValid()
 	{
 		return (float)(Time.timeAsDouble - this.eventTime) <= this.duration;

@@ -8,7 +8,7 @@ using UnityEngine.Localization;
 [Serializable]
 public struct LocalisationFontPair
 {
-	// Token: 0x06004556 RID: 17750 RVA: 0x0016F838 File Offset: 0x0016DA38
+	// Token: 0x06004556 RID: 17750 RVA: 0x0016F818 File Offset: 0x0016DA18
 	public bool ContainsLocale(Locale locale)
 	{
 		int count = this.locales.Count;

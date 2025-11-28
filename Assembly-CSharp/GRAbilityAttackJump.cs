@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityAttackJump : GRAbilityBase
 {
-	// Token: 0x06002A39 RID: 10809 RVA: 0x000E3B31 File Offset: 0x000E1D31
+	// Token: 0x06002A39 RID: 10809 RVA: 0x000E3B11 File Offset: 0x000E1D11
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -16,7 +16,7 @@ public class GRAbilityAttackJump : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A3A RID: 10810 RVA: 0x000E3B64 File Offset: 0x000E1D64
+	// Token: 0x06002A3A RID: 10810 RVA: 0x000E3B44 File Offset: 0x000E1D44
 	public override void Start()
 	{
 		base.Start();
@@ -31,7 +31,7 @@ public class GRAbilityAttackJump : GRAbilityBase
 		this.state = GRAbilityAttackJump.State.Tell;
 	}
 
-	// Token: 0x06002A3B RID: 10811 RVA: 0x000E3BD3 File Offset: 0x000E1DD3
+	// Token: 0x06002A3B RID: 10811 RVA: 0x000E3BB3 File Offset: 0x000E1DB3
 	public override void Stop()
 	{
 		this.agent.SetIsPathing(true, true);
@@ -42,13 +42,13 @@ public class GRAbilityAttackJump : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A3C RID: 10812 RVA: 0x000E3C08 File Offset: 0x000E1E08
+	// Token: 0x06002A3C RID: 10812 RVA: 0x000E3BE8 File Offset: 0x000E1DE8
 	public override bool IsDone()
 	{
 		return Time.timeAsDouble - this.startTime >= (double)this.duration;
 	}
 
-	// Token: 0x06002A3D RID: 10813 RVA: 0x000E3C24 File Offset: 0x000E1E24
+	// Token: 0x06002A3D RID: 10813 RVA: 0x000E3C04 File Offset: 0x000E1E04
 	protected override void UpdateShared(float dt)
 	{
 		double num = (double)((float)Time.timeAsDouble) - this.startTime;
@@ -130,7 +130,7 @@ public class GRAbilityAttackJump : GRAbilityBase
 		GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
 	}
 
-	// Token: 0x06002A3E RID: 10814 RVA: 0x000E3F5C File Offset: 0x000E215C
+	// Token: 0x06002A3E RID: 10814 RVA: 0x000E3F3C File Offset: 0x000E213C
 	public void SetTargetPlayer(NetPlayer targetPlayer)
 	{
 		this.target = null;

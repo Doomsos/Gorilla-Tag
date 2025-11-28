@@ -9,11 +9,11 @@ using UnityEngine;
 public class RankedMultiplayerScore : MonoBehaviourTick
 {
 	// Token: 0x170004FC RID: 1276
-	// (get) Token: 0x06003766 RID: 14182 RVA: 0x0012A76B File Offset: 0x0012896B
-	// (set) Token: 0x06003767 RID: 14183 RVA: 0x0012A773 File Offset: 0x00128973
+	// (get) Token: 0x06003766 RID: 14182 RVA: 0x0012A74B File Offset: 0x0012894B
+	// (set) Token: 0x06003767 RID: 14183 RVA: 0x0012A753 File Offset: 0x00128953
 	public RankedProgressionManager Progression { get; private set; }
 
-	// Token: 0x06003768 RID: 14184 RVA: 0x0012A77C File Offset: 0x0012897C
+	// Token: 0x06003768 RID: 14184 RVA: 0x0012A75C File Offset: 0x0012895C
 	public void Initialize()
 	{
 		GorillaTagCompetitiveManager.onStateChanged += new Action<GorillaTagCompetitiveManager.GameState>(this.OnStateChanged);
@@ -32,19 +32,19 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		progression.OnPlayerEloAcquired = (Action<int, float, int>)Delegate.Combine(progression.OnPlayerEloAcquired, new Action<int, float, int>(this.HandlePlayerEloAcquired));
 	}
 
-	// Token: 0x06003769 RID: 14185 RVA: 0x0012A83C File Offset: 0x00128A3C
+	// Token: 0x06003769 RID: 14185 RVA: 0x0012A81C File Offset: 0x00128A1C
 	private void HandlePlayerEloAcquired(int playerId, float elo, int tier)
 	{
 		this.CachePlayerRankedProgressionData(playerId, tier, elo);
 	}
 
-	// Token: 0x0600376A RID: 14186 RVA: 0x0012A847 File Offset: 0x00128A47
+	// Token: 0x0600376A RID: 14186 RVA: 0x0012A827 File Offset: 0x00128A27
 	private void OnDestroy()
 	{
 		this.Unsubscribe();
 	}
 
-	// Token: 0x0600376B RID: 14187 RVA: 0x0012A850 File Offset: 0x00128A50
+	// Token: 0x0600376B RID: 14187 RVA: 0x0012A830 File Offset: 0x00128A30
 	public void Unsubscribe()
 	{
 		GorillaTagCompetitiveManager.onStateChanged -= new Action<GorillaTagCompetitiveManager.GameState>(this.OnStateChanged);
@@ -60,7 +60,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600376C RID: 14188 RVA: 0x0012A8F8 File Offset: 0x00128AF8
+	// Token: 0x0600376C RID: 14188 RVA: 0x0012A8D8 File Offset: 0x00128AD8
 	public override void Tick()
 	{
 		if (this.PerSecondTimer > 0f && Time.time >= this.PerSecondTimer + 1f)
@@ -74,7 +74,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600376D RID: 14189 RVA: 0x0012A964 File Offset: 0x00128B64
+	// Token: 0x0600376D RID: 14189 RVA: 0x0012A944 File Offset: 0x00128B44
 	private void OnPerSecondTimerElapsed(int playersInGame, int infectedPlayers)
 	{
 		foreach (int num in Enumerable.ToList<int>(this.AllPlayerInRoundScores.Keys))
@@ -90,14 +90,14 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600376E RID: 14190 RVA: 0x0012AA1C File Offset: 0x00128C1C
+	// Token: 0x0600376E RID: 14190 RVA: 0x0012A9FC File Offset: 0x00128BFC
 	public void ResetMatch()
 	{
 		this.AllFinalPlayerScores.Clear();
 		this.AllPlayerInRoundScores.Clear();
 	}
 
-	// Token: 0x0600376F RID: 14191 RVA: 0x0012AA34 File Offset: 0x00128C34
+	// Token: 0x0600376F RID: 14191 RVA: 0x0012AA14 File Offset: 0x00128C14
 	private void OnStateChanged(GorillaTagCompetitiveManager.GameState state)
 	{
 		if (state == GorillaTagCompetitiveManager.GameState.StartingCountdown)
@@ -107,7 +107,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003770 RID: 14192 RVA: 0x0012AA4C File Offset: 0x00128C4C
+	// Token: 0x06003770 RID: 14192 RVA: 0x0012AA2C File Offset: 0x00128C2C
 	public void OnGameStarted()
 	{
 		this.PerSecondTimer = Time.time;
@@ -121,7 +121,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003771 RID: 14193 RVA: 0x0012AA9C File Offset: 0x00128C9C
+	// Token: 0x06003771 RID: 14193 RVA: 0x0012AA7C File Offset: 0x00128C7C
 	public void OnGameEnded()
 	{
 		foreach (int num in Enumerable.ToList<int>(this.AllPlayerInRoundScores.Keys))
@@ -139,7 +139,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		this.IsLateJoiner = false;
 	}
 
-	// Token: 0x06003772 RID: 14194 RVA: 0x0012AB40 File Offset: 0x00128D40
+	// Token: 0x06003772 RID: 14194 RVA: 0x0012AB20 File Offset: 0x00128D20
 	private void OnPlayerJoined(NetPlayer player)
 	{
 		if (NetworkSystem.Instance.IsMasterClient && this.CompetitiveManager.IsMatchActive())
@@ -179,7 +179,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		this.StartTrackingPlayer(player, true);
 	}
 
-	// Token: 0x06003773 RID: 14195 RVA: 0x0012ACC8 File Offset: 0x00128EC8
+	// Token: 0x06003773 RID: 14195 RVA: 0x0012ACA8 File Offset: 0x00128EA8
 	public void ReceivedScoresForLateJoiner(int[] playerIds, int[] numTags, float[] pointsOnDefense, float[] joinTime, bool[] infected, float[] taggedTime)
 	{
 		if (!NetworkSystem.Instance.IsMasterClient)
@@ -205,13 +205,13 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003774 RID: 14196 RVA: 0x0012AD5E File Offset: 0x00128F5E
+	// Token: 0x06003774 RID: 14196 RVA: 0x0012AD3E File Offset: 0x00128F3E
 	private void OnPlayerLeft(NetPlayer player)
 	{
 		this.AllPlayerInRoundScores.Remove(player.ActorNumber);
 	}
 
-	// Token: 0x06003775 RID: 14197 RVA: 0x0012AD74 File Offset: 0x00128F74
+	// Token: 0x06003775 RID: 14197 RVA: 0x0012AD54 File Offset: 0x00128F54
 	private void StartTrackingPlayer(NetPlayer player, bool lateJoin)
 	{
 		bool initInfected = lateJoin;
@@ -230,7 +230,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		this.AllPlayerInRoundScores.TryAdd(player.ActorNumber, new RankedMultiplayerScore.PlayerScoreInRound(player.ActorNumber, initInfected));
 	}
 
-	// Token: 0x06003776 RID: 14198 RVA: 0x0012AE08 File Offset: 0x00129008
+	// Token: 0x06003776 RID: 14198 RVA: 0x0012ADE8 File Offset: 0x00128FE8
 	public RankedMultiplayerScore.PlayerScoreInRound GetInGameScoreForSelf()
 	{
 		RankedMultiplayerScore.PlayerScoreInRound result;
@@ -241,7 +241,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		return default(RankedMultiplayerScore.PlayerScoreInRound);
 	}
 
-	// Token: 0x06003777 RID: 14199 RVA: 0x0012AE3C File Offset: 0x0012903C
+	// Token: 0x06003777 RID: 14199 RVA: 0x0012AE1C File Offset: 0x0012901C
 	public void OnTagReported(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
 	{
 		RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound;
@@ -259,7 +259,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003778 RID: 14200 RVA: 0x0012AEB8 File Offset: 0x001290B8
+	// Token: 0x06003778 RID: 14200 RVA: 0x0012AE98 File Offset: 0x00129098
 	private void ReportScore()
 	{
 		object obj;
@@ -282,13 +282,13 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		this.PredictPlayerEloChanges();
 	}
 
-	// Token: 0x06003779 RID: 14201 RVA: 0x0012B004 File Offset: 0x00129204
+	// Token: 0x06003779 RID: 14201 RVA: 0x0012AFE4 File Offset: 0x001291E4
 	public float ComputeGameScore(int tags, float pointsOnDefense)
 	{
 		return (float)(tags * this.PointsPerTag) + pointsOnDefense;
 	}
 
-	// Token: 0x0600377A RID: 14202 RVA: 0x0012B014 File Offset: 0x00129214
+	// Token: 0x0600377A RID: 14202 RVA: 0x0012AFF4 File Offset: 0x001291F4
 	private void PredictPlayerEloChanges()
 	{
 		this.VisitedScoreCombintations.Clear();
@@ -353,7 +353,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600377B RID: 14203 RVA: 0x0012B2A4 File Offset: 0x001294A4
+	// Token: 0x0600377B RID: 14203 RVA: 0x0012B284 File Offset: 0x00129484
 	public void CachePlayerRankedProgressionData(int playerId, int tierIdx, float elo)
 	{
 		if (this.PlayerRankedTierIndices.ContainsKey(playerId))
@@ -373,8 +373,8 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 	}
 
 	// Token: 0x170004FD RID: 1277
-	// (get) Token: 0x0600377C RID: 14204 RVA: 0x0012B304 File Offset: 0x00129504
-	// (set) Token: 0x0600377D RID: 14205 RVA: 0x0012B30C File Offset: 0x0012950C
+	// (get) Token: 0x0600377C RID: 14204 RVA: 0x0012B2E4 File Offset: 0x001294E4
+	// (set) Token: 0x0600377D RID: 14205 RVA: 0x0012B2EC File Offset: 0x001294EC
 	public Dictionary<int, int> PlayerRankedTiers
 	{
 		get
@@ -388,8 +388,8 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 	}
 
 	// Token: 0x170004FE RID: 1278
-	// (get) Token: 0x0600377E RID: 14206 RVA: 0x0012B315 File Offset: 0x00129515
-	// (set) Token: 0x0600377F RID: 14207 RVA: 0x0012B31D File Offset: 0x0012951D
+	// (get) Token: 0x0600377E RID: 14206 RVA: 0x0012B2F5 File Offset: 0x001294F5
+	// (set) Token: 0x0600377F RID: 14207 RVA: 0x0012B2FD File Offset: 0x001294FD
 	public Dictionary<int, float> PlayerRankedEloScores
 	{
 		get
@@ -403,8 +403,8 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 	}
 
 	// Token: 0x170004FF RID: 1279
-	// (get) Token: 0x06003780 RID: 14208 RVA: 0x0012B326 File Offset: 0x00129526
-	// (set) Token: 0x06003781 RID: 14209 RVA: 0x0012B32E File Offset: 0x0012952E
+	// (get) Token: 0x06003780 RID: 14208 RVA: 0x0012B306 File Offset: 0x00129506
+	// (set) Token: 0x06003781 RID: 14209 RVA: 0x0012B30E File Offset: 0x0012950E
 	public Dictionary<int, float> ProjectedEloDeltas
 	{
 		get
@@ -417,7 +417,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003782 RID: 14210 RVA: 0x0012B338 File Offset: 0x00129538
+	// Token: 0x06003782 RID: 14210 RVA: 0x0012B318 File Offset: 0x00129518
 	public List<RankedMultiplayerScore.PlayerScoreInRound> GetSortedScores()
 	{
 		List<RankedMultiplayerScore.PlayerScoreInRound> list = new List<RankedMultiplayerScore.PlayerScoreInRound>();
@@ -511,7 +511,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 	// Token: 0x0200083D RID: 2109
 	public struct PlayerScoreInRound
 	{
-		// Token: 0x06003786 RID: 14214 RVA: 0x0012B478 File Offset: 0x00129678
+		// Token: 0x06003786 RID: 14214 RVA: 0x0012B458 File Offset: 0x00129658
 		public PlayerScoreInRound(int id, bool initInfected = false)
 		{
 			this.PlayerId = id;
@@ -544,13 +544,13 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 	// Token: 0x0200083E RID: 2110
 	public struct ResultData
 	{
-		// Token: 0x06003787 RID: 14215 RVA: 0x0012B4C5 File Offset: 0x001296C5
+		// Token: 0x06003787 RID: 14215 RVA: 0x0012B4A5 File Offset: 0x001296A5
 		public bool IsMostTagsTied()
 		{
 			return this.MostTagsPlayerId == RankedMultiplayerScore.RESULT_TIE;
 		}
 
-		// Token: 0x06003788 RID: 14216 RVA: 0x0012B4D4 File Offset: 0x001296D4
+		// Token: 0x06003788 RID: 14216 RVA: 0x0012B4B4 File Offset: 0x001296B4
 		public bool IsLongestUntaggedTied()
 		{
 			return this.LongestUntaggedPlayerId == RankedMultiplayerScore.RESULT_TIE;

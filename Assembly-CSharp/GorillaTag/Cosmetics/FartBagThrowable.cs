@@ -9,16 +9,16 @@ namespace GorillaTag.Cosmetics
 	public class FartBagThrowable : MonoBehaviour, IProjectile
 	{
 		// Token: 0x17000A55 RID: 2645
-		// (get) Token: 0x06006CB5 RID: 27829 RVA: 0x0023B0D7 File Offset: 0x002392D7
-		// (set) Token: 0x06006CB6 RID: 27830 RVA: 0x0023B0DF File Offset: 0x002392DF
+		// (get) Token: 0x06006CB5 RID: 27829 RVA: 0x0023B0B7 File Offset: 0x002392B7
+		// (set) Token: 0x06006CB6 RID: 27830 RVA: 0x0023B0BF File Offset: 0x002392BF
 		public TransferrableObject ParentTransferable { get; set; }
 
 		// Token: 0x140000B4 RID: 180
-		// (add) Token: 0x06006CB7 RID: 27831 RVA: 0x0023B0E8 File Offset: 0x002392E8
-		// (remove) Token: 0x06006CB8 RID: 27832 RVA: 0x0023B120 File Offset: 0x00239320
+		// (add) Token: 0x06006CB7 RID: 27831 RVA: 0x0023B0C8 File Offset: 0x002392C8
+		// (remove) Token: 0x06006CB8 RID: 27832 RVA: 0x0023B100 File Offset: 0x00239300
 		public event Action<IProjectile> OnDeflated;
 
-		// Token: 0x06006CB9 RID: 27833 RVA: 0x0023B158 File Offset: 0x00239358
+		// Token: 0x06006CB9 RID: 27833 RVA: 0x0023B138 File Offset: 0x00239338
 		private void OnEnable()
 		{
 			this.placedOnFloor = false;
@@ -33,7 +33,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CBA RID: 27834 RVA: 0x0023B1B7 File Offset: 0x002393B7
+		// Token: 0x06006CBA RID: 27834 RVA: 0x0023B197 File Offset: 0x00239397
 		private void Update()
 		{
 			if (Time.time - this.timeCreated > this.forceDestroyAfterSec)
@@ -42,7 +42,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CBB RID: 27835 RVA: 0x0023B1D4 File Offset: 0x002393D4
+		// Token: 0x06006CBB RID: 27835 RVA: 0x0023B1B4 File Offset: 0x002393B4
 		public void Launch(Vector3 startPosition, Quaternion startRotation, Vector3 velocity, float chargeFrac, VRRig ownerRig, int progress)
 		{
 			base.transform.position = startPosition;
@@ -53,7 +53,7 @@ namespace GorillaTag.Cosmetics
 			this.InitialPhotonEvent();
 		}
 
-		// Token: 0x06006CBC RID: 27836 RVA: 0x0023B234 File Offset: 0x00239434
+		// Token: 0x06006CBC RID: 27836 RVA: 0x0023B214 File Offset: 0x00239414
 		private void InitialPhotonEvent()
 		{
 			this._events = base.gameObject.GetOrAddComponent<RubberDuckEvents>();
@@ -71,7 +71,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CBD RID: 27837 RVA: 0x0023B308 File Offset: 0x00239508
+		// Token: 0x06006CBD RID: 27837 RVA: 0x0023B2E8 File Offset: 0x002394E8
 		private void OnTriggerEnter(Collider other)
 		{
 			if ((this.handLayerMask.value & 1 << other.gameObject.layer) != 0)
@@ -89,7 +89,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CBE RID: 27838 RVA: 0x0023B390 File Offset: 0x00239590
+		// Token: 0x06006CBE RID: 27838 RVA: 0x0023B370 File Offset: 0x00239570
 		private void OnCollisionEnter(Collision other)
 		{
 			if ((this.floorLayerMask.value & 1 << other.gameObject.layer) != 0)
@@ -103,7 +103,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CBF RID: 27839 RVA: 0x0023B438 File Offset: 0x00239638
+		// Token: 0x06006CBF RID: 27839 RVA: 0x0023B418 File Offset: 0x00239618
 		private void Deflate()
 		{
 			if (PhotonNetwork.InRoom && this._events != null && this._events.Activate != null)
@@ -117,7 +117,7 @@ namespace GorillaTag.Cosmetics
 			this.DeflateLocal();
 		}
 
-		// Token: 0x06006CC0 RID: 27840 RVA: 0x0023B4A8 File Offset: 0x002396A8
+		// Token: 0x06006CC0 RID: 27840 RVA: 0x0023B488 File Offset: 0x00239688
 		private void DeflateEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -158,7 +158,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CC1 RID: 27841 RVA: 0x0023B558 File Offset: 0x00239758
+		// Token: 0x06006CC1 RID: 27841 RVA: 0x0023B538 File Offset: 0x00239738
 		private void DeflateLocal()
 		{
 			if (this.deflated)
@@ -183,7 +183,7 @@ namespace GorillaTag.Cosmetics
 			base.Invoke("DisableObject", this.destroyWhenDeflateDelay);
 		}
 
-		// Token: 0x06006CC2 RID: 27842 RVA: 0x0023B607 File Offset: 0x00239807
+		// Token: 0x06006CC2 RID: 27842 RVA: 0x0023B5E7 File Offset: 0x002397E7
 		private void DisableObject()
 		{
 			Action<IProjectile> onDeflated = this.OnDeflated;
@@ -194,7 +194,7 @@ namespace GorillaTag.Cosmetics
 			this.deflated = false;
 		}
 
-		// Token: 0x06006CC3 RID: 27843 RVA: 0x0023B624 File Offset: 0x00239824
+		// Token: 0x06006CC3 RID: 27843 RVA: 0x0023B604 File Offset: 0x00239804
 		private void OnDestroy()
 		{
 			if (this._events != null)

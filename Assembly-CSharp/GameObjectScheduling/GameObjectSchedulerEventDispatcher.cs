@@ -8,7 +8,7 @@ namespace GameObjectScheduling
 	public class GameObjectSchedulerEventDispatcher : MonoBehaviour
 	{
 		// Token: 0x17000A7D RID: 2685
-		// (get) Token: 0x06007018 RID: 28696 RVA: 0x0024764D File Offset: 0x0024584D
+		// (get) Token: 0x06007018 RID: 28696 RVA: 0x0024762D File Offset: 0x0024582D
 		public UnityEvent OnScheduledActivation
 		{
 			get
@@ -18,7 +18,7 @@ namespace GameObjectScheduling
 		}
 
 		// Token: 0x17000A7E RID: 2686
-		// (get) Token: 0x06007019 RID: 28697 RVA: 0x00247655 File Offset: 0x00245855
+		// (get) Token: 0x06007019 RID: 28697 RVA: 0x00247635 File Offset: 0x00245835
 		public UnityEvent OnScheduledDeactivation
 		{
 			get

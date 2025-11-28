@@ -6,7 +6,7 @@ using UnityEngine;
 public class GorillaPawn : MonoBehaviour
 {
 	// Token: 0x1700048D RID: 1165
-	// (get) Token: 0x06003394 RID: 13204 RVA: 0x00115F85 File Offset: 0x00114185
+	// (get) Token: 0x06003394 RID: 13204 RVA: 0x00115F65 File Offset: 0x00114165
 	public VRRig rig
 	{
 		get
@@ -16,7 +16,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x1700048E RID: 1166
-	// (get) Token: 0x06003395 RID: 13205 RVA: 0x00115F8D File Offset: 0x0011418D
+	// (get) Token: 0x06003395 RID: 13205 RVA: 0x00115F6D File Offset: 0x0011416D
 	public ZoneEntityBSP zoneEntity
 	{
 		get
@@ -26,7 +26,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x1700048F RID: 1167
-	// (get) Token: 0x06003396 RID: 13206 RVA: 0x00115F95 File Offset: 0x00114195
+	// (get) Token: 0x06003396 RID: 13206 RVA: 0x00115F75 File Offset: 0x00114175
 	public Transform transform
 	{
 		get
@@ -36,7 +36,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x17000490 RID: 1168
-	// (get) Token: 0x06003397 RID: 13207 RVA: 0x00115F9D File Offset: 0x0011419D
+	// (get) Token: 0x06003397 RID: 13207 RVA: 0x00115F7D File Offset: 0x0011417D
 	public XformNode handLeft
 	{
 		get
@@ -46,7 +46,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x17000491 RID: 1169
-	// (get) Token: 0x06003398 RID: 13208 RVA: 0x00115FA5 File Offset: 0x001141A5
+	// (get) Token: 0x06003398 RID: 13208 RVA: 0x00115F85 File Offset: 0x00114185
 	public XformNode handRight
 	{
 		get
@@ -56,7 +56,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x17000492 RID: 1170
-	// (get) Token: 0x06003399 RID: 13209 RVA: 0x00115FAD File Offset: 0x001141AD
+	// (get) Token: 0x06003399 RID: 13209 RVA: 0x00115F8D File Offset: 0x0011418D
 	public XformNode body
 	{
 		get
@@ -66,7 +66,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x17000493 RID: 1171
-	// (get) Token: 0x0600339A RID: 13210 RVA: 0x00115FB5 File Offset: 0x001141B5
+	// (get) Token: 0x0600339A RID: 13210 RVA: 0x00115F95 File Offset: 0x00114195
 	public XformNode head
 	{
 		get
@@ -75,13 +75,13 @@ public class GorillaPawn : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600339B RID: 13211 RVA: 0x00115FBD File Offset: 0x001141BD
+	// Token: 0x0600339B RID: 13211 RVA: 0x00115F9D File Offset: 0x0011419D
 	private void Awake()
 	{
 		this.Setup(false);
 	}
 
-	// Token: 0x0600339C RID: 13212 RVA: 0x00115FC8 File Offset: 0x001141C8
+	// Token: 0x0600339C RID: 13212 RVA: 0x00115FA8 File Offset: 0x001141A8
 	private void Setup(bool force)
 	{
 		this._transform = base.transform;
@@ -128,7 +128,7 @@ public class GorillaPawn : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600339D RID: 13213 RVA: 0x001161CF File Offset: 0x001143CF
+	// Token: 0x0600339D RID: 13213 RVA: 0x001161AF File Offset: 0x001143AF
 	private bool CanRun()
 	{
 		if (GorillaPawn._gPawnActiveCount > 10)
@@ -139,7 +139,7 @@ public class GorillaPawn : MonoBehaviour
 		return true;
 	}
 
-	// Token: 0x0600339E RID: 13214 RVA: 0x001161F4 File Offset: 0x001143F4
+	// Token: 0x0600339E RID: 13214 RVA: 0x001161D4 File Offset: 0x001143D4
 	private void OnEnable()
 	{
 		if (!this.CanRun())
@@ -155,7 +155,7 @@ public class GorillaPawn : MonoBehaviour
 		GorillaPawn._gPawns[this._index] = this;
 	}
 
-	// Token: 0x0600339F RID: 13215 RVA: 0x00116264 File Offset: 0x00114464
+	// Token: 0x0600339F RID: 13215 RVA: 0x00116244 File Offset: 0x00114444
 	private void OnDisable()
 	{
 		this._id = -1;
@@ -172,7 +172,7 @@ public class GorillaPawn : MonoBehaviour
 		this._index = num;
 	}
 
-	// Token: 0x060033A0 RID: 13216 RVA: 0x001162C0 File Offset: 0x001144C0
+	// Token: 0x060033A0 RID: 13216 RVA: 0x001162A0 File Offset: 0x001144A0
 	private void OnDestroy()
 	{
 		int num = GorillaPawn._gPawns.IndexOfRef(this);
@@ -186,7 +186,7 @@ public class GorillaPawn : MonoBehaviour
 		GorillaPawn._gPawnActiveCount = num2;
 	}
 
-	// Token: 0x060033A1 RID: 13217 RVA: 0x00116320 File Offset: 0x00114520
+	// Token: 0x060033A1 RID: 13217 RVA: 0x00116300 File Offset: 0x00114500
 	private static int ComparePawns(GorillaPawn x, GorillaPawn y)
 	{
 		bool flag = x.AsNull<GorillaPawn>() == null;
@@ -207,7 +207,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x17000494 RID: 1172
-	// (get) Token: 0x060033A2 RID: 13218 RVA: 0x00116369 File Offset: 0x00114569
+	// (get) Token: 0x060033A2 RID: 13218 RVA: 0x00116349 File Offset: 0x00114549
 	public static GorillaPawn[] AllPawns
 	{
 		get
@@ -217,7 +217,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x17000495 RID: 1173
-	// (get) Token: 0x060033A3 RID: 13219 RVA: 0x00116370 File Offset: 0x00114570
+	// (get) Token: 0x060033A3 RID: 13219 RVA: 0x00116350 File Offset: 0x00114550
 	public static int ActiveCount
 	{
 		get
@@ -227,7 +227,7 @@ public class GorillaPawn : MonoBehaviour
 	}
 
 	// Token: 0x17000496 RID: 1174
-	// (get) Token: 0x060033A4 RID: 13220 RVA: 0x00116377 File Offset: 0x00114577
+	// (get) Token: 0x060033A4 RID: 13220 RVA: 0x00116357 File Offset: 0x00114557
 	public static Matrix4x4[] ShaderData
 	{
 		get
@@ -236,7 +236,7 @@ public class GorillaPawn : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060033A5 RID: 13221 RVA: 0x00116380 File Offset: 0x00114580
+	// Token: 0x060033A5 RID: 13221 RVA: 0x00116360 File Offset: 0x00114560
 	public static void SyncPawnData()
 	{
 		Matrix4x4[] gShaderData = GorillaPawn._gShaderData;

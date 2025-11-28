@@ -5,10 +5,10 @@ using System.Collections.Generic;
 public class EnumData<TEnum> where TEnum : struct, Enum
 {
 	// Token: 0x170005F3 RID: 1523
-	// (get) Token: 0x0600400D RID: 16397 RVA: 0x00158235 File Offset: 0x00156435
+	// (get) Token: 0x0600400D RID: 16397 RVA: 0x00158215 File Offset: 0x00156415
 	public static EnumData<TEnum> Shared { get; } = new EnumData<TEnum>();
 
-	// Token: 0x0600400E RID: 16398 RVA: 0x0015823C File Offset: 0x0015643C
+	// Token: 0x0600400E RID: 16398 RVA: 0x0015821C File Offset: 0x0015641C
 	private EnumData()
 	{
 		this.Names = Enum.GetNames(typeof(TEnum));

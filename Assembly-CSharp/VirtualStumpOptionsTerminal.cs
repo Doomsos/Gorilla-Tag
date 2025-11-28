@@ -14,7 +14,7 @@ using UnityEngine.Events;
 // Token: 0x020009AD RID: 2477
 public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 {
-	// Token: 0x06003F3E RID: 16190 RVA: 0x00153310 File Offset: 0x00151510
+	// Token: 0x06003F3E RID: 16190 RVA: 0x001532F0 File Offset: 0x001514F0
 	public void Start()
 	{
 		this.optionList.gameObject.SetActive(true);
@@ -33,7 +33,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		ModIOManager.OnModIOUserChanged.AddListener(new UnityAction<User>(this.OnModIOUserChanged));
 	}
 
-	// Token: 0x06003F3F RID: 16191 RVA: 0x001533CC File Offset: 0x001515CC
+	// Token: 0x06003F3F RID: 16191 RVA: 0x001533AC File Offset: 0x001515AC
 	public void OnDestroy()
 	{
 		CustomMapsKeyboard customMapsKeyboard = this.keyboard;
@@ -48,7 +48,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		ModIOManager.OnModIOUserChanged.RemoveListener(new UnityAction<User>(this.OnModIOUserChanged));
 	}
 
-	// Token: 0x06003F40 RID: 16192 RVA: 0x00153469 File Offset: 0x00151669
+	// Token: 0x06003F40 RID: 16192 RVA: 0x00153449 File Offset: 0x00151649
 	public void OnEnable()
 	{
 		this.RefreshButtonState();
@@ -56,7 +56,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		this.UpdateScreen();
 	}
 
-	// Token: 0x06003F41 RID: 16193 RVA: 0x00153480 File Offset: 0x00151680
+	// Token: 0x06003F41 RID: 16193 RVA: 0x00153460 File Offset: 0x00151660
 	private void OnKeyPressed(CustomMapKeyboardBinding pressedButton)
 	{
 		if (!this.cachedError.IsNullOrEmpty())
@@ -103,7 +103,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		this.OnKeyPressed_RoomSize(pressedButton);
 	}
 
-	// Token: 0x06003F42 RID: 16194 RVA: 0x0015351C File Offset: 0x0015171C
+	// Token: 0x06003F42 RID: 16194 RVA: 0x001534FC File Offset: 0x001516FC
 	private void ChangeState(VirtualStumpOptionsTerminal.ETerminalState newState)
 	{
 		if (newState == this.currentState)
@@ -114,7 +114,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		this.RefreshButtonState();
 	}
 
-	// Token: 0x06003F43 RID: 16195 RVA: 0x00153538 File Offset: 0x00151738
+	// Token: 0x06003F43 RID: 16195 RVA: 0x00153518 File Offset: 0x00151718
 	private void RefreshButtonState()
 	{
 		for (int i = 0; i < this.contextualButtons.Count; i++)
@@ -154,7 +154,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		}
 	}
 
-	// Token: 0x06003F44 RID: 16196 RVA: 0x00153620 File Offset: 0x00151820
+	// Token: 0x06003F44 RID: 16196 RVA: 0x00153600 File Offset: 0x00151800
 	private void UpdateOptionListForCurrentState()
 	{
 		StringBuilder stringBuilder = new StringBuilder();
@@ -170,7 +170,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		this.optionList.text = stringBuilder.ToString();
 	}
 
-	// Token: 0x06003F45 RID: 16197 RVA: 0x00153684 File Offset: 0x00151884
+	// Token: 0x06003F45 RID: 16197 RVA: 0x00153664 File Offset: 0x00151864
 	private void UpdateScreen()
 	{
 		Debug.Log("[VirtualStumpOptionsTerminal::UpdateScreen] State: " + this.currentState.ToString() + " | CachedError: " + (!this.cachedError.IsNullOrEmpty()).ToString());
@@ -199,14 +199,14 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		this.mainScreenText.text = this.UpdateScreen_RoomSize();
 	}
 
-	// Token: 0x06003F46 RID: 16198 RVA: 0x00153757 File Offset: 0x00151957
+	// Token: 0x06003F46 RID: 16198 RVA: 0x00153737 File Offset: 0x00151937
 	private void OnModIOLoginStarted()
 	{
 		Debug.Log("[VirtualStumpOptionsTerminal::OnModIOLoginStarted]...");
 		this.UpdateScreen();
 	}
 
-	// Token: 0x06003F47 RID: 16199 RVA: 0x0015376C File Offset: 0x0015196C
+	// Token: 0x06003F47 RID: 16199 RVA: 0x0015374C File Offset: 0x0015194C
 	private void OnModIOLoggedIn()
 	{
 		Debug.Log("[VirtualStumpOptionsTerminal::OnModIOLoggedIn]...");
@@ -226,7 +226,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		}));
 	}
 
-	// Token: 0x06003F48 RID: 16200 RVA: 0x00153823 File Offset: 0x00151A23
+	// Token: 0x06003F48 RID: 16200 RVA: 0x00153803 File Offset: 0x00151A03
 	private void OnModIOLoggedOut()
 	{
 		Debug.Log("[VirtualStumpOptionsTerminal::OnModIOLoggedOut]...");
@@ -235,7 +235,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		this.UpdateScreen();
 	}
 
-	// Token: 0x06003F49 RID: 16201 RVA: 0x00153852 File Offset: 0x00151A52
+	// Token: 0x06003F49 RID: 16201 RVA: 0x00153832 File Offset: 0x00151A32
 	private void OnModIOLoginFailed(string error)
 	{
 		Debug.Log("[VirtualStumpOptionsTerminal::OnModIOLoginFailed] Error: " + error);
@@ -244,14 +244,14 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		this.UpdateScreen();
 	}
 
-	// Token: 0x06003F4A RID: 16202 RVA: 0x00153878 File Offset: 0x00151A78
+	// Token: 0x06003F4A RID: 16202 RVA: 0x00153858 File Offset: 0x00151A58
 	private void OnModIOUserChanged(User user)
 	{
 		Debug.Log("[VirtualStumpOptionsTerminal::OnModIOUserChanged] Username: " + ModIOManager.GetCurrentUsername());
 		this.UpdateScreen();
 	}
 
-	// Token: 0x06003F4B RID: 16203 RVA: 0x00153894 File Offset: 0x00151A94
+	// Token: 0x06003F4B RID: 16203 RVA: 0x00153874 File Offset: 0x00151A74
 	private void OnKeyPressed_ModIOAccount(CustomMapKeyboardBinding pressedButton)
 	{
 		if (pressedButton == CustomMapKeyboardBinding.option1)
@@ -285,7 +285,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		}
 	}
 
-	// Token: 0x06003F4C RID: 16204 RVA: 0x00153930 File Offset: 0x00151B30
+	// Token: 0x06003F4C RID: 16204 RVA: 0x00153910 File Offset: 0x00151B10
 	private Task StartAccountLinkingProcess()
 	{
 		VirtualStumpOptionsTerminal.<StartAccountLinkingProcess>d__40 <StartAccountLinkingProcess>d__;
@@ -296,7 +296,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		return <StartAccountLinkingProcess>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003F4D RID: 16205 RVA: 0x00153973 File Offset: 0x00151B73
+	// Token: 0x06003F4D RID: 16205 RVA: 0x00153953 File Offset: 0x00151B53
 	public void ShowPrompt(string url, string code)
 	{
 		this.cachedLinkURL = url;
@@ -304,7 +304,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		this.UpdateScreen();
 	}
 
-	// Token: 0x06003F4E RID: 16206 RVA: 0x0015398C File Offset: 0x00151B8C
+	// Token: 0x06003F4E RID: 16206 RVA: 0x0015396C File Offset: 0x00151B6C
 	private string UpdateScreen_ModIOAccount()
 	{
 		StringBuilder stringBuilder = new StringBuilder();
@@ -343,7 +343,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		return stringBuilder.ToString();
 	}
 
-	// Token: 0x06003F4F RID: 16207 RVA: 0x00153AD4 File Offset: 0x00151CD4
+	// Token: 0x06003F4F RID: 16207 RVA: 0x00153AB4 File Offset: 0x00151CB4
 	private void OnKeyPressed_RoomSize(CustomMapKeyboardBinding pressedButton)
 	{
 		if (pressedButton == CustomMapKeyboardBinding.left)
@@ -356,21 +356,21 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		}
 	}
 
-	// Token: 0x06003F50 RID: 16208 RVA: 0x00153AEC File Offset: 0x00151CEC
+	// Token: 0x06003F50 RID: 16208 RVA: 0x00153ACC File Offset: 0x00151CCC
 	private void DecrementRoomSize()
 	{
 		RoomSystem.OverrideRoomSize(RoomSystem.GetOverridenRoomSize() - 1);
 		this.UpdateScreen();
 	}
 
-	// Token: 0x06003F51 RID: 16209 RVA: 0x00153B01 File Offset: 0x00151D01
+	// Token: 0x06003F51 RID: 16209 RVA: 0x00153AE1 File Offset: 0x00151CE1
 	private void IncrementRoomSize()
 	{
 		RoomSystem.OverrideRoomSize(RoomSystem.GetOverridenRoomSize() + 1);
 		this.UpdateScreen();
 	}
 
-	// Token: 0x06003F52 RID: 16210 RVA: 0x00153B18 File Offset: 0x00151D18
+	// Token: 0x06003F52 RID: 16210 RVA: 0x00153AF8 File Offset: 0x00151CF8
 	private string UpdateScreen_RoomSize()
 	{
 		StringBuilder stringBuilder = new StringBuilder();
@@ -379,7 +379,7 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		return stringBuilder.ToString();
 	}
 
-	// Token: 0x06003F53 RID: 16211 RVA: 0x00153B68 File Offset: 0x00151D68
+	// Token: 0x06003F53 RID: 16211 RVA: 0x00153B48 File Offset: 0x00151D48
 	public VirtualStumpOptionsTerminal()
 	{
 		List<string> list = new List<string>();

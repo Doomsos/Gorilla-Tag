@@ -9,7 +9,7 @@ namespace GorillaLocomotion.Gameplay
 	// Token: 0x02000FA1 RID: 4001
 	public class NoncontrollableBroomstick : MonoBehaviour, IGorillaGrabable
 	{
-		// Token: 0x0600646F RID: 25711 RVA: 0x0020C1CC File Offset: 0x0020A3CC
+		// Token: 0x0600646F RID: 25711 RVA: 0x0020C1AC File Offset: 0x0020A3AC
 		private void Start()
 		{
 			this.smoothRotationTrackingRateExp = Mathf.Exp(this.smoothRotationTrackingRate);
@@ -22,7 +22,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x06006470 RID: 25712 RVA: 0x0020C25C File Offset: 0x0020A45C
+		// Token: 0x06006470 RID: 25712 RVA: 0x0020C23C File Offset: 0x0020A43C
 		protected virtual void FixedUpdate()
 		{
 			if (PhotonNetwork.InRoom)
@@ -68,7 +68,7 @@ namespace GorillaLocomotion.Gameplay
 			return true;
 		}
 
-		// Token: 0x06006472 RID: 25714 RVA: 0x0020C3A5 File Offset: 0x0020A5A5
+		// Token: 0x06006472 RID: 25714 RVA: 0x0020C385 File Offset: 0x0020A585
 		void IGorillaGrabable.OnGrabbed(GorillaGrabber g, out Transform grabbedObject, out Vector3 grabbedLocalPosition)
 		{
 			grabbedObject = base.transform;
@@ -80,13 +80,13 @@ namespace GorillaLocomotion.Gameplay
 		{
 		}
 
-		// Token: 0x06006474 RID: 25716 RVA: 0x0020C3CB File Offset: 0x0020A5CB
+		// Token: 0x06006474 RID: 25716 RVA: 0x0020C3AB File Offset: 0x0020A5AB
 		private void OnDestroy()
 		{
 			this.nativeSpline.Dispose();
 		}
 
-		// Token: 0x06006475 RID: 25717 RVA: 0x0020C3D8 File Offset: 0x0020A5D8
+		// Token: 0x06006475 RID: 25717 RVA: 0x0020C3B8 File Offset: 0x0020A5B8
 		public bool MomentaryGrabOnly()
 		{
 			return this.momentaryGrabOnly;

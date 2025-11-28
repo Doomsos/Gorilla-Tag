@@ -6,7 +6,7 @@ namespace Docking
 	// Token: 0x02001147 RID: 4423
 	public class Dockable : MonoBehaviour
 	{
-		// Token: 0x06006FB3 RID: 28595 RVA: 0x00246234 File Offset: 0x00244434
+		// Token: 0x06006FB3 RID: 28595 RVA: 0x00246214 File Offset: 0x00244414
 		protected virtual void OnTriggerEnter(Collider other)
 		{
 			Dock dock;
@@ -16,7 +16,7 @@ namespace Docking
 			}
 		}
 
-		// Token: 0x06006FB4 RID: 28596 RVA: 0x00246257 File Offset: 0x00244457
+		// Token: 0x06006FB4 RID: 28596 RVA: 0x00246237 File Offset: 0x00244437
 		protected virtual void OnTriggerExit(Collider other)
 		{
 			if (this.potentialDock == other.transform)
@@ -25,7 +25,7 @@ namespace Docking
 			}
 		}
 
-		// Token: 0x06006FB5 RID: 28597 RVA: 0x00246274 File Offset: 0x00244474
+		// Token: 0x06006FB5 RID: 28597 RVA: 0x00246254 File Offset: 0x00244454
 		public virtual void Dock()
 		{
 			if (this.potentialDock == null)

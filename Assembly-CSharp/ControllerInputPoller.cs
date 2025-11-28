@@ -10,7 +10,7 @@ using Valve.VR;
 public class ControllerInputPoller : MonoBehaviour
 {
 	// Token: 0x170003AE RID: 942
-	// (get) Token: 0x060024FC RID: 9468 RVA: 0x000C6DEE File Offset: 0x000C4FEE
+	// (get) Token: 0x060024FC RID: 9468 RVA: 0x000C6DCE File Offset: 0x000C4FCE
 	[DebugReadout]
 	public bool leftIndexPressed
 	{
@@ -21,7 +21,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003AF RID: 943
-	// (get) Token: 0x060024FD RID: 9469 RVA: 0x000C6DF6 File Offset: 0x000C4FF6
+	// (get) Token: 0x060024FD RID: 9469 RVA: 0x000C6DD6 File Offset: 0x000C4FD6
 	[DebugReadout]
 	public bool leftIndexReleased
 	{
@@ -32,7 +32,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B0 RID: 944
-	// (get) Token: 0x060024FE RID: 9470 RVA: 0x000C6DFE File Offset: 0x000C4FFE
+	// (get) Token: 0x060024FE RID: 9470 RVA: 0x000C6DDE File Offset: 0x000C4FDE
 	[DebugReadout]
 	public bool rightIndexPressed
 	{
@@ -43,7 +43,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B1 RID: 945
-	// (get) Token: 0x060024FF RID: 9471 RVA: 0x000C6E06 File Offset: 0x000C5006
+	// (get) Token: 0x060024FF RID: 9471 RVA: 0x000C6DE6 File Offset: 0x000C4FE6
 	[DebugReadout]
 	public bool rightIndexReleased
 	{
@@ -54,7 +54,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B2 RID: 946
-	// (get) Token: 0x06002500 RID: 9472 RVA: 0x000C6E0E File Offset: 0x000C500E
+	// (get) Token: 0x06002500 RID: 9472 RVA: 0x000C6DEE File Offset: 0x000C4FEE
 	[DebugReadout]
 	public bool leftIndexPressedThisFrame
 	{
@@ -65,7 +65,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B3 RID: 947
-	// (get) Token: 0x06002501 RID: 9473 RVA: 0x000C6E16 File Offset: 0x000C5016
+	// (get) Token: 0x06002501 RID: 9473 RVA: 0x000C6DF6 File Offset: 0x000C4FF6
 	[DebugReadout]
 	public bool leftIndexReleasedThisFrame
 	{
@@ -76,7 +76,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B4 RID: 948
-	// (get) Token: 0x06002502 RID: 9474 RVA: 0x000C6E1E File Offset: 0x000C501E
+	// (get) Token: 0x06002502 RID: 9474 RVA: 0x000C6DFE File Offset: 0x000C4FFE
 	[DebugReadout]
 	public bool rightIndexPressedThisFrame
 	{
@@ -87,7 +87,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B5 RID: 949
-	// (get) Token: 0x06002503 RID: 9475 RVA: 0x000C6E26 File Offset: 0x000C5026
+	// (get) Token: 0x06002503 RID: 9475 RVA: 0x000C6E06 File Offset: 0x000C5006
 	[DebugReadout]
 	public bool rightIndexReleasedThisFrame
 	{
@@ -98,7 +98,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B6 RID: 950
-	// (get) Token: 0x06002504 RID: 9476 RVA: 0x000C6E2E File Offset: 0x000C502E
+	// (get) Token: 0x06002504 RID: 9476 RVA: 0x000C6E0E File Offset: 0x000C500E
 	[DebugReadout]
 	public Vector3 leftVelocity
 	{
@@ -109,7 +109,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B7 RID: 951
-	// (get) Token: 0x06002505 RID: 9477 RVA: 0x000C6E36 File Offset: 0x000C5036
+	// (get) Token: 0x06002505 RID: 9477 RVA: 0x000C6E16 File Offset: 0x000C5016
 	[DebugReadout]
 	public Vector3 rightVelocity
 	{
@@ -120,7 +120,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B8 RID: 952
-	// (get) Token: 0x06002506 RID: 9478 RVA: 0x000C6E3E File Offset: 0x000C503E
+	// (get) Token: 0x06002506 RID: 9478 RVA: 0x000C6E1E File Offset: 0x000C501E
 	[DebugReadout]
 	public Vector3 leftAngularVelocity
 	{
@@ -131,7 +131,7 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003B9 RID: 953
-	// (get) Token: 0x06002507 RID: 9479 RVA: 0x000C6E46 File Offset: 0x000C5046
+	// (get) Token: 0x06002507 RID: 9479 RVA: 0x000C6E26 File Offset: 0x000C5026
 	[DebugReadout]
 	public Vector3 rightAngularVelocity
 	{
@@ -142,11 +142,11 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003BA RID: 954
-	// (get) Token: 0x06002508 RID: 9480 RVA: 0x000C6E4E File Offset: 0x000C504E
-	// (set) Token: 0x06002509 RID: 9481 RVA: 0x000C6E56 File Offset: 0x000C5056
+	// (get) Token: 0x06002508 RID: 9480 RVA: 0x000C6E2E File Offset: 0x000C502E
+	// (set) Token: 0x06002509 RID: 9481 RVA: 0x000C6E36 File Offset: 0x000C5036
 	public GorillaControllerType controllerType { get; private set; }
 
-	// Token: 0x0600250A RID: 9482 RVA: 0x000C6E5F File Offset: 0x000C505F
+	// Token: 0x0600250A RID: 9482 RVA: 0x000C6E3F File Offset: 0x000C503F
 	private void Awake()
 	{
 		if (ControllerInputPoller.instance == null)
@@ -160,7 +160,7 @@ public class ControllerInputPoller : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600250B RID: 9483 RVA: 0x000C6E94 File Offset: 0x000C5094
+	// Token: 0x0600250B RID: 9483 RVA: 0x000C6E74 File Offset: 0x000C5074
 	public static void AddUpdateCallback(Action callback)
 	{
 		if (!ControllerInputPoller.instance.didModifyOnUpdate)
@@ -172,7 +172,7 @@ public class ControllerInputPoller : MonoBehaviour
 		ControllerInputPoller.instance.onUpdateNext.Add(callback);
 	}
 
-	// Token: 0x0600250C RID: 9484 RVA: 0x000C6EFC File Offset: 0x000C50FC
+	// Token: 0x0600250C RID: 9484 RVA: 0x000C6EDC File Offset: 0x000C50DC
 	public static void RemoveUpdateCallback(Action callback)
 	{
 		if (!ControllerInputPoller.instance.didModifyOnUpdate)
@@ -184,7 +184,7 @@ public class ControllerInputPoller : MonoBehaviour
 		ControllerInputPoller.instance.onUpdateNext.Remove(callback);
 	}
 
-	// Token: 0x0600250D RID: 9485 RVA: 0x000C6F68 File Offset: 0x000C5168
+	// Token: 0x0600250D RID: 9485 RVA: 0x000C6F48 File Offset: 0x000C5148
 	public void LateUpdate()
 	{
 		if (!this.leftControllerDevice.isValid)
@@ -280,7 +280,7 @@ public class ControllerInputPoller : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600250E RID: 9486 RVA: 0x000C7534 File Offset: 0x000C5734
+	// Token: 0x0600250E RID: 9486 RVA: 0x000C7514 File Offset: 0x000C5714
 	private void CalculateGrabState(float grabValue, ref bool grab, ref bool grabRelease, out bool grabMomentary, out bool grabReleaseMomentary, float grabThreshold, float grabReleaseThreshold)
 	{
 		bool flag = grabValue >= grabThreshold;
@@ -291,7 +291,7 @@ public class ControllerInputPoller : MonoBehaviour
 		grabRelease = flag2;
 	}
 
-	// Token: 0x0600250F RID: 9487 RVA: 0x000C7578 File Offset: 0x000C5778
+	// Token: 0x0600250F RID: 9487 RVA: 0x000C7558 File Offset: 0x000C5758
 	public void RecalculateGrabState()
 	{
 		this.CalculateGrabState(this.leftControllerIndexFloat, ref this._leftIndexPressed, ref this._leftIndexReleased, out this._leftIndexPressedThisFrame, out this._leftIndexReleasedThisFrame, 0.75f, 0.65f);
@@ -309,7 +309,7 @@ public class ControllerInputPoller : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002510 RID: 9488 RVA: 0x000C76AB File Offset: 0x000C58AB
+	// Token: 0x06002510 RID: 9488 RVA: 0x000C768B File Offset: 0x000C588B
 	public static bool GetIndexPressed(XRNode node)
 	{
 		if (node != 4)
@@ -319,7 +319,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return ControllerInputPoller.instance.leftIndexPressed;
 	}
 
-	// Token: 0x06002511 RID: 9489 RVA: 0x000C76D0 File Offset: 0x000C58D0
+	// Token: 0x06002511 RID: 9489 RVA: 0x000C76B0 File Offset: 0x000C58B0
 	public static bool GetIndexReleased(XRNode node)
 	{
 		if (node != 4)
@@ -329,7 +329,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return ControllerInputPoller.instance.leftIndexReleased;
 	}
 
-	// Token: 0x06002512 RID: 9490 RVA: 0x000C76F5 File Offset: 0x000C58F5
+	// Token: 0x06002512 RID: 9490 RVA: 0x000C76D5 File Offset: 0x000C58D5
 	public static bool GetIndexPressedThisFrame(XRNode node)
 	{
 		if (node != 4)
@@ -339,7 +339,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return ControllerInputPoller.instance.leftIndexPressedThisFrame;
 	}
 
-	// Token: 0x06002513 RID: 9491 RVA: 0x000C771A File Offset: 0x000C591A
+	// Token: 0x06002513 RID: 9491 RVA: 0x000C76FA File Offset: 0x000C58FA
 	public static bool GetIndexReleasedThisFrame(XRNode node)
 	{
 		if (node != 4)
@@ -349,7 +349,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return ControllerInputPoller.instance.leftIndexReleasedThisFrame;
 	}
 
-	// Token: 0x06002514 RID: 9492 RVA: 0x000C773F File Offset: 0x000C593F
+	// Token: 0x06002514 RID: 9492 RVA: 0x000C771F File Offset: 0x000C591F
 	public static bool GetGrab(XRNode node)
 	{
 		if (node == 4)
@@ -359,7 +359,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightGrab;
 	}
 
-	// Token: 0x06002515 RID: 9493 RVA: 0x000C7764 File Offset: 0x000C5964
+	// Token: 0x06002515 RID: 9493 RVA: 0x000C7744 File Offset: 0x000C5944
 	public static bool GetGrabRelease(XRNode node)
 	{
 		if (node == 4)
@@ -369,7 +369,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightGrabRelease;
 	}
 
-	// Token: 0x06002516 RID: 9494 RVA: 0x000C7789 File Offset: 0x000C5989
+	// Token: 0x06002516 RID: 9494 RVA: 0x000C7769 File Offset: 0x000C5969
 	public static bool GetGrabMomentary(XRNode node)
 	{
 		if (node == 4)
@@ -379,7 +379,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightGrabMomentary;
 	}
 
-	// Token: 0x06002517 RID: 9495 RVA: 0x000C77AE File Offset: 0x000C59AE
+	// Token: 0x06002517 RID: 9495 RVA: 0x000C778E File Offset: 0x000C598E
 	public static bool GetGrabReleaseMomentary(XRNode node)
 	{
 		if (node == 4)
@@ -389,7 +389,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightGrabReleaseMomentary;
 	}
 
-	// Token: 0x06002518 RID: 9496 RVA: 0x000C77D3 File Offset: 0x000C59D3
+	// Token: 0x06002518 RID: 9496 RVA: 0x000C77B3 File Offset: 0x000C59B3
 	public static Vector2 Primary2DAxis(XRNode node)
 	{
 		if (node == 4)
@@ -399,7 +399,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return ControllerInputPoller.instance.rightControllerPrimary2DAxis;
 	}
 
-	// Token: 0x06002519 RID: 9497 RVA: 0x000C77F2 File Offset: 0x000C59F2
+	// Token: 0x06002519 RID: 9497 RVA: 0x000C77D2 File Offset: 0x000C59D2
 	public static bool PrimaryButtonPress(XRNode node)
 	{
 		if (node == 4)
@@ -409,7 +409,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightControllerPrimaryButton;
 	}
 
-	// Token: 0x0600251A RID: 9498 RVA: 0x000C7817 File Offset: 0x000C5A17
+	// Token: 0x0600251A RID: 9498 RVA: 0x000C77F7 File Offset: 0x000C59F7
 	public static bool SecondaryButtonPress(XRNode node)
 	{
 		if (node == 4)
@@ -419,7 +419,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightControllerSecondaryButton;
 	}
 
-	// Token: 0x0600251B RID: 9499 RVA: 0x000C783C File Offset: 0x000C5A3C
+	// Token: 0x0600251B RID: 9499 RVA: 0x000C781C File Offset: 0x000C5A1C
 	public static bool PrimaryButtonTouch(XRNode node)
 	{
 		if (node == 4)
@@ -429,7 +429,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightControllerPrimaryButtonTouch;
 	}
 
-	// Token: 0x0600251C RID: 9500 RVA: 0x000C7861 File Offset: 0x000C5A61
+	// Token: 0x0600251C RID: 9500 RVA: 0x000C7841 File Offset: 0x000C5A41
 	public static bool SecondaryButtonTouch(XRNode node)
 	{
 		if (node == 4)
@@ -439,7 +439,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightControllerSecondaryButtonTouch;
 	}
 
-	// Token: 0x0600251D RID: 9501 RVA: 0x000C7886 File Offset: 0x000C5A86
+	// Token: 0x0600251D RID: 9501 RVA: 0x000C7866 File Offset: 0x000C5A66
 	public static float GripFloat(XRNode node)
 	{
 		if (node == 4)
@@ -453,7 +453,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return 0f;
 	}
 
-	// Token: 0x0600251E RID: 9502 RVA: 0x000C78AF File Offset: 0x000C5AAF
+	// Token: 0x0600251E RID: 9502 RVA: 0x000C788F File Offset: 0x000C5A8F
 	public static float TriggerFloat(XRNode node)
 	{
 		if (node == 4)
@@ -467,7 +467,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return 0f;
 	}
 
-	// Token: 0x0600251F RID: 9503 RVA: 0x000C78D8 File Offset: 0x000C5AD8
+	// Token: 0x0600251F RID: 9503 RVA: 0x000C78B8 File Offset: 0x000C5AB8
 	public static float TriggerTouch(XRNode node)
 	{
 		if (node == 4)
@@ -481,7 +481,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return 0f;
 	}
 
-	// Token: 0x06002520 RID: 9504 RVA: 0x000C7901 File Offset: 0x000C5B01
+	// Token: 0x06002520 RID: 9504 RVA: 0x000C78E1 File Offset: 0x000C5AE1
 	public static Vector3 DevicePosition(XRNode node)
 	{
 		if (node == 3)
@@ -499,7 +499,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return Vector3.zero;
 	}
 
-	// Token: 0x06002521 RID: 9505 RVA: 0x000C793B File Offset: 0x000C5B3B
+	// Token: 0x06002521 RID: 9505 RVA: 0x000C791B File Offset: 0x000C5B1B
 	public static Quaternion DeviceRotation(XRNode node)
 	{
 		if (node == 3)
@@ -517,7 +517,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return Quaternion.identity;
 	}
 
-	// Token: 0x06002522 RID: 9506 RVA: 0x000C7975 File Offset: 0x000C5B75
+	// Token: 0x06002522 RID: 9506 RVA: 0x000C7955 File Offset: 0x000C5B55
 	public static Vector3 DeviceVelocity(XRNode node)
 	{
 		if (node == 4)
@@ -531,7 +531,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return Vector3.zero;
 	}
 
-	// Token: 0x06002523 RID: 9507 RVA: 0x000C799E File Offset: 0x000C5B9E
+	// Token: 0x06002523 RID: 9507 RVA: 0x000C797E File Offset: 0x000C5B7E
 	public static Vector3 DeviceAngularVelocity(XRNode node)
 	{
 		if (node == 4)
@@ -545,7 +545,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return Vector3.zero;
 	}
 
-	// Token: 0x06002524 RID: 9508 RVA: 0x000C79C8 File Offset: 0x000C5BC8
+	// Token: 0x06002524 RID: 9508 RVA: 0x000C79A8 File Offset: 0x000C5BA8
 	public static bool PositionValid(XRNode node)
 	{
 		if (node == 3)
@@ -559,7 +559,7 @@ public class ControllerInputPoller : MonoBehaviour
 		return node == 5 && ControllerInputPoller.instance.rightControllerDevice.isValid;
 	}
 
-	// Token: 0x06002525 RID: 9509 RVA: 0x000C7A18 File Offset: 0x000C5C18
+	// Token: 0x06002525 RID: 9509 RVA: 0x000C79F8 File Offset: 0x000C5BF8
 	public static bool HasPressFlags(XRNode node, EControllerInputPressFlags inputStateFlags)
 	{
 		EControllerInputPressFlags inputStateFlags2 = ControllerInputPoller.GetInputStateFlags(node);
@@ -567,26 +567,26 @@ public class ControllerInputPoller : MonoBehaviour
 	}
 
 	// Token: 0x170003BB RID: 955
-	// (get) Token: 0x06002526 RID: 9510 RVA: 0x000C7A37 File Offset: 0x000C5C37
-	// (set) Token: 0x06002527 RID: 9511 RVA: 0x000C7A3F File Offset: 0x000C5C3F
+	// (get) Token: 0x06002526 RID: 9510 RVA: 0x000C7A17 File Offset: 0x000C5C17
+	// (set) Token: 0x06002527 RID: 9511 RVA: 0x000C7A1F File Offset: 0x000C5C1F
 	public EControllerInputPressFlags leftPressFlags { get; private set; }
 
 	// Token: 0x170003BC RID: 956
-	// (get) Token: 0x06002528 RID: 9512 RVA: 0x000C7A48 File Offset: 0x000C5C48
-	// (set) Token: 0x06002529 RID: 9513 RVA: 0x000C7A50 File Offset: 0x000C5C50
+	// (get) Token: 0x06002528 RID: 9512 RVA: 0x000C7A28 File Offset: 0x000C5C28
+	// (set) Token: 0x06002529 RID: 9513 RVA: 0x000C7A30 File Offset: 0x000C5C30
 	public EControllerInputPressFlags rightPressFlags { get; private set; }
 
 	// Token: 0x170003BD RID: 957
-	// (get) Token: 0x0600252A RID: 9514 RVA: 0x000C7A59 File Offset: 0x000C5C59
-	// (set) Token: 0x0600252B RID: 9515 RVA: 0x000C7A61 File Offset: 0x000C5C61
+	// (get) Token: 0x0600252A RID: 9514 RVA: 0x000C7A39 File Offset: 0x000C5C39
+	// (set) Token: 0x0600252B RID: 9515 RVA: 0x000C7A41 File Offset: 0x000C5C41
 	public EControllerInputPressFlags leftPressFlagsLastFrame { get; private set; }
 
 	// Token: 0x170003BE RID: 958
-	// (get) Token: 0x0600252C RID: 9516 RVA: 0x000C7A6A File Offset: 0x000C5C6A
-	// (set) Token: 0x0600252D RID: 9517 RVA: 0x000C7A72 File Offset: 0x000C5C72
+	// (get) Token: 0x0600252C RID: 9516 RVA: 0x000C7A4A File Offset: 0x000C5C4A
+	// (set) Token: 0x0600252D RID: 9517 RVA: 0x000C7A52 File Offset: 0x000C5C52
 	public EControllerInputPressFlags rightPressFlagsLastFrame { get; private set; }
 
-	// Token: 0x0600252E RID: 9518 RVA: 0x000C7A7B File Offset: 0x000C5C7B
+	// Token: 0x0600252E RID: 9518 RVA: 0x000C7A5B File Offset: 0x000C5C5B
 	public static EControllerInputPressFlags GetInputStateFlags(XRNode node)
 	{
 		if (node == 4)
@@ -600,25 +600,25 @@ public class ControllerInputPoller : MonoBehaviour
 		return ControllerInputPoller.instance.rightPressFlags;
 	}
 
-	// Token: 0x0600252F RID: 9519 RVA: 0x000C7AA0 File Offset: 0x000C5CA0
+	// Token: 0x0600252F RID: 9519 RVA: 0x000C7A80 File Offset: 0x000C5C80
 	public static void AddCallbackOnPressStart(EControllerInputPressFlags flags, Action<EHandednessFlags> callback)
 	{
 		ControllerInputPoller._AddInputStateCallback(ref ControllerInputPoller._g_callbacks_onPressStart, flags, callback);
 	}
 
-	// Token: 0x06002530 RID: 9520 RVA: 0x000C7AAE File Offset: 0x000C5CAE
+	// Token: 0x06002530 RID: 9520 RVA: 0x000C7A8E File Offset: 0x000C5C8E
 	public static void AddCallbackOnPressEnd(EControllerInputPressFlags flags, Action<EHandednessFlags> callback)
 	{
 		ControllerInputPoller._AddInputStateCallback(ref ControllerInputPoller._g_callbacks_onPressEnd, flags, callback);
 	}
 
-	// Token: 0x06002531 RID: 9521 RVA: 0x000C7ABC File Offset: 0x000C5CBC
+	// Token: 0x06002531 RID: 9521 RVA: 0x000C7A9C File Offset: 0x000C5C9C
 	public static void AddCallbackOnPressUpdate(EControllerInputPressFlags flags, Action<EHandednessFlags> callback)
 	{
 		ControllerInputPoller._AddInputStateCallback(ref ControllerInputPoller._g_callbacks_onPressUpdate, flags, callback);
 	}
 
-	// Token: 0x06002532 RID: 9522 RVA: 0x000C7ACC File Offset: 0x000C5CCC
+	// Token: 0x06002532 RID: 9522 RVA: 0x000C7AAC File Offset: 0x000C5CAC
 	private static void _AddInputStateCallback(ref ControllerInputPoller._InputCallbacksCadenceInfo ref_callbacksInfo, EControllerInputPressFlags flags, Action<EHandednessFlags> callback)
 	{
 		if (callback == null || flags == EControllerInputPressFlags.None)
@@ -632,25 +632,25 @@ public class ControllerInputPoller : MonoBehaviour
 		ref_callbacksInfo.list.Add(new ControllerInputPoller._InputCallback(flags, callback));
 	}
 
-	// Token: 0x06002533 RID: 9523 RVA: 0x000C7B22 File Offset: 0x000C5D22
+	// Token: 0x06002533 RID: 9523 RVA: 0x000C7B02 File Offset: 0x000C5D02
 	public static void RemoveCallbackOnPressStart(Action<EHandednessFlags> callback)
 	{
 		ControllerInputPoller._RemoveInputStateCallback(ref ControllerInputPoller._g_callbacks_onPressStart, callback);
 	}
 
-	// Token: 0x06002534 RID: 9524 RVA: 0x000C7B2F File Offset: 0x000C5D2F
+	// Token: 0x06002534 RID: 9524 RVA: 0x000C7B0F File Offset: 0x000C5D0F
 	public static void RemoveCallbackOnPressEnd(Action<EHandednessFlags> callback)
 	{
 		ControllerInputPoller._RemoveInputStateCallback(ref ControllerInputPoller._g_callbacks_onPressEnd, callback);
 	}
 
-	// Token: 0x06002535 RID: 9525 RVA: 0x000C7B3C File Offset: 0x000C5D3C
+	// Token: 0x06002535 RID: 9525 RVA: 0x000C7B1C File Offset: 0x000C5D1C
 	public static void RemoveCallbackOnPressUpdate(Action<EHandednessFlags> callback)
 	{
 		ControllerInputPoller._RemoveInputStateCallback(ref ControllerInputPoller._g_callbacks_onPressUpdate, callback);
 	}
 
-	// Token: 0x06002536 RID: 9526 RVA: 0x000C7B4C File Offset: 0x000C5D4C
+	// Token: 0x06002536 RID: 9526 RVA: 0x000C7B2C File Offset: 0x000C5D2C
 	private static void _RemoveInputStateCallback(ref ControllerInputPoller._InputCallbacksCadenceInfo ref_callbacksInfo, Action<EHandednessFlags> callback)
 	{
 		if (callback == null)
@@ -660,7 +660,7 @@ public class ControllerInputPoller : MonoBehaviour
 		ref_callbacksInfo.list.RemoveAll((ControllerInputPoller._InputCallback sub) => sub.callback == callback);
 	}
 
-	// Token: 0x06002537 RID: 9527 RVA: 0x000C7B88 File Offset: 0x000C5D88
+	// Token: 0x06002537 RID: 9527 RVA: 0x000C7B68 File Offset: 0x000C5D68
 	private void _UpdatePressFlags()
 	{
 		this.leftPressFlagsLastFrame = this.leftPressFlags;
@@ -672,7 +672,7 @@ public class ControllerInputPoller : MonoBehaviour
 		ControllerInputPoller._UpdatePressFlags_Callbacks(ref ControllerInputPoller._g_callbacks_onPressUpdate, ControllerInputPoller._EPressCadence.Held, this.leftPressFlags, this.leftPressFlagsLastFrame, this.rightPressFlags, this.rightPressFlagsLastFrame);
 	}
 
-	// Token: 0x06002538 RID: 9528 RVA: 0x000C7C88 File Offset: 0x000C5E88
+	// Token: 0x06002538 RID: 9528 RVA: 0x000C7C68 File Offset: 0x000C5E68
 	[MethodImpl(256)]
 	private static void _UpdatePressFlags_Callbacks(ref ControllerInputPoller._InputCallbacksCadenceInfo callbacksInfo, ControllerInputPoller._EPressCadence cadence, EControllerInputPressFlags lFlags_now, EControllerInputPressFlags lFlags_old, EControllerInputPressFlags rFlags_now, EControllerInputPressFlags rFlags_old)
 	{
@@ -695,7 +695,7 @@ public class ControllerInputPoller : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002539 RID: 9529 RVA: 0x000C7D20 File Offset: 0x000C5F20
+	// Token: 0x06002539 RID: 9529 RVA: 0x000C7D00 File Offset: 0x000C5F00
 	[MethodImpl(256)]
 	private static EHandednessFlags _IsHandContributingToPressCadence(EHandednessFlags hand, ControllerInputPoller._EPressCadence pressCadence, EControllerInputPressFlags cbFlags, EControllerInputPressFlags flags_now, EControllerInputPressFlags flags_old)
 	{
@@ -889,7 +889,7 @@ public class ControllerInputPoller : MonoBehaviour
 	// Token: 0x020005BE RID: 1470
 	private struct _InputCallback
 	{
-		// Token: 0x0600253C RID: 9532 RVA: 0x000C7D94 File Offset: 0x000C5F94
+		// Token: 0x0600253C RID: 9532 RVA: 0x000C7D74 File Offset: 0x000C5F74
 		public _InputCallback(EControllerInputPressFlags flags, Action<EHandednessFlags> callback)
 		{
 			this.flags = flags;
@@ -906,7 +906,7 @@ public class ControllerInputPoller : MonoBehaviour
 	// Token: 0x020005BF RID: 1471
 	private struct _InputCallbacksCadenceInfo
 	{
-		// Token: 0x0600253D RID: 9533 RVA: 0x000C7DA4 File Offset: 0x000C5FA4
+		// Token: 0x0600253D RID: 9533 RVA: 0x000C7D84 File Offset: 0x000C5F84
 		public _InputCallbacksCadenceInfo(int initialCapacity)
 		{
 			this.list = new List<ControllerInputPoller._InputCallback>(initialCapacity);

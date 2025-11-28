@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020004D0 RID: 1232
 public class WardrobeFunctionButton : GorillaPressableButton
 {
-	// Token: 0x06001FCC RID: 8140 RVA: 0x000A984E File Offset: 0x000A7A4E
+	// Token: 0x06001FCC RID: 8140 RVA: 0x000A982E File Offset: 0x000A7A2E
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
@@ -19,7 +19,7 @@ public class WardrobeFunctionButton : GorillaPressableButton
 	{
 	}
 
-	// Token: 0x06001FCE RID: 8142 RVA: 0x000A9875 File Offset: 0x000A7A75
+	// Token: 0x06001FCE RID: 8142 RVA: 0x000A9855 File Offset: 0x000A7A55
 	private IEnumerator ButtonColorUpdate()
 	{
 		this.buttonRenderer.material = this.pressedMaterial;

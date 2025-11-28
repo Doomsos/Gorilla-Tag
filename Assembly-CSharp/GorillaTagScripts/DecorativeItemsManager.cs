@@ -14,7 +14,7 @@ namespace GorillaTagScripts
 	public class DecorativeItemsManager : NetworkComponent
 	{
 		// Token: 0x1700083F RID: 2111
-		// (get) Token: 0x06005816 RID: 22550 RVA: 0x001C24CC File Offset: 0x001C06CC
+		// (get) Token: 0x06005816 RID: 22550 RVA: 0x001C24AC File Offset: 0x001C06AC
 		public static DecorativeItemsManager Instance
 		{
 			get
@@ -23,7 +23,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005817 RID: 22551 RVA: 0x001C24D4 File Offset: 0x001C06D4
+		// Token: 0x06005817 RID: 22551 RVA: 0x001C24B4 File Offset: 0x001C06B4
 		protected override void Awake()
 		{
 			base.Awake();
@@ -67,7 +67,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005818 RID: 22552 RVA: 0x001C263C File Offset: 0x001C083C
+		// Token: 0x06005818 RID: 22552 RVA: 0x001C261C File Offset: 0x001C081C
 		private void OnDestroy()
 		{
 			NetworkBehaviourUtils.InternalOnDestroy(this);
@@ -83,7 +83,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005819 RID: 22553 RVA: 0x001C26D8 File Offset: 0x001C08D8
+		// Token: 0x06005819 RID: 22553 RVA: 0x001C26B8 File Offset: 0x001C08B8
 		private void Update()
 		{
 			if (!PhotonNetwork.InRoom)
@@ -118,7 +118,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600581A RID: 22554 RVA: 0x001C27C8 File Offset: 0x001C09C8
+		// Token: 0x0600581A RID: 22554 RVA: 0x001C27A8 File Offset: 0x001C09A8
 		private void SpawnItem(int index)
 		{
 			if (!NetworkSystem.Instance.InRoom)
@@ -160,14 +160,14 @@ namespace GorillaTagScripts
 			});
 		}
 
-		// Token: 0x0600581B RID: 22555 RVA: 0x001C288F File Offset: 0x001C0A8F
+		// Token: 0x0600581B RID: 22555 RVA: 0x001C286F File Offset: 0x001C0A6F
 		[PunRPC]
 		private void RespawnItemRPC(int index, Vector3 _transformPos, Quaternion _transformRot, PhotonMessageInfo info)
 		{
 			this.RespawnItemShared(index, _transformPos, _transformRot, info);
 		}
 
-		// Token: 0x0600581C RID: 22556 RVA: 0x001C28A4 File Offset: 0x001C0AA4
+		// Token: 0x0600581C RID: 22556 RVA: 0x001C2884 File Offset: 0x001C0A84
 		[Rpc]
 		private unsafe void RPC_RespawnItem(int index, Vector3 _transformPos, Quaternion _transformRot, RpcInfo info = default(RpcInfo))
 		{
@@ -223,7 +223,7 @@ namespace GorillaTagScripts
 			this.RespawnItemShared(index, _transformPos, _transformRot, info);
 		}
 
-		// Token: 0x0600581D RID: 22557 RVA: 0x001C2A64 File Offset: 0x001C0C64
+		// Token: 0x0600581D RID: 22557 RVA: 0x001C2A44 File Offset: 0x001C0C44
 		protected void RespawnItemShared(int index, Vector3 _transformPos, Quaternion _transformRot, PhotonMessageInfoWrapped info)
 		{
 			if (index >= 0 && index <= this.itemsList.Count - 1)
@@ -238,7 +238,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600581E RID: 22558 RVA: 0x001C2AD4 File Offset: 0x001C0CD4
+		// Token: 0x0600581E RID: 22558 RVA: 0x001C2AB4 File Offset: 0x001C0CB4
 		private Transform RandomSpawn()
 		{
 			this.lastIndex = this.currentIndex;
@@ -269,7 +269,7 @@ namespace GorillaTagScripts
 			return null;
 		}
 
-		// Token: 0x0600581F RID: 22559 RVA: 0x001C2B96 File Offset: 0x001C0D96
+		// Token: 0x0600581F RID: 22559 RVA: 0x001C2B76 File Offset: 0x001C0D76
 		private int UpdateListPerFrame()
 		{
 			this.arrayIndex++;
@@ -281,7 +281,7 @@ namespace GorillaTagScripts
 			return this.arrayIndex;
 		}
 
-		// Token: 0x06005820 RID: 22560 RVA: 0x001C2BD4 File Offset: 0x001C0DD4
+		// Token: 0x06005820 RID: 22560 RVA: 0x001C2BB4 File Offset: 0x001C0DB4
 		private void OnRequestToRespawn(DecorativeItem item)
 		{
 			if (base.IsMine)
@@ -295,7 +295,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005821 RID: 22561 RVA: 0x001C2C08 File Offset: 0x001C0E08
+		// Token: 0x06005821 RID: 22561 RVA: 0x001C2BE8 File Offset: 0x001C0DE8
 		public AttachPoint getCurrentAttachPointByPosition(Vector3 _attachPoint)
 		{
 			foreach (AttachPoint attachPoint in this.allHooks)
@@ -309,8 +309,8 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x17000840 RID: 2112
-		// (get) Token: 0x06005822 RID: 22562 RVA: 0x001C2C70 File Offset: 0x001C0E70
-		// (set) Token: 0x06005823 RID: 22563 RVA: 0x001C2C96 File Offset: 0x001C0E96
+		// (get) Token: 0x06005822 RID: 22562 RVA: 0x001C2C50 File Offset: 0x001C0E50
+		// (set) Token: 0x06005823 RID: 22563 RVA: 0x001C2C76 File Offset: 0x001C0E76
 		[Networked]
 		[NetworkedWeaved(0, 1)]
 		public unsafe int Data
@@ -333,19 +333,19 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005824 RID: 22564 RVA: 0x001C2CBD File Offset: 0x001C0EBD
+		// Token: 0x06005824 RID: 22564 RVA: 0x001C2C9D File Offset: 0x001C0E9D
 		public override void WriteDataFusion()
 		{
 			this.Data = this.currentIndex;
 		}
 
-		// Token: 0x06005825 RID: 22565 RVA: 0x001C2CCB File Offset: 0x001C0ECB
+		// Token: 0x06005825 RID: 22565 RVA: 0x001C2CAB File Offset: 0x001C0EAB
 		public override void ReadDataFusion()
 		{
 			this.currentIndex = this.Data;
 		}
 
-		// Token: 0x06005826 RID: 22566 RVA: 0x001C2CD9 File Offset: 0x001C0ED9
+		// Token: 0x06005826 RID: 22566 RVA: 0x001C2CB9 File Offset: 0x001C0EB9
 		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (info.Sender != PhotonNetwork.MasterClient)
@@ -355,7 +355,7 @@ namespace GorillaTagScripts
 			stream.SendNext(this.currentIndex);
 		}
 
-		// Token: 0x06005827 RID: 22567 RVA: 0x001C2CFA File Offset: 0x001C0EFA
+		// Token: 0x06005827 RID: 22567 RVA: 0x001C2CDA File Offset: 0x001C0EDA
 		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (info.Sender != PhotonNetwork.MasterClient)
@@ -365,7 +365,7 @@ namespace GorillaTagScripts
 			this.currentIndex = (int)stream.ReceiveNext();
 		}
 
-		// Token: 0x06005829 RID: 22569 RVA: 0x001C2D56 File Offset: 0x001C0F56
+		// Token: 0x06005829 RID: 22569 RVA: 0x001C2D36 File Offset: 0x001C0F36
 		[WeaverGenerated]
 		public override void CopyBackingFieldsToState(bool A_1)
 		{
@@ -373,7 +373,7 @@ namespace GorillaTagScripts
 			this.Data = this._Data;
 		}
 
-		// Token: 0x0600582A RID: 22570 RVA: 0x001C2D6E File Offset: 0x001C0F6E
+		// Token: 0x0600582A RID: 22570 RVA: 0x001C2D4E File Offset: 0x001C0F4E
 		[WeaverGenerated]
 		public override void CopyStateToBackingFields()
 		{
@@ -381,7 +381,7 @@ namespace GorillaTagScripts
 			this._Data = this.Data;
 		}
 
-		// Token: 0x0600582B RID: 22571 RVA: 0x001C2D84 File Offset: 0x001C0F84
+		// Token: 0x0600582B RID: 22571 RVA: 0x001C2D64 File Offset: 0x001C0F64
 		[NetworkRpcWeavedInvoker(1, 7, 7)]
 		[Preserve]
 		[WeaverGenerated]

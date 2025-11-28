@@ -12,7 +12,7 @@ namespace CosmeticRoom
 	// Token: 0x02000EA3 RID: 3747
 	public class ItemCheckout : MonoBehaviour
 	{
-		// Token: 0x06005DB1 RID: 23985 RVA: 0x001E14D0 File Offset: 0x001DF6D0
+		// Token: 0x06005DB1 RID: 23985 RVA: 0x001E14B0 File Offset: 0x001DF6B0
 		public void InitializeForCustomMap(CompositeTriggerEvents customMapTryOnArea, Scene customMapScene, bool useCustomCounterMesh = true)
 		{
 			GameObject gameObject = this.checkoutCounterMesh;
@@ -30,7 +30,7 @@ namespace CosmeticRoom
 			CosmeticsController.instance.AddItemCheckout(this);
 		}
 
-		// Token: 0x06005DB2 RID: 23986 RVA: 0x001E1524 File Offset: 0x001DF724
+		// Token: 0x06005DB2 RID: 23986 RVA: 0x001E1504 File Offset: 0x001DF704
 		public void RemoveFromCustomMap(CompositeTriggerEvents customMapTryOnArea)
 		{
 			if (customMapTryOnArea.IsNull())
@@ -40,7 +40,7 @@ namespace CosmeticRoom
 			customMapTryOnArea.RemoveCollider(this.checkoutTryOnArea);
 		}
 
-		// Token: 0x06005DB3 RID: 23987 RVA: 0x001E153C File Offset: 0x001DF73C
+		// Token: 0x06005DB3 RID: 23987 RVA: 0x001E151C File Offset: 0x001DF71C
 		public void UpdateFromCart(List<CosmeticsController.CosmeticItem> currentCart, CosmeticsController.CosmeticItem itemToBuy)
 		{
 			this.iterator = 0;
@@ -59,7 +59,7 @@ namespace CosmeticRoom
 			}
 		}
 
-		// Token: 0x06005DB4 RID: 23988 RVA: 0x001E15D0 File Offset: 0x001DF7D0
+		// Token: 0x06005DB4 RID: 23988 RVA: 0x001E15B0 File Offset: 0x001DF7B0
 		public void UpdatePurchaseText(string newText, string leftPurchaseButtonText, string rightPurchaseButtonText, bool leftButtonOn, bool rightButtonOn)
 		{
 			if (this.purchaseText.IsNotNull())
@@ -82,7 +82,7 @@ namespace CosmeticRoom
 			}
 		}
 
-		// Token: 0x06005DB5 RID: 23989 RVA: 0x001E168F File Offset: 0x001DF88F
+		// Token: 0x06005DB5 RID: 23989 RVA: 0x001E166F File Offset: 0x001DF86F
 		public bool IsFromScene(Scene unloadingScene)
 		{
 			return unloadingScene == this.originalScene;

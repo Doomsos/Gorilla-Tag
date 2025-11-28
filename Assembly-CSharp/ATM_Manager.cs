@@ -11,7 +11,7 @@ using UnityEngine.Events;
 public class ATM_Manager : MonoBehaviour, IBuildValidation
 {
 	// Token: 0x1700035A RID: 858
-	// (get) Token: 0x06001F4C RID: 8012 RVA: 0x000A59ED File Offset: 0x000A3BED
+	// (get) Token: 0x06001F4C RID: 8012 RVA: 0x000A59CD File Offset: 0x000A3BCD
 	public ATM_Manager.ATMStages CurrentATMStage
 	{
 		get
@@ -20,7 +20,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F4D RID: 8013 RVA: 0x000A59F8 File Offset: 0x000A3BF8
+	// Token: 0x06001F4D RID: 8013 RVA: 0x000A59D8 File Offset: 0x000A3BD8
 	public void Awake()
 	{
 		if (ATM_Manager.instance)
@@ -46,7 +46,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		this.HookupToCreatorCodes();
 	}
 
-	// Token: 0x06001F4E RID: 8014 RVA: 0x000A5AA4 File Offset: 0x000A3CA4
+	// Token: 0x06001F4E RID: 8014 RVA: 0x000A5A84 File Offset: 0x000A3C84
 	public void Start()
 	{
 		Debug.Log("ATM COUNT: " + this.atmUIs.Count.ToString());
@@ -54,7 +54,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		GameEvents.OnGorrillaATMKeyButtonPressedEvent.AddListener(new UnityAction<GorillaATMKeyBindings>(this.PressButton));
 	}
 
-	// Token: 0x06001F4F RID: 8015 RVA: 0x000A5B0C File Offset: 0x000A3D0C
+	// Token: 0x06001F4F RID: 8015 RVA: 0x000A5AEC File Offset: 0x000A3CEC
 	public void HookupToCreatorCodes()
 	{
 		CreatorCodes.InitializedEvent += new Action(this.CreatorCodesInitialized);
@@ -66,7 +66,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F50 RID: 8016 RVA: 0x000A5B5C File Offset: 0x000A3D5C
+	// Token: 0x06001F50 RID: 8016 RVA: 0x000A5B3C File Offset: 0x000A3D3C
 	public void CreatorCodesInitialized()
 	{
 		foreach (CreatorCodeSmallDisplay creatorCodeSmallDisplay in this.smallDisplays)
@@ -79,7 +79,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F51 RID: 8017 RVA: 0x000A5C04 File Offset: 0x000A3E04
+	// Token: 0x06001F51 RID: 8017 RVA: 0x000A5BE4 File Offset: 0x000A3DE4
 	public void OnCreatorCodeChanged(string id)
 	{
 		if (id != "atm_terminal_id")
@@ -113,7 +113,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F52 RID: 8018 RVA: 0x000A5D34 File Offset: 0x000A3F34
+	// Token: 0x06001F52 RID: 8018 RVA: 0x000A5D14 File Offset: 0x000A3F14
 	private void OnOnCreatorCodeFailureEvent(string id)
 	{
 		if (id != "atm_terminal_id")
@@ -130,7 +130,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		Debug.Log("ATM CODE FAILURE");
 	}
 
-	// Token: 0x06001F53 RID: 8019 RVA: 0x000A5DCC File Offset: 0x000A3FCC
+	// Token: 0x06001F53 RID: 8019 RVA: 0x000A5DAC File Offset: 0x000A3FAC
 	public void OnCreatorCodeInvalid(string id)
 	{
 		if (id != "atm_terminal_id")
@@ -143,26 +143,26 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F54 RID: 8020 RVA: 0x000A5E34 File Offset: 0x000A4034
+	// Token: 0x06001F54 RID: 8020 RVA: 0x000A5E14 File Offset: 0x000A4014
 	private void OnEnable()
 	{
 		LocalisationManager.RegisterOnLanguageChanged(new Action(this.OnLanguageChanged));
 		this.SwitchToStage(this.currentATMStage);
 	}
 
-	// Token: 0x06001F55 RID: 8021 RVA: 0x000A5E53 File Offset: 0x000A4053
+	// Token: 0x06001F55 RID: 8021 RVA: 0x000A5E33 File Offset: 0x000A4033
 	private void OnDisable()
 	{
 		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.OnLanguageChanged));
 	}
 
-	// Token: 0x06001F56 RID: 8022 RVA: 0x000A5E66 File Offset: 0x000A4066
+	// Token: 0x06001F56 RID: 8022 RVA: 0x000A5E46 File Offset: 0x000A4046
 	private void OnLanguageChanged()
 	{
 		this.SwitchToStage(this.currentATMStage);
 	}
 
-	// Token: 0x06001F57 RID: 8023 RVA: 0x000A5E74 File Offset: 0x000A4074
+	// Token: 0x06001F57 RID: 8023 RVA: 0x000A5E54 File Offset: 0x000A4054
 	public void PressButton(GorillaATMKeyBindings buttonPressed)
 	{
 		if (this.currentATMStage == ATM_Manager.ATMStages.Confirm && CreatorCodes.getCurrentCreatorCodeStatus("atm_terminal_id") != CreatorCodes.CreatorCodeStatus.Validating)
@@ -194,7 +194,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F58 RID: 8024 RVA: 0x000A5F34 File Offset: 0x000A4134
+	// Token: 0x06001F58 RID: 8024 RVA: 0x000A5F14 File Offset: 0x000A4114
 	public void ProcessATMState(string currencyButton)
 	{
 		ATM_Manager.<ProcessATMState>d__55 <ProcessATMState>d__;
@@ -205,7 +205,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		<ProcessATMState>d__.<>t__builder.Start<ATM_Manager.<ProcessATMState>d__55>(ref <ProcessATMState>d__);
 	}
 
-	// Token: 0x06001F59 RID: 8025 RVA: 0x000A5F73 File Offset: 0x000A4173
+	// Token: 0x06001F59 RID: 8025 RVA: 0x000A5F53 File Offset: 0x000A4153
 	public void AddATM(ATM_UI newATM)
 	{
 		this.atmUIs.Add(newATM);
@@ -213,13 +213,13 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		this.SwitchToStage(this.currentATMStage);
 	}
 
-	// Token: 0x06001F5A RID: 8026 RVA: 0x000A5FA2 File Offset: 0x000A41A2
+	// Token: 0x06001F5A RID: 8026 RVA: 0x000A5F82 File Offset: 0x000A4182
 	public void RemoveATM(ATM_UI atmToRemove)
 	{
 		this.atmUIs.Remove(atmToRemove);
 	}
 
-	// Token: 0x06001F5B RID: 8027 RVA: 0x000A5FB4 File Offset: 0x000A41B4
+	// Token: 0x06001F5B RID: 8027 RVA: 0x000A5F94 File Offset: 0x000A4194
 	public void CreatorCodeValidating()
 	{
 		foreach (ATM_UI atm_UI in this.atmUIs)
@@ -228,7 +228,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F5C RID: 8028 RVA: 0x000A6010 File Offset: 0x000A4210
+	// Token: 0x06001F5C RID: 8028 RVA: 0x000A5FF0 File Offset: 0x000A41F0
 	public void CreatorCodeValid()
 	{
 		foreach (ATM_UI atm_UI in this.atmUIs)
@@ -241,7 +241,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F5D RID: 8029 RVA: 0x000A607C File Offset: 0x000A427C
+	// Token: 0x06001F5D RID: 8029 RVA: 0x000A605C File Offset: 0x000A425C
 	public void SwitchToStage(ATM_Manager.ATMStages newStage)
 	{
 		this.currentATMStage = newStage;
@@ -451,7 +451,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F5E RID: 8030 RVA: 0x000A6C54 File Offset: 0x000A4E54
+	// Token: 0x06001F5E RID: 8030 RVA: 0x000A6C34 File Offset: 0x000A4E34
 	public void SetATMText(string newText)
 	{
 		foreach (ATM_UI atm_UI in this.atmUIs)
@@ -460,7 +460,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F5F RID: 8031 RVA: 0x000A6CAC File Offset: 0x000A4EAC
+	// Token: 0x06001F5F RID: 8031 RVA: 0x000A6C8C File Offset: 0x000A4E8C
 	public void PressCurrencyPurchaseButton(string currencyPurchaseSize)
 	{
 		this.ProcessATMState(currencyPurchaseSize);
@@ -471,7 +471,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 	{
 	}
 
-	// Token: 0x06001F61 RID: 8033 RVA: 0x000A6CB5 File Offset: 0x000A4EB5
+	// Token: 0x06001F61 RID: 8033 RVA: 0x000A6C95 File Offset: 0x000A4E95
 	bool IBuildValidation.BuildValidationCheck()
 	{
 		if (this.nexusGroups.Length == 0)
@@ -482,7 +482,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 		return true;
 	}
 
-	// Token: 0x06001F62 RID: 8034 RVA: 0x000A6CE0 File Offset: 0x000A4EE0
+	// Token: 0x06001F62 RID: 8034 RVA: 0x000A6CC0 File Offset: 0x000A4EC0
 	internal void SetTemporaryCreatorCode(string code)
 	{
 		if (code == null)

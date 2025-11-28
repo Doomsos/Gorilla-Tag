@@ -7,7 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GhostReactorBreakableItemSpawnConfig", menuName = "ScriptableObjects/GhostReactorBreakableItemSpawnConfig")]
 public class GRBreakableItemSpawnConfig : ScriptableObject
 {
-	// Token: 0x06002AE5 RID: 10981 RVA: 0x000E6DB8 File Offset: 0x000E4FB8
+	// Token: 0x06002AE5 RID: 10981 RVA: 0x000E6D98 File Offset: 0x000E4F98
 	public bool TryForRandomItem(GameEntity spawnFromEntity, out GameEntity entity, int sanity = 0)
 	{
 		GRBreakableItemSpawnConfig @override = this.GetOverride(spawnFromEntity);
@@ -37,7 +37,7 @@ public class GRBreakableItemSpawnConfig : ScriptableObject
 		return false;
 	}
 
-	// Token: 0x06002AE6 RID: 10982 RVA: 0x000E6E7C File Offset: 0x000E507C
+	// Token: 0x06002AE6 RID: 10982 RVA: 0x000E6E5C File Offset: 0x000E505C
 	public bool TryForRandomItem(GhostReactor reactor, ref SRand srand, out GameEntity entity, int sanity = 0)
 	{
 		GRBreakableItemSpawnConfig @override = this.GetOverride(reactor);
@@ -67,7 +67,7 @@ public class GRBreakableItemSpawnConfig : ScriptableObject
 		return false;
 	}
 
-	// Token: 0x06002AE7 RID: 10983 RVA: 0x000E6F44 File Offset: 0x000E5144
+	// Token: 0x06002AE7 RID: 10983 RVA: 0x000E6F24 File Offset: 0x000E5124
 	private GRBreakableItemSpawnConfig GetOverride(GameEntity entity)
 	{
 		GhostReactorManager ghostReactorManager = GhostReactorManager.Get(entity);
@@ -78,7 +78,7 @@ public class GRBreakableItemSpawnConfig : ScriptableObject
 		return this.GetOverride(ghostReactorManager.reactor);
 	}
 
-	// Token: 0x06002AE8 RID: 10984 RVA: 0x000E6F70 File Offset: 0x000E5170
+	// Token: 0x06002AE8 RID: 10984 RVA: 0x000E6F50 File Offset: 0x000E5150
 	private GRBreakableItemSpawnConfig GetOverride(GhostReactor reactor)
 	{
 		if (reactor == null)
@@ -93,7 +93,7 @@ public class GRBreakableItemSpawnConfig : ScriptableObject
 		return currLevelGenConfig.dropTableOverrides.GetOverride(this);
 	}
 
-	// Token: 0x06002AE9 RID: 10985 RVA: 0x000E6FB4 File Offset: 0x000E51B4
+	// Token: 0x06002AE9 RID: 10985 RVA: 0x000E6F94 File Offset: 0x000E5194
 	private void OnValidate()
 	{
 		this.precomputedItemTotalWeight = 0f;

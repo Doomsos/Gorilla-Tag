@@ -9,7 +9,7 @@ using UnityEngine.Events;
 public class UseableObject : TransferrableObject
 {
 	// Token: 0x17000371 RID: 881
-	// (get) Token: 0x060020AD RID: 8365 RVA: 0x000AD793 File Offset: 0x000AB993
+	// (get) Token: 0x060020AD RID: 8365 RVA: 0x000AD773 File Offset: 0x000AB973
 	public bool isMidUse
 	{
 		get
@@ -19,7 +19,7 @@ public class UseableObject : TransferrableObject
 	}
 
 	// Token: 0x17000372 RID: 882
-	// (get) Token: 0x060020AE RID: 8366 RVA: 0x000AD79B File Offset: 0x000AB99B
+	// (get) Token: 0x060020AE RID: 8366 RVA: 0x000AD77B File Offset: 0x000AB97B
 	public float useTimeElapsed
 	{
 		get
@@ -29,7 +29,7 @@ public class UseableObject : TransferrableObject
 	}
 
 	// Token: 0x17000373 RID: 883
-	// (get) Token: 0x060020AF RID: 8367 RVA: 0x000AD7A3 File Offset: 0x000AB9A3
+	// (get) Token: 0x060020AF RID: 8367 RVA: 0x000AD783 File Offset: 0x000AB983
 	public bool justUsed
 	{
 		get
@@ -43,14 +43,14 @@ public class UseableObject : TransferrableObject
 		}
 	}
 
-	// Token: 0x060020B0 RID: 8368 RVA: 0x000AD7B7 File Offset: 0x000AB9B7
+	// Token: 0x060020B0 RID: 8368 RVA: 0x000AD797 File Offset: 0x000AB997
 	protected override void Awake()
 	{
 		base.Awake();
 		this._events = base.gameObject.GetOrAddComponent<UseableObjectEvents>();
 	}
 
-	// Token: 0x060020B1 RID: 8369 RVA: 0x000AD7D0 File Offset: 0x000AB9D0
+	// Token: 0x060020B1 RID: 8369 RVA: 0x000AD7B0 File Offset: 0x000AB9B0
 	internal override void OnEnable()
 	{
 		base.OnEnable();
@@ -67,24 +67,24 @@ public class UseableObject : TransferrableObject
 		this._events.Deactivate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnObjectDeactivated);
 	}
 
-	// Token: 0x060020B2 RID: 8370 RVA: 0x000AD85A File Offset: 0x000ABA5A
+	// Token: 0x060020B2 RID: 8370 RVA: 0x000AD83A File Offset: 0x000ABA3A
 	internal override void OnDisable()
 	{
 		base.OnDisable();
 		Object.Destroy(this._events);
 	}
 
-	// Token: 0x060020B3 RID: 8371 RVA: 0x000AD86D File Offset: 0x000ABA6D
+	// Token: 0x060020B3 RID: 8371 RVA: 0x000AD84D File Offset: 0x000ABA4D
 	private void OnObjectActivated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 	{
 	}
 
-	// Token: 0x060020B4 RID: 8372 RVA: 0x000AD86D File Offset: 0x000ABA6D
+	// Token: 0x060020B4 RID: 8372 RVA: 0x000AD84D File Offset: 0x000ABA4D
 	private void OnObjectDeactivated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 	{
 	}
 
-	// Token: 0x060020B5 RID: 8373 RVA: 0x000AD873 File Offset: 0x000ABA73
+	// Token: 0x060020B5 RID: 8373 RVA: 0x000AD853 File Offset: 0x000ABA53
 	public override void TriggeredLateUpdate()
 	{
 		base.TriggeredLateUpdate();
@@ -94,7 +94,7 @@ public class UseableObject : TransferrableObject
 		}
 	}
 
-	// Token: 0x060020B6 RID: 8374 RVA: 0x000AD898 File Offset: 0x000ABA98
+	// Token: 0x060020B6 RID: 8374 RVA: 0x000AD878 File Offset: 0x000ABA78
 	public override void OnActivate()
 	{
 		base.OnActivate();
@@ -124,7 +124,7 @@ public class UseableObject : TransferrableObject
 		}
 	}
 
-	// Token: 0x060020B7 RID: 8375 RVA: 0x000AD900 File Offset: 0x000ABB00
+	// Token: 0x060020B7 RID: 8375 RVA: 0x000AD8E0 File Offset: 0x000ABAE0
 	public override void OnDeactivate()
 	{
 		base.OnDeactivate();
@@ -154,13 +154,13 @@ public class UseableObject : TransferrableObject
 		}
 	}
 
-	// Token: 0x060020B8 RID: 8376 RVA: 0x000AD961 File Offset: 0x000ABB61
+	// Token: 0x060020B8 RID: 8376 RVA: 0x000AD941 File Offset: 0x000ABB41
 	public override bool CanActivate()
 	{
 		return !this.disableActivation;
 	}
 
-	// Token: 0x060020B9 RID: 8377 RVA: 0x000AD96C File Offset: 0x000ABB6C
+	// Token: 0x060020B9 RID: 8377 RVA: 0x000AD94C File Offset: 0x000ABB4C
 	public override bool CanDeactivate()
 	{
 		return !this.disableDeactivation;

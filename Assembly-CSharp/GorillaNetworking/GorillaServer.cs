@@ -12,7 +12,7 @@ namespace GorillaNetworking
 	public class GorillaServer : MonoBehaviour, ISerializationCallbackReceiver
 	{
 		// Token: 0x170008E4 RID: 2276
-		// (get) Token: 0x0600605C RID: 24668 RVA: 0x001F1274 File Offset: 0x001EF474
+		// (get) Token: 0x0600605C RID: 24668 RVA: 0x001F1254 File Offset: 0x001EF454
 		public bool FeatureFlagsReady
 		{
 			get
@@ -22,7 +22,7 @@ namespace GorillaNetworking
 		}
 
 		// Token: 0x170008E5 RID: 2277
-		// (get) Token: 0x0600605D RID: 24669 RVA: 0x001F1281 File Offset: 0x001EF481
+		// (get) Token: 0x0600605D RID: 24669 RVA: 0x001F1261 File Offset: 0x001EF461
 		private EntityKey playerEntity
 		{
 			get
@@ -35,13 +35,13 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x0600605E RID: 24670 RVA: 0x001F12A8 File Offset: 0x001EF4A8
+		// Token: 0x0600605E RID: 24670 RVA: 0x001F1288 File Offset: 0x001EF488
 		public void Start()
 		{
 			this.featureFlags.FetchFeatureFlags();
 		}
 
-		// Token: 0x0600605F RID: 24671 RVA: 0x001F12B5 File Offset: 0x001EF4B5
+		// Token: 0x0600605F RID: 24671 RVA: 0x001F1295 File Offset: 0x001EF495
 		private void Awake()
 		{
 			if (GorillaServer.Instance == null)
@@ -52,7 +52,7 @@ namespace GorillaNetworking
 			Object.Destroy(this);
 		}
 
-		// Token: 0x06006060 RID: 24672 RVA: 0x001F12D8 File Offset: 0x001EF4D8
+		// Token: 0x06006060 RID: 24672 RVA: 0x001F12B8 File Offset: 0x001EF4B8
 		public void ReturnCurrentVersion(ReturnCurrentVersionRequest request, Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "ReturnCurrentVersion result");
@@ -66,7 +66,7 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x06006061 RID: 24673 RVA: 0x001F1338 File Offset: 0x001EF538
+		// Token: 0x06006061 RID: 24673 RVA: 0x001F1318 File Offset: 0x001EF518
 		public void ReturnMyOculusHash(Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "ReturnMyOculusHash result");
@@ -83,7 +83,7 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x06006062 RID: 24674 RVA: 0x001F139C File Offset: 0x001EF59C
+		// Token: 0x06006062 RID: 24674 RVA: 0x001F137C File Offset: 0x001EF57C
 		public void TryDistributeCurrency(Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "TryDistributeCurrency result");
@@ -100,7 +100,7 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x06006063 RID: 24675 RVA: 0x001F1400 File Offset: 0x001EF600
+		// Token: 0x06006063 RID: 24675 RVA: 0x001F13E0 File Offset: 0x001EF5E0
 		public void AddOrRemoveDLCOwnership(Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "AddOrRemoveDLCOwnership result");
@@ -117,7 +117,7 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x06006064 RID: 24676 RVA: 0x001F1464 File Offset: 0x001EF664
+		// Token: 0x06006064 RID: 24676 RVA: 0x001F1444 File Offset: 0x001EF644
 		public void BroadcastMyRoom(BroadcastMyRoomRequest request, Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "BroadcastMyRoom result");
@@ -131,31 +131,31 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x06006065 RID: 24677 RVA: 0x001F14C9 File Offset: 0x001EF6C9
+		// Token: 0x06006065 RID: 24677 RVA: 0x001F14A9 File Offset: 0x001EF6A9
 		public bool NewCosmeticsPath()
 		{
 			return this.featureFlags.IsEnabledForUser("2024-06-CosmeticsAuthenticationV2");
 		}
 
-		// Token: 0x06006066 RID: 24678 RVA: 0x001F14DB File Offset: 0x001EF6DB
+		// Token: 0x06006066 RID: 24678 RVA: 0x001F14BB File Offset: 0x001EF6BB
 		public bool NewCosmeticsPathShouldSetSharedGroupData()
 		{
 			return this.featureFlags.IsEnabledForUser("2025-04-CosmeticsAuthenticationV2-SetData");
 		}
 
-		// Token: 0x06006067 RID: 24679 RVA: 0x001F14ED File Offset: 0x001EF6ED
+		// Token: 0x06006067 RID: 24679 RVA: 0x001F14CD File Offset: 0x001EF6CD
 		public bool NewCosmeticsPathShouldReadSharedGroupData()
 		{
 			return this.featureFlags.IsEnabledForUser("2025-04-CosmeticsAuthenticationV2-ReadData");
 		}
 
-		// Token: 0x06006068 RID: 24680 RVA: 0x001F14FF File Offset: 0x001EF6FF
+		// Token: 0x06006068 RID: 24680 RVA: 0x001F14DF File Offset: 0x001EF6DF
 		public bool NewCosmeticsPathShouldSetRoomData()
 		{
 			return this.featureFlags.IsEnabledForUser("2025-04-CosmeticsAuthenticationV2-Compat");
 		}
 
-		// Token: 0x06006069 RID: 24681 RVA: 0x001F1514 File Offset: 0x001EF714
+		// Token: 0x06006069 RID: 24681 RVA: 0x001F14F4 File Offset: 0x001EF6F4
 		public void UpdateUserCosmetics()
 		{
 			ExecuteFunctionRequest executeFunctionRequest = new ExecuteFunctionRequest();
@@ -177,7 +177,7 @@ namespace GorillaNetworking
 			}, null, null);
 		}
 
-		// Token: 0x0600606A RID: 24682 RVA: 0x001F159C File Offset: 0x001EF79C
+		// Token: 0x0600606A RID: 24682 RVA: 0x001F157C File Offset: 0x001EF77C
 		public void GetAcceptedAgreements(GetAcceptedAgreementsRequest request, Action<Dictionary<string, string>> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<Dictionary<string, string>>(successCallback, "GetAcceptedAgreements result");
@@ -207,7 +207,7 @@ namespace GorillaNetworking
 			}, errorCallback, null, null);
 		}
 
-		// Token: 0x0600606B RID: 24683 RVA: 0x001F1654 File Offset: 0x001EF854
+		// Token: 0x0600606B RID: 24683 RVA: 0x001F1634 File Offset: 0x001EF834
 		public void SubmitAcceptedAgreements(SubmitAcceptedAgreementsRequest request, Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "SubmitAcceptedAgreements result");
@@ -222,7 +222,7 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x0600606C RID: 24684 RVA: 0x001F16CC File Offset: 0x001EF8CC
+		// Token: 0x0600606C RID: 24684 RVA: 0x001F16AC File Offset: 0x001EF8AC
 		public void UploadGorillanalytics(object uploadData)
 		{
 			Debug.Log(string.Format("GorillaServer: UploadGorillanalytics call ({0})", uploadData));
@@ -240,7 +240,7 @@ namespace GorillaNetworking
 			}, null, null);
 		}
 
-		// Token: 0x0600606D RID: 24685 RVA: 0x001F1760 File Offset: 0x001EF960
+		// Token: 0x0600606D RID: 24685 RVA: 0x001F1740 File Offset: 0x001EF940
 		public void CheckForBadName(CheckForBadNameRequest request, Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "CheckForBadName result");
@@ -260,7 +260,7 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x0600606E RID: 24686 RVA: 0x001F17F4 File Offset: 0x001EF9F4
+		// Token: 0x0600606E RID: 24686 RVA: 0x001F17D4 File Offset: 0x001EF9D4
 		public void GetRandomName(Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "GetRandomName result");
@@ -274,7 +274,7 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x0600606F RID: 24687 RVA: 0x001F1858 File Offset: 0x001EFA58
+		// Token: 0x0600606F RID: 24687 RVA: 0x001F1838 File Offset: 0x001EFA38
 		public void ReturnQueueStats(ReturnQueueStatsRequest request, Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)
 		{
 			successCallback = this.DebugWrapCb<ExecuteFunctionResult>(successCallback, "ReturnQueueStats result");
@@ -292,7 +292,7 @@ namespace GorillaNetworking
 			}, successCallback, errorCallback, null, null);
 		}
 
-		// Token: 0x06006070 RID: 24688 RVA: 0x001F18CD File Offset: 0x001EFACD
+		// Token: 0x06006070 RID: 24688 RVA: 0x001F18AD File Offset: 0x001EFAAD
 		private Action<T> DebugWrapCb<T>(Action<T> cb, string label)
 		{
 			return delegate(T arg)
@@ -319,7 +319,7 @@ namespace GorillaNetworking
 			};
 		}
 
-		// Token: 0x06006071 RID: 24689 RVA: 0x001F18F4 File Offset: 0x001EFAF4
+		// Token: 0x06006071 RID: 24689 RVA: 0x001F18D4 File Offset: 0x001EFAD4
 		private ExecuteFunctionResult toFunctionResult(ExecuteCloudScriptResult csResult)
 		{
 			FunctionExecutionError error = null;
@@ -343,7 +343,7 @@ namespace GorillaNetworking
 			};
 		}
 
-		// Token: 0x06006072 RID: 24690 RVA: 0x001F19A0 File Offset: 0x001EFBA0
+		// Token: 0x06006072 RID: 24690 RVA: 0x001F1980 File Offset: 0x001EFB80
 		public void OnBeforeSerialize()
 		{
 			this.FeatureFlagsTitleDataKey = this.featureFlags.TitleDataKey;
@@ -357,7 +357,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06006073 RID: 24691 RVA: 0x001F1A28 File Offset: 0x001EFC28
+		// Token: 0x06006073 RID: 24691 RVA: 0x001F1A08 File Offset: 0x001EFC08
 		public void OnAfterDeserialize()
 		{
 			this.featureFlags.TitleDataKey = this.FeatureFlagsTitleDataKey;
@@ -367,37 +367,37 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06006074 RID: 24692 RVA: 0x001F1A98 File Offset: 0x001EFC98
+		// Token: 0x06006074 RID: 24692 RVA: 0x001F1A78 File Offset: 0x001EFC78
 		public bool CheckIsInKIDOptInCohort()
 		{
 			return this.featureFlags.IsEnabledForUser("2025-04-KIDOptIn");
 		}
 
-		// Token: 0x06006075 RID: 24693 RVA: 0x001F1AAA File Offset: 0x001EFCAA
+		// Token: 0x06006075 RID: 24693 RVA: 0x001F1A8A File Offset: 0x001EFC8A
 		public bool CheckIsInKIDRequiredCohort()
 		{
 			return this.featureFlags.IsEnabledForUser("2025-04-KIDRequired");
 		}
 
-		// Token: 0x06006076 RID: 24694 RVA: 0x001F1ABC File Offset: 0x001EFCBC
+		// Token: 0x06006076 RID: 24694 RVA: 0x001F1A9C File Offset: 0x001EFC9C
 		public bool CheckOptedInKID()
 		{
 			return KIDManager.HasOptedInToKID;
 		}
 
-		// Token: 0x06006077 RID: 24695 RVA: 0x001F1AC3 File Offset: 0x001EFCC3
+		// Token: 0x06006077 RID: 24695 RVA: 0x001F1AA3 File Offset: 0x001EFCA3
 		public bool CheckIsTZE_Enabled()
 		{
 			return this.featureFlags.IsEnabledForUser("2025-10-TelemetryZoneEventSampling");
 		}
 
-		// Token: 0x06006078 RID: 24696 RVA: 0x001F1AD5 File Offset: 0x001EFCD5
+		// Token: 0x06006078 RID: 24696 RVA: 0x001F1AB5 File Offset: 0x001EFCB5
 		public bool CheckIsMothershipTelemetryEnabled()
 		{
 			return this.featureFlags.IsEnabledForUser("2025-09-MothershipAnalyticsSampleRate");
 		}
 
-		// Token: 0x06006079 RID: 24697 RVA: 0x001F1AE7 File Offset: 0x001EFCE7
+		// Token: 0x06006079 RID: 24697 RVA: 0x001F1AC7 File Offset: 0x001EFCC7
 		public bool CheckIsPlayFabTelemetryEnabled()
 		{
 			return this.featureFlags.IsEnabledForUser("2025-09-PlayFabAnalyticsSampleRate");

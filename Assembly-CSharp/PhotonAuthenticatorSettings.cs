@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x02000B9B RID: 2971
 public class PhotonAuthenticatorSettings
 {
-	// Token: 0x06004963 RID: 18787 RVA: 0x001814FC File Offset: 0x0017F6FC
+	// Token: 0x06004963 RID: 18787 RVA: 0x001814DC File Offset: 0x0017F6DC
 	static PhotonAuthenticatorSettings()
 	{
 		PhotonAuthenticatorSettings.Load("PhotonAuthenticatorSettings");
 	}
 
-	// Token: 0x06004964 RID: 18788 RVA: 0x00181508 File Offset: 0x0017F708
+	// Token: 0x06004964 RID: 18788 RVA: 0x001814E8 File Offset: 0x0017F6E8
 	public static void Load(string path)
 	{
 		PhotonAuthenticatorSettingsScriptableObject photonAuthenticatorSettingsScriptableObject = Resources.Load<PhotonAuthenticatorSettingsScriptableObject>(path);

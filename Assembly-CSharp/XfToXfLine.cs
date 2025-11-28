@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x0200083A RID: 2106
 public class XfToXfLine : MonoBehaviour
 {
-	// Token: 0x06003763 RID: 14179 RVA: 0x0012A723 File Offset: 0x00128923
+	// Token: 0x06003763 RID: 14179 RVA: 0x0012A703 File Offset: 0x00128903
 	private void Awake()
 	{
 		this.lineRenderer = base.GetComponent<LineRenderer>();
 	}
 
-	// Token: 0x06003764 RID: 14180 RVA: 0x0012A731 File Offset: 0x00128931
+	// Token: 0x06003764 RID: 14180 RVA: 0x0012A711 File Offset: 0x00128911
 	private void Update()
 	{
 		this.lineRenderer.SetPosition(0, this.pt0.transform.position);

@@ -7,14 +7,14 @@ using UnityEngine;
 // Token: 0x02000BF8 RID: 3064
 internal static class ProjectileTracker
 {
-	// Token: 0x06004BC5 RID: 19397 RVA: 0x0018C154 File Offset: 0x0018A354
+	// Token: 0x06004BC5 RID: 19397 RVA: 0x0018C134 File Offset: 0x0018A334
 	static ProjectileTracker()
 	{
 		RoomSystem.LeftRoomEvent += new Action(ProjectileTracker.ClearProjectiles);
 		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(ProjectileTracker.RemovePlayerProjectiles);
 	}
 
-	// Token: 0x06004BC6 RID: 19398 RVA: 0x0018C1C0 File Offset: 0x0018A3C0
+	// Token: 0x06004BC6 RID: 19398 RVA: 0x0018C1A0 File Offset: 0x0018A3A0
 	public static void RemovePlayerProjectiles(NetPlayer player)
 	{
 		LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray;
@@ -26,7 +26,7 @@ internal static class ProjectileTracker
 		}
 	}
 
-	// Token: 0x06004BC7 RID: 19399 RVA: 0x0018C1FC File Offset: 0x0018A3FC
+	// Token: 0x06004BC7 RID: 19399 RVA: 0x0018C1DC File Offset: 0x0018A3DC
 	private static void ClearProjectiles()
 	{
 		foreach (LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray in ProjectileTracker.m_playerProjectiles.Values)
@@ -37,7 +37,7 @@ internal static class ProjectileTracker
 		ProjectileTracker.m_playerProjectiles.Clear();
 	}
 
-	// Token: 0x06004BC8 RID: 19400 RVA: 0x0018C268 File Offset: 0x0018A468
+	// Token: 0x06004BC8 RID: 19400 RVA: 0x0018C248 File Offset: 0x0018A448
 	private static void ResetPlayerProjectiles(LoopingArray<ProjectileTracker.ProjectileInfo> projectiles)
 	{
 		for (int i = 0; i < projectiles.Length; i++)
@@ -50,7 +50,7 @@ internal static class ProjectileTracker
 		}
 	}
 
-	// Token: 0x06004BC9 RID: 19401 RVA: 0x0018C2C0 File Offset: 0x0018A4C0
+	// Token: 0x06004BC9 RID: 19401 RVA: 0x0018C2A0 File Offset: 0x0018A4A0
 	public static int AddAndIncrementLocalProjectile(SlingshotProjectile projectile, Vector3 intialVelocity, Vector3 initialPosition, float scale)
 	{
 		SlingshotProjectile projectileInstance = ProjectileTracker.m_localProjectiles[ProjectileTracker.m_localProjectiles.CurrentIndex].projectileInstance;
@@ -62,7 +62,7 @@ internal static class ProjectileTracker
 		return ProjectileTracker.m_localProjectiles.AddAndIncrement(projectileInfo);
 	}
 
-	// Token: 0x06004BCA RID: 19402 RVA: 0x0018C33C File Offset: 0x0018A53C
+	// Token: 0x06004BCA RID: 19402 RVA: 0x0018C31C File Offset: 0x0018A51C
 	public static void AddRemotePlayerProjectile(NetPlayer player, SlingshotProjectile projectile, int projectileIndex, double timeShot, Vector3 intialVelocity, Vector3 initialPosition, float scale)
 	{
 		LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray;
@@ -89,13 +89,13 @@ internal static class ProjectileTracker
 		loopingArray[projectileIndex] = value;
 	}
 
-	// Token: 0x06004BCB RID: 19403 RVA: 0x0018C3EE File Offset: 0x0018A5EE
+	// Token: 0x06004BCB RID: 19403 RVA: 0x0018C3CE File Offset: 0x0018A5CE
 	public static ProjectileTracker.ProjectileInfo GetLocalProjectile(int index)
 	{
 		return ProjectileTracker.m_localProjectiles[index];
 	}
 
-	// Token: 0x06004BCC RID: 19404 RVA: 0x0018C3FC File Offset: 0x0018A5FC
+	// Token: 0x06004BCC RID: 19404 RVA: 0x0018C3DC File Offset: 0x0018A5DC
 	public static ValueTuple<bool, ProjectileTracker.ProjectileInfo> GetAndRemoveRemotePlayerProjectile(NetPlayer player, int index)
 	{
 		ValueTuple<bool, ProjectileTracker.ProjectileInfo> result = new ValueTuple<bool, ProjectileTracker.ProjectileInfo>(false, default(ProjectileTracker.ProjectileInfo));
@@ -126,7 +126,7 @@ internal static class ProjectileTracker
 	// Token: 0x02000BF9 RID: 3065
 	public struct ProjectileInfo
 	{
-		// Token: 0x06004BCD RID: 19405 RVA: 0x0018C472 File Offset: 0x0018A672
+		// Token: 0x06004BCD RID: 19405 RVA: 0x0018C452 File Offset: 0x0018A652
 		public ProjectileInfo(double newTime, Vector3 newVel, Vector3 origin, float newScale, SlingshotProjectile projectile)
 		{
 			this.timeLaunched = newTime;

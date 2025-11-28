@@ -9,7 +9,7 @@ using UnityEngine;
 // Token: 0x02000638 RID: 1592
 public class GhostReactor : MonoBehaviourTick, IBuildValidation
 {
-	// Token: 0x06002895 RID: 10389 RVA: 0x000D7DD0 File Offset: 0x000D5FD0
+	// Token: 0x06002895 RID: 10389 RVA: 0x000D7DB0 File Offset: 0x000D5FB0
 	public static GhostReactor Get(GameEntity gameEntity)
 	{
 		GhostReactorManager ghostReactorManager = GhostReactorManager.Get(gameEntity);
@@ -20,7 +20,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		return ghostReactorManager.reactor;
 	}
 
-	// Token: 0x06002896 RID: 10390 RVA: 0x000D7DF8 File Offset: 0x000D5FF8
+	// Token: 0x06002896 RID: 10390 RVA: 0x000D7DD8 File Offset: 0x000D5FD8
 	private void Awake()
 	{
 		GhostReactor.instance = this;
@@ -72,7 +72,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		base.GetComponentsInChildren<GRUIStoreDisplay>(false, this.storeDisplays);
 	}
 
-	// Token: 0x06002897 RID: 10391 RVA: 0x000D7F8C File Offset: 0x000D618C
+	// Token: 0x06002897 RID: 10391 RVA: 0x000D7F6C File Offset: 0x000D616C
 	private new void OnEnable()
 	{
 		base.OnEnable();
@@ -173,7 +173,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.RefreshDepth();
 	}
 
-	// Token: 0x06002898 RID: 10392 RVA: 0x000D82CA File Offset: 0x000D64CA
+	// Token: 0x06002898 RID: 10392 RVA: 0x000D82AA File Offset: 0x000D64AA
 	public void EnableGhostReactorForVirtualStump()
 	{
 		GhostReactor.instance = this;
@@ -181,7 +181,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.OnEnable();
 	}
 
-	// Token: 0x06002899 RID: 10393 RVA: 0x000D82E0 File Offset: 0x000D64E0
+	// Token: 0x06002899 RID: 10393 RVA: 0x000D82C0 File Offset: 0x000D64C0
 	public void RefreshReviveStations(bool searchScene = false)
 	{
 		this.reviveStations = new List<GRReviveStation>();
@@ -196,7 +196,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x0600289A RID: 10394 RVA: 0x000D8344 File Offset: 0x000D6544
+	// Token: 0x0600289A RID: 10394 RVA: 0x000D8324 File Offset: 0x000D6524
 	private new void OnDisable()
 	{
 		base.OnDisable();
@@ -218,7 +218,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x0600289B RID: 10395 RVA: 0x000D83F5 File Offset: 0x000D65F5
+	// Token: 0x0600289B RID: 10395 RVA: 0x000D83D5 File Offset: 0x000D65D5
 	private void OnProgressionUpdated()
 	{
 		if (this.toolProgression != null)
@@ -227,7 +227,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x0600289C RID: 10396 RVA: 0x000D840C File Offset: 0x000D660C
+	// Token: 0x0600289C RID: 10396 RVA: 0x000D83EC File Offset: 0x000D65EC
 	public void UpdateLocalPlayerFromProgression()
 	{
 		GRPlayer local = GRPlayer.GetLocal();
@@ -271,7 +271,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x0600289D RID: 10397 RVA: 0x000D853F File Offset: 0x000D673F
+	// Token: 0x0600289D RID: 10397 RVA: 0x000D851F File Offset: 0x000D671F
 	public GRPatrolPath GetPatrolPath(long createData)
 	{
 		if (this.levelGenerator == null)
@@ -281,7 +281,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		return this.levelGenerator.GetPatrolPath(createData);
 	}
 
-	// Token: 0x0600289E RID: 10398 RVA: 0x000D8560 File Offset: 0x000D6760
+	// Token: 0x0600289E RID: 10398 RVA: 0x000D8540 File Offset: 0x000D6740
 	public override void Tick()
 	{
 		if (this.grManager == null)
@@ -363,7 +363,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.UpdateHandprints(Time.deltaTime);
 	}
 
-	// Token: 0x0600289F RID: 10399 RVA: 0x000D8814 File Offset: 0x000D6A14
+	// Token: 0x0600289F RID: 10399 RVA: 0x000D87F4 File Offset: 0x000D69F4
 	private void OnLocalPlayerConnectedToRoom()
 	{
 		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
@@ -378,13 +378,13 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x060028A0 RID: 10400 RVA: 0x000D8864 File Offset: 0x000D6A64
+	// Token: 0x060028A0 RID: 10400 RVA: 0x000D8844 File Offset: 0x000D6A44
 	private void OnVRRigsChanged(RigContainer container)
 	{
 		this.VRRigRefresh();
 	}
 
-	// Token: 0x060028A1 RID: 10401 RVA: 0x000D886C File Offset: 0x000D6A6C
+	// Token: 0x060028A1 RID: 10401 RVA: 0x000D884C File Offset: 0x000D6A4C
 	public void VRRigRefresh()
 	{
 		if (this.isRefreshing)
@@ -422,7 +422,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.isRefreshing = false;
 	}
 
-	// Token: 0x060028A2 RID: 10402 RVA: 0x000D8948 File Offset: 0x000D6B48
+	// Token: 0x060028A2 RID: 10402 RVA: 0x000D8928 File Offset: 0x000D6B28
 	public void UpdateScoreboardScreen(GRUIScoreboard.ScoreboardScreen newScreen)
 	{
 		for (int i = 0; i < this.scoreboards.Count; i++)
@@ -432,7 +432,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.RefreshScoreboards();
 	}
 
-	// Token: 0x060028A3 RID: 10403 RVA: 0x000D8984 File Offset: 0x000D6B84
+	// Token: 0x060028A3 RID: 10403 RVA: 0x000D8964 File Offset: 0x000D6B64
 	public void RefreshScoreboards()
 	{
 		for (int i = 0; i < this.scoreboards.Count; i++)
@@ -459,7 +459,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x060028A4 RID: 10404 RVA: 0x000D8A68 File Offset: 0x000D6C68
+	// Token: 0x060028A4 RID: 10404 RVA: 0x000D8A48 File Offset: 0x000D6C48
 	public int GetItemCost(int entityTypeId)
 	{
 		int result;
@@ -470,7 +470,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		return result;
 	}
 
-	// Token: 0x060028A5 RID: 10405 RVA: 0x000D8A90 File Offset: 0x000D6C90
+	// Token: 0x060028A5 RID: 10405 RVA: 0x000D8A70 File Offset: 0x000D6C70
 	public void UpdateRemoteScoreboardScreen(GRUIScoreboard.ScoreboardScreen scoreboardPage)
 	{
 		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.zone);
@@ -483,7 +483,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x060028A6 RID: 10406 RVA: 0x000D8AE8 File Offset: 0x000D6CE8
+	// Token: 0x060028A6 RID: 10406 RVA: 0x000D8AC8 File Offset: 0x000D6CC8
 	public void SetNextDelveDepth(int newLevel, int newDepthConfigIndex)
 	{
 		this.depthLevel = newLevel;
@@ -504,7 +504,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.depthConfigIndex = newDepthConfigIndex;
 	}
 
-	// Token: 0x060028A7 RID: 10407 RVA: 0x000D8BB3 File Offset: 0x000D6DB3
+	// Token: 0x060028A7 RID: 10407 RVA: 0x000D8B93 File Offset: 0x000D6D93
 	public static int GetJoinDepthSectionFromLevel(int depthLevel)
 	{
 		if (depthLevel < 4)
@@ -530,7 +530,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		return 6;
 	}
 
-	// Token: 0x060028A8 RID: 10408 RVA: 0x000D8BD8 File Offset: 0x000D6DD8
+	// Token: 0x060028A8 RID: 10408 RVA: 0x000D8BB8 File Offset: 0x000D6DB8
 	public void DelveToNextDepth()
 	{
 		if (this.shiftManager != null)
@@ -540,7 +540,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.RefreshDepth();
 	}
 
-	// Token: 0x060028A9 RID: 10409 RVA: 0x000D8BFC File Offset: 0x000D6DFC
+	// Token: 0x060028A9 RID: 10409 RVA: 0x000D8BDC File Offset: 0x000D6DDC
 	public int PickLevelConfigForDepth(int depthLevel)
 	{
 		if (this.zone == GTZone.customMaps)
@@ -565,7 +565,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		return 0;
 	}
 
-	// Token: 0x060028AA RID: 10410 RVA: 0x000D8C9B File Offset: 0x000D6E9B
+	// Token: 0x060028AA RID: 10410 RVA: 0x000D8C7B File Offset: 0x000D6E7B
 	public void RefreshDepth()
 	{
 		if (this.shiftManager != null)
@@ -575,19 +575,19 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.RefreshBays();
 	}
 
-	// Token: 0x060028AB RID: 10411 RVA: 0x000D8CBC File Offset: 0x000D6EBC
+	// Token: 0x060028AB RID: 10411 RVA: 0x000D8C9C File Offset: 0x000D6E9C
 	public int GetDepthLevel()
 	{
 		return this.depthLevel;
 	}
 
-	// Token: 0x060028AC RID: 10412 RVA: 0x000D8CC4 File Offset: 0x000D6EC4
+	// Token: 0x060028AC RID: 10412 RVA: 0x000D8CA4 File Offset: 0x000D6EA4
 	public int GetDepthConfigIndex()
 	{
 		return this.depthConfigIndex;
 	}
 
-	// Token: 0x060028AD RID: 10413 RVA: 0x000D8CCC File Offset: 0x000D6ECC
+	// Token: 0x060028AD RID: 10413 RVA: 0x000D8CAC File Offset: 0x000D6EAC
 	public GhostReactorLevelDepthConfig GetDepthLevelConfig(int level)
 	{
 		if (this.levelGenerator == null)
@@ -598,7 +598,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		return this.levelGenerator.depthConfigs[level];
 	}
 
-	// Token: 0x060028AE RID: 10414 RVA: 0x000D8D0C File Offset: 0x000D6F0C
+	// Token: 0x060028AE RID: 10414 RVA: 0x000D8CEC File Offset: 0x000D6EEC
 	public GhostReactorLevelGenConfig GetCurrLevelGenConfig()
 	{
 		if (this.levelGenerator == null)
@@ -611,7 +611,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		return this.levelGenerator.depthConfigs[num].options[this.depthConfigIndex].levelConfig;
 	}
 
-	// Token: 0x060028AF RID: 10415 RVA: 0x000D8DA0 File Offset: 0x000D6FA0
+	// Token: 0x060028AF RID: 10415 RVA: 0x000D8D80 File Offset: 0x000D6F80
 	public void RefreshStore()
 	{
 		for (int i = 0; i < this.storeDisplays.Count; i++)
@@ -620,7 +620,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x060028B0 RID: 10416 RVA: 0x000D8DE0 File Offset: 0x000D6FE0
+	// Token: 0x060028B0 RID: 10416 RVA: 0x000D8DC0 File Offset: 0x000D6FC0
 	public void RefreshBays()
 	{
 		for (int i = 0; i < this.bays.Count; i++)
@@ -629,7 +629,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x060028B1 RID: 10417 RVA: 0x000D8E14 File Offset: 0x000D7014
+	// Token: 0x060028B1 RID: 10417 RVA: 0x000D8DF4 File Offset: 0x000D6FF4
 	public void UpdateHandprints(float deltaTime)
 	{
 		int num = this.handPrintData.Count - 1000;
@@ -721,7 +721,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x060028B2 RID: 10418 RVA: 0x000D9134 File Offset: 0x000D7334
+	// Token: 0x060028B2 RID: 10418 RVA: 0x000D9114 File Offset: 0x000D7314
 	public void OnTapLocal(bool isLeftHand, Vector3 pos, Quaternion orient, GorillaSurfaceOverride surfaceOverride)
 	{
 		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
@@ -756,7 +756,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.handPrintTimeRight = Time.time;
 	}
 
-	// Token: 0x060028B3 RID: 10419 RVA: 0x000D922C File Offset: 0x000D742C
+	// Token: 0x060028B3 RID: 10419 RVA: 0x000D920C File Offset: 0x000D740C
 	public void AddHandprint(Vector3 pos, Quaternion orient)
 	{
 		Matrix4x4 matrix4x = default(Matrix4x4);
@@ -765,7 +765,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.handPrintData.Add(this.handPrintFadeTime);
 	}
 
-	// Token: 0x060028B4 RID: 10420 RVA: 0x000D9290 File Offset: 0x000D7490
+	// Token: 0x060028B4 RID: 10420 RVA: 0x000D9270 File Offset: 0x000D7470
 	public void ClearAllHandprints()
 	{
 		this.handPrintData.Clear();
@@ -773,7 +773,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 	}
 
 	// Token: 0x170003EE RID: 1006
-	// (get) Token: 0x060028B5 RID: 10421 RVA: 0x000D92A8 File Offset: 0x000D74A8
+	// (get) Token: 0x060028B5 RID: 10421 RVA: 0x000D9288 File Offset: 0x000D7488
 	public int NumActivePlayers
 	{
 		get
@@ -782,7 +782,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		}
 	}
 
-	// Token: 0x060028B6 RID: 10422 RVA: 0x000D92B8 File Offset: 0x000D74B8
+	// Token: 0x060028B6 RID: 10422 RVA: 0x000D9298 File Offset: 0x000D7498
 	public void OnAbilityDie(GameEntity entity)
 	{
 		GhostReactor.EnemyEntityCreateData enemyEntityCreateData = GhostReactor.EnemyEntityCreateData.Unpack(entity.createData);
@@ -797,7 +797,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		this.respawnQueue.Add(entityTypeRespawnTracker);
 	}
 
-	// Token: 0x060028B7 RID: 10423 RVA: 0x000D9311 File Offset: 0x000D7511
+	// Token: 0x060028B7 RID: 10423 RVA: 0x000D92F1 File Offset: 0x000D74F1
 	public void ClearAllRespawns()
 	{
 		this.respawnQueue.Clear();
@@ -1079,19 +1079,19 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 	// Token: 0x0200063D RID: 1597
 	public struct EnemyEntityCreateData
 	{
-		// Token: 0x060028BD RID: 10429 RVA: 0x000D9406 File Offset: 0x000D7606
+		// Token: 0x060028BD RID: 10429 RVA: 0x000D93E6 File Offset: 0x000D75E6
 		private static long PackData(int value, int nbits, int shift)
 		{
 			return ((long)value & (long)((1 << nbits) - 1)) << shift;
 		}
 
-		// Token: 0x060028BE RID: 10430 RVA: 0x000D9419 File Offset: 0x000D7619
+		// Token: 0x060028BE RID: 10430 RVA: 0x000D93F9 File Offset: 0x000D75F9
 		private static int UnpackData(long createData, int nbits, int shift)
 		{
 			return (int)(createData >> shift & (long)((1 << nbits) - 1));
 		}
 
-		// Token: 0x060028BF RID: 10431 RVA: 0x000D942C File Offset: 0x000D762C
+		// Token: 0x060028BF RID: 10431 RVA: 0x000D940C File Offset: 0x000D760C
 		public static GhostReactor.EnemyEntityCreateData Unpack(long bits)
 		{
 			return new GhostReactor.EnemyEntityCreateData
@@ -1102,7 +1102,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 			};
 		}
 
-		// Token: 0x060028C0 RID: 10432 RVA: 0x000D9470 File Offset: 0x000D7670
+		// Token: 0x060028C0 RID: 10432 RVA: 0x000D9450 File Offset: 0x000D7650
 		public long Pack()
 		{
 			return GhostReactor.EnemyEntityCreateData.PackData(this.respawnCount, 8, 16) | GhostReactor.EnemyEntityCreateData.PackData(this.sectionIndex, 8, 8) | GhostReactor.EnemyEntityCreateData.PackData(this.patrolIndex, 8, 0);
@@ -1121,19 +1121,19 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 	// Token: 0x0200063E RID: 1598
 	public struct ToolEntityCreateData
 	{
-		// Token: 0x060028C1 RID: 10433 RVA: 0x000D9406 File Offset: 0x000D7606
+		// Token: 0x060028C1 RID: 10433 RVA: 0x000D93E6 File Offset: 0x000D75E6
 		private static long PackData(int value, int nbits, int shift)
 		{
 			return ((long)value & (long)((1 << nbits) - 1)) << shift;
 		}
 
-		// Token: 0x060028C2 RID: 10434 RVA: 0x000D9419 File Offset: 0x000D7619
+		// Token: 0x060028C2 RID: 10434 RVA: 0x000D93F9 File Offset: 0x000D75F9
 		private static int UnpackData(long createData, int nbits, int shift)
 		{
 			return (int)(createData >> shift & (long)((1 << nbits) - 1));
 		}
 
-		// Token: 0x060028C3 RID: 10435 RVA: 0x000D949C File Offset: 0x000D769C
+		// Token: 0x060028C3 RID: 10435 RVA: 0x000D947C File Offset: 0x000D767C
 		public static GhostReactor.ToolEntityCreateData Unpack(long bits)
 		{
 			GhostReactor.ToolEntityCreateData result = default(GhostReactor.ToolEntityCreateData);
@@ -1143,7 +1143,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 			return result;
 		}
 
-		// Token: 0x060028C4 RID: 10436 RVA: 0x000D94DB File Offset: 0x000D76DB
+		// Token: 0x060028C4 RID: 10436 RVA: 0x000D94BB File Offset: 0x000D76BB
 		public long Pack()
 		{
 			long result = GhostReactor.ToolEntityCreateData.PackData(this.stationIndex + 1, 8, 0);

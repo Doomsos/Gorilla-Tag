@@ -9,24 +9,24 @@ using UnityEngine.Serialization;
 public class Flocking : MonoBehaviour
 {
 	// Token: 0x170003CF RID: 975
-	// (get) Token: 0x060025F0 RID: 9712 RVA: 0x000CADCD File Offset: 0x000C8FCD
-	// (set) Token: 0x060025F1 RID: 9713 RVA: 0x000CADD5 File Offset: 0x000C8FD5
+	// (get) Token: 0x060025F0 RID: 9712 RVA: 0x000CADAD File Offset: 0x000C8FAD
+	// (set) Token: 0x060025F1 RID: 9713 RVA: 0x000CADB5 File Offset: 0x000C8FB5
 	public FlockingManager.FishArea FishArea { get; set; }
 
-	// Token: 0x060025F2 RID: 9714 RVA: 0x000CADDE File Offset: 0x000C8FDE
+	// Token: 0x060025F2 RID: 9714 RVA: 0x000CADBE File Offset: 0x000C8FBE
 	private void Awake()
 	{
 		this.manager = base.GetComponentInParent<FlockingManager>();
 	}
 
-	// Token: 0x060025F3 RID: 9715 RVA: 0x000CADEC File Offset: 0x000C8FEC
+	// Token: 0x060025F3 RID: 9715 RVA: 0x000CADCC File Offset: 0x000C8FCC
 	private void Start()
 	{
 		this.speed = Random.Range(this.minSpeed, this.maxSpeed);
 		this.fishState = Flocking.FishState.patrol;
 	}
 
-	// Token: 0x060025F4 RID: 9716 RVA: 0x000CAE0C File Offset: 0x000C900C
+	// Token: 0x060025F4 RID: 9716 RVA: 0x000CADEC File Offset: 0x000C8FEC
 	private void OnDisable()
 	{
 		FlockingManager flockingManager = this.manager;
@@ -36,7 +36,7 @@ public class Flocking : MonoBehaviour
 		FlockingUpdateManager.UnregisterFlocking(this);
 	}
 
-	// Token: 0x060025F5 RID: 9717 RVA: 0x000CAE70 File Offset: 0x000C9070
+	// Token: 0x060025F5 RID: 9717 RVA: 0x000CAE50 File Offset: 0x000C9050
 	public void InvokeUpdate()
 	{
 		if (this.manager == null)
@@ -98,7 +98,7 @@ public class Flocking : MonoBehaviour
 		this.rot = base.transform.rotation;
 	}
 
-	// Token: 0x060025F6 RID: 9718 RVA: 0x000CB00C File Offset: 0x000C920C
+	// Token: 0x060025F6 RID: 9718 RVA: 0x000CAFEC File Offset: 0x000C91EC
 	private void MaybeTurn()
 	{
 		if (!this.manager.IsInside(base.transform.position, this.FishArea))
@@ -116,7 +116,7 @@ public class Flocking : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060025F7 RID: 9719 RVA: 0x000CB084 File Offset: 0x000C9284
+	// Token: 0x060025F7 RID: 9719 RVA: 0x000CB064 File Offset: 0x000C9264
 	private void Turn(Vector3 towardPoint)
 	{
 		this.isTurning = true;
@@ -124,13 +124,13 @@ public class Flocking : MonoBehaviour
 		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, quaternion, this.rotationSpeed * Time.deltaTime);
 	}
 
-	// Token: 0x060025F8 RID: 9720 RVA: 0x000CB0D7 File Offset: 0x000C92D7
+	// Token: 0x060025F8 RID: 9720 RVA: 0x000CB0B7 File Offset: 0x000C92B7
 	private void SwitchState(Flocking.FishState state)
 	{
 		this.fishState = state;
 	}
 
-	// Token: 0x060025F9 RID: 9721 RVA: 0x000CB0E0 File Offset: 0x000C92E0
+	// Token: 0x060025F9 RID: 9721 RVA: 0x000CB0C0 File Offset: 0x000C92C0
 	private void Flock(Vector3 nextGoal)
 	{
 		Vector3 vector = Vector3.zero;
@@ -169,7 +169,7 @@ public class Flocking : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060025FA RID: 9722 RVA: 0x000CB284 File Offset: 0x000C9484
+	// Token: 0x060025FA RID: 9722 RVA: 0x000CB264 File Offset: 0x000C9464
 	private void HandleOnFoodDetected(FlockingManager.FishFood fishFood)
 	{
 		bool flag = false;
@@ -190,7 +190,7 @@ public class Flocking : MonoBehaviour
 		this.isRealFood = fishFood.isRealFood;
 	}
 
-	// Token: 0x060025FB RID: 9723 RVA: 0x000CB2F4 File Offset: 0x000C94F4
+	// Token: 0x060025FB RID: 9723 RVA: 0x000CB2D4 File Offset: 0x000C94D4
 	private void HandleOnFoodDestroyed(BoxCollider collider)
 	{
 		bool flag = false;
@@ -210,7 +210,7 @@ public class Flocking : MonoBehaviour
 		this.followingFood = false;
 	}
 
-	// Token: 0x060025FC RID: 9724 RVA: 0x000CB348 File Offset: 0x000C9548
+	// Token: 0x060025FC RID: 9724 RVA: 0x000CB328 File Offset: 0x000C9528
 	private void FollowFood()
 	{
 		this.followingFood = true;
@@ -219,7 +219,7 @@ public class Flocking : MonoBehaviour
 		base.transform.position = Vector3.MoveTowards(base.transform.position, this.projectileGameObject.transform.position, this.speed * this.followFoodSpeedMult * Time.deltaTime);
 	}
 
-	// Token: 0x060025FD RID: 9725 RVA: 0x000CB3E8 File Offset: 0x000C95E8
+	// Token: 0x060025FD RID: 9725 RVA: 0x000CB3C8 File Offset: 0x000C95C8
 	private void AvoidPlayerHands()
 	{
 		foreach (GameObject gameObject in FlockingManager.avoidPoints)
@@ -234,7 +234,7 @@ public class Flocking : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060025FE RID: 9726 RVA: 0x000CB480 File Offset: 0x000C9680
+	// Token: 0x060025FE RID: 9726 RVA: 0x000CB460 File Offset: 0x000C9660
 	internal void SetSyncPosRot(Vector3 syncPos, Quaternion syncRot)
 	{
 		if (this.manager == null)
@@ -256,7 +256,7 @@ public class Flocking : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060025FF RID: 9727 RVA: 0x000CB4F4 File Offset: 0x000C96F4
+	// Token: 0x060025FF RID: 9727 RVA: 0x000CB4D4 File Offset: 0x000C96D4
 	private void OnEnable()
 	{
 		if (this.manager == null)

@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200073D RID: 1853
 public class GRToolUpgradeStationDepositBox : MonoBehaviour
 {
-	// Token: 0x06002FDF RID: 12255 RVA: 0x00105E48 File Offset: 0x00104048
+	// Token: 0x06002FDF RID: 12255 RVA: 0x00105E28 File Offset: 0x00104028
 	public void OnTriggerEnter(Collider other)
 	{
 		GRTool component = other.attachedRigidbody.GetComponent<GRTool>();

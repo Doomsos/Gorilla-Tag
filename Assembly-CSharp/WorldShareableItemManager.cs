@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200043A RID: 1082
 public class WorldShareableItemManager : MonoBehaviour
 {
-	// Token: 0x06001A99 RID: 6809 RVA: 0x0008CD72 File Offset: 0x0008AF72
+	// Token: 0x06001A99 RID: 6809 RVA: 0x0008CD52 File Offset: 0x0008AF52
 	protected void Awake()
 	{
 		if (WorldShareableItemManager.hasInstance && WorldShareableItemManager.instance != this)
@@ -17,7 +17,7 @@ public class WorldShareableItemManager : MonoBehaviour
 		WorldShareableItemManager.SetInstance(this);
 	}
 
-	// Token: 0x06001A9A RID: 6810 RVA: 0x0008CD95 File Offset: 0x0008AF95
+	// Token: 0x06001A9A RID: 6810 RVA: 0x0008CD75 File Offset: 0x0008AF75
 	protected void OnDestroy()
 	{
 		if (WorldShareableItemManager.instance == this)
@@ -27,7 +27,7 @@ public class WorldShareableItemManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001A9B RID: 6811 RVA: 0x0008CDB0 File Offset: 0x0008AFB0
+	// Token: 0x06001A9B RID: 6811 RVA: 0x0008CD90 File Offset: 0x0008AF90
 	protected void Update()
 	{
 		if (GTAppState.isQuitting)
@@ -43,7 +43,7 @@ public class WorldShareableItemManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001A9C RID: 6812 RVA: 0x0008CDFD File Offset: 0x0008AFFD
+	// Token: 0x06001A9C RID: 6812 RVA: 0x0008CDDD File Offset: 0x0008AFDD
 	public static void CreateManager()
 	{
 		if (GTAppState.isQuitting)
@@ -53,7 +53,7 @@ public class WorldShareableItemManager : MonoBehaviour
 		WorldShareableItemManager.SetInstance(new GameObject("WorldShareableItemManager").AddComponent<WorldShareableItemManager>());
 	}
 
-	// Token: 0x06001A9D RID: 6813 RVA: 0x0008CE1B File Offset: 0x0008B01B
+	// Token: 0x06001A9D RID: 6813 RVA: 0x0008CDFB File Offset: 0x0008AFFB
 	private static void SetInstance(WorldShareableItemManager manager)
 	{
 		if (GTAppState.isQuitting)
@@ -68,7 +68,7 @@ public class WorldShareableItemManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001A9E RID: 6814 RVA: 0x0008CE3E File Offset: 0x0008B03E
+	// Token: 0x06001A9E RID: 6814 RVA: 0x0008CE1E File Offset: 0x0008B01E
 	public static void Register(WorldShareableItem worldShareableItem)
 	{
 		if (GTAppState.isQuitting)
@@ -85,7 +85,7 @@ public class WorldShareableItemManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001A9F RID: 6815 RVA: 0x0008CE6C File Offset: 0x0008B06C
+	// Token: 0x06001A9F RID: 6815 RVA: 0x0008CE4C File Offset: 0x0008B04C
 	public static void Unregister(WorldShareableItem worldShareableItem)
 	{
 		if (GTAppState.isQuitting)

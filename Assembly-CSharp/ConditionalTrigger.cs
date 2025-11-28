@@ -7,7 +7,7 @@ using UnityEngine.Events;
 public class ConditionalTrigger : MonoBehaviour, IRigAware
 {
 	// Token: 0x170003A8 RID: 936
-	// (get) Token: 0x060024CF RID: 9423 RVA: 0x000C6540 File Offset: 0x000C4740
+	// (get) Token: 0x060024CF RID: 9423 RVA: 0x000C6520 File Offset: 0x000C4720
 	private int intValue
 	{
 		get
@@ -16,7 +16,7 @@ public class ConditionalTrigger : MonoBehaviour, IRigAware
 		}
 	}
 
-	// Token: 0x060024D0 RID: 9424 RVA: 0x000C6548 File Offset: 0x000C4748
+	// Token: 0x060024D0 RID: 9424 RVA: 0x000C6528 File Offset: 0x000C4728
 	public void SetProximityFromRig()
 	{
 		if (this._rig.AsNull<VRRig>() == null)
@@ -29,7 +29,7 @@ public class ConditionalTrigger : MonoBehaviour, IRigAware
 		}
 	}
 
-	// Token: 0x060024D1 RID: 9425 RVA: 0x000C6586 File Offset: 0x000C4786
+	// Token: 0x060024D1 RID: 9425 RVA: 0x000C6566 File Offset: 0x000C4766
 	public void SetProximityToRig()
 	{
 		if (this._rig.AsNull<VRRig>() == null)
@@ -42,67 +42,67 @@ public class ConditionalTrigger : MonoBehaviour, IRigAware
 		}
 	}
 
-	// Token: 0x060024D2 RID: 9426 RVA: 0x000C65C4 File Offset: 0x000C47C4
+	// Token: 0x060024D2 RID: 9426 RVA: 0x000C65A4 File Offset: 0x000C47A4
 	public void SetProximityFrom(Transform from)
 	{
 		this._from = from;
 	}
 
-	// Token: 0x060024D3 RID: 9427 RVA: 0x000C65CD File Offset: 0x000C47CD
+	// Token: 0x060024D3 RID: 9427 RVA: 0x000C65AD File Offset: 0x000C47AD
 	public void SetProxmityTo(Transform to)
 	{
 		this._to = to;
 	}
 
-	// Token: 0x060024D4 RID: 9428 RVA: 0x000C65D6 File Offset: 0x000C47D6
+	// Token: 0x060024D4 RID: 9428 RVA: 0x000C65B6 File Offset: 0x000C47B6
 	public void TrackedSet(TriggerCondition conditions)
 	{
 		this._tracking = conditions;
 	}
 
-	// Token: 0x060024D5 RID: 9429 RVA: 0x000C65DF File Offset: 0x000C47DF
+	// Token: 0x060024D5 RID: 9429 RVA: 0x000C65BF File Offset: 0x000C47BF
 	public void TrackedAdd(TriggerCondition conditions)
 	{
 		this._tracking |= conditions;
 	}
 
-	// Token: 0x060024D6 RID: 9430 RVA: 0x000C65EF File Offset: 0x000C47EF
+	// Token: 0x060024D6 RID: 9430 RVA: 0x000C65CF File Offset: 0x000C47CF
 	public void TrackedRemove(TriggerCondition conditions)
 	{
 		this._tracking &= ~conditions;
 	}
 
-	// Token: 0x060024D7 RID: 9431 RVA: 0x000C65D6 File Offset: 0x000C47D6
+	// Token: 0x060024D7 RID: 9431 RVA: 0x000C65B6 File Offset: 0x000C47B6
 	public void TrackedSet(int conditions)
 	{
 		this._tracking = (TriggerCondition)conditions;
 	}
 
-	// Token: 0x060024D8 RID: 9432 RVA: 0x000C65DF File Offset: 0x000C47DF
+	// Token: 0x060024D8 RID: 9432 RVA: 0x000C65BF File Offset: 0x000C47BF
 	public void TrackedAdd(int conditions)
 	{
 		this._tracking |= (TriggerCondition)conditions;
 	}
 
-	// Token: 0x060024D9 RID: 9433 RVA: 0x000C65EF File Offset: 0x000C47EF
+	// Token: 0x060024D9 RID: 9433 RVA: 0x000C65CF File Offset: 0x000C47CF
 	public void TrackedRemove(int conditions)
 	{
 		this._tracking &= (TriggerCondition)(~(TriggerCondition)conditions);
 	}
 
-	// Token: 0x060024DA RID: 9434 RVA: 0x000C6600 File Offset: 0x000C4800
+	// Token: 0x060024DA RID: 9434 RVA: 0x000C65E0 File Offset: 0x000C47E0
 	public void TrackedClear()
 	{
 		this._tracking = TriggerCondition.None;
 	}
 
-	// Token: 0x060024DB RID: 9435 RVA: 0x000C6609 File Offset: 0x000C4809
+	// Token: 0x060024DB RID: 9435 RVA: 0x000C65E9 File Offset: 0x000C47E9
 	private void OnEnable()
 	{
 		this._timeSince = 0f;
 	}
 
-	// Token: 0x060024DC RID: 9436 RVA: 0x000C661B File Offset: 0x000C481B
+	// Token: 0x060024DC RID: 9436 RVA: 0x000C65FB File Offset: 0x000C47FB
 	private void Update()
 	{
 		if (this.IsTracking(TriggerCondition.TimeElapsed))
@@ -117,7 +117,7 @@ public class ConditionalTrigger : MonoBehaviour, IRigAware
 		this._distance = 0f;
 	}
 
-	// Token: 0x060024DD RID: 9437 RVA: 0x000C6647 File Offset: 0x000C4847
+	// Token: 0x060024DD RID: 9437 RVA: 0x000C6627 File Offset: 0x000C4827
 	private void TrackTimeElapsed()
 	{
 		if (this._timeSince.HasElapsed(this._interval, true))
@@ -131,7 +131,7 @@ public class ConditionalTrigger : MonoBehaviour, IRigAware
 		}
 	}
 
-	// Token: 0x060024DE RID: 9438 RVA: 0x000C6670 File Offset: 0x000C4870
+	// Token: 0x060024DE RID: 9438 RVA: 0x000C6650 File Offset: 0x000C4850
 	private void TrackProximity()
 	{
 		if (!this._from || !this._to)
@@ -151,13 +151,13 @@ public class ConditionalTrigger : MonoBehaviour, IRigAware
 		}
 	}
 
-	// Token: 0x060024DF RID: 9439 RVA: 0x000C66E2 File Offset: 0x000C48E2
+	// Token: 0x060024DF RID: 9439 RVA: 0x000C66C2 File Offset: 0x000C48C2
 	private bool IsTracking(TriggerCondition condition)
 	{
 		return (this._tracking & condition) == condition;
 	}
 
-	// Token: 0x060024E0 RID: 9440 RVA: 0x000C66EF File Offset: 0x000C48EF
+	// Token: 0x060024E0 RID: 9440 RVA: 0x000C66CF File Offset: 0x000C48CF
 	private static void FindRig(out VRRig rig)
 	{
 		if (PhotonNetwork.InRoom)
@@ -168,7 +168,7 @@ public class ConditionalTrigger : MonoBehaviour, IRigAware
 		rig = VRRig.LocalRig;
 	}
 
-	// Token: 0x060024E1 RID: 9441 RVA: 0x000C6711 File Offset: 0x000C4911
+	// Token: 0x060024E1 RID: 9441 RVA: 0x000C66F1 File Offset: 0x000C48F1
 	public void SetRig(VRRig rig)
 	{
 		this._rig = rig;

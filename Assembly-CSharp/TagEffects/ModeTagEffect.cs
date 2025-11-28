@@ -10,7 +10,7 @@ namespace TagEffects
 	public class ModeTagEffect
 	{
 		// Token: 0x17000940 RID: 2368
-		// (get) Token: 0x060062FE RID: 25342 RVA: 0x001FE9C6 File Offset: 0x001FCBC6
+		// (get) Token: 0x060062FE RID: 25342 RVA: 0x001FE9A6 File Offset: 0x001FCBA6
 		public HashSet<GameModeType> Modes
 		{
 			get

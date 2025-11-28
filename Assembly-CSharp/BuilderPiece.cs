@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 // Token: 0x02000583 RID: 1411
 public class BuilderPiece : MonoBehaviour
 {
-	// Token: 0x06002377 RID: 9079 RVA: 0x000B9A9C File Offset: 0x000B7C9C
+	// Token: 0x06002377 RID: 9079 RVA: 0x000B9A7C File Offset: 0x000B7C7C
 	private void Awake()
 	{
 		if (this.fXInfo == null)
@@ -92,19 +92,19 @@ public class BuilderPiece : MonoBehaviour
 		this.ClearCollisionHistory();
 	}
 
-	// Token: 0x06002378 RID: 9080 RVA: 0x000B9D58 File Offset: 0x000B7F58
+	// Token: 0x06002378 RID: 9080 RVA: 0x000B9D38 File Offset: 0x000B7F38
 	public void SetTable(BuilderTable table)
 	{
 		this.tableOwner = table;
 	}
 
-	// Token: 0x06002379 RID: 9081 RVA: 0x000B9D61 File Offset: 0x000B7F61
+	// Token: 0x06002379 RID: 9081 RVA: 0x000B9D41 File Offset: 0x000B7F41
 	public BuilderTable GetTable()
 	{
 		return this.tableOwner;
 	}
 
-	// Token: 0x0600237A RID: 9082 RVA: 0x000B9D6C File Offset: 0x000B7F6C
+	// Token: 0x0600237A RID: 9082 RVA: 0x000B9D4C File Offset: 0x000B7F4C
 	public void OnReturnToPool()
 	{
 		this.tableOwner.builderRenderer.RemovePiece(this);
@@ -153,7 +153,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600237B RID: 9083 RVA: 0x000B9EEE File Offset: 0x000B80EE
+	// Token: 0x0600237B RID: 9083 RVA: 0x000B9ECE File Offset: 0x000B80CE
 	public void OnCreatedByPool()
 	{
 		this.materialSwapTargets = new List<MeshRenderer>(4);
@@ -162,7 +162,7 @@ public class BuilderPiece : MonoBehaviour
 		base.GetComponentsInChildren<GorillaSurfaceOverride>(this.areMeshesToggledOnPlace, this.surfaceOverrides);
 	}
 
-	// Token: 0x0600237C RID: 9084 RVA: 0x000B9F2C File Offset: 0x000B812C
+	// Token: 0x0600237C RID: 9084 RVA: 0x000B9F0C File Offset: 0x000B810C
 	public void SetupPiece(float gridSize)
 	{
 		for (int i = 0; i < this.gridPlanes.Count; i++)
@@ -171,7 +171,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600237D RID: 9085 RVA: 0x000B9F64 File Offset: 0x000B8164
+	// Token: 0x0600237D RID: 9085 RVA: 0x000B9F44 File Offset: 0x000B8144
 	public void SetMaterial(int inMaterialType, bool force = false)
 	{
 		if (this.materialOptions == null || this.materialSwapTargets == null || this.materialSwapTargets.Count < 1)
@@ -226,13 +226,13 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600237E RID: 9086 RVA: 0x000BA0F8 File Offset: 0x000B82F8
+	// Token: 0x0600237E RID: 9086 RVA: 0x000BA0D8 File Offset: 0x000B82D8
 	public int GetPieceId()
 	{
 		return this.pieceId;
 	}
 
-	// Token: 0x0600237F RID: 9087 RVA: 0x000BA100 File Offset: 0x000B8300
+	// Token: 0x0600237F RID: 9087 RVA: 0x000BA0E0 File Offset: 0x000B82E0
 	public int GetParentPieceId()
 	{
 		if (!(this.parentPiece == null))
@@ -242,19 +242,19 @@ public class BuilderPiece : MonoBehaviour
 		return -1;
 	}
 
-	// Token: 0x06002380 RID: 9088 RVA: 0x000BA11D File Offset: 0x000B831D
+	// Token: 0x06002380 RID: 9088 RVA: 0x000BA0FD File Offset: 0x000B82FD
 	public int GetAttachIndex()
 	{
 		return this.attachIndex;
 	}
 
-	// Token: 0x06002381 RID: 9089 RVA: 0x000BA125 File Offset: 0x000B8325
+	// Token: 0x06002381 RID: 9089 RVA: 0x000BA105 File Offset: 0x000B8305
 	public int GetParentAttachIndex()
 	{
 		return this.parentAttachIndex;
 	}
 
-	// Token: 0x06002382 RID: 9090 RVA: 0x000BA130 File Offset: 0x000B8330
+	// Token: 0x06002382 RID: 9090 RVA: 0x000BA110 File Offset: 0x000B8310
 	private void SetPieceActive(List<IBuilderPieceComponent> components, bool active)
 	{
 		if (components == null || active == this.pieceComponentsActive)
@@ -278,7 +278,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002383 RID: 9091 RVA: 0x000BA188 File Offset: 0x000B8388
+	// Token: 0x06002383 RID: 9091 RVA: 0x000BA168 File Offset: 0x000B8368
 	private void SetBehavioursEnabled<T>(List<T> components, bool enabled) where T : Behaviour
 	{
 		if (components == null)
@@ -294,7 +294,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002384 RID: 9092 RVA: 0x000BA1D0 File Offset: 0x000B83D0
+	// Token: 0x06002384 RID: 9092 RVA: 0x000BA1B0 File Offset: 0x000B83B0
 	private void SetCollidersEnabled<T>(List<T> components, bool enabled) where T : Collider
 	{
 		if (components == null)
@@ -310,7 +310,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002385 RID: 9093 RVA: 0x000BA218 File Offset: 0x000B8418
+	// Token: 0x06002385 RID: 9093 RVA: 0x000BA1F8 File Offset: 0x000B83F8
 	public void SetColliderLayers<T>(List<T> components, int layer) where T : Collider
 	{
 		this.currentColliderLayer = layer;
@@ -327,7 +327,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002386 RID: 9094 RVA: 0x000BA26C File Offset: 0x000B846C
+	// Token: 0x06002386 RID: 9094 RVA: 0x000BA24C File Offset: 0x000B844C
 	private void SetActive(List<GameObject> gameObjects, bool active)
 	{
 		if (gameObjects == null)
@@ -343,7 +343,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002387 RID: 9095 RVA: 0x000BA2AA File Offset: 0x000B84AA
+	// Token: 0x06002387 RID: 9095 RVA: 0x000BA28A File Offset: 0x000B848A
 	public void SetFunctionalPieceState(byte fState, NetPlayer instigator, int timeStamp)
 	{
 		if (this.functionalPieceComponent == null || !this.functionalPieceComponent.IsStateValid(fState))
@@ -359,7 +359,7 @@ public class BuilderPiece : MonoBehaviour
 		builderPieceFunctional.OnStateChanged(fState, instigator, timeStamp);
 	}
 
-	// Token: 0x06002388 RID: 9096 RVA: 0x000BA2DF File Offset: 0x000B84DF
+	// Token: 0x06002388 RID: 9096 RVA: 0x000BA2BF File Offset: 0x000B84BF
 	public void SetScale(float scale)
 	{
 		if (this.scaleRoot != null)
@@ -369,13 +369,13 @@ public class BuilderPiece : MonoBehaviour
 		this.pieceScale = scale;
 	}
 
-	// Token: 0x06002389 RID: 9097 RVA: 0x000BA30C File Offset: 0x000B850C
+	// Token: 0x06002389 RID: 9097 RVA: 0x000BA2EC File Offset: 0x000B84EC
 	public float GetScale()
 	{
 		return this.pieceScale;
 	}
 
-	// Token: 0x0600238A RID: 9098 RVA: 0x000BA314 File Offset: 0x000B8514
+	// Token: 0x0600238A RID: 9098 RVA: 0x000BA2F4 File Offset: 0x000B84F4
 	public void PaintingTint(bool enable)
 	{
 		if (enable)
@@ -397,7 +397,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600238B RID: 9099 RVA: 0x000BA354 File Offset: 0x000B8554
+	// Token: 0x0600238B RID: 9099 RVA: 0x000BA334 File Offset: 0x000B8534
 	public void PotentialGrab(bool enable)
 	{
 		if (enable)
@@ -419,7 +419,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600238C RID: 9100 RVA: 0x000BA3B0 File Offset: 0x000B85B0
+	// Token: 0x0600238C RID: 9100 RVA: 0x000BA390 File Offset: 0x000B8590
 	public static void PotentialGrabChildren(BuilderPiece piece, bool enable)
 	{
 		BuilderPiece builderPiece = piece.firstChildPiece;
@@ -446,7 +446,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600238D RID: 9101 RVA: 0x000BA42C File Offset: 0x000B862C
+	// Token: 0x0600238D RID: 9101 RVA: 0x000BA40C File Offset: 0x000B860C
 	private void RefreshTint()
 	{
 		if (this.potentialGrabCount > 0 || this.potentialGrabChildCount > 0)
@@ -478,7 +478,7 @@ public class BuilderPiece : MonoBehaviour
 		this.SetTint(this.tableOwner.defaultTint);
 	}
 
-	// Token: 0x0600238E RID: 9102 RVA: 0x000BA4F0 File Offset: 0x000B86F0
+	// Token: 0x0600238E RID: 9102 RVA: 0x000BA4D0 File Offset: 0x000B86D0
 	private void SetTint(float tint)
 	{
 		if (tint == this.tint)
@@ -489,7 +489,7 @@ public class BuilderPiece : MonoBehaviour
 		this.tableOwner.builderRenderer.SetPieceTint(this, tint);
 	}
 
-	// Token: 0x0600238F RID: 9103 RVA: 0x000BA518 File Offset: 0x000B8718
+	// Token: 0x0600238F RID: 9103 RVA: 0x000BA4F8 File Offset: 0x000B86F8
 	public void SetParentPiece(int newAttachIndex, BuilderPiece newParentPiece, int newParentAttachIndex)
 	{
 		if (this.parentHeld != null)
@@ -522,7 +522,7 @@ public class BuilderPiece : MonoBehaviour
 		this.tableOwner.UpdatePieceData(this);
 	}
 
-	// Token: 0x06002390 RID: 9104 RVA: 0x000BA5D0 File Offset: 0x000B87D0
+	// Token: 0x06002390 RID: 9104 RVA: 0x000BA5B0 File Offset: 0x000B87B0
 	public void ClearParentPiece(bool ignoreSnaps = false)
 	{
 		if (this.parentPiece == null)
@@ -547,7 +547,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002391 RID: 9105 RVA: 0x000BA660 File Offset: 0x000B8860
+	// Token: 0x06002391 RID: 9105 RVA: 0x000BA640 File Offset: 0x000B8840
 	public static void RemoveOverlapsWithDifferentPieceRoot(BuilderPiece piece, BuilderPiece root, BuilderPool pool)
 	{
 		for (int i = 0; i < piece.gridPlanes.Count; i++)
@@ -562,7 +562,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002392 RID: 9106 RVA: 0x000BA6B8 File Offset: 0x000B88B8
+	// Token: 0x06002392 RID: 9106 RVA: 0x000BA698 File Offset: 0x000B8898
 	private void AddPieceToParent(BuilderPiece piece)
 	{
 		BuilderPiece builderPiece = piece.parentPiece;
@@ -578,7 +578,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002393 RID: 9107 RVA: 0x000BA724 File Offset: 0x000B8924
+	// Token: 0x06002393 RID: 9107 RVA: 0x000BA704 File Offset: 0x000B8904
 	private static void RemovePieceFromParent(BuilderPiece piece)
 	{
 		BuilderPiece builderPiece = piece.parentPiece;
@@ -630,7 +630,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002394 RID: 9108 RVA: 0x000BA828 File Offset: 0x000B8A28
+	// Token: 0x06002394 RID: 9108 RVA: 0x000BA808 File Offset: 0x000B8A08
 	public void SetParentHeld(Transform parentHeld, int heldByPlayerActorNumber, bool heldInLeftHand)
 	{
 		if (this.parentPiece != null)
@@ -654,7 +654,7 @@ public class BuilderPiece : MonoBehaviour
 		this.OnReleasedAsRoot();
 	}
 
-	// Token: 0x06002395 RID: 9109 RVA: 0x000BA8B0 File Offset: 0x000B8AB0
+	// Token: 0x06002395 RID: 9109 RVA: 0x000BA890 File Offset: 0x000B8A90
 	public void ClearParentHeld()
 	{
 		if (this.parentHeld == null)
@@ -674,31 +674,31 @@ public class BuilderPiece : MonoBehaviour
 		this.OnReleasedAsRoot();
 	}
 
-	// Token: 0x06002396 RID: 9110 RVA: 0x000BA92D File Offset: 0x000B8B2D
+	// Token: 0x06002396 RID: 9110 RVA: 0x000BA90D File Offset: 0x000B8B0D
 	public bool IsHeldLocal()
 	{
 		return this.heldByPlayerActorNumber != -1 && this.heldByPlayerActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
 	}
 
-	// Token: 0x06002397 RID: 9111 RVA: 0x000BA94C File Offset: 0x000B8B4C
+	// Token: 0x06002397 RID: 9111 RVA: 0x000BA92C File Offset: 0x000B8B2C
 	public bool IsHeldBy(int actorNumber)
 	{
 		return actorNumber != -1 && this.heldByPlayerActorNumber == actorNumber;
 	}
 
-	// Token: 0x06002398 RID: 9112 RVA: 0x000BA95D File Offset: 0x000B8B5D
+	// Token: 0x06002398 RID: 9112 RVA: 0x000BA93D File Offset: 0x000B8B3D
 	public bool IsHeldInLeftHand()
 	{
 		return this.heldInLeftHand;
 	}
 
-	// Token: 0x06002399 RID: 9113 RVA: 0x000BA965 File Offset: 0x000B8B65
+	// Token: 0x06002399 RID: 9113 RVA: 0x000BA945 File Offset: 0x000B8B45
 	public static bool IsDroppedState(BuilderPiece.State state)
 	{
 		return state == BuilderPiece.State.Dropped || state == BuilderPiece.State.AttachedToDropped || state == BuilderPiece.State.OnShelf || state == BuilderPiece.State.OnConveyor;
 	}
 
-	// Token: 0x0600239A RID: 9114 RVA: 0x000BA97C File Offset: 0x000B8B7C
+	// Token: 0x0600239A RID: 9114 RVA: 0x000BA95C File Offset: 0x000B8B5C
 	public void SetActivateTimeStamp(int timeStamp)
 	{
 		this.activatedTimeStamp = timeStamp;
@@ -710,7 +710,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600239B RID: 9115 RVA: 0x000BA9B0 File Offset: 0x000B8BB0
+	// Token: 0x0600239B RID: 9115 RVA: 0x000BA990 File Offset: 0x000B8B90
 	public void SetState(BuilderPiece.State newState, bool force = false)
 	{
 		if (newState == this.state && !force)
@@ -875,7 +875,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600239C RID: 9116 RVA: 0x000BAF44 File Offset: 0x000B9144
+	// Token: 0x0600239C RID: 9116 RVA: 0x000BAF24 File Offset: 0x000B9124
 	public void OnGrabbedAsRoot()
 	{
 		if (this.isArmShelf)
@@ -889,7 +889,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600239D RID: 9117 RVA: 0x000BAFA0 File Offset: 0x000B91A0
+	// Token: 0x0600239D RID: 9117 RVA: 0x000BAF80 File Offset: 0x000B9180
 	public void OnReleasedAsRoot()
 	{
 		if (this.isArmShelf)
@@ -903,7 +903,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600239E RID: 9118 RVA: 0x000BAFDC File Offset: 0x000B91DC
+	// Token: 0x0600239E RID: 9118 RVA: 0x000BAFBC File Offset: 0x000B91BC
 	public void SetKinematic(bool kinematic, bool destroyImmediate = true)
 	{
 		if (kinematic && this.rigidBody != null)
@@ -945,7 +945,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600239F RID: 9119 RVA: 0x000BB0E4 File Offset: 0x000B92E4
+	// Token: 0x0600239F RID: 9119 RVA: 0x000BB0C4 File Offset: 0x000B92C4
 	public void ClearCollisionHistory()
 	{
 		if (this.collisionEnterHistory == null)
@@ -961,7 +961,7 @@ public class BuilderPiece : MonoBehaviour
 		this.forcedFrozen = false;
 	}
 
-	// Token: 0x060023A0 RID: 9120 RVA: 0x000BB144 File Offset: 0x000B9344
+	// Token: 0x060023A0 RID: 9120 RVA: 0x000BB124 File Offset: 0x000B9324
 	private void OnCollisionEnter(Collision other)
 	{
 		if (this.state != BuilderPiece.State.Dropped || this.forcedFrozen)
@@ -987,7 +987,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023A1 RID: 9121 RVA: 0x000BB204 File Offset: 0x000B9404
+	// Token: 0x060023A1 RID: 9121 RVA: 0x000BB1E4 File Offset: 0x000B93E4
 	public int GetExpectedGrabCollisionLayer()
 	{
 		if (this.heldByPlayerActorNumber != -1)
@@ -1008,7 +1008,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023A2 RID: 9122 RVA: 0x000BB25C File Offset: 0x000B945C
+	// Token: 0x060023A2 RID: 9122 RVA: 0x000BB23C File Offset: 0x000B943C
 	public void UpdateGrabbedPieceCollisionLayer()
 	{
 		int expectedGrabCollisionLayer = this.GetExpectedGrabCollisionLayer();
@@ -1019,7 +1019,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023A3 RID: 9123 RVA: 0x000BB290 File Offset: 0x000B9490
+	// Token: 0x060023A3 RID: 9123 RVA: 0x000BB270 File Offset: 0x000B9470
 	private void SetChildrenCollisionLayer(int layer)
 	{
 		BuilderPiece builderPiece = this.firstChildPiece;
@@ -1031,7 +1031,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023A4 RID: 9124 RVA: 0x000BB2CC File Offset: 0x000B94CC
+	// Token: 0x060023A4 RID: 9124 RVA: 0x000BB2AC File Offset: 0x000B94AC
 	public void SetStatic(bool isStatic, bool force = false)
 	{
 		isStatic = true;
@@ -1050,7 +1050,7 @@ public class BuilderPiece : MonoBehaviour
 		this.SetDirectRenderersVisible(this.tableOwner.IsInBuilderZone());
 	}
 
-	// Token: 0x060023A5 RID: 9125 RVA: 0x000BB338 File Offset: 0x000B9538
+	// Token: 0x060023A5 RID: 9125 RVA: 0x000BB318 File Offset: 0x000B9518
 	private void FindActiveRenderers()
 	{
 		if (this.renderingDirect.Count > 0)
@@ -1072,7 +1072,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023A6 RID: 9126 RVA: 0x000BB408 File Offset: 0x000B9608
+	// Token: 0x060023A6 RID: 9126 RVA: 0x000BB3E8 File Offset: 0x000B95E8
 	public void SetDirectRenderersVisible(bool visible)
 	{
 		if (this.renderingDirect != null && this.renderingDirect.Count > 0)
@@ -1084,7 +1084,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023A7 RID: 9127 RVA: 0x000BB470 File Offset: 0x000B9670
+	// Token: 0x060023A7 RID: 9127 RVA: 0x000BB450 File Offset: 0x000B9650
 	private void SetChildrenState(BuilderPiece.State newState, bool force)
 	{
 		BuilderPiece builderPiece = this.firstChildPiece;
@@ -1095,7 +1095,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023A8 RID: 9128 RVA: 0x000BB4A0 File Offset: 0x000B96A0
+	// Token: 0x060023A8 RID: 9128 RVA: 0x000BB480 File Offset: 0x000B9680
 	public void OnCreate()
 	{
 		for (int i = 0; i < this.pieceComponents.Count; i++)
@@ -1104,7 +1104,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023A9 RID: 9129 RVA: 0x000BB4E0 File Offset: 0x000B96E0
+	// Token: 0x060023A9 RID: 9129 RVA: 0x000BB4C0 File Offset: 0x000B96C0
 	public void OnPlacementDeserialized()
 	{
 		for (int i = 0; i < this.pieceComponents.Count; i++)
@@ -1113,49 +1113,49 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023AA RID: 9130 RVA: 0x000BB514 File Offset: 0x000B9714
+	// Token: 0x060023AA RID: 9130 RVA: 0x000BB4F4 File Offset: 0x000B96F4
 	public void PlayPlacementFx()
 	{
 		this.PlayFX(this.fXInfo.placeVFX);
 	}
 
-	// Token: 0x060023AB RID: 9131 RVA: 0x000BB527 File Offset: 0x000B9727
+	// Token: 0x060023AB RID: 9131 RVA: 0x000BB507 File Offset: 0x000B9707
 	public void PlayDisconnectFx()
 	{
 		this.PlayFX(this.fXInfo.disconnectVFX);
 	}
 
-	// Token: 0x060023AC RID: 9132 RVA: 0x000BB53A File Offset: 0x000B973A
+	// Token: 0x060023AC RID: 9132 RVA: 0x000BB51A File Offset: 0x000B971A
 	public void PlayGrabbedFx()
 	{
 		this.PlayFX(this.fXInfo.grabbedVFX);
 	}
 
-	// Token: 0x060023AD RID: 9133 RVA: 0x000BB54D File Offset: 0x000B974D
+	// Token: 0x060023AD RID: 9133 RVA: 0x000BB52D File Offset: 0x000B972D
 	public void PlayTooHeavyFx()
 	{
 		this.PlayFX(this.fXInfo.tooHeavyVFX);
 	}
 
-	// Token: 0x060023AE RID: 9134 RVA: 0x000BB560 File Offset: 0x000B9760
+	// Token: 0x060023AE RID: 9134 RVA: 0x000BB540 File Offset: 0x000B9740
 	public void PlayLocationLockFx()
 	{
 		this.PlayFX(this.fXInfo.locationLockVFX);
 	}
 
-	// Token: 0x060023AF RID: 9135 RVA: 0x000BB573 File Offset: 0x000B9773
+	// Token: 0x060023AF RID: 9135 RVA: 0x000BB553 File Offset: 0x000B9753
 	public void PlayRecycleFx()
 	{
 		this.PlayFX(this.fXInfo.recycleVFX);
 	}
 
-	// Token: 0x060023B0 RID: 9136 RVA: 0x000BB586 File Offset: 0x000B9786
+	// Token: 0x060023B0 RID: 9136 RVA: 0x000BB566 File Offset: 0x000B9766
 	private void PlayFX(GameObject fx)
 	{
 		ObjectPools.instance.Instantiate(fx, base.transform.position, true);
 	}
 
-	// Token: 0x060023B1 RID: 9137 RVA: 0x000BB5A0 File Offset: 0x000B97A0
+	// Token: 0x060023B1 RID: 9137 RVA: 0x000BB580 File Offset: 0x000B9780
 	public static BuilderPiece GetBuilderPieceFromCollider(Collider collider)
 	{
 		if (collider == null)
@@ -1170,7 +1170,7 @@ public class BuilderPiece : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060023B2 RID: 9138 RVA: 0x000BB5D0 File Offset: 0x000B97D0
+	// Token: 0x060023B2 RID: 9138 RVA: 0x000BB5B0 File Offset: 0x000B97B0
 	public static BuilderPiece GetBuilderPieceFromTransform(Transform transform)
 	{
 		while (transform != null)
@@ -1185,7 +1185,7 @@ public class BuilderPiece : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060023B3 RID: 9139 RVA: 0x000BB604 File Offset: 0x000B9804
+	// Token: 0x060023B3 RID: 9139 RVA: 0x000BB5E4 File Offset: 0x000B97E4
 	public static void MakePieceRoot(BuilderPiece piece)
 	{
 		if (piece == null)
@@ -1205,7 +1205,7 @@ public class BuilderPiece : MonoBehaviour
 		builderPiece.SetParentPiece(newAttachIndex, piece, newParentAttachIndex);
 	}
 
-	// Token: 0x060023B4 RID: 9140 RVA: 0x000BB668 File Offset: 0x000B9868
+	// Token: 0x060023B4 RID: 9140 RVA: 0x000BB648 File Offset: 0x000B9848
 	public BuilderPiece GetRootPiece()
 	{
 		BuilderPiece builderPiece = this;
@@ -1216,20 +1216,20 @@ public class BuilderPiece : MonoBehaviour
 		return builderPiece;
 	}
 
-	// Token: 0x060023B5 RID: 9141 RVA: 0x000BB69C File Offset: 0x000B989C
+	// Token: 0x060023B5 RID: 9141 RVA: 0x000BB67C File Offset: 0x000B987C
 	public bool IsPrivatePlot()
 	{
 		return this.isPrivatePlot;
 	}
 
-	// Token: 0x060023B6 RID: 9142 RVA: 0x000BB6A4 File Offset: 0x000B98A4
+	// Token: 0x060023B6 RID: 9142 RVA: 0x000BB684 File Offset: 0x000B9884
 	public bool TryGetPlotComponent(out BuilderPiecePrivatePlot plot)
 	{
 		plot = this.plotComponent;
 		return this.isPrivatePlot;
 	}
 
-	// Token: 0x060023B7 RID: 9143 RVA: 0x000BB6BC File Offset: 0x000B98BC
+	// Token: 0x060023B7 RID: 9143 RVA: 0x000BB69C File Offset: 0x000B989C
 	public static bool CanPlayerAttachPieceToPiece(int playerActorNumber, BuilderPiece attachingPiece, BuilderPiece attachToPiece)
 	{
 		if (attachToPiece.state != BuilderPiece.State.AttachedAndPlaced && !attachToPiece.IsPrivatePlot() && attachToPiece.state != BuilderPiece.State.AttachedToArm)
@@ -1249,7 +1249,7 @@ public class BuilderPiece : MonoBehaviour
 		return !attachedBuiltInPiece.TryGetPlotComponent(out builderPiecePrivatePlot) || (builderPiecePrivatePlot.CanPlayerAttachToPlot(playerActorNumber) && builderPiecePrivatePlot.IsChainUnderCapacity(attachingPiece));
 	}
 
-	// Token: 0x060023B8 RID: 9144 RVA: 0x000BB754 File Offset: 0x000B9954
+	// Token: 0x060023B8 RID: 9144 RVA: 0x000BB734 File Offset: 0x000B9934
 	public bool CanPlayerGrabPiece(int actorNumber, Vector3 worldPosition)
 	{
 		if (this.state != BuilderPiece.State.AttachedAndPlaced && !this.isPrivatePlot)
@@ -1261,7 +1261,7 @@ public class BuilderPiece : MonoBehaviour
 		return attachedBuiltInPiece == null || !attachedBuiltInPiece.isPrivatePlot || !attachedBuiltInPiece.TryGetPlotComponent(out builderPiecePrivatePlot) || builderPiecePrivatePlot.CanPlayerGrabFromPlot(actorNumber, worldPosition) || this.tableOwner.IsLocationWithinSharedBuildArea(worldPosition);
 	}
 
-	// Token: 0x060023B9 RID: 9145 RVA: 0x000BB7B4 File Offset: 0x000B99B4
+	// Token: 0x060023B9 RID: 9145 RVA: 0x000BB794 File Offset: 0x000B9994
 	public bool IsPieceMoving()
 	{
 		if (this.state != BuilderPiece.State.AttachedAndPlaced)
@@ -1293,7 +1293,7 @@ public class BuilderPiece : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x060023BA RID: 9146 RVA: 0x000BB85C File Offset: 0x000B9A5C
+	// Token: 0x060023BA RID: 9146 RVA: 0x000BB83C File Offset: 0x000B9A3C
 	public BuilderPiece GetAttachedBuiltInPiece()
 	{
 		if (this.isBuiltIntoTable)
@@ -1316,7 +1316,7 @@ public class BuilderPiece : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060023BB RID: 9147 RVA: 0x000BB8A4 File Offset: 0x000B9AA4
+	// Token: 0x060023BB RID: 9147 RVA: 0x000BB884 File Offset: 0x000B9A84
 	public int GetChainCostAndCount(int[] costArray)
 	{
 		for (int i = 0; i < costArray.Length; i++)
@@ -1333,7 +1333,7 @@ public class BuilderPiece : MonoBehaviour
 		return 1 + this.GetChildCountAndCost(costArray);
 	}
 
-	// Token: 0x060023BC RID: 9148 RVA: 0x000BB938 File Offset: 0x000B9B38
+	// Token: 0x060023BC RID: 9148 RVA: 0x000BB918 File Offset: 0x000B9B18
 	public int GetChildCountAndCost(int[] costArray)
 	{
 		int num = 0;
@@ -1354,7 +1354,7 @@ public class BuilderPiece : MonoBehaviour
 		return num;
 	}
 
-	// Token: 0x060023BD RID: 9149 RVA: 0x000BB9DC File Offset: 0x000B9BDC
+	// Token: 0x060023BD RID: 9149 RVA: 0x000BB9BC File Offset: 0x000B9BBC
 	public int GetChildCount()
 	{
 		int num = 0;
@@ -1365,7 +1365,7 @@ public class BuilderPiece : MonoBehaviour
 		return num;
 	}
 
-	// Token: 0x060023BE RID: 9150 RVA: 0x000BBA34 File Offset: 0x000B9C34
+	// Token: 0x060023BE RID: 9150 RVA: 0x000BBA14 File Offset: 0x000B9C14
 	public void GetChainCost(int[] costArray)
 	{
 		for (int i = 0; i < costArray.Length; i++)
@@ -1382,7 +1382,7 @@ public class BuilderPiece : MonoBehaviour
 		this.AddChildCost(costArray);
 	}
 
-	// Token: 0x060023BF RID: 9151 RVA: 0x000BBAC8 File Offset: 0x000B9CC8
+	// Token: 0x060023BF RID: 9151 RVA: 0x000BBAA8 File Offset: 0x000B9CA8
 	public void AddChildCost(int[] costArray)
 	{
 		int num = 0;
@@ -1402,7 +1402,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023C0 RID: 9152 RVA: 0x000BBB68 File Offset: 0x000B9D68
+	// Token: 0x060023C0 RID: 9152 RVA: 0x000BBB48 File Offset: 0x000B9D48
 	public void BumpTwistToPositionRotation(byte twist, sbyte xOffset, sbyte zOffset, int potentialAttachIndex, BuilderAttachGridPlane potentialParentGridPlane, out Vector3 localPosition, out Quaternion localRotation, out Vector3 worldPosition, out Quaternion worldRotation)
 	{
 		float gridSize = this.tableOwner.gridSize;
@@ -1432,7 +1432,7 @@ public class BuilderPiece : MonoBehaviour
 		worldRotation = quaternion3;
 	}
 
-	// Token: 0x060023C1 RID: 9153 RVA: 0x000BBCBC File Offset: 0x000B9EBC
+	// Token: 0x060023C1 RID: 9153 RVA: 0x000BBC9C File Offset: 0x000B9E9C
 	public Quaternion TwistToLocalRotation(byte twist, int potentialAttachIndex)
 	{
 		float num = 90f * (float)twist;
@@ -1446,7 +1446,7 @@ public class BuilderPiece : MonoBehaviour
 		return quaternion * Quaternion.Inverse(transform.localRotation);
 	}
 
-	// Token: 0x060023C2 RID: 9154 RVA: 0x000BBD34 File Offset: 0x000B9F34
+	// Token: 0x060023C2 RID: 9154 RVA: 0x000BBD14 File Offset: 0x000B9F14
 	public int GetPiecePlacement()
 	{
 		byte pieceTwist = this.GetPieceTwist();
@@ -1456,7 +1456,7 @@ public class BuilderPiece : MonoBehaviour
 		return BuilderTable.PackPiecePlacement(pieceTwist, xOffset, zOffset);
 	}
 
-	// Token: 0x060023C3 RID: 9155 RVA: 0x000BBD5C File Offset: 0x000B9F5C
+	// Token: 0x060023C3 RID: 9155 RVA: 0x000BBD3C File Offset: 0x000B9F3C
 	public byte GetPieceTwist()
 	{
 		if (this.attachIndex == -1)
@@ -1488,7 +1488,7 @@ public class BuilderPiece : MonoBehaviour
 		return (byte)num4;
 	}
 
-	// Token: 0x060023C4 RID: 9156 RVA: 0x000BBE10 File Offset: 0x000BA010
+	// Token: 0x060023C4 RID: 9156 RVA: 0x000BBDF0 File Offset: 0x000B9FF0
 	public void GetPieceBumpOffset(byte twist, out sbyte xOffset, out sbyte zOffset)
 	{
 		if (this.attachIndex == -1 || this.parentPiece == null)

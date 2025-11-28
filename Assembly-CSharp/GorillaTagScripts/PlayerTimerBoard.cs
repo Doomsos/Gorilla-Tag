@@ -11,24 +11,24 @@ namespace GorillaTagScripts
 	public class PlayerTimerBoard : MonoBehaviour
 	{
 		// Token: 0x1700085E RID: 2142
-		// (get) Token: 0x06005956 RID: 22870 RVA: 0x001C932D File Offset: 0x001C752D
-		// (set) Token: 0x06005957 RID: 22871 RVA: 0x001C9335 File Offset: 0x001C7535
+		// (get) Token: 0x06005956 RID: 22870 RVA: 0x001C930D File Offset: 0x001C750D
+		// (set) Token: 0x06005957 RID: 22871 RVA: 0x001C9315 File Offset: 0x001C7515
 		public bool IsDirty { get; set; } = true;
 
-		// Token: 0x06005958 RID: 22872 RVA: 0x001C933E File Offset: 0x001C753E
+		// Token: 0x06005958 RID: 22872 RVA: 0x001C931E File Offset: 0x001C751E
 		private void Start()
 		{
 			this.TryInit();
 		}
 
-		// Token: 0x06005959 RID: 22873 RVA: 0x001C9346 File Offset: 0x001C7546
+		// Token: 0x06005959 RID: 22873 RVA: 0x001C9326 File Offset: 0x001C7526
 		private void OnEnable()
 		{
 			this.TryInit();
 			LocalisationManager.RegisterOnLanguageChanged(new Action(this.RedrawPlayerLines));
 		}
 
-		// Token: 0x0600595A RID: 22874 RVA: 0x001C935F File Offset: 0x001C755F
+		// Token: 0x0600595A RID: 22874 RVA: 0x001C933F File Offset: 0x001C753F
 		private void TryInit()
 		{
 			if (this.isInitialized)
@@ -43,7 +43,7 @@ namespace GorillaTagScripts
 			this.isInitialized = true;
 		}
 
-		// Token: 0x0600595B RID: 22875 RVA: 0x001C938A File Offset: 0x001C758A
+		// Token: 0x0600595B RID: 22875 RVA: 0x001C936A File Offset: 0x001C756A
 		private void OnDisable()
 		{
 			if (PlayerTimerManager.instance != null)
@@ -54,7 +54,7 @@ namespace GorillaTagScripts
 			LocalisationManager.UnregisterOnLanguageChanged(new Action(this.RedrawPlayerLines));
 		}
 
-		// Token: 0x0600595C RID: 22876 RVA: 0x001C93BC File Offset: 0x001C75BC
+		// Token: 0x0600595C RID: 22876 RVA: 0x001C939C File Offset: 0x001C759C
 		public void SetSleepState(bool awake)
 		{
 			this.playerColumn.enabled = awake;
@@ -65,13 +65,13 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600595D RID: 22877 RVA: 0x001C93F0 File Offset: 0x001C75F0
+		// Token: 0x0600595D RID: 22877 RVA: 0x001C93D0 File Offset: 0x001C75D0
 		public void SortLines()
 		{
 			this.lines.Sort(new Comparison<PlayerTimerBoardLine>(PlayerTimerBoardLine.CompareByTotalTime));
 		}
 
-		// Token: 0x0600595E RID: 22878 RVA: 0x001C940C File Offset: 0x001C760C
+		// Token: 0x0600595E RID: 22878 RVA: 0x001C93EC File Offset: 0x001C75EC
 		public void RedrawPlayerLines()
 		{
 			this.stringBuilder.Clear();

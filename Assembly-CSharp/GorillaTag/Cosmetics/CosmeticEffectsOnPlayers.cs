@@ -14,7 +14,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010A8 RID: 4264
 	public class CosmeticEffectsOnPlayers : MonoBehaviour, ISpawnable
 	{
-		// Token: 0x06006AA2 RID: 27298 RVA: 0x0022F708 File Offset: 0x0022D908
+		// Token: 0x06006AA2 RID: 27298 RVA: 0x0022F6E8 File Offset: 0x0022D8E8
 		private bool ShouldAffectRig(VRRig rig, CosmeticEffectsOnPlayers.TargetType target)
 		{
 			bool flag = rig == this.myRig;
@@ -37,7 +37,7 @@ namespace GorillaTag.Cosmetics
 			return result;
 		}
 
-		// Token: 0x06006AA3 RID: 27299 RVA: 0x0022F748 File Offset: 0x0022D948
+		// Token: 0x06006AA3 RID: 27299 RVA: 0x0022F728 File Offset: 0x0022D928
 		private void Awake()
 		{
 			foreach (CosmeticEffectsOnPlayers.CosmeticEffect cosmeticEffect in this.allEffects)
@@ -46,7 +46,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AA4 RID: 27300 RVA: 0x0022F784 File Offset: 0x0022D984
+		// Token: 0x06006AA4 RID: 27300 RVA: 0x0022F764 File Offset: 0x0022D964
 		public void SetKnockbackStrengthMultiplier(float value)
 		{
 			foreach (KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> keyValuePair in this.allEffectsDict)
@@ -55,19 +55,19 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AA5 RID: 27301 RVA: 0x0022F7E0 File Offset: 0x0022D9E0
+		// Token: 0x06006AA5 RID: 27301 RVA: 0x0022F7C0 File Offset: 0x0022D9C0
 		public void ApplyAllEffects()
 		{
 			this.ApplyAllEffectsByDistance(base.transform.position);
 		}
 
-		// Token: 0x06006AA6 RID: 27302 RVA: 0x0022F7F3 File Offset: 0x0022D9F3
+		// Token: 0x06006AA6 RID: 27302 RVA: 0x0022F7D3 File Offset: 0x0022D9D3
 		public void ApplyAllEffectsByDistance(Transform _transform)
 		{
 			this.ApplyAllEffectsByDistance(_transform.position);
 		}
 
-		// Token: 0x06006AA7 RID: 27303 RVA: 0x0022F804 File Offset: 0x0022DA04
+		// Token: 0x06006AA7 RID: 27303 RVA: 0x0022F7E4 File Offset: 0x0022D9E4
 		public void ApplyAllEffectsByDistance(Vector3 position)
 		{
 			foreach (KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect in this.allEffectsDict)
@@ -93,7 +93,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AA8 RID: 27304 RVA: 0x0022F8AC File Offset: 0x0022DAAC
+		// Token: 0x06006AA8 RID: 27304 RVA: 0x0022F88C File Offset: 0x0022DA8C
 		public void ApplyAllEffectsForRig(VRRig rig)
 		{
 			foreach (KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect in this.allEffectsDict)
@@ -122,7 +122,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AA9 RID: 27305 RVA: 0x0022F960 File Offset: 0x0022DB60
+		// Token: 0x06006AA9 RID: 27305 RVA: 0x0022F940 File Offset: 0x0022DB40
 		private void ApplySkinByDistance(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, Vector3 position)
 		{
 			if (!effect.Value.IsGameModeAllowed())
@@ -157,7 +157,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AAA RID: 27306 RVA: 0x0022FA54 File Offset: 0x0022DC54
+		// Token: 0x06006AAA RID: 27306 RVA: 0x0022FA34 File Offset: 0x0022DC34
 		private void ApplySkinForRig(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, VRRig vrRig)
 		{
 			if (!effect.Value.IsGameModeAllowed() || !this.ShouldAffectRig(vrRig, effect.Value.target))
@@ -172,7 +172,7 @@ namespace GorillaTag.Cosmetics
 			vrRig.SpawnSkinEffects(effect);
 		}
 
-		// Token: 0x06006AAB RID: 27307 RVA: 0x0022FAC4 File Offset: 0x0022DCC4
+		// Token: 0x06006AAB RID: 27307 RVA: 0x0022FAA4 File Offset: 0x0022DCA4
 		private void ApplyTagWithKnockbackForRig(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, VRRig vrRig)
 		{
 			if (!effect.Value.IsGameModeAllowed() || !this.ShouldAffectRig(vrRig, effect.Value.target))
@@ -187,7 +187,7 @@ namespace GorillaTag.Cosmetics
 			vrRig.EnableHitWithKnockBack(effect);
 		}
 
-		// Token: 0x06006AAC RID: 27308 RVA: 0x0022FB34 File Offset: 0x0022DD34
+		// Token: 0x06006AAC RID: 27308 RVA: 0x0022FB14 File Offset: 0x0022DD14
 		private void ApplyTagWithKnockbackByDistance(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, Vector3 position)
 		{
 			if (!effect.Value.IsGameModeAllowed())
@@ -222,7 +222,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AAD RID: 27309 RVA: 0x0022FC28 File Offset: 0x0022DE28
+		// Token: 0x06006AAD RID: 27309 RVA: 0x0022FC08 File Offset: 0x0022DE08
 		private void ApplyInstantKnockbackForRig(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, VRRig vrRig)
 		{
 			if (!effect.Value.IsGameModeAllowed() || !this.ShouldAffectRig(vrRig, effect.Value.target))
@@ -244,7 +244,7 @@ namespace GorillaTag.Cosmetics
 			vrRig.ApplyInstanceKnockBack(effect);
 		}
 
-		// Token: 0x06006AAE RID: 27310 RVA: 0x0022FD24 File Offset: 0x0022DF24
+		// Token: 0x06006AAE RID: 27310 RVA: 0x0022FD04 File Offset: 0x0022DF04
 		private void ApplyInstantKnockbackByDistance(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, Vector3 position)
 		{
 			if (!effect.Value.IsGameModeAllowed() || !this.ShouldAffectRig(GorillaTagger.Instance.offlineVRRig, effect.Value.target))
@@ -277,7 +277,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AAF RID: 27311 RVA: 0x0022FED0 File Offset: 0x0022E0D0
+		// Token: 0x06006AAF RID: 27311 RVA: 0x0022FEB0 File Offset: 0x0022E0B0
 		private void ApplyVOForRig(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, VRRig rig)
 		{
 			if (!effect.Value.IsGameModeAllowed() || !this.ShouldAffectRig(rig, effect.Value.target))
@@ -292,7 +292,7 @@ namespace GorillaTag.Cosmetics
 			rig.ActivateVOEffect(effect);
 		}
 
-		// Token: 0x06006AB0 RID: 27312 RVA: 0x0022FF40 File Offset: 0x0022E140
+		// Token: 0x06006AB0 RID: 27312 RVA: 0x0022FF20 File Offset: 0x0022E120
 		private void PlaySfxForRig(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, VRRig vrRig)
 		{
 			if (!effect.Value.IsGameModeAllowed() || !this.ShouldAffectRig(vrRig, effect.Value.target))
@@ -307,7 +307,7 @@ namespace GorillaTag.Cosmetics
 			vrRig.PlayCosmeticEffectSFX(effect);
 		}
 
-		// Token: 0x06006AB1 RID: 27313 RVA: 0x0022FFB0 File Offset: 0x0022E1B0
+		// Token: 0x06006AB1 RID: 27313 RVA: 0x0022FF90 File Offset: 0x0022E190
 		private void PlaySfxByDistance(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, Vector3 position)
 		{
 			if (!effect.Value.IsGameModeAllowed())
@@ -342,7 +342,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AB2 RID: 27314 RVA: 0x002300A4 File Offset: 0x0022E2A4
+		// Token: 0x06006AB2 RID: 27314 RVA: 0x00230084 File Offset: 0x0022E284
 		private void PlayVFXForRig(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, VRRig vrRig)
 		{
 			if (!effect.Value.IsGameModeAllowed() || !this.ShouldAffectRig(vrRig, effect.Value.target))
@@ -357,7 +357,7 @@ namespace GorillaTag.Cosmetics
 			vrRig.SpawnVFXEffect(effect);
 		}
 
-		// Token: 0x06006AB3 RID: 27315 RVA: 0x00230114 File Offset: 0x0022E314
+		// Token: 0x06006AB3 RID: 27315 RVA: 0x002300F4 File Offset: 0x0022E2F4
 		private void PlayVFXByDistance(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect, Vector3 position)
 		{
 			if (!effect.Value.IsGameModeAllowed())
@@ -393,16 +393,16 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A04 RID: 2564
-		// (get) Token: 0x06006AB4 RID: 27316 RVA: 0x00230208 File Offset: 0x0022E408
-		// (set) Token: 0x06006AB5 RID: 27317 RVA: 0x00230210 File Offset: 0x0022E410
+		// (get) Token: 0x06006AB4 RID: 27316 RVA: 0x002301E8 File Offset: 0x0022E3E8
+		// (set) Token: 0x06006AB5 RID: 27317 RVA: 0x002301F0 File Offset: 0x0022E3F0
 		public bool IsSpawned { get; set; }
 
 		// Token: 0x17000A05 RID: 2565
-		// (get) Token: 0x06006AB6 RID: 27318 RVA: 0x00230219 File Offset: 0x0022E419
-		// (set) Token: 0x06006AB7 RID: 27319 RVA: 0x00230221 File Offset: 0x0022E421
+		// (get) Token: 0x06006AB6 RID: 27318 RVA: 0x002301F9 File Offset: 0x0022E3F9
+		// (set) Token: 0x06006AB7 RID: 27319 RVA: 0x00230201 File Offset: 0x0022E401
 		public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
 
-		// Token: 0x06006AB8 RID: 27320 RVA: 0x0023022A File Offset: 0x0022E42A
+		// Token: 0x06006AB8 RID: 27320 RVA: 0x0023020A File Offset: 0x0022E40A
 		public void OnSpawn(VRRig rig)
 		{
 			this.myRig = rig;
@@ -439,11 +439,11 @@ namespace GorillaTag.Cosmetics
 		public class CosmeticEffect
 		{
 			// Token: 0x17000A06 RID: 2566
-			// (get) Token: 0x06006ABB RID: 27323 RVA: 0x00230252 File Offset: 0x0022E452
-			// (set) Token: 0x06006ABC RID: 27324 RVA: 0x0023025A File Offset: 0x0022E45A
+			// (get) Token: 0x06006ABB RID: 27323 RVA: 0x00230232 File Offset: 0x0022E432
+			// (set) Token: 0x06006ABC RID: 27324 RVA: 0x0023023A File Offset: 0x0022E43A
 			public float knockbackStrengthMultiplier { get; set; }
 
-			// Token: 0x06006ABD RID: 27325 RVA: 0x00230264 File Offset: 0x0022E464
+			// Token: 0x06006ABD RID: 27325 RVA: 0x00230244 File Offset: 0x0022E444
 			public bool IsGameModeAllowed()
 			{
 				GameModeType gameModeType = (GameMode.ActiveGameMode != null) ? GameMode.ActiveGameMode.GameType() : GameModeType.Casual;
@@ -451,8 +451,8 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A07 RID: 2567
-			// (get) Token: 0x06006ABE RID: 27326 RVA: 0x0023029D File Offset: 0x0022E49D
-			// (set) Token: 0x06006ABF RID: 27327 RVA: 0x002302A5 File Offset: 0x0022E4A5
+			// (get) Token: 0x06006ABE RID: 27326 RVA: 0x0023027D File Offset: 0x0022E47D
+			// (set) Token: 0x06006ABF RID: 27327 RVA: 0x00230285 File Offset: 0x0022E485
 			public float EffectDuration
 			{
 				get
@@ -466,55 +466,55 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A08 RID: 2568
-			// (get) Token: 0x06006AC0 RID: 27328 RVA: 0x002302AE File Offset: 0x0022E4AE
-			// (set) Token: 0x06006AC1 RID: 27329 RVA: 0x002302B6 File Offset: 0x0022E4B6
+			// (get) Token: 0x06006AC0 RID: 27328 RVA: 0x0023028E File Offset: 0x0022E48E
+			// (set) Token: 0x06006AC1 RID: 27329 RVA: 0x00230296 File Offset: 0x0022E496
 			public float EffectStartedTime { get; set; }
 
-			// Token: 0x06006AC2 RID: 27330 RVA: 0x002302BF File Offset: 0x0022E4BF
+			// Token: 0x06006AC2 RID: 27330 RVA: 0x0023029F File Offset: 0x0022E49F
 			private bool IsSkin()
 			{
 				return this.effectType == CosmeticEffectsOnPlayers.EFFECTTYPE.Skin;
 			}
 
-			// Token: 0x06006AC3 RID: 27331 RVA: 0x002302CA File Offset: 0x0022E4CA
+			// Token: 0x06006AC3 RID: 27331 RVA: 0x002302AA File Offset: 0x0022E4AA
 			private bool IsTagKnockback()
 			{
 				return this.effectType == CosmeticEffectsOnPlayers.EFFECTTYPE.TagWithKnockback;
 			}
 
-			// Token: 0x06006AC4 RID: 27332 RVA: 0x002302D5 File Offset: 0x0022E4D5
+			// Token: 0x06006AC4 RID: 27332 RVA: 0x002302B5 File Offset: 0x0022E4B5
 			private bool IsInstantKnockback()
 			{
 				return this.effectType == CosmeticEffectsOnPlayers.EFFECTTYPE.InstantKnockback;
 			}
 
-			// Token: 0x06006AC5 RID: 27333 RVA: 0x002302E0 File Offset: 0x0022E4E0
+			// Token: 0x06006AC5 RID: 27333 RVA: 0x002302C0 File Offset: 0x0022E4C0
 			private bool HasKnockback()
 			{
 				CosmeticEffectsOnPlayers.EFFECTTYPE effecttype = this.effectType;
 				return effecttype == CosmeticEffectsOnPlayers.EFFECTTYPE.TagWithKnockback || effecttype == CosmeticEffectsOnPlayers.EFFECTTYPE.InstantKnockback;
 			}
 
-			// Token: 0x06006AC6 RID: 27334 RVA: 0x00230305 File Offset: 0x0022E505
+			// Token: 0x06006AC6 RID: 27334 RVA: 0x002302E5 File Offset: 0x0022E4E5
 			private bool IsVO()
 			{
 				return this.effectType == CosmeticEffectsOnPlayers.EFFECTTYPE.VoiceOverride;
 			}
 
-			// Token: 0x06006AC7 RID: 27335 RVA: 0x00230310 File Offset: 0x0022E510
+			// Token: 0x06006AC7 RID: 27335 RVA: 0x002302F0 File Offset: 0x0022E4F0
 			private bool IsSFX()
 			{
 				return this.effectType == CosmeticEffectsOnPlayers.EFFECTTYPE.SFX;
 			}
 
-			// Token: 0x06006AC8 RID: 27336 RVA: 0x0023031B File Offset: 0x0022E51B
+			// Token: 0x06006AC8 RID: 27336 RVA: 0x002302FB File Offset: 0x0022E4FB
 			private bool IsVFX()
 			{
 				return this.effectType == CosmeticEffectsOnPlayers.EFFECTTYPE.VFX;
 			}
 
 			// Token: 0x17000A09 RID: 2569
-			// (get) Token: 0x06006AC9 RID: 27337 RVA: 0x00230326 File Offset: 0x0022E526
+			// (get) Token: 0x06006AC9 RID: 27337 RVA: 0x00230306 File Offset: 0x0022E506
 			private HashSet<GameModeType> Modes
 			{
 				get

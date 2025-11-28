@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000739 RID: 1849
 public class GRToolUpgradePurchaseStationShelf : MonoBehaviour
 {
-	// Token: 0x06002FC3 RID: 12227 RVA: 0x001051F4 File Offset: 0x001033F4
+	// Token: 0x06002FC3 RID: 12227 RVA: 0x001051D4 File Offset: 0x001033D4
 	public void Awake()
 	{
 		for (int i = 0; i < this.gRPurchaseSlots.Count; i++)
@@ -22,7 +22,7 @@ public class GRToolUpgradePurchaseStationShelf : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002FC4 RID: 12228 RVA: 0x00105270 File Offset: 0x00103470
+	// Token: 0x06002FC4 RID: 12228 RVA: 0x00105250 File Offset: 0x00103450
 	public void SetMaterialOverride(int slotID, Material overrideMaterial)
 	{
 		if (slotID < 0 || slotID >= this.gRPurchaseSlots.Count)
@@ -57,7 +57,7 @@ public class GRToolUpgradePurchaseStationShelf : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002FC5 RID: 12229 RVA: 0x0010533C File Offset: 0x0010353C
+	// Token: 0x06002FC5 RID: 12229 RVA: 0x0010531C File Offset: 0x0010351C
 	public void SetBacklightStateAndMaterial(int slotID, bool isEnabled, Material materialOverride)
 	{
 		if (slotID < 0 || slotID >= this.gRPurchaseSlots.Count)

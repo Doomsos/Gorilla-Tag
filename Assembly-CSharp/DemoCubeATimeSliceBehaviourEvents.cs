@@ -5,14 +5,14 @@ using UnityEngine;
 // Token: 0x02000C1C RID: 3100
 public class DemoCubeATimeSliceBehaviourEvents : TimeSliceLodBehaviour
 {
-	// Token: 0x06004C43 RID: 19523 RVA: 0x0018D024 File Offset: 0x0018B224
+	// Token: 0x06004C43 RID: 19523 RVA: 0x0018D004 File Offset: 0x0018B204
 	protected new void Awake()
 	{
 		base.Awake();
 		this._renderer = base.GetComponent<Renderer>();
 	}
 
-	// Token: 0x06004C44 RID: 19524 RVA: 0x0018D038 File Offset: 0x0018B238
+	// Token: 0x06004C44 RID: 19524 RVA: 0x0018D018 File Offset: 0x0018B218
 	public override void SliceUpdate(float deltaTime)
 	{
 		float num = 0f;
@@ -22,14 +22,14 @@ public class DemoCubeATimeSliceBehaviourEvents : TimeSliceLodBehaviour
 		}
 	}
 
-	// Token: 0x06004C45 RID: 19525 RVA: 0x0018D068 File Offset: 0x0018B268
+	// Token: 0x06004C45 RID: 19525 RVA: 0x0018D048 File Offset: 0x0018B248
 	public void OnLod0Enter()
 	{
 		this._renderer.material = this._red;
 		base.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06004C46 RID: 19526 RVA: 0x0018D087 File Offset: 0x0018B287
+	// Token: 0x06004C46 RID: 19526 RVA: 0x0018D067 File Offset: 0x0018B267
 	public void OnLod1Enter()
 	{
 		this._renderer.material = this._green;

@@ -11,7 +11,7 @@ using UnityEngine.Events;
 public class KIDMessagingController : MonoBehaviour
 {
 	// Token: 0x17000662 RID: 1634
-	// (get) Token: 0x06004385 RID: 17285 RVA: 0x001664B3 File Offset: 0x001646B3
+	// (get) Token: 0x06004385 RID: 17285 RVA: 0x00166493 File Offset: 0x00164693
 	private static string HasShownConfirmationScreenPlayerPref
 	{
 		get
@@ -20,13 +20,13 @@ public class KIDMessagingController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004386 RID: 17286 RVA: 0x001664CB File Offset: 0x001646CB
+	// Token: 0x06004386 RID: 17286 RVA: 0x001664AB File Offset: 0x001646AB
 	public void OnConfirmPressed()
 	{
 		this._closeMessageBox = true;
 	}
 
-	// Token: 0x06004387 RID: 17287 RVA: 0x001664D4 File Offset: 0x001646D4
+	// Token: 0x06004387 RID: 17287 RVA: 0x001664B4 File Offset: 0x001646B4
 	private void Awake()
 	{
 		if (KIDMessagingController.instance != null)
@@ -38,13 +38,13 @@ public class KIDMessagingController : MonoBehaviour
 		KIDMessagingController.instance = this;
 	}
 
-	// Token: 0x06004388 RID: 17288 RVA: 0x001664FA File Offset: 0x001646FA
+	// Token: 0x06004388 RID: 17288 RVA: 0x001664DA File Offset: 0x001646DA
 	private bool ShouldShowConfirmationScreen()
 	{
 		return !KIDManager.CurrentSession.IsDefault;
 	}
 
-	// Token: 0x06004389 RID: 17289 RVA: 0x0016650C File Offset: 0x0016470C
+	// Token: 0x06004389 RID: 17289 RVA: 0x001664EC File Offset: 0x001646EC
 	private Task StartKIDConfirmationScreenInternal(CancellationToken token)
 	{
 		KIDMessagingController.<StartKIDConfirmationScreenInternal>d__18 <StartKIDConfirmationScreenInternal>d__;
@@ -56,7 +56,7 @@ public class KIDMessagingController : MonoBehaviour
 		return <StartKIDConfirmationScreenInternal>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600438A RID: 17290 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x0600438A RID: 17290 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager kidaudioManager = KIDAudioManager.Instance;
@@ -67,7 +67,7 @@ public class KIDMessagingController : MonoBehaviour
 		kidaudioManager.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
 	}
 
-	// Token: 0x0600438B RID: 17291 RVA: 0x00166558 File Offset: 0x00164758
+	// Token: 0x0600438B RID: 17291 RVA: 0x00166538 File Offset: 0x00164738
 	public static Task StartKIDConfirmationScreen(CancellationToken token)
 	{
 		KIDMessagingController.<StartKIDConfirmationScreen>d__20 <StartKIDConfirmationScreen>d__;
@@ -78,7 +78,7 @@ public class KIDMessagingController : MonoBehaviour
 		return <StartKIDConfirmationScreen>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600438C RID: 17292 RVA: 0x0016659C File Offset: 0x0016479C
+	// Token: 0x0600438C RID: 17292 RVA: 0x0016657C File Offset: 0x0016477C
 	private static Task<string> GetSetupConfirmationMessage()
 	{
 		KIDMessagingController.<GetSetupConfirmationMessage>d__21 <GetSetupConfirmationMessage>d__;
@@ -88,7 +88,7 @@ public class KIDMessagingController : MonoBehaviour
 		return <GetSetupConfirmationMessage>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600438D RID: 17293 RVA: 0x001665D8 File Offset: 0x001647D8
+	// Token: 0x0600438D RID: 17293 RVA: 0x001665B8 File Offset: 0x001647B8
 	private static string GetConfirmMessageFromTitleDataJson(string jsonTxt)
 	{
 		if (string.IsNullOrEmpty(jsonTxt))
@@ -110,7 +110,7 @@ public class KIDMessagingController : MonoBehaviour
 		return kidmessagingTitleData.KIDSetupConfirmation;
 	}
 
-	// Token: 0x0600438E RID: 17294 RVA: 0x0016663C File Offset: 0x0016483C
+	// Token: 0x0600438E RID: 17294 RVA: 0x0016661C File Offset: 0x0016481C
 	public static void ShowConnectionErrorScreen()
 	{
 		if (KIDMessagingController.instance == null || KIDMessagingController.instance.messageBox == null)

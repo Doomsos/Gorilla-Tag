@@ -7,7 +7,7 @@ using GorillaTagScripts.GhostReactor;
 public class GRShiftStat
 {
 	// Token: 0x17000432 RID: 1074
-	// (get) Token: 0x06002E0B RID: 11787 RVA: 0x000FA758 File Offset: 0x000F8958
+	// (get) Token: 0x06002E0B RID: 11787 RVA: 0x000FA738 File Offset: 0x000F8938
 	public IReadOnlyDictionary<GREnemyType, int> EnemyKills
 	{
 		get
@@ -16,7 +16,7 @@ public class GRShiftStat
 		}
 	}
 
-	// Token: 0x06002E0C RID: 11788 RVA: 0x000FA760 File Offset: 0x000F8960
+	// Token: 0x06002E0C RID: 11788 RVA: 0x000FA740 File Offset: 0x000F8940
 	public void Serialize(BinaryWriter writer)
 	{
 		writer.Write(this.GetShiftStat(GRShiftStatType.EnemyDeaths));
@@ -31,7 +31,7 @@ public class GRShiftStat
 		}
 	}
 
-	// Token: 0x06002E0D RID: 11789 RVA: 0x000FA80C File Offset: 0x000F8A0C
+	// Token: 0x06002E0D RID: 11789 RVA: 0x000FA7EC File Offset: 0x000F89EC
 	public void Deserialize(BinaryReader reader)
 	{
 		this.shiftStats[GRShiftStatType.EnemyDeaths] = reader.ReadInt32();
@@ -46,14 +46,14 @@ public class GRShiftStat
 		}
 	}
 
-	// Token: 0x06002E0E RID: 11790 RVA: 0x000FA88D File Offset: 0x000F8A8D
+	// Token: 0x06002E0E RID: 11790 RVA: 0x000FA86D File Offset: 0x000F8A6D
 	public void SetShiftStat(GRShiftStatType stat, int newValue)
 	{
 		this.shiftStats[stat] = newValue;
 		GhostReactor.instance.shiftManager.RefreshDepthDisplay();
 	}
 
-	// Token: 0x06002E0F RID: 11791 RVA: 0x000FA8AC File Offset: 0x000F8AAC
+	// Token: 0x06002E0F RID: 11791 RVA: 0x000FA88C File Offset: 0x000F8A8C
 	public void IncrementShiftStat(GRShiftStatType stat)
 	{
 		if (this.shiftStats.ContainsKey(stat))
@@ -67,7 +67,7 @@ public class GRShiftStat
 		GhostReactor.instance.shiftManager.RefreshDepthDisplay();
 	}
 
-	// Token: 0x06002E10 RID: 11792 RVA: 0x000FA900 File Offset: 0x000F8B00
+	// Token: 0x06002E10 RID: 11792 RVA: 0x000FA8E0 File Offset: 0x000F8AE0
 	public void IncrementEnemyKills(GREnemyType type)
 	{
 		if (!this.enemyKills.TryAdd(type, 1))
@@ -79,7 +79,7 @@ public class GRShiftStat
 		GhostReactor.instance.shiftManager.RefreshDepthDisplay();
 	}
 
-	// Token: 0x06002E11 RID: 11793 RVA: 0x000FA944 File Offset: 0x000F8B44
+	// Token: 0x06002E11 RID: 11793 RVA: 0x000FA924 File Offset: 0x000F8B24
 	public void ResetShiftStats()
 	{
 		this.shiftStats[GRShiftStatType.EnemyDeaths] = 0;
@@ -90,7 +90,7 @@ public class GRShiftStat
 		GhostReactor.instance.shiftManager.RefreshDepthDisplay();
 	}
 
-	// Token: 0x06002E12 RID: 11794 RVA: 0x000FA99F File Offset: 0x000F8B9F
+	// Token: 0x06002E12 RID: 11794 RVA: 0x000FA97F File Offset: 0x000F8B7F
 	public int GetShiftStat(GRShiftStatType stat)
 	{
 		if (this.shiftStats.ContainsKey(stat))

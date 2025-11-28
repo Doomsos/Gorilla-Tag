@@ -8,7 +8,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E6B RID: 3691
 	public class RecyclerForceVolume : MonoBehaviour
 	{
-		// Token: 0x06005C4C RID: 23628 RVA: 0x001DA61A File Offset: 0x001D881A
+		// Token: 0x06005C4C RID: 23628 RVA: 0x001DA5FA File Offset: 0x001D87FA
 		private void Awake()
 		{
 			this.volume = base.GetComponent<Collider>();
@@ -19,7 +19,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C4D RID: 23629 RVA: 0x001DA650 File Offset: 0x001D8850
+		// Token: 0x06005C4D RID: 23629 RVA: 0x001DA630 File Offset: 0x001D8830
 		private bool TriggerFilter(Collider other, out Rigidbody rb, out Transform xf)
 		{
 			rb = null;
@@ -32,7 +32,7 @@ namespace GorillaTagScripts.Builder
 			return rb != null && xf != null;
 		}
 
-		// Token: 0x06005C4E RID: 23630 RVA: 0x001DA6B0 File Offset: 0x001D88B0
+		// Token: 0x06005C4E RID: 23630 RVA: 0x001DA690 File Offset: 0x001D8890
 		public void OnTriggerEnter(Collider other)
 		{
 			Rigidbody rigidbody = null;
@@ -50,7 +50,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C4F RID: 23631 RVA: 0x001DA760 File Offset: 0x001D8960
+		// Token: 0x06005C4F RID: 23631 RVA: 0x001DA740 File Offset: 0x001D8940
 		public void OnTriggerExit(Collider other)
 		{
 			Rigidbody rigidbody = null;
@@ -65,7 +65,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C50 RID: 23632 RVA: 0x001DA794 File Offset: 0x001D8994
+		// Token: 0x06005C50 RID: 23632 RVA: 0x001DA774 File Offset: 0x001D8974
 		public void OnTriggerStay(Collider other)
 		{
 			Rigidbody rigidbody = null;

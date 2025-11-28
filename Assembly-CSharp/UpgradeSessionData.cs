@@ -3,7 +3,7 @@
 // Token: 0x02000A2A RID: 2602
 public class UpgradeSessionData
 {
-	// Token: 0x0600420A RID: 16906 RVA: 0x0015D5F0 File Offset: 0x0015B7F0
+	// Token: 0x0600420A RID: 16906 RVA: 0x0015D5D0 File Offset: 0x0015B7D0
 	public UpgradeSessionData(UpgradeSessionResponse response)
 	{
 		this.status = response.status;

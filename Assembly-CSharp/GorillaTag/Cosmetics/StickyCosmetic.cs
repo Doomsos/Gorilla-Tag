@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x0200111A RID: 4378
 	public class StickyCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006D9B RID: 28059 RVA: 0x0023FDDF File Offset: 0x0023DFDF
+		// Token: 0x06006D9B RID: 28059 RVA: 0x0023FDBF File Offset: 0x0023DFBF
 		private void Start()
 		{
 			this.endRigidbody.isKinematic = false;
@@ -17,7 +17,7 @@ namespace GorillaTag.Cosmetics
 			this.UpdateState(StickyCosmetic.ObjectState.Idle);
 		}
 
-		// Token: 0x06006D9C RID: 28060 RVA: 0x0023FE00 File Offset: 0x0023E000
+		// Token: 0x06006D9C RID: 28060 RVA: 0x0023FDE0 File Offset: 0x0023DFE0
 		public void Extend()
 		{
 			if (this.currentState == StickyCosmetic.ObjectState.Idle || this.currentState == StickyCosmetic.ObjectState.Extending)
@@ -26,13 +26,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D9D RID: 28061 RVA: 0x0023FE1A File Offset: 0x0023E01A
+		// Token: 0x06006D9D RID: 28061 RVA: 0x0023FDFA File Offset: 0x0023DFFA
 		public void Retract()
 		{
 			this.UpdateState(StickyCosmetic.ObjectState.Retracting);
 		}
 
-		// Token: 0x06006D9E RID: 28062 RVA: 0x0023FE24 File Offset: 0x0023E024
+		// Token: 0x06006D9E RID: 28062 RVA: 0x0023FE04 File Offset: 0x0023E004
 		private void Extend_Internal()
 		{
 			if (this.endRigidbody.isKinematic)
@@ -43,7 +43,7 @@ namespace GorillaTag.Cosmetics
 			this.endRigidbody.MovePosition(this.startPosition.position + this.startPosition.forward * this.rayLength);
 		}
 
-		// Token: 0x06006D9F RID: 28063 RVA: 0x0023FEA0 File Offset: 0x0023E0A0
+		// Token: 0x06006D9F RID: 28063 RVA: 0x0023FE80 File Offset: 0x0023E080
 		private void Retract_Internal()
 		{
 			this.endRigidbody.isKinematic = false;
@@ -51,7 +51,7 @@ namespace GorillaTag.Cosmetics
 			this.endRigidbody.MovePosition(vector);
 		}
 
-		// Token: 0x06006DA0 RID: 28064 RVA: 0x0023FEF0 File Offset: 0x0023E0F0
+		// Token: 0x06006DA0 RID: 28064 RVA: 0x0023FED0 File Offset: 0x0023E0D0
 		private void FixedUpdate()
 		{
 			switch (this.currentState)
@@ -115,7 +115,7 @@ namespace GorillaTag.Cosmetics
 			Debug.DrawRay(this.rayOrigin.position, this.rayOrigin.forward * this.rayLength, Color.red);
 		}
 
-		// Token: 0x06006DA1 RID: 28065 RVA: 0x002400D0 File Offset: 0x0023E2D0
+		// Token: 0x06006DA1 RID: 28065 RVA: 0x002400B0 File Offset: 0x0023E2B0
 		private void UpdateState(StickyCosmetic.ObjectState newState)
 		{
 			this.lastState = this.currentState;

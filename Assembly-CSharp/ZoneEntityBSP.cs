@@ -5,7 +5,7 @@ using UnityEngine;
 public class ZoneEntityBSP : MonoBehaviour, IGorillaSliceableSimple
 {
 	// Token: 0x17000787 RID: 1927
-	// (get) Token: 0x060050D5 RID: 20693 RVA: 0x001A1930 File Offset: 0x0019FB30
+	// (get) Token: 0x060050D5 RID: 20693 RVA: 0x001A1910 File Offset: 0x0019FB10
 	public VRRig entityRig
 	{
 		get
@@ -15,7 +15,7 @@ public class ZoneEntityBSP : MonoBehaviour, IGorillaSliceableSimple
 	}
 
 	// Token: 0x17000788 RID: 1928
-	// (get) Token: 0x060050D6 RID: 20694 RVA: 0x001A1938 File Offset: 0x0019FB38
+	// (get) Token: 0x060050D6 RID: 20694 RVA: 0x001A1918 File Offset: 0x0019FB18
 	public GTZone currentZone
 	{
 		get
@@ -30,7 +30,7 @@ public class ZoneEntityBSP : MonoBehaviour, IGorillaSliceableSimple
 	}
 
 	// Token: 0x17000789 RID: 1929
-	// (get) Token: 0x060050D7 RID: 20695 RVA: 0x001A194C File Offset: 0x0019FB4C
+	// (get) Token: 0x060050D7 RID: 20695 RVA: 0x001A192C File Offset: 0x0019FB2C
 	public GTSubZone currentSubZone
 	{
 		get
@@ -45,7 +45,7 @@ public class ZoneEntityBSP : MonoBehaviour, IGorillaSliceableSimple
 	}
 
 	// Token: 0x1700078A RID: 1930
-	// (get) Token: 0x060050D8 RID: 20696 RVA: 0x001A1960 File Offset: 0x0019FB60
+	// (get) Token: 0x060050D8 RID: 20696 RVA: 0x001A1940 File Offset: 0x0019FB40
 	public GroupJoinZoneAB GroupZone
 	{
 		get
@@ -59,7 +59,7 @@ public class ZoneEntityBSP : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060050D9 RID: 20697 RVA: 0x001A1986 File Offset: 0x0019FB86
+	// Token: 0x060050D9 RID: 20697 RVA: 0x001A1966 File Offset: 0x0019FB66
 	private void Start()
 	{
 		if (!this._entityRig.isOfflineVRRig)
@@ -69,19 +69,19 @@ public class ZoneEntityBSP : MonoBehaviour, IGorillaSliceableSimple
 		this.SliceUpdate();
 	}
 
-	// Token: 0x060050DA RID: 20698 RVA: 0x001A19A2 File Offset: 0x0019FBA2
+	// Token: 0x060050DA RID: 20698 RVA: 0x001A1982 File Offset: 0x0019FB82
 	public virtual void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.FixedUpdate);
 	}
 
-	// Token: 0x060050DB RID: 20699 RVA: 0x001A19AB File Offset: 0x0019FBAB
+	// Token: 0x060050DB RID: 20699 RVA: 0x001A198B File Offset: 0x0019FB8B
 	public virtual void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.FixedUpdate);
 	}
 
-	// Token: 0x060050DC RID: 20700 RVA: 0x001A19B4 File Offset: 0x0019FBB4
+	// Token: 0x060050DC RID: 20700 RVA: 0x001A1994 File Offset: 0x0019FB94
 	public void SliceUpdate()
 	{
 		if (this.isUpdateDisabled)
@@ -119,13 +119,13 @@ public class ZoneEntityBSP : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060050DD RID: 20701 RVA: 0x001A1A79 File Offset: 0x0019FC79
+	// Token: 0x060050DD RID: 20701 RVA: 0x001A1A59 File Offset: 0x0019FC59
 	public void EnableZoneChanges()
 	{
 		this.isUpdateDisabled = false;
 	}
 
-	// Token: 0x060050DE RID: 20702 RVA: 0x001A1A82 File Offset: 0x0019FC82
+	// Token: 0x060050DE RID: 20702 RVA: 0x001A1A62 File Offset: 0x0019FC62
 	public void DisableZoneChanges()
 	{
 		this.isUpdateDisabled = true;

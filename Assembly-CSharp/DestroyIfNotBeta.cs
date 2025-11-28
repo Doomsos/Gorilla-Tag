@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020004FF RID: 1279
 public class DestroyIfNotBeta : MonoBehaviour
 {
-	// Token: 0x060020D6 RID: 8406 RVA: 0x000AE04D File Offset: 0x000AC24D
+	// Token: 0x060020D6 RID: 8406 RVA: 0x000AE02D File Offset: 0x000AC22D
 	private void Awake()
 	{
 		bool shouldKeepIfBeta = this.m_shouldKeepIfBeta;

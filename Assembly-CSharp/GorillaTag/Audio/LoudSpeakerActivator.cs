@@ -6,7 +6,7 @@ namespace GorillaTag.Audio
 	// Token: 0x02001073 RID: 4211
 	public class LoudSpeakerActivator : MonoBehaviour
 	{
-		// Token: 0x060069B1 RID: 27057 RVA: 0x0022617B File Offset: 0x0022437B
+		// Token: 0x060069B1 RID: 27057 RVA: 0x0022615B File Offset: 0x0022435B
 		private void Awake()
 		{
 			this._isLocal = this.IsParentedToLocalRig();
@@ -16,7 +16,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069B2 RID: 27058 RVA: 0x002261A8 File Offset: 0x002243A8
+		// Token: 0x060069B2 RID: 27058 RVA: 0x00226188 File Offset: 0x00224388
 		private bool IsParentedToLocalRig()
 		{
 			if (VRRigCache.Instance.localRig == null)
@@ -35,13 +35,13 @@ namespace GorillaTag.Audio
 			return false;
 		}
 
-		// Token: 0x060069B3 RID: 27059 RVA: 0x00226201 File Offset: 0x00224401
+		// Token: 0x060069B3 RID: 27059 RVA: 0x002261E1 File Offset: 0x002243E1
 		public void SetRecorder(GTRecorder recorder)
 		{
 			this._recorder = recorder;
 		}
 
-		// Token: 0x060069B4 RID: 27060 RVA: 0x0022620C File Offset: 0x0022440C
+		// Token: 0x060069B4 RID: 27060 RVA: 0x002261EC File Offset: 0x002243EC
 		public void StartLocalBroadcast()
 		{
 			if (!this._isLocal)
@@ -71,7 +71,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069B5 RID: 27061 RVA: 0x00226304 File Offset: 0x00224504
+		// Token: 0x060069B5 RID: 27061 RVA: 0x002262E4 File Offset: 0x002244E4
 		public void StopLocalBroadcast()
 		{
 			if (!this._isLocal)

@@ -14,7 +14,7 @@ namespace GameObjectScheduling
 	public class CountdownText : MonoBehaviour
 	{
 		// Token: 0x17000A6F RID: 2671
-		// (get) Token: 0x06006FD5 RID: 28629 RVA: 0x002467C9 File Offset: 0x002449C9
+		// (get) Token: 0x06006FD5 RID: 28629 RVA: 0x002467A9 File Offset: 0x002449A9
 		private bool ShouldLocalize
 		{
 			get
@@ -24,8 +24,8 @@ namespace GameObjectScheduling
 		}
 
 		// Token: 0x17000A70 RID: 2672
-		// (get) Token: 0x06006FD6 RID: 28630 RVA: 0x00246806 File Offset: 0x00244A06
-		// (set) Token: 0x06006FD7 RID: 28631 RVA: 0x00246810 File Offset: 0x00244A10
+		// (get) Token: 0x06006FD6 RID: 28630 RVA: 0x002467E6 File Offset: 0x002449E6
+		// (set) Token: 0x06006FD7 RID: 28631 RVA: 0x002467F0 File Offset: 0x002449F0
 		public CountdownTextDate Countdown
 		{
 			get
@@ -47,7 +47,7 @@ namespace GameObjectScheduling
 			}
 		}
 
-		// Token: 0x06006FD8 RID: 28632 RVA: 0x0024689C File Offset: 0x00244A9C
+		// Token: 0x06006FD8 RID: 28632 RVA: 0x0024687C File Offset: 0x00244A7C
 		private void Awake()
 		{
 			this.displayText = base.GetComponent<TMP_Text>();
@@ -83,7 +83,7 @@ namespace GameObjectScheduling
 			this._isValidVar = (this._countdownLocStr["is-valid"] as BoolVariable);
 		}
 
-		// Token: 0x06006FD9 RID: 28633 RVA: 0x00246A02 File Offset: 0x00244C02
+		// Token: 0x06006FD9 RID: 28633 RVA: 0x002469E2 File Offset: 0x00244BE2
 		private void OnEnable()
 		{
 			if (this.CountdownTo == null)
@@ -96,14 +96,14 @@ namespace GameObjectScheduling
 			}
 		}
 
-		// Token: 0x06006FDA RID: 28634 RVA: 0x00246A35 File Offset: 0x00244C35
+		// Token: 0x06006FDA RID: 28634 RVA: 0x00246A15 File Offset: 0x00244C15
 		private void OnDisable()
 		{
 			this.StopMonitorTime();
 			this.StopDisplayRefresh();
 		}
 
-		// Token: 0x06006FDB RID: 28635 RVA: 0x00246A43 File Offset: 0x00244C43
+		// Token: 0x06006FDB RID: 28635 RVA: 0x00246A23 File Offset: 0x00244C23
 		private IEnumerator MonitorTime()
 		{
 			while (GorillaComputer.instance == null || GorillaComputer.instance.startupMillis == 0L)
@@ -123,7 +123,7 @@ namespace GameObjectScheduling
 			yield break;
 		}
 
-		// Token: 0x06006FDC RID: 28636 RVA: 0x00246A52 File Offset: 0x00244C52
+		// Token: 0x06006FDC RID: 28636 RVA: 0x00246A32 File Offset: 0x00244C32
 		private IEnumerator MonitorExternalTime(DateTime countdown)
 		{
 			while (GorillaComputer.instance == null || GorillaComputer.instance.startupMillis == 0L)
@@ -143,7 +143,7 @@ namespace GameObjectScheduling
 			yield break;
 		}
 
-		// Token: 0x06006FDD RID: 28637 RVA: 0x00246A68 File Offset: 0x00244C68
+		// Token: 0x06006FDD RID: 28637 RVA: 0x00246A48 File Offset: 0x00244C48
 		private void StopMonitorTime()
 		{
 			if (this.monitor != null)
@@ -153,7 +153,7 @@ namespace GameObjectScheduling
 			this.monitor = null;
 		}
 
-		// Token: 0x06006FDE RID: 28638 RVA: 0x00246A85 File Offset: 0x00244C85
+		// Token: 0x06006FDE RID: 28638 RVA: 0x00246A65 File Offset: 0x00244C65
 		public void SetCountdownTime(DateTime countdown)
 		{
 			this.StopMonitorTime();
@@ -161,7 +161,7 @@ namespace GameObjectScheduling
 			this.monitor = base.StartCoroutine(this.MonitorExternalTime(countdown));
 		}
 
-		// Token: 0x06006FDF RID: 28639 RVA: 0x00246AA6 File Offset: 0x00244CA6
+		// Token: 0x06006FDF RID: 28639 RVA: 0x00246A86 File Offset: 0x00244C86
 		public void SetFixedText(string text)
 		{
 			this.StopMonitorTime();
@@ -169,14 +169,14 @@ namespace GameObjectScheduling
 			this.displayText.text = text;
 		}
 
-		// Token: 0x06006FE0 RID: 28640 RVA: 0x00246AC0 File Offset: 0x00244CC0
+		// Token: 0x06006FE0 RID: 28640 RVA: 0x00246AA0 File Offset: 0x00244CA0
 		private void StartDisplayRefresh()
 		{
 			this.StopDisplayRefresh();
 			this.displayRefresh = base.StartCoroutine(this.WaitForDisplayRefresh());
 		}
 
-		// Token: 0x06006FE1 RID: 28641 RVA: 0x00246ADA File Offset: 0x00244CDA
+		// Token: 0x06006FE1 RID: 28641 RVA: 0x00246ABA File Offset: 0x00244CBA
 		private void StopDisplayRefresh()
 		{
 			if (this.displayRefresh != null)
@@ -186,7 +186,7 @@ namespace GameObjectScheduling
 			this.displayRefresh = null;
 		}
 
-		// Token: 0x06006FE2 RID: 28642 RVA: 0x00246AF7 File Offset: 0x00244CF7
+		// Token: 0x06006FE2 RID: 28642 RVA: 0x00246AD7 File Offset: 0x00244CD7
 		private IEnumerator WaitForDisplayRefresh()
 		{
 			for (;;)
@@ -218,7 +218,7 @@ namespace GameObjectScheduling
 			yield break;
 		}
 
-		// Token: 0x06006FE3 RID: 28643 RVA: 0x00246B08 File Offset: 0x00244D08
+		// Token: 0x06006FE3 RID: 28643 RVA: 0x00246AE8 File Offset: 0x00244CE8
 		private void RefreshDisplay()
 		{
 			this.countdownTime = this.targetTime.Subtract(GorillaComputer.instance.GetServerTime());
@@ -237,13 +237,13 @@ namespace GameObjectScheduling
 			this._isValidVar.Value = item4;
 		}
 
-		// Token: 0x06006FE4 RID: 28644 RVA: 0x00246BB2 File Offset: 0x00244DB2
+		// Token: 0x06006FE4 RID: 28644 RVA: 0x00246B92 File Offset: 0x00244D92
 		public static string GetTimeDisplay(TimeSpan ts, string format)
 		{
 			return CountdownText.GetTimeDisplay(ts, format, int.MaxValue, string.Empty, string.Empty).Item1;
 		}
 
-		// Token: 0x06006FE5 RID: 28645 RVA: 0x00246BD0 File Offset: 0x00244DD0
+		// Token: 0x06006FE5 RID: 28645 RVA: 0x00246BB0 File Offset: 0x00244DB0
 		[return: TupleElementNames(new string[]
 		{
 			"msg",
@@ -295,7 +295,7 @@ namespace GameObjectScheduling
 			return new ValueTuple<string, int, int, bool>(text, num, num2, flag);
 		}
 
-		// Token: 0x06006FE6 RID: 28646 RVA: 0x00246D04 File Offset: 0x00244F04
+		// Token: 0x06006FE6 RID: 28646 RVA: 0x00246CE4 File Offset: 0x00244EE4
 		private static string getTimeChunkString(CountdownText.TimeChunk chunk, int n)
 		{
 			switch (chunk)
@@ -329,7 +329,7 @@ namespace GameObjectScheduling
 			}
 		}
 
-		// Token: 0x06006FE7 RID: 28647 RVA: 0x00246D70 File Offset: 0x00244F70
+		// Token: 0x06006FE7 RID: 28647 RVA: 0x00246D50 File Offset: 0x00244F50
 		private DateTime TryParseDateTime()
 		{
 			DateTime result;

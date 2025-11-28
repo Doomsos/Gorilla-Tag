@@ -8,8 +8,8 @@ using UnityEngine.Scripting;
 public class BattleGameModeData : FusionGameModeData
 {
 	// Token: 0x1700037D RID: 893
-	// (get) Token: 0x060020FE RID: 8446 RVA: 0x000AE94B File Offset: 0x000ACB4B
-	// (set) Token: 0x060020FF RID: 8447 RVA: 0x000AE975 File Offset: 0x000ACB75
+	// (get) Token: 0x060020FE RID: 8446 RVA: 0x000AE92B File Offset: 0x000ACB2B
+	// (set) Token: 0x060020FF RID: 8447 RVA: 0x000AE955 File Offset: 0x000ACB55
 	[Networked]
 	[NetworkedWeaved(0, 31)]
 	private unsafe PaintbrawlData PaintbrawlData
@@ -33,8 +33,8 @@ public class BattleGameModeData : FusionGameModeData
 	}
 
 	// Token: 0x1700037E RID: 894
-	// (get) Token: 0x06002100 RID: 8448 RVA: 0x000AE9A0 File Offset: 0x000ACBA0
-	// (set) Token: 0x06002101 RID: 8449 RVA: 0x000AE9AD File Offset: 0x000ACBAD
+	// (get) Token: 0x06002100 RID: 8448 RVA: 0x000AE980 File Offset: 0x000ACB80
+	// (set) Token: 0x06002101 RID: 8449 RVA: 0x000AE98D File Offset: 0x000ACB8D
 	public override object Data
 	{
 		get
@@ -47,14 +47,14 @@ public class BattleGameModeData : FusionGameModeData
 		}
 	}
 
-	// Token: 0x06002102 RID: 8450 RVA: 0x000AE9BB File Offset: 0x000ACBBB
+	// Token: 0x06002102 RID: 8450 RVA: 0x000AE99B File Offset: 0x000ACB9B
 	public override void Spawned()
 	{
 		this.serializer = base.GetComponent<GameModeSerializer>();
 		this.battleTarget = (GorillaPaintbrawlManager)this.serializer.GameModeInstance;
 	}
 
-	// Token: 0x06002103 RID: 8451 RVA: 0x000AE9E0 File Offset: 0x000ACBE0
+	// Token: 0x06002103 RID: 8451 RVA: 0x000AE9C0 File Offset: 0x000ACBC0
 	[Rpc]
 	public unsafe void RPC_ReportSlinshotHit(int taggedPlayerID, Vector3 hitLocation, int projectileCount, RpcInfo rpcInfo = default(RpcInfo))
 	{
@@ -117,7 +117,7 @@ public class BattleGameModeData : FusionGameModeData
 		this.battleTarget.ReportSlingshotHit(player, hitLocation, projectileCount, photonMessageInfoWrapped);
 	}
 
-	// Token: 0x06002105 RID: 8453 RVA: 0x000AEBC8 File Offset: 0x000ACDC8
+	// Token: 0x06002105 RID: 8453 RVA: 0x000AEBA8 File Offset: 0x000ACDA8
 	[WeaverGenerated]
 	public override void CopyBackingFieldsToState(bool A_1)
 	{
@@ -125,7 +125,7 @@ public class BattleGameModeData : FusionGameModeData
 		this.PaintbrawlData = this._PaintbrawlData;
 	}
 
-	// Token: 0x06002106 RID: 8454 RVA: 0x000AEBE0 File Offset: 0x000ACDE0
+	// Token: 0x06002106 RID: 8454 RVA: 0x000AEBC0 File Offset: 0x000ACDC0
 	[WeaverGenerated]
 	public override void CopyStateToBackingFields()
 	{
@@ -133,7 +133,7 @@ public class BattleGameModeData : FusionGameModeData
 		this._PaintbrawlData = this.PaintbrawlData;
 	}
 
-	// Token: 0x06002107 RID: 8455 RVA: 0x000AEBF4 File Offset: 0x000ACDF4
+	// Token: 0x06002107 RID: 8455 RVA: 0x000AEBD4 File Offset: 0x000ACDD4
 	[NetworkRpcWeavedInvoker(1, 7, 7)]
 	[Preserve]
 	[WeaverGenerated]

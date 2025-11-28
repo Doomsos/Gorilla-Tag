@@ -10,7 +10,7 @@ namespace GorillaTagScripts.CustomMapSupport
 	// Token: 0x02000E0E RID: 3598
 	public class CMSTeleporter : CMSTrigger
 	{
-		// Token: 0x060059CD RID: 22989 RVA: 0x001CB9AC File Offset: 0x001C9BAC
+		// Token: 0x060059CD RID: 22989 RVA: 0x001CB98C File Offset: 0x001C9B8C
 		public override void CopyTriggerSettings(TriggerSettings settings)
 		{
 			if (settings.GetType() == typeof(TeleporterSettings))
@@ -30,7 +30,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			base.CopyTriggerSettings(settings);
 		}
 
-		// Token: 0x060059CE RID: 22990 RVA: 0x001CBA3C File Offset: 0x001C9C3C
+		// Token: 0x060059CE RID: 22990 RVA: 0x001CBA1C File Offset: 0x001C9C1C
 		public override void Trigger(double triggerTime = -1.0, bool originatedLocally = false, bool ignoreTriggerCount = false)
 		{
 			base.Trigger(triggerTime, originatedLocally, ignoreTriggerCount);

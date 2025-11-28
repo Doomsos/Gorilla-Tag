@@ -8,8 +8,8 @@ namespace GorillaTag.Cosmetics
 	public class ContinuousPropertyTimeline : MonoBehaviour, ITickSystemTick, ISpawnable
 	{
 		// Token: 0x17000A3B RID: 2619
-		// (get) Token: 0x06006BFC RID: 27644 RVA: 0x002370DA File Offset: 0x002352DA
-		// (set) Token: 0x06006BFD RID: 27645 RVA: 0x002370E5 File Offset: 0x002352E5
+		// (get) Token: 0x06006BFC RID: 27644 RVA: 0x002370BA File Offset: 0x002352BA
+		// (set) Token: 0x06006BFD RID: 27645 RVA: 0x002370C5 File Offset: 0x002352C5
 		private bool IsBackward
 		{
 			get
@@ -23,8 +23,8 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A3C RID: 2620
-		// (get) Token: 0x06006BFE RID: 27646 RVA: 0x002370F1 File Offset: 0x002352F1
-		// (set) Token: 0x06006BFF RID: 27647 RVA: 0x002370FC File Offset: 0x002352FC
+		// (get) Token: 0x06006BFE RID: 27646 RVA: 0x002370D1 File Offset: 0x002352D1
+		// (set) Token: 0x06006BFF RID: 27647 RVA: 0x002370DC File Offset: 0x002352DC
 		private bool IsPaused
 		{
 			get
@@ -37,27 +37,27 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C00 RID: 27648 RVA: 0x00237108 File Offset: 0x00235308
+		// Token: 0x06006C00 RID: 27648 RVA: 0x002370E8 File Offset: 0x002352E8
 		public void TimelinePlay()
 		{
 			this.IsPlaying = true;
 			TickSystem<object>.AddTickCallback(this);
 		}
 
-		// Token: 0x06006C01 RID: 27649 RVA: 0x00237117 File Offset: 0x00235317
+		// Token: 0x06006C01 RID: 27649 RVA: 0x002370F7 File Offset: 0x002352F7
 		public void TimelinePause()
 		{
 			this.IsPaused = true;
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006C02 RID: 27650 RVA: 0x00237126 File Offset: 0x00235326
+		// Token: 0x06006C02 RID: 27650 RVA: 0x00237106 File Offset: 0x00235306
 		public void TimelineToggleDirection()
 		{
 			this.IsForward = !this.IsForward;
 		}
 
-		// Token: 0x06006C03 RID: 27651 RVA: 0x00237137 File Offset: 0x00235337
+		// Token: 0x06006C03 RID: 27651 RVA: 0x00237117 File Offset: 0x00235317
 		public void TimelineTogglePlay()
 		{
 			if (this.IsPlaying)
@@ -68,21 +68,21 @@ namespace GorillaTag.Cosmetics
 			this.TimelinePlay();
 		}
 
-		// Token: 0x06006C04 RID: 27652 RVA: 0x0023714E File Offset: 0x0023534E
+		// Token: 0x06006C04 RID: 27652 RVA: 0x0023712E File Offset: 0x0023532E
 		public void TimelinePlayForward()
 		{
 			this.IsForward = true;
 			this.TimelinePlay();
 		}
 
-		// Token: 0x06006C05 RID: 27653 RVA: 0x0023715D File Offset: 0x0023535D
+		// Token: 0x06006C05 RID: 27653 RVA: 0x0023713D File Offset: 0x0023533D
 		public void TimelinePlayBackward()
 		{
 			this.IsBackward = true;
 			this.TimelinePlay();
 		}
 
-		// Token: 0x06006C06 RID: 27654 RVA: 0x0023716C File Offset: 0x0023536C
+		// Token: 0x06006C06 RID: 27654 RVA: 0x0023714C File Offset: 0x0023534C
 		public void TimelinePlayFromBeginning()
 		{
 			this.time = 0f;
@@ -90,7 +90,7 @@ namespace GorillaTag.Cosmetics
 			this.OnReachedBeginning();
 		}
 
-		// Token: 0x06006C07 RID: 27655 RVA: 0x00237185 File Offset: 0x00235385
+		// Token: 0x06006C07 RID: 27655 RVA: 0x00237165 File Offset: 0x00235365
 		public void TimelinePlayFromEnd()
 		{
 			this.time = this.durationSeconds;
@@ -98,7 +98,7 @@ namespace GorillaTag.Cosmetics
 			this.OnReachedEnd();
 		}
 
-		// Token: 0x06006C08 RID: 27656 RVA: 0x0023719F File Offset: 0x0023539F
+		// Token: 0x06006C08 RID: 27656 RVA: 0x0023717F File Offset: 0x0023537F
 		public void TimelineScrubToTime(float t)
 		{
 			if (t <= 0f)
@@ -116,13 +116,13 @@ namespace GorillaTag.Cosmetics
 			this.time = t;
 		}
 
-		// Token: 0x06006C09 RID: 27657 RVA: 0x002371DE File Offset: 0x002353DE
+		// Token: 0x06006C09 RID: 27657 RVA: 0x002371BE File Offset: 0x002353BE
 		public void TimelineScrubToFraction(float f)
 		{
 			this.TimelineScrubToTime(f * this.durationSeconds);
 		}
 
-		// Token: 0x06006C0A RID: 27658 RVA: 0x002371EE File Offset: 0x002353EE
+		// Token: 0x06006C0A RID: 27658 RVA: 0x002371CE File Offset: 0x002353CE
 		public void TimelineSetDuration(float d)
 		{
 			this.durationSeconds = d;
@@ -130,7 +130,7 @@ namespace GorillaTag.Cosmetics
 			this.backwardDeltaMult = this.durationSeconds / this.backwardDuration;
 		}
 
-		// Token: 0x06006C0B RID: 27659 RVA: 0x0023721C File Offset: 0x0023541C
+		// Token: 0x06006C0B RID: 27659 RVA: 0x002371FC File Offset: 0x002353FC
 		public void TimelineSetBackwardDuration(float d)
 		{
 			this.separateBackwardDuration = true;
@@ -138,13 +138,13 @@ namespace GorillaTag.Cosmetics
 			this.backwardDeltaMult = this.durationSeconds / this.backwardDuration;
 		}
 
-		// Token: 0x06006C0C RID: 27660 RVA: 0x0023723F File Offset: 0x0023543F
+		// Token: 0x06006C0C RID: 27660 RVA: 0x0023721F File Offset: 0x0023541F
 		private void Awake()
 		{
 			this.IsPlaying = this.startPlaying;
 		}
 
-		// Token: 0x06006C0D RID: 27661 RVA: 0x00237250 File Offset: 0x00235450
+		// Token: 0x06006C0D RID: 27661 RVA: 0x00237230 File Offset: 0x00235430
 		private void OnEnable()
 		{
 			if (this.myRig == null)
@@ -160,14 +160,14 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C0E RID: 27662 RVA: 0x002372D2 File Offset: 0x002354D2
+		// Token: 0x06006C0E RID: 27662 RVA: 0x002372B2 File Offset: 0x002354B2
 		private void OnDisable()
 		{
 			this.events.InvokeAll(ContinuousPropertyTimeline.TimelineEvent.OnDisable, this.myRig != null && this.myRig.isLocal);
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006C0F RID: 27663 RVA: 0x00237304 File Offset: 0x00235504
+		// Token: 0x06006C0F RID: 27663 RVA: 0x002372E4 File Offset: 0x002354E4
 		private void OnReachedEnd()
 		{
 			if (this.IsForward)
@@ -192,7 +192,7 @@ namespace GorillaTag.Cosmetics
 			this.events.InvokeAll(ContinuousPropertyTimeline.TimelineEvent.OnReachedEnd, this.myRig != null && this.myRig.isLocal);
 		}
 
-		// Token: 0x06006C10 RID: 27664 RVA: 0x002373C4 File Offset: 0x002355C4
+		// Token: 0x06006C10 RID: 27664 RVA: 0x002373A4 File Offset: 0x002355A4
 		private void OnReachedBeginning()
 		{
 			if (this.IsBackward)
@@ -217,7 +217,7 @@ namespace GorillaTag.Cosmetics
 			this.events.InvokeAll(ContinuousPropertyTimeline.TimelineEvent.OnReachedBeginning, this.myRig != null && this.myRig.isLocal);
 		}
 
-		// Token: 0x06006C11 RID: 27665 RVA: 0x00237480 File Offset: 0x00235680
+		// Token: 0x06006C11 RID: 27665 RVA: 0x00237460 File Offset: 0x00235660
 		private void InBetween()
 		{
 			float f = this.time * this.inverseDuration;
@@ -226,11 +226,11 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A3D RID: 2621
-		// (get) Token: 0x06006C12 RID: 27666 RVA: 0x002374CE File Offset: 0x002356CE
-		// (set) Token: 0x06006C13 RID: 27667 RVA: 0x002374D6 File Offset: 0x002356D6
+		// (get) Token: 0x06006C12 RID: 27666 RVA: 0x002374AE File Offset: 0x002356AE
+		// (set) Token: 0x06006C13 RID: 27667 RVA: 0x002374B6 File Offset: 0x002356B6
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006C14 RID: 27668 RVA: 0x002374E0 File Offset: 0x002356E0
+		// Token: 0x06006C14 RID: 27668 RVA: 0x002374C0 File Offset: 0x002356C0
 		public void Tick()
 		{
 			if (this.IsForward)
@@ -258,16 +258,16 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A3E RID: 2622
-		// (get) Token: 0x06006C15 RID: 27669 RVA: 0x00237556 File Offset: 0x00235756
-		// (set) Token: 0x06006C16 RID: 27670 RVA: 0x0023755E File Offset: 0x0023575E
+		// (get) Token: 0x06006C15 RID: 27669 RVA: 0x00237536 File Offset: 0x00235736
+		// (set) Token: 0x06006C16 RID: 27670 RVA: 0x0023753E File Offset: 0x0023573E
 		public bool IsSpawned { get; set; }
 
 		// Token: 0x17000A3F RID: 2623
-		// (get) Token: 0x06006C17 RID: 27671 RVA: 0x00237567 File Offset: 0x00235767
-		// (set) Token: 0x06006C18 RID: 27672 RVA: 0x0023756F File Offset: 0x0023576F
+		// (get) Token: 0x06006C17 RID: 27671 RVA: 0x00237547 File Offset: 0x00235747
+		// (set) Token: 0x06006C18 RID: 27672 RVA: 0x0023754F File Offset: 0x0023574F
 		public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
 
-		// Token: 0x06006C19 RID: 27673 RVA: 0x00237578 File Offset: 0x00235778
+		// Token: 0x06006C19 RID: 27673 RVA: 0x00237558 File Offset: 0x00235758
 		public void OnSpawn(VRRig rig)
 		{
 			this.myRig = rig;

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000C7F RID: 3199
 public class SplineDecorator : MonoBehaviour
 {
-	// Token: 0x06004E28 RID: 20008 RVA: 0x001957E0 File Offset: 0x001939E0
+	// Token: 0x06004E28 RID: 20008 RVA: 0x001957C0 File Offset: 0x001939C0
 	private void Awake()
 	{
 		if (this.frequency <= 0 || this.items == null || this.items.Length == 0)

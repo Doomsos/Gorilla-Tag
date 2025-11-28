@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x020004CE RID: 1230
 public class PushableSlider : MonoBehaviour
 {
-	// Token: 0x06001FC3 RID: 8131 RVA: 0x000A9549 File Offset: 0x000A7749
+	// Token: 0x06001FC3 RID: 8131 RVA: 0x000A9529 File Offset: 0x000A7729
 	public void Awake()
 	{
 		this.Initialize();
 	}
 
-	// Token: 0x06001FC4 RID: 8132 RVA: 0x000A9551 File Offset: 0x000A7751
+	// Token: 0x06001FC4 RID: 8132 RVA: 0x000A9531 File Offset: 0x000A7731
 	private void Initialize()
 	{
 		if (this._initialized)
@@ -22,7 +22,7 @@ public class PushableSlider : MonoBehaviour
 		this._startingPos = base.transform.localPosition;
 	}
 
-	// Token: 0x06001FC5 RID: 8133 RVA: 0x000A9588 File Offset: 0x000A7788
+	// Token: 0x06001FC5 RID: 8133 RVA: 0x000A9568 File Offset: 0x000A7768
 	private void OnTriggerStay(Collider other)
 	{
 		if (!base.enabled)
@@ -54,13 +54,13 @@ public class PushableSlider : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001FC6 RID: 8134 RVA: 0x000A96EB File Offset: 0x000A78EB
+	// Token: 0x06001FC6 RID: 8134 RVA: 0x000A96CB File Offset: 0x000A78CB
 	private Vector3 GetXOffsetVector(float x)
 	{
 		return new Vector3(x, this._startingPos.y, this._startingPos.z);
 	}
 
-	// Token: 0x06001FC7 RID: 8135 RVA: 0x000A970C File Offset: 0x000A790C
+	// Token: 0x06001FC7 RID: 8135 RVA: 0x000A96EC File Offset: 0x000A78EC
 	public void SetProgress(float value)
 	{
 		this.Initialize();
@@ -71,7 +71,7 @@ public class PushableSlider : MonoBehaviour
 		this._cachedProgress = value;
 	}
 
-	// Token: 0x06001FC8 RID: 8136 RVA: 0x000A9780 File Offset: 0x000A7980
+	// Token: 0x06001FC8 RID: 8136 RVA: 0x000A9760 File Offset: 0x000A7960
 	public float GetProgress()
 	{
 		this.Initialize();

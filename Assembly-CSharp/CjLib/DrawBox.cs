@@ -7,14 +7,14 @@ namespace CjLib
 	[ExecuteInEditMode]
 	public class DrawBox : DrawBase
 	{
-		// Token: 0x06007031 RID: 28721 RVA: 0x002479E0 File Offset: 0x00245BE0
+		// Token: 0x06007031 RID: 28721 RVA: 0x002479C0 File Offset: 0x00245BC0
 		private void OnValidate()
 		{
 			this.Radius = Mathf.Max(0f, this.Radius);
 			this.NumSegments = Mathf.Max(0, this.NumSegments);
 		}
 
-		// Token: 0x06007032 RID: 28722 RVA: 0x00247A0C File Offset: 0x00245C0C
+		// Token: 0x06007032 RID: 28722 RVA: 0x002479EC File Offset: 0x00245BEC
 		protected override void Draw(Color color, DebugUtil.Style style, bool depthTest)
 		{
 			Quaternion quaternion = QuaternionUtil.AxisAngle(Vector3.forward, this.StartAngle * MathUtil.Deg2Rad);

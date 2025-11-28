@@ -17,8 +17,8 @@ public class PhotonSignal<T1, T2> : PhotonSignal
 	}
 
 	// Token: 0x14000081 RID: 129
-	// (add) Token: 0x06004A75 RID: 19061 RVA: 0x0018630F File Offset: 0x0018450F
-	// (remove) Token: 0x06004A76 RID: 19062 RVA: 0x00186343 File Offset: 0x00184543
+	// (add) Token: 0x06004A75 RID: 19061 RVA: 0x001862EF File Offset: 0x001844EF
+	// (remove) Token: 0x06004A76 RID: 19062 RVA: 0x00186323 File Offset: 0x00184523
 	public new event OnSignalReceived<T1, T2> OnSignal
 	{
 		add
@@ -40,30 +40,30 @@ public class PhotonSignal<T1, T2> : PhotonSignal
 		}
 	}
 
-	// Token: 0x06004A77 RID: 19063 RVA: 0x001861D7 File Offset: 0x001843D7
+	// Token: 0x06004A77 RID: 19063 RVA: 0x001861B7 File Offset: 0x001843B7
 	public PhotonSignal(string signalID) : base(signalID)
 	{
 	}
 
-	// Token: 0x06004A78 RID: 19064 RVA: 0x001861E0 File Offset: 0x001843E0
+	// Token: 0x06004A78 RID: 19064 RVA: 0x001861C0 File Offset: 0x001843C0
 	public PhotonSignal(int signalID) : base(signalID)
 	{
 	}
 
-	// Token: 0x06004A79 RID: 19065 RVA: 0x00186360 File Offset: 0x00184560
+	// Token: 0x06004A79 RID: 19065 RVA: 0x00186340 File Offset: 0x00184540
 	public override void ClearListeners()
 	{
 		this._callbacks = null;
 		base.ClearListeners();
 	}
 
-	// Token: 0x06004A7A RID: 19066 RVA: 0x0018636F File Offset: 0x0018456F
+	// Token: 0x06004A7A RID: 19066 RVA: 0x0018634F File Offset: 0x0018454F
 	public void Raise(T1 arg1, T2 arg2)
 	{
 		this.Raise(this._receivers, arg1, arg2);
 	}
 
-	// Token: 0x06004A7B RID: 19067 RVA: 0x00186380 File Offset: 0x00184580
+	// Token: 0x06004A7B RID: 19067 RVA: 0x00186360 File Offset: 0x00184560
 	public void Raise(ReceiverGroup receivers, T1 arg1, T2 arg2)
 	{
 		if (!this._enabled)
@@ -90,7 +90,7 @@ public class PhotonSignal<T1, T2> : PhotonSignal
 		PhotonNetwork.RaiseEvent(177, array, raiseEventOptions, PhotonSignal.gSendReliable);
 	}
 
-	// Token: 0x06004A7C RID: 19068 RVA: 0x00186428 File Offset: 0x00184628
+	// Token: 0x06004A7C RID: 19068 RVA: 0x00186408 File Offset: 0x00184608
 	protected override void _Relay(object[] args, PhotonSignalInfo info)
 	{
 		T1 arg;
@@ -107,13 +107,13 @@ public class PhotonSignal<T1, T2> : PhotonSignal
 		PhotonSignal._SafeInvoke<T1, T2>(this._callbacks, arg, arg2, info);
 	}
 
-	// Token: 0x06004A7D RID: 19069 RVA: 0x00186468 File Offset: 0x00184668
+	// Token: 0x06004A7D RID: 19069 RVA: 0x00186448 File Offset: 0x00184648
 	public new static implicit operator PhotonSignal<T1, T2>(string s)
 	{
 		return new PhotonSignal<T1, T2>(s);
 	}
 
-	// Token: 0x06004A7E RID: 19070 RVA: 0x00186470 File Offset: 0x00184670
+	// Token: 0x06004A7E RID: 19070 RVA: 0x00186450 File Offset: 0x00184650
 	public new static explicit operator PhotonSignal<T1, T2>(int i)
 	{
 		return new PhotonSignal<T1, T2>(i);

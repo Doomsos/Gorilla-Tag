@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000852 RID: 2130
 public class MusicFadeArea : MonoBehaviour
 {
-	// Token: 0x06003822 RID: 14370 RVA: 0x0012CDCC File Offset: 0x0012AFCC
+	// Token: 0x06003822 RID: 14370 RVA: 0x0012CDAC File Offset: 0x0012AFAC
 	private void Awake()
 	{
 		for (int i = 0; i < this.sourcesToFadeIn.Count; i++)
@@ -17,7 +17,7 @@ public class MusicFadeArea : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003823 RID: 14371 RVA: 0x0012CE20 File Offset: 0x0012B020
+	// Token: 0x06003823 RID: 14371 RVA: 0x0012CE00 File Offset: 0x0012B000
 	private void OnTriggerEnter(Collider other)
 	{
 		if (other == GTPlayer.Instance.headCollider)
@@ -34,7 +34,7 @@ public class MusicFadeArea : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003824 RID: 14372 RVA: 0x0012CE88 File Offset: 0x0012B088
+	// Token: 0x06003824 RID: 14372 RVA: 0x0012CE68 File Offset: 0x0012B068
 	private void OnTriggerExit(Collider other)
 	{
 		if (other == GTPlayer.Instance.headCollider)
@@ -51,7 +51,7 @@ public class MusicFadeArea : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003825 RID: 14373 RVA: 0x0012CEED File Offset: 0x0012B0ED
+	// Token: 0x06003825 RID: 14373 RVA: 0x0012CECD File Offset: 0x0012B0CD
 	private IEnumerator FadeInSources()
 	{
 		for (int i = 0; i < this.sourcesToFadeIn.Count; i++)
@@ -75,7 +75,7 @@ public class MusicFadeArea : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003826 RID: 14374 RVA: 0x0012CEFC File Offset: 0x0012B0FC
+	// Token: 0x06003826 RID: 14374 RVA: 0x0012CEDC File Offset: 0x0012B0DC
 	private IEnumerator FadeOutSources()
 	{
 		for (int i = 0; i < this.sourcesToFadeIn.Count; i++)

@@ -7,7 +7,7 @@ namespace GorillaTag
 	[RequireComponent(typeof(VRRigCollection))]
 	public class CosmeticTryOnNotifier : MonoBehaviour
 	{
-		// Token: 0x0600671C RID: 26396 RVA: 0x0021889C File Offset: 0x00216A9C
+		// Token: 0x0600671C RID: 26396 RVA: 0x0021887C File Offset: 0x00216A7C
 		private void Awake()
 		{
 			if (!base.TryGetComponent<VRRigCollection>(ref this.m_vrrigCollection))
@@ -20,7 +20,7 @@ namespace GorillaTag
 			vrrigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Combine(vrrigCollection2.playerLeftCollection, new Action<RigContainer>(this.PlayerLeftTryOnSpace));
 		}
 
-		// Token: 0x0600671D RID: 26397 RVA: 0x00218914 File Offset: 0x00216B14
+		// Token: 0x0600671D RID: 26397 RVA: 0x002188F4 File Offset: 0x00216AF4
 		private void PlayerEnteredTryOnSpace(RigContainer playerRig)
 		{
 			CosmeticTryOnNotifier.Mode mode = this.mode;
@@ -36,7 +36,7 @@ namespace GorillaTag
 			PlayerCosmeticsSystem.UnlockTemporaryCosmeticsForPlayer(playerRig, this.unlockList.Strings);
 		}
 
-		// Token: 0x0600671E RID: 26398 RVA: 0x0021894C File Offset: 0x00216B4C
+		// Token: 0x0600671E RID: 26398 RVA: 0x0021892C File Offset: 0x00216B2C
 		private void PlayerLeftTryOnSpace(RigContainer playerRig)
 		{
 			CosmeticTryOnNotifier.Mode mode = this.mode;

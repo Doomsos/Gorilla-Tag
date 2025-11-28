@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200070A RID: 1802
 public class GRSpotlight : MonoBehaviourTick
 {
-	// Token: 0x06002E4C RID: 11852 RVA: 0x000FBBEC File Offset: 0x000F9DEC
+	// Token: 0x06002E4C RID: 11852 RVA: 0x000FBBCC File Offset: 0x000F9DCC
 	private void Awake()
 	{
 		this.yStart = base.transform.rotation.eulerAngles.y;
@@ -14,7 +14,7 @@ public class GRSpotlight : MonoBehaviourTick
 		this.xFrequency += Random.value / 100f;
 	}
 
-	// Token: 0x06002E4D RID: 11853 RVA: 0x000FBC78 File Offset: 0x000F9E78
+	// Token: 0x06002E4D RID: 11853 RVA: 0x000FBC58 File Offset: 0x000F9E58
 	public override void Tick()
 	{
 		base.transform.eulerAngles = new Vector3(this.xStart + this.xAmplitude * Mathf.Sin(Time.time * this.xFrequency), this.yStart + this.yAmplitude * Mathf.Cos(Time.time * this.yFrequency), 0f);

@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x02000467 RID: 1127
 public class FittingRoomButton : GorillaPressableButton
 {
-	// Token: 0x06001C86 RID: 7302 RVA: 0x000974CF File Offset: 0x000956CF
+	// Token: 0x06001C86 RID: 7302 RVA: 0x000974AF File Offset: 0x000956AF
 	public override void Start()
 	{
 		this.currentCosmeticItem = CosmeticsController.instance.nullItem;
 	}
 
-	// Token: 0x06001C87 RID: 7303 RVA: 0x000974E4 File Offset: 0x000956E4
+	// Token: 0x06001C87 RID: 7303 RVA: 0x000974C4 File Offset: 0x000956C4
 	public override void UpdateColor()
 	{
 		if (this.currentCosmeticItem.itemName == "null")
@@ -54,14 +54,14 @@ public class FittingRoomButton : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x06001C88 RID: 7304 RVA: 0x00097617 File Offset: 0x00095817
+	// Token: 0x06001C88 RID: 7304 RVA: 0x000975F7 File Offset: 0x000957F7
 	public override void ButtonActivationWithHand(bool isLeftHand)
 	{
 		base.ButtonActivationWithHand(isLeftHand);
 		CosmeticsController.instance.PressFittingRoomButton(this, isLeftHand);
 	}
 
-	// Token: 0x06001C89 RID: 7305 RVA: 0x0009762E File Offset: 0x0009582E
+	// Token: 0x06001C89 RID: 7305 RVA: 0x0009760E File Offset: 0x0009580E
 	public void SetItem(CosmeticsController.CosmeticItem item, bool isInTryOnSet)
 	{
 		this.currentCosmeticItem = item;
@@ -73,7 +73,7 @@ public class FittingRoomButton : GorillaPressableButton
 		this.UpdateColor();
 	}
 
-	// Token: 0x06001C8A RID: 7306 RVA: 0x00097668 File Offset: 0x00095868
+	// Token: 0x06001C8A RID: 7306 RVA: 0x00097648 File Offset: 0x00095848
 	public void ClearItem()
 	{
 		if (this.currentCosmeticItem.isNullItem)

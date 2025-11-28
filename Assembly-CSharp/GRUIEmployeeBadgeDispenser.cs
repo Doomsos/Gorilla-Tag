@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000740 RID: 1856
 public class GRUIEmployeeBadgeDispenser : MonoBehaviour
 {
-	// Token: 0x06002FE8 RID: 12264 RVA: 0x00105F46 File Offset: 0x00104146
+	// Token: 0x06002FE8 RID: 12264 RVA: 0x00105F26 File Offset: 0x00104126
 	public void Setup(GhostReactor reactor, int employeeIndex)
 	{
 		this.reactor = reactor;
 	}
 
-	// Token: 0x06002FE9 RID: 12265 RVA: 0x00105F50 File Offset: 0x00104150
+	// Token: 0x06002FE9 RID: 12265 RVA: 0x00105F30 File Offset: 0x00104130
 	public void Refresh()
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(this.actorNr);
@@ -30,7 +30,7 @@ public class GRUIEmployeeBadgeDispenser : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002FEA RID: 12266 RVA: 0x00105FB8 File Offset: 0x001041B8
+	// Token: 0x06002FEA RID: 12266 RVA: 0x00105F98 File Offset: 0x00104198
 	public void CreateBadge(NetPlayer player, GameEntityManager entityManager)
 	{
 		if (entityManager.IsAuthority())
@@ -39,38 +39,38 @@ public class GRUIEmployeeBadgeDispenser : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002FEB RID: 12267 RVA: 0x0010600B File Offset: 0x0010420B
+	// Token: 0x06002FEB RID: 12267 RVA: 0x00105FEB File Offset: 0x001041EB
 	public Transform GetSpawnMarker()
 	{
 		return this.spawnLocation;
 	}
 
-	// Token: 0x06002FEC RID: 12268 RVA: 0x00106013 File Offset: 0x00104213
+	// Token: 0x06002FEC RID: 12268 RVA: 0x00105FF3 File Offset: 0x001041F3
 	public bool IsDispenserForBadge(GRBadge badge)
 	{
 		return badge == this.idBadge;
 	}
 
-	// Token: 0x06002FED RID: 12269 RVA: 0x00106021 File Offset: 0x00104221
+	// Token: 0x06002FED RID: 12269 RVA: 0x00106001 File Offset: 0x00104201
 	public Vector3 GetSpawnPosition()
 	{
 		return this.spawnLocation.position;
 	}
 
-	// Token: 0x06002FEE RID: 12270 RVA: 0x0010602E File Offset: 0x0010422E
+	// Token: 0x06002FEE RID: 12270 RVA: 0x0010600E File Offset: 0x0010420E
 	public Quaternion GetSpawnRotation()
 	{
 		return this.spawnLocation.rotation;
 	}
 
-	// Token: 0x06002FEF RID: 12271 RVA: 0x0010603B File Offset: 0x0010423B
+	// Token: 0x06002FEF RID: 12271 RVA: 0x0010601B File Offset: 0x0010421B
 	public void ClearBadge()
 	{
 		this.actorNr = -1;
 		this.idBadge = null;
 	}
 
-	// Token: 0x06002FF0 RID: 12272 RVA: 0x0010604C File Offset: 0x0010424C
+	// Token: 0x06002FF0 RID: 12272 RVA: 0x0010602C File Offset: 0x0010422C
 	public void AttachIDBadge(GRBadge linkedBadge, NetPlayer _player)
 	{
 		this.actorNr = ((_player == null) ? -1 : _player.ActorNumber);

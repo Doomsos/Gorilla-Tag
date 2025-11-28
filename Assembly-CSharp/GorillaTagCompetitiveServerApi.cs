@@ -10,7 +10,7 @@ using UnityEngine.Networking;
 // Token: 0x020007C1 RID: 1985
 public class GorillaTagCompetitiveServerApi : MonoBehaviour
 {
-	// Token: 0x06003443 RID: 13379 RVA: 0x00118A47 File Offset: 0x00116C47
+	// Token: 0x06003443 RID: 13379 RVA: 0x00118A27 File Offset: 0x00116C27
 	private void Awake()
 	{
 		if (GorillaTagCompetitiveServerApi.Instance)
@@ -22,7 +22,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		GorillaTagCompetitiveServerApi.Instance = this;
 	}
 
-	// Token: 0x06003444 RID: 13380 RVA: 0x00118A74 File Offset: 0x00116C74
+	// Token: 0x06003444 RID: 13380 RVA: 0x00118A54 File Offset: 0x00116C54
 	public void RequestGetRankInformation(List<string> playfabs, Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData> callback)
 	{
 		if (!MothershipClientContext.IsClientLoggedIn())
@@ -47,7 +47,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}, callback));
 	}
 
-	// Token: 0x06003445 RID: 13381 RVA: 0x00118AFD File Offset: 0x00116CFD
+	// Token: 0x06003445 RID: 13381 RVA: 0x00118ADD File Offset: 0x00116CDD
 	private IEnumerator GetRankInformation(GorillaTagCompetitiveServerApi.RankedModeProgressionRequestData data, Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData> callback)
 	{
 		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/GetTier", "GET");
@@ -113,7 +113,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003446 RID: 13382 RVA: 0x00118B1C File Offset: 0x00116D1C
+	// Token: 0x06003446 RID: 13382 RVA: 0x00118AFC File Offset: 0x00116CFC
 	private void OnCompleteGetRankInformation([CanBeNull] string response, Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData> callback)
 	{
 		this.GetRankInformationInProgress = false;
@@ -146,7 +146,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003447 RID: 13383 RVA: 0x00118BB0 File Offset: 0x00116DB0
+	// Token: 0x06003447 RID: 13383 RVA: 0x00118B90 File Offset: 0x00116D90
 	public void RequestCreateMatchId(Action<string> callback)
 	{
 		if (!MothershipClientContext.IsClientLoggedIn())
@@ -170,7 +170,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}, callback));
 	}
 
-	// Token: 0x06003448 RID: 13384 RVA: 0x00118C32 File Offset: 0x00116E32
+	// Token: 0x06003448 RID: 13384 RVA: 0x00118C12 File Offset: 0x00116E12
 	private IEnumerator CreateMatchId(GorillaTagCompetitiveServerApi.RankedModeRequestDataPlatformed data, Action<string> callback)
 	{
 		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/CreateMatchId", "POST");
@@ -236,7 +236,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003449 RID: 13385 RVA: 0x00118C4F File Offset: 0x00116E4F
+	// Token: 0x06003449 RID: 13385 RVA: 0x00118C2F File Offset: 0x00116E2F
 	private void OnCompleteCreateMatchId([CanBeNull] string response, Action<string> callback)
 	{
 		this.CreateMatchIdInProgress = false;
@@ -251,7 +251,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600344A RID: 13386 RVA: 0x00118C74 File Offset: 0x00116E74
+	// Token: 0x0600344A RID: 13386 RVA: 0x00118C54 File Offset: 0x00116E54
 	public void RequestValidateMatchJoin(string matchId, Action<bool> callback)
 	{
 		if (!MothershipClientContext.IsClientLoggedIn())
@@ -276,7 +276,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}, callback));
 	}
 
-	// Token: 0x0600344B RID: 13387 RVA: 0x00118CFD File Offset: 0x00116EFD
+	// Token: 0x0600344B RID: 13387 RVA: 0x00118CDD File Offset: 0x00116EDD
 	private IEnumerator ValidateMatchJoin(GorillaTagCompetitiveServerApi.RankedModeRequestDataWithMatchId data, Action<bool> callback)
 	{
 		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/ValidateMatchJoin", "POST");
@@ -342,7 +342,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x0600344C RID: 13388 RVA: 0x00118D1C File Offset: 0x00116F1C
+	// Token: 0x0600344C RID: 13388 RVA: 0x00118CFC File Offset: 0x00116EFC
 	private void OnCompleteValidateMatchJoin([CanBeNull] string response, Action<bool> callback)
 	{
 		this.ValidateMatchJoinInProgress = false;
@@ -358,7 +358,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600344D RID: 13389 RVA: 0x00118D58 File Offset: 0x00116F58
+	// Token: 0x0600344D RID: 13389 RVA: 0x00118D38 File Offset: 0x00116F38
 	public void RequestSubmitMatchScores(string matchId, List<RankedMultiplayerScore.PlayerScore> finalScores)
 	{
 		List<GorillaTagCompetitiveServerApi.RankedModePlayerScore> list = new List<GorillaTagCompetitiveServerApi.RankedModePlayerScore>();
@@ -374,7 +374,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		this.RequestSubmitMatchScores(matchId, list);
 	}
 
-	// Token: 0x0600344E RID: 13390 RVA: 0x00118DE4 File Offset: 0x00116FE4
+	// Token: 0x0600344E RID: 13390 RVA: 0x00118DC4 File Offset: 0x00116FC4
 	private void RequestSubmitMatchScores(string matchId, List<GorillaTagCompetitiveServerApi.RankedModePlayerScore> playerScores)
 	{
 		if (!MothershipClientContext.IsClientLoggedIn())
@@ -399,7 +399,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x0600344F RID: 13391 RVA: 0x00118E72 File Offset: 0x00117072
+	// Token: 0x0600344F RID: 13391 RVA: 0x00118E52 File Offset: 0x00117052
 	private IEnumerator SubmitMatchScores(GorillaTagCompetitiveServerApi.RankedModeSubmitMatchScoresRequestData data)
 	{
 		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/SubmitMatchScores", "POST");
@@ -465,14 +465,14 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003450 RID: 13392 RVA: 0x00118E88 File Offset: 0x00117088
+	// Token: 0x06003450 RID: 13392 RVA: 0x00118E68 File Offset: 0x00117068
 	private void OnCompleteSubmitMatchScores([CanBeNull] string response)
 	{
 		this.SubmitMatchScoresInProgress = false;
 		this.SubmitMatchScoresRetryCount = 0;
 	}
 
-	// Token: 0x06003451 RID: 13393 RVA: 0x00118E98 File Offset: 0x00117098
+	// Token: 0x06003451 RID: 13393 RVA: 0x00118E78 File Offset: 0x00117078
 	public void RequestSetEloValue(float desiredElo, Action callback)
 	{
 		if (!MothershipClientContext.IsClientLoggedIn())
@@ -497,14 +497,14 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}, callback));
 	}
 
-	// Token: 0x06003452 RID: 13394 RVA: 0x00118F21 File Offset: 0x00117121
+	// Token: 0x06003452 RID: 13394 RVA: 0x00118F01 File Offset: 0x00117101
 	private IEnumerator SetEloValue(GorillaTagCompetitiveServerApi.RankedModeSetEloValueRequestData data, Action callback)
 	{
 		GTDev.LogWarning<string>("SetEloValue is for internal use only (Is Beta)", null);
 		yield break;
 	}
 
-	// Token: 0x06003453 RID: 13395 RVA: 0x00118F29 File Offset: 0x00117129
+	// Token: 0x06003453 RID: 13395 RVA: 0x00118F09 File Offset: 0x00117109
 	private void OnCompleteSetEloValue([CanBeNull] string response, Action callback)
 	{
 		this.SetEloValueInProgress = false;
@@ -515,7 +515,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003454 RID: 13396 RVA: 0x00118F48 File Offset: 0x00117148
+	// Token: 0x06003454 RID: 13396 RVA: 0x00118F28 File Offset: 0x00117128
 	public void RequestPingRoom(string matchId, Action callback)
 	{
 		if (!MothershipClientContext.IsClientLoggedIn())
@@ -540,7 +540,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}, callback));
 	}
 
-	// Token: 0x06003455 RID: 13397 RVA: 0x00118FD1 File Offset: 0x001171D1
+	// Token: 0x06003455 RID: 13397 RVA: 0x00118FB1 File Offset: 0x001171B1
 	private IEnumerator PingRoom(GorillaTagCompetitiveServerApi.RankedModeRequestDataWithMatchId data, Action callback)
 	{
 		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/PingRoom", "POST");
@@ -606,7 +606,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003456 RID: 13398 RVA: 0x00118FEE File Offset: 0x001171EE
+	// Token: 0x06003456 RID: 13398 RVA: 0x00118FCE File Offset: 0x001171CE
 	private void OnCompletePingRoom([CanBeNull] string response, Action callback)
 	{
 		GTDev.Log<string>("PingRoom complete", null);
@@ -618,7 +618,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003457 RID: 13399 RVA: 0x00119018 File Offset: 0x00117218
+	// Token: 0x06003457 RID: 13399 RVA: 0x00118FF8 File Offset: 0x001171F8
 	public void RequestUnlockCompetitiveQueue(bool unlocked, Action callback)
 	{
 		if (!MothershipClientContext.IsClientLoggedIn())
@@ -643,7 +643,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		}, callback));
 	}
 
-	// Token: 0x06003458 RID: 13400 RVA: 0x001190A1 File Offset: 0x001172A1
+	// Token: 0x06003458 RID: 13400 RVA: 0x00119081 File Offset: 0x00117281
 	private IEnumerator UnlockCompetitiveQueue(GorillaTagCompetitiveServerApi.RankedModeUnlockCompetitiveQueueRequestData data, Action callback)
 	{
 		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.MmrApiBaseUrl + "/api/UnlockCompetitiveQueue", "POST");
@@ -709,7 +709,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003459 RID: 13401 RVA: 0x001190BE File Offset: 0x001172BE
+	// Token: 0x06003459 RID: 13401 RVA: 0x0011909E File Offset: 0x0011729E
 	private void OnCompleteUnlockCompetitiveQueue([CanBeNull] string response, Action callback)
 	{
 		GTDev.Log<string>("UnlockCompetitiveQueue complete", null);

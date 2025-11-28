@@ -3,7 +3,7 @@
 // Token: 0x020009F6 RID: 2550
 public static class StringExts
 {
-	// Token: 0x06004133 RID: 16691 RVA: 0x0015B50D File Offset: 0x0015970D
+	// Token: 0x06004133 RID: 16691 RVA: 0x0015B4ED File Offset: 0x001596ED
 	public static string EscapeCsv(this string field)
 	{
 		if (StringExts._escapeChars == null)

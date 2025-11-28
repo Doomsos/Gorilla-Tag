@@ -12,7 +12,7 @@ public static class AssetUtils
 	{
 	}
 
-	// Token: 0x06004C6B RID: 19563 RVA: 0x0018D4E6 File Offset: 0x0018B6E6
+	// Token: 0x06004C6B RID: 19563 RVA: 0x0018D4C6 File Offset: 0x0018B6C6
 	[Conditional("UNITY_EDITOR")]
 	public static void LoadAssetOfType<T>(ref T result, ref string resultPath) where T : Object
 	{
@@ -20,7 +20,7 @@ public static class AssetUtils
 		resultPath = null;
 	}
 
-	// Token: 0x06004C6C RID: 19564 RVA: 0x0018D4F2 File Offset: 0x0018B6F2
+	// Token: 0x06004C6C RID: 19564 RVA: 0x0018D4D2 File Offset: 0x0018B6D2
 	[Conditional("UNITY_EDITOR")]
 	public static void FindAllAssetsOfType<T>(ref T[] results, ref string[] assetPaths) where T : Object
 	{
@@ -41,7 +41,7 @@ public static class AssetUtils
 	{
 	}
 
-	// Token: 0x06004C6F RID: 19567 RVA: 0x0018D4FB File Offset: 0x0018B6FB
+	// Token: 0x06004C6F RID: 19567 RVA: 0x0018D4DB File Offset: 0x0018B6DB
 	public static long ComputeAssetId(this Object asset, bool unsigned = false)
 	{
 		return 0L;

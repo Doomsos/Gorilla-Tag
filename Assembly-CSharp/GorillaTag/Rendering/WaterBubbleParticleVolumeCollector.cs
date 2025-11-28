@@ -11,7 +11,7 @@ namespace GorillaTag.Rendering
 	// Token: 0x02001077 RID: 4215
 	public class WaterBubbleParticleVolumeCollector : MonoBehaviour
 	{
-		// Token: 0x060069CB RID: 27083 RVA: 0x0022696C File Offset: 0x00224B6C
+		// Token: 0x060069CB RID: 27083 RVA: 0x0022694C File Offset: 0x00224B4C
 		protected void Awake()
 		{
 			List<WaterVolume> componentsInHierarchy = SceneManager.GetActiveScene().GetComponentsInHierarchy(true, 64);
@@ -48,7 +48,7 @@ namespace GorillaTag.Rendering
 			this.SetEmissionState(false);
 		}
 
-		// Token: 0x060069CC RID: 27084 RVA: 0x00226B0C File Offset: 0x00224D0C
+		// Token: 0x060069CC RID: 27084 RVA: 0x00226AEC File Offset: 0x00224CEC
 		protected void LateUpdate()
 		{
 			bool headInWater = GTPlayer.Instance.HeadInWater;
@@ -63,7 +63,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x060069CD RID: 27085 RVA: 0x00226B4C File Offset: 0x00224D4C
+		// Token: 0x060069CD RID: 27085 RVA: 0x00226B2C File Offset: 0x00224D2C
 		private void SetEmissionState(bool setEnabled)
 		{
 			float rateOverTimeMultiplier = setEnabled ? 1f : 0f;

@@ -11,11 +11,11 @@ using UnityEngine.AI;
 public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityComponent
 {
 	// Token: 0x170005B7 RID: 1463
-	// (get) Token: 0x06003D45 RID: 15685 RVA: 0x001454E2 File Offset: 0x001436E2
-	// (set) Token: 0x06003D44 RID: 15684 RVA: 0x001454D9 File Offset: 0x001436D9
+	// (get) Token: 0x06003D45 RID: 15685 RVA: 0x001454C2 File Offset: 0x001436C2
+	// (set) Token: 0x06003D44 RID: 15684 RVA: 0x001454B9 File Offset: 0x001436B9
 	public GRPlayer TargetPlayer { get; private set; }
 
-	// Token: 0x06003D46 RID: 15686 RVA: 0x001454EC File Offset: 0x001436EC
+	// Token: 0x06003D46 RID: 15686 RVA: 0x001454CC File Offset: 0x001436CC
 	private void Awake()
 	{
 		this.TargetPlayer = null;
@@ -27,13 +27,13 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviourStateChanged;
 	}
 
-	// Token: 0x06003D47 RID: 15687 RVA: 0x0014553D File Offset: 0x0014373D
+	// Token: 0x06003D47 RID: 15687 RVA: 0x0014551D File Offset: 0x0014371D
 	private void OnDestroy()
 	{
 		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviourStateChanged;
 	}
 
-	// Token: 0x06003D48 RID: 15688 RVA: 0x00145556 File Offset: 0x00143756
+	// Token: 0x06003D48 RID: 15688 RVA: 0x00145536 File Offset: 0x00143736
 	public void SetTarget(GRPlayer newTarget)
 	{
 		if (newTarget.IsNull())
@@ -44,20 +44,20 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		this.TargetPlayer = newTarget;
 	}
 
-	// Token: 0x06003D49 RID: 15689 RVA: 0x0014556E File Offset: 0x0014376E
+	// Token: 0x06003D49 RID: 15689 RVA: 0x0014554E File Offset: 0x0014374E
 	public void ClearTarget()
 	{
 		this.TargetPlayer = null;
 	}
 
-	// Token: 0x06003D4A RID: 15690 RVA: 0x00145577 File Offset: 0x00143777
+	// Token: 0x06003D4A RID: 15690 RVA: 0x00145557 File Offset: 0x00143757
 	private void Update()
 	{
 		this.OnThink();
 		this.UpdateAnimators();
 	}
 
-	// Token: 0x06003D4B RID: 15691 RVA: 0x00145588 File Offset: 0x00143788
+	// Token: 0x06003D4B RID: 15691 RVA: 0x00145568 File Offset: 0x00143768
 	private void OnTriggerEnter(Collider collider)
 	{
 		CustomMapsBehaviourBase customMapsBehaviourBase = this.behaviourDict[this.currentBehaviour];
@@ -67,13 +67,13 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		}
 	}
 
-	// Token: 0x06003D4C RID: 15692 RVA: 0x001455B1 File Offset: 0x001437B1
+	// Token: 0x06003D4C RID: 15692 RVA: 0x00145591 File Offset: 0x00143791
 	private void InitAnimators()
 	{
 		this.animators = base.gameObject.GetComponentsInChildren<Animator>();
 	}
 
-	// Token: 0x06003D4D RID: 15693 RVA: 0x001455C4 File Offset: 0x001437C4
+	// Token: 0x06003D4D RID: 15693 RVA: 0x001455A4 File Offset: 0x001437A4
 	private void UpdateAnimators()
 	{
 		if (this.animators.IsNullOrEmpty<Animator>())
@@ -87,7 +87,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		}
 	}
 
-	// Token: 0x06003D4E RID: 15694 RVA: 0x00145620 File Offset: 0x00143820
+	// Token: 0x06003D4E RID: 15694 RVA: 0x00145600 File Offset: 0x00143800
 	public void PlayAnimation(string stateName, float blendTime = 0f)
 	{
 		for (int i = 0; i < this.animators.Length; i++)
@@ -96,7 +96,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		}
 	}
 
-	// Token: 0x06003D4F RID: 15695 RVA: 0x00145650 File Offset: 0x00143850
+	// Token: 0x06003D4F RID: 15695 RVA: 0x00145630 File Offset: 0x00143830
 	public bool IsAnimationPlaying(string stateName)
 	{
 		int num = 0;
@@ -109,7 +109,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		return (currentAnimatorStateInfo.IsName(stateName) && currentAnimatorStateInfo.normalizedTime < 1f) || animator.GetNextAnimatorStateInfo(0).IsName(stateName);
 	}
 
-	// Token: 0x06003D50 RID: 15696 RVA: 0x001456B0 File Offset: 0x001438B0
+	// Token: 0x06003D50 RID: 15696 RVA: 0x00145690 File Offset: 0x00143890
 	public void SetupBehaviours(AIAgent aiAgent)
 	{
 		this.allowTargetingTaggedPlayers = aiAgent.allowTargetingTaggedPlayers;
@@ -137,13 +137,13 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		}
 	}
 
-	// Token: 0x06003D51 RID: 15697 RVA: 0x00145773 File Offset: 0x00143973
+	// Token: 0x06003D51 RID: 15697 RVA: 0x00145753 File Offset: 0x00143953
 	public void StopMoving()
 	{
 		this.RequestDestination(base.transform.position);
 	}
 
-	// Token: 0x06003D52 RID: 15698 RVA: 0x00145786 File Offset: 0x00143986
+	// Token: 0x06003D52 RID: 15698 RVA: 0x00145766 File Offset: 0x00143966
 	public void RequestDestination(Vector3 destination)
 	{
 		if (!this.entity.IsAuthority())
@@ -153,7 +153,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		this.agent.RequestDestination(destination);
 	}
 
-	// Token: 0x06003D53 RID: 15699 RVA: 0x001457A4 File Offset: 0x001439A4
+	// Token: 0x06003D53 RID: 15699 RVA: 0x00145784 File Offset: 0x00143984
 	private void OnThink()
 	{
 		if (!this.entity.IsAuthority())
@@ -193,7 +193,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		this.behaviourDict[this.currentBehaviour].Execute();
 	}
 
-	// Token: 0x06003D54 RID: 15700 RVA: 0x0014589C File Offset: 0x00143A9C
+	// Token: 0x06003D54 RID: 15700 RVA: 0x0014587C File Offset: 0x00143A7C
 	private void OnNetworkBehaviourStateChanged(byte newstate)
 	{
 		if (newstate < 0 || newstate >= 3)
@@ -212,7 +212,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		this.behaviourDict[this.currentBehaviour].NetExecute();
 	}
 
-	// Token: 0x06003D55 RID: 15701 RVA: 0x00145914 File Offset: 0x00143B14
+	// Token: 0x06003D55 RID: 15701 RVA: 0x001458F4 File Offset: 0x00143AF4
 	public void OnEntityInit()
 	{
 		bool flag = AISpawnManager.HasInstance && AISpawnManager.instance != null;
@@ -239,7 +239,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		Object.Destroy(base.gameObject);
 	}
 
-	// Token: 0x06003D56 RID: 15702 RVA: 0x001459D8 File Offset: 0x00143BD8
+	// Token: 0x06003D56 RID: 15702 RVA: 0x001459B8 File Offset: 0x00143BB8
 	private void SetupNewEnemy(AIAgent newEnemy)
 	{
 		newEnemy.gameObject.SetActive(true);
@@ -261,7 +261,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		this.SetupBehaviours(newEnemy);
 	}
 
-	// Token: 0x06003D57 RID: 15703 RVA: 0x00145A9C File Offset: 0x00143C9C
+	// Token: 0x06003D57 RID: 15703 RVA: 0x00145A7C File Offset: 0x00143C7C
 	private int GetNavAgentType(NavAgentType navType)
 	{
 		int settingsCount = NavMesh.GetSettingsCount();
@@ -288,7 +288,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 	{
 	}
 
-	// Token: 0x06003D5A RID: 15706 RVA: 0x00145B00 File Offset: 0x00143D00
+	// Token: 0x06003D5A RID: 15706 RVA: 0x00145AE0 File Offset: 0x00143CE0
 	public GRPlayer FindBestTarget(Vector3 sourcePos, float maxRange, float maxRangeSq, float minDotVal)
 	{
 		float num = 0f;
@@ -324,7 +324,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		return result;
 	}
 
-	// Token: 0x06003D5B RID: 15707 RVA: 0x00145C34 File Offset: 0x00143E34
+	// Token: 0x06003D5B RID: 15707 RVA: 0x00145C14 File Offset: 0x00143E14
 	public bool IsTargetVisible(Vector3 startPos, GRPlayer target, float maxDist)
 	{
 		if (!this.IsTargetable(target))
@@ -342,7 +342,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		return true;
 	}
 
-	// Token: 0x06003D5C RID: 15708 RVA: 0x00145CDC File Offset: 0x00143EDC
+	// Token: 0x06003D5C RID: 15708 RVA: 0x00145CBC File Offset: 0x00143EBC
 	public bool IsTargetInRange(Vector3 startPos, GRPlayer target, float maxRangeSq, out Vector3 toTarget)
 	{
 		toTarget = Vector3.zero;
@@ -355,7 +355,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		return toTarget.sqrMagnitude <= maxRangeSq;
 	}
 
-	// Token: 0x06003D5D RID: 15709 RVA: 0x00145D28 File Offset: 0x00143F28
+	// Token: 0x06003D5D RID: 15709 RVA: 0x00145D08 File Offset: 0x00143F08
 	public bool IsTargetable(GRPlayer potentialTarget)
 	{
 		if (potentialTarget.IsNull())

@@ -10,7 +10,7 @@ namespace GorillaLocomotion.Gameplay
 	// Token: 0x02000FA4 RID: 4004
 	public sealed class SplineFollow : MonoBehaviour
 	{
-		// Token: 0x06006496 RID: 25750 RVA: 0x0020CE9C File Offset: 0x0020B09C
+		// Token: 0x06006496 RID: 25750 RVA: 0x0020CE7C File Offset: 0x0020B07C
 		public void Start()
 		{
 			base.transform.rotation *= this._rotationFix;
@@ -25,7 +25,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x06006497 RID: 25751 RVA: 0x0020CF44 File Offset: 0x0020B144
+		// Token: 0x06006497 RID: 25751 RVA: 0x0020CF24 File Offset: 0x0020B124
 		private void CalculateApproximationNodes()
 		{
 			for (int i = 0; i < this._approximationResolution; i++)
@@ -43,7 +43,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x06006498 RID: 25752 RVA: 0x0020CFC8 File Offset: 0x0020B1C8
+		// Token: 0x06006498 RID: 25752 RVA: 0x0020CFA8 File Offset: 0x0020B1A8
 		private void FixedUpdate()
 		{
 			if (!this._approximate)
@@ -52,7 +52,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x06006499 RID: 25753 RVA: 0x0020CFD8 File Offset: 0x0020B1D8
+		// Token: 0x06006499 RID: 25753 RVA: 0x0020CFB8 File Offset: 0x0020B1B8
 		private void Update()
 		{
 			if (this._approximate)
@@ -61,7 +61,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x0600649A RID: 25754 RVA: 0x0020CFE8 File Offset: 0x0020B1E8
+		// Token: 0x0600649A RID: 25754 RVA: 0x0020CFC8 File Offset: 0x0020B1C8
 		private void FollowSpline()
 		{
 			if (PhotonNetwork.InRoom)
@@ -79,7 +79,7 @@ namespace GorillaLocomotion.Gameplay
 			base.transform.rotation = Quaternion.Slerp(quaternion, base.transform.rotation, Mathf.Exp(-this._smoothRotationTrackingRateExp * Time.deltaTime));
 		}
 
-		// Token: 0x0600649B RID: 25755 RVA: 0x0020D0A4 File Offset: 0x0020B2A4
+		// Token: 0x0600649B RID: 25755 RVA: 0x0020D084 File Offset: 0x0020B284
 		private SplineFollow.SplineNode EvaluateSpline(float t)
 		{
 			t %= 1f;
@@ -100,7 +100,7 @@ namespace GorillaLocomotion.Gameplay
 			return new SplineFollow.SplineNode(@float, float2, float3);
 		}
 
-		// Token: 0x0600649C RID: 25756 RVA: 0x0020D140 File Offset: 0x0020B340
+		// Token: 0x0600649C RID: 25756 RVA: 0x0020D120 File Offset: 0x0020B320
 		private void OnDestroy()
 		{
 			this._nativeSpline.Dispose();
@@ -158,7 +158,7 @@ namespace GorillaLocomotion.Gameplay
 		// Token: 0x02000FA5 RID: 4005
 		private struct SplineNode
 		{
-			// Token: 0x0600649E RID: 25758 RVA: 0x0020D180 File Offset: 0x0020B380
+			// Token: 0x0600649E RID: 25758 RVA: 0x0020D160 File Offset: 0x0020B360
 			public SplineNode(Vector3 position, Vector3 tangent, Vector3 up)
 			{
 				this.Position = position;
@@ -166,7 +166,7 @@ namespace GorillaLocomotion.Gameplay
 				this.Up = up;
 			}
 
-			// Token: 0x0600649F RID: 25759 RVA: 0x0020D1A8 File Offset: 0x0020B3A8
+			// Token: 0x0600649F RID: 25759 RVA: 0x0020D188 File Offset: 0x0020B388
 			public static SplineFollow.SplineNode Lerp(SplineFollow.SplineNode a, SplineFollow.SplineNode b, float t)
 			{
 				return new SplineFollow.SplineNode(Vector3.Lerp(a.Position, b.Position, t), Vector3.Lerp(a.Tangent, b.Tangent, t), Vector3.Lerp(a.Up, b.Up, t));

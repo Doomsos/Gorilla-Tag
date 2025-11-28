@@ -12,7 +12,7 @@ using UnityEngine;
 public class GRElevatorManager : NetworkComponent, ITickSystemTick
 {
 	// Token: 0x1700040A RID: 1034
-	// (get) Token: 0x06002B6E RID: 11118 RVA: 0x000E8AAE File Offset: 0x000E6CAE
+	// (get) Token: 0x06002B6E RID: 11118 RVA: 0x000E8A8E File Offset: 0x000E6C8E
 	public bool InPrivateRoom
 	{
 		get
@@ -22,11 +22,11 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 	}
 
 	// Token: 0x1700040B RID: 1035
-	// (get) Token: 0x06002B6F RID: 11119 RVA: 0x000E8ABA File Offset: 0x000E6CBA
-	// (set) Token: 0x06002B70 RID: 11120 RVA: 0x000E8AC2 File Offset: 0x000E6CC2
+	// (get) Token: 0x06002B6F RID: 11119 RVA: 0x000E8A9A File Offset: 0x000E6C9A
+	// (set) Token: 0x06002B70 RID: 11120 RVA: 0x000E8AA2 File Offset: 0x000E6CA2
 	public bool TickRunning { get; set; }
 
-	// Token: 0x06002B71 RID: 11121 RVA: 0x000E8ACC File Offset: 0x000E6CCC
+	// Token: 0x06002B71 RID: 11121 RVA: 0x000E8AAC File Offset: 0x000E6CAC
 	protected override void Awake()
 	{
 		base.Awake();
@@ -65,7 +65,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B72 RID: 11122 RVA: 0x000E8C44 File Offset: 0x000E6E44
+	// Token: 0x06002B72 RID: 11122 RVA: 0x000E8C24 File Offset: 0x000E6E24
 	protected override void Start()
 	{
 		base.Start();
@@ -74,7 +74,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerRemoved);
 	}
 
-	// Token: 0x06002B73 RID: 11123 RVA: 0x000E8CBC File Offset: 0x000E6EBC
+	// Token: 0x06002B73 RID: 11123 RVA: 0x000E8C9C File Offset: 0x000E6E9C
 	protected void OnDestroy()
 	{
 		NetworkBehaviourUtils.InternalOnDestroy(this);
@@ -99,7 +99,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		TickSystem<object>.RemoveTickCallback(this);
 	}
 
-	// Token: 0x06002B76 RID: 11126 RVA: 0x000E8D34 File Offset: 0x000E6F34
+	// Token: 0x06002B76 RID: 11126 RVA: 0x000E8D14 File Offset: 0x000E6F14
 	public void Tick()
 	{
 		if (!this.cosmeticsInitialized)
@@ -119,7 +119,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B77 RID: 11127 RVA: 0x000E8D97 File Offset: 0x000E6F97
+	// Token: 0x06002B77 RID: 11127 RVA: 0x000E8D77 File Offset: 0x000E6F77
 	private void CheckInitializationState()
 	{
 		this.cosmeticsInitialized = true;
@@ -129,7 +129,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B78 RID: 11128 RVA: 0x000E8DB0 File Offset: 0x000E6FB0
+	// Token: 0x06002B78 RID: 11128 RVA: 0x000E8D90 File Offset: 0x000E6F90
 	public void ProcessElevatorSystemState()
 	{
 		switch (this.currentState)
@@ -182,7 +182,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B79 RID: 11129 RVA: 0x000E8EE0 File Offset: 0x000E70E0
+	// Token: 0x06002B79 RID: 11129 RVA: 0x000E8EC0 File Offset: 0x000E70C0
 	public void ActivateElevating()
 	{
 		if (PhotonNetwork.InRoom)
@@ -198,13 +198,13 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		this.ActivateTeleport(this.currentLocation, this.destination, -1, this.GetTime());
 	}
 
-	// Token: 0x06002B7A RID: 11130 RVA: 0x000E8F50 File Offset: 0x000E7150
+	// Token: 0x06002B7A RID: 11130 RVA: 0x000E8F30 File Offset: 0x000E7130
 	public void LeadElevatorJoin()
 	{
 		GRElevatorManager.LeadElevatorJoin(this.elevatorByLocation[this.currentLocation].friendCollider, this.elevatorByLocation[this.destination].friendCollider, this.elevatorByLocation[this.destination].joinTrigger);
 	}
 
-	// Token: 0x06002B7B RID: 11131 RVA: 0x000E8FA4 File Offset: 0x000E71A4
+	// Token: 0x06002B7B RID: 11131 RVA: 0x000E8F84 File Offset: 0x000E7184
 	public static void LeadElevatorJoin(GorillaFriendCollider sourceFriendCollider, GorillaFriendCollider destinationFriendCollider, GorillaNetworkJoinTrigger destinationJoinTrigger)
 	{
 		if (NetworkSystem.Instance.InRoom)
@@ -225,7 +225,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		GRElevatorManager.JoinPublicRoom();
 	}
 
-	// Token: 0x06002B7C RID: 11132 RVA: 0x000E90E4 File Offset: 0x000E72E4
+	// Token: 0x06002B7C RID: 11132 RVA: 0x000E90C4 File Offset: 0x000E72C4
 	public static void LeadShuttleJoin(GorillaFriendCollider sourceFriendCollider, GorillaFriendCollider destinationFriendCollider, GorillaNetworkJoinTrigger destinationJoinTrigger, int targetLevel)
 	{
 		sourceFriendCollider.RefreshPlayersInSphere();
@@ -262,7 +262,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		PhotonNetworkController.Instance.AttemptToJoinPublicRoom(destinationJoinTrigger, JoinType.Solo, null);
 	}
 
-	// Token: 0x06002B7D RID: 11133 RVA: 0x000E92A8 File Offset: 0x000E74A8
+	// Token: 0x06002B7D RID: 11133 RVA: 0x000E9288 File Offset: 0x000E7488
 	public void UpdateElevatorState(GRElevatorManager.ElevatorSystemState newState, GRElevatorManager.ElevatorLocation location = GRElevatorManager.ElevatorLocation.None)
 	{
 		switch (this.currentState)
@@ -397,7 +397,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		this.UpdateUI();
 	}
 
-	// Token: 0x06002B7E RID: 11134 RVA: 0x000E9624 File Offset: 0x000E7824
+	// Token: 0x06002B7E RID: 11134 RVA: 0x000E9604 File Offset: 0x000E7804
 	public void UpdateUI()
 	{
 		for (int i = 0; i < this.allElevators.Count; i++)
@@ -425,7 +425,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B7F RID: 11135 RVA: 0x000E9714 File Offset: 0x000E7914
+	// Token: 0x06002B7F RID: 11135 RVA: 0x000E96F4 File Offset: 0x000E78F4
 	public static void RegisterElevator(GRElevator elevator)
 	{
 		if (GRElevatorManager._instance == null)
@@ -435,7 +435,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		GRElevatorManager._instance.elevatorByLocation[elevator.location] = elevator;
 	}
 
-	// Token: 0x06002B80 RID: 11136 RVA: 0x000E973A File Offset: 0x000E793A
+	// Token: 0x06002B80 RID: 11136 RVA: 0x000E971A File Offset: 0x000E791A
 	public static void DeregisterElevator(GRElevator elevator)
 	{
 		if (GRElevatorManager._instance == null)
@@ -445,7 +445,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		GRElevatorManager._instance.elevatorByLocation[elevator.location] = null;
 	}
 
-	// Token: 0x06002B81 RID: 11137 RVA: 0x000E9760 File Offset: 0x000E7960
+	// Token: 0x06002B81 RID: 11137 RVA: 0x000E9740 File Offset: 0x000E7940
 	public static void ElevatorButtonPressed(GRElevator.ButtonType type, GRElevatorManager.ElevatorLocation location)
 	{
 		if (GRElevatorManager._instance != null)
@@ -462,7 +462,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B82 RID: 11138 RVA: 0x000E97CB File Offset: 0x000E79CB
+	// Token: 0x06002B82 RID: 11138 RVA: 0x000E97AB File Offset: 0x000E79AB
 	private void ElevatorButtonPressedInternal(GRElevator.ButtonType type, GRElevatorManager.ElevatorLocation location)
 	{
 		this.elevatorByLocation[location].PressButtonVisuals(type);
@@ -473,7 +473,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B83 RID: 11139 RVA: 0x000E9800 File Offset: 0x000E7A00
+	// Token: 0x06002B83 RID: 11139 RVA: 0x000E97E0 File Offset: 0x000E79E0
 	public void ProcessElevatorButtonPress(GRElevator.ButtonType type, GRElevatorManager.ElevatorLocation location)
 	{
 		switch (type)
@@ -537,7 +537,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B84 RID: 11140 RVA: 0x000E98EC File Offset: 0x000E7AEC
+	// Token: 0x06002B84 RID: 11140 RVA: 0x000E98CC File Offset: 0x000E7ACC
 	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
 		stream.SendNext(this.doorsFullyClosedTime);
@@ -560,7 +560,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B85 RID: 11141 RVA: 0x000E9A08 File Offset: 0x000E7C08
+	// Token: 0x06002B85 RID: 11141 RVA: 0x000E99E8 File Offset: 0x000E7BE8
 	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (!info.Sender.IsMasterClient)
@@ -624,7 +624,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B86 RID: 11142 RVA: 0x000E9BB8 File Offset: 0x000E7DB8
+	// Token: 0x06002B86 RID: 11142 RVA: 0x000E9B98 File Offset: 0x000E7D98
 	[PunRPC]
 	public void RemoteElevatorButtonPress(int elevatorButtonPressed, int elevatorLocation, PhotonMessageInfo info)
 	{
@@ -643,7 +643,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		this.ElevatorButtonPressedInternal((GRElevator.ButtonType)elevatorButtonPressed, (GRElevatorManager.ElevatorLocation)elevatorLocation);
 	}
 
-	// Token: 0x06002B87 RID: 11143 RVA: 0x000E9BEC File Offset: 0x000E7DEC
+	// Token: 0x06002B87 RID: 11143 RVA: 0x000E9BCC File Offset: 0x000E7DCC
 	[PunRPC]
 	public void RemoteActivateTeleport(int elevatorStartLocation, int elevatorDestinationLocation, int lowestActorNumber, PhotonMessageInfo info)
 	{
@@ -661,7 +661,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B88 RID: 11144 RVA: 0x000E9C46 File Offset: 0x000E7E46
+	// Token: 0x06002B88 RID: 11144 RVA: 0x000E9C26 File Offset: 0x000E7E26
 	private IEnumerator TeleportDelay(GRElevatorManager.ElevatorLocation start, GRElevatorManager.ElevatorLocation destination, int lowestActorNumber, double sentServerTime)
 	{
 		this.timeLastTeleported = (double)Time.time;
@@ -675,7 +675,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		yield break;
 	}
 
-	// Token: 0x06002B89 RID: 11145 RVA: 0x000E9C74 File Offset: 0x000E7E74
+	// Token: 0x06002B89 RID: 11145 RVA: 0x000E9C54 File Offset: 0x000E7E54
 	public void ActivateTeleport(GRElevatorManager.ElevatorLocation start, GRElevatorManager.ElevatorLocation destination, int lowestActorNumber, double photonServerTime)
 	{
 		GRElevator grelevator = this.elevatorByLocation[start];
@@ -730,7 +730,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		grelevator2.PlayElevatorMusic(grelevator.musicAudio.time);
 	}
 
-	// Token: 0x06002B8A RID: 11146 RVA: 0x000E9FE0 File Offset: 0x000E81E0
+	// Token: 0x06002B8A RID: 11146 RVA: 0x000E9FC0 File Offset: 0x000E81C0
 	public void CloseAllElevators()
 	{
 		for (int i = 0; i < this.allElevators.Count; i++)
@@ -742,7 +742,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B8B RID: 11147 RVA: 0x000EA028 File Offset: 0x000E8228
+	// Token: 0x06002B8B RID: 11147 RVA: 0x000EA008 File Offset: 0x000E8208
 	public void OpenElevator(GRElevatorManager.ElevatorLocation location)
 	{
 		for (int i = 0; i < this.allElevators.Count; i++)
@@ -751,7 +751,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B8C RID: 11148 RVA: 0x000EA074 File Offset: 0x000E8274
+	// Token: 0x06002B8C RID: 11148 RVA: 0x000EA054 File Offset: 0x000E8254
 	public double GetTime()
 	{
 		double num = PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time);
@@ -764,7 +764,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return num;
 	}
 
-	// Token: 0x06002B8D RID: 11149 RVA: 0x000EA100 File Offset: 0x000E8300
+	// Token: 0x06002B8D RID: 11149 RVA: 0x000EA0E0 File Offset: 0x000E82E0
 	public static bool ValidElevatorNetworking(int actorNr)
 	{
 		if (GRElevatorManager._instance == null)
@@ -794,7 +794,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return netPlayer != null && (friendCollider.playerIDsCurrentlyTouching.Contains(netPlayer.UserId) || friendCollider2.playerIDsCurrentlyTouching.Contains(netPlayer.UserId));
 	}
 
-	// Token: 0x06002B8E RID: 11150 RVA: 0x000EA1DC File Offset: 0x000E83DC
+	// Token: 0x06002B8E RID: 11150 RVA: 0x000EA1BC File Offset: 0x000E83BC
 	public static bool ValidShuttleNetworking(int actorNr)
 	{
 		if (GRElevatorManager._instance == null)
@@ -840,7 +840,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return friendCollider.playerIDsCurrentlyTouching.Contains(netPlayer.UserId) || friendCollider2.playerIDsCurrentlyTouching.Contains(netPlayer.UserId);
 	}
 
-	// Token: 0x06002B8F RID: 11151 RVA: 0x000EA2D0 File Offset: 0x000E84D0
+	// Token: 0x06002B8F RID: 11151 RVA: 0x000EA2B0 File Offset: 0x000E84B0
 	public static bool IsPlayerInShuttle(int actorNr, GRShuttle currShuttle, GRShuttle targetShuttle)
 	{
 		if (GRElevatorManager._instance == null)
@@ -875,7 +875,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return flag || flag2;
 	}
 
-	// Token: 0x06002B90 RID: 11152 RVA: 0x000EA368 File Offset: 0x000E8568
+	// Token: 0x06002B90 RID: 11152 RVA: 0x000EA348 File Offset: 0x000E8548
 	public static int LowestActorNumberInElevator()
 	{
 		GorillaFriendCollider friendCollider = GRElevatorManager._instance.elevatorByLocation[GRElevatorManager._instance.currentLocation].friendCollider;
@@ -894,7 +894,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return num;
 	}
 
-	// Token: 0x06002B91 RID: 11153 RVA: 0x000EA428 File Offset: 0x000E8628
+	// Token: 0x06002B91 RID: 11153 RVA: 0x000EA408 File Offset: 0x000E8608
 	public static int LowestActorNumberInElevator(GorillaFriendCollider sourceFriendCollider, GorillaFriendCollider destinationFriendCollider)
 	{
 		sourceFriendCollider.RefreshPlayersInSphere();
@@ -911,7 +911,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return num;
 	}
 
-	// Token: 0x06002B92 RID: 11154 RVA: 0x000EA4A0 File Offset: 0x000E86A0
+	// Token: 0x06002B92 RID: 11154 RVA: 0x000EA480 File Offset: 0x000E8680
 	private void RefreshTeleportingPlayersJoinTime()
 	{
 		GorillaFriendCollider friendCollider = GRElevatorManager._instance.elevatorByLocation[GRElevatorManager._instance.currentLocation].friendCollider;
@@ -927,19 +927,19 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B93 RID: 11155 RVA: 0x000EA521 File Offset: 0x000E8721
+	// Token: 0x06002B93 RID: 11155 RVA: 0x000EA501 File Offset: 0x000E8701
 	public static bool InControlOfElevator()
 	{
 		return !NetworkSystem.Instance.InRoom || GRElevatorManager._instance.IsMine;
 	}
 
-	// Token: 0x06002B94 RID: 11156 RVA: 0x000EA53B File Offset: 0x000E873B
+	// Token: 0x06002B94 RID: 11156 RVA: 0x000EA51B File Offset: 0x000E871B
 	public static void JoinPublicRoom()
 	{
 		PhotonNetworkController.Instance.AttemptToJoinPublicRoom(GRElevatorManager._instance.elevatorByLocation[GRElevatorManager._instance.destination].joinTrigger, JoinType.Solo, null);
 	}
 
-	// Token: 0x06002B95 RID: 11157 RVA: 0x000EA56C File Offset: 0x000E876C
+	// Token: 0x06002B95 RID: 11157 RVA: 0x000EA54C File Offset: 0x000E874C
 	public void OnReachedDestination()
 	{
 		ZoneManagement instance = ZoneManagement.instance;
@@ -953,7 +953,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		this.waitForZoneLoadFallbackTimer = -1f;
 	}
 
-	// Token: 0x06002B96 RID: 11158 RVA: 0x000EA5F0 File Offset: 0x000E87F0
+	// Token: 0x06002B96 RID: 11158 RVA: 0x000EA5D0 File Offset: 0x000E87D0
 	public static GRShuttle GetShuttle(int shuttleId)
 	{
 		if (GRElevatorManager._instance == null)
@@ -963,7 +963,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return GRElevatorManager._instance.GetShuttleById(shuttleId);
 	}
 
-	// Token: 0x06002B97 RID: 11159 RVA: 0x000EA60C File Offset: 0x000E880C
+	// Token: 0x06002B97 RID: 11159 RVA: 0x000EA5EC File Offset: 0x000E87EC
 	public void InitShuttles(GhostReactor reactor)
 	{
 		for (int i = 0; i < this.allShuttles.Count; i++)
@@ -972,7 +972,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B98 RID: 11160 RVA: 0x000EA644 File Offset: 0x000E8844
+	// Token: 0x06002B98 RID: 11160 RVA: 0x000EA624 File Offset: 0x000E8824
 	public GRShuttle GetPlayerShuttle(GRShuttleGroupLoc shuttleGroupLoc, int shuttleIndex)
 	{
 		int i = 0;
@@ -999,19 +999,19 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return null;
 	}
 
-	// Token: 0x06002B99 RID: 11161 RVA: 0x000EA6F0 File Offset: 0x000E88F0
+	// Token: 0x06002B99 RID: 11161 RVA: 0x000EA6D0 File Offset: 0x000E88D0
 	public GRShuttle GetDrillShuttleForPlayer(int actorNumber)
 	{
 		return this.GetShuttleForPlayer(actorNumber, GRShuttleGroupLoc.Drill);
 	}
 
-	// Token: 0x06002B9A RID: 11162 RVA: 0x000EA6FA File Offset: 0x000E88FA
+	// Token: 0x06002B9A RID: 11162 RVA: 0x000EA6DA File Offset: 0x000E88DA
 	public GRShuttle GetStagingShuttleForPlayer(int actorNumber)
 	{
 		return this.GetShuttleForPlayer(actorNumber, GRShuttleGroupLoc.Staging);
 	}
 
-	// Token: 0x06002B9B RID: 11163 RVA: 0x000EA704 File Offset: 0x000E8904
+	// Token: 0x06002B9B RID: 11163 RVA: 0x000EA6E4 File Offset: 0x000E88E4
 	public GRShuttle GetShuttleForPlayer(int actorNumber, GRShuttleGroupLoc shuttleGroupLoc)
 	{
 		for (int i = 0; i < this.shuttleGroups.Count; i++)
@@ -1035,7 +1035,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return null;
 	}
 
-	// Token: 0x06002B9C RID: 11164 RVA: 0x000EA794 File Offset: 0x000E8994
+	// Token: 0x06002B9C RID: 11164 RVA: 0x000EA774 File Offset: 0x000E8974
 	public GRShuttle GetShuttleById(int shuttleId)
 	{
 		for (int i = 0; i < this.allShuttles.Count; i++)
@@ -1048,7 +1048,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return null;
 	}
 
-	// Token: 0x06002B9D RID: 11165 RVA: 0x000EA7DC File Offset: 0x000E89DC
+	// Token: 0x06002B9D RID: 11165 RVA: 0x000EA7BC File Offset: 0x000E89BC
 	private int AddPlayer(NetPlayer netPlayer)
 	{
 		if (!PhotonNetwork.IsMasterClient)
@@ -1076,7 +1076,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		return num;
 	}
 
-	// Token: 0x06002B9E RID: 11166 RVA: 0x000EA864 File Offset: 0x000E8A64
+	// Token: 0x06002B9E RID: 11166 RVA: 0x000EA844 File Offset: 0x000E8A44
 	private void RemovePlayer(NetPlayer netPlayer)
 	{
 		if (!PhotonNetwork.IsMasterClient)
@@ -1103,7 +1103,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002B9F RID: 11167 RVA: 0x000EA8EC File Offset: 0x000E8AEC
+	// Token: 0x06002B9F RID: 11167 RVA: 0x000EA8CC File Offset: 0x000E8ACC
 	public void OnLeftRoom()
 	{
 		for (int i = 0; i < this.shuttleGroups.Count; i++)
@@ -1119,7 +1119,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002BA0 RID: 11168 RVA: 0x000EA958 File Offset: 0x000E8B58
+	// Token: 0x06002BA0 RID: 11168 RVA: 0x000EA938 File Offset: 0x000E8B38
 	public void OnPlayerAdded(NetPlayer player)
 	{
 		if (!PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)
@@ -1129,7 +1129,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		this.AddPlayer(player);
 	}
 
-	// Token: 0x06002BA1 RID: 11169 RVA: 0x000EA977 File Offset: 0x000E8B77
+	// Token: 0x06002BA1 RID: 11169 RVA: 0x000EA957 File Offset: 0x000E8B57
 	public void OnPlayerRemoved(NetPlayer player)
 	{
 		if (!PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)

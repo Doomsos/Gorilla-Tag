@@ -6,14 +6,14 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001093 RID: 4243
 	public class CompassNeedleRotator : MonoBehaviour
 	{
-		// Token: 0x06006A2F RID: 27183 RVA: 0x0022A4F2 File Offset: 0x002286F2
+		// Token: 0x06006A2F RID: 27183 RVA: 0x0022A4D2 File Offset: 0x002286D2
 		protected void OnEnable()
 		{
 			this.currentVelocity = 0f;
 			base.transform.localRotation = Quaternion.identity;
 		}
 
-		// Token: 0x06006A30 RID: 27184 RVA: 0x0022A510 File Offset: 0x00228710
+		// Token: 0x06006A30 RID: 27184 RVA: 0x0022A4F0 File Offset: 0x002286F0
 		protected void LateUpdate()
 		{
 			Transform transform = base.transform;

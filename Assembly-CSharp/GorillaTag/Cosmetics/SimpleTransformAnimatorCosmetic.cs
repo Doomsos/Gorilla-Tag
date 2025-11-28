@@ -7,37 +7,37 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x0200112A RID: 4394
 	public class SimpleTransformAnimatorCosmetic : MonoBehaviour, ITickSystemTick
 	{
-		// Token: 0x06006DEA RID: 28138 RVA: 0x0024189C File Offset: 0x0023FA9C
+		// Token: 0x06006DEA RID: 28138 RVA: 0x0024187C File Offset: 0x0023FA7C
 		private void DebugToggle()
 		{
 			this.Toggle();
 		}
 
-		// Token: 0x06006DEB RID: 28139 RVA: 0x002418A4 File Offset: 0x0023FAA4
+		// Token: 0x06006DEB RID: 28139 RVA: 0x00241884 File Offset: 0x0023FA84
 		private void DebugA()
 		{
 			this.TogglePoseA();
 		}
 
-		// Token: 0x06006DEC RID: 28140 RVA: 0x002418AC File Offset: 0x0023FAAC
+		// Token: 0x06006DEC RID: 28140 RVA: 0x0024188C File Offset: 0x0023FA8C
 		private void DebugB()
 		{
 			this.TogglePoseB();
 		}
 
 		// Token: 0x17000A6C RID: 2668
-		// (get) Token: 0x06006DED RID: 28141 RVA: 0x002418B4 File Offset: 0x0023FAB4
-		// (set) Token: 0x06006DEE RID: 28142 RVA: 0x002418BC File Offset: 0x0023FABC
+		// (get) Token: 0x06006DED RID: 28141 RVA: 0x00241894 File Offset: 0x0023FA94
+		// (set) Token: 0x06006DEE RID: 28142 RVA: 0x0024189C File Offset: 0x0023FA9C
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006DEF RID: 28143 RVA: 0x002418C5 File Offset: 0x0023FAC5
+		// Token: 0x06006DEF RID: 28143 RVA: 0x002418A5 File Offset: 0x0023FAA5
 		private void OnEnable()
 		{
 			this.posBlendCurrent = this.posBlendTarget;
 			this.UpdateTransform();
 		}
 
-		// Token: 0x06006DF0 RID: 28144 RVA: 0x002418D9 File Offset: 0x0023FAD9
+		// Token: 0x06006DF0 RID: 28144 RVA: 0x002418B9 File Offset: 0x0023FAB9
 		private void OnDisable()
 		{
 			if (this.TickRunning)
@@ -47,7 +47,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DF1 RID: 28145 RVA: 0x002418F0 File Offset: 0x0023FAF0
+		// Token: 0x06006DF1 RID: 28145 RVA: 0x002418D0 File Offset: 0x0023FAD0
 		private void CheckAnimationNeeded()
 		{
 			bool flag = false;
@@ -76,7 +76,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DF2 RID: 28146 RVA: 0x00241984 File Offset: 0x0023FB84
+		// Token: 0x06006DF2 RID: 28146 RVA: 0x00241964 File Offset: 0x0023FB64
 		public void Tick()
 		{
 			float num = 1f / this.animationDuration;
@@ -90,7 +90,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DF3 RID: 28147 RVA: 0x002419E4 File Offset: 0x0023FBE4
+		// Token: 0x06006DF3 RID: 28147 RVA: 0x002419C4 File Offset: 0x0023FBC4
 		private void UpdateTransform()
 		{
 			Vector3 vector = this.targetTransform.position;
@@ -107,7 +107,7 @@ namespace GorillaTag.Cosmetics
 			this.targetTransform.SetPositionAndRotation(vector, quaternion);
 		}
 
-		// Token: 0x06006DF4 RID: 28148 RVA: 0x00241A85 File Offset: 0x0023FC85
+		// Token: 0x06006DF4 RID: 28148 RVA: 0x00241A65 File Offset: 0x0023FC65
 		public void Toggle()
 		{
 			this.animMode = SimpleTransformAnimatorCosmetic.animModes.stepToTargetPos;
@@ -115,7 +115,7 @@ namespace GorillaTag.Cosmetics
 			this.CheckAnimationNeeded();
 		}
 
-		// Token: 0x06006DF5 RID: 28149 RVA: 0x00241AB3 File Offset: 0x0023FCB3
+		// Token: 0x06006DF5 RID: 28149 RVA: 0x00241A93 File Offset: 0x0023FC93
 		public void TogglePoseA()
 		{
 			this.animMode = SimpleTransformAnimatorCosmetic.animModes.stepToTargetPos;
@@ -123,7 +123,7 @@ namespace GorillaTag.Cosmetics
 			this.CheckAnimationNeeded();
 		}
 
-		// Token: 0x06006DF6 RID: 28150 RVA: 0x00241ACD File Offset: 0x0023FCCD
+		// Token: 0x06006DF6 RID: 28150 RVA: 0x00241AAD File Offset: 0x0023FCAD
 		public void TogglePoseB()
 		{
 			this.animMode = SimpleTransformAnimatorCosmetic.animModes.stepToTargetPos;
@@ -131,7 +131,7 @@ namespace GorillaTag.Cosmetics
 			this.CheckAnimationNeeded();
 		}
 
-		// Token: 0x06006DF7 RID: 28151 RVA: 0x00241AE7 File Offset: 0x0023FCE7
+		// Token: 0x06006DF7 RID: 28151 RVA: 0x00241AC7 File Offset: 0x0023FCC7
 		public void playAnimationOneshot()
 		{
 			this.animMode = SimpleTransformAnimatorCosmetic.animModes.animateOneshot;
@@ -140,7 +140,7 @@ namespace GorillaTag.Cosmetics
 			this.CheckAnimationNeeded();
 		}
 
-		// Token: 0x06006DF8 RID: 28152 RVA: 0x00241B0C File Offset: 0x0023FD0C
+		// Token: 0x06006DF8 RID: 28152 RVA: 0x00241AEC File Offset: 0x0023FCEC
 		private void DebugPlayAnimationOneShot()
 		{
 			this.playAnimationOneshot();

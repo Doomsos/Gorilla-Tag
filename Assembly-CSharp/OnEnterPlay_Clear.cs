@@ -6,7 +6,7 @@ using UnityEngine;
 [AttributeUsage(256)]
 public class OnEnterPlay_Clear : OnEnterPlay_Attribute
 {
-	// Token: 0x06004DAA RID: 19882 RVA: 0x001923C8 File Offset: 0x001905C8
+	// Token: 0x06004DAA RID: 19882 RVA: 0x001923A8 File Offset: 0x001905A8
 	public override void OnEnterPlay(FieldInfo field)
 	{
 		if (!field.IsStatic)

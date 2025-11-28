@@ -9,7 +9,7 @@ public class TestManipulatableSpinner : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06001DAB RID: 7595 RVA: 0x0009C17C File Offset: 0x0009A37C
+	// Token: 0x06001DAB RID: 7595 RVA: 0x0009C15C File Offset: 0x0009A35C
 	private void LateUpdate()
 	{
 		float angle = this.spinner.angle;

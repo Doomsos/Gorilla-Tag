@@ -8,11 +8,11 @@ namespace GorillaTagScripts.ObstacleCourse
 	public class TappableBell : Tappable
 	{
 		// Token: 0x14000099 RID: 153
-		// (add) Token: 0x06005AD7 RID: 23255 RVA: 0x001D17BC File Offset: 0x001CF9BC
-		// (remove) Token: 0x06005AD8 RID: 23256 RVA: 0x001D17F4 File Offset: 0x001CF9F4
+		// (add) Token: 0x06005AD7 RID: 23255 RVA: 0x001D179C File Offset: 0x001CF99C
+		// (remove) Token: 0x06005AD8 RID: 23256 RVA: 0x001D17D4 File Offset: 0x001CF9D4
 		public event TappableBell.ObstacleCourseTriggerEvent OnTapped;
 
-		// Token: 0x06005AD9 RID: 23257 RVA: 0x001D182C File Offset: 0x001CFA2C
+		// Token: 0x06005AD9 RID: 23257 RVA: 0x001D180C File Offset: 0x001CFA0C
 		public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
 		{
 			if (!PhotonNetwork.LocalPlayer.IsMasterClient)

@@ -8,7 +8,7 @@ using UnityEngine.XR;
 public class GorillaGrabber : MonoBehaviour
 {
 	// Token: 0x170004E7 RID: 1255
-	// (get) Token: 0x060036B5 RID: 14005 RVA: 0x00127DA4 File Offset: 0x00125FA4
+	// (get) Token: 0x060036B5 RID: 14005 RVA: 0x00127D84 File Offset: 0x00125F84
 	public bool isGrabbing
 	{
 		get
@@ -18,7 +18,7 @@ public class GorillaGrabber : MonoBehaviour
 	}
 
 	// Token: 0x170004E8 RID: 1256
-	// (get) Token: 0x060036B6 RID: 14006 RVA: 0x00127DAF File Offset: 0x00125FAF
+	// (get) Token: 0x060036B6 RID: 14006 RVA: 0x00127D8F File Offset: 0x00125F8F
 	public XRNode XrNode
 	{
 		get
@@ -28,7 +28,7 @@ public class GorillaGrabber : MonoBehaviour
 	}
 
 	// Token: 0x170004E9 RID: 1257
-	// (get) Token: 0x060036B7 RID: 14007 RVA: 0x00127DB7 File Offset: 0x00125FB7
+	// (get) Token: 0x060036B7 RID: 14007 RVA: 0x00127D97 File Offset: 0x00125F97
 	public bool IsLeftHand
 	{
 		get
@@ -38,7 +38,7 @@ public class GorillaGrabber : MonoBehaviour
 	}
 
 	// Token: 0x170004EA RID: 1258
-	// (get) Token: 0x060036B8 RID: 14008 RVA: 0x00127DC2 File Offset: 0x00125FC2
+	// (get) Token: 0x060036B8 RID: 14008 RVA: 0x00127DA2 File Offset: 0x00125FA2
 	public bool IsRightHand
 	{
 		get
@@ -48,7 +48,7 @@ public class GorillaGrabber : MonoBehaviour
 	}
 
 	// Token: 0x170004EB RID: 1259
-	// (get) Token: 0x060036B9 RID: 14009 RVA: 0x00127DCD File Offset: 0x00125FCD
+	// (get) Token: 0x060036B9 RID: 14009 RVA: 0x00127DAD File Offset: 0x00125FAD
 	public GTPlayer Player
 	{
 		get
@@ -57,7 +57,7 @@ public class GorillaGrabber : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060036BA RID: 14010 RVA: 0x00127DD8 File Offset: 0x00125FD8
+	// Token: 0x060036BA RID: 14010 RVA: 0x00127DB8 File Offset: 0x00125FB8
 	private void Start()
 	{
 		this.hapticStrengthActual = this.hapticStrength;
@@ -70,7 +70,7 @@ public class GorillaGrabber : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060036BB RID: 14011 RVA: 0x00127E2C File Offset: 0x0012602C
+	// Token: 0x060036BB RID: 14011 RVA: 0x00127E0C File Offset: 0x0012600C
 	public void CheckGrabber(bool initiateGrab)
 	{
 		bool grabMomentary = ControllerInputPoller.GetGrabMomentary(this.xrNode);
@@ -94,13 +94,13 @@ public class GorillaGrabber : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060036BC RID: 14012 RVA: 0x00127EEB File Offset: 0x001260EB
+	// Token: 0x060036BC RID: 14012 RVA: 0x00127ECB File Offset: 0x001260CB
 	private bool GrabDistanceOverCheck()
 	{
 		return this.currentGrabbedTransform == null || Vector3.Distance(base.transform.position, this.currentGrabbedTransform.TransformPoint(this.localGrabbedPosition)) > this.breakDistance;
 	}
 
-	// Token: 0x060036BD RID: 14013 RVA: 0x00127F28 File Offset: 0x00126128
+	// Token: 0x060036BD RID: 14013 RVA: 0x00127F08 File Offset: 0x00126108
 	internal void Ungrab(IGorillaGrabable specificGrabbable = null)
 	{
 		if (specificGrabbable != null && specificGrabbable != this.currentGrabbable)
@@ -114,7 +114,7 @@ public class GorillaGrabber : MonoBehaviour
 		this.hapticStrengthActual = this.hapticStrength;
 	}
 
-	// Token: 0x060036BE RID: 14014 RVA: 0x00127F7C File Offset: 0x0012617C
+	// Token: 0x060036BE RID: 14014 RVA: 0x00127F5C File Offset: 0x0012615C
 	private IGorillaGrabable TryGrab(bool momentary)
 	{
 		IGorillaGrabable gorillaGrabable = null;
@@ -146,7 +146,7 @@ public class GorillaGrabber : MonoBehaviour
 		return gorillaGrabable;
 	}
 
-	// Token: 0x060036BF RID: 14015 RVA: 0x0012808F File Offset: 0x0012628F
+	// Token: 0x060036BF RID: 14015 RVA: 0x0012806F File Offset: 0x0012626F
 	private Vector3 FindClosestPoint(Collider collider, Vector3 position)
 	{
 		if (collider is MeshCollider && !(collider as MeshCollider).convex)
@@ -156,7 +156,7 @@ public class GorillaGrabber : MonoBehaviour
 		return collider.ClosestPoint(position);
 	}
 
-	// Token: 0x060036C0 RID: 14016 RVA: 0x001280B0 File Offset: 0x001262B0
+	// Token: 0x060036C0 RID: 14016 RVA: 0x00128090 File Offset: 0x00126290
 	public void Inject(Transform currentGrabbableTransform, Vector3 localGrabbedPosition)
 	{
 		if (this.currentGrabbable != null)

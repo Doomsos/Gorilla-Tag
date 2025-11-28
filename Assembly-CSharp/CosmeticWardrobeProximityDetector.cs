@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider))]
 public class CosmeticWardrobeProximityDetector : MonoBehaviour
 {
-	// Token: 0x06001FB3 RID: 8115 RVA: 0x000A8D14 File Offset: 0x000A6F14
+	// Token: 0x06001FB3 RID: 8115 RVA: 0x000A8CF4 File Offset: 0x000A6EF4
 	private void OnEnable()
 	{
 		if (this.wardrobeNearbyCollider != null)
@@ -16,7 +16,7 @@ public class CosmeticWardrobeProximityDetector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001FB4 RID: 8116 RVA: 0x000A8D34 File Offset: 0x000A6F34
+	// Token: 0x06001FB4 RID: 8116 RVA: 0x000A8D14 File Offset: 0x000A6F14
 	private void OnDisable()
 	{
 		if (this.wardrobeNearbyCollider != null)
@@ -25,7 +25,7 @@ public class CosmeticWardrobeProximityDetector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001FB5 RID: 8117 RVA: 0x000A8D58 File Offset: 0x000A6F58
+	// Token: 0x06001FB5 RID: 8117 RVA: 0x000A8D38 File Offset: 0x000A6F38
 	public static bool IsUserNearWardrobe(string userID)
 	{
 		int num = LayerMask.GetMask(new string[]

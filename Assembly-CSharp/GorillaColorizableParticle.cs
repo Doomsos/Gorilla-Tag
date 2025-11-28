@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000776 RID: 1910
 public class GorillaColorizableParticle : GorillaColorizableBase
 {
-	// Token: 0x060031C7 RID: 12743 RVA: 0x0010DC18 File Offset: 0x0010BE18
+	// Token: 0x060031C7 RID: 12743 RVA: 0x0010DBF8 File Offset: 0x0010BDF8
 	public override void SetColor(Color color)
 	{
 		ParticleSystem.MainModule main = this.particleSystem.main;

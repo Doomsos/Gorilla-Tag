@@ -6,13 +6,13 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityStagger : GRAbilityBase
 {
-	// Token: 0x06002A40 RID: 10816 RVA: 0x000E3FB6 File Offset: 0x000E21B6
+	// Token: 0x06002A40 RID: 10816 RVA: 0x000E3F96 File Offset: 0x000E2196
 	public void SetStunTime(float time)
 	{
 		this.stunTime = time;
 	}
 
-	// Token: 0x06002A41 RID: 10817 RVA: 0x000E3FC0 File Offset: 0x000E21C0
+	// Token: 0x06002A41 RID: 10817 RVA: 0x000E3FA0 File Offset: 0x000E21A0
 	public void SetStaggerVelocity(Vector3 vel)
 	{
 		float magnitude = vel.magnitude;
@@ -25,7 +25,7 @@ public class GRAbilityStagger : GRAbilityBase
 		this.staggerMovement.InitFromVelocityAndDuration(vel, this.duration);
 	}
 
-	// Token: 0x06002A42 RID: 10818 RVA: 0x000E400C File Offset: 0x000E220C
+	// Token: 0x06002A42 RID: 10818 RVA: 0x000E3FEC File Offset: 0x000E21EC
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -33,7 +33,7 @@ public class GRAbilityStagger : GRAbilityBase
 		this.staggerMovement.interpolationType = GRAbilityInterpolatedMovement.InterpType.EaseOut;
 	}
 
-	// Token: 0x06002A43 RID: 10819 RVA: 0x000E4038 File Offset: 0x000E2238
+	// Token: 0x06002A43 RID: 10819 RVA: 0x000E4018 File Offset: 0x000E2218
 	public override void Start()
 	{
 		base.Start();
@@ -54,26 +54,26 @@ public class GRAbilityStagger : GRAbilityBase
 		this.staggerMovement.Start();
 	}
 
-	// Token: 0x06002A44 RID: 10820 RVA: 0x000E4143 File Offset: 0x000E2343
+	// Token: 0x06002A44 RID: 10820 RVA: 0x000E4123 File Offset: 0x000E2323
 	public override void Stop()
 	{
 		this.agent.SetIsPathing(true, true);
 		this.agent.SetDisableNetworkSync(false);
 	}
 
-	// Token: 0x06002A45 RID: 10821 RVA: 0x000E415E File Offset: 0x000E235E
+	// Token: 0x06002A45 RID: 10821 RVA: 0x000E413E File Offset: 0x000E233E
 	public override bool IsDone()
 	{
 		return this.staggerMovement.IsDone();
 	}
 
-	// Token: 0x06002A46 RID: 10822 RVA: 0x000E416B File Offset: 0x000E236B
+	// Token: 0x06002A46 RID: 10822 RVA: 0x000E414B File Offset: 0x000E234B
 	protected override void UpdateShared(float dt)
 	{
 		this.staggerMovement.Update(dt);
 	}
 
-	// Token: 0x06002A47 RID: 10823 RVA: 0x000E4179 File Offset: 0x000E2379
+	// Token: 0x06002A47 RID: 10823 RVA: 0x000E4159 File Offset: 0x000E2359
 	public string GetAnimName()
 	{
 		return this.animNameString;

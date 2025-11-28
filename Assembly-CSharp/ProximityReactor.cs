@@ -6,7 +6,7 @@ using UnityEngine.Events;
 public class ProximityReactor : MonoBehaviour
 {
 	// Token: 0x17000603 RID: 1539
-	// (get) Token: 0x060040D3 RID: 16595 RVA: 0x0015A765 File Offset: 0x00158965
+	// (get) Token: 0x060040D3 RID: 16595 RVA: 0x0015A745 File Offset: 0x00158945
 	public float proximityRange
 	{
 		get
@@ -16,7 +16,7 @@ public class ProximityReactor : MonoBehaviour
 	}
 
 	// Token: 0x17000604 RID: 1540
-	// (get) Token: 0x060040D4 RID: 16596 RVA: 0x0015A774 File Offset: 0x00158974
+	// (get) Token: 0x060040D4 RID: 16596 RVA: 0x0015A754 File Offset: 0x00158954
 	public float distance
 	{
 		get
@@ -26,7 +26,7 @@ public class ProximityReactor : MonoBehaviour
 	}
 
 	// Token: 0x17000605 RID: 1541
-	// (get) Token: 0x060040D5 RID: 16597 RVA: 0x0015A77C File Offset: 0x0015897C
+	// (get) Token: 0x060040D5 RID: 16597 RVA: 0x0015A75C File Offset: 0x0015895C
 	public float distanceLinear
 	{
 		get
@@ -35,7 +35,7 @@ public class ProximityReactor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040D6 RID: 16598 RVA: 0x0015A784 File Offset: 0x00158984
+	// Token: 0x060040D6 RID: 16598 RVA: 0x0015A764 File Offset: 0x00158964
 	public void SetRigFrom()
 	{
 		VRRig componentInParent = base.GetComponentInParent<VRRig>(true);
@@ -45,7 +45,7 @@ public class ProximityReactor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040D7 RID: 16599 RVA: 0x0015A7B0 File Offset: 0x001589B0
+	// Token: 0x060040D7 RID: 16599 RVA: 0x0015A790 File Offset: 0x00158990
 	public void SetRigTo()
 	{
 		VRRig componentInParent = base.GetComponentInParent<VRRig>(true);
@@ -55,32 +55,32 @@ public class ProximityReactor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040D8 RID: 16600 RVA: 0x0015A7DA File Offset: 0x001589DA
+	// Token: 0x060040D8 RID: 16600 RVA: 0x0015A7BA File Offset: 0x001589BA
 	public void SetTransformFrom(Transform t)
 	{
 		this.from = t;
 	}
 
-	// Token: 0x060040D9 RID: 16601 RVA: 0x0015A7E3 File Offset: 0x001589E3
+	// Token: 0x060040D9 RID: 16601 RVA: 0x0015A7C3 File Offset: 0x001589C3
 	public void SetTransformTo(Transform t)
 	{
 		this.to = t;
 	}
 
-	// Token: 0x060040DA RID: 16602 RVA: 0x0015A7EC File Offset: 0x001589EC
+	// Token: 0x060040DA RID: 16602 RVA: 0x0015A7CC File Offset: 0x001589CC
 	private void Setup()
 	{
 		this._distance = 0f;
 		this._distanceLinear = 0f;
 	}
 
-	// Token: 0x060040DB RID: 16603 RVA: 0x0015A804 File Offset: 0x00158A04
+	// Token: 0x060040DB RID: 16603 RVA: 0x0015A7E4 File Offset: 0x001589E4
 	private void OnEnable()
 	{
 		this.Setup();
 	}
 
-	// Token: 0x060040DC RID: 16604 RVA: 0x0015A80C File Offset: 0x00158A0C
+	// Token: 0x060040DC RID: 16604 RVA: 0x0015A7EC File Offset: 0x001589EC
 	private void Update()
 	{
 		if (!this.from || !this.to)

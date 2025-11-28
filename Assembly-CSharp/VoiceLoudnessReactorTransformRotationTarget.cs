@@ -6,8 +6,8 @@ using UnityEngine;
 public class VoiceLoudnessReactorTransformRotationTarget
 {
 	// Token: 0x17000777 RID: 1911
-	// (get) Token: 0x0600506C RID: 20588 RVA: 0x0019E334 File Offset: 0x0019C534
-	// (set) Token: 0x0600506D RID: 20589 RVA: 0x0019E33C File Offset: 0x0019C53C
+	// (get) Token: 0x0600506C RID: 20588 RVA: 0x0019E314 File Offset: 0x0019C514
+	// (set) Token: 0x0600506D RID: 20589 RVA: 0x0019E31C File Offset: 0x0019C51C
 	public Quaternion Initial
 	{
 		get

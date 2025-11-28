@@ -12,7 +12,7 @@ using UnityEngine.Jobs;
 [DOTSCompilerGenerated]
 internal class __JobReflectionRegistrationOutput__1221673671587648887
 {
-	// Token: 0x06007334 RID: 29492 RVA: 0x0025AC74 File Offset: 0x00258E74
+	// Token: 0x06007334 RID: 29492 RVA: 0x0025AC54 File Offset: 0x00258E54
 	public static void CreateJobReflectionData()
 	{
 		try
@@ -39,7 +39,7 @@ internal class __JobReflectionRegistrationOutput__1221673671587648887
 		}
 	}
 
-	// Token: 0x06007335 RID: 29493 RVA: 0x0025ACF0 File Offset: 0x00258EF0
+	// Token: 0x06007335 RID: 29493 RVA: 0x0025ACD0 File Offset: 0x00258ED0
 	[RuntimeInitializeOnLoadMethod(2)]
 	public static void EarlyInit()
 	{

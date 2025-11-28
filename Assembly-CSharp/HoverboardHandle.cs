@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200080F RID: 2063
 public class HoverboardHandle : HoldableObject
 {
-	// Token: 0x06003646 RID: 13894 RVA: 0x001264F8 File Offset: 0x001246F8
+	// Token: 0x06003646 RID: 13894 RVA: 0x001264D8 File Offset: 0x001246D8
 	public override void OnHover(InteractionPoint pointHovered, GameObject hoveringHand)
 	{
 		if (!GTPlayer.Instance.isHoverAllowed)
@@ -20,7 +20,7 @@ public class HoverboardHandle : HoldableObject
 		this.noHapticsUntilFrame = Time.frameCount + 1;
 	}
 
-	// Token: 0x06003647 RID: 13895 RVA: 0x00126568 File Offset: 0x00124768
+	// Token: 0x06003647 RID: 13895 RVA: 0x00126548 File Offset: 0x00124748
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		if (!GTPlayer.Instance.isHoverAllowed)
@@ -45,7 +45,7 @@ public class HoverboardHandle : HoldableObject
 		EquipmentInteractor.instance.UpdateHandEquipment(this, flag);
 	}
 
-	// Token: 0x06003648 RID: 13896 RVA: 0x00126641 File Offset: 0x00124841
+	// Token: 0x06003648 RID: 13896 RVA: 0x00126621 File Offset: 0x00124821
 	public override void DropItemCleanup()
 	{
 		if (this.parentVisual.gameObject.activeSelf)
@@ -55,7 +55,7 @@ public class HoverboardHandle : HoldableObject
 		this.parentVisual.SetNotHeld();
 	}
 
-	// Token: 0x06003649 RID: 13897 RVA: 0x0012666C File Offset: 0x0012486C
+	// Token: 0x06003649 RID: 13897 RVA: 0x0012664C File Offset: 0x0012484C
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		if (EquipmentInteractor.instance.rightHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.rightHand)

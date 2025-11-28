@@ -6,7 +6,7 @@ namespace Viveport.Internal
 	// Token: 0x02000D48 RID: 3400
 	internal class Token
 	{
-		// Token: 0x060052C5 RID: 21189 RVA: 0x001A5083 File Offset: 0x001A3283
+		// Token: 0x060052C5 RID: 21189 RVA: 0x001A5063 File Offset: 0x001A3263
 		static Token()
 		{
 			Api.LoadLibraryManually("viveport_api");

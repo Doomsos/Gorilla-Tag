@@ -6,19 +6,19 @@ namespace TagEffects
 	[Serializable]
 	public class TagEffectsCombo : IEquatable<TagEffectsCombo>
 	{
-		// Token: 0x060062F9 RID: 25337 RVA: 0x001FE944 File Offset: 0x001FCB44
+		// Token: 0x060062F9 RID: 25337 RVA: 0x001FE924 File Offset: 0x001FCB24
 		bool IEquatable<TagEffectsCombo>.Equals(TagEffectsCombo other)
 		{
 			return (other.inputA == this.inputA && other.inputB == this.inputB) || (other.inputA == this.inputB && other.inputB == this.inputA);
 		}
 
-		// Token: 0x060062FA RID: 25338 RVA: 0x001FE99F File Offset: 0x001FCB9F
+		// Token: 0x060062FA RID: 25338 RVA: 0x001FE97F File Offset: 0x001FCB7F
 		public override bool Equals(object obj)
 		{
 			return this.Equals((TagEffectsCombo)obj);
 		}
 
-		// Token: 0x060062FB RID: 25339 RVA: 0x001FE9AD File Offset: 0x001FCBAD
+		// Token: 0x060062FB RID: 25339 RVA: 0x001FE98D File Offset: 0x001FCB8D
 		public override int GetHashCode()
 		{
 			return this.inputA.GetHashCode() * this.inputB.GetHashCode();

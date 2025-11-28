@@ -9,8 +9,8 @@ namespace Fusion.CodeGen
 	internal class UnityLinkedListSurrogate@ElementReaderWriterSingle : UnityLinkedListSurrogate<float, ElementReaderWriterSingle>
 	{
 		// Token: 0x17000ACA RID: 2762
-		// (get) Token: 0x06007331 RID: 29489 RVA: 0x0025AC4D File Offset: 0x00258E4D
-		// (set) Token: 0x06007332 RID: 29490 RVA: 0x0025AC55 File Offset: 0x00258E55
+		// (get) Token: 0x06007331 RID: 29489 RVA: 0x0025AC2D File Offset: 0x00258E2D
+		// (set) Token: 0x06007332 RID: 29490 RVA: 0x0025AC35 File Offset: 0x00258E35
 		[WeaverGenerated]
 		public override float[] DataProperty
 		{
@@ -26,7 +26,7 @@ namespace Fusion.CodeGen
 			}
 		}
 
-		// Token: 0x06007333 RID: 29491 RVA: 0x0025AC5E File Offset: 0x00258E5E
+		// Token: 0x06007333 RID: 29491 RVA: 0x0025AC3E File Offset: 0x00258E3E
 		[WeaverGenerated]
 		public UnityLinkedListSurrogate@ElementReaderWriterSingle()
 		{

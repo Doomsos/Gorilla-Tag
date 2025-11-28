@@ -13,7 +13,7 @@ namespace GorillaNetworking
 	public class CreditsView : MonoBehaviour
 	{
 		// Token: 0x170008D4 RID: 2260
-		// (get) Token: 0x06005F28 RID: 24360 RVA: 0x001E94D9 File Offset: 0x001E76D9
+		// (get) Token: 0x06005F28 RID: 24360 RVA: 0x001E94B9 File Offset: 0x001E76B9
 		private int TotalPages
 		{
 			get
@@ -22,7 +22,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005F29 RID: 24361 RVA: 0x001E94F4 File Offset: 0x001E76F4
+		// Token: 0x06005F29 RID: 24361 RVA: 0x001E94D4 File Offset: 0x001E76D4
 		private void Start()
 		{
 			CreditsSection[] array = new CreditsSection[3];
@@ -86,19 +86,19 @@ namespace GorillaNetworking
 			}, false);
 		}
 
-		// Token: 0x06005F2A RID: 24362 RVA: 0x001E9702 File Offset: 0x001E7902
+		// Token: 0x06005F2A RID: 24362 RVA: 0x001E96E2 File Offset: 0x001E78E2
 		private int PagesPerSection(CreditsSection section)
 		{
 			return (int)Math.Ceiling((double)section.Entries.Count / (double)this.pageSize);
 		}
 
-		// Token: 0x06005F2B RID: 24363 RVA: 0x001E971E File Offset: 0x001E791E
+		// Token: 0x06005F2B RID: 24363 RVA: 0x001E96FE File Offset: 0x001E78FE
 		private IEnumerable<string> PageOfSection(CreditsSection section, int page)
 		{
 			return Enumerable.Take<string>(Enumerable.Skip<string>(section.Entries, this.pageSize * page), this.pageSize);
 		}
 
-		// Token: 0x06005F2C RID: 24364 RVA: 0x001E9740 File Offset: 0x001E7940
+		// Token: 0x06005F2C RID: 24364 RVA: 0x001E9720 File Offset: 0x001E7920
 		[return: TupleElementNames(new string[]
 		{
 			"creditsSection",
@@ -120,7 +120,7 @@ namespace GorillaNetworking
 			return new ValueTuple<CreditsSection, int>(Enumerable.First<CreditsSection>(this.creditsSections), 0);
 		}
 
-		// Token: 0x06005F2D RID: 24365 RVA: 0x001E979C File Offset: 0x001E799C
+		// Token: 0x06005F2D RID: 24365 RVA: 0x001E977C File Offset: 0x001E797C
 		public void ProcessButtonPress(GorillaKeyboardBindings buttonPressed)
 		{
 			if (buttonPressed == GorillaKeyboardBindings.enter)
@@ -130,13 +130,13 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005F2E RID: 24366 RVA: 0x001E97C4 File Offset: 0x001E79C4
+		// Token: 0x06005F2E RID: 24366 RVA: 0x001E97A4 File Offset: 0x001E79A4
 		public string GetScreenText()
 		{
 			return this.GetPage(this.currentPage);
 		}
 
-		// Token: 0x06005F2F RID: 24367 RVA: 0x001E97D4 File Offset: 0x001E79D4
+		// Token: 0x06005F2F RID: 24367 RVA: 0x001E97B4 File Offset: 0x001E79B4
 		private string GetPage(int page)
 		{
 			ValueTuple<CreditsSection, int> pageEntries = this.GetPageEntries(page);

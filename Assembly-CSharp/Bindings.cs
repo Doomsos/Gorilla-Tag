@@ -24,13 +24,13 @@ using UnityEngine;
 [BurstCompile]
 public static class Bindings
 {
-	// Token: 0x060045D2 RID: 17874 RVA: 0x0017263C File Offset: 0x0017083C
+	// Token: 0x060045D2 RID: 17874 RVA: 0x0017261C File Offset: 0x0017081C
 	public unsafe static void GameObjectBuilder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.LuauGameObject>("GameObject").AddField("position", "Position").AddField("rotation", "Rotation").AddField("scale", "Scale").AddStaticFunction("findGameObject", new lua_CFunction(Bindings.GameObjectFunctions.FindGameObject)).AddFunction("setCollision", new lua_CFunction(Bindings.GameObjectFunctions.SetCollision)).AddFunction("setVisibility", new lua_CFunction(Bindings.GameObjectFunctions.SetVisibility)).AddFunction("setActive", new lua_CFunction(Bindings.GameObjectFunctions.SetActive)).AddFunction("setText", new lua_CFunction(Bindings.GameObjectFunctions.SetText)).AddFunction("onTouched", new lua_CFunction(Bindings.GameObjectFunctions.OnTouched)).AddFunction("setVelocity", new lua_CFunction(Bindings.GameObjectFunctions.SetVelocity)).AddFunction("getVelocity", new lua_CFunction(Bindings.GameObjectFunctions.GetVelocity)).AddFunction("setColor", new lua_CFunction(Bindings.GameObjectFunctions.SetColor)).AddFunction("findChild", new lua_CFunction(Bindings.GameObjectFunctions.FindChildGameObject)).AddFunction("clone", new lua_CFunction(Bindings.GameObjectFunctions.CloneGameObject)).AddFunction("destroy", new lua_CFunction(Bindings.GameObjectFunctions.DestroyGameObject)).AddFunction("findComponent", new lua_CFunction(Bindings.GameObjectFunctions.FindComponent)).AddFunction("equals", new lua_CFunction(Bindings.GameObjectFunctions.Equals)).Build(L, true));
 	}
 
-	// Token: 0x060045D3 RID: 17875 RVA: 0x001727C8 File Offset: 0x001709C8
+	// Token: 0x060045D3 RID: 17875 RVA: 0x001727A8 File Offset: 0x001709A8
 	public unsafe static void GorillaLocomotionSettingsBuilder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.GorillaLocomotionSettings>("PSettings").AddField("velocityLimit", null).AddField("slideVelocityLimit", null).AddField("maxJumpSpeed", null).AddField("jumpMultiplier", null).Build(L, false));
@@ -42,7 +42,7 @@ public static class Bindings
 		Luau.lua_setglobal(L, "PlayerSettings");
 	}
 
-	// Token: 0x060045D4 RID: 17876 RVA: 0x0017287C File Offset: 0x00170A7C
+	// Token: 0x060045D4 RID: 17876 RVA: 0x0017285C File Offset: 0x00170A5C
 	public unsafe static void PlayerInputBuilder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.PlayerInput>("PInput").AddField("leftXAxis", null).AddField("rightXAxis", null).AddField("leftYAxis", null).AddField("rightYAxis", null).AddField("leftTrigger", null).AddField("rightTrigger", null).AddField("leftGrip", null).AddField("rightGrip", null).AddField("leftPrimaryButton", null).AddField("rightPrimaryButton", null).AddField("leftSecondaryButton", null).AddField("rightSecondaryButton", null).Build(L, false));
@@ -51,7 +51,7 @@ public static class Bindings
 		Luau.lua_setglobal(L, "PlayerInput");
 	}
 
-	// Token: 0x060045D5 RID: 17877 RVA: 0x00172944 File Offset: 0x00170B44
+	// Token: 0x060045D5 RID: 17877 RVA: 0x00172924 File Offset: 0x00170B24
 	public unsafe static void UpdateInputs()
 	{
 		if (Bindings.LocalPlayerInput != null)
@@ -73,37 +73,37 @@ public static class Bindings
 		}
 	}
 
-	// Token: 0x060045D6 RID: 17878 RVA: 0x00172A2C File Offset: 0x00170C2C
+	// Token: 0x060045D6 RID: 17878 RVA: 0x00172A0C File Offset: 0x00170C0C
 	public unsafe static void Vec3Builder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Vector3>("Vec3").AddField("x", null).AddField("y", null).AddField("z", null).AddStaticFunction("new", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.New))).AddFunction("__add", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Add))).AddFunction("__sub", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Sub))).AddFunction("__mul", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Mul))).AddFunction("__div", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Div))).AddFunction("__unm", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Unm))).AddFunction("__eq", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Eq))).AddFunction("__tostring", new lua_CFunction(Bindings.Vec3Functions.ToString)).AddFunction("toString", new lua_CFunction(Bindings.Vec3Functions.ToString)).AddFunction("dot", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Dot))).AddFunction("cross", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Cross))).AddFunction("projectOnTo", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Project))).AddFunction("length", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Length))).AddFunction("normalize", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Normalize))).AddFunction("getSafeNormal", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.SafeNormal))).AddStaticFunction("rotate", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Rotate))).AddFunction("rotate", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Rotate))).AddStaticFunction("distance", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Distance))).AddFunction("distance", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Distance))).AddStaticFunction("lerp", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Lerp))).AddFunction("lerp", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.Lerp))).AddProperty("zeroVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.ZeroVector))).AddProperty("oneVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.OneVector))).AddStaticFunction("nearlyEqual", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.Vec3Functions.NearlyEqual))).Build(L, true));
 	}
 
-	// Token: 0x060045D7 RID: 17879 RVA: 0x00172CF4 File Offset: 0x00170EF4
+	// Token: 0x060045D7 RID: 17879 RVA: 0x00172CD4 File Offset: 0x00170ED4
 	public unsafe static void QuatBuilder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Quaternion>("Quat").AddField("x", null).AddField("y", null).AddField("z", null).AddField("w", null).AddStaticFunction("new", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.New))).AddFunction("__mul", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.Mul))).AddFunction("__eq", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.Eq))).AddFunction("__tostring", new lua_CFunction(Bindings.QuatFunctions.ToString)).AddFunction("toString", new lua_CFunction(Bindings.QuatFunctions.ToString)).AddStaticFunction("fromEuler", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.FromEuler))).AddStaticFunction("fromDirection", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.FromDirection))).AddFunction("getUpVector", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.GetUpVector))).AddFunction("euler", BurstCompiler.CompileFunctionPointer<lua_CFunction>(new lua_CFunction(Bindings.QuatFunctions.Euler))).Build(L, true));
 	}
 
-	// Token: 0x060045D8 RID: 17880 RVA: 0x00172E34 File Offset: 0x00171034
+	// Token: 0x060045D8 RID: 17880 RVA: 0x00172E14 File Offset: 0x00171014
 	public unsafe static void PlayerBuilder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.LuauPlayer>("Player").AddField("playerID", "PlayerID").AddField("playerName", "PlayerName").AddField("playerMaterial", "PlayerMaterial").AddField("isMasterClient", "IsMasterClient").AddField("bodyPosition", "BodyPosition").AddField("velocity", "Velocity").AddField("isPCVR", "IsPCVR").AddField("leftHandPosition", "LeftHandPosition").AddField("rightHandPosition", "RightHandPosition").AddField("headRotation", "HeadRotation").AddField("leftHandRotation", "LeftHandRotation").AddField("rightHandRotation", "RightHandRotation").AddField("isInVStump", "IsInVStump").AddField("isEntityAuthority", "IsEntityAuthority").AddStaticFunction("getPlayerByID", new lua_CFunction(Bindings.PlayerFunctions.GetPlayerByID)).Build(L, true));
 	}
 
-	// Token: 0x060045D9 RID: 17881 RVA: 0x00172F48 File Offset: 0x00171148
+	// Token: 0x060045D9 RID: 17881 RVA: 0x00172F28 File Offset: 0x00171128
 	public unsafe static void AIAgentBuilder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.LuauAIAgent>("AIAgent").AddField("entityID", "EntityID").AddField("agentPosition", "EntityPosition").AddField("agentRotation", "EntityRotation").AddFunction("__tostring", new lua_CFunction(Bindings.AIAgentFunctions.ToString)).AddFunction("toString", new lua_CFunction(Bindings.AIAgentFunctions.ToString)).AddFunction("setDestination", new lua_CFunction(Bindings.AIAgentFunctions.SetDestination)).AddFunction("destroyAgent", new lua_CFunction(Bindings.AIAgentFunctions.DestroyEntity)).AddFunction("playAgentAnimation", new lua_CFunction(Bindings.AIAgentFunctions.PlayAgentAnimation)).AddFunction("getTargetPlayer", new lua_CFunction(Bindings.AIAgentFunctions.GetTarget)).AddFunction("setTargetPlayer", new lua_CFunction(Bindings.AIAgentFunctions.SetTarget)).AddStaticFunction("findPrePlacedAIAgentByID", new lua_CFunction(Bindings.AIAgentFunctions.FindPrePlacedAIAgentByID)).AddStaticFunction("getAIAgentByEntityID", new lua_CFunction(Bindings.AIAgentFunctions.GetAIAgentByEntityID)).AddStaticFunction("spawnAIAgent", new lua_CFunction(Bindings.AIAgentFunctions.SpawnAIAgent)).Build(L, true));
 	}
 
-	// Token: 0x060045DA RID: 17882 RVA: 0x0017307C File Offset: 0x0017127C
+	// Token: 0x060045DA RID: 17882 RVA: 0x0017305C File Offset: 0x0017125C
 	public unsafe static void GrabbableEntityBuilder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.LuauGrabbableEntity>("GrabbableEntity").AddField("entityID", "EntityID").AddField("entityPosition", "EntityPosition").AddField("entityRotation", "EntityRotation").AddFunction("__tostring", new lua_CFunction(Bindings.GrabbableEntityFunctions.ToString)).AddFunction("toString", new lua_CFunction(Bindings.GrabbableEntityFunctions.ToString)).AddFunction("destroyGrabbable", new lua_CFunction(Bindings.GrabbableEntityFunctions.DestroyEntity)).AddStaticFunction("findPrePlacedGrabbableEntityByID", new lua_CFunction(Bindings.GrabbableEntityFunctions.FindPrePlacedGrabbableEntityByID)).AddStaticFunction("getGrabbableEntityByEntityID", new lua_CFunction(Bindings.GrabbableEntityFunctions.GetGrabbableEntityByEntityID)).AddStaticFunction("getHoldingActorNumberByEntityID", new lua_CFunction(Bindings.GrabbableEntityFunctions.GetHoldingActorNumberByEntityID)).AddStaticFunction("getHoldingActorNumberByLuauID", new lua_CFunction(Bindings.GrabbableEntityFunctions.GetHoldingActorNumberByLuauID)).AddStaticFunction("spawnGrabbableEntity", new lua_CFunction(Bindings.GrabbableEntityFunctions.SpawnGrabbableEntity)).Build(L, true));
 	}
 
-	// Token: 0x060045DB RID: 17883 RVA: 0x00173184 File Offset: 0x00171384
+	// Token: 0x060045DB RID: 17883 RVA: 0x00173164 File Offset: 0x00171364
 	[MonoPInvokeCallback(typeof(lua_CFunction))]
 	public unsafe static int LuaStartVibration(lua_State* L)
 	{
@@ -114,7 +114,7 @@ public static class Bindings
 		return 0;
 	}
 
-	// Token: 0x060045DC RID: 17884 RVA: 0x001731BC File Offset: 0x001713BC
+	// Token: 0x060045DC RID: 17884 RVA: 0x0017319C File Offset: 0x0017139C
 	[MonoPInvokeCallback(typeof(lua_CFunction))]
 	public unsafe static int LuaPlaySound(lua_State* L)
 	{
@@ -129,7 +129,7 @@ public static class Bindings
 		return 0;
 	}
 
-	// Token: 0x060045DD RID: 17885 RVA: 0x0017321C File Offset: 0x0017141C
+	// Token: 0x060045DD RID: 17885 RVA: 0x001731FC File Offset: 0x001713FC
 	public unsafe static void RoomStateBuilder(lua_State* L)
 	{
 		Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.LuauRoomState>("RState").AddField("isQuest", "IsQuest").AddField("fps", "FPS").AddField("isPrivate", "IsPrivate").AddField("code", "RoomCode").Build(L, false));
@@ -141,7 +141,7 @@ public static class Bindings
 		Luau.lua_setglobal(L, "Room");
 	}
 
-	// Token: 0x060045DE RID: 17886 RVA: 0x001732D7 File Offset: 0x001714D7
+	// Token: 0x060045DE RID: 17886 RVA: 0x001732B7 File Offset: 0x001714B7
 	public unsafe static void UpdateRoomState()
 	{
 		Bindings.RoomState->FPS = 1f / Time.smoothDeltaTime;
@@ -186,7 +186,7 @@ public static class Bindings
 	// Token: 0x02000AF3 RID: 2803
 	public static class LuaEmit
 	{
-		// Token: 0x060045E0 RID: 17888 RVA: 0x00173358 File Offset: 0x00171558
+		// Token: 0x060045E0 RID: 17888 RVA: 0x00173338 File Offset: 0x00171538
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Emit(lua_State* L)
 		{
@@ -342,7 +342,7 @@ public static class Bindings
 	[BurstCompile]
 	public static class GameObjectFunctions
 	{
-		// Token: 0x060045E2 RID: 17890 RVA: 0x00173664 File Offset: 0x00171864
+		// Token: 0x060045E2 RID: 17890 RVA: 0x00173644 File Offset: 0x00171844
 		public static int GetDepth(GameObject gameObject)
 		{
 			int num = 0;
@@ -355,14 +355,14 @@ public static class Bindings
 			return num;
 		}
 
-		// Token: 0x060045E3 RID: 17891 RVA: 0x00173696 File Offset: 0x00171896
+		// Token: 0x060045E3 RID: 17891 RVA: 0x00173676 File Offset: 0x00171876
 		public static void UpdateDepthList()
 		{
 			Bindings.LuauGameObjectDepthList.Clear();
 			Bindings.LuauGameObjectDepthList = Enumerable.ToList<KeyValuePair<GameObject, IntPtr>>(Enumerable.OrderByDescending<KeyValuePair<GameObject, IntPtr>, int>(Bindings.LuauGameObjectList, (KeyValuePair<GameObject, IntPtr> kv) => Bindings.GameObjectFunctions.GetDepth(kv.Key)));
 		}
 
-		// Token: 0x060045E4 RID: 17892 RVA: 0x001736D8 File Offset: 0x001718D8
+		// Token: 0x060045E4 RID: 17892 RVA: 0x001736B8 File Offset: 0x001718B8
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int New(lua_State* L)
 		{
@@ -376,7 +376,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060045E5 RID: 17893 RVA: 0x0017374C File Offset: 0x0017194C
+		// Token: 0x060045E5 RID: 17893 RVA: 0x0017372C File Offset: 0x0017192C
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FindGameObject(lua_State* L)
 		{
@@ -425,7 +425,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060045E6 RID: 17894 RVA: 0x001738BC File Offset: 0x00171ABC
+		// Token: 0x060045E6 RID: 17894 RVA: 0x0017389C File Offset: 0x00171A9C
 		public static Transform FindChild(Transform parent, string name)
 		{
 			foreach (object obj in parent)
@@ -444,7 +444,7 @@ public static class Bindings
 			return null;
 		}
 
-		// Token: 0x060045E7 RID: 17895 RVA: 0x00173938 File Offset: 0x00171B38
+		// Token: 0x060045E7 RID: 17895 RVA: 0x00173918 File Offset: 0x00171B18
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FindChildGameObject(lua_State* L)
 		{
@@ -496,7 +496,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045E8 RID: 17896 RVA: 0x00173AD4 File Offset: 0x00171CD4
+		// Token: 0x060045E8 RID: 17896 RVA: 0x00173AB4 File Offset: 0x00171CB4
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FindComponent(lua_State* L)
 		{
@@ -557,7 +557,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045E9 RID: 17897 RVA: 0x00173C1C File Offset: 0x00171E1C
+		// Token: 0x060045E9 RID: 17897 RVA: 0x00173BFC File Offset: 0x00171DFC
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int CloneGameObject(lua_State* L)
 		{
@@ -596,7 +596,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045EA RID: 17898 RVA: 0x00173D70 File Offset: 0x00171F70
+		// Token: 0x060045EA RID: 17898 RVA: 0x00173D50 File Offset: 0x00171F50
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DestroyGameObject(lua_State* L)
 		{
@@ -634,7 +634,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045EB RID: 17899 RVA: 0x00173E9C File Offset: 0x0017209C
+		// Token: 0x060045EB RID: 17899 RVA: 0x00173E7C File Offset: 0x0017207C
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetCollision(lua_State* L)
 		{
@@ -651,7 +651,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045EC RID: 17900 RVA: 0x00173EF0 File Offset: 0x001720F0
+		// Token: 0x060045EC RID: 17900 RVA: 0x00173ED0 File Offset: 0x001720D0
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetVisibility(lua_State* L)
 		{
@@ -668,7 +668,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045ED RID: 17901 RVA: 0x00173F44 File Offset: 0x00172144
+		// Token: 0x060045ED RID: 17901 RVA: 0x00173F24 File Offset: 0x00172124
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetActive(lua_State* L)
 		{
@@ -681,7 +681,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045EE RID: 17902 RVA: 0x00173F88 File Offset: 0x00172188
+		// Token: 0x060045EE RID: 17902 RVA: 0x00173F68 File Offset: 0x00172168
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetText(lua_State* L)
 		{
@@ -707,7 +707,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045EF RID: 17903 RVA: 0x00173FFC File Offset: 0x001721FC
+		// Token: 0x060045EF RID: 17903 RVA: 0x00173FDC File Offset: 0x001721DC
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int OnTouched(lua_State* L)
 		{
@@ -735,7 +735,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045F0 RID: 17904 RVA: 0x00174090 File Offset: 0x00172290
+		// Token: 0x060045F0 RID: 17904 RVA: 0x00174070 File Offset: 0x00172270
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetVelocity(lua_State* L)
 		{
@@ -753,7 +753,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045F1 RID: 17905 RVA: 0x001740E8 File Offset: 0x001722E8
+		// Token: 0x060045F1 RID: 17905 RVA: 0x001740C8 File Offset: 0x001722C8
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetVelocity(lua_State* L)
 		{
@@ -779,7 +779,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060045F2 RID: 17906 RVA: 0x00174160 File Offset: 0x00172360
+		// Token: 0x060045F2 RID: 17906 RVA: 0x00174140 File Offset: 0x00172340
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetColor(lua_State* L)
 		{
@@ -811,7 +811,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045F3 RID: 17907 RVA: 0x0017423C File Offset: 0x0017243C
+		// Token: 0x060045F3 RID: 17907 RVA: 0x0017421C File Offset: 0x0017241C
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Equals(lua_State* L)
 		{
@@ -887,7 +887,7 @@ public static class Bindings
 	[BurstCompile]
 	public static class PlayerFunctions
 	{
-		// Token: 0x060045F7 RID: 17911 RVA: 0x001742CC File Offset: 0x001724CC
+		// Token: 0x060045F7 RID: 17911 RVA: 0x001742AC File Offset: 0x001724AC
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetPlayerByID(lua_State* L)
 		{
@@ -923,7 +923,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045F8 RID: 17912 RVA: 0x00174404 File Offset: 0x00172604
+		// Token: 0x060045F8 RID: 17912 RVA: 0x001743E4 File Offset: 0x001725E4
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static void UpdatePlayer(lua_State* L, VRRig p, Bindings.LuauPlayer* data)
 		{
@@ -982,7 +982,7 @@ public static class Bindings
 	[BurstCompile]
 	public static class GrabbableEntityFunctions
 	{
-		// Token: 0x060045F9 RID: 17913 RVA: 0x001744FC File Offset: 0x001726FC
+		// Token: 0x060045F9 RID: 17913 RVA: 0x001744DC File Offset: 0x001726DC
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int ToString(lua_State* L)
 		{
@@ -1004,7 +1004,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060045FA RID: 17914 RVA: 0x00174580 File Offset: 0x00172780
+		// Token: 0x060045FA RID: 17914 RVA: 0x00174560 File Offset: 0x00172760
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetGrabbableEntityByEntityID(lua_State* L)
 		{
@@ -1040,7 +1040,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045FB RID: 17915 RVA: 0x00174658 File Offset: 0x00172858
+		// Token: 0x060045FB RID: 17915 RVA: 0x00174638 File Offset: 0x00172838
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetHoldingActorNumberByLuauID(lua_State* L)
 		{
@@ -1071,7 +1071,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045FC RID: 17916 RVA: 0x00174730 File Offset: 0x00172930
+		// Token: 0x060045FC RID: 17916 RVA: 0x00174710 File Offset: 0x00172910
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetHoldingActorNumberByEntityID(lua_State* L)
 		{
@@ -1098,7 +1098,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060045FD RID: 17917 RVA: 0x001747D8 File Offset: 0x001729D8
+		// Token: 0x060045FD RID: 17917 RVA: 0x001747B8 File Offset: 0x001729B8
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FindPrePlacedGrabbableEntityByID(lua_State* L)
 		{
@@ -1139,7 +1139,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x060045FE RID: 17918 RVA: 0x00174920 File Offset: 0x00172B20
+		// Token: 0x060045FE RID: 17918 RVA: 0x00174900 File Offset: 0x00172B00
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SpawnGrabbableEntity(lua_State* L)
 		{
@@ -1194,7 +1194,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060045FF RID: 17919 RVA: 0x00174B0A File Offset: 0x00172D0A
+		// Token: 0x060045FF RID: 17919 RVA: 0x00174AEA File Offset: 0x00172CEA
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static void UpdateEntity(GameEntity entity, Bindings.LuauGrabbableEntity* luaAgent)
 		{
@@ -1203,7 +1203,7 @@ public static class Bindings
 			luaAgent->EntityRotation = entity.transform.rotation;
 		}
 
-		// Token: 0x06004600 RID: 17920 RVA: 0x00174B3C File Offset: 0x00172D3C
+		// Token: 0x06004600 RID: 17920 RVA: 0x00174B1C File Offset: 0x00172D1C
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DestroyEntity(lua_State* L)
 		{
@@ -1225,7 +1225,7 @@ public static class Bindings
 	[BurstCompile]
 	public static class AIAgentFunctions
 	{
-		// Token: 0x06004601 RID: 17921 RVA: 0x00174B7C File Offset: 0x00172D7C
+		// Token: 0x06004601 RID: 17921 RVA: 0x00174B5C File Offset: 0x00172D5C
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int ToString(lua_State* L)
 		{
@@ -1247,7 +1247,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004602 RID: 17922 RVA: 0x00174C00 File Offset: 0x00172E00
+		// Token: 0x06004602 RID: 17922 RVA: 0x00174BE0 File Offset: 0x00172DE0
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetAIAgentByEntityID(lua_State* L)
 		{
@@ -1286,7 +1286,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x06004603 RID: 17923 RVA: 0x00174CEC File Offset: 0x00172EEC
+		// Token: 0x06004603 RID: 17923 RVA: 0x00174CCC File Offset: 0x00172ECC
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FindPrePlacedAIAgentByID(lua_State* L)
 		{
@@ -1322,7 +1322,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x06004604 RID: 17924 RVA: 0x00174E04 File Offset: 0x00173004
+		// Token: 0x06004604 RID: 17924 RVA: 0x00174DE4 File Offset: 0x00172FE4
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SpawnAIAgent(lua_State* L)
 		{
@@ -1373,7 +1373,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x06004605 RID: 17925 RVA: 0x00174FCC File Offset: 0x001731CC
+		// Token: 0x06004605 RID: 17925 RVA: 0x00174FAC File Offset: 0x001731AC
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetDestination(lua_State* L)
 		{
@@ -1391,7 +1391,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x06004606 RID: 17926 RVA: 0x00175030 File Offset: 0x00173230
+		// Token: 0x06004606 RID: 17926 RVA: 0x00175010 File Offset: 0x00173210
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int PlayAgentAnimation(lua_State* L)
 		{
@@ -1412,7 +1412,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x06004607 RID: 17927 RVA: 0x00175094 File Offset: 0x00173294
+		// Token: 0x06004607 RID: 17927 RVA: 0x00175074 File Offset: 0x00173274
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetTarget(lua_State* L)
 		{
@@ -1449,7 +1449,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x06004608 RID: 17928 RVA: 0x00175124 File Offset: 0x00173324
+		// Token: 0x06004608 RID: 17928 RVA: 0x00175104 File Offset: 0x00173304
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetTarget(lua_State* L)
 		{
@@ -1471,7 +1471,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004609 RID: 17929 RVA: 0x001751D5 File Offset: 0x001733D5
+		// Token: 0x06004609 RID: 17929 RVA: 0x001751B5 File Offset: 0x001733B5
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static void UpdateEntity(GameEntity entity, Bindings.LuauAIAgent* luaAgent)
 		{
@@ -1480,7 +1480,7 @@ public static class Bindings
 			luaAgent->EntityRotation = entity.transform.rotation;
 		}
 
-		// Token: 0x0600460A RID: 17930 RVA: 0x00175208 File Offset: 0x00173408
+		// Token: 0x0600460A RID: 17930 RVA: 0x001751E8 File Offset: 0x001733E8
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DestroyEntity(lua_State* L)
 		{
@@ -1502,7 +1502,7 @@ public static class Bindings
 	[BurstCompile]
 	public static class Vec3Functions
 	{
-		// Token: 0x0600460B RID: 17931 RVA: 0x00175245 File Offset: 0x00173445
+		// Token: 0x0600460B RID: 17931 RVA: 0x00175225 File Offset: 0x00173425
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int New(lua_State* L)
@@ -1510,7 +1510,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.New_0000460B$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600460C RID: 17932 RVA: 0x0017524D File Offset: 0x0017344D
+		// Token: 0x0600460C RID: 17932 RVA: 0x0017522D File Offset: 0x0017342D
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Add(lua_State* L)
@@ -1518,7 +1518,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Add_0000460C$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600460D RID: 17933 RVA: 0x00175255 File Offset: 0x00173455
+		// Token: 0x0600460D RID: 17933 RVA: 0x00175235 File Offset: 0x00173435
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Sub(lua_State* L)
@@ -1526,7 +1526,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Sub_0000460D$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600460E RID: 17934 RVA: 0x0017525D File Offset: 0x0017345D
+		// Token: 0x0600460E RID: 17934 RVA: 0x0017523D File Offset: 0x0017343D
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Mul(lua_State* L)
@@ -1534,7 +1534,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Mul_0000460E$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600460F RID: 17935 RVA: 0x00175265 File Offset: 0x00173465
+		// Token: 0x0600460F RID: 17935 RVA: 0x00175245 File Offset: 0x00173445
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Div(lua_State* L)
@@ -1542,7 +1542,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Div_0000460F$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004610 RID: 17936 RVA: 0x0017526D File Offset: 0x0017346D
+		// Token: 0x06004610 RID: 17936 RVA: 0x0017524D File Offset: 0x0017344D
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Unm(lua_State* L)
@@ -1550,7 +1550,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Unm_00004610$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004611 RID: 17937 RVA: 0x00175275 File Offset: 0x00173475
+		// Token: 0x06004611 RID: 17937 RVA: 0x00175255 File Offset: 0x00173455
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Eq(lua_State* L)
@@ -1558,7 +1558,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Eq_00004611$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004612 RID: 17938 RVA: 0x00175280 File Offset: 0x00173480
+		// Token: 0x06004612 RID: 17938 RVA: 0x00175260 File Offset: 0x00173460
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int ToString(lua_State* L)
 		{
@@ -1567,7 +1567,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004613 RID: 17939 RVA: 0x001752B9 File Offset: 0x001734B9
+		// Token: 0x06004613 RID: 17939 RVA: 0x00175299 File Offset: 0x00173499
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Dot(lua_State* L)
@@ -1575,7 +1575,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Dot_00004613$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004614 RID: 17940 RVA: 0x001752C1 File Offset: 0x001734C1
+		// Token: 0x06004614 RID: 17940 RVA: 0x001752A1 File Offset: 0x001734A1
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Cross(lua_State* L)
@@ -1583,7 +1583,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Cross_00004614$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004615 RID: 17941 RVA: 0x001752C9 File Offset: 0x001734C9
+		// Token: 0x06004615 RID: 17941 RVA: 0x001752A9 File Offset: 0x001734A9
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Project(lua_State* L)
@@ -1591,7 +1591,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Project_00004615$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004616 RID: 17942 RVA: 0x001752D1 File Offset: 0x001734D1
+		// Token: 0x06004616 RID: 17942 RVA: 0x001752B1 File Offset: 0x001734B1
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Length(lua_State* L)
@@ -1599,7 +1599,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Length_00004616$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004617 RID: 17943 RVA: 0x001752D9 File Offset: 0x001734D9
+		// Token: 0x06004617 RID: 17943 RVA: 0x001752B9 File Offset: 0x001734B9
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Normalize(lua_State* L)
@@ -1607,7 +1607,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Normalize_00004617$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004618 RID: 17944 RVA: 0x001752E1 File Offset: 0x001734E1
+		// Token: 0x06004618 RID: 17944 RVA: 0x001752C1 File Offset: 0x001734C1
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SafeNormal(lua_State* L)
@@ -1615,7 +1615,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.SafeNormal_00004618$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x06004619 RID: 17945 RVA: 0x001752E9 File Offset: 0x001734E9
+		// Token: 0x06004619 RID: 17945 RVA: 0x001752C9 File Offset: 0x001734C9
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Distance(lua_State* L)
@@ -1623,7 +1623,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Distance_00004619$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600461A RID: 17946 RVA: 0x001752F1 File Offset: 0x001734F1
+		// Token: 0x0600461A RID: 17946 RVA: 0x001752D1 File Offset: 0x001734D1
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Lerp(lua_State* L)
@@ -1631,7 +1631,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Lerp_0000461A$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600461B RID: 17947 RVA: 0x001752F9 File Offset: 0x001734F9
+		// Token: 0x0600461B RID: 17947 RVA: 0x001752D9 File Offset: 0x001734D9
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Rotate(lua_State* L)
@@ -1639,7 +1639,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.Rotate_0000461B$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600461C RID: 17948 RVA: 0x00175301 File Offset: 0x00173501
+		// Token: 0x0600461C RID: 17948 RVA: 0x001752E1 File Offset: 0x001734E1
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int ZeroVector(lua_State* L)
@@ -1647,7 +1647,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.ZeroVector_0000461C$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600461D RID: 17949 RVA: 0x00175309 File Offset: 0x00173509
+		// Token: 0x0600461D RID: 17949 RVA: 0x001752E9 File Offset: 0x001734E9
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int OneVector(lua_State* L)
@@ -1655,7 +1655,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.OneVector_0000461D$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600461E RID: 17950 RVA: 0x00175311 File Offset: 0x00173511
+		// Token: 0x0600461E RID: 17950 RVA: 0x001752F1 File Offset: 0x001734F1
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int NearlyEqual(lua_State* L)
@@ -1663,7 +1663,7 @@ public static class Bindings
 			return Bindings.Vec3Functions.NearlyEqual_0000461E$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x0600461F RID: 17951 RVA: 0x0017531C File Offset: 0x0017351C
+		// Token: 0x0600461F RID: 17951 RVA: 0x001752FC File Offset: 0x001734FC
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int New$BurstManaged(lua_State* L)
@@ -1675,7 +1675,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004620 RID: 17952 RVA: 0x00175380 File Offset: 0x00173580
+		// Token: 0x06004620 RID: 17952 RVA: 0x00175360 File Offset: 0x00173560
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Add$BurstManaged(lua_State* L)
@@ -1686,7 +1686,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004621 RID: 17953 RVA: 0x001753D8 File Offset: 0x001735D8
+		// Token: 0x06004621 RID: 17953 RVA: 0x001753B8 File Offset: 0x001735B8
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Sub$BurstManaged(lua_State* L)
@@ -1697,7 +1697,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004622 RID: 17954 RVA: 0x00175430 File Offset: 0x00173630
+		// Token: 0x06004622 RID: 17954 RVA: 0x00175410 File Offset: 0x00173610
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Mul$BurstManaged(lua_State* L)
@@ -1708,7 +1708,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004623 RID: 17955 RVA: 0x0017547C File Offset: 0x0017367C
+		// Token: 0x06004623 RID: 17955 RVA: 0x0017545C File Offset: 0x0017365C
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Div$BurstManaged(lua_State* L)
@@ -1719,7 +1719,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004624 RID: 17956 RVA: 0x001754C8 File Offset: 0x001736C8
+		// Token: 0x06004624 RID: 17956 RVA: 0x001754A8 File Offset: 0x001736A8
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Unm$BurstManaged(lua_State* L)
@@ -1729,7 +1729,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004625 RID: 17957 RVA: 0x00175508 File Offset: 0x00173708
+		// Token: 0x06004625 RID: 17957 RVA: 0x001754E8 File Offset: 0x001736E8
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Eq$BurstManaged(lua_State* L)
@@ -1741,7 +1741,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004626 RID: 17958 RVA: 0x00175558 File Offset: 0x00173758
+		// Token: 0x06004626 RID: 17958 RVA: 0x00175538 File Offset: 0x00173738
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Dot$BurstManaged(lua_State* L)
@@ -1753,7 +1753,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004627 RID: 17959 RVA: 0x001755A4 File Offset: 0x001737A4
+		// Token: 0x06004627 RID: 17959 RVA: 0x00175584 File Offset: 0x00173784
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Cross$BurstManaged(lua_State* L)
@@ -1764,7 +1764,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004628 RID: 17960 RVA: 0x001755FC File Offset: 0x001737FC
+		// Token: 0x06004628 RID: 17960 RVA: 0x001755DC File Offset: 0x001737DC
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Project$BurstManaged(lua_State* L)
@@ -1775,7 +1775,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004629 RID: 17961 RVA: 0x00175654 File Offset: 0x00173854
+		// Token: 0x06004629 RID: 17961 RVA: 0x00175634 File Offset: 0x00173834
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Length$BurstManaged(lua_State* L)
@@ -1785,7 +1785,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x0600462A RID: 17962 RVA: 0x00175686 File Offset: 0x00173886
+		// Token: 0x0600462A RID: 17962 RVA: 0x00175666 File Offset: 0x00173866
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Normalize$BurstManaged(lua_State* L)
@@ -1794,7 +1794,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x0600462B RID: 17963 RVA: 0x001756A0 File Offset: 0x001738A0
+		// Token: 0x0600462B RID: 17963 RVA: 0x00175680 File Offset: 0x00173880
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int SafeNormal$BurstManaged(lua_State* L)
@@ -1804,7 +1804,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x0600462C RID: 17964 RVA: 0x001756E4 File Offset: 0x001738E4
+		// Token: 0x0600462C RID: 17964 RVA: 0x001756C4 File Offset: 0x001738C4
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Distance$BurstManaged(lua_State* L)
@@ -1815,7 +1815,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x0600462D RID: 17965 RVA: 0x00175730 File Offset: 0x00173930
+		// Token: 0x0600462D RID: 17965 RVA: 0x00175710 File Offset: 0x00173910
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Lerp$BurstManaged(lua_State* L)
@@ -1827,7 +1827,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x0600462E RID: 17966 RVA: 0x00175794 File Offset: 0x00173994
+		// Token: 0x0600462E RID: 17966 RVA: 0x00175774 File Offset: 0x00173974
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Rotate$BurstManaged(lua_State* L)
@@ -1838,7 +1838,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x0600462F RID: 17967 RVA: 0x001757EC File Offset: 0x001739EC
+		// Token: 0x0600462F RID: 17967 RVA: 0x001757CC File Offset: 0x001739CC
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int ZeroVector$BurstManaged(lua_State* L)
@@ -1850,7 +1850,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004630 RID: 17968 RVA: 0x0017581F File Offset: 0x00173A1F
+		// Token: 0x06004630 RID: 17968 RVA: 0x001757FF File Offset: 0x001739FF
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int OneVector$BurstManaged(lua_State* L)
@@ -1862,7 +1862,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x06004631 RID: 17969 RVA: 0x00175854 File Offset: 0x00173A54
+		// Token: 0x06004631 RID: 17969 RVA: 0x00175834 File Offset: 0x00173A34
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int NearlyEqual$BurstManaged(lua_State* L)
@@ -1891,7 +1891,7 @@ public static class Bindings
 		// Token: 0x02000B00 RID: 2816
 		internal static class New_0000460B$BurstDirectCall
 		{
-			// Token: 0x06004636 RID: 17974 RVA: 0x001758FC File Offset: 0x00173AFC
+			// Token: 0x06004636 RID: 17974 RVA: 0x001758DC File Offset: 0x00173ADC
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -1902,7 +1902,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.New_0000460B$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004637 RID: 17975 RVA: 0x0017593C File Offset: 0x00173B3C
+			// Token: 0x06004637 RID: 17975 RVA: 0x0017591C File Offset: 0x00173B1C
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -1910,7 +1910,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004638 RID: 17976 RVA: 0x00175954 File Offset: 0x00173B54
+			// Token: 0x06004638 RID: 17976 RVA: 0x00175934 File Offset: 0x00173B34
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -1936,7 +1936,7 @@ public static class Bindings
 		// Token: 0x02000B02 RID: 2818
 		internal static class Add_0000460C$BurstDirectCall
 		{
-			// Token: 0x0600463D RID: 17981 RVA: 0x00175988 File Offset: 0x00173B88
+			// Token: 0x0600463D RID: 17981 RVA: 0x00175968 File Offset: 0x00173B68
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -1947,7 +1947,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Add_0000460C$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x0600463E RID: 17982 RVA: 0x001759C8 File Offset: 0x00173BC8
+			// Token: 0x0600463E RID: 17982 RVA: 0x001759A8 File Offset: 0x00173BA8
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -1955,7 +1955,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x0600463F RID: 17983 RVA: 0x001759E0 File Offset: 0x00173BE0
+			// Token: 0x0600463F RID: 17983 RVA: 0x001759C0 File Offset: 0x00173BC0
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -1981,7 +1981,7 @@ public static class Bindings
 		// Token: 0x02000B04 RID: 2820
 		internal static class Sub_0000460D$BurstDirectCall
 		{
-			// Token: 0x06004644 RID: 17988 RVA: 0x00175A14 File Offset: 0x00173C14
+			// Token: 0x06004644 RID: 17988 RVA: 0x001759F4 File Offset: 0x00173BF4
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -1992,7 +1992,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Sub_0000460D$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004645 RID: 17989 RVA: 0x00175A54 File Offset: 0x00173C54
+			// Token: 0x06004645 RID: 17989 RVA: 0x00175A34 File Offset: 0x00173C34
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2000,7 +2000,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004646 RID: 17990 RVA: 0x00175A6C File Offset: 0x00173C6C
+			// Token: 0x06004646 RID: 17990 RVA: 0x00175A4C File Offset: 0x00173C4C
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2026,7 +2026,7 @@ public static class Bindings
 		// Token: 0x02000B06 RID: 2822
 		internal static class Mul_0000460E$BurstDirectCall
 		{
-			// Token: 0x0600464B RID: 17995 RVA: 0x00175AA0 File Offset: 0x00173CA0
+			// Token: 0x0600464B RID: 17995 RVA: 0x00175A80 File Offset: 0x00173C80
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2037,7 +2037,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Mul_0000460E$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x0600464C RID: 17996 RVA: 0x00175AE0 File Offset: 0x00173CE0
+			// Token: 0x0600464C RID: 17996 RVA: 0x00175AC0 File Offset: 0x00173CC0
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2045,7 +2045,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x0600464D RID: 17997 RVA: 0x00175AF8 File Offset: 0x00173CF8
+			// Token: 0x0600464D RID: 17997 RVA: 0x00175AD8 File Offset: 0x00173CD8
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2071,7 +2071,7 @@ public static class Bindings
 		// Token: 0x02000B08 RID: 2824
 		internal static class Div_0000460F$BurstDirectCall
 		{
-			// Token: 0x06004652 RID: 18002 RVA: 0x00175B2C File Offset: 0x00173D2C
+			// Token: 0x06004652 RID: 18002 RVA: 0x00175B0C File Offset: 0x00173D0C
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2082,7 +2082,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Div_0000460F$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004653 RID: 18003 RVA: 0x00175B6C File Offset: 0x00173D6C
+			// Token: 0x06004653 RID: 18003 RVA: 0x00175B4C File Offset: 0x00173D4C
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2090,7 +2090,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004654 RID: 18004 RVA: 0x00175B84 File Offset: 0x00173D84
+			// Token: 0x06004654 RID: 18004 RVA: 0x00175B64 File Offset: 0x00173D64
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2116,7 +2116,7 @@ public static class Bindings
 		// Token: 0x02000B0A RID: 2826
 		internal static class Unm_00004610$BurstDirectCall
 		{
-			// Token: 0x06004659 RID: 18009 RVA: 0x00175BB8 File Offset: 0x00173DB8
+			// Token: 0x06004659 RID: 18009 RVA: 0x00175B98 File Offset: 0x00173D98
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2127,7 +2127,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Unm_00004610$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x0600465A RID: 18010 RVA: 0x00175BF8 File Offset: 0x00173DF8
+			// Token: 0x0600465A RID: 18010 RVA: 0x00175BD8 File Offset: 0x00173DD8
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2135,7 +2135,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x0600465B RID: 18011 RVA: 0x00175C10 File Offset: 0x00173E10
+			// Token: 0x0600465B RID: 18011 RVA: 0x00175BF0 File Offset: 0x00173DF0
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2161,7 +2161,7 @@ public static class Bindings
 		// Token: 0x02000B0C RID: 2828
 		internal static class Eq_00004611$BurstDirectCall
 		{
-			// Token: 0x06004660 RID: 18016 RVA: 0x00175C44 File Offset: 0x00173E44
+			// Token: 0x06004660 RID: 18016 RVA: 0x00175C24 File Offset: 0x00173E24
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2172,7 +2172,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Eq_00004611$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004661 RID: 18017 RVA: 0x00175C84 File Offset: 0x00173E84
+			// Token: 0x06004661 RID: 18017 RVA: 0x00175C64 File Offset: 0x00173E64
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2180,7 +2180,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004662 RID: 18018 RVA: 0x00175C9C File Offset: 0x00173E9C
+			// Token: 0x06004662 RID: 18018 RVA: 0x00175C7C File Offset: 0x00173E7C
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2206,7 +2206,7 @@ public static class Bindings
 		// Token: 0x02000B0E RID: 2830
 		internal static class Dot_00004613$BurstDirectCall
 		{
-			// Token: 0x06004667 RID: 18023 RVA: 0x00175CD0 File Offset: 0x00173ED0
+			// Token: 0x06004667 RID: 18023 RVA: 0x00175CB0 File Offset: 0x00173EB0
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2217,7 +2217,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Dot_00004613$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004668 RID: 18024 RVA: 0x00175D10 File Offset: 0x00173F10
+			// Token: 0x06004668 RID: 18024 RVA: 0x00175CF0 File Offset: 0x00173EF0
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2225,7 +2225,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004669 RID: 18025 RVA: 0x00175D28 File Offset: 0x00173F28
+			// Token: 0x06004669 RID: 18025 RVA: 0x00175D08 File Offset: 0x00173F08
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2251,7 +2251,7 @@ public static class Bindings
 		// Token: 0x02000B10 RID: 2832
 		internal static class Cross_00004614$BurstDirectCall
 		{
-			// Token: 0x0600466E RID: 18030 RVA: 0x00175D5C File Offset: 0x00173F5C
+			// Token: 0x0600466E RID: 18030 RVA: 0x00175D3C File Offset: 0x00173F3C
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2262,7 +2262,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Cross_00004614$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x0600466F RID: 18031 RVA: 0x00175D9C File Offset: 0x00173F9C
+			// Token: 0x0600466F RID: 18031 RVA: 0x00175D7C File Offset: 0x00173F7C
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2270,7 +2270,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004670 RID: 18032 RVA: 0x00175DB4 File Offset: 0x00173FB4
+			// Token: 0x06004670 RID: 18032 RVA: 0x00175D94 File Offset: 0x00173F94
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2296,7 +2296,7 @@ public static class Bindings
 		// Token: 0x02000B12 RID: 2834
 		internal static class Project_00004615$BurstDirectCall
 		{
-			// Token: 0x06004675 RID: 18037 RVA: 0x00175DE8 File Offset: 0x00173FE8
+			// Token: 0x06004675 RID: 18037 RVA: 0x00175DC8 File Offset: 0x00173FC8
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2307,7 +2307,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Project_00004615$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004676 RID: 18038 RVA: 0x00175E28 File Offset: 0x00174028
+			// Token: 0x06004676 RID: 18038 RVA: 0x00175E08 File Offset: 0x00174008
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2315,7 +2315,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004677 RID: 18039 RVA: 0x00175E40 File Offset: 0x00174040
+			// Token: 0x06004677 RID: 18039 RVA: 0x00175E20 File Offset: 0x00174020
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2341,7 +2341,7 @@ public static class Bindings
 		// Token: 0x02000B14 RID: 2836
 		internal static class Length_00004616$BurstDirectCall
 		{
-			// Token: 0x0600467C RID: 18044 RVA: 0x00175E74 File Offset: 0x00174074
+			// Token: 0x0600467C RID: 18044 RVA: 0x00175E54 File Offset: 0x00174054
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2352,7 +2352,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Length_00004616$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x0600467D RID: 18045 RVA: 0x00175EB4 File Offset: 0x001740B4
+			// Token: 0x0600467D RID: 18045 RVA: 0x00175E94 File Offset: 0x00174094
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2360,7 +2360,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x0600467E RID: 18046 RVA: 0x00175ECC File Offset: 0x001740CC
+			// Token: 0x0600467E RID: 18046 RVA: 0x00175EAC File Offset: 0x001740AC
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2386,7 +2386,7 @@ public static class Bindings
 		// Token: 0x02000B16 RID: 2838
 		internal static class Normalize_00004617$BurstDirectCall
 		{
-			// Token: 0x06004683 RID: 18051 RVA: 0x00175F00 File Offset: 0x00174100
+			// Token: 0x06004683 RID: 18051 RVA: 0x00175EE0 File Offset: 0x001740E0
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2397,7 +2397,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Normalize_00004617$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004684 RID: 18052 RVA: 0x00175F40 File Offset: 0x00174140
+			// Token: 0x06004684 RID: 18052 RVA: 0x00175F20 File Offset: 0x00174120
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2405,7 +2405,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004685 RID: 18053 RVA: 0x00175F58 File Offset: 0x00174158
+			// Token: 0x06004685 RID: 18053 RVA: 0x00175F38 File Offset: 0x00174138
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2431,7 +2431,7 @@ public static class Bindings
 		// Token: 0x02000B18 RID: 2840
 		internal static class SafeNormal_00004618$BurstDirectCall
 		{
-			// Token: 0x0600468A RID: 18058 RVA: 0x00175F8C File Offset: 0x0017418C
+			// Token: 0x0600468A RID: 18058 RVA: 0x00175F6C File Offset: 0x0017416C
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2442,7 +2442,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.SafeNormal_00004618$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x0600468B RID: 18059 RVA: 0x00175FCC File Offset: 0x001741CC
+			// Token: 0x0600468B RID: 18059 RVA: 0x00175FAC File Offset: 0x001741AC
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2450,7 +2450,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x0600468C RID: 18060 RVA: 0x00175FE4 File Offset: 0x001741E4
+			// Token: 0x0600468C RID: 18060 RVA: 0x00175FC4 File Offset: 0x001741C4
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2476,7 +2476,7 @@ public static class Bindings
 		// Token: 0x02000B1A RID: 2842
 		internal static class Distance_00004619$BurstDirectCall
 		{
-			// Token: 0x06004691 RID: 18065 RVA: 0x00176018 File Offset: 0x00174218
+			// Token: 0x06004691 RID: 18065 RVA: 0x00175FF8 File Offset: 0x001741F8
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2487,7 +2487,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Distance_00004619$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004692 RID: 18066 RVA: 0x00176058 File Offset: 0x00174258
+			// Token: 0x06004692 RID: 18066 RVA: 0x00176038 File Offset: 0x00174238
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2495,7 +2495,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x06004693 RID: 18067 RVA: 0x00176070 File Offset: 0x00174270
+			// Token: 0x06004693 RID: 18067 RVA: 0x00176050 File Offset: 0x00174250
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2521,7 +2521,7 @@ public static class Bindings
 		// Token: 0x02000B1C RID: 2844
 		internal static class Lerp_0000461A$BurstDirectCall
 		{
-			// Token: 0x06004698 RID: 18072 RVA: 0x001760A4 File Offset: 0x001742A4
+			// Token: 0x06004698 RID: 18072 RVA: 0x00176084 File Offset: 0x00174284
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2532,7 +2532,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Lerp_0000461A$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x06004699 RID: 18073 RVA: 0x001760E4 File Offset: 0x001742E4
+			// Token: 0x06004699 RID: 18073 RVA: 0x001760C4 File Offset: 0x001742C4
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2540,7 +2540,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x0600469A RID: 18074 RVA: 0x001760FC File Offset: 0x001742FC
+			// Token: 0x0600469A RID: 18074 RVA: 0x001760DC File Offset: 0x001742DC
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2566,7 +2566,7 @@ public static class Bindings
 		// Token: 0x02000B1E RID: 2846
 		internal static class Rotate_0000461B$BurstDirectCall
 		{
-			// Token: 0x0600469F RID: 18079 RVA: 0x00176130 File Offset: 0x00174330
+			// Token: 0x0600469F RID: 18079 RVA: 0x00176110 File Offset: 0x00174310
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2577,7 +2577,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.Rotate_0000461B$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046A0 RID: 18080 RVA: 0x00176170 File Offset: 0x00174370
+			// Token: 0x060046A0 RID: 18080 RVA: 0x00176150 File Offset: 0x00174350
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2585,7 +2585,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046A1 RID: 18081 RVA: 0x00176188 File Offset: 0x00174388
+			// Token: 0x060046A1 RID: 18081 RVA: 0x00176168 File Offset: 0x00174368
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2611,7 +2611,7 @@ public static class Bindings
 		// Token: 0x02000B20 RID: 2848
 		internal static class ZeroVector_0000461C$BurstDirectCall
 		{
-			// Token: 0x060046A6 RID: 18086 RVA: 0x001761BC File Offset: 0x001743BC
+			// Token: 0x060046A6 RID: 18086 RVA: 0x0017619C File Offset: 0x0017439C
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2622,7 +2622,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.ZeroVector_0000461C$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046A7 RID: 18087 RVA: 0x001761FC File Offset: 0x001743FC
+			// Token: 0x060046A7 RID: 18087 RVA: 0x001761DC File Offset: 0x001743DC
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2630,7 +2630,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046A8 RID: 18088 RVA: 0x00176214 File Offset: 0x00174414
+			// Token: 0x060046A8 RID: 18088 RVA: 0x001761F4 File Offset: 0x001743F4
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2656,7 +2656,7 @@ public static class Bindings
 		// Token: 0x02000B22 RID: 2850
 		internal static class OneVector_0000461D$BurstDirectCall
 		{
-			// Token: 0x060046AD RID: 18093 RVA: 0x00176248 File Offset: 0x00174448
+			// Token: 0x060046AD RID: 18093 RVA: 0x00176228 File Offset: 0x00174428
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2667,7 +2667,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.OneVector_0000461D$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046AE RID: 18094 RVA: 0x00176288 File Offset: 0x00174488
+			// Token: 0x060046AE RID: 18094 RVA: 0x00176268 File Offset: 0x00174468
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2675,7 +2675,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046AF RID: 18095 RVA: 0x001762A0 File Offset: 0x001744A0
+			// Token: 0x060046AF RID: 18095 RVA: 0x00176280 File Offset: 0x00174480
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2701,7 +2701,7 @@ public static class Bindings
 		// Token: 0x02000B24 RID: 2852
 		internal static class NearlyEqual_0000461E$BurstDirectCall
 		{
-			// Token: 0x060046B4 RID: 18100 RVA: 0x001762D4 File Offset: 0x001744D4
+			// Token: 0x060046B4 RID: 18100 RVA: 0x001762B4 File Offset: 0x001744B4
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2712,7 +2712,7 @@ public static class Bindings
 				A_0 = Bindings.Vec3Functions.NearlyEqual_0000461E$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046B5 RID: 18101 RVA: 0x00176314 File Offset: 0x00174514
+			// Token: 0x060046B5 RID: 18101 RVA: 0x001762F4 File Offset: 0x001744F4
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2720,7 +2720,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046B6 RID: 18102 RVA: 0x0017632C File Offset: 0x0017452C
+			// Token: 0x060046B6 RID: 18102 RVA: 0x0017630C File Offset: 0x0017450C
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2743,7 +2743,7 @@ public static class Bindings
 	[BurstCompile]
 	public static class QuatFunctions
 	{
-		// Token: 0x060046B7 RID: 18103 RVA: 0x0017635D File Offset: 0x0017455D
+		// Token: 0x060046B7 RID: 18103 RVA: 0x0017633D File Offset: 0x0017453D
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int New(lua_State* L)
@@ -2751,7 +2751,7 @@ public static class Bindings
 			return Bindings.QuatFunctions.New_0000461F$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x060046B8 RID: 18104 RVA: 0x00176365 File Offset: 0x00174565
+		// Token: 0x060046B8 RID: 18104 RVA: 0x00176345 File Offset: 0x00174545
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Mul(lua_State* L)
@@ -2759,7 +2759,7 @@ public static class Bindings
 			return Bindings.QuatFunctions.Mul_00004620$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x060046B9 RID: 18105 RVA: 0x0017636D File Offset: 0x0017456D
+		// Token: 0x060046B9 RID: 18105 RVA: 0x0017634D File Offset: 0x0017454D
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Eq(lua_State* L)
@@ -2767,7 +2767,7 @@ public static class Bindings
 			return Bindings.QuatFunctions.Eq_00004621$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x060046BA RID: 18106 RVA: 0x00176378 File Offset: 0x00174578
+		// Token: 0x060046BA RID: 18106 RVA: 0x00176358 File Offset: 0x00174558
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int ToString(lua_State* L)
 		{
@@ -2776,7 +2776,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060046BB RID: 18107 RVA: 0x001763B1 File Offset: 0x001745B1
+		// Token: 0x060046BB RID: 18107 RVA: 0x00176391 File Offset: 0x00174591
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FromEuler(lua_State* L)
@@ -2784,7 +2784,7 @@ public static class Bindings
 			return Bindings.QuatFunctions.FromEuler_00004623$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x060046BC RID: 18108 RVA: 0x001763B9 File Offset: 0x001745B9
+		// Token: 0x060046BC RID: 18108 RVA: 0x00176399 File Offset: 0x00174599
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int FromDirection(lua_State* L)
@@ -2792,7 +2792,7 @@ public static class Bindings
 			return Bindings.QuatFunctions.FromDirection_00004624$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x060046BD RID: 18109 RVA: 0x001763C1 File Offset: 0x001745C1
+		// Token: 0x060046BD RID: 18109 RVA: 0x001763A1 File Offset: 0x001745A1
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int GetUpVector(lua_State* L)
@@ -2800,7 +2800,7 @@ public static class Bindings
 			return Bindings.QuatFunctions.GetUpVector_00004625$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x060046BE RID: 18110 RVA: 0x001763C9 File Offset: 0x001745C9
+		// Token: 0x060046BE RID: 18110 RVA: 0x001763A9 File Offset: 0x001745A9
 		[BurstCompile]
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int Euler(lua_State* L)
@@ -2808,7 +2808,7 @@ public static class Bindings
 			return Bindings.QuatFunctions.Euler_00004626$BurstDirectCall.Invoke(L);
 		}
 
-		// Token: 0x060046BF RID: 18111 RVA: 0x001763D4 File Offset: 0x001745D4
+		// Token: 0x060046BF RID: 18111 RVA: 0x001763B4 File Offset: 0x001745B4
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int New$BurstManaged(lua_State* L)
@@ -2821,7 +2821,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060046C0 RID: 18112 RVA: 0x00176450 File Offset: 0x00174650
+		// Token: 0x060046C0 RID: 18112 RVA: 0x00176430 File Offset: 0x00174630
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Mul$BurstManaged(lua_State* L)
@@ -2832,7 +2832,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060046C1 RID: 18113 RVA: 0x001764A8 File Offset: 0x001746A8
+		// Token: 0x060046C1 RID: 18113 RVA: 0x00176488 File Offset: 0x00174688
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Eq$BurstManaged(lua_State* L)
@@ -2844,7 +2844,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060046C2 RID: 18114 RVA: 0x001764F8 File Offset: 0x001746F8
+		// Token: 0x060046C2 RID: 18114 RVA: 0x001764D8 File Offset: 0x001746D8
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int FromEuler$BurstManaged(lua_State* L)
@@ -2856,7 +2856,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060046C3 RID: 18115 RVA: 0x0017655C File Offset: 0x0017475C
+		// Token: 0x060046C3 RID: 18115 RVA: 0x0017653C File Offset: 0x0017473C
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int FromDirection$BurstManaged(lua_State* L)
@@ -2866,7 +2866,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060046C4 RID: 18116 RVA: 0x00176598 File Offset: 0x00174798
+		// Token: 0x060046C4 RID: 18116 RVA: 0x00176578 File Offset: 0x00174778
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int GetUpVector$BurstManaged(lua_State* L)
@@ -2876,7 +2876,7 @@ public static class Bindings
 			return 1;
 		}
 
-		// Token: 0x060046C5 RID: 18117 RVA: 0x001765E0 File Offset: 0x001747E0
+		// Token: 0x060046C5 RID: 18117 RVA: 0x001765C0 File Offset: 0x001747C0
 		[BurstCompile]
 		[MethodImpl(256)]
 		internal unsafe static int Euler$BurstManaged(lua_State* L)
@@ -2894,7 +2894,7 @@ public static class Bindings
 		// Token: 0x02000B27 RID: 2855
 		internal static class New_0000461F$BurstDirectCall
 		{
-			// Token: 0x060046CA RID: 18122 RVA: 0x00176624 File Offset: 0x00174824
+			// Token: 0x060046CA RID: 18122 RVA: 0x00176604 File Offset: 0x00174804
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2905,7 +2905,7 @@ public static class Bindings
 				A_0 = Bindings.QuatFunctions.New_0000461F$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046CB RID: 18123 RVA: 0x00176664 File Offset: 0x00174864
+			// Token: 0x060046CB RID: 18123 RVA: 0x00176644 File Offset: 0x00174844
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2913,7 +2913,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046CC RID: 18124 RVA: 0x0017667C File Offset: 0x0017487C
+			// Token: 0x060046CC RID: 18124 RVA: 0x0017665C File Offset: 0x0017485C
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2939,7 +2939,7 @@ public static class Bindings
 		// Token: 0x02000B29 RID: 2857
 		internal static class Mul_00004620$BurstDirectCall
 		{
-			// Token: 0x060046D1 RID: 18129 RVA: 0x001766B0 File Offset: 0x001748B0
+			// Token: 0x060046D1 RID: 18129 RVA: 0x00176690 File Offset: 0x00174890
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2950,7 +2950,7 @@ public static class Bindings
 				A_0 = Bindings.QuatFunctions.Mul_00004620$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046D2 RID: 18130 RVA: 0x001766F0 File Offset: 0x001748F0
+			// Token: 0x060046D2 RID: 18130 RVA: 0x001766D0 File Offset: 0x001748D0
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -2958,7 +2958,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046D3 RID: 18131 RVA: 0x00176708 File Offset: 0x00174908
+			// Token: 0x060046D3 RID: 18131 RVA: 0x001766E8 File Offset: 0x001748E8
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -2984,7 +2984,7 @@ public static class Bindings
 		// Token: 0x02000B2B RID: 2859
 		internal static class Eq_00004621$BurstDirectCall
 		{
-			// Token: 0x060046D8 RID: 18136 RVA: 0x0017673C File Offset: 0x0017493C
+			// Token: 0x060046D8 RID: 18136 RVA: 0x0017671C File Offset: 0x0017491C
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -2995,7 +2995,7 @@ public static class Bindings
 				A_0 = Bindings.QuatFunctions.Eq_00004621$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046D9 RID: 18137 RVA: 0x0017677C File Offset: 0x0017497C
+			// Token: 0x060046D9 RID: 18137 RVA: 0x0017675C File Offset: 0x0017495C
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -3003,7 +3003,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046DA RID: 18138 RVA: 0x00176794 File Offset: 0x00174994
+			// Token: 0x060046DA RID: 18138 RVA: 0x00176774 File Offset: 0x00174974
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -3029,7 +3029,7 @@ public static class Bindings
 		// Token: 0x02000B2D RID: 2861
 		internal static class FromEuler_00004623$BurstDirectCall
 		{
-			// Token: 0x060046DF RID: 18143 RVA: 0x001767C8 File Offset: 0x001749C8
+			// Token: 0x060046DF RID: 18143 RVA: 0x001767A8 File Offset: 0x001749A8
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -3040,7 +3040,7 @@ public static class Bindings
 				A_0 = Bindings.QuatFunctions.FromEuler_00004623$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046E0 RID: 18144 RVA: 0x00176808 File Offset: 0x00174A08
+			// Token: 0x060046E0 RID: 18144 RVA: 0x001767E8 File Offset: 0x001749E8
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -3048,7 +3048,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046E1 RID: 18145 RVA: 0x00176820 File Offset: 0x00174A20
+			// Token: 0x060046E1 RID: 18145 RVA: 0x00176800 File Offset: 0x00174A00
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -3074,7 +3074,7 @@ public static class Bindings
 		// Token: 0x02000B2F RID: 2863
 		internal static class FromDirection_00004624$BurstDirectCall
 		{
-			// Token: 0x060046E6 RID: 18150 RVA: 0x00176854 File Offset: 0x00174A54
+			// Token: 0x060046E6 RID: 18150 RVA: 0x00176834 File Offset: 0x00174A34
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -3085,7 +3085,7 @@ public static class Bindings
 				A_0 = Bindings.QuatFunctions.FromDirection_00004624$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046E7 RID: 18151 RVA: 0x00176894 File Offset: 0x00174A94
+			// Token: 0x060046E7 RID: 18151 RVA: 0x00176874 File Offset: 0x00174A74
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -3093,7 +3093,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046E8 RID: 18152 RVA: 0x001768AC File Offset: 0x00174AAC
+			// Token: 0x060046E8 RID: 18152 RVA: 0x0017688C File Offset: 0x00174A8C
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -3119,7 +3119,7 @@ public static class Bindings
 		// Token: 0x02000B31 RID: 2865
 		internal static class GetUpVector_00004625$BurstDirectCall
 		{
-			// Token: 0x060046ED RID: 18157 RVA: 0x001768E0 File Offset: 0x00174AE0
+			// Token: 0x060046ED RID: 18157 RVA: 0x001768C0 File Offset: 0x00174AC0
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -3130,7 +3130,7 @@ public static class Bindings
 				A_0 = Bindings.QuatFunctions.GetUpVector_00004625$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046EE RID: 18158 RVA: 0x00176920 File Offset: 0x00174B20
+			// Token: 0x060046EE RID: 18158 RVA: 0x00176900 File Offset: 0x00174B00
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -3138,7 +3138,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046EF RID: 18159 RVA: 0x00176938 File Offset: 0x00174B38
+			// Token: 0x060046EF RID: 18159 RVA: 0x00176918 File Offset: 0x00174B18
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -3164,7 +3164,7 @@ public static class Bindings
 		// Token: 0x02000B33 RID: 2867
 		internal static class Euler_00004626$BurstDirectCall
 		{
-			// Token: 0x060046F4 RID: 18164 RVA: 0x0017696C File Offset: 0x00174B6C
+			// Token: 0x060046F4 RID: 18164 RVA: 0x0017694C File Offset: 0x00174B4C
 			[BurstDiscard]
 			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
 			{
@@ -3175,7 +3175,7 @@ public static class Bindings
 				A_0 = Bindings.QuatFunctions.Euler_00004626$BurstDirectCall.Pointer;
 			}
 
-			// Token: 0x060046F5 RID: 18165 RVA: 0x001769AC File Offset: 0x00174BAC
+			// Token: 0x060046F5 RID: 18165 RVA: 0x0017698C File Offset: 0x00174B8C
 			private static IntPtr GetFunctionPointer()
 			{
 				IntPtr result = (IntPtr)0;
@@ -3183,7 +3183,7 @@ public static class Bindings
 				return result;
 			}
 
-			// Token: 0x060046F6 RID: 18166 RVA: 0x001769C4 File Offset: 0x00174BC4
+			// Token: 0x060046F6 RID: 18166 RVA: 0x001769A4 File Offset: 0x00174BA4
 			public unsafe static int Invoke(lua_State* L)
 			{
 				if (BurstCompiler.IsEnabled)
@@ -3266,7 +3266,7 @@ public static class Bindings
 	// Token: 0x02000B36 RID: 2870
 	public static class JSON
 	{
-		// Token: 0x060046F7 RID: 18167 RVA: 0x001769F8 File Offset: 0x00174BF8
+		// Token: 0x060046F7 RID: 18167 RVA: 0x001769D8 File Offset: 0x00174BD8
 		public unsafe static Dictionary<object, object> ConsumeTable(lua_State* L, int tableIndex)
 		{
 			Dictionary<object, object> dictionary = new Dictionary<object, object>();
@@ -3358,7 +3358,7 @@ public static class Bindings
 			return dictionary;
 		}
 
-		// Token: 0x060046F8 RID: 18168 RVA: 0x00176C40 File Offset: 0x00174E40
+		// Token: 0x060046F8 RID: 18168 RVA: 0x00176C20 File Offset: 0x00174E20
 		private static int ParseStrictInt(string input)
 		{
 			if (string.IsNullOrEmpty(input) || input != input.Trim())
@@ -3373,14 +3373,14 @@ public static class Bindings
 			return result;
 		}
 
-		// Token: 0x060046F9 RID: 18169 RVA: 0x00176C74 File Offset: 0x00174E74
+		// Token: 0x060046F9 RID: 18169 RVA: 0x00176C54 File Offset: 0x00174E54
 		private static bool CompareKeys(JObject obj, HashSet<string> set)
 		{
 			HashSet<string> equals = new HashSet<string>(Enumerable.Select<JProperty, string>(obj.Properties(), (JProperty p) => p.Name));
 			return set.SetEquals(equals);
 		}
 
-		// Token: 0x060046FA RID: 18170 RVA: 0x00176CB8 File Offset: 0x00174EB8
+		// Token: 0x060046FA RID: 18170 RVA: 0x00176C98 File Offset: 0x00174E98
 		public unsafe static bool PushTable(lua_State* L, JObject table)
 		{
 			Luau.lua_createtable(L, 0, 0);
@@ -3472,7 +3472,7 @@ public static class Bindings
 			return true;
 		}
 
-		// Token: 0x060046FB RID: 18171 RVA: 0x00176F68 File Offset: 0x00175168
+		// Token: 0x060046FB RID: 18171 RVA: 0x00176F48 File Offset: 0x00175148
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DataSave(lua_State* L)
 		{
@@ -3504,7 +3504,7 @@ public static class Bindings
 			return result;
 		}
 
-		// Token: 0x060046FC RID: 18172 RVA: 0x00177034 File Offset: 0x00175234
+		// Token: 0x060046FC RID: 18172 RVA: 0x00177014 File Offset: 0x00175214
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int DataLoad(lua_State* L)
 		{
@@ -3573,7 +3573,7 @@ public static class Bindings
 	// Token: 0x02000B39 RID: 2873
 	public static class PlayerUtils
 	{
-		// Token: 0x06004701 RID: 18177 RVA: 0x0017714C File Offset: 0x0017534C
+		// Token: 0x06004701 RID: 18177 RVA: 0x0017712C File Offset: 0x0017532C
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int TeleportPlayer(lua_State* L)
 		{
@@ -3590,7 +3590,7 @@ public static class Bindings
 			return 0;
 		}
 
-		// Token: 0x06004702 RID: 18178 RVA: 0x001771CC File Offset: 0x001753CC
+		// Token: 0x06004702 RID: 18178 RVA: 0x001771AC File Offset: 0x001753AC
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int SetVelocity(lua_State* L)
 		{
@@ -3606,7 +3606,7 @@ public static class Bindings
 	// Token: 0x02000B3A RID: 2874
 	public static class RayCastUtils
 	{
-		// Token: 0x06004703 RID: 18179 RVA: 0x001771FC File Offset: 0x001753FC
+		// Token: 0x06004703 RID: 18179 RVA: 0x001771DC File Offset: 0x001753DC
 		[MonoPInvokeCallback(typeof(lua_CFunction))]
 		public unsafe static int RayCast(lua_State* L)
 		{
@@ -3675,7 +3675,7 @@ public static class Bindings
 	// Token: 0x02000B3B RID: 2875
 	public static class Components
 	{
-		// Token: 0x06004704 RID: 18180 RVA: 0x0017739F File Offset: 0x0017559F
+		// Token: 0x06004704 RID: 18180 RVA: 0x0017737F File Offset: 0x0017557F
 		public unsafe static void Build(lua_State* L)
 		{
 			Bindings.Components.LuauParticleSystemBindings.Builder(L);
@@ -3690,13 +3690,13 @@ public static class Bindings
 		// Token: 0x02000B3C RID: 2876
 		public static class LuauParticleSystemBindings
 		{
-			// Token: 0x06004706 RID: 18182 RVA: 0x001773C8 File Offset: 0x001755C8
+			// Token: 0x06004706 RID: 18182 RVA: 0x001773A8 File Offset: 0x001755A8
 			public unsafe static void Builder(lua_State* L)
 			{
 				Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.Components.LuauParticleSystemBindings.LuauParticleSystem>("ParticleSystem").AddFunction("play", new lua_CFunction(Bindings.Components.LuauParticleSystemBindings.play)).AddFunction("stop", new lua_CFunction(Bindings.Components.LuauParticleSystemBindings.stop)).AddFunction("clear", new lua_CFunction(Bindings.Components.LuauParticleSystemBindings.clear)).Build(L, false));
 			}
 
-			// Token: 0x06004707 RID: 18183 RVA: 0x00177434 File Offset: 0x00175634
+			// Token: 0x06004707 RID: 18183 RVA: 0x00177414 File Offset: 0x00175614
 			public unsafe static ParticleSystem GetParticleSystem(lua_State* L)
 			{
 				Bindings.Components.LuauParticleSystemBindings.LuauParticleSystem* ptr = Luau.lua_class_get<Bindings.Components.LuauParticleSystemBindings.LuauParticleSystem>(L, 1);
@@ -3712,7 +3712,7 @@ public static class Bindings
 				return null;
 			}
 
-			// Token: 0x06004708 RID: 18184 RVA: 0x0017746C File Offset: 0x0017566C
+			// Token: 0x06004708 RID: 18184 RVA: 0x0017744C File Offset: 0x0017564C
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int play(lua_State* L)
 			{
@@ -3724,7 +3724,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x06004709 RID: 18185 RVA: 0x00177490 File Offset: 0x00175690
+			// Token: 0x06004709 RID: 18185 RVA: 0x00177470 File Offset: 0x00175670
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int stop(lua_State* L)
 			{
@@ -3736,7 +3736,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x0600470A RID: 18186 RVA: 0x001774B4 File Offset: 0x001756B4
+			// Token: 0x0600470A RID: 18186 RVA: 0x00177494 File Offset: 0x00175694
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int clear(lua_State* L)
 			{
@@ -3759,13 +3759,13 @@ public static class Bindings
 		// Token: 0x02000B3E RID: 2878
 		public static class LuauAudioSourceBindings
 		{
-			// Token: 0x0600470B RID: 18187 RVA: 0x001774D8 File Offset: 0x001756D8
+			// Token: 0x0600470B RID: 18187 RVA: 0x001774B8 File Offset: 0x001756B8
 			public unsafe static void Builder(lua_State* L)
 			{
 				Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.Components.LuauAudioSourceBindings.LuauAudioSource>("AudioSource").AddFunction("play", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.play)).AddFunction("setVolume", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setVolume)).AddFunction("setLoop", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setLoop)).AddFunction("setPitch", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setPitch)).AddFunction("setMinDistance", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setMinDistance)).AddFunction("setMaxDistance", new lua_CFunction(Bindings.Components.LuauAudioSourceBindings.setMaxDistance)).Build(L, false));
 			}
 
-			// Token: 0x0600470C RID: 18188 RVA: 0x00177588 File Offset: 0x00175788
+			// Token: 0x0600470C RID: 18188 RVA: 0x00177568 File Offset: 0x00175768
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static AudioSource GetAudioSource(lua_State* L)
 			{
@@ -3782,7 +3782,7 @@ public static class Bindings
 				return null;
 			}
 
-			// Token: 0x0600470D RID: 18189 RVA: 0x001775C0 File Offset: 0x001757C0
+			// Token: 0x0600470D RID: 18189 RVA: 0x001775A0 File Offset: 0x001757A0
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int play(lua_State* L)
 			{
@@ -3794,7 +3794,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x0600470E RID: 18190 RVA: 0x001775E4 File Offset: 0x001757E4
+			// Token: 0x0600470E RID: 18190 RVA: 0x001775C4 File Offset: 0x001757C4
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setVolume(lua_State* L)
 			{
@@ -3807,7 +3807,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x0600470F RID: 18191 RVA: 0x00177614 File Offset: 0x00175814
+			// Token: 0x0600470F RID: 18191 RVA: 0x001775F4 File Offset: 0x001757F4
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setLoop(lua_State* L)
 			{
@@ -3820,7 +3820,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x06004710 RID: 18192 RVA: 0x00177644 File Offset: 0x00175844
+			// Token: 0x06004710 RID: 18192 RVA: 0x00177624 File Offset: 0x00175824
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setPitch(lua_State* L)
 			{
@@ -3833,7 +3833,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x06004711 RID: 18193 RVA: 0x00177674 File Offset: 0x00175874
+			// Token: 0x06004711 RID: 18193 RVA: 0x00177654 File Offset: 0x00175854
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setMinDistance(lua_State* L)
 			{
@@ -3846,7 +3846,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x06004712 RID: 18194 RVA: 0x001776A4 File Offset: 0x001758A4
+			// Token: 0x06004712 RID: 18194 RVA: 0x00177684 File Offset: 0x00175884
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setMaxDistance(lua_State* L)
 			{
@@ -3870,13 +3870,13 @@ public static class Bindings
 		// Token: 0x02000B40 RID: 2880
 		public static class LuauLightBindings
 		{
-			// Token: 0x06004713 RID: 18195 RVA: 0x001776D4 File Offset: 0x001758D4
+			// Token: 0x06004713 RID: 18195 RVA: 0x001776B4 File Offset: 0x001758B4
 			public unsafe static void Builder(lua_State* L)
 			{
 				Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.Components.LuauLightBindings.LuauLight>("Light").AddFunction("setColor", new lua_CFunction(Bindings.Components.LuauLightBindings.setColor)).AddFunction("setIntensity", new lua_CFunction(Bindings.Components.LuauLightBindings.setIntensity)).AddFunction("setRange", new lua_CFunction(Bindings.Components.LuauLightBindings.setRange)).Build(L, false));
 			}
 
-			// Token: 0x06004714 RID: 18196 RVA: 0x00177740 File Offset: 0x00175940
+			// Token: 0x06004714 RID: 18196 RVA: 0x00177720 File Offset: 0x00175920
 			public unsafe static Light GetLight(lua_State* L)
 			{
 				Bindings.Components.LuauLightBindings.LuauLight* ptr = Luau.lua_class_get<Bindings.Components.LuauLightBindings.LuauLight>(L, 1);
@@ -3892,7 +3892,7 @@ public static class Bindings
 				return null;
 			}
 
-			// Token: 0x06004715 RID: 18197 RVA: 0x00177778 File Offset: 0x00175978
+			// Token: 0x06004715 RID: 18197 RVA: 0x00177758 File Offset: 0x00175958
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setColor(lua_State* L)
 			{
@@ -3905,7 +3905,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x06004716 RID: 18198 RVA: 0x001777C0 File Offset: 0x001759C0
+			// Token: 0x06004716 RID: 18198 RVA: 0x001777A0 File Offset: 0x001759A0
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setIntensity(lua_State* L)
 			{
@@ -3918,7 +3918,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x06004717 RID: 18199 RVA: 0x001777F0 File Offset: 0x001759F0
+			// Token: 0x06004717 RID: 18199 RVA: 0x001777D0 File Offset: 0x001759D0
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setRange(lua_State* L)
 			{
@@ -3942,13 +3942,13 @@ public static class Bindings
 		// Token: 0x02000B42 RID: 2882
 		public static class LuauAnimatorBindings
 		{
-			// Token: 0x06004718 RID: 18200 RVA: 0x00177820 File Offset: 0x00175A20
+			// Token: 0x06004718 RID: 18200 RVA: 0x00177800 File Offset: 0x00175A00
 			public unsafe static void Builder(lua_State* L)
 			{
 				Enumerable.Append<object>(LuauVm.ClassBuilders, new LuauClassBuilder<Bindings.Components.LuauAnimatorBindings.LuauAnimator>("Animator").AddFunction("setSpeed", new lua_CFunction(Bindings.Components.LuauAnimatorBindings.setSpeed)).AddFunction("startPlayback", new lua_CFunction(Bindings.Components.LuauAnimatorBindings.startPlayback)).AddFunction("stopPlayback", new lua_CFunction(Bindings.Components.LuauAnimatorBindings.stopPlayback)).AddFunction("reset", new lua_CFunction(Bindings.Components.LuauAnimatorBindings.reset)).Build(L, false));
 			}
 
-			// Token: 0x06004719 RID: 18201 RVA: 0x001778A4 File Offset: 0x00175AA4
+			// Token: 0x06004719 RID: 18201 RVA: 0x00177884 File Offset: 0x00175A84
 			public unsafe static Animator GetAnimator(lua_State* L)
 			{
 				Bindings.Components.LuauAnimatorBindings.LuauAnimator* ptr = Luau.lua_class_get<Bindings.Components.LuauAnimatorBindings.LuauAnimator>(L, 1);
@@ -3964,7 +3964,7 @@ public static class Bindings
 				return null;
 			}
 
-			// Token: 0x0600471A RID: 18202 RVA: 0x001778DC File Offset: 0x00175ADC
+			// Token: 0x0600471A RID: 18202 RVA: 0x001778BC File Offset: 0x00175ABC
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int setSpeed(lua_State* L)
 			{
@@ -3977,7 +3977,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x0600471B RID: 18203 RVA: 0x0017790C File Offset: 0x00175B0C
+			// Token: 0x0600471B RID: 18203 RVA: 0x001778EC File Offset: 0x00175AEC
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int startPlayback(lua_State* L)
 			{
@@ -3989,7 +3989,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x0600471C RID: 18204 RVA: 0x00177930 File Offset: 0x00175B30
+			// Token: 0x0600471C RID: 18204 RVA: 0x00177910 File Offset: 0x00175B10
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int stopPlayback(lua_State* L)
 			{
@@ -4001,7 +4001,7 @@ public static class Bindings
 				return 0;
 			}
 
-			// Token: 0x0600471D RID: 18205 RVA: 0x00177954 File Offset: 0x00175B54
+			// Token: 0x0600471D RID: 18205 RVA: 0x00177934 File Offset: 0x00175B34
 			[MonoPInvokeCallback(typeof(lua_CFunction))]
 			public unsafe static int reset(lua_State* L)
 			{

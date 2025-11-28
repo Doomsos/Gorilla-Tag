@@ -7,7 +7,7 @@ namespace GorillaTag.Reactions
 	public class ShakeReaction : MonoBehaviour, ITickSystemPost
 	{
 		// Token: 0x170009D2 RID: 2514
-		// (get) Token: 0x060068A6 RID: 26790 RVA: 0x002216CE File Offset: 0x0021F8CE
+		// (get) Token: 0x060068A6 RID: 26790 RVA: 0x002216AE File Offset: 0x0021F8AE
 		private float loopSoundTotalDuration
 		{
 			get
@@ -17,11 +17,11 @@ namespace GorillaTag.Reactions
 		}
 
 		// Token: 0x170009D3 RID: 2515
-		// (get) Token: 0x060068A7 RID: 26791 RVA: 0x002216E4 File Offset: 0x0021F8E4
-		// (set) Token: 0x060068A8 RID: 26792 RVA: 0x002216EC File Offset: 0x0021F8EC
+		// (get) Token: 0x060068A7 RID: 26791 RVA: 0x002216C4 File Offset: 0x0021F8C4
+		// (set) Token: 0x060068A8 RID: 26792 RVA: 0x002216CC File Offset: 0x0021F8CC
 		bool ITickSystemPost.PostTickRunning { get; set; }
 
-		// Token: 0x060068A9 RID: 26793 RVA: 0x002216F8 File Offset: 0x0021F8F8
+		// Token: 0x060068A9 RID: 26793 RVA: 0x002216D8 File Offset: 0x0021F8D8
 		protected void Awake()
 		{
 			this.sampleHistoryPos = new Vector3[256];
@@ -34,7 +34,7 @@ namespace GorillaTag.Reactions
 			Application.quitting += new Action(this.HandleApplicationQuitting);
 		}
 
-		// Token: 0x060068AA RID: 26794 RVA: 0x00221778 File Offset: 0x0021F978
+		// Token: 0x060068AA RID: 26794 RVA: 0x00221758 File Offset: 0x0021F958
 		protected void OnEnable()
 		{
 			float unscaledTime = Time.unscaledTime;
@@ -56,7 +56,7 @@ namespace GorillaTag.Reactions
 			TickSystem<object>.AddPostTickCallback(this);
 		}
 
-		// Token: 0x060068AB RID: 26795 RVA: 0x0022182F File Offset: 0x0021FA2F
+		// Token: 0x060068AB RID: 26795 RVA: 0x0022180F File Offset: 0x0021FA0F
 		protected void OnDisable()
 		{
 			if (this.loopSoundAudioSource != null)
@@ -66,13 +66,13 @@ namespace GorillaTag.Reactions
 			TickSystem<object>.RemovePostTickCallback(this);
 		}
 
-		// Token: 0x060068AC RID: 26796 RVA: 0x001338F3 File Offset: 0x00131AF3
+		// Token: 0x060068AC RID: 26796 RVA: 0x001338D3 File Offset: 0x00131AD3
 		private void HandleApplicationQuitting()
 		{
 			TickSystem<object>.RemovePostTickCallback(this);
 		}
 
-		// Token: 0x060068AD RID: 26797 RVA: 0x00221850 File Offset: 0x0021FA50
+		// Token: 0x060068AD RID: 26797 RVA: 0x00221830 File Offset: 0x0021FA30
 		void ITickSystemPost.PostTick()
 		{
 			float unscaledTime = Time.unscaledTime;

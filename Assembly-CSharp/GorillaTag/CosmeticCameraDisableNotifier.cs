@@ -7,7 +7,7 @@ namespace GorillaTag
 	[RequireComponent(typeof(VRRigCollection))]
 	public class CosmeticCameraDisableNotifier : MonoBehaviour
 	{
-		// Token: 0x06006718 RID: 26392 RVA: 0x002187F0 File Offset: 0x002169F0
+		// Token: 0x06006718 RID: 26392 RVA: 0x002187D0 File Offset: 0x002169D0
 		private void Awake()
 		{
 			if (!base.TryGetComponent<VRRigCollection>(ref this._vrrigCollection))
@@ -20,7 +20,7 @@ namespace GorillaTag
 			vrrigCollection2.playerLeftCollection = (Action<RigContainer>)Delegate.Combine(vrrigCollection2.playerLeftCollection, new Action<RigContainer>(this.PlayerLeftTryOnSpace));
 		}
 
-		// Token: 0x06006719 RID: 26393 RVA: 0x00218865 File Offset: 0x00216A65
+		// Token: 0x06006719 RID: 26393 RVA: 0x00218845 File Offset: 0x00216A45
 		private void PlayerEnteredTryOnSpace(RigContainer playerRig)
 		{
 			if (playerRig.Rig.isLocal)
@@ -29,7 +29,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600671A RID: 26394 RVA: 0x00218880 File Offset: 0x00216A80
+		// Token: 0x0600671A RID: 26394 RVA: 0x00218860 File Offset: 0x00216A60
 		private void PlayerLeftTryOnSpace(RigContainer playerRig)
 		{
 			if (playerRig.Rig.isLocal)

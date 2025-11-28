@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameBall : MonoBehaviour
 {
 	// Token: 0x17000392 RID: 914
-	// (get) Token: 0x060021BB RID: 8635 RVA: 0x000B0427 File Offset: 0x000AE627
+	// (get) Token: 0x060021BB RID: 8635 RVA: 0x000B0407 File Offset: 0x000AE607
 	public bool IsLaunched
 	{
 		get
@@ -14,7 +14,7 @@ public class GameBall : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060021BC RID: 8636 RVA: 0x000B0430 File Offset: 0x000AE630
+	// Token: 0x060021BC RID: 8636 RVA: 0x000B0410 File Offset: 0x000AE610
 	private void Awake()
 	{
 		this.id = GameBallId.Invalid;
@@ -36,7 +36,7 @@ public class GameBall : MonoBehaviour
 		this._monkeBall = base.GetComponent<MonkeBall>();
 	}
 
-	// Token: 0x060021BD RID: 8637 RVA: 0x000B04C4 File Offset: 0x000AE6C4
+	// Token: 0x060021BD RID: 8637 RVA: 0x000B04A4 File Offset: 0x000AE6A4
 	private void FixedUpdate()
 	{
 		if (this.rigidBody == null)
@@ -57,7 +57,7 @@ public class GameBall : MonoBehaviour
 		this._catchSoundDecay -= Time.deltaTime;
 	}
 
-	// Token: 0x060021BE RID: 8638 RVA: 0x000B0589 File Offset: 0x000AE789
+	// Token: 0x060021BE RID: 8638 RVA: 0x000B0569 File Offset: 0x000AE769
 	public void WasLaunched()
 	{
 		this._launched = true;
@@ -65,7 +65,7 @@ public class GameBall : MonoBehaviour
 		this._launchedTimer = 0f;
 	}
 
-	// Token: 0x060021BF RID: 8639 RVA: 0x000B05A9 File Offset: 0x000AE7A9
+	// Token: 0x060021BF RID: 8639 RVA: 0x000B0589 File Offset: 0x000AE789
 	public Vector3 GetVelocity()
 	{
 		if (this.rigidBody == null)
@@ -75,13 +75,13 @@ public class GameBall : MonoBehaviour
 		return this.rigidBody.linearVelocity;
 	}
 
-	// Token: 0x060021C0 RID: 8640 RVA: 0x000B05CA File Offset: 0x000AE7CA
+	// Token: 0x060021C0 RID: 8640 RVA: 0x000B05AA File Offset: 0x000AE7AA
 	public void SetVelocity(Vector3 velocity)
 	{
 		this.rigidBody.linearVelocity = velocity;
 	}
 
-	// Token: 0x060021C1 RID: 8641 RVA: 0x000B05D8 File Offset: 0x000AE7D8
+	// Token: 0x060021C1 RID: 8641 RVA: 0x000B05B8 File Offset: 0x000AE7B8
 	public void PlayCatchFx()
 	{
 		if (this.audioSource != null && this._catchSoundDecay <= 0f)
@@ -93,7 +93,7 @@ public class GameBall : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060021C2 RID: 8642 RVA: 0x000B0638 File Offset: 0x000AE838
+	// Token: 0x060021C2 RID: 8642 RVA: 0x000B0618 File Offset: 0x000AE818
 	public void PlayThrowFx()
 	{
 		if (this.audioSource != null)
@@ -104,7 +104,7 @@ public class GameBall : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060021C3 RID: 8643 RVA: 0x000B0675 File Offset: 0x000AE875
+	// Token: 0x060021C3 RID: 8643 RVA: 0x000B0655 File Offset: 0x000AE855
 	public void PlayBounceFX()
 	{
 		if (this.audioSource != null)
@@ -115,19 +115,19 @@ public class GameBall : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060021C4 RID: 8644 RVA: 0x000B06B2 File Offset: 0x000AE8B2
+	// Token: 0x060021C4 RID: 8644 RVA: 0x000B0692 File Offset: 0x000AE892
 	public void SetHeldByTeamId(int teamId)
 	{
 		this.lastHeldByTeamId = teamId;
 	}
 
-	// Token: 0x060021C5 RID: 8645 RVA: 0x000B06BB File Offset: 0x000AE8BB
+	// Token: 0x060021C5 RID: 8645 RVA: 0x000B069B File Offset: 0x000AE89B
 	private bool IsGamePlayer(Collider collider)
 	{
 		return GameBallPlayer.GetGamePlayer(collider, false) != null;
 	}
 
-	// Token: 0x060021C6 RID: 8646 RVA: 0x000B06CA File Offset: 0x000AE8CA
+	// Token: 0x060021C6 RID: 8646 RVA: 0x000B06AA File Offset: 0x000AE8AA
 	public void SetVisualOffset(bool detach)
 	{
 		if (this._monkeBall != null)

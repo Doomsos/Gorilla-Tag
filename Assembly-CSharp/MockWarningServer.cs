@@ -9,7 +9,7 @@ using UnityEngine;
 internal class MockWarningServer : WarningsServer
 {
 	// Token: 0x1700065F RID: 1631
-	// (get) Token: 0x06004332 RID: 17202 RVA: 0x0016473C File Offset: 0x0016293C
+	// (get) Token: 0x06004332 RID: 17202 RVA: 0x0016471C File Offset: 0x0016291C
 	public static string ShownScreenPlayerPref
 	{
 		get
@@ -18,7 +18,7 @@ internal class MockWarningServer : WarningsServer
 		}
 	}
 
-	// Token: 0x06004333 RID: 17203 RVA: 0x00164754 File Offset: 0x00162954
+	// Token: 0x06004333 RID: 17203 RVA: 0x00164734 File Offset: 0x00162934
 	private void Awake()
 	{
 		if (WarningsServer.Instance == null)
@@ -29,7 +29,7 @@ internal class MockWarningServer : WarningsServer
 		Object.Destroy(this);
 	}
 
-	// Token: 0x06004334 RID: 17204 RVA: 0x00164774 File Offset: 0x00162974
+	// Token: 0x06004334 RID: 17204 RVA: 0x00164754 File Offset: 0x00162954
 	private PlayerAgeGateWarningStatus CreateWarningStatus(string header, string body, MockWarningServer.ButtonSetup? leftButtonSetup, MockWarningServer.ButtonSetup? rightButtonSetup, EImageVisibility showImage, Action leftButtonCallback, Action rightButtonCallback)
 	{
 		PlayerAgeGateWarningStatus result;
@@ -56,7 +56,7 @@ internal class MockWarningServer : WarningsServer
 		return result;
 	}
 
-	// Token: 0x06004335 RID: 17205 RVA: 0x0016483C File Offset: 0x00162A3C
+	// Token: 0x06004335 RID: 17205 RVA: 0x0016481C File Offset: 0x00162A1C
 	public override Task<PlayerAgeGateWarningStatus?> FetchPlayerData(CancellationToken token)
 	{
 		MockWarningServer.<FetchPlayerData>d__12 <FetchPlayerData>d__;
@@ -68,7 +68,7 @@ internal class MockWarningServer : WarningsServer
 		return <FetchPlayerData>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004336 RID: 17206 RVA: 0x00164888 File Offset: 0x00162A88
+	// Token: 0x06004336 RID: 17206 RVA: 0x00164868 File Offset: 0x00162A68
 	public override Task<PlayerAgeGateWarningStatus?> GetOptInFollowUpMessage(CancellationToken token)
 	{
 		MockWarningServer.<GetOptInFollowUpMessage>d__13 <GetOptInFollowUpMessage>d__;
@@ -80,7 +80,7 @@ internal class MockWarningServer : WarningsServer
 		return <GetOptInFollowUpMessage>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004337 RID: 17207 RVA: 0x001648D3 File Offset: 0x00162AD3
+	// Token: 0x06004337 RID: 17207 RVA: 0x001648B3 File Offset: 0x00162AB3
 	private bool ShouldShowWarningScreen(int phase, bool inOptInCohort)
 	{
 		if (PlayerPrefs.GetInt(string.Format("phase-{0}-{1}", phase, MockWarningServer.ShownScreenPlayerPref), 0) == 0)
@@ -123,7 +123,7 @@ internal class MockWarningServer : WarningsServer
 	// Token: 0x02000A6F RID: 2671
 	public struct ButtonSetup
 	{
-		// Token: 0x06004339 RID: 17209 RVA: 0x00164919 File Offset: 0x00162B19
+		// Token: 0x06004339 RID: 17209 RVA: 0x001648F9 File Offset: 0x00162AF9
 		public ButtonSetup(string txt, WarningButtonResult result)
 		{
 			this.buttonText = txt;

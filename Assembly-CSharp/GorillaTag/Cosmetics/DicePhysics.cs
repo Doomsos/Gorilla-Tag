@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001095 RID: 4245
 	public class DicePhysics : MonoBehaviour
 	{
-		// Token: 0x06006A39 RID: 27193 RVA: 0x0022A9B0 File Offset: 0x00228BB0
+		// Token: 0x06006A39 RID: 27193 RVA: 0x0022A990 File Offset: 0x00228B90
 		public int GetRandomSide()
 		{
 			DicePhysics.DiceType diceType = this.diceType;
@@ -40,7 +40,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A3A RID: 27194 RVA: 0x0022AA30 File Offset: 0x00228C30
+		// Token: 0x06006A3A RID: 27194 RVA: 0x0022AA10 File Offset: 0x00228C10
 		public Vector3 GetSideDirection(int side)
 		{
 			DicePhysics.DiceType diceType = this.diceType;
@@ -53,7 +53,7 @@ namespace GorillaTag.Cosmetics
 			return this.d6SideDirections[num2];
 		}
 
-		// Token: 0x06006A3B RID: 27195 RVA: 0x0022AA7C File Offset: 0x00228C7C
+		// Token: 0x06006A3B RID: 27195 RVA: 0x0022AA5C File Offset: 0x00228C5C
 		public void StartThrow(DiceHoldable holdable, Vector3 startPosition, Vector3 velocity, float playerScale, int side, double startTime)
 		{
 			this.holdableParent = holdable;
@@ -76,7 +76,7 @@ namespace GorillaTag.Cosmetics
 			base.enabled = true;
 		}
 
-		// Token: 0x06006A3C RID: 27196 RVA: 0x0022AB64 File Offset: 0x00228D64
+		// Token: 0x06006A3C RID: 27196 RVA: 0x0022AB44 File Offset: 0x00228D44
 		public void EndThrow()
 		{
 			this.rb.isKinematic = true;
@@ -98,7 +98,7 @@ namespace GorillaTag.Cosmetics
 			base.enabled = false;
 		}
 
-		// Token: 0x06006A3D RID: 27197 RVA: 0x0022AC28 File Offset: 0x00228E28
+		// Token: 0x06006A3D RID: 27197 RVA: 0x0022AC08 File Offset: 0x00228E08
 		private void FixedUpdate()
 		{
 			double num = PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time);
@@ -140,7 +140,7 @@ namespace GorillaTag.Cosmetics
 			this.velocity = this.rb.linearVelocity;
 		}
 
-		// Token: 0x06006A3E RID: 27198 RVA: 0x0022AE74 File Offset: 0x00229074
+		// Token: 0x06006A3E RID: 27198 RVA: 0x0022AE54 File Offset: 0x00229054
 		private void OnCollisionEnter(Collision collision)
 		{
 			float magnitude = collision.impulse.magnitude;
@@ -151,7 +151,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A3F RID: 27199 RVA: 0x0022AEC8 File Offset: 0x002290C8
+		// Token: 0x06006A3F RID: 27199 RVA: 0x0022AEA8 File Offset: 0x002290A8
 		private void InvokeLandingEffects(int side)
 		{
 			DicePhysics.DiceType diceType = this.diceType;
@@ -182,7 +182,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A40 RID: 27200 RVA: 0x0022AF24 File Offset: 0x00229124
+		// Token: 0x06006A40 RID: 27200 RVA: 0x0022AF04 File Offset: 0x00229104
 		private bool CheckCosmeticRollOverride(out int rollSide)
 		{
 			if (this.cosmeticRollOverrides.Length != 0)

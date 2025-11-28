@@ -6,19 +6,19 @@ namespace PerformanceSystems
 	// Token: 0x02000D81 RID: 3457
 	public abstract class ATimeSliceBehaviour : MonoBehaviour, ITimeSlice
 	{
-		// Token: 0x060054BC RID: 21692 RVA: 0x001AB80D File Offset: 0x001A9A0D
+		// Token: 0x060054BC RID: 21692 RVA: 0x001AB7ED File Offset: 0x001A99ED
 		protected void Awake()
 		{
 			this._timeSliceControllerAsset.AddTimeSliceBehaviour(this);
 		}
 
-		// Token: 0x060054BD RID: 21693 RVA: 0x001AB81B File Offset: 0x001A9A1B
+		// Token: 0x060054BD RID: 21693 RVA: 0x001AB7FB File Offset: 0x001A99FB
 		protected void OnDestroy()
 		{
 			this._timeSliceControllerAsset.RemoveTimeSliceBehaviour(this);
 		}
 
-		// Token: 0x060054BE RID: 21694 RVA: 0x001AB82C File Offset: 0x001A9A2C
+		// Token: 0x060054BE RID: 21694 RVA: 0x001AB80C File Offset: 0x001A9A0C
 		public void SliceUpdate()
 		{
 			float deltaTime = Time.realtimeSinceStartup - this._lastUpdateTime;

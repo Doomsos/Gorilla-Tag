@@ -5,13 +5,13 @@ using UnityEngine.Events;
 // Token: 0x020005D4 RID: 1492
 public class Decelerate : MonoBehaviour
 {
-	// Token: 0x060025B1 RID: 9649 RVA: 0x000C96D4 File Offset: 0x000C78D4
+	// Token: 0x060025B1 RID: 9649 RVA: 0x000C96B4 File Offset: 0x000C78B4
 	public void Restart()
 	{
 		base.enabled = true;
 	}
 
-	// Token: 0x060025B2 RID: 9650 RVA: 0x000C96E0 File Offset: 0x000C78E0
+	// Token: 0x060025B2 RID: 9650 RVA: 0x000C96C0 File Offset: 0x000C78C0
 	private void Update()
 	{
 		if (!this._rigidbody)

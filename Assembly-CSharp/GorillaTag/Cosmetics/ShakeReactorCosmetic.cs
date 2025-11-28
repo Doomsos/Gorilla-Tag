@@ -12,7 +12,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001114 RID: 4372
 	public class ShakeReactorCosmetic : MonoBehaviour, ISpawnable
 	{
-		// Token: 0x06006D70 RID: 28016 RVA: 0x0023ED40 File Offset: 0x0023CF40
+		// Token: 0x06006D70 RID: 28016 RVA: 0x0023ED20 File Offset: 0x0023CF20
 		private void OnEnable()
 		{
 			this.lastReversalTime = Time.time;
@@ -46,7 +46,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D71 RID: 28017 RVA: 0x0023EEAC File Offset: 0x0023D0AC
+		// Token: 0x06006D71 RID: 28017 RVA: 0x0023EE8C File Offset: 0x0023D08C
 		private void OnDisable()
 		{
 			if (this._events != null)
@@ -58,7 +58,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D72 RID: 28018 RVA: 0x0023EF04 File Offset: 0x0023D104
+		// Token: 0x06006D72 RID: 28018 RVA: 0x0023EEE4 File Offset: 0x0023D0E4
 		private void Update()
 		{
 			if (this.myRig != null && !this.myRig.isLocal)
@@ -214,7 +214,7 @@ namespace GorillaTag.Cosmetics
 			this.ApplyStrength(strength);
 		}
 
-		// Token: 0x06006D73 RID: 28019 RVA: 0x0023F3B4 File Offset: 0x0023D5B4
+		// Token: 0x06006D73 RID: 28019 RVA: 0x0023F394 File Offset: 0x0023D594
 		private void EnqueueHalfCycle(float duration)
 		{
 			this.recentHalfCycleDurations.Enqueue(duration);
@@ -224,7 +224,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D74 RID: 28020 RVA: 0x0023F3E4 File Offset: 0x0023D5E4
+		// Token: 0x06006D74 RID: 28020 RVA: 0x0023F3C4 File Offset: 0x0023D5C4
 		private float GetAverageHalfCycleDuration()
 		{
 			if (this.recentHalfCycleDurations.Count == 0)
@@ -239,7 +239,7 @@ namespace GorillaTag.Cosmetics
 			return num / (float)this.recentHalfCycleDurations.Count;
 		}
 
-		// Token: 0x06006D75 RID: 28021 RVA: 0x0023F45C File Offset: 0x0023D65C
+		// Token: 0x06006D75 RID: 28021 RVA: 0x0023F43C File Offset: 0x0023D63C
 		private void ApplyStrength(float strength01)
 		{
 			if (this.continuousProperties != null)
@@ -248,7 +248,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D76 RID: 28022 RVA: 0x0023F474 File Offset: 0x0023D674
+		// Token: 0x06006D76 RID: 28022 RVA: 0x0023F454 File Offset: 0x0023D654
 		private void OnShake(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target || info.senderID != this.myRig.creator.ActorNumber)
@@ -293,16 +293,16 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A65 RID: 2661
-		// (get) Token: 0x06006D77 RID: 28023 RVA: 0x0023F4FF File Offset: 0x0023D6FF
-		// (set) Token: 0x06006D78 RID: 28024 RVA: 0x0023F507 File Offset: 0x0023D707
+		// (get) Token: 0x06006D77 RID: 28023 RVA: 0x0023F4DF File Offset: 0x0023D6DF
+		// (set) Token: 0x06006D78 RID: 28024 RVA: 0x0023F4E7 File Offset: 0x0023D6E7
 		public bool IsSpawned { get; set; }
 
 		// Token: 0x17000A66 RID: 2662
-		// (get) Token: 0x06006D79 RID: 28025 RVA: 0x0023F510 File Offset: 0x0023D710
-		// (set) Token: 0x06006D7A RID: 28026 RVA: 0x0023F518 File Offset: 0x0023D718
+		// (get) Token: 0x06006D79 RID: 28025 RVA: 0x0023F4F0 File Offset: 0x0023D6F0
+		// (set) Token: 0x06006D7A RID: 28026 RVA: 0x0023F4F8 File Offset: 0x0023D6F8
 		public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
 
-		// Token: 0x06006D7B RID: 28027 RVA: 0x0023F521 File Offset: 0x0023D721
+		// Token: 0x06006D7B RID: 28027 RVA: 0x0023F501 File Offset: 0x0023D701
 		public void OnSpawn(VRRig rig)
 		{
 			this.myRig = rig;

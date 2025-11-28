@@ -9,7 +9,7 @@ namespace GorillaTagScripts.AI.Entities
 	// Token: 0x02000E9B RID: 3739
 	public class TestShark : AIEntity
 	{
-		// Token: 0x06005D79 RID: 23929 RVA: 0x001E016C File Offset: 0x001DE36C
+		// Token: 0x06005D79 RID: 23929 RVA: 0x001E014C File Offset: 0x001DE34C
 		private new void Awake()
 		{
 			base.Awake();
@@ -23,7 +23,7 @@ namespace GorillaTagScripts.AI.Entities
 			this._stateMachine.SetState(this.patrol);
 		}
 
-		// Token: 0x06005D7A RID: 23930 RVA: 0x001E0204 File Offset: 0x001DE404
+		// Token: 0x06005D7A RID: 23930 RVA: 0x001E01E4 File Offset: 0x001DE3E4
 		private void Update()
 		{
 			this._stateMachine.Tick();
@@ -41,14 +41,14 @@ namespace GorillaTagScripts.AI.Entities
 			}
 		}
 
-		// Token: 0x06005D7C RID: 23932 RVA: 0x001E028D File Offset: 0x001DE48D
+		// Token: 0x06005D7C RID: 23932 RVA: 0x001E026D File Offset: 0x001DE46D
 		[CompilerGenerated]
 		private Func<bool> <Awake>g__ShouldChase|7_0()
 		{
 			return () => this.shouldChase && PhotonNetwork.InRoom;
 		}
 
-		// Token: 0x06005D7E RID: 23934 RVA: 0x001E02AC File Offset: 0x001DE4AC
+		// Token: 0x06005D7E RID: 23934 RVA: 0x001E028C File Offset: 0x001DE48C
 		[CompilerGenerated]
 		private Func<bool> <Awake>g__ShouldPatrol|7_1()
 		{

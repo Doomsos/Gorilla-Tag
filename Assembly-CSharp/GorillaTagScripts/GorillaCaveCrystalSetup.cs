@@ -10,7 +10,7 @@ namespace GorillaTagScripts
 	public class GorillaCaveCrystalSetup : ScriptableObject
 	{
 		// Token: 0x17000853 RID: 2131
-		// (get) Token: 0x060058B9 RID: 22713 RVA: 0x001C6983 File Offset: 0x001C4B83
+		// (get) Token: 0x060058B9 RID: 22713 RVA: 0x001C6963 File Offset: 0x001C4B63
 		public static GorillaCaveCrystalSetup Instance
 		{
 			get
@@ -19,7 +19,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058BA RID: 22714 RVA: 0x001C698A File Offset: 0x001C4B8A
+		// Token: 0x060058BA RID: 22714 RVA: 0x001C696A File Offset: 0x001C4B6A
 		private void OnEnable()
 		{
 			if (GorillaCaveCrystalSetup.gInstance == null)
@@ -28,7 +28,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058BB RID: 22715 RVA: 0x001C69A0 File Offset: 0x001C4BA0
+		// Token: 0x060058BB RID: 22715 RVA: 0x001C6980 File Offset: 0x001C4B80
 		public GorillaCaveCrystalSetup.CrystalDef[] GetCrystalDefs()
 		{
 			return Enumerable.ToArray<GorillaCaveCrystalSetup.CrystalDef>(Enumerable.Select<FieldInfo, GorillaCaveCrystalSetup.CrystalDef>(Enumerable.Where<FieldInfo>(RuntimeReflectionExtensions.GetRuntimeFields(typeof(GorillaCaveCrystalSetup)), (FieldInfo f) => f != null && f.FieldType == typeof(GorillaCaveCrystalSetup.CrystalDef)), (FieldInfo f) => (GorillaCaveCrystalSetup.CrystalDef)f.GetValue(this)));

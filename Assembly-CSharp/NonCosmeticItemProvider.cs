@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020003FA RID: 1018
 public class NonCosmeticItemProvider : MonoBehaviour
 {
-	// Token: 0x060018F1 RID: 6385 RVA: 0x000858EC File Offset: 0x00083AEC
+	// Token: 0x060018F1 RID: 6385 RVA: 0x000858CC File Offset: 0x00083ACC
 	private void OnTriggerEnter(Collider other)
 	{
 		GorillaTriggerColliderHandIndicator component = other.GetComponent<GorillaTriggerColliderHandIndicator>();

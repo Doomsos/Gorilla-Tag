@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000CEA RID: 3306
 public class VoiceLoudnessReactor : MonoBehaviour
 {
-	// Token: 0x06005061 RID: 20577 RVA: 0x0019D8EC File Offset: 0x0019BAEC
+	// Token: 0x06005061 RID: 20577 RVA: 0x0019D8CC File Offset: 0x0019BACC
 	private void Start()
 	{
 		for (int i = 0; i < this.transformPositionTargets.Length; i++)
@@ -42,7 +42,7 @@ public class VoiceLoudnessReactor : MonoBehaviour
 		this.hasContinuousProperties = (this.continuousProperties != null && this.continuousProperties.Count > 0);
 	}
 
-	// Token: 0x06005062 RID: 20578 RVA: 0x0019DB08 File Offset: 0x0019BD08
+	// Token: 0x06005062 RID: 20578 RVA: 0x0019DAE8 File Offset: 0x0019BCE8
 	private void OnEnable()
 	{
 		if (this.loudness != null)
@@ -65,7 +65,7 @@ public class VoiceLoudnessReactor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06005063 RID: 20579 RVA: 0x0019DB90 File Offset: 0x0019BD90
+	// Token: 0x06005063 RID: 20579 RVA: 0x0019DB70 File Offset: 0x0019BD70
 	private void Update()
 	{
 		if (this.loudness == null)

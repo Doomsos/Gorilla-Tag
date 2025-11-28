@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020009BF RID: 2495
 public class HalloweenWatcherEyes : MonoBehaviour
 {
-	// Token: 0x06003FBF RID: 16319 RVA: 0x00155C84 File Offset: 0x00153E84
+	// Token: 0x06003FBF RID: 16319 RVA: 0x00155C64 File Offset: 0x00153E64
 	private void Start()
 	{
 		this.playersViewCenterCosAngle = Mathf.Cos(this.playersViewCenterAngle * 0.017453292f);
@@ -15,7 +15,7 @@ public class HalloweenWatcherEyes : MonoBehaviour
 		base.enabled = false;
 	}
 
-	// Token: 0x06003FC0 RID: 16320 RVA: 0x00155CE3 File Offset: 0x00153EE3
+	// Token: 0x06003FC0 RID: 16320 RVA: 0x00155CC3 File Offset: 0x00153EC3
 	private IEnumerator CheckIfNearPlayer(float initialSleep)
 	{
 		yield return new WaitForSeconds(initialSleep);
@@ -31,7 +31,7 @@ public class HalloweenWatcherEyes : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003FC1 RID: 16321 RVA: 0x00155CFC File Offset: 0x00153EFC
+	// Token: 0x06003FC1 RID: 16321 RVA: 0x00155CDC File Offset: 0x00153EDC
 	private void Update()
 	{
 		Vector3 normalized = (GTPlayer.Instance.headCollider.transform.position - base.transform.position).normalized;
@@ -61,7 +61,7 @@ public class HalloweenWatcherEyes : MonoBehaviour
 		this.lerpValue = 1f;
 	}
 
-	// Token: 0x06003FC2 RID: 16322 RVA: 0x00155E2A File Offset: 0x0015402A
+	// Token: 0x06003FC2 RID: 16322 RVA: 0x00155E0A File Offset: 0x0015400A
 	private void LookNormal()
 	{
 		this.leftEye.transform.localRotation = Quaternion.identity;

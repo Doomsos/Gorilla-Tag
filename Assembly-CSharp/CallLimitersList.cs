@@ -6,31 +6,31 @@ using UnityEngine;
 [Serializable]
 public class CallLimitersList<Titem, Tenum> where Titem : CallLimiter, new() where Tenum : Enum
 {
-	// Token: 0x06004B01 RID: 19201 RVA: 0x0018840C File Offset: 0x0018660C
+	// Token: 0x06004B01 RID: 19201 RVA: 0x001883EC File Offset: 0x001865EC
 	public bool IsSpamming(Tenum index)
 	{
 		return this.IsSpamming((int)((object)index));
 	}
 
-	// Token: 0x06004B02 RID: 19202 RVA: 0x0018841F File Offset: 0x0018661F
+	// Token: 0x06004B02 RID: 19202 RVA: 0x001883FF File Offset: 0x001865FF
 	public bool IsSpamming(int index)
 	{
 		return !this.m_callLimiters[index].CheckCallTime(Time.unscaledTime);
 	}
 
-	// Token: 0x06004B03 RID: 19203 RVA: 0x0018843F File Offset: 0x0018663F
+	// Token: 0x06004B03 RID: 19203 RVA: 0x0018841F File Offset: 0x0018661F
 	public bool IsSpamming(Tenum index, double serverTime)
 	{
 		return this.IsSpamming((int)((object)index), serverTime);
 	}
 
-	// Token: 0x06004B04 RID: 19204 RVA: 0x00188453 File Offset: 0x00186653
+	// Token: 0x06004B04 RID: 19204 RVA: 0x00188433 File Offset: 0x00186633
 	public bool IsSpamming(int index, double serverTime)
 	{
 		return !this.m_callLimiters[index].CheckCallServerTime(serverTime);
 	}
 
-	// Token: 0x06004B05 RID: 19205 RVA: 0x00188470 File Offset: 0x00186670
+	// Token: 0x06004B05 RID: 19205 RVA: 0x00188450 File Offset: 0x00186650
 	public void Reset()
 	{
 		Titem[] callLimiters = this.m_callLimiters;

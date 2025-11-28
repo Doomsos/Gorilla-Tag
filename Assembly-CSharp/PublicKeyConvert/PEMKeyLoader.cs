@@ -7,7 +7,7 @@ namespace PublicKeyConvert
 	// Token: 0x02000D06 RID: 3334
 	public class PEMKeyLoader
 	{
-		// Token: 0x060050EC RID: 20716 RVA: 0x001A1C50 File Offset: 0x0019FE50
+		// Token: 0x060050EC RID: 20716 RVA: 0x001A1C30 File Offset: 0x0019FE30
 		private static bool CompareBytearrays(byte[] a, byte[] b)
 		{
 			if (a.Length != b.Length)
@@ -26,7 +26,7 @@ namespace PublicKeyConvert
 			return true;
 		}
 
-		// Token: 0x060050ED RID: 20717 RVA: 0x001A1C88 File Offset: 0x0019FE88
+		// Token: 0x060050ED RID: 20717 RVA: 0x001A1C68 File Offset: 0x0019FE68
 		public static RSACryptoServiceProvider CryptoServiceProviderFromPublicKeyInfo(byte[] x509key)
 		{
 			new byte[15];
@@ -140,7 +140,7 @@ namespace PublicKeyConvert
 			return result;
 		}
 
-		// Token: 0x060050EE RID: 20718 RVA: 0x001A1E54 File Offset: 0x001A0054
+		// Token: 0x060050EE RID: 20718 RVA: 0x001A1E34 File Offset: 0x001A0034
 		public static RSACryptoServiceProvider CryptoServiceProviderFromPublicKeyInfo(string base64EncodedKey)
 		{
 			try

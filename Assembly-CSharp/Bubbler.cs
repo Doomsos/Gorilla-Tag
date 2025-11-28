@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020004EE RID: 1262
 public class Bubbler : TransferrableObject
 {
-	// Token: 0x06002073 RID: 8307 RVA: 0x000AC1A0 File Offset: 0x000AA3A0
+	// Token: 0x06002073 RID: 8307 RVA: 0x000AC180 File Offset: 0x000AA380
 	public override void OnSpawn(VRRig rig)
 	{
 		base.OnSpawn(rig);
@@ -21,7 +21,7 @@ public class Bubbler : TransferrableObject
 		this.itemState = TransferrableObject.ItemStates.State0;
 	}
 
-	// Token: 0x06002074 RID: 8308 RVA: 0x000AC244 File Offset: 0x000AA444
+	// Token: 0x06002074 RID: 8308 RVA: 0x000AC224 File Offset: 0x000AA424
 	internal override void OnEnable()
 	{
 		base.OnEnable();
@@ -32,7 +32,7 @@ public class Bubbler : TransferrableObject
 		this.hasActiveOnlyComponent = (this.gameObjectActiveOnlyWhileTriggerDown != null);
 	}
 
-	// Token: 0x06002075 RID: 8309 RVA: 0x000AC2D4 File Offset: 0x000AA4D4
+	// Token: 0x06002075 RID: 8309 RVA: 0x000AC2B4 File Offset: 0x000AA4B4
 	private void InitToDefault()
 	{
 		this.itemState = TransferrableObject.ItemStates.State0;
@@ -46,7 +46,7 @@ public class Bubbler : TransferrableObject
 		}
 	}
 
-	// Token: 0x06002076 RID: 8310 RVA: 0x000AC328 File Offset: 0x000AA528
+	// Token: 0x06002076 RID: 8310 RVA: 0x000AC308 File Offset: 0x000AA508
 	internal override void OnDisable()
 	{
 		base.OnDisable();
@@ -63,14 +63,14 @@ public class Bubbler : TransferrableObject
 		this.particleInfoDict.Clear();
 	}
 
-	// Token: 0x06002077 RID: 8311 RVA: 0x000AC398 File Offset: 0x000AA598
+	// Token: 0x06002077 RID: 8311 RVA: 0x000AC378 File Offset: 0x000AA578
 	public override void ResetToDefaultState()
 	{
 		base.ResetToDefaultState();
 		this.InitToDefault();
 	}
 
-	// Token: 0x06002078 RID: 8312 RVA: 0x000AC3A6 File Offset: 0x000AA5A6
+	// Token: 0x06002078 RID: 8312 RVA: 0x000AC386 File Offset: 0x000AA586
 	protected override void LateUpdateLocal()
 	{
 		base.LateUpdateLocal();
@@ -80,7 +80,7 @@ public class Bubbler : TransferrableObject
 		}
 	}
 
-	// Token: 0x06002079 RID: 8313 RVA: 0x000AC3CC File Offset: 0x000AA5CC
+	// Token: 0x06002079 RID: 8313 RVA: 0x000AC3AC File Offset: 0x000AA5AC
 	protected override void LateUpdateShared()
 	{
 		base.LateUpdateShared();
@@ -188,7 +188,7 @@ public class Bubbler : TransferrableObject
 		}
 	}
 
-	// Token: 0x0600207A RID: 8314 RVA: 0x000AC7D8 File Offset: 0x000AA9D8
+	// Token: 0x0600207A RID: 8314 RVA: 0x000AC7B8 File Offset: 0x000AA9B8
 	public override void OnActivate()
 	{
 		base.OnActivate();
@@ -202,13 +202,13 @@ public class Bubbler : TransferrableObject
 		this.itemState = TransferrableObject.ItemStates.State0;
 	}
 
-	// Token: 0x0600207C RID: 8316 RVA: 0x000AC7E7 File Offset: 0x000AA9E7
+	// Token: 0x0600207C RID: 8316 RVA: 0x000AC7C7 File Offset: 0x000AA9C7
 	public override bool CanActivate()
 	{
 		return !this.disableActivation;
 	}
 
-	// Token: 0x0600207D RID: 8317 RVA: 0x000AC7F2 File Offset: 0x000AA9F2
+	// Token: 0x0600207D RID: 8317 RVA: 0x000AC7D2 File Offset: 0x000AA9D2
 	public override bool CanDeactivate()
 	{
 		return !this.disableDeactivation;

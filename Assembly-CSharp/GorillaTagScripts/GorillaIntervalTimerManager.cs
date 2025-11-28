@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DED RID: 3565
 	public class GorillaIntervalTimerManager : MonoBehaviour
 	{
-		// Token: 0x060058E3 RID: 22755 RVA: 0x001C77F2 File Offset: 0x001C59F2
+		// Token: 0x060058E3 RID: 22755 RVA: 0x001C77D2 File Offset: 0x001C59D2
 		protected void Awake()
 		{
 			if (GorillaIntervalTimerManager.hasInstance && GorillaIntervalTimerManager.instance != null && GorillaIntervalTimerManager.instance != this)
@@ -18,13 +18,13 @@ namespace GorillaTagScripts
 			GorillaIntervalTimerManager.SetInstance(this);
 		}
 
-		// Token: 0x060058E4 RID: 22756 RVA: 0x001C7822 File Offset: 0x001C5A22
+		// Token: 0x060058E4 RID: 22756 RVA: 0x001C7802 File Offset: 0x001C5A02
 		private static void CreateManager()
 		{
 			GorillaIntervalTimerManager.SetInstance(new GameObject("GorillaIntervalTimerManager").AddComponent<GorillaIntervalTimerManager>());
 		}
 
-		// Token: 0x060058E5 RID: 22757 RVA: 0x001C7838 File Offset: 0x001C5A38
+		// Token: 0x060058E5 RID: 22757 RVA: 0x001C7818 File Offset: 0x001C5A18
 		private static void SetInstance(GorillaIntervalTimerManager manager)
 		{
 			GorillaIntervalTimerManager.instance = manager;
@@ -35,7 +35,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058E6 RID: 22758 RVA: 0x001C7853 File Offset: 0x001C5A53
+		// Token: 0x060058E6 RID: 22758 RVA: 0x001C7833 File Offset: 0x001C5A33
 		public static void RegisterGorillaTimer(GorillaIntervalTimer gTimer)
 		{
 			if (!GorillaIntervalTimerManager.hasInstance)
@@ -48,7 +48,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058E7 RID: 22759 RVA: 0x001C7879 File Offset: 0x001C5A79
+		// Token: 0x060058E7 RID: 22759 RVA: 0x001C7859 File Offset: 0x001C5A59
 		public static void UnregisterGorillaTimer(GorillaIntervalTimer gTimer)
 		{
 			if (!GorillaIntervalTimerManager.hasInstance)
@@ -61,7 +61,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058E8 RID: 22760 RVA: 0x001C78A0 File Offset: 0x001C5AA0
+		// Token: 0x060058E8 RID: 22760 RVA: 0x001C7880 File Offset: 0x001C5A80
 		private void Update()
 		{
 			for (int i = 0; i < GorillaIntervalTimerManager.allTimers.Count; i++)

@@ -6,7 +6,7 @@ namespace Viveport.Internal
 	// Token: 0x02000D44 RID: 3396
 	internal class UserStats
 	{
-		// Token: 0x06005272 RID: 21106 RVA: 0x001A5083 File Offset: 0x001A3283
+		// Token: 0x06005272 RID: 21106 RVA: 0x001A5063 File Offset: 0x001A3263
 		static UserStats()
 		{
 			Api.LoadLibraryManually("viveport_api");

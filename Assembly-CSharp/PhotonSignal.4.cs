@@ -7,7 +7,7 @@ using Photon.Realtime;
 public class PhotonSignal<T1, T2, T3> : PhotonSignal
 {
 	// Token: 0x170006E8 RID: 1768
-	// (get) Token: 0x06004A80 RID: 19072 RVA: 0x00114822 File Offset: 0x00112A22
+	// (get) Token: 0x06004A80 RID: 19072 RVA: 0x00114802 File Offset: 0x00112A02
 	public override int argCount
 	{
 		get
@@ -17,8 +17,8 @@ public class PhotonSignal<T1, T2, T3> : PhotonSignal
 	}
 
 	// Token: 0x14000082 RID: 130
-	// (add) Token: 0x06004A81 RID: 19073 RVA: 0x00186493 File Offset: 0x00184693
-	// (remove) Token: 0x06004A82 RID: 19074 RVA: 0x001864C7 File Offset: 0x001846C7
+	// (add) Token: 0x06004A81 RID: 19073 RVA: 0x00186473 File Offset: 0x00184673
+	// (remove) Token: 0x06004A82 RID: 19074 RVA: 0x001864A7 File Offset: 0x001846A7
 	public new event OnSignalReceived<T1, T2, T3> OnSignal
 	{
 		add
@@ -40,30 +40,30 @@ public class PhotonSignal<T1, T2, T3> : PhotonSignal
 		}
 	}
 
-	// Token: 0x06004A83 RID: 19075 RVA: 0x001861D7 File Offset: 0x001843D7
+	// Token: 0x06004A83 RID: 19075 RVA: 0x001861B7 File Offset: 0x001843B7
 	public PhotonSignal(string signalID) : base(signalID)
 	{
 	}
 
-	// Token: 0x06004A84 RID: 19076 RVA: 0x001861E0 File Offset: 0x001843E0
+	// Token: 0x06004A84 RID: 19076 RVA: 0x001861C0 File Offset: 0x001843C0
 	public PhotonSignal(int signalID) : base(signalID)
 	{
 	}
 
-	// Token: 0x06004A85 RID: 19077 RVA: 0x001864E4 File Offset: 0x001846E4
+	// Token: 0x06004A85 RID: 19077 RVA: 0x001864C4 File Offset: 0x001846C4
 	public override void ClearListeners()
 	{
 		this._callbacks = null;
 		base.ClearListeners();
 	}
 
-	// Token: 0x06004A86 RID: 19078 RVA: 0x001864F3 File Offset: 0x001846F3
+	// Token: 0x06004A86 RID: 19078 RVA: 0x001864D3 File Offset: 0x001846D3
 	public void Raise(T1 arg1, T2 arg2, T3 arg3)
 	{
 		this.Raise(this._receivers, arg1, arg2, arg3);
 	}
 
-	// Token: 0x06004A87 RID: 19079 RVA: 0x00186504 File Offset: 0x00184704
+	// Token: 0x06004A87 RID: 19079 RVA: 0x001864E4 File Offset: 0x001846E4
 	public void Raise(ReceiverGroup receivers, T1 arg1, T2 arg2, T3 arg3)
 	{
 		if (!this._enabled)
@@ -91,7 +91,7 @@ public class PhotonSignal<T1, T2, T3> : PhotonSignal
 		PhotonNetwork.RaiseEvent(177, array, raiseEventOptions, PhotonSignal.gSendReliable);
 	}
 
-	// Token: 0x06004A88 RID: 19080 RVA: 0x001865B4 File Offset: 0x001847B4
+	// Token: 0x06004A88 RID: 19080 RVA: 0x00186594 File Offset: 0x00184794
 	protected override void _Relay(object[] args, PhotonSignalInfo info)
 	{
 		T1 arg;
@@ -109,13 +109,13 @@ public class PhotonSignal<T1, T2, T3> : PhotonSignal
 		PhotonSignal._SafeInvoke<T1, T2, T3>(this._callbacks, arg, arg2, arg3, info);
 	}
 
-	// Token: 0x06004A89 RID: 19081 RVA: 0x001865F8 File Offset: 0x001847F8
+	// Token: 0x06004A89 RID: 19081 RVA: 0x001865D8 File Offset: 0x001847D8
 	public new static implicit operator PhotonSignal<T1, T2, T3>(string s)
 	{
 		return new PhotonSignal<T1, T2, T3>(s);
 	}
 
-	// Token: 0x06004A8A RID: 19082 RVA: 0x00186600 File Offset: 0x00184800
+	// Token: 0x06004A8A RID: 19082 RVA: 0x001865E0 File Offset: 0x001847E0
 	public new static explicit operator PhotonSignal<T1, T2, T3>(int i)
 	{
 		return new PhotonSignal<T1, T2, T3>(i);

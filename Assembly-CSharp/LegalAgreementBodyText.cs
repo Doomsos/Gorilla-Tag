@@ -10,13 +10,13 @@ using UnityEngine.UI;
 // Token: 0x02000ACA RID: 2762
 public class LegalAgreementBodyText : MonoBehaviour
 {
-	// Token: 0x06004512 RID: 17682 RVA: 0x0016DFC6 File Offset: 0x0016C1C6
+	// Token: 0x06004512 RID: 17682 RVA: 0x0016DFA6 File Offset: 0x0016C1A6
 	private void Awake()
 	{
 		this.textCollection.Add(this.textBox);
 	}
 
-	// Token: 0x06004513 RID: 17683 RVA: 0x0016DFDC File Offset: 0x0016C1DC
+	// Token: 0x06004513 RID: 17683 RVA: 0x0016DFBC File Offset: 0x0016C1BC
 	public void SetText(string text)
 	{
 		text = Regex.Unescape(text);
@@ -42,7 +42,7 @@ public class LegalAgreementBodyText : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004514 RID: 17684 RVA: 0x0016E06C File Offset: 0x0016C26C
+	// Token: 0x06004514 RID: 17684 RVA: 0x0016E04C File Offset: 0x0016C24C
 	public void ClearText()
 	{
 		foreach (Text text in this.textCollection)
@@ -52,7 +52,7 @@ public class LegalAgreementBodyText : MonoBehaviour
 		this.state = LegalAgreementBodyText.State.Ready;
 	}
 
-	// Token: 0x06004515 RID: 17685 RVA: 0x0016E0C8 File Offset: 0x0016C2C8
+	// Token: 0x06004515 RID: 17685 RVA: 0x0016E0A8 File Offset: 0x0016C2A8
 	public Task<bool> UpdateTextFromPlayFabTitleData(string key, string version)
 	{
 		LegalAgreementBodyText.<UpdateTextFromPlayFabTitleData>d__10 <UpdateTextFromPlayFabTitleData>d__;
@@ -65,14 +65,14 @@ public class LegalAgreementBodyText : MonoBehaviour
 		return <UpdateTextFromPlayFabTitleData>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004516 RID: 17686 RVA: 0x0016E11B File Offset: 0x0016C31B
+	// Token: 0x06004516 RID: 17686 RVA: 0x0016E0FB File Offset: 0x0016C2FB
 	private void OnPlayFabError(PlayFabError obj)
 	{
 		Debug.LogError("ERROR: " + obj.ErrorMessage);
 		this.state = LegalAgreementBodyText.State.Error;
 	}
 
-	// Token: 0x06004517 RID: 17687 RVA: 0x0016E139 File Offset: 0x0016C339
+	// Token: 0x06004517 RID: 17687 RVA: 0x0016E119 File Offset: 0x0016C319
 	private void OnTitleDataReceived(string text)
 	{
 		this.cachedText = text;
@@ -80,7 +80,7 @@ public class LegalAgreementBodyText : MonoBehaviour
 	}
 
 	// Token: 0x17000680 RID: 1664
-	// (get) Token: 0x06004518 RID: 17688 RVA: 0x0016E14C File Offset: 0x0016C34C
+	// (get) Token: 0x06004518 RID: 17688 RVA: 0x0016E12C File Offset: 0x0016C32C
 	public float Height
 	{
 		get

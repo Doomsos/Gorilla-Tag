@@ -5,7 +5,7 @@ using UnityEngine;
 public class GRShieldCollider : MonoBehaviour
 {
 	// Token: 0x17000430 RID: 1072
-	// (get) Token: 0x06002E04 RID: 11780 RVA: 0x000FA5CE File Offset: 0x000F87CE
+	// (get) Token: 0x06002E04 RID: 11780 RVA: 0x000FA5AE File Offset: 0x000F87AE
 	public float KnockbackVelocity
 	{
 		get
@@ -15,7 +15,7 @@ public class GRShieldCollider : MonoBehaviour
 	}
 
 	// Token: 0x17000431 RID: 1073
-	// (get) Token: 0x06002E05 RID: 11781 RVA: 0x000FA5D6 File Offset: 0x000F87D6
+	// (get) Token: 0x06002E05 RID: 11781 RVA: 0x000FA5B6 File Offset: 0x000F87B6
 	public GRToolDirectionalShield ShieldTool
 	{
 		get
@@ -24,7 +24,7 @@ public class GRShieldCollider : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002E06 RID: 11782 RVA: 0x000FA5DE File Offset: 0x000F87DE
+	// Token: 0x06002E06 RID: 11782 RVA: 0x000FA5BE File Offset: 0x000F87BE
 	public void OnEnemyBlocked(Vector3 enemyPosition)
 	{
 		if (this.shieldTool != null)
@@ -33,7 +33,7 @@ public class GRShieldCollider : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002E07 RID: 11783 RVA: 0x000FA5FA File Offset: 0x000F87FA
+	// Token: 0x06002E07 RID: 11783 RVA: 0x000FA5DA File Offset: 0x000F87DA
 	public void BlockHittable(Vector3 enemyPosition, Vector3 enemyAttackDirection, GameHittable hittable)
 	{
 		if (this.shieldTool != null)

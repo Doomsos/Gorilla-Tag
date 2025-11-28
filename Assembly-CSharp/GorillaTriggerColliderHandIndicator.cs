@@ -4,14 +4,14 @@ using UnityEngine;
 // Token: 0x02000929 RID: 2345
 public class GorillaTriggerColliderHandIndicator : MonoBehaviourTick
 {
-	// Token: 0x06003BF1 RID: 15345 RVA: 0x0013C910 File Offset: 0x0013AB10
+	// Token: 0x06003BF1 RID: 15345 RVA: 0x0013C8F0 File Offset: 0x0013AAF0
 	public override void Tick()
 	{
 		this.currentVelocity = (base.transform.position - this.lastPosition) / Time.deltaTime;
 		this.lastPosition = base.transform.position;
 	}
 
-	// Token: 0x06003BF2 RID: 15346 RVA: 0x0013C949 File Offset: 0x0013AB49
+	// Token: 0x06003BF2 RID: 15346 RVA: 0x0013C929 File Offset: 0x0013AB29
 	private void OnTriggerEnter(Collider other)
 	{
 		if (this.throwableController != null)

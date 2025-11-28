@@ -9,19 +9,19 @@ using UnityEngine;
 [Serializable]
 public class GhostReactorShiftDepthDisplay
 {
-	// Token: 0x06002990 RID: 10640 RVA: 0x000DFA39 File Offset: 0x000DDC39
+	// Token: 0x06002990 RID: 10640 RVA: 0x000DFA19 File Offset: 0x000DDC19
 	public void Setup()
 	{
 		this.StopDelveDeeperFX();
 	}
 
-	// Token: 0x06002991 RID: 10641 RVA: 0x000DFA41 File Offset: 0x000DDC41
+	// Token: 0x06002991 RID: 10641 RVA: 0x000DFA21 File Offset: 0x000DDC21
 	public int GetRewardXP()
 	{
 		return this.reactor.GetDepthLevel() * 10 + 10;
 	}
 
-	// Token: 0x06002992 RID: 10642 RVA: 0x000DFA54 File Offset: 0x000DDC54
+	// Token: 0x06002992 RID: 10642 RVA: 0x000DFA34 File Offset: 0x000DDC34
 	public void RefreshDisplay()
 	{
 		int depthLevel = this.reactor.GetDepthLevel();
@@ -115,7 +115,7 @@ public class GhostReactorShiftDepthDisplay
 		this.RefreshObjectives();
 	}
 
-	// Token: 0x06002993 RID: 10643 RVA: 0x000DFF14 File Offset: 0x000DE114
+	// Token: 0x06002993 RID: 10643 RVA: 0x000DFEF4 File Offset: 0x000DE0F4
 	public void RefreshObjectives()
 	{
 		GRShiftStat shiftStats = this.shiftManager.shiftStats;
@@ -150,7 +150,7 @@ public class GhostReactorShiftDepthDisplay
 		}
 	}
 
-	// Token: 0x06002994 RID: 10644 RVA: 0x000E0090 File Offset: 0x000DE290
+	// Token: 0x06002994 RID: 10644 RVA: 0x000E0070 File Offset: 0x000DE270
 	public void StartDelveDeeperFX()
 	{
 		this.delveDeeperAudio.Play();
@@ -171,7 +171,7 @@ public class GhostReactorShiftDepthDisplay
 		GorillaTagger.Instance.StartVibration(true, 0.1f, (float)this.shiftManager.GetDrillingDuration());
 	}
 
-	// Token: 0x06002995 RID: 10645 RVA: 0x000E016C File Offset: 0x000DE36C
+	// Token: 0x06002995 RID: 10645 RVA: 0x000E014C File Offset: 0x000DE34C
 	public void StopDelveDeeperFX()
 	{
 		this.delveDeeperAudio.Stop();

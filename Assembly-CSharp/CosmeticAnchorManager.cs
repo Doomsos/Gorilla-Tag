@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000476 RID: 1142
 public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06001D01 RID: 7425 RVA: 0x0009959D File Offset: 0x0009779D
+	// Token: 0x06001D01 RID: 7425 RVA: 0x0009957D File Offset: 0x0009777D
 	protected void Awake()
 	{
 		if (CosmeticAnchorManager.hasInstance && CosmeticAnchorManager.instance != this)
@@ -16,13 +16,13 @@ public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 		CosmeticAnchorManager.SetInstance(this);
 	}
 
-	// Token: 0x06001D02 RID: 7426 RVA: 0x000995C0 File Offset: 0x000977C0
+	// Token: 0x06001D02 RID: 7426 RVA: 0x000995A0 File Offset: 0x000977A0
 	public static void CreateManager()
 	{
 		CosmeticAnchorManager.SetInstance(new GameObject("CosmeticAnchorManager").AddComponent<CosmeticAnchorManager>());
 	}
 
-	// Token: 0x06001D03 RID: 7427 RVA: 0x000995D6 File Offset: 0x000977D6
+	// Token: 0x06001D03 RID: 7427 RVA: 0x000995B6 File Offset: 0x000977B6
 	private static void SetInstance(CosmeticAnchorManager manager)
 	{
 		CosmeticAnchorManager.instance = manager;
@@ -33,7 +33,7 @@ public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06001D04 RID: 7428 RVA: 0x000995F1 File Offset: 0x000977F1
+	// Token: 0x06001D04 RID: 7428 RVA: 0x000995D1 File Offset: 0x000977D1
 	public static void RegisterCosmeticAnchor(CosmeticAnchors cA)
 	{
 		if (!CosmeticAnchorManager.hasInstance)
@@ -46,7 +46,7 @@ public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06001D05 RID: 7429 RVA: 0x00099627 File Offset: 0x00097827
+	// Token: 0x06001D05 RID: 7429 RVA: 0x00099607 File Offset: 0x00097807
 	public static void UnregisterCosmeticAnchor(CosmeticAnchors cA)
 	{
 		if (!CosmeticAnchorManager.hasInstance)
@@ -71,7 +71,7 @@ public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06001D08 RID: 7432 RVA: 0x00099660 File Offset: 0x00097860
+	// Token: 0x06001D08 RID: 7432 RVA: 0x00099640 File Offset: 0x00097840
 	public void SliceUpdate()
 	{
 		for (int i = 0; i < CosmeticAnchorManager.allAnchors.Count; i++)

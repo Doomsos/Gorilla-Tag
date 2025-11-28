@@ -8,7 +8,7 @@ namespace GorillaNetworking
 	[Serializable]
 	public class GorillaText
 	{
-		// Token: 0x0600601B RID: 24603 RVA: 0x001F00B2 File Offset: 0x001EE2B2
+		// Token: 0x0600601B RID: 24603 RVA: 0x001F0092 File Offset: 0x001EE292
 		public void Initialize(Material[] originalMaterials, Material failureMaterial, UnityEvent<string> callback = null, UnityEvent<Material[]> materialCallback = null)
 		{
 			this.failureMaterial = failureMaterial;
@@ -20,8 +20,8 @@ namespace GorillaNetworking
 		}
 
 		// Token: 0x170008E2 RID: 2274
-		// (get) Token: 0x0600601C RID: 24604 RVA: 0x001F00ED File Offset: 0x001EE2ED
-		// (set) Token: 0x0600601D RID: 24605 RVA: 0x001F00F5 File Offset: 0x001EE2F5
+		// (get) Token: 0x0600601C RID: 24604 RVA: 0x001F00CD File Offset: 0x001EE2CD
+		// (set) Token: 0x0600601D RID: 24605 RVA: 0x001F00D5 File Offset: 0x001EE2D5
 		public string Text
 		{
 			get
@@ -47,7 +47,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x0600601E RID: 24606 RVA: 0x001F0128 File Offset: 0x001EE328
+		// Token: 0x0600601E RID: 24606 RVA: 0x001F0108 File Offset: 0x001EE308
 		public void EnableFailedState(string failText)
 		{
 			this.failedState = true;
@@ -67,7 +67,7 @@ namespace GorillaNetworking
 			unityEvent2.Invoke(this.currentMaterials);
 		}
 
-		// Token: 0x0600601F RID: 24607 RVA: 0x001F0190 File Offset: 0x001EE390
+		// Token: 0x0600601F RID: 24607 RVA: 0x001F0170 File Offset: 0x001EE370
 		public void DisableFailedState()
 		{
 			this.failedState = false;

@@ -7,7 +7,7 @@ namespace GameObjectScheduling.DeepLinks
 	// Token: 0x0200115E RID: 4446
 	public class DeepLinkButton : GorillaPressableButton
 	{
-		// Token: 0x0600701E RID: 28702 RVA: 0x0024768A File Offset: 0x0024588A
+		// Token: 0x0600701E RID: 28702 RVA: 0x0024766A File Offset: 0x0024586A
 		public override void ButtonActivation()
 		{
 			base.ButtonActivation();
@@ -15,7 +15,7 @@ namespace GameObjectScheduling.DeepLinks
 			base.StartCoroutine(this.ButtonPressed_Local());
 		}
 
-		// Token: 0x0600701F RID: 28703 RVA: 0x002476C2 File Offset: 0x002458C2
+		// Token: 0x0600701F RID: 28703 RVA: 0x002476A2 File Offset: 0x002458A2
 		private void OnDeepLinkSent(string message)
 		{
 			this.sendingDeepLink = false;
@@ -25,7 +25,7 @@ namespace GameObjectScheduling.DeepLinks
 			}
 		}
 
-		// Token: 0x06007020 RID: 28704 RVA: 0x002476D9 File Offset: 0x002458D9
+		// Token: 0x06007020 RID: 28704 RVA: 0x002476B9 File Offset: 0x002458B9
 		private IEnumerator ButtonPressed_Local()
 		{
 			this.isOn = true;

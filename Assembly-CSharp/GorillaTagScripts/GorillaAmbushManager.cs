@@ -8,7 +8,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DE7 RID: 3559
 	public sealed class GorillaAmbushManager : GorillaTagManager
 	{
-		// Token: 0x060058AA RID: 22698 RVA: 0x001C6703 File Offset: 0x001C4903
+		// Token: 0x060058AA RID: 22698 RVA: 0x001C66E3 File Offset: 0x001C48E3
 		public override GameModeType GameType()
 		{
 			if (!this.isGhostTag)
@@ -19,7 +19,7 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x17000850 RID: 2128
-		// (get) Token: 0x060058AB RID: 22699 RVA: 0x001C6710 File Offset: 0x001C4910
+		// (get) Token: 0x060058AB RID: 22699 RVA: 0x001C66F0 File Offset: 0x001C48F0
 		public static int HandEffectHash
 		{
 			get
@@ -29,16 +29,16 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x17000851 RID: 2129
-		// (get) Token: 0x060058AC RID: 22700 RVA: 0x001C6717 File Offset: 0x001C4917
-		// (set) Token: 0x060058AD RID: 22701 RVA: 0x001C671E File Offset: 0x001C491E
+		// (get) Token: 0x060058AC RID: 22700 RVA: 0x001C66F7 File Offset: 0x001C48F7
+		// (set) Token: 0x060058AD RID: 22701 RVA: 0x001C66FE File Offset: 0x001C48FE
 		public static float HandFXScaleModifier { get; private set; }
 
 		// Token: 0x17000852 RID: 2130
-		// (get) Token: 0x060058AE RID: 22702 RVA: 0x001C6726 File Offset: 0x001C4926
-		// (set) Token: 0x060058AF RID: 22703 RVA: 0x001C672E File Offset: 0x001C492E
+		// (get) Token: 0x060058AE RID: 22702 RVA: 0x001C6706 File Offset: 0x001C4906
+		// (set) Token: 0x060058AF RID: 22703 RVA: 0x001C670E File Offset: 0x001C490E
 		public bool isGhostTag { get; private set; }
 
-		// Token: 0x060058B0 RID: 22704 RVA: 0x001C6737 File Offset: 0x001C4937
+		// Token: 0x060058B0 RID: 22704 RVA: 0x001C6717 File Offset: 0x001C4917
 		public override void Awake()
 		{
 			base.Awake();
@@ -49,14 +49,14 @@ namespace GorillaTagScripts
 			GorillaAmbushManager.HandFXScaleModifier = this.handTapScaleFactor;
 		}
 
-		// Token: 0x060058B1 RID: 22705 RVA: 0x001C6768 File Offset: 0x001C4968
+		// Token: 0x060058B1 RID: 22705 RVA: 0x001C6748 File Offset: 0x001C4948
 		private void Start()
 		{
 			this.hasScryingPlane = this.scryingPlaneRef.TryResolve<MeshRenderer>(out this.scryingPlane);
 			this.hasScryingPlane3p = this.scryingPlane3pRef.TryResolve<MeshRenderer>(out this.scryingPlane3p);
 		}
 
-		// Token: 0x060058B2 RID: 22706 RVA: 0x001C6798 File Offset: 0x001C4998
+		// Token: 0x060058B2 RID: 22706 RVA: 0x001C6778 File Offset: 0x001C4978
 		public override string GameModeName()
 		{
 			if (!this.isGhostTag)
@@ -66,7 +66,7 @@ namespace GorillaTagScripts
 			return "GHOST";
 		}
 
-		// Token: 0x060058B3 RID: 22707 RVA: 0x001C67B0 File Offset: 0x001C49B0
+		// Token: 0x060058B3 RID: 22707 RVA: 0x001C6790 File Offset: 0x001C4990
 		public override string GameModeNameRoomLabel()
 		{
 			string text = this.isGhostTag ? "GAME_MODE_GHOST_ROOM_LABEL" : "GAME_MODE_AMBUSH_ROOM_LABEL";
@@ -79,7 +79,7 @@ namespace GorillaTagScripts
 			return result;
 		}
 
-		// Token: 0x060058B4 RID: 22708 RVA: 0x001C6808 File Offset: 0x001C4A08
+		// Token: 0x060058B4 RID: 22708 RVA: 0x001C67E8 File Offset: 0x001C49E8
 		public override void UpdatePlayerAppearance(VRRig rig)
 		{
 			int materialIndex = this.MyMatIndex(rig.creator);
@@ -102,7 +102,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058B5 RID: 22709 RVA: 0x001C68AE File Offset: 0x001C4AAE
+		// Token: 0x060058B5 RID: 22709 RVA: 0x001C688E File Offset: 0x001C4A8E
 		public override int MyMatIndex(NetPlayer forPlayer)
 		{
 			if (!base.IsInfected(forPlayer))
@@ -112,7 +112,7 @@ namespace GorillaTagScripts
 			return 13;
 		}
 
-		// Token: 0x060058B6 RID: 22710 RVA: 0x001C68C0 File Offset: 0x001C4AC0
+		// Token: 0x060058B6 RID: 22710 RVA: 0x001C68A0 File Offset: 0x001C4AA0
 		public override void StopPlaying()
 		{
 			base.StopPlaying();

@@ -9,7 +9,7 @@ using UnityEngine;
 public class SteamManager : MonoBehaviour
 {
 	// Token: 0x170006F1 RID: 1777
-	// (get) Token: 0x06004AF0 RID: 19184 RVA: 0x0018803A File Offset: 0x0018623A
+	// (get) Token: 0x06004AF0 RID: 19184 RVA: 0x0018801A File Offset: 0x0018621A
 	protected static SteamManager Instance
 	{
 		get
@@ -23,7 +23,7 @@ public class SteamManager : MonoBehaviour
 	}
 
 	// Token: 0x170006F2 RID: 1778
-	// (get) Token: 0x06004AF1 RID: 19185 RVA: 0x0018805E File Offset: 0x0018625E
+	// (get) Token: 0x06004AF1 RID: 19185 RVA: 0x0018803E File Offset: 0x0018623E
 	public static bool Initialized
 	{
 		get
@@ -32,14 +32,14 @@ public class SteamManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004AF2 RID: 19186 RVA: 0x0018806A File Offset: 0x0018626A
+	// Token: 0x06004AF2 RID: 19186 RVA: 0x0018804A File Offset: 0x0018624A
 	[MonoPInvokeCallback(typeof(SteamAPIWarningMessageHook_t))]
 	protected static void SteamAPIDebugTextHook(int nSeverity, StringBuilder pchDebugText)
 	{
 		Debug.LogWarning(pchDebugText);
 	}
 
-	// Token: 0x06004AF3 RID: 19187 RVA: 0x00188072 File Offset: 0x00186272
+	// Token: 0x06004AF3 RID: 19187 RVA: 0x00188052 File Offset: 0x00186252
 	[RuntimeInitializeOnLoadMethod(4)]
 	private static void InitOnPlayMode()
 	{
@@ -47,7 +47,7 @@ public class SteamManager : MonoBehaviour
 		SteamManager.s_instance = null;
 	}
 
-	// Token: 0x06004AF4 RID: 19188 RVA: 0x00188080 File Offset: 0x00186280
+	// Token: 0x06004AF4 RID: 19188 RVA: 0x00188060 File Offset: 0x00186260
 	protected virtual void Awake()
 	{
 		if (SteamManager.s_instance != null)
@@ -95,7 +95,7 @@ public class SteamManager : MonoBehaviour
 		SteamManager.s_EverInitialized = true;
 	}
 
-	// Token: 0x06004AF5 RID: 19189 RVA: 0x00188168 File Offset: 0x00186368
+	// Token: 0x06004AF5 RID: 19189 RVA: 0x00188148 File Offset: 0x00186348
 	protected virtual void OnEnable()
 	{
 		if (SteamManager.s_instance == null)
@@ -113,7 +113,7 @@ public class SteamManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004AF6 RID: 19190 RVA: 0x001881B6 File Offset: 0x001863B6
+	// Token: 0x06004AF6 RID: 19190 RVA: 0x00188196 File Offset: 0x00186396
 	protected virtual void OnDestroy()
 	{
 		if (SteamManager.s_instance != this)
@@ -128,7 +128,7 @@ public class SteamManager : MonoBehaviour
 		SteamAPI.Shutdown();
 	}
 
-	// Token: 0x06004AF7 RID: 19191 RVA: 0x001881DA File Offset: 0x001863DA
+	// Token: 0x06004AF7 RID: 19191 RVA: 0x001881BA File Offset: 0x001863BA
 	protected virtual void Update()
 	{
 		if (!this.m_bInitialized)

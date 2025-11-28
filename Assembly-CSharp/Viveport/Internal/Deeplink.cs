@@ -7,7 +7,7 @@ namespace Viveport.Internal
 	// Token: 0x02000D49 RID: 3401
 	internal class Deeplink
 	{
-		// Token: 0x060052CB RID: 21195 RVA: 0x001A5083 File Offset: 0x001A3283
+		// Token: 0x060052CB RID: 21195 RVA: 0x001A5063 File Offset: 0x001A3263
 		static Deeplink()
 		{
 			Api.LoadLibraryManually("viveport_api");

@@ -8,7 +8,7 @@ using UnityEngine;
 internal class RoomSystemSettings : ScriptableObject
 {
 	// Token: 0x17000711 RID: 1809
-	// (get) Token: 0x06004BCE RID: 19406 RVA: 0x0018C4AB File Offset: 0x0018A6AB
+	// (get) Token: 0x06004BCE RID: 19406 RVA: 0x0018C48B File Offset: 0x0018A68B
 	public ExpectedUsersDecayTimer ExpectedUsersTimer
 	{
 		get
@@ -18,7 +18,7 @@ internal class RoomSystemSettings : ScriptableObject
 	}
 
 	// Token: 0x17000712 RID: 1810
-	// (get) Token: 0x06004BCF RID: 19407 RVA: 0x0018C4B3 File Offset: 0x0018A6B3
+	// (get) Token: 0x06004BCF RID: 19407 RVA: 0x0018C493 File Offset: 0x0018A693
 	public TickSystemTimer ResyncNetworkTimeTimer
 	{
 		get
@@ -28,7 +28,7 @@ internal class RoomSystemSettings : ScriptableObject
 	}
 
 	// Token: 0x17000713 RID: 1811
-	// (get) Token: 0x06004BD0 RID: 19408 RVA: 0x0018C4BB File Offset: 0x0018A6BB
+	// (get) Token: 0x06004BD0 RID: 19408 RVA: 0x0018C49B File Offset: 0x0018A69B
 	public CallLimiterWithCooldown StatusEffectLimiter
 	{
 		get
@@ -38,7 +38,7 @@ internal class RoomSystemSettings : ScriptableObject
 	}
 
 	// Token: 0x17000714 RID: 1812
-	// (get) Token: 0x06004BD1 RID: 19409 RVA: 0x0018C4C3 File Offset: 0x0018A6C3
+	// (get) Token: 0x06004BD1 RID: 19409 RVA: 0x0018C4A3 File Offset: 0x0018A6A3
 	public CallLimiterWithCooldown SoundEffectLimiter
 	{
 		get
@@ -48,7 +48,7 @@ internal class RoomSystemSettings : ScriptableObject
 	}
 
 	// Token: 0x17000715 RID: 1813
-	// (get) Token: 0x06004BD2 RID: 19410 RVA: 0x0018C4CB File Offset: 0x0018A6CB
+	// (get) Token: 0x06004BD2 RID: 19410 RVA: 0x0018C4AB File Offset: 0x0018A6AB
 	public CallLimiterWithCooldown SoundEffectOtherLimiter
 	{
 		get
@@ -58,7 +58,7 @@ internal class RoomSystemSettings : ScriptableObject
 	}
 
 	// Token: 0x17000716 RID: 1814
-	// (get) Token: 0x06004BD3 RID: 19411 RVA: 0x0018C4D3 File Offset: 0x0018A6D3
+	// (get) Token: 0x06004BD3 RID: 19411 RVA: 0x0018C4B3 File Offset: 0x0018A6B3
 	public CallLimiterWithCooldown PlayerEffectLimiter
 	{
 		get
@@ -68,7 +68,7 @@ internal class RoomSystemSettings : ScriptableObject
 	}
 
 	// Token: 0x17000717 RID: 1815
-	// (get) Token: 0x06004BD4 RID: 19412 RVA: 0x0018C4DB File Offset: 0x0018A6DB
+	// (get) Token: 0x06004BD4 RID: 19412 RVA: 0x0018C4BB File Offset: 0x0018A6BB
 	public GameObject PlayerImpactEffect
 	{
 		get
@@ -78,7 +78,7 @@ internal class RoomSystemSettings : ScriptableObject
 	}
 
 	// Token: 0x17000718 RID: 1816
-	// (get) Token: 0x06004BD5 RID: 19413 RVA: 0x0018C4E3 File Offset: 0x0018A6E3
+	// (get) Token: 0x06004BD5 RID: 19413 RVA: 0x0018C4C3 File Offset: 0x0018A6C3
 	public List<RoomSystem.PlayerEffectConfig> PlayerEffects
 	{
 		get
@@ -88,7 +88,7 @@ internal class RoomSystemSettings : ScriptableObject
 	}
 
 	// Token: 0x17000719 RID: 1817
-	// (get) Token: 0x06004BD6 RID: 19414 RVA: 0x0018C4EB File Offset: 0x0018A6EB
+	// (get) Token: 0x06004BD6 RID: 19414 RVA: 0x0018C4CB File Offset: 0x0018A6CB
 	public int PausedDCTimer
 	{
 		get

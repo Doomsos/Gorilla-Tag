@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics.Summer
 	// Token: 0x0200112D RID: 4397
 	public class Projectile : MonoBehaviour, IProjectile
 	{
-		// Token: 0x06006DFA RID: 28154 RVA: 0x00241B4D File Offset: 0x0023FD4D
+		// Token: 0x06006DFA RID: 28154 RVA: 0x00241B2D File Offset: 0x0023FD2D
 		protected void Awake()
 		{
 			this.rigidbody = base.GetComponentInChildren<Rigidbody>();
@@ -22,7 +22,7 @@ namespace GorillaTag.Cosmetics.Summer
 		{
 		}
 
-		// Token: 0x06006DFC RID: 28156 RVA: 0x00241B70 File Offset: 0x0023FD70
+		// Token: 0x06006DFC RID: 28156 RVA: 0x00241B50 File Offset: 0x0023FD50
 		public void Launch(Vector3 startPosition, Quaternion startRotation, Vector3 velocity, float chargeFrac, VRRig ownerRig, int progressStep)
 		{
 			Transform transform = base.transform;
@@ -44,13 +44,13 @@ namespace GorillaTag.Cosmetics.Summer
 			unityEvent.Invoke(chargeFrac);
 		}
 
-		// Token: 0x06006DFD RID: 28157 RVA: 0x00241BFD File Offset: 0x0023FDFD
+		// Token: 0x06006DFD RID: 28157 RVA: 0x00241BDD File Offset: 0x0023FDDD
 		private bool IsTagValid(GameObject obj)
 		{
 			return this.collisionTags.Contains(obj.tag);
 		}
 
-		// Token: 0x06006DFE RID: 28158 RVA: 0x00241C10 File Offset: 0x0023FE10
+		// Token: 0x06006DFE RID: 28158 RVA: 0x00241BF0 File Offset: 0x0023FDF0
 		private void HandleImpact(GameObject hitObject, Vector3 hitPosition, Vector3 hitNormal)
 		{
 			if (this.impactEffectSpawned)
@@ -86,7 +86,7 @@ namespace GorillaTag.Cosmetics.Summer
 			}
 		}
 
-		// Token: 0x06006DFF RID: 28159 RVA: 0x00241CCC File Offset: 0x0023FECC
+		// Token: 0x06006DFF RID: 28159 RVA: 0x00241CAC File Offset: 0x0023FEAC
 		private void GetColliderHitInfo(Collider other, out Vector3 position, out Vector3 normal)
 		{
 			Vector3 vector = Time.fixedDeltaTime * 2f * this.rigidbody.linearVelocity;
@@ -98,21 +98,21 @@ namespace GorillaTag.Cosmetics.Summer
 			normal = raycastHit.normal;
 		}
 
-		// Token: 0x06006E00 RID: 28160 RVA: 0x00241D48 File Offset: 0x0023FF48
+		// Token: 0x06006E00 RID: 28160 RVA: 0x00241D28 File Offset: 0x0023FF28
 		private void OnCollisionEnter(Collision other)
 		{
 			ContactPoint contact = other.GetContact(0);
 			this.HandleImpact(other.gameObject, contact.point, contact.normal);
 		}
 
-		// Token: 0x06006E01 RID: 28161 RVA: 0x00241D78 File Offset: 0x0023FF78
+		// Token: 0x06006E01 RID: 28161 RVA: 0x00241D58 File Offset: 0x0023FF58
 		private void OnCollisionStay(Collision other)
 		{
 			ContactPoint contact = other.GetContact(0);
 			this.HandleImpact(other.gameObject, contact.point, contact.normal);
 		}
 
-		// Token: 0x06006E02 RID: 28162 RVA: 0x00241DA8 File Offset: 0x0023FFA8
+		// Token: 0x06006E02 RID: 28162 RVA: 0x00241D88 File Offset: 0x0023FF88
 		private void OnTriggerEnter(Collider other)
 		{
 			Vector3 hitPosition;
@@ -121,14 +121,14 @@ namespace GorillaTag.Cosmetics.Summer
 			this.HandleImpact(other.gameObject, hitPosition, hitNormal);
 		}
 
-		// Token: 0x06006E03 RID: 28163 RVA: 0x00241DD0 File Offset: 0x0023FFD0
+		// Token: 0x06006E03 RID: 28163 RVA: 0x00241DB0 File Offset: 0x0023FFB0
 		private void OnTriggerStay(Collider other)
 		{
 			Transform transform = base.transform;
 			this.HandleImpact(other.gameObject, transform.position, -transform.forward);
 		}
 
-		// Token: 0x06006E04 RID: 28164 RVA: 0x00241E04 File Offset: 0x00240004
+		// Token: 0x06006E04 RID: 28164 RVA: 0x00241DE4 File Offset: 0x0023FFE4
 		private void SpawnImpactEffect(GameObject prefab, Vector3 position, Vector3 normal)
 		{
 			if (prefab != null)
@@ -145,7 +145,7 @@ namespace GorillaTag.Cosmetics.Summer
 			}
 		}
 
-		// Token: 0x06006E05 RID: 28165 RVA: 0x00241E78 File Offset: 0x00240078
+		// Token: 0x06006E05 RID: 28165 RVA: 0x00241E58 File Offset: 0x00240058
 		private void DestroyProjectile()
 		{
 			this.impactEffectSpawned = false;

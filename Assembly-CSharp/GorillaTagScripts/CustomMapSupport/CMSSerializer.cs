@@ -10,7 +10,7 @@ namespace GorillaTagScripts.CustomMapSupport
 	// Token: 0x02000E0C RID: 3596
 	internal class CMSSerializer : GorillaSerializer
 	{
-		// Token: 0x060059B5 RID: 22965 RVA: 0x001CB072 File Offset: 0x001C9272
+		// Token: 0x060059B5 RID: 22965 RVA: 0x001CB052 File Offset: 0x001C9252
 		public void Awake()
 		{
 			if (CMSSerializer.instance != null)
@@ -21,20 +21,20 @@ namespace GorillaTagScripts.CustomMapSupport
 			CMSSerializer.hasInstance = true;
 		}
 
-		// Token: 0x060059B6 RID: 22966 RVA: 0x001CB097 File Offset: 0x001C9297
+		// Token: 0x060059B6 RID: 22966 RVA: 0x001CB077 File Offset: 0x001C9277
 		public void OnEnable()
 		{
 			CustomMapManager.OnMapLoadComplete.RemoveListener(new UnityAction<bool>(this.OnCustomMapLoaded));
 			CustomMapManager.OnMapLoadComplete.AddListener(new UnityAction<bool>(this.OnCustomMapLoaded));
 		}
 
-		// Token: 0x060059B7 RID: 22967 RVA: 0x001CB0C5 File Offset: 0x001C92C5
+		// Token: 0x060059B7 RID: 22967 RVA: 0x001CB0A5 File Offset: 0x001C92A5
 		public void OnDisable()
 		{
 			CustomMapManager.OnMapLoadComplete.RemoveListener(new UnityAction<bool>(this.OnCustomMapLoaded));
 		}
 
-		// Token: 0x060059B8 RID: 22968 RVA: 0x001CB0DD File Offset: 0x001C92DD
+		// Token: 0x060059B8 RID: 22968 RVA: 0x001CB0BD File Offset: 0x001C92BD
 		private void OnCustomMapLoaded(bool success)
 		{
 			if (success)
@@ -43,7 +43,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059B9 RID: 22969 RVA: 0x001CB0E7 File Offset: 0x001C92E7
+		// Token: 0x060059B9 RID: 22969 RVA: 0x001CB0C7 File Offset: 0x001C92C7
 		public static void ResetSyncedMapObjects()
 		{
 			CMSSerializer.triggerHistory.Clear();
@@ -53,7 +53,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			CMSSerializer.waitingForTriggerCounts = false;
 		}
 
-		// Token: 0x060059BA RID: 22970 RVA: 0x001CB114 File Offset: 0x001C9314
+		// Token: 0x060059BA RID: 22970 RVA: 0x001CB0F4 File Offset: 0x001C92F4
 		public static void RegisterTrigger(string sceneName, CMSTrigger trigger)
 		{
 			Dictionary<byte, CMSTrigger> dictionary;
@@ -74,7 +74,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059BB RID: 22971 RVA: 0x001CB16C File Offset: 0x001C936C
+		// Token: 0x060059BB RID: 22971 RVA: 0x001CB14C File Offset: 0x001C934C
 		private static bool TryGetRegisteredTrigger(byte triggerID, out CMSTrigger trigger)
 		{
 			trigger = null;
@@ -88,19 +88,19 @@ namespace GorillaTagScripts.CustomMapSupport
 			return false;
 		}
 
-		// Token: 0x060059BC RID: 22972 RVA: 0x001CB1D4 File Offset: 0x001C93D4
+		// Token: 0x060059BC RID: 22972 RVA: 0x001CB1B4 File Offset: 0x001C93B4
 		public static void UnregisterTriggers(string forScene)
 		{
 			CMSSerializer.registeredTriggersPerScene.Remove(forScene);
 		}
 
-		// Token: 0x060059BD RID: 22973 RVA: 0x001CB1E2 File Offset: 0x001C93E2
+		// Token: 0x060059BD RID: 22973 RVA: 0x001CB1C2 File Offset: 0x001C93C2
 		public static void ResetTrigger(byte triggerID)
 		{
 			CMSSerializer.triggerCounts.Remove(triggerID);
 		}
 
-		// Token: 0x060059BE RID: 22974 RVA: 0x001CB1F0 File Offset: 0x001C93F0
+		// Token: 0x060059BE RID: 22974 RVA: 0x001CB1D0 File Offset: 0x001C93D0
 		private static void RequestSyncTriggerHistory()
 		{
 			if (!CMSSerializer.hasInstance || !NetworkSystem.Instance.InRoom || NetworkSystem.Instance.IsMasterClient)
@@ -112,7 +112,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			CMSSerializer.instance.SendRPC("RequestSyncTriggerHistory_RPC", false, Array.Empty<object>());
 		}
 
-		// Token: 0x060059BF RID: 22975 RVA: 0x001CB240 File Offset: 0x001C9440
+		// Token: 0x060059BF RID: 22975 RVA: 0x001CB220 File Offset: 0x001C9420
 		[PunRPC]
 		private void RequestSyncTriggerHistory_RPC(PhotonMessageInfo info)
 		{
@@ -138,7 +138,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			});
 		}
 
-		// Token: 0x060059C0 RID: 22976 RVA: 0x001CB2D8 File Offset: 0x001C94D8
+		// Token: 0x060059C0 RID: 22976 RVA: 0x001CB2B8 File Offset: 0x001C94B8
 		[PunRPC]
 		private void SyncTriggerHistory_RPC(byte[] syncedTriggerHistory, PhotonMessageInfo info)
 		{
@@ -170,7 +170,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			CMSSerializer.scenesWaitingForTriggerHistory.Clear();
 		}
 
-		// Token: 0x060059C1 RID: 22977 RVA: 0x001CB3A4 File Offset: 0x001C95A4
+		// Token: 0x060059C1 RID: 22977 RVA: 0x001CB384 File Offset: 0x001C9584
 		[PunRPC]
 		private void SyncTriggerCounts_RPC(Dictionary<byte, byte> syncedTriggerCounts, PhotonMessageInfo info)
 		{
@@ -202,7 +202,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			CMSSerializer.scenesWaitingForTriggerCounts.Clear();
 		}
 
-		// Token: 0x060059C2 RID: 22978 RVA: 0x001CB470 File Offset: 0x001C9670
+		// Token: 0x060059C2 RID: 22978 RVA: 0x001CB450 File Offset: 0x001C9650
 		public static void ProcessSceneLoad(string sceneName)
 		{
 			if (CMSSerializer.waitingForTriggerHistory)
@@ -221,7 +221,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			CMSSerializer.ProcessTriggerCounts(sceneName);
 		}
 
-		// Token: 0x060059C3 RID: 22979 RVA: 0x001CB4A8 File Offset: 0x001C96A8
+		// Token: 0x060059C3 RID: 22979 RVA: 0x001CB488 File Offset: 0x001C9688
 		private static void ProcessTriggerHistory(string forScene)
 		{
 			Dictionary<byte, CMSTrigger> dictionary;
@@ -244,7 +244,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			onTriggerHistoryProcessedForScene.Invoke(forScene);
 		}
 
-		// Token: 0x060059C4 RID: 22980 RVA: 0x001CB530 File Offset: 0x001C9730
+		// Token: 0x060059C4 RID: 22980 RVA: 0x001CB510 File Offset: 0x001C9710
 		private static void ProcessTriggerCounts(string forScene)
 		{
 			Dictionary<byte, CMSTrigger> dictionary;
@@ -273,7 +273,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059C5 RID: 22981 RVA: 0x001CB610 File Offset: 0x001C9810
+		// Token: 0x060059C5 RID: 22981 RVA: 0x001CB5F0 File Offset: 0x001C97F0
 		public static void RequestTrigger(byte triggerID)
 		{
 			if (!CMSSerializer.hasInstance)
@@ -301,7 +301,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			});
 		}
 
-		// Token: 0x060059C6 RID: 22982 RVA: 0x001CB6C0 File Offset: 0x001C98C0
+		// Token: 0x060059C6 RID: 22982 RVA: 0x001CB6A0 File Offset: 0x001C98A0
 		[PunRPC]
 		private void RequestTrigger_RPC(byte triggerID, PhotonMessageInfo info)
 		{
@@ -342,7 +342,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			this.ActivateTrigger(triggerID, info.SentServerTime, false);
 		}
 
-		// Token: 0x060059C7 RID: 22983 RVA: 0x001CB7D8 File Offset: 0x001C99D8
+		// Token: 0x060059C7 RID: 22983 RVA: 0x001CB7B8 File Offset: 0x001C99B8
 		[PunRPC]
 		private void ActivateTrigger_RPC(byte triggerID, int originatingPlayer, PhotonMessageInfo info)
 		{
@@ -367,7 +367,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			this.ActivateTrigger(triggerID, info.SentServerTime, NetworkSystem.Instance.LocalPlayer.ActorNumber == originatingPlayer);
 		}
 
-		// Token: 0x060059C8 RID: 22984 RVA: 0x001CB89C File Offset: 0x001C9A9C
+		// Token: 0x060059C8 RID: 22984 RVA: 0x001CB87C File Offset: 0x001C9A7C
 		private void ActivateTrigger(byte triggerID, double triggerTime = -1.0, bool originatedLocally = false)
 		{
 			CMSTrigger cmstrigger;

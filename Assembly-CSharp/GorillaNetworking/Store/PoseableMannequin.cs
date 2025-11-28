@@ -9,26 +9,26 @@ namespace GorillaNetworking.Store
 	// Token: 0x02000F4B RID: 3915
 	public class PoseableMannequin : MonoBehaviour
 	{
-		// Token: 0x06006213 RID: 25107 RVA: 0x001F9AC5 File Offset: 0x001F7CC5
+		// Token: 0x06006213 RID: 25107 RVA: 0x001F9AA5 File Offset: 0x001F7CA5
 		public void Start()
 		{
 			this.skinnedMeshRenderer.gameObject.SetActive(false);
 			this.staticGorillaMesh.gameObject.SetActive(true);
 		}
 
-		// Token: 0x06006214 RID: 25108 RVA: 0x00147A6B File Offset: 0x00145C6B
+		// Token: 0x06006214 RID: 25108 RVA: 0x00147A4B File Offset: 0x00145C4B
 		private string GetPrefabPathFromCurrentPrefabStage()
 		{
 			return "";
 		}
 
-		// Token: 0x06006215 RID: 25109 RVA: 0x00147A6B File Offset: 0x00145C6B
+		// Token: 0x06006215 RID: 25109 RVA: 0x00147A4B File Offset: 0x00145C4B
 		private string GetMeshPathFromPrefabPath(string prefabPath)
 		{
 			return "";
 		}
 
-		// Token: 0x06006216 RID: 25110 RVA: 0x001F9AE9 File Offset: 0x001F7CE9
+		// Token: 0x06006216 RID: 25110 RVA: 0x001F9AC9 File Offset: 0x001F7CC9
 		public void BakeSkinnedMesh()
 		{
 			this.BakeAndSaveMeshInPath(this.GetMeshPathFromPrefabPath(this.GetPrefabPathFromCurrentPrefabStage()));
@@ -39,7 +39,7 @@ namespace GorillaNetworking.Store
 		{
 		}
 
-		// Token: 0x06006218 RID: 25112 RVA: 0x001F9AFD File Offset: 0x001F7CFD
+		// Token: 0x06006218 RID: 25112 RVA: 0x001F9ADD File Offset: 0x001F7CDD
 		private void UpdateStaticMeshMannequin()
 		{
 			this.staticGorillaMesh.sharedMesh = this.BakedColliderMesh;
@@ -47,13 +47,13 @@ namespace GorillaNetworking.Store
 			this.staticGorillaMeshCollider.sharedMesh = this.BakedColliderMesh;
 		}
 
-		// Token: 0x06006219 RID: 25113 RVA: 0x001F9B37 File Offset: 0x001F7D37
+		// Token: 0x06006219 RID: 25113 RVA: 0x001F9B17 File Offset: 0x001F7D17
 		private void UpdateSkinnedMeshCollider()
 		{
 			this.skinnedMeshCollider.sharedMesh = this.BakedColliderMesh;
 		}
 
-		// Token: 0x0600621A RID: 25114 RVA: 0x001F9B4C File Offset: 0x001F7D4C
+		// Token: 0x0600621A RID: 25114 RVA: 0x001F9B2C File Offset: 0x001F7D2C
 		public void UpdateGTPosRotConstraints()
 		{
 			GTPosRotConstraints[] array = this.cosmeticConstraints;
@@ -67,7 +67,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x0600621B RID: 25115 RVA: 0x001F9B9C File Offset: 0x001F7D9C
+		// Token: 0x0600621B RID: 25115 RVA: 0x001F9B7C File Offset: 0x001F7D7C
 		private void HookupCosmeticConstraints()
 		{
 			this.cosmeticConstraints = base.GetComponentsInChildren<GTPosRotConstraints>();
@@ -80,7 +80,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x0600621C RID: 25116 RVA: 0x001F9C10 File Offset: 0x001F7E10
+		// Token: 0x0600621C RID: 25116 RVA: 0x001F9BF0 File Offset: 0x001F7DF0
 		private Transform FindBone(string boneName)
 		{
 			foreach (Transform transform in this.skinnedMeshRenderer.bones)
@@ -98,13 +98,13 @@ namespace GorillaNetworking.Store
 		{
 		}
 
-		// Token: 0x0600621E RID: 25118 RVA: 0x001F9C4C File Offset: 0x001F7E4C
+		// Token: 0x0600621E RID: 25118 RVA: 0x001F9C2C File Offset: 0x001F7E2C
 		public void SerializeVRRig()
 		{
 			base.StartCoroutine(this.SaveLocalPlayerPose());
 		}
 
-		// Token: 0x0600621F RID: 25119 RVA: 0x001F9C5B File Offset: 0x001F7E5B
+		// Token: 0x0600621F RID: 25119 RVA: 0x001F9C3B File Offset: 0x001F7E3B
 		public IEnumerator SaveLocalPlayerPose()
 		{
 			yield return null;
@@ -116,7 +116,7 @@ namespace GorillaNetworking.Store
 		{
 		}
 
-		// Token: 0x06006221 RID: 25121 RVA: 0x001F9C64 File Offset: 0x001F7E64
+		// Token: 0x06006221 RID: 25121 RVA: 0x001F9C44 File Offset: 0x001F7E44
 		public void SetCurvesForBone(SkinnedMeshRenderer paramSkinnedMeshRenderer, AnimationClip clip, Transform bone)
 		{
 			Keyframe[] array = new Keyframe[]

@@ -6,7 +6,7 @@ using UnityEngine;
 public class FriendSystem : MonoBehaviour
 {
 	// Token: 0x170006D2 RID: 1746
-	// (get) Token: 0x060048E5 RID: 18661 RVA: 0x0017F20A File Offset: 0x0017D40A
+	// (get) Token: 0x060048E5 RID: 18661 RVA: 0x0017F1EA File Offset: 0x0017D3EA
 	public FriendSystem.PlayerPrivacy LocalPlayerPrivacy
 	{
 		get
@@ -16,11 +16,11 @@ public class FriendSystem : MonoBehaviour
 	}
 
 	// Token: 0x1400007D RID: 125
-	// (add) Token: 0x060048E6 RID: 18662 RVA: 0x0017F214 File Offset: 0x0017D414
-	// (remove) Token: 0x060048E7 RID: 18663 RVA: 0x0017F24C File Offset: 0x0017D44C
+	// (add) Token: 0x060048E6 RID: 18662 RVA: 0x0017F1F4 File Offset: 0x0017D3F4
+	// (remove) Token: 0x060048E7 RID: 18663 RVA: 0x0017F22C File Offset: 0x0017D42C
 	public event Action<List<FriendBackendController.Friend>> OnFriendListRefresh;
 
-	// Token: 0x060048E8 RID: 18664 RVA: 0x0017F284 File Offset: 0x0017D484
+	// Token: 0x060048E8 RID: 18664 RVA: 0x0017F264 File Offset: 0x0017D464
 	public void SetLocalPlayerPrivacy(FriendSystem.PlayerPrivacy privacyState)
 	{
 		this.localPlayerPrivacy = privacyState;
@@ -40,13 +40,13 @@ public class FriendSystem : MonoBehaviour
 		FriendBackendController.Instance.SetPrivacyState(privacyState2);
 	}
 
-	// Token: 0x060048E9 RID: 18665 RVA: 0x0017F2C1 File Offset: 0x0017D4C1
+	// Token: 0x060048E9 RID: 18665 RVA: 0x0017F2A1 File Offset: 0x0017D4A1
 	public void RefreshFriendsList()
 	{
 		FriendBackendController.Instance.GetFriends();
 	}
 
-	// Token: 0x060048EA RID: 18666 RVA: 0x0017F2D0 File Offset: 0x0017D4D0
+	// Token: 0x060048EA RID: 18666 RVA: 0x0017F2B0 File Offset: 0x0017D4B0
 	public void SendFriendRequest(NetPlayer targetPlayer, GTZone stationZone, FriendSystem.FriendRequestCallback callback)
 	{
 		FriendSystem.FriendRequestData friendRequestData = new FriendSystem.FriendRequestData
@@ -61,7 +61,7 @@ public class FriendSystem : MonoBehaviour
 		FriendBackendController.Instance.AddFriend(targetPlayer);
 	}
 
-	// Token: 0x060048EB RID: 18667 RVA: 0x0017F34C File Offset: 0x0017D54C
+	// Token: 0x060048EB RID: 18667 RVA: 0x0017F32C File Offset: 0x0017D52C
 	public void RemoveFriend(FriendBackendController.Friend friend, FriendSystem.FriendRemovalCallback callback = null)
 	{
 		this.pendingFriendRemovals.Add(new FriendSystem.FriendRemovalData
@@ -73,7 +73,7 @@ public class FriendSystem : MonoBehaviour
 		FriendBackendController.Instance.RemoveFriend(friend);
 	}
 
-	// Token: 0x060048EC RID: 18668 RVA: 0x0017F3A8 File Offset: 0x0017D5A8
+	// Token: 0x060048EC RID: 18668 RVA: 0x0017F388 File Offset: 0x0017D588
 	public bool HasPendingFriendRequest(GTZone zone, int senderId)
 	{
 		for (int i = 0; i < this.pendingFriendRequests.Count; i++)
@@ -86,7 +86,7 @@ public class FriendSystem : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x060048ED RID: 18669 RVA: 0x0017F3F8 File Offset: 0x0017D5F8
+	// Token: 0x060048ED RID: 18669 RVA: 0x0017F3D8 File Offset: 0x0017D5D8
 	public bool CheckFriendshipWithPlayer(int targetActorNumber)
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(targetActorNumber);
@@ -105,7 +105,7 @@ public class FriendSystem : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x060048EE RID: 18670 RVA: 0x0017F471 File Offset: 0x0017D671
+	// Token: 0x060048EE RID: 18670 RVA: 0x0017F451 File Offset: 0x0017D651
 	private void Awake()
 	{
 		if (FriendSystem.Instance == null)
@@ -116,7 +116,7 @@ public class FriendSystem : MonoBehaviour
 		Object.Destroy(this);
 	}
 
-	// Token: 0x060048EF RID: 18671 RVA: 0x0017F494 File Offset: 0x0017D694
+	// Token: 0x060048EF RID: 18671 RVA: 0x0017F474 File Offset: 0x0017D674
 	private void Start()
 	{
 		FriendBackendController.Instance.OnGetFriendsComplete += new Action<bool>(this.OnGetFriendsReturned);
@@ -124,7 +124,7 @@ public class FriendSystem : MonoBehaviour
 		FriendBackendController.Instance.OnRemoveFriendComplete += new Action<FriendBackendController.Friend, bool>(this.OnRemoveFriendReturned);
 	}
 
-	// Token: 0x060048F0 RID: 18672 RVA: 0x0017F4EC File Offset: 0x0017D6EC
+	// Token: 0x060048F0 RID: 18672 RVA: 0x0017F4CC File Offset: 0x0017D6CC
 	private void OnDestroy()
 	{
 		if (FriendBackendController.Instance != null)
@@ -135,7 +135,7 @@ public class FriendSystem : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048F1 RID: 18673 RVA: 0x0017F550 File Offset: 0x0017D750
+	// Token: 0x060048F1 RID: 18673 RVA: 0x0017F530 File Offset: 0x0017D730
 	private void OnGetFriendsReturned(bool succeeded)
 	{
 		if (succeeded)
@@ -162,7 +162,7 @@ public class FriendSystem : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048F2 RID: 18674 RVA: 0x0017F5C0 File Offset: 0x0017D7C0
+	// Token: 0x060048F2 RID: 18674 RVA: 0x0017F5A0 File Offset: 0x0017D7A0
 	private void OnAddFriendReturned(NetPlayer targetPlayer, bool succeeded)
 	{
 		int hashCode = targetPlayer.UserId.GetHashCode();
@@ -189,7 +189,7 @@ public class FriendSystem : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048F3 RID: 18675 RVA: 0x0017F6CC File Offset: 0x0017D8CC
+	// Token: 0x060048F3 RID: 18675 RVA: 0x0017F6AC File Offset: 0x0017D8AC
 	private void OnRemoveFriendReturned(FriendBackendController.Friend friend, bool succeeded)
 	{
 		if (friend != null && friend.Presence != null)

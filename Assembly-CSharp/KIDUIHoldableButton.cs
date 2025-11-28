@@ -8,8 +8,8 @@ using UnityEngine.UI;
 public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSystemHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
 {
 	// Token: 0x17000665 RID: 1637
-	// (get) Token: 0x060043C5 RID: 17349 RVA: 0x001677A6 File Offset: 0x001659A6
-	// (set) Token: 0x060043C6 RID: 17350 RVA: 0x001677AE File Offset: 0x001659AE
+	// (get) Token: 0x060043C5 RID: 17349 RVA: 0x00167786 File Offset: 0x00165986
+	// (set) Token: 0x060043C6 RID: 17350 RVA: 0x0016778E File Offset: 0x0016598E
 	public KIDUIHoldableButton.ButtonHoldCompleteEvent onHoldComplete
 	{
 		get
@@ -23,7 +23,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 	}
 
 	// Token: 0x17000666 RID: 1638
-	// (get) Token: 0x060043C7 RID: 17351 RVA: 0x001677B7 File Offset: 0x001659B7
+	// (get) Token: 0x060043C7 RID: 17351 RVA: 0x00167797 File Offset: 0x00165997
 	public float HoldPercentage
 	{
 		get
@@ -32,7 +32,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		}
 	}
 
-	// Token: 0x060043C8 RID: 17352 RVA: 0x001677C8 File Offset: 0x001659C8
+	// Token: 0x060043C8 RID: 17352 RVA: 0x001677A8 File Offset: 0x001659A8
 	private void OnEnable()
 	{
 		this._holdProgressFill.rectTransform.localScale = new Vector3(0f, 1f, 1f);
@@ -42,20 +42,20 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		}
 	}
 
-	// Token: 0x060043C9 RID: 17353 RVA: 0x0016781B File Offset: 0x00165A1B
+	// Token: 0x060043C9 RID: 17353 RVA: 0x001677FB File Offset: 0x001659FB
 	private void Update()
 	{
 		this.ManageButtonInteraction(false);
 	}
 
-	// Token: 0x060043CA RID: 17354 RVA: 0x00167824 File Offset: 0x00165A24
+	// Token: 0x060043CA RID: 17354 RVA: 0x00167804 File Offset: 0x00165A04
 	public void OnPointerDown(PointerEventData eventData)
 	{
 		this._isHoldingMouse = true;
 		this.ToggleHoldingButton(true);
 	}
 
-	// Token: 0x060043CB RID: 17355 RVA: 0x00167834 File Offset: 0x00165A34
+	// Token: 0x060043CB RID: 17355 RVA: 0x00167814 File Offset: 0x00165A14
 	public void OnPointerUp(PointerEventData eventData)
 	{
 		this._isHoldingMouse = false;
@@ -63,7 +63,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		this.ToggleHoldingButton(false);
 	}
 
-	// Token: 0x060043CC RID: 17356 RVA: 0x0016784C File Offset: 0x00165A4C
+	// Token: 0x060043CC RID: 17356 RVA: 0x0016782C File Offset: 0x00165A2C
 	private void ToggleHoldingButton(bool isPointerDown)
 	{
 		this._isHoldingButton = (isPointerDown && this._button.interactable);
@@ -87,7 +87,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		KIDAudioManager.Instance.StopButtonHeldSound();
 	}
 
-	// Token: 0x060043CD RID: 17357 RVA: 0x001678DC File Offset: 0x00165ADC
+	// Token: 0x060043CD RID: 17357 RVA: 0x001678BC File Offset: 0x00165ABC
 	private void ManageButtonInteraction(bool isPointerUp = false)
 	{
 		if (!this._isHoldingButton)
@@ -114,7 +114,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		}
 	}
 
-	// Token: 0x060043CE RID: 17358 RVA: 0x00167970 File Offset: 0x00165B70
+	// Token: 0x060043CE RID: 17358 RVA: 0x00167950 File Offset: 0x00165B50
 	private void HoldComplete()
 	{
 		this.ToggleHoldingButton(false);
@@ -127,7 +127,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		this.ResetButton();
 	}
 
-	// Token: 0x060043CF RID: 17359 RVA: 0x001679AA File Offset: 0x00165BAA
+	// Token: 0x060043CF RID: 17359 RVA: 0x0016798A File Offset: 0x00165B8A
 	private void ResetButton()
 	{
 		this._elapsedTime = 0f;
@@ -136,7 +136,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		this._button.ResetButton();
 	}
 
-	// Token: 0x060043D0 RID: 17360 RVA: 0x001679CF File Offset: 0x00165BCF
+	// Token: 0x060043D0 RID: 17360 RVA: 0x001679AF File Offset: 0x00165BAF
 	protected void Awake()
 	{
 		if (this._button != null)
@@ -151,7 +151,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		}
 	}
 
-	// Token: 0x060043D1 RID: 17361 RVA: 0x00167A08 File Offset: 0x00165C08
+	// Token: 0x060043D1 RID: 17361 RVA: 0x001679E8 File Offset: 0x00165BE8
 	private void PostUpdate()
 	{
 		if (!KIDUIHoldableButton._canTrigger)
@@ -201,7 +201,7 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		}
 	}
 
-	// Token: 0x060043D2 RID: 17362 RVA: 0x00167B6C File Offset: 0x00165D6C
+	// Token: 0x060043D2 RID: 17362 RVA: 0x00167B4C File Offset: 0x00165D4C
 	private void LateUpdate()
 	{
 		if (KIDUIHoldableButton._triggeredThisFrame)
@@ -230,19 +230,19 @@ public class KIDUIHoldableButton : MonoBehaviour, IPointerDownHandler, IEventSys
 		KIDUIHoldableButton._triggeredThisFrame = false;
 	}
 
-	// Token: 0x060043D3 RID: 17363 RVA: 0x00167C51 File Offset: 0x00165E51
+	// Token: 0x060043D3 RID: 17363 RVA: 0x00167C31 File Offset: 0x00165E31
 	public void OnPointerEnter(PointerEventData eventData)
 	{
 		this.inside = true;
 	}
 
-	// Token: 0x060043D4 RID: 17364 RVA: 0x00167C5A File Offset: 0x00165E5A
+	// Token: 0x060043D4 RID: 17364 RVA: 0x00167C3A File Offset: 0x00165E3A
 	public void OnPointerExit(PointerEventData eventData)
 	{
 		this.inside = false;
 	}
 
-	// Token: 0x060043D5 RID: 17365 RVA: 0x00167C63 File Offset: 0x00165E63
+	// Token: 0x060043D5 RID: 17365 RVA: 0x00167C43 File Offset: 0x00165E43
 	protected void OnDisable()
 	{
 		if (ControllerBehaviour.Instance)

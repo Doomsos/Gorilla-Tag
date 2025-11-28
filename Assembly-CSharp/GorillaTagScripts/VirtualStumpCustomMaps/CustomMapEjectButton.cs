@@ -8,7 +8,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 	// Token: 0x02000E14 RID: 3604
 	public class CustomMapEjectButton : GorillaPressableButton
 	{
-		// Token: 0x060059EB RID: 23019 RVA: 0x001CC378 File Offset: 0x001CA578
+		// Token: 0x060059EB RID: 23019 RVA: 0x001CC358 File Offset: 0x001CA558
 		public override void ButtonActivation()
 		{
 			base.ButtonActivation();
@@ -19,7 +19,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x060059EC RID: 23020 RVA: 0x001CC39B File Offset: 0x001CA59B
+		// Token: 0x060059EC RID: 23020 RVA: 0x001CC37B File Offset: 0x001CA57B
 		private IEnumerator ButtonPressed_Local()
 		{
 			this.isOn = true;
@@ -30,7 +30,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			yield break;
 		}
 
-		// Token: 0x060059ED RID: 23021 RVA: 0x001CC3AC File Offset: 0x001CA5AC
+		// Token: 0x060059ED RID: 23021 RVA: 0x001CC38C File Offset: 0x001CA58C
 		private void HandleTeleport()
 		{
 			if (this.processing)
@@ -54,7 +54,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x060059EE RID: 23022 RVA: 0x001CC3F5 File Offset: 0x001CA5F5
+		// Token: 0x060059EE RID: 23022 RVA: 0x001CC3D5 File Offset: 0x001CA5D5
 		private void FinishTeleport(bool success = true)
 		{
 			if (!this.processing)
@@ -64,7 +64,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			this.processing = false;
 		}
 
-		// Token: 0x060059EF RID: 23023 RVA: 0x001CC407 File Offset: 0x001CA607
+		// Token: 0x060059EF RID: 23023 RVA: 0x001CC3E7 File Offset: 0x001CA5E7
 		public void CopySettings(CustomMapEjectButtonSettings customMapEjectButtonSettings)
 		{
 			this.ejectType = customMapEjectButtonSettings.ejectType;

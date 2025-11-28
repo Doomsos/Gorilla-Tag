@@ -8,7 +8,7 @@ namespace UnityChan
 	// Token: 0x02001179 RID: 4473
 	public class IdleChanger : MonoBehaviour
 	{
-		// Token: 0x060070E7 RID: 28903 RVA: 0x0024F13D File Offset: 0x0024D33D
+		// Token: 0x060070E7 RID: 28903 RVA: 0x0024F11D File Offset: 0x0024D31D
 		private void Start()
 		{
 			this.currentState = this.UnityChanA.GetCurrentAnimatorStateInfo(0);
@@ -17,7 +17,7 @@ namespace UnityChan
 			this.kb = Keyboard.current;
 		}
 
-		// Token: 0x060070E8 RID: 28904 RVA: 0x0024F174 File Offset: 0x0024D374
+		// Token: 0x060070E8 RID: 28904 RVA: 0x0024F154 File Offset: 0x0024D354
 		private void Update()
 		{
 			if (this.kb.upArrowKey.wasPressedThisFrame || this.kb.spaceKey.wasPressedThisFrame)
@@ -52,7 +52,7 @@ namespace UnityChan
 			}
 		}
 
-		// Token: 0x060070E9 RID: 28905 RVA: 0x0024F2D0 File Offset: 0x0024D4D0
+		// Token: 0x060070E9 RID: 28905 RVA: 0x0024F2B0 File Offset: 0x0024D4B0
 		private void OnGUI()
 		{
 			if (this.isGUI)
@@ -71,7 +71,7 @@ namespace UnityChan
 			}
 		}
 
-		// Token: 0x060070EA RID: 28906 RVA: 0x0024F3A5 File Offset: 0x0024D5A5
+		// Token: 0x060070EA RID: 28906 RVA: 0x0024F385 File Offset: 0x0024D585
 		private IEnumerator RandomChange()
 		{
 			for (;;)

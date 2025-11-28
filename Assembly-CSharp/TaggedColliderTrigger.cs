@@ -5,7 +5,7 @@ using UnityEngine.Events;
 // Token: 0x020009F8 RID: 2552
 public class TaggedColliderTrigger : MonoBehaviour
 {
-	// Token: 0x0600413E RID: 16702 RVA: 0x0015B722 File Offset: 0x00159922
+	// Token: 0x0600413E RID: 16702 RVA: 0x0015B702 File Offset: 0x00159902
 	private void OnTriggerEnter(Collider other)
 	{
 		if (!other.CompareTag(this.tag))
@@ -23,7 +23,7 @@ public class TaggedColliderTrigger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600413F RID: 16703 RVA: 0x0015B758 File Offset: 0x00159958
+	// Token: 0x0600413F RID: 16703 RVA: 0x0015B738 File Offset: 0x00159938
 	private void OnTriggerExit(Collider other)
 	{
 		if (!other.CompareTag(this.tag))

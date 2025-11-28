@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010B9 RID: 4281
 	public class TrashcanCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006B3C RID: 27452 RVA: 0x00233094 File Offset: 0x00231294
+		// Token: 0x06006B3C RID: 27452 RVA: 0x00233074 File Offset: 0x00231274
 		public void OnBasket(bool isLeftHand, Collider other)
 		{
 			SlingshotProjectile slingshotProjectile;

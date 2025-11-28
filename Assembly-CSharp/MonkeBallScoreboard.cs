@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000554 RID: 1364
 public class MonkeBallScoreboard : MonoBehaviour
 {
-	// Token: 0x06002280 RID: 8832 RVA: 0x000B4AA2 File Offset: 0x000B2CA2
+	// Token: 0x06002280 RID: 8832 RVA: 0x000B4A82 File Offset: 0x000B2C82
 	public void Setup(MonkeBallGame game)
 	{
 		this.game = game;
 	}
 
-	// Token: 0x06002281 RID: 8833 RVA: 0x000B4AAC File Offset: 0x000B2CAC
+	// Token: 0x06002281 RID: 8833 RVA: 0x000B4A8C File Offset: 0x000B2C8C
 	public void RefreshScore()
 	{
 		for (int i = 0; i < this.game.team.Count; i++)
@@ -20,43 +20,43 @@ public class MonkeBallScoreboard : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002282 RID: 8834 RVA: 0x000B4B01 File Offset: 0x000B2D01
+	// Token: 0x06002282 RID: 8834 RVA: 0x000B4AE1 File Offset: 0x000B2CE1
 	public void RefreshTeamPlayers(int teamId, int numPlayers)
 	{
 		this.teamDisplays[teamId].playersLabel.text = string.Format("PLAYERS: {0}", Mathf.Clamp(numPlayers, 0, 99));
 	}
 
-	// Token: 0x06002283 RID: 8835 RVA: 0x000B4B2D File Offset: 0x000B2D2D
+	// Token: 0x06002283 RID: 8835 RVA: 0x000B4B0D File Offset: 0x000B2D0D
 	public void PlayScoreFx()
 	{
 		this.PlayFX(this.scoreSound, this.scoreSoundVolume);
 	}
 
-	// Token: 0x06002284 RID: 8836 RVA: 0x000B4B41 File Offset: 0x000B2D41
+	// Token: 0x06002284 RID: 8836 RVA: 0x000B4B21 File Offset: 0x000B2D21
 	public void PlayPlayerJoinFx()
 	{
 		this.PlayFX(this.playerJoinSound, 0.5f);
 	}
 
-	// Token: 0x06002285 RID: 8837 RVA: 0x000B4B54 File Offset: 0x000B2D54
+	// Token: 0x06002285 RID: 8837 RVA: 0x000B4B34 File Offset: 0x000B2D34
 	public void PlayPlayerLeaveFx()
 	{
 		this.PlayFX(this.playerLeaveSound, 0.5f);
 	}
 
-	// Token: 0x06002286 RID: 8838 RVA: 0x000B4B67 File Offset: 0x000B2D67
+	// Token: 0x06002286 RID: 8838 RVA: 0x000B4B47 File Offset: 0x000B2D47
 	public void PlayGameStartFx()
 	{
 		this.PlayFX(this.gameStartSound, this.gameStartVolume);
 	}
 
-	// Token: 0x06002287 RID: 8839 RVA: 0x000B4B7B File Offset: 0x000B2D7B
+	// Token: 0x06002287 RID: 8839 RVA: 0x000B4B5B File Offset: 0x000B2D5B
 	public void PlayGameEndFx()
 	{
 		this.PlayFX(this.gameEndSound, this.gameEndVolume);
 	}
 
-	// Token: 0x06002288 RID: 8840 RVA: 0x000B4B8F File Offset: 0x000B2D8F
+	// Token: 0x06002288 RID: 8840 RVA: 0x000B4B6F File Offset: 0x000B2D6F
 	private void PlayFX(AudioClip clip, float volume)
 	{
 		if (this.audioSource != null)
@@ -67,7 +67,7 @@ public class MonkeBallScoreboard : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002289 RID: 8841 RVA: 0x000B4BC2 File Offset: 0x000B2DC2
+	// Token: 0x06002289 RID: 8841 RVA: 0x000B4BA2 File Offset: 0x000B2DA2
 	public void RefreshTime(string timeString)
 	{
 		this.timeRemainingLabel.text = timeString;

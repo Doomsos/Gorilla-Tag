@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x02000CBF RID: 3263
 public class RandomLocalColliders : MonoBehaviour
 {
-	// Token: 0x06004F9D RID: 20381 RVA: 0x00199DE3 File Offset: 0x00197FE3
+	// Token: 0x06004F9D RID: 20381 RVA: 0x00199DC3 File Offset: 0x00197FC3
 	private void Start()
 	{
 		this.seekFreq = RandomLocalColliders.rand.NextFloat(this.minseekFreq, this.maxseekFreq);
 	}
 
-	// Token: 0x06004F9E RID: 20382 RVA: 0x00199E04 File Offset: 0x00198004
+	// Token: 0x06004F9E RID: 20382 RVA: 0x00199DE4 File Offset: 0x00197FE4
 	private void Update()
 	{
 		if (this.colliderFound == null)
@@ -26,7 +26,7 @@ public class RandomLocalColliders : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004F9F RID: 20383 RVA: 0x00199E68 File Offset: 0x00198068
+	// Token: 0x06004F9F RID: 20383 RVA: 0x00199E48 File Offset: 0x00198048
 	private void seek()
 	{
 		float num = Mathf.Max(new float[]

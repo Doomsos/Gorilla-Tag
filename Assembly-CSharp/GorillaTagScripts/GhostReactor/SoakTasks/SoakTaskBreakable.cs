@@ -9,17 +9,17 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 	public sealed class SoakTaskBreakable : IGhostReactorSoakTask
 	{
 		// Token: 0x1700087B RID: 2171
-		// (get) Token: 0x06005AE8 RID: 23272 RVA: 0x001D1AEA File Offset: 0x001CFCEA
-		// (set) Token: 0x06005AE9 RID: 23273 RVA: 0x001D1AF2 File Offset: 0x001CFCF2
+		// (get) Token: 0x06005AE8 RID: 23272 RVA: 0x001D1ACA File Offset: 0x001CFCCA
+		// (set) Token: 0x06005AE9 RID: 23273 RVA: 0x001D1AD2 File Offset: 0x001CFCD2
 		public bool Complete { get; private set; }
 
-		// Token: 0x06005AEA RID: 23274 RVA: 0x001D1AFB File Offset: 0x001CFCFB
+		// Token: 0x06005AEA RID: 23274 RVA: 0x001D1ADB File Offset: 0x001CFCDB
 		public SoakTaskBreakable(GRPlayer grPlayer)
 		{
 			this._grPlayer = grPlayer;
 		}
 
-		// Token: 0x06005AEB RID: 23275 RVA: 0x001D1B0C File Offset: 0x001CFD0C
+		// Token: 0x06005AEB RID: 23275 RVA: 0x001D1AEC File Offset: 0x001CFCEC
 		public bool Update()
 		{
 			GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this._grPlayer.gamePlayer.rig.zoneEntity.currentZone);
@@ -84,7 +84,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 			return true;
 		}
 
-		// Token: 0x06005AEC RID: 23276 RVA: 0x001D1D14 File Offset: 0x001CFF14
+		// Token: 0x06005AEC RID: 23276 RVA: 0x001D1CF4 File Offset: 0x001CFEF4
 		public void Reset()
 		{
 			this._breakable = null;

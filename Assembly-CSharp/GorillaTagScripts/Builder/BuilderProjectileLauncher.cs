@@ -8,7 +8,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E5C RID: 3676
 	public class BuilderProjectileLauncher : MonoBehaviour, IBuilderPieceFunctional, IBuilderPieceComponent
 	{
-		// Token: 0x06005BD5 RID: 23509 RVA: 0x001D7A14 File Offset: 0x001D5C14
+		// Token: 0x06005BD5 RID: 23509 RVA: 0x001D79F4 File Offset: 0x001D5BF4
 		private void LaunchProjectile(int timeStamp)
 		{
 			if (Time.time > this.lastFireTime + this.fireCooldown)
@@ -52,7 +52,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BD6 RID: 23510 RVA: 0x001D7BFC File Offset: 0x001D5DFC
+		// Token: 0x06005BD6 RID: 23510 RVA: 0x001D7BDC File Offset: 0x001D5DDC
 		public void OnStateChanged(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!this.IsStateValid(newState))
@@ -76,13 +76,13 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005BD8 RID: 23512 RVA: 0x001D68CB File Offset: 0x001D4ACB
+		// Token: 0x06005BD8 RID: 23512 RVA: 0x001D68AB File Offset: 0x001D4AAB
 		public bool IsStateValid(byte state)
 		{
 			return state <= 1;
 		}
 
-		// Token: 0x06005BD9 RID: 23513 RVA: 0x001D7C50 File Offset: 0x001D5E50
+		// Token: 0x06005BD9 RID: 23513 RVA: 0x001D7C30 File Offset: 0x001D5E30
 		public void FunctionalPieceUpdate()
 		{
 			for (int i = this.launchedProjectiles.Count - 1; i >= 0; i--)
@@ -110,13 +110,13 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005BDD RID: 23517 RVA: 0x001D7CD1 File Offset: 0x001D5ED1
+		// Token: 0x06005BDD RID: 23517 RVA: 0x001D7CB1 File Offset: 0x001D5EB1
 		public void OnPieceActivate()
 		{
 			this.myPiece.GetTable().RegisterFunctionalPiece(this);
 		}
 
-		// Token: 0x06005BDE RID: 23518 RVA: 0x001D7CE4 File Offset: 0x001D5EE4
+		// Token: 0x06005BDE RID: 23518 RVA: 0x001D7CC4 File Offset: 0x001D5EC4
 		public void OnPieceDeactivate()
 		{
 			this.myPiece.GetTable().UnregisterFunctionalPiece(this);
@@ -126,13 +126,13 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BDF RID: 23519 RVA: 0x001D7D2B File Offset: 0x001D5F2B
+		// Token: 0x06005BDF RID: 23519 RVA: 0x001D7D0B File Offset: 0x001D5F0B
 		public void RegisterProjectile(BuilderProjectile projectile)
 		{
 			this.launchedProjectiles.Add(projectile);
 		}
 
-		// Token: 0x06005BE0 RID: 23520 RVA: 0x001D7D39 File Offset: 0x001D5F39
+		// Token: 0x06005BE0 RID: 23520 RVA: 0x001D7D19 File Offset: 0x001D5F19
 		public void UnRegisterProjectile(BuilderProjectile projectile)
 		{
 			this.launchedProjectiles.Remove(projectile);

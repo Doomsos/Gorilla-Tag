@@ -10,7 +10,7 @@ using UnityEngine;
 // Token: 0x02000C99 RID: 3225
 public static class Utils
 {
-	// Token: 0x06004EB5 RID: 20149 RVA: 0x00197480 File Offset: 0x00195680
+	// Token: 0x06004EB5 RID: 20149 RVA: 0x00197460 File Offset: 0x00195660
 	public static void Disable(this GameObject target)
 	{
 		if (!target.activeSelf)
@@ -35,7 +35,7 @@ public static class Utils
 		Utils.g_listPool.Return(pooledList);
 	}
 
-	// Token: 0x06004EB6 RID: 20150 RVA: 0x001974F8 File Offset: 0x001956F8
+	// Token: 0x06004EB6 RID: 20150 RVA: 0x001974D8 File Offset: 0x001956D8
 	public static void AddIfNew<T>(this List<T> list, T item)
 	{
 		if (!list.Contains(item))
@@ -44,7 +44,7 @@ public static class Utils
 		}
 	}
 
-	// Token: 0x06004EB7 RID: 20151 RVA: 0x0019750A File Offset: 0x0019570A
+	// Token: 0x06004EB7 RID: 20151 RVA: 0x001974EA File Offset: 0x001956EA
 	public static void RemoveIfContains<T>(this List<T> list, T item)
 	{
 		if (list.Contains(item))
@@ -53,13 +53,13 @@ public static class Utils
 		}
 	}
 
-	// Token: 0x06004EB8 RID: 20152 RVA: 0x0019751D File Offset: 0x0019571D
+	// Token: 0x06004EB8 RID: 20152 RVA: 0x001974FD File Offset: 0x001956FD
 	public static bool InRoom(this NetPlayer player)
 	{
 		return NetworkSystem.Instance.InRoom && Enumerable.Contains<NetPlayer>(NetworkSystem.Instance.AllNetPlayers, player);
 	}
 
-	// Token: 0x06004EB9 RID: 20153 RVA: 0x00197540 File Offset: 0x00195740
+	// Token: 0x06004EB9 RID: 20153 RVA: 0x00197520 File Offset: 0x00195720
 	public static bool PlayerInRoom(int actorNumber)
 	{
 		if (NetworkSystem.Instance.InRoom)
@@ -76,14 +76,14 @@ public static class Utils
 		return false;
 	}
 
-	// Token: 0x06004EBA RID: 20154 RVA: 0x00197580 File Offset: 0x00195780
+	// Token: 0x06004EBA RID: 20154 RVA: 0x00197560 File Offset: 0x00195760
 	public static bool PlayerInRoom(int actorNumer, out Player photonPlayer)
 	{
 		photonPlayer = null;
 		return PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.Players.TryGetValue(actorNumer, ref photonPlayer);
 	}
 
-	// Token: 0x06004EBB RID: 20155 RVA: 0x0019759F File Offset: 0x0019579F
+	// Token: 0x06004EBB RID: 20155 RVA: 0x0019757F File Offset: 0x0019577F
 	public static bool PlayerInRoom(int actorNumber, out NetPlayer player)
 	{
 		if (NetworkSystem.Instance == null)
@@ -95,7 +95,7 @@ public static class Utils
 		return NetworkSystem.Instance.InRoom && player != null;
 	}
 
-	// Token: 0x06004EBC RID: 20156 RVA: 0x001975D4 File Offset: 0x001957D4
+	// Token: 0x06004EBC RID: 20156 RVA: 0x001975B4 File Offset: 0x001957B4
 	public static long PackVector3ToLong(Vector3 vector)
 	{
 		long num = (long)Mathf.Clamp(Mathf.RoundToInt(vector.x * 1024f) + 1048576, 0, 2097151);
@@ -104,7 +104,7 @@ public static class Utils
 		return num + (num2 << 21) + (num3 << 42);
 	}
 
-	// Token: 0x06004EBD RID: 20157 RVA: 0x00197658 File Offset: 0x00195858
+	// Token: 0x06004EBD RID: 20157 RVA: 0x00197638 File Offset: 0x00195838
 	public static Vector3 UnpackVector3FromLong(long data)
 	{
 		float num = (float)(data & 2097151L);
@@ -113,7 +113,7 @@ public static class Utils
 		return new Vector3((float)((long)num - 1048576L) * 0.0009765625f, (float)(num2 - 1048576L) * 0.0009765625f, (float)(num3 - 1048576L) * 0.0009765625f);
 	}
 
-	// Token: 0x06004EBE RID: 20158 RVA: 0x001976B6 File Offset: 0x001958B6
+	// Token: 0x06004EBE RID: 20158 RVA: 0x00197696 File Offset: 0x00195896
 	public static bool IsASCIILetterOrDigit(char c)
 	{
 		return (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z');
@@ -129,7 +129,7 @@ public static class Utils
 	{
 	}
 
-	// Token: 0x06004EC1 RID: 20161 RVA: 0x001976E0 File Offset: 0x001958E0
+	// Token: 0x06004EC1 RID: 20161 RVA: 0x001976C0 File Offset: 0x001958C0
 	public static bool ValidateServerTime(double time, double maximumLatency)
 	{
 		double currentTime = PhotonNetwork.CurrentTime;
@@ -155,7 +155,7 @@ public static class Utils
 		return num2 <= maximumLatency;
 	}
 
-	// Token: 0x06004EC2 RID: 20162 RVA: 0x00197750 File Offset: 0x00195950
+	// Token: 0x06004EC2 RID: 20162 RVA: 0x00197730 File Offset: 0x00195930
 	public static double CalculateNetworkDeltaTime(double prevTime, double newTime)
 	{
 		if (newTime >= prevTime)

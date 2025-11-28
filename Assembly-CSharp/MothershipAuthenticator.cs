@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000B91 RID: 2961
 public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06004930 RID: 18736 RVA: 0x00180B59 File Offset: 0x0017ED59
+	// Token: 0x06004930 RID: 18736 RVA: 0x00180B39 File Offset: 0x0017ED39
 	[RuntimeInitializeOnLoadMethod]
 	private static void Init()
 	{
@@ -16,7 +16,7 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06004931 RID: 18737 RVA: 0x00180B74 File Offset: 0x0017ED74
+	// Token: 0x06004931 RID: 18737 RVA: 0x00180B54 File Offset: 0x0017ED54
 	public void Awake()
 	{
 		if (MothershipAuthenticator.Instance == null)
@@ -42,14 +42,14 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 		});
 	}
 
-	// Token: 0x06004932 RID: 18738 RVA: 0x00180C08 File Offset: 0x0017EE08
+	// Token: 0x06004932 RID: 18738 RVA: 0x00180BE8 File Offset: 0x0017EDE8
 	public void BeginLoginFlow()
 	{
 		Debug.Log("making login call");
 		this.LogInWithSteam();
 	}
 
-	// Token: 0x06004933 RID: 18739 RVA: 0x00180C1A File Offset: 0x0017EE1A
+	// Token: 0x06004933 RID: 18739 RVA: 0x00180BFA File Offset: 0x0017EDFA
 	private void LogInWithInsecure()
 	{
 		MothershipClientApiUnity.LogInWithInsecure1(this.TestNickname, this.TestAccountId, delegate(LoginResponse LoginResponse)
@@ -85,7 +85,7 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 		});
 	}
 
-	// Token: 0x06004934 RID: 18740 RVA: 0x00180C46 File Offset: 0x0017EE46
+	// Token: 0x06004934 RID: 18740 RVA: 0x00180C26 File Offset: 0x0017EE26
 	private void LogInWithSteam()
 	{
 		MothershipClientApiUnity.StartLoginWithSteam(delegate(PlayerSteamBeginLoginResponse resp)
@@ -190,7 +190,7 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06004937 RID: 18743 RVA: 0x00180C66 File Offset: 0x0017EE66
+	// Token: 0x06004937 RID: 18743 RVA: 0x00180C46 File Offset: 0x0017EE46
 	public void SliceUpdate()
 	{
 		if (MothershipClientApiUnity.IsEnabled())

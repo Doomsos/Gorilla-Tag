@@ -6,7 +6,7 @@ namespace GorillaTagScripts.GhostReactor
 	// Token: 0x02000E3E RID: 3646
 	public static class GRGameObjectExtensions
 	{
-		// Token: 0x06005AE4 RID: 23268 RVA: 0x001D1A40 File Offset: 0x001CFC40
+		// Token: 0x06005AE4 RID: 23268 RVA: 0x001D1A20 File Offset: 0x001CFC20
 		public static GRTool.GRToolType GetToolType(this GameObject obj)
 		{
 			if (obj.GetComponentInParent<GRToolClub>() != null)

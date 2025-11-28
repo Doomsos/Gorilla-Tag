@@ -9,7 +9,7 @@ namespace GorillaTagScripts
 	[RequireComponent(typeof(Collider))]
 	public class BuilderPieceHandHold : MonoBehaviour, IGorillaGrabable, IBuilderPieceComponent, ITickSystemTick
 	{
-		// Token: 0x060055F4 RID: 22004 RVA: 0x001B0665 File Offset: 0x001AE865
+		// Token: 0x060055F4 RID: 22004 RVA: 0x001B0645 File Offset: 0x001AE845
 		private void Initialize()
 		{
 			if (this.initialized)
@@ -20,25 +20,25 @@ namespace GorillaTagScripts
 			this.initialized = true;
 		}
 
-		// Token: 0x060055F5 RID: 22005 RVA: 0x001B0683 File Offset: 0x001AE883
+		// Token: 0x060055F5 RID: 22005 RVA: 0x001B0663 File Offset: 0x001AE863
 		public bool IsHandHoldMoving()
 		{
 			return this.myPiece.IsPieceMoving();
 		}
 
-		// Token: 0x060055F6 RID: 22006 RVA: 0x001B0690 File Offset: 0x001AE890
+		// Token: 0x060055F6 RID: 22006 RVA: 0x001B0670 File Offset: 0x001AE870
 		public bool MomentaryGrabOnly()
 		{
 			return this.forceMomentary;
 		}
 
-		// Token: 0x060055F7 RID: 22007 RVA: 0x001B0698 File Offset: 0x001AE898
+		// Token: 0x060055F7 RID: 22007 RVA: 0x001B0678 File Offset: 0x001AE878
 		public virtual bool CanBeGrabbed(GorillaGrabber grabber)
 		{
 			return this.myPiece.state == BuilderPiece.State.AttachedAndPlaced && (!this.myPiece.GetTable().isTableMutable || grabber.Player.scale < 0.5f);
 		}
 
-		// Token: 0x060055F8 RID: 22008 RVA: 0x001B06D0 File Offset: 0x001AE8D0
+		// Token: 0x060055F8 RID: 22008 RVA: 0x001B06B0 File Offset: 0x001AE8B0
 		public void OnGrabbed(GorillaGrabber grabber, out Transform grabbedTransform, out Vector3 localGrabbedPosition)
 		{
 			this.Initialize();
@@ -51,7 +51,7 @@ namespace GorillaTagScripts
 			grabber.Player.AddHandHold(base.transform, localGrabbedPosition, grabber, grabber.IsRightHand, false, out vector);
 		}
 
-		// Token: 0x060055F9 RID: 22009 RVA: 0x001B073D File Offset: 0x001AE93D
+		// Token: 0x060055F9 RID: 22009 RVA: 0x001B071D File Offset: 0x001AE91D
 		public void OnGrabReleased(GorillaGrabber grabber)
 		{
 			this.Initialize();
@@ -61,11 +61,11 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x17000835 RID: 2101
-		// (get) Token: 0x060055FA RID: 22010 RVA: 0x001B0778 File Offset: 0x001AE978
-		// (set) Token: 0x060055FB RID: 22011 RVA: 0x001B0780 File Offset: 0x001AE980
+		// (get) Token: 0x060055FA RID: 22010 RVA: 0x001B0758 File Offset: 0x001AE958
+		// (set) Token: 0x060055FB RID: 22011 RVA: 0x001B0760 File Offset: 0x001AE960
 		public bool TickRunning { get; set; }
 
-		// Token: 0x060055FC RID: 22012 RVA: 0x001B078C File Offset: 0x001AE98C
+		// Token: 0x060055FC RID: 22012 RVA: 0x001B076C File Offset: 0x001AE96C
 		public void Tick()
 		{
 			if (!this.isGrabbed)
@@ -96,7 +96,7 @@ namespace GorillaTagScripts
 		{
 		}
 
-		// Token: 0x06005600 RID: 22016 RVA: 0x001B0804 File Offset: 0x001AEA04
+		// Token: 0x06005600 RID: 22016 RVA: 0x001B07E4 File Offset: 0x001AE9E4
 		public void OnPieceActivate()
 		{
 			if (!this.TickRunning && this.myPiece.GetTable().isTableMutable)
@@ -105,7 +105,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005601 RID: 22017 RVA: 0x001B0828 File Offset: 0x001AEA28
+		// Token: 0x06005601 RID: 22017 RVA: 0x001B0808 File Offset: 0x001AEA08
 		public void OnPieceDeactivate()
 		{
 			if (this.TickRunning)

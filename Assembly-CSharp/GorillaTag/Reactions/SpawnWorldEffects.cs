@@ -8,7 +8,7 @@ namespace GorillaTag.Reactions
 	// Token: 0x02001030 RID: 4144
 	public class SpawnWorldEffects : MonoBehaviour
 	{
-		// Token: 0x060068AF RID: 26799 RVA: 0x00221B1C File Offset: 0x0021FD1C
+		// Token: 0x060068AF RID: 26799 RVA: 0x00221AFC File Offset: 0x0021FCFC
 		protected void OnEnable()
 		{
 			if (GorillaComputer.instance == null)
@@ -37,13 +37,13 @@ namespace GorillaTag.Reactions
 			this._hasPrefabToSpawn = (this._prefabToSpawn != null && this._isPrefabInPool);
 		}
 
-		// Token: 0x060068B0 RID: 26800 RVA: 0x00221C20 File Offset: 0x0021FE20
+		// Token: 0x060068B0 RID: 26800 RVA: 0x00221C00 File Offset: 0x0021FE00
 		public void RequestSpawn(Vector3 worldPosition)
 		{
 			this.RequestSpawn(worldPosition, Vector3.up);
 		}
 
-		// Token: 0x060068B1 RID: 26801 RVA: 0x00221C30 File Offset: 0x0021FE30
+		// Token: 0x060068B1 RID: 26801 RVA: 0x00221C10 File Offset: 0x0021FE10
 		public void RequestSpawn(Vector3 worldPosition, Vector3 normal)
 		{
 			if (this._maxParticleHitReactionRate < 1E-05f || !FireManager.hasInstance)

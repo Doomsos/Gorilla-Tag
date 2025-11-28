@@ -7,7 +7,7 @@ using UnityEngine.UI;
 // Token: 0x02000918 RID: 2328
 public class GorillaPlayerLineButton : MonoBehaviour
 {
-	// Token: 0x06003B75 RID: 15221 RVA: 0x0013A07C File Offset: 0x0013827C
+	// Token: 0x06003B75 RID: 15221 RVA: 0x0013A05C File Offset: 0x0013825C
 	private void OnEnable()
 	{
 		if (Application.isEditor)
@@ -16,7 +16,7 @@ public class GorillaPlayerLineButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B76 RID: 15222 RVA: 0x0013A092 File Offset: 0x00138292
+	// Token: 0x06003B76 RID: 15222 RVA: 0x0013A072 File Offset: 0x00138272
 	private void OnDisable()
 	{
 		if (Application.isEditor)
@@ -25,7 +25,7 @@ public class GorillaPlayerLineButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B77 RID: 15223 RVA: 0x0013A0A1 File Offset: 0x001382A1
+	// Token: 0x06003B77 RID: 15223 RVA: 0x0013A081 File Offset: 0x00138281
 	private IEnumerator TestPressCheck()
 	{
 		for (;;)
@@ -44,7 +44,7 @@ public class GorillaPlayerLineButton : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003B78 RID: 15224 RVA: 0x0013A0B0 File Offset: 0x001382B0
+	// Token: 0x06003B78 RID: 15224 RVA: 0x0013A090 File Offset: 0x00138290
 	private void OnTriggerEnter(Collider collider)
 	{
 		if (base.enabled && this.touchTime + this.debounceTime < Time.time && collider.GetComponentInParent<GorillaTriggerColliderHandIndicator>() != null)
@@ -83,7 +83,7 @@ public class GorillaPlayerLineButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B79 RID: 15225 RVA: 0x0013A220 File Offset: 0x00138420
+	// Token: 0x06003B79 RID: 15225 RVA: 0x0013A200 File Offset: 0x00138400
 	private void OnTriggerExit(Collider other)
 	{
 		if (this.buttonType != GorillaPlayerLineButton.ButtonType.Mute && other.GetComponentInParent<GorillaTriggerColliderHandIndicator>() != null)
@@ -92,7 +92,7 @@ public class GorillaPlayerLineButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B7A RID: 15226 RVA: 0x0013A248 File Offset: 0x00138448
+	// Token: 0x06003B7A RID: 15226 RVA: 0x0013A228 File Offset: 0x00138428
 	public void UpdateColor()
 	{
 		if (this.isOn)

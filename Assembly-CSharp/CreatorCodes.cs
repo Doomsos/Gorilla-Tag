@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x02000461 RID: 1121
 public static class CreatorCodes
 {
-	// Token: 0x06001C65 RID: 7269 RVA: 0x00096BBC File Offset: 0x00094DBC
+	// Token: 0x06001C65 RID: 7269 RVA: 0x00096B9C File Offset: 0x00094D9C
 	public static string getCurrentCreatorCode(string id)
 	{
 		if (id.IsNullOrEmpty())
@@ -26,7 +26,7 @@ public static class CreatorCodes
 		return CreatorCodes.data.currentCreatorCode[id];
 	}
 
-	// Token: 0x06001C66 RID: 7270 RVA: 0x00096C11 File Offset: 0x00094E11
+	// Token: 0x06001C66 RID: 7270 RVA: 0x00096BF1 File Offset: 0x00094DF1
 	public static CreatorCodes.CreatorCodeStatus getCurrentCreatorCodeStatus(string id)
 	{
 		if (id == null)
@@ -45,26 +45,26 @@ public static class CreatorCodes
 	}
 
 	// Token: 0x14000040 RID: 64
-	// (add) Token: 0x06001C67 RID: 7271 RVA: 0x00096C3C File Offset: 0x00094E3C
-	// (remove) Token: 0x06001C68 RID: 7272 RVA: 0x00096C70 File Offset: 0x00094E70
+	// (add) Token: 0x06001C67 RID: 7271 RVA: 0x00096C1C File Offset: 0x00094E1C
+	// (remove) Token: 0x06001C68 RID: 7272 RVA: 0x00096C50 File Offset: 0x00094E50
 	public static event Action<string> OnCreatorCodeChangedEvent;
 
 	// Token: 0x14000041 RID: 65
-	// (add) Token: 0x06001C69 RID: 7273 RVA: 0x00096CA4 File Offset: 0x00094EA4
-	// (remove) Token: 0x06001C6A RID: 7274 RVA: 0x00096CD8 File Offset: 0x00094ED8
+	// (add) Token: 0x06001C69 RID: 7273 RVA: 0x00096C84 File Offset: 0x00094E84
+	// (remove) Token: 0x06001C6A RID: 7274 RVA: 0x00096CB8 File Offset: 0x00094EB8
 	public static event Action InitializedEvent;
 
 	// Token: 0x14000042 RID: 66
-	// (add) Token: 0x06001C6B RID: 7275 RVA: 0x00096D0C File Offset: 0x00094F0C
-	// (remove) Token: 0x06001C6C RID: 7276 RVA: 0x00096D40 File Offset: 0x00094F40
+	// (add) Token: 0x06001C6B RID: 7275 RVA: 0x00096CEC File Offset: 0x00094EEC
+	// (remove) Token: 0x06001C6C RID: 7276 RVA: 0x00096D20 File Offset: 0x00094F20
 	public static event Action<string, string, NexusGroupId> OnCreatorCodeValidEvent;
 
 	// Token: 0x14000043 RID: 67
-	// (add) Token: 0x06001C6D RID: 7277 RVA: 0x00096D74 File Offset: 0x00094F74
-	// (remove) Token: 0x06001C6E RID: 7278 RVA: 0x00096DA8 File Offset: 0x00094FA8
+	// (add) Token: 0x06001C6D RID: 7277 RVA: 0x00096D54 File Offset: 0x00094F54
+	// (remove) Token: 0x06001C6E RID: 7278 RVA: 0x00096D88 File Offset: 0x00094F88
 	public static event Action<string> OnCreatorCodeFailureEvent;
 
-	// Token: 0x06001C6F RID: 7279 RVA: 0x00096DDB File Offset: 0x00094FDB
+	// Token: 0x06001C6F RID: 7279 RVA: 0x00096DBB File Offset: 0x00094FBB
 	public static void Initialize()
 	{
 		CreatorCodes.ValidatedCreatorCode = new Dictionary<string, NexusManager.MemberCode>();
@@ -79,7 +79,7 @@ public static class CreatorCodes
 		initializedEvent.Invoke();
 	}
 
-	// Token: 0x06001C70 RID: 7280 RVA: 0x00096E0C File Offset: 0x0009500C
+	// Token: 0x06001C70 RID: 7280 RVA: 0x00096DEC File Offset: 0x00094FEC
 	public static void DeleteCharacter(string id)
 	{
 		if (CreatorCodes.data.currentCreatorCode.ContainsKey(id) && CreatorCodes.data.currentCreatorCode[id].Length > 0)
@@ -96,7 +96,7 @@ public static class CreatorCodes
 		}
 	}
 
-	// Token: 0x06001C71 RID: 7281 RVA: 0x00096EC8 File Offset: 0x000950C8
+	// Token: 0x06001C71 RID: 7281 RVA: 0x00096EA8 File Offset: 0x000950A8
 	public static void AppendKey(string id, string input)
 	{
 		if (!CreatorCodes.data.currentCreatorCode.ContainsKey(id))
@@ -118,7 +118,7 @@ public static class CreatorCodes
 		}
 	}
 
-	// Token: 0x06001C72 RID: 7282 RVA: 0x00096F60 File Offset: 0x00095160
+	// Token: 0x06001C72 RID: 7282 RVA: 0x00096F40 File Offset: 0x00095140
 	public static void ResetCreatorCode(string id)
 	{
 		Debug.Log("Resetting creator code");
@@ -135,7 +135,7 @@ public static class CreatorCodes
 		onCreatorCodeChangedEvent.Invoke(id);
 	}
 
-	// Token: 0x06001C73 RID: 7283 RVA: 0x00096FC4 File Offset: 0x000951C4
+	// Token: 0x06001C73 RID: 7283 RVA: 0x00096FA4 File Offset: 0x000951A4
 	public static Task<NexusManager.MemberCode> CheckValidationCoroutineJIT(string terminalId, string code, NexusGroupId[] group)
 	{
 		CreatorCodes.<CheckValidationCoroutineJIT>d__27 <CheckValidationCoroutineJIT>d__;
@@ -148,13 +148,13 @@ public static class CreatorCodes
 		return <CheckValidationCoroutineJIT>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06001C74 RID: 7284 RVA: 0x00097017 File Offset: 0x00095217
+	// Token: 0x06001C74 RID: 7284 RVA: 0x00096FF7 File Offset: 0x000951F7
 	private static void SaveData()
 	{
 		PlayerPrefs.SetString("CreatorCodes_Store", JsonConvert.SerializeObject(CreatorCodes.data));
 	}
 
-	// Token: 0x06001C75 RID: 7285 RVA: 0x00097030 File Offset: 0x00095230
+	// Token: 0x06001C75 RID: 7285 RVA: 0x00097010 File Offset: 0x00095210
 	private static void LoadData()
 	{
 		string @string = PlayerPrefs.GetString("CreatorCodes_Store", string.Empty);

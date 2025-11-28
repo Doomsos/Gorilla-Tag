@@ -7,7 +7,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E61 RID: 3681
 	public class BuilderScaleAudioRadius : MonoBehaviour
 	{
-		// Token: 0x06005BFD RID: 23549 RVA: 0x001D8529 File Offset: 0x001D6729
+		// Token: 0x06005BFD RID: 23549 RVA: 0x001D8509 File Offset: 0x001D6709
 		private void OnEnable()
 		{
 			if (this.useLossyScaleOnEnable)
@@ -17,7 +17,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BFE RID: 23550 RVA: 0x001D8545 File Offset: 0x001D6745
+		// Token: 0x06005BFE RID: 23550 RVA: 0x001D8525 File Offset: 0x001D6725
 		private void OnDisable()
 		{
 			if (this.useLossyScaleOnEnable)
@@ -26,7 +26,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BFF RID: 23551 RVA: 0x001D8555 File Offset: 0x001D6755
+		// Token: 0x06005BFF RID: 23551 RVA: 0x001D8535 File Offset: 0x001D6735
 		private void LateUpdate()
 		{
 			if (this.setScaleNextFrame && Time.frameCount > this.enableFrame)
@@ -39,7 +39,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C00 RID: 23552 RVA: 0x001D8591 File Offset: 0x001D6791
+		// Token: 0x06005C00 RID: 23552 RVA: 0x001D8571 File Offset: 0x001D6771
 		private void PlaySound()
 		{
 			if (this.autoPlaySoundBank != null)
@@ -53,7 +53,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C01 RID: 23553 RVA: 0x001D85CC File Offset: 0x001D67CC
+		// Token: 0x06005C01 RID: 23553 RVA: 0x001D85AC File Offset: 0x001D67AC
 		public void SetScale(float inScale)
 		{
 			if (Mathf.Approximately(inScale, this.scale))
@@ -97,7 +97,7 @@ namespace GorillaTagScripts.Builder
 			this.shouldRevert = true;
 		}
 
-		// Token: 0x06005C02 RID: 23554 RVA: 0x001D86CC File Offset: 0x001D68CC
+		// Token: 0x06005C02 RID: 23554 RVA: 0x001D86AC File Offset: 0x001D68AC
 		public void RevertScale()
 		{
 			if (!this.shouldRevert)

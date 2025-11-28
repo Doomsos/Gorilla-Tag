@@ -8,7 +8,7 @@ using UnityEngine.Events;
 // Token: 0x020005CC RID: 1484
 public class CosmeticTiltReactor : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06002596 RID: 9622 RVA: 0x000C8D40 File Offset: 0x000C6F40
+	// Token: 0x06002596 RID: 9622 RVA: 0x000C8D20 File Offset: 0x000C6F20
 	private void Awake()
 	{
 		this.referenceDirection.Normalize();
@@ -60,7 +60,7 @@ public class CosmeticTiltReactor : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002597 RID: 9623 RVA: 0x000C8F30 File Offset: 0x000C7130
+	// Token: 0x06002597 RID: 9623 RVA: 0x000C8F10 File Offset: 0x000C7110
 	public void OnEnable()
 	{
 		if (!this.syncForAllPlayers && !this.isLocallyOwned)
@@ -84,7 +84,7 @@ public class CosmeticTiltReactor : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
-	// Token: 0x06002598 RID: 9624 RVA: 0x000C8FCC File Offset: 0x000C71CC
+	// Token: 0x06002598 RID: 9624 RVA: 0x000C8FAC File Offset: 0x000C71AC
 	public void OnDisable()
 	{
 		if (!this.syncForAllPlayers && !this.isLocallyOwned)
@@ -98,7 +98,7 @@ public class CosmeticTiltReactor : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
-	// Token: 0x06002599 RID: 9625 RVA: 0x000C9000 File Offset: 0x000C7200
+	// Token: 0x06002599 RID: 9625 RVA: 0x000C8FE0 File Offset: 0x000C71E0
 	public void SliceUpdate()
 	{
 		if (this.onlyWhileHeld)
@@ -130,7 +130,7 @@ public class CosmeticTiltReactor : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600259A RID: 9626 RVA: 0x000C90C8 File Offset: 0x000C72C8
+	// Token: 0x0600259A RID: 9626 RVA: 0x000C90A8 File Offset: 0x000C72A8
 	private void ResetEvents()
 	{
 		if (this.events == null || this.events.Count <= 0)
@@ -160,7 +160,7 @@ public class CosmeticTiltReactor : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600259B RID: 9627 RVA: 0x000C918C File Offset: 0x000C738C
+	// Token: 0x0600259B RID: 9627 RVA: 0x000C916C File Offset: 0x000C736C
 	private void FireEvents()
 	{
 		if (this.events == null || this.events.Count <= 0)
@@ -324,7 +324,7 @@ public class CosmeticTiltReactor : MonoBehaviour, IGorillaSliceableSimple
 	[Serializable]
 	public class TiltEvent
 	{
-		// Token: 0x0600259D RID: 9629 RVA: 0x000C93D4 File Offset: 0x000C75D4
+		// Token: 0x0600259D RID: 9629 RVA: 0x000C93B4 File Offset: 0x000C75B4
 		public TiltEvent()
 		{
 			this.tiltEventType = CosmeticTiltReactor.TiltEvent.TiltEventType.LessThanThreshold;

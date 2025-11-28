@@ -8,7 +8,7 @@ namespace MTAssets.EasyMeshCombiner
 	[AddComponentMenu("")]
 	public class MTAssetsMathematics : MonoBehaviour
 	{
-		// Token: 0x06006283 RID: 25219 RVA: 0x001FB53C File Offset: 0x001F973C
+		// Token: 0x06006283 RID: 25219 RVA: 0x001FB51C File Offset: 0x001F971C
 		public static List<T> RandomizeThisList<T>(List<T> list)
 		{
 			int count = list.Count;
@@ -23,7 +23,7 @@ namespace MTAssets.EasyMeshCombiner
 			return list;
 		}
 
-		// Token: 0x06006284 RID: 25220 RVA: 0x001FB589 File Offset: 0x001F9789
+		// Token: 0x06006284 RID: 25220 RVA: 0x001FB569 File Offset: 0x001F9769
 		public static Vector3 GetHalfPositionBetweenTwoPoints(Vector3 pointA, Vector3 pointB)
 		{
 			return Vector3.Lerp(pointA, pointB, 0.5f);

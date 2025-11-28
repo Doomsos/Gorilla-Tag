@@ -6,7 +6,7 @@ namespace Viveport.Core
 	// Token: 0x02000D50 RID: 3408
 	public class Logger
 	{
-		// Token: 0x060052FB RID: 21243 RVA: 0x001A5698 File Offset: 0x001A3898
+		// Token: 0x060052FB RID: 21243 RVA: 0x001A5678 File Offset: 0x001A3878
 		public static void Log(string message)
 		{
 			if (!Logger._hasDetected || Logger._usingUnityLog)
@@ -17,14 +17,14 @@ namespace Viveport.Core
 			Logger.ConsoleLog(message);
 		}
 
-		// Token: 0x060052FC RID: 21244 RVA: 0x001A56B5 File Offset: 0x001A38B5
+		// Token: 0x060052FC RID: 21244 RVA: 0x001A5695 File Offset: 0x001A3895
 		private static void ConsoleLog(string message)
 		{
 			Console.WriteLine(message);
 			Logger._hasDetected = true;
 		}
 
-		// Token: 0x060052FD RID: 21245 RVA: 0x001A56C4 File Offset: 0x001A38C4
+		// Token: 0x060052FD RID: 21245 RVA: 0x001A56A4 File Offset: 0x001A38A4
 		private static void UnityLog(string message)
 		{
 			try
@@ -50,7 +50,7 @@ namespace Viveport.Core
 			Logger._hasDetected = true;
 		}
 
-		// Token: 0x060052FE RID: 21246 RVA: 0x001A5750 File Offset: 0x001A3950
+		// Token: 0x060052FE RID: 21246 RVA: 0x001A5730 File Offset: 0x001A3930
 		private static Type GetType(string typeName)
 		{
 			Type type = Type.GetType(typeName);

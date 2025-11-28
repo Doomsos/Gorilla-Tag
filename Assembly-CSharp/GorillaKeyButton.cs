@@ -9,7 +9,7 @@ using UnityEngine.Events;
 // Token: 0x02000913 RID: 2323
 public abstract class GorillaKeyButton<TBinding> : MonoBehaviour where TBinding : Enum
 {
-	// Token: 0x06003B46 RID: 15174 RVA: 0x001394D2 File Offset: 0x001376D2
+	// Token: 0x06003B46 RID: 15174 RVA: 0x001394B2 File Offset: 0x001376B2
 	private void Awake()
 	{
 		if (this.ButtonRenderer == null)
@@ -20,7 +20,7 @@ public abstract class GorillaKeyButton<TBinding> : MonoBehaviour where TBinding 
 		this.pressTime = 0f;
 	}
 
-	// Token: 0x06003B47 RID: 15175 RVA: 0x00139504 File Offset: 0x00137704
+	// Token: 0x06003B47 RID: 15175 RVA: 0x001394E4 File Offset: 0x001376E4
 	private void OnEnable()
 	{
 		for (int i = 0; i < this.linkedObjects.Length; i++)
@@ -33,7 +33,7 @@ public abstract class GorillaKeyButton<TBinding> : MonoBehaviour where TBinding 
 		this.OnEnableEvents();
 	}
 
-	// Token: 0x06003B48 RID: 15176 RVA: 0x00139548 File Offset: 0x00137748
+	// Token: 0x06003B48 RID: 15176 RVA: 0x00139528 File Offset: 0x00137728
 	private void OnDisable()
 	{
 		for (int i = 0; i < this.linkedObjects.Length; i++)
@@ -46,7 +46,7 @@ public abstract class GorillaKeyButton<TBinding> : MonoBehaviour where TBinding 
 		this.OnDisableEvents();
 	}
 
-	// Token: 0x06003B49 RID: 15177 RVA: 0x0013958C File Offset: 0x0013778C
+	// Token: 0x06003B49 RID: 15177 RVA: 0x0013956C File Offset: 0x0013776C
 	private void OnTriggerEnter(Collider collider)
 	{
 		GorillaTriggerColliderHandIndicator componentInParent = collider.GetComponentInParent<GorillaTriggerColliderHandIndicator>();
@@ -56,7 +56,7 @@ public abstract class GorillaKeyButton<TBinding> : MonoBehaviour where TBinding 
 		}
 	}
 
-	// Token: 0x06003B4A RID: 15178 RVA: 0x001395B4 File Offset: 0x001377B4
+	// Token: 0x06003B4A RID: 15178 RVA: 0x00139594 File Offset: 0x00137794
 	private void PressButton(bool isLeftHand)
 	{
 		this.OnButtonPressedEvent();
@@ -89,13 +89,13 @@ public abstract class GorillaKeyButton<TBinding> : MonoBehaviour where TBinding 
 	{
 	}
 
-	// Token: 0x06003B4D RID: 15181 RVA: 0x00139679 File Offset: 0x00137879
+	// Token: 0x06003B4D RID: 15181 RVA: 0x00139659 File Offset: 0x00137859
 	public void Click(bool leftHand = false)
 	{
 		this.PressButton(leftHand);
 	}
 
-	// Token: 0x06003B4E RID: 15182 RVA: 0x00139684 File Offset: 0x00137884
+	// Token: 0x06003B4E RID: 15182 RVA: 0x00139664 File Offset: 0x00137864
 	public virtual void PressButtonColourUpdate()
 	{
 		if (!base.gameObject.activeInHierarchy)
@@ -112,7 +112,7 @@ public abstract class GorillaKeyButton<TBinding> : MonoBehaviour where TBinding 
 	// Token: 0x06003B4F RID: 15183
 	protected abstract void OnButtonPressedEvent();
 
-	// Token: 0x06003B51 RID: 15185 RVA: 0x0013971C File Offset: 0x0013791C
+	// Token: 0x06003B51 RID: 15185 RVA: 0x001396FC File Offset: 0x001378FC
 	[CompilerGenerated]
 	private IEnumerator <PressButtonColourUpdate>g__ButtonColorUpdate_Local|21_0()
 	{

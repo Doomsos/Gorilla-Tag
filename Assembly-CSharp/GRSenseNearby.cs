@@ -7,14 +7,14 @@ using UnityEngine;
 [Serializable]
 public class GRSenseNearby
 {
-	// Token: 0x06002DE1 RID: 11745 RVA: 0x000F9425 File Offset: 0x000F7625
+	// Token: 0x06002DE1 RID: 11745 RVA: 0x000F9405 File Offset: 0x000F7605
 	public void Setup(Transform headTransform)
 	{
 		this.rigsNearby = new List<VRRig>();
 		this.headTransform = headTransform;
 	}
 
-	// Token: 0x06002DE2 RID: 11746 RVA: 0x000F943C File Offset: 0x000F763C
+	// Token: 0x06002DE2 RID: 11746 RVA: 0x000F941C File Offset: 0x000F761C
 	public void UpdateNearby(List<VRRig> allRigs, GRSenseLineOfSight senseLineOfSight)
 	{
 		Vector3 position = this.headTransform.position;
@@ -24,19 +24,19 @@ public class GRSenseNearby
 		this.RemoveNoLineOfSight(position, senseLineOfSight);
 	}
 
-	// Token: 0x06002DE3 RID: 11747 RVA: 0x000F9483 File Offset: 0x000F7683
+	// Token: 0x06002DE3 RID: 11747 RVA: 0x000F9463 File Offset: 0x000F7663
 	public bool IsAnyoneNearby()
 	{
 		return !GhostReactorManager.AggroDisabled && this.rigsNearby != null && this.rigsNearby.Count > 0;
 	}
 
-	// Token: 0x06002DE4 RID: 11748 RVA: 0x000F94A4 File Offset: 0x000F76A4
+	// Token: 0x06002DE4 RID: 11748 RVA: 0x000F9484 File Offset: 0x000F7684
 	public static Vector3 GetRigTestLocation(VRRig rig)
 	{
 		return rig.transform.position;
 	}
 
-	// Token: 0x06002DE5 RID: 11749 RVA: 0x000F94B4 File Offset: 0x000F76B4
+	// Token: 0x06002DE5 RID: 11749 RVA: 0x000F9494 File Offset: 0x000F7694
 	public void AddNearby(Vector3 position, Vector3 forward, List<VRRig> allRigs)
 	{
 		float num = this.range * this.range;
@@ -66,7 +66,7 @@ public class GRSenseNearby
 		}
 	}
 
-	// Token: 0x06002DE6 RID: 11750 RVA: 0x000F957C File Offset: 0x000F777C
+	// Token: 0x06002DE6 RID: 11750 RVA: 0x000F955C File Offset: 0x000F775C
 	public void RemoveNotNearby(Vector3 position)
 	{
 		float num = this.exitRange * this.exitRange;
@@ -93,7 +93,7 @@ public class GRSenseNearby
 		}
 	}
 
-	// Token: 0x06002DE7 RID: 11751 RVA: 0x000F9604 File Offset: 0x000F7804
+	// Token: 0x06002DE7 RID: 11751 RVA: 0x000F95E4 File Offset: 0x000F77E4
 	public void RemoveNoLineOfSight(Vector3 headPos, GRSenseLineOfSight senseLineOfSight)
 	{
 		for (int i = 0; i < this.rigsNearby.Count; i++)
@@ -107,7 +107,7 @@ public class GRSenseNearby
 		}
 	}
 
-	// Token: 0x06002DE8 RID: 11752 RVA: 0x000F9654 File Offset: 0x000F7854
+	// Token: 0x06002DE8 RID: 11752 RVA: 0x000F9634 File Offset: 0x000F7834
 	public VRRig PickClosest(out float outDistanceSq)
 	{
 		Vector3 position = this.headTransform.position;

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000C0E RID: 3086
 public class BuildTargetManager : MonoBehaviour
 {
-	// Token: 0x06004C2C RID: 19500 RVA: 0x0018CD9B File Offset: 0x0018AF9B
+	// Token: 0x06004C2C RID: 19500 RVA: 0x0018CD7B File Offset: 0x0018AF7B
 	public string GetPath()
 	{
 		return this.path;

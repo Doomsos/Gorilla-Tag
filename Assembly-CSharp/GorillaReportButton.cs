@@ -5,13 +5,13 @@ using UnityEngine.UI;
 // Token: 0x02000404 RID: 1028
 public class GorillaReportButton : MonoBehaviour
 {
-	// Token: 0x0600191C RID: 6428 RVA: 0x00086642 File Offset: 0x00084842
+	// Token: 0x0600191C RID: 6428 RVA: 0x00086622 File Offset: 0x00084822
 	public void AssignParentLine(GorillaPlayerScoreboardLine parent)
 	{
 		this.parentLine = parent;
 	}
 
-	// Token: 0x0600191D RID: 6429 RVA: 0x0008664C File Offset: 0x0008484C
+	// Token: 0x0600191D RID: 6429 RVA: 0x0008662C File Offset: 0x0008482C
 	private void OnTriggerEnter(Collider collider)
 	{
 		if (base.enabled && this.touchTime + this.debounceTime < Time.time)
@@ -34,7 +34,7 @@ public class GorillaReportButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600191E RID: 6430 RVA: 0x0008673F File Offset: 0x0008493F
+	// Token: 0x0600191E RID: 6430 RVA: 0x0008671F File Offset: 0x0008491F
 	private void OnTriggerExit(Collider other)
 	{
 		if (this.metaReportType != GorillaReportButton.MetaReportReason.Cancel)
@@ -43,7 +43,7 @@ public class GorillaReportButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600191F RID: 6431 RVA: 0x00086757 File Offset: 0x00084957
+	// Token: 0x0600191F RID: 6431 RVA: 0x00086737 File Offset: 0x00084937
 	public void UpdateColor()
 	{
 		if (this.isOn)

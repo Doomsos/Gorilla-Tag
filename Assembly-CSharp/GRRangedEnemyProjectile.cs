@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020006EB RID: 1771
 public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGameHittable, IGameHitter
 {
-	// Token: 0x06002D55 RID: 11605 RVA: 0x000F53D8 File Offset: 0x000F35D8
+	// Token: 0x06002D55 RID: 11605 RVA: 0x000F53B8 File Offset: 0x000F35B8
 	private void Awake()
 	{
 		this.particleSystem = base.GetComponentInChildren<ParticleSystem>();
@@ -15,7 +15,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		this.entity = base.GetComponent<GameEntity>();
 	}
 
-	// Token: 0x06002D56 RID: 11606 RVA: 0x000F5430 File Offset: 0x000F3630
+	// Token: 0x06002D56 RID: 11606 RVA: 0x000F5410 File Offset: 0x000F3610
 	private void Start()
 	{
 		if (this.projectileRigidbody != null)
@@ -37,7 +37,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		}
 	}
 
-	// Token: 0x06002D57 RID: 11607 RVA: 0x000F54BC File Offset: 0x000F36BC
+	// Token: 0x06002D57 RID: 11607 RVA: 0x000F549C File Offset: 0x000F369C
 	private void Update()
 	{
 		if (this.entity.IsAuthority() && this.projectileHasImpacted && Time.timeAsDouble > this.projectileImpactTime + (double)this.postImpactLifetime)
@@ -46,7 +46,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		}
 	}
 
-	// Token: 0x06002D58 RID: 11608 RVA: 0x000F5510 File Offset: 0x000F3710
+	// Token: 0x06002D58 RID: 11608 RVA: 0x000F54F0 File Offset: 0x000F36F0
 	public void OnEntityInit()
 	{
 		this.owningEntityNetID = (int)this.entity.createData;
@@ -71,7 +71,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 	{
 	}
 
-	// Token: 0x06002D5B RID: 11611 RVA: 0x000F5568 File Offset: 0x000F3768
+	// Token: 0x06002D5B RID: 11611 RVA: 0x000F5548 File Offset: 0x000F3748
 	private GameEntity FindOwningEntity()
 	{
 		if (this.owningEntityNetID != 0)
@@ -83,7 +83,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		return null;
 	}
 
-	// Token: 0x06002D5C RID: 11612 RVA: 0x000F55A4 File Offset: 0x000F37A4
+	// Token: 0x06002D5C RID: 11612 RVA: 0x000F5584 File Offset: 0x000F3784
 	private void OnCollisionEnter(Collision collision)
 	{
 		if (!this.projectileHasImpacted)
@@ -106,7 +106,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		}
 	}
 
-	// Token: 0x06002D5D RID: 11613 RVA: 0x000F5668 File Offset: 0x000F3868
+	// Token: 0x06002D5D RID: 11613 RVA: 0x000F5648 File Offset: 0x000F3848
 	private void OnTriggerEnter(Collider collider)
 	{
 		if (!this.projectileHasImpacted)
@@ -125,7 +125,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		return true;
 	}
 
-	// Token: 0x06002D5F RID: 11615 RVA: 0x000F56BC File Offset: 0x000F38BC
+	// Token: 0x06002D5F RID: 11615 RVA: 0x000F569C File Offset: 0x000F389C
 	public void OnHit(GameHitData hit)
 	{
 		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
@@ -149,7 +149,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		}
 	}
 
-	// Token: 0x06002D60 RID: 11616 RVA: 0x000F5720 File Offset: 0x000F3920
+	// Token: 0x06002D60 RID: 11616 RVA: 0x000F5700 File Offset: 0x000F3900
 	public void OnHitByClub(GRTool tool, GameHitData hit)
 	{
 		this.projectileHasImpacted = true;
@@ -166,7 +166,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 	{
 	}
 
-	// Token: 0x06002D62 RID: 11618 RVA: 0x000F5782 File Offset: 0x000F3982
+	// Token: 0x06002D62 RID: 11618 RVA: 0x000F5762 File Offset: 0x000F3962
 	public void OnHitByShield(GRTool tool, GameHitData hit)
 	{
 		this.projectileHasImpacted = true;
@@ -178,7 +178,7 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		}
 	}
 
-	// Token: 0x06002D63 RID: 11619 RVA: 0x000F57BB File Offset: 0x000F39BB
+	// Token: 0x06002D63 RID: 11619 RVA: 0x000F579B File Offset: 0x000F399B
 	private void PlayImpactFX()
 	{
 		if (this.particleSystem != null)
@@ -191,13 +191,13 @@ public class GRRangedEnemyProjectile : MonoBehaviour, IGameEntityComponent, IGam
 		}
 	}
 
-	// Token: 0x06002D64 RID: 11620 RVA: 0x000F57F0 File Offset: 0x000F39F0
+	// Token: 0x06002D64 RID: 11620 RVA: 0x000F57D0 File Offset: 0x000F39D0
 	public void OnSuccessfulHit(GameHitData hit)
 	{
 		this.PlayImpactFX();
 	}
 
-	// Token: 0x06002D65 RID: 11621 RVA: 0x000F57F8 File Offset: 0x000F39F8
+	// Token: 0x06002D65 RID: 11621 RVA: 0x000F57D8 File Offset: 0x000F39D8
 	public void OnSuccessfulHitPlayer(GRPlayer player, Vector3 hitPosition)
 	{
 		this.PlayImpactFX();

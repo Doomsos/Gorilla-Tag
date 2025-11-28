@@ -8,8 +8,8 @@ using UnityEngine;
 public class ModeSelectButton : GorillaPressableButton
 {
 	// Token: 0x17000508 RID: 1288
-	// (get) Token: 0x0600380D RID: 14349 RVA: 0x0012CAC9 File Offset: 0x0012ACC9
-	// (set) Token: 0x0600380E RID: 14350 RVA: 0x0012CAD1 File Offset: 0x0012ACD1
+	// (get) Token: 0x0600380D RID: 14349 RVA: 0x0012CAA9 File Offset: 0x0012ACA9
+	// (set) Token: 0x0600380E RID: 14350 RVA: 0x0012CAB1 File Offset: 0x0012ACB1
 	public PartyGameModeWarning WarningScreen
 	{
 		get
@@ -22,14 +22,14 @@ public class ModeSelectButton : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x0600380F RID: 14351 RVA: 0x0012CADA File Offset: 0x0012ACDA
+	// Token: 0x0600380F RID: 14351 RVA: 0x0012CABA File Offset: 0x0012ACBA
 	public override void Start()
 	{
 		base.Start();
 		GorillaComputer.instance.currentGameMode.AddCallback(new Action<string>(this.OnGameModeChanged), true);
 	}
 
-	// Token: 0x06003810 RID: 14352 RVA: 0x0012CB00 File Offset: 0x0012AD00
+	// Token: 0x06003810 RID: 14352 RVA: 0x0012CAE0 File Offset: 0x0012ACE0
 	private void OnDestroy()
 	{
 		if (!ApplicationQuittingState.IsQuitting)
@@ -38,7 +38,7 @@ public class ModeSelectButton : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x06003811 RID: 14353 RVA: 0x0012CB26 File Offset: 0x0012AD26
+	// Token: 0x06003811 RID: 14353 RVA: 0x0012CB06 File Offset: 0x0012AD06
 	public override void ButtonActivationWithHand(bool isLeftHand)
 	{
 		base.ButtonActivationWithHand(isLeftHand);
@@ -50,13 +50,13 @@ public class ModeSelectButton : GorillaPressableButton
 		GorillaComputer.instance.OnModeSelectButtonPress(this.gameMode, isLeftHand);
 	}
 
-	// Token: 0x06003812 RID: 14354 RVA: 0x0012CB5B File Offset: 0x0012AD5B
+	// Token: 0x06003812 RID: 14354 RVA: 0x0012CB3B File Offset: 0x0012AD3B
 	public void OnGameModeChanged(string newGameMode)
 	{
 		this.buttonRenderer.material = ((newGameMode.ToLower() == this.gameMode.ToLower()) ? this.pressedMaterial : this.unpressedMaterial);
 	}
 
-	// Token: 0x06003813 RID: 14355 RVA: 0x0012CB90 File Offset: 0x0012AD90
+	// Token: 0x06003813 RID: 14355 RVA: 0x0012CB70 File Offset: 0x0012AD70
 	public void SetInfo(string Mode, string ModeTitle, bool NewMode, CountdownTextDate CountdownTo)
 	{
 		this.gameModeTitle.text = ModeTitle;
@@ -71,7 +71,7 @@ public class ModeSelectButton : GorillaPressableButton
 		this.limitedCountdown.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06003814 RID: 14356 RVA: 0x0012CBF6 File Offset: 0x0012ADF6
+	// Token: 0x06003814 RID: 14356 RVA: 0x0012CBD6 File Offset: 0x0012ADD6
 	public void HideNewAndLimitedTimeInfo()
 	{
 		this.limitedCountdown.gameObject.SetActive(false);

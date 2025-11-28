@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200055A RID: 1370
 public class BuilderPaintBrush : HoldableObject
 {
-	// Token: 0x060022A8 RID: 8872 RVA: 0x000B51B0 File Offset: 0x000B33B0
+	// Token: 0x060022A8 RID: 8872 RVA: 0x000B5190 File Offset: 0x000B3390
 	private void Awake()
 	{
 		this.pieceLayers |= 1 << LayerMask.NameToLayer("Gorilla Object");
@@ -21,7 +21,7 @@ public class BuilderPaintBrush : HoldableObject
 	{
 	}
 
-	// Token: 0x060022AA RID: 8874 RVA: 0x000B524C File Offset: 0x000B344C
+	// Token: 0x060022AA RID: 8874 RVA: 0x000B522C File Offset: 0x000B342C
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		this.holdingHand = grabbingHand;
@@ -53,7 +53,7 @@ public class BuilderPaintBrush : HoldableObject
 	{
 	}
 
-	// Token: 0x060022AC RID: 8876 RVA: 0x000B534C File Offset: 0x000B354C
+	// Token: 0x060022AC RID: 8876 RVA: 0x000B532C File Offset: 0x000B352C
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		if (base.OnRelease(zoneReleased, releasingHand))
@@ -74,7 +74,7 @@ public class BuilderPaintBrush : HoldableObject
 		return false;
 	}
 
-	// Token: 0x060022AD RID: 8877 RVA: 0x000B53EB File Offset: 0x000B35EB
+	// Token: 0x060022AD RID: 8877 RVA: 0x000B53CB File Offset: 0x000B35CB
 	private void LateUpdate()
 	{
 		if (this.brushState == BuilderPaintBrush.PaintBrushState.Inactive)
@@ -89,7 +89,7 @@ public class BuilderPaintBrush : HoldableObject
 		this.FindPieceToPaint();
 	}
 
-	// Token: 0x060022AE RID: 8878 RVA: 0x000B541C File Offset: 0x000B361C
+	// Token: 0x060022AE RID: 8878 RVA: 0x000B53FC File Offset: 0x000B35FC
 	private void FindPieceToPaint()
 	{
 		switch (this.brushState)
@@ -188,7 +188,7 @@ public class BuilderPaintBrush : HoldableObject
 		}
 	}
 
-	// Token: 0x060022AF RID: 8879 RVA: 0x000B57E4 File Offset: 0x000B39E4
+	// Token: 0x060022AF RID: 8879 RVA: 0x000B57C4 File Offset: 0x000B39C4
 	private void PaintPiece()
 	{
 		this.hoveredPiece.GetTable().RequestPaintPiece(this.hoveredPiece.pieceId, this.materialType);
@@ -199,7 +199,7 @@ public class BuilderPaintBrush : HoldableObject
 		GorillaTagger.Instance.StartVibration(this.inLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
 	}
 
-	// Token: 0x060022B0 RID: 8880 RVA: 0x000B5864 File Offset: 0x000B3A64
+	// Token: 0x060022B0 RID: 8880 RVA: 0x000B5844 File Offset: 0x000B3A44
 	private void ClearHoveredPiece()
 	{
 		if (this.hoveredPiece != null)
@@ -212,7 +212,7 @@ public class BuilderPaintBrush : HoldableObject
 		this.brushState = ((this.holdingHand == null || this.materialType == -1) ? BuilderPaintBrush.PaintBrushState.Inactive : BuilderPaintBrush.PaintBrushState.Held);
 	}
 
-	// Token: 0x060022B1 RID: 8881 RVA: 0x000B58C8 File Offset: 0x000B3AC8
+	// Token: 0x060022B1 RID: 8881 RVA: 0x000B58A8 File Offset: 0x000B3AA8
 	public void SetBrushMaterial(int inMaterialType)
 	{
 		this.materialType = inMaterialType;

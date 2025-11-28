@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x02000458 RID: 1112
 public class CheckoutCartButton : GorillaPressableButton
 {
-	// Token: 0x06001C4B RID: 7243 RVA: 0x00096477 File Offset: 0x00094677
+	// Token: 0x06001C4B RID: 7243 RVA: 0x00096457 File Offset: 0x00094657
 	public override void Start()
 	{
 		this.currentCosmeticItem = CosmeticsController.instance.nullItem;
 	}
 
-	// Token: 0x06001C4C RID: 7244 RVA: 0x0009648C File Offset: 0x0009468C
+	// Token: 0x06001C4C RID: 7244 RVA: 0x0009646C File Offset: 0x0009466C
 	public override void UpdateColor()
 	{
 		if (this.currentCosmeticItem.itemName == "null")
@@ -54,14 +54,14 @@ public class CheckoutCartButton : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x06001C4D RID: 7245 RVA: 0x000965BF File Offset: 0x000947BF
+	// Token: 0x06001C4D RID: 7245 RVA: 0x0009659F File Offset: 0x0009479F
 	public override void ButtonActivationWithHand(bool isLeftHand)
 	{
 		base.ButtonActivation();
 		CosmeticsController.instance.PressCheckoutCartButton(this, isLeftHand);
 	}
 
-	// Token: 0x06001C4E RID: 7246 RVA: 0x000965D5 File Offset: 0x000947D5
+	// Token: 0x06001C4E RID: 7246 RVA: 0x000965B5 File Offset: 0x000947B5
 	public void SetItem(CosmeticsController.CosmeticItem item, bool isCurrentItemToBuy)
 	{
 		this.currentCosmeticItem = item;
@@ -73,7 +73,7 @@ public class CheckoutCartButton : GorillaPressableButton
 		this.UpdateColor();
 	}
 
-	// Token: 0x06001C4F RID: 7247 RVA: 0x0009660E File Offset: 0x0009480E
+	// Token: 0x06001C4F RID: 7247 RVA: 0x000965EE File Offset: 0x000947EE
 	public void ClearItem()
 	{
 		this.currentCosmeticItem = CosmeticsController.instance.nullItem;

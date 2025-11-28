@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 public class VoiceLoudnessReactorRendererColorTarget
 {
-	// Token: 0x06005065 RID: 20581 RVA: 0x0019E218 File Offset: 0x0019C418
+	// Token: 0x06005065 RID: 20581 RVA: 0x0019E1F8 File Offset: 0x0019C3F8
 	public void Inititialize()
 	{
 		if (this._materials == null)
@@ -18,7 +18,7 @@ public class VoiceLoudnessReactorRendererColorTarget
 		}
 	}
 
-	// Token: 0x06005066 RID: 20582 RVA: 0x0019E27C File Offset: 0x0019C47C
+	// Token: 0x06005066 RID: 20582 RVA: 0x0019E25C File Offset: 0x0019C45C
 	public void UpdateMaterialColor(float level)
 	{
 		Color color = this.gradient.Evaluate(level);

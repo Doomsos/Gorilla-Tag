@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x0200109D RID: 4253
 	public class RCPlane : RCVehicle
 	{
-		// Token: 0x06006A64 RID: 27236 RVA: 0x0022D530 File Offset: 0x0022B730
+		// Token: 0x06006A64 RID: 27236 RVA: 0x0022D510 File Offset: 0x0022B710
 		protected override void Awake()
 		{
 			base.Awake();
@@ -19,7 +19,7 @@ namespace GorillaTag.Cosmetics
 			this.thrustAccel = this.thrustVelocityTarget / this.thrustAccelTime;
 		}
 
-		// Token: 0x06006A65 RID: 27237 RVA: 0x0022D5B0 File Offset: 0x0022B7B0
+		// Token: 0x06006A65 RID: 27237 RVA: 0x0022D590 File Offset: 0x0022B790
 		protected override void AuthorityBeginMobilization()
 		{
 			base.AuthorityBeginMobilization();
@@ -27,7 +27,7 @@ namespace GorillaTag.Cosmetics
 			this.rb.linearVelocity = base.transform.forward * this.initialSpeed * x;
 		}
 
-		// Token: 0x06006A66 RID: 27238 RVA: 0x0022D5FC File Offset: 0x0022B7FC
+		// Token: 0x06006A66 RID: 27238 RVA: 0x0022D5DC File Offset: 0x0022B7DC
 		protected override void AuthorityUpdate(float dt)
 		{
 			base.AuthorityUpdate(dt);
@@ -54,7 +54,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A67 RID: 27239 RVA: 0x0022D7A0 File Offset: 0x0022B9A0
+		// Token: 0x06006A67 RID: 27239 RVA: 0x0022D780 File Offset: 0x0022B980
 		protected override void RemoteUpdate(float dt)
 		{
 			base.RemoteUpdate(dt);
@@ -66,7 +66,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A68 RID: 27240 RVA: 0x0022D83C File Offset: 0x0022BA3C
+		// Token: 0x06006A68 RID: 27240 RVA: 0x0022D81C File Offset: 0x0022BA1C
 		protected override void SharedUpdate(float dt)
 		{
 			base.SharedUpdate(dt);
@@ -123,7 +123,7 @@ namespace GorillaTag.Cosmetics
 			this.rightAileronUpper.localRotation = localRotation2;
 		}
 
-		// Token: 0x06006A69 RID: 27241 RVA: 0x0022DBA4 File Offset: 0x0022BDA4
+		// Token: 0x06006A69 RID: 27241 RVA: 0x0022DB84 File Offset: 0x0022BD84
 		private void FixedUpdate()
 		{
 			if (!base.HasLocalAuthority || this.localState != RCVehicle.State.Mobilized)
@@ -183,7 +183,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A6A RID: 27242 RVA: 0x0022DF8C File Offset: 0x0022C18C
+		// Token: 0x06006A6A RID: 27242 RVA: 0x0022DF6C File Offset: 0x0022C16C
 		private void OnCollisionEnter(Collision collision)
 		{
 			if (base.HasLocalAuthority && this.localState == RCVehicle.State.Mobilized)

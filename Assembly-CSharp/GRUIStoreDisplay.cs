@@ -12,7 +12,7 @@ public class GRUIStoreDisplay : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06003032 RID: 12338 RVA: 0x00107A7D File Offset: 0x00105C7D
+	// Token: 0x06003032 RID: 12338 RVA: 0x00107A5D File Offset: 0x00105C5D
 	public void OnEnable()
 	{
 		this.RefreshUI();
@@ -23,7 +23,7 @@ public class GRUIStoreDisplay : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06003034 RID: 12340 RVA: 0x00107A85 File Offset: 0x00105C85
+	// Token: 0x06003034 RID: 12340 RVA: 0x00107A65 File Offset: 0x00105C65
 	public void Setup(int playerActorId, GhostReactor reactor)
 	{
 		this.reactor = reactor;
@@ -33,19 +33,19 @@ public class GRUIStoreDisplay : MonoBehaviour
 		this.toolProgressionManager.OnProgressionUpdated += new Action(this.onProgressionUpdated);
 	}
 
-	// Token: 0x06003035 RID: 12341 RVA: 0x00107A7D File Offset: 0x00105C7D
+	// Token: 0x06003035 RID: 12341 RVA: 0x00107A5D File Offset: 0x00105C5D
 	private void onProgressionUpdated()
 	{
 		this.RefreshUI();
 	}
 
-	// Token: 0x06003036 RID: 12342 RVA: 0x00107ABE File Offset: 0x00105CBE
+	// Token: 0x06003036 RID: 12342 RVA: 0x00107A9E File Offset: 0x00105C9E
 	private void RefreshUI()
 	{
 		this.RefreshItemInfo();
 	}
 
-	// Token: 0x06003037 RID: 12343 RVA: 0x00107AC8 File Offset: 0x00105CC8
+	// Token: 0x06003037 RID: 12343 RVA: 0x00107AA8 File Offset: 0x00105CA8
 	public void OnBuy(int playerActorNumber)
 	{
 		if (playerActorNumber != this.playerActorId)
@@ -95,13 +95,13 @@ public class GRUIStoreDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003038 RID: 12344 RVA: 0x00107BB3 File Offset: 0x00105DB3
+	// Token: 0x06003038 RID: 12344 RVA: 0x00107B93 File Offset: 0x00105D93
 	private bool CanLocalPlayerPurchaseItem()
 	{
 		return this.slot.canAfford;
 	}
 
-	// Token: 0x06003039 RID: 12345 RVA: 0x00107BC0 File Offset: 0x00105DC0
+	// Token: 0x06003039 RID: 12345 RVA: 0x00107BA0 File Offset: 0x00105DA0
 	public void RefreshItemInfo()
 	{
 		bool flag = true;

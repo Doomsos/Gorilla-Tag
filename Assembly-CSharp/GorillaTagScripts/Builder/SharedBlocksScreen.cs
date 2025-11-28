@@ -36,7 +36,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005D01 RID: 23809 RVA: 0x001DDB8E File Offset: 0x001DBD8E
+		// Token: 0x06005D01 RID: 23809 RVA: 0x001DDB6E File Offset: 0x001DBD6E
 		public virtual void Show()
 		{
 			if (!base.gameObject.activeSelf)
@@ -45,7 +45,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D02 RID: 23810 RVA: 0x001DDBA9 File Offset: 0x001DBDA9
+		// Token: 0x06005D02 RID: 23810 RVA: 0x001DDB89 File Offset: 0x001DBD89
 		public virtual void Hide()
 		{
 			if (base.gameObject.activeSelf)

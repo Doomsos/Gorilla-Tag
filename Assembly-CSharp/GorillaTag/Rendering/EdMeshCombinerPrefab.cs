@@ -17,7 +17,7 @@ namespace GorillaTag.Rendering
 	[DefaultExecutionOrder(-2147482648)]
 	public class EdMeshCombinerPrefab : MonoBehaviour
 	{
-		// Token: 0x060069DD RID: 27101 RVA: 0x00226E56 File Offset: 0x00225056
+		// Token: 0x060069DD RID: 27101 RVA: 0x00226E36 File Offset: 0x00225036
 		private void Awake()
 		{
 			if (this.combinedData == null)
@@ -27,7 +27,7 @@ namespace GorillaTag.Rendering
 			EdMeshCombinerPrefab.CombineMeshesRuntime(this, false, this.combinedData);
 		}
 
-		// Token: 0x060069DE RID: 27102 RVA: 0x00226E78 File Offset: 0x00225078
+		// Token: 0x060069DE RID: 27102 RVA: 0x00226E58 File Offset: 0x00225058
 		private static void Special_MarkDoNotCombine(Component component)
 		{
 			if (component != null)
@@ -40,7 +40,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x060069DF RID: 27103 RVA: 0x00226EAC File Offset: 0x002250AC
+		// Token: 0x060069DF RID: 27103 RVA: 0x00226E8C File Offset: 0x0022508C
 		public static void CombineMeshesRuntime(EdMeshCombinerPrefab combiner, bool undo = false, EdMeshCombinedPrefabData combinedPrefabData = null)
 		{
 			bool flag = true;
@@ -428,7 +428,7 @@ namespace GorillaTag.Rendering
 		// Token: 0x0200107F RID: 4223
 		private struct CombinerCriteria
 		{
-			// Token: 0x060069E2 RID: 27106 RVA: 0x00227C98 File Offset: 0x00225E98
+			// Token: 0x060069E2 RID: 27106 RVA: 0x00227C78 File Offset: 0x00225E78
 			public override int GetHashCode()
 			{
 				return HashCode.Combine<int, int, int, bool, int, float, float, bool>(this.mat.GetInstanceID(), this.staticFlags, this.lightmapIndex, this.hasMeshCollider, this.surfOverrideIndex, this.surfExtraVelMultiplier, this.surfExtraVelMaxMultiplier, this.surfSendOnTapEvent);
@@ -469,7 +469,7 @@ namespace GorillaTag.Rendering
 		[BurstCompile]
 		private struct CopyMeshJob : IJob
 		{
-			// Token: 0x060069E3 RID: 27107 RVA: 0x00227CD4 File Offset: 0x00225ED4
+			// Token: 0x060069E3 RID: 27107 RVA: 0x00227CB4 File Offset: 0x00225EB4
 			public void Execute()
 			{
 				int num = 0;

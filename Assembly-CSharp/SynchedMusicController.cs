@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x020008EA RID: 2282
 public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06003A74 RID: 14964 RVA: 0x0013447C File Offset: 0x0013267C
+	// Token: 0x06003A74 RID: 14964 RVA: 0x0013445C File Offset: 0x0013265C
 	private void Start()
 	{
 		if (this.usingNewSyncedSongsCode)
@@ -42,7 +42,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003A75 RID: 14965 RVA: 0x00134598 File Offset: 0x00132798
+	// Token: 0x06003A75 RID: 14965 RVA: 0x00134578 File Offset: 0x00132778
 	public void SliceUpdate()
 	{
 		if (this.usingNewSyncedSongsCode)
@@ -118,7 +118,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003A76 RID: 14966 RVA: 0x00134876 File Offset: 0x00132A76
+	// Token: 0x06003A76 RID: 14966 RVA: 0x00134856 File Offset: 0x00132A56
 	private void StartPlayingSong(long timeStarted, long currentTime)
 	{
 		if (this.audioSource.volume != 0f)
@@ -128,7 +128,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		this.audioSource.time = (float)(currentTime - timeStarted) / 1000f;
 	}
 
-	// Token: 0x06003A77 RID: 14967 RVA: 0x001348AC File Offset: 0x00132AAC
+	// Token: 0x06003A77 RID: 14967 RVA: 0x0013488C File Offset: 0x00132A8C
 	private void StartPlayingSongs(long timeStarted, long currentTime)
 	{
 		foreach (AudioSource audioSource in this.audioSourceArray)
@@ -141,7 +141,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003A78 RID: 14968 RVA: 0x001348F8 File Offset: 0x00132AF8
+	// Token: 0x06003A78 RID: 14968 RVA: 0x001348D8 File Offset: 0x00132AD8
 	private void StartPlayingSong(long timeStarted, long currentTime, AudioClip clipToPlay, AudioSource sourceToPlay)
 	{
 		this.audioSource = sourceToPlay;
@@ -153,7 +153,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		sourceToPlay.time = (float)(currentTime - timeStarted) / 1000f;
 	}
 
-	// Token: 0x06003A79 RID: 14969 RVA: 0x00134944 File Offset: 0x00132B44
+	// Token: 0x06003A79 RID: 14969 RVA: 0x00134924 File Offset: 0x00132B24
 	private void GenerateSongStartRandomTimes()
 	{
 		this.songStartTimes = new long[500];
@@ -189,7 +189,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003A7A RID: 14970 RVA: 0x00134AD4 File Offset: 0x00132CD4
+	// Token: 0x06003A7A RID: 14970 RVA: 0x00134AB4 File Offset: 0x00132CB4
 	public void MuteAudio(GorillaPressableButton pressedButton)
 	{
 		AudioSource[] array;
@@ -235,7 +235,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003A7B RID: 14971 RVA: 0x00134C14 File Offset: 0x00132E14
+	// Token: 0x06003A7B RID: 14971 RVA: 0x00134BF4 File Offset: 0x00132DF4
 	protected void New_Start()
 	{
 		string text = this.New_Validate();
@@ -296,7 +296,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003A7C RID: 14972 RVA: 0x00134E3B File Offset: 0x0013303B
+	// Token: 0x06003A7C RID: 14972 RVA: 0x00134E1B File Offset: 0x0013301B
 	public void OnEnable()
 	{
 		this.lastPlayIndex = -1;
@@ -309,7 +309,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06003A7E RID: 14974 RVA: 0x00134E4C File Offset: 0x0013304C
+	// Token: 0x06003A7E RID: 14974 RVA: 0x00134E2C File Offset: 0x0013302C
 	private void New_Update()
 	{
 		if (!GorillaComputer.hasInstance)
@@ -402,7 +402,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003A7F RID: 14975 RVA: 0x001350CC File Offset: 0x001332CC
+	// Token: 0x06003A7F RID: 14975 RVA: 0x001350AC File Offset: 0x001332AC
 	private string New_Validate()
 	{
 		if (this.syncedSongs == null)
@@ -447,7 +447,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 		return string.Empty;
 	}
 
-	// Token: 0x06003A80 RID: 14976 RVA: 0x00135234 File Offset: 0x00133434
+	// Token: 0x06003A80 RID: 14976 RVA: 0x00135214 File Offset: 0x00133414
 	private void New_GeneratePlaylistArrays()
 	{
 		if (this.syncedSongs == null || this.syncedSongs.Length == 0)

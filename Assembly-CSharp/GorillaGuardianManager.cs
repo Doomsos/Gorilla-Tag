@@ -10,11 +10,11 @@ using UnityEngine;
 public sealed class GorillaGuardianManager : GorillaGameManager
 {
 	// Token: 0x17000476 RID: 1142
-	// (get) Token: 0x06003233 RID: 12851 RVA: 0x0010ED2B File Offset: 0x0010CF2B
-	// (set) Token: 0x06003234 RID: 12852 RVA: 0x0010ED33 File Offset: 0x0010CF33
+	// (get) Token: 0x06003233 RID: 12851 RVA: 0x0010ED0B File Offset: 0x0010CF0B
+	// (set) Token: 0x06003234 RID: 12852 RVA: 0x0010ED13 File Offset: 0x0010CF13
 	public bool isPlaying { get; private set; }
 
-	// Token: 0x06003235 RID: 12853 RVA: 0x0010ED3C File Offset: 0x0010CF3C
+	// Token: 0x06003235 RID: 12853 RVA: 0x0010ED1C File Offset: 0x0010CF1C
 	public override void StartPlaying()
 	{
 		base.StartPlaying();
@@ -28,7 +28,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		}
 	}
 
-	// Token: 0x06003236 RID: 12854 RVA: 0x0010EDA0 File Offset: 0x0010CFA0
+	// Token: 0x06003236 RID: 12854 RVA: 0x0010ED80 File Offset: 0x0010CF80
 	public override void StopPlaying()
 	{
 		base.StopPlaying();
@@ -42,13 +42,13 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		}
 	}
 
-	// Token: 0x06003237 RID: 12855 RVA: 0x0010EE04 File Offset: 0x0010D004
+	// Token: 0x06003237 RID: 12855 RVA: 0x0010EDE4 File Offset: 0x0010CFE4
 	public override void ResetGame()
 	{
 		base.ResetGame();
 	}
 
-	// Token: 0x06003238 RID: 12856 RVA: 0x0010EE0C File Offset: 0x0010D00C
+	// Token: 0x06003238 RID: 12856 RVA: 0x0010EDEC File Offset: 0x0010CFEC
 	internal override void NetworkLinkSetup(GameModeSerializer netSerializer)
 	{
 		base.NetworkLinkSetup(netSerializer);
@@ -71,7 +71,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		return null;
 	}
 
-	// Token: 0x0600323C RID: 12860 RVA: 0x0010EE1C File Offset: 0x0010D01C
+	// Token: 0x0600323C RID: 12860 RVA: 0x0010EDFC File Offset: 0x0010CFFC
 	public override bool LocalCanTag(NetPlayer myPlayer, NetPlayer otherPlayer)
 	{
 		return this.IsPlayerGuardian(myPlayer) && !this.IsHoldingPlayer();
@@ -83,13 +83,13 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		return false;
 	}
 
-	// Token: 0x0600323E RID: 12862 RVA: 0x0010EE32 File Offset: 0x0010D032
+	// Token: 0x0600323E RID: 12862 RVA: 0x0010EE12 File Offset: 0x0010D012
 	public override bool CanJoinFrienship(NetPlayer player)
 	{
 		return player != null && !this.IsPlayerGuardian(player);
 	}
 
-	// Token: 0x0600323F RID: 12863 RVA: 0x0010EE44 File Offset: 0x0010D044
+	// Token: 0x0600323F RID: 12863 RVA: 0x0010EE24 File Offset: 0x0010D024
 	public bool IsPlayerGuardian(NetPlayer player)
 	{
 		using (List<GorillaGuardianZoneManager>.Enumerator enumerator = GorillaGuardianZoneManager.zoneManagers.GetEnumerator())
@@ -105,7 +105,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		return false;
 	}
 
-	// Token: 0x06003240 RID: 12864 RVA: 0x0010EEA0 File Offset: 0x0010D0A0
+	// Token: 0x06003240 RID: 12864 RVA: 0x0010EE80 File Offset: 0x0010D080
 	public void RequestEjectGuardian(NetPlayer player)
 	{
 		if (PhotonNetwork.IsMasterClient)
@@ -116,7 +116,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		GameMode.ActiveNetworkHandler.SendRPC("GuardianRequestEject", false, Array.Empty<object>());
 	}
 
-	// Token: 0x06003241 RID: 12865 RVA: 0x0010EEC8 File Offset: 0x0010D0C8
+	// Token: 0x06003241 RID: 12865 RVA: 0x0010EEA8 File Offset: 0x0010D0A8
 	public void EjectGuardian(NetPlayer player)
 	{
 		foreach (GorillaGuardianZoneManager gorillaGuardianZoneManager in GorillaGuardianZoneManager.zoneManagers)
@@ -128,7 +128,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		}
 	}
 
-	// Token: 0x06003242 RID: 12866 RVA: 0x0010EF24 File Offset: 0x0010D124
+	// Token: 0x06003242 RID: 12866 RVA: 0x0010EF04 File Offset: 0x0010D104
 	public void LaunchPlayer(NetPlayer launcher, Vector3 velocity)
 	{
 		RigContainer rigContainer;
@@ -147,7 +147,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		GTPlayer.Instance.DoLaunch(velocity);
 	}
 
-	// Token: 0x06003243 RID: 12867 RVA: 0x0010EFA8 File Offset: 0x0010D1A8
+	// Token: 0x06003243 RID: 12867 RVA: 0x0010EF88 File Offset: 0x0010D188
 	public override void LocalTag(NetPlayer taggedPlayer, NetPlayer taggingPlayer, bool bodyHit, bool leftHand)
 	{
 		base.LocalTag(taggedPlayer, taggingPlayer, bodyHit, leftHand);
@@ -173,7 +173,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		}
 	}
 
-	// Token: 0x06003244 RID: 12868 RVA: 0x0010F06C File Offset: 0x0010D26C
+	// Token: 0x06003244 RID: 12868 RVA: 0x0010F04C File Offset: 0x0010D24C
 	private bool CheckSlap(NetPlayer slapper, NetPlayer target, bool leftHand, out Vector3 velocity)
 	{
 		velocity = Vector3.zero;
@@ -220,7 +220,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		return true;
 	}
 
-	// Token: 0x06003245 RID: 12869 RVA: 0x0010F1D8 File Offset: 0x0010D3D8
+	// Token: 0x06003245 RID: 12869 RVA: 0x0010F1B8 File Offset: 0x0010D3B8
 	public override void HandleHandTap(NetPlayer tappingPlayer, Tappable hitTappable, bool leftHand, Vector3 handVelocity, Vector3 tapSurfaceNormal)
 	{
 		base.HandleHandTap(tappingPlayer, hitTappable, leftHand, handVelocity, tapSurfaceNormal);
@@ -285,25 +285,25 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		});
 	}
 
-	// Token: 0x06003246 RID: 12870 RVA: 0x0010F44A File Offset: 0x0010D64A
+	// Token: 0x06003246 RID: 12870 RVA: 0x0010F42A File Offset: 0x0010D62A
 	private bool CheckLaunchRetriggerDelay(VRRig launchedRig)
 	{
 		return launchedRig.fxSettings.callSettings[7].CallLimitSettings.CheckCallTime(Time.time);
 	}
 
-	// Token: 0x06003247 RID: 12871 RVA: 0x0010F468 File Offset: 0x0010D668
+	// Token: 0x06003247 RID: 12871 RVA: 0x0010F448 File Offset: 0x0010D648
 	private bool IsHoldingPlayer()
 	{
 		return this.IsHoldingPlayer(true) || this.IsHoldingPlayer(false);
 	}
 
-	// Token: 0x06003248 RID: 12872 RVA: 0x0010F47C File Offset: 0x0010D67C
+	// Token: 0x06003248 RID: 12872 RVA: 0x0010F45C File Offset: 0x0010D65C
 	private bool IsHoldingPlayer(bool leftHand)
 	{
 		return (leftHand && EquipmentInteractor.instance.leftHandHeldEquipment != null && EquipmentInteractor.instance.leftHandHeldEquipment is HoldableHand) || (!leftHand && EquipmentInteractor.instance.rightHandHeldEquipment != null && EquipmentInteractor.instance.rightHandHeldEquipment is HoldableHand);
 	}
 
-	// Token: 0x06003249 RID: 12873 RVA: 0x0010F4D8 File Offset: 0x0010D6D8
+	// Token: 0x06003249 RID: 12873 RVA: 0x0010F4B8 File Offset: 0x0010D6B8
 	private bool IsRigBeingHeld(VRRig rig)
 	{
 		if (EquipmentInteractor.instance.leftHandHeldEquipment != null)
@@ -335,31 +335,31 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 	{
 	}
 
-	// Token: 0x0600324C RID: 12876 RVA: 0x0010F54C File Offset: 0x0010D74C
+	// Token: 0x0600324C RID: 12876 RVA: 0x0010F52C File Offset: 0x0010D72C
 	public override GameModeType GameType()
 	{
 		return GameModeType.Guardian;
 	}
 
-	// Token: 0x0600324D RID: 12877 RVA: 0x0010F54F File Offset: 0x0010D74F
+	// Token: 0x0600324D RID: 12877 RVA: 0x0010F52F File Offset: 0x0010D72F
 	public void PlaySlapEffect(Vector3 location, Vector3 direction)
 	{
 		this.LocalPlaySlapEffect(location, direction);
 	}
 
-	// Token: 0x0600324E RID: 12878 RVA: 0x0010F559 File Offset: 0x0010D759
+	// Token: 0x0600324E RID: 12878 RVA: 0x0010F539 File Offset: 0x0010D739
 	private void LocalPlaySlapEffect(Vector3 location, Vector3 direction)
 	{
 		ObjectPools.instance.Instantiate(this.slapImpactPrefab, location, Quaternion.LookRotation(direction), true);
 	}
 
-	// Token: 0x0600324F RID: 12879 RVA: 0x0010F574 File Offset: 0x0010D774
+	// Token: 0x0600324F RID: 12879 RVA: 0x0010F554 File Offset: 0x0010D754
 	public void PlaySlamEffect(Vector3 location, Vector3 direction)
 	{
 		this.LocalPlaySlamEffect(location, direction);
 	}
 
-	// Token: 0x06003250 RID: 12880 RVA: 0x0010F57E File Offset: 0x0010D77E
+	// Token: 0x06003250 RID: 12880 RVA: 0x0010F55E File Offset: 0x0010D75E
 	private void LocalPlaySlamEffect(Vector3 location, Vector3 direction)
 	{
 		ObjectPools.instance.Instantiate(this.slamImpactPrefab, location, Quaternion.LookRotation(direction), true);

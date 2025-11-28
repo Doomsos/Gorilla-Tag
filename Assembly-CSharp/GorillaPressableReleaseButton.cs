@@ -5,7 +5,7 @@ using UnityEngine.Events;
 // Token: 0x0200091E RID: 2334
 public class GorillaPressableReleaseButton : GorillaPressableButton
 {
-	// Token: 0x06003BA7 RID: 15271 RVA: 0x0013B468 File Offset: 0x00139668
+	// Token: 0x06003BA7 RID: 15271 RVA: 0x0013B448 File Offset: 0x00139648
 	private new void OnTriggerEnter(Collider other)
 	{
 		if (!base.enabled)
@@ -47,7 +47,7 @@ public class GorillaPressableReleaseButton : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x06003BA8 RID: 15272 RVA: 0x0013B590 File Offset: 0x00139790
+	// Token: 0x06003BA8 RID: 15272 RVA: 0x0013B570 File Offset: 0x00139770
 	private void OnTriggerExit(Collider other)
 	{
 		if (!base.enabled)
@@ -84,7 +84,7 @@ public class GorillaPressableReleaseButton : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x06003BA9 RID: 15273 RVA: 0x0013B698 File Offset: 0x00139898
+	// Token: 0x06003BA9 RID: 15273 RVA: 0x0013B678 File Offset: 0x00139878
 	public override void ResetState()
 	{
 		base.ResetState();

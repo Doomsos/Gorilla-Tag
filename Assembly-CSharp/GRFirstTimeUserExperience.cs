@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x020006C6 RID: 1734
 public class GRFirstTimeUserExperience : MonoBehaviour
 {
-	// Token: 0x06002C92 RID: 11410 RVA: 0x000E763B File Offset: 0x000E583B
+	// Token: 0x06002C92 RID: 11410 RVA: 0x000E761B File Offset: 0x000E581B
 	[ContextMenu("Set Player Pref")]
 	private void RemovePlayerPref()
 	{
@@ -15,7 +15,7 @@ public class GRFirstTimeUserExperience : MonoBehaviour
 		PlayerPrefs.Save();
 	}
 
-	// Token: 0x06002C93 RID: 11411 RVA: 0x000F1620 File Offset: 0x000EF820
+	// Token: 0x06002C93 RID: 11411 RVA: 0x000F1600 File Offset: 0x000EF800
 	private void OnEnable()
 	{
 		this.audioSource = base.GetComponent<AudioSource>();
@@ -28,7 +28,7 @@ public class GRFirstTimeUserExperience : MonoBehaviour
 		this.ChangeState(GRFirstTimeUserExperience.TransitionState.Waiting);
 	}
 
-	// Token: 0x06002C94 RID: 11412 RVA: 0x000F16A4 File Offset: 0x000EF8A4
+	// Token: 0x06002C94 RID: 11412 RVA: 0x000F1684 File Offset: 0x000EF884
 	public void ChangeState(GRFirstTimeUserExperience.TransitionState state)
 	{
 		this.transitionState = state;
@@ -74,7 +74,7 @@ public class GRFirstTimeUserExperience : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002C95 RID: 11413 RVA: 0x000F1826 File Offset: 0x000EFA26
+	// Token: 0x06002C95 RID: 11413 RVA: 0x000F1806 File Offset: 0x000EFA06
 	private void OnZoneLoadComplete()
 	{
 		ZoneManagement instance = ZoneManagement.instance;
@@ -82,7 +82,7 @@ public class GRFirstTimeUserExperience : MonoBehaviour
 		this.ChangeState(GRFirstTimeUserExperience.TransitionState.Teleport);
 	}
 
-	// Token: 0x06002C96 RID: 11414 RVA: 0x000F1858 File Offset: 0x000EFA58
+	// Token: 0x06002C96 RID: 11414 RVA: 0x000F1838 File Offset: 0x000EFA38
 	public void InterruptWaitingTimer()
 	{
 		this.stateStartTime = -1f;
@@ -92,7 +92,7 @@ public class GRFirstTimeUserExperience : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002C97 RID: 11415 RVA: 0x000F18A0 File Offset: 0x000EFAA0
+	// Token: 0x06002C97 RID: 11415 RVA: 0x000F1880 File Offset: 0x000EFA80
 	private void Update()
 	{
 		switch (this.transitionState)

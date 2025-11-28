@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x02000ABF RID: 2751
 public class WarningScreens : MonoBehaviour
 {
-	// Token: 0x060044E3 RID: 17635 RVA: 0x0016CF09 File Offset: 0x0016B109
+	// Token: 0x060044E3 RID: 17635 RVA: 0x0016CEE9 File Offset: 0x0016B0E9
 	private void Awake()
 	{
 		if (WarningScreens._activeReference == null)
@@ -20,7 +20,7 @@ public class WarningScreens : MonoBehaviour
 		Object.Destroy(this);
 	}
 
-	// Token: 0x060044E4 RID: 17636 RVA: 0x0016CF30 File Offset: 0x0016B130
+	// Token: 0x060044E4 RID: 17636 RVA: 0x0016CF10 File Offset: 0x0016B110
 	private Task<WarningButtonResult> StartWarningScreenInternal(CancellationToken cancellationToken)
 	{
 		WarningScreens.<StartWarningScreenInternal>d__14 <StartWarningScreenInternal>d__;
@@ -32,7 +32,7 @@ public class WarningScreens : MonoBehaviour
 		return <StartWarningScreenInternal>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x060044E5 RID: 17637 RVA: 0x0016CF7C File Offset: 0x0016B17C
+	// Token: 0x060044E5 RID: 17637 RVA: 0x0016CF5C File Offset: 0x0016B15C
 	private Task<WarningButtonResult> StartOptInFollowUpScreenInternal(CancellationToken cancellationToken)
 	{
 		WarningScreens.<StartOptInFollowUpScreenInternal>d__15 <StartOptInFollowUpScreenInternal>d__;
@@ -44,7 +44,7 @@ public class WarningScreens : MonoBehaviour
 		return <StartOptInFollowUpScreenInternal>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x060044E6 RID: 17638 RVA: 0x0016CFC8 File Offset: 0x0016B1C8
+	// Token: 0x060044E6 RID: 17638 RVA: 0x0016CFA8 File Offset: 0x0016B1A8
 	public static Task<WarningButtonResult> StartWarningScreen(CancellationToken cancellationToken)
 	{
 		WarningScreens.<StartWarningScreen>d__16 <StartWarningScreen>d__;
@@ -55,7 +55,7 @@ public class WarningScreens : MonoBehaviour
 		return <StartWarningScreen>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x060044E7 RID: 17639 RVA: 0x0016D00C File Offset: 0x0016B20C
+	// Token: 0x060044E7 RID: 17639 RVA: 0x0016CFEC File Offset: 0x0016B1EC
 	public static Task<WarningButtonResult> StartOptInFollowUpScreen(CancellationToken cancellationToken)
 	{
 		WarningScreens.<StartOptInFollowUpScreen>d__17 <StartOptInFollowUpScreen>d__;
@@ -66,7 +66,7 @@ public class WarningScreens : MonoBehaviour
 		return <StartOptInFollowUpScreen>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x060044E8 RID: 17640 RVA: 0x0016D050 File Offset: 0x0016B250
+	// Token: 0x060044E8 RID: 17640 RVA: 0x0016D030 File Offset: 0x0016B230
 	private static Task WaitForResponse(CancellationToken cancellationToken)
 	{
 		WarningScreens.<WaitForResponse>d__18 <WaitForResponse>d__;
@@ -77,7 +77,7 @@ public class WarningScreens : MonoBehaviour
 		return <WaitForResponse>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x060044E9 RID: 17641 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x060044E9 RID: 17641 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;
@@ -88,7 +88,7 @@ public class WarningScreens : MonoBehaviour
 		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
 	}
 
-	// Token: 0x060044EA RID: 17642 RVA: 0x0016D093 File Offset: 0x0016B293
+	// Token: 0x060044EA RID: 17642 RVA: 0x0016D073 File Offset: 0x0016B273
 	public static void OnLeftButtonClicked()
 	{
 		WarningScreens._result = WarningScreens._leftButtonResult;
@@ -106,7 +106,7 @@ public class WarningScreens : MonoBehaviour
 		onLeftButtonPressedAction.Invoke();
 	}
 
-	// Token: 0x060044EB RID: 17643 RVA: 0x0016D0BE File Offset: 0x0016B2BE
+	// Token: 0x060044EB RID: 17643 RVA: 0x0016D09E File Offset: 0x0016B29E
 	public static void OnRightButtonClicked()
 	{
 		WarningScreens._result = WarningScreens._rightButtonResult;

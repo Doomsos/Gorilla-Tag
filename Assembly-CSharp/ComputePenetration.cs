@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020009C6 RID: 2502
 public class ComputePenetration : MonoBehaviour
 {
-	// Token: 0x06004000 RID: 16384 RVA: 0x00157F2B File Offset: 0x0015612B
+	// Token: 0x06004000 RID: 16384 RVA: 0x00157F0B File Offset: 0x0015610B
 	public void Compute()
 	{
 		if (this.colliderA == null)
@@ -15,7 +15,7 @@ public class ComputePenetration : MonoBehaviour
 		this.colliderB == null;
 	}
 
-	// Token: 0x06004001 RID: 16385 RVA: 0x00157F4C File Offset: 0x0015614C
+	// Token: 0x06004001 RID: 16385 RVA: 0x00157F2C File Offset: 0x0015612C
 	public void OnDrawGizmos()
 	{
 		if (this.colliderA.AsNull<Collider>() == null)
@@ -43,7 +43,7 @@ public class ComputePenetration : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004002 RID: 16386 RVA: 0x0015804C File Offset: 0x0015624C
+	// Token: 0x06004002 RID: 16386 RVA: 0x0015802C File Offset: 0x0015622C
 	private unsafe void DrawCollider(Collider c, Color color)
 	{
 		CommandBuilder commandBuilder = *Draw.ingame;

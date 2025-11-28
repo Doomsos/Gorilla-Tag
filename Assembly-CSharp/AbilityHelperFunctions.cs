@@ -5,13 +5,13 @@ using UnityEngine.AI;
 // Token: 0x02000661 RID: 1633
 public static class AbilityHelperFunctions
 {
-	// Token: 0x060029D8 RID: 10712 RVA: 0x000E23D4 File Offset: 0x000E05D4
+	// Token: 0x060029D8 RID: 10712 RVA: 0x000E23B4 File Offset: 0x000E05B4
 	public static float EaseOutPower(float t, float power)
 	{
 		return 1f - Mathf.Pow(1f - t, power);
 	}
 
-	// Token: 0x060029D9 RID: 10713 RVA: 0x000E23EC File Offset: 0x000E05EC
+	// Token: 0x060029D9 RID: 10713 RVA: 0x000E23CC File Offset: 0x000E05CC
 	public static int RandomRangeUnique(int minInclusive, int maxExclusive, int lastValue)
 	{
 		int num = maxExclusive - minInclusive;
@@ -27,7 +27,7 @@ public static class AbilityHelperFunctions
 		return (num2 + 1) % num;
 	}
 
-	// Token: 0x060029DA RID: 10714 RVA: 0x000E2416 File Offset: 0x000E0616
+	// Token: 0x060029DA RID: 10714 RVA: 0x000E23F6 File Offset: 0x000E05F6
 	public static int GetNavMeshWalkableArea()
 	{
 		if (AbilityHelperFunctions.navMeshWalkableArea == -1)
@@ -37,7 +37,7 @@ public static class AbilityHelperFunctions
 		return AbilityHelperFunctions.navMeshWalkableArea;
 	}
 
-	// Token: 0x060029DB RID: 10715 RVA: 0x000E2434 File Offset: 0x000E0634
+	// Token: 0x060029DB RID: 10715 RVA: 0x000E2414 File Offset: 0x000E0614
 	public static Vector3? GetLocationToInvestigate(Vector3 listenerLocation, float hearingRadius, Vector3? currentInvestigationLocation)
 	{
 		GameNoiseEvent gameNoiseEvent;

@@ -8,7 +8,7 @@ namespace GorillaTag
 	[DefaultExecutionOrder(1250)]
 	public class HeartRingCosmetic : MonoBehaviour
 	{
-		// Token: 0x0600666D RID: 26221 RVA: 0x002160A7 File Offset: 0x002142A7
+		// Token: 0x0600666D RID: 26221 RVA: 0x00216087 File Offset: 0x00214287
 		protected void Awake()
 		{
 			Application.quitting += delegate()
@@ -17,7 +17,7 @@ namespace GorillaTag
 			};
 		}
 
-		// Token: 0x0600666E RID: 26222 RVA: 0x002160BC File Offset: 0x002142BC
+		// Token: 0x0600666E RID: 26222 RVA: 0x0021609C File Offset: 0x0021429C
 		protected void OnEnable()
 		{
 			this.particleSystem = this.effects.GetComponentInChildren<ParticleSystem>(true);
@@ -36,7 +36,7 @@ namespace GorillaTag
 			this.maxVolume = this.audioSource.volume;
 		}
 
-		// Token: 0x0600666F RID: 26223 RVA: 0x002161C4 File Offset: 0x002143C4
+		// Token: 0x0600666F RID: 26223 RVA: 0x002161A4 File Offset: 0x002143A4
 		protected void LateUpdate()
 		{
 			Transform transform = base.transform;

@@ -10,14 +10,14 @@ using UnityEngine.Localization.Events;
 [DisallowMultipleComponent]
 public class LocalizedText : LocalizeStringEvent
 {
-	// Token: 0x06004599 RID: 17817 RVA: 0x00170B89 File Offset: 0x0016ED89
+	// Token: 0x06004599 RID: 17817 RVA: 0x00170B69 File Offset: 0x0016ED69
 	public bool HasFontOverrides()
 	{
 		return this._localisationFontsOverrides.Count > 0;
 	}
 
 	// Token: 0x1700068E RID: 1678
-	// (get) Token: 0x0600459A RID: 17818 RVA: 0x00170B99 File Offset: 0x0016ED99
+	// (get) Token: 0x0600459A RID: 17818 RVA: 0x00170B79 File Offset: 0x0016ED79
 	private TextComponentLegacySupportStore TextComponent
 	{
 		get
@@ -30,7 +30,7 @@ public class LocalizedText : LocalizeStringEvent
 		}
 	}
 
-	// Token: 0x0600459B RID: 17819 RVA: 0x00170BC0 File Offset: 0x0016EDC0
+	// Token: 0x0600459B RID: 17819 RVA: 0x00170BA0 File Offset: 0x0016EDA0
 	private void Awake()
 	{
 		this._textComponent = new TextComponentLegacySupportStore(base.transform);
@@ -46,7 +46,7 @@ public class LocalizedText : LocalizeStringEvent
 		}
 	}
 
-	// Token: 0x0600459C RID: 17820 RVA: 0x00170C30 File Offset: 0x0016EE30
+	// Token: 0x0600459C RID: 17820 RVA: 0x00170C10 File Offset: 0x0016EE10
 	protected override void UpdateString(string value)
 	{
 		LocalizedText.<UpdateString>d__11 <UpdateString>d__;
@@ -57,7 +57,7 @@ public class LocalizedText : LocalizeStringEvent
 		<UpdateString>d__.<>t__builder.Start<LocalizedText.<UpdateString>d__11>(ref <UpdateString>d__);
 	}
 
-	// Token: 0x0600459D RID: 17821 RVA: 0x00170C70 File Offset: 0x0016EE70
+	// Token: 0x0600459D RID: 17821 RVA: 0x00170C50 File Offset: 0x0016EE50
 	private void OnLocaleChanged(string newText)
 	{
 		LocalizedText.<OnLocaleChanged>d__12 <OnLocaleChanged>d__;
@@ -68,7 +68,7 @@ public class LocalizedText : LocalizeStringEvent
 		<OnLocaleChanged>d__.<>t__builder.Start<LocalizedText.<OnLocaleChanged>d__12>(ref <OnLocaleChanged>d__);
 	}
 
-	// Token: 0x0600459E RID: 17822 RVA: 0x00170CB0 File Offset: 0x0016EEB0
+	// Token: 0x0600459E RID: 17822 RVA: 0x00170C90 File Offset: 0x0016EE90
 	private bool GetLocalizedFonts(out LocalisationFontPair fontData)
 	{
 		fontData = default(LocalisationFontPair);

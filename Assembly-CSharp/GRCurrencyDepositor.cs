@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000695 RID: 1685
 public class GRCurrencyDepositor : MonoBehaviour
 {
-	// Token: 0x06002AFD RID: 11005 RVA: 0x000E74DC File Offset: 0x000E56DC
+	// Token: 0x06002AFD RID: 11005 RVA: 0x000E74BC File Offset: 0x000E56BC
 	public void Init(GhostReactor reactor)
 	{
 		this.reactor = reactor;
 	}
 
-	// Token: 0x06002AFE RID: 11006 RVA: 0x000E74E8 File Offset: 0x000E56E8
+	// Token: 0x06002AFE RID: 11006 RVA: 0x000E74C8 File Offset: 0x000E56C8
 	private void OnTriggerEnter(Collider other)
 	{
 		if (other.attachedRigidbody != null)

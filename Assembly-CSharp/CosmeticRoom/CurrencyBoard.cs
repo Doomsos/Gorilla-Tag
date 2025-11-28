@@ -9,19 +9,19 @@ namespace CosmeticRoom
 	// Token: 0x02000EA1 RID: 3745
 	public class CurrencyBoard : MonoBehaviour
 	{
-		// Token: 0x06005DAA RID: 23978 RVA: 0x001E1350 File Offset: 0x001DF550
+		// Token: 0x06005DAA RID: 23978 RVA: 0x001E1330 File Offset: 0x001DF530
 		public void OnEnable()
 		{
 			CosmeticsController.instance.AddCurrencyBoard(this);
 		}
 
-		// Token: 0x06005DAB RID: 23979 RVA: 0x001E135F File Offset: 0x001DF55F
+		// Token: 0x06005DAB RID: 23979 RVA: 0x001E133F File Offset: 0x001DF53F
 		public void OnDisable()
 		{
 			CosmeticsController.instance.RemoveCurrencyBoard(this);
 		}
 
-		// Token: 0x06005DAC RID: 23980 RVA: 0x001E1370 File Offset: 0x001DF570
+		// Token: 0x06005DAC RID: 23980 RVA: 0x001E1350 File Offset: 0x001DF550
 		public void UpdateCurrencyBoard(bool checkedDaily, bool gotDaily, int currencyBalance, int secTilTomorrow)
 		{
 			if (this.dailyRocksTextTMP.IsNotNull())

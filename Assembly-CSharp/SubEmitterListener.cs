@@ -5,7 +5,7 @@ using UnityEngine.Events;
 // Token: 0x020009F7 RID: 2551
 public class SubEmitterListener : MonoBehaviour
 {
-	// Token: 0x06004134 RID: 16692 RVA: 0x0015B54C File Offset: 0x0015974C
+	// Token: 0x06004134 RID: 16692 RVA: 0x0015B52C File Offset: 0x0015972C
 	private void OnEnable()
 	{
 		if (this.target == null)
@@ -29,14 +29,14 @@ public class SubEmitterListener : MonoBehaviour
 		this.interval = main.startLifetime.constantMax * main.startLifetimeMultiplier;
 	}
 
-	// Token: 0x06004135 RID: 16693 RVA: 0x0015B608 File Offset: 0x00159808
+	// Token: 0x06004135 RID: 16693 RVA: 0x0015B5E8 File Offset: 0x001597E8
 	private void OnDisable()
 	{
 		this._listenOnce = false;
 		this._listening = false;
 	}
 
-	// Token: 0x06004136 RID: 16694 RVA: 0x0015B618 File Offset: 0x00159818
+	// Token: 0x06004136 RID: 16694 RVA: 0x0015B5F8 File Offset: 0x001597F8
 	public void ListenStart()
 	{
 		if (this._listening)
@@ -50,13 +50,13 @@ public class SubEmitterListener : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004137 RID: 16695 RVA: 0x0015B638 File Offset: 0x00159838
+	// Token: 0x06004137 RID: 16695 RVA: 0x0015B618 File Offset: 0x00159818
 	public void ListenStop()
 	{
 		this.Disable();
 	}
 
-	// Token: 0x06004138 RID: 16696 RVA: 0x0015B640 File Offset: 0x00159840
+	// Token: 0x06004138 RID: 16696 RVA: 0x0015B620 File Offset: 0x00159820
 	public void ListenOnce()
 	{
 		if (this._listening)
@@ -72,7 +72,7 @@ public class SubEmitterListener : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004139 RID: 16697 RVA: 0x0015B670 File Offset: 0x00159870
+	// Token: 0x06004139 RID: 16697 RVA: 0x0015B650 File Offset: 0x00159850
 	private void Update()
 	{
 		if (!this._canListen)
@@ -94,7 +94,7 @@ public class SubEmitterListener : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600413A RID: 16698 RVA: 0x0015B6DB File Offset: 0x001598DB
+	// Token: 0x0600413A RID: 16698 RVA: 0x0015B6BB File Offset: 0x001598BB
 	protected virtual void OnSubEmit()
 	{
 		UnityEvent unityEvent = this.onSubEmit;
@@ -105,7 +105,7 @@ public class SubEmitterListener : MonoBehaviour
 		unityEvent.Invoke();
 	}
 
-	// Token: 0x0600413B RID: 16699 RVA: 0x0015B6ED File Offset: 0x001598ED
+	// Token: 0x0600413B RID: 16699 RVA: 0x0015B6CD File Offset: 0x001598CD
 	public void Enable()
 	{
 		if (!base.enabled)
@@ -114,7 +114,7 @@ public class SubEmitterListener : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600413C RID: 16700 RVA: 0x0015B6FE File Offset: 0x001598FE
+	// Token: 0x0600413C RID: 16700 RVA: 0x0015B6DE File Offset: 0x001598DE
 	public void Disable()
 	{
 		if (base.enabled)

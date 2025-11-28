@@ -11,7 +11,7 @@ using UnityEngine;
 // Token: 0x020009A7 RID: 2471
 public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 {
-	// Token: 0x06003F09 RID: 16137 RVA: 0x00151D14 File Offset: 0x0014FF14
+	// Token: 0x06003F09 RID: 16137 RVA: 0x00151CF4 File Offset: 0x0014FEF4
 	public override void Show()
 	{
 		base.Show();
@@ -29,7 +29,7 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		this.currentModPage = 0;
 	}
 
-	// Token: 0x06003F0A RID: 16138 RVA: 0x00151DC7 File Offset: 0x0014FFC7
+	// Token: 0x06003F0A RID: 16138 RVA: 0x00151DA7 File Offset: 0x0014FFA7
 	public override void Hide()
 	{
 		base.Hide();
@@ -41,14 +41,14 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 	{
 	}
 
-	// Token: 0x06003F0C RID: 16140 RVA: 0x00151DDC File Offset: 0x0014FFDC
+	// Token: 0x06003F0C RID: 16140 RVA: 0x00151DBC File Offset: 0x0014FFBC
 	public void ReturnFromDetailsScreen()
 	{
 		base.Show();
 		this.customMapsGalleryView.ShowTileText(true, true);
 	}
 
-	// Token: 0x06003F0D RID: 16141 RVA: 0x00151DF4 File Offset: 0x0014FFF4
+	// Token: 0x06003F0D RID: 16141 RVA: 0x00151DD4 File Offset: 0x0014FFD4
 	public override void PressButton(CustomMapKeyboardBinding pressedButton)
 	{
 		if (Time.time < this.showTime + this.activationTime)
@@ -121,7 +121,7 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		this.RefreshSearchText();
 	}
 
-	// Token: 0x06003F0E RID: 16142 RVA: 0x00151F81 File Offset: 0x00150181
+	// Token: 0x06003F0E RID: 16142 RVA: 0x00151F61 File Offset: 0x00150161
 	private void RefreshSearchText()
 	{
 		if (this.searchPhrase.IsNullOrEmpty())
@@ -132,7 +132,7 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		this.searchPhraseText.text = this.searchPhrase;
 	}
 
-	// Token: 0x06003F0F RID: 16143 RVA: 0x00151FB4 File Offset: 0x001501B4
+	// Token: 0x06003F0F RID: 16143 RVA: 0x00151F94 File Offset: 0x00150194
 	private Task RetrieveMods()
 	{
 		CustomMapsSearchScreen.<RetrieveMods>d__26 <RetrieveMods>d__;
@@ -143,7 +143,7 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		return <RetrieveMods>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003F10 RID: 16144 RVA: 0x00151FF8 File Offset: 0x001501F8
+	// Token: 0x06003F10 RID: 16144 RVA: 0x00151FD8 File Offset: 0x001501D8
 	private void FilterSearchMods()
 	{
 		if (this.searchedMods.IsNullOrEmpty<Mod>())
@@ -165,7 +165,7 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		}
 	}
 
-	// Token: 0x06003F11 RID: 16145 RVA: 0x00152098 File Offset: 0x00150298
+	// Token: 0x06003F11 RID: 16145 RVA: 0x00152078 File Offset: 0x00150278
 	private void RefreshScreenState()
 	{
 		this.searchMessageText.gameObject.SetActive(false);
@@ -231,7 +231,7 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		}
 	}
 
-	// Token: 0x06003F12 RID: 16146 RVA: 0x001522AC File Offset: 0x001504AC
+	// Token: 0x06003F12 RID: 16146 RVA: 0x0015228C File Offset: 0x0015048C
 	private int GetNumPages()
 	{
 		int num = this.totalSearchMods % this.modsPerPage;
@@ -243,13 +243,13 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		return num2;
 	}
 
-	// Token: 0x06003F13 RID: 16147 RVA: 0x001522DC File Offset: 0x001504DC
+	// Token: 0x06003F13 RID: 16147 RVA: 0x001522BC File Offset: 0x001504BC
 	private bool IsOnFirstPage()
 	{
 		return this.currentModPage == 0;
 	}
 
-	// Token: 0x06003F14 RID: 16148 RVA: 0x001522E8 File Offset: 0x001504E8
+	// Token: 0x06003F14 RID: 16148 RVA: 0x001522C8 File Offset: 0x001504C8
 	private bool IsOnLastPage()
 	{
 		long num = (long)this.GetNumPages();

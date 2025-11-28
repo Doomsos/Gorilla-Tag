@@ -6,7 +6,7 @@ using UnityEngine.XR;
 // Token: 0x02000531 RID: 1329
 public class PrimaryButtonWatcher : MonoBehaviour
 {
-	// Token: 0x06002181 RID: 8577 RVA: 0x000AFABB File Offset: 0x000ADCBB
+	// Token: 0x06002181 RID: 8577 RVA: 0x000AFA9B File Offset: 0x000ADC9B
 	private void Awake()
 	{
 		if (this.primaryButtonPress == null)
@@ -16,7 +16,7 @@ public class PrimaryButtonWatcher : MonoBehaviour
 		this.devicesWithPrimaryButton = new List<InputDevice>();
 	}
 
-	// Token: 0x06002182 RID: 8578 RVA: 0x000AFADC File Offset: 0x000ADCDC
+	// Token: 0x06002182 RID: 8578 RVA: 0x000AFABC File Offset: 0x000ADCBC
 	private void OnEnable()
 	{
 		List<InputDevice> list = new List<InputDevice>();
@@ -29,7 +29,7 @@ public class PrimaryButtonWatcher : MonoBehaviour
 		InputDevices.deviceDisconnected += new Action<InputDevice>(this.InputDevices_deviceDisconnected);
 	}
 
-	// Token: 0x06002183 RID: 8579 RVA: 0x000AFB58 File Offset: 0x000ADD58
+	// Token: 0x06002183 RID: 8579 RVA: 0x000AFB38 File Offset: 0x000ADD38
 	private void OnDisable()
 	{
 		InputDevices.deviceConnected -= new Action<InputDevice>(this.InputDevices_deviceConnected);
@@ -37,7 +37,7 @@ public class PrimaryButtonWatcher : MonoBehaviour
 		this.devicesWithPrimaryButton.Clear();
 	}
 
-	// Token: 0x06002184 RID: 8580 RVA: 0x000AFB88 File Offset: 0x000ADD88
+	// Token: 0x06002184 RID: 8580 RVA: 0x000AFB68 File Offset: 0x000ADD68
 	private void InputDevices_deviceConnected(InputDevice device)
 	{
 		bool flag;
@@ -47,7 +47,7 @@ public class PrimaryButtonWatcher : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002185 RID: 8581 RVA: 0x000AFBB1 File Offset: 0x000ADDB1
+	// Token: 0x06002185 RID: 8581 RVA: 0x000AFB91 File Offset: 0x000ADD91
 	private void InputDevices_deviceDisconnected(InputDevice device)
 	{
 		if (this.devicesWithPrimaryButton.Contains(device))
@@ -56,7 +56,7 @@ public class PrimaryButtonWatcher : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002186 RID: 8582 RVA: 0x000AFBD0 File Offset: 0x000ADDD0
+	// Token: 0x06002186 RID: 8582 RVA: 0x000AFBB0 File Offset: 0x000ADDB0
 	private void Update()
 	{
 		bool flag = false;

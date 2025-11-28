@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020007BE RID: 1982
 public class GorillaTagCompetitiveScoreboard : MonoBehaviour
 {
-	// Token: 0x06003438 RID: 13368 RVA: 0x00118738 File Offset: 0x00116938
+	// Token: 0x06003438 RID: 13368 RVA: 0x00118718 File Offset: 0x00116918
 	private void Awake()
 	{
 		GorillaTagCompetitiveManager.RegisterScoreboard(this);
@@ -15,13 +15,13 @@ public class GorillaTagCompetitiveScoreboard : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003439 RID: 13369 RVA: 0x00118771 File Offset: 0x00116971
+	// Token: 0x06003439 RID: 13369 RVA: 0x00118751 File Offset: 0x00116951
 	private void OnDestroy()
 	{
 		GorillaTagCompetitiveManager.DeregisterScoreboard(this);
 	}
 
-	// Token: 0x0600343A RID: 13370 RVA: 0x0011877C File Offset: 0x0011697C
+	// Token: 0x0600343A RID: 13370 RVA: 0x0011875C File Offset: 0x0011695C
 	public void UpdateScores(GorillaTagCompetitiveManager.GameState gameState, float activeRoundTime, List<RankedMultiplayerScore.PlayerScoreInRound> scores, Dictionary<int, int> PlayerRankedTiers, Dictionary<int, float> PlayerPredictedEloDeltas, List<NetPlayer> infectedPlayers, RankedProgressionManager progressionManager)
 	{
 		this.waitingForPlayers.SetActive(gameState == GorillaTagCompetitiveManager.GameState.WaitingForPlayers);
@@ -82,7 +82,7 @@ public class GorillaTagCompetitiveScoreboard : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600343B RID: 13371 RVA: 0x0011894C File Offset: 0x00116B4C
+	// Token: 0x0600343B RID: 13371 RVA: 0x0011892C File Offset: 0x00116B2C
 	public void DisplayPredictedResults(bool bShow)
 	{
 		for (int i = 0; i < this.lines.Length; i++)

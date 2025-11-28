@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x0200111F RID: 4383
 	public class TransferrableObjectHoldablePart_Pin : TransferrableObjectHoldablePart
 	{
-		// Token: 0x06006DB2 RID: 28082 RVA: 0x0024044D File Offset: 0x0023E64D
+		// Token: 0x06006DB2 RID: 28082 RVA: 0x0024042D File Offset: 0x0023E62D
 		protected void OnEnable()
 		{
 			UnityEvent onEnableHoldable = this.OnEnableHoldable;
@@ -20,7 +20,7 @@ namespace GorillaTag.Cosmetics
 			onEnableHoldable.Invoke();
 		}
 
-		// Token: 0x06006DB3 RID: 28083 RVA: 0x00240460 File Offset: 0x0023E660
+		// Token: 0x06006DB3 RID: 28083 RVA: 0x00240440 File Offset: 0x0023E640
 		protected override void UpdateHeld(VRRig rig, bool isHeldLeftHand)
 		{
 			if (rig.isOfflineVRRig)

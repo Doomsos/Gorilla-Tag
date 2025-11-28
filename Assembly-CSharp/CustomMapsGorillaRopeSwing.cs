@@ -11,7 +11,7 @@ using UnityEngine;
 // Token: 0x02000938 RID: 2360
 public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 {
-	// Token: 0x06003C48 RID: 15432 RVA: 0x0013E7E6 File Offset: 0x0013C9E6
+	// Token: 0x06003C48 RID: 15432 RVA: 0x0013E7C6 File Offset: 0x0013C9C6
 	protected override void Awake()
 	{
 		base.CalculateId(true);
@@ -23,7 +23,7 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 	{
 	}
 
-	// Token: 0x06003C4A RID: 15434 RVA: 0x0013E7FC File Offset: 0x0013C9FC
+	// Token: 0x06003C4A RID: 15434 RVA: 0x0013E7DC File Offset: 0x0013C9DC
 	protected override void OnEnable()
 	{
 		if (!this.isRopeLengthSet)
@@ -33,14 +33,14 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 		base.OnEnable();
 	}
 
-	// Token: 0x06003C4B RID: 15435 RVA: 0x0013E80D File Offset: 0x0013CA0D
+	// Token: 0x06003C4B RID: 15435 RVA: 0x0013E7ED File Offset: 0x0013C9ED
 	public void SetRopeLength(int length)
 	{
 		this.ropeLength = length;
 		this.isRopeLengthSet = true;
 	}
 
-	// Token: 0x06003C4C RID: 15436 RVA: 0x0013E820 File Offset: 0x0013CA20
+	// Token: 0x06003C4C RID: 15436 RVA: 0x0013E800 File Offset: 0x0013CA00
 	public void SetRopeProperties(GTObjectPlaceholder placeholder)
 	{
 		this.ropePlaceholder = placeholder;
@@ -52,7 +52,7 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 		this.isRopeLengthSet = true;
 	}
 
-	// Token: 0x06003C4D RID: 15437 RVA: 0x0013E894 File Offset: 0x0013CA94
+	// Token: 0x06003C4D RID: 15437 RVA: 0x0013E874 File Offset: 0x0013CA74
 	private IEnumerator WaitForRopeLength()
 	{
 		while (!this.isRopeLengthSet)
@@ -66,7 +66,7 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 		yield break;
 	}
 
-	// Token: 0x06003C4E RID: 15438 RVA: 0x0013E8A4 File Offset: 0x0013CAA4
+	// Token: 0x06003C4E RID: 15438 RVA: 0x0013E884 File Offset: 0x0013CA84
 	private void RopeGeneration()
 	{
 		List<Transform> list = new List<Transform>();

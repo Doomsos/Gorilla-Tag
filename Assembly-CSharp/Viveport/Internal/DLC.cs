@@ -7,7 +7,7 @@ namespace Viveport.Internal
 	// Token: 0x02000D46 RID: 3398
 	internal class DLC
 	{
-		// Token: 0x060052B1 RID: 21169 RVA: 0x001A5083 File Offset: 0x001A3283
+		// Token: 0x060052B1 RID: 21169 RVA: 0x001A5063 File Offset: 0x001A3263
 		static DLC()
 		{
 			Api.LoadLibraryManually("viveport_api");

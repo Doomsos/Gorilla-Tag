@@ -6,14 +6,14 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityIdle : GRAbilityBase
 {
-	// Token: 0x060029F5 RID: 10741 RVA: 0x000E2946 File Offset: 0x000E0B46
+	// Token: 0x060029F5 RID: 10741 RVA: 0x000E2926 File Offset: 0x000E0B26
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
 		this.animLoops = 0;
 	}
 
-	// Token: 0x060029F6 RID: 10742 RVA: 0x000E2960 File Offset: 0x000E0B60
+	// Token: 0x060029F6 RID: 10742 RVA: 0x000E2940 File Offset: 0x000E0B40
 	public override void Start()
 	{
 		base.Start();
@@ -23,20 +23,20 @@ public class GRAbilityIdle : GRAbilityBase
 		this.events.Reset();
 	}
 
-	// Token: 0x060029F7 RID: 10743 RVA: 0x000E29AD File Offset: 0x000E0BAD
+	// Token: 0x060029F7 RID: 10743 RVA: 0x000E298D File Offset: 0x000E0B8D
 	public override void Stop()
 	{
 		base.Stop();
 		this.agent.navAgent.isStopped = false;
 	}
 
-	// Token: 0x060029F8 RID: 10744 RVA: 0x000E29C6 File Offset: 0x000E0BC6
+	// Token: 0x060029F8 RID: 10744 RVA: 0x000E29A6 File Offset: 0x000E0BA6
 	public override bool IsDone()
 	{
 		return (double)this.duration > 0.0 && Time.timeAsDouble >= this.startTime + (double)this.duration;
 	}
 
-	// Token: 0x060029F9 RID: 10745 RVA: 0x000E29F4 File Offset: 0x000E0BF4
+	// Token: 0x060029F9 RID: 10745 RVA: 0x000E29D4 File Offset: 0x000E0BD4
 	protected override void UpdateShared(float dt)
 	{
 		float abilityTime = (float)(Time.timeAsDouble - this.startTime);

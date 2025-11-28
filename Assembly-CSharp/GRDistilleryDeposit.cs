@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200069B RID: 1691
 public class GRDistilleryDeposit : MonoBehaviour
 {
-	// Token: 0x06002B3E RID: 11070 RVA: 0x000E8108 File Offset: 0x000E6308
+	// Token: 0x06002B3E RID: 11070 RVA: 0x000E80E8 File Offset: 0x000E62E8
 	private void Start()
 	{
 		this._distillery = base.GetComponentInParent<GRDistillery>();

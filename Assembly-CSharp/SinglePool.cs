@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 public class SinglePool
 {
-	// Token: 0x06004D84 RID: 19844 RVA: 0x00191DDC File Offset: 0x0018FFDC
+	// Token: 0x06004D84 RID: 19844 RVA: 0x00191DBC File Offset: 0x0018FFBC
 	private void PrivAllocPooledObjects()
 	{
 		int count = this.inactivePool.Count;
@@ -22,7 +22,7 @@ public class SinglePool
 		}
 	}
 
-	// Token: 0x06004D85 RID: 19845 RVA: 0x00191E7F File Offset: 0x0019007F
+	// Token: 0x06004D85 RID: 19845 RVA: 0x00191E5F File Offset: 0x0019005F
 	public void Initialize(GameObject gameObject_)
 	{
 		this.gameObject = gameObject_;
@@ -32,7 +32,7 @@ public class SinglePool
 		this.PrivAllocPooledObjects();
 	}
 
-	// Token: 0x06004D86 RID: 19846 RVA: 0x00191EBC File Offset: 0x001900BC
+	// Token: 0x06004D86 RID: 19846 RVA: 0x00191E9C File Offset: 0x0019009C
 	public GameObject Instantiate(bool setActive = true)
 	{
 		if (this.inactivePool.Count == 0)
@@ -47,7 +47,7 @@ public class SinglePool
 		return gameObject;
 	}
 
-	// Token: 0x06004D87 RID: 19847 RVA: 0x00191F24 File Offset: 0x00190124
+	// Token: 0x06004D87 RID: 19847 RVA: 0x00191F04 File Offset: 0x00190104
 	public void Destroy(GameObject obj)
 	{
 		int instanceID = obj.GetInstanceID();
@@ -66,25 +66,25 @@ public class SinglePool
 		this.activePool.Remove(instanceID);
 	}
 
-	// Token: 0x06004D88 RID: 19848 RVA: 0x00191FAA File Offset: 0x001901AA
+	// Token: 0x06004D88 RID: 19848 RVA: 0x00191F8A File Offset: 0x0019018A
 	public int PoolGUID()
 	{
 		return PoolUtils.GameObjHashCode(this.objectToPool);
 	}
 
-	// Token: 0x06004D89 RID: 19849 RVA: 0x00191FB7 File Offset: 0x001901B7
+	// Token: 0x06004D89 RID: 19849 RVA: 0x00191F97 File Offset: 0x00190197
 	public int GetTotalCount()
 	{
 		return this.pooledObjects.Count;
 	}
 
-	// Token: 0x06004D8A RID: 19850 RVA: 0x00191FC4 File Offset: 0x001901C4
+	// Token: 0x06004D8A RID: 19850 RVA: 0x00191FA4 File Offset: 0x001901A4
 	public int GetActiveCount()
 	{
 		return this.activePool.Count;
 	}
 
-	// Token: 0x06004D8B RID: 19851 RVA: 0x00191FD1 File Offset: 0x001901D1
+	// Token: 0x06004D8B RID: 19851 RVA: 0x00191FB1 File Offset: 0x001901B1
 	public int GetInactiveCount()
 	{
 		return this.inactivePool.Count;

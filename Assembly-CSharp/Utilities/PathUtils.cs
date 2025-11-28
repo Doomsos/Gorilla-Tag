@@ -5,7 +5,7 @@ namespace Utilities
 	// Token: 0x02000D80 RID: 3456
 	public static class PathUtils
 	{
-		// Token: 0x060054BA RID: 21690 RVA: 0x001AB7B4 File Offset: 0x001A99B4
+		// Token: 0x060054BA RID: 21690 RVA: 0x001AB794 File Offset: 0x001A9994
 		public static string Resolve(params string[] subPaths)
 		{
 			if (subPaths == null || subPaths.Length == 0)

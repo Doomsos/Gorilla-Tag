@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class GRBonusEntry
 {
-	// Token: 0x06002AD0 RID: 10960 RVA: 0x000E675A File Offset: 0x000E495A
+	// Token: 0x06002AD0 RID: 10960 RVA: 0x000E673A File Offset: 0x000E493A
 	private GRBonusEntry()
 	{
 		GRBonusEntry.idCounter++;
@@ -13,17 +13,17 @@ public class GRBonusEntry
 	}
 
 	// Token: 0x17000404 RID: 1028
-	// (get) Token: 0x06002AD1 RID: 10961 RVA: 0x000E6779 File Offset: 0x000E4979
-	// (set) Token: 0x06002AD2 RID: 10962 RVA: 0x000E6781 File Offset: 0x000E4981
+	// (get) Token: 0x06002AD1 RID: 10961 RVA: 0x000E6759 File Offset: 0x000E4959
+	// (set) Token: 0x06002AD2 RID: 10962 RVA: 0x000E6761 File Offset: 0x000E4961
 	public int id { get; private set; }
 
-	// Token: 0x06002AD3 RID: 10963 RVA: 0x000E678A File Offset: 0x000E498A
+	// Token: 0x06002AD3 RID: 10963 RVA: 0x000E676A File Offset: 0x000E496A
 	public int GetBonusValue()
 	{
 		return (int)(this.bonusValue * 100f);
 	}
 
-	// Token: 0x06002AD4 RID: 10964 RVA: 0x000E679C File Offset: 0x000E499C
+	// Token: 0x06002AD4 RID: 10964 RVA: 0x000E677C File Offset: 0x000E497C
 	public override string ToString()
 	{
 		bool flag = this.customBonus != null;

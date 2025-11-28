@@ -6,7 +6,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DB1 RID: 3505
 	public class BuilderAttachPoint : MonoBehaviour
 	{
-		// Token: 0x06005633 RID: 22067 RVA: 0x001B19ED File Offset: 0x001AFBED
+		// Token: 0x06005633 RID: 22067 RVA: 0x001B19CD File Offset: 0x001AFBCD
 		private void Awake()
 		{
 			if (this.center == null)

@@ -7,11 +7,11 @@ namespace GorillaTagScripts.ObstacleCourse
 	public class ObstacleCourse : MonoBehaviour
 	{
 		// Token: 0x17000873 RID: 2163
-		// (get) Token: 0x06005A9D RID: 23197 RVA: 0x001D0E2C File Offset: 0x001CF02C
-		// (set) Token: 0x06005A9E RID: 23198 RVA: 0x001D0E34 File Offset: 0x001CF034
+		// (get) Token: 0x06005A9D RID: 23197 RVA: 0x001D0E0C File Offset: 0x001CF00C
+		// (set) Token: 0x06005A9E RID: 23198 RVA: 0x001D0E14 File Offset: 0x001CF014
 		public int winnerActorNumber { get; private set; }
 
-		// Token: 0x06005A9F RID: 23199 RVA: 0x001D0E40 File Offset: 0x001CF040
+		// Token: 0x06005A9F RID: 23199 RVA: 0x001D0E20 File Offset: 0x001CF020
 		private void Awake()
 		{
 			this.numPlayersOnCourse = 0;
@@ -27,7 +27,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			this.TappableBell.OnTapped += this.OnEndLineTrigger;
 		}
 
-		// Token: 0x06005AA0 RID: 23200 RVA: 0x001D0EB4 File Offset: 0x001CF0B4
+		// Token: 0x06005AA0 RID: 23200 RVA: 0x001D0E94 File Offset: 0x001CF094
 		private void OnDestroy()
 		{
 			for (int i = 0; i < this.zoneTriggers.Length; i++)
@@ -42,13 +42,13 @@ namespace GorillaTagScripts.ObstacleCourse
 			this.TappableBell.OnTapped -= this.OnEndLineTrigger;
 		}
 
-		// Token: 0x06005AA1 RID: 23201 RVA: 0x001D0F21 File Offset: 0x001CF121
+		// Token: 0x06005AA1 RID: 23201 RVA: 0x001D0F01 File Offset: 0x001CF101
 		private void Start()
 		{
 			this.RestartTimer(false);
 		}
 
-		// Token: 0x06005AA2 RID: 23202 RVA: 0x001D0F2A File Offset: 0x001CF12A
+		// Token: 0x06005AA2 RID: 23202 RVA: 0x001D0F0A File Offset: 0x001CF10A
 		public void InvokeUpdate()
 		{
 			if (NetworkSystem.Instance.InRoom && ObstacleCourseManager.Instance.IsMine && this.currentState == ObstacleCourse.RaceState.Finished && Time.time - this.startTime >= this.cooldownTime)
@@ -57,7 +57,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			}
 		}
 
-		// Token: 0x06005AA3 RID: 23203 RVA: 0x001D0F68 File Offset: 0x001CF168
+		// Token: 0x06005AA3 RID: 23203 RVA: 0x001D0F48 File Offset: 0x001CF148
 		public void OnPlayerEnterZone(Collider other)
 		{
 			if (ObstacleCourseManager.Instance.IsMine)
@@ -66,7 +66,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			}
 		}
 
-		// Token: 0x06005AA4 RID: 23204 RVA: 0x001D0F84 File Offset: 0x001CF184
+		// Token: 0x06005AA4 RID: 23204 RVA: 0x001D0F64 File Offset: 0x001CF164
 		public void OnPlayerExitZone(Collider other)
 		{
 			if (ObstacleCourseManager.Instance.IsMine)
@@ -75,20 +75,20 @@ namespace GorillaTagScripts.ObstacleCourse
 			}
 		}
 
-		// Token: 0x06005AA5 RID: 23205 RVA: 0x001D0FA0 File Offset: 0x001CF1A0
+		// Token: 0x06005AA5 RID: 23205 RVA: 0x001D0F80 File Offset: 0x001CF180
 		private void RestartTimer(bool playFx = true)
 		{
 			this.UpdateState(ObstacleCourse.RaceState.Started, playFx);
 		}
 
-		// Token: 0x06005AA6 RID: 23206 RVA: 0x001D0FAA File Offset: 0x001CF1AA
+		// Token: 0x06005AA6 RID: 23206 RVA: 0x001D0F8A File Offset: 0x001CF18A
 		private void EndRace()
 		{
 			this.UpdateState(ObstacleCourse.RaceState.Finished, true);
 			this.startTime = Time.time;
 		}
 
-		// Token: 0x06005AA7 RID: 23207 RVA: 0x001D0FC0 File Offset: 0x001CF1C0
+		// Token: 0x06005AA7 RID: 23207 RVA: 0x001D0FA0 File Offset: 0x001CF1A0
 		public void PlayWinningEffects()
 		{
 			if (this.confettiParticle)
@@ -105,7 +105,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			this.audioSource.GTPlay();
 		}
 
-		// Token: 0x06005AA8 RID: 23208 RVA: 0x001D1036 File Offset: 0x001CF236
+		// Token: 0x06005AA8 RID: 23208 RVA: 0x001D1016 File Offset: 0x001CF216
 		public void OnEndLineTrigger(VRRig rig)
 		{
 			if (ObstacleCourseManager.Instance.IsMine && this.currentState == ObstacleCourse.RaceState.Started)
@@ -116,7 +116,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			}
 		}
 
-		// Token: 0x06005AA9 RID: 23209 RVA: 0x001D106F File Offset: 0x001CF26F
+		// Token: 0x06005AA9 RID: 23209 RVA: 0x001D104F File Offset: 0x001CF24F
 		public void Deserialize(int _winnerActorNumber, ObstacleCourse.RaceState _currentState)
 		{
 			if (!ObstacleCourseManager.Instance.IsMine)
@@ -127,7 +127,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			}
 		}
 
-		// Token: 0x06005AAA RID: 23210 RVA: 0x001D10B0 File Offset: 0x001CF2B0
+		// Token: 0x06005AAA RID: 23210 RVA: 0x001D1090 File Offset: 0x001CF290
 		private void UpdateState(ObstacleCourse.RaceState state, bool playFX = true)
 		{
 			this.currentState = state;
@@ -145,7 +145,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			this.UpdateStartingGate();
 		}
 
-		// Token: 0x06005AAB RID: 23211 RVA: 0x001D1134 File Offset: 0x001CF334
+		// Token: 0x06005AAB RID: 23211 RVA: 0x001D1114 File Offset: 0x001CF314
 		private void UpdateStartingGate()
 		{
 			if (this.currentState == ObstacleCourse.RaceState.Finished)

@@ -10,7 +10,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010BE RID: 4286
 	public class NetworkedWearable : MonoBehaviour, ISpawnable, ITickSystemTick
 	{
-		// Token: 0x06006B59 RID: 27481 RVA: 0x00233E90 File Offset: 0x00232090
+		// Token: 0x06006B59 RID: 27481 RVA: 0x00233E70 File Offset: 0x00232070
 		private void Awake()
 		{
 			if (this.assignedSlot != CosmeticsController.CosmeticCategory.Paw)
@@ -22,7 +22,7 @@ namespace GorillaTag.Cosmetics
 			this.rightSlot = this.CosmeticCategoryToWearableSlot(this.assignedSlot, false);
 		}
 
-		// Token: 0x06006B5A RID: 27482 RVA: 0x00233EE6 File Offset: 0x002320E6
+		// Token: 0x06006B5A RID: 27482 RVA: 0x00233EC6 File Offset: 0x002320C6
 		private void OnEnable()
 		{
 			if (!this.IsSpawned)
@@ -40,7 +40,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B5B RID: 27483 RVA: 0x00233F1C File Offset: 0x0023211C
+		// Token: 0x06006B5B RID: 27483 RVA: 0x00233EFC File Offset: 0x002320FC
 		public void ToggleWearableStateBool()
 		{
 			if (!this.isLocal || !this.IsSpawned)
@@ -71,7 +71,7 @@ namespace GorillaTag.Cosmetics
 			this.OnWearableStateChanged();
 		}
 
-		// Token: 0x06006B5C RID: 27484 RVA: 0x00233FF4 File Offset: 0x002321F4
+		// Token: 0x06006B5C RID: 27484 RVA: 0x00233FD4 File Offset: 0x002321D4
 		public void SetWearableStateBool(bool newState)
 		{
 			if (!this.isLocal || !this.IsSpawned)
@@ -105,7 +105,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B5D RID: 27485 RVA: 0x002340D0 File Offset: 0x002322D0
+		// Token: 0x06006B5D RID: 27485 RVA: 0x002340B0 File Offset: 0x002322B0
 		public void ToggleLeftWearableStateBool()
 		{
 			if (!this.isLocal || !this.IsSpawned)
@@ -136,7 +136,7 @@ namespace GorillaTag.Cosmetics
 			this.OnLeftStateChanged();
 		}
 
-		// Token: 0x06006B5E RID: 27486 RVA: 0x002341A8 File Offset: 0x002323A8
+		// Token: 0x06006B5E RID: 27486 RVA: 0x00234188 File Offset: 0x00232388
 		public void ToggleRightWearableStateBool()
 		{
 			if (!this.isLocal || !this.IsSpawned)
@@ -167,7 +167,7 @@ namespace GorillaTag.Cosmetics
 			this.OnRightStateChanged();
 		}
 
-		// Token: 0x06006B5F RID: 27487 RVA: 0x00234280 File Offset: 0x00232480
+		// Token: 0x06006B5F RID: 27487 RVA: 0x00234260 File Offset: 0x00232460
 		public void SetLeftWearableStateBool(bool newState)
 		{
 			if (!this.isLocal || !this.IsSpawned)
@@ -201,7 +201,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B60 RID: 27488 RVA: 0x0023435C File Offset: 0x0023255C
+		// Token: 0x06006B60 RID: 27488 RVA: 0x0023433C File Offset: 0x0023253C
 		public void SetRightWearableStateBool(bool newState)
 		{
 			if (!this.isLocal || !this.IsSpawned)
@@ -235,7 +235,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B61 RID: 27489 RVA: 0x00234436 File Offset: 0x00232636
+		// Token: 0x06006B61 RID: 27489 RVA: 0x00234416 File Offset: 0x00232616
 		public void OnDisable()
 		{
 			if (this.isLocal && !this.listenForChangesLocal)
@@ -249,7 +249,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B62 RID: 27490 RVA: 0x0023445E File Offset: 0x0023265E
+		// Token: 0x06006B62 RID: 27490 RVA: 0x0023443E File Offset: 0x0023263E
 		private void OnWearableStateChanged()
 		{
 			if (this.value)
@@ -274,7 +274,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B63 RID: 27491 RVA: 0x00234489 File Offset: 0x00232689
+		// Token: 0x06006B63 RID: 27491 RVA: 0x00234469 File Offset: 0x00232669
 		private void OnLeftStateChanged()
 		{
 			if (this.leftHandValue)
@@ -299,7 +299,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B64 RID: 27492 RVA: 0x002344B4 File Offset: 0x002326B4
+		// Token: 0x06006B64 RID: 27492 RVA: 0x00234494 File Offset: 0x00232694
 		private void OnRightStateChanged()
 		{
 			if (this.rightHandValue)
@@ -325,16 +325,16 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A10 RID: 2576
-		// (get) Token: 0x06006B65 RID: 27493 RVA: 0x002344DF File Offset: 0x002326DF
-		// (set) Token: 0x06006B66 RID: 27494 RVA: 0x002344E7 File Offset: 0x002326E7
+		// (get) Token: 0x06006B65 RID: 27493 RVA: 0x002344BF File Offset: 0x002326BF
+		// (set) Token: 0x06006B66 RID: 27494 RVA: 0x002344C7 File Offset: 0x002326C7
 		public bool IsSpawned { get; set; }
 
 		// Token: 0x17000A11 RID: 2577
-		// (get) Token: 0x06006B67 RID: 27495 RVA: 0x002344F0 File Offset: 0x002326F0
-		// (set) Token: 0x06006B68 RID: 27496 RVA: 0x002344F8 File Offset: 0x002326F8
+		// (get) Token: 0x06006B67 RID: 27495 RVA: 0x002344D0 File Offset: 0x002326D0
+		// (set) Token: 0x06006B68 RID: 27496 RVA: 0x002344D8 File Offset: 0x002326D8
 		public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
 
-		// Token: 0x06006B69 RID: 27497 RVA: 0x00234504 File Offset: 0x00232704
+		// Token: 0x06006B69 RID: 27497 RVA: 0x002344E4 File Offset: 0x002326E4
 		public void OnSpawn(VRRig rig)
 		{
 			if (this.assignedSlot == CosmeticsController.CosmeticCategory.Paw && this.CosmeticSelectedSide == ECosmeticSelectSide.Both)
@@ -357,11 +357,11 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A12 RID: 2578
-		// (get) Token: 0x06006B6B RID: 27499 RVA: 0x002345DC File Offset: 0x002327DC
-		// (set) Token: 0x06006B6C RID: 27500 RVA: 0x002345E4 File Offset: 0x002327E4
+		// (get) Token: 0x06006B6B RID: 27499 RVA: 0x002345BC File Offset: 0x002327BC
+		// (set) Token: 0x06006B6C RID: 27500 RVA: 0x002345C4 File Offset: 0x002327C4
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006B6D RID: 27501 RVA: 0x002345F0 File Offset: 0x002327F0
+		// Token: 0x06006B6D RID: 27501 RVA: 0x002345D0 File Offset: 0x002327D0
 		public void Tick()
 		{
 			if ((!this.isLocal || this.listenForChangesLocal) && this.IsSpawned)
@@ -394,7 +394,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B6E RID: 27502 RVA: 0x002346B4 File Offset: 0x002328B4
+		// Token: 0x06006B6E RID: 27502 RVA: 0x00234694 File Offset: 0x00232894
 		public static bool IsCategoryValid(CosmeticsController.CosmeticCategory category)
 		{
 			switch (category)
@@ -411,7 +411,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006B6F RID: 27503 RVA: 0x002346EC File Offset: 0x002328EC
+		// Token: 0x06006B6F RID: 27503 RVA: 0x002346CC File Offset: 0x002328CC
 		private VRRig.WearablePackedStateSlots CosmeticCategoryToWearableSlot(CosmeticsController.CosmeticCategory category, bool isLeft)
 		{
 			switch (category)

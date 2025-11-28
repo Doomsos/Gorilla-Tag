@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000C80 RID: 3200
 public class SplineWalker : MonoBehaviour, IPunObservable
 {
-	// Token: 0x06004E2A RID: 20010 RVA: 0x001958E0 File Offset: 0x00193AE0
+	// Token: 0x06004E2A RID: 20010 RVA: 0x001958C0 File Offset: 0x00193AC0
 	private void Awake()
 	{
 		this._view = base.GetComponent<PhotonView>();
 	}
 
-	// Token: 0x06004E2B RID: 20011 RVA: 0x001958F0 File Offset: 0x00193AF0
+	// Token: 0x06004E2B RID: 20011 RVA: 0x001958D0 File Offset: 0x00193AD0
 	private void Update()
 	{
 		if (this.goingForward)
@@ -78,7 +78,7 @@ public class SplineWalker : MonoBehaviour, IPunObservable
 		}
 	}
 
-	// Token: 0x06004E2C RID: 20012 RVA: 0x00195A9E File Offset: 0x00193C9E
+	// Token: 0x06004E2C RID: 20012 RVA: 0x00195A7E File Offset: 0x00193C7E
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 		stream.Serialize(ref this.progress);

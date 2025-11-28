@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000CBD RID: 3261
 public class LightningGenerator : MonoBehaviour
 {
-	// Token: 0x06004F94 RID: 20372 RVA: 0x00199B6C File Offset: 0x00197D6C
+	// Token: 0x06004F94 RID: 20372 RVA: 0x00199B4C File Offset: 0x00197D4C
 	private void Awake()
 	{
 		this.strikes = new LightningStrike[this.maxConcurrentStrikes];
@@ -22,19 +22,19 @@ public class LightningGenerator : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004F95 RID: 20373 RVA: 0x00199BDC File Offset: 0x00197DDC
+	// Token: 0x06004F95 RID: 20373 RVA: 0x00199BBC File Offset: 0x00197DBC
 	private void OnEnable()
 	{
 		LightningDispatcher.RequestLightningStrike += this.LightningDispatcher_RequestLightningStrike;
 	}
 
-	// Token: 0x06004F96 RID: 20374 RVA: 0x00199BEF File Offset: 0x00197DEF
+	// Token: 0x06004F96 RID: 20374 RVA: 0x00199BCF File Offset: 0x00197DCF
 	private void OnDisable()
 	{
 		LightningDispatcher.RequestLightningStrike -= this.LightningDispatcher_RequestLightningStrike;
 	}
 
-	// Token: 0x06004F97 RID: 20375 RVA: 0x00199C02 File Offset: 0x00197E02
+	// Token: 0x06004F97 RID: 20375 RVA: 0x00199BE2 File Offset: 0x00197DE2
 	private LightningStrike LightningDispatcher_RequestLightningStrike(Vector3 t1, Vector3 t2)
 	{
 		this.index = (this.index + 1) % this.strikes.Length;

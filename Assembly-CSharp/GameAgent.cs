@@ -8,50 +8,50 @@ using UnityEngine.AI;
 public class GameAgent : MonoBehaviour, IGameEntityComponent
 {
 	// Token: 0x14000045 RID: 69
-	// (add) Token: 0x0600265B RID: 9819 RVA: 0x000CCB04 File Offset: 0x000CAD04
-	// (remove) Token: 0x0600265C RID: 9820 RVA: 0x000CCB3C File Offset: 0x000CAD3C
+	// (add) Token: 0x0600265B RID: 9819 RVA: 0x000CCAE4 File Offset: 0x000CACE4
+	// (remove) Token: 0x0600265C RID: 9820 RVA: 0x000CCB1C File Offset: 0x000CAD1C
 	public event GameAgent.StateChangedEvent onBodyStateChanged;
 
 	// Token: 0x14000046 RID: 70
-	// (add) Token: 0x0600265D RID: 9821 RVA: 0x000CCB74 File Offset: 0x000CAD74
-	// (remove) Token: 0x0600265E RID: 9822 RVA: 0x000CCBAC File Offset: 0x000CADAC
+	// (add) Token: 0x0600265D RID: 9821 RVA: 0x000CCB54 File Offset: 0x000CAD54
+	// (remove) Token: 0x0600265E RID: 9822 RVA: 0x000CCB8C File Offset: 0x000CAD8C
 	public event GameAgent.StateChangedEvent onBehaviorStateChanged;
 
 	// Token: 0x14000047 RID: 71
-	// (add) Token: 0x0600265F RID: 9823 RVA: 0x000CCBE4 File Offset: 0x000CADE4
-	// (remove) Token: 0x06002660 RID: 9824 RVA: 0x000CCC1C File Offset: 0x000CAE1C
+	// (add) Token: 0x0600265F RID: 9823 RVA: 0x000CCBC4 File Offset: 0x000CADC4
+	// (remove) Token: 0x06002660 RID: 9824 RVA: 0x000CCBFC File Offset: 0x000CADFC
 	public event GameAgent.NavigationLinkReachedEvent onReachedNavigationLink;
 
 	// Token: 0x14000048 RID: 72
-	// (add) Token: 0x06002661 RID: 9825 RVA: 0x000CCC54 File Offset: 0x000CAE54
-	// (remove) Token: 0x06002662 RID: 9826 RVA: 0x000CCC8C File Offset: 0x000CAE8C
+	// (add) Token: 0x06002661 RID: 9825 RVA: 0x000CCC34 File Offset: 0x000CAE34
+	// (remove) Token: 0x06002662 RID: 9826 RVA: 0x000CCC6C File Offset: 0x000CAE6C
 	public event GameAgent.JumpRequestedEvent onJumpRequested;
 
 	// Token: 0x14000049 RID: 73
-	// (add) Token: 0x06002663 RID: 9827 RVA: 0x000CCCC4 File Offset: 0x000CAEC4
-	// (remove) Token: 0x06002664 RID: 9828 RVA: 0x000CCCFC File Offset: 0x000CAEFC
+	// (add) Token: 0x06002663 RID: 9827 RVA: 0x000CCCA4 File Offset: 0x000CAEA4
+	// (remove) Token: 0x06002664 RID: 9828 RVA: 0x000CCCDC File Offset: 0x000CAEDC
 	public event GameAgent.NavigationFailedEvent onNavigationFailed;
 
-	// Token: 0x06002665 RID: 9829 RVA: 0x000CCD31 File Offset: 0x000CAF31
+	// Token: 0x06002665 RID: 9829 RVA: 0x000CCD11 File Offset: 0x000CAF11
 	public GameAgentManager GetGameAgentManager()
 	{
 		return this.entity.manager.gameAgentManager;
 	}
 
-	// Token: 0x06002666 RID: 9830 RVA: 0x000CCD43 File Offset: 0x000CAF43
+	// Token: 0x06002666 RID: 9830 RVA: 0x000CCD23 File Offset: 0x000CAF23
 	private void Awake()
 	{
 		this.agentComponents = new List<IGameAgentComponent>(1);
 		base.GetComponentsInChildren<IGameAgentComponent>(this.agentComponents);
 	}
 
-	// Token: 0x06002667 RID: 9831 RVA: 0x000CCD5D File Offset: 0x000CAF5D
+	// Token: 0x06002667 RID: 9831 RVA: 0x000CCD3D File Offset: 0x000CAF3D
 	public void OnEntityInit()
 	{
 		this.GetGameAgentManager().AddGameAgent(this);
 	}
 
-	// Token: 0x06002668 RID: 9832 RVA: 0x000CCD6B File Offset: 0x000CAF6B
+	// Token: 0x06002668 RID: 9832 RVA: 0x000CCD4B File Offset: 0x000CAF4B
 	public void OnEntityDestroy()
 	{
 		this.GetGameAgentManager().RemoveGameAgent(this);
@@ -62,7 +62,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 	{
 	}
 
-	// Token: 0x0600266A RID: 9834 RVA: 0x000CCD79 File Offset: 0x000CAF79
+	// Token: 0x0600266A RID: 9834 RVA: 0x000CCD59 File Offset: 0x000CAF59
 	public void OnBehaviorStateChanged(byte newState)
 	{
 		GameAgent.StateChangedEvent stateChangedEvent = this.onBehaviorStateChanged;
@@ -73,7 +73,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		stateChangedEvent(newState);
 	}
 
-	// Token: 0x0600266B RID: 9835 RVA: 0x000CCD8C File Offset: 0x000CAF8C
+	// Token: 0x0600266B RID: 9835 RVA: 0x000CCD6C File Offset: 0x000CAF6C
 	public void OnBodyStateChanged(byte newState)
 	{
 		GameAgent.StateChangedEvent stateChangedEvent = this.onBodyStateChanged;
@@ -84,7 +84,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		stateChangedEvent(newState);
 	}
 
-	// Token: 0x0600266C RID: 9836 RVA: 0x000CCDA0 File Offset: 0x000CAFA0
+	// Token: 0x0600266C RID: 9836 RVA: 0x000CCD80 File Offset: 0x000CAF80
 	public void OnThink(float deltaTime)
 	{
 		if (!this.pauseEntityThink)
@@ -96,7 +96,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x0600266D RID: 9837 RVA: 0x000CCDE0 File Offset: 0x000CAFE0
+	// Token: 0x0600266D RID: 9837 RVA: 0x000CCDC0 File Offset: 0x000CAFC0
 	public void OnUpdate()
 	{
 		if (this.navAgent.isOnNavMesh)
@@ -134,7 +134,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x0600266E RID: 9838 RVA: 0x000CCFBA File Offset: 0x000CB1BA
+	// Token: 0x0600266E RID: 9838 RVA: 0x000CCF9A File Offset: 0x000CB19A
 	public void OnJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
 	{
 		GameAgent.JumpRequestedEvent jumpRequestedEvent = this.onJumpRequested;
@@ -145,19 +145,19 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		jumpRequestedEvent(start, end, heightScale, speedScale);
 	}
 
-	// Token: 0x0600266F RID: 9839 RVA: 0x000CCFD1 File Offset: 0x000CB1D1
+	// Token: 0x0600266F RID: 9839 RVA: 0x000CCFB1 File Offset: 0x000CB1B1
 	public bool IsOnNavMesh()
 	{
 		return this.navAgent != null && this.navAgent.isOnNavMesh;
 	}
 
-	// Token: 0x06002670 RID: 9840 RVA: 0x000CCFEE File Offset: 0x000CB1EE
+	// Token: 0x06002670 RID: 9840 RVA: 0x000CCFCE File Offset: 0x000CB1CE
 	public Vector3 GetLastPosOnNavMesh()
 	{
 		return this.lastPosOnNavMesh;
 	}
 
-	// Token: 0x06002671 RID: 9841 RVA: 0x000CCFF8 File Offset: 0x000CB1F8
+	// Token: 0x06002671 RID: 9841 RVA: 0x000CCFD8 File Offset: 0x000CB1D8
 	public void RequestDestination(Vector3 dest)
 	{
 		if (!this.entity.IsAuthority())
@@ -179,25 +179,25 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002672 RID: 9842 RVA: 0x000CD058 File Offset: 0x000CB258
+	// Token: 0x06002672 RID: 9842 RVA: 0x000CD038 File Offset: 0x000CB238
 	public void RequestBehaviorChange(byte behavior)
 	{
 		this.GetGameAgentManager().RequestBehavior(this, behavior);
 	}
 
-	// Token: 0x06002673 RID: 9843 RVA: 0x000CD067 File Offset: 0x000CB267
+	// Token: 0x06002673 RID: 9843 RVA: 0x000CD047 File Offset: 0x000CB247
 	public void RequestStateChange(byte state)
 	{
 		this.GetGameAgentManager().RequestState(this, state);
 	}
 
-	// Token: 0x06002674 RID: 9844 RVA: 0x000CD076 File Offset: 0x000CB276
+	// Token: 0x06002674 RID: 9844 RVA: 0x000CD056 File Offset: 0x000CB256
 	public void RequestTarget(NetPlayer targetPlayer)
 	{
 		this.GetGameAgentManager().RequestTarget(this, targetPlayer);
 	}
 
-	// Token: 0x06002675 RID: 9845 RVA: 0x000CD088 File Offset: 0x000CB288
+	// Token: 0x06002675 RID: 9845 RVA: 0x000CD068 File Offset: 0x000CB268
 	public void ApplyDestination(Vector3 dest)
 	{
 		NavMeshHit navMeshHit;
@@ -214,13 +214,13 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002676 RID: 9846 RVA: 0x000CD0D6 File Offset: 0x000CB2D6
+	// Token: 0x06002676 RID: 9846 RVA: 0x000CD0B6 File Offset: 0x000CB2B6
 	public void SetDisableNetworkSync(bool disable)
 	{
 		this.disableNetworkSync = disable;
 	}
 
-	// Token: 0x06002677 RID: 9847 RVA: 0x000CD0DF File Offset: 0x000CB2DF
+	// Token: 0x06002677 RID: 9847 RVA: 0x000CD0BF File Offset: 0x000CB2BF
 	public void SetIsPathing(bool isPathing, bool ignoreRigiBody = false)
 	{
 		this.navAgent.enabled = isPathing;
@@ -230,13 +230,13 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002678 RID: 9848 RVA: 0x000CD10A File Offset: 0x000CB30A
+	// Token: 0x06002678 RID: 9848 RVA: 0x000CD0EA File Offset: 0x000CB2EA
 	public void SetSpeed(float speed)
 	{
 		this.navAgent.speed = speed;
 	}
 
-	// Token: 0x06002679 RID: 9849 RVA: 0x000CD118 File Offset: 0x000CB318
+	// Token: 0x06002679 RID: 9849 RVA: 0x000CD0F8 File Offset: 0x000CB2F8
 	public void ApplyNetworkUpdate(Vector3 position, Quaternion rotation)
 	{
 		if (this.disableNetworkSync)
@@ -255,7 +255,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x0600267A RID: 9850 RVA: 0x000CD19C File Offset: 0x000CB39C
+	// Token: 0x0600267A RID: 9850 RVA: 0x000CD17C File Offset: 0x000CB37C
 	public static void UpdateFacing(Transform transform, NavMeshAgent navAgent, NetPlayer targetPlayer, float turnspeed = 3600f)
 	{
 		Transform target = null;
@@ -271,7 +271,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		GameAgent.UpdateFacingTarget(transform, navAgent, target, turnspeed);
 	}
 
-	// Token: 0x0600267B RID: 9851 RVA: 0x000CD1E4 File Offset: 0x000CB3E4
+	// Token: 0x0600267B RID: 9851 RVA: 0x000CD1C4 File Offset: 0x000CB3C4
 	public static void UpdateFacingTarget(Transform transform, NavMeshAgent navAgent, Transform target, float turnspeed = 3600f)
 	{
 		Vector3 vector = transform.forward;
@@ -306,7 +306,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		transform.rotation = Quaternion.Lerp(transform.rotation, quaternion, Mathf.Clamp(turnspeed / Quaternion.Angle(transform.rotation, quaternion) * Time.deltaTime, 0f, 1f));
 	}
 
-	// Token: 0x0600267C RID: 9852 RVA: 0x000CD2F4 File Offset: 0x000CB4F4
+	// Token: 0x0600267C RID: 9852 RVA: 0x000CD2D4 File Offset: 0x000CB4D4
 	public static void UpdateFacingForward(Transform transform, NavMeshAgent navAgent, float turnspeed = 3600f)
 	{
 		Vector3 desiredVelocity = navAgent.desiredVelocity;
@@ -320,7 +320,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		GameAgent.UpdateFacingDir(transform, navAgent, facingDir, turnspeed);
 	}
 
-	// Token: 0x0600267D RID: 9853 RVA: 0x000CD338 File Offset: 0x000CB538
+	// Token: 0x0600267D RID: 9853 RVA: 0x000CD318 File Offset: 0x000CB518
 	public static void UpdateFacingPos(Transform transform, NavMeshAgent navAgent, Vector3 facingPos, float turnspeed = 3600f)
 	{
 		Vector3 facingDir = facingPos - transform.position;
@@ -329,7 +329,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		GameAgent.UpdateFacingDir(transform, navAgent, facingDir, turnspeed);
 	}
 
-	// Token: 0x0600267E RID: 9854 RVA: 0x000CD370 File Offset: 0x000CB570
+	// Token: 0x0600267E RID: 9854 RVA: 0x000CD350 File Offset: 0x000CB550
 	public static void UpdateFacingDir(Transform transform, NavMeshAgent navAgent, Vector3 facingDir, float turnspeed = 3600f)
 	{
 		Quaternion quaternion = Quaternion.LookRotation(facingDir);

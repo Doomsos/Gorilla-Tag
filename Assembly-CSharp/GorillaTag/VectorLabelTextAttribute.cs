@@ -9,7 +9,7 @@ namespace GorillaTag
 	[Conditional("UNITY_EDITOR")]
 	public class VectorLabelTextAttribute : PropertyAttribute
 	{
-		// Token: 0x0600667F RID: 26239 RVA: 0x002163DE File Offset: 0x002145DE
+		// Token: 0x0600667F RID: 26239 RVA: 0x002163BE File Offset: 0x002145BE
 		public VectorLabelTextAttribute(params string[] labels) : this(-1, labels)
 		{
 		}

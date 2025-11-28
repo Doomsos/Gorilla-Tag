@@ -9,7 +9,7 @@ using UnityEngine.Events;
 // Token: 0x02000742 RID: 1858
 public class GRUIPromotionBot : MonoBehaviourTick
 {
-	// Token: 0x06002FFC RID: 12284 RVA: 0x00106288 File Offset: 0x00104488
+	// Token: 0x06002FFC RID: 12284 RVA: 0x00106268 File Offset: 0x00104468
 	public string FormattedUserInfo()
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -47,7 +47,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		return this.cachedStringBuilder.ToString();
 	}
 
-	// Token: 0x06002FFD RID: 12285 RVA: 0x0010647C File Offset: 0x0010467C
+	// Token: 0x06002FFD RID: 12285 RVA: 0x0010645C File Offset: 0x0010465C
 	public bool ActivePlayerEligibleForPromotion()
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -61,7 +61,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		return item - item2 < grplayer.CurrentProgression.points - grplayer.CurrentProgression.redeemedPoints;
 	}
 
-	// Token: 0x06002FFE RID: 12286 RVA: 0x001064DC File Offset: 0x001046DC
+	// Token: 0x06002FFE RID: 12286 RVA: 0x001064BC File Offset: 0x001046BC
 	public void Init(GhostReactor _reactor)
 	{
 		this.reactor = _reactor;
@@ -69,13 +69,13 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		this.currentState = GRUIPromotionBot.PromotionBotState.WaitingForLogin;
 	}
 
-	// Token: 0x06002FFF RID: 12287 RVA: 0x001064F3 File Offset: 0x001046F3
+	// Token: 0x06002FFF RID: 12287 RVA: 0x001064D3 File Offset: 0x001046D3
 	public void Refresh()
 	{
 		this.RefreshPlayerData();
 	}
 
-	// Token: 0x06003000 RID: 12288 RVA: 0x001064FC File Offset: 0x001046FC
+	// Token: 0x06003000 RID: 12288 RVA: 0x001064DC File Offset: 0x001046DC
 	public override void Tick()
 	{
 		if (this.reactor == null || this.reactor.grManager == null || !this.reactor.grManager.IsAuthority())
@@ -93,7 +93,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003001 RID: 12289 RVA: 0x001065B4 File Offset: 0x001047B4
+	// Token: 0x06003001 RID: 12289 RVA: 0x00106594 File Offset: 0x00104794
 	public bool CheckIsActivePlayer()
 	{
 		Object @object = GRPlayer.Get(VRRig.LocalRig);
@@ -101,7 +101,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		return @object == grplayer;
 	}
 
-	// Token: 0x06003002 RID: 12290 RVA: 0x001065E0 File Offset: 0x001047E0
+	// Token: 0x06003002 RID: 12290 RVA: 0x001065C0 File Offset: 0x001047C0
 	public void UpPressed()
 	{
 		if (!this.CheckIsActivePlayer())
@@ -123,7 +123,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003003 RID: 12291 RVA: 0x00106618 File Offset: 0x00104818
+	// Token: 0x06003003 RID: 12291 RVA: 0x001065F8 File Offset: 0x001047F8
 	public void DownPressed()
 	{
 		if (!this.CheckIsActivePlayer())
@@ -143,7 +143,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		this.SwitchState(GRUIPromotionBot.PromotionBotState.ChoosePurchaseCredits, false);
 	}
 
-	// Token: 0x06003004 RID: 12292 RVA: 0x00106650 File Offset: 0x00104850
+	// Token: 0x06003004 RID: 12292 RVA: 0x00106630 File Offset: 0x00104830
 	public void YesPressed()
 	{
 		if (!this.CheckIsActivePlayer())
@@ -169,7 +169,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003005 RID: 12293 RVA: 0x001066A8 File Offset: 0x001048A8
+	// Token: 0x06003005 RID: 12293 RVA: 0x00106688 File Offset: 0x00104888
 	public void NoPressed()
 	{
 		if (!this.CheckIsActivePlayer())
@@ -191,7 +191,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003006 RID: 12294 RVA: 0x001066E0 File Offset: 0x001048E0
+	// Token: 0x06003006 RID: 12294 RVA: 0x001066C0 File Offset: 0x001048C0
 	public void SwitchState(GRUIPromotionBot.PromotionBotState newState, bool fromRPC = false)
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -274,7 +274,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003007 RID: 12295 RVA: 0x00106900 File Offset: 0x00104B00
+	// Token: 0x06003007 RID: 12295 RVA: 0x001068E0 File Offset: 0x00104AE0
 	public int GetPurchaseToCreditCapAmount()
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -283,7 +283,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		return Math.Max(0, num - shiftCredits);
 	}
 
-	// Token: 0x06003008 RID: 12296 RVA: 0x0010693C File Offset: 0x00104B3C
+	// Token: 0x06003008 RID: 12296 RVA: 0x0010691C File Offset: 0x00104B1C
 	public void CelebratePromotion()
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -299,7 +299,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		grplayer.SendRankUpTelemetry(GhostReactorProgression.GetTitleNameAndGrade(grplayer.CurrentProgression.redeemedPoints));
 	}
 
-	// Token: 0x06003009 RID: 12297 RVA: 0x001069B0 File Offset: 0x00104BB0
+	// Token: 0x06003009 RID: 12297 RVA: 0x00106990 File Offset: 0x00104B90
 	public void SetMenuText(GRUIPromotionBot.PromotionBotState menuState)
 	{
 		switch (menuState)
@@ -319,7 +319,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600300A RID: 12298 RVA: 0x00106A08 File Offset: 0x00104C08
+	// Token: 0x0600300A RID: 12298 RVA: 0x001069E8 File Offset: 0x00104BE8
 	public void SetScreenVisibility()
 	{
 		this.startScreenText.gameObject.SetActive(this.currentState == GRUIPromotionBot.PromotionBotState.WaitingForLogin);
@@ -329,13 +329,13 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		this.purchaseSuccessText.gameObject.SetActive(false);
 	}
 
-	// Token: 0x0600300B RID: 12299 RVA: 0x00106A8A File Offset: 0x00104C8A
+	// Token: 0x0600300B RID: 12299 RVA: 0x00106A6A File Offset: 0x00104C6A
 	public void RefreshPlayerData()
 	{
 		this.userInfo.text = this.FormattedUserInfo();
 	}
 
-	// Token: 0x0600300C RID: 12300 RVA: 0x00106AA0 File Offset: 0x00104CA0
+	// Token: 0x0600300C RID: 12300 RVA: 0x00106A80 File Offset: 0x00104C80
 	public void OnPurchaseCallback(bool success)
 	{
 		if (success)
@@ -366,13 +366,13 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600300D RID: 12301 RVA: 0x001064F3 File Offset: 0x001046F3
+	// Token: 0x0600300D RID: 12301 RVA: 0x001064D3 File Offset: 0x001046D3
 	public void OnJuiceUpdated()
 	{
 		this.RefreshPlayerData();
 	}
 
-	// Token: 0x0600300E RID: 12302 RVA: 0x00106B2C File Offset: 0x00104D2C
+	// Token: 0x0600300E RID: 12302 RVA: 0x00106B0C File Offset: 0x00104D0C
 	public void OnGetShiftCredit(string mothershipId, int credit)
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -382,7 +382,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600300F RID: 12303 RVA: 0x00106B64 File Offset: 0x00104D64
+	// Token: 0x0600300F RID: 12303 RVA: 0x00106B44 File Offset: 0x00104D44
 	public void OnShinyRocksUpdated()
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -392,7 +392,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003010 RID: 12304 RVA: 0x00106B9C File Offset: 0x00104D9C
+	// Token: 0x06003010 RID: 12304 RVA: 0x00106B7C File Offset: 0x00104D7C
 	public void OnGetShiftCreditCapData(string mothershipId, int creditCap, int creditCapMax)
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -402,7 +402,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003011 RID: 12305 RVA: 0x00106BD4 File Offset: 0x00104DD4
+	// Token: 0x06003011 RID: 12305 RVA: 0x00106BB4 File Offset: 0x00104DB4
 	public void AttemptPromotion()
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -418,7 +418,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003012 RID: 12306 RVA: 0x00106C88 File Offset: 0x00104E88
+	// Token: 0x06003012 RID: 12306 RVA: 0x00106C68 File Offset: 0x00104E68
 	public void AttemptPurchaseShiftCreditIncrease()
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
@@ -440,7 +440,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		this.RefreshPlayerData();
 	}
 
-	// Token: 0x06003013 RID: 12307 RVA: 0x00106D44 File Offset: 0x00104F44
+	// Token: 0x06003013 RID: 12307 RVA: 0x00106D24 File Offset: 0x00104F24
 	public void AttemptPurchaseShiftCreditRefillToMax()
 	{
 		if (this.GetPurchaseToCreditCapAmount() == 0)
@@ -469,7 +469,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		this.SwitchState(GRUIPromotionBot.PromotionBotState.ChoosePurchaseCredits, false);
 	}
 
-	// Token: 0x06003014 RID: 12308 RVA: 0x00106E00 File Offset: 0x00105000
+	// Token: 0x06003014 RID: 12308 RVA: 0x00106DE0 File Offset: 0x00104FE0
 	public void PlayerSwipedID()
 	{
 		if (this.reactor == null || this.reactor.grManager == null)
@@ -509,7 +509,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003015 RID: 12309 RVA: 0x00106EB0 File Offset: 0x001050B0
+	// Token: 0x06003015 RID: 12309 RVA: 0x00106E90 File Offset: 0x00105090
 	public void RefreshActivePlayerBadge()
 	{
 		if (this.currentPlayerActorNumber == -1)
@@ -527,7 +527,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06003016 RID: 12310 RVA: 0x00106F14 File Offset: 0x00105114
+	// Token: 0x06003016 RID: 12310 RVA: 0x00106EF4 File Offset: 0x001050F4
 	public void SetActivePlayerStateChange(int actorNumber, int state)
 	{
 		if (state == 0)
@@ -573,7 +573,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		this.SwitchState((GRUIPromotionBot.PromotionBotState)state, true);
 	}
 
-	// Token: 0x06003017 RID: 12311 RVA: 0x001070E0 File Offset: 0x001052E0
+	// Token: 0x06003017 RID: 12311 RVA: 0x001070C0 File Offset: 0x001052C0
 	public int GetCurrentPlayerActorNumber()
 	{
 		return this.currentPlayerActorNumber;

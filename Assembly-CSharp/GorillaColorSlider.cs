@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000909 RID: 2313
 public class GorillaColorSlider : MonoBehaviour
 {
-	// Token: 0x06003B1C RID: 15132 RVA: 0x00138B39 File Offset: 0x00136D39
+	// Token: 0x06003B1C RID: 15132 RVA: 0x00138B19 File Offset: 0x00136D19
 	private void Start()
 	{
 		if (!this.setRandomly)
@@ -13,7 +13,7 @@ public class GorillaColorSlider : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B1D RID: 15133 RVA: 0x00138B54 File Offset: 0x00136D54
+	// Token: 0x06003B1D RID: 15133 RVA: 0x00138B34 File Offset: 0x00136D34
 	public void SetPosition(float speed)
 	{
 		float num = this.startingLocation.x - this.zRange / 2f;
@@ -23,7 +23,7 @@ public class GorillaColorSlider : MonoBehaviour
 		this.valueImReporting = this.InterpolateValue(base.transform.position.x);
 	}
 
-	// Token: 0x06003B1E RID: 15134 RVA: 0x00138BF4 File Offset: 0x00136DF4
+	// Token: 0x06003B1E RID: 15134 RVA: 0x00138BD4 File Offset: 0x00136DD4
 	public float InterpolateValue(float value)
 	{
 		float num = this.startingLocation.x - this.zRange / 2f;
@@ -31,7 +31,7 @@ public class GorillaColorSlider : MonoBehaviour
 		return (value - num) / (num2 - num) * (this.maxValue - this.minValue) + this.minValue;
 	}
 
-	// Token: 0x06003B1F RID: 15135 RVA: 0x00138C50 File Offset: 0x00136E50
+	// Token: 0x06003B1F RID: 15135 RVA: 0x00138C30 File Offset: 0x00136E30
 	public void OnSliderRelease()
 	{
 		if (this.zRange != 0f && (base.transform.position - this.startingLocation).magnitude > this.zRange / 2f)

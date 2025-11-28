@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000CC1 RID: 3265
 public class ReportTargetHit : MonoBehaviour
 {
-	// Token: 0x06004FAA RID: 20394 RVA: 0x0019A174 File Offset: 0x00198374
+	// Token: 0x06004FAA RID: 20394 RVA: 0x0019A154 File Offset: 0x00198354
 	private void Start()
 	{
 		this.seekFreq = ReportTargetHit.rand.NextFloat(this.minseekFreq, this.maxseekFreq);
 	}
 
-	// Token: 0x06004FAB RID: 20395 RVA: 0x0019A192 File Offset: 0x00198392
+	// Token: 0x06004FAB RID: 20395 RVA: 0x0019A172 File Offset: 0x00198372
 	private void OnEnable()
 	{
 		if (this.nsRand != null)
@@ -20,7 +20,7 @@ public class ReportTargetHit : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004FAC RID: 20396 RVA: 0x0019A1B9 File Offset: 0x001983B9
+	// Token: 0x06004FAC RID: 20396 RVA: 0x0019A199 File Offset: 0x00198399
 	private void OnDisable()
 	{
 		if (this.nsRand != null)
@@ -29,13 +29,13 @@ public class ReportTargetHit : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004FAD RID: 20397 RVA: 0x0019A1E0 File Offset: 0x001983E0
+	// Token: 0x06004FAD RID: 20397 RVA: 0x0019A1C0 File Offset: 0x001983C0
 	private void NsRand_Dispatch(RandomDispatcher randomDispatcher)
 	{
 		this.seek();
 	}
 
-	// Token: 0x06004FAE RID: 20398 RVA: 0x0019A1E8 File Offset: 0x001983E8
+	// Token: 0x06004FAE RID: 20398 RVA: 0x0019A1C8 File Offset: 0x001983C8
 	private void Update()
 	{
 		if (this.nsRand != null)
@@ -51,7 +51,7 @@ public class ReportTargetHit : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004FAF RID: 20399 RVA: 0x0019A254 File Offset: 0x00198454
+	// Token: 0x06004FAF RID: 20399 RVA: 0x0019A234 File Offset: 0x00198434
 	private void seek()
 	{
 		if (this.targets.Length != 0)

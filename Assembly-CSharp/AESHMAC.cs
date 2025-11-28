@@ -6,7 +6,7 @@ using System.Text;
 // Token: 0x020009C1 RID: 2497
 public static class AESHMAC
 {
-	// Token: 0x06003FCA RID: 16330 RVA: 0x00155F70 File Offset: 0x00154170
+	// Token: 0x06003FCA RID: 16330 RVA: 0x00155F50 File Offset: 0x00154150
 	public static byte[] NewKey()
 	{
 		byte[] array = new byte[32];
@@ -14,7 +14,7 @@ public static class AESHMAC
 		return array;
 	}
 
-	// Token: 0x06003FCB RID: 16331 RVA: 0x00155F91 File Offset: 0x00154191
+	// Token: 0x06003FCB RID: 16331 RVA: 0x00155F71 File Offset: 0x00154171
 	public static string SimpleEncrypt(string plaintext, byte[] key, byte[] auth, byte[] salt = null)
 	{
 		if (string.IsNullOrEmpty(plaintext))
@@ -24,7 +24,7 @@ public static class AESHMAC
 		return Convert.ToBase64String(AESHMAC.SimpleEncrypt(Encoding.UTF8.GetBytes(plaintext), key, auth, salt));
 	}
 
-	// Token: 0x06003FCC RID: 16332 RVA: 0x00155FC0 File Offset: 0x001541C0
+	// Token: 0x06003FCC RID: 16332 RVA: 0x00155FA0 File Offset: 0x001541A0
 	public static string SimpleDecrypt(string ciphertext, byte[] key, byte[] auth, int saltLength = 0)
 	{
 		if (string.IsNullOrWhiteSpace(ciphertext))
@@ -39,7 +39,7 @@ public static class AESHMAC
 		return null;
 	}
 
-	// Token: 0x06003FCD RID: 16333 RVA: 0x00155FFF File Offset: 0x001541FF
+	// Token: 0x06003FCD RID: 16333 RVA: 0x00155FDF File Offset: 0x001541DF
 	public static string SimpleEncryptWithKey(string plaintext, string key, byte[] salt = null)
 	{
 		if (string.IsNullOrEmpty(plaintext))
@@ -49,7 +49,7 @@ public static class AESHMAC
 		return Convert.ToBase64String(AESHMAC.SimpleEncryptWithKey(Encoding.UTF8.GetBytes(plaintext), key, salt));
 	}
 
-	// Token: 0x06003FCE RID: 16334 RVA: 0x0015602C File Offset: 0x0015422C
+	// Token: 0x06003FCE RID: 16334 RVA: 0x0015600C File Offset: 0x0015420C
 	public static string SimpleDecryptWithKey(string ciphertext, string key, int saltLength = 0)
 	{
 		if (string.IsNullOrWhiteSpace(ciphertext))
@@ -64,7 +64,7 @@ public static class AESHMAC
 		return null;
 	}
 
-	// Token: 0x06003FCF RID: 16335 RVA: 0x0015606C File Offset: 0x0015426C
+	// Token: 0x06003FCF RID: 16335 RVA: 0x0015604C File Offset: 0x0015424C
 	public static byte[] SimpleEncrypt(byte[] plaintext, byte[] key, byte[] auth, byte[] salt = null)
 	{
 		if (key == null || key.Length != 32)
@@ -130,7 +130,7 @@ public static class AESHMAC
 		return result;
 	}
 
-	// Token: 0x06003FD0 RID: 16336 RVA: 0x00156278 File Offset: 0x00154478
+	// Token: 0x06003FD0 RID: 16336 RVA: 0x00156258 File Offset: 0x00154458
 	public static byte[] SimpleDecrypt(byte[] ciphertext, byte[] key, byte[] auth, int saltLength = 0)
 	{
 		if (key == null || key.Length != 32)
@@ -200,7 +200,7 @@ public static class AESHMAC
 		return result;
 	}
 
-	// Token: 0x06003FD1 RID: 16337 RVA: 0x001564D4 File Offset: 0x001546D4
+	// Token: 0x06003FD1 RID: 16337 RVA: 0x001564B4 File Offset: 0x001546B4
 	public static byte[] SimpleEncryptWithKey(byte[] plaintext, string key, byte[] salt = null)
 	{
 		if (salt == null)
@@ -236,7 +236,7 @@ public static class AESHMAC
 		return AESHMAC.SimpleEncrypt(plaintext, bytes, bytes2, array);
 	}
 
-	// Token: 0x06003FD2 RID: 16338 RVA: 0x001565EC File Offset: 0x001547EC
+	// Token: 0x06003FD2 RID: 16338 RVA: 0x001565CC File Offset: 0x001547CC
 	public static byte[] SimpleDecryptWithKey(byte[] ciphertext, string key, int saltLength = 0)
 	{
 		if (string.IsNullOrWhiteSpace(key) || key.Length < 12)
@@ -256,7 +256,7 @@ public static class AESHMAC
 		return AESHMAC.SimpleDecrypt(ciphertext, key2, auth, array.Length + array2.Length + saltLength);
 	}
 
-	// Token: 0x06003FD3 RID: 16339 RVA: 0x00156694 File Offset: 0x00154894
+	// Token: 0x06003FD3 RID: 16339 RVA: 0x00156674 File Offset: 0x00154874
 	private static byte[] Rfc2898DeriveBytes(string password, byte[] salt, int iterations, int numBytes)
 	{
 		byte[] bytes;

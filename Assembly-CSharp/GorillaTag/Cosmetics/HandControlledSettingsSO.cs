@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	public class HandControlledSettingsSO : ScriptableObject
 	{
 		// Token: 0x17000A60 RID: 2656
-		// (get) Token: 0x06006CF7 RID: 27895 RVA: 0x0023CA5C File Offset: 0x0023AC5C
+		// (get) Token: 0x06006CF7 RID: 27895 RVA: 0x0023CA3C File Offset: 0x0023AC3C
 		private bool IsAngle
 		{
 			get
@@ -17,7 +17,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A61 RID: 2657
-		// (get) Token: 0x06006CF8 RID: 27896 RVA: 0x0023CA67 File Offset: 0x0023AC67
+		// (get) Token: 0x06006CF8 RID: 27896 RVA: 0x0023CA47 File Offset: 0x0023AC47
 		private bool IsTranslation
 		{
 			get

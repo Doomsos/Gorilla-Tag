@@ -9,13 +9,13 @@ using UnityEngine.Localization.SmartFormat.PersistentVariables;
 // Token: 0x02000A9A RID: 2714
 public class KIDUI_AgeDiscrepancyScreen : MonoBehaviour
 {
-	// Token: 0x06004430 RID: 17456 RVA: 0x0016923F File Offset: 0x0016743F
+	// Token: 0x06004430 RID: 17456 RVA: 0x0016921F File Offset: 0x0016741F
 	private void Awake()
 	{
 		this.CheckLocalizationReferences();
 	}
 
-	// Token: 0x06004431 RID: 17457 RVA: 0x00169248 File Offset: 0x00167448
+	// Token: 0x06004431 RID: 17457 RVA: 0x00169228 File Offset: 0x00167428
 	public Task ShowAgeDiscrepancyScreenWithAwait(string description)
 	{
 		KIDUI_AgeDiscrepancyScreen.<ShowAgeDiscrepancyScreenWithAwait>d__8 <ShowAgeDiscrepancyScreenWithAwait>d__;
@@ -27,7 +27,7 @@ public class KIDUI_AgeDiscrepancyScreen : MonoBehaviour
 		return <ShowAgeDiscrepancyScreenWithAwait>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004432 RID: 17458 RVA: 0x00169294 File Offset: 0x00167494
+	// Token: 0x06004432 RID: 17458 RVA: 0x00169274 File Offset: 0x00167474
 	public Task ShowAgeDiscrepancyScreenWithAwait(int userAge, int accAge, int lowestAge)
 	{
 		KIDUI_AgeDiscrepancyScreen.<ShowAgeDiscrepancyScreenWithAwait>d__9 <ShowAgeDiscrepancyScreenWithAwait>d__;
@@ -41,7 +41,7 @@ public class KIDUI_AgeDiscrepancyScreen : MonoBehaviour
 		return <ShowAgeDiscrepancyScreenWithAwait>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004433 RID: 17459 RVA: 0x001692F0 File Offset: 0x001674F0
+	// Token: 0x06004433 RID: 17459 RVA: 0x001692D0 File Offset: 0x001674D0
 	private Task WaitForCompletion()
 	{
 		KIDUI_AgeDiscrepancyScreen.<WaitForCompletion>d__10 <WaitForCompletion>d__;
@@ -52,19 +52,19 @@ public class KIDUI_AgeDiscrepancyScreen : MonoBehaviour
 		return <WaitForCompletion>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004434 RID: 17460 RVA: 0x00169333 File Offset: 0x00167533
+	// Token: 0x06004434 RID: 17460 RVA: 0x00169313 File Offset: 0x00167513
 	public void OnHoldComplete()
 	{
 		this._hasCompleted = true;
 	}
 
-	// Token: 0x06004435 RID: 17461 RVA: 0x0016895E File Offset: 0x00166B5E
+	// Token: 0x06004435 RID: 17461 RVA: 0x0016893E File Offset: 0x00166B3E
 	public void OnQuitPressed()
 	{
 		Application.Quit();
 	}
 
-	// Token: 0x06004436 RID: 17462 RVA: 0x0016933C File Offset: 0x0016753C
+	// Token: 0x06004436 RID: 17462 RVA: 0x0016931C File Offset: 0x0016751C
 	private void CheckLocalizationReferences()
 	{
 		if (this._bodyLocStr != null && this._userAgeVar != null && this._accountAgeVar != null && this._lowestAgeVar != null)

@@ -8,13 +8,13 @@ using UnityEngine;
 // Token: 0x02000A96 RID: 2710
 public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 {
-	// Token: 0x0600441F RID: 17439 RVA: 0x00168B0D File Offset: 0x00166D0D
+	// Token: 0x0600441F RID: 17439 RVA: 0x00168AED File Offset: 0x00166CED
 	private void OnEnable()
 	{
 		KIDManager.onEmailResultReceived = (KIDManager.OnEmailResultReceived)Delegate.Combine(KIDManager.onEmailResultReceived, new KIDManager.OnEmailResultReceived(this.NotifyOfEmailResult));
 	}
 
-	// Token: 0x06004420 RID: 17440 RVA: 0x00168B2F File Offset: 0x00166D2F
+	// Token: 0x06004420 RID: 17440 RVA: 0x00168B0F File Offset: 0x00166D0F
 	private void OnDisable()
 	{
 		KIDManager.onEmailResultReceived = (KIDManager.OnEmailResultReceived)Delegate.Remove(KIDManager.onEmailResultReceived, new KIDManager.OnEmailResultReceived(this.NotifyOfEmailResult));
@@ -26,7 +26,7 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
 	}
 
-	// Token: 0x06004421 RID: 17441 RVA: 0x00168B64 File Offset: 0x00166D64
+	// Token: 0x06004421 RID: 17441 RVA: 0x00168B44 File Offset: 0x00166D44
 	public void ShowAgeAppealConfirmationScreen(bool hasChallenge, int newAge, string emailToConfirm)
 	{
 		this.hasChallenge = hasChallenge;
@@ -36,7 +36,7 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 		base.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06004422 RID: 17442 RVA: 0x00168BB8 File Offset: 0x00166DB8
+	// Token: 0x06004422 RID: 17442 RVA: 0x00168B98 File Offset: 0x00166D98
 	public void OnConfirmPressed()
 	{
 		TelemetryData telemetryData = default(TelemetryData);
@@ -61,7 +61,7 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 		this.StartAgeAppealEmail();
 	}
 
-	// Token: 0x06004423 RID: 17443 RVA: 0x00168C68 File Offset: 0x00166E68
+	// Token: 0x06004423 RID: 17443 RVA: 0x00168C48 File Offset: 0x00166E48
 	public void OnBackPressed()
 	{
 		TelemetryData telemetryData = default(TelemetryData);
@@ -82,7 +82,7 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 		this._ageAppealEmailScreen.ShowAgeAppealEmailScreen(this.hasChallenge, this.newAgeToAppeal);
 	}
 
-	// Token: 0x06004424 RID: 17444 RVA: 0x00168D28 File Offset: 0x00166F28
+	// Token: 0x06004424 RID: 17444 RVA: 0x00168D08 File Offset: 0x00166F08
 	private void StartAgeAppealChallengeEmail()
 	{
 		KIDUI_AgeAppealEmailConfirmation.<StartAgeAppealChallengeEmail>d__16 <StartAgeAppealChallengeEmail>d__;
@@ -92,7 +92,7 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 		<StartAgeAppealChallengeEmail>d__.<>t__builder.Start<KIDUI_AgeAppealEmailConfirmation.<StartAgeAppealChallengeEmail>d__16>(ref <StartAgeAppealChallengeEmail>d__);
 	}
 
-	// Token: 0x06004425 RID: 17445 RVA: 0x00168D60 File Offset: 0x00166F60
+	// Token: 0x06004425 RID: 17445 RVA: 0x00168D40 File Offset: 0x00166F40
 	private Task StartAgeAppealEmail()
 	{
 		KIDUI_AgeAppealEmailConfirmation.<StartAgeAppealEmail>d__17 <StartAgeAppealEmail>d__;
@@ -103,7 +103,7 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 		return <StartAgeAppealEmail>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004426 RID: 17446 RVA: 0x00168DA4 File Offset: 0x00166FA4
+	// Token: 0x06004426 RID: 17446 RVA: 0x00168D84 File Offset: 0x00166F84
 	private void NotifyOfEmailResult(bool success)
 	{
 		if (this._successScreen == null)
@@ -120,7 +120,7 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004427 RID: 17447 RVA: 0x00168DF7 File Offset: 0x00166FF7
+	// Token: 0x06004427 RID: 17447 RVA: 0x00168DD7 File Offset: 0x00166FD7
 	private void ShowErrorScreen()
 	{
 		Debug.LogErrorFormat("[KID::UI::Setup] K-ID Confirmation Failed - Failed to send email", Array.Empty<object>());

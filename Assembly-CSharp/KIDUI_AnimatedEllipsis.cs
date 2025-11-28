@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x02000A9F RID: 2719
 public class KIDUI_AnimatedEllipsis : MonoBehaviour
 {
-	// Token: 0x0600443E RID: 17470 RVA: 0x001696A6 File Offset: 0x001678A6
+	// Token: 0x0600443E RID: 17470 RVA: 0x00169686 File Offset: 0x00167886
 	private void Awake()
 	{
 		if (this._ellipsisObjects != null)
@@ -23,13 +23,13 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06004440 RID: 17472 RVA: 0x001696B7 File Offset: 0x001678B7
+	// Token: 0x06004440 RID: 17472 RVA: 0x00169697 File Offset: 0x00167897
 	private void OnDisable()
 	{
 		this.StopAnimation();
 	}
 
-	// Token: 0x06004441 RID: 17473 RVA: 0x001696C0 File Offset: 0x001678C0
+	// Token: 0x06004441 RID: 17473 RVA: 0x001696A0 File Offset: 0x001678A0
 	private void SetupEllipsis()
 	{
 		if (this._ellipsisRoot == null)
@@ -46,7 +46,7 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004442 RID: 17474 RVA: 0x00169796 File Offset: 0x00167996
+	// Token: 0x06004442 RID: 17474 RVA: 0x00169776 File Offset: 0x00167976
 	private IEnumerator EllipsisAnimation()
 	{
 		int currIndex = 0;
@@ -73,7 +73,7 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06004443 RID: 17475 RVA: 0x001697A5 File Offset: 0x001679A5
+	// Token: 0x06004443 RID: 17475 RVA: 0x00169785 File Offset: 0x00167985
 	private IEnumerator EllipsisAnimation2()
 	{
 		float time = 0f;
@@ -91,7 +91,7 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06004444 RID: 17476 RVA: 0x001697B4 File Offset: 0x001679B4
+	// Token: 0x06004444 RID: 17476 RVA: 0x00169794 File Offset: 0x00167994
 	public Task StartAnimation()
 	{
 		KIDUI_AnimatedEllipsis.<StartAnimation>d__24 <StartAnimation>d__;
@@ -102,7 +102,7 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 		return <StartAnimation>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004445 RID: 17477 RVA: 0x001697F8 File Offset: 0x001679F8
+	// Token: 0x06004445 RID: 17477 RVA: 0x001697D8 File Offset: 0x001679D8
 	public Task StopAnimation()
 	{
 		KIDUI_AnimatedEllipsis.<StopAnimation>d__25 <StopAnimation>d__;
@@ -113,7 +113,7 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 		return <StopAnimation>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004446 RID: 17478 RVA: 0x0016983C File Offset: 0x00167A3C
+	// Token: 0x06004446 RID: 17478 RVA: 0x0016981C File Offset: 0x00167A1C
 	public float LerpLoop(float start, float end, float time, float offsetTime, float duration)
 	{
 		float num = (offsetTime - time) % duration / duration;

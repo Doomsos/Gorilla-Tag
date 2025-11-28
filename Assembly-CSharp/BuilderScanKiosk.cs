@@ -11,13 +11,13 @@ using UnityEngine.Events;
 // Token: 0x0200059F RID: 1439
 public class BuilderScanKiosk : MonoBehaviourTick
 {
-	// Token: 0x06002444 RID: 9284 RVA: 0x000C2732 File Offset: 0x000C0932
+	// Token: 0x06002444 RID: 9284 RVA: 0x000C2712 File Offset: 0x000C0912
 	public static bool IsSaveSlotValid(int slot)
 	{
 		return slot >= 0 && slot < BuilderScanKiosk.NUM_SAVE_SLOTS;
 	}
 
-	// Token: 0x06002445 RID: 9285 RVA: 0x000C2744 File Offset: 0x000C0944
+	// Token: 0x06002445 RID: 9285 RVA: 0x000C2724 File Offset: 0x000C0924
 	private void Start()
 	{
 		if (this.saveButton != null)
@@ -46,19 +46,19 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		this.UpdateUI();
 	}
 
-	// Token: 0x06002446 RID: 9286 RVA: 0x000C2898 File Offset: 0x000C0A98
+	// Token: 0x06002446 RID: 9286 RVA: 0x000C2878 File Offset: 0x000C0A78
 	private new void OnEnable()
 	{
 		LocalisationManager.RegisterOnLanguageChanged(new Action(this.UpdateUI));
 	}
 
-	// Token: 0x06002447 RID: 9287 RVA: 0x000C28AB File Offset: 0x000C0AAB
+	// Token: 0x06002447 RID: 9287 RVA: 0x000C288B File Offset: 0x000C0A8B
 	private new void OnDisable()
 	{
 		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.UpdateUI));
 	}
 
-	// Token: 0x06002448 RID: 9288 RVA: 0x000C28C0 File Offset: 0x000C0AC0
+	// Token: 0x06002448 RID: 9288 RVA: 0x000C28A0 File Offset: 0x000C0AA0
 	private void OnDestroy()
 	{
 		if (this.saveButton != null)
@@ -84,7 +84,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002449 RID: 9289 RVA: 0x000C29D4 File Offset: 0x000C0BD4
+	// Token: 0x06002449 RID: 9289 RVA: 0x000C29B4 File Offset: 0x000C0BB4
 	private void OnNoneButtonPressed()
 	{
 		if (this.targetTable == null)
@@ -103,7 +103,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600244A RID: 9290 RVA: 0x000C2A28 File Offset: 0x000C0C28
+	// Token: 0x0600244A RID: 9290 RVA: 0x000C2A08 File Offset: 0x000C0C08
 	private void OnScanButtonPressed(GorillaPressableButton button, bool isLeft)
 	{
 		if (this.targetTable == null)
@@ -140,7 +140,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 	{
 	}
 
-	// Token: 0x0600244C RID: 9292 RVA: 0x000C2AA8 File Offset: 0x000C0CA8
+	// Token: 0x0600244C RID: 9292 RVA: 0x000C2A88 File Offset: 0x000C0C88
 	private void LoadPlayerPrefs()
 	{
 		int @int = PlayerPrefs.GetInt(BuilderScanKiosk.playerPrefKey, -1);
@@ -148,14 +148,14 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		this.UpdateUI();
 	}
 
-	// Token: 0x0600244D RID: 9293 RVA: 0x000C2AD3 File Offset: 0x000C0CD3
+	// Token: 0x0600244D RID: 9293 RVA: 0x000C2AB3 File Offset: 0x000C0CB3
 	private void SavePlayerPrefs()
 	{
 		PlayerPrefs.SetInt(BuilderScanKiosk.playerPrefKey, this.targetTable.CurrentSaveSlot);
 		PlayerPrefs.Save();
 	}
 
-	// Token: 0x0600244E RID: 9294 RVA: 0x000C2AF0 File Offset: 0x000C0CF0
+	// Token: 0x0600244E RID: 9294 RVA: 0x000C2AD0 File Offset: 0x000C0CD0
 	private void ToggleSaveButton(bool enabled)
 	{
 		if (enabled)
@@ -168,7 +168,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		this.saveButton.buttonRenderer.material = this.saveButton.pressedMaterial;
 	}
 
-	// Token: 0x0600244F RID: 9295 RVA: 0x000C2B50 File Offset: 0x000C0D50
+	// Token: 0x0600244F RID: 9295 RVA: 0x000C2B30 File Offset: 0x000C0D30
 	public override void Tick()
 	{
 		if (this.isAnimating)
@@ -190,7 +190,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002450 RID: 9296 RVA: 0x000C2BC0 File Offset: 0x000C0DC0
+	// Token: 0x06002450 RID: 9296 RVA: 0x000C2BA0 File Offset: 0x000C0DA0
 	private void OnSavePressed()
 	{
 		if (this.targetTable == null || !this.isDirty || this.coolingDown)
@@ -233,7 +233,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		this.targetTable.SaveTableForPlayer(busyStr, blocksErrStr);
 	}
 
-	// Token: 0x06002451 RID: 9297 RVA: 0x000C2CE4 File Offset: 0x000C0EE4
+	// Token: 0x06002451 RID: 9297 RVA: 0x000C2CC4 File Offset: 0x000C0EC4
 	private string GetSavePath()
 	{
 		return string.Concat(new string[]
@@ -247,20 +247,20 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		});
 	}
 
-	// Token: 0x06002452 RID: 9298 RVA: 0x000C2D40 File Offset: 0x000C0F40
+	// Token: 0x06002452 RID: 9298 RVA: 0x000C2D20 File Offset: 0x000C0F20
 	private string GetSaveFolder()
 	{
 		return Application.persistentDataPath + Path.DirectorySeparatorChar.ToString() + BuilderScanKiosk.SAVE_FOLDER;
 	}
 
-	// Token: 0x06002453 RID: 9299 RVA: 0x000C2D5B File Offset: 0x000C0F5B
+	// Token: 0x06002453 RID: 9299 RVA: 0x000C2D3B File Offset: 0x000C0F3B
 	private void OnSaveDirtyChanged(bool dirty)
 	{
 		this.isDirty = dirty;
 		this.UpdateUI();
 	}
 
-	// Token: 0x06002454 RID: 9300 RVA: 0x000C2D6A File Offset: 0x000C0F6A
+	// Token: 0x06002454 RID: 9300 RVA: 0x000C2D4A File Offset: 0x000C0F4A
 	private void OnSaveTimeUpdated()
 	{
 		this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
@@ -268,7 +268,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		this.UpdateUI();
 	}
 
-	// Token: 0x06002455 RID: 9301 RVA: 0x000C2D6A File Offset: 0x000C0F6A
+	// Token: 0x06002455 RID: 9301 RVA: 0x000C2D4A File Offset: 0x000C0F4A
 	private void OnSaveSuccess()
 	{
 		this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
@@ -276,7 +276,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		this.UpdateUI();
 	}
 
-	// Token: 0x06002456 RID: 9302 RVA: 0x000C2D80 File Offset: 0x000C0F80
+	// Token: 0x06002456 RID: 9302 RVA: 0x000C2D60 File Offset: 0x000C0F60
 	private void OnSaveFail(string errorMsg)
 	{
 		this.scannerState = BuilderScanKiosk.ScannerState.IDLE;
@@ -285,7 +285,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		this.UpdateUI();
 	}
 
-	// Token: 0x06002457 RID: 9303 RVA: 0x000C2DA0 File Offset: 0x000C0FA0
+	// Token: 0x06002457 RID: 9303 RVA: 0x000C2D80 File Offset: 0x000C0F80
 	private void UpdateUI()
 	{
 		this.screenText.text = this.GetTextForScreen();
@@ -307,7 +307,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		this.saveButton.myTmpText.text = text2;
 	}
 
-	// Token: 0x06002458 RID: 9304 RVA: 0x000C2ECC File Offset: 0x000C10CC
+	// Token: 0x06002458 RID: 9304 RVA: 0x000C2EAC File Offset: 0x000C10AC
 	private string GetTextForScreen()
 	{
 		if (this.targetTable == null)

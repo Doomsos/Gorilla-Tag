@@ -7,7 +7,7 @@ using UnityEngine;
 internal class GorillaSerializerScene : GorillaSerializer, IOnPhotonViewPreNetDestroy, IPhotonViewCallback
 {
 	// Token: 0x17000441 RID: 1089
-	// (get) Token: 0x0600309B RID: 12443 RVA: 0x00109E41 File Offset: 0x00108041
+	// (get) Token: 0x0600309B RID: 12443 RVA: 0x00109E21 File Offset: 0x00108021
 	internal bool HasAuthority
 	{
 		get
@@ -16,7 +16,7 @@ internal class GorillaSerializerScene : GorillaSerializer, IOnPhotonViewPreNetDe
 		}
 	}
 
-	// Token: 0x0600309C RID: 12444 RVA: 0x00109E50 File Offset: 0x00108050
+	// Token: 0x0600309C RID: 12444 RVA: 0x00109E30 File Offset: 0x00108030
 	protected virtual void Start()
 	{
 		if (!this.targetComponent.IsNull())
@@ -36,7 +36,7 @@ internal class GorillaSerializerScene : GorillaSerializer, IOnPhotonViewPreNetDe
 		base.gameObject.SetActive(false);
 	}
 
-	// Token: 0x0600309D RID: 12445 RVA: 0x00109EBE File Offset: 0x001080BE
+	// Token: 0x0600309D RID: 12445 RVA: 0x00109E9E File Offset: 0x0010809E
 	private void OnEnable()
 	{
 		if (!this.successfullInstantiate)
@@ -51,13 +51,13 @@ internal class GorillaSerializerScene : GorillaSerializer, IOnPhotonViewPreNetDe
 		this.OnValidEnable();
 	}
 
-	// Token: 0x0600309E RID: 12446 RVA: 0x00109EDF File Offset: 0x001080DF
+	// Token: 0x0600309E RID: 12446 RVA: 0x00109EBF File Offset: 0x001080BF
 	protected virtual void OnValidEnable()
 	{
 		this.sceneSerializeTarget.OnNetworkObjectEnable();
 	}
 
-	// Token: 0x0600309F RID: 12447 RVA: 0x00109EEC File Offset: 0x001080EC
+	// Token: 0x0600309F RID: 12447 RVA: 0x00109ECC File Offset: 0x001080CC
 	private void OnDisable()
 	{
 		if (!this.successfullInstantiate || !this.validDisable)
@@ -67,13 +67,13 @@ internal class GorillaSerializerScene : GorillaSerializer, IOnPhotonViewPreNetDe
 		this.OnValidDisable();
 	}
 
-	// Token: 0x060030A0 RID: 12448 RVA: 0x00109F05 File Offset: 0x00108105
+	// Token: 0x060030A0 RID: 12448 RVA: 0x00109EE5 File Offset: 0x001080E5
 	protected virtual void OnValidDisable()
 	{
 		this.sceneSerializeTarget.OnNetworkObjectDisable();
 	}
 
-	// Token: 0x060030A1 RID: 12449 RVA: 0x00109F14 File Offset: 0x00108114
+	// Token: 0x060030A1 RID: 12449 RVA: 0x00109EF4 File Offset: 0x001080F4
 	public override void OnPhotonInstantiate(PhotonMessageInfo info)
 	{
 		GorillaNot.instance.SendReport("bad net obj creation", info.Sender.UserId, info.Sender.NickName);
@@ -85,13 +85,13 @@ internal class GorillaSerializerScene : GorillaSerializer, IOnPhotonViewPreNetDe
 		Object.Destroy(base.gameObject);
 	}
 
-	// Token: 0x060030A2 RID: 12450 RVA: 0x00109F6C File Offset: 0x0010816C
+	// Token: 0x060030A2 RID: 12450 RVA: 0x00109F4C File Offset: 0x0010814C
 	void IOnPhotonViewPreNetDestroy.OnPreNetDestroy(PhotonView rootView)
 	{
 		this.validDisable = false;
 	}
 
-	// Token: 0x060030A3 RID: 12451 RVA: 0x00109F75 File Offset: 0x00108175
+	// Token: 0x060030A3 RID: 12451 RVA: 0x00109F55 File Offset: 0x00108155
 	protected override bool ValidOnSerialize(PhotonStream stream, in PhotonMessageInfo info)
 	{
 		if (!this.transferrable)

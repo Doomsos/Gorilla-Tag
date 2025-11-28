@@ -11,7 +11,7 @@ using UnityEngine;
 // Token: 0x020009B5 RID: 2485
 public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaSliceableSimple
 {
-	// Token: 0x06003F7C RID: 16252 RVA: 0x001547ED File Offset: 0x001529ED
+	// Token: 0x06003F7C RID: 16252 RVA: 0x001547CD File Offset: 0x001529CD
 	public bool BuildValidationCheck()
 	{
 		if (this.netSerializer.IsNull())
@@ -22,7 +22,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		return true;
 	}
 
-	// Token: 0x06003F7D RID: 16253 RVA: 0x00154820 File Offset: 0x00152A20
+	// Token: 0x06003F7D RID: 16253 RVA: 0x00154800 File Offset: 0x00152A00
 	public void SliceUpdate()
 	{
 		if (!this.accessDenied && NetworkSystem.Instance.netState != NetSystemState.Idle && NetworkSystem.Instance.netState != NetSystemState.InGame)
@@ -35,7 +35,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F7E RID: 16254 RVA: 0x00154884 File Offset: 0x00152A84
+	// Token: 0x06003F7E RID: 16254 RVA: 0x00154864 File Offset: 0x00152A64
 	public void OnEnable()
 	{
 		if (this.netSerializer.IsNull())
@@ -59,7 +59,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06003F7F RID: 16255 RVA: 0x00154931 File Offset: 0x00152B31
+	// Token: 0x06003F7F RID: 16255 RVA: 0x00154911 File Offset: 0x00152B11
 	public void OnDisable()
 	{
 		this.AllowAccess();
@@ -68,7 +68,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06003F80 RID: 16256 RVA: 0x00154962 File Offset: 0x00152B62
+	// Token: 0x06003F80 RID: 16256 RVA: 0x00154942 File Offset: 0x00152B42
 	private void OnUGCEnabled()
 	{
 		this.AllowAccess();
@@ -76,7 +76,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		VirtualStumpTeleporter.lastLoggingHandsMsgId = 3;
 	}
 
-	// Token: 0x06003F81 RID: 16257 RVA: 0x00154978 File Offset: 0x00152B78
+	// Token: 0x06003F81 RID: 16257 RVA: 0x00154958 File Offset: 0x00152B58
 	private void OnUGCDisabled()
 	{
 		this.DenyAccess();
@@ -84,7 +84,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		VirtualStumpTeleporter.lastLoggingHandsMsgId = 4;
 	}
 
-	// Token: 0x06003F82 RID: 16258 RVA: 0x00154990 File Offset: 0x00152B90
+	// Token: 0x06003F82 RID: 16258 RVA: 0x00154970 File Offset: 0x00152B70
 	public void OnTriggerEnter(Collider other)
 	{
 		if (UGCPermissionManager.IsUGCDisabled || this.accessDenied || this.teleporting || CustomMapManager.WaitingForRoomJoin || CustomMapManager.WaitingForDisconnect)
@@ -98,7 +98,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F83 RID: 16259 RVA: 0x001549F0 File Offset: 0x00152BF0
+	// Token: 0x06003F83 RID: 16259 RVA: 0x001549D0 File Offset: 0x00152BD0
 	public void OnTriggerStay(Collider other)
 	{
 		if (UGCPermissionManager.IsUGCDisabled || this.accessDenied)
@@ -116,7 +116,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F84 RID: 16260 RVA: 0x00154A64 File Offset: 0x00152C64
+	// Token: 0x06003F84 RID: 16260 RVA: 0x00154A44 File Offset: 0x00152C44
 	public void OnTriggerExit(Collider other)
 	{
 		if (UGCPermissionManager.IsUGCDisabled || this.accessDenied)
@@ -130,7 +130,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F85 RID: 16261 RVA: 0x00154AA4 File Offset: 0x00152CA4
+	// Token: 0x06003F85 RID: 16261 RVA: 0x00154A84 File Offset: 0x00152C84
 	private void ShowCountdownText()
 	{
 		if (UGCPermissionManager.IsUGCDisabled || this.accessDenied)
@@ -151,7 +151,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F86 RID: 16262 RVA: 0x00154B28 File Offset: 0x00152D28
+	// Token: 0x06003F86 RID: 16262 RVA: 0x00154B08 File Offset: 0x00152D08
 	private void HideCountdownText()
 	{
 		if (!this.countdownTexts.IsNullOrEmpty<TMP_Text>())
@@ -167,7 +167,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F87 RID: 16263 RVA: 0x00154B8C File Offset: 0x00152D8C
+	// Token: 0x06003F87 RID: 16263 RVA: 0x00154B6C File Offset: 0x00152D6C
 	private void UpdateCountdownText()
 	{
 		if (UGCPermissionManager.IsUGCDisabled || this.accessDenied)
@@ -188,7 +188,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F88 RID: 16264 RVA: 0x00154C09 File Offset: 0x00152E09
+	// Token: 0x06003F88 RID: 16264 RVA: 0x00154BE9 File Offset: 0x00152DE9
 	public void TeleportPlayer()
 	{
 		if (UGCPermissionManager.IsUGCDisabled || this.accessDenied)
@@ -202,7 +202,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F89 RID: 16265 RVA: 0x00154C3C File Offset: 0x00152E3C
+	// Token: 0x06003F89 RID: 16265 RVA: 0x00154C1C File Offset: 0x00152E1C
 	private void FinishTeleport(bool success = true)
 	{
 		if (this.teleporting)
@@ -212,7 +212,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F8A RID: 16266 RVA: 0x00154C58 File Offset: 0x00152E58
+	// Token: 0x06003F8A RID: 16266 RVA: 0x00154C38 File Offset: 0x00152E38
 	private void DenyAccess()
 	{
 		this.accessDenied = true;
@@ -226,7 +226,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F8B RID: 16267 RVA: 0x00154CF0 File Offset: 0x00152EF0
+	// Token: 0x06003F8B RID: 16267 RVA: 0x00154CD0 File Offset: 0x00152ED0
 	private void AllowAccess()
 	{
 		if (UGCPermissionManager.IsUGCDisabled)
@@ -244,7 +244,7 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 	}
 
-	// Token: 0x06003F8C RID: 16268 RVA: 0x00154D90 File Offset: 0x00152F90
+	// Token: 0x06003F8C RID: 16268 RVA: 0x00154D70 File Offset: 0x00152F70
 	private short GetIndex()
 	{
 		if (!this.netSerializer.IsNotNull())
@@ -254,43 +254,43 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		return this.netSerializer.GetTeleporterIndex(this);
 	}
 
-	// Token: 0x06003F8D RID: 16269 RVA: 0x00154DAD File Offset: 0x00152FAD
+	// Token: 0x06003F8D RID: 16269 RVA: 0x00154D8D File Offset: 0x00152F8D
 	public GTZone GetZone()
 	{
 		return this.entranceZone;
 	}
 
-	// Token: 0x06003F8E RID: 16270 RVA: 0x00154DB5 File Offset: 0x00152FB5
+	// Token: 0x06003F8E RID: 16270 RVA: 0x00154D95 File Offset: 0x00152F95
 	public GorillaNetworkJoinTrigger GetExitVStumpJoinTrigger()
 	{
 		return this.exitVStumpJoinTrigger;
 	}
 
-	// Token: 0x06003F8F RID: 16271 RVA: 0x00154DBD File Offset: 0x00152FBD
+	// Token: 0x06003F8F RID: 16271 RVA: 0x00154D9D File Offset: 0x00152F9D
 	public Transform GetReturnTransform()
 	{
 		return this.returnLocation;
 	}
 
-	// Token: 0x06003F90 RID: 16272 RVA: 0x00154DC5 File Offset: 0x00152FC5
+	// Token: 0x06003F90 RID: 16272 RVA: 0x00154DA5 File Offset: 0x00152FA5
 	public long GetAutoLoadMapModId()
 	{
 		return this.autoLoadMapModId;
 	}
 
-	// Token: 0x06003F91 RID: 16273 RVA: 0x00154DCD File Offset: 0x00152FCD
+	// Token: 0x06003F91 RID: 16273 RVA: 0x00154DAD File Offset: 0x00152FAD
 	public GameModeType GetAutoLoadGamemode()
 	{
 		return this.autoLoadGamemode;
 	}
 
-	// Token: 0x06003F92 RID: 16274 RVA: 0x00154DD5 File Offset: 0x00152FD5
+	// Token: 0x06003F92 RID: 16274 RVA: 0x00154DB5 File Offset: 0x00152FB5
 	public GameModeType GetReturnGamemode()
 	{
 		return this.forcedGamemodeUponReturn;
 	}
 
-	// Token: 0x06003F93 RID: 16275 RVA: 0x00154DE0 File Offset: 0x00152FE0
+	// Token: 0x06003F93 RID: 16275 RVA: 0x00154DC0 File Offset: 0x00152FC0
 	public void PlayTeleportEffects(bool forLocalPlayer, bool toVStump, AudioSource vStumpSFXAudioSource = null, bool sendRPC = false)
 	{
 		if (sendRPC && this.netSerializer.IsNotNull())

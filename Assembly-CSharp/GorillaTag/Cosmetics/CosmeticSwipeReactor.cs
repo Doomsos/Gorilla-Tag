@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	[RequireComponent(typeof(Collider))]
 	public class CosmeticSwipeReactor : MonoBehaviour, ITickSystemTick
 	{
-		// Token: 0x06006DDF RID: 28127 RVA: 0x0024127C File Offset: 0x0023F47C
+		// Token: 0x06006DDF RID: 28127 RVA: 0x0024125C File Offset: 0x0023F45C
 		private void Awake()
 		{
 			this._rig = base.GetComponentInParent<VRRig>();
@@ -35,7 +35,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DE0 RID: 28128 RVA: 0x00241334 File Offset: 0x0023F534
+		// Token: 0x06006DE0 RID: 28128 RVA: 0x00241314 File Offset: 0x0023F514
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!this.isLocal || !base.enabled)
@@ -66,7 +66,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DE1 RID: 28129 RVA: 0x002413E4 File Offset: 0x0023F5E4
+		// Token: 0x06006DE1 RID: 28129 RVA: 0x002413C4 File Offset: 0x0023F5C4
 		private void OnTriggerExit(Collider other)
 		{
 			if (!this.isLocal || !base.enabled)
@@ -102,11 +102,11 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A6B RID: 2667
-		// (get) Token: 0x06006DE2 RID: 28130 RVA: 0x00241484 File Offset: 0x0023F684
-		// (set) Token: 0x06006DE3 RID: 28131 RVA: 0x0024148C File Offset: 0x0023F68C
+		// (get) Token: 0x06006DE2 RID: 28130 RVA: 0x00241464 File Offset: 0x0023F664
+		// (set) Token: 0x06006DE3 RID: 28131 RVA: 0x0024146C File Offset: 0x0023F66C
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006DE4 RID: 28132 RVA: 0x00241498 File Offset: 0x0023F698
+		// Token: 0x06006DE4 RID: 28132 RVA: 0x00241478 File Offset: 0x0023F678
 		public void Tick()
 		{
 			if (this.handInTriggerL)
@@ -123,7 +123,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DE5 RID: 28133 RVA: 0x00241534 File Offset: 0x0023F734
+		// Token: 0x06006DE5 RID: 28133 RVA: 0x00241514 File Offset: 0x0023F714
 		private void ResetProgress(bool left, Vector3 pos)
 		{
 			if (left)
@@ -138,7 +138,7 @@ namespace GorillaTag.Cosmetics
 			this.distanceR = 0f;
 		}
 
-		// Token: 0x06006DE6 RID: 28134 RVA: 0x00241584 File Offset: 0x0023F784
+		// Token: 0x06006DE6 RID: 28134 RVA: 0x00241564 File Offset: 0x0023F764
 		private void ProcessHandMovement(GorillaTriggerColliderHandIndicator hand, Vector3 start, ref Vector3 last, ref bool swipingUp, ref float dist, ref bool isCoolingDown, ref double cooldownEndTime)
 		{
 			if (isCoolingDown)
@@ -210,7 +210,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DE7 RID: 28135 RVA: 0x00241774 File Offset: 0x0023F974
+		// Token: 0x06006DE7 RID: 28135 RVA: 0x00241754 File Offset: 0x0023F954
 		private float GetAxisComponent(Vector3 vec)
 		{
 			CosmeticSwipeReactor.Axis axis = this.localSwipeAxis;
@@ -225,7 +225,7 @@ namespace GorillaTag.Cosmetics
 			return vec.y;
 		}
 
-		// Token: 0x06006DE8 RID: 28136 RVA: 0x002417A8 File Offset: 0x0023F9A8
+		// Token: 0x06006DE8 RID: 28136 RVA: 0x00241788 File Offset: 0x0023F988
 		private Vector2 GetLateralMovement(Vector3 vec)
 		{
 			CosmeticSwipeReactor.Axis axis = this.localSwipeAxis;

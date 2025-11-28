@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	[RequireComponent(typeof(NetworkedRandomProvider))]
 	public class RandomWeightedOutput : MonoBehaviour
 	{
-		// Token: 0x06006D6B RID: 28011 RVA: 0x0023EB07 File Offset: 0x0023CD07
+		// Token: 0x06006D6B RID: 28011 RVA: 0x0023EAE7 File Offset: 0x0023CCE7
 		private void Awake()
 		{
 			if (this.networkProvider == null)
@@ -18,7 +18,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D6C RID: 28012 RVA: 0x0023EB24 File Offset: 0x0023CD24
+		// Token: 0x06006D6C RID: 28012 RVA: 0x0023EB04 File Offset: 0x0023CD04
 		public void PickNextRandom()
 		{
 			int deterministicPickIndex = this.GetDeterministicPickIndex();
@@ -41,7 +41,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D6D RID: 28013 RVA: 0x0023EB98 File Offset: 0x0023CD98
+		// Token: 0x06006D6D RID: 28013 RVA: 0x0023EB78 File Offset: 0x0023CD78
 		private int GetDeterministicPickIndex()
 		{
 			if (this.networkProvider == null)

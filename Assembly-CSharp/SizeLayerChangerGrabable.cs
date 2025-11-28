@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200082E RID: 2094
 public class SizeLayerChangerGrabable : MonoBehaviour, IGorillaGrabable
 {
-	// Token: 0x06003717 RID: 14103 RVA: 0x0012907A File Offset: 0x0012727A
+	// Token: 0x06003717 RID: 14103 RVA: 0x0012905A File Offset: 0x0012725A
 	public bool MomentaryGrabOnly()
 	{
 		return this.momentaryGrabOnly;
@@ -18,7 +18,7 @@ public class SizeLayerChangerGrabable : MonoBehaviour, IGorillaGrabable
 		return true;
 	}
 
-	// Token: 0x06003719 RID: 14105 RVA: 0x00129084 File Offset: 0x00127284
+	// Token: 0x06003719 RID: 14105 RVA: 0x00129064 File Offset: 0x00127264
 	void IGorillaGrabable.OnGrabbed(GorillaGrabber g, out Transform grabbedObject, out Vector3 grabbedLocalPosiiton)
 	{
 		if (this.grabChangesSizeLayer)
@@ -31,7 +31,7 @@ public class SizeLayerChangerGrabable : MonoBehaviour, IGorillaGrabable
 		grabbedLocalPosiiton = base.transform.InverseTransformPoint(g.transform.position);
 	}
 
-	// Token: 0x0600371A RID: 14106 RVA: 0x001290EC File Offset: 0x001272EC
+	// Token: 0x0600371A RID: 14106 RVA: 0x001290CC File Offset: 0x001272CC
 	void IGorillaGrabable.OnGrabReleased(GorillaGrabber g)
 	{
 		if (this.releaseChangesSizeLayer)

@@ -7,7 +7,7 @@ namespace GorillaTag.Scripts.Utilities
 	// Token: 0x02001025 RID: 4133
 	public static class GTStr
 	{
-		// Token: 0x0600687E RID: 26750 RVA: 0x00220414 File Offset: 0x0021E614
+		// Token: 0x0600687E RID: 26750 RVA: 0x002203F4 File Offset: 0x0021E5F4
 		public static void Bullet(StringBuilder builder, IList<string> strings, string bulletStr = "- ")
 		{
 			for (int i = 0; i < strings.Count; i++)
@@ -16,7 +16,7 @@ namespace GorillaTag.Scripts.Utilities
 			}
 		}
 
-		// Token: 0x0600687F RID: 26751 RVA: 0x00220450 File Offset: 0x0021E650
+		// Token: 0x0600687F RID: 26751 RVA: 0x00220430 File Offset: 0x0021E630
 		public static string Bullet(IList<string> strings, string bulletStr = "- ")
 		{
 			if (strings == null || strings.Count == 0)

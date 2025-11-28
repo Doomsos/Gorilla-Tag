@@ -5,7 +5,7 @@ namespace UniLabs.Time
 	// Token: 0x02000D73 RID: 3443
 	public static class TimeUnitExtensions
 	{
-		// Token: 0x06005449 RID: 21577 RVA: 0x001AA1D8 File Offset: 0x001A83D8
+		// Token: 0x06005449 RID: 21577 RVA: 0x001AA1B8 File Offset: 0x001A83B8
 		public static string ToShortString(this TimeUnit timeUnit)
 		{
 			string result;
@@ -35,7 +35,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x0600544A RID: 21578 RVA: 0x001AA248 File Offset: 0x001A8448
+		// Token: 0x0600544A RID: 21578 RVA: 0x001AA228 File Offset: 0x001A8428
 		public static string ToSeparatorString(this TimeUnit timeUnit)
 		{
 			string result;
@@ -65,7 +65,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x0600544B RID: 21579 RVA: 0x001AA2B8 File Offset: 0x001A84B8
+		// Token: 0x0600544B RID: 21579 RVA: 0x001AA298 File Offset: 0x001A8498
 		public static double GetUnitValue(this TimeSpan timeSpan, TimeUnit timeUnit)
 		{
 			int num;
@@ -95,7 +95,7 @@ namespace UniLabs.Time
 			return (double)num;
 		}
 
-		// Token: 0x0600544C RID: 21580 RVA: 0x001AA330 File Offset: 0x001A8530
+		// Token: 0x0600544C RID: 21580 RVA: 0x001AA310 File Offset: 0x001A8510
 		public static TimeSpan WithUnitValue(this TimeSpan timeSpan, TimeUnit timeUnit, double value)
 		{
 			TimeSpan result;
@@ -125,7 +125,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x0600544D RID: 21581 RVA: 0x001AA3F4 File Offset: 0x001A85F4
+		// Token: 0x0600544D RID: 21581 RVA: 0x001AA3D4 File Offset: 0x001A85D4
 		public static double GetLowestUnitValue(this TimeSpan timeSpan, TimeUnit timeUnit)
 		{
 			double result;
@@ -155,7 +155,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x0600544E RID: 21582 RVA: 0x001AA4D0 File Offset: 0x001A86D0
+		// Token: 0x0600544E RID: 21582 RVA: 0x001AA4B0 File Offset: 0x001A86B0
 		public static TimeSpan WithLowestUnitValue(this TimeSpan timeSpan, TimeUnit timeUnit, double value)
 		{
 			TimeSpan result;
@@ -185,7 +185,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x0600544F RID: 21583 RVA: 0x001AA5BC File Offset: 0x001A87BC
+		// Token: 0x0600544F RID: 21583 RVA: 0x001AA59C File Offset: 0x001A879C
 		public static double GetHighestUnitValue(this TimeSpan timeSpan, TimeUnit timeUnit)
 		{
 			double result;
@@ -215,7 +215,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x06005450 RID: 21584 RVA: 0x001AA698 File Offset: 0x001A8898
+		// Token: 0x06005450 RID: 21584 RVA: 0x001AA678 File Offset: 0x001A8878
 		public static TimeSpan WithHighestUnitValue(this TimeSpan timeSpan, TimeUnit timeUnit, double value)
 		{
 			TimeSpan result;
@@ -245,7 +245,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x06005451 RID: 21585 RVA: 0x001AA798 File Offset: 0x001A8998
+		// Token: 0x06005451 RID: 21585 RVA: 0x001AA778 File Offset: 0x001A8978
 		public static double GetSingleUnitValue(this TimeSpan timeSpan, TimeUnit timeUnit)
 		{
 			double result;
@@ -272,7 +272,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x06005452 RID: 21586 RVA: 0x001AA808 File Offset: 0x001A8A08
+		// Token: 0x06005452 RID: 21586 RVA: 0x001AA7E8 File Offset: 0x001A89E8
 		public static TimeSpan FromSingleUnitValue(this TimeSpan timeSpan, TimeUnit timeUnit, double value)
 		{
 			TimeSpan result;
@@ -302,7 +302,7 @@ namespace UniLabs.Time
 			return result;
 		}
 
-		// Token: 0x06005453 RID: 21587 RVA: 0x001AA880 File Offset: 0x001A8A80
+		// Token: 0x06005453 RID: 21587 RVA: 0x001AA860 File Offset: 0x001A8A60
 		public static TimeSpan SnapToUnit(this TimeSpan timeSpan, TimeUnit timeUnit)
 		{
 			TimeSpan result;

@@ -12,7 +12,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 	// Token: 0x02000E23 RID: 3619
 	public class VirtualStumpReturnWatch : MonoBehaviour
 	{
-		// Token: 0x06005A62 RID: 23138 RVA: 0x001CF454 File Offset: 0x001CD654
+		// Token: 0x06005A62 RID: 23138 RVA: 0x001CF434 File Offset: 0x001CD634
 		private void Start()
 		{
 			if (this.returnButton != null)
@@ -23,7 +23,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x06005A63 RID: 23139 RVA: 0x001CF4C4 File Offset: 0x001CD6C4
+		// Token: 0x06005A63 RID: 23139 RVA: 0x001CF4A4 File Offset: 0x001CD6A4
 		private void OnDestroy()
 		{
 			if (this.returnButton != null)
@@ -34,7 +34,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x06005A64 RID: 23140 RVA: 0x001CF534 File Offset: 0x001CD734
+		// Token: 0x06005A64 RID: 23140 RVA: 0x001CF514 File Offset: 0x001CD714
 		public static void SetWatchProperties(VirtualStumpReturnWatchProps props)
 		{
 			VirtualStumpReturnWatch.currentCustomMapProps = props;
@@ -43,7 +43,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			VirtualStumpReturnWatch.currentCustomMapProps.holdDuration_Custom = Mathf.Clamp(VirtualStumpReturnWatch.currentCustomMapProps.holdDuration_Custom, 0.5f, 5f);
 		}
 
-		// Token: 0x06005A65 RID: 23141 RVA: 0x001CF5B0 File Offset: 0x001CD7B0
+		// Token: 0x06005A65 RID: 23141 RVA: 0x001CF590 File Offset: 0x001CD790
 		private float GetCurrentHoldDuration()
 		{
 			if (GorillaGameManager.instance.IsNull())
@@ -68,7 +68,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			return VirtualStumpReturnWatch.currentCustomMapProps.holdDuration;
 		}
 
-		// Token: 0x06005A66 RID: 23142 RVA: 0x001CF659 File Offset: 0x001CD859
+		// Token: 0x06005A66 RID: 23142 RVA: 0x001CF639 File Offset: 0x001CD839
 		private void OnStartedPressingButton()
 		{
 			this.startPressingButtonTime = Time.time;
@@ -78,7 +78,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			this.updateCountdownCoroutine = base.StartCoroutine(this.UpdateCountdownText());
 		}
 
-		// Token: 0x06005A67 RID: 23143 RVA: 0x001CF696 File Offset: 0x001CD896
+		// Token: 0x06005A67 RID: 23143 RVA: 0x001CF676 File Offset: 0x001CD876
 		private void OnStoppedPressingButton()
 		{
 			this.currentlyBeingPressed = false;
@@ -90,7 +90,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x06005A68 RID: 23144 RVA: 0x001CF6C0 File Offset: 0x001CD8C0
+		// Token: 0x06005A68 RID: 23144 RVA: 0x001CF6A0 File Offset: 0x001CD8A0
 		private void OnButtonPressed()
 		{
 			this.currentlyBeingPressed = false;
@@ -130,7 +130,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x06005A69 RID: 23145 RVA: 0x001CF7C0 File Offset: 0x001CD9C0
+		// Token: 0x06005A69 RID: 23145 RVA: 0x001CF7A0 File Offset: 0x001CD9A0
 		private void ShowCountdownText()
 		{
 			if (this.countdownText.IsNull())
@@ -146,7 +146,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x06005A6A RID: 23146 RVA: 0x001CF82C File Offset: 0x001CDA2C
+		// Token: 0x06005A6A RID: 23146 RVA: 0x001CF80C File Offset: 0x001CDA0C
 		private void HideCountdownText()
 		{
 			if (this.countdownText.IsNull())
@@ -161,7 +161,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x06005A6B RID: 23147 RVA: 0x001CF886 File Offset: 0x001CDA86
+		// Token: 0x06005A6B RID: 23147 RVA: 0x001CF866 File Offset: 0x001CDA66
 		private IEnumerator UpdateCountdownText()
 		{
 			while (this.currentlyBeingPressed)

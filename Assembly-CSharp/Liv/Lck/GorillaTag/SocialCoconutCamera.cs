@@ -6,7 +6,7 @@ namespace Liv.Lck.GorillaTag
 	// Token: 0x02000F65 RID: 3941
 	public class SocialCoconutCamera : MonoBehaviour
 	{
-		// Token: 0x06006292 RID: 25234 RVA: 0x001FC3B3 File Offset: 0x001FA5B3
+		// Token: 0x06006292 RID: 25234 RVA: 0x001FC393 File Offset: 0x001FA593
 		private void Awake()
 		{
 			if (this._propertyBlock == null)
@@ -17,14 +17,14 @@ namespace Liv.Lck.GorillaTag
 			this._bodyRenderer.SetPropertyBlock(this._propertyBlock);
 		}
 
-		// Token: 0x06006293 RID: 25235 RVA: 0x001FC3EB File Offset: 0x001FA5EB
+		// Token: 0x06006293 RID: 25235 RVA: 0x001FC3CB File Offset: 0x001FA5CB
 		public void SetVisualsActive(bool active)
 		{
 			this._isActive = active;
 			this._visuals.SetActive(active);
 		}
 
-		// Token: 0x06006294 RID: 25236 RVA: 0x001FC400 File Offset: 0x001FA600
+		// Token: 0x06006294 RID: 25236 RVA: 0x001FC3E0 File Offset: 0x001FA5E0
 		public void SetRecordingState(bool isRecording)
 		{
 			if (!this._isActive)

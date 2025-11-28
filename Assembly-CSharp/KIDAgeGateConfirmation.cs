@@ -6,7 +6,7 @@ using UnityEngine.Localization.SmartFormat.PersistentVariables;
 public class KIDAgeGateConfirmation : MonoBehaviour
 {
 	// Token: 0x1700063B RID: 1595
-	// (get) Token: 0x0600423C RID: 16956 RVA: 0x0015E864 File Offset: 0x0015CA64
+	// (get) Token: 0x0600423C RID: 16956 RVA: 0x0015E844 File Offset: 0x0015CA44
 	private IntVariable UserAgeVar
 	{
 		get
@@ -24,29 +24,29 @@ public class KIDAgeGateConfirmation : MonoBehaviour
 	}
 
 	// Token: 0x1700063C RID: 1596
-	// (get) Token: 0x0600423D RID: 16957 RVA: 0x0015E8B1 File Offset: 0x0015CAB1
-	// (set) Token: 0x0600423E RID: 16958 RVA: 0x0015E8B9 File Offset: 0x0015CAB9
+	// (get) Token: 0x0600423D RID: 16957 RVA: 0x0015E891 File Offset: 0x0015CA91
+	// (set) Token: 0x0600423E RID: 16958 RVA: 0x0015E899 File Offset: 0x0015CA99
 	public KidAgeConfirmationResult Result { get; private set; }
 
-	// Token: 0x0600423F RID: 16959 RVA: 0x0015E8C2 File Offset: 0x0015CAC2
+	// Token: 0x0600423F RID: 16959 RVA: 0x0015E8A2 File Offset: 0x0015CAA2
 	private void Start()
 	{
 		this.Result = KidAgeConfirmationResult.None;
 	}
 
-	// Token: 0x06004240 RID: 16960 RVA: 0x0015E8CB File Offset: 0x0015CACB
+	// Token: 0x06004240 RID: 16960 RVA: 0x0015E8AB File Offset: 0x0015CAAB
 	public void OnConfirm()
 	{
 		this.Result = KidAgeConfirmationResult.Confirm;
 	}
 
-	// Token: 0x06004241 RID: 16961 RVA: 0x0015E8D4 File Offset: 0x0015CAD4
+	// Token: 0x06004241 RID: 16961 RVA: 0x0015E8B4 File Offset: 0x0015CAB4
 	public void OnBack()
 	{
 		this.Result = KidAgeConfirmationResult.Back;
 	}
 
-	// Token: 0x06004242 RID: 16962 RVA: 0x0015E8DD File Offset: 0x0015CADD
+	// Token: 0x06004242 RID: 16962 RVA: 0x0015E8BD File Offset: 0x0015CABD
 	public void Reset(int userAge)
 	{
 		this.Result = KidAgeConfirmationResult.None;

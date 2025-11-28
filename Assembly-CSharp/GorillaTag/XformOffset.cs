@@ -9,8 +9,8 @@ namespace GorillaTag
 	public struct XformOffset
 	{
 		// Token: 0x170009A1 RID: 2465
-		// (get) Token: 0x060066A4 RID: 26276 RVA: 0x00216DE9 File Offset: 0x00214FE9
-		// (set) Token: 0x060066A5 RID: 26277 RVA: 0x00216DF1 File Offset: 0x00214FF1
+		// (get) Token: 0x060066A4 RID: 26276 RVA: 0x00216DC9 File Offset: 0x00214FC9
+		// (set) Token: 0x060066A5 RID: 26277 RVA: 0x00216DD1 File Offset: 0x00214FD1
 		[Tooltip("The rotation of the offset relative to the parent bone.")]
 		public Quaternion rot
 		{
@@ -24,7 +24,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060066A6 RID: 26278 RVA: 0x00216DFA File Offset: 0x00214FFA
+		// Token: 0x060066A6 RID: 26278 RVA: 0x00216DDA File Offset: 0x00214FDA
 		public XformOffset(Vector3 pos, Quaternion rot, Vector3 scale)
 		{
 			this.pos = pos;
@@ -33,7 +33,7 @@ namespace GorillaTag
 			this.scale = scale;
 		}
 
-		// Token: 0x060066A7 RID: 26279 RVA: 0x00216E1E File Offset: 0x0021501E
+		// Token: 0x060066A7 RID: 26279 RVA: 0x00216DFE File Offset: 0x00214FFE
 		public XformOffset(Vector3 pos, Vector3 rot, Vector3 scale)
 		{
 			this.pos = pos;
@@ -42,7 +42,7 @@ namespace GorillaTag
 			this.scale = scale;
 		}
 
-		// Token: 0x060066A8 RID: 26280 RVA: 0x00216E41 File Offset: 0x00215041
+		// Token: 0x060066A8 RID: 26280 RVA: 0x00216E21 File Offset: 0x00215021
 		public XformOffset(Vector3 pos, Quaternion rot)
 		{
 			this.pos = pos;
@@ -51,7 +51,7 @@ namespace GorillaTag
 			this.scale = Vector3.one;
 		}
 
-		// Token: 0x060066A9 RID: 26281 RVA: 0x00216E69 File Offset: 0x00215069
+		// Token: 0x060066A9 RID: 26281 RVA: 0x00216E49 File Offset: 0x00215049
 		public XformOffset(Vector3 pos, Vector3 rot)
 		{
 			this.pos = pos;
@@ -60,7 +60,7 @@ namespace GorillaTag
 			this.scale = Vector3.one;
 		}
 
-		// Token: 0x060066AA RID: 26282 RVA: 0x00216E90 File Offset: 0x00215090
+		// Token: 0x060066AA RID: 26282 RVA: 0x00216E70 File Offset: 0x00215070
 		public XformOffset(Transform parentXform, Transform childXform)
 		{
 			this.pos = parentXform.InverseTransformPoint(childXform.position);
@@ -69,7 +69,7 @@ namespace GorillaTag
 			this.scale = childXform.lossyScale.SafeDivide(parentXform.lossyScale);
 		}
 
-		// Token: 0x060066AB RID: 26283 RVA: 0x00216EF4 File Offset: 0x002150F4
+		// Token: 0x060066AB RID: 26283 RVA: 0x00216ED4 File Offset: 0x002150D4
 		public XformOffset(Matrix4x4 matrix)
 		{
 			this.pos = matrix.GetPosition();
@@ -86,7 +86,7 @@ namespace GorillaTag
 			this._rotEulerAngles = this._rotQuat.eulerAngles;
 		}
 
-		// Token: 0x060066AC RID: 26284 RVA: 0x00216FFC File Offset: 0x002151FC
+		// Token: 0x060066AC RID: 26284 RVA: 0x00216FDC File Offset: 0x002151DC
 		public bool Approx(XformOffset other)
 		{
 			return this.pos.Approx(other.pos, 1E-05f) && this._rotQuat.Approx(other._rotQuat, 1E-06f) && this.scale.Approx(other.scale, 1E-05f);

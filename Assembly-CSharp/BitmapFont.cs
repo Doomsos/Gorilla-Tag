@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x02000440 RID: 1088
 public class BitmapFont : ScriptableObject
 {
-	// Token: 0x06001AC3 RID: 6851 RVA: 0x0008D58C File Offset: 0x0008B78C
+	// Token: 0x06001AC3 RID: 6851 RVA: 0x0008D56C File Offset: 0x0008B76C
 	private void OnEnable()
 	{
 		this._charToSymbol = Enumerable.ToDictionary<BitmapFont.SymbolData, char, BitmapFont.SymbolData>(this.symbols, (BitmapFont.SymbolData s) => s.character, (BitmapFont.SymbolData s) => s);
 	}
 
-	// Token: 0x06001AC4 RID: 6852 RVA: 0x0008D5E8 File Offset: 0x0008B7E8
+	// Token: 0x06001AC4 RID: 6852 RVA: 0x0008D5C8 File Offset: 0x0008B7C8
 	public void RenderToTexture(Texture2D target, string text)
 	{
 		if (text == null)

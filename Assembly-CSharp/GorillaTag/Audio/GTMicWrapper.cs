@@ -8,35 +8,35 @@ namespace GorillaTag.Audio
 	// Token: 0x0200106E RID: 4206
 	public class GTMicWrapper : MicWrapper
 	{
-		// Token: 0x0600698C RID: 27020 RVA: 0x002253A4 File Offset: 0x002235A4
+		// Token: 0x0600698C RID: 27020 RVA: 0x00225384 File Offset: 0x00223584
 		public GTMicWrapper(string device, int suggestedFrequency, bool allowPitchAdjustment, float pitchAdjustment, bool allowVolumeAdjustment, float volumeAdjustment, ILogger logger) : base(device, suggestedFrequency, logger)
 		{
 			this.UpdatePitchAdjustment(allowPitchAdjustment, pitchAdjustment);
 			this.UpdateVolumeAdjustment(allowVolumeAdjustment, volumeAdjustment);
 		}
 
-		// Token: 0x0600698D RID: 27021 RVA: 0x00225490 File Offset: 0x00223690
+		// Token: 0x0600698D RID: 27021 RVA: 0x00225470 File Offset: 0x00223670
 		public void UpdateWrapper(bool allowPitchAdjustment, float pitchAdjustment, bool allowVolumeAdjustment, float volumeAdjustment)
 		{
 			this.UpdatePitchAdjustment(allowPitchAdjustment, pitchAdjustment);
 			this.UpdateVolumeAdjustment(allowVolumeAdjustment, volumeAdjustment);
 		}
 
-		// Token: 0x0600698E RID: 27022 RVA: 0x002254A3 File Offset: 0x002236A3
+		// Token: 0x0600698E RID: 27022 RVA: 0x00225483 File Offset: 0x00223683
 		public void UpdatePitchAdjustment(bool allow, float pitchAdjustment)
 		{
 			this._allowPitchAdjustment = allow;
 			this._pitchAdjustment = pitchAdjustment;
 		}
 
-		// Token: 0x0600698F RID: 27023 RVA: 0x002254B3 File Offset: 0x002236B3
+		// Token: 0x0600698F RID: 27023 RVA: 0x00225493 File Offset: 0x00223693
 		public void UpdateVolumeAdjustment(bool allow, float volumeAdjustment)
 		{
 			this._allowVolumeAdjustment = allow;
 			this._volumeAdjustment = volumeAdjustment;
 		}
 
-		// Token: 0x06006990 RID: 27024 RVA: 0x002254C4 File Offset: 0x002236C4
+		// Token: 0x06006990 RID: 27024 RVA: 0x002254A4 File Offset: 0x002236A4
 		public override bool Read(float[] buffer)
 		{
 			if (base.Error != null)
@@ -79,13 +79,13 @@ namespace GorillaTag.Audio
 			return false;
 		}
 
-		// Token: 0x06006991 RID: 27025 RVA: 0x00225626 File Offset: 0x00223826
+		// Token: 0x06006991 RID: 27025 RVA: 0x00225606 File Offset: 0x00223806
 		private void PitchShift(float pitchShift, long numSampsToProcess, float sampleRate, float[] indata)
 		{
 			this.PitchShift(pitchShift, numSampsToProcess, 2048L, 10L, sampleRate, indata);
 		}
 
-		// Token: 0x06006992 RID: 27026 RVA: 0x0022563C File Offset: 0x0022383C
+		// Token: 0x06006992 RID: 27026 RVA: 0x0022561C File Offset: 0x0022381C
 		public void PitchShift(float pitchShift, long numSampsToProcess, long fftFrameSize, long osamp, float sampleRate, float[] indata)
 		{
 			long num = fftFrameSize / 2L;
@@ -216,7 +216,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x06006993 RID: 27027 RVA: 0x00225AB4 File Offset: 0x00223CB4
+		// Token: 0x06006993 RID: 27027 RVA: 0x00225A94 File Offset: 0x00223C94
 		public void ShortTimeFourierTransform(float[] fftBuffer, long fftFrameSize, long sign)
 		{
 			for (long num = 2L; num < 2L * fftFrameSize - 2L; num += 2L)

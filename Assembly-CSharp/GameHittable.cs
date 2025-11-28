@@ -5,21 +5,21 @@ using UnityEngine;
 // Token: 0x0200061F RID: 1567
 public class GameHittable : MonoBehaviour
 {
-	// Token: 0x060027D6 RID: 10198 RVA: 0x000D407A File Offset: 0x000D227A
+	// Token: 0x060027D6 RID: 10198 RVA: 0x000D405A File Offset: 0x000D225A
 	private void Awake()
 	{
 		this.components = new List<IGameHittable>(1);
 		base.GetComponentsInChildren<IGameHittable>(this.components);
 	}
 
-	// Token: 0x060027D7 RID: 10199 RVA: 0x000D4094 File Offset: 0x000D2294
+	// Token: 0x060027D7 RID: 10199 RVA: 0x000D4074 File Offset: 0x000D2274
 	public void RequestHit(GameHitData hitData)
 	{
 		hitData.hitEntityId = this.gameEntity.id;
 		this.gameEntity.manager.RequestHit(hitData);
 	}
 
-	// Token: 0x060027D8 RID: 10200 RVA: 0x000D40BC File Offset: 0x000D22BC
+	// Token: 0x060027D8 RID: 10200 RVA: 0x000D409C File Offset: 0x000D229C
 	public void ApplyHit(GameHitData hitData)
 	{
 		for (int i = 0; i < this.components.Count; i++)
@@ -33,7 +33,7 @@ public class GameHittable : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060027D9 RID: 10201 RVA: 0x000D4120 File Offset: 0x000D2320
+	// Token: 0x060027D9 RID: 10201 RVA: 0x000D4100 File Offset: 0x000D2300
 	public bool IsHitValid(GameHitData hitData)
 	{
 		for (int i = 0; i < this.components.Count; i++)

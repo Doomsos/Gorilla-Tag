@@ -4,21 +4,21 @@ using UnityEngine;
 // Token: 0x020007BD RID: 1981
 public class GorillaTagCompetitiveRoundBuzzer : MonoBehaviour
 {
-	// Token: 0x06003431 RID: 13361 RVA: 0x001185F7 File Offset: 0x001167F7
+	// Token: 0x06003431 RID: 13361 RVA: 0x001185D7 File Offset: 0x001167D7
 	private void OnEnable()
 	{
 		GorillaTagCompetitiveManager.onStateChanged += new Action<GorillaTagCompetitiveManager.GameState>(this.OnStateChanged);
 		GorillaTagCompetitiveManager.onUpdateRemainingTime += new Action<float>(this.OnUpdateRemainingTime);
 	}
 
-	// Token: 0x06003432 RID: 13362 RVA: 0x0011861B File Offset: 0x0011681B
+	// Token: 0x06003432 RID: 13362 RVA: 0x001185FB File Offset: 0x001167FB
 	private void OnDisable()
 	{
 		GorillaTagCompetitiveManager.onStateChanged -= new Action<GorillaTagCompetitiveManager.GameState>(this.OnStateChanged);
 		GorillaTagCompetitiveManager.onUpdateRemainingTime -= new Action<float>(this.OnUpdateRemainingTime);
 	}
 
-	// Token: 0x06003433 RID: 13363 RVA: 0x00118640 File Offset: 0x00116840
+	// Token: 0x06003433 RID: 13363 RVA: 0x00118620 File Offset: 0x00116820
 	private void OnStateChanged(GorillaTagCompetitiveManager.GameState newState)
 	{
 		switch (newState)
@@ -36,7 +36,7 @@ public class GorillaTagCompetitiveRoundBuzzer : MonoBehaviour
 		this.lastState = newState;
 	}
 
-	// Token: 0x06003434 RID: 13364 RVA: 0x00118698 File Offset: 0x00116898
+	// Token: 0x06003434 RID: 13364 RVA: 0x00118678 File Offset: 0x00116878
 	private void OnUpdateRemainingTime(float remainingTime)
 	{
 		int num = Mathf.CeilToInt(remainingTime);
@@ -62,13 +62,13 @@ public class GorillaTagCompetitiveRoundBuzzer : MonoBehaviour
 		this.lastStateRemainingTime = remainingTime;
 	}
 
-	// Token: 0x06003435 RID: 13365 RVA: 0x001186FF File Offset: 0x001168FF
+	// Token: 0x06003435 RID: 13365 RVA: 0x001186DF File Offset: 0x001168DF
 	private void PlaySFX(AudioClip clip)
 	{
 		this.PlaySFX(clip, 1f);
 	}
 
-	// Token: 0x06003436 RID: 13366 RVA: 0x0011870D File Offset: 0x0011690D
+	// Token: 0x06003436 RID: 13366 RVA: 0x001186ED File Offset: 0x001168ED
 	private void PlaySFX(AudioClip clip, float volume)
 	{
 		this.audioSource.PlayOneShot(clip, volume);

@@ -7,19 +7,19 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001115 RID: 4373
 	public class SmoothScaleModifierCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006D7E RID: 28030 RVA: 0x0023F5B9 File Offset: 0x0023D7B9
+		// Token: 0x06006D7E RID: 28030 RVA: 0x0023F599 File Offset: 0x0023D799
 		private void Awake()
 		{
 			this.initialScale = this.objectPrefab.transform.localScale;
 		}
 
-		// Token: 0x06006D7F RID: 28031 RVA: 0x0023F5D1 File Offset: 0x0023D7D1
+		// Token: 0x06006D7F RID: 28031 RVA: 0x0023F5B1 File Offset: 0x0023D7B1
 		private void OnEnable()
 		{
 			this.UpdateState(SmoothScaleModifierCosmetic.State.Reset);
 		}
 
-		// Token: 0x06006D80 RID: 28032 RVA: 0x0023F5DC File Offset: 0x0023D7DC
+		// Token: 0x06006D80 RID: 28032 RVA: 0x0023F5BC File Offset: 0x0023D7BC
 		private void Update()
 		{
 			switch (this.currentState)
@@ -57,19 +57,19 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D81 RID: 28033 RVA: 0x0023F6E7 File Offset: 0x0023D8E7
+		// Token: 0x06006D81 RID: 28033 RVA: 0x0023F6C7 File Offset: 0x0023D8C7
 		private void SmoothScale(Vector3 initial, Vector3 target)
 		{
 			this.objectPrefab.transform.localScale = Vector3.MoveTowards(initial, target, this.speed * Time.deltaTime);
 		}
 
-		// Token: 0x06006D82 RID: 28034 RVA: 0x0023F70C File Offset: 0x0023D90C
+		// Token: 0x06006D82 RID: 28034 RVA: 0x0023F6EC File Offset: 0x0023D8EC
 		private void UpdateState(SmoothScaleModifierCosmetic.State newState)
 		{
 			this.currentState = newState;
 		}
 
-		// Token: 0x06006D83 RID: 28035 RVA: 0x0023F715 File Offset: 0x0023D915
+		// Token: 0x06006D83 RID: 28035 RVA: 0x0023F6F5 File Offset: 0x0023D8F5
 		public void TriggerScale()
 		{
 			if (this.currentState != SmoothScaleModifierCosmetic.State.Scaled)
@@ -78,7 +78,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D84 RID: 28036 RVA: 0x0023F727 File Offset: 0x0023D927
+		// Token: 0x06006D84 RID: 28036 RVA: 0x0023F707 File Offset: 0x0023D907
 		public void TriggerReset()
 		{
 			if (this.currentState != SmoothScaleModifierCosmetic.State.Reset)

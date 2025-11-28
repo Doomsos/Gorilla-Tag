@@ -26,7 +26,7 @@ public abstract class NetworkHoldableObject : NetworkComponent, IHoldableObject
 	// Token: 0x06001DCD RID: 7629
 	public abstract void DropItemCleanup();
 
-	// Token: 0x06001DCE RID: 7630 RVA: 0x0009CBA0 File Offset: 0x0009ADA0
+	// Token: 0x06001DCE RID: 7630 RVA: 0x0009CB80 File Offset: 0x0009AD80
 	public virtual bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		return (EquipmentInteractor.instance.rightHandHeldEquipment != this || !(releasingHand != EquipmentInteractor.instance.rightHand)) && (EquipmentInteractor.instance.leftHandHeldEquipment != this || !(releasingHand != EquipmentInteractor.instance.leftHand));

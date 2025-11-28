@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 {
-	// Token: 0x060037A2 RID: 14242 RVA: 0x0012B72B File Offset: 0x0012992B
+	// Token: 0x060037A2 RID: 14242 RVA: 0x0012B70B File Offset: 0x0012990B
 	public RankedMultiplayerStatisticFloat(string n, float val, float min = 0f, float max = 3.4028235E+38f, RankedMultiplayerStatistic.SerializationType s = RankedMultiplayerStatistic.SerializationType.None) : base(n, s)
 	{
 		this.floatValue = val;
@@ -13,7 +13,7 @@ public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 		this.maxValue = max;
 	}
 
-	// Token: 0x060037A3 RID: 14243 RVA: 0x0012B74C File Offset: 0x0012994C
+	// Token: 0x060037A3 RID: 14243 RVA: 0x0012B72C File Offset: 0x0012992C
 	public static implicit operator float(RankedMultiplayerStatisticFloat stat)
 	{
 		if (stat.IsValid)
@@ -24,20 +24,20 @@ public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 		return 0f;
 	}
 
-	// Token: 0x060037A4 RID: 14244 RVA: 0x0012B777 File Offset: 0x00129977
+	// Token: 0x060037A4 RID: 14244 RVA: 0x0012B757 File Offset: 0x00129957
 	public void Set(float val)
 	{
 		this.floatValue = Mathf.Clamp(val, this.minValue, this.maxValue);
 		this.Save();
 	}
 
-	// Token: 0x060037A5 RID: 14245 RVA: 0x0012B797 File Offset: 0x00129997
+	// Token: 0x060037A5 RID: 14245 RVA: 0x0012B777 File Offset: 0x00129977
 	public float Get()
 	{
 		return this.floatValue;
 	}
 
-	// Token: 0x060037A6 RID: 14246 RVA: 0x0012B7A0 File Offset: 0x001299A0
+	// Token: 0x060037A6 RID: 14246 RVA: 0x0012B780 File Offset: 0x00129980
 	public override bool TrySetValue(string valAsString)
 	{
 		float num;
@@ -49,13 +49,13 @@ public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 		return flag;
 	}
 
-	// Token: 0x060037A7 RID: 14247 RVA: 0x0012B7D0 File Offset: 0x001299D0
+	// Token: 0x060037A7 RID: 14247 RVA: 0x0012B7B0 File Offset: 0x001299B0
 	public void Increment()
 	{
 		this.AddTo(1f);
 	}
 
-	// Token: 0x060037A8 RID: 14248 RVA: 0x0012B7DD File Offset: 0x001299DD
+	// Token: 0x060037A8 RID: 14248 RVA: 0x0012B7BD File Offset: 0x001299BD
 	public void AddTo(float amount)
 	{
 		this.floatValue += amount;
@@ -63,7 +63,7 @@ public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 		this.Save();
 	}
 
-	// Token: 0x060037A9 RID: 14249 RVA: 0x0012B810 File Offset: 0x00129A10
+	// Token: 0x060037A9 RID: 14249 RVA: 0x0012B7F0 File Offset: 0x001299F0
 	protected override void Save()
 	{
 		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
@@ -74,7 +74,7 @@ public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 		}
 	}
 
-	// Token: 0x060037AA RID: 14250 RVA: 0x0012B844 File Offset: 0x00129A44
+	// Token: 0x060037AA RID: 14250 RVA: 0x0012B824 File Offset: 0x00129A24
 	public override void Load()
 	{
 		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
@@ -93,7 +93,7 @@ public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 		}
 	}
 
-	// Token: 0x060037AB RID: 14251 RVA: 0x0012B886 File Offset: 0x00129A86
+	// Token: 0x060037AB RID: 14251 RVA: 0x0012B866 File Offset: 0x00129A66
 	public override string ToString()
 	{
 		return this.floatValue.ToString();

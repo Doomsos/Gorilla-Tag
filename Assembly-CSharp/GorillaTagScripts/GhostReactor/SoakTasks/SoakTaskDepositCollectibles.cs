@@ -9,17 +9,17 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 	public sealed class SoakTaskDepositCollectibles : IGhostReactorSoakTask
 	{
 		// Token: 0x1700087C RID: 2172
-		// (get) Token: 0x06005AED RID: 23277 RVA: 0x001D1D30 File Offset: 0x001CFF30
-		// (set) Token: 0x06005AEE RID: 23278 RVA: 0x001D1D38 File Offset: 0x001CFF38
+		// (get) Token: 0x06005AED RID: 23277 RVA: 0x001D1D10 File Offset: 0x001CFF10
+		// (set) Token: 0x06005AEE RID: 23278 RVA: 0x001D1D18 File Offset: 0x001CFF18
 		public bool Complete { get; private set; }
 
-		// Token: 0x06005AEF RID: 23279 RVA: 0x001D1D41 File Offset: 0x001CFF41
+		// Token: 0x06005AEF RID: 23279 RVA: 0x001D1D21 File Offset: 0x001CFF21
 		public SoakTaskDepositCollectibles(GRPlayer grPlayer)
 		{
 			this._grPlayer = grPlayer;
 		}
 
-		// Token: 0x06005AF0 RID: 23280 RVA: 0x001D1D50 File Offset: 0x001CFF50
+		// Token: 0x06005AF0 RID: 23280 RVA: 0x001D1D30 File Offset: 0x001CFF30
 		public bool Update()
 		{
 			if (this._coreDepositor == null)
@@ -111,7 +111,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 			return true;
 		}
 
-		// Token: 0x06005AF1 RID: 23281 RVA: 0x001D2030 File Offset: 0x001D0230
+		// Token: 0x06005AF1 RID: 23281 RVA: 0x001D2010 File Offset: 0x001D0210
 		public void Reset()
 		{
 			this._heldEntity = null;

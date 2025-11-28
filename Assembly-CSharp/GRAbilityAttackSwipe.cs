@@ -7,7 +7,7 @@ using UnityEngine.AI;
 [Serializable]
 public class GRAbilityAttackSwipe : GRAbilityBase
 {
-	// Token: 0x06002A28 RID: 10792 RVA: 0x000E3568 File Offset: 0x000E1768
+	// Token: 0x06002A28 RID: 10792 RVA: 0x000E3548 File Offset: 0x000E1748
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -18,7 +18,7 @@ public class GRAbilityAttackSwipe : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A29 RID: 10793 RVA: 0x000E359C File Offset: 0x000E179C
+	// Token: 0x06002A29 RID: 10793 RVA: 0x000E357C File Offset: 0x000E177C
 	public override void Start()
 	{
 		base.Start();
@@ -44,7 +44,7 @@ public class GRAbilityAttackSwipe : GRAbilityBase
 		this.state = GRAbilityAttackSwipe.State.Tell;
 	}
 
-	// Token: 0x06002A2A RID: 10794 RVA: 0x000E36AB File Offset: 0x000E18AB
+	// Token: 0x06002A2A RID: 10794 RVA: 0x000E368B File Offset: 0x000E188B
 	public override void Stop()
 	{
 		this.agent.SetIsPathing(true, true);
@@ -55,13 +55,13 @@ public class GRAbilityAttackSwipe : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A2B RID: 10795 RVA: 0x000E36E0 File Offset: 0x000E18E0
+	// Token: 0x06002A2B RID: 10795 RVA: 0x000E36C0 File Offset: 0x000E18C0
 	public override bool IsDone()
 	{
 		return this.state == GRAbilityAttackSwipe.State.Done;
 	}
 
-	// Token: 0x06002A2C RID: 10796 RVA: 0x000E36EC File Offset: 0x000E18EC
+	// Token: 0x06002A2C RID: 10796 RVA: 0x000E36CC File Offset: 0x000E18CC
 	protected override void UpdateShared(float dt)
 	{
 		float num = (float)(Time.timeAsDouble - this.startTime);
@@ -122,7 +122,7 @@ public class GRAbilityAttackSwipe : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A2D RID: 10797 RVA: 0x000E38A4 File Offset: 0x000E1AA4
+	// Token: 0x06002A2D RID: 10797 RVA: 0x000E3884 File Offset: 0x000E1A84
 	public void SetTargetPlayer(NetPlayer targetPlayer)
 	{
 		this.target = null;
@@ -136,7 +136,7 @@ public class GRAbilityAttackSwipe : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A2E RID: 10798 RVA: 0x000E38E4 File Offset: 0x000E1AE4
+	// Token: 0x06002A2E RID: 10798 RVA: 0x000E38C4 File Offset: 0x000E1AC4
 	public string GetAnimName()
 	{
 		return this.animNameString;

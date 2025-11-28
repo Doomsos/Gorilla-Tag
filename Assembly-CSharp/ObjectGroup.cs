@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020009EB RID: 2539
 public class ObjectGroup : MonoBehaviour
 {
-	// Token: 0x060040BA RID: 16570 RVA: 0x0015A28C File Offset: 0x0015848C
+	// Token: 0x060040BA RID: 16570 RVA: 0x0015A26C File Offset: 0x0015846C
 	private void OnEnable()
 	{
 		if (this.syncWithGroupState)
@@ -14,7 +14,7 @@ public class ObjectGroup : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040BB RID: 16571 RVA: 0x0015A29D File Offset: 0x0015849D
+	// Token: 0x060040BB RID: 16571 RVA: 0x0015A27D File Offset: 0x0015847D
 	private void OnDisable()
 	{
 		if (this.syncWithGroupState)
@@ -23,7 +23,7 @@ public class ObjectGroup : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040BC RID: 16572 RVA: 0x0015A2B0 File Offset: 0x001584B0
+	// Token: 0x060040BC RID: 16572 RVA: 0x0015A290 File Offset: 0x00158490
 	public void SetObjectStates(bool active)
 	{
 		int count = this.gameObjects.Count;

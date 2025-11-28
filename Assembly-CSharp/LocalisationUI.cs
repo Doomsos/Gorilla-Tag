@@ -8,7 +8,7 @@ using UnityEngine.Localization;
 public class LocalisationUI : MonoBehaviour
 {
 	// Token: 0x1700068C RID: 1676
-	// (get) Token: 0x06004580 RID: 17792 RVA: 0x00170515 File Offset: 0x0016E715
+	// (get) Token: 0x06004580 RID: 17792 RVA: 0x001704F5 File Offset: 0x0016E6F5
 	public static LocalisationUI Instance
 	{
 		get
@@ -17,7 +17,7 @@ public class LocalisationUI : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004581 RID: 17793 RVA: 0x0017051C File Offset: 0x0016E71C
+	// Token: 0x06004581 RID: 17793 RVA: 0x001704FC File Offset: 0x0016E6FC
 	private void Awake()
 	{
 		if (LocalisationUI._instance != null)
@@ -28,14 +28,14 @@ public class LocalisationUI : MonoBehaviour
 		LocalisationUI._instance = this;
 	}
 
-	// Token: 0x06004582 RID: 17794 RVA: 0x00170538 File Offset: 0x0016E738
+	// Token: 0x06004582 RID: 17794 RVA: 0x00170518 File Offset: 0x0016E718
 	private void Start()
 	{
 		this.ConstructLocalisationUI();
 		this.CheckSelectedLanguage();
 	}
 
-	// Token: 0x06004583 RID: 17795 RVA: 0x00170546 File Offset: 0x0016E746
+	// Token: 0x06004583 RID: 17795 RVA: 0x00170526 File Offset: 0x0016E726
 	private void OnEnable()
 	{
 		LocalisationManager.RegisterOnLanguageChanged(new Action(this.OnLanguageChanged));
@@ -45,13 +45,13 @@ public class LocalisationUI : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004584 RID: 17796 RVA: 0x00170567 File Offset: 0x0016E767
+	// Token: 0x06004584 RID: 17796 RVA: 0x00170547 File Offset: 0x0016E747
 	private void OnDisable()
 	{
 		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.OnLanguageChanged));
 	}
 
-	// Token: 0x06004585 RID: 17797 RVA: 0x0017057C File Offset: 0x0016E77C
+	// Token: 0x06004585 RID: 17797 RVA: 0x0017055C File Offset: 0x0016E75C
 	public void OnLanguageButtonPressed(KIDUIButton objRef, int languageIndex)
 	{
 		if (objRef != this._activeButton)
@@ -72,7 +72,7 @@ public class LocalisationUI : MonoBehaviour
 		LocalisationManager.Instance.OnLanguageButtonPressed(locale.Identifier.Code, false);
 	}
 
-	// Token: 0x06004586 RID: 17798 RVA: 0x001705E5 File Offset: 0x0016E7E5
+	// Token: 0x06004586 RID: 17798 RVA: 0x001705C5 File Offset: 0x0016E7C5
 	public void OnContinueButtonPressed()
 	{
 		HandRayController.Instance.DisableHandRays();
@@ -80,7 +80,7 @@ public class LocalisationUI : MonoBehaviour
 		LocalisationManager.OnSaveLanguage();
 	}
 
-	// Token: 0x06004587 RID: 17799 RVA: 0x00170600 File Offset: 0x0016E800
+	// Token: 0x06004587 RID: 17799 RVA: 0x001705E0 File Offset: 0x0016E7E0
 	private void ConstructLocalisationUI()
 	{
 		using (Dictionary<int, Locale>.Enumerator enumerator = LocalisationManager.GetAllBindings().GetEnumerator())
@@ -101,7 +101,7 @@ public class LocalisationUI : MonoBehaviour
 		this._hasConstructedUI = true;
 	}
 
-	// Token: 0x06004588 RID: 17800 RVA: 0x001706F4 File Offset: 0x0016E8F4
+	// Token: 0x06004588 RID: 17800 RVA: 0x001706D4 File Offset: 0x0016E8D4
 	private void CheckSelectedLanguage()
 	{
 		KIDUIButton kiduibutton = null;
@@ -126,7 +126,7 @@ public class LocalisationUI : MonoBehaviour
 		this._activeButton = kiduibutton;
 	}
 
-	// Token: 0x06004589 RID: 17801 RVA: 0x001707B0 File Offset: 0x0016E9B0
+	// Token: 0x06004589 RID: 17801 RVA: 0x00170790 File Offset: 0x0016E990
 	private void OnLanguageChanged()
 	{
 		for (int i = 0; i < this._languageButtons.Count; i++)
@@ -144,7 +144,7 @@ public class LocalisationUI : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600458A RID: 17802 RVA: 0x00170878 File Offset: 0x0016EA78
+	// Token: 0x0600458A RID: 17802 RVA: 0x00170858 File Offset: 0x0016EA58
 	public static Transform GetUITransform()
 	{
 		if (LocalisationUI.Instance == null)

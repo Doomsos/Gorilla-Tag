@@ -11,7 +11,7 @@ namespace GorillaNetworking
 	public class GorillaNetworkJoinTrigger : GorillaTriggerBox
 	{
 		// Token: 0x170008E3 RID: 2275
-		// (get) Token: 0x06006039 RID: 24633 RVA: 0x001F09C4 File Offset: 0x001EEBC4
+		// (get) Token: 0x06006039 RID: 24633 RVA: 0x001F09A4 File Offset: 0x001EEBA4
 		public GroupJoinZoneAB groupJoinRequiredZonesAB
 		{
 			get
@@ -24,7 +24,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x0600603A RID: 24634 RVA: 0x001F09F4 File Offset: 0x001EEBF4
+		// Token: 0x0600603A RID: 24634 RVA: 0x001F09D4 File Offset: 0x001EEBD4
 		private void Start()
 		{
 			if (this.primaryTriggerForMyZone == null)
@@ -43,7 +43,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x0600603B RID: 24635 RVA: 0x001F0A74 File Offset: 0x001EEC74
+		// Token: 0x0600603B RID: 24635 RVA: 0x001F0A54 File Offset: 0x001EEC54
 		public void RegisterUI(JoinTriggerUI ui)
 		{
 			this.ui = ui;
@@ -55,13 +55,13 @@ namespace GorillaNetworking
 			this.UpdateUI();
 		}
 
-		// Token: 0x0600603C RID: 24636 RVA: 0x001F0AC0 File Offset: 0x001EECC0
+		// Token: 0x0600603C RID: 24636 RVA: 0x001F0AA0 File Offset: 0x001EECA0
 		public void UnregisterUI(JoinTriggerUI ui)
 		{
 			this.ui = null;
 		}
 
-		// Token: 0x0600603D RID: 24637 RVA: 0x001F0AC9 File Offset: 0x001EECC9
+		// Token: 0x0600603D RID: 24637 RVA: 0x001F0AA9 File Offset: 0x001EECA9
 		private void OnDestroy()
 		{
 			if (this.didRegisterForCallbacks)
@@ -70,13 +70,13 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x0600603E RID: 24638 RVA: 0x001F0AE9 File Offset: 0x001EECE9
+		// Token: 0x0600603E RID: 24638 RVA: 0x001F0AC9 File Offset: 0x001EECC9
 		private void OnGroupPositionsChanged(GroupJoinZoneAB groupZone)
 		{
 			this.UpdateUI();
 		}
 
-		// Token: 0x0600603F RID: 24639 RVA: 0x001F0AF4 File Offset: 0x001EECF4
+		// Token: 0x0600603F RID: 24639 RVA: 0x001F0AD4 File Offset: 0x001EECD4
 		public void UpdateUI()
 		{
 			if (this.ui == null || NetworkSystem.Instance == null)
@@ -116,62 +116,62 @@ namespace GorillaNetworking
 			this.ui.SetState(JoinTriggerVisualState.LeaveRoomAndSoloJoin, new Func<string>(this.GetActiveNetworkZone), new Func<string>(this.GetDesiredNetworkZone), new Func<string>(GorillaNetworkJoinTrigger.GetActiveGameType), new Func<string>(this.GetDesiredGameTypeLocalized));
 		}
 
-		// Token: 0x06006040 RID: 24640 RVA: 0x001F0D3E File Offset: 0x001EEF3E
+		// Token: 0x06006040 RID: 24640 RVA: 0x001F0D1E File Offset: 0x001EEF1E
 		private string GetActiveNetworkZone()
 		{
 			return PhotonNetworkController.Instance.currentJoinTrigger.networkZone.ToUpper();
 		}
 
-		// Token: 0x06006041 RID: 24641 RVA: 0x001F0D56 File Offset: 0x001EEF56
+		// Token: 0x06006041 RID: 24641 RVA: 0x001F0D36 File Offset: 0x001EEF36
 		private string GetDesiredNetworkZone()
 		{
 			return this.networkZone.ToUpper();
 		}
 
-		// Token: 0x06006042 RID: 24642 RVA: 0x001F0D63 File Offset: 0x001EEF63
+		// Token: 0x06006042 RID: 24642 RVA: 0x001F0D43 File Offset: 0x001EEF43
 		public static string GetActiveGameType()
 		{
 			GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
 			return ((activeGameMode != null) ? activeGameMode.GameModeName() : null) ?? "";
 		}
 
-		// Token: 0x06006043 RID: 24643 RVA: 0x001F0D80 File Offset: 0x001EEF80
+		// Token: 0x06006043 RID: 24643 RVA: 0x001F0D60 File Offset: 0x001EEF60
 		public string GetDesiredGameType()
 		{
 			return GameMode.GameModeZoneMapping.VerifyModeForZone(this.zone, Enum.Parse<GameModeType>(GorillaComputer.instance.currentGameMode.Value, true), NetworkSystem.Instance.SessionIsPrivate).ToString();
 		}
 
-		// Token: 0x06006044 RID: 24644 RVA: 0x001F0DCC File Offset: 0x001EEFCC
+		// Token: 0x06006044 RID: 24644 RVA: 0x001F0DAC File Offset: 0x001EEFAC
 		public string GetDesiredGameTypeLocalized()
 		{
 			return GorillaGameManager.GameModeEnumToName(GameMode.GameModeZoneMapping.VerifyModeForZone(this.zone, Enum.Parse<GameModeType>(GorillaComputer.instance.currentGameMode.Value, true), NetworkSystem.Instance.SessionIsPrivate));
 		}
 
-		// Token: 0x06006045 RID: 24645 RVA: 0x001F0E04 File Offset: 0x001EF004
+		// Token: 0x06006045 RID: 24645 RVA: 0x001F0DE4 File Offset: 0x001EEFE4
 		public virtual string GetFullDesiredGameModeString()
 		{
 			return this.networkZone + GorillaComputer.instance.currentQueue + this.GetDesiredGameType();
 		}
 
-		// Token: 0x06006046 RID: 24646 RVA: 0x001F0E23 File Offset: 0x001EF023
+		// Token: 0x06006046 RID: 24646 RVA: 0x001F0E03 File Offset: 0x001EF003
 		public virtual byte GetRoomSize()
 		{
 			return RoomSystem.GetRoomSizeForCreate(this.networkZone);
 		}
 
-		// Token: 0x06006047 RID: 24647 RVA: 0x001F0E30 File Offset: 0x001EF030
+		// Token: 0x06006047 RID: 24647 RVA: 0x001F0E10 File Offset: 0x001EF010
 		public bool CanPartyJoin()
 		{
 			return this.CanPartyJoin(FriendshipGroupDetection.Instance.partyZone);
 		}
 
-		// Token: 0x06006048 RID: 24648 RVA: 0x001F0E42 File Offset: 0x001EF042
+		// Token: 0x06006048 RID: 24648 RVA: 0x001F0E22 File Offset: 0x001EF022
 		public bool CanPartyJoin(GroupJoinZoneAB zone)
 		{
 			return (this.groupJoinRequiredZonesAB & zone) == zone;
 		}
 
-		// Token: 0x06006049 RID: 24649 RVA: 0x001F0E58 File Offset: 0x001EF058
+		// Token: 0x06006049 RID: 24649 RVA: 0x001F0E38 File Offset: 0x001EF038
 		public override void OnBoxTriggered()
 		{
 			base.OnBoxTriggered();
@@ -233,14 +233,14 @@ namespace GorillaNetworking
 			PhotonNetworkController.Instance.AttemptToJoinPublicRoom(this, JoinType.Solo, list);
 		}
 
-		// Token: 0x0600604A RID: 24650 RVA: 0x001F1043 File Offset: 0x001EF243
+		// Token: 0x0600604A RID: 24650 RVA: 0x001F1023 File Offset: 0x001EF223
 		public static void DisableTriggerJoins()
 		{
 			Debug.Log("[GorillaNetworkJoinTrigger::DisableTriggerJoins] Disabling Trigger-based Room Joins...");
 			GorillaNetworkJoinTrigger.triggerJoinsDisabled = true;
 		}
 
-		// Token: 0x0600604B RID: 24651 RVA: 0x001F1055 File Offset: 0x001EF255
+		// Token: 0x0600604B RID: 24651 RVA: 0x001F1035 File Offset: 0x001EF235
 		public static void EnableTriggerJoins()
 		{
 			Debug.Log("[GorillaNetworkJoinTrigger::EnableTriggerJoins] Enabling Trigger-based Room Joins...");

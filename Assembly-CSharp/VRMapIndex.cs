@@ -6,7 +6,7 @@ using UnityEngine.XR;
 [Serializable]
 public class VRMapIndex : VRMap
 {
-	// Token: 0x06001BF4 RID: 7156 RVA: 0x00094CB8 File Offset: 0x00092EB8
+	// Token: 0x06001BF4 RID: 7156 RVA: 0x00094C98 File Offset: 0x00092E98
 	public override void Initialize()
 	{
 		this.closedAngle1Quat = Quaternion.Euler(this.closedAngle1);
@@ -17,7 +17,7 @@ public class VRMapIndex : VRMap
 		this.startingAngle3Quat = Quaternion.Euler(this.startingAngle3);
 	}
 
-	// Token: 0x06001BF5 RID: 7157 RVA: 0x00094D2C File Offset: 0x00092F2C
+	// Token: 0x06001BF5 RID: 7157 RVA: 0x00094D0C File Offset: 0x00092F0C
 	public override void MapMyFinger(float lerpValue)
 	{
 		this.calcT = 0f;
@@ -28,7 +28,7 @@ public class VRMapIndex : VRMap
 		this.LerpFinger(lerpValue, false);
 	}
 
-	// Token: 0x06001BF6 RID: 7158 RVA: 0x00094D9C File Offset: 0x00092F9C
+	// Token: 0x06001BF6 RID: 7158 RVA: 0x00094D7C File Offset: 0x00092F7C
 	public override void LerpFinger(float lerpValue, bool isOther)
 	{
 		if (isOther)

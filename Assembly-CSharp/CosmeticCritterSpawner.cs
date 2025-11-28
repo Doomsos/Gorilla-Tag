@@ -4,19 +4,19 @@ using UnityEngine;
 // Token: 0x020005C8 RID: 1480
 public abstract class CosmeticCritterSpawner : CosmeticCritterHoldable
 {
-	// Token: 0x06002581 RID: 9601 RVA: 0x000C8BA8 File Offset: 0x000C6DA8
+	// Token: 0x06002581 RID: 9601 RVA: 0x000C8B88 File Offset: 0x000C6D88
 	public GameObject GetCritterPrefab()
 	{
 		return this.critterPrefab;
 	}
 
-	// Token: 0x06002582 RID: 9602 RVA: 0x000C8BB0 File Offset: 0x000C6DB0
+	// Token: 0x06002582 RID: 9602 RVA: 0x000C8B90 File Offset: 0x000C6D90
 	public CosmeticCritter GetCritter()
 	{
 		return this.cachedCritter;
 	}
 
-	// Token: 0x06002583 RID: 9603 RVA: 0x000C8BB8 File Offset: 0x000C6DB8
+	// Token: 0x06002583 RID: 9603 RVA: 0x000C8B98 File Offset: 0x000C6D98
 	public Type GetCritterType()
 	{
 		return this.cachedType;
@@ -27,19 +27,19 @@ public abstract class CosmeticCritterSpawner : CosmeticCritterHoldable
 	{
 	}
 
-	// Token: 0x06002585 RID: 9605 RVA: 0x000C8BC0 File Offset: 0x000C6DC0
+	// Token: 0x06002585 RID: 9605 RVA: 0x000C8BA0 File Offset: 0x000C6DA0
 	public virtual void OnSpawn(CosmeticCritter critter)
 	{
 		this.numCritters++;
 	}
 
-	// Token: 0x06002586 RID: 9606 RVA: 0x000C8BD0 File Offset: 0x000C6DD0
+	// Token: 0x06002586 RID: 9606 RVA: 0x000C8BB0 File Offset: 0x000C6DB0
 	public virtual void OnDespawn(CosmeticCritter critter)
 	{
 		this.numCritters = Math.Max(this.numCritters - 1, 0);
 	}
 
-	// Token: 0x06002587 RID: 9607 RVA: 0x000C8BE6 File Offset: 0x000C6DE6
+	// Token: 0x06002587 RID: 9607 RVA: 0x000C8BC6 File Offset: 0x000C6DC6
 	protected override void OnEnable()
 	{
 		base.OnEnable();
@@ -50,7 +50,7 @@ public abstract class CosmeticCritterSpawner : CosmeticCritterHoldable
 		}
 	}
 
-	// Token: 0x06002588 RID: 9608 RVA: 0x000C8C1E File Offset: 0x000C6E1E
+	// Token: 0x06002588 RID: 9608 RVA: 0x000C8BFE File Offset: 0x000C6DFE
 	protected override void OnDisable()
 	{
 		base.OnDisable();

@@ -14,7 +14,7 @@ using UnityEngine;
 // Token: 0x02000B62 RID: 2914
 public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 {
-	// Token: 0x060047BF RID: 18367 RVA: 0x00179330 File Offset: 0x00177530
+	// Token: 0x060047BF RID: 18367 RVA: 0x00179310 File Offset: 0x00177510
 	private void LateUpdate()
 	{
 		foreach (LuauScriptRunner luauScriptRunner in LuauScriptRunner.ScriptRunners)
@@ -38,7 +38,7 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 	{
 	}
 
-	// Token: 0x060047C2 RID: 18370 RVA: 0x001793B0 File Offset: 0x001775B0
+	// Token: 0x060047C2 RID: 18370 RVA: 0x00179390 File Offset: 0x00177590
 	public void OnEvent(EventData eventData)
 	{
 		if (eventData.Code != 180)
@@ -69,7 +69,7 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 		LuauVm.eventQueue.Enqueue(array);
 	}
 
-	// Token: 0x060047C3 RID: 18371 RVA: 0x00179464 File Offset: 0x00177664
+	// Token: 0x060047C3 RID: 18371 RVA: 0x00179444 File Offset: 0x00177644
 	public unsafe static int SendEvent(lua_State* L, object[] args, bool useTable = true)
 	{
 		try
@@ -272,7 +272,7 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 		return 0;
 	}
 
-	// Token: 0x060047C4 RID: 18372 RVA: 0x0017993C File Offset: 0x00177B3C
+	// Token: 0x060047C4 RID: 18372 RVA: 0x0017991C File Offset: 0x00177B1C
 	public static void ProcessEvents()
 	{
 		while (LuauVm.eventQueue.Count > 0)
@@ -318,7 +318,7 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 		}
 	}
 
-	// Token: 0x060047C5 RID: 18373 RVA: 0x00179B10 File Offset: 0x00177D10
+	// Token: 0x060047C5 RID: 18373 RVA: 0x00179AF0 File Offset: 0x00177CF0
 	protected override void Finalize()
 	{
 		try

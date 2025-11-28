@@ -7,13 +7,13 @@ namespace Critters.Scripts
 	// Token: 0x0200114A RID: 4426
 	public class CrittersActorSpawner : MonoBehaviour
 	{
-		// Token: 0x06006FBE RID: 28606 RVA: 0x002463EC File Offset: 0x002445EC
+		// Token: 0x06006FBE RID: 28606 RVA: 0x002463CC File Offset: 0x002445CC
 		private void Awake()
 		{
 			this.spawnPoint.OnSpawnChanged += new Action<CrittersActor>(this.HandleSpawnedActor);
 		}
 
-		// Token: 0x06006FBF RID: 28607 RVA: 0x00246405 File Offset: 0x00244605
+		// Token: 0x06006FBF RID: 28607 RVA: 0x002463E5 File Offset: 0x002445E5
 		private void OnEnable()
 		{
 			if (!CrittersManager.instance.actorSpawners.Contains(this))
@@ -22,7 +22,7 @@ namespace Critters.Scripts
 			}
 		}
 
-		// Token: 0x06006FC0 RID: 28608 RVA: 0x0024642D File Offset: 0x0024462D
+		// Token: 0x06006FC0 RID: 28608 RVA: 0x0024640D File Offset: 0x0024460D
 		private void OnDisable()
 		{
 			if (CrittersManager.instance.actorSpawners.Contains(this))
@@ -31,7 +31,7 @@ namespace Critters.Scripts
 			}
 		}
 
-		// Token: 0x06006FC1 RID: 28609 RVA: 0x00246458 File Offset: 0x00244658
+		// Token: 0x06006FC1 RID: 28609 RVA: 0x00246438 File Offset: 0x00244638
 		public void ProcessLocal()
 		{
 			if (!CrittersManager.instance.LocalAuthority())
@@ -70,19 +70,19 @@ namespace Critters.Scripts
 			}
 		}
 
-		// Token: 0x06006FC2 RID: 28610 RVA: 0x00246552 File Offset: 0x00244752
+		// Token: 0x06006FC2 RID: 28610 RVA: 0x00246532 File Offset: 0x00244732
 		public void DoReset()
 		{
 			this.currentSpawnedObject = null;
 		}
 
-		// Token: 0x06006FC3 RID: 28611 RVA: 0x0024655B File Offset: 0x0024475B
+		// Token: 0x06006FC3 RID: 28611 RVA: 0x0024653B File Offset: 0x0024473B
 		private void HandleSpawnedActor(CrittersActor spawnedActor)
 		{
 			this.currentSpawnedObject = spawnedActor;
 		}
 
-		// Token: 0x06006FC4 RID: 28612 RVA: 0x00246564 File Offset: 0x00244764
+		// Token: 0x06006FC4 RID: 28612 RVA: 0x00246544 File Offset: 0x00244744
 		private void SpawnActor()
 		{
 			CrittersActor crittersActor = CrittersManager.instance.SpawnActor(this.actorType, this.subActorIndex);
@@ -104,7 +104,7 @@ namespace Critters.Scripts
 			}
 		}
 
-		// Token: 0x06006FC5 RID: 28613 RVA: 0x00246610 File Offset: 0x00244810
+		// Token: 0x06006FC5 RID: 28613 RVA: 0x002465F0 File Offset: 0x002447F0
 		private bool VerifySpawnAttached()
 		{
 			if (this.attachSpawnedObjectToSpawnLocation)

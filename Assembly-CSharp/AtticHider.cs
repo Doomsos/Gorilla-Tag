@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000537 RID: 1335
 public class AtticHider : MonoBehaviour
 {
-	// Token: 0x0600219F RID: 8607 RVA: 0x000AFF9D File Offset: 0x000AE19D
+	// Token: 0x0600219F RID: 8607 RVA: 0x000AFF7D File Offset: 0x000AE17D
 	private void Start()
 	{
 		this.OnZoneChanged();
@@ -13,14 +13,14 @@ public class AtticHider : MonoBehaviour
 		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(this.OnZoneChanged));
 	}
 
-	// Token: 0x060021A0 RID: 8608 RVA: 0x000AFFCB File Offset: 0x000AE1CB
+	// Token: 0x060021A0 RID: 8608 RVA: 0x000AFFAB File Offset: 0x000AE1AB
 	private void OnDestroy()
 	{
 		ZoneManagement instance = ZoneManagement.instance;
 		instance.onZoneChanged = (Action)Delegate.Remove(instance.onZoneChanged, new Action(this.OnZoneChanged));
 	}
 
-	// Token: 0x060021A1 RID: 8609 RVA: 0x000AFFF4 File Offset: 0x000AE1F4
+	// Token: 0x060021A1 RID: 8609 RVA: 0x000AFFD4 File Offset: 0x000AE1D4
 	private void OnZoneChanged()
 	{
 		if (this.AtticRenderer == null)
@@ -45,7 +45,7 @@ public class AtticHider : MonoBehaviour
 		this.AtticRenderer.enabled = true;
 	}
 
-	// Token: 0x060021A2 RID: 8610 RVA: 0x000B0073 File Offset: 0x000AE273
+	// Token: 0x060021A2 RID: 8610 RVA: 0x000B0053 File Offset: 0x000AE253
 	private IEnumerator WaitForAtticLoad()
 	{
 		while (!ZoneManagement.instance.IsSceneLoaded(GTZone.attic))

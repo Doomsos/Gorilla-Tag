@@ -7,16 +7,16 @@ using UnityEngine.Events;
 public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListener
 {
 	// Token: 0x14000073 RID: 115
-	// (add) Token: 0x06003B3B RID: 15163 RVA: 0x00139084 File Offset: 0x00137284
-	// (remove) Token: 0x06003B3C RID: 15164 RVA: 0x001390BC File Offset: 0x001372BC
+	// (add) Token: 0x06003B3B RID: 15163 RVA: 0x00139064 File Offset: 0x00137264
+	// (remove) Token: 0x06003B3C RID: 15164 RVA: 0x0013909C File Offset: 0x0013729C
 	public event Action<GorillaHeldItemPressableButton, TransferrableObject, bool> onPressed;
 
 	// Token: 0x14000074 RID: 116
-	// (add) Token: 0x06003B3D RID: 15165 RVA: 0x001390F4 File Offset: 0x001372F4
-	// (remove) Token: 0x06003B3E RID: 15166 RVA: 0x0013912C File Offset: 0x0013732C
+	// (add) Token: 0x06003B3D RID: 15165 RVA: 0x001390D4 File Offset: 0x001372D4
+	// (remove) Token: 0x06003B3E RID: 15166 RVA: 0x0013910C File Offset: 0x0013730C
 	public event Action<GorillaHeldItemPressableButton, TransferrableObject, bool> onReleased;
 
-	// Token: 0x06003B3F RID: 15167 RVA: 0x00139164 File Offset: 0x00137364
+	// Token: 0x06003B3F RID: 15167 RVA: 0x00139144 File Offset: 0x00137344
 	private void Start()
 	{
 		if (this.acceptAnyHoldableThatMatchesType)
@@ -29,7 +29,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 		}
 	}
 
-	// Token: 0x06003B40 RID: 15168 RVA: 0x001391D4 File Offset: 0x001373D4
+	// Token: 0x06003B40 RID: 15168 RVA: 0x001391B4 File Offset: 0x001373B4
 	protected void OnTriggerEnter(Collider collider)
 	{
 		if (!base.enabled)
@@ -165,7 +165,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 	{
 	}
 
-	// Token: 0x06003B43 RID: 15171 RVA: 0x0013947A File Offset: 0x0013767A
+	// Token: 0x06003B43 RID: 15171 RVA: 0x0013945A File Offset: 0x0013765A
 	public virtual void ResetState()
 	{
 		this.isOn = false;
@@ -182,7 +182,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 		action.Invoke(this, null, false);
 	}
 
-	// Token: 0x06003B44 RID: 15172 RVA: 0x001394A8 File Offset: 0x001376A8
+	// Token: 0x06003B44 RID: 15172 RVA: 0x00139488 File Offset: 0x00137688
 	public void OnDelayedAction(int contextIndex)
 	{
 		this.ResetState();

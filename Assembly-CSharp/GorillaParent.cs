@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020007AE RID: 1966
 public class GorillaParent : MonoBehaviour
 {
-	// Token: 0x0600338F RID: 13199 RVA: 0x00115EDC File Offset: 0x001140DC
+	// Token: 0x0600338F RID: 13199 RVA: 0x00115EBC File Offset: 0x001140BC
 	public void Awake()
 	{
 		if (GorillaParent.instance == null)
@@ -21,7 +21,7 @@ public class GorillaParent : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003390 RID: 13200 RVA: 0x00115F17 File Offset: 0x00114117
+	// Token: 0x06003390 RID: 13200 RVA: 0x00115EF7 File Offset: 0x001140F7
 	protected void OnDestroy()
 	{
 		if (GorillaParent.instance == this)
@@ -31,7 +31,7 @@ public class GorillaParent : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003391 RID: 13201 RVA: 0x00115F36 File Offset: 0x00114136
+	// Token: 0x06003391 RID: 13201 RVA: 0x00115F16 File Offset: 0x00114116
 	public static void ReplicatedClientReady()
 	{
 		GorillaParent.replicatedClientReady = true;
@@ -43,7 +43,7 @@ public class GorillaParent : MonoBehaviour
 		action.Invoke();
 	}
 
-	// Token: 0x06003392 RID: 13202 RVA: 0x00115F4D File Offset: 0x0011414D
+	// Token: 0x06003392 RID: 13202 RVA: 0x00115F2D File Offset: 0x0011412D
 	public static void OnReplicatedClientReady(Action action)
 	{
 		if (GorillaParent.replicatedClientReady)

@@ -7,11 +7,11 @@ namespace GorillaTag
 	public static class GTAppState
 	{
 		// Token: 0x170009A4 RID: 2468
-		// (get) Token: 0x060066C7 RID: 26311 RVA: 0x002173D8 File Offset: 0x002155D8
-		// (set) Token: 0x060066C8 RID: 26312 RVA: 0x002173DF File Offset: 0x002155DF
+		// (get) Token: 0x060066C7 RID: 26311 RVA: 0x002173B8 File Offset: 0x002155B8
+		// (set) Token: 0x060066C8 RID: 26312 RVA: 0x002173BF File Offset: 0x002155BF
 		public static bool isQuitting { get; private set; }
 
-		// Token: 0x060066C9 RID: 26313 RVA: 0x002173E8 File Offset: 0x002155E8
+		// Token: 0x060066C9 RID: 26313 RVA: 0x002173C8 File Offset: 0x002155C8
 		[RuntimeInitializeOnLoadMethod(4)]
 		private static void HandleOnSubsystemRegistration()
 		{

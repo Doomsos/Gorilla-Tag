@@ -7,7 +7,7 @@ using UnityEngine.AI;
 [Serializable]
 public class GRAbilityKeepDistance : GRAbilityBase
 {
-	// Token: 0x06002A76 RID: 10870 RVA: 0x000E4E08 File Offset: 0x000E3008
+	// Token: 0x06002A76 RID: 10870 RVA: 0x000E4DE8 File Offset: 0x000E2FE8
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -19,7 +19,7 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A77 RID: 10871 RVA: 0x000E4E7C File Offset: 0x000E307C
+	// Token: 0x06002A77 RID: 10871 RVA: 0x000E4E5C File Offset: 0x000E305C
 	public override void Start()
 	{
 		base.Start();
@@ -48,7 +48,7 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		this.navMeshAgent.updateRotation = false;
 	}
 
-	// Token: 0x06002A78 RID: 10872 RVA: 0x000E4F5F File Offset: 0x000E315F
+	// Token: 0x06002A78 RID: 10872 RVA: 0x000E4F3F File Offset: 0x000E313F
 	public override void Stop()
 	{
 		this.moveAbility.Stop();
@@ -63,7 +63,7 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		return false;
 	}
 
-	// Token: 0x06002A7A RID: 10874 RVA: 0x000E4F94 File Offset: 0x000E3194
+	// Token: 0x06002A7A RID: 10874 RVA: 0x000E4F74 File Offset: 0x000E3174
 	public void SetTargetPlayer(NetPlayer targetPlayer)
 	{
 		this.target = null;
@@ -78,7 +78,7 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A7B RID: 10875 RVA: 0x000E4FE8 File Offset: 0x000E31E8
+	// Token: 0x06002A7B RID: 10875 RVA: 0x000E4FC8 File Offset: 0x000E31C8
 	public override void Think(float dt)
 	{
 		Vector3 vector = this.agent.transform.position - this.target.position;
@@ -106,7 +106,7 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A7C RID: 10876 RVA: 0x000E50F4 File Offset: 0x000E32F4
+	// Token: 0x06002A7C RID: 10876 RVA: 0x000E50D4 File Offset: 0x000E32D4
 	private Vector3 PickBackupDestination()
 	{
 		Vector3 position = this.agent.transform.position;
@@ -159,7 +159,7 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		return position;
 	}
 
-	// Token: 0x06002A7D RID: 10877 RVA: 0x000E523E File Offset: 0x000E343E
+	// Token: 0x06002A7D RID: 10877 RVA: 0x000E521E File Offset: 0x000E341E
 	protected override void UpdateShared(float dt)
 	{
 		this.moveAbility.Update(dt);

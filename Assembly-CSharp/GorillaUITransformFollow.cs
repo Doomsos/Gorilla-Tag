@@ -9,7 +9,7 @@ public class GorillaUITransformFollow : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06003560 RID: 13664 RVA: 0x00121E84 File Offset: 0x00120084
+	// Token: 0x06003560 RID: 13664 RVA: 0x00121E64 File Offset: 0x00120064
 	private void LateUpdate()
 	{
 		if (this.doesMove)

@@ -9,8 +9,8 @@ namespace Fusion.CodeGen
 	internal class UnityArraySurrogate@ElementReaderWriterInt64 : UnityArraySurrogate<long, ElementReaderWriterInt64>
 	{
 		// Token: 0x17000ABF RID: 2751
-		// (get) Token: 0x06007304 RID: 29444 RVA: 0x0025A9E6 File Offset: 0x00258BE6
-		// (set) Token: 0x06007305 RID: 29445 RVA: 0x0025A9EE File Offset: 0x00258BEE
+		// (get) Token: 0x06007304 RID: 29444 RVA: 0x0025A9C6 File Offset: 0x00258BC6
+		// (set) Token: 0x06007305 RID: 29445 RVA: 0x0025A9CE File Offset: 0x00258BCE
 		[WeaverGenerated]
 		public override long[] DataProperty
 		{
@@ -26,7 +26,7 @@ namespace Fusion.CodeGen
 			}
 		}
 
-		// Token: 0x06007306 RID: 29446 RVA: 0x0025A9F7 File Offset: 0x00258BF7
+		// Token: 0x06007306 RID: 29446 RVA: 0x0025A9D7 File Offset: 0x00258BD7
 		[WeaverGenerated]
 		public UnityArraySurrogate@ElementReaderWriterInt64()
 		{

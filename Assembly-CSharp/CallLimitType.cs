@@ -4,7 +4,7 @@
 [Serializable]
 public class CallLimitType<T> where T : CallLimiter
 {
-	// Token: 0x06004B20 RID: 19232 RVA: 0x0018869F File Offset: 0x0018689F
+	// Token: 0x06004B20 RID: 19232 RVA: 0x0018867F File Offset: 0x0018687F
 	public static implicit operator CallLimitType<CallLimiter>(CallLimitType<T> clt)
 	{
 		return new CallLimitType<CallLimiter>

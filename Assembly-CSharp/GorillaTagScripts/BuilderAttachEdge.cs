@@ -6,7 +6,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DAE RID: 3502
 	public class BuilderAttachEdge : MonoBehaviour
 	{
-		// Token: 0x06005620 RID: 22048 RVA: 0x001B0FA2 File Offset: 0x001AF1A2
+		// Token: 0x06005620 RID: 22048 RVA: 0x001B0F82 File Offset: 0x001AF182
 		private void Awake()
 		{
 			if (this.center == null)
@@ -15,7 +15,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005621 RID: 22049 RVA: 0x001B0FC0 File Offset: 0x001AF1C0
+		// Token: 0x06005621 RID: 22049 RVA: 0x001B0FA0 File Offset: 0x001AF1A0
 		protected virtual void OnDrawGizmosSelected()
 		{
 			Gizmos.color = Color.green;

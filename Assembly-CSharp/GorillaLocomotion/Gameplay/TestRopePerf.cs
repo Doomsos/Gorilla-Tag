@@ -7,7 +7,7 @@ namespace GorillaLocomotion.Gameplay
 	// Token: 0x02000FA6 RID: 4006
 	public class TestRopePerf : MonoBehaviour
 	{
-		// Token: 0x060064A0 RID: 25760 RVA: 0x0020D1E5 File Offset: 0x0020B3E5
+		// Token: 0x060064A0 RID: 25760 RVA: 0x0020D1C5 File Offset: 0x0020B3C5
 		private IEnumerator Start()
 		{
 			yield break;

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000766 RID: 1894
 public class SafeOwnershipRequestsCallbacks : MonoBehaviour, IRequestableOwnershipGuardCallbacks
 {
-	// Token: 0x0600311A RID: 12570 RVA: 0x0010B2C4 File Offset: 0x001094C4
+	// Token: 0x0600311A RID: 12570 RVA: 0x0010B2A4 File Offset: 0x001094A4
 	private void Awake()
 	{
 		this._requestableOwnershipGuard.AddCallbackTarget(this);

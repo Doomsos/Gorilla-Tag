@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x02000534 RID: 1332
 public class SetStateIfNoOverlaps : SetStateConditional
 {
-	// Token: 0x06002190 RID: 8592 RVA: 0x000AFDDB File Offset: 0x000ADFDB
+	// Token: 0x06002190 RID: 8592 RVA: 0x000AFDBB File Offset: 0x000ADFBB
 	protected override void Setup(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
 		this._volume = animator.GetComponent<VolumeCast>();
 	}
 
-	// Token: 0x06002191 RID: 8593 RVA: 0x000AFDE9 File Offset: 0x000ADFE9
+	// Token: 0x06002191 RID: 8593 RVA: 0x000AFDC9 File Offset: 0x000ADFC9
 	protected override bool CanSetState(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
 		bool flag = this._volume.CheckOverlaps();

@@ -8,7 +8,7 @@ public class BuilderRendererPreRender : MonoBehaviourPostTick
 	{
 	}
 
-	// Token: 0x060022C8 RID: 8904 RVA: 0x000B5D49 File Offset: 0x000B3F49
+	// Token: 0x060022C8 RID: 8904 RVA: 0x000B5D29 File Offset: 0x000B3F29
 	public override void PostTick()
 	{
 		if (this.builderRenderer != null)

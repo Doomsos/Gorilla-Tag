@@ -6,7 +6,7 @@ using UnityEngine;
 public class MusicSource : MonoBehaviour
 {
 	// Token: 0x17000514 RID: 1300
-	// (get) Token: 0x06003848 RID: 14408 RVA: 0x0012D5E8 File Offset: 0x0012B7E8
+	// (get) Token: 0x06003848 RID: 14408 RVA: 0x0012D5C8 File Offset: 0x0012B7C8
 	public AudioSource AudioSource
 	{
 		get
@@ -16,7 +16,7 @@ public class MusicSource : MonoBehaviour
 	}
 
 	// Token: 0x17000515 RID: 1301
-	// (get) Token: 0x06003849 RID: 14409 RVA: 0x0012D5F0 File Offset: 0x0012B7F0
+	// (get) Token: 0x06003849 RID: 14409 RVA: 0x0012D5D0 File Offset: 0x0012B7D0
 	public float DefaultVolume
 	{
 		get
@@ -26,7 +26,7 @@ public class MusicSource : MonoBehaviour
 	}
 
 	// Token: 0x17000516 RID: 1302
-	// (get) Token: 0x0600384A RID: 14410 RVA: 0x0012D5F8 File Offset: 0x0012B7F8
+	// (get) Token: 0x0600384A RID: 14410 RVA: 0x0012D5D8 File Offset: 0x0012B7D8
 	public bool VolumeOverridden
 	{
 		get
@@ -35,7 +35,7 @@ public class MusicSource : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600384B RID: 14411 RVA: 0x0012D605 File Offset: 0x0012B805
+	// Token: 0x0600384B RID: 14411 RVA: 0x0012D5E5 File Offset: 0x0012B7E5
 	private void Awake()
 	{
 		if (this.audioSource == null)
@@ -48,7 +48,7 @@ public class MusicSource : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600384C RID: 14412 RVA: 0x0012D63A File Offset: 0x0012B83A
+	// Token: 0x0600384C RID: 14412 RVA: 0x0012D61A File Offset: 0x0012B81A
 	private void OnEnable()
 	{
 		if (MusicManager.Instance != null)
@@ -57,7 +57,7 @@ public class MusicSource : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600384D RID: 14413 RVA: 0x0012D658 File Offset: 0x0012B858
+	// Token: 0x0600384D RID: 14413 RVA: 0x0012D638 File Offset: 0x0012B838
 	private void OnDisable()
 	{
 		if (MusicManager.Instance != null)
@@ -66,14 +66,14 @@ public class MusicSource : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600384E RID: 14414 RVA: 0x0012D676 File Offset: 0x0012B876
+	// Token: 0x0600384E RID: 14414 RVA: 0x0012D656 File Offset: 0x0012B856
 	public void SetVolumeOverride(float volume)
 	{
 		this.volumeOverride = new float?(volume);
 		this.audioSource.volume = this.volumeOverride.Value;
 	}
 
-	// Token: 0x0600384F RID: 14415 RVA: 0x0012D69A File Offset: 0x0012B89A
+	// Token: 0x0600384F RID: 14415 RVA: 0x0012D67A File Offset: 0x0012B87A
 	public void UnsetVolumeOverride()
 	{
 		this.volumeOverride = default(float?);

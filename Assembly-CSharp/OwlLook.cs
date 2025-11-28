@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000490 RID: 1168
 public class OwlLook : MonoBehaviour
 {
-	// Token: 0x06001DF2 RID: 7666 RVA: 0x0009D9D3 File Offset: 0x0009BBD3
+	// Token: 0x06001DF2 RID: 7666 RVA: 0x0009D9B3 File Offset: 0x0009BBB3
 	private void Awake()
 	{
 		this.overlapRigs = new VRRig[10];
@@ -14,7 +14,7 @@ public class OwlLook : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001DF3 RID: 7667 RVA: 0x0009D9FC File Offset: 0x0009BBFC
+	// Token: 0x06001DF3 RID: 7667 RVA: 0x0009D9DC File Offset: 0x0009BBDC
 	private void LateUpdate()
 	{
 		if (NetworkSystem.Instance.InRoom)

@@ -7,7 +7,7 @@ using UnityEngine;
 public class SizeManager : MonoBehaviour
 {
 	// Token: 0x170004F9 RID: 1273
-	// (get) Token: 0x0600371F RID: 14111 RVA: 0x001291B0 File Offset: 0x001273B0
+	// (get) Token: 0x0600371F RID: 14111 RVA: 0x00129190 File Offset: 0x00127390
 	public float currentScale
 	{
 		get
@@ -25,8 +25,8 @@ public class SizeManager : MonoBehaviour
 	}
 
 	// Token: 0x170004FA RID: 1274
-	// (get) Token: 0x06003720 RID: 14112 RVA: 0x001291EB File Offset: 0x001273EB
-	// (set) Token: 0x06003721 RID: 14113 RVA: 0x00129220 File Offset: 0x00127420
+	// (get) Token: 0x06003720 RID: 14112 RVA: 0x001291CB File Offset: 0x001273CB
+	// (set) Token: 0x06003721 RID: 14113 RVA: 0x00129200 File Offset: 0x00127400
 	public int currentSizeLayerMaskValue
 	{
 		get
@@ -59,7 +59,7 @@ public class SizeManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003722 RID: 14114 RVA: 0x0012927A File Offset: 0x0012747A
+	// Token: 0x06003722 RID: 14114 RVA: 0x0012925A File Offset: 0x0012745A
 	private void OnDisable()
 	{
 		this.touchingChangers.Clear();
@@ -67,13 +67,13 @@ public class SizeManager : MonoBehaviour
 		SizeManagerManager.UnregisterSM(this);
 	}
 
-	// Token: 0x06003723 RID: 14115 RVA: 0x00129294 File Offset: 0x00127494
+	// Token: 0x06003723 RID: 14115 RVA: 0x00129274 File Offset: 0x00127474
 	private void OnEnable()
 	{
 		SizeManagerManager.RegisterSM(this);
 	}
 
-	// Token: 0x06003724 RID: 14116 RVA: 0x0012929C File Offset: 0x0012749C
+	// Token: 0x06003724 RID: 14116 RVA: 0x0012927C File Offset: 0x0012747C
 	private void CollectLineRenderers(GameObject obj)
 	{
 		this.lineRenderers = obj.GetComponentsInChildren<LineRenderer>(true);
@@ -84,7 +84,7 @@ public class SizeManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003725 RID: 14117 RVA: 0x001292EC File Offset: 0x001274EC
+	// Token: 0x06003725 RID: 14117 RVA: 0x001292CC File Offset: 0x001274CC
 	public void BuildInitialize()
 	{
 		this.rate = 650f;
@@ -112,7 +112,7 @@ public class SizeManager : MonoBehaviour
 		this.buildInitialized = true;
 	}
 
-	// Token: 0x06003726 RID: 14118 RVA: 0x001293D0 File Offset: 0x001275D0
+	// Token: 0x06003726 RID: 14118 RVA: 0x001293B0 File Offset: 0x001275B0
 	private void Awake()
 	{
 		if (!this.buildInitialized)
@@ -122,7 +122,7 @@ public class SizeManager : MonoBehaviour
 		SizeManagerManager.RegisterSM(this);
 	}
 
-	// Token: 0x06003727 RID: 14119 RVA: 0x001293E8 File Offset: 0x001275E8
+	// Token: 0x06003727 RID: 14119 RVA: 0x001293C8 File Offset: 0x001275C8
 	public void InvokeFixedUpdate()
 	{
 		float num = 1f;
@@ -168,7 +168,7 @@ public class SizeManager : MonoBehaviour
 		this.lastScale = num;
 	}
 
-	// Token: 0x06003728 RID: 14120 RVA: 0x00129588 File Offset: 0x00127788
+	// Token: 0x06003728 RID: 14120 RVA: 0x00129568 File Offset: 0x00127768
 	private SizeChanger ControllingChanger(Transform t)
 	{
 		for (int i = this.touchingChangers.Count - 1; i >= 0; i--)
@@ -182,7 +182,7 @@ public class SizeManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x06003729 RID: 14121 RVA: 0x00129614 File Offset: 0x00127814
+	// Token: 0x06003729 RID: 14121 RVA: 0x001295F4 File Offset: 0x001277F4
 	private float ScaleFromChanger(SizeChanger sC, Transform t, float deltaTime)
 	{
 		if (sC == null)
@@ -202,7 +202,7 @@ public class SizeManager : MonoBehaviour
 		return 1f;
 	}
 
-	// Token: 0x0600372A RID: 14122 RVA: 0x001296E6 File Offset: 0x001278E6
+	// Token: 0x0600372A RID: 14122 RVA: 0x001296C6 File Offset: 0x001278C6
 	private float SizeOverTime(float targetSize, float easing, float deltaTime)
 	{
 		if (easing <= 0f || Mathf.Abs(this.targetRig.ScaleMultiplier - targetSize) < 0.05f)
@@ -212,7 +212,7 @@ public class SizeManager : MonoBehaviour
 		return Mathf.MoveTowards(this.targetRig.ScaleMultiplier, targetSize, deltaTime / easing);
 	}
 
-	// Token: 0x0600372B RID: 14123 RVA: 0x00129720 File Offset: 0x00127920
+	// Token: 0x0600372B RID: 14123 RVA: 0x00129700 File Offset: 0x00127900
 	private void CheckSizeChangeEvents(float newSize)
 	{
 		if (newSize < this.smallThreshold)

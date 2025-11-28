@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x0200092E RID: 2350
 public class GorillaFireball : GorillaThrowable, IPunInstantiateMagicCallback
 {
-	// Token: 0x06003C12 RID: 15378 RVA: 0x0013D15B File Offset: 0x0013B35B
+	// Token: 0x06003C12 RID: 15378 RVA: 0x0013D13B File Offset: 0x0013B33B
 	public override void Start()
 	{
 		base.Start();
@@ -13,7 +13,7 @@ public class GorillaFireball : GorillaThrowable, IPunInstantiateMagicCallback
 		this.explosionStartTime = 0f;
 	}
 
-	// Token: 0x06003C13 RID: 15379 RVA: 0x0013D178 File Offset: 0x0013B378
+	// Token: 0x06003C13 RID: 15379 RVA: 0x0013D158 File Offset: 0x0013B358
 	private void Update()
 	{
 		if (this.explosionStartTime != 0f)
@@ -27,7 +27,7 @@ public class GorillaFireball : GorillaThrowable, IPunInstantiateMagicCallback
 		}
 	}
 
-	// Token: 0x06003C14 RID: 15380 RVA: 0x0013D200 File Offset: 0x0013B400
+	// Token: 0x06003C14 RID: 15380 RVA: 0x0013D1E0 File Offset: 0x0013B3E0
 	public override void LateUpdate()
 	{
 		base.LateUpdate();
@@ -37,14 +37,14 @@ public class GorillaFireball : GorillaThrowable, IPunInstantiateMagicCallback
 		}
 	}
 
-	// Token: 0x06003C15 RID: 15381 RVA: 0x0013D24C File Offset: 0x0013B44C
+	// Token: 0x06003C15 RID: 15381 RVA: 0x0013D22C File Offset: 0x0013B42C
 	public override void ThrowThisThingo()
 	{
 		base.ThrowThisThingo();
 		this.canExplode = true;
 	}
 
-	// Token: 0x06003C16 RID: 15382 RVA: 0x0013D25B File Offset: 0x0013B45B
+	// Token: 0x06003C16 RID: 15382 RVA: 0x0013D23B File Offset: 0x0013B43B
 	private new void OnCollisionEnter(Collision collision)
 	{
 		if (base.photonView.IsMine && this.canExplode)
@@ -53,7 +53,7 @@ public class GorillaFireball : GorillaThrowable, IPunInstantiateMagicCallback
 		}
 	}
 
-	// Token: 0x06003C17 RID: 15383 RVA: 0x0013D284 File Offset: 0x0013B484
+	// Token: 0x06003C17 RID: 15383 RVA: 0x0013D264 File Offset: 0x0013B464
 	public void LocalExplode()
 	{
 		this.rigidbody.isKinematic = true;
@@ -61,7 +61,7 @@ public class GorillaFireball : GorillaThrowable, IPunInstantiateMagicCallback
 		this.explosionStartTime = Time.time;
 	}
 
-	// Token: 0x06003C18 RID: 15384 RVA: 0x0013D2A4 File Offset: 0x0013B4A4
+	// Token: 0x06003C18 RID: 15384 RVA: 0x0013D284 File Offset: 0x0013B484
 	public void OnPhotonInstantiate(PhotonMessageInfo info)
 	{
 		if (base.photonView.IsMine)
@@ -75,7 +75,7 @@ public class GorillaFireball : GorillaThrowable, IPunInstantiateMagicCallback
 		}
 	}
 
-	// Token: 0x06003C19 RID: 15385 RVA: 0x0013D307 File Offset: 0x0013B507
+	// Token: 0x06003C19 RID: 15385 RVA: 0x0013D2E7 File Offset: 0x0013B4E7
 	public void Explode()
 	{
 		this.LocalExplode();

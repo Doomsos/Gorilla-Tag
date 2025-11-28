@@ -14,7 +14,7 @@ public abstract class HoldableObject : MonoBehaviour, IHoldableObject
 		}
 	}
 
-	// Token: 0x06001D4E RID: 7502 RVA: 0x0009A987 File Offset: 0x00098B87
+	// Token: 0x06001D4E RID: 7502 RVA: 0x0009A967 File Offset: 0x00098B67
 	protected void OnDestroy()
 	{
 		if (EquipmentInteractor.hasInstance)
@@ -32,7 +32,7 @@ public abstract class HoldableObject : MonoBehaviour, IHoldableObject
 	// Token: 0x06001D51 RID: 7505
 	public abstract void DropItemCleanup();
 
-	// Token: 0x06001D52 RID: 7506 RVA: 0x0009A9A0 File Offset: 0x00098BA0
+	// Token: 0x06001D52 RID: 7506 RVA: 0x0009A980 File Offset: 0x00098B80
 	public virtual bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		return (EquipmentInteractor.instance.rightHandHeldEquipment != this || !(releasingHand != EquipmentInteractor.instance.rightHand)) && (EquipmentInteractor.instance.leftHandHeldEquipment != this || !(releasingHand != EquipmentInteractor.instance.leftHand));

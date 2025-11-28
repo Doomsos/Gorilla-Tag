@@ -5,14 +5,14 @@ using UnityEngine;
 // Token: 0x02000C91 RID: 3217
 public static class UnityEngineUtils
 {
-	// Token: 0x06004E9B RID: 20123 RVA: 0x001970AA File Offset: 0x001952AA
+	// Token: 0x06004E9B RID: 20123 RVA: 0x0019708A File Offset: 0x0019528A
 	[MethodImpl(256)]
 	public static bool EqualsColor(this Color32 c, Color32 other)
 	{
 		return c.r == other.r && c.g == other.g && c.b == other.b && c.a == other.a;
 	}
 
-	// Token: 0x06004E9C RID: 20124 RVA: 0x001970E8 File Offset: 0x001952E8
+	// Token: 0x06004E9C RID: 20124 RVA: 0x001970C8 File Offset: 0x001952C8
 	public static Color32 IdToColor32(this Object obj, int alpha = -1, bool distinct = true)
 	{
 		if (!(obj == null))
@@ -22,7 +22,7 @@ public static class UnityEngineUtils
 		return default(Color32);
 	}
 
-	// Token: 0x06004E9D RID: 20125 RVA: 0x00197118 File Offset: 0x00195318
+	// Token: 0x06004E9D RID: 20125 RVA: 0x001970F8 File Offset: 0x001952F8
 	public unsafe static Color32 IdToColor32(this int id, int alpha = -1, bool distinct = true)
 	{
 		if (distinct)
@@ -37,7 +37,7 @@ public static class UnityEngineUtils
 		return result;
 	}
 
-	// Token: 0x06004E9E RID: 20126 RVA: 0x00197158 File Offset: 0x00195358
+	// Token: 0x06004E9E RID: 20126 RVA: 0x00197138 File Offset: 0x00195338
 	public static Color32 ToHighViz(this Color32 c)
 	{
 		float num;
@@ -47,7 +47,7 @@ public static class UnityEngineUtils
 		return Color.HSVToRGB(num, 1f, 1f);
 	}
 
-	// Token: 0x06004E9F RID: 20127 RVA: 0x0019718C File Offset: 0x0019538C
+	// Token: 0x06004E9F RID: 20127 RVA: 0x0019716C File Offset: 0x0019536C
 	public unsafe static int Color32ToId(this Color32 c, bool distinct = true)
 	{
 		int num = *Unsafe.As<Color32, int>(ref c);
@@ -58,7 +58,7 @@ public static class UnityEngineUtils
 		return num;
 	}
 
-	// Token: 0x06004EA0 RID: 20128 RVA: 0x001971B0 File Offset: 0x001953B0
+	// Token: 0x06004EA0 RID: 20128 RVA: 0x00197190 File Offset: 0x00195390
 	public static Hash128 QuantizedHash128(this Matrix4x4 m)
 	{
 		Hash128 result = default(Hash128);
@@ -66,7 +66,7 @@ public static class UnityEngineUtils
 		return result;
 	}
 
-	// Token: 0x06004EA1 RID: 20129 RVA: 0x001971D0 File Offset: 0x001953D0
+	// Token: 0x06004EA1 RID: 20129 RVA: 0x001971B0 File Offset: 0x001953B0
 	public static Hash128 QuantizedHash128(this Vector3 v)
 	{
 		Hash128 result = default(Hash128);
@@ -74,19 +74,19 @@ public static class UnityEngineUtils
 		return result;
 	}
 
-	// Token: 0x06004EA2 RID: 20130 RVA: 0x001971EF File Offset: 0x001953EF
+	// Token: 0x06004EA2 RID: 20130 RVA: 0x001971CF File Offset: 0x001953CF
 	public static Id128 QuantizedId128(this Vector3 v)
 	{
 		return v.QuantizedHash128();
 	}
 
-	// Token: 0x06004EA3 RID: 20131 RVA: 0x001971FC File Offset: 0x001953FC
+	// Token: 0x06004EA3 RID: 20131 RVA: 0x001971DC File Offset: 0x001953DC
 	public static Id128 QuantizedId128(this Matrix4x4 m)
 	{
 		return m.QuantizedHash128();
 	}
 
-	// Token: 0x06004EA4 RID: 20132 RVA: 0x0019720C File Offset: 0x0019540C
+	// Token: 0x06004EA4 RID: 20132 RVA: 0x001971EC File Offset: 0x001953EC
 	public static Id128 QuantizedId128(this Quaternion q)
 	{
 		int a = (int)((double)q.x * 1000.0 + 0.5);
@@ -96,7 +96,7 @@ public static class UnityEngineUtils
 		return new Id128(a, b, c, d);
 	}
 
-	// Token: 0x06004EA5 RID: 20133 RVA: 0x00197294 File Offset: 0x00195494
+	// Token: 0x06004EA5 RID: 20133 RVA: 0x00197274 File Offset: 0x00195474
 	[MethodImpl(256)]
 	public static long QuantizedHash64(this Vector4 v)
 	{
@@ -109,7 +109,7 @@ public static class UnityEngineUtils
 		return StaticHash.Compute128To64(a3, b3);
 	}
 
-	// Token: 0x06004EA6 RID: 20134 RVA: 0x00197328 File Offset: 0x00195528
+	// Token: 0x06004EA6 RID: 20134 RVA: 0x00197308 File Offset: 0x00195508
 	[MethodImpl(256)]
 	public unsafe static long QuantizedHash64(this Matrix4x4 m)
 	{
@@ -123,21 +123,21 @@ public static class UnityEngineUtils
 		return StaticHash.Compute128To64(a3, b3);
 	}
 
-	// Token: 0x06004EA7 RID: 20135 RVA: 0x00197388 File Offset: 0x00195588
+	// Token: 0x06004EA7 RID: 20135 RVA: 0x00197368 File Offset: 0x00195568
 	[MethodImpl(256)]
 	private static ulong MergeTo64(int a, int b)
 	{
 		return (ulong)b << 32 | (ulong)a;
 	}
 
-	// Token: 0x06004EA8 RID: 20136 RVA: 0x0019739F File Offset: 0x0019559F
+	// Token: 0x06004EA8 RID: 20136 RVA: 0x0019737F File Offset: 0x0019557F
 	[MethodImpl(256)]
 	public unsafe static Vector4 ToVector(this Quaternion q)
 	{
 		return *Unsafe.As<Quaternion, Vector4>(ref q);
 	}
 
-	// Token: 0x06004EA9 RID: 20137 RVA: 0x001973AD File Offset: 0x001955AD
+	// Token: 0x06004EA9 RID: 20137 RVA: 0x0019738D File Offset: 0x0019558D
 	[MethodImpl(256)]
 	public static void CopyTo(this Quaternion q, ref Vector4 v)
 	{

@@ -9,7 +9,7 @@ namespace PerformanceSystems
 	public class TimeSliceControllerAsset : ScriptableObject
 	{
 		// Token: 0x1700080B RID: 2059
-		// (get) Token: 0x060054CD RID: 21709 RVA: 0x001AB945 File Offset: 0x001A9B45
+		// (get) Token: 0x060054CD RID: 21709 RVA: 0x001AB925 File Offset: 0x001A9B25
 		public Transform ReferenceTransform
 		{
 			get
@@ -18,14 +18,14 @@ namespace PerformanceSystems
 			}
 		}
 
-		// Token: 0x060054CE RID: 21710 RVA: 0x001AB94D File Offset: 0x001A9B4D
+		// Token: 0x060054CE RID: 21710 RVA: 0x001AB92D File Offset: 0x001A9B2D
 		private void RemovePendingObjects()
 		{
 			this._currentTimeSliceBehaviours.FastRemove(this._timeSliceBehavioursToRemove);
 			this._timeSliceBehavioursToRemove.Clear();
 		}
 
-		// Token: 0x060054CF RID: 21711 RVA: 0x001AB96C File Offset: 0x001A9B6C
+		// Token: 0x060054CF RID: 21711 RVA: 0x001AB94C File Offset: 0x001A9B4C
 		private void AddPendingObjects()
 		{
 			foreach (ITimeSlice timeSlice in this._timeSliceBehavioursToAdd)
@@ -38,7 +38,7 @@ namespace PerformanceSystems
 			this._timeSliceBehavioursToAdd.Clear();
 		}
 
-		// Token: 0x060054D0 RID: 21712 RVA: 0x001AB9E0 File Offset: 0x001A9BE0
+		// Token: 0x060054D0 RID: 21712 RVA: 0x001AB9C0 File Offset: 0x001A9BC0
 		private void UpdateCurrentSliceObjects()
 		{
 			int count = this._currentTimeSliceBehaviours.Count;
@@ -77,14 +77,14 @@ namespace PerformanceSystems
 			}
 		}
 
-		// Token: 0x060054D1 RID: 21713 RVA: 0x001ABAA1 File Offset: 0x001A9CA1
+		// Token: 0x060054D1 RID: 21713 RVA: 0x001ABA81 File Offset: 0x001A9C81
 		public void SetRefTransform(Transform refTransform)
 		{
 			this._referenceTransform = refTransform;
 			this._isActive = (this._referenceTransform != null);
 		}
 
-		// Token: 0x060054D2 RID: 21714 RVA: 0x001ABABC File Offset: 0x001A9CBC
+		// Token: 0x060054D2 RID: 21714 RVA: 0x001ABA9C File Offset: 0x001A9C9C
 		public void AddTimeSliceBehaviour(ITimeSlice timeSlice)
 		{
 			if (this._currentTimeSliceBehaviours.Contains(timeSlice))
@@ -94,7 +94,7 @@ namespace PerformanceSystems
 			this._timeSliceBehavioursToAdd.Add(timeSlice);
 		}
 
-		// Token: 0x060054D3 RID: 21715 RVA: 0x001ABADA File Offset: 0x001A9CDA
+		// Token: 0x060054D3 RID: 21715 RVA: 0x001ABABA File Offset: 0x001A9CBA
 		public void RemoveTimeSliceBehaviour(ITimeSlice timeSlice)
 		{
 			if (!this._currentTimeSliceBehaviours.Contains(timeSlice))
@@ -105,7 +105,7 @@ namespace PerformanceSystems
 			this._timeSliceBehavioursToRemove.Add(timeSlice);
 		}
 
-		// Token: 0x060054D4 RID: 21716 RVA: 0x001ABB08 File Offset: 0x001A9D08
+		// Token: 0x060054D4 RID: 21716 RVA: 0x001ABAE8 File Offset: 0x001A9CE8
 		public void Update()
 		{
 			this.InitializeReferenceTransformWithMainCam();
@@ -122,7 +122,7 @@ namespace PerformanceSystems
 			this._currentSlice = (this._currentSlice + 1) % Mathf.Max(1, this._timeSlices);
 		}
 
-		// Token: 0x060054D5 RID: 21717 RVA: 0x001ABB59 File Offset: 0x001A9D59
+		// Token: 0x060054D5 RID: 21717 RVA: 0x001ABB39 File Offset: 0x001A9D39
 		public void InitializeReferenceTransformWithMainCam()
 		{
 			if (this._referenceTransform == null)
@@ -133,13 +133,13 @@ namespace PerformanceSystems
 			this._isActive = (this._referenceTransform != null);
 		}
 
-		// Token: 0x060054D6 RID: 21718 RVA: 0x001ABB92 File Offset: 0x001A9D92
+		// Token: 0x060054D6 RID: 21718 RVA: 0x001ABB72 File Offset: 0x001A9D72
 		private void OnDisable()
 		{
 			this.ClearAsset();
 		}
 
-		// Token: 0x060054D7 RID: 21719 RVA: 0x001ABB9A File Offset: 0x001A9D9A
+		// Token: 0x060054D7 RID: 21719 RVA: 0x001ABB7A File Offset: 0x001A9D7A
 		public void ClearAsset()
 		{
 			this._currentTimeSliceBehaviours.Clear();

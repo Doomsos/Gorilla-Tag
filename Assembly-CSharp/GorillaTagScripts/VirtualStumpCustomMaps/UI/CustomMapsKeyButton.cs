@@ -8,7 +8,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.UI
 	// Token: 0x02000E28 RID: 3624
 	public class CustomMapsKeyButton : GorillaKeyButton<CustomMapKeyboardBinding>
 	{
-		// Token: 0x06005A78 RID: 23160 RVA: 0x001CF9A7 File Offset: 0x001CDBA7
+		// Token: 0x06005A78 RID: 23160 RVA: 0x001CF987 File Offset: 0x001CDB87
 		protected override void OnEnableEvents()
 		{
 			base.OnEnableEvents();
@@ -20,7 +20,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.UI
 			LocalisationManager.RegisterOnLanguageChanged(new Action(this.OnLanguageChanged));
 		}
 
-		// Token: 0x06005A79 RID: 23161 RVA: 0x001CF9CF File Offset: 0x001CDBCF
+		// Token: 0x06005A79 RID: 23161 RVA: 0x001CF9AF File Offset: 0x001CDBAF
 		protected override void OnDisableEvents()
 		{
 			base.OnDisableEvents();
@@ -31,7 +31,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.UI
 			LocalisationManager.UnregisterOnLanguageChanged(new Action(this.OnLanguageChanged));
 		}
 
-		// Token: 0x06005A7A RID: 23162 RVA: 0x001CF9F4 File Offset: 0x001CDBF4
+		// Token: 0x06005A7A RID: 23162 RVA: 0x001CF9D4 File Offset: 0x001CDBD4
 		public static string BindingToString(CustomMapKeyboardBinding binding)
 		{
 			if (binding < CustomMapKeyboardBinding.up || (binding > CustomMapKeyboardBinding.option3 && binding < CustomMapKeyboardBinding.at))
@@ -70,7 +70,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.UI
 		{
 		}
 
-		// Token: 0x06005A7C RID: 23164 RVA: 0x001CFA7C File Offset: 0x001CDC7C
+		// Token: 0x06005A7C RID: 23164 RVA: 0x001CFA5C File Offset: 0x001CDC5C
 		private void OnLanguageChanged()
 		{
 			if (!this._isLocalized)

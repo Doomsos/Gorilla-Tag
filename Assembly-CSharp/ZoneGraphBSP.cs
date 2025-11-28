@@ -5,11 +5,11 @@ using UnityEngine;
 public class ZoneGraphBSP : MonoBehaviour
 {
 	// Token: 0x1700078B RID: 1931
-	// (get) Token: 0x060050E0 RID: 20704 RVA: 0x001A1A9A File Offset: 0x0019FC9A
-	// (set) Token: 0x060050E1 RID: 20705 RVA: 0x001A1AA1 File Offset: 0x0019FCA1
+	// (get) Token: 0x060050E0 RID: 20704 RVA: 0x001A1A7A File Offset: 0x0019FC7A
+	// (set) Token: 0x060050E1 RID: 20705 RVA: 0x001A1A81 File Offset: 0x0019FC81
 	public static ZoneGraphBSP Instance { get; private set; }
 
-	// Token: 0x060050E2 RID: 20706 RVA: 0x001A1AA9 File Offset: 0x0019FCA9
+	// Token: 0x060050E2 RID: 20706 RVA: 0x001A1A89 File Offset: 0x0019FC89
 	private void Awake()
 	{
 		if (ZoneGraphBSP.Instance == null)
@@ -20,7 +20,7 @@ public class ZoneGraphBSP : MonoBehaviour
 		Object.Destroy(this);
 	}
 
-	// Token: 0x060050E3 RID: 20707 RVA: 0x001A1AC8 File Offset: 0x0019FCC8
+	// Token: 0x060050E3 RID: 20707 RVA: 0x001A1AA8 File Offset: 0x0019FCA8
 	public void Preprocess()
 	{
 		BoxCollider[] componentsInChildren = base.GetComponentsInChildren<BoxCollider>(true);
@@ -40,7 +40,7 @@ public class ZoneGraphBSP : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060050E4 RID: 20708 RVA: 0x001A1B1C File Offset: 0x0019FD1C
+	// Token: 0x060050E4 RID: 20708 RVA: 0x001A1AFC File Offset: 0x0019FCFC
 	public void CompileBSP()
 	{
 		ZoneDef[] componentsInChildren = base.gameObject.GetComponentsInChildren<ZoneDef>();
@@ -53,7 +53,7 @@ public class ZoneGraphBSP : MonoBehaviour
 		Debug.Log("BSP Tree compilation failed - no zones found");
 	}
 
-	// Token: 0x060050E5 RID: 20709 RVA: 0x001A1B8A File Offset: 0x0019FD8A
+	// Token: 0x060050E5 RID: 20709 RVA: 0x001A1B6A File Offset: 0x0019FD6A
 	public ZoneDef FindZoneAtPoint(Vector3 worldPoint)
 	{
 		SerializableBSPTree serializableBSPTree = this.bspTree;
@@ -64,19 +64,19 @@ public class ZoneGraphBSP : MonoBehaviour
 		return serializableBSPTree.FindZone(worldPoint);
 	}
 
-	// Token: 0x060050E6 RID: 20710 RVA: 0x001A1B9E File Offset: 0x0019FD9E
+	// Token: 0x060050E6 RID: 20710 RVA: 0x001A1B7E File Offset: 0x0019FD7E
 	public bool IsPointInAnyZone(Vector3 worldPoint)
 	{
 		return this.FindZoneAtPoint(worldPoint) != null;
 	}
 
-	// Token: 0x060050E7 RID: 20711 RVA: 0x001A1BAD File Offset: 0x0019FDAD
+	// Token: 0x060050E7 RID: 20711 RVA: 0x001A1B8D File Offset: 0x0019FD8D
 	public bool HasCompiledTree()
 	{
 		return this.bspTree != null && this.bspTree.nodes != null && this.bspTree.nodes.Length != 0;
 	}
 
-	// Token: 0x060050E8 RID: 20712 RVA: 0x001A1BD5 File Offset: 0x0019FDD5
+	// Token: 0x060050E8 RID: 20712 RVA: 0x001A1BB5 File Offset: 0x0019FDB5
 	public SerializableBSPTree GetBSPTree()
 	{
 		return this.bspTree;

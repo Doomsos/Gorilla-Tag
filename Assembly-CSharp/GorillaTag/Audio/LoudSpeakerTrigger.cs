@@ -6,13 +6,13 @@ namespace GorillaTag.Audio
 	// Token: 0x02001075 RID: 4213
 	public class LoudSpeakerTrigger : MonoBehaviour
 	{
-		// Token: 0x060069C4 RID: 27076 RVA: 0x002267D6 File Offset: 0x002249D6
+		// Token: 0x060069C4 RID: 27076 RVA: 0x002267B6 File Offset: 0x002249B6
 		public void SetRecorder(GTRecorder recorder)
 		{
 			this._recorder = recorder;
 		}
 
-		// Token: 0x060069C5 RID: 27077 RVA: 0x002267E0 File Offset: 0x002249E0
+		// Token: 0x060069C5 RID: 27077 RVA: 0x002267C0 File Offset: 0x002249C0
 		public void OnPlayerEnter(VRRig player)
 		{
 			if (this._recorder != null && this._network != null)
@@ -23,7 +23,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069C6 RID: 27078 RVA: 0x00226834 File Offset: 0x00224A34
+		// Token: 0x060069C6 RID: 27078 RVA: 0x00226814 File Offset: 0x00224A14
 		public void OnPlayerExit(VRRig player)
 		{
 			if (this._recorder != null && this._network != null)

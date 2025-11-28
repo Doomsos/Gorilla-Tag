@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000AB7 RID: 2743
 public class KIDUI_RestrictedAccessScreen : MonoBehaviour
 {
-	// Token: 0x060044C9 RID: 17609 RVA: 0x0016C930 File Offset: 0x0016AB30
+	// Token: 0x060044C9 RID: 17609 RVA: 0x0016C910 File Offset: 0x0016AB10
 	public void ShowRestrictedAccessScreen(SessionStatus? sessionStatus)
 	{
 		base.gameObject.SetActive(true);
@@ -34,7 +34,7 @@ public class KIDUI_RestrictedAccessScreen : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060044CA RID: 17610 RVA: 0x0016C9B0 File Offset: 0x0016ABB0
+	// Token: 0x060044CA RID: 17610 RVA: 0x0016C990 File Offset: 0x0016AB90
 	public void OnChangeAgePressed()
 	{
 		PrivateUIRoom.RemoveUI(base.transform);
@@ -42,7 +42,7 @@ public class KIDUI_RestrictedAccessScreen : MonoBehaviour
 		this._ageAppealScreen.ShowAgeAppealScreen();
 	}
 
-	// Token: 0x060044CB RID: 17611 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x060044CB RID: 17611 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;

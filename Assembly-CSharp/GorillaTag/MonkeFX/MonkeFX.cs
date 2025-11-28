@@ -9,7 +9,7 @@ namespace GorillaTag.MonkeFX
 	// Token: 0x02001031 RID: 4145
 	public class MonkeFX : ITickSystemPost
 	{
-		// Token: 0x060068B3 RID: 26803 RVA: 0x00221CC8 File Offset: 0x0021FEC8
+		// Token: 0x060068B3 RID: 26803 RVA: 0x00221CA8 File Offset: 0x0021FEA8
 		private static void InitBonesArray()
 		{
 			MonkeFX._rigs = VRRigCache.Instance.GetAllRigs();
@@ -66,7 +66,7 @@ namespace GorillaTag.MonkeFX
 		{
 		}
 
-		// Token: 0x060068B6 RID: 26806 RVA: 0x00221E70 File Offset: 0x00220070
+		// Token: 0x060068B6 RID: 26806 RVA: 0x00221E50 File Offset: 0x00220050
 		public static void Register(MonkeFXSettingsSO settingsSO)
 		{
 			MonkeFX.EnsureInstance();
@@ -86,7 +86,7 @@ namespace GorillaTag.MonkeFX
 			}
 		}
 
-		// Token: 0x060068B7 RID: 26807 RVA: 0x00221F08 File Offset: 0x00220108
+		// Token: 0x060068B7 RID: 26807 RVA: 0x00221EE8 File Offset: 0x002200E8
 		[MethodImpl(256)]
 		public static float GetScaleToFitInBounds(Mesh mesh)
 		{
@@ -99,7 +99,7 @@ namespace GorillaTag.MonkeFX
 			return 1f / num;
 		}
 
-		// Token: 0x060068B8 RID: 26808 RVA: 0x00221F60 File Offset: 0x00220160
+		// Token: 0x060068B8 RID: 26808 RVA: 0x00221F40 File Offset: 0x00220140
 		[MethodImpl(256)]
 		public static float Pack0To1Floats(float x, float y)
 		{
@@ -107,16 +107,16 @@ namespace GorillaTag.MonkeFX
 		}
 
 		// Token: 0x170009D4 RID: 2516
-		// (get) Token: 0x060068B9 RID: 26809 RVA: 0x00221F75 File Offset: 0x00220175
-		// (set) Token: 0x060068BA RID: 26810 RVA: 0x00221F7C File Offset: 0x0022017C
+		// (get) Token: 0x060068B9 RID: 26809 RVA: 0x00221F55 File Offset: 0x00220155
+		// (set) Token: 0x060068BA RID: 26810 RVA: 0x00221F5C File Offset: 0x0022015C
 		public static MonkeFX instance { get; private set; }
 
 		// Token: 0x170009D5 RID: 2517
-		// (get) Token: 0x060068BB RID: 26811 RVA: 0x00221F84 File Offset: 0x00220184
-		// (set) Token: 0x060068BC RID: 26812 RVA: 0x00221F8B File Offset: 0x0022018B
+		// (get) Token: 0x060068BB RID: 26811 RVA: 0x00221F64 File Offset: 0x00220164
+		// (set) Token: 0x060068BC RID: 26812 RVA: 0x00221F6B File Offset: 0x0022016B
 		public static bool hasInstance { get; private set; }
 
-		// Token: 0x060068BD RID: 26813 RVA: 0x00221F93 File Offset: 0x00220193
+		// Token: 0x060068BD RID: 26813 RVA: 0x00221F73 File Offset: 0x00220173
 		private static void EnsureInstance()
 		{
 			if (MonkeFX.hasInstance)
@@ -127,7 +127,7 @@ namespace GorillaTag.MonkeFX
 			MonkeFX.hasInstance = true;
 		}
 
-		// Token: 0x060068BE RID: 26814 RVA: 0x00221FAD File Offset: 0x002201AD
+		// Token: 0x060068BE RID: 26814 RVA: 0x00221F8D File Offset: 0x0022018D
 		[RuntimeInitializeOnLoadMethod(0)]
 		private static void OnAfterFirstSceneLoaded()
 		{
@@ -135,7 +135,7 @@ namespace GorillaTag.MonkeFX
 			TickSystem<object>.AddPostTickCallback(MonkeFX.instance);
 		}
 
-		// Token: 0x060068BF RID: 26815 RVA: 0x00221FBE File Offset: 0x002201BE
+		// Token: 0x060068BF RID: 26815 RVA: 0x00221F9E File Offset: 0x0022019E
 		void ITickSystemPost.PostTick()
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -146,11 +146,11 @@ namespace GorillaTag.MonkeFX
 		}
 
 		// Token: 0x170009D6 RID: 2518
-		// (get) Token: 0x060068C0 RID: 26816 RVA: 0x00221FCD File Offset: 0x002201CD
-		// (set) Token: 0x060068C1 RID: 26817 RVA: 0x00221FD5 File Offset: 0x002201D5
+		// (get) Token: 0x060068C0 RID: 26816 RVA: 0x00221FAD File Offset: 0x002201AD
+		// (set) Token: 0x060068C1 RID: 26817 RVA: 0x00221FB5 File Offset: 0x002201B5
 		bool ITickSystemPost.PostTickRunning { get; set; }
 
-		// Token: 0x060068C2 RID: 26818 RVA: 0x00221FDE File Offset: 0x002201DE
+		// Token: 0x060068C2 RID: 26818 RVA: 0x00221FBE File Offset: 0x002201BE
 		private static void PauseTick()
 		{
 			if (!MonkeFX.hasInstance)
@@ -160,7 +160,7 @@ namespace GorillaTag.MonkeFX
 			TickSystem<object>.RemovePostTickCallback(MonkeFX.instance);
 		}
 
-		// Token: 0x060068C3 RID: 26819 RVA: 0x00221FFB File Offset: 0x002201FB
+		// Token: 0x060068C3 RID: 26819 RVA: 0x00221FDB File Offset: 0x002201DB
 		private static void ResumeTick()
 		{
 			if (!MonkeFX.hasInstance)

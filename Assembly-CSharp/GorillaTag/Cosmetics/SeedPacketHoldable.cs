@@ -11,14 +11,14 @@ namespace GorillaTag.Cosmetics
 	[RequireComponent(typeof(TransferrableObject))]
 	public class SeedPacketHoldable : MonoBehaviour
 	{
-		// Token: 0x06006B00 RID: 27392 RVA: 0x002319DB File Offset: 0x0022FBDB
+		// Token: 0x06006B00 RID: 27392 RVA: 0x002319BB File Offset: 0x0022FBBB
 		private void Awake()
 		{
 			this.transferrableObject = base.GetComponent<TransferrableObject>();
 			this.flowerEffectHash = PoolUtils.GameObjHashCode(this.flowerEffectPrefab);
 		}
 
-		// Token: 0x06006B01 RID: 27393 RVA: 0x002319FC File Offset: 0x0022FBFC
+		// Token: 0x06006B01 RID: 27393 RVA: 0x002319DC File Offset: 0x0022FBDC
 		private void OnEnable()
 		{
 			if (this._events == null)
@@ -36,7 +36,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B02 RID: 27394 RVA: 0x00231AC4 File Offset: 0x0022FCC4
+		// Token: 0x06006B02 RID: 27394 RVA: 0x00231AA4 File Offset: 0x0022FCA4
 		private void OnDisable()
 		{
 			if (this._events != null)
@@ -47,13 +47,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B03 RID: 27395 RVA: 0x00231B13 File Offset: 0x0022FD13
+		// Token: 0x06006B03 RID: 27395 RVA: 0x00231AF3 File Offset: 0x0022FCF3
 		private void OnDestroy()
 		{
 			this.pooledObjects.Clear();
 		}
 
-		// Token: 0x06006B04 RID: 27396 RVA: 0x00231B20 File Offset: 0x0022FD20
+		// Token: 0x06006B04 RID: 27396 RVA: 0x00231B00 File Offset: 0x0022FD00
 		private void Update()
 		{
 			if (!this.transferrableObject.InHand())
@@ -76,7 +76,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B05 RID: 27397 RVA: 0x00231BD9 File Offset: 0x0022FDD9
+		// Token: 0x06006B05 RID: 27397 RVA: 0x00231BB9 File Offset: 0x0022FDB9
 		private void StartPouring()
 		{
 			if (this.particles)
@@ -87,7 +87,7 @@ namespace GorillaTag.Cosmetics
 			this.pouringStartedTime = Time.time;
 		}
 
-		// Token: 0x06006B06 RID: 27398 RVA: 0x00231C08 File Offset: 0x0022FE08
+		// Token: 0x06006B06 RID: 27398 RVA: 0x00231BE8 File Offset: 0x0022FDE8
 		private void SpawnEffect()
 		{
 			GameObject gameObject = ObjectPools.instance.Instantiate(this.flowerEffectHash, true);
@@ -100,7 +100,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B07 RID: 27399 RVA: 0x00231C64 File Offset: 0x0022FE64
+		// Token: 0x06006B07 RID: 27399 RVA: 0x00231C44 File Offset: 0x0022FE44
 		private void SyncTriggerEffectForOthers(SeedPacketTriggerHandler seedPacketTriggerHandlerTriggerHandlerEvent)
 		{
 			int num = this.pooledObjects.IndexOf(seedPacketTriggerHandlerTriggerHandlerEvent);
@@ -113,7 +113,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B08 RID: 27400 RVA: 0x00231CC8 File Offset: 0x0022FEC8
+		// Token: 0x06006B08 RID: 27400 RVA: 0x00231CA8 File Offset: 0x0022FEA8
 		private void SyncTriggerEffect(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)

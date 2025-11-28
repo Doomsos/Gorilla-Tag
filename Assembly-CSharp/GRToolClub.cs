@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000718 RID: 1816
 public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugComponent, IGameEntityComponent
 {
-	// Token: 0x06002E93 RID: 11923 RVA: 0x000FCD6D File Offset: 0x000FAF6D
+	// Token: 0x06002E93 RID: 11923 RVA: 0x000FCD4D File Offset: 0x000FAF4D
 	private void Awake()
 	{
 		this.retractableSection.localPosition = new Vector3(0f, 0f, 0f);
 	}
 
-	// Token: 0x06002E94 RID: 11924 RVA: 0x000FCD8E File Offset: 0x000FAF8E
+	// Token: 0x06002E94 RID: 11924 RVA: 0x000FCD6E File Offset: 0x000FAF6E
 	public new void OnEnable()
 	{
 		base.OnEnable();
@@ -21,7 +21,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		this.SetState(GRToolClub.State.Idle);
 	}
 
-	// Token: 0x06002E95 RID: 11925 RVA: 0x000FCDCA File Offset: 0x000FAFCA
+	// Token: 0x06002E95 RID: 11925 RVA: 0x000FCDAA File Offset: 0x000FAFAA
 	public void OnEntityInit()
 	{
 		if (this.tool != null)
@@ -46,7 +46,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 	{
 	}
 
-	// Token: 0x06002E99 RID: 11929 RVA: 0x000FCE00 File Offset: 0x000FB000
+	// Token: 0x06002E99 RID: 11929 RVA: 0x000FCDE0 File Offset: 0x000FAFE0
 	private void EnableImpactVFXForCurrentUpgradeLevel()
 	{
 		if (this.tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.BatonDamage1))
@@ -67,7 +67,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		this.gameHitter.hitFx = this.poweredImpactFx;
 	}
 
-	// Token: 0x06002E9A RID: 11930 RVA: 0x000FCE80 File Offset: 0x000FB080
+	// Token: 0x06002E9A RID: 11930 RVA: 0x000FCE60 File Offset: 0x000FB060
 	public override void Tick()
 	{
 		float deltaTime = Time.deltaTime;
@@ -89,7 +89,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		this.OnUpdateShared(deltaTime);
 	}
 
-	// Token: 0x06002E9B RID: 11931 RVA: 0x000FCED0 File Offset: 0x000FB0D0
+	// Token: 0x06002E9B RID: 11931 RVA: 0x000FCEB0 File Offset: 0x000FB0B0
 	private void OnUpdateAuthority(float dt)
 	{
 		GRToolClub.State state = this.state;
@@ -111,7 +111,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		}
 	}
 
-	// Token: 0x06002E9C RID: 11932 RVA: 0x000FCF30 File Offset: 0x000FB130
+	// Token: 0x06002E9C RID: 11932 RVA: 0x000FCF10 File Offset: 0x000FB110
 	private void OnUpdateRemote(float dt)
 	{
 		GRToolClub.State state = (GRToolClub.State)this.gameEntity.GetState();
@@ -121,7 +121,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		}
 	}
 
-	// Token: 0x06002E9D RID: 11933 RVA: 0x000FCF5C File Offset: 0x000FB15C
+	// Token: 0x06002E9D RID: 11933 RVA: 0x000FCF3C File Offset: 0x000FB13C
 	private void OnUpdateShared(float dt)
 	{
 		GRToolClub.State state = this.state;
@@ -145,7 +145,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		}
 	}
 
-	// Token: 0x06002E9E RID: 11934 RVA: 0x000FCFE8 File Offset: 0x000FB1E8
+	// Token: 0x06002E9E RID: 11934 RVA: 0x000FCFC8 File Offset: 0x000FB1C8
 	private void SetExtendedAmount(float newExtendedAmount)
 	{
 		this.extendedAmount = newExtendedAmount;
@@ -153,7 +153,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		this.retractableSection.localPosition = new Vector3(0f, num, 0f);
 	}
 
-	// Token: 0x06002E9F RID: 11935 RVA: 0x000FD030 File Offset: 0x000FB230
+	// Token: 0x06002E9F RID: 11935 RVA: 0x000FD010 File Offset: 0x000FB210
 	private void SetState(GRToolClub.State newState)
 	{
 		if (this.state == newState)
@@ -213,7 +213,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		}
 	}
 
-	// Token: 0x06002EA0 RID: 11936 RVA: 0x000FD234 File Offset: 0x000FB434
+	// Token: 0x06002EA0 RID: 11936 RVA: 0x000FD214 File Offset: 0x000FB414
 	private bool IsButtonHeld()
 	{
 		if (!this.gameEntity.IsHeldByLocalPlayer())
@@ -229,7 +229,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? 4 : 5) > 0.25f;
 	}
 
-	// Token: 0x06002EA1 RID: 11937 RVA: 0x000FD296 File Offset: 0x000FB496
+	// Token: 0x06002EA1 RID: 11937 RVA: 0x000FD276 File Offset: 0x000FB476
 	public void OnSuccessfulHit(GameHitData hitData)
 	{
 		if (this.state == GRToolClub.State.Extended)
@@ -238,7 +238,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 		}
 	}
 
-	// Token: 0x06002EA2 RID: 11938 RVA: 0x000FD2AC File Offset: 0x000FB4AC
+	// Token: 0x06002EA2 RID: 11938 RVA: 0x000FD28C File Offset: 0x000FB48C
 	public void GetDebugTextLines(out List<string> strings)
 	{
 		strings = new List<string>();

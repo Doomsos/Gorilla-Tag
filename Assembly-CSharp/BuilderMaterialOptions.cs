@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BuilderMaterialOptions01a", menuName = "Gorilla Tag/Builder/Options", order = 0)]
 public class BuilderMaterialOptions : ScriptableObject
 {
-	// Token: 0x06002361 RID: 9057 RVA: 0x000B98AC File Offset: 0x000B7AAC
+	// Token: 0x06002361 RID: 9057 RVA: 0x000B988C File Offset: 0x000B7A8C
 	public void GetMaterialFromType(int materialType, out Material material, out int soundIndex)
 	{
 		if (this.options == null)
@@ -28,7 +28,7 @@ public class BuilderMaterialOptions : ScriptableObject
 		soundIndex = -1;
 	}
 
-	// Token: 0x06002362 RID: 9058 RVA: 0x000B9930 File Offset: 0x000B7B30
+	// Token: 0x06002362 RID: 9058 RVA: 0x000B9910 File Offset: 0x000B7B10
 	public void GetDefaultMaterial(out int materialType, out Material material, out int soundIndex)
 	{
 		if (this.options.Count > 0)

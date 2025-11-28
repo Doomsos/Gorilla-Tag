@@ -10,7 +10,7 @@ using UnityEngine;
 public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable<T>, IEnumerable, IReadOnlyCollection<T> where T : MonoBehaviour
 {
 	// Token: 0x170004EC RID: 1260
-	// (get) Token: 0x060036C2 RID: 14018 RVA: 0x00128162 File Offset: 0x00126362
+	// (get) Token: 0x060036C2 RID: 14018 RVA: 0x00128142 File Offset: 0x00126342
 	public PhotonView photonView
 	{
 		get
@@ -19,13 +19,13 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 		}
 	}
 
-	// Token: 0x060036C3 RID: 14019 RVA: 0x0012816A File Offset: 0x0012636A
+	// Token: 0x060036C3 RID: 14019 RVA: 0x0012814A File Offset: 0x0012634A
 	protected virtual void Awake()
 	{
 		GTSystem<T>.SetSingleton(this);
 	}
 
-	// Token: 0x060036C4 RID: 14020 RVA: 0x00128174 File Offset: 0x00126374
+	// Token: 0x060036C4 RID: 14020 RVA: 0x00128154 File Offset: 0x00126354
 	protected virtual void Tick()
 	{
 		float deltaTime = Time.deltaTime;
@@ -39,7 +39,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 		}
 	}
 
-	// Token: 0x060036C5 RID: 14021 RVA: 0x001281BF File Offset: 0x001263BF
+	// Token: 0x060036C5 RID: 14021 RVA: 0x0012819F File Offset: 0x0012639F
 	protected virtual void OnApplicationQuit()
 	{
 		GTSystem<T>.gAppQuitting = true;
@@ -50,7 +50,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 	{
 	}
 
-	// Token: 0x060036C7 RID: 14023 RVA: 0x001281C8 File Offset: 0x001263C8
+	// Token: 0x060036C7 RID: 14023 RVA: 0x001281A8 File Offset: 0x001263A8
 	private bool RegisterInstance(T instance)
 	{
 		if (instance == null)
@@ -72,7 +72,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 	{
 	}
 
-	// Token: 0x060036C9 RID: 14025 RVA: 0x0012822C File Offset: 0x0012642C
+	// Token: 0x060036C9 RID: 14025 RVA: 0x0012820C File Offset: 0x0012640C
 	private bool UnregisterInstance(T instance)
 	{
 		if (instance == null)
@@ -94,20 +94,20 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 	{
 	}
 
-	// Token: 0x060036CB RID: 14027 RVA: 0x0012828E File Offset: 0x0012648E
+	// Token: 0x060036CB RID: 14027 RVA: 0x0012826E File Offset: 0x0012646E
 	IEnumerator<T> IEnumerable<!0>.GetEnumerator()
 	{
 		return this._instances.GetEnumerator();
 	}
 
-	// Token: 0x060036CC RID: 14028 RVA: 0x0012828E File Offset: 0x0012648E
+	// Token: 0x060036CC RID: 14028 RVA: 0x0012826E File Offset: 0x0012646E
 	IEnumerator IEnumerable.GetEnumerator()
 	{
 		return this._instances.GetEnumerator();
 	}
 
 	// Token: 0x170004ED RID: 1261
-	// (get) Token: 0x060036CD RID: 14029 RVA: 0x0012829B File Offset: 0x0012649B
+	// (get) Token: 0x060036CD RID: 14029 RVA: 0x0012827B File Offset: 0x0012647B
 	int IReadOnlyCollection<!0>.Count
 	{
 		get
@@ -117,7 +117,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 	}
 
 	// Token: 0x170004EE RID: 1262
-	// (get) Token: 0x060036CE RID: 14030 RVA: 0x001282A8 File Offset: 0x001264A8
+	// (get) Token: 0x060036CE RID: 14030 RVA: 0x00128288 File Offset: 0x00126488
 	T IReadOnlyList<!0>.Item
 	{
 		get
@@ -127,7 +127,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 	}
 
 	// Token: 0x170004EF RID: 1263
-	// (get) Token: 0x060036CF RID: 14031 RVA: 0x001282B6 File Offset: 0x001264B6
+	// (get) Token: 0x060036CF RID: 14031 RVA: 0x00128296 File Offset: 0x00126496
 	public static PhotonView PhotonView
 	{
 		get
@@ -136,7 +136,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 		}
 	}
 
-	// Token: 0x060036D0 RID: 14032 RVA: 0x001282C4 File Offset: 0x001264C4
+	// Token: 0x060036D0 RID: 14032 RVA: 0x001282A4 File Offset: 0x001264A4
 	protected static void SetSingleton(GTSystem<T> system)
 	{
 		if (GTSystem<T>.gAppQuitting)
@@ -167,7 +167,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 		GTSystem<T>.gInitializing = false;
 	}
 
-	// Token: 0x060036D1 RID: 14033 RVA: 0x001283B4 File Offset: 0x001265B4
+	// Token: 0x060036D1 RID: 14033 RVA: 0x00128394 File Offset: 0x00126594
 	public static void Register(T instance)
 	{
 		if (GTSystem<T>.gAppQuitting)
@@ -192,7 +192,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 		GTSystem<T>.gSingleton.RegisterInstance(instance);
 	}
 
-	// Token: 0x060036D2 RID: 14034 RVA: 0x00128420 File Offset: 0x00126620
+	// Token: 0x060036D2 RID: 14034 RVA: 0x00128400 File Offset: 0x00126600
 	public static void Unregister(T instance)
 	{
 		if (GTSystem<T>.gAppQuitting)

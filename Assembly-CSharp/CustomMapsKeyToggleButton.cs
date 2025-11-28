@@ -9,7 +9,7 @@ public class CustomMapsKeyToggleButton : CustomMapsKeyButton
 	{
 	}
 
-	// Token: 0x06003EAB RID: 16043 RVA: 0x0014F458 File Offset: 0x0014D658
+	// Token: 0x06003EAB RID: 16043 RVA: 0x0014F438 File Offset: 0x0014D638
 	public void SetButtonStatus(bool newIsPressed)
 	{
 		if (this.isPressed == newIsPressed)

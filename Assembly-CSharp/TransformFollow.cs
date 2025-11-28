@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x020008FA RID: 2298
 public class TransformFollow : MonoBehaviour
 {
-	// Token: 0x06003AC1 RID: 15041 RVA: 0x0013643F File Offset: 0x0013463F
+	// Token: 0x06003AC1 RID: 15041 RVA: 0x0013641F File Offset: 0x0013461F
 	private void Awake()
 	{
 		this.prevPos = base.transform.position;
 	}
 
-	// Token: 0x06003AC2 RID: 15042 RVA: 0x00136454 File Offset: 0x00134654
+	// Token: 0x06003AC2 RID: 15042 RVA: 0x00136434 File Offset: 0x00134634
 	private void LateUpdate()
 	{
 		this.prevPos = base.transform.position;

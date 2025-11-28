@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000517 RID: 1303
 public class GameModePageButton : GorillaPressableButton
 {
-	// Token: 0x06002135 RID: 8501 RVA: 0x000AEF40 File Offset: 0x000AD140
+	// Token: 0x06002135 RID: 8501 RVA: 0x000AEF20 File Offset: 0x000AD120
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();

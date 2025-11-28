@@ -6,7 +6,7 @@ using UnityEngine;
 [AttributeUsage(64)]
 public class OnEnterPlay_Run : OnEnterPlay_Attribute
 {
-	// Token: 0x06004DAC RID: 19884 RVA: 0x00192423 File Offset: 0x00190623
+	// Token: 0x06004DAC RID: 19884 RVA: 0x00192403 File Offset: 0x00190603
 	public override void OnEnterPlay(MethodInfo method)
 	{
 		if (!method.IsStatic)

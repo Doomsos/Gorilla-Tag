@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x0200054C RID: 1356
 public class MonkeBallBallResetTrigger : MonoBehaviour
 {
-	// Token: 0x0600222E RID: 8750 RVA: 0x000B2C8C File Offset: 0x000B0E8C
+	// Token: 0x0600222E RID: 8750 RVA: 0x000B2C6C File Offset: 0x000B0E6C
 	private void OnTriggerEnter(Collider other)
 	{
 		GameBall component = other.transform.GetComponent<GameBall>();
@@ -37,7 +37,7 @@ public class MonkeBallBallResetTrigger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600222F RID: 8751 RVA: 0x000B2D44 File Offset: 0x000B0F44
+	// Token: 0x0600222F RID: 8751 RVA: 0x000B2D24 File Offset: 0x000B0F24
 	private void OnTriggerExit(Collider other)
 	{
 		GameBall component = other.transform.GetComponent<GameBall>();

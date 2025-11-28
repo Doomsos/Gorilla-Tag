@@ -9,7 +9,7 @@ namespace GorillaLocomotion.Climbing
 	public class GorillaHandClimber : MonoBehaviour
 	{
 		// Token: 0x1700098D RID: 2445
-		// (get) Token: 0x060064D0 RID: 25808 RVA: 0x0020ED0C File Offset: 0x0020CF0C
+		// (get) Token: 0x060064D0 RID: 25808 RVA: 0x0020ECEC File Offset: 0x0020CEEC
 		public bool isClimbingOrGrabbing
 		{
 			get
@@ -18,14 +18,14 @@ namespace GorillaLocomotion.Climbing
 			}
 		}
 
-		// Token: 0x060064D1 RID: 25809 RVA: 0x0020ED23 File Offset: 0x0020CF23
+		// Token: 0x060064D1 RID: 25809 RVA: 0x0020ED03 File Offset: 0x0020CF03
 		private void Awake()
 		{
 			this.col = base.GetComponent<Collider>();
 			this.grabber = base.GetComponent<GorillaGrabber>();
 		}
 
-		// Token: 0x060064D2 RID: 25810 RVA: 0x0020ED40 File Offset: 0x0020CF40
+		// Token: 0x060064D2 RID: 25810 RVA: 0x0020ED20 File Offset: 0x0020CF20
 		public void CheckHandClimber()
 		{
 			for (int i = this.potentialClimbables.Count - 1; i >= 0; i--)
@@ -74,19 +74,19 @@ namespace GorillaLocomotion.Climbing
 			this.grabber.CheckGrabber(this.CanInitiateClimb() && grab);
 		}
 
-		// Token: 0x060064D3 RID: 25811 RVA: 0x0020EEB8 File Offset: 0x0020D0B8
+		// Token: 0x060064D3 RID: 25811 RVA: 0x0020EE98 File Offset: 0x0020D098
 		private bool CanInitiateClimb()
 		{
 			return !this.isClimbing && !this.equipmentInteractor.GetIsHolding(this.xrNode) && !this.equipmentInteractor.builderPieceInteractor.GetIsHolding(this.xrNode) && !this.equipmentInteractor.IsGrabDisabled(this.xrNode) && !GamePlayerLocal.IsHandHolding(this.xrNode) && !this.player.inOverlay;
 		}
 
-		// Token: 0x060064D4 RID: 25812 RVA: 0x0020EF28 File Offset: 0x0020D128
+		// Token: 0x060064D4 RID: 25812 RVA: 0x0020EF08 File Offset: 0x0020D108
 		public void SetCanRelease(bool canRelease)
 		{
 			this.canRelease = canRelease;
 		}
 
-		// Token: 0x060064D5 RID: 25813 RVA: 0x0020EF34 File Offset: 0x0020D134
+		// Token: 0x060064D5 RID: 25813 RVA: 0x0020EF14 File Offset: 0x0020D114
 		public GorillaClimbable GetClosestClimbable()
 		{
 			if (this.potentialClimbables.Count == 0)
@@ -126,7 +126,7 @@ namespace GorillaLocomotion.Climbing
 			return result;
 		}
 
-		// Token: 0x060064D6 RID: 25814 RVA: 0x0020F034 File Offset: 0x0020D234
+		// Token: 0x060064D6 RID: 25814 RVA: 0x0020F014 File Offset: 0x0020D214
 		private void OnTriggerEnter(Collider other)
 		{
 			GorillaClimbable gorillaClimbable;
@@ -142,7 +142,7 @@ namespace GorillaLocomotion.Climbing
 			}
 		}
 
-		// Token: 0x060064D7 RID: 25815 RVA: 0x0020F070 File Offset: 0x0020D270
+		// Token: 0x060064D7 RID: 25815 RVA: 0x0020F050 File Offset: 0x0020D250
 		private void OnTriggerExit(Collider other)
 		{
 			GorillaClimbable gorillaClimbable;
@@ -158,7 +158,7 @@ namespace GorillaLocomotion.Climbing
 			}
 		}
 
-		// Token: 0x060064D8 RID: 25816 RVA: 0x0020F0AC File Offset: 0x0020D2AC
+		// Token: 0x060064D8 RID: 25816 RVA: 0x0020F08C File Offset: 0x0020D28C
 		public void ForceStopClimbing(bool startingNewClimb = false, bool doDontReclimb = false)
 		{
 			this.player.EndClimbing(this, startingNewClimb, doDontReclimb);

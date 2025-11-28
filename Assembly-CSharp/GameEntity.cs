@@ -7,76 +7,76 @@ using UnityEngine;
 public class GameEntity : MonoBehaviour
 {
 	// Token: 0x170003D9 RID: 985
-	// (get) Token: 0x060026D3 RID: 9939 RVA: 0x000CE4BF File Offset: 0x000CC6BF
-	// (set) Token: 0x060026D4 RID: 9940 RVA: 0x000CE4C7 File Offset: 0x000CC6C7
+	// (get) Token: 0x060026D3 RID: 9939 RVA: 0x000CE49F File Offset: 0x000CC69F
+	// (set) Token: 0x060026D4 RID: 9940 RVA: 0x000CE4A7 File Offset: 0x000CC6A7
 	[DebugReadout]
 	public GameEntityId id { get; internal set; }
 
 	// Token: 0x170003DA RID: 986
-	// (get) Token: 0x060026D5 RID: 9941 RVA: 0x000CE4D0 File Offset: 0x000CC6D0
-	// (set) Token: 0x060026D6 RID: 9942 RVA: 0x000CE4D8 File Offset: 0x000CC6D8
+	// (get) Token: 0x060026D5 RID: 9941 RVA: 0x000CE4B0 File Offset: 0x000CC6B0
+	// (set) Token: 0x060026D6 RID: 9942 RVA: 0x000CE4B8 File Offset: 0x000CC6B8
 	[DebugReadout]
 	public int typeId { get; private set; }
 
 	// Token: 0x170003DB RID: 987
-	// (get) Token: 0x060026D7 RID: 9943 RVA: 0x000CE4E1 File Offset: 0x000CC6E1
-	// (set) Token: 0x060026D8 RID: 9944 RVA: 0x000CE4E9 File Offset: 0x000CC6E9
+	// (get) Token: 0x060026D7 RID: 9943 RVA: 0x000CE4C1 File Offset: 0x000CC6C1
+	// (set) Token: 0x060026D8 RID: 9944 RVA: 0x000CE4C9 File Offset: 0x000CC6C9
 	[DebugReadout]
 	public long createData { get; set; }
 
 	// Token: 0x170003DC RID: 988
-	// (get) Token: 0x060026D9 RID: 9945 RVA: 0x000CE4F2 File Offset: 0x000CC6F2
-	// (set) Token: 0x060026DA RID: 9946 RVA: 0x000CE4FA File Offset: 0x000CC6FA
+	// (get) Token: 0x060026D9 RID: 9945 RVA: 0x000CE4D2 File Offset: 0x000CC6D2
+	// (set) Token: 0x060026DA RID: 9946 RVA: 0x000CE4DA File Offset: 0x000CC6DA
 	[DebugReadout]
 	public int heldByActorNumber { get; internal set; }
 
 	// Token: 0x170003DD RID: 989
-	// (get) Token: 0x060026DB RID: 9947 RVA: 0x000CE503 File Offset: 0x000CC703
-	// (set) Token: 0x060026DC RID: 9948 RVA: 0x000CE50B File Offset: 0x000CC70B
+	// (get) Token: 0x060026DB RID: 9947 RVA: 0x000CE4E3 File Offset: 0x000CC6E3
+	// (set) Token: 0x060026DC RID: 9948 RVA: 0x000CE4EB File Offset: 0x000CC6EB
 	[DebugReadout]
 	public int snappedByActorNumber { get; internal set; }
 
 	// Token: 0x170003DE RID: 990
-	// (get) Token: 0x060026DD RID: 9949 RVA: 0x000CE514 File Offset: 0x000CC714
-	// (set) Token: 0x060026DE RID: 9950 RVA: 0x000CE51C File Offset: 0x000CC71C
+	// (get) Token: 0x060026DD RID: 9949 RVA: 0x000CE4F4 File Offset: 0x000CC6F4
+	// (set) Token: 0x060026DE RID: 9950 RVA: 0x000CE4FC File Offset: 0x000CC6FC
 	[DebugReadout]
 	public SnapJointType snappedJoint { get; internal set; }
 
 	// Token: 0x170003DF RID: 991
-	// (get) Token: 0x060026DF RID: 9951 RVA: 0x000CE525 File Offset: 0x000CC725
-	// (set) Token: 0x060026E0 RID: 9952 RVA: 0x000CE52D File Offset: 0x000CC72D
+	// (get) Token: 0x060026DF RID: 9951 RVA: 0x000CE505 File Offset: 0x000CC705
+	// (set) Token: 0x060026E0 RID: 9952 RVA: 0x000CE50D File Offset: 0x000CC70D
 	[DebugReadout]
 	public int heldByHandIndex { get; internal set; }
 
 	// Token: 0x170003E0 RID: 992
-	// (get) Token: 0x060026E1 RID: 9953 RVA: 0x000CE536 File Offset: 0x000CC736
-	// (set) Token: 0x060026E2 RID: 9954 RVA: 0x000CE53E File Offset: 0x000CC73E
+	// (get) Token: 0x060026E1 RID: 9953 RVA: 0x000CE516 File Offset: 0x000CC716
+	// (set) Token: 0x060026E2 RID: 9954 RVA: 0x000CE51E File Offset: 0x000CC71E
 	[DebugReadout]
 	public int lastHeldByActorNumber { get; internal set; }
 
 	// Token: 0x170003E1 RID: 993
-	// (get) Token: 0x060026E3 RID: 9955 RVA: 0x000CE547 File Offset: 0x000CC747
-	// (set) Token: 0x060026E4 RID: 9956 RVA: 0x000CE54F File Offset: 0x000CC74F
+	// (get) Token: 0x060026E3 RID: 9955 RVA: 0x000CE527 File Offset: 0x000CC727
+	// (set) Token: 0x060026E4 RID: 9956 RVA: 0x000CE52F File Offset: 0x000CC72F
 	[DebugReadout]
 	public int onlyGrabActorNumber { get; internal set; }
 
 	// Token: 0x170003E2 RID: 994
-	// (get) Token: 0x060026E5 RID: 9957 RVA: 0x000CE558 File Offset: 0x000CC758
-	// (set) Token: 0x060026E6 RID: 9958 RVA: 0x000CE560 File Offset: 0x000CC760
+	// (get) Token: 0x060026E5 RID: 9957 RVA: 0x000CE538 File Offset: 0x000CC738
+	// (set) Token: 0x060026E6 RID: 9958 RVA: 0x000CE540 File Offset: 0x000CC740
 	[DebugReadout]
 	public GameEntityId attachedToEntityId { get; internal set; }
 
 	// Token: 0x1400004A RID: 74
-	// (add) Token: 0x060026E7 RID: 9959 RVA: 0x000CE56C File Offset: 0x000CC76C
-	// (remove) Token: 0x060026E8 RID: 9960 RVA: 0x000CE5A4 File Offset: 0x000CC7A4
+	// (add) Token: 0x060026E7 RID: 9959 RVA: 0x000CE54C File Offset: 0x000CC74C
+	// (remove) Token: 0x060026E8 RID: 9960 RVA: 0x000CE584 File Offset: 0x000CC784
 	public event GameEntity.StateChangedEvent OnStateChanged;
 
 	// Token: 0x1400004B RID: 75
-	// (add) Token: 0x060026E9 RID: 9961 RVA: 0x000CE5DC File Offset: 0x000CC7DC
-	// (remove) Token: 0x060026EA RID: 9962 RVA: 0x000CE614 File Offset: 0x000CC814
+	// (add) Token: 0x060026E9 RID: 9961 RVA: 0x000CE5BC File Offset: 0x000CC7BC
+	// (remove) Token: 0x060026EA RID: 9962 RVA: 0x000CE5F4 File Offset: 0x000CC7F4
 	public event GameEntity.EntityDestroyedEvent onEntityDestroyed;
 
-	// Token: 0x060026EB RID: 9963 RVA: 0x000CE64C File Offset: 0x000CC84C
+	// Token: 0x060026EB RID: 9963 RVA: 0x000CE62C File Offset: 0x000CC82C
 	private void Awake()
 	{
 		this.id = GameEntityId.Invalid;
@@ -92,14 +92,14 @@ public class GameEntity : MonoBehaviour
 		base.GetComponentsInChildren<IGameEntitySerialize>(this.entitySerialize);
 	}
 
-	// Token: 0x060026EC RID: 9964 RVA: 0x000CE6C7 File Offset: 0x000CC8C7
+	// Token: 0x060026EC RID: 9964 RVA: 0x000CE6A7 File Offset: 0x000CC8A7
 	public void Create(GameEntityManager manager, int typeId)
 	{
 		this.manager = manager;
 		this.typeId = typeId;
 	}
 
-	// Token: 0x060026ED RID: 9965 RVA: 0x000CE6D8 File Offset: 0x000CC8D8
+	// Token: 0x060026ED RID: 9965 RVA: 0x000CE6B8 File Offset: 0x000CC8B8
 	public void Init(long createData)
 	{
 		this.createData = createData;
@@ -109,7 +109,7 @@ public class GameEntity : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060026EE RID: 9966 RVA: 0x000CE714 File Offset: 0x000CC914
+	// Token: 0x060026EE RID: 9966 RVA: 0x000CE6F4 File Offset: 0x000CC8F4
 	public void OnDestroy()
 	{
 		if (GTAppState.isQuitting)
@@ -128,7 +128,7 @@ public class GameEntity : MonoBehaviour
 		entityDestroyedEvent(this);
 	}
 
-	// Token: 0x060026EF RID: 9967 RVA: 0x000CE761 File Offset: 0x000CC961
+	// Token: 0x060026EF RID: 9967 RVA: 0x000CE741 File Offset: 0x000CC941
 	public Vector3 GetVelocity()
 	{
 		if (this.rigidBody == null)
@@ -138,7 +138,7 @@ public class GameEntity : MonoBehaviour
 		return this.rigidBody.linearVelocity;
 	}
 
-	// Token: 0x060026F0 RID: 9968 RVA: 0x000CE782 File Offset: 0x000CC982
+	// Token: 0x060026F0 RID: 9968 RVA: 0x000CE762 File Offset: 0x000CC962
 	public void PlayCatchFx()
 	{
 		if (this.audioSource != null)
@@ -148,7 +148,7 @@ public class GameEntity : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060026F1 RID: 9969 RVA: 0x000CE7B9 File Offset: 0x000CC9B9
+	// Token: 0x060026F1 RID: 9969 RVA: 0x000CE799 File Offset: 0x000CC999
 	public void PlayThrowFx()
 	{
 		if (this.audioSource != null)
@@ -158,7 +158,7 @@ public class GameEntity : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060026F2 RID: 9970 RVA: 0x000CE7F0 File Offset: 0x000CC9F0
+	// Token: 0x060026F2 RID: 9970 RVA: 0x000CE7D0 File Offset: 0x000CC9D0
 	public void PlaySnapFx()
 	{
 		if (this.audioSource != null)
@@ -168,37 +168,37 @@ public class GameEntity : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060026F3 RID: 9971 RVA: 0x000CE827 File Offset: 0x000CCA27
+	// Token: 0x060026F3 RID: 9971 RVA: 0x000CE807 File Offset: 0x000CCA07
 	private bool IsGamePlayer(Collider collider)
 	{
 		return GamePlayer.GetGamePlayer(collider, false) != null;
 	}
 
-	// Token: 0x060026F4 RID: 9972 RVA: 0x000CE836 File Offset: 0x000CCA36
+	// Token: 0x060026F4 RID: 9972 RVA: 0x000CE816 File Offset: 0x000CCA16
 	public long GetState()
 	{
 		return this.state;
 	}
 
-	// Token: 0x060026F5 RID: 9973 RVA: 0x000CE83E File Offset: 0x000CCA3E
+	// Token: 0x060026F5 RID: 9973 RVA: 0x000CE81E File Offset: 0x000CCA1E
 	public void RequestState(GameEntityId id, long newState)
 	{
 		this.manager.RequestState(id, newState);
 	}
 
-	// Token: 0x060026F6 RID: 9974 RVA: 0x000CE84D File Offset: 0x000CCA4D
+	// Token: 0x060026F6 RID: 9974 RVA: 0x000CE82D File Offset: 0x000CCA2D
 	public bool IsAuthority()
 	{
 		return this.manager.IsAuthority();
 	}
 
-	// Token: 0x060026F7 RID: 9975 RVA: 0x000CE85A File Offset: 0x000CCA5A
+	// Token: 0x060026F7 RID: 9975 RVA: 0x000CE83A File Offset: 0x000CCA3A
 	public bool IsValidToMigrate()
 	{
 		return this.manager.IsEntityValidToMigrate(this);
 	}
 
-	// Token: 0x060026F8 RID: 9976 RVA: 0x000CE868 File Offset: 0x000CCA68
+	// Token: 0x060026F8 RID: 9976 RVA: 0x000CE848 File Offset: 0x000CCA48
 	public void SetState(long newState)
 	{
 		if (this.state != newState)
@@ -217,7 +217,7 @@ public class GameEntity : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060026F9 RID: 9977 RVA: 0x000CE8C8 File Offset: 0x000CCAC8
+	// Token: 0x060026F9 RID: 9977 RVA: 0x000CE8A8 File Offset: 0x000CCAA8
 	public GameEntityId MigrateToEntityManager(GameEntityManager newManager)
 	{
 		this.manager.RemoveGameEntity(this);
@@ -228,7 +228,7 @@ public class GameEntity : MonoBehaviour
 		return gameEntityId;
 	}
 
-	// Token: 0x060026FA RID: 9978 RVA: 0x000CE90A File Offset: 0x000CCB0A
+	// Token: 0x060026FA RID: 9978 RVA: 0x000CE8EA File Offset: 0x000CCAEA
 	public void MigrateHeldBy(int actorNumber)
 	{
 		if (this.heldByActorNumber >= 0)
@@ -237,7 +237,7 @@ public class GameEntity : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060026FB RID: 9979 RVA: 0x000CE91C File Offset: 0x000CCB1C
+	// Token: 0x060026FB RID: 9979 RVA: 0x000CE8FC File Offset: 0x000CCAFC
 	public void MigrateSnappedBy(int actorNumber)
 	{
 		if (this.snappedByActorNumber >= 0)
@@ -246,19 +246,19 @@ public class GameEntity : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060026FC RID: 9980 RVA: 0x000CE92E File Offset: 0x000CCB2E
+	// Token: 0x060026FC RID: 9980 RVA: 0x000CE90E File Offset: 0x000CCB0E
 	public int GetNetId(GameEntityId gameEntityId)
 	{
 		return this.manager.GetNetIdFromEntityId(gameEntityId);
 	}
 
-	// Token: 0x060026FD RID: 9981 RVA: 0x000CE93C File Offset: 0x000CCB3C
+	// Token: 0x060026FD RID: 9981 RVA: 0x000CE91C File Offset: 0x000CCB1C
 	public int GetNetId()
 	{
 		return this.manager.GetNetIdFromEntityId(this.id);
 	}
 
-	// Token: 0x060026FE RID: 9982 RVA: 0x000CE950 File Offset: 0x000CCB50
+	// Token: 0x060026FE RID: 9982 RVA: 0x000CE930 File Offset: 0x000CCB30
 	public static GameEntity Get(Collider collider)
 	{
 		if (collider == null)
@@ -278,25 +278,25 @@ public class GameEntity : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060026FF RID: 9983 RVA: 0x000CE994 File Offset: 0x000CCB94
+	// Token: 0x060026FF RID: 9983 RVA: 0x000CE974 File Offset: 0x000CCB74
 	public bool IsHeldByLocalPlayer()
 	{
 		return this.heldByActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber;
 	}
 
-	// Token: 0x06002700 RID: 9984 RVA: 0x000CE9AD File Offset: 0x000CCBAD
+	// Token: 0x06002700 RID: 9984 RVA: 0x000CE98D File Offset: 0x000CCB8D
 	public bool IsSnappedByLocalPlayer()
 	{
 		return this.snappedByActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber;
 	}
 
-	// Token: 0x06002701 RID: 9985 RVA: 0x000CE9C6 File Offset: 0x000CCBC6
+	// Token: 0x06002701 RID: 9985 RVA: 0x000CE9A6 File Offset: 0x000CCBA6
 	public bool IsHeld()
 	{
 		return this.heldByActorNumber != -1;
 	}
 
-	// Token: 0x06002702 RID: 9986 RVA: 0x000CE9D4 File Offset: 0x000CCBD4
+	// Token: 0x06002702 RID: 9986 RVA: 0x000CE9B4 File Offset: 0x000CCBB4
 	public int GetLastHeldByPlayerForEntityID(GameEntityId gameEntityId)
 	{
 		GameEntity gameEntity = this.manager.GetGameEntity(gameEntityId);
@@ -307,20 +307,20 @@ public class GameEntity : MonoBehaviour
 		return 0;
 	}
 
-	// Token: 0x06002703 RID: 9987 RVA: 0x000CE9FF File Offset: 0x000CCBFF
+	// Token: 0x06002703 RID: 9987 RVA: 0x000CE9DF File Offset: 0x000CCBDF
 	public bool WasLastHeldByLocalPlayer()
 	{
 		return this.lastHeldByActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber;
 	}
 
-	// Token: 0x06002704 RID: 9988 RVA: 0x000CEA18 File Offset: 0x000CCC18
+	// Token: 0x06002704 RID: 9988 RVA: 0x000CE9F8 File Offset: 0x000CCBF8
 	public bool IsAttachedToPlayer(NetPlayer player)
 	{
 		return player != null && (this.heldByActorNumber == player.ActorNumber || this.snappedByActorNumber == player.ActorNumber);
 	}
 
 	// Token: 0x170003E3 RID: 995
-	// (get) Token: 0x06002705 RID: 9989 RVA: 0x000CEA3D File Offset: 0x000CCC3D
+	// (get) Token: 0x06002705 RID: 9989 RVA: 0x000CEA1D File Offset: 0x000CCC1D
 	public EHandedness EquippedHandedness
 	{
 		get

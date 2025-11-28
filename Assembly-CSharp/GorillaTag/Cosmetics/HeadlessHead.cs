@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010BD RID: 4285
 	public class HeadlessHead : HoldableObject
 	{
-		// Token: 0x06006B4D RID: 27469 RVA: 0x002339A0 File Offset: 0x00231BA0
+		// Token: 0x06006B4D RID: 27469 RVA: 0x00233980 File Offset: 0x00231B80
 		protected void Awake()
 		{
 			this.ownerRig = base.GetComponentInParent<VRRig>();
@@ -22,7 +22,7 @@ namespace GorillaTag.Cosmetics
 			this.hasFirstPersonRenderer = (this.firstPersonRenderer != null);
 		}
 
-		// Token: 0x06006B4E RID: 27470 RVA: 0x00233A24 File Offset: 0x00231C24
+		// Token: 0x06006B4E RID: 27470 RVA: 0x00233A04 File Offset: 0x00231C04
 		protected void OnEnable()
 		{
 			if (this.ownerRig == null)
@@ -34,13 +34,13 @@ namespace GorillaTag.Cosmetics
 			this.ownerRig.bodyRenderer.SetCosmeticBodyType(GorillaBodyType.NoHead);
 		}
 
-		// Token: 0x06006B4F RID: 27471 RVA: 0x00233A7D File Offset: 0x00231C7D
+		// Token: 0x06006B4F RID: 27471 RVA: 0x00233A5D File Offset: 0x00231C5D
 		private void OnDisable()
 		{
 			this.ownerRig.bodyRenderer.SetCosmeticBodyType(GorillaBodyType.Default);
 		}
 
-		// Token: 0x06006B50 RID: 27472 RVA: 0x00233A90 File Offset: 0x00231C90
+		// Token: 0x06006B50 RID: 27472 RVA: 0x00233A70 File Offset: 0x00231C70
 		protected virtual void LateUpdate()
 		{
 			if (this.isLocal)
@@ -54,13 +54,13 @@ namespace GorillaTag.Cosmetics
 			this.LateUpdateShared();
 		}
 
-		// Token: 0x06006B51 RID: 27473 RVA: 0x00233AAE File Offset: 0x00231CAE
+		// Token: 0x06006B51 RID: 27473 RVA: 0x00233A8E File Offset: 0x00231C8E
 		protected virtual void LateUpdateLocal()
 		{
 			this.ownerRig.WearablePackedStates = GTBitOps.WriteBits(this.ownerRig.WearablePackedStates, this.stateBitsWriteInfo, (this.isHeld ? 1 : 0) + (this.isHeldLeftHand ? 2 : 0));
 		}
 
-		// Token: 0x06006B52 RID: 27474 RVA: 0x00233AEC File Offset: 0x00231CEC
+		// Token: 0x06006B52 RID: 27474 RVA: 0x00233ACC File Offset: 0x00231CCC
 		protected virtual void LateUpdateReplicated()
 		{
 			int num = GTBitOps.ReadBits(this.ownerRig.WearablePackedStates, this.stateBitsWriteInfo.index, this.stateBitsWriteInfo.valueMask);
@@ -68,7 +68,7 @@ namespace GorillaTag.Cosmetics
 			this.isHeldLeftHand = ((num & 2) != 0);
 		}
 
-		// Token: 0x06006B53 RID: 27475 RVA: 0x00233B38 File Offset: 0x00231D38
+		// Token: 0x06006B53 RID: 27475 RVA: 0x00233B18 File Offset: 0x00231D18
 		protected virtual void LateUpdateShared()
 		{
 			if (this.isHeld != this.wasHeld || this.isHeldLeftHand != this.wasHeldLeftHand)
@@ -116,7 +116,7 @@ namespace GorillaTag.Cosmetics
 		{
 		}
 
-		// Token: 0x06006B55 RID: 27477 RVA: 0x00233D3F File Offset: 0x00231F3F
+		// Token: 0x06006B55 RID: 27477 RVA: 0x00233D1F File Offset: 0x00231F1F
 		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 		{
 			this.isHeld = true;
@@ -124,14 +124,14 @@ namespace GorillaTag.Cosmetics
 			EquipmentInteractor.instance.UpdateHandEquipment(this, this.isHeldLeftHand);
 		}
 
-		// Token: 0x06006B56 RID: 27478 RVA: 0x00233D73 File Offset: 0x00231F73
+		// Token: 0x06006B56 RID: 27478 RVA: 0x00233D53 File Offset: 0x00231F53
 		public override void DropItemCleanup()
 		{
 			this.isHeld = false;
 			this.isHeldLeftHand = false;
 		}
 
-		// Token: 0x06006B57 RID: 27479 RVA: 0x00233D84 File Offset: 0x00231F84
+		// Token: 0x06006B57 RID: 27479 RVA: 0x00233D64 File Offset: 0x00231F64
 		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 		{
 			if (EquipmentInteractor.instance.rightHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.rightHand)

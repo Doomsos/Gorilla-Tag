@@ -7,7 +7,7 @@ using UnityEngine.Events;
 // Token: 0x02000BAD RID: 2989
 public class WaterInteractionEvents : MonoBehaviour
 {
-	// Token: 0x060049D5 RID: 18901 RVA: 0x00184E9C File Offset: 0x0018309C
+	// Token: 0x060049D5 RID: 18901 RVA: 0x00184E7C File Offset: 0x0018307C
 	private void Update()
 	{
 		if (this.overlappingWaterVolumes.Count < 1)
@@ -47,7 +47,7 @@ public class WaterInteractionEvents : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060049D6 RID: 18902 RVA: 0x00184FD8 File Offset: 0x001831D8
+	// Token: 0x060049D6 RID: 18902 RVA: 0x00184FB8 File Offset: 0x001831B8
 	protected void OnTriggerEnter(Collider other)
 	{
 		WaterVolume component = other.GetComponent<WaterVolume>();
@@ -58,7 +58,7 @@ public class WaterInteractionEvents : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060049D7 RID: 18903 RVA: 0x00185018 File Offset: 0x00183218
+	// Token: 0x060049D7 RID: 18903 RVA: 0x00184FF8 File Offset: 0x001831F8
 	protected void OnTriggerExit(Collider other)
 	{
 		WaterVolume component = other.GetComponent<WaterVolume>();

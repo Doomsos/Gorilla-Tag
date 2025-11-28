@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000702 RID: 1794
 public class GRShiftSirenLight : MonoBehaviourTick
 {
-	// Token: 0x06002E09 RID: 11785 RVA: 0x000FA62C File Offset: 0x000F882C
+	// Token: 0x06002E09 RID: 11785 RVA: 0x000FA60C File Offset: 0x000F880C
 	public override void Tick()
 	{
 		if (this.shiftManager == null)

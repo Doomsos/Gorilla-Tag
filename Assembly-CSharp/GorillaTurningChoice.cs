@@ -3,7 +3,7 @@
 // Token: 0x020007EB RID: 2027
 public class GorillaTurningChoice : GorillaTriggerBox
 {
-	// Token: 0x06003558 RID: 13656 RVA: 0x00121E46 File Offset: 0x00120046
+	// Token: 0x06003558 RID: 13656 RVA: 0x00121E26 File Offset: 0x00120026
 	public override void OnBoxTriggered()
 	{
 		base.OnBoxTriggered();

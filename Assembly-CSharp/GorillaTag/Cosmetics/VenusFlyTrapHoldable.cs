@@ -10,17 +10,17 @@ namespace GorillaTag.Cosmetics
 	public class VenusFlyTrapHoldable : MonoBehaviour, ITickSystemTick
 	{
 		// Token: 0x17000A6A RID: 2666
-		// (get) Token: 0x06006DC0 RID: 28096 RVA: 0x002407D8 File Offset: 0x0023E9D8
-		// (set) Token: 0x06006DC1 RID: 28097 RVA: 0x002407E0 File Offset: 0x0023E9E0
+		// (get) Token: 0x06006DC0 RID: 28096 RVA: 0x002407B8 File Offset: 0x0023E9B8
+		// (set) Token: 0x06006DC1 RID: 28097 RVA: 0x002407C0 File Offset: 0x0023E9C0
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006DC2 RID: 28098 RVA: 0x002407E9 File Offset: 0x0023E9E9
+		// Token: 0x06006DC2 RID: 28098 RVA: 0x002407C9 File Offset: 0x0023E9C9
 		private void Awake()
 		{
 			this.transferrableObject = base.GetComponent<TransferrableObject>();
 		}
 
-		// Token: 0x06006DC3 RID: 28099 RVA: 0x002407F8 File Offset: 0x0023E9F8
+		// Token: 0x06006DC3 RID: 28099 RVA: 0x002407D8 File Offset: 0x0023E9D8
 		private void OnEnable()
 		{
 			TickSystem<object>.AddCallbackTarget(this);
@@ -43,7 +43,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DC4 RID: 28100 RVA: 0x00240910 File Offset: 0x0023EB10
+		// Token: 0x06006DC4 RID: 28100 RVA: 0x002408F0 File Offset: 0x0023EAF0
 		private void OnDisable()
 		{
 			TickSystem<object>.RemoveCallbackTarget(this);
@@ -56,7 +56,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DC5 RID: 28101 RVA: 0x0024097C File Offset: 0x0023EB7C
+		// Token: 0x06006DC5 RID: 28101 RVA: 0x0024095C File Offset: 0x0023EB5C
 		public void Tick()
 		{
 			if (this.transferrableObject.InHand() && this.audioSource && !this.audioSource.isPlaying && this.flyLoopingAudio != null)
@@ -91,7 +91,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DC6 RID: 28102 RVA: 0x00240A8C File Offset: 0x0023EC8C
+		// Token: 0x06006DC6 RID: 28102 RVA: 0x00240A6C File Offset: 0x0023EC6C
 		private void SmoothRotation(bool isClosing)
 		{
 			if (isClosing)
@@ -121,7 +121,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DC7 RID: 28103 RVA: 0x00240C76 File Offset: 0x0023EE76
+		// Token: 0x06006DC7 RID: 28103 RVA: 0x00240C56 File Offset: 0x0023EE56
 		private void UpdateState(VenusFlyTrapHoldable.VenusState newState)
 		{
 			this.state = newState;
@@ -131,7 +131,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DC8 RID: 28104 RVA: 0x00240C94 File Offset: 0x0023EE94
+		// Token: 0x06006DC8 RID: 28104 RVA: 0x00240C74 File Offset: 0x0023EE74
 		private void TriggerEntered(TriggerEventNotifier notifier, Collider other)
 		{
 			if (this.state != VenusFlyTrapHoldable.VenusState.Open)
@@ -155,7 +155,7 @@ namespace GorillaTag.Cosmetics
 			GorillaTagger.Instance.StartVibration(componentInChildren.isLeftHand, this.hapticStrength, this.hapticDuration);
 		}
 
-		// Token: 0x06006DC9 RID: 28105 RVA: 0x00240D2F File Offset: 0x0023EF2F
+		// Token: 0x06006DC9 RID: 28105 RVA: 0x00240D0F File Offset: 0x0023EF0F
 		private void OnTriggerEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -170,7 +170,7 @@ namespace GorillaTag.Cosmetics
 			this.OnTriggerLocal();
 		}
 
-		// Token: 0x06006DCA RID: 28106 RVA: 0x00240D5B File Offset: 0x0023EF5B
+		// Token: 0x06006DCA RID: 28106 RVA: 0x00240D3B File Offset: 0x0023EF3B
 		private void OnTriggerLocal()
 		{
 			this.UpdateState(VenusFlyTrapHoldable.VenusState.Closing);

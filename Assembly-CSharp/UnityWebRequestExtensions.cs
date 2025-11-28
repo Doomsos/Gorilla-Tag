@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 // Token: 0x02000ABD RID: 2749
 public static class UnityWebRequestExtensions
 {
-	// Token: 0x060044E0 RID: 17632 RVA: 0x0016CEA4 File Offset: 0x0016B0A4
+	// Token: 0x060044E0 RID: 17632 RVA: 0x0016CE84 File Offset: 0x0016B084
 	public static TaskAwaiter<UnityWebRequest> GetAwaiter(this UnityWebRequestAsyncOperation asyncOp)
 	{
 		TaskCompletionSource<UnityWebRequest> tcs = new TaskCompletionSource<UnityWebRequest>();

@@ -11,7 +11,7 @@ namespace GorillaTag.Cosmetics
 	public class CosmeticSwapper : MonoBehaviour, ITickSystemTick
 	{
 		// Token: 0x17000A48 RID: 2632
-		// (get) Token: 0x06006C60 RID: 27744 RVA: 0x00238DFF File Offset: 0x00236FFF
+		// (get) Token: 0x06006C60 RID: 27744 RVA: 0x00238DDF File Offset: 0x00236FDF
 		private int CosmeticStepIndex
 		{
 			get
@@ -20,45 +20,45 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C61 RID: 27745 RVA: 0x00238E0C File Offset: 0x0023700C
+		// Token: 0x06006C61 RID: 27745 RVA: 0x00238DEC File Offset: 0x00236FEC
 		private void Awake()
 		{
 			this.controller = CosmeticsController.instance;
 		}
 
-		// Token: 0x06006C62 RID: 27746 RVA: 0x00238E1B File Offset: 0x0023701B
+		// Token: 0x06006C62 RID: 27746 RVA: 0x00238DFB File Offset: 0x00236FFB
 		private void OnEnable()
 		{
 			TickSystem<object>.AddTickCallback(this);
 			PlayerCosmeticsSystem.UnlockTemporaryCosmeticsGlobal(this.cosmeticIDs);
 		}
 
-		// Token: 0x06006C63 RID: 27747 RVA: 0x00238E2E File Offset: 0x0023702E
+		// Token: 0x06006C63 RID: 27747 RVA: 0x00238E0E File Offset: 0x0023700E
 		private void OnDisable()
 		{
 			PlayerCosmeticsSystem.LockTemporaryCosmeticsGlobal(this.cosmeticIDs);
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006C64 RID: 27748 RVA: 0x00238E41 File Offset: 0x00237041
+		// Token: 0x06006C64 RID: 27748 RVA: 0x00238E21 File Offset: 0x00237021
 		public void SwapInCosmetic(VRRig vrRig)
 		{
 			this.TriggerSwap(vrRig);
 		}
 
-		// Token: 0x06006C65 RID: 27749 RVA: 0x00238E4A File Offset: 0x0023704A
+		// Token: 0x06006C65 RID: 27749 RVA: 0x00238E2A File Offset: 0x0023702A
 		private CosmeticSwapper.SwapMode GetCurrentMode()
 		{
 			return this.swapMode;
 		}
 
-		// Token: 0x06006C66 RID: 27750 RVA: 0x00238E52 File Offset: 0x00237052
+		// Token: 0x06006C66 RID: 27750 RVA: 0x00238E32 File Offset: 0x00237032
 		private bool ShouldHoldFinalStep()
 		{
 			return this.holdFinalStep;
 		}
 
-		// Token: 0x06006C67 RID: 27751 RVA: 0x00238E5A File Offset: 0x0023705A
+		// Token: 0x06006C67 RID: 27751 RVA: 0x00238E3A File Offset: 0x0023703A
 		public int GetCurrentStepIndex(VRRig rig)
 		{
 			if (rig == null)
@@ -68,13 +68,13 @@ namespace GorillaTag.Cosmetics
 			return this.CosmeticStepIndex;
 		}
 
-		// Token: 0x06006C68 RID: 27752 RVA: 0x00238E6D File Offset: 0x0023706D
+		// Token: 0x06006C68 RID: 27752 RVA: 0x00238E4D File Offset: 0x0023704D
 		public int GetNumberOfSteps()
 		{
 			return this.cosmeticIDs.Count;
 		}
 
-		// Token: 0x06006C69 RID: 27753 RVA: 0x00238E7C File Offset: 0x0023707C
+		// Token: 0x06006C69 RID: 27753 RVA: 0x00238E5C File Offset: 0x0023705C
 		private void TriggerSwap(VRRig rig)
 		{
 			if (GorillaGameManager.instance != null && this.gameModeExclusion.Contains(GorillaGameManager.instance.GameType()))
@@ -130,7 +130,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C6A RID: 27754 RVA: 0x00238FD0 File Offset: 0x002371D0
+		// Token: 0x06006C6A RID: 27754 RVA: 0x00238FB0 File Offset: 0x002371B0
 		private CosmeticSwapper.CosmeticState? SwapInCosmeticWithReturn(string nameOrId, VRRig rig)
 		{
 			if (this.controller == null)
@@ -162,7 +162,7 @@ namespace GorillaTag.Cosmetics
 			});
 		}
 
-		// Token: 0x06006C6B RID: 27755 RVA: 0x002390BC File Offset: 0x002372BC
+		// Token: 0x06006C6B RID: 27755 RVA: 0x0023909C File Offset: 0x0023729C
 		private void RestorePreviousCosmetic(CosmeticSwapper.CosmeticState state)
 		{
 			if (this.controller == null)
@@ -182,7 +182,7 @@ namespace GorillaTag.Cosmetics
 			this.controller.UpdateWornCosmetics(true);
 		}
 
-		// Token: 0x06006C6C RID: 27756 RVA: 0x00239148 File Offset: 0x00237348
+		// Token: 0x06006C6C RID: 27756 RVA: 0x00239128 File Offset: 0x00237328
 		private CosmeticsController.CosmeticItem FindItem(string nameOrId)
 		{
 			CosmeticsController.CosmeticItem result;
@@ -198,7 +198,7 @@ namespace GorillaTag.Cosmetics
 			return this.controller.nullItem;
 		}
 
-		// Token: 0x06006C6D RID: 27757 RVA: 0x0023919C File Offset: 0x0023739C
+		// Token: 0x06006C6D RID: 27757 RVA: 0x0023917C File Offset: 0x0023737C
 		private CosmeticsController.CosmeticSlots GetCosmeticSlot(CosmeticsController.CosmeticItem item, out bool isLeftHand)
 		{
 			isLeftHand = false;
@@ -221,11 +221,11 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A49 RID: 2633
-		// (get) Token: 0x06006C6E RID: 27758 RVA: 0x00239211 File Offset: 0x00237411
-		// (set) Token: 0x06006C6F RID: 27759 RVA: 0x00239219 File Offset: 0x00237419
+		// (get) Token: 0x06006C6E RID: 27758 RVA: 0x002391F1 File Offset: 0x002373F1
+		// (set) Token: 0x06006C6F RID: 27759 RVA: 0x002391F9 File Offset: 0x002373F9
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006C70 RID: 27760 RVA: 0x00239224 File Offset: 0x00237424
+		// Token: 0x06006C70 RID: 27760 RVA: 0x00239204 File Offset: 0x00237404
 		public void Tick()
 		{
 			if (this.newSwappedCosmetics.Count > 0)
@@ -265,21 +265,21 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C71 RID: 27761 RVA: 0x00239315 File Offset: 0x00237515
+		// Token: 0x06006C71 RID: 27761 RVA: 0x002392F5 File Offset: 0x002374F5
 		private void AddNewSwappedCosmetic(CosmeticSwapper.CosmeticState state)
 		{
 			this.newSwappedCosmetics.Push(state);
 			this.lastCosmeticSwapTime = Time.time;
 		}
 
-		// Token: 0x06006C72 RID: 27762 RVA: 0x0023932E File Offset: 0x0023752E
+		// Token: 0x06006C72 RID: 27762 RVA: 0x0023930E File Offset: 0x0023750E
 		private void MarkFinalCosmeticStep()
 		{
 			this.isAtFinalCosmeticStep = true;
 			this.lastCosmeticSwapTime = Time.time;
 		}
 
-		// Token: 0x06006C73 RID: 27763 RVA: 0x00239342 File Offset: 0x00237542
+		// Token: 0x06006C73 RID: 27763 RVA: 0x00239322 File Offset: 0x00237522
 		private void UnmarkFinalCosmeticStep()
 		{
 			this.isAtFinalCosmeticStep = false;

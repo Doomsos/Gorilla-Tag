@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200093B RID: 2363
 public class CustomMapsLoadRoomMapButton : GorillaPressableButton
 {
-	// Token: 0x06003C5E RID: 15454 RVA: 0x0013EFB3 File Offset: 0x0013D1B3
+	// Token: 0x06003C5E RID: 15454 RVA: 0x0013EF93 File Offset: 0x0013D193
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
@@ -17,7 +17,7 @@ public class CustomMapsLoadRoomMapButton : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x06003C5F RID: 15455 RVA: 0x0013EFD4 File Offset: 0x0013D1D4
+	// Token: 0x06003C5F RID: 15455 RVA: 0x0013EFB4 File Offset: 0x0013D1B4
 	private IEnumerator ButtonPressed_Local()
 	{
 		this.isOn = true;

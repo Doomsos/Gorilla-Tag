@@ -7,7 +7,7 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityDie : GRAbilityBase
 {
-	// Token: 0x06002A49 RID: 10825 RVA: 0x000E4190 File Offset: 0x000E2390
+	// Token: 0x06002A49 RID: 10825 RVA: 0x000E4170 File Offset: 0x000E2370
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -23,7 +23,7 @@ public class GRAbilityDie : GRAbilityBase
 		this.staggerMovement.Setup(root);
 	}
 
-	// Token: 0x06002A4A RID: 10826 RVA: 0x000E41F0 File Offset: 0x000E23F0
+	// Token: 0x06002A4A RID: 10826 RVA: 0x000E41D0 File Offset: 0x000E23D0
 	public override void Start()
 	{
 		base.Start();
@@ -47,7 +47,7 @@ public class GRAbilityDie : GRAbilityBase
 		GRAbilityDie.Disable(this.disableCollidersWhenDead, true);
 	}
 
-	// Token: 0x06002A4B RID: 10827 RVA: 0x000E42E6 File Offset: 0x000E24E6
+	// Token: 0x06002A4B RID: 10827 RVA: 0x000E42C6 File Offset: 0x000E24C6
 	public override void Stop()
 	{
 		this.staggerMovement.Stop();
@@ -57,7 +57,7 @@ public class GRAbilityDie : GRAbilityBase
 		GRAbilityDie.Disable(this.disableCollidersWhenDead, false);
 	}
 
-	// Token: 0x06002A4C RID: 10828 RVA: 0x000E4324 File Offset: 0x000E2524
+	// Token: 0x06002A4C RID: 10828 RVA: 0x000E4304 File Offset: 0x000E2504
 	public void SetStaggerVelocity(Vector3 vel)
 	{
 		float magnitude = vel.magnitude;
@@ -70,13 +70,13 @@ public class GRAbilityDie : GRAbilityBase
 		this.staggerMovement.InitFromVelocityAndDuration(vel, this.delayDeath);
 	}
 
-	// Token: 0x06002A4D RID: 10829 RVA: 0x000E4370 File Offset: 0x000E2570
+	// Token: 0x06002A4D RID: 10829 RVA: 0x000E4350 File Offset: 0x000E2550
 	public void SetInstigatingPlayerIndex(int actorNumber)
 	{
 		this.instigatingActorNumber = actorNumber;
 	}
 
-	// Token: 0x06002A4E RID: 10830 RVA: 0x000E437C File Offset: 0x000E257C
+	// Token: 0x06002A4E RID: 10830 RVA: 0x000E435C File Offset: 0x000E255C
 	private void Die()
 	{
 		this.soundOnHide.Play(null);
@@ -105,7 +105,7 @@ public class GRAbilityDie : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A4F RID: 10831 RVA: 0x000E4468 File Offset: 0x000E2668
+	// Token: 0x06002A4F RID: 10831 RVA: 0x000E4448 File Offset: 0x000E2648
 	public void DestroySelf()
 	{
 		GameEntity entity = this.agent.entity;
@@ -132,7 +132,7 @@ public class GRAbilityDie : GRAbilityBase
 		return false;
 	}
 
-	// Token: 0x06002A51 RID: 10833 RVA: 0x000E44E8 File Offset: 0x000E26E8
+	// Token: 0x06002A51 RID: 10833 RVA: 0x000E44C8 File Offset: 0x000E26C8
 	protected override void UpdateShared(float dt)
 	{
 		if (this.startTime >= 0.0)
@@ -157,7 +157,7 @@ public class GRAbilityDie : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A52 RID: 10834 RVA: 0x000E4590 File Offset: 0x000E2790
+	// Token: 0x06002A52 RID: 10834 RVA: 0x000E4570 File Offset: 0x000E2770
 	public static void Hide(List<Renderer> renderers, bool hide)
 	{
 		if (renderers == null)
@@ -173,7 +173,7 @@ public class GRAbilityDie : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A53 RID: 10835 RVA: 0x000E45D4 File Offset: 0x000E27D4
+	// Token: 0x06002A53 RID: 10835 RVA: 0x000E45B4 File Offset: 0x000E27B4
 	public static void Disable(List<Collider> colliders, bool disable)
 	{
 		if (colliders == null)

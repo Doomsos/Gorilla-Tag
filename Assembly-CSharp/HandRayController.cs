@@ -6,7 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 public class HandRayController : MonoBehaviour
 {
 	// Token: 0x17000661 RID: 1633
-	// (get) Token: 0x06004371 RID: 17265 RVA: 0x0016612A File Offset: 0x0016432A
+	// (get) Token: 0x06004371 RID: 17265 RVA: 0x0016610A File Offset: 0x0016430A
 	public static HandRayController Instance
 	{
 		get
@@ -23,7 +23,7 @@ public class HandRayController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004372 RID: 17266 RVA: 0x00166164 File Offset: 0x00164364
+	// Token: 0x06004372 RID: 17266 RVA: 0x00166144 File Offset: 0x00164344
 	private void Awake()
 	{
 		if (HandRayController.instance != null && HandRayController.instance != this)
@@ -35,7 +35,7 @@ public class HandRayController : MonoBehaviour
 		HandRayController.instance = this;
 	}
 
-	// Token: 0x06004373 RID: 17267 RVA: 0x001661A4 File Offset: 0x001643A4
+	// Token: 0x06004373 RID: 17267 RVA: 0x00166184 File Offset: 0x00164384
 	private void Start()
 	{
 		this._leftHandRay.attachTransform = (this._leftHandRay.rayOriginTransform = KIDHandReference.LeftHand.transform);
@@ -44,13 +44,13 @@ public class HandRayController : MonoBehaviour
 		this._activationCounter = 0;
 	}
 
-	// Token: 0x06004374 RID: 17268 RVA: 0x00166204 File Offset: 0x00164404
+	// Token: 0x06004374 RID: 17268 RVA: 0x001661E4 File Offset: 0x001643E4
 	private void OnDisable()
 	{
 		this.DisableHandRays();
 	}
 
-	// Token: 0x06004375 RID: 17269 RVA: 0x0016620C File Offset: 0x0016440C
+	// Token: 0x06004375 RID: 17269 RVA: 0x001661EC File Offset: 0x001643EC
 	public void EnableHandRays()
 	{
 		if (this._activationCounter == 0)
@@ -64,7 +64,7 @@ public class HandRayController : MonoBehaviour
 		this._activationCounter++;
 	}
 
-	// Token: 0x06004376 RID: 17270 RVA: 0x0016624C File Offset: 0x0016444C
+	// Token: 0x06004376 RID: 17270 RVA: 0x0016622C File Offset: 0x0016442C
 	public void DisableHandRays()
 	{
 		this._activationCounter--;
@@ -78,7 +78,7 @@ public class HandRayController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004377 RID: 17271 RVA: 0x0016628C File Offset: 0x0016448C
+	// Token: 0x06004377 RID: 17271 RVA: 0x0016626C File Offset: 0x0016446C
 	public void PulseActiveHandray(float vibrationStrength, float vibrationDuration)
 	{
 		if (this._activeHandRay == null)
@@ -88,7 +88,7 @@ public class HandRayController : MonoBehaviour
 		this._activeHandRay.SendHapticImpulse(vibrationStrength, vibrationDuration);
 	}
 
-	// Token: 0x06004378 RID: 17272 RVA: 0x001662AB File Offset: 0x001644AB
+	// Token: 0x06004378 RID: 17272 RVA: 0x0016628B File Offset: 0x0016448B
 	private void PostUpdate()
 	{
 		if (!this._hasInitialised)
@@ -109,7 +109,7 @@ public class HandRayController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004379 RID: 17273 RVA: 0x001662E4 File Offset: 0x001644E4
+	// Token: 0x06004379 RID: 17273 RVA: 0x001662C4 File Offset: 0x001644C4
 	private void ToggleRightHandRay(bool enabled)
 	{
 		Debug.LogFormat(string.Format("[KID::UI::HAND_RAY_CONTROLLER] RIGHT Hand is: {0}. Setting to: {1}", this._rightHandRay.gameObject.activeInHierarchy, enabled), Array.Empty<object>());
@@ -120,7 +120,7 @@ public class HandRayController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600437A RID: 17274 RVA: 0x00166340 File Offset: 0x00164540
+	// Token: 0x0600437A RID: 17274 RVA: 0x00166320 File Offset: 0x00164520
 	private void ToggleLeftHandRay(bool enabled)
 	{
 		Debug.LogFormat(string.Format("[KID::UI::HAND_RAY_CONTROLLER] LEFT Hand is: {0}. Setting to: {1}", this._rightHandRay.gameObject.activeInHierarchy, enabled), Array.Empty<object>());
@@ -131,7 +131,7 @@ public class HandRayController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600437B RID: 17275 RVA: 0x0016639C File Offset: 0x0016459C
+	// Token: 0x0600437B RID: 17275 RVA: 0x0016637C File Offset: 0x0016457C
 	private void InitialiseHands()
 	{
 		Debug.Log("[KID::UI::HAND_RAY_CONTROLLER] Initialising Hands");
@@ -140,7 +140,7 @@ public class HandRayController : MonoBehaviour
 		this._hasInitialised = true;
 	}
 
-	// Token: 0x0600437C RID: 17276 RVA: 0x001663D0 File Offset: 0x001645D0
+	// Token: 0x0600437C RID: 17276 RVA: 0x001663B0 File Offset: 0x001645B0
 	private void ToggleHands()
 	{
 		if (!this._hasInitialised)
@@ -162,7 +162,7 @@ public class HandRayController : MonoBehaviour
 		this.ToggleLeftHandRay(handSide == HandRayController.HandSide.Left);
 	}
 
-	// Token: 0x0600437D RID: 17277 RVA: 0x00166465 File Offset: 0x00164665
+	// Token: 0x0600437D RID: 17277 RVA: 0x00166445 File Offset: 0x00164645
 	private void HideHands()
 	{
 		this.ToggleRightHandRay(false);

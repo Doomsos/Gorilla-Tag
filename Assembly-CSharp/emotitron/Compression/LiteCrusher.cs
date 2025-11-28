@@ -7,7 +7,7 @@ namespace emotitron.Compression
 	[Serializable]
 	public abstract class LiteCrusher
 	{
-		// Token: 0x06006F3A RID: 28474 RVA: 0x00244884 File Offset: 0x00242A84
+		// Token: 0x06006F3A RID: 28474 RVA: 0x00244864 File Offset: 0x00242A64
 		public static int GetBitsForMaxValue(uint maxvalue)
 		{
 			for (int i = 0; i < 32; i++)

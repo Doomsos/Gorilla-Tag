@@ -7,14 +7,14 @@ namespace GorillaTagScripts.AI.States
 	// Token: 0x02000E9A RID: 3738
 	public class Patrol_State : IState
 	{
-		// Token: 0x06005D75 RID: 23925 RVA: 0x001E0077 File Offset: 0x001DE277
+		// Token: 0x06005D75 RID: 23925 RVA: 0x001E0057 File Offset: 0x001DE257
 		public Patrol_State(AIEntity entity)
 		{
 			this.entity = entity;
 			this.agent = this.entity.navMeshAgent;
 		}
 
-		// Token: 0x06005D76 RID: 23926 RVA: 0x001E0098 File Offset: 0x001DE298
+		// Token: 0x06005D76 RID: 23926 RVA: 0x001E0078 File Offset: 0x001DE278
 		public void Tick()
 		{
 			if (this.agent.remainingDistance <= this.agent.stoppingDistance)
@@ -24,7 +24,7 @@ namespace GorillaTagScripts.AI.States
 			}
 		}
 
-		// Token: 0x06005D77 RID: 23927 RVA: 0x001E0100 File Offset: 0x001DE300
+		// Token: 0x06005D77 RID: 23927 RVA: 0x001E00E0 File Offset: 0x001DE2E0
 		public void OnEnter()
 		{
 			string text = "Current State: ";

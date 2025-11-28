@@ -5,11 +5,11 @@ using UnityEngine;
 public class RotationAnimation : MonoBehaviour, ITickSystemTick
 {
 	// Token: 0x170002D3 RID: 723
-	// (get) Token: 0x06001AB6 RID: 6838 RVA: 0x0008D339 File Offset: 0x0008B539
-	// (set) Token: 0x06001AB7 RID: 6839 RVA: 0x0008D341 File Offset: 0x0008B541
+	// (get) Token: 0x06001AB6 RID: 6838 RVA: 0x0008D319 File Offset: 0x0008B519
+	// (set) Token: 0x06001AB7 RID: 6839 RVA: 0x0008D321 File Offset: 0x0008B521
 	public bool TickRunning { get; set; }
 
-	// Token: 0x06001AB8 RID: 6840 RVA: 0x0008D34C File Offset: 0x0008B54C
+	// Token: 0x06001AB8 RID: 6840 RVA: 0x0008D32C File Offset: 0x0008B52C
 	public void Tick()
 	{
 		Vector3 vector = Vector3.zero;
@@ -28,13 +28,13 @@ public class RotationAnimation : MonoBehaviour, ITickSystemTick
 		base.transform.localRotation = Quaternion.Euler(vector) * this.baseRotation;
 	}
 
-	// Token: 0x06001AB9 RID: 6841 RVA: 0x0008D466 File Offset: 0x0008B666
+	// Token: 0x06001AB9 RID: 6841 RVA: 0x0008D446 File Offset: 0x0008B646
 	private void Awake()
 	{
 		this.baseRotation = base.transform.localRotation;
 	}
 
-	// Token: 0x06001ABA RID: 6842 RVA: 0x0008D479 File Offset: 0x0008B679
+	// Token: 0x06001ABA RID: 6842 RVA: 0x0008D459 File Offset: 0x0008B659
 	private void OnEnable()
 	{
 		TickSystem<object>.AddTickCallback(this);
@@ -42,20 +42,20 @@ public class RotationAnimation : MonoBehaviour, ITickSystemTick
 		this.baseTime = Time.time;
 	}
 
-	// Token: 0x06001ABB RID: 6843 RVA: 0x0008D493 File Offset: 0x0008B693
+	// Token: 0x06001ABB RID: 6843 RVA: 0x0008D473 File Offset: 0x0008B673
 	public void ReleaseToDisable()
 	{
 		this.releaseSet = true;
 		this.releaseTime = Time.time;
 	}
 
-	// Token: 0x06001ABC RID: 6844 RVA: 0x0008D4A7 File Offset: 0x0008B6A7
+	// Token: 0x06001ABC RID: 6844 RVA: 0x0008D487 File Offset: 0x0008B687
 	public void CancelRelease()
 	{
 		this.releaseSet = false;
 	}
 
-	// Token: 0x06001ABD RID: 6845 RVA: 0x0008D4B0 File Offset: 0x0008B6B0
+	// Token: 0x06001ABD RID: 6845 RVA: 0x0008D490 File Offset: 0x0008B690
 	private void OnDisable()
 	{
 		base.transform.localRotation = this.baseRotation;

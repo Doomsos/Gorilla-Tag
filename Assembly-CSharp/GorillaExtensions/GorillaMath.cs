@@ -7,7 +7,7 @@ namespace GorillaExtensions
 	// Token: 0x02000FB9 RID: 4025
 	public static class GorillaMath
 	{
-		// Token: 0x06006506 RID: 25862 RVA: 0x0020FC4C File Offset: 0x0020DE4C
+		// Token: 0x06006506 RID: 25862 RVA: 0x0020FC2C File Offset: 0x0020DE2C
 		public static Vector3 GetAngularVelocity(Quaternion oldRotation, Quaternion newRotation)
 		{
 			Quaternion quaternion = newRotation * Quaternion.Inverse(oldRotation);
@@ -35,7 +35,7 @@ namespace GorillaExtensions
 			return zero;
 		}
 
-		// Token: 0x06006507 RID: 25863 RVA: 0x0020FD08 File Offset: 0x0020DF08
+		// Token: 0x06006507 RID: 25863 RVA: 0x0020FCE8 File Offset: 0x0020DEE8
 		public static float FastInvSqrt(float z)
 		{
 			if (z == 0f)
@@ -51,13 +51,13 @@ namespace GorillaExtensions
 			return floatIntUnion.f * z;
 		}
 
-		// Token: 0x06006508 RID: 25864 RVA: 0x0020FD7B File Offset: 0x0020DF7B
+		// Token: 0x06006508 RID: 25864 RVA: 0x0020FD5B File Offset: 0x0020DF5B
 		public static float Dot2(in Vector3 v)
 		{
 			return Vector3.Dot(v, v);
 		}
 
-		// Token: 0x06006509 RID: 25865 RVA: 0x0020FD90 File Offset: 0x0020DF90
+		// Token: 0x06006509 RID: 25865 RVA: 0x0020FD70 File Offset: 0x0020DF70
 		public static Vector4 RaycastToCappedCone(in Vector3 rayOrigin, in Vector3 rayDirection, in Vector3 coneTip, in Vector3 coneBase, in float coneTipRadius, in float coneBaseRadius)
 		{
 			Vector3 vector = coneBase - coneTip;
@@ -108,7 +108,7 @@ namespace GorillaExtensions
 			return -Vector4.one;
 		}
 
-		// Token: 0x0600650A RID: 25866 RVA: 0x00210034 File Offset: 0x0020E234
+		// Token: 0x0600650A RID: 25866 RVA: 0x00210014 File Offset: 0x0020E214
 		public static void LineSegClosestPoints(Vector3 a, Vector3 u, Vector3 b, Vector3 v, out Vector3 lineAPoint, out Vector3 lineBPoint)
 		{
 			lineAPoint = a;
@@ -139,7 +139,7 @@ namespace GorillaExtensions
 		[Serializable]
 		public struct RemapFloatInfo
 		{
-			// Token: 0x0600650B RID: 25867 RVA: 0x0021013A File Offset: 0x0020E33A
+			// Token: 0x0600650B RID: 25867 RVA: 0x0021011A File Offset: 0x0020E31A
 			public RemapFloatInfo(float fromMin = 0f, float toMin = 0f, float fromMax = 1f, float toMax = 1f)
 			{
 				this.fromMin = fromMin;
@@ -148,7 +148,7 @@ namespace GorillaExtensions
 				this.toMax = toMax;
 			}
 
-			// Token: 0x0600650C RID: 25868 RVA: 0x0021015C File Offset: 0x0020E35C
+			// Token: 0x0600650C RID: 25868 RVA: 0x0021013C File Offset: 0x0020E33C
 			public void OnValidate()
 			{
 				if (this.fromMin < this.fromMax)
@@ -161,13 +161,13 @@ namespace GorillaExtensions
 				}
 			}
 
-			// Token: 0x0600650D RID: 25869 RVA: 0x002101A9 File Offset: 0x0020E3A9
+			// Token: 0x0600650D RID: 25869 RVA: 0x00210189 File Offset: 0x0020E389
 			public bool IsValid()
 			{
 				return this.fromMin < this.fromMax && this.toMin < this.toMax;
 			}
 
-			// Token: 0x0600650E RID: 25870 RVA: 0x002101C9 File Offset: 0x0020E3C9
+			// Token: 0x0600650E RID: 25870 RVA: 0x002101A9 File Offset: 0x0020E3A9
 			public float Remap(float value)
 			{
 				return this.toMin + (value - this.fromMin) / (this.fromMax - this.fromMin) * (this.toMax - this.toMin);

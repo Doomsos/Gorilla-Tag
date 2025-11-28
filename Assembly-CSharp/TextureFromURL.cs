@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000CC2 RID: 3266
 public class TextureFromURL : MonoBehaviour
 {
-	// Token: 0x06004FB2 RID: 20402 RVA: 0x0019A302 File Offset: 0x00198502
+	// Token: 0x06004FB2 RID: 20402 RVA: 0x0019A2E2 File Offset: 0x001984E2
 	private void OnEnable()
 	{
 		if (this.data.Length == 0)
@@ -22,7 +22,7 @@ public class TextureFromURL : MonoBehaviour
 		this.applyRemoteTexture(this.data);
 	}
 
-	// Token: 0x06004FB3 RID: 20403 RVA: 0x0019A330 File Offset: 0x00198530
+	// Token: 0x06004FB3 RID: 20403 RVA: 0x0019A310 File Offset: 0x00198510
 	private void LoadFromTitleData()
 	{
 		TextureFromURL.<LoadFromTitleData>d__7 <LoadFromTitleData>d__;
@@ -32,7 +32,7 @@ public class TextureFromURL : MonoBehaviour
 		<LoadFromTitleData>d__.<>t__builder.Start<TextureFromURL.<LoadFromTitleData>d__7>(ref <LoadFromTitleData>d__);
 	}
 
-	// Token: 0x06004FB4 RID: 20404 RVA: 0x0019A367 File Offset: 0x00198567
+	// Token: 0x06004FB4 RID: 20404 RVA: 0x0019A347 File Offset: 0x00198547
 	private void OnDisable()
 	{
 		if (this.texture != null)
@@ -47,7 +47,7 @@ public class TextureFromURL : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06004FB6 RID: 20406 RVA: 0x0019A38C File Offset: 0x0019858C
+	// Token: 0x06004FB6 RID: 20406 RVA: 0x0019A36C File Offset: 0x0019856C
 	private void OnTitleDataRequestComplete(string imageUrl)
 	{
 		imageUrl = imageUrl.Replace("\\r", "\r").Replace("\\n", "\n");
@@ -58,7 +58,7 @@ public class TextureFromURL : MonoBehaviour
 		this.applyRemoteTexture(imageUrl);
 	}
 
-	// Token: 0x06004FB7 RID: 20407 RVA: 0x0019A3F0 File Offset: 0x001985F0
+	// Token: 0x06004FB7 RID: 20407 RVA: 0x0019A3D0 File Offset: 0x001985D0
 	private void applyRemoteTexture(string imageUrl)
 	{
 		TextureFromURL.<applyRemoteTexture>d__11 <applyRemoteTexture>d__;
@@ -69,7 +69,7 @@ public class TextureFromURL : MonoBehaviour
 		<applyRemoteTexture>d__.<>t__builder.Start<TextureFromURL.<applyRemoteTexture>d__11>(ref <applyRemoteTexture>d__);
 	}
 
-	// Token: 0x06004FB8 RID: 20408 RVA: 0x0019A430 File Offset: 0x00198630
+	// Token: 0x06004FB8 RID: 20408 RVA: 0x0019A410 File Offset: 0x00198610
 	private Task<Texture2D> GetRemoteTexture(string url)
 	{
 		TextureFromURL.<GetRemoteTexture>d__12 <GetRemoteTexture>d__;

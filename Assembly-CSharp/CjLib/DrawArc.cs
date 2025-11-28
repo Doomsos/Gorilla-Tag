@@ -7,7 +7,7 @@ namespace CjLib
 	[ExecuteInEditMode]
 	public class DrawArc : DrawBase
 	{
-		// Token: 0x06007028 RID: 28712 RVA: 0x0024778F File Offset: 0x0024598F
+		// Token: 0x06007028 RID: 28712 RVA: 0x0024776F File Offset: 0x0024596F
 		private void OnValidate()
 		{
 			this.Wireframe = true;
@@ -16,7 +16,7 @@ namespace CjLib
 			this.NumSegments = Mathf.Max(0, this.NumSegments);
 		}
 
-		// Token: 0x06007029 RID: 28713 RVA: 0x002477C8 File Offset: 0x002459C8
+		// Token: 0x06007029 RID: 28713 RVA: 0x002477A8 File Offset: 0x002459A8
 		protected override void Draw(Color color, DebugUtil.Style style, bool depthTest)
 		{
 			Quaternion quaternion = QuaternionUtil.AxisAngle(Vector3.forward, this.StartAngle * MathUtil.Deg2Rad);

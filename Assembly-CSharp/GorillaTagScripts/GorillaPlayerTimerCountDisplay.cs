@@ -8,19 +8,19 @@ namespace GorillaTagScripts
 	// Token: 0x02000DEF RID: 3567
 	public class GorillaPlayerTimerCountDisplay : MonoBehaviour, ITickSystemTick
 	{
-		// Token: 0x060058F5 RID: 22773 RVA: 0x001C7B34 File Offset: 0x001C5D34
+		// Token: 0x060058F5 RID: 22773 RVA: 0x001C7B14 File Offset: 0x001C5D14
 		private void Start()
 		{
 			this.TryInit();
 		}
 
-		// Token: 0x060058F6 RID: 22774 RVA: 0x001C7B34 File Offset: 0x001C5D34
+		// Token: 0x060058F6 RID: 22774 RVA: 0x001C7B14 File Offset: 0x001C5D14
 		private void OnEnable()
 		{
 			this.TryInit();
 		}
 
-		// Token: 0x060058F7 RID: 22775 RVA: 0x001C7B3C File Offset: 0x001C5D3C
+		// Token: 0x060058F7 RID: 22775 RVA: 0x001C7B1C File Offset: 0x001C5D1C
 		private void TryInit()
 		{
 			if (this.isInitialized)
@@ -41,7 +41,7 @@ namespace GorillaTagScripts
 			this.isInitialized = true;
 		}
 
-		// Token: 0x060058F8 RID: 22776 RVA: 0x001C7BC8 File Offset: 0x001C5DC8
+		// Token: 0x060058F8 RID: 22776 RVA: 0x001C7BA8 File Offset: 0x001C5DA8
 		private void OnDisable()
 		{
 			if (PlayerTimerManager.instance != null)
@@ -56,7 +56,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058F9 RID: 22777 RVA: 0x001C7C2D File Offset: 0x001C5E2D
+		// Token: 0x060058F9 RID: 22777 RVA: 0x001C7C0D File Offset: 0x001C5E0D
 		private void OnLocalTimerStarted()
 		{
 			if (!this.TickRunning)
@@ -65,7 +65,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058FA RID: 22778 RVA: 0x001C7C40 File Offset: 0x001C5E40
+		// Token: 0x060058FA RID: 22778 RVA: 0x001C7C20 File Offset: 0x001C5E20
 		private void OnTimerStopped(int actorNum, int timeDelta)
 		{
 			if (actorNum == NetworkSystem.Instance.LocalPlayer.ActorNumber)
@@ -79,7 +79,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058FB RID: 22779 RVA: 0x001C7CA4 File Offset: 0x001C5EA4
+		// Token: 0x060058FB RID: 22779 RVA: 0x001C7C84 File Offset: 0x001C5E84
 		private void UpdateLatestTime()
 		{
 			float timeForPlayer = PlayerTimerManager.instance.GetTimeForPlayer(NetworkSystem.Instance.LocalPlayer.ActorNumber);
@@ -87,11 +87,11 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x17000856 RID: 2134
-		// (get) Token: 0x060058FC RID: 22780 RVA: 0x001C7CF4 File Offset: 0x001C5EF4
-		// (set) Token: 0x060058FD RID: 22781 RVA: 0x001C7CFC File Offset: 0x001C5EFC
+		// (get) Token: 0x060058FC RID: 22780 RVA: 0x001C7CD4 File Offset: 0x001C5ED4
+		// (set) Token: 0x060058FD RID: 22781 RVA: 0x001C7CDC File Offset: 0x001C5EDC
 		public bool TickRunning { get; set; }
 
-		// Token: 0x060058FE RID: 22782 RVA: 0x001C7D05 File Offset: 0x001C5F05
+		// Token: 0x060058FE RID: 22782 RVA: 0x001C7CE5 File Offset: 0x001C5EE5
 		public void Tick()
 		{
 			this.UpdateLatestTime();

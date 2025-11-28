@@ -9,7 +9,7 @@ using UnityEngine.Networking;
 // Token: 0x02000504 RID: 1284
 public class DeepLinkHandler : MonoBehaviour
 {
-	// Token: 0x060020DC RID: 8412 RVA: 0x000AE08A File Offset: 0x000AC28A
+	// Token: 0x060020DC RID: 8412 RVA: 0x000AE06A File Offset: 0x000AC26A
 	public void Awake()
 	{
 		if (DeepLinkHandler.instance == null)
@@ -23,7 +23,7 @@ public class DeepLinkHandler : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060020DD RID: 8413 RVA: 0x000AE0BC File Offset: 0x000AC2BC
+	// Token: 0x060020DD RID: 8413 RVA: 0x000AE09C File Offset: 0x000AC29C
 	public static void Initialize(GameObject parent)
 	{
 		if (DeepLinkHandler.instance == null && parent != null)
@@ -43,7 +43,7 @@ public class DeepLinkHandler : MonoBehaviour
 		Object.Destroy(DeepLinkHandler.instance);
 	}
 
-	// Token: 0x060020DE RID: 8414 RVA: 0x000AE140 File Offset: 0x000AC340
+	// Token: 0x060020DE RID: 8414 RVA: 0x000AE120 File Offset: 0x000AC320
 	private void RefreshLaunchDetails()
 	{
 		if (Application.platform != 11)
@@ -63,7 +63,7 @@ public class DeepLinkHandler : MonoBehaviour
 		}), null);
 	}
 
-	// Token: 0x060020DF RID: 8415 RVA: 0x000AE1CB File Offset: 0x000AC3CB
+	// Token: 0x060020DF RID: 8415 RVA: 0x000AE1AB File Offset: 0x000AC3AB
 	private static IEnumerator ProcessWebRequest(string url, string data, string contentType, Action<UnityWebRequest> callback)
 	{
 		UnityWebRequest request = UnityWebRequest.Post(url, data, contentType);
@@ -72,7 +72,7 @@ public class DeepLinkHandler : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060020E0 RID: 8416 RVA: 0x000AE1F0 File Offset: 0x000AC3F0
+	// Token: 0x060020E0 RID: 8416 RVA: 0x000AE1D0 File Offset: 0x000AC3D0
 	private void HandleDeepLink()
 	{
 		GTDev.Log<string>("[DeepLinkHandler::HandleDeepLink] Handling deep link...", null);
@@ -116,7 +116,7 @@ public class DeepLinkHandler : MonoBehaviour
 		Object.Destroy(this);
 	}
 
-	// Token: 0x060020E1 RID: 8417 RVA: 0x000AE3FC File Offset: 0x000AC5FC
+	// Token: 0x060020E1 RID: 8417 RVA: 0x000AE3DC File Offset: 0x000AC5DC
 	private void OnWitchbloodCollabResponse(UnityWebRequest completedRequest)
 	{
 		if (completedRequest.result != 1)
@@ -135,7 +135,7 @@ public class DeepLinkHandler : MonoBehaviour
 		base.StartCoroutine(this.CheckProcessExternalUnlock(this.WitchbloodCollabCosmeticID, true, true, true));
 	}
 
-	// Token: 0x060020E2 RID: 8418 RVA: 0x000AE48C File Offset: 0x000AC68C
+	// Token: 0x060020E2 RID: 8418 RVA: 0x000AE46C File Offset: 0x000AC66C
 	private void OnRaccoonLagoonCollabResponse(UnityWebRequest completedRequest)
 	{
 		if (completedRequest.result != 1)
@@ -154,7 +154,7 @@ public class DeepLinkHandler : MonoBehaviour
 		base.StartCoroutine(this.CheckProcessExternalUnlock(this.RaccoonLagoonCosmeticIDs, true, true, true));
 	}
 
-	// Token: 0x060020E3 RID: 8419 RVA: 0x000AE51A File Offset: 0x000AC71A
+	// Token: 0x060020E3 RID: 8419 RVA: 0x000AE4FA File Offset: 0x000AC6FA
 	private IEnumerator CheckProcessExternalUnlock(string[] itemIDs, bool autoEquip, bool isLeftHand, bool destroyOnFinish)
 	{
 		GTDev.Log<string>("[DeepLinkHandler::CheckProcessExternalUnlock] Checking if we can process external cosmetic unlock...", null);

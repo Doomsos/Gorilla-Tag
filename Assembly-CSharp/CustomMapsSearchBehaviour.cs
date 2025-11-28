@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200095A RID: 2394
 public class CustomMapsSearchBehaviour : CustomMapsBehaviourBase
 {
-	// Token: 0x06003D3D RID: 15677 RVA: 0x001453B8 File Offset: 0x001435B8
+	// Token: 0x06003D3D RID: 15677 RVA: 0x00145398 File Offset: 0x00143598
 	public CustomMapsSearchBehaviour(CustomMapsAIBehaviourController AIcontroller, AIAgent agentSettings)
 	{
 		this.sightOffset = agentSettings.sightOffset;
@@ -17,19 +17,19 @@ public class CustomMapsSearchBehaviour : CustomMapsBehaviourBase
 		this.controller = AIcontroller;
 	}
 
-	// Token: 0x06003D3E RID: 15678 RVA: 0x00145426 File Offset: 0x00143626
+	// Token: 0x06003D3E RID: 15678 RVA: 0x00145406 File Offset: 0x00143606
 	public override bool CanExecute()
 	{
 		return !this.controller.IsNull();
 	}
 
-	// Token: 0x06003D3F RID: 15679 RVA: 0x00145438 File Offset: 0x00143638
+	// Token: 0x06003D3F RID: 15679 RVA: 0x00145418 File Offset: 0x00143618
 	public override bool CanContinueExecuting()
 	{
 		return this.CanExecute() && this.controller.TargetPlayer == null;
 	}
 
-	// Token: 0x06003D40 RID: 15680 RVA: 0x00145458 File Offset: 0x00143658
+	// Token: 0x06003D40 RID: 15680 RVA: 0x00145438 File Offset: 0x00143638
 	public override void Execute()
 	{
 		if (Time.time < this.lastSearchTime + 0.1f)

@@ -6,7 +6,7 @@ namespace GorillaTagScripts
 	[Serializable]
 	public class BuilderTableConfiguration
 	{
-		// Token: 0x0600568D RID: 22157 RVA: 0x001B3C1C File Offset: 0x001B1E1C
+		// Token: 0x0600568D RID: 22157 RVA: 0x001B3BFC File Offset: 0x001B1DFC
 		public BuilderTableConfiguration()
 		{
 			this.version = 0;

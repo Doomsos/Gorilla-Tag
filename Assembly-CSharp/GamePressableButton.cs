@@ -5,13 +5,13 @@ using UnityEngine.Events;
 // Token: 0x02000630 RID: 1584
 public class GamePressableButton : MonoBehaviour, IClickable
 {
-	// Token: 0x0600286F RID: 10351 RVA: 0x000D7220 File Offset: 0x000D5420
+	// Token: 0x0600286F RID: 10351 RVA: 0x000D7200 File Offset: 0x000D5400
 	public void Click(bool leftHand = false)
 	{
 		this.PressButton(leftHand);
 	}
 
-	// Token: 0x06002870 RID: 10352 RVA: 0x000D722C File Offset: 0x000D542C
+	// Token: 0x06002870 RID: 10352 RVA: 0x000D720C File Offset: 0x000D540C
 	protected void OnTriggerEnter(Collider collider)
 	{
 		if (!base.enabled)
@@ -34,7 +34,7 @@ public class GamePressableButton : MonoBehaviour, IClickable
 		this.PressButton(component.isLeftHand);
 	}
 
-	// Token: 0x06002871 RID: 10353 RVA: 0x000D7288 File Offset: 0x000D5488
+	// Token: 0x06002871 RID: 10353 RVA: 0x000D7268 File Offset: 0x000D5468
 	private bool CheckValidEquippedState(bool pressedHandLeft)
 	{
 		if (!this.requireEquipped)
@@ -60,7 +60,7 @@ public class GamePressableButton : MonoBehaviour, IClickable
 		return pressedHandLeft != flag;
 	}
 
-	// Token: 0x06002872 RID: 10354 RVA: 0x000D7330 File Offset: 0x000D5530
+	// Token: 0x06002872 RID: 10354 RVA: 0x000D7310 File Offset: 0x000D5510
 	private void PressButton(bool isLeftHand)
 	{
 		this.touchTime = Time.time;

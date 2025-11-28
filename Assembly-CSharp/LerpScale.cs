@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020009E2 RID: 2530
 public class LerpScale : LerpComponent
 {
-	// Token: 0x06004086 RID: 16518 RVA: 0x001595A0 File Offset: 0x001577A0
+	// Token: 0x06004086 RID: 16518 RVA: 0x00159580 File Offset: 0x00157780
 	protected override void OnLerp(float t)
 	{
 		this.current = Vector3.Lerp(this.start, this.end, this.scaleCurve.Evaluate(t));

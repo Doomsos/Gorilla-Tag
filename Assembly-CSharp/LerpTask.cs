@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000816 RID: 2070
 public class LerpTask<T>
 {
-	// Token: 0x06003670 RID: 13936 RVA: 0x00126C6E File Offset: 0x00124E6E
+	// Token: 0x06003670 RID: 13936 RVA: 0x00126C4E File Offset: 0x00124E4E
 	public void Reset()
 	{
 		this.onLerp.Invoke(this.lerpFrom, this.lerpTo, 0f);
@@ -12,7 +12,7 @@ public class LerpTask<T>
 		this.elapsed = 0f;
 	}
 
-	// Token: 0x06003671 RID: 13937 RVA: 0x00126C9E File Offset: 0x00124E9E
+	// Token: 0x06003671 RID: 13937 RVA: 0x00126C7E File Offset: 0x00124E7E
 	public void Start(T from, T to, float duration)
 	{
 		this.lerpFrom = from;
@@ -22,7 +22,7 @@ public class LerpTask<T>
 		this.active = true;
 	}
 
-	// Token: 0x06003672 RID: 13938 RVA: 0x00126CC8 File Offset: 0x00124EC8
+	// Token: 0x06003672 RID: 13938 RVA: 0x00126CA8 File Offset: 0x00124EA8
 	public void Finish()
 	{
 		this.onLerp.Invoke(this.lerpFrom, this.lerpTo, 1f);
@@ -35,7 +35,7 @@ public class LerpTask<T>
 		this.elapsed = 0f;
 	}
 
-	// Token: 0x06003673 RID: 13939 RVA: 0x00126D14 File Offset: 0x00124F14
+	// Token: 0x06003673 RID: 13939 RVA: 0x00126CF4 File Offset: 0x00124EF4
 	public void Update()
 	{
 		if (!this.active)

@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DA7 RID: 3495
 	public class WhackAMoleManager : MonoBehaviour, IGorillaSliceableSimple
 	{
-		// Token: 0x060055E5 RID: 21989 RVA: 0x001B04E2 File Offset: 0x001AE6E2
+		// Token: 0x060055E5 RID: 21989 RVA: 0x001B04C2 File Offset: 0x001AE6C2
 		private void Awake()
 		{
 			WhackAMoleManager.instance = this;
@@ -26,7 +26,7 @@ namespace GorillaTagScripts
 			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 		}
 
-		// Token: 0x060055E8 RID: 21992 RVA: 0x001B04F8 File Offset: 0x001AE6F8
+		// Token: 0x060055E8 RID: 21992 RVA: 0x001B04D8 File Offset: 0x001AE6D8
 		public void SliceUpdate()
 		{
 			foreach (WhackAMole whackAMole in this.allGames)
@@ -35,19 +35,19 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060055E9 RID: 21993 RVA: 0x001B0548 File Offset: 0x001AE748
+		// Token: 0x060055E9 RID: 21993 RVA: 0x001B0528 File Offset: 0x001AE728
 		private void OnDestroy()
 		{
 			WhackAMoleManager.instance = null;
 		}
 
-		// Token: 0x060055EA RID: 21994 RVA: 0x001B0550 File Offset: 0x001AE750
+		// Token: 0x060055EA RID: 21994 RVA: 0x001B0530 File Offset: 0x001AE730
 		public void Register(WhackAMole whackAMole)
 		{
 			this.allGames.Add(whackAMole);
 		}
 
-		// Token: 0x060055EB RID: 21995 RVA: 0x001B055F File Offset: 0x001AE75F
+		// Token: 0x060055EB RID: 21995 RVA: 0x001B053F File Offset: 0x001AE73F
 		public void Unregister(WhackAMole whackAMole)
 		{
 			this.allGames.Remove(whackAMole);

@@ -7,11 +7,11 @@ namespace GorillaTag.Audio
 	internal static class GTAudioOneShot
 	{
 		// Token: 0x170009EF RID: 2543
-		// (get) Token: 0x06006979 RID: 27001 RVA: 0x0022509F File Offset: 0x0022329F
-		// (set) Token: 0x0600697A RID: 27002 RVA: 0x002250A6 File Offset: 0x002232A6
+		// (get) Token: 0x06006979 RID: 27001 RVA: 0x0022507F File Offset: 0x0022327F
+		// (set) Token: 0x0600697A RID: 27002 RVA: 0x00225086 File Offset: 0x00223286
 		internal static bool isInitialized { get; private set; }
 
-		// Token: 0x0600697B RID: 27003 RVA: 0x002250B0 File Offset: 0x002232B0
+		// Token: 0x0600697B RID: 27003 RVA: 0x00225090 File Offset: 0x00223290
 		[RuntimeInitializeOnLoadMethod(1)]
 		private static void Initialize()
 		{
@@ -31,7 +31,7 @@ namespace GorillaTag.Audio
 			GTAudioOneShot.isInitialized = true;
 		}
 
-		// Token: 0x0600697C RID: 27004 RVA: 0x0022510F File Offset: 0x0022330F
+		// Token: 0x0600697C RID: 27004 RVA: 0x002250EF File Offset: 0x002232EF
 		internal static void Play(AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f)
 		{
 			if (ApplicationQuittingState.IsQuitting || !GTAudioOneShot.isInitialized)
@@ -43,7 +43,7 @@ namespace GorillaTag.Audio
 			GTAudioOneShot.audioSource.GTPlayOneShot(clip, volume);
 		}
 
-		// Token: 0x0600697D RID: 27005 RVA: 0x00225147 File Offset: 0x00223347
+		// Token: 0x0600697D RID: 27005 RVA: 0x00225127 File Offset: 0x00223327
 		internal static void Play(AudioClip clip, Vector3 position, AnimationCurve curve, float volume = 1f, float pitch = 1f)
 		{
 			if (ApplicationQuittingState.IsQuitting || !GTAudioOneShot.isInitialized)

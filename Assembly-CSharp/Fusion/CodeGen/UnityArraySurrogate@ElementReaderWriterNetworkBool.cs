@@ -9,8 +9,8 @@ namespace Fusion.CodeGen
 	internal class UnityArraySurrogate@ElementReaderWriterNetworkBool : UnityArraySurrogate<NetworkBool, ElementReaderWriterNetworkBool>
 	{
 		// Token: 0x17000ABB RID: 2747
-		// (get) Token: 0x060072F2 RID: 29426 RVA: 0x0025A8F7 File Offset: 0x00258AF7
-		// (set) Token: 0x060072F3 RID: 29427 RVA: 0x0025A8FF File Offset: 0x00258AFF
+		// (get) Token: 0x060072F2 RID: 29426 RVA: 0x0025A8D7 File Offset: 0x00258AD7
+		// (set) Token: 0x060072F3 RID: 29427 RVA: 0x0025A8DF File Offset: 0x00258ADF
 		[WeaverGenerated]
 		public override NetworkBool[] DataProperty
 		{
@@ -26,7 +26,7 @@ namespace Fusion.CodeGen
 			}
 		}
 
-		// Token: 0x060072F4 RID: 29428 RVA: 0x0025A908 File Offset: 0x00258B08
+		// Token: 0x060072F4 RID: 29428 RVA: 0x0025A8E8 File Offset: 0x00258AE8
 		[WeaverGenerated]
 		public UnityArraySurrogate@ElementReaderWriterNetworkBool()
 		{

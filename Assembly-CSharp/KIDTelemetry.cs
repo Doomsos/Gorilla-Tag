@@ -15,7 +15,7 @@ public static class KIDTelemetry
 	}
 
 	// Token: 0x17000654 RID: 1620
-	// (get) Token: 0x06004318 RID: 17176 RVA: 0x001643C6 File Offset: 0x001625C6
+	// (get) Token: 0x06004318 RID: 17176 RVA: 0x001643A6 File Offset: 0x001625A6
 	public static string Open_MetricActionCustomTag
 	{
 		get
@@ -25,7 +25,7 @@ public static class KIDTelemetry
 	}
 
 	// Token: 0x17000655 RID: 1621
-	// (get) Token: 0x06004319 RID: 17177 RVA: 0x001643CD File Offset: 0x001625CD
+	// (get) Token: 0x06004319 RID: 17177 RVA: 0x001643AD File Offset: 0x001625AD
 	public static string Updated_MetricActionCustomTag
 	{
 		get
@@ -35,7 +35,7 @@ public static class KIDTelemetry
 	}
 
 	// Token: 0x17000656 RID: 1622
-	// (get) Token: 0x0600431A RID: 17178 RVA: 0x001643D4 File Offset: 0x001625D4
+	// (get) Token: 0x0600431A RID: 17178 RVA: 0x001643B4 File Offset: 0x001625B4
 	public static string Closed_MetricActionCustomTag
 	{
 		get
@@ -54,13 +54,13 @@ public static class KIDTelemetry
 		}
 	}
 
-	// Token: 0x0600431C RID: 17180 RVA: 0x001643DB File Offset: 0x001625DB
+	// Token: 0x0600431C RID: 17180 RVA: 0x001643BB File Offset: 0x001625BB
 	public static string GetPermissionManagedByBodyData(string permission)
 	{
 		return "permission_managedby_" + permission.Replace('-', '_');
 	}
 
-	// Token: 0x0600431D RID: 17181 RVA: 0x001643F1 File Offset: 0x001625F1
+	// Token: 0x0600431D RID: 17181 RVA: 0x001643D1 File Offset: 0x001625D1
 	public static string GetPermissionEnabledBodyData(string permission)
 	{
 		return "permission_eneabled_" + permission.Replace('-', '_');

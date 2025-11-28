@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020007B2 RID: 1970
 public class GorillaSlicerSimpleManager : MonoBehaviour
 {
-	// Token: 0x060033B7 RID: 13239 RVA: 0x00116811 File Offset: 0x00114A11
+	// Token: 0x060033B7 RID: 13239 RVA: 0x001167F1 File Offset: 0x001149F1
 	protected void Awake()
 	{
 		if (GorillaSlicerSimpleManager.hasInstance && GorillaSlicerSimpleManager.instance != this)
@@ -17,7 +17,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		GorillaSlicerSimpleManager.SetInstance(this);
 	}
 
-	// Token: 0x060033B8 RID: 13240 RVA: 0x00116834 File Offset: 0x00114A34
+	// Token: 0x060033B8 RID: 13240 RVA: 0x00116814 File Offset: 0x00114A14
 	public static void CreateManager()
 	{
 		GorillaSlicerSimpleManager gorillaSlicerSimpleManager = new GameObject("GorillaSlicerSimpleManager").AddComponent<GorillaSlicerSimpleManager>();
@@ -28,7 +28,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		GorillaSlicerSimpleManager.SetInstance(gorillaSlicerSimpleManager);
 	}
 
-	// Token: 0x060033B9 RID: 13241 RVA: 0x00116881 File Offset: 0x00114A81
+	// Token: 0x060033B9 RID: 13241 RVA: 0x00116861 File Offset: 0x00114A61
 	private static void SetInstance(GorillaSlicerSimpleManager manager)
 	{
 		GorillaSlicerSimpleManager.instance = manager;
@@ -39,7 +39,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060033BA RID: 13242 RVA: 0x0011689C File Offset: 0x00114A9C
+	// Token: 0x060033BA RID: 13242 RVA: 0x0011687C File Offset: 0x00114A7C
 	public static void RegisterSliceable(IGorillaSliceableSimple gSS, GorillaSlicerSimpleManager.UpdateStep step)
 	{
 		if (!GorillaSlicerSimpleManager.hasInstance)
@@ -73,7 +73,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060033BB RID: 13243 RVA: 0x00116930 File Offset: 0x00114B30
+	// Token: 0x060033BB RID: 13243 RVA: 0x00116910 File Offset: 0x00114B10
 	public static void UnregisterSliceable(IGorillaSliceableSimple gSS, GorillaSlicerSimpleManager.UpdateStep step)
 	{
 		if (!GorillaSlicerSimpleManager.hasInstance)
@@ -107,7 +107,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060033BC RID: 13244 RVA: 0x001169C8 File Offset: 0x00114BC8
+	// Token: 0x060033BC RID: 13244 RVA: 0x001169A8 File Offset: 0x00114BA8
 	public void FixedUpdate()
 	{
 		if (this.updateIndex < 0 || this.updateIndex >= this.fixedUpdateSlice.Count + this.updateSlice.Count + this.lateUpdateSlice.Count)
@@ -132,7 +132,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		this.sW.Stop();
 	}
 
-	// Token: 0x060033BD RID: 13245 RVA: 0x00116AC4 File Offset: 0x00114CC4
+	// Token: 0x060033BD RID: 13245 RVA: 0x00116AA4 File Offset: 0x00114CA4
 	public void Update()
 	{
 		int count = this.fixedUpdateSlice.Count;
@@ -156,7 +156,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		this.sW.Stop();
 	}
 
-	// Token: 0x060033BE RID: 13246 RVA: 0x00116BAC File Offset: 0x00114DAC
+	// Token: 0x060033BE RID: 13246 RVA: 0x00116B8C File Offset: 0x00114D8C
 	public void LateUpdate()
 	{
 		int count = this.fixedUpdateSlice.Count;

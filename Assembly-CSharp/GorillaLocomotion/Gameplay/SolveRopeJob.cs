@@ -10,7 +10,7 @@ namespace GorillaLocomotion.Gameplay
 	[BurstCompile]
 	public struct SolveRopeJob : IJob
 	{
-		// Token: 0x06006431 RID: 25649 RVA: 0x0020ACD8 File Offset: 0x00208ED8
+		// Token: 0x06006431 RID: 25649 RVA: 0x0020ACB8 File Offset: 0x00208EB8
 		public void Execute()
 		{
 			this.Simulate();
@@ -20,7 +20,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x06006432 RID: 25650 RVA: 0x0020AD00 File Offset: 0x00208F00
+		// Token: 0x06006432 RID: 25650 RVA: 0x0020ACE0 File Offset: 0x00208EE0
 		private void Simulate()
 		{
 			for (int i = 0; i < this.nodes.Length; i++)
@@ -35,7 +35,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x06006433 RID: 25651 RVA: 0x0020AD8C File Offset: 0x00208F8C
+		// Token: 0x06006433 RID: 25651 RVA: 0x0020AD6C File Offset: 0x00208F6C
 		private void ApplyConstraint()
 		{
 			BurstRopeNode burstRopeNode = this.nodes[0];

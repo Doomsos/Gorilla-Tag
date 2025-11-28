@@ -10,7 +10,7 @@ namespace GorillaTag.Reactions
 	// Token: 0x02001029 RID: 4137
 	public class GorillaMaterialReaction : MonoBehaviour, ITickSystemPost
 	{
-		// Token: 0x0600689C RID: 26780 RVA: 0x00221058 File Offset: 0x0021F258
+		// Token: 0x0600689C RID: 26780 RVA: 0x00221038 File Offset: 0x0021F238
 		public void PopulateRuntimeLookupArrays()
 		{
 			this._momentEnumCount = ((GorillaMaterialReaction.EMomentInState[])Enum.GetValues(typeof(GorillaMaterialReaction.EMomentInState))).Length;
@@ -88,14 +88,14 @@ namespace GorillaTag.Reactions
 			}
 		}
 
-		// Token: 0x0600689D RID: 26781 RVA: 0x00221287 File Offset: 0x0021F487
+		// Token: 0x0600689D RID: 26781 RVA: 0x00221267 File Offset: 0x0021F467
 		protected void Awake()
 		{
 			this.RemoveAndReportNulls();
 			this.PopulateRuntimeLookupArrays();
 		}
 
-		// Token: 0x0600689E RID: 26782 RVA: 0x00221298 File Offset: 0x0021F498
+		// Token: 0x0600689E RID: 26782 RVA: 0x00221278 File Offset: 0x0021F478
 		protected void OnEnable()
 		{
 			if (this._ownerVRRig == null)
@@ -124,11 +124,11 @@ namespace GorillaTag.Reactions
 		}
 
 		// Token: 0x170009D1 RID: 2513
-		// (get) Token: 0x060068A0 RID: 26784 RVA: 0x00221340 File Offset: 0x0021F540
-		// (set) Token: 0x060068A1 RID: 26785 RVA: 0x00221348 File Offset: 0x0021F548
+		// (get) Token: 0x060068A0 RID: 26784 RVA: 0x00221320 File Offset: 0x0021F520
+		// (set) Token: 0x060068A1 RID: 26785 RVA: 0x00221328 File Offset: 0x0021F528
 		bool ITickSystemPost.PostTickRunning { get; set; }
 
-		// Token: 0x060068A2 RID: 26786 RVA: 0x00221354 File Offset: 0x0021F554
+		// Token: 0x060068A2 RID: 26786 RVA: 0x00221334 File Offset: 0x0021F534
 		void ITickSystemPost.PostTick()
 		{
 			if (!GorillaComputer.hasInstance || this._ownerVRRig == null)
@@ -186,7 +186,7 @@ namespace GorillaTag.Reactions
 			}
 		}
 
-		// Token: 0x060068A3 RID: 26787 RVA: 0x0022150C File Offset: 0x0021F70C
+		// Token: 0x060068A3 RID: 26787 RVA: 0x002214EC File Offset: 0x0021F6EC
 		private void RemoveAndReportNulls()
 		{
 			StringBuilder stringBuilder = new StringBuilder(1024);

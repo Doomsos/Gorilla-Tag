@@ -11,8 +11,8 @@ namespace GorillaTag
 	public class GTLogErrorLimiter
 	{
 		// Token: 0x170009A6 RID: 2470
-		// (get) Token: 0x060066DB RID: 26331 RVA: 0x00217530 File Offset: 0x00215730
-		// (set) Token: 0x060066DC RID: 26332 RVA: 0x00217538 File Offset: 0x00215738
+		// (get) Token: 0x060066DB RID: 26331 RVA: 0x00217510 File Offset: 0x00215710
+		// (set) Token: 0x060066DC RID: 26332 RVA: 0x00217518 File Offset: 0x00215718
 		public string baseMessage
 		{
 			get
@@ -25,7 +25,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060066DD RID: 26333 RVA: 0x0021754A File Offset: 0x0021574A
+		// Token: 0x060066DD RID: 26333 RVA: 0x0021752A File Offset: 0x0021572A
 		public GTLogErrorLimiter(string baseMessage, int countdown = 10, string occurrencesJoinString = "\n- ")
 		{
 			this.baseMessage = baseMessage;
@@ -35,7 +35,7 @@ namespace GorillaTag
 			this.occurrencesJoinString = occurrencesJoinString;
 		}
 
-		// Token: 0x060066DE RID: 26334 RVA: 0x00217584 File Offset: 0x00215784
+		// Token: 0x060066DE RID: 26334 RVA: 0x00217564 File Offset: 0x00215764
 		public void Log(string subMessage = "", Object context = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
 		{
 			if (this.countdown < 0)
@@ -60,7 +60,7 @@ namespace GorillaTag
 			this.occurrenceCount = 0;
 		}
 
-		// Token: 0x060066DF RID: 26335 RVA: 0x00217679 File Offset: 0x00215879
+		// Token: 0x060066DF RID: 26335 RVA: 0x00217659 File Offset: 0x00215859
 		public void Log(Object obj, Object context = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
 		{
 			if (!obj)
@@ -71,7 +71,7 @@ namespace GorillaTag
 			this.Log(obj.ToString(), null, "Log", "C:\\Users\\root\\GT\\Assets\\GorillaTag\\Shared\\Scripts\\MonkeFX\\GTLogErrorLimiter.cs", 137);
 		}
 
-		// Token: 0x060066E0 RID: 26336 RVA: 0x002176B1 File Offset: 0x002158B1
+		// Token: 0x060066E0 RID: 26336 RVA: 0x00217691 File Offset: 0x00215891
 		public void AddOccurrence(string s)
 		{
 			this.occurrenceCount++;
@@ -79,7 +79,7 @@ namespace GorillaTag
 			this.sb.Append(s);
 		}
 
-		// Token: 0x060066E1 RID: 26337 RVA: 0x002176E7 File Offset: 0x002158E7
+		// Token: 0x060066E1 RID: 26337 RVA: 0x002176C7 File Offset: 0x002158C7
 		public void AddOccurrence(StringBuilder stringBuilder)
 		{
 			this.occurrenceCount++;
@@ -87,7 +87,7 @@ namespace GorillaTag
 			this.sb.Append<StringBuilder>(stringBuilder);
 		}
 
-		// Token: 0x060066E2 RID: 26338 RVA: 0x00217720 File Offset: 0x00215920
+		// Token: 0x060066E2 RID: 26338 RVA: 0x00217700 File Offset: 0x00215900
 		public void AddOccurence(GameObject gObj)
 		{
 			this.occurrenceCount++;
@@ -100,7 +100,7 @@ namespace GorillaTag
 			this.sb.Q(gObj.GetPath());
 		}
 
-		// Token: 0x060066E3 RID: 26339 RVA: 0x0021777C File Offset: 0x0021597C
+		// Token: 0x060066E3 RID: 26339 RVA: 0x0021775C File Offset: 0x0021595C
 		public void LogOccurrences(Component component = null, Object obj = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
 		{
 			if (this.occurrenceCount <= 0)
@@ -111,7 +111,7 @@ namespace GorillaTag
 			this.Log("\"" + component.GetComponentPath(int.MaxValue) + "\"", obj, caller, sourceFilePath, line);
 		}
 
-		// Token: 0x060066E4 RID: 26340 RVA: 0x002177DC File Offset: 0x002159DC
+		// Token: 0x060066E4 RID: 26340 RVA: 0x002177BC File Offset: 0x002159BC
 		public void LogOccurrences(Utf16ValueStringBuilder subMessage, Object obj = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
 		{
 			if (this.occurrenceCount <= 0)

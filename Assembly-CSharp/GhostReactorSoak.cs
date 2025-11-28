@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x02000659 RID: 1625
 public class GhostReactorSoak
 {
-	// Token: 0x060029CA RID: 10698 RVA: 0x000E2010 File Offset: 0x000E0210
+	// Token: 0x060029CA RID: 10698 RVA: 0x000E1FF0 File Offset: 0x000E01F0
 	public void Setup(GRPlayer grPlayer)
 	{
 		this.grPlayer = grPlayer;
@@ -34,7 +34,7 @@ public class GhostReactorSoak
 		return false;
 	}
 
-	// Token: 0x060029CC RID: 10700 RVA: 0x000E20C8 File Offset: 0x000E02C8
+	// Token: 0x060029CC RID: 10700 RVA: 0x000E20A8 File Offset: 0x000E02A8
 	public void OnUpdate()
 	{
 		if (!this.IsSoaking())
@@ -90,7 +90,7 @@ public class GhostReactorSoak
 		}
 	}
 
-	// Token: 0x060029CD RID: 10701 RVA: 0x000E21B0 File Offset: 0x000E03B0
+	// Token: 0x060029CD RID: 10701 RVA: 0x000E2190 File Offset: 0x000E0390
 	private int GetActorNumber()
 	{
 		if (this.grPlayer.gamePlayer.rig.OwningNetPlayer == null)
@@ -100,7 +100,7 @@ public class GhostReactorSoak
 		return this.grPlayer.gamePlayer.rig.OwningNetPlayer.ActorNumber;
 	}
 
-	// Token: 0x060029CE RID: 10702 RVA: 0x000E21E8 File Offset: 0x000E03E8
+	// Token: 0x060029CE RID: 10702 RVA: 0x000E21C8 File Offset: 0x000E03C8
 	public void SetState(GhostReactorSoak.State newState)
 	{
 		this.state = newState;
@@ -129,7 +129,7 @@ public class GhostReactorSoak
 		}
 	}
 
-	// Token: 0x060029CF RID: 10703 RVA: 0x000E22C6 File Offset: 0x000E04C6
+	// Token: 0x060029CF RID: 10703 RVA: 0x000E22A6 File Offset: 0x000E04A6
 	public void JoinRoom()
 	{
 		Debug.LogFormat("Soak Join Room {0}", new object[]
@@ -139,14 +139,14 @@ public class GhostReactorSoak
 		PhotonNetworkController.Instance.AttemptToJoinSpecificRoom("AKJSOAK", JoinType.Solo);
 	}
 
-	// Token: 0x060029D0 RID: 10704 RVA: 0x000E22F2 File Offset: 0x000E04F2
+	// Token: 0x060029D0 RID: 10704 RVA: 0x000E22D2 File Offset: 0x000E04D2
 	public void LeaveRoom()
 	{
 		Debug.LogFormat("Soak Leave Room", Array.Empty<object>());
 		NetworkSystem.Instance.ReturnToSinglePlayer();
 	}
 
-	// Token: 0x060029D1 RID: 10705 RVA: 0x000E2310 File Offset: 0x000E0510
+	// Token: 0x060029D1 RID: 10705 RVA: 0x000E22F0 File Offset: 0x000E04F0
 	private void UpdateActive()
 	{
 		if (this._activeTask != null)

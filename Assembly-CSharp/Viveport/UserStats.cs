@@ -7,14 +7,14 @@ namespace Viveport
 	// Token: 0x02000D19 RID: 3353
 	public class UserStats
 	{
-		// Token: 0x0600514F RID: 20815 RVA: 0x001A2A48 File Offset: 0x001A0C48
+		// Token: 0x0600514F RID: 20815 RVA: 0x001A2A28 File Offset: 0x001A0C28
 		[MonoPInvokeCallback(typeof(StatusCallback))]
 		private static void IsReadyIl2cppCallback(int errorCode)
 		{
 			UserStats.isReadyIl2cppCallback(errorCode);
 		}
 
-		// Token: 0x06005150 RID: 20816 RVA: 0x001A2A58 File Offset: 0x001A0C58
+		// Token: 0x06005150 RID: 20816 RVA: 0x001A2A38 File Offset: 0x001A0C38
 		public static int IsReady(StatusCallback callback)
 		{
 			if (callback == null)
@@ -30,14 +30,14 @@ namespace Viveport
 			return UserStats.IsReady(new StatusCallback(UserStats.IsReadyIl2cppCallback));
 		}
 
-		// Token: 0x06005151 RID: 20817 RVA: 0x001A2AC5 File Offset: 0x001A0CC5
+		// Token: 0x06005151 RID: 20817 RVA: 0x001A2AA5 File Offset: 0x001A0CA5
 		[MonoPInvokeCallback(typeof(StatusCallback))]
 		private static void DownloadStatsIl2cppCallback(int errorCode)
 		{
 			UserStats.downloadStatsIl2cppCallback(errorCode);
 		}
 
-		// Token: 0x06005152 RID: 20818 RVA: 0x001A2AD4 File Offset: 0x001A0CD4
+		// Token: 0x06005152 RID: 20818 RVA: 0x001A2AB4 File Offset: 0x001A0CB4
 		public static int DownloadStats(StatusCallback callback)
 		{
 			if (callback == null)
@@ -53,7 +53,7 @@ namespace Viveport
 			return UserStats.DownloadStats(new StatusCallback(UserStats.DownloadStatsIl2cppCallback));
 		}
 
-		// Token: 0x06005153 RID: 20819 RVA: 0x001A2B44 File Offset: 0x001A0D44
+		// Token: 0x06005153 RID: 20819 RVA: 0x001A2B24 File Offset: 0x001A0D24
 		public static int GetStat(string name, int defaultValue)
 		{
 			int result = defaultValue;
@@ -68,7 +68,7 @@ namespace Viveport
 			return result;
 		}
 
-		// Token: 0x06005154 RID: 20820 RVA: 0x001A2B70 File Offset: 0x001A0D70
+		// Token: 0x06005154 RID: 20820 RVA: 0x001A2B50 File Offset: 0x001A0D50
 		public static float GetStat(string name, float defaultValue)
 		{
 			float result = defaultValue;
@@ -83,7 +83,7 @@ namespace Viveport
 			return result;
 		}
 
-		// Token: 0x06005155 RID: 20821 RVA: 0x001A2B9C File Offset: 0x001A0D9C
+		// Token: 0x06005155 RID: 20821 RVA: 0x001A2B7C File Offset: 0x001A0D7C
 		public static void SetStat(string name, int value)
 		{
 			if (IntPtr.Size == 8)
@@ -94,7 +94,7 @@ namespace Viveport
 			UserStats.SetStat(name, value);
 		}
 
-		// Token: 0x06005156 RID: 20822 RVA: 0x001A2BB7 File Offset: 0x001A0DB7
+		// Token: 0x06005156 RID: 20822 RVA: 0x001A2B97 File Offset: 0x001A0D97
 		public static void SetStat(string name, float value)
 		{
 			if (IntPtr.Size == 8)
@@ -105,14 +105,14 @@ namespace Viveport
 			UserStats.SetStat(name, value);
 		}
 
-		// Token: 0x06005157 RID: 20823 RVA: 0x001A2BD2 File Offset: 0x001A0DD2
+		// Token: 0x06005157 RID: 20823 RVA: 0x001A2BB2 File Offset: 0x001A0DB2
 		[MonoPInvokeCallback(typeof(StatusCallback))]
 		private static void UploadStatsIl2cppCallback(int errorCode)
 		{
 			UserStats.uploadStatsIl2cppCallback(errorCode);
 		}
 
-		// Token: 0x06005158 RID: 20824 RVA: 0x001A2BE0 File Offset: 0x001A0DE0
+		// Token: 0x06005158 RID: 20824 RVA: 0x001A2BC0 File Offset: 0x001A0DC0
 		public static int UploadStats(StatusCallback callback)
 		{
 			if (callback == null)
@@ -128,7 +128,7 @@ namespace Viveport
 			return UserStats.UploadStats(new StatusCallback(UserStats.UploadStatsIl2cppCallback));
 		}
 
-		// Token: 0x06005159 RID: 20825 RVA: 0x001A2C50 File Offset: 0x001A0E50
+		// Token: 0x06005159 RID: 20825 RVA: 0x001A2C30 File Offset: 0x001A0E30
 		public static bool GetAchievement(string pchName)
 		{
 			int num = 0;
@@ -143,7 +143,7 @@ namespace Viveport
 			return num == 1;
 		}
 
-		// Token: 0x0600515A RID: 20826 RVA: 0x001A2C80 File Offset: 0x001A0E80
+		// Token: 0x0600515A RID: 20826 RVA: 0x001A2C60 File Offset: 0x001A0E60
 		public static int GetAchievementUnlockTime(string pchName)
 		{
 			int result = 0;
@@ -158,25 +158,25 @@ namespace Viveport
 			return result;
 		}
 
-		// Token: 0x0600515B RID: 20827 RVA: 0x00147A6B File Offset: 0x00145C6B
+		// Token: 0x0600515B RID: 20827 RVA: 0x00147A4B File Offset: 0x00145C4B
 		public static string GetAchievementIcon(string pchName)
 		{
 			return "";
 		}
 
-		// Token: 0x0600515C RID: 20828 RVA: 0x00147A6B File Offset: 0x00145C6B
+		// Token: 0x0600515C RID: 20828 RVA: 0x00147A4B File Offset: 0x00145C4B
 		public static string GetAchievementDisplayAttribute(string pchName, UserStats.AchievementDisplayAttribute attr)
 		{
 			return "";
 		}
 
-		// Token: 0x0600515D RID: 20829 RVA: 0x00147A6B File Offset: 0x00145C6B
+		// Token: 0x0600515D RID: 20829 RVA: 0x00147A4B File Offset: 0x00145C4B
 		public static string GetAchievementDisplayAttribute(string pchName, UserStats.AchievementDisplayAttribute attr, Locale locale)
 		{
 			return "";
 		}
 
-		// Token: 0x0600515E RID: 20830 RVA: 0x001A2CAC File Offset: 0x001A0EAC
+		// Token: 0x0600515E RID: 20830 RVA: 0x001A2C8C File Offset: 0x001A0E8C
 		public static int SetAchievement(string pchName)
 		{
 			if (IntPtr.Size == 8)
@@ -186,7 +186,7 @@ namespace Viveport
 			return UserStats.SetAchievement(pchName);
 		}
 
-		// Token: 0x0600515F RID: 20831 RVA: 0x001A2CC3 File Offset: 0x001A0EC3
+		// Token: 0x0600515F RID: 20831 RVA: 0x001A2CA3 File Offset: 0x001A0EA3
 		public static int ClearAchievement(string pchName)
 		{
 			if (IntPtr.Size == 8)
@@ -196,14 +196,14 @@ namespace Viveport
 			return UserStats.ClearAchievement(pchName);
 		}
 
-		// Token: 0x06005160 RID: 20832 RVA: 0x001A2CDA File Offset: 0x001A0EDA
+		// Token: 0x06005160 RID: 20832 RVA: 0x001A2CBA File Offset: 0x001A0EBA
 		[MonoPInvokeCallback(typeof(StatusCallback))]
 		private static void DownloadLeaderboardScoresIl2cppCallback(int errorCode)
 		{
 			UserStats.downloadLeaderboardScoresIl2cppCallback(errorCode);
 		}
 
-		// Token: 0x06005161 RID: 20833 RVA: 0x001A2CE8 File Offset: 0x001A0EE8
+		// Token: 0x06005161 RID: 20833 RVA: 0x001A2CC8 File Offset: 0x001A0EC8
 		public static int DownloadLeaderboardScores(StatusCallback callback, string pchLeaderboardName, UserStats.LeaderBoardRequestType eLeaderboardDataRequest, UserStats.LeaderBoardTimeRange eLeaderboardDataTimeRange, int nRangeStart, int nRangeEnd)
 		{
 			if (callback == null)
@@ -219,14 +219,14 @@ namespace Viveport
 			return UserStats.DownloadLeaderboardScores(new StatusCallback(UserStats.DownloadLeaderboardScoresIl2cppCallback), pchLeaderboardName, (ELeaderboardDataRequest)eLeaderboardDataRequest, (ELeaderboardDataTimeRange)eLeaderboardDataTimeRange, nRangeStart, nRangeEnd);
 		}
 
-		// Token: 0x06005162 RID: 20834 RVA: 0x001A2D63 File Offset: 0x001A0F63
+		// Token: 0x06005162 RID: 20834 RVA: 0x001A2D43 File Offset: 0x001A0F43
 		[MonoPInvokeCallback(typeof(StatusCallback))]
 		private static void UploadLeaderboardScoreIl2cppCallback(int errorCode)
 		{
 			UserStats.uploadLeaderboardScoreIl2cppCallback(errorCode);
 		}
 
-		// Token: 0x06005163 RID: 20835 RVA: 0x001A2D70 File Offset: 0x001A0F70
+		// Token: 0x06005163 RID: 20835 RVA: 0x001A2D50 File Offset: 0x001A0F50
 		public static int UploadLeaderboardScore(StatusCallback callback, string pchLeaderboardName, int nScore)
 		{
 			if (callback == null)
@@ -242,7 +242,7 @@ namespace Viveport
 			return UserStats.UploadLeaderboardScore(new StatusCallback(UserStats.UploadLeaderboardScoreIl2cppCallback), pchLeaderboardName, nScore);
 		}
 
-		// Token: 0x06005164 RID: 20836 RVA: 0x001A2DE4 File Offset: 0x001A0FE4
+		// Token: 0x06005164 RID: 20836 RVA: 0x001A2DC4 File Offset: 0x001A0FC4
 		public static Leaderboard GetLeaderboardScore(int index)
 		{
 			LeaderboardEntry_t leaderboardEntry_t;
@@ -265,7 +265,7 @@ namespace Viveport
 			};
 		}
 
-		// Token: 0x06005165 RID: 20837 RVA: 0x001A2E52 File Offset: 0x001A1052
+		// Token: 0x06005165 RID: 20837 RVA: 0x001A2E32 File Offset: 0x001A1032
 		public static int GetLeaderboardScoreCount()
 		{
 			if (IntPtr.Size == 8)
@@ -275,7 +275,7 @@ namespace Viveport
 			return UserStats.GetLeaderboardScoreCount();
 		}
 
-		// Token: 0x06005166 RID: 20838 RVA: 0x001A2E67 File Offset: 0x001A1067
+		// Token: 0x06005166 RID: 20838 RVA: 0x001A2E47 File Offset: 0x001A1047
 		public static UserStats.LeaderBoardSortMethod GetLeaderboardSortMethod()
 		{
 			if (IntPtr.Size == 8)
@@ -285,7 +285,7 @@ namespace Viveport
 			return (UserStats.LeaderBoardSortMethod)UserStats.GetLeaderboardSortMethod();
 		}
 
-		// Token: 0x06005167 RID: 20839 RVA: 0x001A2E7C File Offset: 0x001A107C
+		// Token: 0x06005167 RID: 20839 RVA: 0x001A2E5C File Offset: 0x001A105C
 		public static UserStats.LeaderBoardDiaplayType GetLeaderboardDisplayType()
 		{
 			if (IntPtr.Size == 8)

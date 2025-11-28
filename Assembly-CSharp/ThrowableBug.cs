@@ -7,11 +7,11 @@ using UnityEngine.Serialization;
 public class ThrowableBug : TransferrableObject, ITickSystemTick
 {
 	// Token: 0x17000769 RID: 1897
-	// (get) Token: 0x06004FC0 RID: 20416 RVA: 0x0019A7EE File Offset: 0x001989EE
-	// (set) Token: 0x06004FC1 RID: 20417 RVA: 0x0019A7F6 File Offset: 0x001989F6
+	// (get) Token: 0x06004FC0 RID: 20416 RVA: 0x0019A7CE File Offset: 0x001989CE
+	// (set) Token: 0x06004FC1 RID: 20417 RVA: 0x0019A7D6 File Offset: 0x001989D6
 	public bool TickRunning { get; set; }
 
-	// Token: 0x06004FC2 RID: 20418 RVA: 0x0019A800 File Offset: 0x00198A00
+	// Token: 0x06004FC2 RID: 20418 RVA: 0x0019A7E0 File Offset: 0x001989E0
 	protected override void Start()
 	{
 		base.Start();
@@ -23,7 +23,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		this.velocityEstimator = base.GetComponent<GorillaVelocityEstimator>();
 	}
 
-	// Token: 0x06004FC3 RID: 20419 RVA: 0x0019A87C File Offset: 0x00198A7C
+	// Token: 0x06004FC3 RID: 20419 RVA: 0x0019A85C File Offset: 0x00198A5C
 	internal override void OnEnable()
 	{
 		base.OnEnable();
@@ -35,7 +35,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		TickSystem<object>.AddTickCallback(this);
 	}
 
-	// Token: 0x06004FC4 RID: 20420 RVA: 0x0019A8EC File Offset: 0x00198AEC
+	// Token: 0x06004FC4 RID: 20420 RVA: 0x0019A8CC File Offset: 0x00198ACC
 	internal override void OnDisable()
 	{
 		base.OnDisable();
@@ -47,13 +47,13 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		TickSystem<object>.RemoveTickCallback(this);
 	}
 
-	// Token: 0x06004FC5 RID: 20421 RVA: 0x0019A95C File Offset: 0x00198B5C
+	// Token: 0x06004FC5 RID: 20421 RVA: 0x0019A93C File Offset: 0x00198B3C
 	private bool isValid(ThrowableBugBeacon tbb)
 	{
 		return tbb.BugName == this.bugName && (tbb.Range <= 0f || Vector3.Distance(tbb.transform.position, base.transform.position) <= tbb.Range);
 	}
 
-	// Token: 0x06004FC6 RID: 20422 RVA: 0x0019A9AE File Offset: 0x00198BAE
+	// Token: 0x06004FC6 RID: 20422 RVA: 0x0019A98E File Offset: 0x00198B8E
 	private void ThrowableBugBeacon_OnCall(ThrowableBugBeacon tbb)
 	{
 		if (this.isValid(tbb))
@@ -62,7 +62,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06004FC7 RID: 20423 RVA: 0x0019A9E0 File Offset: 0x00198BE0
+	// Token: 0x06004FC7 RID: 20423 RVA: 0x0019A9C0 File Offset: 0x00198BC0
 	private void ThrowableBugBeacon_OnLock(ThrowableBugBeacon tbb)
 	{
 		if (this.isValid(tbb))
@@ -73,7 +73,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06004FC8 RID: 20424 RVA: 0x0019AA2F File Offset: 0x00198C2F
+	// Token: 0x06004FC8 RID: 20424 RVA: 0x0019AA0F File Offset: 0x00198C0F
 	private void ThrowableBugBeacon_OnDismiss(ThrowableBugBeacon tbb)
 	{
 		if (this.isValid(tbb))
@@ -83,7 +83,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06004FC9 RID: 20425 RVA: 0x0019AA67 File Offset: 0x00198C67
+	// Token: 0x06004FC9 RID: 20425 RVA: 0x0019AA47 File Offset: 0x00198C47
 	private void ThrowableBugBeacon_OnUnlock(ThrowableBugBeacon tbb)
 	{
 		if (this.isValid(tbb))
@@ -92,7 +92,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06004FCA RID: 20426 RVA: 0x0019AA79 File Offset: 0x00198C79
+	// Token: 0x06004FCA RID: 20426 RVA: 0x0019AA59 File Offset: 0x00198C59
 	private void ThrowableBugBeacon_OnChangeSpeedMultiplier(ThrowableBugBeacon tbb, float f)
 	{
 		if (this.isValid(tbb))
@@ -107,7 +107,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		return true;
 	}
 
-	// Token: 0x06004FCC RID: 20428 RVA: 0x0019AA8C File Offset: 0x00198C8C
+	// Token: 0x06004FCC RID: 20428 RVA: 0x0019AA6C File Offset: 0x00198C6C
 	protected override void LateUpdateShared()
 	{
 		base.LateUpdateShared();
@@ -198,7 +198,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06004FCD RID: 20429 RVA: 0x0019AC90 File Offset: 0x00198E90
+	// Token: 0x06004FCD RID: 20429 RVA: 0x0019AC70 File Offset: 0x00198E70
 	protected override void LateUpdateLocal()
 	{
 		base.LateUpdateLocal();
@@ -308,13 +308,13 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		base.transform.rotation = this.bugRotationalVelocity * base.transform.rotation;
 	}
 
-	// Token: 0x06004FCE RID: 20430 RVA: 0x0019B215 File Offset: 0x00199415
+	// Token: 0x06004FCE RID: 20430 RVA: 0x0019B1F5 File Offset: 0x001993F5
 	private float RandomizeBobingFrequency()
 	{
 		return Random.Range(this.minRandFrequency, this.maxRandFrequency);
 	}
 
-	// Token: 0x06004FCF RID: 20431 RVA: 0x0019B228 File Offset: 0x00199428
+	// Token: 0x06004FCF RID: 20431 RVA: 0x0019B208 File Offset: 0x00199408
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		if (!base.OnRelease(zoneReleased, releasingHand))
@@ -332,13 +332,13 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		return true;
 	}
 
-	// Token: 0x06004FD0 RID: 20432 RVA: 0x0019B2BA File Offset: 0x001994BA
+	// Token: 0x06004FD0 RID: 20432 RVA: 0x0019B29A File Offset: 0x0019949A
 	public void OnCollisionEnter(Collision collision)
 	{
 		this.reliableState.travelingDirection *= -1f;
 	}
 
-	// Token: 0x06004FD1 RID: 20433 RVA: 0x0019B2D8 File Offset: 0x001994D8
+	// Token: 0x06004FD1 RID: 20433 RVA: 0x0019B2B8 File Offset: 0x001994B8
 	public void Tick()
 	{
 		if (this.updateMultiplier > 0)

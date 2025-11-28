@@ -9,8 +9,8 @@ namespace BuildSafe
 	public abstract class SceneBakeTask : MonoBehaviour
 	{
 		// Token: 0x170008B5 RID: 2229
-		// (get) Token: 0x06005DE7 RID: 24039 RVA: 0x001E1A13 File Offset: 0x001DFC13
-		// (set) Token: 0x06005DE8 RID: 24040 RVA: 0x001E1A1B File Offset: 0x001DFC1B
+		// (get) Token: 0x06005DE7 RID: 24039 RVA: 0x001E19F3 File Offset: 0x001DFBF3
+		// (set) Token: 0x06005DE8 RID: 24040 RVA: 0x001E19FB File Offset: 0x001DFBFB
 		public SceneBakeMode bakeMode
 		{
 			get
@@ -24,8 +24,8 @@ namespace BuildSafe
 		}
 
 		// Token: 0x170008B6 RID: 2230
-		// (get) Token: 0x06005DE9 RID: 24041 RVA: 0x001E1A24 File Offset: 0x001DFC24
-		// (set) Token: 0x06005DEA RID: 24042 RVA: 0x001E1A2C File Offset: 0x001DFC2C
+		// (get) Token: 0x06005DE9 RID: 24041 RVA: 0x001E1A04 File Offset: 0x001DFC04
+		// (set) Token: 0x06005DEA RID: 24042 RVA: 0x001E1A0C File Offset: 0x001DFC0C
 		public virtual int callbackOrder
 		{
 			get
@@ -39,8 +39,8 @@ namespace BuildSafe
 		}
 
 		// Token: 0x170008B7 RID: 2231
-		// (get) Token: 0x06005DEB RID: 24043 RVA: 0x001E1A35 File Offset: 0x001DFC35
-		// (set) Token: 0x06005DEC RID: 24044 RVA: 0x001E1A3D File Offset: 0x001DFC3D
+		// (get) Token: 0x06005DEB RID: 24043 RVA: 0x001E1A15 File Offset: 0x001DFC15
+		// (set) Token: 0x06005DEC RID: 24044 RVA: 0x001E1A1D File Offset: 0x001DFC1D
 		public bool runIfInactive
 		{
 			get

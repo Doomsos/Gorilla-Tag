@@ -6,7 +6,7 @@ namespace emotitron.Compression.HalfFloat
 	// Token: 0x02001142 RID: 4418
 	public static class HalfUtilities
 	{
-		// Token: 0x06006FA0 RID: 28576 RVA: 0x00245744 File Offset: 0x00243944
+		// Token: 0x06006FA0 RID: 28576 RVA: 0x00245724 File Offset: 0x00243924
 		static HalfUtilities()
 		{
 			HalfUtilities.HalfToFloatMantissaTable[0] = 0U;
@@ -89,7 +89,7 @@ namespace emotitron.Compression.HalfFloat
 			}
 		}
 
-		// Token: 0x06006FA1 RID: 28577 RVA: 0x00245A28 File Offset: 0x00243C28
+		// Token: 0x06006FA1 RID: 28577 RVA: 0x00245A08 File Offset: 0x00243C08
 		public static float Unpack(ushort value)
 		{
 			return new HalfUtilities.FloatToUint
@@ -98,7 +98,7 @@ namespace emotitron.Compression.HalfFloat
 			}.floatValue;
 		}
 
-		// Token: 0x06006FA2 RID: 28578 RVA: 0x00245A70 File Offset: 0x00243C70
+		// Token: 0x06006FA2 RID: 28578 RVA: 0x00245A50 File Offset: 0x00243C50
 		public static ushort Pack(float value)
 		{
 			HalfUtilities.FloatToUint floatToUint = default(HalfUtilities.FloatToUint);

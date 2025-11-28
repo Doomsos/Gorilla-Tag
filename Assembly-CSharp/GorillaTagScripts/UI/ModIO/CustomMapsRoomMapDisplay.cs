@@ -12,7 +12,7 @@ namespace GorillaTagScripts.UI.ModIO
 	// Token: 0x02000E2D RID: 3629
 	public class CustomMapsRoomMapDisplay : MonoBehaviour
 	{
-		// Token: 0x06005A8E RID: 23182 RVA: 0x001D07CC File Offset: 0x001CE9CC
+		// Token: 0x06005A8E RID: 23182 RVA: 0x001D07AC File Offset: 0x001CE9AC
 		public void Start()
 		{
 			this.roomMapNameText.text = this.noRoomMapString;
@@ -28,7 +28,7 @@ namespace GorillaTagScripts.UI.ModIO
 			CustomMapManager.OnMapLoadComplete.AddListener(new UnityAction<bool>(this.OnMapLoadComplete));
 		}
 
-		// Token: 0x06005A8F RID: 23183 RVA: 0x001D08C4 File Offset: 0x001CEAC4
+		// Token: 0x06005A8F RID: 23183 RVA: 0x001D08A4 File Offset: 0x001CEAA4
 		public void OnDestroy()
 		{
 			NetworkSystem.Instance.OnMultiplayerStarted -= new Action(this.OnJoinedRoom);
@@ -36,25 +36,25 @@ namespace GorillaTagScripts.UI.ModIO
 			CustomMapManager.OnRoomMapChanged.RemoveListener(new UnityAction<ModId>(this.OnRoomMapChanged));
 		}
 
-		// Token: 0x06005A90 RID: 23184 RVA: 0x001D0929 File Offset: 0x001CEB29
+		// Token: 0x06005A90 RID: 23184 RVA: 0x001D0909 File Offset: 0x001CEB09
 		private void OnJoinedRoom()
 		{
 			this.UpdateRoomMap();
 		}
 
-		// Token: 0x06005A91 RID: 23185 RVA: 0x001D0929 File Offset: 0x001CEB29
+		// Token: 0x06005A91 RID: 23185 RVA: 0x001D0909 File Offset: 0x001CEB09
 		private void OnDisconnectedFromRoom()
 		{
 			this.UpdateRoomMap();
 		}
 
-		// Token: 0x06005A92 RID: 23186 RVA: 0x001D0929 File Offset: 0x001CEB29
+		// Token: 0x06005A92 RID: 23186 RVA: 0x001D0909 File Offset: 0x001CEB09
 		private void OnRoomMapChanged(ModId roomMapModId)
 		{
 			this.UpdateRoomMap();
 		}
 
-		// Token: 0x06005A93 RID: 23187 RVA: 0x001D0934 File Offset: 0x001CEB34
+		// Token: 0x06005A93 RID: 23187 RVA: 0x001D0914 File Offset: 0x001CEB14
 		private Task UpdateRoomMap()
 		{
 			CustomMapsRoomMapDisplay.<UpdateRoomMap>d__18 <UpdateRoomMap>d__;
@@ -65,7 +65,7 @@ namespace GorillaTagScripts.UI.ModIO
 			return <UpdateRoomMap>d__.<>t__builder.Task;
 		}
 
-		// Token: 0x06005A94 RID: 23188 RVA: 0x001D0978 File Offset: 0x001CEB78
+		// Token: 0x06005A94 RID: 23188 RVA: 0x001D0958 File Offset: 0x001CEB58
 		private void OnMapLoadComplete(bool success)
 		{
 			if (success)
@@ -78,7 +78,7 @@ namespace GorillaTagScripts.UI.ModIO
 			this.roomMapStatusText.color = this.loadFailedStatusStringColor;
 		}
 
-		// Token: 0x06005A95 RID: 23189 RVA: 0x001D09CD File Offset: 0x001CEBCD
+		// Token: 0x06005A95 RID: 23189 RVA: 0x001D09AD File Offset: 0x001CEBAD
 		private void OnMapLoadProgress(MapLoadStatus status, int progress, string message)
 		{
 			if (status - MapLoadStatus.Downloading <= 1)

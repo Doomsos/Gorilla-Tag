@@ -8,7 +8,7 @@ using UnityEngine.Events;
 public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 {
 	// Token: 0x17000434 RID: 1076
-	// (get) Token: 0x06002F8E RID: 12174 RVA: 0x00102D0C File Offset: 0x00100F0C
+	// (get) Token: 0x06002F8E RID: 12174 RVA: 0x00102CEC File Offset: 0x00100EEC
 	public int SelectedShelf
 	{
 		get
@@ -18,7 +18,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 	}
 
 	// Token: 0x17000435 RID: 1077
-	// (get) Token: 0x06002F8F RID: 12175 RVA: 0x00102D14 File Offset: 0x00100F14
+	// (get) Token: 0x06002F8F RID: 12175 RVA: 0x00102CF4 File Offset: 0x00100EF4
 	public int SelectedItem
 	{
 		get
@@ -28,8 +28,8 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 	}
 
 	// Token: 0x17000436 RID: 1078
-	// (get) Token: 0x06002F90 RID: 12176 RVA: 0x00102D1C File Offset: 0x00100F1C
-	// (set) Token: 0x06002F91 RID: 12177 RVA: 0x00102D24 File Offset: 0x00100F24
+	// (get) Token: 0x06002F90 RID: 12176 RVA: 0x00102CFC File Offset: 0x00100EFC
+	// (set) Token: 0x06002F91 RID: 12177 RVA: 0x00102D04 File Offset: 0x00100F04
 	public bool TickRunning { get; set; }
 
 	// Token: 0x06002F92 RID: 12178 RVA: 0x0001877F File Offset: 0x0001697F
@@ -44,7 +44,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		TickSystem<object>.RemoveTickCallback(this);
 	}
 
-	// Token: 0x06002F94 RID: 12180 RVA: 0x00102D30 File Offset: 0x00100F30
+	// Token: 0x06002F94 RID: 12180 RVA: 0x00102D10 File Offset: 0x00100F10
 	public void Init(GRToolProgressionManager progression, GhostReactor reactor)
 	{
 		this.reactor = reactor;
@@ -63,13 +63,13 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.SetActivePlayer(-1);
 	}
 
-	// Token: 0x06002F95 RID: 12181 RVA: 0x00102DFB File Offset: 0x00100FFB
+	// Token: 0x06002F95 RID: 12181 RVA: 0x00102DDB File Offset: 0x00100FDB
 	public void OnShiftCreditChanged(string targetMothershipId, int newShiftCredits)
 	{
 		this.needsUIRefresh = true;
 	}
 
-	// Token: 0x06002F96 RID: 12182 RVA: 0x00102E04 File Offset: 0x00101004
+	// Token: 0x06002F96 RID: 12182 RVA: 0x00102DE4 File Offset: 0x00100FE4
 	public void HideOrShowTextBasedOnLocalPlayerDistance()
 	{
 		Vector3 position = GRPlayer.Get(VRRig.LocalRig).transform.position;
@@ -106,7 +106,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.currentlyShowingText = flag;
 	}
 
-	// Token: 0x06002F97 RID: 12183 RVA: 0x00102F7C File Offset: 0x0010117C
+	// Token: 0x06002F97 RID: 12183 RVA: 0x00102F5C File Offset: 0x0010115C
 	public void Tick()
 	{
 		this.HideOrShowTextBasedOnLocalPlayerDistance();
@@ -147,7 +147,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002F98 RID: 12184 RVA: 0x00103080 File Offset: 0x00101280
+	// Token: 0x06002F98 RID: 12184 RVA: 0x00103060 File Offset: 0x00101260
 	public void SetActivePlayer(int actorNum)
 	{
 		this.currentActivePlayerActorNumber = actorNum;
@@ -175,7 +175,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002F99 RID: 12185 RVA: 0x001031B8 File Offset: 0x001013B8
+	// Token: 0x06002F99 RID: 12185 RVA: 0x00103198 File Offset: 0x00101398
 	public void UpdateActivePlayer()
 	{
 		if (!this.grManager.IsAuthority())
@@ -204,7 +204,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002F9A RID: 12186 RVA: 0x00103290 File Offset: 0x00101490
+	// Token: 0x06002F9A RID: 12186 RVA: 0x00103270 File Offset: 0x00101470
 	private void UpdateShelf()
 	{
 		switch (this.shelfMovementState)
@@ -317,7 +317,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002F9B RID: 12187 RVA: 0x001035C4 File Offset: 0x001017C4
+	// Token: 0x06002F9B RID: 12187 RVA: 0x001035A4 File Offset: 0x001017A4
 	private void UpdateSoundsForMovement(GRSpringMovement movement)
 	{
 		if (movement.IsAtTarget())
@@ -335,7 +335,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002F9C RID: 12188 RVA: 0x00103620 File Offset: 0x00101820
+	// Token: 0x06002F9C RID: 12188 RVA: 0x00103600 File Offset: 0x00101800
 	public void SetCurrentShelf(int idx)
 	{
 		if (idx == -1)
@@ -361,7 +361,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.currentVisibleShelfIndex = idx;
 	}
 
-	// Token: 0x06002F9D RID: 12189 RVA: 0x001036A0 File Offset: 0x001018A0
+	// Token: 0x06002F9D RID: 12189 RVA: 0x00103680 File Offset: 0x00101880
 	public void SetNextShelf(int idx)
 	{
 		if (idx == this.nextVisibleShelfIndex)
@@ -385,7 +385,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.nextVisibleShelfIndex = idx;
 	}
 
-	// Token: 0x06002F9E RID: 12190 RVA: 0x00103718 File Offset: 0x00101918
+	// Token: 0x06002F9E RID: 12190 RVA: 0x001036F8 File Offset: 0x001018F8
 	public void ChangeShelfMovementState(GRToolUpgradePurchaseStationFull.ShelfMovementState newState)
 	{
 		this.shelfMovementState = newState;
@@ -418,7 +418,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002F9F RID: 12191 RVA: 0x001037B5 File Offset: 0x001019B5
+	// Token: 0x06002F9F RID: 12191 RVA: 0x00103795 File Offset: 0x00101995
 	public void UpdateShelfVisibility(int shelfID, bool isVisible)
 	{
 		if (!this.IsValidShelfItemIndex(shelfID, 0))
@@ -432,7 +432,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FA0 RID: 12192 RVA: 0x001037E4 File Offset: 0x001019E4
+	// Token: 0x06002FA0 RID: 12192 RVA: 0x001037C4 File Offset: 0x001019C4
 	public void UpdateShelfDisplayElements(int shelfID)
 	{
 		if (!this.IsValidShelfItemIndex(shelfID, 0))
@@ -446,7 +446,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FA1 RID: 12193 RVA: 0x00103828 File Offset: 0x00101A28
+	// Token: 0x06002FA1 RID: 12193 RVA: 0x00103808 File Offset: 0x00101A08
 	public void UpdatePurchaseButtonText()
 	{
 		if (!this.IsValidShelfItemIndex(this.selectedShelf, this.selectedItem))
@@ -467,7 +467,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FA2 RID: 12194 RVA: 0x001038D8 File Offset: 0x00101AD8
+	// Token: 0x06002FA2 RID: 12194 RVA: 0x001038B8 File Offset: 0x00101AB8
 	public void UpdateShelfItemDisplayElements(int shelf, int slotID)
 	{
 		if (!this.IsValidShelfItemIndex(shelf, slotID))
@@ -600,7 +600,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FA3 RID: 12195 RVA: 0x00103DB8 File Offset: 0x00101FB8
+	// Token: 0x06002FA3 RID: 12195 RVA: 0x00103D98 File Offset: 0x00101F98
 	public void UpdatePlayerCurrencyUI()
 	{
 		if (this.currentActivePlayerActorNumber == -1)
@@ -640,7 +640,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.playerInfo.text = text2;
 	}
 
-	// Token: 0x06002FA4 RID: 12196 RVA: 0x00103EE8 File Offset: 0x001020E8
+	// Token: 0x06002FA4 RID: 12196 RVA: 0x00103EC8 File Offset: 0x001020C8
 	public bool CanLocalPlayerPurchaseItem(int shelf, int slotID)
 	{
 		if (!this.IsValidShelfItemIndex(shelf, slotID))
@@ -655,7 +655,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		return this.gameShelves[shelf].gRPurchaseSlots[slotID].canAfford;
 	}
 
-	// Token: 0x06002FA5 RID: 12197 RVA: 0x00103F44 File Offset: 0x00102144
+	// Token: 0x06002FA5 RID: 12197 RVA: 0x00103F24 File Offset: 0x00102124
 	public bool CheckActivePlayer()
 	{
 		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
@@ -672,31 +672,31 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		return !(grplayer2 != grplayer);
 	}
 
-	// Token: 0x06002FA6 RID: 12198 RVA: 0x00103F93 File Offset: 0x00102193
+	// Token: 0x06002FA6 RID: 12198 RVA: 0x00103F73 File Offset: 0x00102173
 	public void SelectOption1()
 	{
 		this.OnLocalSelectionButtonPressed(0);
 	}
 
-	// Token: 0x06002FA7 RID: 12199 RVA: 0x00103F9C File Offset: 0x0010219C
+	// Token: 0x06002FA7 RID: 12199 RVA: 0x00103F7C File Offset: 0x0010217C
 	public void SelectOption2()
 	{
 		this.OnLocalSelectionButtonPressed(1);
 	}
 
-	// Token: 0x06002FA8 RID: 12200 RVA: 0x00103FA5 File Offset: 0x001021A5
+	// Token: 0x06002FA8 RID: 12200 RVA: 0x00103F85 File Offset: 0x00102185
 	public void SelectOption3()
 	{
 		this.OnLocalSelectionButtonPressed(2);
 	}
 
-	// Token: 0x06002FA9 RID: 12201 RVA: 0x00103FAE File Offset: 0x001021AE
+	// Token: 0x06002FA9 RID: 12201 RVA: 0x00103F8E File Offset: 0x0010218E
 	public void SelectOption4()
 	{
 		this.OnLocalSelectionButtonPressed(3);
 	}
 
-	// Token: 0x06002FAA RID: 12202 RVA: 0x00103FB8 File Offset: 0x001021B8
+	// Token: 0x06002FAA RID: 12202 RVA: 0x00103F98 File Offset: 0x00102198
 	public void OnLocalSelectionButtonPressed(int index)
 	{
 		if (!this.CheckActivePlayer())
@@ -741,19 +741,19 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FAB RID: 12203 RVA: 0x00104085 File Offset: 0x00102285
+	// Token: 0x06002FAB RID: 12203 RVA: 0x00104065 File Offset: 0x00102265
 	public void SelectPageDown()
 	{
 		this.OnLocalSelectionPageChange(1);
 	}
 
-	// Token: 0x06002FAC RID: 12204 RVA: 0x0010408E File Offset: 0x0010228E
+	// Token: 0x06002FAC RID: 12204 RVA: 0x0010406E File Offset: 0x0010226E
 	public void SelectPageUp()
 	{
 		this.OnLocalSelectionPageChange(-1);
 	}
 
-	// Token: 0x06002FAD RID: 12205 RVA: 0x00104097 File Offset: 0x00102297
+	// Token: 0x06002FAD RID: 12205 RVA: 0x00104077 File Offset: 0x00102277
 	public void OnLocalSelectionPageChange(int delta)
 	{
 		if (!this.CheckActivePlayer())
@@ -763,13 +763,13 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.pageSelectionWheel.SetTargetShelf((this.pageSelectionWheel.targetPage + delta + this.gameShelves.Count) % this.gameShelves.Count);
 	}
 
-	// Token: 0x06002FAE RID: 12206 RVA: 0x001040D2 File Offset: 0x001022D2
+	// Token: 0x06002FAE RID: 12206 RVA: 0x001040B2 File Offset: 0x001022B2
 	public void CardSwiped()
 	{
 		this.RequestActivePlayerToken();
 	}
 
-	// Token: 0x06002FAF RID: 12207 RVA: 0x001040DC File Offset: 0x001022DC
+	// Token: 0x06002FAF RID: 12207 RVA: 0x001040BC File Offset: 0x001022BC
 	public void PurchaseButtonPressed()
 	{
 		if (this.disablePurchaseButton)
@@ -793,7 +793,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 	{
 	}
 
-	// Token: 0x06002FB1 RID: 12209 RVA: 0x00104136 File Offset: 0x00102336
+	// Token: 0x06002FB1 RID: 12209 RVA: 0x00104116 File Offset: 0x00102316
 	public void RequestActivePlayerToken()
 	{
 		if (this.lastRequestedActivePlayerTokenTime > Time.time || this.lastRequestedActivePlayerTokenTime + this.requestActivePlayerTokenThrottleTime < Time.time)
@@ -803,7 +803,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FB2 RID: 12210 RVA: 0x00104170 File Offset: 0x00102370
+	// Token: 0x06002FB2 RID: 12210 RVA: 0x00104150 File Offset: 0x00102350
 	private void UpdateMagnet()
 	{
 		if (this.desiredMagnetEntityTypeId != this.currentMagnetEntityTypeId || this.currentMagnetEntityTypeId == -1 || this.currentMagnetEntity == null)
@@ -852,7 +852,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FB3 RID: 12211 RVA: 0x001043E4 File Offset: 0x001025E4
+	// Token: 0x06002FB3 RID: 12211 RVA: 0x001043C4 File Offset: 0x001025C4
 	public void InitLinkedEntity(GameEntity entity)
 	{
 		if (this.currentMagnetEntity != null)
@@ -899,7 +899,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.currentMagnetEntityTypeId = entity.typeId;
 	}
 
-	// Token: 0x06002FB4 RID: 12212 RVA: 0x001045DC File Offset: 0x001027DC
+	// Token: 0x06002FB4 RID: 12212 RVA: 0x001045BC File Offset: 0x001027BC
 	public void UpdateSelectionLever()
 	{
 		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
@@ -994,7 +994,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FB5 RID: 12213 RVA: 0x0010495C File Offset: 0x00102B5C
+	// Token: 0x06002FB5 RID: 12213 RVA: 0x0010493C File Offset: 0x00102B3C
 	public static void AttachEntityToMagnet_DockGoesToLocation(Transform magnet, Transform entity, Transform dock, Vector3 magnetDockOffset)
 	{
 		if (magnet == null || entity == null || dock == null)
@@ -1017,7 +1017,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		entity.localScale = localScale;
 	}
 
-	// Token: 0x06002FB6 RID: 12214 RVA: 0x001049EC File Offset: 0x00102BEC
+	// Token: 0x06002FB6 RID: 12214 RVA: 0x001049CC File Offset: 0x00102BCC
 	public void SetHandleAndSelectionWheelPositionRemote(int handlePos, int wheelPos)
 	{
 		this.pageSelectionWheel.isBeingDrivenRemotely = true;
@@ -1027,13 +1027,13 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.pageSelectionWheel.SetTargetAngle((float)wheelPos / this.quantMult);
 	}
 
-	// Token: 0x06002FB7 RID: 12215 RVA: 0x00102DFB File Offset: 0x00100FFB
+	// Token: 0x06002FB7 RID: 12215 RVA: 0x00102DDB File Offset: 0x00100FDB
 	public void ProgressionUpdated()
 	{
 		this.needsUIRefresh = true;
 	}
 
-	// Token: 0x06002FB8 RID: 12216 RVA: 0x00104A54 File Offset: 0x00102C54
+	// Token: 0x06002FB8 RID: 12216 RVA: 0x00104A34 File Offset: 0x00102C34
 	public void SetSelectedShelfAndItem(int shelf, int item, bool fromNetworkRPC)
 	{
 		if (!this.IsValidShelfItemIndex(shelf, item))
@@ -1083,7 +1083,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FB9 RID: 12217 RVA: 0x00104C00 File Offset: 0x00102E00
+	// Token: 0x06002FB9 RID: 12217 RVA: 0x00104BE0 File Offset: 0x00102DE0
 	public void RequestPurchaseItem(int shelf, int item)
 	{
 		if (!this.IsValidShelfItemIndex(shelf, item))
@@ -1121,7 +1121,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.grManager.RequestPurchaseToolOrUpgrade(this, shelf, item);
 	}
 
-	// Token: 0x06002FBA RID: 12218 RVA: 0x00104CC8 File Offset: 0x00102EC8
+	// Token: 0x06002FBA RID: 12218 RVA: 0x00104CA8 File Offset: 0x00102EA8
 	public ValueTuple<bool, bool> TryPurchaseAuthority(GRPlayer player, int shelf, int item)
 	{
 		if (this.currentActivePlayerActorNumber == -1)
@@ -1155,7 +1155,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		return new ValueTuple<bool, bool>(true, true);
 	}
 
-	// Token: 0x06002FBB RID: 12219 RVA: 0x00104D88 File Offset: 0x00102F88
+	// Token: 0x06002FBB RID: 12219 RVA: 0x00104D68 File Offset: 0x00102F68
 	public void ToolPurchaseResponseLocal(GRPlayer player, int shelf, int item, bool success)
 	{
 		if (!this.IsValidShelfItemIndex(shelf, item))
@@ -1220,7 +1220,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002FBC RID: 12220 RVA: 0x00104EC4 File Offset: 0x001030C4
+	// Token: 0x06002FBC RID: 12220 RVA: 0x00104EA4 File Offset: 0x001030A4
 	public void InitPageSelectionWheel()
 	{
 		List<string> list = new List<string>();
@@ -1231,19 +1231,19 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.pageSelectionWheel.InitFromNameList(list);
 	}
 
-	// Token: 0x06002FBD RID: 12221 RVA: 0x00104F10 File Offset: 0x00103110
+	// Token: 0x06002FBD RID: 12221 RVA: 0x00104EF0 File Offset: 0x001030F0
 	public static Color ColorFromRGB32(int r, int g, int b)
 	{
 		return new Color((float)r / 255f, (float)g / 255f, (float)b / 255f);
 	}
 
-	// Token: 0x06002FBE RID: 12222 RVA: 0x00104F30 File Offset: 0x00103130
+	// Token: 0x06002FBE RID: 12222 RVA: 0x00104F10 File Offset: 0x00103110
 	public bool IsValidShelfItemIndex(int shelf, int idx)
 	{
 		return shelf >= 0 && shelf < this.gameShelves.Count && this.gameShelves[shelf].gRPurchaseSlots != null && idx >= 0 && idx < this.gameShelves[shelf].gRPurchaseSlots.Count && this.gameShelves[shelf].gRPurchaseSlots[idx].PurchaseID > GRToolProgressionManager.ToolParts.None;
 	}
 
-	// Token: 0x06002FBF RID: 12223 RVA: 0x00104FA0 File Offset: 0x001031A0
+	// Token: 0x06002FBF RID: 12223 RVA: 0x00104F80 File Offset: 0x00103180
 	private static Vector3 ExtractLossyScale(Matrix4x4 m)
 	{
 		float magnitude = new Vector3(m.m00, m.m10, m.m20).magnitude;
@@ -1252,7 +1252,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		return new Vector3(magnitude, magnitude2, magnitude3);
 	}
 
-	// Token: 0x06002FC0 RID: 12224 RVA: 0x00105014 File Offset: 0x00103214
+	// Token: 0x06002FC0 RID: 12224 RVA: 0x00104FF4 File Offset: 0x001031F4
 	private static void DecomposeTRS(Matrix4x4 m, out Vector3 pos, out Quaternion rot, out Vector3 scale)
 	{
 		pos = m.GetColumn(3);

@@ -7,8 +7,8 @@ using UnityEngine;
 public class CosmeticWardrobe : MonoBehaviour
 {
 	// Token: 0x1700035F RID: 863
-	// (get) Token: 0x06001F9F RID: 8095 RVA: 0x000A813C File Offset: 0x000A633C
-	// (set) Token: 0x06001FA0 RID: 8096 RVA: 0x000A8144 File Offset: 0x000A6344
+	// (get) Token: 0x06001F9F RID: 8095 RVA: 0x000A811C File Offset: 0x000A631C
+	// (set) Token: 0x06001FA0 RID: 8096 RVA: 0x000A8124 File Offset: 0x000A6324
 	public bool UseTemporarySet
 	{
 		get
@@ -26,7 +26,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001FA1 RID: 8097 RVA: 0x000A8164 File Offset: 0x000A6364
+	// Token: 0x06001FA1 RID: 8097 RVA: 0x000A8144 File Offset: 0x000A6344
 	private void Start()
 	{
 		for (int i = 0; i < this.cosmeticCategoryButtons.Length; i++)
@@ -69,7 +69,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		this.HandleCosmeticsUpdated();
 	}
 
-	// Token: 0x06001FA2 RID: 8098 RVA: 0x000A83A4 File Offset: 0x000A65A4
+	// Token: 0x06001FA2 RID: 8098 RVA: 0x000A8384 File Offset: 0x000A6584
 	private void OnDestroy()
 	{
 		if (GorillaTagger.Instance && GorillaTagger.Instance.offlineVRRig)
@@ -96,7 +96,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		this.nextOutfit.onPressed -= new Action<GorillaPressableButton, bool>(this.HandlePressedNextOutfitButton);
 	}
 
-	// Token: 0x06001FA3 RID: 8099 RVA: 0x000A8538 File Offset: 0x000A6738
+	// Token: 0x06001FA3 RID: 8099 RVA: 0x000A8518 File Offset: 0x000A6718
 	private void HandlePressedNextSelection(GorillaPressableButton button, bool isLeft)
 	{
 		CosmeticWardrobe.startingDisplayIndex += this.cosmeticCollectionDisplays.Length;
@@ -112,7 +112,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		onWardrobeUpdateDisplays.Invoke();
 	}
 
-	// Token: 0x06001FA4 RID: 8100 RVA: 0x000A8588 File Offset: 0x000A6788
+	// Token: 0x06001FA4 RID: 8100 RVA: 0x000A8568 File Offset: 0x000A6768
 	private void HandlePressedPrevSelection(GorillaPressableButton button, bool isLeft)
 	{
 		CosmeticWardrobe.startingDisplayIndex -= this.cosmeticCollectionDisplays.Length;
@@ -139,7 +139,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		onWardrobeUpdateDisplays.Invoke();
 	}
 
-	// Token: 0x06001FA5 RID: 8101 RVA: 0x000A8608 File Offset: 0x000A6808
+	// Token: 0x06001FA5 RID: 8101 RVA: 0x000A85E8 File Offset: 0x000A67E8
 	private void HandlePressedSelectCosmeticButton(GorillaPressableButton button, bool isLeft)
 	{
 		int i = 0;
@@ -163,7 +163,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001FA6 RID: 8102 RVA: 0x000A86A0 File Offset: 0x000A68A0
+	// Token: 0x06001FA6 RID: 8102 RVA: 0x000A8680 File Offset: 0x000A6880
 	private void HandleChangeCategory(GorillaPressableButton button, bool isLeft)
 	{
 		for (int i = 0; i < this.cosmeticCategoryButtons.Length; i++)
@@ -257,7 +257,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001FA7 RID: 8103 RVA: 0x000A88C4 File Offset: 0x000A6AC4
+	// Token: 0x06001FA7 RID: 8103 RVA: 0x000A88A4 File Offset: 0x000A6AA4
 	private void HandleCosmeticsUpdated()
 	{
 		string[] currentlyWornCosmetics = CosmeticsController.instance.GetCurrentlyWornCosmetics(this.m_useTemporarySet);
@@ -268,7 +268,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		this.UpdateOutfitButtons();
 	}
 
-	// Token: 0x06001FA8 RID: 8104 RVA: 0x000A8918 File Offset: 0x000A6B18
+	// Token: 0x06001FA8 RID: 8104 RVA: 0x000A88F8 File Offset: 0x000A6AF8
 	private void HandleLocalColorChanged(Color newColor)
 	{
 		MeshRenderer component = this.currentEquippedDisplay.GetComponent<MeshRenderer>();
@@ -278,19 +278,19 @@ public class CosmeticWardrobe : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001FA9 RID: 8105 RVA: 0x000A8946 File Offset: 0x000A6B46
+	// Token: 0x06001FA9 RID: 8105 RVA: 0x000A8926 File Offset: 0x000A6B26
 	private void HandlePressedPrevOutfitButton(GorillaPressableButton button, bool isLeft)
 	{
 		CosmeticsController.instance.PressWardrobeScrollOutfit(false);
 	}
 
-	// Token: 0x06001FAA RID: 8106 RVA: 0x000A8955 File Offset: 0x000A6B55
+	// Token: 0x06001FAA RID: 8106 RVA: 0x000A8935 File Offset: 0x000A6B35
 	private void HandlePressedNextOutfitButton(GorillaPressableButton button, bool isLeft)
 	{
 		CosmeticsController.instance.PressWardrobeScrollOutfit(true);
 	}
 
-	// Token: 0x06001FAB RID: 8107 RVA: 0x000A8964 File Offset: 0x000A6B64
+	// Token: 0x06001FAB RID: 8107 RVA: 0x000A8944 File Offset: 0x000A6B44
 	private void UpdateCosmeticDisplays()
 	{
 		for (int i = 0; i < this.cosmeticCollectionDisplays.Length; i++)
@@ -309,7 +309,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		this.prevSelection.UpdateColor();
 	}
 
-	// Token: 0x06001FAC RID: 8108 RVA: 0x000A8A7C File Offset: 0x000A6C7C
+	// Token: 0x06001FAC RID: 8108 RVA: 0x000A8A5C File Offset: 0x000A6C5C
 	private void UpdateCategoryButtons()
 	{
 		for (int i = 0; i < this.cosmeticCategoryButtons.Length; i++)
@@ -346,7 +346,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001FAD RID: 8109 RVA: 0x000A8BDC File Offset: 0x000A6DDC
+	// Token: 0x06001FAD RID: 8109 RVA: 0x000A8BBC File Offset: 0x000A6DBC
 	private void UpdateOutfitButtons()
 	{
 		bool enabled = CosmeticsController.CanScrollOutfits();
@@ -359,7 +359,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		this.outfitTextOutline.text = "Outfit #" + num.ToString();
 	}
 
-	// Token: 0x06001FAE RID: 8110 RVA: 0x000A8C60 File Offset: 0x000A6E60
+	// Token: 0x06001FAE RID: 8110 RVA: 0x000A8C40 File Offset: 0x000A6E40
 	public bool WardrobeButtonsInitialized()
 	{
 		for (int i = 0; i < this.cosmeticCategoryButtons.Length; i++)

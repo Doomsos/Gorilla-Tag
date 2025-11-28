@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020005C1 RID: 1473
 public class ChestHeartbeat : MonoBehaviour
 {
-	// Token: 0x06002540 RID: 9536 RVA: 0x000C7DC8 File Offset: 0x000C5FC8
+	// Token: 0x06002540 RID: 9536 RVA: 0x000C7DA8 File Offset: 0x000C5FA8
 	public void Update()
 	{
 		if (PhotonNetwork.InRoom)
@@ -27,7 +27,7 @@ public class ChestHeartbeat : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002541 RID: 9537 RVA: 0x000C7ED6 File Offset: 0x000C60D6
+	// Token: 0x06002541 RID: 9537 RVA: 0x000C7EB6 File Offset: 0x000C60B6
 	private IEnumerator HeartBeat()
 	{
 		float startTime = Time.time;

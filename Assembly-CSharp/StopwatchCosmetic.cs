@@ -6,7 +6,7 @@ using UnityEngine;
 public class StopwatchCosmetic : TransferrableObject
 {
 	// Token: 0x1700036B RID: 875
-	// (get) Token: 0x06002064 RID: 8292 RVA: 0x000ABD97 File Offset: 0x000A9F97
+	// (get) Token: 0x06002064 RID: 8292 RVA: 0x000ABD77 File Offset: 0x000A9F77
 	public bool isActivating
 	{
 		get
@@ -16,7 +16,7 @@ public class StopwatchCosmetic : TransferrableObject
 	}
 
 	// Token: 0x1700036C RID: 876
-	// (get) Token: 0x06002065 RID: 8293 RVA: 0x000ABD9F File Offset: 0x000A9F9F
+	// (get) Token: 0x06002065 RID: 8293 RVA: 0x000ABD7F File Offset: 0x000A9F7F
 	public float activeTimeElapsed
 	{
 		get
@@ -25,7 +25,7 @@ public class StopwatchCosmetic : TransferrableObject
 		}
 	}
 
-	// Token: 0x06002066 RID: 8294 RVA: 0x000ABDA8 File Offset: 0x000A9FA8
+	// Token: 0x06002066 RID: 8294 RVA: 0x000ABD88 File Offset: 0x000A9F88
 	protected override void Awake()
 	{
 		base.Awake();
@@ -41,7 +41,7 @@ public class StopwatchCosmetic : TransferrableObject
 		this._watchReset = new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnWatchReset);
 	}
 
-	// Token: 0x06002067 RID: 8295 RVA: 0x000ABE2C File Offset: 0x000AA02C
+	// Token: 0x06002067 RID: 8295 RVA: 0x000ABE0C File Offset: 0x000AA00C
 	internal override void OnEnable()
 	{
 		base.OnEnable();
@@ -56,7 +56,7 @@ public class StopwatchCosmetic : TransferrableObject
 		this._photonID = i.GetStaticHash();
 	}
 
-	// Token: 0x06002068 RID: 8296 RVA: 0x000ABE87 File Offset: 0x000AA087
+	// Token: 0x06002068 RID: 8296 RVA: 0x000ABE67 File Offset: 0x000AA067
 	internal override void OnDisable()
 	{
 		base.OnDisable();
@@ -64,7 +64,7 @@ public class StopwatchCosmetic : TransferrableObject
 		StopwatchCosmetic.gWatchToggleRPC -= this._watchToggle;
 	}
 
-	// Token: 0x06002069 RID: 8297 RVA: 0x000ABEBC File Offset: 0x000AA0BC
+	// Token: 0x06002069 RID: 8297 RVA: 0x000ABE9C File Offset: 0x000AA09C
 	private void OnWatchToggle(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 	{
 		if (this._photonID == -1)
@@ -90,7 +90,7 @@ public class StopwatchCosmetic : TransferrableObject
 		this._watchFace.WatchToggle();
 	}
 
-	// Token: 0x0600206A RID: 8298 RVA: 0x000ABF3C File Offset: 0x000AA13C
+	// Token: 0x0600206A RID: 8298 RVA: 0x000ABF1C File Offset: 0x000AA11C
 	private void OnWatchReset(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 	{
 		if (this._photonID == -1)
@@ -113,7 +113,7 @@ public class StopwatchCosmetic : TransferrableObject
 		this._watchFace.WatchReset();
 	}
 
-	// Token: 0x0600206B RID: 8299 RVA: 0x000ABF9C File Offset: 0x000AA19C
+	// Token: 0x0600206B RID: 8299 RVA: 0x000ABF7C File Offset: 0x000AA17C
 	private bool FetchMyViewID(out int viewID)
 	{
 		viewID = -1;
@@ -135,7 +135,7 @@ public class StopwatchCosmetic : TransferrableObject
 		return true;
 	}
 
-	// Token: 0x0600206C RID: 8300 RVA: 0x000AC03B File Offset: 0x000AA23B
+	// Token: 0x0600206C RID: 8300 RVA: 0x000AC01B File Offset: 0x000AA21B
 	public bool PollActivated()
 	{
 		if (!this._activated)
@@ -146,7 +146,7 @@ public class StopwatchCosmetic : TransferrableObject
 		return true;
 	}
 
-	// Token: 0x0600206D RID: 8301 RVA: 0x000AC050 File Offset: 0x000AA250
+	// Token: 0x0600206D RID: 8301 RVA: 0x000AC030 File Offset: 0x000AA230
 	public override void TriggeredLateUpdate()
 	{
 		base.TriggeredLateUpdate();
@@ -165,7 +165,7 @@ public class StopwatchCosmetic : TransferrableObject
 		}
 	}
 
-	// Token: 0x0600206E RID: 8302 RVA: 0x000AC0C3 File Offset: 0x000AA2C3
+	// Token: 0x0600206E RID: 8302 RVA: 0x000AC0A3 File Offset: 0x000AA2A3
 	public override void OnActivate()
 	{
 		if (!this.CanActivate())
@@ -180,7 +180,7 @@ public class StopwatchCosmetic : TransferrableObject
 		}
 	}
 
-	// Token: 0x0600206F RID: 8303 RVA: 0x000AC0F0 File Offset: 0x000AA2F0
+	// Token: 0x0600206F RID: 8303 RVA: 0x000AC0D0 File Offset: 0x000AA2D0
 	public override void OnDeactivate()
 	{
 		if (!this.CanDeactivate())
@@ -204,13 +204,13 @@ public class StopwatchCosmetic : TransferrableObject
 		this._activated = false;
 	}
 
-	// Token: 0x06002070 RID: 8304 RVA: 0x000AC179 File Offset: 0x000AA379
+	// Token: 0x06002070 RID: 8304 RVA: 0x000AC159 File Offset: 0x000AA359
 	public override bool CanActivate()
 	{
 		return !this.disableActivation;
 	}
 
-	// Token: 0x06002071 RID: 8305 RVA: 0x000AC184 File Offset: 0x000AA384
+	// Token: 0x06002071 RID: 8305 RVA: 0x000AC164 File Offset: 0x000AA364
 	public override bool CanDeactivate()
 	{
 		return !this.disableDeactivation;

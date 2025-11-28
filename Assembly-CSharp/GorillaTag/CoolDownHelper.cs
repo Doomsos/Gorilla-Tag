@@ -8,21 +8,21 @@ namespace GorillaTag
 	[Serializable]
 	public class CoolDownHelper
 	{
-		// Token: 0x060067F5 RID: 26613 RVA: 0x0021F10B File Offset: 0x0021D30B
+		// Token: 0x060067F5 RID: 26613 RVA: 0x0021F0EB File Offset: 0x0021D2EB
 		public CoolDownHelper()
 		{
 			this.coolDown = 1f;
 			this.checkTime = 0f;
 		}
 
-		// Token: 0x060067F6 RID: 26614 RVA: 0x0021F129 File Offset: 0x0021D329
+		// Token: 0x060067F6 RID: 26614 RVA: 0x0021F109 File Offset: 0x0021D309
 		public CoolDownHelper(float cd)
 		{
 			this.coolDown = cd;
 			this.checkTime = 0f;
 		}
 
-		// Token: 0x060067F7 RID: 26615 RVA: 0x0021F144 File Offset: 0x0021D344
+		// Token: 0x060067F7 RID: 26615 RVA: 0x0021F124 File Offset: 0x0021D324
 		[MethodImpl(256)]
 		public bool CheckCooldown()
 		{
@@ -36,13 +36,13 @@ namespace GorillaTag
 			return true;
 		}
 
-		// Token: 0x060067F8 RID: 26616 RVA: 0x0021F177 File Offset: 0x0021D377
+		// Token: 0x060067F8 RID: 26616 RVA: 0x0021F157 File Offset: 0x0021D357
 		public virtual void Start()
 		{
 			this.checkTime = Time.unscaledTime + this.coolDown;
 		}
 
-		// Token: 0x060067F9 RID: 26617 RVA: 0x0021F18B File Offset: 0x0021D38B
+		// Token: 0x060067F9 RID: 26617 RVA: 0x0021F16B File Offset: 0x0021D36B
 		public virtual void Stop()
 		{
 			this.checkTime = float.MaxValue;

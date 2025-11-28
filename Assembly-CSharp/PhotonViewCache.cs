@@ -6,8 +6,8 @@ using UnityEngine;
 public class PhotonViewCache : MonoBehaviour, IPunInstantiateMagicCallback
 {
 	// Token: 0x17000447 RID: 1095
-	// (get) Token: 0x060030D6 RID: 12502 RVA: 0x0010A77C File Offset: 0x0010897C
-	// (set) Token: 0x060030D7 RID: 12503 RVA: 0x0010A784 File Offset: 0x00108984
+	// (get) Token: 0x060030D6 RID: 12502 RVA: 0x0010A75C File Offset: 0x0010895C
+	// (set) Token: 0x060030D7 RID: 12503 RVA: 0x0010A764 File Offset: 0x00108964
 	public bool Initialized { get; private set; }
 
 	// Token: 0x060030D8 RID: 12504 RVA: 0x00002789 File Offset: 0x00000989

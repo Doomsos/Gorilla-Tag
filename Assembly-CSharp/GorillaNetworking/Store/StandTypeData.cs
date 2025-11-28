@@ -6,7 +6,7 @@ namespace GorillaNetworking.Store
 	// Token: 0x02000F47 RID: 3911
 	public class StandTypeData
 	{
-		// Token: 0x0600620C RID: 25100 RVA: 0x001F9894 File Offset: 0x001F7A94
+		// Token: 0x0600620C RID: 25100 RVA: 0x001F9874 File Offset: 0x001F7A74
 		public StandTypeData(string[] spawnData)
 		{
 			this.departmentID = spawnData[0];
@@ -32,7 +32,7 @@ namespace GorillaNetworking.Store
 			}));
 		}
 
-		// Token: 0x0600620D RID: 25101 RVA: 0x001F9978 File Offset: 0x001F7B78
+		// Token: 0x0600620D RID: 25101 RVA: 0x001F9958 File Offset: 0x001F7B58
 		public StandTypeData(string departmentID, string displayID, string standID, HeadModel_CosmeticStand.BustType bustType, string playFabID)
 		{
 			this.departmentID = departmentID;

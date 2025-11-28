@@ -6,7 +6,7 @@ namespace PerformanceSystems
 	// Token: 0x02000D82 RID: 3458
 	public static class FastRemoveExtensions
 	{
-		// Token: 0x060054C2 RID: 21698 RVA: 0x001AB884 File Offset: 0x001A9A84
+		// Token: 0x060054C2 RID: 21698 RVA: 0x001AB864 File Offset: 0x001A9A64
 		public static bool FastRemove<T>(this List<T> list, T itemToRemove)
 		{
 			EqualityComparer<T> @default = EqualityComparer<T>.Default;
@@ -28,7 +28,7 @@ namespace PerformanceSystems
 			return false;
 		}
 
-		// Token: 0x060054C3 RID: 21699 RVA: 0x001AB8DC File Offset: 0x001A9ADC
+		// Token: 0x060054C3 RID: 21699 RVA: 0x001AB8BC File Offset: 0x001A9ABC
 		public static bool FastRemove<T>(this List<T> list, HashSet<T> setToRemove)
 		{
 			if (setToRemove == null || setToRemove.Count == 0 || list.Count == 0)

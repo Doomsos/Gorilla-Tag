@@ -12,7 +12,7 @@ using UnityEngine;
 // Token: 0x0200098E RID: 2446
 public class NewMapsDisplay : MonoBehaviour
 {
-	// Token: 0x06003E3D RID: 15933 RVA: 0x0014BC44 File Offset: 0x00149E44
+	// Token: 0x06003E3D RID: 15933 RVA: 0x0014BC24 File Offset: 0x00149E24
 	public void OnEnable()
 	{
 		this.mapImage.gameObject.SetActive(false);
@@ -38,7 +38,7 @@ public class NewMapsDisplay : MonoBehaviour
 		this.loadingText.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06003E3E RID: 15934 RVA: 0x0014BD00 File Offset: 0x00149F00
+	// Token: 0x06003E3E RID: 15934 RVA: 0x0014BCE0 File Offset: 0x00149EE0
 	public void OnDisable()
 	{
 		if (this.initCoroutine != null)
@@ -60,7 +60,7 @@ public class NewMapsDisplay : MonoBehaviour
 		UGCPermissionManager.UnsubscribeFromUGCDisabled(new Action(this.OnUGCDisabled));
 	}
 
-	// Token: 0x06003E3F RID: 15935 RVA: 0x0014BDCC File Offset: 0x00149FCC
+	// Token: 0x06003E3F RID: 15935 RVA: 0x0014BDAC File Offset: 0x00149FAC
 	private void OnUGCEnabled()
 	{
 		if (this.newMapDatas.IsNullOrEmpty<NewMapsDisplay.NewMapData>())
@@ -78,7 +78,7 @@ public class NewMapsDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003E40 RID: 15936 RVA: 0x0014BE28 File Offset: 0x0014A028
+	// Token: 0x06003E40 RID: 15936 RVA: 0x0014BE08 File Offset: 0x0014A008
 	private void OnUGCDisabled()
 	{
 		this.mapImage.gameObject.SetActive(false);
@@ -88,7 +88,7 @@ public class NewMapsDisplay : MonoBehaviour
 		this.loadingText.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06003E41 RID: 15937 RVA: 0x0014BE89 File Offset: 0x0014A089
+	// Token: 0x06003E41 RID: 15937 RVA: 0x0014BE69 File Offset: 0x0014A069
 	private IEnumerator DelayedInitialize()
 	{
 		while (!ModIOManager.TryGetNewMapsModId(out this.newMapsModId))
@@ -104,7 +104,7 @@ public class NewMapsDisplay : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003E42 RID: 15938 RVA: 0x0014BE98 File Offset: 0x0014A098
+	// Token: 0x06003E42 RID: 15938 RVA: 0x0014BE78 File Offset: 0x0014A078
 	private Task<Error> Initialize()
 	{
 		NewMapsDisplay.<Initialize>d__28 <Initialize>d__;
@@ -115,7 +115,7 @@ public class NewMapsDisplay : MonoBehaviour
 		return <Initialize>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003E43 RID: 15939 RVA: 0x0014BEDB File Offset: 0x0014A0DB
+	// Token: 0x06003E43 RID: 15939 RVA: 0x0014BEBB File Offset: 0x0014A0BB
 	private void StartSlideshow()
 	{
 		if (this.newMapDatas.IsNullOrEmpty<NewMapsDisplay.NewMapData>())
@@ -127,7 +127,7 @@ public class NewMapsDisplay : MonoBehaviour
 		this.UpdateSlideshow();
 	}
 
-	// Token: 0x06003E44 RID: 15940 RVA: 0x0014BEFF File Offset: 0x0014A0FF
+	// Token: 0x06003E44 RID: 15940 RVA: 0x0014BEDF File Offset: 0x0014A0DF
 	public void Update()
 	{
 		if (!this.slideshowActive || Time.time - this.lastSlideshowUpdate < this.slideshowUpdateInterval)
@@ -137,7 +137,7 @@ public class NewMapsDisplay : MonoBehaviour
 		this.UpdateSlideshow();
 	}
 
-	// Token: 0x06003E45 RID: 15941 RVA: 0x0014BF24 File Offset: 0x0014A124
+	// Token: 0x06003E45 RID: 15941 RVA: 0x0014BF04 File Offset: 0x0014A104
 	private void UpdateSlideshow()
 	{
 		this.loadingText.gameObject.SetActive(false);

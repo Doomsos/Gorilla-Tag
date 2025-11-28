@@ -11,7 +11,7 @@ namespace GorillaGameModes
 	public class GameModeZoneMapping : ScriptableObject
 	{
 		// Token: 0x17000816 RID: 2070
-		// (get) Token: 0x06005522 RID: 21794 RVA: 0x001AC945 File Offset: 0x001AAB45
+		// (get) Token: 0x06005522 RID: 21794 RVA: 0x001AC925 File Offset: 0x001AAB25
 		public HashSet<GameModeType> AllModes
 		{
 			get
@@ -21,7 +21,7 @@ namespace GorillaGameModes
 			}
 		}
 
-		// Token: 0x06005523 RID: 21795 RVA: 0x001AC954 File Offset: 0x001AAB54
+		// Token: 0x06005523 RID: 21795 RVA: 0x001AC934 File Offset: 0x001AAB34
 		private void init()
 		{
 			if (this.allModes != null)
@@ -80,7 +80,7 @@ namespace GorillaGameModes
 			}
 		}
 
-		// Token: 0x06005524 RID: 21796 RVA: 0x001ACC2C File Offset: 0x001AAE2C
+		// Token: 0x06005524 RID: 21796 RVA: 0x001ACC0C File Offset: 0x001AAE0C
 		public HashSet<GameModeType> GetModesForZone(GTZone zone, bool isPrivate)
 		{
 			this.init();
@@ -95,7 +95,7 @@ namespace GorillaGameModes
 			return new HashSet<GameModeType>(this.defaultGameModes);
 		}
 
-		// Token: 0x06005525 RID: 21797 RVA: 0x001ACC83 File Offset: 0x001AAE83
+		// Token: 0x06005525 RID: 21797 RVA: 0x001ACC63 File Offset: 0x001AAE63
 		internal string GetModeName(GameModeType mode)
 		{
 			this.init();
@@ -106,14 +106,14 @@ namespace GorillaGameModes
 			return mode.ToString().ToUpper();
 		}
 
-		// Token: 0x06005526 RID: 21798 RVA: 0x001ACCB8 File Offset: 0x001AAEB8
+		// Token: 0x06005526 RID: 21798 RVA: 0x001ACC98 File Offset: 0x001AAE98
 		internal bool IsNew(GameModeType mode)
 		{
 			this.init();
 			return this.isNewLookup.Contains(mode);
 		}
 
-		// Token: 0x06005527 RID: 21799 RVA: 0x001ACCCC File Offset: 0x001AAECC
+		// Token: 0x06005527 RID: 21799 RVA: 0x001ACCAC File Offset: 0x001AAEAC
 		internal CountdownTextDate GetCountdown(GameModeType mode)
 		{
 			this.init();
@@ -124,7 +124,7 @@ namespace GorillaGameModes
 			return null;
 		}
 
-		// Token: 0x06005528 RID: 21800 RVA: 0x001ACCF0 File Offset: 0x001AAEF0
+		// Token: 0x06005528 RID: 21800 RVA: 0x001ACCD0 File Offset: 0x001AAED0
 		internal GameModeType VerifyModeForZone(GTZone zone, GameModeType mode, bool isPrivate)
 		{
 			if (GorillaComputer.instance.IsPlayerInVirtualStump())

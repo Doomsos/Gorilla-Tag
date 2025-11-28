@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "ScriptableObjects/FXSystemSettings", order = 2)]
 public class FXSystemSettings : ScriptableObject
 {
-	// Token: 0x06004B22 RID: 19234 RVA: 0x001886D0 File Offset: 0x001868D0
+	// Token: 0x06004B22 RID: 19234 RVA: 0x001886B0 File Offset: 0x001868B0
 	public void Awake()
 	{
 		int num = (this.callLimits != null) ? this.callLimits.Length : 0;

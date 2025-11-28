@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 // Token: 0x02000C9D RID: 3229
 public class GraphicsStateCollectionManager : MonoBehaviour
 {
-	// Token: 0x06004EE2 RID: 20194 RVA: 0x00198050 File Offset: 0x00196250
+	// Token: 0x06004EE2 RID: 20194 RVA: 0x00198030 File Offset: 0x00196230
 	private GraphicsStateCollection FindExistingCollection()
 	{
 		for (int i = 0; i < this.collections.Length; i++)
@@ -21,7 +21,7 @@ public class GraphicsStateCollectionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x06004EE3 RID: 20195 RVA: 0x001980D4 File Offset: 0x001962D4
+	// Token: 0x06004EE3 RID: 20195 RVA: 0x001980B4 File Offset: 0x001962B4
 	private void Awake()
 	{
 		if (GraphicsStateCollectionManager.Instance != null && GraphicsStateCollectionManager.Instance != this)
@@ -34,7 +34,7 @@ public class GraphicsStateCollectionManager : MonoBehaviour
 		Object.DontDestroyOnLoad(base.gameObject);
 	}
 
-	// Token: 0x06004EE4 RID: 20196 RVA: 0x00198124 File Offset: 0x00196324
+	// Token: 0x06004EE4 RID: 20196 RVA: 0x00198104 File Offset: 0x00196304
 	private void Start()
 	{
 		if (this.mode == GraphicsStateCollectionManager.Mode.Tracing)
@@ -81,7 +81,7 @@ public class GraphicsStateCollectionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004EE5 RID: 20197 RVA: 0x001982A8 File Offset: 0x001964A8
+	// Token: 0x06004EE5 RID: 20197 RVA: 0x00198288 File Offset: 0x00196488
 	private void OnApplicationFocus(bool focus)
 	{
 		if (!focus && this.mode == GraphicsStateCollectionManager.Mode.Tracing && this.m_GraphicsStateCollection != null)
@@ -91,7 +91,7 @@ public class GraphicsStateCollectionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004EE6 RID: 20198 RVA: 0x00198308 File Offset: 0x00196508
+	// Token: 0x06004EE6 RID: 20198 RVA: 0x001982E8 File Offset: 0x001964E8
 	private void OnDestroy()
 	{
 		if (this._autoSaveRoutine != null)
@@ -106,7 +106,7 @@ public class GraphicsStateCollectionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004EE7 RID: 20199 RVA: 0x00198383 File Offset: 0x00196583
+	// Token: 0x06004EE7 RID: 20199 RVA: 0x00198363 File Offset: 0x00196563
 	private IEnumerator AutoSaveRoutine()
 	{
 		for (;;)

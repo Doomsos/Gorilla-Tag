@@ -4,14 +4,14 @@ using UnityEngine;
 // Token: 0x02000C8E RID: 3214
 public class UIMatchRotation : MonoBehaviour
 {
-	// Token: 0x06004E8C RID: 20108 RVA: 0x00196EA5 File Offset: 0x001950A5
+	// Token: 0x06004E8C RID: 20108 RVA: 0x00196E85 File Offset: 0x00195085
 	private void Start()
 	{
 		this.referenceTransform = Camera.main.transform;
 		base.transform.forward = this.x0z(this.referenceTransform.forward);
 	}
 
-	// Token: 0x06004E8D RID: 20109 RVA: 0x00196ED4 File Offset: 0x001950D4
+	// Token: 0x06004E8D RID: 20109 RVA: 0x00196EB4 File Offset: 0x001950B4
 	private void Update()
 	{
 		Vector3 vector = this.x0z(base.transform.forward);
@@ -37,7 +37,7 @@ public class UIMatchRotation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004E8E RID: 20110 RVA: 0x00196F78 File Offset: 0x00195178
+	// Token: 0x06004E8E RID: 20110 RVA: 0x00196F58 File Offset: 0x00195158
 	private Vector3 x0z(Vector3 vector)
 	{
 		vector.y = 0f;

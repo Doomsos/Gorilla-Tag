@@ -6,8 +6,8 @@ using UnityEngine;
 public class VoiceLoudnessReactorParticleSystemTarget
 {
 	// Token: 0x17000778 RID: 1912
-	// (get) Token: 0x0600506F RID: 20591 RVA: 0x0019E363 File Offset: 0x0019C563
-	// (set) Token: 0x06005070 RID: 20592 RVA: 0x0019E36B File Offset: 0x0019C56B
+	// (get) Token: 0x0600506F RID: 20591 RVA: 0x0019E343 File Offset: 0x0019C543
+	// (set) Token: 0x06005070 RID: 20592 RVA: 0x0019E34B File Offset: 0x0019C54B
 	public float InitialSpeed
 	{
 		get
@@ -21,8 +21,8 @@ public class VoiceLoudnessReactorParticleSystemTarget
 	}
 
 	// Token: 0x17000779 RID: 1913
-	// (get) Token: 0x06005071 RID: 20593 RVA: 0x0019E374 File Offset: 0x0019C574
-	// (set) Token: 0x06005072 RID: 20594 RVA: 0x0019E37C File Offset: 0x0019C57C
+	// (get) Token: 0x06005071 RID: 20593 RVA: 0x0019E354 File Offset: 0x0019C554
+	// (set) Token: 0x06005072 RID: 20594 RVA: 0x0019E35C File Offset: 0x0019C55C
 	public float InitialRate
 	{
 		get
@@ -36,8 +36,8 @@ public class VoiceLoudnessReactorParticleSystemTarget
 	}
 
 	// Token: 0x1700077A RID: 1914
-	// (get) Token: 0x06005073 RID: 20595 RVA: 0x0019E385 File Offset: 0x0019C585
-	// (set) Token: 0x06005074 RID: 20596 RVA: 0x0019E38D File Offset: 0x0019C58D
+	// (get) Token: 0x06005073 RID: 20595 RVA: 0x0019E365 File Offset: 0x0019C565
+	// (set) Token: 0x06005074 RID: 20596 RVA: 0x0019E36D File Offset: 0x0019C56D
 	public float InitialSize
 	{
 		get

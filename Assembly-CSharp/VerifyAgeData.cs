@@ -3,7 +3,7 @@
 // Token: 0x02000A2B RID: 2603
 public class VerifyAgeData
 {
-	// Token: 0x0600420B RID: 16907 RVA: 0x0015D630 File Offset: 0x0015B830
+	// Token: 0x0600420B RID: 16907 RVA: 0x0015D610 File Offset: 0x0015B810
 	public VerifyAgeData(VerifyAgeResponse response, int? age)
 	{
 		if (response == null)

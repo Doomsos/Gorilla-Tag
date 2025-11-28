@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x02000834 RID: 2100
 public class Tappable : MonoBehaviour
 {
-	// Token: 0x06003738 RID: 14136 RVA: 0x0012994E File Offset: 0x00127B4E
+	// Token: 0x06003738 RID: 14136 RVA: 0x0012992E File Offset: 0x00127B2E
 	public void Validate()
 	{
 		this.CalculateId(true);
 	}
 
-	// Token: 0x06003739 RID: 14137 RVA: 0x00129957 File Offset: 0x00127B57
+	// Token: 0x06003739 RID: 14137 RVA: 0x00129937 File Offset: 0x00127B37
 	protected virtual void OnEnable()
 	{
 		if (!this.useStaticId)
@@ -22,7 +22,7 @@ public class Tappable : MonoBehaviour
 		TappableManager.Register(this);
 	}
 
-	// Token: 0x0600373A RID: 14138 RVA: 0x0012996E File Offset: 0x00127B6E
+	// Token: 0x0600373A RID: 14138 RVA: 0x0012994E File Offset: 0x00127B4E
 	protected virtual void OnDisable()
 	{
 		TappableManager.Unregister(this);
@@ -34,7 +34,7 @@ public class Tappable : MonoBehaviour
 		return true;
 	}
 
-	// Token: 0x0600373C RID: 14140 RVA: 0x00129978 File Offset: 0x00127B78
+	// Token: 0x0600373C RID: 14140 RVA: 0x00129958 File Offset: 0x00127B58
 	public void OnTap(float tapStrength)
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -52,7 +52,7 @@ public class Tappable : MonoBehaviour
 		});
 	}
 
-	// Token: 0x0600373D RID: 14141 RVA: 0x001299D4 File Offset: 0x00127BD4
+	// Token: 0x0600373D RID: 14141 RVA: 0x001299B4 File Offset: 0x00127BB4
 	public void OnGrab()
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -69,7 +69,7 @@ public class Tappable : MonoBehaviour
 		});
 	}
 
-	// Token: 0x0600373E RID: 14142 RVA: 0x00129A28 File Offset: 0x00127C28
+	// Token: 0x0600373E RID: 14142 RVA: 0x00129A08 File Offset: 0x00127C08
 	public void OnRelease()
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -101,13 +101,13 @@ public class Tappable : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06003742 RID: 14146 RVA: 0x0012994E File Offset: 0x00127B4E
+	// Token: 0x06003742 RID: 14146 RVA: 0x0012992E File Offset: 0x00127B2E
 	private void EdRecalculateId()
 	{
 		this.CalculateId(true);
 	}
 
-	// Token: 0x06003743 RID: 14147 RVA: 0x00129A7C File Offset: 0x00127C7C
+	// Token: 0x06003743 RID: 14147 RVA: 0x00129A5C File Offset: 0x00127C5C
 	private void CalculateId(bool force = false)
 	{
 		Transform transform = base.transform;
@@ -129,7 +129,7 @@ public class Tappable : MonoBehaviour
 		this.tappableId = (Application.isPlaying ? num : 0);
 	}
 
-	// Token: 0x06003744 RID: 14148 RVA: 0x00129B46 File Offset: 0x00127D46
+	// Token: 0x06003744 RID: 14148 RVA: 0x00129B26 File Offset: 0x00127D26
 	[Conditional("UNITY_EDITOR")]
 	private void OnValidate()
 	{

@@ -6,8 +6,8 @@ using UnityEngine;
 public abstract class LerpComponent : MonoBehaviour
 {
 	// Token: 0x170005F6 RID: 1526
-	// (get) Token: 0x06004076 RID: 16502 RVA: 0x001594C4 File Offset: 0x001576C4
-	// (set) Token: 0x06004077 RID: 16503 RVA: 0x001594CC File Offset: 0x001576CC
+	// (get) Token: 0x06004076 RID: 16502 RVA: 0x001594A4 File Offset: 0x001576A4
+	// (set) Token: 0x06004077 RID: 16503 RVA: 0x001594AC File Offset: 0x001576AC
 	public float Lerp
 	{
 		get
@@ -30,8 +30,8 @@ public abstract class LerpComponent : MonoBehaviour
 	}
 
 	// Token: 0x170005F7 RID: 1527
-	// (get) Token: 0x06004078 RID: 16504 RVA: 0x00159507 File Offset: 0x00157707
-	// (set) Token: 0x06004079 RID: 16505 RVA: 0x0015950F File Offset: 0x0015770F
+	// (get) Token: 0x06004078 RID: 16504 RVA: 0x001594E7 File Offset: 0x001576E7
+	// (set) Token: 0x06004079 RID: 16505 RVA: 0x001594EF File Offset: 0x001576EF
 	public float LerpTime
 	{
 		get
@@ -57,19 +57,19 @@ public abstract class LerpComponent : MonoBehaviour
 	// Token: 0x0600407B RID: 16507
 	protected abstract void OnLerp(float t);
 
-	// Token: 0x0600407C RID: 16508 RVA: 0x00159527 File Offset: 0x00157727
+	// Token: 0x0600407C RID: 16508 RVA: 0x00159507 File Offset: 0x00157707
 	protected void RenderLerp()
 	{
 		this.OnLerp(this._lerp);
 	}
 
-	// Token: 0x0600407D RID: 16509 RVA: 0x00159538 File Offset: 0x00157738
+	// Token: 0x0600407D RID: 16509 RVA: 0x00159518 File Offset: 0x00157718
 	protected virtual int GetState()
 	{
 		return new ValueTuple<float, int>(this._lerp, 779562875).GetHashCode();
 	}
 
-	// Token: 0x0600407E RID: 16510 RVA: 0x00159563 File Offset: 0x00157763
+	// Token: 0x0600407E RID: 16510 RVA: 0x00159543 File Offset: 0x00157743
 	protected virtual void Validate()
 	{
 		if (this._lerpLength < 0f)

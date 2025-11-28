@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000962 RID: 2402
 public class ForceDisableHoverboardTrigger : MonoBehaviour
 {
-	// Token: 0x06003D9A RID: 15770 RVA: 0x001466C5 File Offset: 0x001448C5
+	// Token: 0x06003D9A RID: 15770 RVA: 0x001466A5 File Offset: 0x001448A5
 	public void OnTriggerEnter(Collider other)
 	{
 		if (other == GTPlayer.Instance.headCollider)
@@ -16,7 +16,7 @@ public class ForceDisableHoverboardTrigger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003D9B RID: 15771 RVA: 0x001466F8 File Offset: 0x001448F8
+	// Token: 0x06003D9B RID: 15771 RVA: 0x001466D8 File Offset: 0x001448D8
 	public void OnTriggerExit(Collider other)
 	{
 		if (!this.reEnableOnExit || !this.wasEnabled)

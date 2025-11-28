@@ -6,32 +6,32 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x0200110C RID: 4364
 	public class ParticleModifierCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006D2E RID: 27950 RVA: 0x0023DB38 File Offset: 0x0023BD38
+		// Token: 0x06006D2E RID: 27950 RVA: 0x0023DB18 File Offset: 0x0023BD18
 		private void Awake()
 		{
 			this.StoreOriginalValues();
 			this.currentIndex = -1;
 		}
 
-		// Token: 0x06006D2F RID: 27951 RVA: 0x0023DB47 File Offset: 0x0023BD47
+		// Token: 0x06006D2F RID: 27951 RVA: 0x0023DB27 File Offset: 0x0023BD27
 		private void OnValidate()
 		{
 			this.StoreOriginalValues();
 		}
 
-		// Token: 0x06006D30 RID: 27952 RVA: 0x0023DB47 File Offset: 0x0023BD47
+		// Token: 0x06006D30 RID: 27952 RVA: 0x0023DB27 File Offset: 0x0023BD27
 		private void OnEnable()
 		{
 			this.StoreOriginalValues();
 		}
 
-		// Token: 0x06006D31 RID: 27953 RVA: 0x0023DB4F File Offset: 0x0023BD4F
+		// Token: 0x06006D31 RID: 27953 RVA: 0x0023DB2F File Offset: 0x0023BD2F
 		private void OnDisable()
 		{
 			this.ResetToOriginal();
 		}
 
-		// Token: 0x06006D32 RID: 27954 RVA: 0x0023DB58 File Offset: 0x0023BD58
+		// Token: 0x06006D32 RID: 27954 RVA: 0x0023DB38 File Offset: 0x0023BD38
 		private void StoreOriginalValues()
 		{
 			if (this.ps == null)
@@ -43,21 +43,21 @@ namespace GorillaTag.Cosmetics
 			this.originalStartColor = main.startColor.color;
 		}
 
-		// Token: 0x06006D33 RID: 27955 RVA: 0x0023DBAA File Offset: 0x0023BDAA
+		// Token: 0x06006D33 RID: 27955 RVA: 0x0023DB8A File Offset: 0x0023BD8A
 		public void ApplySetting(ParticleSettingsSO setting)
 		{
 			this.SetStartSize(setting.startSize);
 			this.SetStartColor(setting.startColor);
 		}
 
-		// Token: 0x06006D34 RID: 27956 RVA: 0x0023DBC4 File Offset: 0x0023BDC4
+		// Token: 0x06006D34 RID: 27956 RVA: 0x0023DBA4 File Offset: 0x0023BDA4
 		public void ApplySettingLerp(ParticleSettingsSO setting)
 		{
 			this.LerpStartSize(setting.startSize);
 			this.LerpStartColor(setting.startColor);
 		}
 
-		// Token: 0x06006D35 RID: 27957 RVA: 0x0023DBE0 File Offset: 0x0023BDE0
+		// Token: 0x06006D35 RID: 27957 RVA: 0x0023DBC0 File Offset: 0x0023BDC0
 		public void MoveToNextSetting()
 		{
 			this.currentIndex++;
@@ -68,7 +68,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D36 RID: 27958 RVA: 0x0023DC2C File Offset: 0x0023BE2C
+		// Token: 0x06006D36 RID: 27958 RVA: 0x0023DC0C File Offset: 0x0023BE0C
 		public void MoveToNextSettingLerp()
 		{
 			this.currentIndex++;
@@ -79,14 +79,14 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D37 RID: 27959 RVA: 0x0023DC75 File Offset: 0x0023BE75
+		// Token: 0x06006D37 RID: 27959 RVA: 0x0023DC55 File Offset: 0x0023BE55
 		public void ResetSettings()
 		{
 			this.currentIndex = -1;
 			this.ResetToOriginal();
 		}
 
-		// Token: 0x06006D38 RID: 27960 RVA: 0x0023DC84 File Offset: 0x0023BE84
+		// Token: 0x06006D38 RID: 27960 RVA: 0x0023DC64 File Offset: 0x0023BE64
 		public void MoveToSettingIndex(int index)
 		{
 			if (index > -1 && index < this.particleSettings.Length)
@@ -96,7 +96,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D39 RID: 27961 RVA: 0x0023DCB0 File Offset: 0x0023BEB0
+		// Token: 0x06006D39 RID: 27961 RVA: 0x0023DC90 File Offset: 0x0023BE90
 		public void MoveToSettingIndexLerp(int index)
 		{
 			if (index > -1 && index < this.particleSettings.Length)
@@ -106,7 +106,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D3A RID: 27962 RVA: 0x0023DCDC File Offset: 0x0023BEDC
+		// Token: 0x06006D3A RID: 27962 RVA: 0x0023DCBC File Offset: 0x0023BEBC
 		public void SetStartSize(float size)
 		{
 			if (this.ps == null)
@@ -117,7 +117,7 @@ namespace GorillaTag.Cosmetics
 			this.targetSize = default(float?);
 		}
 
-		// Token: 0x06006D3B RID: 27963 RVA: 0x0023DD20 File Offset: 0x0023BF20
+		// Token: 0x06006D3B RID: 27963 RVA: 0x0023DD00 File Offset: 0x0023BF00
 		public void IncreaseStartSize(float delta)
 		{
 			if (this.ps == null)
@@ -130,7 +130,7 @@ namespace GorillaTag.Cosmetics
 			this.targetSize = default(float?);
 		}
 
-		// Token: 0x06006D3C RID: 27964 RVA: 0x0023DD74 File Offset: 0x0023BF74
+		// Token: 0x06006D3C RID: 27964 RVA: 0x0023DD54 File Offset: 0x0023BF54
 		public void LerpStartSize(float size)
 		{
 			if (this.ps == null)
@@ -144,7 +144,7 @@ namespace GorillaTag.Cosmetics
 			this.targetSize = new float?(size);
 		}
 
-		// Token: 0x06006D3D RID: 27965 RVA: 0x0023DDC8 File Offset: 0x0023BFC8
+		// Token: 0x06006D3D RID: 27965 RVA: 0x0023DDA8 File Offset: 0x0023BFA8
 		public void SetStartColor(Color color)
 		{
 			if (this.ps == null)
@@ -155,7 +155,7 @@ namespace GorillaTag.Cosmetics
 			this.targetColor = default(Color?);
 		}
 
-		// Token: 0x06006D3E RID: 27966 RVA: 0x0023DE0C File Offset: 0x0023C00C
+		// Token: 0x06006D3E RID: 27966 RVA: 0x0023DDEC File Offset: 0x0023BFEC
 		public void LerpStartColor(Color color)
 		{
 			if (this.ps == null)
@@ -170,21 +170,21 @@ namespace GorillaTag.Cosmetics
 			this.targetColor = new Color?(color);
 		}
 
-		// Token: 0x06006D3F RID: 27967 RVA: 0x0023DE60 File Offset: 0x0023C060
+		// Token: 0x06006D3F RID: 27967 RVA: 0x0023DE40 File Offset: 0x0023C040
 		public void SetStartValues(float size, Color color)
 		{
 			this.SetStartSize(size);
 			this.SetStartColor(color);
 		}
 
-		// Token: 0x06006D40 RID: 27968 RVA: 0x0023DE70 File Offset: 0x0023C070
+		// Token: 0x06006D40 RID: 27968 RVA: 0x0023DE50 File Offset: 0x0023C050
 		public void LerpStartValues(float size, Color color)
 		{
 			this.LerpStartSize(size);
 			this.LerpStartColor(color);
 		}
 
-		// Token: 0x06006D41 RID: 27969 RVA: 0x0023DE80 File Offset: 0x0023C080
+		// Token: 0x06006D41 RID: 27969 RVA: 0x0023DE60 File Offset: 0x0023C060
 		private void Update()
 		{
 			if (this.ps == null)
@@ -214,7 +214,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D42 RID: 27970 RVA: 0x0023DFB0 File Offset: 0x0023C1B0
+		// Token: 0x06006D42 RID: 27970 RVA: 0x0023DF90 File Offset: 0x0023C190
 		[ContextMenu("Reset To Original")]
 		public void ResetToOriginal()
 		{
@@ -229,7 +229,7 @@ namespace GorillaTag.Cosmetics
 			main.startColor = this.originalStartColor;
 		}
 
-		// Token: 0x06006D43 RID: 27971 RVA: 0x0023E014 File Offset: 0x0023C214
+		// Token: 0x06006D43 RID: 27971 RVA: 0x0023DFF4 File Offset: 0x0023C1F4
 		private bool IsColorApproximatelyEqual(Color a, Color b, float threshold = 0.0001f)
 		{
 			float num = a.r - b.r;

@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000A2F RID: 2607
 public class KIDAgeAppeal : MonoBehaviour
 {
-	// Token: 0x0600420F RID: 16911 RVA: 0x0015D788 File Offset: 0x0015B988
+	// Token: 0x0600420F RID: 16911 RVA: 0x0015D768 File Offset: 0x0015B968
 	public void ShowAgeAppealScreen()
 	{
 		this._ageSlider = base.GetComponentInChildren<AgeSliderWithProgressBar>(true);
@@ -16,7 +16,7 @@ public class KIDAgeAppeal : MonoBehaviour
 		this._monkeLoader.SetActive(false);
 	}
 
-	// Token: 0x06004210 RID: 16912 RVA: 0x0015D7C8 File Offset: 0x0015B9C8
+	// Token: 0x06004210 RID: 16912 RVA: 0x0015D7A8 File Offset: 0x0015B9A8
 	public void OnNewAgeConfirmed()
 	{
 		KIDAgeAppeal.<OnNewAgeConfirmed>d__6 <OnNewAgeConfirmed>d__;

@@ -7,14 +7,14 @@ namespace GorillaTagScripts
 	// Token: 0x02000DB9 RID: 3513
 	public class BuilderRecycler : MonoBehaviour
 	{
-		// Token: 0x06005681 RID: 22145 RVA: 0x001B34D8 File Offset: 0x001B16D8
+		// Token: 0x06005681 RID: 22145 RVA: 0x001B34B8 File Offset: 0x001B16B8
 		private void Awake()
 		{
 			this.hasFans = (this.effectBehaviors.Count > 0 && this.bladeSoundPlayer != null && this.recycleParticles != null);
 			this.hasPipes = (this.outputPipes.Count > 0);
 		}
 
-		// Token: 0x06005682 RID: 22146 RVA: 0x001B352C File Offset: 0x001B172C
+		// Token: 0x06005682 RID: 22146 RVA: 0x001B350C File Offset: 0x001B170C
 		private void Start()
 		{
 			if (this.hasPipes)
@@ -52,7 +52,7 @@ namespace GorillaTagScripts
 			this.OnZoneChanged();
 		}
 
-		// Token: 0x06005683 RID: 22147 RVA: 0x001B3660 File Offset: 0x001B1860
+		// Token: 0x06005683 RID: 22147 RVA: 0x001B3640 File Offset: 0x001B1840
 		private void OnDestroy()
 		{
 			if (ZoneManagement.instance != null)
@@ -62,7 +62,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005684 RID: 22148 RVA: 0x001B3698 File Offset: 0x001B1898
+		// Token: 0x06005684 RID: 22148 RVA: 0x001B3678 File Offset: 0x001B1878
 		private void OnZoneChanged()
 		{
 			bool flag = ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocks);
@@ -89,7 +89,7 @@ namespace GorillaTagScripts
 			this.inBuilderZone = flag;
 		}
 
-		// Token: 0x06005685 RID: 22149 RVA: 0x001B3754 File Offset: 0x001B1954
+		// Token: 0x06005685 RID: 22149 RVA: 0x001B3734 File Offset: 0x001B1934
 		private void OnTriggerEnter(Collider other)
 		{
 			BuilderPiece builderPieceFromCollider = BuilderPiece.GetBuilderPieceFromCollider(other);
@@ -103,7 +103,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005686 RID: 22150 RVA: 0x001B3798 File Offset: 0x001B1998
+		// Token: 0x06005686 RID: 22150 RVA: 0x001B3778 File Offset: 0x001B1978
 		public void OnRecycleRequestedAtRecycler(BuilderPiece piece)
 		{
 			if (this.hasPipes)
@@ -123,7 +123,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005687 RID: 22151 RVA: 0x001B3838 File Offset: 0x001B1A38
+		// Token: 0x06005687 RID: 22151 RVA: 0x001B3818 File Offset: 0x001B1A18
 		private void AddPieceCost(BuilderResources cost)
 		{
 			foreach (BuilderResourceQuantity builderResourceQuantity in cost.quantities)
@@ -139,7 +139,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005688 RID: 22152 RVA: 0x001B38C0 File Offset: 0x001B1AC0
+		// Token: 0x06005688 RID: 22152 RVA: 0x001B38A0 File Offset: 0x001B1AA0
 		private Vector2 GetUVShiftOffset()
 		{
 			float y = Shader.GetGlobalVector(ShaderProps._Time).y;
@@ -149,7 +149,7 @@ namespace GorillaTagScripts
 			return new Vector2(-1f * (Mathf.Floor(y * vector2.x) * 1f / vector.x % 1f) * vector.x - vector.x + 165f, 0f);
 		}
 
-		// Token: 0x06005689 RID: 22153 RVA: 0x001B394C File Offset: 0x001B1B4C
+		// Token: 0x06005689 RID: 22153 RVA: 0x001B392C File Offset: 0x001B1B2C
 		private void UpdatePipeLoop()
 		{
 			bool flag = false;
@@ -183,7 +183,7 @@ namespace GorillaTagScripts
 			this.playingPipeEffect = false;
 		}
 
-		// Token: 0x0600568A RID: 22154 RVA: 0x001B3AB0 File Offset: 0x001B1CB0
+		// Token: 0x0600568A RID: 22154 RVA: 0x001B3A90 File Offset: 0x001B1C90
 		private void ResetOutputPipes()
 		{
 			foreach (MeshRenderer meshRenderer in this.outputPipes)
@@ -194,7 +194,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600568B RID: 22155 RVA: 0x001B3B2C File Offset: 0x001B1D2C
+		// Token: 0x0600568B RID: 22155 RVA: 0x001B3B0C File Offset: 0x001B1D0C
 		public void UpdateRecycler()
 		{
 			if (this.playingBladeEffect && (double)Time.time > this.timeToStopBlades)

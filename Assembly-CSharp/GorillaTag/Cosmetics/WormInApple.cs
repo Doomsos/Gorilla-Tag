@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001127 RID: 4391
 	public class WormInApple : MonoBehaviour
 	{
-		// Token: 0x06006DDD RID: 28125 RVA: 0x00241248 File Offset: 0x0023F448
+		// Token: 0x06006DDD RID: 28125 RVA: 0x00241228 File Offset: 0x0023F428
 		public void OnHandTap()
 		{
 			if (this.blendShapeCosmetic && this.blendShapeCosmetic.GetBlendValue() > 0.5f)

@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	public class ContinuousPropertyModeSO : ScriptableObject
 	{
 		// Token: 0x17000A3A RID: 2618
-		// (get) Token: 0x06006BF1 RID: 27633 RVA: 0x00236D2E File Offset: 0x00234F2E
+		// (get) Token: 0x06006BF1 RID: 27633 RVA: 0x00236D0E File Offset: 0x00234F0E
 		private string GetTestDescription
 		{
 			get
@@ -21,7 +21,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BF2 RID: 27634 RVA: 0x00236D60 File Offset: 0x00234F60
+		// Token: 0x06006BF2 RID: 27634 RVA: 0x00236D40 File Offset: 0x00234F40
 		public bool IsCastValid(ContinuousProperty.Cast cast)
 		{
 			for (int i = 0; i < this.castData.Length; i++)
@@ -34,7 +34,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006BF3 RID: 27635 RVA: 0x00236D9C File Offset: 0x00234F9C
+		// Token: 0x06006BF3 RID: 27635 RVA: 0x00236D7C File Offset: 0x00234F7C
 		public ContinuousProperty.Cast GetClosestCast(ContinuousProperty.Cast cast)
 		{
 			for (int i = 0; i < this.castData.Length; i++)
@@ -47,7 +47,7 @@ namespace GorillaTag.Cosmetics
 			return ContinuousProperty.Cast.Null;
 		}
 
-		// Token: 0x06006BF4 RID: 27636 RVA: 0x00236DE8 File Offset: 0x00234FE8
+		// Token: 0x06006BF4 RID: 27636 RVA: 0x00236DC8 File Offset: 0x00234FC8
 		public ContinuousProperty.DataFlags GetFlagsForCast(ContinuousProperty.Cast cast)
 		{
 			for (int i = 0; i < this.castData.Length; i++)
@@ -60,7 +60,7 @@ namespace GorillaTag.Cosmetics
 			return this.flags;
 		}
 
-		// Token: 0x06006BF5 RID: 27637 RVA: 0x00236E3C File Offset: 0x0023503C
+		// Token: 0x06006BF5 RID: 27637 RVA: 0x00236E1C File Offset: 0x0023501C
 		public ContinuousProperty.DataFlags GetFlagsForClosestCast(ContinuousProperty.Cast cast)
 		{
 			for (int i = 0; i < this.castData.Length; i++)
@@ -73,7 +73,7 @@ namespace GorillaTag.Cosmetics
 			return this.flags;
 		}
 
-		// Token: 0x06006BF6 RID: 27638 RVA: 0x00236E94 File Offset: 0x00235094
+		// Token: 0x06006BF6 RID: 27638 RVA: 0x00236E74 File Offset: 0x00235074
 		public string GetDescriptionForCast(ContinuousProperty.Cast cast)
 		{
 			for (int i = 0; i < this.castData.Length; i++)
@@ -123,7 +123,7 @@ namespace GorillaTag.Cosmetics
 			return "Invalid target\n\n" + this.ListValidCasts();
 		}
 
-		// Token: 0x06006BF7 RID: 27639 RVA: 0x00237086 File Offset: 0x00235286
+		// Token: 0x06006BF7 RID: 27639 RVA: 0x00237066 File Offset: 0x00235266
 		public string ListValidCasts()
 		{
 			return "Valid targets: " + string.Join<ContinuousProperty.Cast>(", ", Enumerable.Select<ContinuousPropertyModeSO.CastData, ContinuousProperty.Cast>(this.castData, (ContinuousPropertyModeSO.CastData x) => x.target));

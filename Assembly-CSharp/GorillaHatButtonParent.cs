@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200078C RID: 1932
 public class GorillaHatButtonParent : MonoBehaviour
 {
-	// Token: 0x0600329A RID: 12954 RVA: 0x00110A00 File Offset: 0x0010EC00
+	// Token: 0x0600329A RID: 12954 RVA: 0x001109E0 File Offset: 0x0010EBE0
 	public void Start()
 	{
 		this.hat = PlayerPrefs.GetString("hatCosmetic", "none");
@@ -14,7 +14,7 @@ public class GorillaHatButtonParent : MonoBehaviour
 		this.rightHandHold = PlayerPrefs.GetString("rightHandHoldCosmetic", "none");
 	}
 
-	// Token: 0x0600329B RID: 12955 RVA: 0x00110A78 File Offset: 0x0010EC78
+	// Token: 0x0600329B RID: 12955 RVA: 0x00110A58 File Offset: 0x0010EC58
 	public void LateUpdate()
 	{
 		if (!this.initialized && GorillaTagger.Instance.offlineVRRig.InitializedCosmetics)
@@ -36,7 +36,7 @@ public class GorillaHatButtonParent : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600329C RID: 12956 RVA: 0x00110B20 File Offset: 0x0010ED20
+	// Token: 0x0600329C RID: 12956 RVA: 0x00110B00 File Offset: 0x0010ED00
 	public void PressButton(bool isOn, GorillaHatButton.HatButtonType buttonType, string buttonValue)
 	{
 		if (this.initialized && GorillaTagger.Instance.offlineVRRig.concatStringOfCosmeticsAllowed.Contains("earlyaccess"))
@@ -85,7 +85,7 @@ public class GorillaHatButtonParent : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600329D RID: 12957 RVA: 0x00110C34 File Offset: 0x0010EE34
+	// Token: 0x0600329D RID: 12957 RVA: 0x00110C14 File Offset: 0x0010EE14
 	private void UpdateButtonState()
 	{
 		foreach (GorillaHatButton gorillaHatButton in this.hatButtons)

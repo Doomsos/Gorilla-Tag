@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	[Serializable]
 	public class BuilderTableData
 	{
-		// Token: 0x060057EC RID: 22508 RVA: 0x001C1AB0 File Offset: 0x001BFCB0
+		// Token: 0x060057EC RID: 22508 RVA: 0x001C1A90 File Offset: 0x001BFC90
 		public BuilderTableData()
 		{
 			this.version = 4;
@@ -26,7 +26,7 @@ namespace GorillaTagScripts
 			this.timeOffset = new List<int>(1024);
 		}
 
-		// Token: 0x060057ED RID: 22509 RVA: 0x001C1B88 File Offset: 0x001BFD88
+		// Token: 0x060057ED RID: 22509 RVA: 0x001C1B68 File Offset: 0x001BFD68
 		public void Clear()
 		{
 			this.numPieces = 0;

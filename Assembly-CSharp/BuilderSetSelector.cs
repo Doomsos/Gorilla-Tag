@@ -10,7 +10,7 @@ using UnityEngine.UI;
 // Token: 0x020005AB RID: 1451
 public class BuilderSetSelector : MonoBehaviour
 {
-	// Token: 0x06002499 RID: 9369 RVA: 0x000C4ACC File Offset: 0x000C2CCC
+	// Token: 0x06002499 RID: 9369 RVA: 0x000C4AAC File Offset: 0x000C2CAC
 	private void Start()
 	{
 		this.zoneRenderers.Clear();
@@ -48,7 +48,7 @@ public class BuilderSetSelector : MonoBehaviour
 		this.OnZoneChanged();
 	}
 
-	// Token: 0x0600249A RID: 9370 RVA: 0x000C4C38 File Offset: 0x000C2E38
+	// Token: 0x0600249A RID: 9370 RVA: 0x000C4C18 File Offset: 0x000C2E18
 	public void Setup(List<BuilderPieceSet.BuilderPieceCategory> categories)
 	{
 		List<BuilderPieceSet.BuilderDisplayGroup> liveDisplayGroups = BuilderSetManager.instance.GetLiveDisplayGroups();
@@ -86,7 +86,7 @@ public class BuilderSetSelector : MonoBehaviour
 		this.UpdateLabels();
 	}
 
-	// Token: 0x0600249B RID: 9371 RVA: 0x000C4E38 File Offset: 0x000C3038
+	// Token: 0x0600249B RID: 9371 RVA: 0x000C4E18 File Offset: 0x000C3018
 	private void OnDestroy()
 	{
 		if (this.previousPageButton != null)
@@ -116,7 +116,7 @@ public class BuilderSetSelector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600249C RID: 9372 RVA: 0x000C4F4C File Offset: 0x000C314C
+	// Token: 0x0600249C RID: 9372 RVA: 0x000C4F2C File Offset: 0x000C312C
 	private void OnZoneChanged()
 	{
 		bool flag = ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocks);
@@ -143,7 +143,7 @@ public class BuilderSetSelector : MonoBehaviour
 		this.inBuilderZone = flag;
 	}
 
-	// Token: 0x0600249D RID: 9373 RVA: 0x000C5008 File Offset: 0x000C3208
+	// Token: 0x0600249D RID: 9373 RVA: 0x000C4FE8 File Offset: 0x000C31E8
 	private void OnSetButtonPressed(GorillaPressableButton button, bool isLeft)
 	{
 		int num = 0;
@@ -171,7 +171,7 @@ public class BuilderSetSelector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600249E RID: 9374 RVA: 0x000C50A0 File Offset: 0x000C32A0
+	// Token: 0x0600249E RID: 9374 RVA: 0x000C5080 File Offset: 0x000C3280
 	private void RefreshUnlockedGroups()
 	{
 		List<BuilderPieceSet.BuilderDisplayGroup> liveDisplayGroups = BuilderSetManager.instance.GetLiveDisplayGroups();
@@ -215,7 +215,7 @@ public class BuilderSetSelector : MonoBehaviour
 		this.UpdateLabels();
 	}
 
-	// Token: 0x0600249F RID: 9375 RVA: 0x000C5258 File Offset: 0x000C3458
+	// Token: 0x0600249F RID: 9375 RVA: 0x000C5238 File Offset: 0x000C3438
 	private void OnPreviousPageClicked()
 	{
 		this.RefreshUnlockedGroups();
@@ -227,7 +227,7 @@ public class BuilderSetSelector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060024A0 RID: 9376 RVA: 0x000C5298 File Offset: 0x000C3498
+	// Token: 0x060024A0 RID: 9376 RVA: 0x000C5278 File Offset: 0x000C3478
 	private void OnNextPageClicked()
 	{
 		this.RefreshUnlockedGroups();
@@ -239,7 +239,7 @@ public class BuilderSetSelector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060024A1 RID: 9377 RVA: 0x000C52D8 File Offset: 0x000C34D8
+	// Token: 0x060024A1 RID: 9377 RVA: 0x000C52B8 File Offset: 0x000C34B8
 	public void SetSelection(int groupID)
 	{
 		if (BuilderSetManager.instance == null)
@@ -256,7 +256,7 @@ public class BuilderSetSelector : MonoBehaviour
 		this.UpdateLabels();
 	}
 
-	// Token: 0x060024A2 RID: 9378 RVA: 0x000C5348 File Offset: 0x000C3548
+	// Token: 0x060024A2 RID: 9378 RVA: 0x000C5328 File Offset: 0x000C3528
 	private void UpdateLabels()
 	{
 		for (int i = 0; i < this.groupLabels.Length; i++)
@@ -318,7 +318,7 @@ public class BuilderSetSelector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060024A3 RID: 9379 RVA: 0x000C561C File Offset: 0x000C381C
+	// Token: 0x060024A3 RID: 9379 RVA: 0x000C55FC File Offset: 0x000C37FC
 	public bool DoesDisplayGroupHaveIncludedCategories(BuilderPieceSet.BuilderDisplayGroup set)
 	{
 		foreach (BuilderPieceSet.BuilderPieceSubset builderPieceSubset in set.pieceSubsets)
@@ -331,13 +331,13 @@ public class BuilderSetSelector : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x060024A4 RID: 9380 RVA: 0x000C5684 File Offset: 0x000C3884
+	// Token: 0x060024A4 RID: 9380 RVA: 0x000C5664 File Offset: 0x000C3864
 	public BuilderPieceSet.BuilderDisplayGroup GetSelectedGroup()
 	{
 		return this.currentGroup;
 	}
 
-	// Token: 0x060024A5 RID: 9381 RVA: 0x000C568C File Offset: 0x000C388C
+	// Token: 0x060024A5 RID: 9381 RVA: 0x000C566C File Offset: 0x000C386C
 	public int GetDefaultGroupID()
 	{
 		if (this.includedGroups == null || this.includedGroups.Count < 1)

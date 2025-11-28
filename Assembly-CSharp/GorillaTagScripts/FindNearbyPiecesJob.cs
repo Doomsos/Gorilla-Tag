@@ -10,7 +10,7 @@ namespace GorillaTagScripts
 	[BurstCompile]
 	internal struct FindNearbyPiecesJob : IJobParallelForTransform
 	{
-		// Token: 0x06005798 RID: 22424 RVA: 0x001BEE7C File Offset: 0x001BD07C
+		// Token: 0x06005798 RID: 22424 RVA: 0x001BEE5C File Offset: 0x001BD05C
 		public void Execute(int index, TransformAccess transform)
 		{
 			if (!transform.isValid)
@@ -21,7 +21,7 @@ namespace GorillaTagScripts
 			this.CheckGridPlane(index, this.rightPieceInHandIndex, transform, this.rightHandPos, false, this.rightHandGridPlanes);
 		}
 
-		// Token: 0x06005799 RID: 22425 RVA: 0x001BEECC File Offset: 0x001BD0CC
+		// Token: 0x06005799 RID: 22425 RVA: 0x001BEEAC File Offset: 0x001BD0AC
 		private void CheckGridPlane(int gridPlaneIndex, int handPieceIndex, TransformAccess transform, Vector3 handPos, bool isLeft, NativeList<BuilderGridPlaneData>.ParallelWriter checkGridPlanes)
 		{
 			if (handPieceIndex < 0)
@@ -47,13 +47,13 @@ namespace GorillaTagScripts
 			checkGridPlanes.AddNoResize(builderGridPlaneData);
 		}
 
-		// Token: 0x0600579A RID: 22426 RVA: 0x001BEF60 File Offset: 0x001BD160
+		// Token: 0x0600579A RID: 22426 RVA: 0x001BEF40 File Offset: 0x001BD140
 		public bool CanPiecesPotentiallySnap(int localActorNumber, int pieceInHandIndex, int attachToPieceIndex, int attachToPieceRootIndex, int requestedParentPieceIndex, bool isLeft)
 		{
 			return this.CanPlayerAttachToRootPiece(localActorNumber, attachToPieceRootIndex, isLeft) && (requestedParentPieceIndex == -1 || pieceInHandIndex != this.GetRootPieceIndex(requestedParentPieceIndex));
 		}
 
-		// Token: 0x0600579B RID: 22427 RVA: 0x001BEF8C File Offset: 0x001BD18C
+		// Token: 0x0600579B RID: 22427 RVA: 0x001BEF6C File Offset: 0x001BD16C
 		public bool CanPlayerAttachToRootPiece(int playerActorNumber, int attachToPieceRootIndex, bool isLeft)
 		{
 			BuilderPieceData builderPieceData = this.pieceData[attachToPieceRootIndex];
@@ -98,14 +98,14 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600579C RID: 22428 RVA: 0x001BF07C File Offset: 0x001BD27C
+		// Token: 0x0600579C RID: 22428 RVA: 0x001BF05C File Offset: 0x001BD25C
 		public bool CanPlayerAttachToPlot(int privatePlotIndex, int actorNumber)
 		{
 			BuilderPrivatePlotData builderPrivatePlotData = this.privatePlotData[privatePlotIndex];
 			return (builderPrivatePlotData.plotState == BuilderPiecePrivatePlot.PlotState.Occupied && builderPrivatePlotData.ownerActorNumber == actorNumber) || (builderPrivatePlotData.plotState == BuilderPiecePrivatePlot.PlotState.Vacant && this.localPlayerPlotIndex < 0);
 		}
 
-		// Token: 0x0600579D RID: 22429 RVA: 0x001BF0C0 File Offset: 0x001BD2C0
+		// Token: 0x0600579D RID: 22429 RVA: 0x001BF0A0 File Offset: 0x001BD2A0
 		private int GetPlayerIndex(int playerActorNumber)
 		{
 			for (int i = 0; i < this.playerData.Length; i++)
@@ -118,7 +118,7 @@ namespace GorillaTagScripts
 			return -1;
 		}
 
-		// Token: 0x0600579E RID: 22430 RVA: 0x001BF0FC File Offset: 0x001BD2FC
+		// Token: 0x0600579E RID: 22430 RVA: 0x001BF0DC File Offset: 0x001BD2DC
 		public int GetAttachedBuiltInPiece(int pieceIndex)
 		{
 			BuilderPieceData builderPieceData = this.pieceData[pieceIndex];
@@ -143,7 +143,7 @@ namespace GorillaTagScripts
 			return -1;
 		}
 
-		// Token: 0x0600579F RID: 22431 RVA: 0x001BF160 File Offset: 0x001BD360
+		// Token: 0x0600579F RID: 22431 RVA: 0x001BF140 File Offset: 0x001BD340
 		private int GetRootPieceIndex(int pieceIndex)
 		{
 			int num = pieceIndex;

@@ -7,7 +7,7 @@ namespace GorillaNetworking
 	// Token: 0x02000EF8 RID: 3832
 	public class GorillaNetworkDisconnectTrigger : GorillaTriggerBox
 	{
-		// Token: 0x06006037 RID: 24631 RVA: 0x001F0900 File Offset: 0x001EEB00
+		// Token: 0x06006037 RID: 24631 RVA: 0x001F08E0 File Offset: 0x001EEAE0
 		public override void OnBoxTriggered()
 		{
 			base.OnBoxTriggered();

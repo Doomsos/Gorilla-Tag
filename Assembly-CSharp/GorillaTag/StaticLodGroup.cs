@@ -7,25 +7,25 @@ namespace GorillaTag
 	[DefaultExecutionOrder(2000)]
 	public class StaticLodGroup : MonoBehaviour
 	{
-		// Token: 0x060066E7 RID: 26343 RVA: 0x00217845 File Offset: 0x00215A45
+		// Token: 0x060066E7 RID: 26343 RVA: 0x00217825 File Offset: 0x00215A25
 		protected void Awake()
 		{
 			this.index = StaticLodManager.Register(this);
 		}
 
-		// Token: 0x060066E8 RID: 26344 RVA: 0x00217853 File Offset: 0x00215A53
+		// Token: 0x060066E8 RID: 26344 RVA: 0x00217833 File Offset: 0x00215A33
 		protected void OnEnable()
 		{
 			StaticLodManager.SetEnabled(this.index, true);
 		}
 
-		// Token: 0x060066E9 RID: 26345 RVA: 0x00217861 File Offset: 0x00215A61
+		// Token: 0x060066E9 RID: 26345 RVA: 0x00217841 File Offset: 0x00215A41
 		protected void OnDisable()
 		{
 			StaticLodManager.SetEnabled(this.index, false);
 		}
 
-		// Token: 0x060066EA RID: 26346 RVA: 0x0021786F File Offset: 0x00215A6F
+		// Token: 0x060066EA RID: 26346 RVA: 0x0021784F File Offset: 0x00215A4F
 		private void OnDestroy()
 		{
 			StaticLodManager.Unregister(this.index);

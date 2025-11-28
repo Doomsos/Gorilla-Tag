@@ -7,7 +7,7 @@ namespace Fusion.CodeGen
 	[WeaverGenerated]
 	internal struct ReaderWriter@BarrelCannon__BarrelCannonState : IElementReaderWriter<BarrelCannon.BarrelCannonState>
 	{
-		// Token: 0x060072D7 RID: 29399 RVA: 0x0025A788 File Offset: 0x00258988
+		// Token: 0x060072D7 RID: 29399 RVA: 0x0025A768 File Offset: 0x00258968
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe BarrelCannon.BarrelCannonState Read(byte* data, int index)
@@ -15,7 +15,7 @@ namespace Fusion.CodeGen
 			return *(BarrelCannon.BarrelCannonState*)(data + index * 4);
 		}
 
-		// Token: 0x060072D8 RID: 29400 RVA: 0x0025A798 File Offset: 0x00258998
+		// Token: 0x060072D8 RID: 29400 RVA: 0x0025A778 File Offset: 0x00258978
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe ref BarrelCannon.BarrelCannonState ReadRef(byte* data, int index)
@@ -23,7 +23,7 @@ namespace Fusion.CodeGen
 			return ref *(BarrelCannon.BarrelCannonState*)(data + index * 4);
 		}
 
-		// Token: 0x060072D9 RID: 29401 RVA: 0x0025A7A3 File Offset: 0x002589A3
+		// Token: 0x060072D9 RID: 29401 RVA: 0x0025A783 File Offset: 0x00258983
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe void Write(byte* data, int index, BarrelCannon.BarrelCannonState val)
@@ -39,7 +39,7 @@ namespace Fusion.CodeGen
 			return 1;
 		}
 
-		// Token: 0x060072DB RID: 29403 RVA: 0x0025A7B4 File Offset: 0x002589B4
+		// Token: 0x060072DB RID: 29403 RVA: 0x0025A794 File Offset: 0x00258994
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementHashCode(BarrelCannon.BarrelCannonState val)
@@ -47,7 +47,7 @@ namespace Fusion.CodeGen
 			return val.GetHashCode();
 		}
 
-		// Token: 0x060072DC RID: 29404 RVA: 0x0025A7D0 File Offset: 0x002589D0
+		// Token: 0x060072DC RID: 29404 RVA: 0x0025A7B0 File Offset: 0x002589B0
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public static IElementReaderWriter<BarrelCannon.BarrelCannonState> GetInstance()

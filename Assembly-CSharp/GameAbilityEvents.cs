@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 public class GameAbilityEvents
 {
-	// Token: 0x060029E8 RID: 10728 RVA: 0x000E2810 File Offset: 0x000E0A10
+	// Token: 0x060029E8 RID: 10728 RVA: 0x000E27F0 File Offset: 0x000E09F0
 	public void Reset()
 	{
 		for (int i = 0; i < this.events.Count; i++)
@@ -15,7 +15,7 @@ public class GameAbilityEvents
 		}
 	}
 
-	// Token: 0x060029E9 RID: 10729 RVA: 0x000E2844 File Offset: 0x000E0A44
+	// Token: 0x060029E9 RID: 10729 RVA: 0x000E2824 File Offset: 0x000E0A24
 	public void TryPlay(float abilityTime, AudioSource audioSource)
 	{
 		for (int i = 0; i < this.events.Count; i++)

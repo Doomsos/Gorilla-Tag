@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x0200052D RID: 1325
 public class GravityOverrideVolume : MonoBehaviour
 {
-	// Token: 0x06002179 RID: 8569 RVA: 0x000AF938 File Offset: 0x000ADB38
+	// Token: 0x06002179 RID: 8569 RVA: 0x000AF918 File Offset: 0x000ADB18
 	private void OnEnable()
 	{
 		if (this.triggerEvents != null)
@@ -15,7 +15,7 @@ public class GravityOverrideVolume : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600217A RID: 8570 RVA: 0x000AF976 File Offset: 0x000ADB76
+	// Token: 0x0600217A RID: 8570 RVA: 0x000AF956 File Offset: 0x000ADB56
 	private void OnDisable()
 	{
 		if (this.triggerEvents != null)
@@ -25,7 +25,7 @@ public class GravityOverrideVolume : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600217B RID: 8571 RVA: 0x000AF9B4 File Offset: 0x000ADBB4
+	// Token: 0x0600217B RID: 8571 RVA: 0x000AF994 File Offset: 0x000ADB94
 	private void OnColliderEnteredVolume(Collider collider)
 	{
 		GTPlayer instance = GTPlayer.Instance;
@@ -35,7 +35,7 @@ public class GravityOverrideVolume : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600217C RID: 8572 RVA: 0x000AF9F4 File Offset: 0x000ADBF4
+	// Token: 0x0600217C RID: 8572 RVA: 0x000AF9D4 File Offset: 0x000ADBD4
 	private void OnColliderExitedVolume(Collider collider)
 	{
 		GTPlayer instance = GTPlayer.Instance;
@@ -45,7 +45,7 @@ public class GravityOverrideVolume : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600217D RID: 8573 RVA: 0x000AFA28 File Offset: 0x000ADC28
+	// Token: 0x0600217D RID: 8573 RVA: 0x000AFA08 File Offset: 0x000ADC08
 	public void GravityOverrideFunction(GTPlayer player)
 	{
 		GravityOverrideVolume.GravityType gravityType = this.gravityType;

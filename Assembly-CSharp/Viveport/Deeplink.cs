@@ -8,14 +8,14 @@ namespace Viveport
 	// Token: 0x02000D30 RID: 3376
 	public class Deeplink
 	{
-		// Token: 0x06005225 RID: 21029 RVA: 0x001A4CA9 File Offset: 0x001A2EA9
+		// Token: 0x06005225 RID: 21029 RVA: 0x001A4C89 File Offset: 0x001A2E89
 		[MonoPInvokeCallback(typeof(StatusCallback))]
 		private static void IsReadyIl2cppCallback(int errorCode)
 		{
 			Deeplink.isReadyIl2cppCallback(errorCode);
 		}
 
-		// Token: 0x06005226 RID: 21030 RVA: 0x001A4CB8 File Offset: 0x001A2EB8
+		// Token: 0x06005226 RID: 21030 RVA: 0x001A4C98 File Offset: 0x001A2E98
 		public static void IsReady(StatusCallback callback)
 		{
 			if (callback == null)
@@ -32,14 +32,14 @@ namespace Viveport
 			Deeplink.IsReady(new StatusCallback(Deeplink.IsReadyIl2cppCallback));
 		}
 
-		// Token: 0x06005227 RID: 21031 RVA: 0x001A4D25 File Offset: 0x001A2F25
+		// Token: 0x06005227 RID: 21031 RVA: 0x001A4D05 File Offset: 0x001A2F05
 		[MonoPInvokeCallback(typeof(StatusCallback2))]
 		private static void GoToAppIl2cppCallback(int errorCode, string message)
 		{
 			Deeplink.goToAppIl2cppCallback(errorCode, message);
 		}
 
-		// Token: 0x06005228 RID: 21032 RVA: 0x001A4D34 File Offset: 0x001A2F34
+		// Token: 0x06005228 RID: 21032 RVA: 0x001A4D14 File Offset: 0x001A2F14
 		public static void GoToApp(StatusCallback2 callback, string viveportId, string launchData)
 		{
 			if (callback == null || string.IsNullOrEmpty(viveportId))
@@ -56,14 +56,14 @@ namespace Viveport
 			Deeplink.GoToApp(new StatusCallback2(Deeplink.GoToAppIl2cppCallback), viveportId, launchData);
 		}
 
-		// Token: 0x06005229 RID: 21033 RVA: 0x001A4DAD File Offset: 0x001A2FAD
+		// Token: 0x06005229 RID: 21033 RVA: 0x001A4D8D File Offset: 0x001A2F8D
 		[MonoPInvokeCallback(typeof(StatusCallback2))]
 		private static void GoToAppWithBranchNameIl2cppCallback(int errorCode, string message)
 		{
 			Deeplink.goToAppWithBranchNameIl2cppCallback(errorCode, message);
 		}
 
-		// Token: 0x0600522A RID: 21034 RVA: 0x001A4DBC File Offset: 0x001A2FBC
+		// Token: 0x0600522A RID: 21034 RVA: 0x001A4D9C File Offset: 0x001A2F9C
 		public static void GoToApp(StatusCallback2 callback, string viveportId, string launchData, string branchName)
 		{
 			if (callback == null || string.IsNullOrEmpty(viveportId))
@@ -80,14 +80,14 @@ namespace Viveport
 			Deeplink.GoToApp(new StatusCallback2(Deeplink.GoToAppWithBranchNameIl2cppCallback), viveportId, launchData, branchName);
 		}
 
-		// Token: 0x0600522B RID: 21035 RVA: 0x001A4E37 File Offset: 0x001A3037
+		// Token: 0x0600522B RID: 21035 RVA: 0x001A4E17 File Offset: 0x001A3017
 		[MonoPInvokeCallback(typeof(StatusCallback2))]
 		private static void GoToStoreIl2cppCallback(int errorCode, string message)
 		{
 			Deeplink.goToStoreIl2cppCallback(errorCode, message);
 		}
 
-		// Token: 0x0600522C RID: 21036 RVA: 0x001A4E48 File Offset: 0x001A3048
+		// Token: 0x0600522C RID: 21036 RVA: 0x001A4E28 File Offset: 0x001A3028
 		public static void GoToStore(StatusCallback2 callback, string viveportId = "")
 		{
 			if (callback == null)
@@ -104,14 +104,14 @@ namespace Viveport
 			Deeplink.GoToStore(new StatusCallback2(Deeplink.GoToStoreIl2cppCallback), viveportId);
 		}
 
-		// Token: 0x0600522D RID: 21037 RVA: 0x001A4EB7 File Offset: 0x001A30B7
+		// Token: 0x0600522D RID: 21037 RVA: 0x001A4E97 File Offset: 0x001A3097
 		[MonoPInvokeCallback(typeof(StatusCallback2))]
 		private static void GoToAppOrGoToStoreIl2cppCallback(int errorCode, string message)
 		{
 			Deeplink.goToAppOrGoToStoreIl2cppCallback(errorCode, message);
 		}
 
-		// Token: 0x0600522E RID: 21038 RVA: 0x001A4EC8 File Offset: 0x001A30C8
+		// Token: 0x0600522E RID: 21038 RVA: 0x001A4EA8 File Offset: 0x001A30A8
 		public static void GoToAppOrGoToStore(StatusCallback2 callback, string viveportId, string launchData)
 		{
 			if (callback == null || string.IsNullOrEmpty(viveportId))
@@ -128,7 +128,7 @@ namespace Viveport
 			Deeplink.GoToAppOrGoToStore(new StatusCallback2(Deeplink.GoToAppOrGoToStoreIl2cppCallback), viveportId, launchData);
 		}
 
-		// Token: 0x0600522F RID: 21039 RVA: 0x001A4F44 File Offset: 0x001A3144
+		// Token: 0x0600522F RID: 21039 RVA: 0x001A4F24 File Offset: 0x001A3124
 		public static string GetAppLaunchData()
 		{
 			StringBuilder stringBuilder = new StringBuilder(256);

@@ -8,7 +8,7 @@ namespace GorillaTag
 	[Serializable]
 	public class GTAssetRef<TObject> : AssetReferenceT<TObject> where TObject : Object
 	{
-		// Token: 0x0600669D RID: 26269 RVA: 0x00216DE0 File Offset: 0x00214FE0
+		// Token: 0x0600669D RID: 26269 RVA: 0x00216DC0 File Offset: 0x00214FC0
 		public GTAssetRef(string guid) : base(guid)
 		{
 		}

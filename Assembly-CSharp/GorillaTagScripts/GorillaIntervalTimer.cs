@@ -9,7 +9,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000D96 RID: 3478
 	public class GorillaIntervalTimer : MonoBehaviourPun
 	{
-		// Token: 0x0600556F RID: 21871 RVA: 0x001ADF33 File Offset: 0x001AC133
+		// Token: 0x0600556F RID: 21871 RVA: 0x001ADF13 File Offset: 0x001AC113
 		private void Awake()
 		{
 			if (this.networkProvider == null)
@@ -20,7 +20,7 @@ namespace GorillaTagScripts
 			this.ResetRun();
 		}
 
-		// Token: 0x06005570 RID: 21872 RVA: 0x001ADF5B File Offset: 0x001AC15B
+		// Token: 0x06005570 RID: 21872 RVA: 0x001ADF3B File Offset: 0x001AC13B
 		private void OnEnable()
 		{
 			if (this.runOnEnable)
@@ -34,7 +34,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005571 RID: 21873 RVA: 0x001ADF80 File Offset: 0x001AC180
+		// Token: 0x06005571 RID: 21873 RVA: 0x001ADF60 File Offset: 0x001AC160
 		private void OnDisable()
 		{
 			if (this.isRegistered)
@@ -45,7 +45,7 @@ namespace GorillaTagScripts
 			this.StopTimer();
 		}
 
-		// Token: 0x06005572 RID: 21874 RVA: 0x001ADFA0 File Offset: 0x001AC1A0
+		// Token: 0x06005572 RID: 21874 RVA: 0x001ADF80 File Offset: 0x001AC180
 		public void StartTimer()
 		{
 			if (!this.isRegistered)
@@ -74,7 +74,7 @@ namespace GorillaTagScripts
 			unityEvent.Invoke();
 		}
 
-		// Token: 0x06005573 RID: 21875 RVA: 0x001AE034 File Offset: 0x001AC234
+		// Token: 0x06005573 RID: 21875 RVA: 0x001AE014 File Offset: 0x001AC214
 		public void StopTimer()
 		{
 			this.isRunning = false;
@@ -93,19 +93,19 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005574 RID: 21876 RVA: 0x001AE087 File Offset: 0x001AC287
+		// Token: 0x06005574 RID: 21876 RVA: 0x001AE067 File Offset: 0x001AC267
 		public void Pause()
 		{
 			this.isPaused = true;
 		}
 
-		// Token: 0x06005575 RID: 21877 RVA: 0x001AE090 File Offset: 0x001AC290
+		// Token: 0x06005575 RID: 21877 RVA: 0x001AE070 File Offset: 0x001AC270
 		public void Resume()
 		{
 			this.isPaused = false;
 		}
 
-		// Token: 0x06005576 RID: 21878 RVA: 0x001AE09C File Offset: 0x001AC29C
+		// Token: 0x06005576 RID: 21878 RVA: 0x001AE07C File Offset: 0x001AC27C
 		public void SetFixedIntervalSeconds(float seconds)
 		{
 			this.useRandomDuration = false;
@@ -114,20 +114,20 @@ namespace GorillaTagScripts
 			this.elapsed = 0f;
 		}
 
-		// Token: 0x06005577 RID: 21879 RVA: 0x001AE0E8 File Offset: 0x001AC2E8
+		// Token: 0x06005577 RID: 21879 RVA: 0x001AE0C8 File Offset: 0x001AC2C8
 		public void OverrideNextIntervalSeconds(float seconds)
 		{
 			this.currentIntervalSeconds = Mathf.Max(0.001f, seconds);
 			this.elapsed = 0f;
 		}
 
-		// Token: 0x06005578 RID: 21880 RVA: 0x001AE106 File Offset: 0x001AC306
+		// Token: 0x06005578 RID: 21880 RVA: 0x001AE0E6 File Offset: 0x001AC2E6
 		public void ResetRun()
 		{
 			this.runFiredSoFar = 0;
 		}
 
-		// Token: 0x06005579 RID: 21881 RVA: 0x001AE110 File Offset: 0x001AC310
+		// Token: 0x06005579 RID: 21881 RVA: 0x001AE0F0 File Offset: 0x001AC2F0
 		public void InvokeUpdate()
 		{
 			if (!this.isRunning || this.isPaused)
@@ -171,13 +171,13 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600557A RID: 21882 RVA: 0x001AE219 File Offset: 0x001AC419
+		// Token: 0x0600557A RID: 21882 RVA: 0x001AE1F9 File Offset: 0x001AC3F9
 		private void ResetElapsed()
 		{
 			this.elapsed = 0f;
 		}
 
-		// Token: 0x0600557B RID: 21883 RVA: 0x001AE228 File Offset: 0x001AC428
+		// Token: 0x0600557B RID: 21883 RVA: 0x001AE208 File Offset: 0x001AC408
 		private void RollNextInterval()
 		{
 			if (!this.useRandomDuration)
@@ -243,7 +243,7 @@ namespace GorillaTagScripts
 			this.currentIntervalSeconds = Mathf.Max(0.001f, num3);
 		}
 
-		// Token: 0x0600557C RID: 21884 RVA: 0x001AE4F8 File Offset: 0x001AC6F8
+		// Token: 0x0600557C RID: 21884 RVA: 0x001AE4D8 File Offset: 0x001AC6D8
 		private float ToSeconds(float value)
 		{
 			switch (this.unit)
@@ -257,7 +257,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600557D RID: 21885 RVA: 0x001AE52F File Offset: 0x001AC72F
+		// Token: 0x0600557D RID: 21885 RVA: 0x001AE50F File Offset: 0x001AC70F
 		public void RestartTimer()
 		{
 			this.ResetElapsed();
@@ -265,13 +265,13 @@ namespace GorillaTagScripts
 			this.StartTimer();
 		}
 
-		// Token: 0x0600557E RID: 21886 RVA: 0x001AE543 File Offset: 0x001AC743
+		// Token: 0x0600557E RID: 21886 RVA: 0x001AE523 File Offset: 0x001AC723
 		public float GetPassedTime()
 		{
 			return this.elapsed;
 		}
 
-		// Token: 0x0600557F RID: 21887 RVA: 0x001AE54B File Offset: 0x001AC74B
+		// Token: 0x0600557F RID: 21887 RVA: 0x001AE52B File Offset: 0x001AC72B
 		public float GetRemainingTime()
 		{
 			return Mathf.Max(0f, this.currentIntervalSeconds - this.elapsed);

@@ -6,14 +6,14 @@ using UnityEngine.AI;
 [Serializable]
 public class GRAbilityWander : GRAbilityBase
 {
-	// Token: 0x06002A55 RID: 10837 RVA: 0x000E462F File Offset: 0x000E282F
+	// Token: 0x06002A55 RID: 10837 RVA: 0x000E460F File Offset: 0x000E280F
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
 		this.moveAbility.Setup(agent, anim, audioSource, root, head, lineOfSight);
 	}
 
-	// Token: 0x06002A56 RID: 10838 RVA: 0x000E4654 File Offset: 0x000E2854
+	// Token: 0x06002A56 RID: 10838 RVA: 0x000E4634 File Offset: 0x000E2834
 	public override void Start()
 	{
 		base.Start();
@@ -22,7 +22,7 @@ public class GRAbilityWander : GRAbilityBase
 		this.moveAbility.SetTargetPos(targetPos);
 	}
 
-	// Token: 0x06002A57 RID: 10839 RVA: 0x000E4685 File Offset: 0x000E2885
+	// Token: 0x06002A57 RID: 10839 RVA: 0x000E4665 File Offset: 0x000E2865
 	public override void Stop()
 	{
 		this.moveAbility.Stop();
@@ -34,7 +34,7 @@ public class GRAbilityWander : GRAbilityBase
 		return false;
 	}
 
-	// Token: 0x06002A59 RID: 10841 RVA: 0x000E4694 File Offset: 0x000E2894
+	// Token: 0x06002A59 RID: 10841 RVA: 0x000E4674 File Offset: 0x000E2874
 	public override void Think(float dt)
 	{
 		if (this.moveAbility.IsDone())
@@ -44,7 +44,7 @@ public class GRAbilityWander : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A5A RID: 10842 RVA: 0x000E46C4 File Offset: 0x000E28C4
+	// Token: 0x06002A5A RID: 10842 RVA: 0x000E46A4 File Offset: 0x000E28A4
 	private Vector3 PickRandomDestination()
 	{
 		Vector3 position = this.agent.transform.position;
@@ -78,7 +78,7 @@ public class GRAbilityWander : GRAbilityBase
 		return position;
 	}
 
-	// Token: 0x06002A5B RID: 10843 RVA: 0x000E47C6 File Offset: 0x000E29C6
+	// Token: 0x06002A5B RID: 10843 RVA: 0x000E47A6 File Offset: 0x000E29A6
 	protected override void UpdateShared(float dt)
 	{
 		this.moveAbility.Update(dt);

@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	[CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/WhackAMoleLevelSetting", order = 1)]
 	public class WhackAMoleLevelSO : ScriptableObject
 	{
-		// Token: 0x060055E3 RID: 21987 RVA: 0x001B047C File Offset: 0x001AE67C
+		// Token: 0x060055E3 RID: 21987 RVA: 0x001B045C File Offset: 0x001AE65C
 		public int GetMinScore(bool isCoop)
 		{
 			if (!isCoop)

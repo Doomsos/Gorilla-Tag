@@ -6,7 +6,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001103 RID: 4355
 	public class MaterialChangerCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006CFF RID: 27903 RVA: 0x0023CB10 File Offset: 0x0023AD10
+		// Token: 0x06006CFF RID: 27903 RVA: 0x0023CAF0 File Offset: 0x0023ACF0
 		public void ChangeMaterial(Material newMaterial)
 		{
 			if (this.targetRenderer == null || newMaterial == null || this.materialIndex < 0)
@@ -23,7 +23,7 @@ namespace GorillaTag.Cosmetics
 			this.targetRenderer.materials = materials;
 		}
 
-		// Token: 0x06006D00 RID: 27904 RVA: 0x0023CB88 File Offset: 0x0023AD88
+		// Token: 0x06006D00 RID: 27904 RVA: 0x0023CB68 File Offset: 0x0023AD68
 		public void ChangeAllMaterials(Material newMat)
 		{
 			if (this.targetRenderer == null || newMat == null)

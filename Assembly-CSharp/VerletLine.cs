@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 [DisallowMultipleComponent]
 public class VerletLine : MonoBehaviour
 {
-	// Token: 0x06003C32 RID: 15410 RVA: 0x0013DF2C File Offset: 0x0013C12C
+	// Token: 0x06003C32 RID: 15410 RVA: 0x0013DF0C File Offset: 0x0013C10C
 	private void Awake()
 	{
 		this._nodes = new VerletLine.LineNode[this.segmentNumber];
@@ -37,7 +37,7 @@ public class VerletLine : MonoBehaviour
 		this.totalLineLength = this.segmentLength * (float)this.segmentNumber;
 	}
 
-	// Token: 0x06003C33 RID: 15411 RVA: 0x0013E06C File Offset: 0x0013C26C
+	// Token: 0x06003C33 RID: 15411 RVA: 0x0013E04C File Offset: 0x0013C24C
 	private void OnEnable()
 	{
 		if (this.endRigidbody)
@@ -47,7 +47,7 @@ public class VerletLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003C34 RID: 15412 RVA: 0x0013E0B8 File Offset: 0x0013C2B8
+	// Token: 0x06003C34 RID: 15412 RVA: 0x0013E098 File Offset: 0x0013C298
 	private void OnDisable()
 	{
 		if (this.endRigidbody)
@@ -56,7 +56,7 @@ public class VerletLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003C35 RID: 15413 RVA: 0x0013E0D8 File Offset: 0x0013C2D8
+	// Token: 0x06003C35 RID: 15413 RVA: 0x0013E0B8 File Offset: 0x0013C2B8
 	public void SetLength(float total, float delay = 0f)
 	{
 		this.segmentTargetLength = total / (float)this.segmentNumber;
@@ -74,7 +74,7 @@ public class VerletLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003C36 RID: 15414 RVA: 0x0013E140 File Offset: 0x0013C340
+	// Token: 0x06003C36 RID: 15414 RVA: 0x0013E120 File Offset: 0x0013C320
 	public void AddSegmentLength(float amount, float delay = 0f)
 	{
 		this.segmentTargetLength = this.segmentLength + amount;
@@ -92,7 +92,7 @@ public class VerletLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003C37 RID: 15415 RVA: 0x0013E19C File Offset: 0x0013C39C
+	// Token: 0x06003C37 RID: 15415 RVA: 0x0013E17C File Offset: 0x0013C37C
 	public void RemoveSegmentLength(float amount, float delay = 0f)
 	{
 		this.segmentTargetLength = this.segmentLength - amount;
@@ -107,14 +107,14 @@ public class VerletLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003C38 RID: 15416 RVA: 0x0013E1F1 File Offset: 0x0013C3F1
+	// Token: 0x06003C38 RID: 15416 RVA: 0x0013E1D1 File Offset: 0x0013C3D1
 	private IEnumerator ResizeAfterDelay(float delay)
 	{
 		yield return new WaitForSeconds(delay);
 		yield break;
 	}
 
-	// Token: 0x06003C39 RID: 15417 RVA: 0x0013E200 File Offset: 0x0013C400
+	// Token: 0x06003C39 RID: 15417 RVA: 0x0013E1E0 File Offset: 0x0013C3E0
 	private void Update()
 	{
 		if (this.segmentLength.Approx(this.segmentTargetLength, 0.1f))
@@ -129,7 +129,7 @@ public class VerletLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003C3A RID: 15418 RVA: 0x0013E280 File Offset: 0x0013C480
+	// Token: 0x06003C3A RID: 15418 RVA: 0x0013E260 File Offset: 0x0013C460
 	public void ForceTotalLength(float totalLength)
 	{
 		float num = totalLength / (float)((this.segmentNumber < 1) ? 1 : this.segmentNumber);
@@ -137,7 +137,7 @@ public class VerletLine : MonoBehaviour
 		this.totalLineLength = this.segmentLength * (float)this.segmentNumber;
 	}
 
-	// Token: 0x06003C3B RID: 15419 RVA: 0x0013E2C8 File Offset: 0x0013C4C8
+	// Token: 0x06003C3B RID: 15419 RVA: 0x0013E2A8 File Offset: 0x0013C4A8
 	private void FixedUpdate()
 	{
 		for (int i = 0; i < this._nodes.Length; i++)
@@ -190,7 +190,7 @@ public class VerletLine : MonoBehaviour
 		this.line.SetPositions(this._positions);
 	}
 
-	// Token: 0x06003C3C RID: 15420 RVA: 0x0013E588 File Offset: 0x0013C788
+	// Token: 0x06003C3C RID: 15420 RVA: 0x0013E568 File Offset: 0x0013C768
 	private static void Simulate(ref VerletLine.LineNode p, float dt)
 	{
 		Vector3 position = p.position;
@@ -198,7 +198,7 @@ public class VerletLine : MonoBehaviour
 		p.lastPosition = position;
 	}
 
-	// Token: 0x06003C3D RID: 15421 RVA: 0x0013E5E0 File Offset: 0x0013C7E0
+	// Token: 0x06003C3D RID: 15421 RVA: 0x0013E5C0 File Offset: 0x0013C7C0
 	private static void LimitDistance(ref VerletLine.LineNode p1, ref VerletLine.LineNode p2, float restLength)
 	{
 		Vector3 vector = p2.position - p1.position;

@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000747 RID: 1863
 public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06003025 RID: 12325 RVA: 0x001075F0 File Offset: 0x001057F0
+	// Token: 0x06003025 RID: 12325 RVA: 0x001075D0 File Offset: 0x001057D0
 	public void Init(GhostReactor reactor)
 	{
 		this.reactor = reactor;
@@ -15,7 +15,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003026 RID: 12326 RVA: 0x00107630 File Offset: 0x00105830
+	// Token: 0x06003026 RID: 12326 RVA: 0x00107610 File Offset: 0x00105810
 	public void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
@@ -32,7 +32,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		this.UpdateRigs();
 	}
 
-	// Token: 0x06003027 RID: 12327 RVA: 0x001076D8 File Offset: 0x001058D8
+	// Token: 0x06003027 RID: 12327 RVA: 0x001076B8 File Offset: 0x001058B8
 	public void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
@@ -41,13 +41,13 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		RoomSystem.JoinedRoomEvent -= new Action(this.UpdateRigs);
 	}
 
-	// Token: 0x06003028 RID: 12328 RVA: 0x00107729 File Offset: 0x00105929
+	// Token: 0x06003028 RID: 12328 RVA: 0x00107709 File Offset: 0x00105909
 	public void UpdateRigs(RigContainer container)
 	{
 		this.UpdateRigs();
 	}
 
-	// Token: 0x06003029 RID: 12329 RVA: 0x00107731 File Offset: 0x00105931
+	// Token: 0x06003029 RID: 12329 RVA: 0x00107711 File Offset: 0x00105911
 	public void UpdateRigs()
 	{
 		GRUIStationEmployeeBadges.tempRigs.Clear();
@@ -58,7 +58,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600302A RID: 12330 RVA: 0x00107768 File Offset: 0x00105968
+	// Token: 0x0600302A RID: 12330 RVA: 0x00107748 File Offset: 0x00105948
 	public void RefreshBadgesAuthority()
 	{
 		for (int i = 0; i < GRUIStationEmployeeBadges.tempRigs.Count; i++)
@@ -87,7 +87,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600302B RID: 12331 RVA: 0x001078D4 File Offset: 0x00105AD4
+	// Token: 0x0600302B RID: 12331 RVA: 0x001078B4 File Offset: 0x00105AB4
 	public void SliceUpdate()
 	{
 		if (this.reactor == null || this.reactor.grManager == null)
@@ -108,7 +108,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600302C RID: 12332 RVA: 0x0010795C File Offset: 0x00105B5C
+	// Token: 0x0600302C RID: 12332 RVA: 0x0010793C File Offset: 0x00105B3C
 	public void RemoveBadge(GRBadge badge)
 	{
 		if (this.registeredBadges.Contains(badge))
@@ -122,7 +122,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600302D RID: 12333 RVA: 0x001079CC File Offset: 0x00105BCC
+	// Token: 0x0600302D RID: 12333 RVA: 0x001079AC File Offset: 0x00105BAC
 	public void LinkBadgeToDispenser(GRBadge badge, long createData)
 	{
 		if (!this.registeredBadges.Contains(badge))
@@ -142,7 +142,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600302E RID: 12334 RVA: 0x00107A44 File Offset: 0x00105C44
+	// Token: 0x0600302E RID: 12334 RVA: 0x00107A24 File Offset: 0x00105C24
 	public GRUIEmployeeBadgeDispenser GetDispenserForPlayer(int actorNumber)
 	{
 		int num;

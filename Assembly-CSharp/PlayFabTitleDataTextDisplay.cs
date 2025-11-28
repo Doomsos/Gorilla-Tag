@@ -10,7 +10,7 @@ using UnityEngine.Localization;
 public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 {
 	// Token: 0x1700058D RID: 1421
-	// (get) Token: 0x06003BFA RID: 15354 RVA: 0x0013CB6A File Offset: 0x0013AD6A
+	// (get) Token: 0x06003BFA RID: 15354 RVA: 0x0013CB4A File Offset: 0x0013AD4A
 	public string playFabKeyValue
 	{
 		get
@@ -19,7 +19,7 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06003BFB RID: 15355 RVA: 0x0013CB74 File Offset: 0x0013AD74
+	// Token: 0x06003BFB RID: 15355 RVA: 0x0013CB54 File Offset: 0x0013AD54
 	private void Start()
 	{
 		if (this.textBox != null)
@@ -38,7 +38,7 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06003BFC RID: 15356 RVA: 0x0013CC09 File Offset: 0x0013AE09
+	// Token: 0x06003BFC RID: 15356 RVA: 0x0013CBE9 File Offset: 0x0013ADE9
 	private void OnEnable()
 	{
 		if (LocalisationManager.Instance == null)
@@ -49,14 +49,14 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		this._hasRegisteredCallback = true;
 	}
 
-	// Token: 0x06003BFD RID: 15357 RVA: 0x0013CC31 File Offset: 0x0013AE31
+	// Token: 0x06003BFD RID: 15357 RVA: 0x0013CC11 File Offset: 0x0013AE11
 	private void OnDisable()
 	{
 		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.OnLanguageChanged));
 		this._hasRegisteredCallback = false;
 	}
 
-	// Token: 0x06003BFE RID: 15358 RVA: 0x0013CC4C File Offset: 0x0013AE4C
+	// Token: 0x06003BFE RID: 15358 RVA: 0x0013CC2C File Offset: 0x0013AE2C
 	private void OnPlayFabError(PlayFabError error)
 	{
 		if (this.textBox != null)
@@ -84,7 +84,7 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06003BFF RID: 15359 RVA: 0x0013CD00 File Offset: 0x0013AF00
+	// Token: 0x06003BFF RID: 15359 RVA: 0x0013CCE0 File Offset: 0x0013AEE0
 	private void OnLanguageChanged()
 	{
 		if (string.IsNullOrEmpty(this._cachedText))
@@ -95,7 +95,7 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		PlayFabTitleDataCache.Instance.GetTitleData(this.playfabKey, new Action<string>(this.OnTitleDataRequestComplete), new Action<PlayFabError>(this.OnPlayFabError), false);
 	}
 
-	// Token: 0x06003C00 RID: 15360 RVA: 0x0013CD50 File Offset: 0x0013AF50
+	// Token: 0x06003C00 RID: 15360 RVA: 0x0013CD30 File Offset: 0x0013AF30
 	private void OnTitleDataRequestComplete(string titleDataResult)
 	{
 		if (this.textBox != null)
@@ -111,7 +111,7 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06003C01 RID: 15361 RVA: 0x0013CDDB File Offset: 0x0013AFDB
+	// Token: 0x06003C01 RID: 15361 RVA: 0x0013CDBB File Offset: 0x0013AFBB
 	private void OnNewTitleDataAdded(string key)
 	{
 		if (key == this.playfabKey && this.textBox != null)
@@ -120,13 +120,13 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06003C02 RID: 15362 RVA: 0x0013CE0A File Offset: 0x0013B00A
+	// Token: 0x06003C02 RID: 15362 RVA: 0x0013CDEA File Offset: 0x0013AFEA
 	private void OnDestroy()
 	{
 		PlayFabTitleDataCache.Instance.OnTitleDataUpdate.RemoveListener(new UnityAction<string>(this.OnNewTitleDataAdded));
 	}
 
-	// Token: 0x06003C03 RID: 15363 RVA: 0x0013CE27 File Offset: 0x0013B027
+	// Token: 0x06003C03 RID: 15363 RVA: 0x0013CE07 File Offset: 0x0013B007
 	public bool BuildValidationCheck()
 	{
 		if (this.textBox == null)
@@ -137,7 +137,7 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		return true;
 	}
 
-	// Token: 0x06003C04 RID: 15364 RVA: 0x0013CE44 File Offset: 0x0013B044
+	// Token: 0x06003C04 RID: 15364 RVA: 0x0013CE24 File Offset: 0x0013B024
 	public void ChangeTitleDataAtRuntime(string newTitleDataKey)
 	{
 		this.playfabKey = newTitleDataKey;

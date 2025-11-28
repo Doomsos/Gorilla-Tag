@@ -5,7 +5,7 @@ using UnityEngine.UI;
 // Token: 0x0200079B RID: 1947
 public class GorillaLevelScreen : MonoBehaviour
 {
-	// Token: 0x060032F3 RID: 13043 RVA: 0x00113416 File Offset: 0x00111616
+	// Token: 0x060032F3 RID: 13043 RVA: 0x001133F6 File Offset: 0x001115F6
 	private void Awake()
 	{
 		if (this.myText != null)
@@ -14,7 +14,7 @@ public class GorillaLevelScreen : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060032F4 RID: 13044 RVA: 0x00113438 File Offset: 0x00111638
+	// Token: 0x060032F4 RID: 13044 RVA: 0x00113418 File Offset: 0x00111618
 	public void UpdateText(string newText, bool setToGoodMaterial)
 	{
 		if (this.myText != null)

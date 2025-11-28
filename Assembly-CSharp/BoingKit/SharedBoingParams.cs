@@ -7,7 +7,7 @@ namespace BoingKit
 	[CreateAssetMenu(fileName = "BoingParams", menuName = "Boing Kit/Shared Boing Params", order = 550)]
 	public class SharedBoingParams : ScriptableObject
 	{
-		// Token: 0x06007242 RID: 29250 RVA: 0x002583A4 File Offset: 0x002565A4
+		// Token: 0x06007242 RID: 29250 RVA: 0x00258384 File Offset: 0x00256584
 		public SharedBoingParams()
 		{
 			this.Params.Init();

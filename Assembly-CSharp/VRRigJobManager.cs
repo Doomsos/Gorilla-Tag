@@ -11,7 +11,7 @@ using UnityEngine.Jobs;
 public class VRRigJobManager : MonoBehaviour
 {
 	// Token: 0x170005CE RID: 1486
-	// (get) Token: 0x06003F9A RID: 16282 RVA: 0x0015518D File Offset: 0x0015338D
+	// (get) Token: 0x06003F9A RID: 16282 RVA: 0x0015516D File Offset: 0x0015336D
 	public static VRRigJobManager Instance
 	{
 		get
@@ -20,7 +20,7 @@ public class VRRigJobManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003F9B RID: 16283 RVA: 0x00155194 File Offset: 0x00153394
+	// Token: 0x06003F9B RID: 16283 RVA: 0x00155174 File Offset: 0x00153374
 	private void Awake()
 	{
 		VRRigJobManager._instance = this;
@@ -29,7 +29,7 @@ public class VRRigJobManager : MonoBehaviour
 		this.job = default(VRRigJobManager.VRRigTransformJob);
 	}
 
-	// Token: 0x06003F9C RID: 16284 RVA: 0x001551C5 File Offset: 0x001533C5
+	// Token: 0x06003F9C RID: 16284 RVA: 0x001551A5 File Offset: 0x001533A5
 	private void OnDestroy()
 	{
 		this.jobHandle.Complete();
@@ -37,7 +37,7 @@ public class VRRigJobManager : MonoBehaviour
 		this.tAA.Dispose();
 	}
 
-	// Token: 0x06003F9D RID: 16285 RVA: 0x001551E8 File Offset: 0x001533E8
+	// Token: 0x06003F9D RID: 16285 RVA: 0x001551C8 File Offset: 0x001533C8
 	public void RegisterVRRig(VRRig rig)
 	{
 		this.rigList.Add(rig);
@@ -45,7 +45,7 @@ public class VRRigJobManager : MonoBehaviour
 		this.actualListSz++;
 	}
 
-	// Token: 0x06003F9E RID: 16286 RVA: 0x00155218 File Offset: 0x00153418
+	// Token: 0x06003F9E RID: 16286 RVA: 0x001551F8 File Offset: 0x001533F8
 	public void DeregisterVRRig(VRRig rig)
 	{
 		if (ApplicationQuittingState.IsQuitting)
@@ -64,7 +64,7 @@ public class VRRigJobManager : MonoBehaviour
 		this.actualListSz--;
 	}
 
-	// Token: 0x06003F9F RID: 16287 RVA: 0x00155284 File Offset: 0x00153484
+	// Token: 0x06003F9F RID: 16287 RVA: 0x00155264 File Offset: 0x00153464
 	private void CopyInput()
 	{
 		for (int i = 0; i < this.actualListSz; i++)
@@ -78,7 +78,7 @@ public class VRRigJobManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003FA0 RID: 16288 RVA: 0x00155304 File Offset: 0x00153504
+	// Token: 0x06003FA0 RID: 16288 RVA: 0x001552E4 File Offset: 0x001534E4
 	public void Update()
 	{
 		this.jobHandle.Complete();
@@ -133,7 +133,7 @@ public class VRRigJobManager : MonoBehaviour
 	[BurstCompile]
 	private struct VRRigTransformJob : IJobParallelForTransform
 	{
-		// Token: 0x06003FA2 RID: 16290 RVA: 0x0015538F File Offset: 0x0015358F
+		// Token: 0x06003FA2 RID: 16290 RVA: 0x0015536F File Offset: 0x0015356F
 		public void Execute(int i, TransformAccess tA)
 		{
 			if (i < this.input.Length)

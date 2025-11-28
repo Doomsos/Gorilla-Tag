@@ -9,7 +9,7 @@ namespace GorillaTag
 	[Serializable]
 	internal class ExpectedUsersDecayTimer : TickSystemTimerAbstract
 	{
-		// Token: 0x06006817 RID: 26647 RVA: 0x0021F718 File Offset: 0x0021D918
+		// Token: 0x06006817 RID: 26647 RVA: 0x0021F6F8 File Offset: 0x0021D8F8
 		public override void OnTimedEvent()
 		{
 			if (NetworkSystem.Instance.InRoom && NetworkSystem.Instance.IsMasterClient)
@@ -41,7 +41,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006818 RID: 26648 RVA: 0x0021F7DF File Offset: 0x0021D9DF
+		// Token: 0x06006818 RID: 26648 RVA: 0x0021F7BF File Offset: 0x0021D9BF
 		public override void Stop()
 		{
 			base.Stop();

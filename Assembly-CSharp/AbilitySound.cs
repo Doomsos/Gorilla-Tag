@@ -6,13 +6,13 @@ using UnityEngine;
 [Serializable]
 public class AbilitySound
 {
-	// Token: 0x060029DD RID: 10717 RVA: 0x000E2493 File Offset: 0x000E0693
+	// Token: 0x060029DD RID: 10717 RVA: 0x000E2473 File Offset: 0x000E0673
 	public bool IsValid()
 	{
 		return this.sounds != null && this.sounds.Count > 0;
 	}
 
-	// Token: 0x060029DE RID: 10718 RVA: 0x000E24B0 File Offset: 0x000E06B0
+	// Token: 0x060029DE RID: 10718 RVA: 0x000E2490 File Offset: 0x000E0690
 	private void UpdateNextSound()
 	{
 		AbilitySound.SoundSelectMode soundSelectMode = this.soundSelectMode;
@@ -28,7 +28,7 @@ public class AbilitySound
 		this.nextSound = Random.Range(0, this.sounds.Count);
 	}
 
-	// Token: 0x060029DF RID: 10719 RVA: 0x000E2500 File Offset: 0x000E0700
+	// Token: 0x060029DF RID: 10719 RVA: 0x000E24E0 File Offset: 0x000E06E0
 	public void Play(AudioSource audioSourceIn)
 	{
 		this.usedAudioSource = ((audioSourceIn != null) ? audioSourceIn : this.audioSource);
@@ -59,7 +59,7 @@ public class AbilitySound
 		}
 	}
 
-	// Token: 0x060029E0 RID: 10720 RVA: 0x000E25F4 File Offset: 0x000E07F4
+	// Token: 0x060029E0 RID: 10720 RVA: 0x000E25D4 File Offset: 0x000E07D4
 	public void Stop()
 	{
 		if (this.usedAudioSource != null && this.usedAudioSource.clip == this.currentSound)

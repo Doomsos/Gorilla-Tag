@@ -4,7 +4,7 @@
 [Serializable]
 public class AbilityHaptic
 {
-	// Token: 0x060029E2 RID: 10722 RVA: 0x000E2668 File Offset: 0x000E0868
+	// Token: 0x060029E2 RID: 10722 RVA: 0x000E2648 File Offset: 0x000E0848
 	public void PlayIfHeldLocal(GameEntity gameEntity)
 	{
 		if (gameEntity == null || !gameEntity.IsHeldByLocalPlayer())
@@ -24,7 +24,7 @@ public class AbilityHaptic
 		GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), this.strength, this.duration);
 	}
 
-	// Token: 0x060029E3 RID: 10723 RVA: 0x000E26CC File Offset: 0x000E08CC
+	// Token: 0x060029E3 RID: 10723 RVA: 0x000E26AC File Offset: 0x000E08AC
 	public void PlayIfSnappedLocal(GameEntity gameEntity)
 	{
 		if (gameEntity == null || !gameEntity.IsSnappedByLocalPlayer())

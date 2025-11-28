@@ -6,19 +6,19 @@ namespace BoingKit
 	// Token: 0x020011A6 RID: 4518
 	public class BoingReactorFieldGPUSampler : MonoBehaviour
 	{
-		// Token: 0x060071F1 RID: 29169 RVA: 0x00255728 File Offset: 0x00253928
+		// Token: 0x060071F1 RID: 29169 RVA: 0x00255708 File Offset: 0x00253908
 		public void OnEnable()
 		{
 			BoingManager.Register(this);
 		}
 
-		// Token: 0x060071F2 RID: 29170 RVA: 0x00255730 File Offset: 0x00253930
+		// Token: 0x060071F2 RID: 29170 RVA: 0x00255710 File Offset: 0x00253910
 		public void OnDisable()
 		{
 			BoingManager.Unregister(this);
 		}
 
-		// Token: 0x060071F3 RID: 29171 RVA: 0x00255738 File Offset: 0x00253938
+		// Token: 0x060071F3 RID: 29171 RVA: 0x00255718 File Offset: 0x00253918
 		public void Update()
 		{
 			if (this.ReactorField == null)

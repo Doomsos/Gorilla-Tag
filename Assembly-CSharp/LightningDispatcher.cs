@@ -5,11 +5,11 @@ using UnityEngine;
 public class LightningDispatcher : MonoBehaviour
 {
 	// Token: 0x1400008D RID: 141
-	// (add) Token: 0x06004F8B RID: 20363 RVA: 0x00199A24 File Offset: 0x00197C24
-	// (remove) Token: 0x06004F8C RID: 20364 RVA: 0x00199A58 File Offset: 0x00197C58
+	// (add) Token: 0x06004F8B RID: 20363 RVA: 0x00199A04 File Offset: 0x00197C04
+	// (remove) Token: 0x06004F8C RID: 20364 RVA: 0x00199A38 File Offset: 0x00197C38
 	public static event LightningDispatcher.DispatchLightningEvent RequestLightningStrike;
 
-	// Token: 0x06004F8D RID: 20365 RVA: 0x00199A8C File Offset: 0x00197C8C
+	// Token: 0x06004F8D RID: 20365 RVA: 0x00199A6C File Offset: 0x00197C6C
 	public void DispatchLightning(Vector3 p1, Vector3 p2)
 	{
 		if (LightningDispatcher.RequestLightningStrike != null)

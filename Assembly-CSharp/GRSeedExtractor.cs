@@ -10,7 +10,7 @@ using UnityEngine;
 public class GRSeedExtractor : MonoBehaviour
 {
 	// Token: 0x17000428 RID: 1064
-	// (get) Token: 0x06002DA7 RID: 11687 RVA: 0x000F6973 File Offset: 0x000F4B73
+	// (get) Token: 0x06002DA7 RID: 11687 RVA: 0x000F6953 File Offset: 0x000F4B53
 	public bool StationOpen
 	{
 		get
@@ -20,7 +20,7 @@ public class GRSeedExtractor : MonoBehaviour
 	}
 
 	// Token: 0x17000429 RID: 1065
-	// (get) Token: 0x06002DA8 RID: 11688 RVA: 0x000F697B File Offset: 0x000F4B7B
+	// (get) Token: 0x06002DA8 RID: 11688 RVA: 0x000F695B File Offset: 0x000F4B5B
 	public bool StationOpenForLocalPlayer
 	{
 		get
@@ -30,7 +30,7 @@ public class GRSeedExtractor : MonoBehaviour
 	}
 
 	// Token: 0x1700042A RID: 1066
-	// (get) Token: 0x06002DA9 RID: 11689 RVA: 0x000F699E File Offset: 0x000F4B9E
+	// (get) Token: 0x06002DA9 RID: 11689 RVA: 0x000F697E File Offset: 0x000F4B7E
 	public int CurrentPlayerActorNumber
 	{
 		get
@@ -39,7 +39,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DAA RID: 11690 RVA: 0x000F69A8 File Offset: 0x000F4BA8
+	// Token: 0x06002DAA RID: 11690 RVA: 0x000F6988 File Offset: 0x000F4B88
 	private void Awake()
 	{
 		this.triggerNotifier.TriggerEnterEvent += this.TriggerEntered;
@@ -56,7 +56,7 @@ public class GRSeedExtractor : MonoBehaviour
 		base.enabled = false;
 	}
 
-	// Token: 0x06002DAB RID: 11691 RVA: 0x000F6A54 File Offset: 0x000F4C54
+	// Token: 0x06002DAB RID: 11691 RVA: 0x000F6A34 File Offset: 0x000F4C34
 	public void Init(GRToolProgressionManager progression, GhostReactor gr)
 	{
 		this.ghostReactor = gr;
@@ -72,7 +72,7 @@ public class GRSeedExtractor : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002DAD RID: 11693 RVA: 0x000F6AC8 File Offset: 0x000F4CC8
+	// Token: 0x06002DAD RID: 11693 RVA: 0x000F6AA8 File Offset: 0x000F4CA8
 	private void OnDisable()
 	{
 		this.ClearSeedVisuals();
@@ -99,7 +99,7 @@ public class GRSeedExtractor : MonoBehaviour
 		this.processingLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(this.processingAmountVisual), 1f);
 	}
 
-	// Token: 0x06002DAE RID: 11694 RVA: 0x000F6C14 File Offset: 0x000F4E14
+	// Token: 0x06002DAE RID: 11694 RVA: 0x000F6BF4 File Offset: 0x000F4DF4
 	private void Update()
 	{
 		this.ValidateCurrentPlayer();
@@ -179,7 +179,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DAF RID: 11695 RVA: 0x000F706C File Offset: 0x000F526C
+	// Token: 0x06002DAF RID: 11695 RVA: 0x000F704C File Offset: 0x000F524C
 	private void ValidateCurrentPlayer()
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -207,7 +207,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DB0 RID: 11696 RVA: 0x000F7144 File Offset: 0x000F5344
+	// Token: 0x06002DB0 RID: 11696 RVA: 0x000F7124 File Offset: 0x000F5324
 	public void TriggerEntered(TriggerEventNotifier notifier, Collider other)
 	{
 		VRRig component = other.GetComponent<VRRig>();
@@ -217,7 +217,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DB1 RID: 11697 RVA: 0x000F719C File Offset: 0x000F539C
+	// Token: 0x06002DB1 RID: 11697 RVA: 0x000F717C File Offset: 0x000F537C
 	public void TriggerExited(TriggerEventNotifier notifier, Collider other)
 	{
 		VRRig component = other.GetComponent<VRRig>();
@@ -234,7 +234,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DB2 RID: 11698 RVA: 0x000F724C File Offset: 0x000F544C
+	// Token: 0x06002DB2 RID: 11698 RVA: 0x000F722C File Offset: 0x000F542C
 	public void OnPlayerCardSwipe(int playerActorNumber)
 	{
 		if (playerActorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber && NetworkSystem.Instance.InRoom)
@@ -244,7 +244,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DB3 RID: 11699 RVA: 0x000F72A4 File Offset: 0x000F54A4
+	// Token: 0x06002DB3 RID: 11699 RVA: 0x000F7284 File Offset: 0x000F5484
 	public void DepositorTriggerEntered(TriggerEventNotifier notifier, Collider other)
 	{
 		if (this.ghostReactor == null || this.ghostReactor.grManager == null || other == null || !NetworkSystem.Instance.InRoom)
@@ -285,7 +285,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DB4 RID: 11700 RVA: 0x000F7455 File Offset: 0x000F5655
+	// Token: 0x06002DB4 RID: 11700 RVA: 0x000F7435 File Offset: 0x000F5635
 	public void OverdrivePurchaseButtonPressed()
 	{
 		if (this.overdrivePurchasePending)
@@ -299,7 +299,7 @@ public class GRSeedExtractor : MonoBehaviour
 		this.UpdateOverdrivePurchaseButtons();
 	}
 
-	// Token: 0x06002DB5 RID: 11701 RVA: 0x000F7480 File Offset: 0x000F5680
+	// Token: 0x06002DB5 RID: 11701 RVA: 0x000F7460 File Offset: 0x000F5660
 	private bool LocalPlayerCanPurchaseOverdrive()
 	{
 		if (Time.time - this.overdrivePurchaseTime > 5f)
@@ -309,7 +309,7 @@ public class GRSeedExtractor : MonoBehaviour
 		return this.StationOpenForLocalPlayer && !this.overdriveServerConfirmationPending && CosmeticsController.instance.CurrencyBalance >= 250 && this.localPlayerData.overdriveSupply <= 0f;
 	}
 
-	// Token: 0x06002DB6 RID: 11702 RVA: 0x000F74E8 File Offset: 0x000F56E8
+	// Token: 0x06002DB6 RID: 11702 RVA: 0x000F74C8 File Offset: 0x000F56C8
 	public void OverdrivePurchaseConfirmButtonPressed()
 	{
 		if (this.overdrivePurchasePending)
@@ -325,7 +325,7 @@ public class GRSeedExtractor : MonoBehaviour
 		this.UpdateOverdrivePurchaseButtons();
 	}
 
-	// Token: 0x06002DB7 RID: 11703 RVA: 0x000F7548 File Offset: 0x000F5748
+	// Token: 0x06002DB7 RID: 11703 RVA: 0x000F7528 File Offset: 0x000F5728
 	public void OnPlayerStatusReceived(ProgressionManager.JuicerStatusResponse statusResponse)
 	{
 		if (statusResponse.MothershipId == GRPlayer.GetLocal().mothershipId && statusResponse.RefreshJuice)
@@ -362,7 +362,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DB8 RID: 11704 RVA: 0x000F7748 File Offset: 0x000F5948
+	// Token: 0x06002DB8 RID: 11704 RVA: 0x000F7728 File Offset: 0x000F5928
 	private void TryDepositSeedServerResponse(bool succeeded)
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -394,19 +394,19 @@ public class GRSeedExtractor : MonoBehaviour
 		this.ghostReactor.grManager.RequestPlayerAction(GhostReactorManager.GRPlayerAction.SeedExtractorDepositSeedFailed, actorNumber, num);
 	}
 
-	// Token: 0x06002DB9 RID: 11705 RVA: 0x000F7814 File Offset: 0x000F5A14
+	// Token: 0x06002DB9 RID: 11705 RVA: 0x000F77F4 File Offset: 0x000F59F4
 	public void CardSwipeSuccess()
 	{
 		this.idCardScanner.onSucceeded.Invoke();
 	}
 
-	// Token: 0x06002DBA RID: 11706 RVA: 0x000F7826 File Offset: 0x000F5A26
+	// Token: 0x06002DBA RID: 11706 RVA: 0x000F7806 File Offset: 0x000F5A06
 	public void CardSwipeFail()
 	{
 		this.idCardScanner.onFailed.Invoke();
 	}
 
-	// Token: 0x06002DBB RID: 11707 RVA: 0x000F7838 File Offset: 0x000F5A38
+	// Token: 0x06002DBB RID: 11707 RVA: 0x000F7818 File Offset: 0x000F5A18
 	public void TryDepositSeed(int playerActorNumber, int seedNetId)
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(playerActorNumber);
@@ -446,7 +446,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DBC RID: 11708 RVA: 0x000F79D4 File Offset: 0x000F5BD4
+	// Token: 0x06002DBC RID: 11708 RVA: 0x000F79B4 File Offset: 0x000F5BB4
 	public bool ValidateSeedDepositSucceeded(int playerActorNumber, int entityNetId)
 	{
 		if (this.ghostReactor.grManager.IsAuthority())
@@ -464,7 +464,7 @@ public class GRSeedExtractor : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06002DBD RID: 11709 RVA: 0x000F7A38 File Offset: 0x000F5C38
+	// Token: 0x06002DBD RID: 11709 RVA: 0x000F7A18 File Offset: 0x000F5C18
 	public void SeedDepositSucceeded(int playerActorNumber, int entityNetId)
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -484,14 +484,14 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DBE RID: 11710 RVA: 0x000F7AC5 File Offset: 0x000F5CC5
+	// Token: 0x06002DBE RID: 11710 RVA: 0x000F7AA5 File Offset: 0x000F5CA5
 	public void SeedDepositFailed(int playerActorNumber, int entityNetId)
 	{
 		this.depositorAudioSource.PlayOneShot(this.seedDepositFailedAudio, this.seedDepositFailedVolume);
 		this.RemovePendingSeedDeposit(entityNetId);
 	}
 
-	// Token: 0x06002DBF RID: 11711 RVA: 0x000F7AE8 File Offset: 0x000F5CE8
+	// Token: 0x06002DBF RID: 11711 RVA: 0x000F7AC8 File Offset: 0x000F5CC8
 	private void RemovePendingSeedDeposit(int entityId)
 	{
 		for (int i = this.seedDepositsPending.Count - 1; i >= 0; i--)
@@ -503,7 +503,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DC0 RID: 11712 RVA: 0x000F7B30 File Offset: 0x000F5D30
+	// Token: 0x06002DC0 RID: 11712 RVA: 0x000F7B10 File Offset: 0x000F5D10
 	public void ApplyState(int playerActorNumber, int coreCount, int coresProcessedByOverdrive, int researchPoints, float coreProcessingPercentage, float overdriveSupply)
 	{
 		if (playerActorNumber == this.currentPlayerActorNumber)
@@ -533,7 +533,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DC1 RID: 11713 RVA: 0x000F7C68 File Offset: 0x000F5E68
+	// Token: 0x06002DC1 RID: 11713 RVA: 0x000F7C48 File Offset: 0x000F5E48
 	public void OpenStation(int playerActorNumber)
 	{
 		if (NetworkSystem.Instance.GetPlayer(playerActorNumber) == null)
@@ -551,7 +551,7 @@ public class GRSeedExtractor : MonoBehaviour
 		this.UpdateOverdrivePurchaseButtons();
 	}
 
-	// Token: 0x06002DC2 RID: 11714 RVA: 0x000F7CC8 File Offset: 0x000F5EC8
+	// Token: 0x06002DC2 RID: 11714 RVA: 0x000F7CA8 File Offset: 0x000F5EA8
 	public void CloseStation()
 	{
 		if (this.stationOpen)
@@ -563,7 +563,7 @@ public class GRSeedExtractor : MonoBehaviour
 		this.UpdateOverdrivePurchaseButtons();
 	}
 
-	// Token: 0x06002DC3 RID: 11715 RVA: 0x000F7D00 File Offset: 0x000F5F00
+	// Token: 0x06002DC3 RID: 11715 RVA: 0x000F7CE0 File Offset: 0x000F5EE0
 	private void UpdateOverdrivePurchaseButtons()
 	{
 		if (!this.LocalPlayerCanPurchaseOverdrive())
@@ -588,7 +588,7 @@ public class GRSeedExtractor : MonoBehaviour
 		this.overdriveConfirmButton.buttonRenderer.material = this.defaultButtonMaterial;
 	}
 
-	// Token: 0x06002DC4 RID: 11716 RVA: 0x000F7E24 File Offset: 0x000F6024
+	// Token: 0x06002DC4 RID: 11716 RVA: 0x000F7E04 File Offset: 0x000F6004
 	public void OnStateUpdated()
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(this.currentPlayerActorNumber);
@@ -642,7 +642,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DC5 RID: 11717 RVA: 0x000F7F58 File Offset: 0x000F6158
+	// Token: 0x06002DC5 RID: 11717 RVA: 0x000F7F38 File Offset: 0x000F6138
 	private void DepositSeedVisual()
 	{
 		for (int i = 0; i < this.chaosSeedVisuals.Count; i++)
@@ -668,7 +668,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DC6 RID: 11718 RVA: 0x000F8078 File Offset: 0x000F6278
+	// Token: 0x06002DC6 RID: 11718 RVA: 0x000F8058 File Offset: 0x000F6258
 	private void CompleteSeedVisual()
 	{
 		if (this.seedProcessingStates.Count > 0)
@@ -679,7 +679,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DC7 RID: 11719 RVA: 0x000F80C4 File Offset: 0x000F62C4
+	// Token: 0x06002DC7 RID: 11719 RVA: 0x000F80A4 File Offset: 0x000F62A4
 	private void ClearSeedVisuals()
 	{
 		int count = this.seedProcessingStates.Count;
@@ -689,7 +689,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DC8 RID: 11720 RVA: 0x000F80F0 File Offset: 0x000F62F0
+	// Token: 0x06002DC8 RID: 11720 RVA: 0x000F80D0 File Offset: 0x000F62D0
 	private void UpdateScreenDisplay()
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(this.currentPlayerActorNumber);
@@ -744,7 +744,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DC9 RID: 11721 RVA: 0x000F8354 File Offset: 0x000F6554
+	// Token: 0x06002DC9 RID: 11721 RVA: 0x000F8334 File Offset: 0x000F6534
 	private void StepSeedVisualAnimation(float dt)
 	{
 		float magnitude = (this.seedTubeStart.position - this.seedTubeEnd.position).magnitude;
@@ -804,7 +804,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DCA RID: 11722 RVA: 0x000F869F File Offset: 0x000F689F
+	// Token: 0x06002DCA RID: 11722 RVA: 0x000F867F File Offset: 0x000F687F
 	private IEnumerator OverdrivePurchaseAnimationVisual(int coresToProcess)
 	{
 		this.overdriveActive = true;
@@ -921,7 +921,7 @@ public class GRSeedExtractor : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06002DCB RID: 11723 RVA: 0x000F86B8 File Offset: 0x000F68B8
+	// Token: 0x06002DCB RID: 11723 RVA: 0x000F8698 File Offset: 0x000F6898
 	public void OnResearchPointsUpdated()
 	{
 		int numberOfResearchPoints = this.toolProgressionManager.GetNumberOfResearchPoints();
@@ -942,7 +942,7 @@ public class GRSeedExtractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DCC RID: 11724 RVA: 0x000F8798 File Offset: 0x000F6998
+	// Token: 0x06002DCC RID: 11724 RVA: 0x000F8778 File Offset: 0x000F6978
 	public void OnPurchaseOverdrive(bool success)
 	{
 		this.overdriveServerConfirmationPending = false;

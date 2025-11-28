@@ -6,7 +6,7 @@ namespace CosmeticRoom.ItemScripts
 	// Token: 0x02000EA4 RID: 3748
 	public class TrickTreatHoldable : TransferrableObject
 	{
-		// Token: 0x06005DB7 RID: 23991 RVA: 0x001E169D File Offset: 0x001DF89D
+		// Token: 0x06005DB7 RID: 23991 RVA: 0x001E167D File Offset: 0x001DF87D
 		protected override void LateUpdateLocal()
 		{
 			base.LateUpdateLocal();

@@ -6,23 +6,23 @@ using UnityEngine;
 public class GRToolProgressionManager : MonoBehaviourTick
 {
 	// Token: 0x14000050 RID: 80
-	// (add) Token: 0x06002EFB RID: 12027 RVA: 0x000FF150 File Offset: 0x000FD350
-	// (remove) Token: 0x06002EFC RID: 12028 RVA: 0x000FF188 File Offset: 0x000FD388
+	// (add) Token: 0x06002EFB RID: 12027 RVA: 0x000FF130 File Offset: 0x000FD330
+	// (remove) Token: 0x06002EFC RID: 12028 RVA: 0x000FF168 File Offset: 0x000FD368
 	public event Action OnProgressionUpdated;
 
-	// Token: 0x06002EFD RID: 12029 RVA: 0x000FF1BD File Offset: 0x000FD3BD
+	// Token: 0x06002EFD RID: 12029 RVA: 0x000FF19D File Offset: 0x000FD39D
 	public void SetPendingTreeToProcess()
 	{
 		this.pendingTreeToProcess = true;
 	}
 
-	// Token: 0x06002EFE RID: 12030 RVA: 0x000FF1C6 File Offset: 0x000FD3C6
+	// Token: 0x06002EFE RID: 12030 RVA: 0x000FF1A6 File Offset: 0x000FD3A6
 	public void UpdateInventory()
 	{
 		this.pendingUpdateInventory = true;
 	}
 
-	// Token: 0x06002EFF RID: 12031 RVA: 0x000FF1D0 File Offset: 0x000FD3D0
+	// Token: 0x06002EFF RID: 12031 RVA: 0x000FF1B0 File Offset: 0x000FD3B0
 	public void Init(GhostReactor ghostReactor)
 	{
 		this.reactor = ghostReactor;
@@ -49,14 +49,14 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F00 RID: 12032 RVA: 0x000FF2B0 File Offset: 0x000FD4B0
+	// Token: 0x06002F00 RID: 12032 RVA: 0x000FF290 File Offset: 0x000FD490
 	private void NodeUnlocked()
 	{
 		this.toolProgressionTree.RefreshUserInventory();
 		this.toolProgressionTree.RefreshProgressionTree();
 	}
 
-	// Token: 0x06002F01 RID: 12033 RVA: 0x000FF2C8 File Offset: 0x000FD4C8
+	// Token: 0x06002F01 RID: 12033 RVA: 0x000FF2A8 File Offset: 0x000FD4A8
 	public override void Tick()
 	{
 		if (this.sendUpdate)
@@ -80,13 +80,13 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002F02 RID: 12034 RVA: 0x000FF329 File Offset: 0x000FD529
+	// Token: 0x06002F02 RID: 12034 RVA: 0x000FF309 File Offset: 0x000FD509
 	public void SendMothershipUpdated()
 	{
 		this.sendUpdate = true;
 	}
 
-	// Token: 0x06002F03 RID: 12035 RVA: 0x000FF334 File Offset: 0x000FD534
+	// Token: 0x06002F03 RID: 12035 RVA: 0x000FF314 File Offset: 0x000FD514
 	public GRToolProgressionManager.ToolProgressionMetaData GetPartMetadata(GRToolProgressionManager.ToolParts part)
 	{
 		GRToolProgressionManager.ToolProgressionMetaData result;
@@ -94,7 +94,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return result;
 	}
 
-	// Token: 0x06002F04 RID: 12036 RVA: 0x000FF354 File Offset: 0x000FD554
+	// Token: 0x06002F04 RID: 12036 RVA: 0x000FF334 File Offset: 0x000FD534
 	private void PopulateToolPartMetadata()
 	{
 		this.PopulateClubPartMetadata();
@@ -110,7 +110,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		this.PopulateHocketStickMetadata();
 	}
 
-	// Token: 0x06002F05 RID: 12037 RVA: 0x000FF3A4 File Offset: 0x000FD5A4
+	// Token: 0x06002F05 RID: 12037 RVA: 0x000FF384 File Offset: 0x000FD584
 	private void PopulateEmployeeLevelMetadata()
 	{
 		this.employeeLevelMetadata[GRToolProgressionTree.EmployeeLevelRequirement.None] = new GRToolProgressionManager.EmployeeMetadata
@@ -135,7 +135,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F06 RID: 12038 RVA: 0x000FF458 File Offset: 0x000FD658
+	// Token: 0x06002F06 RID: 12038 RVA: 0x000FF438 File Offset: 0x000FD638
 	private void PopulateClubPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.Baton] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -168,7 +168,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F07 RID: 12039 RVA: 0x000FF558 File Offset: 0x000FD758
+	// Token: 0x06002F07 RID: 12039 RVA: 0x000FF538 File Offset: 0x000FD738
 	private void PopulateFlashPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.Flash] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -201,7 +201,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F08 RID: 12040 RVA: 0x000FF658 File Offset: 0x000FD858
+	// Token: 0x06002F08 RID: 12040 RVA: 0x000FF638 File Offset: 0x000FD838
 	private void PopulateCollectorPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.Collector] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -234,7 +234,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F09 RID: 12041 RVA: 0x000FF75C File Offset: 0x000FD95C
+	// Token: 0x06002F09 RID: 12041 RVA: 0x000FF73C File Offset: 0x000FD93C
 	private void PopulateLanternPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.Lantern] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -267,7 +267,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F0A RID: 12042 RVA: 0x000FF860 File Offset: 0x000FDA60
+	// Token: 0x06002F0A RID: 12042 RVA: 0x000FF840 File Offset: 0x000FDA40
 	private void PopulateShieldGunPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.ShieldGun] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -300,7 +300,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F0B RID: 12043 RVA: 0x000FF964 File Offset: 0x000FDB64
+	// Token: 0x06002F0B RID: 12043 RVA: 0x000FF944 File Offset: 0x000FDB44
 	private void PopulateDirectionalShieldPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.DirectionalShield] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -333,7 +333,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F0C RID: 12044 RVA: 0x000FFA68 File Offset: 0x000FDC68
+	// Token: 0x06002F0C RID: 12044 RVA: 0x000FFA48 File Offset: 0x000FDC48
 	private void PopulateEnergyEfficiencyPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.EnergyEff] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -365,7 +365,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F0D RID: 12045 RVA: 0x000FFB5F File Offset: 0x000FDD5F
+	// Token: 0x06002F0D RID: 12045 RVA: 0x000FFB3F File Offset: 0x000FDD3F
 	private void PopulateRevivePartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.Revive] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -377,7 +377,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F0E RID: 12046 RVA: 0x000FFB9C File Offset: 0x000FDD9C
+	// Token: 0x06002F0E RID: 12046 RVA: 0x000FFB7C File Offset: 0x000FDD7C
 	private void PopulateDockWristPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.DockWrist] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -403,7 +403,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F0F RID: 12047 RVA: 0x000FFC64 File Offset: 0x000FDE64
+	// Token: 0x06002F0F RID: 12047 RVA: 0x000FFC44 File Offset: 0x000FDE44
 	private void PopulateDropPodPartMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.DropPodBasic] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -436,7 +436,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F10 RID: 12048 RVA: 0x000FFD66 File Offset: 0x000FDF66
+	// Token: 0x06002F10 RID: 12048 RVA: 0x000FFD46 File Offset: 0x000FDF46
 	private void PopulateHocketStickMetadata()
 	{
 		this.partMetadata[GRToolProgressionManager.ToolParts.HockeyStick] = new GRToolProgressionManager.ToolProgressionMetaData
@@ -448,37 +448,37 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		};
 	}
 
-	// Token: 0x06002F11 RID: 12049 RVA: 0x000FFDA3 File Offset: 0x000FDFA3
+	// Token: 0x06002F11 RID: 12049 RVA: 0x000FFD83 File Offset: 0x000FDF83
 	public int GetRequiredEmployeeLevel(GRToolProgressionTree.EmployeeLevelRequirement employeeLevel)
 	{
 		return this.employeeLevelMetadata[employeeLevel].level;
 	}
 
-	// Token: 0x06002F12 RID: 12050 RVA: 0x000FFDB6 File Offset: 0x000FDFB6
+	// Token: 0x06002F12 RID: 12050 RVA: 0x000FFD96 File Offset: 0x000FDF96
 	public string GetEmployeeLevelDisplayName(GRToolProgressionTree.EmployeeLevelRequirement employeeLevel)
 	{
 		return this.employeeLevelMetadata[employeeLevel].name;
 	}
 
-	// Token: 0x06002F13 RID: 12051 RVA: 0x000FFDC9 File Offset: 0x000FDFC9
+	// Token: 0x06002F13 RID: 12051 RVA: 0x000FFDA9 File Offset: 0x000FDFA9
 	public int GetNumberOfResearchPoints()
 	{
 		return this.toolProgressionTree.GetNumberOfResearchPoints();
 	}
 
-	// Token: 0x06002F14 RID: 12052 RVA: 0x000FFDD6 File Offset: 0x000FDFD6
+	// Token: 0x06002F14 RID: 12052 RVA: 0x000FFDB6 File Offset: 0x000FDFB6
 	public List<GRTool.GRToolType> GetSupportedTools()
 	{
 		return this.toolProgressionTree.GetSupportedTools();
 	}
 
-	// Token: 0x06002F15 RID: 12053 RVA: 0x000FFDE3 File Offset: 0x000FDFE3
+	// Token: 0x06002F15 RID: 12053 RVA: 0x000FFDC3 File Offset: 0x000FDFC3
 	public List<GRToolProgressionTree.GRToolProgressionNode> GetToolUpgrades(GRTool.GRToolType tool)
 	{
 		return this.toolProgressionTree.GetToolUpgrades(tool);
 	}
 
-	// Token: 0x06002F16 RID: 12054 RVA: 0x000FFDF4 File Offset: 0x000FDFF4
+	// Token: 0x06002F16 RID: 12054 RVA: 0x000FFDD4 File Offset: 0x000FDFD4
 	public int GetRecycleShiftCredit(GRTool.GRToolType tool)
 	{
 		if (tool == GRTool.GRToolType.HockeyStick)
@@ -493,7 +493,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return 0;
 	}
 
-	// Token: 0x06002F17 RID: 12055 RVA: 0x000FFE52 File Offset: 0x000FE052
+	// Token: 0x06002F17 RID: 12055 RVA: 0x000FFE32 File Offset: 0x000FE032
 	public bool GetShiftCreditCost(GRToolProgressionManager.ToolParts part, out int shiftCreditCost)
 	{
 		shiftCreditCost = 0;
@@ -505,7 +505,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return false;
 	}
 
-	// Token: 0x06002F18 RID: 12056 RVA: 0x000FFE80 File Offset: 0x000FE080
+	// Token: 0x06002F18 RID: 12056 RVA: 0x000FFE60 File Offset: 0x000FE060
 	public void AttemptToUnlockPart(GRToolProgressionManager.ToolParts part)
 	{
 		bool flag;
@@ -540,7 +540,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002F19 RID: 12057 RVA: 0x000FFEE8 File Offset: 0x000FE0E8
+	// Token: 0x06002F19 RID: 12057 RVA: 0x000FFEC8 File Offset: 0x000FE0C8
 	public bool IsPartUnlocked(GRToolProgressionManager.ToolParts part, out bool unlocked)
 	{
 		unlocked = false;
@@ -553,7 +553,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return true;
 	}
 
-	// Token: 0x06002F1A RID: 12058 RVA: 0x000FFF14 File Offset: 0x000FE114
+	// Token: 0x06002F1A RID: 12058 RVA: 0x000FFEF4 File Offset: 0x000FE0F4
 	public bool GetPartUnlockEmployeeRequiredLevel(GRToolProgressionManager.ToolParts part, out GRToolProgressionTree.EmployeeLevelRequirement level)
 	{
 		level = GRToolProgressionTree.EmployeeLevelRequirement.None;
@@ -566,7 +566,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return true;
 	}
 
-	// Token: 0x06002F1B RID: 12059 RVA: 0x000FFF40 File Offset: 0x000FE140
+	// Token: 0x06002F1B RID: 12059 RVA: 0x000FFF20 File Offset: 0x000FE120
 	public bool GetPartUnlockJuiceCost(GRToolProgressionManager.ToolParts part, out int juiceCost)
 	{
 		juiceCost = 0;
@@ -579,7 +579,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return true;
 	}
 
-	// Token: 0x06002F1C RID: 12060 RVA: 0x000FFF6C File Offset: 0x000FE16C
+	// Token: 0x06002F1C RID: 12060 RVA: 0x000FFF4C File Offset: 0x000FE14C
 	public bool GetPartUnlockRequiredParentParts(GRToolProgressionManager.ToolParts part, out List<GRToolProgressionManager.ToolParts> requiredParts)
 	{
 		requiredParts = new List<GRToolProgressionManager.ToolParts>();
@@ -595,7 +595,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return true;
 	}
 
-	// Token: 0x06002F1D RID: 12061 RVA: 0x000FFFE0 File Offset: 0x000FE1E0
+	// Token: 0x06002F1D RID: 12061 RVA: 0x000FFFC0 File Offset: 0x000FE1C0
 	public bool GetPlayerShiftCredit(out int playerShiftCredit)
 	{
 		playerShiftCredit = 0;
@@ -611,19 +611,19 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return false;
 	}
 
-	// Token: 0x06002F1E RID: 12062 RVA: 0x0010001C File Offset: 0x000FE21C
+	// Token: 0x06002F1E RID: 12062 RVA: 0x000FFFFC File Offset: 0x000FE1FC
 	public GRToolProgressionTree.EmployeeLevelRequirement GetCurrentEmployeeLevel()
 	{
 		return this.toolProgressionTree.GetCurrentEmploymentLevel();
 	}
 
-	// Token: 0x06002F1F RID: 12063 RVA: 0x00100029 File Offset: 0x000FE229
+	// Token: 0x06002F1F RID: 12063 RVA: 0x00100009 File Offset: 0x000FE209
 	public string GetTreeId()
 	{
 		return this.toolProgressionTree.GetTreeId();
 	}
 
-	// Token: 0x06002F20 RID: 12064 RVA: 0x00100038 File Offset: 0x000FE238
+	// Token: 0x06002F20 RID: 12064 RVA: 0x00100018 File Offset: 0x000FE218
 	public int GetDropPodLevel()
 	{
 		bool flag;
@@ -634,7 +634,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return 0;
 	}
 
-	// Token: 0x06002F21 RID: 12065 RVA: 0x00100058 File Offset: 0x000FE258
+	// Token: 0x06002F21 RID: 12065 RVA: 0x00100038 File Offset: 0x000FE238
 	public int GetDropPodChasisLevel()
 	{
 		bool flag;
@@ -653,7 +653,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return 0;
 	}
 
-	// Token: 0x06002F22 RID: 12066 RVA: 0x00100098 File Offset: 0x000FE298
+	// Token: 0x06002F22 RID: 12066 RVA: 0x00100078 File Offset: 0x000FE278
 	public ProgressionManager.DrillUpgradeLevel GetDrillLevel()
 	{
 		bool flag;
@@ -676,7 +676,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return ProgressionManager.DrillUpgradeLevel.None;
 	}
 
-	// Token: 0x06002F23 RID: 12067 RVA: 0x001000E8 File Offset: 0x000FE2E8
+	// Token: 0x06002F23 RID: 12067 RVA: 0x001000C8 File Offset: 0x000FE2C8
 	public int GetJuiceCostForDrillUpgrade(ProgressionManager.DrillUpgradeLevel upgradeLevel)
 	{
 		int result = 0;
@@ -698,7 +698,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 		return result;
 	}
 
-	// Token: 0x06002F24 RID: 12068 RVA: 0x00100144 File Offset: 0x000FE344
+	// Token: 0x06002F24 RID: 12068 RVA: 0x00100124 File Offset: 0x000FE324
 	public int GetSRCostForDrillUpgradeLevel(ProgressionManager.DrillUpgradeLevel level)
 	{
 		switch (level)

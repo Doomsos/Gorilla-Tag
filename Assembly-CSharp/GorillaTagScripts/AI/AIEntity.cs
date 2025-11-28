@@ -8,7 +8,7 @@ namespace GorillaTagScripts.AI
 	// Token: 0x02000E93 RID: 3731
 	public class AIEntity : MonoBehaviour
 	{
-		// Token: 0x06005D57 RID: 23895 RVA: 0x001DFA68 File Offset: 0x001DDC68
+		// Token: 0x06005D57 RID: 23895 RVA: 0x001DFA48 File Offset: 0x001DDC48
 		protected void Awake()
 		{
 			this.navMeshAgent = base.gameObject.GetComponent<NavMeshAgent>();
@@ -22,7 +22,7 @@ namespace GorillaTagScripts.AI
 			}
 		}
 
-		// Token: 0x06005D58 RID: 23896 RVA: 0x001DFAD0 File Offset: 0x001DDCD0
+		// Token: 0x06005D58 RID: 23896 RVA: 0x001DFAB0 File Offset: 0x001DDCB0
 		protected void ChooseRandomTarget()
 		{
 			int randomTarget = Random.Range(0, GorillaParent.instance.vrrigs.Count);
@@ -43,7 +43,7 @@ namespace GorillaTagScripts.AI
 			this.followTarget = null;
 		}
 
-		// Token: 0x06005D59 RID: 23897 RVA: 0x001DFBC0 File Offset: 0x001DDDC0
+		// Token: 0x06005D59 RID: 23897 RVA: 0x001DFBA0 File Offset: 0x001DDDA0
 		protected void ChooseClosestTarget()
 		{
 			VRRig vrrig = null;

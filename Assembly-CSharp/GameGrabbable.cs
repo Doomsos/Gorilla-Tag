@@ -10,7 +10,7 @@ public class GameGrabbable : MonoBehaviour
 	{
 	}
 
-	// Token: 0x060027CE RID: 10190 RVA: 0x000D3E9C File Offset: 0x000D209C
+	// Token: 0x060027CE RID: 10190 RVA: 0x000D3E7C File Offset: 0x000D207C
 	public bool GetBestGrabPoint(Vector3 handPos, Quaternion handRot, int handIndex, out GameGrab grab)
 	{
 		float num = 0.15f;

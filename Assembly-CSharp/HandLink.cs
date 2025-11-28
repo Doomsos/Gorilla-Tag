@@ -12,11 +12,11 @@ using UnityEngine.Serialization;
 public class HandLink : HoldableObject, IGorillaSliceableSimple
 {
 	// Token: 0x170004C9 RID: 1225
-	// (get) Token: 0x060035DB RID: 13787 RVA: 0x001240EB File Offset: 0x001222EB
-	// (set) Token: 0x060035DC RID: 13788 RVA: 0x001240F3 File Offset: 0x001222F3
+	// (get) Token: 0x060035DB RID: 13787 RVA: 0x001240CB File Offset: 0x001222CB
+	// (set) Token: 0x060035DC RID: 13788 RVA: 0x001240D3 File Offset: 0x001222D3
 	public bool IsLocal { get; private set; }
 
-	// Token: 0x060035DD RID: 13789 RVA: 0x001240FC File Offset: 0x001222FC
+	// Token: 0x060035DD RID: 13789 RVA: 0x001240DC File Offset: 0x001222DC
 	private void Start()
 	{
 		this.myOtherHandLink = (this.isLeftHand ? this.myRig.rightHandLink : this.myRig.leftHandLink);
@@ -43,13 +43,13 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
-	// Token: 0x060035E0 RID: 13792 RVA: 0x0012416C File Offset: 0x0012236C
+	// Token: 0x060035E0 RID: 13792 RVA: 0x0012414C File Offset: 0x0012234C
 	public void SliceUpdate()
 	{
 		this.interactionPoint.enabled = (this.canBeGrabbed && (this.myRig.transform.position - VRRig.LocalRig.transform.position).sqrMagnitude < 9f);
 	}
 
-	// Token: 0x060035E1 RID: 13793 RVA: 0x001241C4 File Offset: 0x001223C4
+	// Token: 0x060035E1 RID: 13793 RVA: 0x001241A4 File Offset: 0x001223A4
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		if (!this.CanBeGrabbed())
@@ -69,7 +69,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060035E2 RID: 13794 RVA: 0x00124270 File Offset: 0x00122470
+	// Token: 0x060035E2 RID: 13794 RVA: 0x00124250 File Offset: 0x00122450
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		if (!base.OnRelease(zoneReleased, releasingHand))
@@ -115,7 +115,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 	{
 	}
 
-	// Token: 0x060035E4 RID: 13796 RVA: 0x00124397 File Offset: 0x00122597
+	// Token: 0x060035E4 RID: 13796 RVA: 0x00124377 File Offset: 0x00122577
 	public override void DropItemCleanup()
 	{
 		if (this.grabbedLink != null)
@@ -124,19 +124,19 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060035E5 RID: 13797 RVA: 0x001243B2 File Offset: 0x001225B2
+	// Token: 0x060035E5 RID: 13797 RVA: 0x00124392 File Offset: 0x00122592
 	public bool CanBeGrabbed()
 	{
 		return (!GorillaComputer.instance.IsPlayerInVirtualStump() || !CustomMapManager.WantsHoldingHandsDisabled()) && Time.time >= this.rejectGrabsUntilTimestamp && this.canBeGrabbed && this.grabbedPlayer == null;
 	}
 
-	// Token: 0x060035E6 RID: 13798 RVA: 0x001243ED File Offset: 0x001225ED
+	// Token: 0x060035E6 RID: 13798 RVA: 0x001243CD File Offset: 0x001225CD
 	public bool IsLinkActive()
 	{
 		return this.grabbedLink != null;
 	}
 
-	// Token: 0x060035E7 RID: 13799 RVA: 0x001243FC File Offset: 0x001225FC
+	// Token: 0x060035E7 RID: 13799 RVA: 0x001243DC File Offset: 0x001225DC
 	private void CreateLink(HandLink remoteLink)
 	{
 		if (this.grabbedPlayer != null || !this.myRig.isLocal)
@@ -163,7 +163,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		onHandLinkChanged.Invoke();
 	}
 
-	// Token: 0x060035E8 RID: 13800 RVA: 0x001244F2 File Offset: 0x001226F2
+	// Token: 0x060035E8 RID: 13800 RVA: 0x001244D2 File Offset: 0x001226D2
 	public void BreakLinkTo(HandLink targetLink)
 	{
 		if (this.grabbedLink == targetLink)
@@ -172,7 +172,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060035E9 RID: 13801 RVA: 0x00124508 File Offset: 0x00122708
+	// Token: 0x060035E9 RID: 13801 RVA: 0x001244E8 File Offset: 0x001226E8
 	public void BreakLink()
 	{
 		if (this.grabbedPlayer == null || this.grabbedLink == null)
@@ -193,7 +193,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		onHandLinkChanged.Invoke();
 	}
 
-	// Token: 0x060035EA RID: 13802 RVA: 0x0012457C File Offset: 0x0012277C
+	// Token: 0x060035EA RID: 13802 RVA: 0x0012455C File Offset: 0x0012275C
 	public static bool IsHandInChainWithOtherPlayer(HandLink startingLink, int targetPlayer)
 	{
 		HandLink handLink = startingLink;
@@ -229,7 +229,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		return false;
 	}
 
-	// Token: 0x060035EB RID: 13803 RVA: 0x00124678 File Offset: 0x00122878
+	// Token: 0x060035EB RID: 13803 RVA: 0x00124658 File Offset: 0x00122858
 	public void LocalUpdate(bool isGroundedHand, bool isGroundedButt, bool isGripPressed, bool canBeGrabbed)
 	{
 		if (isGripPressed && !this.wasGripPressed)
@@ -273,13 +273,13 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060035EC RID: 13804 RVA: 0x001247A2 File Offset: 0x001229A2
+	// Token: 0x060035EC RID: 13804 RVA: 0x00124782 File Offset: 0x00122982
 	public void RejectGrabsFor(float duration)
 	{
 		this.rejectGrabsUntilTimestamp = Mathf.Max(this.rejectGrabsUntilTimestamp, Time.time + duration);
 	}
 
-	// Token: 0x060035ED RID: 13805 RVA: 0x001247BC File Offset: 0x001229BC
+	// Token: 0x060035ED RID: 13805 RVA: 0x0012479C File Offset: 0x0012299C
 	public void Write(out bool isGroundedHand, out bool isGroundedButt, out int grabbedPlayerActorNumber, out bool grabbedHandIsLeft)
 	{
 		isGroundedHand = this.isGroundedHand;
@@ -294,7 +294,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		grabbedHandIsLeft = false;
 	}
 
-	// Token: 0x060035EE RID: 13806 RVA: 0x001247F4 File Offset: 0x001229F4
+	// Token: 0x060035EE RID: 13806 RVA: 0x001247D4 File Offset: 0x001229D4
 	public void Read(Vector3 remoteHandLocalPos, Quaternion remoteBodyWorldRot, Vector3 remoteBodyWorldPos, bool isGroundedHand, bool isGroundedButt, bool isGripReady, int grabbedPlayerActorNumber, bool grabbedHandIsLeft)
 	{
 		this.isGroundedHand = isGroundedHand;
@@ -400,13 +400,13 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		this.lastReadGrabbedPlayerActorNumber = grabbedPlayerActorNumber;
 	}
 
-	// Token: 0x060035EF RID: 13807 RVA: 0x00124A3B File Offset: 0x00122C3B
+	// Token: 0x060035EF RID: 13807 RVA: 0x00124A1B File Offset: 0x00122C1B
 	private bool IsLocalGrabInRange(bool grabbedLeftHand, Vector3 handLocalPos, Quaternion bodyWorldRot, Vector3 bodyWorldPos, float tolerance)
 	{
 		return ((grabbedLeftHand ? VRRig.LocalRig.leftHandLink : VRRig.LocalRig.rightHandLink).transform.position - (bodyWorldPos + bodyWorldRot * handLocalPos)).IsShorterThan(tolerance);
 	}
 
-	// Token: 0x060035F0 RID: 13808 RVA: 0x00124A7C File Offset: 0x00122C7C
+	// Token: 0x060035F0 RID: 13808 RVA: 0x00124A5C File Offset: 0x00122C5C
 	private void CheckFormLinkWithRemoteGrab()
 	{
 		RigContainer rigContainer;
@@ -430,7 +430,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060035F1 RID: 13809 RVA: 0x00124B34 File Offset: 0x00122D34
+	// Token: 0x060035F1 RID: 13809 RVA: 0x00124B14 File Offset: 0x00122D14
 	public HandLinkAuthorityStatus GetChainAuthority(out int stepsToAuth)
 	{
 		HandLink handLink = this.grabbedLink;
@@ -469,7 +469,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		return handLinkAuthorityStatus;
 	}
 
-	// Token: 0x060035F2 RID: 13810 RVA: 0x00124C4C File Offset: 0x00122E4C
+	// Token: 0x060035F2 RID: 13810 RVA: 0x00124C2C File Offset: 0x00122E2C
 	public void SnapHandsTogether()
 	{
 		if (this.grabbedLink == null)
@@ -492,7 +492,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		this.grabbedLink.myIK.OverrideTargetPos(this.grabbedLink.isLeftHand, targetWorldPos2);
 	}
 
-	// Token: 0x060035F3 RID: 13811 RVA: 0x00124D70 File Offset: 0x00122F70
+	// Token: 0x060035F3 RID: 13811 RVA: 0x00124D50 File Offset: 0x00122F50
 	public void PlayVicariousTapHaptic()
 	{
 		GorillaTagger.Instance.StartVibration(this.isLeftHand, this.hapticStrengthOnVicariousTap, this.hapticDurationOnVicariousTap);

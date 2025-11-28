@@ -10,13 +10,13 @@ using UnityEngine.AI;
 [Serializable]
 public class GRAbilityPatrol : GRAbilityBase
 {
-	// Token: 0x06002A80 RID: 10880 RVA: 0x000E53BC File Offset: 0x000E35BC
+	// Token: 0x06002A80 RID: 10880 RVA: 0x000E539C File Offset: 0x000E359C
 	public bool HasValidPatrolPath()
 	{
 		return this.patrolPath != null && this.patrolPath.patrolNodes.Count > 1;
 	}
 
-	// Token: 0x06002A81 RID: 10881 RVA: 0x000E53E4 File Offset: 0x000E35E4
+	// Token: 0x06002A81 RID: 10881 RVA: 0x000E53C4 File Offset: 0x000E35C4
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -30,14 +30,14 @@ public class GRAbilityPatrol : GRAbilityBase
 		this.nextPatrolNode = 0;
 	}
 
-	// Token: 0x06002A82 RID: 10882 RVA: 0x000E5464 File Offset: 0x000E3664
+	// Token: 0x06002A82 RID: 10882 RVA: 0x000E5444 File Offset: 0x000E3644
 	private void InitializeRandoms()
 	{
 		this.patrolGroanSoundDelayRandom = new Random((uint)this.entity.GetNetId());
 		this.patrolGroanSoundRandom = new Random((uint)this.entity.GetNetId());
 	}
 
-	// Token: 0x06002A83 RID: 10883 RVA: 0x000E5494 File Offset: 0x000E3694
+	// Token: 0x06002A83 RID: 10883 RVA: 0x000E5474 File Offset: 0x000E3674
 	public override void Start()
 	{
 		base.Start();
@@ -54,7 +54,7 @@ public class GRAbilityPatrol : GRAbilityBase
 		this.CalculateNextPatrolGroan();
 	}
 
-	// Token: 0x06002A84 RID: 10884 RVA: 0x000E5500 File Offset: 0x000E3700
+	// Token: 0x06002A84 RID: 10884 RVA: 0x000E54E0 File Offset: 0x000E36E0
 	public override void Stop()
 	{
 		this.moveAbility.Stop();
@@ -66,31 +66,31 @@ public class GRAbilityPatrol : GRAbilityBase
 		return false;
 	}
 
-	// Token: 0x06002A86 RID: 10886 RVA: 0x000E550D File Offset: 0x000E370D
+	// Token: 0x06002A86 RID: 10886 RVA: 0x000E54ED File Offset: 0x000E36ED
 	public void SetPatrolPath(GRPatrolPath patrolPath)
 	{
 		this.patrolPath = patrolPath;
 	}
 
-	// Token: 0x06002A87 RID: 10887 RVA: 0x000E5516 File Offset: 0x000E3716
+	// Token: 0x06002A87 RID: 10887 RVA: 0x000E54F6 File Offset: 0x000E36F6
 	public GRPatrolPath GetPatrolPath()
 	{
 		return this.patrolPath;
 	}
 
-	// Token: 0x06002A88 RID: 10888 RVA: 0x000E551E File Offset: 0x000E371E
+	// Token: 0x06002A88 RID: 10888 RVA: 0x000E54FE File Offset: 0x000E36FE
 	public void SetNextPatrolNode(int nextPatrolNode)
 	{
 		this.nextPatrolNode = nextPatrolNode;
 	}
 
-	// Token: 0x06002A89 RID: 10889 RVA: 0x000E5527 File Offset: 0x000E3727
+	// Token: 0x06002A89 RID: 10889 RVA: 0x000E5507 File Offset: 0x000E3707
 	public void CalculateNextPatrolGroan()
 	{
 		this.nextPatrolGroanTime = this.patrolGroanSoundDelayRandom.NextDouble(this.ambientSoundDelayMin, this.ambientSoundDelayMax) + PhotonNetwork.Time;
 	}
 
-	// Token: 0x06002A8A RID: 10890 RVA: 0x000E554C File Offset: 0x000E374C
+	// Token: 0x06002A8A RID: 10890 RVA: 0x000E552C File Offset: 0x000E372C
 	private void PlayPatrolGroan()
 	{
 		this.audioSource.clip = this.ambientPatrolSounds[this.patrolGroanSoundRandom.NextInt(this.ambientPatrolSounds.Length - 1)];
@@ -99,7 +99,7 @@ public class GRAbilityPatrol : GRAbilityBase
 		this.CalculateNextPatrolGroan();
 	}
 
-	// Token: 0x06002A8B RID: 10891 RVA: 0x000E55A4 File Offset: 0x000E37A4
+	// Token: 0x06002A8B RID: 10891 RVA: 0x000E5584 File Offset: 0x000E3784
 	public override void Update(float dt)
 	{
 		this.moveAbility.Update(dt);
@@ -118,7 +118,7 @@ public class GRAbilityPatrol : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A8C RID: 10892 RVA: 0x000E5648 File Offset: 0x000E3848
+	// Token: 0x06002A8C RID: 10892 RVA: 0x000E5628 File Offset: 0x000E3828
 	public override void UpdateRemote(float dt)
 	{
 		this.moveAbility.SetTarget(null);

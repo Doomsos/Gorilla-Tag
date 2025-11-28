@@ -6,7 +6,7 @@ using UnityEngine.AI;
 // Token: 0x02000667 RID: 1639
 public class GRAbilityBase
 {
-	// Token: 0x060029EB RID: 10731 RVA: 0x000E287C File Offset: 0x000E0A7C
+	// Token: 0x060029EB RID: 10731 RVA: 0x000E285C File Offset: 0x000E0A5C
 	public virtual void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		this.root = root;
@@ -21,7 +21,7 @@ public class GRAbilityBase
 		this.walkableArea = NavMesh.GetAreaFromName("walkable");
 	}
 
-	// Token: 0x060029EC RID: 10732 RVA: 0x000E28EA File Offset: 0x000E0AEA
+	// Token: 0x060029EC RID: 10732 RVA: 0x000E28CA File Offset: 0x000E0ACA
 	public virtual void Start()
 	{
 		this.startTime = Time.timeAsDouble;
@@ -43,13 +43,13 @@ public class GRAbilityBase
 	{
 	}
 
-	// Token: 0x060029F0 RID: 10736 RVA: 0x000E28F7 File Offset: 0x000E0AF7
+	// Token: 0x060029F0 RID: 10736 RVA: 0x000E28D7 File Offset: 0x000E0AD7
 	public virtual void Update(float dt)
 	{
 		this.UpdateShared(dt);
 	}
 
-	// Token: 0x060029F1 RID: 10737 RVA: 0x000E28F7 File Offset: 0x000E0AF7
+	// Token: 0x060029F1 RID: 10737 RVA: 0x000E28D7 File Offset: 0x000E0AD7
 	public virtual void UpdateRemote(float dt)
 	{
 		this.UpdateShared(dt);
@@ -60,7 +60,7 @@ public class GRAbilityBase
 	{
 	}
 
-	// Token: 0x060029F3 RID: 10739 RVA: 0x000E2900 File Offset: 0x000E0B00
+	// Token: 0x060029F3 RID: 10739 RVA: 0x000E28E0 File Offset: 0x000E0AE0
 	protected virtual void PlayAnim(string animName, float blendTime, float speed)
 	{
 		if (this.anim != null && !string.IsNullOrEmpty(animName))

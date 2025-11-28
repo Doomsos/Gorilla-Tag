@@ -6,19 +6,19 @@ namespace BoingKit
 	// Token: 0x020011A5 RID: 4517
 	public class BoingReactorFieldCPUSampler : MonoBehaviour
 	{
-		// Token: 0x060071EC RID: 29164 RVA: 0x0025560E File Offset: 0x0025380E
+		// Token: 0x060071EC RID: 29164 RVA: 0x002555EE File Offset: 0x002537EE
 		public void OnEnable()
 		{
 			BoingManager.Register(this);
 		}
 
-		// Token: 0x060071ED RID: 29165 RVA: 0x00255616 File Offset: 0x00253816
+		// Token: 0x060071ED RID: 29165 RVA: 0x002555F6 File Offset: 0x002537F6
 		public void OnDisable()
 		{
 			BoingManager.Unregister(this);
 		}
 
-		// Token: 0x060071EE RID: 29166 RVA: 0x00255620 File Offset: 0x00253820
+		// Token: 0x060071EE RID: 29166 RVA: 0x00255600 File Offset: 0x00253800
 		public void SampleFromField()
 		{
 			this.m_objPosition = base.transform.position;
@@ -46,7 +46,7 @@ namespace BoingKit
 			base.transform.rotation = QuaternionUtil.Pow(QuaternionUtil.FromVector4(v, true), this.RotationSampleMultiplier) * this.m_objRotation;
 		}
 
-		// Token: 0x060071EF RID: 29167 RVA: 0x002556DF File Offset: 0x002538DF
+		// Token: 0x060071EF RID: 29167 RVA: 0x002556BF File Offset: 0x002538BF
 		public void Restore()
 		{
 			base.transform.position = this.m_objPosition;

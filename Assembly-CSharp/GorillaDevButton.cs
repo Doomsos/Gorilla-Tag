@@ -5,8 +5,8 @@ using UnityEngine;
 public class GorillaDevButton : GorillaPressableButton
 {
 	// Token: 0x17000581 RID: 1409
-	// (get) Token: 0x06003B37 RID: 15159 RVA: 0x00139059 File Offset: 0x00137259
-	// (set) Token: 0x06003B38 RID: 15160 RVA: 0x00139061 File Offset: 0x00137261
+	// (get) Token: 0x06003B37 RID: 15159 RVA: 0x00139039 File Offset: 0x00137239
+	// (set) Token: 0x06003B38 RID: 15160 RVA: 0x00139041 File Offset: 0x00137241
 	public bool on
 	{
 		get
@@ -23,7 +23,7 @@ public class GorillaDevButton : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x06003B39 RID: 15161 RVA: 0x00139079 File Offset: 0x00137279
+	// Token: 0x06003B39 RID: 15161 RVA: 0x00139059 File Offset: 0x00137259
 	public new void OnEnable()
 	{
 		this.UpdateColor();

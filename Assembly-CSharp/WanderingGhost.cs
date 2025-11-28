@@ -11,7 +11,7 @@ using UnityEngine.Events;
 [NetworkBehaviourWeaved(1)]
 public class WanderingGhost : NetworkComponent
 {
-	// Token: 0x06003FA6 RID: 16294 RVA: 0x001553D0 File Offset: 0x001535D0
+	// Token: 0x06003FA6 RID: 16294 RVA: 0x001553B0 File Offset: 0x001535B0
 	protected override void Start()
 	{
 		base.Start();
@@ -25,7 +25,7 @@ public class WanderingGhost : NetworkComponent
 		base.Invoke("DelayedStart", 0.5f);
 	}
 
-	// Token: 0x06003FA7 RID: 16295 RVA: 0x00155437 File Offset: 0x00153637
+	// Token: 0x06003FA7 RID: 16295 RVA: 0x00155417 File Offset: 0x00153617
 	private void DelayedStart()
 	{
 		this.PickNextWaypoint();
@@ -34,7 +34,7 @@ public class WanderingGhost : NetworkComponent
 		this.ChangeState(WanderingGhost.ghostState.patrol);
 	}
 
-	// Token: 0x06003FA8 RID: 16296 RVA: 0x00155468 File Offset: 0x00153668
+	// Token: 0x06003FA8 RID: 16296 RVA: 0x00155448 File Offset: 0x00153648
 	private void LateUpdate()
 	{
 		this.UpdateState();
@@ -44,7 +44,7 @@ public class WanderingGhost : NetworkComponent
 		this.mrenderer.transform.localPosition += this.hoverVelocity * Time.deltaTime;
 	}
 
-	// Token: 0x06003FA9 RID: 16297 RVA: 0x0015552C File Offset: 0x0015372C
+	// Token: 0x06003FA9 RID: 16297 RVA: 0x0015550C File Offset: 0x0015370C
 	private void PickNextWaypoint()
 	{
 		if (this.waypoints.Count == 0 || this.lastWaypointRegion == null || !this.lastWaypointRegion.IsLocalPlayerInZone())
@@ -71,7 +71,7 @@ public class WanderingGhost : NetworkComponent
 		this.waypoints.RemoveAt(num);
 	}
 
-	// Token: 0x06003FAA RID: 16298 RVA: 0x0015563C File Offset: 0x0015383C
+	// Token: 0x06003FAA RID: 16298 RVA: 0x0015561C File Offset: 0x0015381C
 	private void Patrol()
 	{
 		this.idlePassedTime = 0f;
@@ -81,7 +81,7 @@ public class WanderingGhost : NetworkComponent
 		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, Quaternion.LookRotation(transform.position - base.transform.position), 360f * Time.deltaTime);
 	}
 
-	// Token: 0x06003FAB RID: 16299 RVA: 0x001556E0 File Offset: 0x001538E0
+	// Token: 0x06003FAB RID: 16299 RVA: 0x001556C0 File Offset: 0x001538C0
 	private bool MaybeHideGhost()
 	{
 		int num = Physics.OverlapSphereNonAlloc(base.transform.position, this.sphereColliderRadius, this.hitColliders);
@@ -96,7 +96,7 @@ public class WanderingGhost : NetworkComponent
 		return false;
 	}
 
-	// Token: 0x06003FAC RID: 16300 RVA: 0x0015574C File Offset: 0x0015394C
+	// Token: 0x06003FAC RID: 16300 RVA: 0x0015572C File Offset: 0x0015392C
 	private void ChangeState(WanderingGhost.ghostState newState)
 	{
 		this.currentState = newState;
@@ -122,7 +122,7 @@ public class WanderingGhost : NetworkComponent
 		}
 	}
 
-	// Token: 0x06003FAD RID: 16301 RVA: 0x00155808 File Offset: 0x00153A08
+	// Token: 0x06003FAD RID: 16301 RVA: 0x001557E8 File Offset: 0x001539E8
 	private void UpdateState()
 	{
 		if (!NetworkSystem.Instance.IsMasterClient)
@@ -164,7 +164,7 @@ public class WanderingGhost : NetworkComponent
 		}
 	}
 
-	// Token: 0x06003FAE RID: 16302 RVA: 0x001558CC File Offset: 0x00153ACC
+	// Token: 0x06003FAE RID: 16302 RVA: 0x001558AC File Offset: 0x00153AAC
 	private void HauntObjects()
 	{
 		Collider[] array = new Collider[20];
@@ -183,8 +183,8 @@ public class WanderingGhost : NetworkComponent
 	}
 
 	// Token: 0x170005CF RID: 1487
-	// (get) Token: 0x06003FAF RID: 16303 RVA: 0x0015592D File Offset: 0x00153B2D
-	// (set) Token: 0x06003FB0 RID: 16304 RVA: 0x00155957 File Offset: 0x00153B57
+	// (get) Token: 0x06003FAF RID: 16303 RVA: 0x0015590D File Offset: 0x00153B0D
+	// (set) Token: 0x06003FB0 RID: 16304 RVA: 0x00155937 File Offset: 0x00153B37
 	[Networked]
 	[NetworkedWeaved(0, 1)]
 	private unsafe WanderingGhost.ghostState Data
@@ -207,19 +207,19 @@ public class WanderingGhost : NetworkComponent
 		}
 	}
 
-	// Token: 0x06003FB1 RID: 16305 RVA: 0x00155982 File Offset: 0x00153B82
+	// Token: 0x06003FB1 RID: 16305 RVA: 0x00155962 File Offset: 0x00153B62
 	public override void WriteDataFusion()
 	{
 		this.Data = this.currentState;
 	}
 
-	// Token: 0x06003FB2 RID: 16306 RVA: 0x00155990 File Offset: 0x00153B90
+	// Token: 0x06003FB2 RID: 16306 RVA: 0x00155970 File Offset: 0x00153B70
 	public override void ReadDataFusion()
 	{
 		this.ReadDataShared(this.Data);
 	}
 
-	// Token: 0x06003FB3 RID: 16307 RVA: 0x0015599E File Offset: 0x00153B9E
+	// Token: 0x06003FB3 RID: 16307 RVA: 0x0015597E File Offset: 0x00153B7E
 	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (info.Sender != PhotonNetwork.MasterClient)
@@ -229,7 +229,7 @@ public class WanderingGhost : NetworkComponent
 		stream.SendNext(this.currentState);
 	}
 
-	// Token: 0x06003FB4 RID: 16308 RVA: 0x001559C0 File Offset: 0x00153BC0
+	// Token: 0x06003FB4 RID: 16308 RVA: 0x001559A0 File Offset: 0x00153BA0
 	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (info.Sender != PhotonNetwork.MasterClient)
@@ -240,7 +240,7 @@ public class WanderingGhost : NetworkComponent
 		this.ReadDataShared(state);
 	}
 
-	// Token: 0x06003FB5 RID: 16309 RVA: 0x001559EE File Offset: 0x00153BEE
+	// Token: 0x06003FB5 RID: 16309 RVA: 0x001559CE File Offset: 0x00153BCE
 	private void ReadDataShared(WanderingGhost.ghostState state)
 	{
 		WanderingGhost.ghostState ghostState = this.currentState;
@@ -251,7 +251,7 @@ public class WanderingGhost : NetworkComponent
 		}
 	}
 
-	// Token: 0x06003FB6 RID: 16310 RVA: 0x00155A11 File Offset: 0x00153C11
+	// Token: 0x06003FB6 RID: 16310 RVA: 0x001559F1 File Offset: 0x00153BF1
 	public override void OnOwnerChange(Player newOwner, Player previousOwner)
 	{
 		base.OnOwnerChange(newOwner, previousOwner);
@@ -261,7 +261,7 @@ public class WanderingGhost : NetworkComponent
 		}
 	}
 
-	// Token: 0x06003FB7 RID: 16311 RVA: 0x00155A30 File Offset: 0x00153C30
+	// Token: 0x06003FB7 RID: 16311 RVA: 0x00155A10 File Offset: 0x00153C10
 	private void SpawnFlowerNearby()
 	{
 		Vector3 position = base.transform.position + Vector3.down * 0.25f;
@@ -295,7 +295,7 @@ public class WanderingGhost : NetworkComponent
 		}
 	}
 
-	// Token: 0x06003FB9 RID: 16313 RVA: 0x00155B70 File Offset: 0x00153D70
+	// Token: 0x06003FB9 RID: 16313 RVA: 0x00155B50 File Offset: 0x00153D50
 	[WeaverGenerated]
 	public override void CopyBackingFieldsToState(bool A_1)
 	{
@@ -303,7 +303,7 @@ public class WanderingGhost : NetworkComponent
 		this.Data = this._Data;
 	}
 
-	// Token: 0x06003FBA RID: 16314 RVA: 0x00155B88 File Offset: 0x00153D88
+	// Token: 0x06003FBA RID: 16314 RVA: 0x00155B68 File Offset: 0x00153D68
 	[WeaverGenerated]
 	public override void CopyStateToBackingFields()
 	{
@@ -415,7 +415,7 @@ public class WanderingGhost : NetworkComponent
 	[Serializable]
 	public struct Waypoint
 	{
-		// Token: 0x06003FBB RID: 16315 RVA: 0x00155B9C File Offset: 0x00153D9C
+		// Token: 0x06003FBB RID: 16315 RVA: 0x00155B7C File Offset: 0x00153D7C
 		public Waypoint(bool visible, Transform tr)
 		{
 			this._visible = visible;

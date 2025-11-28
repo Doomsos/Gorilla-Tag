@@ -6,7 +6,7 @@ using UnityEngine;
 internal struct OnHandTapFX : IFXEffectContext<HandEffectContext>
 {
 	// Token: 0x17000460 RID: 1120
-	// (get) Token: 0x06003154 RID: 12628 RVA: 0x0010C26C File Offset: 0x0010A46C
+	// (get) Token: 0x06003154 RID: 12628 RVA: 0x0010C24C File Offset: 0x0010A44C
 	public HandEffectContext effectContext
 	{
 		get
@@ -18,7 +18,7 @@ internal struct OnHandTapFX : IFXEffectContext<HandEffectContext>
 	}
 
 	// Token: 0x17000461 RID: 1121
-	// (get) Token: 0x06003155 RID: 12629 RVA: 0x0010C2C8 File Offset: 0x0010A4C8
+	// (get) Token: 0x06003155 RID: 12629 RVA: 0x0010C2A8 File Offset: 0x0010A4A8
 	public FXSystemSettings settings
 	{
 		get

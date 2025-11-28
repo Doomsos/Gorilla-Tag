@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010A5 RID: 4261
 	public class AOESender : MonoBehaviour
 	{
-		// Token: 0x06006A99 RID: 27289 RVA: 0x0022F3C7 File Offset: 0x0022D5C7
+		// Token: 0x06006A99 RID: 27289 RVA: 0x0022F3A7 File Offset: 0x0022D5A7
 		private void Awake()
 		{
 			if (this.hits == null || this.hits.Length != this.maxColliders)
@@ -16,7 +16,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A9A RID: 27290 RVA: 0x0022F3F8 File Offset: 0x0022D5F8
+		// Token: 0x06006A9A RID: 27290 RVA: 0x0022F3D8 File Offset: 0x0022D5D8
 		private void OnEnable()
 		{
 			if (this.applyOnEnable)
@@ -26,7 +26,7 @@ namespace GorillaTag.Cosmetics
 			this.nextTime = Time.time + this.repeatInterval;
 		}
 
-		// Token: 0x06006A9B RID: 27291 RVA: 0x0022F41A File Offset: 0x0022D61A
+		// Token: 0x06006A9B RID: 27291 RVA: 0x0022F3FA File Offset: 0x0022D5FA
 		private void Update()
 		{
 			if (this.repeatInterval > 0f && Time.time >= this.nextTime)
@@ -36,13 +36,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A9C RID: 27292 RVA: 0x0022F44E File Offset: 0x0022D64E
+		// Token: 0x06006A9C RID: 27292 RVA: 0x0022F42E File Offset: 0x0022D62E
 		public void ApplyAOE()
 		{
 			this.ApplyAOE(base.transform.position);
 		}
 
-		// Token: 0x06006A9D RID: 27293 RVA: 0x0022F464 File Offset: 0x0022D664
+		// Token: 0x06006A9D RID: 27293 RVA: 0x0022F444 File Offset: 0x0022D644
 		public void ApplyAOE(Vector3 worldOrigin)
 		{
 			this.visited.Clear();
@@ -77,7 +77,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A9E RID: 27294 RVA: 0x0022F5DC File Offset: 0x0022D7DC
+		// Token: 0x06006A9E RID: 27294 RVA: 0x0022F5BC File Offset: 0x0022D7BC
 		private float EvaluateFalloff(float t)
 		{
 			switch (this.falloffMode)
@@ -93,7 +93,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A9F RID: 27295 RVA: 0x0022F630 File Offset: 0x0022D830
+		// Token: 0x06006A9F RID: 27295 RVA: 0x0022F610 File Offset: 0x0022D810
 		private bool TagValidation(GameObject go)
 		{
 			if (go == null)

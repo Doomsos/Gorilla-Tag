@@ -6,7 +6,7 @@ using UnityEngine;
 public class SizeLayerChanger : MonoBehaviour
 {
 	// Token: 0x170004F7 RID: 1271
-	// (get) Token: 0x06003712 RID: 14098 RVA: 0x00128EF8 File Offset: 0x001270F8
+	// (get) Token: 0x06003712 RID: 14098 RVA: 0x00128ED8 File Offset: 0x001270D8
 	public int SizeLayerMask
 	{
 		get
@@ -32,13 +32,13 @@ public class SizeLayerChanger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003713 RID: 14099 RVA: 0x00128F38 File Offset: 0x00127138
+	// Token: 0x06003713 RID: 14099 RVA: 0x00128F18 File Offset: 0x00127118
 	private void Awake()
 	{
 		this.minScale = Mathf.Max(this.minScale, 0.01f);
 	}
 
-	// Token: 0x06003714 RID: 14100 RVA: 0x00128F50 File Offset: 0x00127150
+	// Token: 0x06003714 RID: 14100 RVA: 0x00128F30 File Offset: 0x00127130
 	public void OnTriggerEnter(Collider other)
 	{
 		if (!this.triggerWithBodyCollider && !other.GetComponent<SphereCollider>())
@@ -68,7 +68,7 @@ public class SizeLayerChanger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003715 RID: 14101 RVA: 0x00128FD0 File Offset: 0x001271D0
+	// Token: 0x06003715 RID: 14101 RVA: 0x00128FB0 File Offset: 0x001271B0
 	public void OnTriggerExit(Collider other)
 	{
 		if (!this.triggerWithBodyCollider && !other.GetComponent<SphereCollider>())

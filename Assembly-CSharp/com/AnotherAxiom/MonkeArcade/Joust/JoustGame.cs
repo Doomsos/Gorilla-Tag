@@ -6,7 +6,7 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 	// Token: 0x02000F6C RID: 3948
 	public class JoustGame : ArcadeGame
 	{
-		// Token: 0x060062B3 RID: 25267 RVA: 0x001FD832 File Offset: 0x001FBA32
+		// Token: 0x060062B3 RID: 25267 RVA: 0x001FD812 File Offset: 0x001FBA12
 		public override byte[] GetNetworkState()
 		{
 			return new byte[0];
@@ -17,7 +17,7 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 		{
 		}
 
-		// Token: 0x060062B5 RID: 25269 RVA: 0x001FD83A File Offset: 0x001FBA3A
+		// Token: 0x060062B5 RID: 25269 RVA: 0x001FD81A File Offset: 0x001FBA1A
 		protected override void ButtonDown(int player, ArcadeButtons button)
 		{
 			if (button != ArcadeButtons.GRAB)
@@ -34,7 +34,7 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 			}
 		}
 
-		// Token: 0x060062B6 RID: 25270 RVA: 0x001FD869 File Offset: 0x001FBA69
+		// Token: 0x060062B6 RID: 25270 RVA: 0x001FD849 File Offset: 0x001FBA49
 		protected override void ButtonUp(int player, ArcadeButtons button)
 		{
 			if (button == ArcadeButtons.GRAB)
@@ -43,7 +43,7 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 			}
 		}
 
-		// Token: 0x060062B7 RID: 25271 RVA: 0x001FD884 File Offset: 0x001FBA84
+		// Token: 0x060062B7 RID: 25271 RVA: 0x001FD864 File Offset: 0x001FBA64
 		private void Start()
 		{
 			for (int i = 0; i < this.joustPlayers.Length; i++)
@@ -52,7 +52,7 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 			}
 		}
 
-		// Token: 0x060062B8 RID: 25272 RVA: 0x001FD8B8 File Offset: 0x001FBAB8
+		// Token: 0x060062B8 RID: 25272 RVA: 0x001FD898 File Offset: 0x001FBA98
 		private void Update()
 		{
 			for (int i = 0; i < this.joustPlayers.Length; i++)

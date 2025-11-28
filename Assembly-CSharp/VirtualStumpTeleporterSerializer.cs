@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x020009B6 RID: 2486
 internal class VirtualStumpTeleporterSerializer : GorillaSerializer
 {
-	// Token: 0x06003F95 RID: 16277 RVA: 0x00154FD3 File Offset: 0x001531D3
+	// Token: 0x06003F95 RID: 16277 RVA: 0x00154FB3 File Offset: 0x001531B3
 	public void NotifyPlayerTeleporting(short teleporterIdx, AudioSource localPlayerTeleporterAudioSource)
 	{
 		if ((int)teleporterIdx >= this.teleporters.Count)
@@ -24,7 +24,7 @@ internal class VirtualStumpTeleporterSerializer : GorillaSerializer
 		}
 	}
 
-	// Token: 0x06003F96 RID: 16278 RVA: 0x00155010 File Offset: 0x00153210
+	// Token: 0x06003F96 RID: 16278 RVA: 0x00154FF0 File Offset: 0x001531F0
 	public void NotifyPlayerReturning(short teleporterIdx)
 	{
 		if ((int)teleporterIdx >= this.teleporters.Count)
@@ -42,7 +42,7 @@ internal class VirtualStumpTeleporterSerializer : GorillaSerializer
 		}
 	}
 
-	// Token: 0x06003F97 RID: 16279 RVA: 0x0015506C File Offset: 0x0015326C
+	// Token: 0x06003F97 RID: 16279 RVA: 0x0015504C File Offset: 0x0015324C
 	[PunRPC]
 	private void ActivateTeleportVFX(bool returning, short teleporterIdx, PhotonMessageInfo info)
 	{
@@ -64,7 +64,7 @@ internal class VirtualStumpTeleporterSerializer : GorillaSerializer
 		}
 	}
 
-	// Token: 0x06003F98 RID: 16280 RVA: 0x001550FC File Offset: 0x001532FC
+	// Token: 0x06003F98 RID: 16280 RVA: 0x001550DC File Offset: 0x001532DC
 	public short GetTeleporterIndex(VirtualStumpTeleporter teleporter)
 	{
 		short num = 0;

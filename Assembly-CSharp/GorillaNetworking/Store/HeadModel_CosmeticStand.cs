@@ -13,7 +13,7 @@ namespace GorillaNetworking.Store
 	public class HeadModel_CosmeticStand : HeadModel
 	{
 		// Token: 0x17000919 RID: 2329
-		// (get) Token: 0x060061DD RID: 25053 RVA: 0x001F82A1 File Offset: 0x001F64A1
+		// (get) Token: 0x060061DD RID: 25053 RVA: 0x001F8281 File Offset: 0x001F6481
 		private string mountID
 		{
 			get
@@ -22,7 +22,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061DE RID: 25054 RVA: 0x001F82C0 File Offset: 0x001F64C0
+		// Token: 0x060061DE RID: 25054 RVA: 0x001F82A0 File Offset: 0x001F64A0
 		public void LoadCosmeticParts(CosmeticSO cosmeticInfo, bool forRightSide = false)
 		{
 			this.ClearManuallySpawnedCosmeticParts();
@@ -36,7 +36,7 @@ namespace GorillaNetworking.Store
 			this.HandleLoadCosmeticParts(cosmeticInfo, forRightSide);
 		}
 
-		// Token: 0x060061DF RID: 25055 RVA: 0x001F8310 File Offset: 0x001F6510
+		// Token: 0x060061DF RID: 25055 RVA: 0x001F82F0 File Offset: 0x001F64F0
 		private void ResetMannequinSkin()
 		{
 			SkinnedMeshRenderer skinnedMeshRenderer;
@@ -70,7 +70,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061E0 RID: 25056 RVA: 0x001F8400 File Offset: 0x001F6600
+		// Token: 0x060061E0 RID: 25056 RVA: 0x001F83E0 File Offset: 0x001F65E0
 		private void HandleLoadCosmeticParts(CosmeticSO cosmeticInfo, bool forRightSide)
 		{
 			if (cosmeticInfo.info.category == CosmeticsController.CosmeticCategory.Set && !cosmeticInfo.info.hasStoreParts)
@@ -148,7 +148,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061E1 RID: 25057 RVA: 0x001F8650 File Offset: 0x001F6850
+		// Token: 0x060061E1 RID: 25057 RVA: 0x001F8630 File Offset: 0x001F6830
 		public void LoadCosmeticPartsV2(string playFabId, bool forRightSide = false)
 		{
 			this.ClearManuallySpawnedCosmeticParts();
@@ -165,7 +165,7 @@ namespace GorillaNetworking.Store
 			this.HandleLoadingAllPieces(playFabId, forRightSide, cosmeticInfo);
 		}
 
-		// Token: 0x060061E2 RID: 25058 RVA: 0x001F86C4 File Offset: 0x001F68C4
+		// Token: 0x060061E2 RID: 25058 RVA: 0x001F86A4 File Offset: 0x001F68A4
 		private void HandleLoadingAllPieces(string playFabId, bool forRightSide, CosmeticInfoV2 cosmeticInfo)
 		{
 			CosmeticPart[] array;
@@ -212,7 +212,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061E3 RID: 25059 RVA: 0x001F885C File Offset: 0x001F6A5C
+		// Token: 0x060061E3 RID: 25059 RVA: 0x001F883C File Offset: 0x001F6A3C
 		private void _HandleLoadCosmeticPartsV2(AsyncOperationHandle<GameObject> loadOp)
 		{
 			int num;
@@ -273,7 +273,7 @@ namespace GorillaNetworking.Store
 			cosmeticPartLoadInfo.xform.gameObject.SetActive(true);
 		}
 
-		// Token: 0x060061E4 RID: 25060 RVA: 0x001F89D4 File Offset: 0x001F6BD4
+		// Token: 0x060061E4 RID: 25060 RVA: 0x001F89B4 File Offset: 0x001F6BB4
 		private void HandleLoadingFur(string playFabId, bool forRightSide, CosmeticInfoV2 cosmeticInfo)
 		{
 			foreach (CosmeticPart cosmeticPart in cosmeticInfo.functionalParts)
@@ -298,7 +298,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061E5 RID: 25061 RVA: 0x001F8AF4 File Offset: 0x001F6CF4
+		// Token: 0x060061E5 RID: 25061 RVA: 0x001F8AD4 File Offset: 0x001F6CD4
 		private void _HandleLoadCosmeticPartsV2Fur(AsyncOperationHandle<GameObject> loadOp)
 		{
 			int num;
@@ -322,13 +322,13 @@ namespace GorillaNetworking.Store
 			Object.DestroyImmediate(cosmeticPartLoadInfo.xform.gameObject);
 		}
 
-		// Token: 0x060061E6 RID: 25062 RVA: 0x001F8BB4 File Offset: 0x001F6DB4
+		// Token: 0x060061E6 RID: 25062 RVA: 0x001F8B94 File Offset: 0x001F6D94
 		public void SetStandType(HeadModel_CosmeticStand.BustType newBustType)
 		{
 			this.bustType = newBustType;
 		}
 
-		// Token: 0x060061E7 RID: 25063 RVA: 0x001F8BC0 File Offset: 0x001F6DC0
+		// Token: 0x060061E7 RID: 25063 RVA: 0x001F8BA0 File Offset: 0x001F6DA0
 		private void PositionWardRobeItems(GameObject instantiateEdObject, HeadModel._CosmeticPartLoadInfo partLoadInfo)
 		{
 			Transform transform = OVRExtensions.FindChildRecursive(instantiateEdObject.transform, this.mountID);
@@ -351,7 +351,7 @@ namespace GorillaNetworking.Store
 			this.PositionWithWardRobeOffsets(partLoadInfo);
 		}
 
-		// Token: 0x060061E8 RID: 25064 RVA: 0x001F8C94 File Offset: 0x001F6E94
+		// Token: 0x060061E8 RID: 25064 RVA: 0x001F8C74 File Offset: 0x001F6E74
 		private void PositionWardRobeItems(HeadModel._CosmeticPartLoadInfo partLoadInfo)
 		{
 			Transform transform = OVRExtensions.FindChildRecursive(partLoadInfo.xform, this.mountID);
@@ -374,7 +374,7 @@ namespace GorillaNetworking.Store
 			this.PositionWithWardRobeOffsets(partLoadInfo);
 		}
 
-		// Token: 0x060061E9 RID: 25065 RVA: 0x001F8D68 File Offset: 0x001F6F68
+		// Token: 0x060061E9 RID: 25065 RVA: 0x001F8D48 File Offset: 0x001F6F48
 		private void PositionWithWardRobeOffsets(HeadModel._CosmeticPartLoadInfo partLoadInfo)
 		{
 			Debug.Log("Dynamic Cosmetics - Mount Not Found: " + this.mountID);
@@ -383,7 +383,7 @@ namespace GorillaNetworking.Store
 			partLoadInfo.xform.localScale = partLoadInfo.attachInfo.offset.scale;
 		}
 
-		// Token: 0x060061EA RID: 25066 RVA: 0x001F8DDC File Offset: 0x001F6FDC
+		// Token: 0x060061EA RID: 25066 RVA: 0x001F8DBC File Offset: 0x001F6FBC
 		public void ClearManuallySpawnedCosmeticParts()
 		{
 			foreach (GameObject gameObject in this._manuallySpawnedCosmeticParts)
@@ -393,7 +393,7 @@ namespace GorillaNetworking.Store
 			this._manuallySpawnedCosmeticParts.Clear();
 		}
 
-		// Token: 0x060061EB RID: 25067 RVA: 0x001F8E38 File Offset: 0x001F7038
+		// Token: 0x060061EB RID: 25067 RVA: 0x001F8E18 File Offset: 0x001F7018
 		public void ClearCosmetics()
 		{
 			this.ResetMannequinSkin();

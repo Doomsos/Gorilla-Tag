@@ -10,7 +10,7 @@ using UnityEngine;
 internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 {
 	// Token: 0x1700043E RID: 1086
-	// (get) Token: 0x0600307B RID: 12411 RVA: 0x00109538 File Offset: 0x00107738
+	// (get) Token: 0x0600307B RID: 12411 RVA: 0x00109518 File Offset: 0x00107718
 	public bool RespectOwnership
 	{
 		get
@@ -20,13 +20,13 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 	}
 
 	// Token: 0x1700043F RID: 1087
-	// (get) Token: 0x0600307C RID: 12412 RVA: 0x00109540 File Offset: 0x00107740
-	// (set) Token: 0x0600307D RID: 12413 RVA: 0x00109548 File Offset: 0x00107748
+	// (get) Token: 0x0600307C RID: 12412 RVA: 0x00109520 File Offset: 0x00107720
+	// (set) Token: 0x0600307D RID: 12413 RVA: 0x00109528 File Offset: 0x00107728
 	public bool TickRunning { get; set; }
 
 	// Token: 0x17000440 RID: 1088
-	// (get) Token: 0x0600307E RID: 12414 RVA: 0x00109551 File Offset: 0x00107751
-	// (set) Token: 0x0600307F RID: 12415 RVA: 0x0010957B File Offset: 0x0010777B
+	// (get) Token: 0x0600307E RID: 12414 RVA: 0x00109531 File Offset: 0x00107731
+	// (set) Token: 0x0600307F RID: 12415 RVA: 0x0010955B File Offset: 0x0010775B
 	[Networked]
 	[NetworkedWeaved(0, 15)]
 	private unsafe GorillaNetworkTransform.NetTransformData data
@@ -49,7 +49,7 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06003080 RID: 12416 RVA: 0x001095A8 File Offset: 0x001077A8
+	// Token: 0x06003080 RID: 12416 RVA: 0x00109588 File Offset: 0x00107788
 	public new void Awake()
 	{
 		this.m_StoredPosition = base.transform.localPosition;
@@ -59,7 +59,7 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		this.maxDistanceSquare = this.maxDistance * this.maxDistance;
 	}
 
-	// Token: 0x06003081 RID: 12417 RVA: 0x001095FC File Offset: 0x001077FC
+	// Token: 0x06003081 RID: 12417 RVA: 0x001095DC File Offset: 0x001077DC
 	private new void OnEnable()
 	{
 		NetworkBehaviourUtils.InternalOnEnable(this);
@@ -71,14 +71,14 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		TickSystem<object>.AddTickCallback(this);
 	}
 
-	// Token: 0x06003082 RID: 12418 RVA: 0x0010964A File Offset: 0x0010784A
+	// Token: 0x06003082 RID: 12418 RVA: 0x0010962A File Offset: 0x0010782A
 	private new void OnDisable()
 	{
 		NetworkBehaviourUtils.InternalOnDisable(this);
 		TickSystem<object>.RemoveTickCallback(this);
 	}
 
-	// Token: 0x06003083 RID: 12419 RVA: 0x00109658 File Offset: 0x00107858
+	// Token: 0x06003083 RID: 12419 RVA: 0x00109638 File Offset: 0x00107838
 	public void Tick()
 	{
 		if (!base.IsLocallyOwned)
@@ -92,7 +92,7 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06003084 RID: 12420 RVA: 0x00109748 File Offset: 0x00107948
+	// Token: 0x06003084 RID: 12420 RVA: 0x00109728 File Offset: 0x00107928
 	public override void WriteDataFusion()
 	{
 		GorillaNetworkTransform.NetTransformData data = this.SharedWrite();
@@ -101,13 +101,13 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		this.data = data;
 	}
 
-	// Token: 0x06003085 RID: 12421 RVA: 0x00109782 File Offset: 0x00107982
+	// Token: 0x06003085 RID: 12421 RVA: 0x00109762 File Offset: 0x00107962
 	public override void ReadDataFusion()
 	{
 		this.SharedRead(this.data);
 	}
 
-	// Token: 0x06003086 RID: 12422 RVA: 0x00109790 File Offset: 0x00107990
+	// Token: 0x06003086 RID: 12422 RVA: 0x00109770 File Offset: 0x00107970
 	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);
@@ -131,7 +131,7 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06003087 RID: 12423 RVA: 0x00109824 File Offset: 0x00107A24
+	// Token: 0x06003087 RID: 12423 RVA: 0x00109804 File Offset: 0x00107A04
 	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);
@@ -157,7 +157,7 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		this.SharedRead(data);
 	}
 
-	// Token: 0x06003088 RID: 12424 RVA: 0x001098D4 File Offset: 0x00107AD4
+	// Token: 0x06003088 RID: 12424 RVA: 0x001098B4 File Offset: 0x00107AB4
 	private void SharedRead(GorillaNetworkTransform.NetTransformData data)
 	{
 		if (this.m_SynchronizePosition)
@@ -230,7 +230,7 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06003089 RID: 12425 RVA: 0x00109AFC File Offset: 0x00107CFC
+	// Token: 0x06003089 RID: 12425 RVA: 0x00109ADC File Offset: 0x00107CDC
 	private GorillaNetworkTransform.NetTransformData SharedWrite()
 	{
 		GorillaNetworkTransform.NetTransformData result = default(GorillaNetworkTransform.NetTransformData);
@@ -269,13 +269,13 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		return result;
 	}
 
-	// Token: 0x0600308A RID: 12426 RVA: 0x00109C0F File Offset: 0x00107E0F
+	// Token: 0x0600308A RID: 12426 RVA: 0x00109BEF File Offset: 0x00107DEF
 	public void GTAddition_DoTeleport()
 	{
 		this.m_firstTake = true;
 	}
 
-	// Token: 0x0600308C RID: 12428 RVA: 0x00109C47 File Offset: 0x00107E47
+	// Token: 0x0600308C RID: 12428 RVA: 0x00109C27 File Offset: 0x00107E27
 	[WeaverGenerated]
 	public override void CopyBackingFieldsToState(bool A_1)
 	{
@@ -283,7 +283,7 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 		this.data = this._data;
 	}
 
-	// Token: 0x0600308D RID: 12429 RVA: 0x00109C5F File Offset: 0x00107E5F
+	// Token: 0x0600308D RID: 12429 RVA: 0x00109C3F File Offset: 0x00107E3F
 	[WeaverGenerated]
 	public override void CopyStateToBackingFields()
 	{

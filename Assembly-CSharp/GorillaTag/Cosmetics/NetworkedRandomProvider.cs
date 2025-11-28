@@ -10,7 +10,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001104 RID: 4356
 	public class NetworkedRandomProvider : MonoBehaviour
 	{
-		// Token: 0x06006D02 RID: 27906 RVA: 0x0023CBDE File Offset: 0x0023ADDE
+		// Token: 0x06006D02 RID: 27906 RVA: 0x0023CBBE File Offset: 0x0023ADBE
 		private void Awake()
 		{
 			if (this.parentTransferable == null)
@@ -19,13 +19,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D03 RID: 27907 RVA: 0x0023CBFA File Offset: 0x0023ADFA
+		// Token: 0x06006D03 RID: 27907 RVA: 0x0023CBDA File Offset: 0x0023ADDA
 		private void OnEnable()
 		{
 			this.EnsureOwner();
 		}
 
-		// Token: 0x06006D04 RID: 27908 RVA: 0x0023CC04 File Offset: 0x0023AE04
+		// Token: 0x06006D04 RID: 27908 RVA: 0x0023CBE4 File Offset: 0x0023ADE4
 		private void OnValidate()
 		{
 			if (this.windowSeconds < 0.01f)
@@ -49,32 +49,32 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D05 RID: 27909 RVA: 0x0023CCA4 File Offset: 0x0023AEA4
+		// Token: 0x06006D05 RID: 27909 RVA: 0x0023CC84 File Offset: 0x0023AE84
 		private void Update()
 		{
 			long num = (long)Math.Floor(this.GetSharedTime() / (double)this.windowSeconds);
 			this.debugWindow = num;
 		}
 
-		// Token: 0x06006D06 RID: 27910 RVA: 0x0023CCCD File Offset: 0x0023AECD
+		// Token: 0x06006D06 RID: 27910 RVA: 0x0023CCAD File Offset: 0x0023AEAD
 		private bool ShowFloatRange()
 		{
 			return this.outputMode == NetworkedRandomProvider.OutputMode.FloatRange;
 		}
 
-		// Token: 0x06006D07 RID: 27911 RVA: 0x0023CCD8 File Offset: 0x0023AED8
+		// Token: 0x06006D07 RID: 27911 RVA: 0x0023CCB8 File Offset: 0x0023AEB8
 		private bool ShowDoubleRange()
 		{
 			return this.outputMode == NetworkedRandomProvider.OutputMode.DoubleRange;
 		}
 
-		// Token: 0x06006D08 RID: 27912 RVA: 0x0023CCE3 File Offset: 0x0023AEE3
+		// Token: 0x06006D08 RID: 27912 RVA: 0x0023CCC3 File Offset: 0x0023AEC3
 		private long GetWindowIndex()
 		{
 			return (long)Math.Floor(this.GetSharedTime() / (double)this.windowSeconds);
 		}
 
-		// Token: 0x06006D09 RID: 27913 RVA: 0x0023CCF9 File Offset: 0x0023AEF9
+		// Token: 0x06006D09 RID: 27913 RVA: 0x0023CCD9 File Offset: 0x0023AED9
 		private double GetSharedTime()
 		{
 			if (PhotonNetwork.InRoom)
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 			return (double)Time.realtimeSinceStartup;
 		}
 
-		// Token: 0x06006D0A RID: 27914 RVA: 0x0023CD0E File Offset: 0x0023AF0E
+		// Token: 0x06006D0A RID: 27914 RVA: 0x0023CCEE File Offset: 0x0023AEEE
 		private static ulong Mix64(ulong x)
 		{
 			x += 11400714819323198485UL;
@@ -94,25 +94,25 @@ namespace GorillaTag.Cosmetics
 			return x;
 		}
 
-		// Token: 0x06006D0B RID: 27915 RVA: 0x0023CD4A File Offset: 0x0023AF4A
+		// Token: 0x06006D0B RID: 27915 RVA: 0x0023CD2A File Offset: 0x0023AF2A
 		private static ulong BuildSeed(long windowIndex, int ownerId, int objectSalt, uint roomSalt)
 		{
 			return (ulong)(windowIndex ^ (long)((long)((ulong)ownerId) << 32) ^ (long)((ulong)objectSalt * 11400714819323198485UL) ^ (long)((ulong)roomSalt * 15183679468541472403UL));
 		}
 
-		// Token: 0x06006D0C RID: 27916 RVA: 0x0023CD6D File Offset: 0x0023AF6D
+		// Token: 0x06006D0C RID: 27916 RVA: 0x0023CD4D File Offset: 0x0023AF4D
 		private static float UnitFloat01(long windowIndex, int ownerId, int objectSalt, uint roomSalt)
 		{
 			return (uint)(NetworkedRandomProvider.Mix64(NetworkedRandomProvider.BuildSeed(windowIndex, ownerId, objectSalt, roomSalt)) >> 40) * 5.9604645E-08f;
 		}
 
-		// Token: 0x06006D0D RID: 27917 RVA: 0x0023CD89 File Offset: 0x0023AF89
+		// Token: 0x06006D0D RID: 27917 RVA: 0x0023CD69 File Offset: 0x0023AF69
 		private static double UnitDouble01(long windowIndex, int ownerId, int objectSalt, uint roomSalt)
 		{
 			return (NetworkedRandomProvider.Mix64(NetworkedRandomProvider.BuildSeed(windowIndex, ownerId, objectSalt, roomSalt)) >> 11) * 1.1102230246251565E-16;
 		}
 
-		// Token: 0x06006D0E RID: 27918 RVA: 0x0023CDA8 File Offset: 0x0023AFA8
+		// Token: 0x06006D0E RID: 27918 RVA: 0x0023CD88 File Offset: 0x0023AF88
 		public float NextFloat01()
 		{
 			this.EnsureOwner();
@@ -142,7 +142,7 @@ namespace GorillaTag.Cosmetics
 			return result;
 		}
 
-		// Token: 0x06006D0F RID: 27919 RVA: 0x0023CE18 File Offset: 0x0023B018
+		// Token: 0x06006D0F RID: 27919 RVA: 0x0023CDF8 File Offset: 0x0023AFF8
 		public float NextFloat(float min, float max)
 		{
 			float num = this.NextFloat01();
@@ -156,7 +156,7 @@ namespace GorillaTag.Cosmetics
 			return Mathf.Lerp(min, max, num);
 		}
 
-		// Token: 0x06006D10 RID: 27920 RVA: 0x0023CE40 File Offset: 0x0023B040
+		// Token: 0x06006D10 RID: 27920 RVA: 0x0023CE20 File Offset: 0x0023B020
 		public double NextDouble(double min, double max)
 		{
 			this.EnsureOwner();
@@ -194,7 +194,7 @@ namespace GorillaTag.Cosmetics
 			return num5;
 		}
 
-		// Token: 0x06006D11 RID: 27921 RVA: 0x0023CEC4 File Offset: 0x0023B0C4
+		// Token: 0x06006D11 RID: 27921 RVA: 0x0023CEA4 File Offset: 0x0023B0A4
 		public float GetSelectedAsFloat()
 		{
 			switch (this.outputMode)
@@ -210,7 +210,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D12 RID: 27922 RVA: 0x0023CF40 File Offset: 0x0023B140
+		// Token: 0x06006D12 RID: 27922 RVA: 0x0023CF20 File Offset: 0x0023B120
 		public double GetSelectedAsDouble()
 		{
 			switch (this.outputMode)
@@ -226,7 +226,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D13 RID: 27923 RVA: 0x0023CFBC File Offset: 0x0023B1BC
+		// Token: 0x06006D13 RID: 27923 RVA: 0x0023CF9C File Offset: 0x0023B19C
 		private static uint StableHash(string s)
 		{
 			if (string.IsNullOrEmpty(s))
@@ -242,7 +242,7 @@ namespace GorillaTag.Cosmetics
 			return num;
 		}
 
-		// Token: 0x06006D14 RID: 27924 RVA: 0x0023CFFD File Offset: 0x0023B1FD
+		// Token: 0x06006D14 RID: 27924 RVA: 0x0023CFDD File Offset: 0x0023B1DD
 		private void EnsureOwner()
 		{
 			if (this.OwnerID == 0)
@@ -251,7 +251,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D15 RID: 27925 RVA: 0x0023D010 File Offset: 0x0023B210
+		// Token: 0x06006D15 RID: 27925 RVA: 0x0023CFF0 File Offset: 0x0023B1F0
 		private void TrySetID()
 		{
 			if (this.parentTransferable == null)
@@ -283,7 +283,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D16 RID: 27926 RVA: 0x0023D11C File Offset: 0x0023B31C
+		// Token: 0x06006D16 RID: 27926 RVA: 0x0023D0FC File Offset: 0x0023B2FC
 		private static string GetHierarchyPath(Transform t)
 		{
 			StringBuilder stringBuilder = new StringBuilder();

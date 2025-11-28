@@ -6,26 +6,26 @@ namespace BoingKit
 	// Token: 0x020011BC RID: 4540
 	public class QuaternionUtil
 	{
-		// Token: 0x06007283 RID: 29315 RVA: 0x0024E85C File Offset: 0x0024CA5C
+		// Token: 0x06007283 RID: 29315 RVA: 0x0024E83C File Offset: 0x0024CA3C
 		public static float Magnitude(Quaternion q)
 		{
 			return Mathf.Sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
 		}
 
-		// Token: 0x06007284 RID: 29316 RVA: 0x0024E89A File Offset: 0x0024CA9A
+		// Token: 0x06007284 RID: 29316 RVA: 0x0024E87A File Offset: 0x0024CA7A
 		public static float MagnitudeSqr(Quaternion q)
 		{
 			return q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
 		}
 
-		// Token: 0x06007285 RID: 29317 RVA: 0x0025904C File Offset: 0x0025724C
+		// Token: 0x06007285 RID: 29317 RVA: 0x0025902C File Offset: 0x0025722C
 		public static Quaternion Normalize(Quaternion q)
 		{
 			float num = 1f / QuaternionUtil.Magnitude(q);
 			return new Quaternion(num * q.x, num * q.y, num * q.z, num * q.w);
 		}
 
-		// Token: 0x06007286 RID: 29318 RVA: 0x0025908C File Offset: 0x0025728C
+		// Token: 0x06007286 RID: 29318 RVA: 0x0025906C File Offset: 0x0025726C
 		public static Quaternion AxisAngle(Vector3 axis, float angle)
 		{
 			float num = 0.5f * angle;
@@ -34,7 +34,7 @@ namespace BoingKit
 			return new Quaternion(num2 * axis.x, num2 * axis.y, num2 * axis.z, num3);
 		}
 
-		// Token: 0x06007287 RID: 29319 RVA: 0x002590CC File Offset: 0x002572CC
+		// Token: 0x06007287 RID: 29319 RVA: 0x002590AC File Offset: 0x002572AC
 		public static Vector3 GetAxis(Quaternion q)
 		{
 			Vector3 vector;
@@ -47,13 +47,13 @@ namespace BoingKit
 			return vector / magnitude;
 		}
 
-		// Token: 0x06007288 RID: 29320 RVA: 0x0024E9F7 File Offset: 0x0024CBF7
+		// Token: 0x06007288 RID: 29320 RVA: 0x0024E9D7 File Offset: 0x0024CBD7
 		public static float GetAngle(Quaternion q)
 		{
 			return 2f * Mathf.Acos(Mathf.Clamp(q.w, -1f, 1f));
 		}
 
-		// Token: 0x06007289 RID: 29321 RVA: 0x00259110 File Offset: 0x00257310
+		// Token: 0x06007289 RID: 29321 RVA: 0x002590F0 File Offset: 0x002572F0
 		public static Quaternion FromAngularVector(Vector3 v)
 		{
 			float magnitude = v.magnitude;
@@ -68,14 +68,14 @@ namespace BoingKit
 			return new Quaternion(num2 * v.x, num2 * v.y, num2 * v.z, num3);
 		}
 
-		// Token: 0x0600728A RID: 29322 RVA: 0x00259170 File Offset: 0x00257370
+		// Token: 0x0600728A RID: 29322 RVA: 0x00259150 File Offset: 0x00257350
 		public static Vector3 ToAngularVector(Quaternion q)
 		{
 			Vector3 axis = QuaternionUtil.GetAxis(q);
 			return QuaternionUtil.GetAngle(q) * axis;
 		}
 
-		// Token: 0x0600728B RID: 29323 RVA: 0x00259190 File Offset: 0x00257390
+		// Token: 0x0600728B RID: 29323 RVA: 0x00259170 File Offset: 0x00257370
 		public static Quaternion Pow(Quaternion q, float exp)
 		{
 			Vector3 axis = QuaternionUtil.GetAxis(q);
@@ -83,13 +83,13 @@ namespace BoingKit
 			return QuaternionUtil.AxisAngle(axis, angle);
 		}
 
-		// Token: 0x0600728C RID: 29324 RVA: 0x002591B2 File Offset: 0x002573B2
+		// Token: 0x0600728C RID: 29324 RVA: 0x00259192 File Offset: 0x00257392
 		public static Quaternion Integrate(Quaternion q, Quaternion v, float dt)
 		{
 			return QuaternionUtil.Pow(v, dt) * q;
 		}
 
-		// Token: 0x0600728D RID: 29325 RVA: 0x002591C4 File Offset: 0x002573C4
+		// Token: 0x0600728D RID: 29325 RVA: 0x002591A4 File Offset: 0x002573A4
 		public static Quaternion Integrate(Quaternion q, Vector3 omega, float dt)
 		{
 			omega *= 0.5f;
@@ -97,13 +97,13 @@ namespace BoingKit
 			return QuaternionUtil.Normalize(new Quaternion(q.x + quaternion.x * dt, q.y + quaternion.y * dt, q.z + quaternion.z * dt, q.w + quaternion.w * dt));
 		}
 
-		// Token: 0x0600728E RID: 29326 RVA: 0x0024EA85 File Offset: 0x0024CC85
+		// Token: 0x0600728E RID: 29326 RVA: 0x0024EA65 File Offset: 0x0024CC65
 		public static Vector4 ToVector4(Quaternion q)
 		{
 			return new Vector4(q.x, q.y, q.z, q.w);
 		}
 
-		// Token: 0x0600728F RID: 29327 RVA: 0x00259248 File Offset: 0x00257448
+		// Token: 0x0600728F RID: 29327 RVA: 0x00259228 File Offset: 0x00257428
 		public static Quaternion FromVector4(Vector4 v, bool normalize = true)
 		{
 			if (normalize)
@@ -118,7 +118,7 @@ namespace BoingKit
 			return new Quaternion(v.x, v.y, v.z, v.w);
 		}
 
-		// Token: 0x06007290 RID: 29328 RVA: 0x0025929C File Offset: 0x0025749C
+		// Token: 0x06007290 RID: 29328 RVA: 0x0025927C File Offset: 0x0025747C
 		public static void DecomposeSwingTwist(Quaternion q, Vector3 twistAxis, out Quaternion swing, out Quaternion twist)
 		{
 			Vector3 vector;
@@ -145,7 +145,7 @@ namespace BoingKit
 			swing = q * Quaternion.Inverse(twist);
 		}
 
-		// Token: 0x06007291 RID: 29329 RVA: 0x00259378 File Offset: 0x00257578
+		// Token: 0x06007291 RID: 29329 RVA: 0x00259358 File Offset: 0x00257558
 		public static Quaternion Sterp(Quaternion a, Quaternion b, Vector3 twistAxis, float t, QuaternionUtil.SterpMode mode = QuaternionUtil.SterpMode.Slerp)
 		{
 			Quaternion quaternion;
@@ -153,13 +153,13 @@ namespace BoingKit
 			return QuaternionUtil.Sterp(a, b, twistAxis, t, out quaternion, out quaternion2, mode);
 		}
 
-		// Token: 0x06007292 RID: 29330 RVA: 0x00259394 File Offset: 0x00257594
+		// Token: 0x06007292 RID: 29330 RVA: 0x00259374 File Offset: 0x00257574
 		public static Quaternion Sterp(Quaternion a, Quaternion b, Vector3 twistAxis, float t, out Quaternion swing, out Quaternion twist, QuaternionUtil.SterpMode mode = QuaternionUtil.SterpMode.Slerp)
 		{
 			return QuaternionUtil.Sterp(a, b, twistAxis, t, t, out swing, out twist, mode);
 		}
 
-		// Token: 0x06007293 RID: 29331 RVA: 0x002593A8 File Offset: 0x002575A8
+		// Token: 0x06007293 RID: 29331 RVA: 0x00259388 File Offset: 0x00257588
 		public static Quaternion Sterp(Quaternion a, Quaternion b, Vector3 twistAxis, float tSwing, float tTwist, QuaternionUtil.SterpMode mode = QuaternionUtil.SterpMode.Slerp)
 		{
 			Quaternion quaternion;
@@ -167,7 +167,7 @@ namespace BoingKit
 			return QuaternionUtil.Sterp(a, b, twistAxis, tSwing, tTwist, out quaternion, out quaternion2, mode);
 		}
 
-		// Token: 0x06007294 RID: 29332 RVA: 0x002593C8 File Offset: 0x002575C8
+		// Token: 0x06007294 RID: 29332 RVA: 0x002593A8 File Offset: 0x002575A8
 		public static Quaternion Sterp(Quaternion a, Quaternion b, Vector3 twistAxis, float tSwing, float tTwist, out Quaternion swing, out Quaternion twist, QuaternionUtil.SterpMode mode)
 		{
 			Quaternion quaternion;

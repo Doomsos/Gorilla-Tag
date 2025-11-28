@@ -10,21 +10,21 @@ using UnityEngine;
 // Token: 0x02000C86 RID: 3206
 public static class StringUtils
 {
-	// Token: 0x06004E5F RID: 20063 RVA: 0x001964F1 File Offset: 0x001946F1
+	// Token: 0x06004E5F RID: 20063 RVA: 0x001964D1 File Offset: 0x001946D1
 	[MethodImpl(256)]
 	public static bool IsNullOrEmpty(this string s)
 	{
 		return string.IsNullOrEmpty(s);
 	}
 
-	// Token: 0x06004E60 RID: 20064 RVA: 0x001964F9 File Offset: 0x001946F9
+	// Token: 0x06004E60 RID: 20064 RVA: 0x001964D9 File Offset: 0x001946D9
 	[MethodImpl(256)]
 	public static bool IsNullOrWhiteSpace(this string s)
 	{
 		return string.IsNullOrWhiteSpace(s);
 	}
 
-	// Token: 0x06004E61 RID: 20065 RVA: 0x00196504 File Offset: 0x00194704
+	// Token: 0x06004E61 RID: 20065 RVA: 0x001964E4 File Offset: 0x001946E4
 	public static string ToAlphaNumeric(this string s)
 	{
 		if (string.IsNullOrWhiteSpace(s))
@@ -47,7 +47,7 @@ public static class StringUtils
 		return result;
 	}
 
-	// Token: 0x06004E62 RID: 20066 RVA: 0x00196580 File Offset: 0x00194780
+	// Token: 0x06004E62 RID: 20066 RVA: 0x00196560 File Offset: 0x00194760
 	public static string Capitalize(this string s)
 	{
 		if (string.IsNullOrWhiteSpace(s))
@@ -59,25 +59,25 @@ public static class StringUtils
 		return new string(array);
 	}
 
-	// Token: 0x06004E63 RID: 20067 RVA: 0x001965AF File Offset: 0x001947AF
+	// Token: 0x06004E63 RID: 20067 RVA: 0x0019658F File Offset: 0x0019478F
 	public static string Concat(this IEnumerable<string> source)
 	{
 		return string.Concat(source);
 	}
 
-	// Token: 0x06004E64 RID: 20068 RVA: 0x001965B7 File Offset: 0x001947B7
+	// Token: 0x06004E64 RID: 20068 RVA: 0x00196597 File Offset: 0x00194797
 	public static string Join(this IEnumerable<string> source, string separator)
 	{
 		return string.Join(separator, source);
 	}
 
-	// Token: 0x06004E65 RID: 20069 RVA: 0x001965C0 File Offset: 0x001947C0
+	// Token: 0x06004E65 RID: 20069 RVA: 0x001965A0 File Offset: 0x001947A0
 	public static string Join(this IEnumerable<string> source, char separator)
 	{
 		return string.Join<string>(separator, source);
 	}
 
-	// Token: 0x06004E66 RID: 20070 RVA: 0x001965C9 File Offset: 0x001947C9
+	// Token: 0x06004E66 RID: 20070 RVA: 0x001965A9 File Offset: 0x001947A9
 	public static string RemoveAll(this string s, string value, StringComparison mode = 5)
 	{
 		if (string.IsNullOrEmpty(s))
@@ -87,37 +87,37 @@ public static class StringUtils
 		return s.Replace(value, string.Empty, mode);
 	}
 
-	// Token: 0x06004E67 RID: 20071 RVA: 0x001965E2 File Offset: 0x001947E2
+	// Token: 0x06004E67 RID: 20071 RVA: 0x001965C2 File Offset: 0x001947C2
 	public static string RemoveAll(this string s, char value, StringComparison mode = 5)
 	{
 		return s.RemoveAll(value.ToString(), mode);
 	}
 
-	// Token: 0x06004E68 RID: 20072 RVA: 0x001965F2 File Offset: 0x001947F2
+	// Token: 0x06004E68 RID: 20072 RVA: 0x001965D2 File Offset: 0x001947D2
 	public static byte[] ToBytesASCII(this string s)
 	{
 		return Encoding.ASCII.GetBytes(s);
 	}
 
-	// Token: 0x06004E69 RID: 20073 RVA: 0x001965FF File Offset: 0x001947FF
+	// Token: 0x06004E69 RID: 20073 RVA: 0x001965DF File Offset: 0x001947DF
 	public static byte[] ToBytesUTF8(this string s)
 	{
 		return Encoding.UTF8.GetBytes(s);
 	}
 
-	// Token: 0x06004E6A RID: 20074 RVA: 0x0019660C File Offset: 0x0019480C
+	// Token: 0x06004E6A RID: 20074 RVA: 0x001965EC File Offset: 0x001947EC
 	public static byte[] ToBytesUnicode(this string s)
 	{
 		return Encoding.Unicode.GetBytes(s);
 	}
 
-	// Token: 0x06004E6B RID: 20075 RVA: 0x0019661C File Offset: 0x0019481C
+	// Token: 0x06004E6B RID: 20075 RVA: 0x001965FC File Offset: 0x001947FC
 	public static string ComputeSHV2(this string s)
 	{
 		return Hash128.Compute(s).ToString();
 	}
 
-	// Token: 0x06004E6C RID: 20076 RVA: 0x0019663D File Offset: 0x0019483D
+	// Token: 0x06004E6C RID: 20076 RVA: 0x0019661D File Offset: 0x0019481D
 	public static string ToQueryString(this Dictionary<string, string> d)
 	{
 		if (d == null)
@@ -127,7 +127,7 @@ public static class StringUtils
 		return "?" + string.Join("&", Enumerable.Select<KeyValuePair<string, string>, string>(d, (KeyValuePair<string, string> x) => x.Key + "=" + x.Value));
 	}
 
-	// Token: 0x06004E6D RID: 20077 RVA: 0x00196680 File Offset: 0x00194880
+	// Token: 0x06004E6D RID: 20077 RVA: 0x00196660 File Offset: 0x00194860
 	public static string Combine(string separator, params string[] values)
 	{
 		if (values == null || values.Length == 0)
@@ -147,7 +147,7 @@ public static class StringUtils
 		return stringBuilder.ToString();
 	}
 
-	// Token: 0x06004E6E RID: 20078 RVA: 0x001966D0 File Offset: 0x001948D0
+	// Token: 0x06004E6E RID: 20078 RVA: 0x001966B0 File Offset: 0x001948B0
 	public static string ToUpperCamelCase(this string input)
 	{
 		if (string.IsNullOrWhiteSpace(input))
@@ -178,7 +178,7 @@ public static class StringUtils
 		return string.Join("", array);
 	}
 
-	// Token: 0x06004E6F RID: 20079 RVA: 0x00196764 File Offset: 0x00194964
+	// Token: 0x06004E6F RID: 20079 RVA: 0x00196744 File Offset: 0x00194944
 	public static string ToUpperCaseFromCamelCase(this string input)
 	{
 		if (string.IsNullOrEmpty(input))
@@ -205,7 +205,7 @@ public static class StringUtils
 		return result;
 	}
 
-	// Token: 0x06004E70 RID: 20080 RVA: 0x00196804 File Offset: 0x00194A04
+	// Token: 0x06004E70 RID: 20080 RVA: 0x001967E4 File Offset: 0x001949E4
 	public static string RemoveStart(this string s, string value, StringComparison comparison = 1)
 	{
 		if (string.IsNullOrEmpty(s) || !s.StartsWith(value, comparison))
@@ -215,7 +215,7 @@ public static class StringUtils
 		return s.Substring(value.Length);
 	}
 
-	// Token: 0x06004E71 RID: 20081 RVA: 0x00196826 File Offset: 0x00194A26
+	// Token: 0x06004E71 RID: 20081 RVA: 0x00196806 File Offset: 0x00194A06
 	public static string RemoveEnd(this string s, string value, StringComparison comparison = 1)
 	{
 		if (string.IsNullOrEmpty(s) || !s.EndsWith(value, comparison))
@@ -225,13 +225,13 @@ public static class StringUtils
 		return s.Substring(0, s.Length - value.Length);
 	}
 
-	// Token: 0x06004E72 RID: 20082 RVA: 0x00196850 File Offset: 0x00194A50
+	// Token: 0x06004E72 RID: 20082 RVA: 0x00196830 File Offset: 0x00194A30
 	public static string RemoveBothEnds(this string s, string value, StringComparison comparison = 1)
 	{
 		return s.RemoveEnd(value, comparison).RemoveStart(value, comparison);
 	}
 
-	// Token: 0x06004E73 RID: 20083 RVA: 0x00196861 File Offset: 0x00194A61
+	// Token: 0x06004E73 RID: 20083 RVA: 0x00196841 File Offset: 0x00194A41
 	public static string TrailingSpace(this string s)
 	{
 		if (string.IsNullOrEmpty(s))

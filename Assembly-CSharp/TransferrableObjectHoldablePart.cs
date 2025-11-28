@@ -6,8 +6,8 @@ using UnityEngine.Events;
 public class TransferrableObjectHoldablePart : HoldableObject, ITickSystemTick
 {
 	// Token: 0x170002C9 RID: 713
-	// (get) Token: 0x06001A51 RID: 6737 RVA: 0x0008C007 File Offset: 0x0008A207
-	// (set) Token: 0x06001A52 RID: 6738 RVA: 0x0008C00F File Offset: 0x0008A20F
+	// (get) Token: 0x06001A51 RID: 6737 RVA: 0x0008BFE7 File Offset: 0x0008A1E7
+	// (set) Token: 0x06001A52 RID: 6738 RVA: 0x0008BFEF File Offset: 0x0008A1EF
 	public bool TickRunning { get; set; }
 
 	// Token: 0x06001A53 RID: 6739 RVA: 0x0001877F File Offset: 0x0001697F
@@ -22,7 +22,7 @@ public class TransferrableObjectHoldablePart : HoldableObject, ITickSystemTick
 		TickSystem<object>.RemoveTickCallback(this);
 	}
 
-	// Token: 0x06001A55 RID: 6741 RVA: 0x0008C018 File Offset: 0x0008A218
+	// Token: 0x06001A55 RID: 6741 RVA: 0x0008BFF8 File Offset: 0x0008A1F8
 	public void Tick()
 	{
 		VRRig rig;
@@ -68,7 +68,7 @@ public class TransferrableObjectHoldablePart : HoldableObject, ITickSystemTick
 	{
 	}
 
-	// Token: 0x06001A58 RID: 6744 RVA: 0x0008C0E4 File Offset: 0x0008A2E4
+	// Token: 0x06001A58 RID: 6744 RVA: 0x0008C0C4 File Offset: 0x0008A2C4
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		if (this.transferrableParentObject.ownerRig && !this.transferrableParentObject.ownerRig.isLocal)
@@ -87,7 +87,7 @@ public class TransferrableObjectHoldablePart : HoldableObject, ITickSystemTick
 		unityEvent.Invoke();
 	}
 
-	// Token: 0x06001A59 RID: 6745 RVA: 0x0008C170 File Offset: 0x0008A370
+	// Token: 0x06001A59 RID: 6745 RVA: 0x0008C150 File Offset: 0x0008A350
 	public override void DropItemCleanup()
 	{
 		this.isHeld = false;
@@ -95,7 +95,7 @@ public class TransferrableObjectHoldablePart : HoldableObject, ITickSystemTick
 		this.transferrableParentObject.itemState &= ~this.heldBit;
 	}
 
-	// Token: 0x06001A5A RID: 6746 RVA: 0x0008C19C File Offset: 0x0008A39C
+	// Token: 0x06001A5A RID: 6746 RVA: 0x0008C17C File Offset: 0x0008A37C
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		if (EquipmentInteractor.instance.rightHandHeldEquipment == this && releasingHand != EquipmentInteractor.instance.rightHand)

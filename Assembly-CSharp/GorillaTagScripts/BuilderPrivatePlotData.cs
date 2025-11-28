@@ -5,7 +5,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DCB RID: 3531
 	public struct BuilderPrivatePlotData
 	{
-		// Token: 0x0600578E RID: 22414 RVA: 0x001BE4C7 File Offset: 0x001BC6C7
+		// Token: 0x0600578E RID: 22414 RVA: 0x001BE4A7 File Offset: 0x001BC6A7
 		public BuilderPrivatePlotData(BuilderPiecePrivatePlot plot)
 		{
 			this.plotState = plot.plotState;

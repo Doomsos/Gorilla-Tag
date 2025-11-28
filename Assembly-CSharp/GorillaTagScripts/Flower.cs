@@ -8,11 +8,11 @@ namespace GorillaTagScripts
 	public class Flower : MonoBehaviour
 	{
 		// Token: 0x17000841 RID: 2113
-		// (get) Token: 0x06005830 RID: 22576 RVA: 0x001C2E53 File Offset: 0x001C1053
-		// (set) Token: 0x06005831 RID: 22577 RVA: 0x001C2E5B File Offset: 0x001C105B
+		// (get) Token: 0x06005830 RID: 22576 RVA: 0x001C2E33 File Offset: 0x001C1033
+		// (set) Token: 0x06005831 RID: 22577 RVA: 0x001C2E3B File Offset: 0x001C103B
 		public bool IsWatered { get; private set; }
 
-		// Token: 0x06005832 RID: 22578 RVA: 0x001C2E64 File Offset: 0x001C1064
+		// Token: 0x06005832 RID: 22578 RVA: 0x001C2E44 File Offset: 0x001C1044
 		private void Awake()
 		{
 			this.shouldUpdateVisuals = true;
@@ -28,13 +28,13 @@ namespace GorillaTagScripts
 			this.anim.enabled = false;
 		}
 
-		// Token: 0x06005833 RID: 22579 RVA: 0x001C2EFB File Offset: 0x001C10FB
+		// Token: 0x06005833 RID: 22579 RVA: 0x001C2EDB File Offset: 0x001C10DB
 		private void OnDestroy()
 		{
 			this.timer.onTimerStopped.RemoveListener(new UnityAction<GorillaTimer>(this.HandleOnFlowerTimerEnded));
 		}
 
-		// Token: 0x06005834 RID: 22580 RVA: 0x001C2F1C File Offset: 0x001C111C
+		// Token: 0x06005834 RID: 22580 RVA: 0x001C2EFC File Offset: 0x001C10FC
 		public void WaterFlower(bool isWatered = false)
 		{
 			this.IsWatered = isWatered;
@@ -69,7 +69,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005835 RID: 22581 RVA: 0x001C2F8C File Offset: 0x001C118C
+		// Token: 0x06005835 RID: 22581 RVA: 0x001C2F6C File Offset: 0x001C116C
 		public void UpdateFlowerState(Flower.FlowerState newState, bool isWatered = false, bool updateVisual = true)
 		{
 			if (FlowersManager.Instance.IsMine)
@@ -87,7 +87,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005836 RID: 22582 RVA: 0x001C2FE4 File Offset: 0x001C11E4
+		// Token: 0x06005836 RID: 22582 RVA: 0x001C2FC4 File Offset: 0x001C11C4
 		private void LocalUpdateFlowers(Flower.FlowerState state, bool isWatered = false)
 		{
 			GameObject[] array = this.meshStates;
@@ -127,7 +127,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005837 RID: 22583 RVA: 0x001C30BD File Offset: 0x001C12BD
+		// Token: 0x06005837 RID: 22583 RVA: 0x001C309D File Offset: 0x001C129D
 		private void HandleOnFlowerTimerEnded(GorillaTimer _timer)
 		{
 			if (!FlowersManager.Instance.IsMine)
@@ -140,20 +140,20 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005838 RID: 22584 RVA: 0x001C30E1 File Offset: 0x001C12E1
+		// Token: 0x06005838 RID: 22584 RVA: 0x001C30C1 File Offset: 0x001C12C1
 		private void ChangeState(Flower.FlowerState state)
 		{
 			this.lastState = this.currentState;
 			this.currentState = state;
 		}
 
-		// Token: 0x06005839 RID: 22585 RVA: 0x001C30F6 File Offset: 0x001C12F6
+		// Token: 0x06005839 RID: 22585 RVA: 0x001C30D6 File Offset: 0x001C12D6
 		public Flower.FlowerState GetCurrentState()
 		{
 			return this.currentState;
 		}
 
-		// Token: 0x0600583A RID: 22586 RVA: 0x001C3100 File Offset: 0x001C1300
+		// Token: 0x0600583A RID: 22586 RVA: 0x001C30E0 File Offset: 0x001C12E0
 		public void OnAnimationIsDone(int state)
 		{
 			if (this.meshRenderer.enabled)
@@ -168,14 +168,14 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600583B RID: 22587 RVA: 0x001C315D File Offset: 0x001C135D
+		// Token: 0x0600583B RID: 22587 RVA: 0x001C313D File Offset: 0x001C133D
 		public void UpdateVisuals(bool enable)
 		{
 			this.shouldUpdateVisuals = enable;
 			this.meshStatesGameObject.SetActive(enable);
 		}
 
-		// Token: 0x0600583C RID: 22588 RVA: 0x001C3174 File Offset: 0x001C1374
+		// Token: 0x0600583C RID: 22588 RVA: 0x001C3154 File Offset: 0x001C1354
 		public void AnimCatch()
 		{
 			if (this.anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)

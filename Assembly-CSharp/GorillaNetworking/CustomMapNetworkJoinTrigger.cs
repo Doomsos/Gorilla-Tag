@@ -5,7 +5,7 @@ namespace GorillaNetworking
 	// Token: 0x02000EF5 RID: 3829
 	public class CustomMapNetworkJoinTrigger : GorillaNetworkJoinTrigger
 	{
-		// Token: 0x06006021 RID: 24609 RVA: 0x001F01FC File Offset: 0x001EE3FC
+		// Token: 0x06006021 RID: 24609 RVA: 0x001F01DC File Offset: 0x001EE3DC
 		public override string GetFullDesiredGameModeString()
 		{
 			return string.Concat(new string[]
@@ -19,7 +19,7 @@ namespace GorillaNetworking
 			});
 		}
 
-		// Token: 0x06006022 RID: 24610 RVA: 0x001F0263 File Offset: 0x001EE463
+		// Token: 0x06006022 RID: 24610 RVA: 0x001F0243 File Offset: 0x001EE443
 		public override byte GetRoomSize()
 		{
 			return CustomMapLoader.GetRoomSizeForCurrentlyLoadedMap();

@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200050A RID: 1290
 public sealed class FlickerManager : MonoBehaviour
 {
-	// Token: 0x060020F5 RID: 8437 RVA: 0x000AE740 File Offset: 0x000AC940
+	// Token: 0x060020F5 RID: 8437 RVA: 0x000AE720 File Offset: 0x000AC920
 	private void Awake()
 	{
 		if (this.FlickerDurations.Length % 2 != 0)
@@ -22,7 +22,7 @@ public sealed class FlickerManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060020F6 RID: 8438 RVA: 0x000AE7A0 File Offset: 0x000AC9A0
+	// Token: 0x060020F6 RID: 8438 RVA: 0x000AE780 File Offset: 0x000AC980
 	private void Update()
 	{
 		float serverTime = FlickerManager.GetServerTime();
@@ -35,7 +35,7 @@ public sealed class FlickerManager : MonoBehaviour
 		this._flickerIndex = (this._flickerIndex + 2) % this.FlickerDurations.Length;
 	}
 
-	// Token: 0x060020F7 RID: 8439 RVA: 0x000AE818 File Offset: 0x000ACA18
+	// Token: 0x060020F7 RID: 8439 RVA: 0x000AE7F8 File Offset: 0x000AC9F8
 	private static float GetServerTime()
 	{
 		return (float)(GorillaComputer.instance.GetServerTime() - GorillaComputer.instance.startupTime).TotalSeconds;

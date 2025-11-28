@@ -4,19 +4,19 @@ using UnityEngine;
 // Token: 0x02000C1F RID: 3103
 public class AmbientSoundRandomizer : MonoBehaviour
 {
-	// Token: 0x06004C53 RID: 19539 RVA: 0x0018D1E5 File Offset: 0x0018B3E5
+	// Token: 0x06004C53 RID: 19539 RVA: 0x0018D1C5 File Offset: 0x0018B3C5
 	private void Button_Cache()
 	{
 		this.audioSources = base.GetComponentsInChildren<AudioSource>();
 	}
 
-	// Token: 0x06004C54 RID: 19540 RVA: 0x0018D1F3 File Offset: 0x0018B3F3
+	// Token: 0x06004C54 RID: 19540 RVA: 0x0018D1D3 File Offset: 0x0018B3D3
 	private void Awake()
 	{
 		this.SetTarget();
 	}
 
-	// Token: 0x06004C55 RID: 19541 RVA: 0x0018D1FC File Offset: 0x0018B3FC
+	// Token: 0x06004C55 RID: 19541 RVA: 0x0018D1DC File Offset: 0x0018B3DC
 	private void Update()
 	{
 		if (this.timer >= this.timerTarget)
@@ -31,7 +31,7 @@ public class AmbientSoundRandomizer : MonoBehaviour
 		this.timer += Time.deltaTime;
 	}
 
-	// Token: 0x06004C56 RID: 19542 RVA: 0x0018D270 File Offset: 0x0018B470
+	// Token: 0x06004C56 RID: 19542 RVA: 0x0018D250 File Offset: 0x0018B450
 	private void SetTarget()
 	{
 		this.timerTarget = this.baseTime + Random.Range(0f, this.randomModifier);

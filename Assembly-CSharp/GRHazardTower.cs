@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020006CE RID: 1742
 public class GRHazardTower : MonoBehaviour, IGameEntityComponent, IGameProjectileLauncher
 {
-	// Token: 0x06002CB7 RID: 11447 RVA: 0x000F2734 File Offset: 0x000F0934
+	// Token: 0x06002CB7 RID: 11447 RVA: 0x000F2714 File Offset: 0x000F0914
 	public void OnEntityInit()
 	{
 		this.gameEntity.MinTimeBetweenTicks = 0.5f;
@@ -25,7 +25,7 @@ public class GRHazardTower : MonoBehaviour, IGameEntityComponent, IGameProjectil
 	{
 	}
 
-	// Token: 0x06002CBA RID: 11450 RVA: 0x000F278C File Offset: 0x000F098C
+	// Token: 0x06002CBA RID: 11450 RVA: 0x000F276C File Offset: 0x000F096C
 	public void OnThink()
 	{
 		if (!this.gameEntity.IsAuthority())
@@ -54,7 +54,7 @@ public class GRHazardTower : MonoBehaviour, IGameEntityComponent, IGameProjectil
 		this.nextFireTime = timeAsDouble + (double)this.fireCooldownTime;
 	}
 
-	// Token: 0x06002CBB RID: 11451 RVA: 0x000F2878 File Offset: 0x000F0A78
+	// Token: 0x06002CBB RID: 11451 RVA: 0x000F2858 File Offset: 0x000F0A58
 	public void OnFire(Vector3 fireFromPos, Vector3 fireAtPos, double fireAtTime)
 	{
 		Vector3 vector;

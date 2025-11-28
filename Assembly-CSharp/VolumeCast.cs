@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x020009FC RID: 2556
 public class VolumeCast : MonoBehaviourGizmos
 {
-	// Token: 0x06004174 RID: 16756 RVA: 0x0015BC90 File Offset: 0x00159E90
+	// Token: 0x06004174 RID: 16756 RVA: 0x0015BC70 File Offset: 0x00159E70
 	public bool CheckOverlaps()
 	{
 		Transform transform = base.transform;
@@ -72,7 +72,7 @@ public class VolumeCast : MonoBehaviourGizmos
 		return this._colliding = (this._hits > 0);
 	}
 
-	// Token: 0x06004175 RID: 16757 RVA: 0x0015BED4 File Offset: 0x0015A0D4
+	// Token: 0x06004175 RID: 16757 RVA: 0x0015BEB4 File Offset: 0x0015A0B4
 	private static void GetEndsAndRadius(Transform t, Vector3 center, float height, float radius, out Vector3 a, out Vector3 b, out float r)
 	{
 		float num = height * 0.5f;

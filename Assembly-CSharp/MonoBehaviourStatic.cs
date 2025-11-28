@@ -5,7 +5,7 @@ using UnityEngine;
 public class MonoBehaviourStatic<T> : MonoBehaviour where T : MonoBehaviour
 {
 	// Token: 0x170005FE RID: 1534
-	// (get) Token: 0x060040B6 RID: 16566 RVA: 0x0015A239 File Offset: 0x00158439
+	// (get) Token: 0x060040B6 RID: 16566 RVA: 0x0015A219 File Offset: 0x00158419
 	public static T Instance
 	{
 		get
@@ -14,7 +14,7 @@ public class MonoBehaviourStatic<T> : MonoBehaviour where T : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040B7 RID: 16567 RVA: 0x0015A240 File Offset: 0x00158440
+	// Token: 0x060040B7 RID: 16567 RVA: 0x0015A220 File Offset: 0x00158420
 	protected void Awake()
 	{
 		if (MonoBehaviourStatic<T>.gInstance && MonoBehaviourStatic<T>.gInstance != this)

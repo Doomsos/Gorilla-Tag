@@ -7,7 +7,7 @@ namespace GorillaLocomotion.Swimming
 	// Token: 0x02000F8F RID: 3983
 	public struct WaterOverlappingCollider
 	{
-		// Token: 0x060063F8 RID: 25592 RVA: 0x00208E20 File Offset: 0x00207020
+		// Token: 0x060063F8 RID: 25592 RVA: 0x00208E00 File Offset: 0x00207000
 		public void PlayRippleEffect(GameObject rippleEffectPrefab, Vector3 surfacePoint, Vector3 surfaceNormal, float defaultRippleScale, float currentTime, WaterVolume volume)
 		{
 			this.lastRipplePosition = this.GetClosestPositionOnSurface(surfacePoint, surfaceNormal);
@@ -17,7 +17,7 @@ namespace GorillaLocomotion.Swimming
 			ObjectPools.instance.Instantiate(rippleEffectPrefab, this.lastRipplePosition, Quaternion.FromToRotation(Vector3.up, this.lastSurfaceQuery.surfaceNormal) * Quaternion.AngleAxis(-90f, Vector3.right), this.lastRippleScale, true).GetComponent<WaterRippleEffect>().PlayEffect(volume);
 		}
 
-		// Token: 0x060063F9 RID: 25593 RVA: 0x00208EBC File Offset: 0x002070BC
+		// Token: 0x060063F9 RID: 25593 RVA: 0x00208E9C File Offset: 0x0020709C
 		public void PlaySplashEffect(GameObject splashEffectPrefab, Vector3 splashPosition, float splashScale, bool bigSplash, bool enteringWater, WaterVolume volume)
 		{
 			Quaternion quaternion = Quaternion.FromToRotation(Vector3.up, this.lastSurfaceQuery.surfaceNormal) * Quaternion.AngleAxis(-90f, Vector3.right);
@@ -51,7 +51,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x060063FA RID: 25594 RVA: 0x00208FDC File Offset: 0x002071DC
+		// Token: 0x060063FA RID: 25594 RVA: 0x00208FBC File Offset: 0x002071BC
 		public void PlayDripEffect(GameObject rippleEffectPrefab, Vector3 surfacePoint, Vector3 surfaceNormal, float dripScale)
 		{
 			Vector3 closestPositionOnSurface = this.GetClosestPositionOnSurface(surfacePoint, surfaceNormal);
@@ -60,13 +60,13 @@ namespace GorillaLocomotion.Swimming
 			ObjectPools.instance.Instantiate(rippleEffectPrefab, closestPositionOnSurface + vector, Quaternion.FromToRotation(Vector3.up, this.lastSurfaceQuery.surfaceNormal) * Quaternion.AngleAxis(-90f, Vector3.right), dripScale * this.scaleMultiplier, true);
 		}
 
-		// Token: 0x060063FB RID: 25595 RVA: 0x0020906B File Offset: 0x0020726B
+		// Token: 0x060063FB RID: 25595 RVA: 0x0020904B File Offset: 0x0020724B
 		public Vector3 GetClosestPositionOnSurface(Vector3 surfacePoint, Vector3 surfaceNormal)
 		{
 			return Vector3.ProjectOnPlane(this.collider.transform.position - surfacePoint, surfaceNormal) + surfacePoint;
 		}
 
-		// Token: 0x060063FC RID: 25596 RVA: 0x00209090 File Offset: 0x00207290
+		// Token: 0x060063FC RID: 25596 RVA: 0x00209070 File Offset: 0x00207270
 		private float GetBoundingRadiusOnSurface(Vector3 surfaceNormal)
 		{
 			if (this.overrideBoundingRadius)

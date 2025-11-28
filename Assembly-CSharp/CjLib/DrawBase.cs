@@ -6,7 +6,7 @@ namespace CjLib
 	// Token: 0x02001162 RID: 4450
 	public abstract class DrawBase : MonoBehaviour
 	{
-		// Token: 0x0600702E RID: 28718 RVA: 0x00247964 File Offset: 0x00245B64
+		// Token: 0x0600702E RID: 28718 RVA: 0x00247944 File Offset: 0x00245B44
 		private void Update()
 		{
 			if (this.Style != DebugUtil.Style.Wireframe)

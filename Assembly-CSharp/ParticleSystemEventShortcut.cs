@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(ParticleSystem))]
 public class ParticleSystemEventShortcut : MonoBehaviour
 {
-	// Token: 0x0600203C RID: 8252 RVA: 0x000AB220 File Offset: 0x000A9420
+	// Token: 0x0600203C RID: 8252 RVA: 0x000AB200 File Offset: 0x000A9400
 	private void InitIfNeeded()
 	{
 		if (!this.initialized)
@@ -17,14 +17,14 @@ public class ParticleSystemEventShortcut : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600203D RID: 8253 RVA: 0x000AB26F File Offset: 0x000A946F
+	// Token: 0x0600203D RID: 8253 RVA: 0x000AB24F File Offset: 0x000A944F
 	public void StopAndClear()
 	{
 		this.InitIfNeeded();
 		this.ps.Stop(true, 0);
 	}
 
-	// Token: 0x0600203E RID: 8254 RVA: 0x000AB284 File Offset: 0x000A9484
+	// Token: 0x0600203E RID: 8254 RVA: 0x000AB264 File Offset: 0x000A9464
 	public void ClearAndPlay()
 	{
 		this.InitIfNeeded();
@@ -32,7 +32,7 @@ public class ParticleSystemEventShortcut : MonoBehaviour
 		this.ps.Play();
 	}
 
-	// Token: 0x0600203F RID: 8255 RVA: 0x000AB2A2 File Offset: 0x000A94A2
+	// Token: 0x0600203F RID: 8255 RVA: 0x000AB282 File Offset: 0x000A9482
 	public void PlayFromMesh(MeshRenderer mesh)
 	{
 		this.InitIfNeeded();
@@ -41,7 +41,7 @@ public class ParticleSystemEventShortcut : MonoBehaviour
 		this.ps.Play();
 	}
 
-	// Token: 0x06002040 RID: 8256 RVA: 0x000AB2CE File Offset: 0x000A94CE
+	// Token: 0x06002040 RID: 8256 RVA: 0x000AB2AE File Offset: 0x000A94AE
 	public void PlayFromSkin(SkinnedMeshRenderer skin)
 	{
 		this.InitIfNeeded();
@@ -50,7 +50,7 @@ public class ParticleSystemEventShortcut : MonoBehaviour
 		this.ps.Play();
 	}
 
-	// Token: 0x06002041 RID: 8257 RVA: 0x000AB2FA File Offset: 0x000A94FA
+	// Token: 0x06002041 RID: 8257 RVA: 0x000AB2DA File Offset: 0x000A94DA
 	public void ReturnToPool()
 	{
 		this.InitIfNeeded();
@@ -60,7 +60,7 @@ public class ParticleSystemEventShortcut : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002042 RID: 8258 RVA: 0x000AB31A File Offset: 0x000A951A
+	// Token: 0x06002042 RID: 8258 RVA: 0x000AB2FA File Offset: 0x000A94FA
 	private void OnParticleSystemStopped()
 	{
 		this.ReturnToPool();

@@ -11,13 +11,13 @@ namespace GorillaTag.Cosmetics
 	[RequireComponent(typeof(Collider))]
 	public class OnTriggerEventsCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006D23 RID: 27939 RVA: 0x0023D65C File Offset: 0x0023B85C
+		// Token: 0x06006D23 RID: 27939 RVA: 0x0023D63C File Offset: 0x0023B83C
 		private bool IsMyItem()
 		{
 			return this.rig != null && this.rig.isOfflineVRRig;
 		}
 
-		// Token: 0x06006D24 RID: 27940 RVA: 0x0023D67C File Offset: 0x0023B87C
+		// Token: 0x06006D24 RID: 27940 RVA: 0x0023D65C File Offset: 0x0023B85C
 		private void Awake()
 		{
 			Collider[] components = base.GetComponents<Collider>();
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 			this.exitListeners = ((list3.Count > 0) ? list3.ToArray() : Array.Empty<OnTriggerEventsCosmetic.Listener>());
 		}
 
-		// Token: 0x06006D25 RID: 27941 RVA: 0x0023D872 File Offset: 0x0023BA72
+		// Token: 0x06006D25 RID: 27941 RVA: 0x0023D852 File Offset: 0x0023BA52
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!OnTriggerEventsCosmetic.IsOtherUsable(other))
@@ -94,7 +94,7 @@ namespace GorillaTag.Cosmetics
 			this.Dispatch(this.enterListeners, other);
 		}
 
-		// Token: 0x06006D26 RID: 27942 RVA: 0x0023D88A File Offset: 0x0023BA8A
+		// Token: 0x06006D26 RID: 27942 RVA: 0x0023D86A File Offset: 0x0023BA6A
 		private void OnTriggerStay(Collider other)
 		{
 			if (!OnTriggerEventsCosmetic.IsOtherUsable(other))
@@ -104,7 +104,7 @@ namespace GorillaTag.Cosmetics
 			this.Dispatch(this.stayListeners, other);
 		}
 
-		// Token: 0x06006D27 RID: 27943 RVA: 0x0023D8A2 File Offset: 0x0023BAA2
+		// Token: 0x06006D27 RID: 27943 RVA: 0x0023D882 File Offset: 0x0023BA82
 		private void OnTriggerExit(Collider other)
 		{
 			if (!OnTriggerEventsCosmetic.IsOtherUsable(other))
@@ -114,7 +114,7 @@ namespace GorillaTag.Cosmetics
 			this.Dispatch(this.exitListeners, other);
 		}
 
-		// Token: 0x06006D28 RID: 27944 RVA: 0x0023D8BC File Offset: 0x0023BABC
+		// Token: 0x06006D28 RID: 27944 RVA: 0x0023D89C File Offset: 0x0023BA9C
 		private static bool IsOtherUsable(Collider other)
 		{
 			if (other == null)
@@ -125,7 +125,7 @@ namespace GorillaTag.Cosmetics
 			return !(gameObject == null) && gameObject.activeInHierarchy;
 		}
 
-		// Token: 0x06006D29 RID: 27945 RVA: 0x0023D8F0 File Offset: 0x0023BAF0
+		// Token: 0x06006D29 RID: 27945 RVA: 0x0023D8D0 File Offset: 0x0023BAD0
 		private void Dispatch(OnTriggerEventsCosmetic.Listener[] listeners, Collider other)
 		{
 			if (listeners == null || listeners.Length == 0)
@@ -163,7 +163,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D2A RID: 27946 RVA: 0x0023DA4C File Offset: 0x0023BC4C
+		// Token: 0x06006D2A RID: 27946 RVA: 0x0023DA2C File Offset: 0x0023BC2C
 		private static bool CompareTagAny(GameObject go, HashSet<string> tagSet)
 		{
 			if (tagSet == null || tagSet.Count == 0)
@@ -180,7 +180,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006D2B RID: 27947 RVA: 0x0023DAB8 File Offset: 0x0023BCB8
+		// Token: 0x06006D2B RID: 27947 RVA: 0x0023DA98 File Offset: 0x0023BC98
 		private bool IsTagValid(GameObject obj, OnTriggerEventsCosmetic.Listener listener)
 		{
 			return listener == null || (listener.tagSet == null || listener.tagSet.Count == 0) || OnTriggerEventsCosmetic.CompareTagAny(obj, listener.tagSet);

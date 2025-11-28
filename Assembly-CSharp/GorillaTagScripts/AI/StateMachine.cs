@@ -6,7 +6,7 @@ namespace GorillaTagScripts.AI
 	// Token: 0x02000E96 RID: 3734
 	public class StateMachine
 	{
-		// Token: 0x06005D60 RID: 23904 RVA: 0x001DFD24 File Offset: 0x001DDF24
+		// Token: 0x06005D60 RID: 23904 RVA: 0x001DFD04 File Offset: 0x001DDF04
 		public void Tick()
 		{
 			StateMachine.Transition transition = this.GetTransition();
@@ -22,7 +22,7 @@ namespace GorillaTagScripts.AI
 			currentState.Tick();
 		}
 
-		// Token: 0x06005D61 RID: 23905 RVA: 0x001DFD58 File Offset: 0x001DDF58
+		// Token: 0x06005D61 RID: 23905 RVA: 0x001DFD38 File Offset: 0x001DDF38
 		public void SetState(IState state)
 		{
 			if (state == this._currentState)
@@ -43,13 +43,13 @@ namespace GorillaTagScripts.AI
 			this._currentState.OnEnter();
 		}
 
-		// Token: 0x06005D62 RID: 23906 RVA: 0x001DFDC2 File Offset: 0x001DDFC2
+		// Token: 0x06005D62 RID: 23906 RVA: 0x001DFDA2 File Offset: 0x001DDFA2
 		public IState GetState()
 		{
 			return this._currentState;
 		}
 
-		// Token: 0x06005D63 RID: 23907 RVA: 0x001DFDCC File Offset: 0x001DDFCC
+		// Token: 0x06005D63 RID: 23907 RVA: 0x001DFDAC File Offset: 0x001DDFAC
 		public void AddTransition(IState from, IState to, Func<bool> predicate)
 		{
 			List<StateMachine.Transition> list;
@@ -61,13 +61,13 @@ namespace GorillaTagScripts.AI
 			list.Add(new StateMachine.Transition(to, predicate));
 		}
 
-		// Token: 0x06005D64 RID: 23908 RVA: 0x001DFE13 File Offset: 0x001DE013
+		// Token: 0x06005D64 RID: 23908 RVA: 0x001DFDF3 File Offset: 0x001DDFF3
 		public void AddAnyTransition(IState state, Func<bool> predicate)
 		{
 			this._anyTransitions.Add(new StateMachine.Transition(state, predicate));
 		}
 
-		// Token: 0x06005D65 RID: 23909 RVA: 0x001DFE28 File Offset: 0x001DE028
+		// Token: 0x06005D65 RID: 23909 RVA: 0x001DFE08 File Offset: 0x001DE008
 		private StateMachine.Transition GetTransition()
 		{
 			foreach (StateMachine.Transition transition in this._anyTransitions)
@@ -106,14 +106,14 @@ namespace GorillaTagScripts.AI
 		private class Transition
 		{
 			// Token: 0x170008A5 RID: 2213
-			// (get) Token: 0x06005D68 RID: 23912 RVA: 0x001DFF0A File Offset: 0x001DE10A
+			// (get) Token: 0x06005D68 RID: 23912 RVA: 0x001DFEEA File Offset: 0x001DE0EA
 			public Func<bool> Condition { get; }
 
 			// Token: 0x170008A6 RID: 2214
-			// (get) Token: 0x06005D69 RID: 23913 RVA: 0x001DFF12 File Offset: 0x001DE112
+			// (get) Token: 0x06005D69 RID: 23913 RVA: 0x001DFEF2 File Offset: 0x001DE0F2
 			public IState To { get; }
 
-			// Token: 0x06005D6A RID: 23914 RVA: 0x001DFF1A File Offset: 0x001DE11A
+			// Token: 0x06005D6A RID: 23914 RVA: 0x001DFEFA File Offset: 0x001DE0FA
 			public Transition(IState to, Func<bool> condition)
 			{
 				this.To = to;

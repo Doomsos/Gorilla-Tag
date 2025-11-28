@@ -7,13 +7,13 @@ using UnityEngine.InputSystem;
 // Token: 0x02000C0C RID: 3084
 public class AutoCatchThrowBall : MonoBehaviour
 {
-	// Token: 0x06004C28 RID: 19496 RVA: 0x0018C989 File Offset: 0x0018AB89
+	// Token: 0x06004C28 RID: 19496 RVA: 0x0018C969 File Offset: 0x0018AB69
 	private void Start()
 	{
 		this.vrRig = base.GetComponent<VRRig>();
 	}
 
-	// Token: 0x06004C29 RID: 19497 RVA: 0x0018C998 File Offset: 0x0018AB98
+	// Token: 0x06004C29 RID: 19497 RVA: 0x0018C978 File Offset: 0x0018AB78
 	private void Update()
 	{
 		float time = Time.time;
@@ -87,7 +87,7 @@ public class AutoCatchThrowBall : MonoBehaviour
 		DebugUtil.DrawRect(vector, quaternion * Quaternion.AngleAxis(-90f, Vector3.right), Vector2.one, Color.green, true, DebugUtil.Style.Wireframe);
 	}
 
-	// Token: 0x06004C2A RID: 19498 RVA: 0x0018CCD4 File Offset: 0x0018AED4
+	// Token: 0x06004C2A RID: 19498 RVA: 0x0018CCB4 File Offset: 0x0018AEB4
 	private void Throw(TransferrableObject transferrable, Vector3 throwDir)
 	{
 		Rigidbody componentInChildren = transferrable.GetComponentInChildren<Rigidbody>();

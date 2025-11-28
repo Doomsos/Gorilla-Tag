@@ -5,33 +5,33 @@ using UnityEngine.Events;
 // Token: 0x020004DC RID: 1244
 public class HotPepperEvents : MonoBehaviour
 {
-	// Token: 0x06002000 RID: 8192 RVA: 0x000AA026 File Offset: 0x000A8226
+	// Token: 0x06002000 RID: 8192 RVA: 0x000AA006 File Offset: 0x000A8206
 	private void OnEnable()
 	{
 		this._pepper.onBiteWorld.AddListener(new UnityAction<VRRig, int>(this.OnBiteWorld));
 		this._pepper.onBiteView.AddListener(new UnityAction<VRRig, int>(this.OnBiteView));
 	}
 
-	// Token: 0x06002001 RID: 8193 RVA: 0x000AA060 File Offset: 0x000A8260
+	// Token: 0x06002001 RID: 8193 RVA: 0x000AA040 File Offset: 0x000A8240
 	private void OnDisable()
 	{
 		this._pepper.onBiteWorld.RemoveListener(new UnityAction<VRRig, int>(this.OnBiteWorld));
 		this._pepper.onBiteView.RemoveListener(new UnityAction<VRRig, int>(this.OnBiteView));
 	}
 
-	// Token: 0x06002002 RID: 8194 RVA: 0x000AA09A File Offset: 0x000A829A
+	// Token: 0x06002002 RID: 8194 RVA: 0x000AA07A File Offset: 0x000A827A
 	public void OnBiteView(VRRig rig, int nextState)
 	{
 		this.OnBite(rig, nextState, true);
 	}
 
-	// Token: 0x06002003 RID: 8195 RVA: 0x000AA0A5 File Offset: 0x000A82A5
+	// Token: 0x06002003 RID: 8195 RVA: 0x000AA085 File Offset: 0x000A8285
 	public void OnBiteWorld(VRRig rig, int nextState)
 	{
 		this.OnBite(rig, nextState, false);
 	}
 
-	// Token: 0x06002004 RID: 8196 RVA: 0x000AA0B0 File Offset: 0x000A82B0
+	// Token: 0x06002004 RID: 8196 RVA: 0x000AA090 File Offset: 0x000A8290
 	public void OnBite(VRRig rig, int nextState, bool isViewRig)
 	{
 		if (nextState != 8)

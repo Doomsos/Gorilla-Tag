@@ -4,7 +4,7 @@ using Unity.Burst;
 // Token: 0x02000B52 RID: 2898
 public static class LuaHashing
 {
-	// Token: 0x0600473F RID: 18239 RVA: 0x00178330 File Offset: 0x00176530
+	// Token: 0x0600473F RID: 18239 RVA: 0x00178310 File Offset: 0x00176510
 	[BurstCompile]
 	public unsafe static int ByteHash(byte* bytes, int len)
 	{
@@ -22,7 +22,7 @@ public static class LuaHashing
 		return num + num2 * 1648465312;
 	}
 
-	// Token: 0x06004740 RID: 18240 RVA: 0x00178378 File Offset: 0x00176578
+	// Token: 0x06004740 RID: 18240 RVA: 0x00178358 File Offset: 0x00176558
 	[BurstCompile]
 	public unsafe static int ByteHash(byte* bytes)
 	{
@@ -43,7 +43,7 @@ public static class LuaHashing
 		return num + num2 * 1648465312;
 	}
 
-	// Token: 0x06004741 RID: 18241 RVA: 0x001783C4 File Offset: 0x001765C4
+	// Token: 0x06004741 RID: 18241 RVA: 0x001783A4 File Offset: 0x001765A4
 	public static int ByteHash(string bytes)
 	{
 		int length = bytes.Length;
@@ -61,7 +61,7 @@ public static class LuaHashing
 		return num + num2 * 1648465312;
 	}
 
-	// Token: 0x06004742 RID: 18242 RVA: 0x0017841C File Offset: 0x0017661C
+	// Token: 0x06004742 RID: 18242 RVA: 0x001783FC File Offset: 0x001765FC
 	[BurstCompile]
 	public static int ByteHash(byte[] bytes)
 	{

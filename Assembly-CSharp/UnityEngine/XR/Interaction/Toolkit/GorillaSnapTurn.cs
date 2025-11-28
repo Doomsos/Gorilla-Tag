@@ -10,13 +10,13 @@ namespace UnityEngine.XR.Interaction.Toolkit
 	public class GorillaSnapTurn : LocomotionProvider, ITickSystemTick
 	{
 		// Token: 0x1700081A RID: 2074
-		// (get) Token: 0x0600554D RID: 21837 RVA: 0x001AD8CF File Offset: 0x001ABACF
-		// (set) Token: 0x0600554E RID: 21838 RVA: 0x001AD8D7 File Offset: 0x001ABAD7
+		// (get) Token: 0x0600554D RID: 21837 RVA: 0x001AD8AF File Offset: 0x001ABAAF
+		// (set) Token: 0x0600554E RID: 21838 RVA: 0x001AD8B7 File Offset: 0x001ABAB7
 		public bool TickRunning { get; set; }
 
 		// Token: 0x1700081B RID: 2075
-		// (get) Token: 0x0600554F RID: 21839 RVA: 0x001AD8E0 File Offset: 0x001ABAE0
-		// (set) Token: 0x06005550 RID: 21840 RVA: 0x001AD8E8 File Offset: 0x001ABAE8
+		// (get) Token: 0x0600554F RID: 21839 RVA: 0x001AD8C0 File Offset: 0x001ABAC0
+		// (set) Token: 0x06005550 RID: 21840 RVA: 0x001AD8C8 File Offset: 0x001ABAC8
 		public GorillaSnapTurn.InputAxes turnUsage
 		{
 			get
@@ -30,8 +30,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
 		}
 
 		// Token: 0x1700081C RID: 2076
-		// (get) Token: 0x06005551 RID: 21841 RVA: 0x001AD8F1 File Offset: 0x001ABAF1
-		// (set) Token: 0x06005552 RID: 21842 RVA: 0x001AD8F9 File Offset: 0x001ABAF9
+		// (get) Token: 0x06005551 RID: 21841 RVA: 0x001AD8D1 File Offset: 0x001ABAD1
+		// (set) Token: 0x06005552 RID: 21842 RVA: 0x001AD8D9 File Offset: 0x001ABAD9
 		public List<XRController> controllers
 		{
 			get
@@ -45,8 +45,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
 		}
 
 		// Token: 0x1700081D RID: 2077
-		// (get) Token: 0x06005553 RID: 21843 RVA: 0x001AD902 File Offset: 0x001ABB02
-		// (set) Token: 0x06005554 RID: 21844 RVA: 0x001AD90A File Offset: 0x001ABB0A
+		// (get) Token: 0x06005553 RID: 21843 RVA: 0x001AD8E2 File Offset: 0x001ABAE2
+		// (set) Token: 0x06005554 RID: 21844 RVA: 0x001AD8EA File Offset: 0x001ABAEA
 		public float turnAmount
 		{
 			get
@@ -60,8 +60,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
 		}
 
 		// Token: 0x1700081E RID: 2078
-		// (get) Token: 0x06005555 RID: 21845 RVA: 0x001AD913 File Offset: 0x001ABB13
-		// (set) Token: 0x06005556 RID: 21846 RVA: 0x001AD91B File Offset: 0x001ABB1B
+		// (get) Token: 0x06005555 RID: 21845 RVA: 0x001AD8F3 File Offset: 0x001ABAF3
+		// (set) Token: 0x06005556 RID: 21846 RVA: 0x001AD8FB File Offset: 0x001ABAFB
 		public float debounceTime
 		{
 			get
@@ -75,8 +75,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
 		}
 
 		// Token: 0x1700081F RID: 2079
-		// (get) Token: 0x06005557 RID: 21847 RVA: 0x001AD924 File Offset: 0x001ABB24
-		// (set) Token: 0x06005558 RID: 21848 RVA: 0x001AD92C File Offset: 0x001ABB2C
+		// (get) Token: 0x06005557 RID: 21847 RVA: 0x001AD904 File Offset: 0x001ABB04
+		// (set) Token: 0x06005558 RID: 21848 RVA: 0x001AD90C File Offset: 0x001ABB0C
 		public float deadZone
 		{
 			get
@@ -90,8 +90,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
 		}
 
 		// Token: 0x17000820 RID: 2080
-		// (get) Token: 0x06005559 RID: 21849 RVA: 0x001AD935 File Offset: 0x001ABB35
-		// (set) Token: 0x0600555A RID: 21850 RVA: 0x001AD93D File Offset: 0x001ABB3D
+		// (get) Token: 0x06005559 RID: 21849 RVA: 0x001AD915 File Offset: 0x001ABB15
+		// (set) Token: 0x0600555A RID: 21850 RVA: 0x001AD91D File Offset: 0x001ABB1D
 		public string turnType
 		{
 			get
@@ -105,8 +105,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
 		}
 
 		// Token: 0x17000821 RID: 2081
-		// (get) Token: 0x0600555B RID: 21851 RVA: 0x001AD946 File Offset: 0x001ABB46
-		// (set) Token: 0x0600555C RID: 21852 RVA: 0x001AD94E File Offset: 0x001ABB4E
+		// (get) Token: 0x0600555B RID: 21851 RVA: 0x001AD926 File Offset: 0x001ABB26
+		// (set) Token: 0x0600555C RID: 21852 RVA: 0x001AD92E File Offset: 0x001ABB2E
 		public int turnFactor
 		{
 			get
@@ -120,7 +120,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 		}
 
 		// Token: 0x17000822 RID: 2082
-		// (get) Token: 0x0600555D RID: 21853 RVA: 0x001AD957 File Offset: 0x001ABB57
+		// (get) Token: 0x0600555D RID: 21853 RVA: 0x001AD937 File Offset: 0x001ABB37
 		public static GorillaSnapTurn CachedSnapTurnRef
 		{
 			get
@@ -134,7 +134,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			}
 		}
 
-		// Token: 0x0600555E RID: 21854 RVA: 0x001AD97F File Offset: 0x001ABB7F
+		// Token: 0x0600555E RID: 21854 RVA: 0x001AD95F File Offset: 0x001ABB5F
 		protected override void Awake()
 		{
 			base.Awake();
@@ -147,7 +147,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			TickSystem<object>.AddTickCallback(this);
 		}
 
-		// Token: 0x0600555F RID: 21855 RVA: 0x001AD9AC File Offset: 0x001ABBAC
+		// Token: 0x0600555F RID: 21855 RVA: 0x001AD98C File Offset: 0x001ABB8C
 		public void Tick()
 		{
 			this.ValidateTurningOverriders();
@@ -194,7 +194,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			}
 		}
 
-		// Token: 0x06005560 RID: 21856 RVA: 0x001ADAD0 File Offset: 0x001ABCD0
+		// Token: 0x06005560 RID: 21856 RVA: 0x001ADAB0 File Offset: 0x001ABCB0
 		private void EnsureControllerDataListSize()
 		{
 			if (this.m_Controllers.Count != this.m_ControllersWereActive.Count)
@@ -210,13 +210,13 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			}
 		}
 
-		// Token: 0x06005561 RID: 21857 RVA: 0x001ADB4D File Offset: 0x001ABD4D
+		// Token: 0x06005561 RID: 21857 RVA: 0x001ADB2D File Offset: 0x001ABD2D
 		internal void FakeStartTurn(bool isLeft)
 		{
 			this.StartTurn(isLeft ? (-this.m_TurnAmount) : this.m_TurnAmount);
 		}
 
-		// Token: 0x06005562 RID: 21858 RVA: 0x001ADB68 File Offset: 0x001ABD68
+		// Token: 0x06005562 RID: 21858 RVA: 0x001ADB48 File Offset: 0x001ABD48
 		private void StartTurn(float amount)
 		{
 			if (this.m_TimeStarted + this.m_DebounceTime > Time.time && !this.m_AxisReset)
@@ -236,7 +236,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			this.m_AxisReset = false;
 		}
 
-		// Token: 0x06005563 RID: 21859 RVA: 0x001ADBC4 File Offset: 0x001ABDC4
+		// Token: 0x06005563 RID: 21859 RVA: 0x001ADBA4 File Offset: 0x001ABDA4
 		public void ChangeTurnMode(string turnMode, int turnSpeedFactor)
 		{
 			this.turnType = turnMode;
@@ -257,13 +257,13 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			this.m_TurnAmount = 360f * Time.fixedDeltaTime * this.ConvertedTurnFactor((float)turnSpeedFactor);
 		}
 
-		// Token: 0x06005564 RID: 21860 RVA: 0x001ADC57 File Offset: 0x001ABE57
+		// Token: 0x06005564 RID: 21860 RVA: 0x001ADC37 File Offset: 0x001ABE37
 		public float ConvertedTurnFactor(float newTurnSpeed)
 		{
 			return Mathf.Max(0.75f, 0.5f + newTurnSpeed / 10f * 1.5f);
 		}
 
-		// Token: 0x06005565 RID: 21861 RVA: 0x001ADC76 File Offset: 0x001ABE76
+		// Token: 0x06005565 RID: 21861 RVA: 0x001ADC56 File Offset: 0x001ABE56
 		public void SetTurningOverride(ISnapTurnOverride caller)
 		{
 			if (!this.turningOverriders.Contains(caller))
@@ -272,7 +272,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			}
 		}
 
-		// Token: 0x06005566 RID: 21862 RVA: 0x001ADC93 File Offset: 0x001ABE93
+		// Token: 0x06005566 RID: 21862 RVA: 0x001ADC73 File Offset: 0x001ABE73
 		public void UnsetTurningOverride(ISnapTurnOverride caller)
 		{
 			if (this.turningOverriders.Contains(caller))
@@ -281,7 +281,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			}
 		}
 
-		// Token: 0x06005567 RID: 21863 RVA: 0x001ADCB0 File Offset: 0x001ABEB0
+		// Token: 0x06005567 RID: 21863 RVA: 0x001ADC90 File Offset: 0x001ABE90
 		public void ValidateTurningOverriders()
 		{
 			foreach (ISnapTurnOverride snapTurnOverride in this.turningOverriders)
@@ -293,7 +293,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			}
 		}
 
-		// Token: 0x06005568 RID: 21864 RVA: 0x001ADD14 File Offset: 0x001ABF14
+		// Token: 0x06005568 RID: 21864 RVA: 0x001ADCF4 File Offset: 0x001ABEF4
 		public static void DisableSnapTurn()
 		{
 			Debug.Log("[SNAP_TURN] Disabling Snap Turn");
@@ -306,7 +306,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			GorillaSnapTurn.CachedSnapTurnRef.ChangeTurnMode("NONE", 0);
 		}
 
-		// Token: 0x06005569 RID: 21865 RVA: 0x001ADD67 File Offset: 0x001ABF67
+		// Token: 0x06005569 RID: 21865 RVA: 0x001ADD47 File Offset: 0x001ABF47
 		public static void UpdateAndSaveTurnType(string mode)
 		{
 			if (GorillaSnapTurn.CachedSnapTurnRef == null)
@@ -319,7 +319,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			GorillaSnapTurn.CachedSnapTurnRef.ChangeTurnMode(mode, GorillaSnapTurn.CachedSnapTurnRef.turnFactor);
 		}
 
-		// Token: 0x0600556A RID: 21866 RVA: 0x001ADDA6 File Offset: 0x001ABFA6
+		// Token: 0x0600556A RID: 21866 RVA: 0x001ADD86 File Offset: 0x001ABF86
 		public static void UpdateAndSaveTurnFactor(int factor)
 		{
 			if (GorillaSnapTurn.CachedSnapTurnRef == null)
@@ -332,7 +332,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			GorillaSnapTurn.CachedSnapTurnRef.ChangeTurnMode(GorillaSnapTurn.CachedSnapTurnRef.turnType, factor);
 		}
 
-		// Token: 0x0600556B RID: 21867 RVA: 0x001ADDE8 File Offset: 0x001ABFE8
+		// Token: 0x0600556B RID: 21867 RVA: 0x001ADDC8 File Offset: 0x001ABFC8
 		public static void LoadSettingsFromPlayerPrefs()
 		{
 			if (GorillaSnapTurn.CachedSnapTurnRef == null)
@@ -345,7 +345,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			GorillaSnapTurn.CachedSnapTurnRef.ChangeTurnMode(@string, @int);
 		}
 
-		// Token: 0x0600556C RID: 21868 RVA: 0x001ADE40 File Offset: 0x001AC040
+		// Token: 0x0600556C RID: 21868 RVA: 0x001ADE20 File Offset: 0x001AC020
 		public static void LoadSettingsFromCache()
 		{
 			if (GorillaSnapTurn.CachedSnapTurnRef == null)

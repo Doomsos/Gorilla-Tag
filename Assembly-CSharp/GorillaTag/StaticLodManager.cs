@@ -11,7 +11,7 @@ namespace GorillaTag
 	[DefaultExecutionOrder(2000)]
 	public class StaticLodManager : MonoBehaviour, IGorillaSliceableSimple
 	{
-		// Token: 0x060066ED RID: 26349 RVA: 0x0021789A File Offset: 0x00215A9A
+		// Token: 0x060066ED RID: 26349 RVA: 0x0021787A File Offset: 0x00215A7A
 		public void OnEnable()
 		{
 			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
@@ -25,7 +25,7 @@ namespace GorillaTag
 			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 		}
 
-		// Token: 0x060066EF RID: 26351 RVA: 0x002178C0 File Offset: 0x00215AC0
+		// Token: 0x060066EF RID: 26351 RVA: 0x002178A0 File Offset: 0x00215AA0
 		public static int Register(StaticLodGroup lodGroup)
 		{
 			int count;
@@ -61,7 +61,7 @@ namespace GorillaTag
 			return count;
 		}
 
-		// Token: 0x060066F0 RID: 26352 RVA: 0x00217A24 File Offset: 0x00215C24
+		// Token: 0x060066F0 RID: 26352 RVA: 0x00217A04 File Offset: 0x00215C04
 		public static int OldRegister(StaticLodGroup lodGroup)
 		{
 			StaticLodGroupExcluder componentInParent = lodGroup.GetComponentInParent<StaticLodGroupExcluder>();
@@ -165,7 +165,7 @@ namespace GorillaTag
 			return num;
 		}
 
-		// Token: 0x060066F1 RID: 26353 RVA: 0x00217DE4 File Offset: 0x00215FE4
+		// Token: 0x060066F1 RID: 26353 RVA: 0x00217DC4 File Offset: 0x00215FC4
 		public static void Unregister(int lodGroupIndex)
 		{
 			StaticLodGroup staticLodGroup = StaticLodManager.groupMonoBehaviours[lodGroupIndex];
@@ -178,7 +178,7 @@ namespace GorillaTag
 			StaticLodManager.freeSlots.Push(lodGroupIndex);
 		}
 
-		// Token: 0x060066F2 RID: 26354 RVA: 0x00217E44 File Offset: 0x00216044
+		// Token: 0x060066F2 RID: 26354 RVA: 0x00217E24 File Offset: 0x00216024
 		public static bool TryAddLateInstantiatedMembers(GameObject root)
 		{
 			StaticLodGroup componentInParent = root.GetComponentInParent<StaticLodGroup>(true);
@@ -202,7 +202,7 @@ namespace GorillaTag
 			return StaticLodManager._TryAddMembersToLodGroup(false, groupIndex);
 		}
 
-		// Token: 0x060066F3 RID: 26355 RVA: 0x00217EBC File Offset: 0x002160BC
+		// Token: 0x060066F3 RID: 26355 RVA: 0x00217E9C File Offset: 0x0021609C
 		private static bool _TryAddMembersToLodGroup(bool isNew, int groupIndex)
 		{
 			bool flag = false;
@@ -218,7 +218,7 @@ namespace GorillaTag
 			return result;
 		}
 
-		// Token: 0x060066F4 RID: 26356 RVA: 0x00217FE4 File Offset: 0x002161E4
+		// Token: 0x060066F4 RID: 26356 RVA: 0x00217FC4 File Offset: 0x002161C4
 		private static bool _TryAddComponentsToGroup<T>(StaticLodGroup lodGroup, StaticLodGroupExcluder excluderAboveGroup, ref StaticLodManager.GroupInfo ref_groupInfo, ref T[] ref_components, Predicate<T> includeIf, StaticLodManager._GetBoundsDelegate<T> getBounds) where T : Component
 		{
 			List<T> list;
@@ -286,7 +286,7 @@ namespace GorillaTag
 		{
 		}
 
-		// Token: 0x060066F6 RID: 26358 RVA: 0x00218170 File Offset: 0x00216370
+		// Token: 0x060066F6 RID: 26358 RVA: 0x00218150 File Offset: 0x00216350
 		public static void SetEnabled(int index, bool enable)
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -298,7 +298,7 @@ namespace GorillaTag
 			StaticLodManager.groupInfos[index] = groupInfo;
 		}
 
-		// Token: 0x060066F7 RID: 26359 RVA: 0x002181A8 File Offset: 0x002163A8
+		// Token: 0x060066F7 RID: 26359 RVA: 0x00218188 File Offset: 0x00216388
 		public void SliceUpdate()
 		{
 			if (!this.hasMainCamera)

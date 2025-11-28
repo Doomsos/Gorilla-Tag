@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020006A3 RID: 1699
 public class GRElevatorButton : MonoBehaviour
 {
-	// Token: 0x06002B6A RID: 11114 RVA: 0x000E8A40 File Offset: 0x000E6C40
+	// Token: 0x06002B6A RID: 11114 RVA: 0x000E8A20 File Offset: 0x000E6C20
 	private void Awake()
 	{
 		if (this.disableDelayed == null)
@@ -19,13 +19,13 @@ public class GRElevatorButton : MonoBehaviour
 		this.disableDelayed.delayTime = this.litUpTime;
 	}
 
-	// Token: 0x06002B6B RID: 11115 RVA: 0x000E8A92 File Offset: 0x000E6C92
+	// Token: 0x06002B6B RID: 11115 RVA: 0x000E8A72 File Offset: 0x000E6C72
 	public void Pressed()
 	{
 		this.buttonLit.SetActive(true);
 	}
 
-	// Token: 0x06002B6C RID: 11116 RVA: 0x000E8AA0 File Offset: 0x000E6CA0
+	// Token: 0x06002B6C RID: 11116 RVA: 0x000E8A80 File Offset: 0x000E6C80
 	public void Depressed()
 	{
 		this.buttonLit.SetActive(false);

@@ -9,11 +9,11 @@ using UnityEngine.Serialization;
 public class HoverboardVisual : MonoBehaviour, ICallBack
 {
 	// Token: 0x170004D2 RID: 1234
-	// (get) Token: 0x0600364B RID: 13899 RVA: 0x001266F6 File Offset: 0x001248F6
-	// (set) Token: 0x0600364C RID: 13900 RVA: 0x001266FE File Offset: 0x001248FE
+	// (get) Token: 0x0600364B RID: 13899 RVA: 0x001266D6 File Offset: 0x001248D6
+	// (set) Token: 0x0600364C RID: 13900 RVA: 0x001266DE File Offset: 0x001248DE
 	public Color boardColor { get; private set; }
 
-	// Token: 0x0600364D RID: 13901 RVA: 0x00126708 File Offset: 0x00124908
+	// Token: 0x0600364D RID: 13901 RVA: 0x001266E8 File Offset: 0x001248E8
 	private void Awake()
 	{
 		Material[] sharedMaterials = this.boardMesh.sharedMaterials;
@@ -23,27 +23,27 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 	}
 
 	// Token: 0x170004D3 RID: 1235
-	// (get) Token: 0x0600364E RID: 13902 RVA: 0x00126744 File Offset: 0x00124944
-	// (set) Token: 0x0600364F RID: 13903 RVA: 0x0012674C File Offset: 0x0012494C
+	// (get) Token: 0x0600364E RID: 13902 RVA: 0x00126724 File Offset: 0x00124924
+	// (set) Token: 0x0600364F RID: 13903 RVA: 0x0012672C File Offset: 0x0012492C
 	public bool IsHeld { get; private set; }
 
 	// Token: 0x170004D4 RID: 1236
-	// (get) Token: 0x06003650 RID: 13904 RVA: 0x00126755 File Offset: 0x00124955
-	// (set) Token: 0x06003651 RID: 13905 RVA: 0x0012675D File Offset: 0x0012495D
+	// (get) Token: 0x06003650 RID: 13904 RVA: 0x00126735 File Offset: 0x00124935
+	// (set) Token: 0x06003651 RID: 13905 RVA: 0x0012673D File Offset: 0x0012493D
 	public bool IsLeftHanded { get; private set; }
 
 	// Token: 0x170004D5 RID: 1237
-	// (get) Token: 0x06003652 RID: 13906 RVA: 0x00126766 File Offset: 0x00124966
-	// (set) Token: 0x06003653 RID: 13907 RVA: 0x0012676E File Offset: 0x0012496E
+	// (get) Token: 0x06003652 RID: 13906 RVA: 0x00126746 File Offset: 0x00124946
+	// (set) Token: 0x06003653 RID: 13907 RVA: 0x0012674E File Offset: 0x0012494E
 	public Vector3 NominalLocalPosition { get; private set; }
 
 	// Token: 0x170004D6 RID: 1238
-	// (get) Token: 0x06003654 RID: 13908 RVA: 0x00126777 File Offset: 0x00124977
-	// (set) Token: 0x06003655 RID: 13909 RVA: 0x0012677F File Offset: 0x0012497F
+	// (get) Token: 0x06003654 RID: 13908 RVA: 0x00126757 File Offset: 0x00124957
+	// (set) Token: 0x06003655 RID: 13909 RVA: 0x0012675F File Offset: 0x0012495F
 	public Quaternion NominalLocalRotation { get; private set; }
 
 	// Token: 0x170004D7 RID: 1239
-	// (get) Token: 0x06003656 RID: 13910 RVA: 0x00126788 File Offset: 0x00124988
+	// (get) Token: 0x06003656 RID: 13910 RVA: 0x00126768 File Offset: 0x00124968
 	private Transform NominalParentTransform
 	{
 		get
@@ -56,7 +56,7 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		}
 	}
 
-	// Token: 0x06003657 RID: 13911 RVA: 0x001267C8 File Offset: 0x001249C8
+	// Token: 0x06003657 RID: 13911 RVA: 0x001267A8 File Offset: 0x001249A8
 	public void SetIsHeld(bool isHeldLeftHanded, Vector3 localPosition, Quaternion localRotation, Color boardColor)
 	{
 		if (!this.isCallbackActive)
@@ -85,14 +85,14 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		this.boardColor = boardColor;
 	}
 
-	// Token: 0x06003658 RID: 13912 RVA: 0x001268D1 File Offset: 0x00124AD1
+	// Token: 0x06003658 RID: 13912 RVA: 0x001268B1 File Offset: 0x00124AB1
 	public void SetNotHeld(bool isLeftHanded)
 	{
 		this.IsLeftHanded = isLeftHanded;
 		this.SetNotHeld();
 	}
 
-	// Token: 0x06003659 RID: 13913 RVA: 0x001268E0 File Offset: 0x00124AE0
+	// Token: 0x06003659 RID: 13913 RVA: 0x001268C0 File Offset: 0x00124AC0
 	public void SetNotHeld()
 	{
 		bool isHeld = this.IsHeld;
@@ -117,7 +117,7 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		this.hoverboardAudio.Stop();
 	}
 
-	// Token: 0x0600365A RID: 13914 RVA: 0x001269E8 File Offset: 0x00124BE8
+	// Token: 0x0600365A RID: 13914 RVA: 0x001269C8 File Offset: 0x00124BC8
 	void ICallBack.CallBack()
 	{
 		Transform nominalParentTransform = this.NominalParentTransform;
@@ -149,7 +149,7 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		}
 	}
 
-	// Token: 0x0600365B RID: 13915 RVA: 0x00126B3E File Offset: 0x00124D3E
+	// Token: 0x0600365B RID: 13915 RVA: 0x00126B1E File Offset: 0x00124D1E
 	public void PlayGrindHaptic()
 	{
 		if (this.IsHeld)
@@ -158,7 +158,7 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		}
 	}
 
-	// Token: 0x0600365C RID: 13916 RVA: 0x00126B64 File Offset: 0x00124D64
+	// Token: 0x0600365C RID: 13916 RVA: 0x00126B44 File Offset: 0x00124D44
 	public void PlayCarveHaptic(float carveForce)
 	{
 		if (this.IsHeld)
@@ -167,19 +167,19 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		}
 	}
 
-	// Token: 0x0600365D RID: 13917 RVA: 0x00126B8C File Offset: 0x00124D8C
+	// Token: 0x0600365D RID: 13917 RVA: 0x00126B6C File Offset: 0x00124D6C
 	public void ProxyGrabHandle(bool isLeftHand)
 	{
 		EquipmentInteractor.instance.UpdateHandEquipment(this.handlePosition, isLeftHand);
 	}
 
-	// Token: 0x0600365E RID: 13918 RVA: 0x00126BA1 File Offset: 0x00124DA1
+	// Token: 0x0600365E RID: 13918 RVA: 0x00126B81 File Offset: 0x00124D81
 	public void DropFreeBoard()
 	{
 		FreeHoverboardManager.instance.SendDropBoardRPC(base.transform.position, base.transform.rotation, this.velocityEstimator.linearVelocity, this.velocityEstimator.angularVelocity, this.boardColor);
 	}
 
-	// Token: 0x0600365F RID: 13919 RVA: 0x00126BDF File Offset: 0x00124DDF
+	// Token: 0x0600365F RID: 13919 RVA: 0x00126BBF File Offset: 0x00124DBF
 	public void SetRaceDisplay(string text)
 	{
 		if (string.IsNullOrEmpty(text))
@@ -191,7 +191,7 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		this.racePositionReadout.text = text;
 	}
 
-	// Token: 0x06003660 RID: 13920 RVA: 0x00126C18 File Offset: 0x00124E18
+	// Token: 0x06003660 RID: 13920 RVA: 0x00126BF8 File Offset: 0x00124DF8
 	public void SetRaceLapsDisplay(string text)
 	{
 		if (string.IsNullOrEmpty(text))

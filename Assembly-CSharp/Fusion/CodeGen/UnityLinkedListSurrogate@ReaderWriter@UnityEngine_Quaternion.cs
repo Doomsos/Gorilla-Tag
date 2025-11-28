@@ -10,8 +10,8 @@ namespace Fusion.CodeGen
 	internal class UnityLinkedListSurrogate@ReaderWriter@UnityEngine_Quaternion : UnityLinkedListSurrogate<Quaternion, ReaderWriter@UnityEngine_Quaternion>
 	{
 		// Token: 0x17000AC3 RID: 2755
-		// (get) Token: 0x06007316 RID: 29462 RVA: 0x0025AAE0 File Offset: 0x00258CE0
-		// (set) Token: 0x06007317 RID: 29463 RVA: 0x0025AAE8 File Offset: 0x00258CE8
+		// (get) Token: 0x06007316 RID: 29462 RVA: 0x0025AAC0 File Offset: 0x00258CC0
+		// (set) Token: 0x06007317 RID: 29463 RVA: 0x0025AAC8 File Offset: 0x00258CC8
 		[WeaverGenerated]
 		public override Quaternion[] DataProperty
 		{
@@ -27,7 +27,7 @@ namespace Fusion.CodeGen
 			}
 		}
 
-		// Token: 0x06007318 RID: 29464 RVA: 0x0025AAF1 File Offset: 0x00258CF1
+		// Token: 0x06007318 RID: 29464 RVA: 0x0025AAD1 File Offset: 0x00258CD1
 		[WeaverGenerated]
 		public UnityLinkedListSurrogate@ReaderWriter@UnityEngine_Quaternion()
 		{

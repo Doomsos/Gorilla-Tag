@@ -8,7 +8,7 @@ namespace emotitron.CompressionTests
 	// Token: 0x02001144 RID: 4420
 	public class BenchmarkTests : MonoBehaviour
 	{
-		// Token: 0x06006FA3 RID: 28579 RVA: 0x00245AC9 File Offset: 0x00243CC9
+		// Token: 0x06006FA3 RID: 28579 RVA: 0x00245AA9 File Offset: 0x00243CA9
 		private void Start()
 		{
 			BenchmarkTests.TestWriterIntegrity();
@@ -16,7 +16,7 @@ namespace emotitron.CompressionTests
 			BenchmarkTests.ArrayCopySafe();
 		}
 
-		// Token: 0x06006FA4 RID: 28580 RVA: 0x00245ADC File Offset: 0x00243CDC
+		// Token: 0x06006FA4 RID: 28580 RVA: 0x00245ABC File Offset: 0x00243CBC
 		public static void TestWriterIntegrity()
 		{
 			int num = 1;
@@ -116,7 +116,7 @@ namespace emotitron.CompressionTests
 			Debug.Log("Integrity check complete.");
 		}
 
-		// Token: 0x06006FA5 RID: 28581 RVA: 0x00245DFC File Offset: 0x00243FFC
+		// Token: 0x06006FA5 RID: 28581 RVA: 0x00245DDC File Offset: 0x00243FDC
 		private static void TestLog2()
 		{
 			Stopwatch stopwatch = Stopwatch.StartNew();
@@ -136,7 +136,7 @@ namespace emotitron.CompressionTests
 			Debug.Log("Log2 nifty: time=" + stopwatch.ElapsedMilliseconds.ToString() + " ms");
 		}
 
-		// Token: 0x06006FA6 RID: 28582 RVA: 0x00245E74 File Offset: 0x00244074
+		// Token: 0x06006FA6 RID: 28582 RVA: 0x00245E54 File Offset: 0x00244054
 		private static void ArrayCopy()
 		{
 			Stopwatch stopwatch = Stopwatch.StartNew();
@@ -149,7 +149,7 @@ namespace emotitron.CompressionTests
 			Debug.Log("Array Copy Unsafe: time=" + stopwatch.ElapsedMilliseconds.ToString() + " ms");
 		}
 
-		// Token: 0x06006FA7 RID: 28583 RVA: 0x00245ED8 File Offset: 0x002440D8
+		// Token: 0x06006FA7 RID: 28583 RVA: 0x00245EB8 File Offset: 0x002440B8
 		private static void ArrayCopySafe()
 		{
 			Stopwatch stopwatch = Stopwatch.StartNew();
@@ -162,7 +162,7 @@ namespace emotitron.CompressionTests
 			Debug.Log("Array Copy Safe: time=" + stopwatch.ElapsedMilliseconds.ToString() + " ms");
 		}
 
-		// Token: 0x06006FA8 RID: 28584 RVA: 0x00245F3C File Offset: 0x0024413C
+		// Token: 0x06006FA8 RID: 28584 RVA: 0x00245F1C File Offset: 0x0024411C
 		public static void ByteForByteWrite()
 		{
 			Stopwatch stopwatch = Stopwatch.StartNew();
@@ -183,7 +183,7 @@ namespace emotitron.CompressionTests
 			Debug.Log("Byte For Byte: time=" + stopwatch.ElapsedMilliseconds.ToString() + " ms");
 		}
 
-		// Token: 0x06006FA9 RID: 28585 RVA: 0x00245FD0 File Offset: 0x002441D0
+		// Token: 0x06006FA9 RID: 28585 RVA: 0x00245FB0 File Offset: 0x002441B0
 		public static void BitpackBytesEven()
 		{
 			Stopwatch stopwatch = Stopwatch.StartNew();
@@ -204,7 +204,7 @@ namespace emotitron.CompressionTests
 			Debug.Log("Even Bitpack byte: time=" + stopwatch.ElapsedMilliseconds.ToString() + " ms");
 		}
 
-		// Token: 0x06006FAA RID: 28586 RVA: 0x00246064 File Offset: 0x00244264
+		// Token: 0x06006FAA RID: 28586 RVA: 0x00246044 File Offset: 0x00244244
 		public static void BitpackBytesToULongUneven()
 		{
 			Stopwatch stopwatch = Stopwatch.StartNew();
@@ -227,7 +227,7 @@ namespace emotitron.CompressionTests
 			Debug.Log("Uneven Bitpack ulong[]: time=" + stopwatch.ElapsedMilliseconds.ToString() + " ms");
 		}
 
-		// Token: 0x06006FAB RID: 28587 RVA: 0x00246114 File Offset: 0x00244314
+		// Token: 0x06006FAB RID: 28587 RVA: 0x002460F4 File Offset: 0x002442F4
 		public static void BitpackBytesUnEven()
 		{
 			Stopwatch stopwatch = Stopwatch.StartNew();

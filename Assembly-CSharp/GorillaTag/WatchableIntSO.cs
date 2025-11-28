@@ -8,7 +8,7 @@ namespace GorillaTag
 	public class WatchableIntSO : WatchableGenericSO<int>
 	{
 		// Token: 0x170009A8 RID: 2472
-		// (get) Token: 0x06006716 RID: 26390 RVA: 0x002187DE File Offset: 0x002169DE
+		// (get) Token: 0x06006716 RID: 26390 RVA: 0x002187BE File Offset: 0x002169BE
 		private int currentValue
 		{
 			get

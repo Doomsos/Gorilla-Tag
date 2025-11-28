@@ -6,7 +6,7 @@ using UnityEngine.Events;
 [Serializable]
 public class FlagEvents<T> where T : Enum
 {
-	// Token: 0x06001FE7 RID: 8167 RVA: 0x000A9B30 File Offset: 0x000A7D30
+	// Token: 0x06001FE7 RID: 8167 RVA: 0x000A9B10 File Offset: 0x000A7D10
 	public void InvokeAll(T test, bool isLocal = false)
 	{
 		int num = Convert.ToInt32(test);
@@ -32,7 +32,7 @@ public class FlagEvents<T> where T : Enum
 	private class FlagEvent : ISerializationCallbackReceiver
 	{
 		// Token: 0x17000362 RID: 866
-		// (get) Token: 0x06001FE9 RID: 8169 RVA: 0x000A9B99 File Offset: 0x000A7D99
+		// (get) Token: 0x06001FE9 RID: 8169 RVA: 0x000A9B79 File Offset: 0x000A7D79
 		private string FlagsLabel
 		{
 			get
@@ -41,13 +41,13 @@ public class FlagEvents<T> where T : Enum
 			}
 		}
 
-		// Token: 0x06001FEA RID: 8170 RVA: 0x000A9BAA File Offset: 0x000A7DAA
+		// Token: 0x06001FEA RID: 8170 RVA: 0x000A9B8A File Offset: 0x000A7D8A
 		public void OnBeforeSerialize()
 		{
 			this.flagsAsInt = Convert.ToInt32(this.flags);
 		}
 
-		// Token: 0x06001FEB RID: 8171 RVA: 0x000A9BC2 File Offset: 0x000A7DC2
+		// Token: 0x06001FEB RID: 8171 RVA: 0x000A9BA2 File Offset: 0x000A7DA2
 		public void OnAfterDeserialize()
 		{
 			this.flags = (T)((object)this.flagsAsInt);

@@ -10,7 +10,7 @@ using UnityEngine.Scripting;
 // Token: 0x02000835 RID: 2101
 public class TappableManager : NetworkSceneObject
 {
-	// Token: 0x06003746 RID: 14150 RVA: 0x00129B50 File Offset: 0x00127D50
+	// Token: 0x06003746 RID: 14150 RVA: 0x00129B30 File Offset: 0x00127D30
 	private void Awake()
 	{
 		if (TappableManager.gManager != null && TappableManager.gManager != this)
@@ -38,7 +38,7 @@ public class TappableManager : NetworkSceneObject
 		TappableManager.gRegistry.Clear();
 	}
 
-	// Token: 0x06003747 RID: 14151 RVA: 0x00129BE0 File Offset: 0x00127DE0
+	// Token: 0x06003747 RID: 14151 RVA: 0x00129BC0 File Offset: 0x00127DC0
 	private void RegisterInstance(Tappable t)
 	{
 		if (t == null)
@@ -53,7 +53,7 @@ public class TappableManager : NetworkSceneObject
 		}
 	}
 
-	// Token: 0x06003748 RID: 14152 RVA: 0x00129C1D File Offset: 0x00127E1D
+	// Token: 0x06003748 RID: 14152 RVA: 0x00129BFD File Offset: 0x00127DFD
 	private void UnregisterInstance(Tappable t)
 	{
 		if (t == null)
@@ -68,7 +68,7 @@ public class TappableManager : NetworkSceneObject
 		t.manager = null;
 	}
 
-	// Token: 0x06003749 RID: 14153 RVA: 0x00129C51 File Offset: 0x00127E51
+	// Token: 0x06003749 RID: 14153 RVA: 0x00129C31 File Offset: 0x00127E31
 	public static void Register(Tappable t)
 	{
 		if (TappableManager.gManager != null)
@@ -79,7 +79,7 @@ public class TappableManager : NetworkSceneObject
 		TappableManager.gRegistry.Add(t);
 	}
 
-	// Token: 0x0600374A RID: 14154 RVA: 0x00129C78 File Offset: 0x00127E78
+	// Token: 0x0600374A RID: 14154 RVA: 0x00129C58 File Offset: 0x00127E58
 	public static void Unregister(Tappable t)
 	{
 		if (TappableManager.gManager != null)
@@ -90,7 +90,7 @@ public class TappableManager : NetworkSceneObject
 		TappableManager.gRegistry.Remove(t);
 	}
 
-	// Token: 0x0600374B RID: 14155 RVA: 0x00129CA0 File Offset: 0x00127EA0
+	// Token: 0x0600374B RID: 14155 RVA: 0x00129C80 File Offset: 0x00127E80
 	[Conditional("QATESTING")]
 	public void DebugTestTap()
 	{
@@ -104,14 +104,14 @@ public class TappableManager : NetworkSceneObject
 		Debug.Log("TappableManager: tappables array is empty.");
 	}
 
-	// Token: 0x0600374C RID: 14156 RVA: 0x00129D1C File Offset: 0x00127F1C
+	// Token: 0x0600374C RID: 14156 RVA: 0x00129CFC File Offset: 0x00127EFC
 	[PunRPC]
 	public void SendOnTapRPC(int key, float tapStrength, PhotonMessageInfo info)
 	{
 		this.SendOnTapShared(key, tapStrength, new PhotonMessageInfoWrapped(info));
 	}
 
-	// Token: 0x0600374D RID: 14157 RVA: 0x00129D2C File Offset: 0x00127F2C
+	// Token: 0x0600374D RID: 14157 RVA: 0x00129D0C File Offset: 0x00127F0C
 	[Rpc]
 	public unsafe static void RPC_SendOnTap(NetworkRunner runner, int key, float tapStrength, RpcInfo info = default(RpcInfo))
 	{
@@ -157,7 +157,7 @@ public class TappableManager : NetworkSceneObject
 		TappableManager.gManager.SendOnTapShared(key, tapStrength, new PhotonMessageInfoWrapped(info));
 	}
 
-	// Token: 0x0600374E RID: 14158 RVA: 0x00129E68 File Offset: 0x00128068
+	// Token: 0x0600374E RID: 14158 RVA: 0x00129E48 File Offset: 0x00128048
 	private void SendOnTapShared(int key, float tapStrength, PhotonMessageInfoWrapped info)
 	{
 		GorillaNot.IncrementRPCCall(info, "SendOnTapShared");
@@ -176,14 +176,14 @@ public class TappableManager : NetworkSceneObject
 		}
 	}
 
-	// Token: 0x0600374F RID: 14159 RVA: 0x00129ED7 File Offset: 0x001280D7
+	// Token: 0x0600374F RID: 14159 RVA: 0x00129EB7 File Offset: 0x001280B7
 	[PunRPC]
 	public void SendOnGrabRPC(int key, PhotonMessageInfo info)
 	{
 		this.SendOnGrabShared(key, new PhotonMessageInfoWrapped(info));
 	}
 
-	// Token: 0x06003750 RID: 14160 RVA: 0x00129EE8 File Offset: 0x001280E8
+	// Token: 0x06003750 RID: 14160 RVA: 0x00129EC8 File Offset: 0x001280C8
 	[Rpc]
 	public unsafe static void RPC_SendOnGrab(NetworkRunner runner, int key, RpcInfo info = default(RpcInfo))
 	{
@@ -226,7 +226,7 @@ public class TappableManager : NetworkSceneObject
 		TappableManager.gManager.SendOnGrabShared(key, new PhotonMessageInfoWrapped(info));
 	}
 
-	// Token: 0x06003751 RID: 14161 RVA: 0x0012A000 File Offset: 0x00128200
+	// Token: 0x06003751 RID: 14161 RVA: 0x00129FE0 File Offset: 0x001281E0
 	private void SendOnGrabShared(int key, PhotonMessageInfoWrapped info)
 	{
 		GorillaNot.IncrementRPCCall(info, "SendOnGrabShared");
@@ -244,14 +244,14 @@ public class TappableManager : NetworkSceneObject
 		}
 	}
 
-	// Token: 0x06003752 RID: 14162 RVA: 0x0012A054 File Offset: 0x00128254
+	// Token: 0x06003752 RID: 14162 RVA: 0x0012A034 File Offset: 0x00128234
 	[PunRPC]
 	public void SendOnReleaseRPC(int key, PhotonMessageInfo info)
 	{
 		this.SendOnReleaseShared(key, new PhotonMessageInfoWrapped(info));
 	}
 
-	// Token: 0x06003753 RID: 14163 RVA: 0x0012A064 File Offset: 0x00128264
+	// Token: 0x06003753 RID: 14163 RVA: 0x0012A044 File Offset: 0x00128244
 	[Rpc]
 	public unsafe static void RPC_SendOnRelease(NetworkRunner runner, int key, RpcInfo info = default(RpcInfo))
 	{
@@ -294,7 +294,7 @@ public class TappableManager : NetworkSceneObject
 		TappableManager.gManager.SendOnReleaseShared(key, new PhotonMessageInfoWrapped(info));
 	}
 
-	// Token: 0x06003754 RID: 14164 RVA: 0x0012A17C File Offset: 0x0012837C
+	// Token: 0x06003754 RID: 14164 RVA: 0x0012A15C File Offset: 0x0012835C
 	public void SendOnReleaseShared(int key, PhotonMessageInfoWrapped info)
 	{
 		GorillaNot.IncrementRPCCall(info, "SendOnReleaseShared");
@@ -312,7 +312,7 @@ public class TappableManager : NetworkSceneObject
 		}
 	}
 
-	// Token: 0x06003757 RID: 14167 RVA: 0x0012A1FC File Offset: 0x001283FC
+	// Token: 0x06003757 RID: 14167 RVA: 0x0012A1DC File Offset: 0x001283DC
 	[NetworkRpcStaticWeavedInvoker("System.Void TappableManager::RPC_SendOnTap(Fusion.NetworkRunner,System.Int32,System.Single,Fusion.RpcInfo)")]
 	[Preserve]
 	[WeaverGenerated]
@@ -331,7 +331,7 @@ public class TappableManager : NetworkSceneObject
 		TappableManager.RPC_SendOnTap(runner, key, tapStrength, info);
 	}
 
-	// Token: 0x06003758 RID: 14168 RVA: 0x0012A278 File Offset: 0x00128478
+	// Token: 0x06003758 RID: 14168 RVA: 0x0012A258 File Offset: 0x00128458
 	[NetworkRpcStaticWeavedInvoker("System.Void TappableManager::RPC_SendOnGrab(Fusion.NetworkRunner,System.Int32,Fusion.RpcInfo)")]
 	[Preserve]
 	[WeaverGenerated]
@@ -347,7 +347,7 @@ public class TappableManager : NetworkSceneObject
 		TappableManager.RPC_SendOnGrab(runner, key, info);
 	}
 
-	// Token: 0x06003759 RID: 14169 RVA: 0x0012A2D8 File Offset: 0x001284D8
+	// Token: 0x06003759 RID: 14169 RVA: 0x0012A2B8 File Offset: 0x001284B8
 	[NetworkRpcStaticWeavedInvoker("System.Void TappableManager::RPC_SendOnRelease(Fusion.NetworkRunner,System.Int32,Fusion.RpcInfo)")]
 	[Preserve]
 	[WeaverGenerated]

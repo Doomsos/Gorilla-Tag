@@ -9,8 +9,8 @@ namespace Fusion.CodeGen
 	internal class UnityArraySurrogate@ReaderWriter@GorillaPaintbrawlManager__PaintbrawlStatus : UnityArraySurrogate<GorillaPaintbrawlManager.PaintbrawlStatus, ReaderWriter@GorillaPaintbrawlManager__PaintbrawlStatus>
 	{
 		// Token: 0x17000AC1 RID: 2753
-		// (get) Token: 0x06007310 RID: 29456 RVA: 0x0025AA98 File Offset: 0x00258C98
-		// (set) Token: 0x06007311 RID: 29457 RVA: 0x0025AAA0 File Offset: 0x00258CA0
+		// (get) Token: 0x06007310 RID: 29456 RVA: 0x0025AA78 File Offset: 0x00258C78
+		// (set) Token: 0x06007311 RID: 29457 RVA: 0x0025AA80 File Offset: 0x00258C80
 		[WeaverGenerated]
 		public override GorillaPaintbrawlManager.PaintbrawlStatus[] DataProperty
 		{
@@ -26,7 +26,7 @@ namespace Fusion.CodeGen
 			}
 		}
 
-		// Token: 0x06007312 RID: 29458 RVA: 0x0025AAA9 File Offset: 0x00258CA9
+		// Token: 0x06007312 RID: 29458 RVA: 0x0025AA89 File Offset: 0x00258C89
 		[WeaverGenerated]
 		public UnityArraySurrogate@ReaderWriter@GorillaPaintbrawlManager__PaintbrawlStatus()
 		{

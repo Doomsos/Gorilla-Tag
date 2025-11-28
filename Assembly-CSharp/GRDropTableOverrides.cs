@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GhostReactorDropTableOverrides", menuName = "ScriptableObjects/GhostReactorDropTableOverride")]
 public class GRDropTableOverrides : ScriptableObject
 {
-	// Token: 0x06002B41 RID: 11073 RVA: 0x000E8118 File Offset: 0x000E6318
+	// Token: 0x06002B41 RID: 11073 RVA: 0x000E80F8 File Offset: 0x000E62F8
 	public GRBreakableItemSpawnConfig GetOverride(GRBreakableItemSpawnConfig table)
 	{
 		for (int i = 0; i < this.overrides.Count; i++)

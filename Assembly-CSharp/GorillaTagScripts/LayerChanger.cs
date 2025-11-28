@@ -8,7 +8,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DF5 RID: 3573
 	public class LayerChanger : MonoBehaviour
 	{
-		// Token: 0x0600591E RID: 22814 RVA: 0x001C7F91 File Offset: 0x001C6191
+		// Token: 0x0600591E RID: 22814 RVA: 0x001C7F71 File Offset: 0x001C6171
 		public void InitializeLayers(Transform parent)
 		{
 			if (!this.layersStored)
@@ -18,7 +18,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600591F RID: 22815 RVA: 0x001C7FAC File Offset: 0x001C61AC
+		// Token: 0x0600591F RID: 22815 RVA: 0x001C7F8C File Offset: 0x001C618C
 		private void StoreOriginalLayers(Transform parent)
 		{
 			if (!this.includeChildren)
@@ -34,7 +34,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005920 RID: 22816 RVA: 0x001C8028 File Offset: 0x001C6228
+		// Token: 0x06005920 RID: 22816 RVA: 0x001C8008 File Offset: 0x001C6208
 		public void ChangeLayer(Transform parent, string newLayer)
 		{
 			if (!this.layersStored)
@@ -45,7 +45,7 @@ namespace GorillaTagScripts
 			this.ChangeLayers(parent, LayerMask.NameToLayer(newLayer));
 		}
 
-		// Token: 0x06005921 RID: 22817 RVA: 0x001C804C File Offset: 0x001C624C
+		// Token: 0x06005921 RID: 22817 RVA: 0x001C802C File Offset: 0x001C622C
 		private void ChangeLayers(Transform parent, int newLayer)
 		{
 			if (!this.includeChildren)
@@ -67,7 +67,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005922 RID: 22818 RVA: 0x001C80F4 File Offset: 0x001C62F4
+		// Token: 0x06005922 RID: 22818 RVA: 0x001C80D4 File Offset: 0x001C62D4
 		public void RestoreOriginalLayers()
 		{
 			if (!this.layersStored)

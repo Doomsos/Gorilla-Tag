@@ -9,13 +9,13 @@ using UnityEngine;
 public class CosmeticAnchors : MonoBehaviour, ISpawnable
 {
 	// Token: 0x1700032A RID: 810
-	// (get) Token: 0x06001D0B RID: 7435 RVA: 0x000996A4 File Offset: 0x000978A4
-	// (set) Token: 0x06001D0C RID: 7436 RVA: 0x000996AC File Offset: 0x000978AC
+	// (get) Token: 0x06001D0B RID: 7435 RVA: 0x00099684 File Offset: 0x00097884
+	// (set) Token: 0x06001D0C RID: 7436 RVA: 0x0009968C File Offset: 0x0009788C
 	bool ISpawnable.IsSpawned { get; set; }
 
 	// Token: 0x1700032B RID: 811
-	// (get) Token: 0x06001D0D RID: 7437 RVA: 0x000996B5 File Offset: 0x000978B5
-	// (set) Token: 0x06001D0E RID: 7438 RVA: 0x000996BD File Offset: 0x000978BD
+	// (get) Token: 0x06001D0D RID: 7437 RVA: 0x00099695 File Offset: 0x00097895
+	// (set) Token: 0x06001D0E RID: 7438 RVA: 0x0009969D File Offset: 0x0009789D
 	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
 
 	// Token: 0x06001D0F RID: 7439 RVA: 0x00002789 File Offset: 0x00000989
@@ -28,7 +28,7 @@ public class CosmeticAnchors : MonoBehaviour, ISpawnable
 	{
 	}
 
-	// Token: 0x06001D11 RID: 7441 RVA: 0x000996C8 File Offset: 0x000978C8
+	// Token: 0x06001D11 RID: 7441 RVA: 0x000996A8 File Offset: 0x000978A8
 	private void AssignAnchorToPath(ref GameObject anchorGObjRef, string path)
 	{
 		if (string.IsNullOrEmpty(path))
@@ -68,7 +68,7 @@ public class CosmeticAnchors : MonoBehaviour, ISpawnable
 	{
 	}
 
-	// Token: 0x06001D16 RID: 7446 RVA: 0x00099740 File Offset: 0x00097940
+	// Token: 0x06001D16 RID: 7446 RVA: 0x00099720 File Offset: 0x00097920
 	private void SetHuntComputerAnchor(bool enable)
 	{
 		Transform huntComputer = this.anchorOverrides.HuntComputer;
@@ -84,7 +84,7 @@ public class CosmeticAnchors : MonoBehaviour, ISpawnable
 		huntComputer.transform.localRotation = Quaternion.identity;
 	}
 
-	// Token: 0x06001D17 RID: 7447 RVA: 0x000997B8 File Offset: 0x000979B8
+	// Token: 0x06001D17 RID: 7447 RVA: 0x00099798 File Offset: 0x00097998
 	private void SetBuilderWatchAnchor(bool enable)
 	{
 		Transform builderWatch = this.anchorOverrides.BuilderWatch;
@@ -100,7 +100,7 @@ public class CosmeticAnchors : MonoBehaviour, ISpawnable
 		builderWatch.transform.localRotation = Quaternion.identity;
 	}
 
-	// Token: 0x06001D18 RID: 7448 RVA: 0x00099830 File Offset: 0x00097A30
+	// Token: 0x06001D18 RID: 7448 RVA: 0x00099810 File Offset: 0x00097A10
 	private void SetCustomAnchor(Transform target, bool enable, GameObject overrideAnchor, Transform defaultAnchor)
 	{
 		Transform transform = (enable && overrideAnchor != null) ? overrideAnchor.transform : defaultAnchor;
@@ -113,7 +113,7 @@ public class CosmeticAnchors : MonoBehaviour, ISpawnable
 		}
 	}
 
-	// Token: 0x06001D19 RID: 7449 RVA: 0x000998A4 File Offset: 0x00097AA4
+	// Token: 0x06001D19 RID: 7449 RVA: 0x00099884 File Offset: 0x00097A84
 	public Transform GetPositionAnchor(TransferrableObject.PositionState pos)
 	{
 		if (pos != TransferrableObject.PositionState.OnLeftArm)
@@ -149,7 +149,7 @@ public class CosmeticAnchors : MonoBehaviour, ISpawnable
 		}
 	}
 
-	// Token: 0x06001D1A RID: 7450 RVA: 0x00099912 File Offset: 0x00097B12
+	// Token: 0x06001D1A RID: 7450 RVA: 0x000998F2 File Offset: 0x00097AF2
 	public Transform GetNameAnchor()
 	{
 		if (!this.nameAnchor)
@@ -159,13 +159,13 @@ public class CosmeticAnchors : MonoBehaviour, ISpawnable
 		return this.nameAnchor.transform;
 	}
 
-	// Token: 0x06001D1B RID: 7451 RVA: 0x0009992E File Offset: 0x00097B2E
+	// Token: 0x06001D1B RID: 7451 RVA: 0x0009990E File Offset: 0x00097B0E
 	public bool AffectedByHunt()
 	{
 		return this.huntComputerAnchor != null;
 	}
 
-	// Token: 0x06001D1C RID: 7452 RVA: 0x0009993C File Offset: 0x00097B3C
+	// Token: 0x06001D1C RID: 7452 RVA: 0x0009991C File Offset: 0x00097B1C
 	public bool AffectedByBuilder()
 	{
 		return this.builderWatchAnchor != null;

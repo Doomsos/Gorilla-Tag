@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x0200070E RID: 1806
 public class GRSummonerEgg : MonoBehaviour
 {
-	// Token: 0x06002E5E RID: 11870 RVA: 0x000FBFB6 File Offset: 0x000FA1B6
+	// Token: 0x06002E5E RID: 11870 RVA: 0x000FBF96 File Offset: 0x000FA196
 	private void Awake()
 	{
 		this.summonedEntity = base.GetComponent<GRSummonedEntity>();
 	}
 
-	// Token: 0x06002E5F RID: 11871 RVA: 0x000FBFC4 File Offset: 0x000FA1C4
+	// Token: 0x06002E5F RID: 11871 RVA: 0x000FBFA4 File Offset: 0x000FA1A4
 	private void Start()
 	{
 		this.hatchTime = Random.Range(this.minHatchTime, this.maxHatchTime);
@@ -26,7 +26,7 @@ public class GRSummonerEgg : MonoBehaviour
 		base.Invoke("HatchEgg", this.hatchTime);
 	}
 
-	// Token: 0x06002E60 RID: 11872 RVA: 0x000FC054 File Offset: 0x000FA254
+	// Token: 0x06002E60 RID: 11872 RVA: 0x000FC034 File Offset: 0x000FA234
 	public void HatchEgg()
 	{
 		GRBreakable component = base.GetComponent<GRBreakable>();
@@ -49,7 +49,7 @@ public class GRSummonerEgg : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002E62 RID: 11874 RVA: 0x000FC10B File Offset: 0x000FA30B
+	// Token: 0x06002E62 RID: 11874 RVA: 0x000FC0EB File Offset: 0x000FA2EB
 	public void DestroySelf()
 	{
 		if (this.entity.IsAuthority())

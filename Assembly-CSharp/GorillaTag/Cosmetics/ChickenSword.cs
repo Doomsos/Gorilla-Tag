@@ -10,14 +10,14 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010C1 RID: 4289
 	public class ChickenSword : MonoBehaviour
 	{
-		// Token: 0x06006B96 RID: 27542 RVA: 0x00234D58 File Offset: 0x00232F58
+		// Token: 0x06006B96 RID: 27542 RVA: 0x00234D38 File Offset: 0x00232F38
 		private void Awake()
 		{
 			this.lastHitTime = float.PositiveInfinity;
 			this.SwitchState(ChickenSword.SwordState.Ready);
 		}
 
-		// Token: 0x06006B97 RID: 27543 RVA: 0x00234D6C File Offset: 0x00232F6C
+		// Token: 0x06006B97 RID: 27543 RVA: 0x00234D4C File Offset: 0x00232F4C
 		internal void OnEnable()
 		{
 			if (this._events == null)
@@ -39,7 +39,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B98 RID: 27544 RVA: 0x00234E50 File Offset: 0x00233050
+		// Token: 0x06006B98 RID: 27544 RVA: 0x00234E30 File Offset: 0x00233030
 		private void OnDisable()
 		{
 			if (this._events != null)
@@ -50,7 +50,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B99 RID: 27545 RVA: 0x00234EA0 File Offset: 0x002330A0
+		// Token: 0x06006B99 RID: 27545 RVA: 0x00234E80 File Offset: 0x00233080
 		private void Update()
 		{
 			ChickenSword.SwordState swordState = this.currentState;
@@ -103,7 +103,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B9A RID: 27546 RVA: 0x00234F9C File Offset: 0x0023319C
+		// Token: 0x06006B9A RID: 27546 RVA: 0x00234F7C File Offset: 0x0023317C
 		public void OnHitTargetSync(VRRig playerRig)
 		{
 			if (this.velocityTracker == null)
@@ -135,7 +135,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B9B RID: 27547 RVA: 0x002350B0 File Offset: 0x002332B0
+		// Token: 0x06006B9B RID: 27547 RVA: 0x00235090 File Offset: 0x00233290
 		private void OnReachedLastTransformationStep(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -159,7 +159,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B9C RID: 27548 RVA: 0x00235138 File Offset: 0x00233338
+		// Token: 0x06006B9C RID: 27548 RVA: 0x00235118 File Offset: 0x00233318
 		private void SwitchState(ChickenSword.SwordState newState)
 		{
 			this.currentState = newState;

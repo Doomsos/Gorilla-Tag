@@ -7,25 +7,25 @@ namespace GorillaTagScripts
 	// Token: 0x02000DEE RID: 3566
 	public class GorillaPlayerTimerButton : MonoBehaviour
 	{
-		// Token: 0x060058EB RID: 22763 RVA: 0x001C78E4 File Offset: 0x001C5AE4
+		// Token: 0x060058EB RID: 22763 RVA: 0x001C78C4 File Offset: 0x001C5AC4
 		private void Awake()
 		{
 			this.materialProps = new MaterialPropertyBlock();
 		}
 
-		// Token: 0x060058EC RID: 22764 RVA: 0x001C78F1 File Offset: 0x001C5AF1
+		// Token: 0x060058EC RID: 22764 RVA: 0x001C78D1 File Offset: 0x001C5AD1
 		private void Start()
 		{
 			this.TryInit();
 		}
 
-		// Token: 0x060058ED RID: 22765 RVA: 0x001C78F1 File Offset: 0x001C5AF1
+		// Token: 0x060058ED RID: 22765 RVA: 0x001C78D1 File Offset: 0x001C5AD1
 		private void OnEnable()
 		{
 			this.TryInit();
 		}
 
-		// Token: 0x060058EE RID: 22766 RVA: 0x001C78FC File Offset: 0x001C5AFC
+		// Token: 0x060058EE RID: 22766 RVA: 0x001C78DC File Offset: 0x001C5ADC
 		private void TryInit()
 		{
 			if (this.isInitialized)
@@ -45,7 +45,7 @@ namespace GorillaTagScripts
 			this.isInitialized = true;
 		}
 
-		// Token: 0x060058EF RID: 22767 RVA: 0x001C7978 File Offset: 0x001C5B78
+		// Token: 0x060058EF RID: 22767 RVA: 0x001C7958 File Offset: 0x001C5B58
 		private void OnDisable()
 		{
 			if (PlayerTimerManager.instance != null)
@@ -56,7 +56,7 @@ namespace GorillaTagScripts
 			this.isInitialized = false;
 		}
 
-		// Token: 0x060058F0 RID: 22768 RVA: 0x001C79CF File Offset: 0x001C5BCF
+		// Token: 0x060058F0 RID: 22768 RVA: 0x001C79AF File Offset: 0x001C5BAF
 		private void OnLocalTimerStarted()
 		{
 			if (this.isBothStartAndStop)
@@ -65,7 +65,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058F1 RID: 22769 RVA: 0x001C79E0 File Offset: 0x001C5BE0
+		// Token: 0x060058F1 RID: 22769 RVA: 0x001C79C0 File Offset: 0x001C5BC0
 		private void OnTimerStopped(int actorNum, int timeDelta)
 		{
 			if (this.isBothStartAndStop && actorNum == NetworkSystem.Instance.LocalPlayer.ActorNumber)
@@ -74,7 +74,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058F2 RID: 22770 RVA: 0x001C7A04 File Offset: 0x001C5C04
+		// Token: 0x060058F2 RID: 22770 RVA: 0x001C79E4 File Offset: 0x001C5BE4
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!base.enabled)
@@ -102,7 +102,7 @@ namespace GorillaTagScripts
 			this.lastTriggeredTime = Time.time;
 		}
 
-		// Token: 0x060058F3 RID: 22771 RVA: 0x001C7AC4 File Offset: 0x001C5CC4
+		// Token: 0x060058F3 RID: 22771 RVA: 0x001C7AA4 File Offset: 0x001C5CA4
 		private void OnTriggerExit(Collider other)
 		{
 			if (!base.enabled)

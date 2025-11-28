@@ -6,7 +6,7 @@ using UnityEngine.Events;
 public class SnapXformToLine : MonoBehaviour
 {
 	// Token: 0x17000560 RID: 1376
-	// (get) Token: 0x06003A45 RID: 14917 RVA: 0x00133ADB File Offset: 0x00131CDB
+	// (get) Token: 0x06003A45 RID: 14917 RVA: 0x00133ABB File Offset: 0x00131CBB
 	public Vector3 linePoint
 	{
 		get
@@ -16,7 +16,7 @@ public class SnapXformToLine : MonoBehaviour
 	}
 
 	// Token: 0x17000561 RID: 1377
-	// (get) Token: 0x06003A46 RID: 14918 RVA: 0x00133AE3 File Offset: 0x00131CE3
+	// (get) Token: 0x06003A46 RID: 14918 RVA: 0x00133AC3 File Offset: 0x00131CC3
 	public float linearDistance
 	{
 		get
@@ -25,13 +25,13 @@ public class SnapXformToLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003A47 RID: 14919 RVA: 0x00133AEB File Offset: 0x00131CEB
+	// Token: 0x06003A47 RID: 14919 RVA: 0x00133ACB File Offset: 0x00131CCB
 	public void SnapTarget(bool applyToXform = true)
 	{
 		this.Snap(this.target, true);
 	}
 
-	// Token: 0x06003A48 RID: 14920 RVA: 0x00133AFA File Offset: 0x00131CFA
+	// Token: 0x06003A48 RID: 14920 RVA: 0x00133ADA File Offset: 0x00131CDA
 	public void SnapTarget(Vector3 point)
 	{
 		if (this.target)
@@ -40,7 +40,7 @@ public class SnapXformToLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003A49 RID: 14921 RVA: 0x00133B28 File Offset: 0x00131D28
+	// Token: 0x06003A49 RID: 14921 RVA: 0x00133B08 File Offset: 0x00131D08
 	public void SnapTargetLinear(float t)
 	{
 		if (this.target && this.from && this.to)
@@ -49,13 +49,13 @@ public class SnapXformToLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003A4A RID: 14922 RVA: 0x00133B83 File Offset: 0x00131D83
+	// Token: 0x06003A4A RID: 14922 RVA: 0x00133B63 File Offset: 0x00131D63
 	public Vector3 GetSnappedPoint(Transform t)
 	{
 		return this.GetSnappedPoint(t.position);
 	}
 
-	// Token: 0x06003A4B RID: 14923 RVA: 0x00133B94 File Offset: 0x00131D94
+	// Token: 0x06003A4B RID: 14923 RVA: 0x00133B74 File Offset: 0x00131D74
 	public Vector3 GetSnappedPoint(Vector3 point)
 	{
 		if (!this.apply)
@@ -69,7 +69,7 @@ public class SnapXformToLine : MonoBehaviour
 		return SnapXformToLine.GetClosestPointOnLine(point, this.from.position, this.to.position);
 	}
 
-	// Token: 0x06003A4C RID: 14924 RVA: 0x00133BE4 File Offset: 0x00131DE4
+	// Token: 0x06003A4C RID: 14924 RVA: 0x00133BC4 File Offset: 0x00131DC4
 	public void Snap(Transform xform, bool applyToXform = true)
 	{
 		if (!this.apply || !xform || !this.from || !this.to)
@@ -120,7 +120,7 @@ public class SnapXformToLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003A4D RID: 14925 RVA: 0x00133DAA File Offset: 0x00131FAA
+	// Token: 0x06003A4D RID: 14925 RVA: 0x00133D8A File Offset: 0x00131F8A
 	private void OnDisable()
 	{
 		if (this.resetOnDisable)
@@ -129,13 +129,13 @@ public class SnapXformToLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003A4E RID: 14926 RVA: 0x00133DBF File Offset: 0x00131FBF
+	// Token: 0x06003A4E RID: 14926 RVA: 0x00133D9F File Offset: 0x00131F9F
 	private void LateUpdate()
 	{
 		this.SnapTarget(true);
 	}
 
-	// Token: 0x06003A4F RID: 14927 RVA: 0x00133DC8 File Offset: 0x00131FC8
+	// Token: 0x06003A4F RID: 14927 RVA: 0x00133DA8 File Offset: 0x00131FA8
 	private static Vector3 GetClosestPointOnLine(Vector3 p, Vector3 a, Vector3 b)
 	{
 		Vector3 vector = p - a;

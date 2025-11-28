@@ -10,7 +10,7 @@ namespace GameObjectScheduling
 	public class GameObjectSchedule : ScriptableObject
 	{
 		// Token: 0x17000A77 RID: 2679
-		// (get) Token: 0x06006FFC RID: 28668 RVA: 0x00247066 File Offset: 0x00245266
+		// (get) Token: 0x06006FFC RID: 28668 RVA: 0x00247046 File Offset: 0x00245246
 		public GameObjectSchedule.GameObjectScheduleNode[] Nodes
 		{
 			get
@@ -20,7 +20,7 @@ namespace GameObjectScheduling
 		}
 
 		// Token: 0x17000A78 RID: 2680
-		// (get) Token: 0x06006FFD RID: 28669 RVA: 0x0024706E File Offset: 0x0024526E
+		// (get) Token: 0x06006FFD RID: 28669 RVA: 0x0024704E File Offset: 0x0024524E
 		public bool InitialState
 		{
 			get
@@ -29,7 +29,7 @@ namespace GameObjectScheduling
 			}
 		}
 
-		// Token: 0x06006FFE RID: 28670 RVA: 0x00247078 File Offset: 0x00245278
+		// Token: 0x06006FFE RID: 28670 RVA: 0x00247058 File Offset: 0x00245258
 		public int GetCurrentNodeIndex(DateTime currentDate, int startFrom = 0)
 		{
 			if (startFrom >= this.nodes.Length)
@@ -46,7 +46,7 @@ namespace GameObjectScheduling
 			return int.MaxValue;
 		}
 
-		// Token: 0x06006FFF RID: 28671 RVA: 0x002470C9 File Offset: 0x002452C9
+		// Token: 0x06006FFF RID: 28671 RVA: 0x002470A9 File Offset: 0x002452A9
 		public void Validate()
 		{
 			if (this.validated)
@@ -57,7 +57,7 @@ namespace GameObjectScheduling
 			this.validated = true;
 		}
 
-		// Token: 0x06007000 RID: 28672 RVA: 0x002470E4 File Offset: 0x002452E4
+		// Token: 0x06007000 RID: 28672 RVA: 0x002470C4 File Offset: 0x002452C4
 		private void _validate()
 		{
 			for (int i = 0; i < this.nodes.Length; i++)
@@ -69,7 +69,7 @@ namespace GameObjectScheduling
 			this.nodes = list.ToArray();
 		}
 
-		// Token: 0x06007001 RID: 28673 RVA: 0x00247150 File Offset: 0x00245350
+		// Token: 0x06007001 RID: 28673 RVA: 0x00247130 File Offset: 0x00245330
 		public static void GenerateDailyShuffle(DateTime startDate, DateTime endDate, GameObjectSchedule[] schedules)
 		{
 			TimeSpan timeSpan = TimeSpan.FromDays(1.0);
@@ -145,7 +145,7 @@ namespace GameObjectScheduling
 		public class GameObjectScheduleNode
 		{
 			// Token: 0x17000A79 RID: 2681
-			// (get) Token: 0x06007003 RID: 28675 RVA: 0x00247287 File Offset: 0x00245487
+			// (get) Token: 0x06007003 RID: 28675 RVA: 0x00247267 File Offset: 0x00245467
 			public bool ActiveState
 			{
 				get
@@ -155,7 +155,7 @@ namespace GameObjectScheduling
 			}
 
 			// Token: 0x17000A7A RID: 2682
-			// (get) Token: 0x06007004 RID: 28676 RVA: 0x0024728F File Offset: 0x0024548F
+			// (get) Token: 0x06007004 RID: 28676 RVA: 0x0024726F File Offset: 0x0024546F
 			public DateTime DateTime
 			{
 				get
@@ -164,7 +164,7 @@ namespace GameObjectScheduling
 				}
 			}
 
-			// Token: 0x06007005 RID: 28677 RVA: 0x00247298 File Offset: 0x00245498
+			// Token: 0x06007005 RID: 28677 RVA: 0x00247278 File Offset: 0x00245478
 			public void Validate()
 			{
 				try

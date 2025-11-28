@@ -5,7 +5,7 @@ namespace emotitron.Compression
 	// Token: 0x02001135 RID: 4405
 	public static class BitCounter
 	{
-		// Token: 0x06006EB2 RID: 28338 RVA: 0x00243B50 File Offset: 0x00241D50
+		// Token: 0x06006EB2 RID: 28338 RVA: 0x00243B30 File Offset: 0x00241D30
 		public static int UsedBitCount(this ulong val)
 		{
 			val |= val >> 1;
@@ -17,7 +17,7 @@ namespace emotitron.Compression
 			return BitCounter.bitPatternToLog2[(int)(checked((IntPtr)(unchecked(val * 7783611145303519083UL) >> 57)))];
 		}
 
-		// Token: 0x06006EB3 RID: 28339 RVA: 0x00243B9E File Offset: 0x00241D9E
+		// Token: 0x06006EB3 RID: 28339 RVA: 0x00243B7E File Offset: 0x00241D7E
 		public static int UsedBitCount(this uint val)
 		{
 			val |= val >> 1;
@@ -28,7 +28,7 @@ namespace emotitron.Compression
 			return BitCounter.bitPatternToLog2[(int)(checked((IntPtr)(unchecked((ulong)val * 7783611145303519083UL) >> 57)))];
 		}
 
-		// Token: 0x06006EB4 RID: 28340 RVA: 0x00243BDA File Offset: 0x00241DDA
+		// Token: 0x06006EB4 RID: 28340 RVA: 0x00243BBA File Offset: 0x00241DBA
 		public static int UsedBitCount(this int val)
 		{
 			val |= val >> 1;
@@ -39,7 +39,7 @@ namespace emotitron.Compression
 			return BitCounter.bitPatternToLog2[(int)(checked((IntPtr)((ulong)(unchecked((long)val * 7783611145303519083L)) >> 57)))];
 		}
 
-		// Token: 0x06006EB5 RID: 28341 RVA: 0x00243C18 File Offset: 0x00241E18
+		// Token: 0x06006EB5 RID: 28341 RVA: 0x00243BF8 File Offset: 0x00241DF8
 		public static int UsedBitCount(this ushort val)
 		{
 			uint num = (uint)val | (uint)val >> 1;
@@ -49,7 +49,7 @@ namespace emotitron.Compression
 			return BitCounter.bitPatternToLog2[(int)(checked((IntPtr)(unchecked((ulong)num * 7783611145303519083UL) >> 57)))];
 		}
 
-		// Token: 0x06006EB6 RID: 28342 RVA: 0x00243C58 File Offset: 0x00241E58
+		// Token: 0x06006EB6 RID: 28342 RVA: 0x00243C38 File Offset: 0x00241E38
 		public static int UsedBitCount(this byte val)
 		{
 			uint num = (uint)val | (uint)val >> 1;
@@ -58,7 +58,7 @@ namespace emotitron.Compression
 			return BitCounter.bitPatternToLog2[(int)(checked((IntPtr)(unchecked((ulong)num * 7783611145303519083UL) >> 57)))];
 		}
 
-		// Token: 0x06006EB7 RID: 28343 RVA: 0x00243C90 File Offset: 0x00241E90
+		// Token: 0x06006EB7 RID: 28343 RVA: 0x00243C70 File Offset: 0x00241E70
 		public static int UsedByteCount(this ulong val)
 		{
 			if (val == 0UL)
@@ -102,7 +102,7 @@ namespace emotitron.Compression
 			}
 		}
 
-		// Token: 0x06006EB8 RID: 28344 RVA: 0x00243D03 File Offset: 0x00241F03
+		// Token: 0x06006EB8 RID: 28344 RVA: 0x00243CE3 File Offset: 0x00241EE3
 		public static int UsedByteCount(this uint val)
 		{
 			if (val == 0U)
@@ -127,7 +127,7 @@ namespace emotitron.Compression
 			}
 		}
 
-		// Token: 0x06006EB9 RID: 28345 RVA: 0x00243D2C File Offset: 0x00241F2C
+		// Token: 0x06006EB9 RID: 28345 RVA: 0x00243D0C File Offset: 0x00241F0C
 		public static int UsedByteCount(this ushort val)
 		{
 			if (val == 0)

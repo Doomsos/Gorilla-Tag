@@ -7,16 +7,16 @@ using UnityEngine;
 public class SlingshotLifeIndicator : MonoBehaviour, IGorillaSliceableSimple, ISpawnable
 {
 	// Token: 0x170002C6 RID: 710
-	// (get) Token: 0x060019F5 RID: 6645 RVA: 0x0008AB07 File Offset: 0x00088D07
-	// (set) Token: 0x060019F6 RID: 6646 RVA: 0x0008AB0F File Offset: 0x00088D0F
+	// (get) Token: 0x060019F5 RID: 6645 RVA: 0x0008AAE7 File Offset: 0x00088CE7
+	// (set) Token: 0x060019F6 RID: 6646 RVA: 0x0008AAEF File Offset: 0x00088CEF
 	bool ISpawnable.IsSpawned { get; set; }
 
 	// Token: 0x170002C7 RID: 711
-	// (get) Token: 0x060019F7 RID: 6647 RVA: 0x0008AB18 File Offset: 0x00088D18
-	// (set) Token: 0x060019F8 RID: 6648 RVA: 0x0008AB20 File Offset: 0x00088D20
+	// (get) Token: 0x060019F7 RID: 6647 RVA: 0x0008AAF8 File Offset: 0x00088CF8
+	// (set) Token: 0x060019F8 RID: 6648 RVA: 0x0008AB00 File Offset: 0x00088D00
 	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
 
-	// Token: 0x060019F9 RID: 6649 RVA: 0x0008AB29 File Offset: 0x00088D29
+	// Token: 0x060019F9 RID: 6649 RVA: 0x0008AB09 File Offset: 0x00088D09
 	void ISpawnable.OnSpawn(VRRig rig)
 	{
 		this.myRig = rig;
@@ -27,14 +27,14 @@ public class SlingshotLifeIndicator : MonoBehaviour, IGorillaSliceableSimple, IS
 	{
 	}
 
-	// Token: 0x060019FB RID: 6651 RVA: 0x0008AB32 File Offset: 0x00088D32
+	// Token: 0x060019FB RID: 6651 RVA: 0x0008AB12 File Offset: 0x00088D12
 	public void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 		RoomSystem.LeftRoomEvent += new Action(this.OnLeftRoom);
 	}
 
-	// Token: 0x060019FC RID: 6652 RVA: 0x0008AB56 File Offset: 0x00088D56
+	// Token: 0x060019FC RID: 6652 RVA: 0x0008AB36 File Offset: 0x00088D36
 	public void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
@@ -42,7 +42,7 @@ public class SlingshotLifeIndicator : MonoBehaviour, IGorillaSliceableSimple, IS
 		RoomSystem.LeftRoomEvent -= new Action(this.OnLeftRoom);
 	}
 
-	// Token: 0x060019FD RID: 6653 RVA: 0x0008AB80 File Offset: 0x00088D80
+	// Token: 0x060019FD RID: 6653 RVA: 0x0008AB60 File Offset: 0x00088D60
 	private void SetActive(GameObject obj, bool active)
 	{
 		if (!obj.activeSelf && active)
@@ -55,7 +55,7 @@ public class SlingshotLifeIndicator : MonoBehaviour, IGorillaSliceableSimple, IS
 		}
 	}
 
-	// Token: 0x060019FE RID: 6654 RVA: 0x0008ABA8 File Offset: 0x00088DA8
+	// Token: 0x060019FE RID: 6654 RVA: 0x0008AB88 File Offset: 0x00088D88
 	public void SliceUpdate()
 	{
 		if (!NetworkSystem.Instance.InRoom || (this.checkedBattle && !this.inBattle))
@@ -100,13 +100,13 @@ public class SlingshotLifeIndicator : MonoBehaviour, IGorillaSliceableSimple, IS
 		this.SetActive(this.indicator3, playerLives >= 3);
 	}
 
-	// Token: 0x060019FF RID: 6655 RVA: 0x0008ACDD File Offset: 0x00088EDD
+	// Token: 0x060019FF RID: 6655 RVA: 0x0008ACBD File Offset: 0x00088EBD
 	public void OnLeftRoom()
 	{
 		this.Reset();
 	}
 
-	// Token: 0x06001A00 RID: 6656 RVA: 0x0008ACE5 File Offset: 0x00088EE5
+	// Token: 0x06001A00 RID: 6656 RVA: 0x0008ACC5 File Offset: 0x00088EC5
 	public void Reset()
 	{
 		this.bMgr = null;

@@ -12,7 +12,7 @@ using Valve.VR;
 public class GorillaMetaReport : MonoBehaviour
 {
 	// Token: 0x170002B0 RID: 688
-	// (get) Token: 0x06001904 RID: 6404 RVA: 0x00085C74 File Offset: 0x00083E74
+	// (get) Token: 0x06001904 RID: 6404 RVA: 0x00085C54 File Offset: 0x00083E54
 	private GTPlayer localPlayer
 	{
 		get
@@ -21,7 +21,7 @@ public class GorillaMetaReport : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001905 RID: 6405 RVA: 0x00085C7B File Offset: 0x00083E7B
+	// Token: 0x06001905 RID: 6405 RVA: 0x00085C5B File Offset: 0x00083E5B
 	private void Start()
 	{
 		this.localPlayer.inOverlay = false;
@@ -29,7 +29,7 @@ public class GorillaMetaReport : MonoBehaviour
 		base.gameObject.SetActive(false);
 	}
 
-	// Token: 0x06001906 RID: 6406 RVA: 0x00085CA6 File Offset: 0x00083EA6
+	// Token: 0x06001906 RID: 6406 RVA: 0x00085C86 File Offset: 0x00083E86
 	private void OnDisable()
 	{
 		if (ApplicationQuittingState.IsQuitting)
@@ -40,7 +40,7 @@ public class GorillaMetaReport : MonoBehaviour
 		base.StopAllCoroutines();
 	}
 
-	// Token: 0x06001907 RID: 6407 RVA: 0x00085CC4 File Offset: 0x00083EC4
+	// Token: 0x06001907 RID: 6407 RVA: 0x00085CA4 File Offset: 0x00083EA4
 	private void OnReportButtonIntentNotif(Message<string> message)
 	{
 		if (message.IsError)
@@ -62,7 +62,7 @@ public class GorillaMetaReport : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001908 RID: 6408 RVA: 0x00085D1C File Offset: 0x00083F1C
+	// Token: 0x06001908 RID: 6408 RVA: 0x00085CFC File Offset: 0x00083EFC
 	private void OnNotification(NotificationsMessageResponse notification, [NativeInteger] IntPtr _)
 	{
 		string title = notification.Title;
@@ -89,7 +89,7 @@ public class GorillaMetaReport : MonoBehaviour
 		GorillaTelemetry.PostNotificationEvent("Unmute");
 	}
 
-	// Token: 0x06001909 RID: 6409 RVA: 0x00085DA4 File Offset: 0x00083FA4
+	// Token: 0x06001909 RID: 6409 RVA: 0x00085D84 File Offset: 0x00083F84
 	private void OnWarning(string warningNotification)
 	{
 		string[] array = warningNotification.Split('|', 0);
@@ -110,7 +110,7 @@ public class GorillaMetaReport : MonoBehaviour
 		this.StartOverlay(true);
 	}
 
-	// Token: 0x0600190A RID: 6410 RVA: 0x00085E20 File Offset: 0x00084020
+	// Token: 0x0600190A RID: 6410 RVA: 0x00085E00 File Offset: 0x00084000
 	private void OnMuteSanction(string muteNotification)
 	{
 		string[] array = muteNotification.Split('|', 0);
@@ -144,7 +144,7 @@ public class GorillaMetaReport : MonoBehaviour
 		this.StartOverlay(true);
 	}
 
-	// Token: 0x0600190B RID: 6411 RVA: 0x00085ED4 File Offset: 0x000840D4
+	// Token: 0x0600190B RID: 6411 RVA: 0x00085EB4 File Offset: 0x000840B4
 	private static string FormatListToString(in string[] list)
 	{
 		int num = list.Length;
@@ -170,7 +170,7 @@ public class GorillaMetaReport : MonoBehaviour
 		return result;
 	}
 
-	// Token: 0x0600190C RID: 6412 RVA: 0x00085F3D File Offset: 0x0008413D
+	// Token: 0x0600190C RID: 6412 RVA: 0x00085F1D File Offset: 0x0008411D
 	private IEnumerator Submitted()
 	{
 		yield return new WaitForSeconds(1.5f);
@@ -178,7 +178,7 @@ public class GorillaMetaReport : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x0600190D RID: 6413 RVA: 0x00085F4C File Offset: 0x0008414C
+	// Token: 0x0600190D RID: 6413 RVA: 0x00085F2C File Offset: 0x0008412C
 	private void DuplicateScoreboard()
 	{
 		this.currentScoreboard.gameObject.SetActive(true);
@@ -194,7 +194,7 @@ public class GorillaMetaReport : MonoBehaviour
 		this.reportScoreboard.transform.SetPositionAndRotation(vector, quaternion);
 	}
 
-	// Token: 0x0600190E RID: 6414 RVA: 0x00085FB8 File Offset: 0x000841B8
+	// Token: 0x0600190E RID: 6414 RVA: 0x00085F98 File Offset: 0x00084198
 	private void ToggleLevelVisibility(bool state)
 	{
 		Camera component = GorillaTagger.Instance.mainCamera.GetComponent<Camera>();
@@ -207,7 +207,7 @@ public class GorillaMetaReport : MonoBehaviour
 		component.cullingMask = this.visibleLayers;
 	}
 
-	// Token: 0x0600190F RID: 6415 RVA: 0x00086004 File Offset: 0x00084204
+	// Token: 0x0600190F RID: 6415 RVA: 0x00085FE4 File Offset: 0x000841E4
 	private void Teardown()
 	{
 		this.ReportText.GetComponent<Text>().text = "NOT CURRENTLY CONNECTED TO A ROOM";
@@ -227,7 +227,7 @@ public class GorillaMetaReport : MonoBehaviour
 		GorillaScoreboardTotalUpdater.instance.UpdateActiveScoreboards();
 	}
 
-	// Token: 0x06001910 RID: 6416 RVA: 0x000860E0 File Offset: 0x000842E0
+	// Token: 0x06001910 RID: 6416 RVA: 0x000860C0 File Offset: 0x000842C0
 	private void CheckReportSubmit()
 	{
 		if (this.currentScoreboard == null)
@@ -246,7 +246,7 @@ public class GorillaMetaReport : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001911 RID: 6417 RVA: 0x00086194 File Offset: 0x00084394
+	// Token: 0x06001911 RID: 6417 RVA: 0x00086174 File Offset: 0x00084374
 	private void GetIdealScreenPositionRotation(out Vector3 position, out Quaternion rotation, out Vector3 scale)
 	{
 		GameObject mainCamera = GorillaTagger.Instance.mainCamera;
@@ -255,7 +255,7 @@ public class GorillaMetaReport : MonoBehaviour
 		position = mainCamera.transform.position + rotation * this.playerLocalScreenPosition * scale.x;
 	}
 
-	// Token: 0x06001912 RID: 6418 RVA: 0x00086220 File Offset: 0x00084420
+	// Token: 0x06001912 RID: 6418 RVA: 0x00086200 File Offset: 0x00084400
 	private void StartOverlay(bool isSanction = false)
 	{
 		Vector3 vector;
@@ -298,7 +298,7 @@ public class GorillaMetaReport : MonoBehaviour
 		this.currentScoreboard.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06001913 RID: 6419 RVA: 0x000863A4 File Offset: 0x000845A4
+	// Token: 0x06001913 RID: 6419 RVA: 0x00086384 File Offset: 0x00084584
 	private void CheckDistance()
 	{
 		Vector3 vector;
@@ -329,7 +329,7 @@ public class GorillaMetaReport : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001914 RID: 6420 RVA: 0x000864C4 File Offset: 0x000846C4
+	// Token: 0x06001914 RID: 6420 RVA: 0x000864A4 File Offset: 0x000846A4
 	private void Update()
 	{
 		if (this.blockButtonsUntilTimestamp > Time.time)

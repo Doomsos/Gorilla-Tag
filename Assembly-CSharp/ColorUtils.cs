@@ -5,21 +5,21 @@ using UnityEngine;
 // Token: 0x02000C3A RID: 3130
 public static class ColorUtils
 {
-	// Token: 0x06004CCA RID: 19658 RVA: 0x0018EA3D File Offset: 0x0018CC3D
+	// Token: 0x06004CCA RID: 19658 RVA: 0x0018EA1D File Offset: 0x0018CC1D
 	public static Color WithAlpha(this Color c, float alpha)
 	{
 		c.a = Math.Clamp(alpha, 0f, 1f);
 		return c;
 	}
 
-	// Token: 0x06004CCB RID: 19659 RVA: 0x0018EA57 File Offset: 0x0018CC57
+	// Token: 0x06004CCB RID: 19659 RVA: 0x0018EA37 File Offset: 0x0018CC37
 	public static Color32 WithAlpha(this Color32 c, byte alpha)
 	{
 		c.a = alpha;
 		return c;
 	}
 
-	// Token: 0x06004CCC RID: 19660 RVA: 0x0018EA64 File Offset: 0x0018CC64
+	// Token: 0x06004CCC RID: 19660 RVA: 0x0018EA44 File Offset: 0x0018CC44
 	public static Color ComposeHDR(Color baseColor, float intensity)
 	{
 		intensity = Mathf.Clamp(intensity, -10f, 10f);
@@ -38,7 +38,7 @@ public static class ColorUtils
 		return color;
 	}
 
-	// Token: 0x06004CCD RID: 19661 RVA: 0x0018EAD0 File Offset: 0x0018CCD0
+	// Token: 0x06004CCD RID: 19661 RVA: 0x0018EAB0 File Offset: 0x0018CCB0
 	[return: TupleElementNames(new string[]
 	{
 		"baseColor",

@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000750 RID: 1872
 public class GRToolStatusWatch : MonoBehaviour, IGameEntityComponent
 {
-	// Token: 0x06003057 RID: 12375 RVA: 0x001088C0 File Offset: 0x00106AC0
+	// Token: 0x06003057 RID: 12375 RVA: 0x001088A0 File Offset: 0x00106AA0
 	public void OnEntityInit()
 	{
 		if (this.gameEntity == null)
@@ -32,7 +32,7 @@ public class GRToolStatusWatch : MonoBehaviour, IGameEntityComponent
 	{
 	}
 
-	// Token: 0x0600305A RID: 12378 RVA: 0x0010895C File Offset: 0x00106B5C
+	// Token: 0x0600305A RID: 12378 RVA: 0x0010893C File Offset: 0x00106B3C
 	public void UpdateSnappedPlayer()
 	{
 		this.currentPlayer = GRPlayer.Get(this.gameEntity.snappedByActorNumber);
@@ -52,7 +52,7 @@ public class GRToolStatusWatch : MonoBehaviour, IGameEntityComponent
 		this.UpdateVisuals();
 	}
 
-	// Token: 0x0600305B RID: 12379 RVA: 0x001089D3 File Offset: 0x00106BD3
+	// Token: 0x0600305B RID: 12379 RVA: 0x001089B3 File Offset: 0x00106BB3
 	public void RemoveSnappedPlayer()
 	{
 		this.currentPlayer = null;
@@ -61,7 +61,7 @@ public class GRToolStatusWatch : MonoBehaviour, IGameEntityComponent
 		this.UpdateVisuals();
 	}
 
-	// Token: 0x0600305C RID: 12380 RVA: 0x001089F9 File Offset: 0x00106BF9
+	// Token: 0x0600305C RID: 12380 RVA: 0x001089D9 File Offset: 0x00106BD9
 	private void Update()
 	{
 		if (this.currentPlayer == null)
@@ -71,7 +71,7 @@ public class GRToolStatusWatch : MonoBehaviour, IGameEntityComponent
 		this.UpdateVisuals();
 	}
 
-	// Token: 0x0600305D RID: 12381 RVA: 0x00108A10 File Offset: 0x00106C10
+	// Token: 0x0600305D RID: 12381 RVA: 0x001089F0 File Offset: 0x00106BF0
 	private void UpdateVisuals()
 	{
 		bool flag = this.state == GRToolStatusWatch.WatchState.SnappedLocal || this.state == GRToolStatusWatch.WatchState.SnappedRemote;

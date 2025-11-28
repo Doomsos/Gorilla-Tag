@@ -7,7 +7,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E47 RID: 3655
 	public class BuilderMovingPart : MonoBehaviour
 	{
-		// Token: 0x06005B12 RID: 23314 RVA: 0x001D2D94 File Offset: 0x001D0F94
+		// Token: 0x06005B12 RID: 23314 RVA: 0x001D2D74 File Offset: 0x001D0F74
 		private void Awake()
 		{
 			foreach (BuilderAttachGridPlane builderAttachGridPlane in this.myGridPlanes)
@@ -19,7 +19,7 @@ namespace GorillaTagScripts.Builder
 			this.initLocalRotation = base.transform.localRotation;
 		}
 
-		// Token: 0x06005B13 RID: 23315 RVA: 0x001D2DE8 File Offset: 0x001D0FE8
+		// Token: 0x06005B13 RID: 23315 RVA: 0x001D2DC8 File Offset: 0x001D0FC8
 		private long NetworkTimeMs()
 		{
 			if (PhotonNetwork.InRoom)
@@ -29,13 +29,13 @@ namespace GorillaTagScripts.Builder
 			return (long)(Time.time * 1000f);
 		}
 
-		// Token: 0x06005B14 RID: 23316 RVA: 0x001D2E1D File Offset: 0x001D101D
+		// Token: 0x06005B14 RID: 23316 RVA: 0x001D2DFD File Offset: 0x001D0FFD
 		private long CycleLengthMs()
 		{
 			return (long)(this.cycleDuration * 1000f);
 		}
 
-		// Token: 0x06005B15 RID: 23317 RVA: 0x001D2E2C File Offset: 0x001D102C
+		// Token: 0x06005B15 RID: 23317 RVA: 0x001D2E0C File Offset: 0x001D100C
 		public double PlatformTime()
 		{
 			long num = this.NetworkTimeMs();
@@ -43,25 +43,25 @@ namespace GorillaTagScripts.Builder
 			return (double)(num - num / num2 * num2) / 1000.0;
 		}
 
-		// Token: 0x06005B16 RID: 23318 RVA: 0x001D2E57 File Offset: 0x001D1057
+		// Token: 0x06005B16 RID: 23318 RVA: 0x001D2E37 File Offset: 0x001D1037
 		public int CycleCount()
 		{
 			return (int)(this.NetworkTimeMs() / this.CycleLengthMs());
 		}
 
-		// Token: 0x06005B17 RID: 23319 RVA: 0x001D2E67 File Offset: 0x001D1067
+		// Token: 0x06005B17 RID: 23319 RVA: 0x001D2E47 File Offset: 0x001D1047
 		public float CycleCompletionPercent()
 		{
 			return Mathf.Clamp((float)(this.PlatformTime() / (double)this.cycleDuration), 0f, 1f);
 		}
 
-		// Token: 0x06005B18 RID: 23320 RVA: 0x001D2E87 File Offset: 0x001D1087
+		// Token: 0x06005B18 RID: 23320 RVA: 0x001D2E67 File Offset: 0x001D1067
 		public bool IsEvenCycle()
 		{
 			return this.CycleCount() % 2 == 0;
 		}
 
-		// Token: 0x06005B19 RID: 23321 RVA: 0x001D2E94 File Offset: 0x001D1094
+		// Token: 0x06005B19 RID: 23321 RVA: 0x001D2E74 File Offset: 0x001D1074
 		public void ActivateAtNode(byte node, int timestamp)
 		{
 			float num = (float)node;
@@ -94,7 +94,7 @@ namespace GorillaTagScripts.Builder
 			this.SetMoving(true);
 		}
 
-		// Token: 0x06005B1A RID: 23322 RVA: 0x001D2F4C File Offset: 0x001D114C
+		// Token: 0x06005B1A RID: 23322 RVA: 0x001D2F2C File Offset: 0x001D112C
 		public int GetTimeOffsetMS()
 		{
 			int num = PhotonNetwork.ServerTimestamp - this.myPiece.activatedTimeStamp;
@@ -102,7 +102,7 @@ namespace GorillaTagScripts.Builder
 			return num % (int)num2;
 		}
 
-		// Token: 0x06005B1B RID: 23323 RVA: 0x001D2F78 File Offset: 0x001D1178
+		// Token: 0x06005B1B RID: 23323 RVA: 0x001D2F58 File Offset: 0x001D1158
 		public byte GetNearestNode()
 		{
 			int num = Mathf.RoundToInt(this.currT * (float)BuilderMovingPart.NUM_PAUSE_NODES);
@@ -113,13 +113,13 @@ namespace GorillaTagScripts.Builder
 			return (byte)num;
 		}
 
-		// Token: 0x06005B1C RID: 23324 RVA: 0x001D2FAA File Offset: 0x001D11AA
+		// Token: 0x06005B1C RID: 23324 RVA: 0x001D2F8A File Offset: 0x001D118A
 		public byte GetStartNode()
 		{
 			return (byte)Mathf.RoundToInt(this.startPercentage * (float)BuilderMovingPart.NUM_PAUSE_NODES);
 		}
 
-		// Token: 0x06005B1D RID: 23325 RVA: 0x001D2FC0 File Offset: 0x001D11C0
+		// Token: 0x06005B1D RID: 23325 RVA: 0x001D2FA0 File Offset: 0x001D11A0
 		public void PauseMovement(byte node)
 		{
 			this.SetMoving(false);
@@ -152,7 +152,7 @@ namespace GorillaTagScripts.Builder
 			this.UpdateRotation(num);
 		}
 
-		// Token: 0x06005B1E RID: 23326 RVA: 0x001D3058 File Offset: 0x001D1258
+		// Token: 0x06005B1E RID: 23326 RVA: 0x001D3038 File Offset: 0x001D1238
 		public void SetMoving(bool isMoving)
 		{
 			this.isMoving = isMoving;
@@ -167,7 +167,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B1F RID: 23327 RVA: 0x001D3094 File Offset: 0x001D1294
+		// Token: 0x06005B1F RID: 23327 RVA: 0x001D3074 File Offset: 0x001D1274
 		public void InitMovingGrid()
 		{
 			if (this.moveType == BuilderMovingPart.BuilderMovingPartType.Translation)
@@ -203,7 +203,7 @@ namespace GorillaTagScripts.Builder
 			this.startPercentageCycleOffset = num6 + num4 + num4 - num5;
 		}
 
-		// Token: 0x06005B20 RID: 23328 RVA: 0x001D3208 File Offset: 0x001D1408
+		// Token: 0x06005B20 RID: 23328 RVA: 0x001D31E8 File Offset: 0x001D13E8
 		public void UpdateMovingGrid()
 		{
 			this.Progress();
@@ -220,27 +220,27 @@ namespace GorillaTagScripts.Builder
 			this.UpdateRotation(this.percent);
 		}
 
-		// Token: 0x06005B21 RID: 23329 RVA: 0x001D3258 File Offset: 0x001D1458
+		// Token: 0x06005B21 RID: 23329 RVA: 0x001D3238 File Offset: 0x001D1438
 		private Vector3 UpdatePointToPoint(float perc)
 		{
 			float num = this.lerpAlpha.Evaluate(perc);
 			return Vector3.Lerp(this.startXf.localPosition, this.endXf.localPosition, num);
 		}
 
-		// Token: 0x06005B22 RID: 23330 RVA: 0x001D3290 File Offset: 0x001D1490
+		// Token: 0x06005B22 RID: 23330 RVA: 0x001D3270 File Offset: 0x001D1470
 		private void UpdateRotation(float perc)
 		{
 			Quaternion localRotation = Quaternion.AngleAxis(perc * 360f, Vector3.up);
 			base.transform.localRotation = localRotation;
 		}
 
-		// Token: 0x06005B23 RID: 23331 RVA: 0x001D32BB File Offset: 0x001D14BB
+		// Token: 0x06005B23 RID: 23331 RVA: 0x001D329B File Offset: 0x001D149B
 		private void ResetMovingGrid()
 		{
 			base.transform.SetLocalPositionAndRotation(this.initLocalPos, this.initLocalRotation);
 		}
 
-		// Token: 0x06005B24 RID: 23332 RVA: 0x001D32D4 File Offset: 0x001D14D4
+		// Token: 0x06005B24 RID: 23332 RVA: 0x001D32B4 File Offset: 0x001D14B4
 		private void Progress()
 		{
 			this.currT = this.CycleCompletionPercent();
@@ -256,7 +256,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B25 RID: 23333 RVA: 0x001D334C File Offset: 0x001D154C
+		// Token: 0x06005B25 RID: 23333 RVA: 0x001D332C File Offset: 0x001D152C
 		public bool IsAnchoredToTable()
 		{
 			foreach (BuilderAttachGridPlane builderAttachGridPlane in this.myGridPlanes)
@@ -269,7 +269,7 @@ namespace GorillaTagScripts.Builder
 			return false;
 		}
 
-		// Token: 0x06005B26 RID: 23334 RVA: 0x001D3388 File Offset: 0x001D1588
+		// Token: 0x06005B26 RID: 23334 RVA: 0x001D3368 File Offset: 0x001D1568
 		public void OnPieceDestroy()
 		{
 			this.ResetMovingGrid();

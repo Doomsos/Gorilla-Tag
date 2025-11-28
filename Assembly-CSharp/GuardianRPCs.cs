@@ -6,14 +6,14 @@ using UnityEngine;
 // Token: 0x02000BE4 RID: 3044
 internal class GuardianRPCs : RPCNetworkBase
 {
-	// Token: 0x06004B27 RID: 19239 RVA: 0x001889EE File Offset: 0x00186BEE
+	// Token: 0x06004B27 RID: 19239 RVA: 0x001889CE File Offset: 0x00186BCE
 	public override void SetClassTarget(IWrappedSerializable target, GorillaWrappedSerializer netHandler)
 	{
 		this.guardianManager = (GorillaGuardianManager)target;
 		this.serializer = (GameModeSerializer)netHandler;
 	}
 
-	// Token: 0x06004B28 RID: 19240 RVA: 0x00188A08 File Offset: 0x00186C08
+	// Token: 0x06004B28 RID: 19240 RVA: 0x001889E8 File Offset: 0x00186BE8
 	[PunRPC]
 	public void GuardianRequestEject(PhotonMessageInfo info)
 	{
@@ -25,7 +25,7 @@ internal class GuardianRPCs : RPCNetworkBase
 		}
 	}
 
-	// Token: 0x06004B29 RID: 19241 RVA: 0x00188A44 File Offset: 0x00186C44
+	// Token: 0x06004B29 RID: 19241 RVA: 0x00188A24 File Offset: 0x00186C24
 	[PunRPC]
 	public void GuardianLaunchPlayer(Vector3 velocity, PhotonMessageInfo info)
 	{
@@ -48,7 +48,7 @@ internal class GuardianRPCs : RPCNetworkBase
 		this.guardianManager.LaunchPlayer(photonMessageInfoWrapped.Sender, velocity);
 	}
 
-	// Token: 0x06004B2A RID: 19242 RVA: 0x00188AD8 File Offset: 0x00186CD8
+	// Token: 0x06004B2A RID: 19242 RVA: 0x00188AB8 File Offset: 0x00186CB8
 	[PunRPC]
 	public void ShowSlapEffects(Vector3 location, Vector3 direction, PhotonMessageInfo info)
 	{
@@ -75,7 +75,7 @@ internal class GuardianRPCs : RPCNetworkBase
 		}
 	}
 
-	// Token: 0x06004B2B RID: 19243 RVA: 0x00188B78 File Offset: 0x00186D78
+	// Token: 0x06004B2B RID: 19243 RVA: 0x00188B58 File Offset: 0x00186D58
 	[PunRPC]
 	public void ShowSlamEffect(Vector3 location, Vector3 direction, PhotonMessageInfo info)
 	{

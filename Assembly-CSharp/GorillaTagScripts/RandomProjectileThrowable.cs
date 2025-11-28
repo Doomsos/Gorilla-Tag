@@ -10,47 +10,47 @@ namespace GorillaTagScripts
 	public class RandomProjectileThrowable : MonoBehaviour
 	{
 		// Token: 0x1700085F RID: 2143
-		// (get) Token: 0x0600598A RID: 22922 RVA: 0x001CA7E0 File Offset: 0x001C89E0
-		// (set) Token: 0x0600598B RID: 22923 RVA: 0x001CA7E8 File Offset: 0x001C89E8
+		// (get) Token: 0x0600598A RID: 22922 RVA: 0x001CA7C0 File Offset: 0x001C89C0
+		// (set) Token: 0x0600598B RID: 22923 RVA: 0x001CA7C8 File Offset: 0x001C89C8
 		public float TimeEnabled { get; private set; }
 
 		// Token: 0x17000860 RID: 2144
-		// (get) Token: 0x0600598C RID: 22924 RVA: 0x001CA7F1 File Offset: 0x001C89F1
-		// (set) Token: 0x0600598D RID: 22925 RVA: 0x001CA7F9 File Offset: 0x001C89F9
+		// (get) Token: 0x0600598C RID: 22924 RVA: 0x001CA7D1 File Offset: 0x001C89D1
+		// (set) Token: 0x0600598D RID: 22925 RVA: 0x001CA7D9 File Offset: 0x001C89D9
 		public bool ForceDestroy { get; set; }
 
-		// Token: 0x0600598E RID: 22926 RVA: 0x001CA802 File Offset: 0x001C8A02
+		// Token: 0x0600598E RID: 22926 RVA: 0x001CA7E2 File Offset: 0x001C89E2
 		private void OnEnable()
 		{
 			this.TimeEnabled = Time.time;
 			this.currentProjectile = this.projectilePrefab;
 		}
 
-		// Token: 0x0600598F RID: 22927 RVA: 0x001CA81B File Offset: 0x001C8A1B
+		// Token: 0x0600598F RID: 22927 RVA: 0x001CA7FB File Offset: 0x001C89FB
 		private void OnDisable()
 		{
 			this.ForceDestroy = false;
 		}
 
-		// Token: 0x06005990 RID: 22928 RVA: 0x001CA824 File Offset: 0x001C8A24
+		// Token: 0x06005990 RID: 22928 RVA: 0x001CA804 File Offset: 0x001C8A04
 		public void ForceDestroyThrowable()
 		{
 			this.ForceDestroy = true;
 		}
 
-		// Token: 0x06005991 RID: 22929 RVA: 0x001CA82D File Offset: 0x001C8A2D
+		// Token: 0x06005991 RID: 22929 RVA: 0x001CA80D File Offset: 0x001C8A0D
 		public void UpdateProjectilePrefab()
 		{
 			this.currentProjectile = this.alternativeProjectilePrefab;
 		}
 
-		// Token: 0x06005992 RID: 22930 RVA: 0x001CA83B File Offset: 0x001C8A3B
+		// Token: 0x06005992 RID: 22930 RVA: 0x001CA81B File Offset: 0x001C8A1B
 		public GameObject GetProjectilePrefab()
 		{
 			return this.currentProjectile;
 		}
 
-		// Token: 0x06005993 RID: 22931 RVA: 0x001CA844 File Offset: 0x001C8A44
+		// Token: 0x06005993 RID: 22931 RVA: 0x001CA824 File Offset: 0x001C8A24
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!this.destroyOnTrigger)
@@ -72,13 +72,13 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005994 RID: 22932 RVA: 0x001CA8B9 File Offset: 0x001C8AB9
+		// Token: 0x06005994 RID: 22932 RVA: 0x001CA899 File Offset: 0x001C8A99
 		public void DestroyProjectile()
 		{
 			base.StartCoroutine(this.DestroyProjectileCoroutine(0.25f));
 		}
 
-		// Token: 0x06005995 RID: 22933 RVA: 0x001CA8CD File Offset: 0x001C8ACD
+		// Token: 0x06005995 RID: 22933 RVA: 0x001CA8AD File Offset: 0x001C8AAD
 		private IEnumerator DestroyProjectileCoroutine(float delay)
 		{
 			yield return new WaitForSeconds(delay);

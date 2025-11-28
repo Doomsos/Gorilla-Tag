@@ -9,7 +9,7 @@ using UnityEngine;
 public sealed class ComponentFunctionReference<TResult>
 {
 	// Token: 0x1700058A RID: 1418
-	// (get) Token: 0x06003BDF RID: 15327 RVA: 0x0013C480 File Offset: 0x0013A680
+	// (get) Token: 0x06003BDF RID: 15327 RVA: 0x0013C460 File Offset: 0x0013A660
 	public bool IsValid
 	{
 		get
@@ -18,7 +18,7 @@ public sealed class ComponentFunctionReference<TResult>
 		}
 	}
 
-	// Token: 0x06003BE0 RID: 15328 RVA: 0x0013C4A9 File Offset: 0x0013A6A9
+	// Token: 0x06003BE0 RID: 15328 RVA: 0x0013C489 File Offset: 0x0013A689
 	private IEnumerable<ValueDropdownItem<ComponentFunctionReference<TResult>.MethodRef>> GetMethodOptions()
 	{
 		if (this._target == null)
@@ -55,7 +55,7 @@ public sealed class ComponentFunctionReference<TResult>
 		yield break;
 	}
 
-	// Token: 0x06003BE1 RID: 15329 RVA: 0x0013C4BC File Offset: 0x0013A6BC
+	// Token: 0x06003BE1 RID: 15329 RVA: 0x0013C49C File Offset: 0x0013A69C
 	public TResult Invoke()
 	{
 		if (this._cached == null)
@@ -69,7 +69,7 @@ public sealed class ComponentFunctionReference<TResult>
 		return this._cached.Invoke();
 	}
 
-	// Token: 0x06003BE2 RID: 15330 RVA: 0x0013C4F4 File Offset: 0x0013A6F4
+	// Token: 0x06003BE2 RID: 15330 RVA: 0x0013C4D4 File Offset: 0x0013A6D4
 	public void Cache()
 	{
 		this._cached = null;
@@ -99,7 +99,7 @@ public sealed class ComponentFunctionReference<TResult>
 	[Serializable]
 	private struct MethodRef
 	{
-		// Token: 0x06003BE4 RID: 15332 RVA: 0x0013C587 File Offset: 0x0013A787
+		// Token: 0x06003BE4 RID: 15332 RVA: 0x0013C567 File Offset: 0x0013A767
 		public MethodRef(Object obj, MethodInfo m)
 		{
 			this.component = obj;

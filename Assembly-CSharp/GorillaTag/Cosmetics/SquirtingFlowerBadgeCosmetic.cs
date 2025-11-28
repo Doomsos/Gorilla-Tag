@@ -8,21 +8,21 @@ namespace GorillaTag.Cosmetics
 	public class SquirtingFlowerBadgeCosmetic : MonoBehaviour, ISpawnable, IFingerFlexListener
 	{
 		// Token: 0x17000A0C RID: 2572
-		// (get) Token: 0x06006B0A RID: 27402 RVA: 0x00231D82 File Offset: 0x0022FF82
-		// (set) Token: 0x06006B0B RID: 27403 RVA: 0x00231D8A File Offset: 0x0022FF8A
+		// (get) Token: 0x06006B0A RID: 27402 RVA: 0x00231D62 File Offset: 0x0022FF62
+		// (set) Token: 0x06006B0B RID: 27403 RVA: 0x00231D6A File Offset: 0x0022FF6A
 		public VRRig MyRig { get; private set; }
 
 		// Token: 0x17000A0D RID: 2573
-		// (get) Token: 0x06006B0C RID: 27404 RVA: 0x00231D93 File Offset: 0x0022FF93
-		// (set) Token: 0x06006B0D RID: 27405 RVA: 0x00231D9B File Offset: 0x0022FF9B
+		// (get) Token: 0x06006B0C RID: 27404 RVA: 0x00231D73 File Offset: 0x0022FF73
+		// (set) Token: 0x06006B0D RID: 27405 RVA: 0x00231D7B File Offset: 0x0022FF7B
 		public bool IsSpawned { get; set; }
 
 		// Token: 0x17000A0E RID: 2574
-		// (get) Token: 0x06006B0E RID: 27406 RVA: 0x00231DA4 File Offset: 0x0022FFA4
-		// (set) Token: 0x06006B0F RID: 27407 RVA: 0x00231DAC File Offset: 0x0022FFAC
+		// (get) Token: 0x06006B0E RID: 27406 RVA: 0x00231D84 File Offset: 0x0022FF84
+		// (set) Token: 0x06006B0F RID: 27407 RVA: 0x00231D8C File Offset: 0x0022FF8C
 		public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
 
-		// Token: 0x06006B10 RID: 27408 RVA: 0x00231DB5 File Offset: 0x0022FFB5
+		// Token: 0x06006B10 RID: 27408 RVA: 0x00231D95 File Offset: 0x0022FF95
 		public void OnSpawn(VRRig rig)
 		{
 			this.MyRig = rig;
@@ -33,7 +33,7 @@ namespace GorillaTag.Cosmetics
 		{
 		}
 
-		// Token: 0x06006B12 RID: 27410 RVA: 0x00231DBE File Offset: 0x0022FFBE
+		// Token: 0x06006B12 RID: 27410 RVA: 0x00231D9E File Offset: 0x0022FF9E
 		private void Update()
 		{
 			if (!this.restartTimer && Time.time - this.triggeredTime >= this.coolDownTimer)
@@ -42,7 +42,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B13 RID: 27411 RVA: 0x00231DE4 File Offset: 0x0022FFE4
+		// Token: 0x06006B13 RID: 27411 RVA: 0x00231DC4 File Offset: 0x0022FFC4
 		private void OnPlayEffectLocal()
 		{
 			if (this.particlesToPlay != null)
@@ -61,7 +61,7 @@ namespace GorillaTag.Cosmetics
 			this.triggeredTime = Time.time;
 		}
 
-		// Token: 0x06006B14 RID: 27412 RVA: 0x00231E68 File Offset: 0x00230068
+		// Token: 0x06006B14 RID: 27412 RVA: 0x00231E48 File Offset: 0x00230048
 		public void OnButtonPressed(bool isLeftHand, float value)
 		{
 			if (!this.FingerFlexValidation(isLeftHand))
@@ -76,7 +76,7 @@ namespace GorillaTag.Cosmetics
 			this.buttonReleased = false;
 		}
 
-		// Token: 0x06006B15 RID: 27413 RVA: 0x00231E92 File Offset: 0x00230092
+		// Token: 0x06006B15 RID: 27413 RVA: 0x00231E72 File Offset: 0x00230072
 		public void OnButtonReleased(bool isLeftHand, float value)
 		{
 			if (!this.FingerFlexValidation(isLeftHand))
@@ -91,7 +91,7 @@ namespace GorillaTag.Cosmetics
 		{
 		}
 
-		// Token: 0x06006B17 RID: 27415 RVA: 0x00231EA5 File Offset: 0x002300A5
+		// Token: 0x06006B17 RID: 27415 RVA: 0x00231E85 File Offset: 0x00230085
 		public bool FingerFlexValidation(bool isLeftHand)
 		{
 			return (!this.leftHand || isLeftHand) && (this.leftHand || !isLeftHand);

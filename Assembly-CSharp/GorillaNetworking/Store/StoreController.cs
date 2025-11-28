@@ -11,7 +11,7 @@ namespace GorillaNetworking.Store
 	// Token: 0x02000F44 RID: 3908
 	public class StoreController : MonoBehaviour
 	{
-		// Token: 0x060061EF RID: 25071 RVA: 0x001F8E9F File Offset: 0x001F709F
+		// Token: 0x060061EF RID: 25071 RVA: 0x001F8E7F File Offset: 0x001F707F
 		public void Awake()
 		{
 			if (StoreController.instance == null)
@@ -31,7 +31,7 @@ namespace GorillaNetworking.Store
 		{
 		}
 
-		// Token: 0x060061F1 RID: 25073 RVA: 0x001F8ED4 File Offset: 0x001F70D4
+		// Token: 0x060061F1 RID: 25073 RVA: 0x001F8EB4 File Offset: 0x001F70B4
 		public void CreateDynamicCosmeticStandsDictionatary()
 		{
 			this.CosmeticStandsDict = new Dictionary<string, DynamicCosmeticStand>();
@@ -88,7 +88,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061F2 RID: 25074 RVA: 0x001F90B0 File Offset: 0x001F72B0
+		// Token: 0x060061F2 RID: 25074 RVA: 0x001F9090 File Offset: 0x001F7290
 		private void Create_StandsByPlayfabIDDictionary()
 		{
 			this.StandsByPlayfabID = new Dictionary<string, List<DynamicCosmeticStand>>();
@@ -98,7 +98,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061F3 RID: 25075 RVA: 0x001F9114 File Offset: 0x001F7314
+		// Token: 0x060061F3 RID: 25075 RVA: 0x001F90F4 File Offset: 0x001F72F4
 		public void AddStandToPlayfabIDDictionary(DynamicCosmeticStand dynamicCosmeticStand)
 		{
 			if (!dynamicCosmeticStand.StandName.IsNullOrEmpty())
@@ -120,7 +120,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061F4 RID: 25076 RVA: 0x001F9184 File Offset: 0x001F7384
+		// Token: 0x060061F4 RID: 25076 RVA: 0x001F9164 File Offset: 0x001F7364
 		public void RemoveStandFromPlayFabIDDictionary(DynamicCosmeticStand dynamicCosmeticStand)
 		{
 			List<DynamicCosmeticStand> list;
@@ -145,7 +145,7 @@ namespace GorillaNetworking.Store
 		{
 		}
 
-		// Token: 0x060061F8 RID: 25080 RVA: 0x001F91AE File Offset: 0x001F73AE
+		// Token: 0x060061F8 RID: 25080 RVA: 0x001F918E File Offset: 0x001F738E
 		private void InitializeFromTitleData()
 		{
 			PlayFabTitleDataCache.Instance.GetTitleData("StoreLayoutData", delegate(string data)
@@ -157,7 +157,7 @@ namespace GorillaNetworking.Store
 			}, false);
 		}
 
-		// Token: 0x060061F9 RID: 25081 RVA: 0x001F91EC File Offset: 0x001F73EC
+		// Token: 0x060061F9 RID: 25081 RVA: 0x001F91CC File Offset: 0x001F73CC
 		private void ImportCosmeticStandLayoutFromTitleData(string TSVData)
 		{
 			StandImport standImport = new StandImport();
@@ -196,7 +196,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061FA RID: 25082 RVA: 0x001F9368 File Offset: 0x001F7568
+		// Token: 0x060061FA RID: 25082 RVA: 0x001F9348 File Offset: 0x001F7548
 		public void InitalizeCosmeticStands()
 		{
 			this.CreateDynamicCosmeticStandsDictionatary();
@@ -211,7 +211,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061FB RID: 25083 RVA: 0x001F93D8 File Offset: 0x001F75D8
+		// Token: 0x060061FB RID: 25083 RVA: 0x001F93B8 File Offset: 0x001F75B8
 		public void LoadCosmeticOntoStand(string standID, string playFabId)
 		{
 			if (this.CosmeticStandsDict.ContainsKey(standID))
@@ -221,7 +221,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061FC RID: 25084 RVA: 0x001F9410 File Offset: 0x001F7610
+		// Token: 0x060061FC RID: 25084 RVA: 0x001F93F0 File Offset: 0x001F75F0
 		public void ClearCosmetics()
 		{
 			foreach (StoreDepartment storeDepartment in this.Departments)
@@ -238,7 +238,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061FD RID: 25085 RVA: 0x001F9494 File Offset: 0x001F7694
+		// Token: 0x060061FD RID: 25085 RVA: 0x001F9474 File Offset: 0x001F7674
 		public static CosmeticSO FindCosmeticInAllCosmeticsArraySO(string playfabId)
 		{
 			if (StoreController.instance == null)
@@ -248,7 +248,7 @@ namespace GorillaNetworking.Store
 			return StoreController.instance.AllCosmeticsArraySO.SearchForCosmeticSO(playfabId);
 		}
 
-		// Token: 0x060061FE RID: 25086 RVA: 0x001F94C4 File Offset: 0x001F76C4
+		// Token: 0x060061FE RID: 25086 RVA: 0x001F94A4 File Offset: 0x001F76A4
 		public DynamicCosmeticStand FindCosmeticStandByCosmeticName(string PlayFabID)
 		{
 			foreach (DynamicCosmeticStand dynamicCosmeticStand in this.CosmeticStandsDict.Values)
@@ -261,13 +261,13 @@ namespace GorillaNetworking.Store
 			return null;
 		}
 
-		// Token: 0x060061FF RID: 25087 RVA: 0x001F952C File Offset: 0x001F772C
+		// Token: 0x060061FF RID: 25087 RVA: 0x001F950C File Offset: 0x001F770C
 		public void FindAllDepartments()
 		{
 			this.Departments = Enumerable.ToList<StoreDepartment>(Object.FindObjectsByType<StoreDepartment>(0));
 		}
 
-		// Token: 0x06006200 RID: 25088 RVA: 0x001F9540 File Offset: 0x001F7740
+		// Token: 0x06006200 RID: 25088 RVA: 0x001F9520 File Offset: 0x001F7720
 		public void SaveAllCosmeticsPositions()
 		{
 			foreach (StoreDepartment storeDepartment in this.Departments)
@@ -295,7 +295,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006201 RID: 25089 RVA: 0x001F9660 File Offset: 0x001F7860
+		// Token: 0x06006201 RID: 25089 RVA: 0x001F9640 File Offset: 0x001F7840
 		public static void SetForGame()
 		{
 			if (StoreController.instance == null)

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000BAC RID: 2988
 public class GliderWindVolume : MonoBehaviour
 {
-	// Token: 0x060049D1 RID: 18897 RVA: 0x00184DBF File Offset: 0x00182FBF
+	// Token: 0x060049D1 RID: 18897 RVA: 0x00184D9F File Offset: 0x00182F9F
 	public void SetProperties(float speed, float accel, AnimationCurve svaCurve, Vector3 windDirection)
 	{
 		this.maxSpeed = speed;
@@ -14,7 +14,7 @@ public class GliderWindVolume : MonoBehaviour
 	}
 
 	// Token: 0x170006DF RID: 1759
-	// (get) Token: 0x060049D2 RID: 18898 RVA: 0x00184DE3 File Offset: 0x00182FE3
+	// (get) Token: 0x060049D2 RID: 18898 RVA: 0x00184DC3 File Offset: 0x00182FC3
 	public Vector3 WindDirection
 	{
 		get
@@ -23,7 +23,7 @@ public class GliderWindVolume : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060049D3 RID: 18899 RVA: 0x00184DF8 File Offset: 0x00182FF8
+	// Token: 0x060049D3 RID: 18899 RVA: 0x00184DD8 File Offset: 0x00182FD8
 	public Vector3 GetAccelFromVelocity(Vector3 velocity)
 	{
 		Vector3 windDirection = this.WindDirection;

@@ -8,11 +8,11 @@ namespace BuildSafe
 	public static class Reflection<T>
 	{
 		// Token: 0x170008AE RID: 2222
-		// (get) Token: 0x06005DCB RID: 24011 RVA: 0x001E170C File Offset: 0x001DF90C
+		// (get) Token: 0x06005DCB RID: 24011 RVA: 0x001E16EC File Offset: 0x001DF8EC
 		public static Type Type { get; } = typeof(T);
 
 		// Token: 0x170008AF RID: 2223
-		// (get) Token: 0x06005DCC RID: 24012 RVA: 0x001E1713 File Offset: 0x001DF913
+		// (get) Token: 0x06005DCC RID: 24012 RVA: 0x001E16F3 File Offset: 0x001DF8F3
 		public static EventInfo[] Events
 		{
 			get
@@ -22,7 +22,7 @@ namespace BuildSafe
 		}
 
 		// Token: 0x170008B0 RID: 2224
-		// (get) Token: 0x06005DCD RID: 24013 RVA: 0x001E171A File Offset: 0x001DF91A
+		// (get) Token: 0x06005DCD RID: 24013 RVA: 0x001E16FA File Offset: 0x001DF8FA
 		public static MethodInfo[] Methods
 		{
 			get
@@ -32,7 +32,7 @@ namespace BuildSafe
 		}
 
 		// Token: 0x170008B1 RID: 2225
-		// (get) Token: 0x06005DCE RID: 24014 RVA: 0x001E1721 File Offset: 0x001DF921
+		// (get) Token: 0x06005DCE RID: 24014 RVA: 0x001E1701 File Offset: 0x001DF901
 		public static FieldInfo[] Fields
 		{
 			get
@@ -42,7 +42,7 @@ namespace BuildSafe
 		}
 
 		// Token: 0x170008B2 RID: 2226
-		// (get) Token: 0x06005DCF RID: 24015 RVA: 0x001E1728 File Offset: 0x001DF928
+		// (get) Token: 0x06005DCF RID: 24015 RVA: 0x001E1708 File Offset: 0x001DF908
 		public static PropertyInfo[] Properties
 		{
 			get
@@ -51,7 +51,7 @@ namespace BuildSafe
 			}
 		}
 
-		// Token: 0x06005DD0 RID: 24016 RVA: 0x001E172F File Offset: 0x001DF92F
+		// Token: 0x06005DD0 RID: 24016 RVA: 0x001E170F File Offset: 0x001DF90F
 		private static EventInfo[] PreFetchEvents()
 		{
 			if (Reflection<T>.gEventsCache != null)
@@ -61,7 +61,7 @@ namespace BuildSafe
 			return Reflection<T>.gEventsCache = Enumerable.ToArray<EventInfo>(RuntimeReflectionExtensions.GetRuntimeEvents(Reflection<T>.Type));
 		}
 
-		// Token: 0x06005DD1 RID: 24017 RVA: 0x001E1753 File Offset: 0x001DF953
+		// Token: 0x06005DD1 RID: 24017 RVA: 0x001E1733 File Offset: 0x001DF933
 		private static PropertyInfo[] PreFetchProperties()
 		{
 			if (Reflection<T>.gPropertiesCache != null)
@@ -71,7 +71,7 @@ namespace BuildSafe
 			return Reflection<T>.gPropertiesCache = Enumerable.ToArray<PropertyInfo>(RuntimeReflectionExtensions.GetRuntimeProperties(Reflection<T>.Type));
 		}
 
-		// Token: 0x06005DD2 RID: 24018 RVA: 0x001E1777 File Offset: 0x001DF977
+		// Token: 0x06005DD2 RID: 24018 RVA: 0x001E1757 File Offset: 0x001DF957
 		private static MethodInfo[] PreFetchMethods()
 		{
 			if (Reflection<T>.gMethodsCache != null)
@@ -81,7 +81,7 @@ namespace BuildSafe
 			return Reflection<T>.gMethodsCache = Enumerable.ToArray<MethodInfo>(RuntimeReflectionExtensions.GetRuntimeMethods(Reflection<T>.Type));
 		}
 
-		// Token: 0x06005DD3 RID: 24019 RVA: 0x001E179B File Offset: 0x001DF99B
+		// Token: 0x06005DD3 RID: 24019 RVA: 0x001E177B File Offset: 0x001DF97B
 		private static FieldInfo[] PreFetchFields()
 		{
 			if (Reflection<T>.gFieldsCache != null)

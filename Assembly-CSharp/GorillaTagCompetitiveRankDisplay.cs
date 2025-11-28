@@ -5,20 +5,20 @@ using UnityEngine;
 // Token: 0x020007BC RID: 1980
 public class GorillaTagCompetitiveRankDisplay : MonoBehaviour
 {
-	// Token: 0x0600342B RID: 13355 RVA: 0x00118412 File Offset: 0x00116612
+	// Token: 0x0600342B RID: 13355 RVA: 0x001183F2 File Offset: 0x001165F2
 	private void OnEnable()
 	{
 		VRRig.LocalRig.OnRankedSubtierChanged += new Action<int, int>(this.HandleRankedSubtierChanged);
 		this.HandleRankedSubtierChanged(0, 0);
 	}
 
-	// Token: 0x0600342C RID: 13356 RVA: 0x00118432 File Offset: 0x00116632
+	// Token: 0x0600342C RID: 13356 RVA: 0x00118412 File Offset: 0x00116612
 	private void OnDisable()
 	{
 		VRRig.LocalRig.OnRankedSubtierChanged -= new Action<int, int>(this.HandleRankedSubtierChanged);
 	}
 
-	// Token: 0x0600342D RID: 13357 RVA: 0x0011844C File Offset: 0x0011664C
+	// Token: 0x0600342D RID: 13357 RVA: 0x0011842C File Offset: 0x0011662C
 	public void HandleRankedSubtierChanged(int questSubTier, int pcSubTier)
 	{
 		float currentELO = RankedProgressionManager.Instance.GetCurrentELO();
@@ -27,7 +27,7 @@ public class GorillaTagCompetitiveRankDisplay : MonoBehaviour
 		this.UpdateRankProgress(RankedProgressionManager.Instance.GetProgressionRankProgress());
 	}
 
-	// Token: 0x0600342E RID: 13358 RVA: 0x00118488 File Offset: 0x00116688
+	// Token: 0x0600342E RID: 13358 RVA: 0x00118468 File Offset: 0x00116668
 	private void UpdateRankIcons(int currentRank)
 	{
 		this.currentRankSprite.sprite = RankedProgressionManager.Instance.GetProgressionRankIcon(currentRank);
@@ -52,7 +52,7 @@ public class GorillaTagCompetitiveRankDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600342F RID: 13359 RVA: 0x001185A8 File Offset: 0x001167A8
+	// Token: 0x0600342F RID: 13359 RVA: 0x00118588 File Offset: 0x00116788
 	private void UpdateRankProgress(float percent)
 	{
 		percent = Mathf.Clamp01(percent);

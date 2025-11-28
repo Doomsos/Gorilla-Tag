@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 [RequireComponent(typeof(RuntimeMeshCombiner))]
 public class UberCombiner : MonoBehaviour
 {
-	// Token: 0x06005029 RID: 20521 RVA: 0x0019C1D0 File Offset: 0x0019A3D0
+	// Token: 0x06005029 RID: 20521 RVA: 0x0019C1B0 File Offset: 0x0019A3B0
 	private void CollectRenderers()
 	{
 		MeshRenderer[] array = Enumerable.ToArray<MeshRenderer>(UberCombiner.FilterRenderers(Enumerable.ToArray<MeshRenderer>(Enumerable.SelectMany<GameObject, MeshRenderer>(this.meshSources, (GameObject g) => g.GetComponentsInChildren<MeshRenderer>(this.includeInactive)))).DistinctBy((MeshRenderer mr) => mr.GetInstanceID()));
@@ -19,7 +19,7 @@ public class UberCombiner : MonoBehaviour
 		string.Format("Found {0} renderers to combine.", array.Length).Echo<string>();
 	}
 
-	// Token: 0x0600502A RID: 20522 RVA: 0x0019C248 File Offset: 0x0019A448
+	// Token: 0x0600502A RID: 20522 RVA: 0x0019C228 File Offset: 0x0019A428
 	private void ValidateRenderers()
 	{
 		List<GameObject> list = new List<GameObject>(16);
@@ -126,33 +126,33 @@ public class UberCombiner : MonoBehaviour
 		this.invalidObjects = Enumerable.ToList<GameObject>(list.DistinctBy((GameObject g) => g.GetHashCode()));
 	}
 
-	// Token: 0x0600502B RID: 20523 RVA: 0x0019C544 File Offset: 0x0019A744
+	// Token: 0x0600502B RID: 20523 RVA: 0x0019C524 File Offset: 0x0019A724
 	private void SendToCombiner()
 	{
 		List<GameObject> targetMeshes = Enumerable.ToList<GameObject>(Enumerable.Where<GameObject>(Enumerable.Where<GameObject>(Enumerable.Where<GameObject>(Enumerable.Select<MeshRenderer, GameObject>(this.renderersToCombine, (MeshRenderer r) => r.gameObject), (GameObject g) => !(g == null)), (GameObject g) => !Enumerable.Contains<GameObject>(this.objectsToIgnore, g)), (GameObject g) => !this.invalidObjects.Contains(g)).DistinctBy((GameObject g) => g.GetInstanceID()));
 		this._combiner.targetMeshes = targetMeshes;
 	}
 
-	// Token: 0x0600502C RID: 20524 RVA: 0x0019C5F7 File Offset: 0x0019A7F7
+	// Token: 0x0600502C RID: 20524 RVA: 0x0019C5D7 File Offset: 0x0019A7D7
 	private void MergeMeshes()
 	{
 		this._combiner.CombineMeshes();
 	}
 
-	// Token: 0x0600502D RID: 20525 RVA: 0x0019C605 File Offset: 0x0019A805
+	// Token: 0x0600502D RID: 20525 RVA: 0x0019C5E5 File Offset: 0x0019A7E5
 	private void UndoMerge()
 	{
 		this._combiner.UndoMerge();
 	}
 
-	// Token: 0x0600502E RID: 20526 RVA: 0x0019C613 File Offset: 0x0019A813
+	// Token: 0x0600502E RID: 20526 RVA: 0x0019C5F3 File Offset: 0x0019A7F3
 	private void MergeAndExtractPerMaterialMeshes()
 	{
 		this._combiner.onDoneMerge.AddListener(new UnityAction(this.OnPostMerge));
 		this._combiner.CombineMeshes();
 	}
 
-	// Token: 0x0600502F RID: 20527 RVA: 0x0019C63D File Offset: 0x0019A83D
+	// Token: 0x0600502F RID: 20527 RVA: 0x0019C61D File Offset: 0x0019A81D
 	private void QuickMerge()
 	{
 		this.CollectRenderers();
@@ -161,7 +161,7 @@ public class UberCombiner : MonoBehaviour
 		this.MergeAndExtractPerMaterialMeshes();
 	}
 
-	// Token: 0x06005030 RID: 20528 RVA: 0x0019C658 File Offset: 0x0019A858
+	// Token: 0x06005030 RID: 20528 RVA: 0x0019C638 File Offset: 0x0019A838
 	private void OnPostMerge()
 	{
 		MeshFilter component = base.GetComponent<MeshFilter>();
@@ -198,7 +198,7 @@ public class UberCombiner : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06005031 RID: 20529 RVA: 0x0019C7B0 File Offset: 0x0019A9B0
+	// Token: 0x06005031 RID: 20529 RVA: 0x0019C790 File Offset: 0x0019A990
 	private void OnValidate()
 	{
 		if (!base.transform.position.Approx0(1E-05f))
@@ -216,7 +216,7 @@ public class UberCombiner : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06005032 RID: 20530 RVA: 0x0019C83A File Offset: 0x0019AA3A
+	// Token: 0x06005032 RID: 20530 RVA: 0x0019C81A File Offset: 0x0019AA1A
 	private static IEnumerable<MeshRenderer> FilterRenderers(IList<MeshRenderer> renderers)
 	{
 		Shader uberShader = UberShader.ReferenceShader;

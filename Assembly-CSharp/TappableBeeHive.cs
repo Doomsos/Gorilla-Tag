@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020008EF RID: 2287
 public class TappableBeeHive : Tappable
 {
-	// Token: 0x06003A87 RID: 14983 RVA: 0x00135554 File Offset: 0x00133754
+	// Token: 0x06003A87 RID: 14983 RVA: 0x00135534 File Offset: 0x00133734
 	private void Awake()
 	{
 		if (this.swarmEmergeFromPoint == null || this.swarmEmergeToPoint == null)
@@ -18,7 +18,7 @@ public class TappableBeeHive : Tappable
 		base.GetComponent<SlingshotProjectileHitNotifier>().OnProjectileHit += this.OnSlingshotHit;
 	}
 
-	// Token: 0x06003A88 RID: 14984 RVA: 0x001355B8 File Offset: 0x001337B8
+	// Token: 0x06003A88 RID: 14984 RVA: 0x00135598 File Offset: 0x00133798
 	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
 	{
 		if (!Application.isPlaying)
@@ -35,7 +35,7 @@ public class TappableBeeHive : Tappable
 		}
 	}
 
-	// Token: 0x06003A89 RID: 14985 RVA: 0x0013562C File Offset: 0x0013382C
+	// Token: 0x06003A89 RID: 14985 RVA: 0x0013560C File Offset: 0x0013380C
 	public void OnSlingshotHit(SlingshotProjectile projectile, Collision collision)
 	{
 		if (!Application.isPlaying)

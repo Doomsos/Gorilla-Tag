@@ -8,7 +8,7 @@ namespace UniLabs.Time
 	[Conditional("UNITY_EDITOR")]
 	public class TimeSpanRangeAttribute : Attribute
 	{
-		// Token: 0x06005447 RID: 21575 RVA: 0x001AA195 File Offset: 0x001A8395
+		// Token: 0x06005447 RID: 21575 RVA: 0x001AA175 File Offset: 0x001A8375
 		public TimeSpanRangeAttribute(string maxGetter, bool inline = false, TimeUnit snappingUnit = TimeUnit.Seconds)
 		{
 			this.MaxGetter = maxGetter;
@@ -16,7 +16,7 @@ namespace UniLabs.Time
 			this.Inline = inline;
 		}
 
-		// Token: 0x06005448 RID: 21576 RVA: 0x001AA1B2 File Offset: 0x001A83B2
+		// Token: 0x06005448 RID: 21576 RVA: 0x001AA192 File Offset: 0x001A8392
 		public TimeSpanRangeAttribute(string minGetter, string maxGetter, bool inline = false, TimeUnit snappingUnit = TimeUnit.Seconds)
 		{
 			this.MinGetter = minGetter;

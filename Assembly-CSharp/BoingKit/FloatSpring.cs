@@ -6,28 +6,28 @@ namespace BoingKit
 	// Token: 0x020011BE RID: 4542
 	public struct FloatSpring
 	{
-		// Token: 0x06007296 RID: 29334 RVA: 0x00259457 File Offset: 0x00257657
+		// Token: 0x06007296 RID: 29334 RVA: 0x00259437 File Offset: 0x00257637
 		public void Reset()
 		{
 			this.Value = 0f;
 			this.Velocity = 0f;
 		}
 
-		// Token: 0x06007297 RID: 29335 RVA: 0x0025946F File Offset: 0x0025766F
+		// Token: 0x06007297 RID: 29335 RVA: 0x0025944F File Offset: 0x0025764F
 		public void Reset(float initValue)
 		{
 			this.Value = initValue;
 			this.Velocity = 0f;
 		}
 
-		// Token: 0x06007298 RID: 29336 RVA: 0x00259483 File Offset: 0x00257683
+		// Token: 0x06007298 RID: 29336 RVA: 0x00259463 File Offset: 0x00257663
 		public void Reset(float initValue, float initVelocity)
 		{
 			this.Value = initValue;
 			this.Velocity = initVelocity;
 		}
 
-		// Token: 0x06007299 RID: 29337 RVA: 0x00259494 File Offset: 0x00257694
+		// Token: 0x06007299 RID: 29337 RVA: 0x00259474 File Offset: 0x00257674
 		public float TrackDampingRatio(float targetValue, float angularFrequency, float dampingRatio, float deltaTime)
 		{
 			if (angularFrequency < MathUtil.Epsilon)
@@ -53,7 +53,7 @@ namespace BoingKit
 			return this.Value;
 		}
 
-		// Token: 0x0600729A RID: 29338 RVA: 0x00259564 File Offset: 0x00257764
+		// Token: 0x0600729A RID: 29338 RVA: 0x00259544 File Offset: 0x00257744
 		public float TrackHalfLife(float targetValue, float frequencyHz, float halfLife, float deltaTime)
 		{
 			if (halfLife < MathUtil.Epsilon)
@@ -67,7 +67,7 @@ namespace BoingKit
 			return this.TrackDampingRatio(targetValue, num, dampingRatio, deltaTime);
 		}
 
-		// Token: 0x0600729B RID: 29339 RVA: 0x002595B0 File Offset: 0x002577B0
+		// Token: 0x0600729B RID: 29339 RVA: 0x00259590 File Offset: 0x00257790
 		public float TrackExponential(float targetValue, float halfLife, float deltaTime)
 		{
 			if (halfLife < MathUtil.Epsilon)

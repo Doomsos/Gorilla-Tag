@@ -9,16 +9,16 @@ namespace GorillaTagScripts.Builder
 	public class BuilderProjectile : MonoBehaviour
 	{
 		// Token: 0x17000883 RID: 2179
-		// (get) Token: 0x06005BC1 RID: 23489 RVA: 0x001D72EC File Offset: 0x001D54EC
-		// (set) Token: 0x06005BC2 RID: 23490 RVA: 0x001D72F4 File Offset: 0x001D54F4
+		// (get) Token: 0x06005BC1 RID: 23489 RVA: 0x001D72CC File Offset: 0x001D54CC
+		// (set) Token: 0x06005BC2 RID: 23490 RVA: 0x001D72D4 File Offset: 0x001D54D4
 		public Vector3 launchPosition { get; private set; }
 
 		// Token: 0x1400009A RID: 154
-		// (add) Token: 0x06005BC3 RID: 23491 RVA: 0x001D7300 File Offset: 0x001D5500
-		// (remove) Token: 0x06005BC4 RID: 23492 RVA: 0x001D7338 File Offset: 0x001D5538
+		// (add) Token: 0x06005BC3 RID: 23491 RVA: 0x001D72E0 File Offset: 0x001D54E0
+		// (remove) Token: 0x06005BC4 RID: 23492 RVA: 0x001D7318 File Offset: 0x001D5518
 		public event BuilderProjectile.ProjectileImpactEvent OnImpact;
 
-		// Token: 0x06005BC5 RID: 23493 RVA: 0x001D7370 File Offset: 0x001D5570
+		// Token: 0x06005BC5 RID: 23493 RVA: 0x001D7350 File Offset: 0x001D5550
 		public void Launch(Vector3 position, Vector3 velocity, BuilderProjectileLauncher sourceObject, int projectileCount, float scale, int timeStamp)
 		{
 			this.particleLaunched = true;
@@ -55,7 +55,7 @@ namespace GorillaTagScripts.Builder
 			this.projectileSource.RegisterProjectile(this);
 		}
 
-		// Token: 0x06005BC6 RID: 23494 RVA: 0x001D7531 File Offset: 0x001D5731
+		// Token: 0x06005BC6 RID: 23494 RVA: 0x001D7511 File Offset: 0x001D5711
 		protected void Awake()
 		{
 			this.projectileRigidbody = base.GetComponent<Rigidbody>();
@@ -63,7 +63,7 @@ namespace GorillaTagScripts.Builder
 			this.initialScale = base.transform.localScale.x;
 		}
 
-		// Token: 0x06005BC7 RID: 23495 RVA: 0x001D7564 File Offset: 0x001D5764
+		// Token: 0x06005BC7 RID: 23495 RVA: 0x001D7544 File Offset: 0x001D5744
 		public void Deactivate()
 		{
 			base.transform.localScale = Vector3.one * this.initialScale;
@@ -78,7 +78,7 @@ namespace GorillaTagScripts.Builder
 			ObjectPools.instance.Destroy(base.gameObject);
 		}
 
-		// Token: 0x06005BC8 RID: 23496 RVA: 0x001D75FC File Offset: 0x001D57FC
+		// Token: 0x06005BC8 RID: 23496 RVA: 0x001D75DC File Offset: 0x001D57DC
 		private void SpawnImpactEffect(GameObject prefab, Vector3 position, Vector3 normal)
 		{
 			Vector3 position2 = position + normal * this.impactEffectOffset;
@@ -98,7 +98,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BC9 RID: 23497 RVA: 0x001D76A4 File Offset: 0x001D58A4
+		// Token: 0x06005BC9 RID: 23497 RVA: 0x001D7684 File Offset: 0x001D5884
 		public void ApplyHitKnockback(Vector3 hitNormal)
 		{
 			if (this.aoeKnockbackConfig != null && this.aoeKnockbackConfig.Value.applyAOEKnockback)
@@ -112,14 +112,14 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BCA RID: 23498 RVA: 0x001D7734 File Offset: 0x001D5934
+		// Token: 0x06005BCA RID: 23498 RVA: 0x001D7714 File Offset: 0x001D5914
 		private void OnEnable()
 		{
 			this.timeCreated = 0f;
 			this.particleLaunched = false;
 		}
 
-		// Token: 0x06005BCB RID: 23499 RVA: 0x001D7748 File Offset: 0x001D5948
+		// Token: 0x06005BCB RID: 23499 RVA: 0x001D7728 File Offset: 0x001D5928
 		protected void OnDisable()
 		{
 			this.particleLaunched = false;
@@ -130,7 +130,7 @@ namespace GorillaTagScripts.Builder
 			this.projectileSource = null;
 		}
 
-		// Token: 0x06005BCC RID: 23500 RVA: 0x001D7774 File Offset: 0x001D5974
+		// Token: 0x06005BCC RID: 23500 RVA: 0x001D7754 File Offset: 0x001D5954
 		public void UpdateProjectile()
 		{
 			if (this.particleLaunched)
@@ -150,7 +150,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BCD RID: 23501 RVA: 0x001D77F0 File Offset: 0x001D59F0
+		// Token: 0x06005BCD RID: 23501 RVA: 0x001D77D0 File Offset: 0x001D59D0
 		private void OnCollisionEnter(Collision other)
 		{
 			if (!this.particleLaunched)
@@ -176,7 +176,7 @@ namespace GorillaTagScripts.Builder
 			this.Deactivate();
 		}
 
-		// Token: 0x06005BCE RID: 23502 RVA: 0x001D78A8 File Offset: 0x001D5AA8
+		// Token: 0x06005BCE RID: 23502 RVA: 0x001D7888 File Offset: 0x001D5A88
 		protected void OnCollisionStay(Collision other)
 		{
 			if (!this.particleLaunched)
@@ -202,7 +202,7 @@ namespace GorillaTagScripts.Builder
 			this.Deactivate();
 		}
 
-		// Token: 0x06005BCF RID: 23503 RVA: 0x001D7960 File Offset: 0x001D5B60
+		// Token: 0x06005BCF RID: 23503 RVA: 0x001D7940 File Offset: 0x001D5B40
 		protected void OnTriggerEnter(Collider other)
 		{
 			if (!this.particleLaunched)

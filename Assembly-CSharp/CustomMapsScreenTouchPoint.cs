@@ -13,7 +13,7 @@ public abstract class CustomMapsScreenTouchPoint : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06003EFB RID: 16123 RVA: 0x00151A0C File Offset: 0x0014FC0C
+	// Token: 0x06003EFB RID: 16123 RVA: 0x001519EC File Offset: 0x0014FBEC
 	protected virtual void OnDisable()
 	{
 		if (this.colorUpdateCoroutine != null)
@@ -26,7 +26,7 @@ public abstract class CustomMapsScreenTouchPoint : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003EFC RID: 16124 RVA: 0x00151A48 File Offset: 0x0014FC48
+	// Token: 0x06003EFC RID: 16124 RVA: 0x00151A28 File Offset: 0x0014FC28
 	private void OnTriggerEnter(Collider collider)
 	{
 		GTDev.Log<string>(string.Format("trigger {0} pressTime={1} time={2}", base.gameObject.name, CustomMapsScreenTouchPoint.pressTime, Time.time), null);
@@ -57,7 +57,7 @@ public abstract class CustomMapsScreenTouchPoint : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003EFD RID: 16125 RVA: 0x00151B85 File Offset: 0x0014FD85
+	// Token: 0x06003EFD RID: 16125 RVA: 0x00151B65 File Offset: 0x0014FD65
 	public virtual void PressButtonColourUpdate()
 	{
 		if (!base.gameObject.activeInHierarchy)
@@ -68,7 +68,7 @@ public abstract class CustomMapsScreenTouchPoint : MonoBehaviour
 		this.colorUpdateCoroutine = base.StartCoroutine(this.<PressButtonColourUpdate>g__ButtonColorUpdate_Local|12_0());
 	}
 
-	// Token: 0x06003EFE RID: 16126 RVA: 0x00151BC0 File Offset: 0x0014FDC0
+	// Token: 0x06003EFE RID: 16126 RVA: 0x00151BA0 File Offset: 0x0014FDA0
 	private Vector3 GetForwardDirection()
 	{
 		switch (this.forwardDirection)
@@ -93,7 +93,7 @@ public abstract class CustomMapsScreenTouchPoint : MonoBehaviour
 	// Token: 0x06003EFF RID: 16127
 	protected abstract void OnButtonPressedEvent();
 
-	// Token: 0x06003F02 RID: 16130 RVA: 0x00151C62 File Offset: 0x0014FE62
+	// Token: 0x06003F02 RID: 16130 RVA: 0x00151C42 File Offset: 0x0014FE42
 	[CompilerGenerated]
 	private IEnumerator <PressButtonColourUpdate>g__ButtonColorUpdate_Local|12_0()
 	{

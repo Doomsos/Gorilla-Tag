@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010E7 RID: 4327
 	public class Dreidel : MonoBehaviour
 	{
-		// Token: 0x06006C84 RID: 27780 RVA: 0x00239760 File Offset: 0x00237960
+		// Token: 0x06006C84 RID: 27780 RVA: 0x00239740 File Offset: 0x00237940
 		public bool TrySetIdle()
 		{
 			if (this.state == Dreidel.State.Idle || this.state == Dreidel.State.FindingSurface || this.state == Dreidel.State.Fallen)
@@ -20,7 +20,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006C85 RID: 27781 RVA: 0x00239785 File Offset: 0x00237985
+		// Token: 0x06006C85 RID: 27781 RVA: 0x00239765 File Offset: 0x00237965
 		public bool TryCheckForSurfaces()
 		{
 			if (this.state == Dreidel.State.Idle || this.state == Dreidel.State.FindingSurface)
@@ -31,13 +31,13 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006C86 RID: 27782 RVA: 0x002397A1 File Offset: 0x002379A1
+		// Token: 0x06006C86 RID: 27782 RVA: 0x00239781 File Offset: 0x00237981
 		public void Spin()
 		{
 			this.StartSpin();
 		}
 
-		// Token: 0x06006C87 RID: 27783 RVA: 0x002397AC File Offset: 0x002379AC
+		// Token: 0x06006C87 RID: 27783 RVA: 0x0023978C File Offset: 0x0023798C
 		public bool TryGetSpinStartData(out Vector3 surfacePoint, out Vector3 surfaceNormal, out float randomDuration, out Dreidel.Side randomSide, out Dreidel.Variation randomVariation, out double startTime)
 		{
 			if (this.canStartSpin)
@@ -59,7 +59,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006C88 RID: 27784 RVA: 0x00239858 File Offset: 0x00237A58
+		// Token: 0x06006C88 RID: 27784 RVA: 0x00239838 File Offset: 0x00237A38
 		public void SetSpinStartData(Vector3 surfacePoint, Vector3 surfaceNormal, float duration, bool counterClockwise, Dreidel.Side side, Dreidel.Variation variation, double startTime)
 		{
 			this.surfacePlanePoint = surfacePoint;
@@ -71,7 +71,7 @@ namespace GorillaTag.Cosmetics
 			this.landingVariation = variation;
 		}
 
-		// Token: 0x06006C89 RID: 27785 RVA: 0x00239890 File Offset: 0x00237A90
+		// Token: 0x06006C89 RID: 27785 RVA: 0x00239870 File Offset: 0x00237A70
 		private void LateUpdate()
 		{
 			float deltaTime = Time.deltaTime;
@@ -244,7 +244,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C8A RID: 27786 RVA: 0x0023A0BC File Offset: 0x002382BC
+		// Token: 0x06006C8A RID: 27786 RVA: 0x0023A09C File Offset: 0x0023829C
 		private void StartIdle()
 		{
 			this.state = Dreidel.State.Idle;
@@ -264,7 +264,7 @@ namespace GorillaTag.Cosmetics
 			this.UpdateSpinTransform();
 		}
 
-		// Token: 0x06006C8B RID: 27787 RVA: 0x0023A198 File Offset: 0x00238398
+		// Token: 0x06006C8B RID: 27787 RVA: 0x0023A178 File Offset: 0x00238378
 		private void StartFindingSurfaces()
 		{
 			this.state = Dreidel.State.FindingSurface;
@@ -284,7 +284,7 @@ namespace GorillaTag.Cosmetics
 			this.UpdateSpinTransform();
 		}
 
-		// Token: 0x06006C8C RID: 27788 RVA: 0x0023A274 File Offset: 0x00238474
+		// Token: 0x06006C8C RID: 27788 RVA: 0x0023A254 File Offset: 0x00238454
 		private void StartSpin()
 		{
 			this.state = Dreidel.State.Spinning;
@@ -303,7 +303,7 @@ namespace GorillaTag.Cosmetics
 			this.pathDir = Vector3.forward;
 		}
 
-		// Token: 0x06006C8D RID: 27789 RVA: 0x0023A33C File Offset: 0x0023853C
+		// Token: 0x06006C8D RID: 27789 RVA: 0x0023A31C File Offset: 0x0023851C
 		private void StartFall()
 		{
 			this.state = Dreidel.State.Falling;
@@ -339,7 +339,7 @@ namespace GorillaTag.Cosmetics
 			this.gimelConfetti.gameObject.SetActive(false);
 		}
 
-		// Token: 0x06006C8E RID: 27790 RVA: 0x0023A48C File Offset: 0x0023868C
+		// Token: 0x06006C8E RID: 27790 RVA: 0x0023A46C File Offset: 0x0023866C
 		private Vector3 GetGroundContactPoint()
 		{
 			Vector3 position = this.spinTransform.position;
@@ -354,7 +354,7 @@ namespace GorillaTag.Cosmetics
 			return this.spinTransform.InverseTransformPoint(vector);
 		}
 
-		// Token: 0x06006C8F RID: 27791 RVA: 0x0023A520 File Offset: 0x00238720
+		// Token: 0x06006C8F RID: 27791 RVA: 0x0023A500 File Offset: 0x00238700
 		private void GetTiltVectorsForSideWithPrev(Dreidel.Side side, out Vector2 sideTilt, out Vector2 prevSideTilt)
 		{
 			int num = (side <= Dreidel.Side.Shin) ? 3 : (side - Dreidel.Side.Hey);
@@ -370,7 +370,7 @@ namespace GorillaTag.Cosmetics
 			sideTilt.x = prevSideTilt.x;
 		}
 
-		// Token: 0x06006C90 RID: 27792 RVA: 0x0023A5A4 File Offset: 0x002387A4
+		// Token: 0x06006C90 RID: 27792 RVA: 0x0023A584 File Offset: 0x00238784
 		private void GetTiltVectorsForSideWithNext(Dreidel.Side side, out Vector2 sideTilt, out Vector2 nextSideTilt)
 		{
 			int num = (int)((side + 1) % Dreidel.Side.Count);
@@ -386,7 +386,7 @@ namespace GorillaTag.Cosmetics
 			sideTilt.x = nextSideTilt.x;
 		}
 
-		// Token: 0x06006C91 RID: 27793 RVA: 0x0023A620 File Offset: 0x00238820
+		// Token: 0x06006C91 RID: 27793 RVA: 0x0023A600 File Offset: 0x00238800
 		private void AlignToSurfacePlane()
 		{
 			Vector3 vector = Vector3.forward;
@@ -400,7 +400,7 @@ namespace GorillaTag.Cosmetics
 			base.transform.rotation = rotation;
 		}
 
-		// Token: 0x06006C92 RID: 27794 RVA: 0x0023A69C File Offset: 0x0023889C
+		// Token: 0x06006C92 RID: 27794 RVA: 0x0023A67C File Offset: 0x0023887C
 		private void UpdateSpinTransform()
 		{
 			Vector3 position = this.spinTransform.position;

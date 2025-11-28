@@ -17,27 +17,27 @@ namespace GorillaTagScripts
 	public class FriendshipGroupDetection : NetworkSceneObject, ITickSystemTick
 	{
 		// Token: 0x17000847 RID: 2119
-		// (get) Token: 0x06005858 RID: 22616 RVA: 0x001C39B8 File Offset: 0x001C1BB8
-		// (set) Token: 0x06005859 RID: 22617 RVA: 0x001C39BF File Offset: 0x001C1BBF
+		// (get) Token: 0x06005858 RID: 22616 RVA: 0x001C3998 File Offset: 0x001C1B98
+		// (set) Token: 0x06005859 RID: 22617 RVA: 0x001C399F File Offset: 0x001C1B9F
 		public static FriendshipGroupDetection Instance { get; private set; }
 
 		// Token: 0x17000848 RID: 2120
-		// (get) Token: 0x0600585A RID: 22618 RVA: 0x001C39C7 File Offset: 0x001C1BC7
-		// (set) Token: 0x0600585B RID: 22619 RVA: 0x001C39CF File Offset: 0x001C1BCF
+		// (get) Token: 0x0600585A RID: 22618 RVA: 0x001C39A7 File Offset: 0x001C1BA7
+		// (set) Token: 0x0600585B RID: 22619 RVA: 0x001C39AF File Offset: 0x001C1BAF
 		public List<Color> myBeadColors { get; private set; } = new List<Color>();
 
 		// Token: 0x17000849 RID: 2121
-		// (get) Token: 0x0600585C RID: 22620 RVA: 0x001C39D8 File Offset: 0x001C1BD8
-		// (set) Token: 0x0600585D RID: 22621 RVA: 0x001C39E0 File Offset: 0x001C1BE0
+		// (get) Token: 0x0600585C RID: 22620 RVA: 0x001C39B8 File Offset: 0x001C1BB8
+		// (set) Token: 0x0600585D RID: 22621 RVA: 0x001C39C0 File Offset: 0x001C1BC0
 		public Color myBraceletColor { get; private set; }
 
 		// Token: 0x1700084A RID: 2122
-		// (get) Token: 0x0600585E RID: 22622 RVA: 0x001C39E9 File Offset: 0x001C1BE9
-		// (set) Token: 0x0600585F RID: 22623 RVA: 0x001C39F1 File Offset: 0x001C1BF1
+		// (get) Token: 0x0600585E RID: 22622 RVA: 0x001C39C9 File Offset: 0x001C1BC9
+		// (set) Token: 0x0600585F RID: 22623 RVA: 0x001C39D1 File Offset: 0x001C1BD1
 		public int MyBraceletSelfIndex { get; private set; }
 
 		// Token: 0x1700084B RID: 2123
-		// (get) Token: 0x06005860 RID: 22624 RVA: 0x001C39FA File Offset: 0x001C1BFA
+		// (get) Token: 0x06005860 RID: 22624 RVA: 0x001C39DA File Offset: 0x001C1BDA
 		public List<string> PartyMemberIDs
 		{
 			get
@@ -47,7 +47,7 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x1700084C RID: 2124
-		// (get) Token: 0x06005861 RID: 22625 RVA: 0x001C3A02 File Offset: 0x001C1C02
+		// (get) Token: 0x06005861 RID: 22625 RVA: 0x001C39E2 File Offset: 0x001C1BE2
 		public bool IsInParty
 		{
 			get
@@ -57,16 +57,16 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x1700084D RID: 2125
-		// (get) Token: 0x06005862 RID: 22626 RVA: 0x001C3A0D File Offset: 0x001C1C0D
-		// (set) Token: 0x06005863 RID: 22627 RVA: 0x001C3A15 File Offset: 0x001C1C15
+		// (get) Token: 0x06005862 RID: 22626 RVA: 0x001C39ED File Offset: 0x001C1BED
+		// (set) Token: 0x06005863 RID: 22627 RVA: 0x001C39F5 File Offset: 0x001C1BF5
 		public GroupJoinZoneAB partyZone { get; private set; }
 
 		// Token: 0x1700084E RID: 2126
-		// (get) Token: 0x06005864 RID: 22628 RVA: 0x001C3A1E File Offset: 0x001C1C1E
-		// (set) Token: 0x06005865 RID: 22629 RVA: 0x001C3A26 File Offset: 0x001C1C26
+		// (get) Token: 0x06005864 RID: 22628 RVA: 0x001C39FE File Offset: 0x001C1BFE
+		// (set) Token: 0x06005865 RID: 22629 RVA: 0x001C3A06 File Offset: 0x001C1C06
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06005866 RID: 22630 RVA: 0x001C3A30 File Offset: 0x001C1C30
+		// Token: 0x06005866 RID: 22630 RVA: 0x001C3A10 File Offset: 0x001C1C10
 		private void Awake()
 		{
 			FriendshipGroupDetection.Instance = this;
@@ -78,7 +78,7 @@ namespace GorillaTagScripts
 			NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(this.OnPlayerJoinedRoom);
 		}
 
-		// Token: 0x06005867 RID: 22631 RVA: 0x000C833B File Offset: 0x000C653B
+		// Token: 0x06005867 RID: 22631 RVA: 0x000C831B File Offset: 0x000C651B
 		private new void OnEnable()
 		{
 			NetworkBehaviourUtils.InternalOnEnable(this);
@@ -86,7 +86,7 @@ namespace GorillaTagScripts
 			TickSystem<object>.AddTickCallback(this);
 		}
 
-		// Token: 0x06005868 RID: 22632 RVA: 0x000C834F File Offset: 0x000C654F
+		// Token: 0x06005868 RID: 22632 RVA: 0x000C832F File Offset: 0x000C652F
 		private new void OnDisable()
 		{
 			NetworkBehaviourUtils.InternalOnDisable(this);
@@ -94,7 +94,7 @@ namespace GorillaTagScripts
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06005869 RID: 22633 RVA: 0x001C3A94 File Offset: 0x001C1C94
+		// Token: 0x06005869 RID: 22633 RVA: 0x001C3A74 File Offset: 0x001C1C74
 		private void OnPlayerJoinedRoom(NetPlayer joiningPlayer)
 		{
 			if (!this.IsInParty)
@@ -127,25 +127,25 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600586A RID: 22634 RVA: 0x001C3B4B File Offset: 0x001C1D4B
+		// Token: 0x0600586A RID: 22634 RVA: 0x001C3B2B File Offset: 0x001C1D2B
 		public void AddGroupZoneCallback(Action<GroupJoinZoneAB> callback)
 		{
 			this.groupZoneCallbacks.Add(callback);
 		}
 
-		// Token: 0x0600586B RID: 22635 RVA: 0x001C3B59 File Offset: 0x001C1D59
+		// Token: 0x0600586B RID: 22635 RVA: 0x001C3B39 File Offset: 0x001C1D39
 		public void RemoveGroupZoneCallback(Action<GroupJoinZoneAB> callback)
 		{
 			this.groupZoneCallbacks.Remove(callback);
 		}
 
-		// Token: 0x0600586C RID: 22636 RVA: 0x001C3B68 File Offset: 0x001C1D68
+		// Token: 0x0600586C RID: 22636 RVA: 0x001C3B48 File Offset: 0x001C1D48
 		public bool IsInMyGroup(string userID)
 		{
 			return this.myPartyMemberIDs != null && this.myPartyMemberIDs.Contains(userID);
 		}
 
-		// Token: 0x0600586D RID: 22637 RVA: 0x001C3B80 File Offset: 0x001C1D80
+		// Token: 0x0600586D RID: 22637 RVA: 0x001C3B60 File Offset: 0x001C1D60
 		public bool AnyPartyMembersOutsideFriendCollider()
 		{
 			if (!this.IsInParty)
@@ -163,11 +163,11 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x1700084F RID: 2127
-		// (get) Token: 0x0600586E RID: 22638 RVA: 0x001C3C10 File Offset: 0x001C1E10
-		// (set) Token: 0x0600586F RID: 22639 RVA: 0x001C3C18 File Offset: 0x001C1E18
+		// (get) Token: 0x0600586E RID: 22638 RVA: 0x001C3BF0 File Offset: 0x001C1DF0
+		// (set) Token: 0x0600586F RID: 22639 RVA: 0x001C3BF8 File Offset: 0x001C1DF8
 		public bool DidJoinLeftHanded { get; private set; }
 
-		// Token: 0x06005870 RID: 22640 RVA: 0x001C3C24 File Offset: 0x001C1E24
+		// Token: 0x06005870 RID: 22640 RVA: 0x001C3C04 File Offset: 0x001C1E04
 		public void Tick()
 		{
 			if (this.wantsPartyRefreshPostJoin && this.lastJoinedRoomTime + this.joinedRoomRefreshPartyDelay < (double)Time.time)
@@ -303,7 +303,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005871 RID: 22641 RVA: 0x001C40AC File Offset: 0x001C22AC
+		// Token: 0x06005871 RID: 22641 RVA: 0x001C408C File Offset: 0x001C228C
 		private void UpdateProvisionalGroup(out Vector3 midpoint)
 		{
 			this.playersInProvisionalGroup.Clear();
@@ -381,7 +381,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005872 RID: 22642 RVA: 0x001C441C File Offset: 0x001C261C
+		// Token: 0x06005872 RID: 22642 RVA: 0x001C43FC File Offset: 0x001C25FC
 		private void UpdateWarningSigns()
 		{
 			ZoneEntityBSP zoneEntity = GorillaTagger.Instance.offlineVRRig.zoneEntity;
@@ -415,7 +415,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005873 RID: 22643 RVA: 0x001C45A4 File Offset: 0x001C27A4
+		// Token: 0x06005873 RID: 22643 RVA: 0x001C4584 File Offset: 0x001C2784
 		[PunRPC]
 		private void NotifyNoPartyToMerge(PhotonMessageInfo info)
 		{
@@ -427,7 +427,7 @@ namespace GorillaTagScripts
 			this.partyMergeIDs.Remove(info.Sender.ActorNumber);
 		}
 
-		// Token: 0x06005874 RID: 22644 RVA: 0x001C45DC File Offset: 0x001C27DC
+		// Token: 0x06005874 RID: 22644 RVA: 0x001C45BC File Offset: 0x001C27BC
 		[Rpc]
 		private unsafe static void RPC_NotifyNoPartyToMerge(NetworkRunner runner, RpcInfo info = default(RpcInfo))
 		{
@@ -467,7 +467,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.partyMergeIDs.Remove(info.Source.PlayerId);
 		}
 
-		// Token: 0x06005875 RID: 22645 RVA: 0x001C46DD File Offset: 0x001C28DD
+		// Token: 0x06005875 RID: 22645 RVA: 0x001C46BD File Offset: 0x001C28BD
 		[PunRPC]
 		private void NotifyPartyMerging(int[] memberIDs, PhotonMessageInfo info)
 		{
@@ -483,7 +483,7 @@ namespace GorillaTagScripts
 			this.partyMergeIDs[info.Sender.ActorNumber] = memberIDs;
 		}
 
-		// Token: 0x06005876 RID: 22646 RVA: 0x001C4710 File Offset: 0x001C2910
+		// Token: 0x06005876 RID: 22646 RVA: 0x001C46F0 File Offset: 0x001C28F0
 		[Rpc]
 		private unsafe static void RPC_NotifyPartyMerging(NetworkRunner runner, [RpcTarget] PlayerRef playerRef, int[] memberIDs, RpcInfo info = default(RpcInfo))
 		{
@@ -543,7 +543,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.partyMergeIDs[info.Source.PlayerId] = memberIDs;
 		}
 
-		// Token: 0x06005877 RID: 22647 RVA: 0x001C489C File Offset: 0x001C2A9C
+		// Token: 0x06005877 RID: 22647 RVA: 0x001C487C File Offset: 0x001C2A7C
 		public void SendAboutToGroupJoin()
 		{
 			foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
@@ -564,7 +564,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005878 RID: 22648 RVA: 0x001C4984 File Offset: 0x001C2B84
+		// Token: 0x06005878 RID: 22648 RVA: 0x001C4964 File Offset: 0x001C2B64
 		[PunRPC]
 		private void PartyMemberIsAboutToGroupJoin(PhotonMessageInfo info)
 		{
@@ -572,7 +572,7 @@ namespace GorillaTagScripts
 			this.PartMemberIsAboutToGroupJoinWrapped(new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005879 RID: 22649 RVA: 0x001C49A0 File Offset: 0x001C2BA0
+		// Token: 0x06005879 RID: 22649 RVA: 0x001C4980 File Offset: 0x001C2B80
 		[Rpc]
 		private unsafe static void RPC_PartyMemberIsAboutToGroupJoin(NetworkRunner runner, [RpcTarget] PlayerRef targetPlayer, RpcInfo info = default(RpcInfo))
 		{
@@ -624,7 +624,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.PartMemberIsAboutToGroupJoinWrapped(new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x0600587A RID: 22650 RVA: 0x001C4AC0 File Offset: 0x001C2CC0
+		// Token: 0x0600587A RID: 22650 RVA: 0x001C4AA0 File Offset: 0x001C2CA0
 		private void PartMemberIsAboutToGroupJoinWrapped(PhotonMessageInfoWrapped wrappedInfo)
 		{
 			float time = Time.time;
@@ -639,7 +639,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600587B RID: 22651 RVA: 0x001C4B2C File Offset: 0x001C2D2C
+		// Token: 0x0600587B RID: 22651 RVA: 0x001C4B0C File Offset: 0x001C2D0C
 		private void SendPartyFormedRPC(short braceletColor, int[] memberIDs, bool forceDebug)
 		{
 			string text = Enum.Parse<GameModeType>(GorillaComputer.instance.currentGameMode.Value, true).ToString();
@@ -658,7 +658,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600587C RID: 22652 RVA: 0x001C4BF8 File Offset: 0x001C2DF8
+		// Token: 0x0600587C RID: 22652 RVA: 0x001C4BD8 File Offset: 0x001C2DD8
 		[Rpc]
 		private unsafe static void RPC_PartyFormedSuccessfully(NetworkRunner runner, [RpcTarget] PlayerRef targetPlayer, string partyGameMode, short braceletColor, int[] memberIDs, bool forceDebug, RpcInfo info = default(RpcInfo))
 		{
@@ -723,7 +723,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.PartyFormedSuccesfullyWrapped(partyGameMode, braceletColor, memberIDs, forceDebug, new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x0600587D RID: 22653 RVA: 0x001C4E15 File Offset: 0x001C3015
+		// Token: 0x0600587D RID: 22653 RVA: 0x001C4DF5 File Offset: 0x001C2FF5
 		[PunRPC]
 		private void PartyFormedSuccessfully(string partyGameMode, short braceletColor, int[] memberIDs, bool forceDebug, PhotonMessageInfo info)
 		{
@@ -731,7 +731,7 @@ namespace GorillaTagScripts
 			this.PartyFormedSuccesfullyWrapped(partyGameMode, braceletColor, memberIDs, forceDebug, new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x0600587E RID: 22654 RVA: 0x001C4E38 File Offset: 0x001C3038
+		// Token: 0x0600587E RID: 22654 RVA: 0x001C4E18 File Offset: 0x001C3018
 		private void PartyFormedSuccesfullyWrapped(string partyGameMode, short braceletColor, int[] memberIDs, bool forceDebug, PhotonMessageInfoWrapped info)
 		{
 			if (memberIDs == null || memberIDs.Length > 10 || !Enumerable.Contains<int>(memberIDs, info.Sender.ActorNumber) || this.playersInProvisionalGroup.IndexOf(info.Sender.ActorNumber) != 0 || Mathf.Abs(this.groupCreateAfterTimestamp - Time.time) > this.m_maxGroupJoinTimeDifference || !GameMode.IsValidGameMode(partyGameMode))
@@ -759,14 +759,14 @@ namespace GorillaTagScripts
 			this.SetNewParty(partyGameMode, braceletColor, memberIDs);
 		}
 
-		// Token: 0x0600587F RID: 22655 RVA: 0x001C4F80 File Offset: 0x001C3180
+		// Token: 0x0600587F RID: 22655 RVA: 0x001C4F60 File Offset: 0x001C3160
 		[PunRPC]
 		private void AddPartyMembers(string partyGameMode, short braceletColor, int[] memberIDs, PhotonMessageInfo info)
 		{
 			this.AddPartyMembersWrapped(partyGameMode, braceletColor, memberIDs, new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005880 RID: 22656 RVA: 0x001C4F94 File Offset: 0x001C3194
+		// Token: 0x06005880 RID: 22656 RVA: 0x001C4F74 File Offset: 0x001C3174
 		[Rpc]
 		private unsafe static void RPC_AddPartyMembers(NetworkRunner runner, [RpcTarget] PlayerRef rpcTarget, string partyGameMode, short braceletColor, int[] memberIDs, RpcInfo info = default(RpcInfo))
 		{
@@ -827,7 +827,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.AddPartyMembersWrapped(partyGameMode, braceletColor, memberIDs, new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005881 RID: 22657 RVA: 0x001C5178 File Offset: 0x001C3378
+		// Token: 0x06005881 RID: 22657 RVA: 0x001C5158 File Offset: 0x001C3358
 		private void AddPartyMembersWrapped(string partyGameMode, short braceletColor, int[] memberIDs, PhotonMessageInfoWrapped infoWrapped)
 		{
 			GorillaNot.IncrementRPCCall(infoWrapped, "AddPartyMembersWrapped");
@@ -839,7 +839,7 @@ namespace GorillaTagScripts
 			this.SetNewParty(partyGameMode, braceletColor, memberIDs);
 		}
 
-		// Token: 0x06005882 RID: 22658 RVA: 0x001C51F0 File Offset: 0x001C33F0
+		// Token: 0x06005882 RID: 22658 RVA: 0x001C51D0 File Offset: 0x001C33D0
 		private void SetNewParty(string partyGameMode, short braceletColor, int[] memberIDs)
 		{
 			GorillaComputer.instance.SetGameModeWithoutButton(partyGameMode);
@@ -863,7 +863,7 @@ namespace GorillaTagScripts
 			PlayerGameEvents.MiscEvent("FriendshipGroupJoined", 1);
 		}
 
-		// Token: 0x06005883 RID: 22659 RVA: 0x001C52F0 File Offset: 0x001C34F0
+		// Token: 0x06005883 RID: 22659 RVA: 0x001C52D0 File Offset: 0x001C34D0
 		public void LeaveParty()
 		{
 			if (this.myPartyMemberIDs == null)
@@ -883,7 +883,7 @@ namespace GorillaTagScripts
 			GorillaTagger.Instance.StartVibration(false, this.hapticStrength, this.hapticDuration);
 		}
 
-		// Token: 0x06005884 RID: 22660 RVA: 0x001C53AC File Offset: 0x001C35AC
+		// Token: 0x06005884 RID: 22660 RVA: 0x001C538C File Offset: 0x001C358C
 		public void OnFailedToFollowParty()
 		{
 			if (!this.IsInParty)
@@ -894,7 +894,7 @@ namespace GorillaTagScripts
 			this.wantsPartyRefreshPostFollowFailed = true;
 		}
 
-		// Token: 0x06005885 RID: 22661 RVA: 0x001C53CC File Offset: 0x001C35CC
+		// Token: 0x06005885 RID: 22661 RVA: 0x001C53AC File Offset: 0x001C35AC
 		public void RefreshPartyMembers()
 		{
 			if (this.myPartyMemberIDs.IsNullOrEmpty<string>())
@@ -920,7 +920,7 @@ namespace GorillaTagScripts
 			this.wantsPartyRefreshPostFollowFailed = false;
 		}
 
-		// Token: 0x06005886 RID: 22662 RVA: 0x001C54AC File Offset: 0x001C36AC
+		// Token: 0x06005886 RID: 22662 RVA: 0x001C548C File Offset: 0x001C368C
 		[Rpc]
 		private unsafe static void RPC_PlayerLeftParty(NetworkRunner runner, [RpcTarget] PlayerRef player, RpcInfo info = default(RpcInfo))
 		{
@@ -973,7 +973,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.PlayerLeftPartyWrapped(new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005887 RID: 22663 RVA: 0x001C55DC File Offset: 0x001C37DC
+		// Token: 0x06005887 RID: 22663 RVA: 0x001C55BC File Offset: 0x001C37BC
 		[PunRPC]
 		private void PlayerLeftParty(PhotonMessageInfo info)
 		{
@@ -981,7 +981,7 @@ namespace GorillaTagScripts
 			this.PlayerLeftPartyWrapped(new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005888 RID: 22664 RVA: 0x001C55F8 File Offset: 0x001C37F8
+		// Token: 0x06005888 RID: 22664 RVA: 0x001C55D8 File Offset: 0x001C37D8
 		private void PlayerLeftPartyWrapped(PhotonMessageInfoWrapped infoWrapped)
 		{
 			if (this.myPartyMemberIDs == null)
@@ -1000,7 +1000,7 @@ namespace GorillaTagScripts
 			GorillaTagger.Instance.StartVibration(this.DidJoinLeftHanded, this.hapticStrength, this.hapticDuration);
 		}
 
-		// Token: 0x06005889 RID: 22665 RVA: 0x001C5660 File Offset: 0x001C3860
+		// Token: 0x06005889 RID: 22665 RVA: 0x001C5640 File Offset: 0x001C3840
 		private void PlayerIDLeftParty(string userID)
 		{
 			if (this.myPartyMemberIDs == null)
@@ -1019,20 +1019,20 @@ namespace GorillaTagScripts
 			GorillaTagger.Instance.StartVibration(this.DidJoinLeftHanded, this.hapticStrength, this.hapticDuration);
 		}
 
-		// Token: 0x0600588A RID: 22666 RVA: 0x001C56BC File Offset: 0x001C38BC
+		// Token: 0x0600588A RID: 22666 RVA: 0x001C569C File Offset: 0x001C389C
 		public void SendVerifyPartyMember(NetPlayer player)
 		{
 			this.photonView.RPC("VerifyPartyMember", player.GetPlayerRef(), Array.Empty<object>());
 		}
 
-		// Token: 0x0600588B RID: 22667 RVA: 0x001C56D9 File Offset: 0x001C38D9
+		// Token: 0x0600588B RID: 22667 RVA: 0x001C56B9 File Offset: 0x001C38B9
 		[PunRPC]
 		private void VerifyPartyMember(PhotonMessageInfo info)
 		{
 			this.VerifyPartyMemberWrapped(new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x0600588C RID: 22668 RVA: 0x001C56E8 File Offset: 0x001C38E8
+		// Token: 0x0600588C RID: 22668 RVA: 0x001C56C8 File Offset: 0x001C38C8
 		[Rpc]
 		private unsafe static void RPC_VerifyPartyMember(NetworkRunner runner, [RpcTarget] PlayerRef rpcTarget, RpcInfo info = default(RpcInfo))
 		{
@@ -1084,7 +1084,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.VerifyPartyMemberWrapped(new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x0600588D RID: 22669 RVA: 0x001C5808 File Offset: 0x001C3A08
+		// Token: 0x0600588D RID: 22669 RVA: 0x001C57E8 File Offset: 0x001C39E8
 		private void VerifyPartyMemberWrapped(PhotonMessageInfoWrapped infoWrapped)
 		{
 			GorillaNot.IncrementRPCCall(infoWrapped, "VerifyPartyMemberWrapped");
@@ -1099,7 +1099,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600588E RID: 22670 RVA: 0x001C5898 File Offset: 0x001C3A98
+		// Token: 0x0600588E RID: 22670 RVA: 0x001C5878 File Offset: 0x001C3A78
 		public void SendRequestPartyGameMode(string gameMode)
 		{
 			int num = int.MaxValue;
@@ -1121,7 +1121,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600588F RID: 22671 RVA: 0x001C5940 File Offset: 0x001C3B40
+		// Token: 0x0600588F RID: 22671 RVA: 0x001C5920 File Offset: 0x001C3B20
 		[Rpc]
 		private unsafe static void RPC_RequestPartyGameMode(NetworkRunner runner, [RpcTarget] PlayerRef targetPlayer, string gameMode, RpcInfo info = default(RpcInfo))
 		{
@@ -1175,14 +1175,14 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.RequestPartyGameModeWrapped(gameMode, new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005890 RID: 22672 RVA: 0x001C5A9E File Offset: 0x001C3C9E
+		// Token: 0x06005890 RID: 22672 RVA: 0x001C5A7E File Offset: 0x001C3C7E
 		[PunRPC]
 		private void RequestPartyGameMode(string gameMode, PhotonMessageInfo info)
 		{
 			this.RequestPartyGameModeWrapped(gameMode, new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005891 RID: 22673 RVA: 0x001C5AB0 File Offset: 0x001C3CB0
+		// Token: 0x06005891 RID: 22673 RVA: 0x001C5A90 File Offset: 0x001C3C90
 		private void RequestPartyGameModeWrapped(string gameMode, PhotonMessageInfoWrapped info)
 		{
 			GorillaNot.IncrementRPCCall(info, "RequestPartyGameModeWrapped");
@@ -1202,7 +1202,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005892 RID: 22674 RVA: 0x001C5B60 File Offset: 0x001C3D60
+		// Token: 0x06005892 RID: 22674 RVA: 0x001C5B40 File Offset: 0x001C3D40
 		[Rpc]
 		private unsafe static void RPC_NotifyPartyGameModeChanged(NetworkRunner runner, [RpcTarget] PlayerRef targetPlayer, string gameMode, RpcInfo info = default(RpcInfo))
 		{
@@ -1256,14 +1256,14 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.Instance.NotifyPartyGameModeChangedWrapped(gameMode, new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005893 RID: 22675 RVA: 0x001C5CBE File Offset: 0x001C3EBE
+		// Token: 0x06005893 RID: 22675 RVA: 0x001C5C9E File Offset: 0x001C3E9E
 		[PunRPC]
 		private void NotifyPartyGameModeChanged(string gameMode, PhotonMessageInfo info)
 		{
 			this.NotifyPartyGameModeChangedWrapped(gameMode, new PhotonMessageInfoWrapped(info));
 		}
 
-		// Token: 0x06005894 RID: 22676 RVA: 0x001C5CCD File Offset: 0x001C3ECD
+		// Token: 0x06005894 RID: 22676 RVA: 0x001C5CAD File Offset: 0x001C3EAD
 		private void NotifyPartyGameModeChangedWrapped(string gameMode, PhotonMessageInfoWrapped info)
 		{
 			GorillaNot.IncrementRPCCall(info, "NotifyPartyGameModeChangedWrapped");
@@ -1274,7 +1274,7 @@ namespace GorillaTagScripts
 			GorillaComputer.instance.SetGameModeWithoutButton(gameMode);
 		}
 
-		// Token: 0x06005895 RID: 22677 RVA: 0x001C5D0C File Offset: 0x001C3F0C
+		// Token: 0x06005895 RID: 22677 RVA: 0x001C5CEC File Offset: 0x001C3EEC
 		private void OnPartyMembershipChanged()
 		{
 			this.myPartyMembersHash.Clear();
@@ -1325,7 +1325,7 @@ namespace GorillaTagScripts
 			this.UpdateWarningSigns();
 		}
 
-		// Token: 0x06005896 RID: 22678 RVA: 0x001C5ED0 File Offset: 0x001C40D0
+		// Token: 0x06005896 RID: 22678 RVA: 0x001C5EB0 File Offset: 0x001C40B0
 		public bool IsPartyWithinCollider(GorillaFriendCollider friendCollider)
 		{
 			foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
@@ -1338,13 +1338,13 @@ namespace GorillaTagScripts
 			return true;
 		}
 
-		// Token: 0x06005897 RID: 22679 RVA: 0x001C5F54 File Offset: 0x001C4154
+		// Token: 0x06005897 RID: 22679 RVA: 0x001C5F34 File Offset: 0x001C4134
 		public static short PackColor(Color col)
 		{
 			return (short)(Mathf.RoundToInt(col.r * 9f) + Mathf.RoundToInt(col.g * 9f) * 10 + Mathf.RoundToInt(col.b * 9f) * 100);
 		}
 
-		// Token: 0x06005898 RID: 22680 RVA: 0x001C5F94 File Offset: 0x001C4194
+		// Token: 0x06005898 RID: 22680 RVA: 0x001C5F74 File Offset: 0x001C4174
 		public static Color UnpackColor(short data)
 		{
 			Color result = default(Color);
@@ -1354,7 +1354,7 @@ namespace GorillaTagScripts
 			return result;
 		}
 
-		// Token: 0x0600589B RID: 22683 RVA: 0x001C60F0 File Offset: 0x001C42F0
+		// Token: 0x0600589B RID: 22683 RVA: 0x001C60D0 File Offset: 0x001C42D0
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyNoPartyToMerge(Fusion.NetworkRunner,Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]
@@ -1366,7 +1366,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.RPC_NotifyNoPartyToMerge(runner, info);
 		}
 
-		// Token: 0x0600589C RID: 22684 RVA: 0x001C6134 File Offset: 0x001C4334
+		// Token: 0x0600589C RID: 22684 RVA: 0x001C6114 File Offset: 0x001C4314
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyPartyMerging(Fusion.NetworkRunner,Fusion.PlayerRef,System.Int32[],Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]
@@ -1383,7 +1383,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.RPC_NotifyPartyMerging(runner, target, array, info);
 		}
 
-		// Token: 0x0600589D RID: 22685 RVA: 0x001C61C8 File Offset: 0x001C43C8
+		// Token: 0x0600589D RID: 22685 RVA: 0x001C61A8 File Offset: 0x001C43A8
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_PartyMemberIsAboutToGroupJoin(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]
@@ -1396,7 +1396,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.RPC_PartyMemberIsAboutToGroupJoin(runner, target, info);
 		}
 
-		// Token: 0x0600589E RID: 22686 RVA: 0x001C6218 File Offset: 0x001C4418
+		// Token: 0x0600589E RID: 22686 RVA: 0x001C61F8 File Offset: 0x001C43F8
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_PartyFormedSuccessfully(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,System.Int16,System.Int32[],System.Boolean,Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]
@@ -1421,7 +1421,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.RPC_PartyFormedSuccessfully(runner, target, partyGameMode, braceletColor, array, forceDebug, info);
 		}
 
-		// Token: 0x0600589F RID: 22687 RVA: 0x001C6318 File Offset: 0x001C4518
+		// Token: 0x0600589F RID: 22687 RVA: 0x001C62F8 File Offset: 0x001C44F8
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_AddPartyMembers(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,System.Int16,System.Int32[],Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]
@@ -1443,7 +1443,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.RPC_AddPartyMembers(runner, target, partyGameMode, braceletColor, array, info);
 		}
 
-		// Token: 0x060058A0 RID: 22688 RVA: 0x001C63F8 File Offset: 0x001C45F8
+		// Token: 0x060058A0 RID: 22688 RVA: 0x001C63D8 File Offset: 0x001C45D8
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_PlayerLeftParty(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]
@@ -1456,7 +1456,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.RPC_PlayerLeftParty(runner, target, info);
 		}
 
-		// Token: 0x060058A1 RID: 22689 RVA: 0x001C6448 File Offset: 0x001C4648
+		// Token: 0x060058A1 RID: 22689 RVA: 0x001C6428 File Offset: 0x001C4628
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_VerifyPartyMember(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]
@@ -1469,7 +1469,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.RPC_VerifyPartyMember(runner, target, info);
 		}
 
-		// Token: 0x060058A2 RID: 22690 RVA: 0x001C6498 File Offset: 0x001C4698
+		// Token: 0x060058A2 RID: 22690 RVA: 0x001C6478 File Offset: 0x001C4678
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_RequestPartyGameMode(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]
@@ -1485,7 +1485,7 @@ namespace GorillaTagScripts
 			FriendshipGroupDetection.RPC_RequestPartyGameMode(runner, target, gameMode, info);
 		}
 
-		// Token: 0x060058A3 RID: 22691 RVA: 0x001C6510 File Offset: 0x001C4710
+		// Token: 0x060058A3 RID: 22691 RVA: 0x001C64F0 File Offset: 0x001C46F0
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyPartyGameModeChanged(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,Fusion.RpcInfo)")]
 		[Preserve]
 		[WeaverGenerated]

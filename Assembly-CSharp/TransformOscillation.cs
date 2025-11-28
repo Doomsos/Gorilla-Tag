@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000CD4 RID: 3284
 public class TransformOscillation : MonoBehaviour
 {
-	// Token: 0x0600501E RID: 20510 RVA: 0x0019BAC2 File Offset: 0x00199CC2
+	// Token: 0x0600501E RID: 20510 RVA: 0x0019BAA2 File Offset: 0x00199CA2
 	private void Awake()
 	{
 		if (this.useRigidbodyMotion && !this.targetRigidbody)
@@ -17,7 +17,7 @@ public class TransformOscillation : MonoBehaviour
 		this.isRunning = false;
 	}
 
-	// Token: 0x0600501F RID: 20511 RVA: 0x0019BB02 File Offset: 0x00199D02
+	// Token: 0x0600501F RID: 20511 RVA: 0x0019BAE2 File Offset: 0x00199CE2
 	private void OnEnable()
 	{
 		this.lastPosOffs = Vector3.zero;
@@ -30,14 +30,14 @@ public class TransformOscillation : MonoBehaviour
 		this.isRunning = false;
 	}
 
-	// Token: 0x06005020 RID: 20512 RVA: 0x0019BB30 File Offset: 0x00199D30
+	// Token: 0x06005020 RID: 20512 RVA: 0x0019BB10 File Offset: 0x00199D10
 	public void StartOscillation()
 	{
 		this.startTime = Time.time;
 		this.isRunning = true;
 	}
 
-	// Token: 0x06005021 RID: 20513 RVA: 0x0019BB44 File Offset: 0x00199D44
+	// Token: 0x06005021 RID: 20513 RVA: 0x0019BB24 File Offset: 0x00199D24
 	private float GetTimeSeconds()
 	{
 		if (!this.useServerTime)
@@ -52,7 +52,7 @@ public class TransformOscillation : MonoBehaviour
 		return (float)this.dt.Minute * 60f + (float)this.dt.Second + (float)this.dt.Millisecond / 1000f;
 	}
 
-	// Token: 0x06005022 RID: 20514 RVA: 0x0019BBB8 File Offset: 0x00199DB8
+	// Token: 0x06005022 RID: 20514 RVA: 0x0019BB98 File Offset: 0x00199D98
 	private void ComputeOffsets(float t)
 	{
 		this.offsPos.x = this.PosAmp.x * Mathf.Sin(t * this.PosFreq.x);
@@ -63,7 +63,7 @@ public class TransformOscillation : MonoBehaviour
 		this.offsRot.z = this.RotAmp.z * Mathf.Sin(t * this.RotFreq.z);
 	}
 
-	// Token: 0x06005023 RID: 20515 RVA: 0x0019BCBC File Offset: 0x00199EBC
+	// Token: 0x06005023 RID: 20515 RVA: 0x0019BC9C File Offset: 0x00199E9C
 	private void LateUpdate()
 	{
 		if (!this.isRunning)
@@ -90,7 +90,7 @@ public class TransformOscillation : MonoBehaviour
 		this.lastRotOffs = quaternion;
 	}
 
-	// Token: 0x06005024 RID: 20516 RVA: 0x0019BD80 File Offset: 0x00199F80
+	// Token: 0x06005024 RID: 20516 RVA: 0x0019BD60 File Offset: 0x00199F60
 	private void FixedUpdate()
 	{
 		if (!this.isRunning)

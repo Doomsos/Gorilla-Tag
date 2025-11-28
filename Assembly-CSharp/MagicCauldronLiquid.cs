@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200081F RID: 2079
 public class MagicCauldronLiquid : MonoBehaviour
 {
-	// Token: 0x060036A7 RID: 13991 RVA: 0x00127ADB File Offset: 0x00125CDB
+	// Token: 0x060036A7 RID: 13991 RVA: 0x00127ABB File Offset: 0x00125CBB
 	private void Test()
 	{
 		this._animProgress = 0f;
@@ -12,7 +12,7 @@ public class MagicCauldronLiquid : MonoBehaviour
 		base.enabled = true;
 	}
 
-	// Token: 0x060036A8 RID: 13992 RVA: 0x00127AF6 File Offset: 0x00125CF6
+	// Token: 0x060036A8 RID: 13992 RVA: 0x00127AD6 File Offset: 0x00125CD6
 	public void AnimateColorFromTo(Color a, Color b, float length = 1f)
 	{
 		this._colorStart = a;
@@ -23,7 +23,7 @@ public class MagicCauldronLiquid : MonoBehaviour
 		base.enabled = true;
 	}
 
-	// Token: 0x060036A9 RID: 13993 RVA: 0x00127B26 File Offset: 0x00125D26
+	// Token: 0x060036A9 RID: 13993 RVA: 0x00127B06 File Offset: 0x00125D06
 	private void ApplyColor(Color color)
 	{
 		if (!this._applyMaterial)
@@ -34,7 +34,7 @@ public class MagicCauldronLiquid : MonoBehaviour
 		this._applyMaterial.Apply();
 	}
 
-	// Token: 0x060036AA RID: 13994 RVA: 0x00127B54 File Offset: 0x00125D54
+	// Token: 0x060036AA RID: 13994 RVA: 0x00127B34 File Offset: 0x00125D34
 	private void ApplyWaveParams(float amplitude, float frequency, float scale, float rotation)
 	{
 		if (!this._applyMaterial)
@@ -47,7 +47,7 @@ public class MagicCauldronLiquid : MonoBehaviour
 		this._applyMaterial.Apply();
 	}
 
-	// Token: 0x060036AB RID: 13995 RVA: 0x00127BAD File Offset: 0x00125DAD
+	// Token: 0x060036AB RID: 13995 RVA: 0x00127B8D File Offset: 0x00125D8D
 	private void OnEnable()
 	{
 		if (this._applyMaterial)
@@ -56,14 +56,14 @@ public class MagicCauldronLiquid : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060036AC RID: 13996 RVA: 0x00127BC8 File Offset: 0x00125DC8
+	// Token: 0x060036AC RID: 13996 RVA: 0x00127BA8 File Offset: 0x00125DA8
 	private void OnDisable()
 	{
 		this._animating = false;
 		this._animProgress = 0f;
 	}
 
-	// Token: 0x060036AD RID: 13997 RVA: 0x00127BDC File Offset: 0x00125DDC
+	// Token: 0x060036AD RID: 13997 RVA: 0x00127BBC File Offset: 0x00125DBC
 	private void Update()
 	{
 		if (!this._animating)

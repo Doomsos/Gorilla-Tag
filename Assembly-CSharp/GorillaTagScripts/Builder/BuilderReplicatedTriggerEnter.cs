@@ -9,7 +9,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E5F RID: 3679
 	public class BuilderReplicatedTriggerEnter : MonoBehaviour, IBuilderPieceComponent, IBuilderPieceFunctional
 	{
-		// Token: 0x06005BED RID: 23533 RVA: 0x001D8018 File Offset: 0x001D6218
+		// Token: 0x06005BED RID: 23533 RVA: 0x001D7FF8 File Offset: 0x001D61F8
 		private void Awake()
 		{
 			this.colliders.Clear();
@@ -33,7 +33,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BEE RID: 23534 RVA: 0x001D80C4 File Offset: 0x001D62C4
+		// Token: 0x06005BEE RID: 23534 RVA: 0x001D80A4 File Offset: 0x001D62A4
 		private void OnDestroy()
 		{
 			BuilderSmallHandTrigger[] array = this.handTriggers;
@@ -48,7 +48,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BEF RID: 23535 RVA: 0x001D8128 File Offset: 0x001D6328
+		// Token: 0x06005BEF RID: 23535 RVA: 0x001D8108 File Offset: 0x001D6308
 		private void PlayTriggerEffects(NetPlayer target)
 		{
 			UnityEvent onTriggered = this.OnTriggered;
@@ -83,7 +83,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BF0 RID: 23536 RVA: 0x001D8261 File Offset: 0x001D6461
+		// Token: 0x06005BF0 RID: 23536 RVA: 0x001D8241 File Offset: 0x001D6441
 		private void OnHandTriggerEntered()
 		{
 			if (this.CanTrigger())
@@ -92,7 +92,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BF1 RID: 23537 RVA: 0x001D828C File Offset: 0x001D648C
+		// Token: 0x06005BF1 RID: 23537 RVA: 0x001D826C File Offset: 0x001D646C
 		private void OnBodyTriggerEntered(int playerNumber)
 		{
 			if (!NetworkSystem.Instance.IsMasterClient)
@@ -110,13 +110,13 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BF2 RID: 23538 RVA: 0x001D82EF File Offset: 0x001D64EF
+		// Token: 0x06005BF2 RID: 23538 RVA: 0x001D82CF File Offset: 0x001D64CF
 		private bool CanTrigger()
 		{
 			return this.isPieceActive && this.currentState == BuilderReplicatedTriggerEnter.FunctionalState.Idle && Time.time > this.lastTriggerTime + this.triggerCooldown;
 		}
 
-		// Token: 0x06005BF3 RID: 23539 RVA: 0x001D8317 File Offset: 0x001D6517
+		// Token: 0x06005BF3 RID: 23539 RVA: 0x001D82F7 File Offset: 0x001D64F7
 		public void OnPieceCreate(int pieceType, int pieceId)
 		{
 			this.currentState = BuilderReplicatedTriggerEnter.FunctionalState.Idle;
@@ -132,7 +132,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005BF6 RID: 23542 RVA: 0x001D8320 File Offset: 0x001D6520
+		// Token: 0x06005BF6 RID: 23542 RVA: 0x001D8300 File Offset: 0x001D6500
 		public void OnPieceActivate()
 		{
 			this.isPieceActive = true;
@@ -142,7 +142,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BF7 RID: 23543 RVA: 0x001D8378 File Offset: 0x001D6578
+		// Token: 0x06005BF7 RID: 23543 RVA: 0x001D8358 File Offset: 0x001D6558
 		public void OnPieceDeactivate()
 		{
 			this.isPieceActive = false;
@@ -157,7 +157,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BF8 RID: 23544 RVA: 0x001D840C File Offset: 0x001D660C
+		// Token: 0x06005BF8 RID: 23544 RVA: 0x001D83EC File Offset: 0x001D65EC
 		public void OnStateChanged(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!this.IsStateValid(newState))
@@ -173,7 +173,7 @@ namespace GorillaTagScripts.Builder
 			this.currentState = (BuilderReplicatedTriggerEnter.FunctionalState)newState;
 		}
 
-		// Token: 0x06005BF9 RID: 23545 RVA: 0x001D845C File Offset: 0x001D665C
+		// Token: 0x06005BF9 RID: 23545 RVA: 0x001D843C File Offset: 0x001D663C
 		public void OnStateRequest(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!NetworkSystem.Instance.IsMasterClient)
@@ -190,13 +190,13 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BFA RID: 23546 RVA: 0x001D68CB File Offset: 0x001D4ACB
+		// Token: 0x06005BFA RID: 23546 RVA: 0x001D68AB File Offset: 0x001D4AAB
 		public bool IsStateValid(byte state)
 		{
 			return state <= 1;
 		}
 
-		// Token: 0x06005BFB RID: 23547 RVA: 0x001D84B8 File Offset: 0x001D66B8
+		// Token: 0x06005BFB RID: 23547 RVA: 0x001D8498 File Offset: 0x001D6698
 		public void FunctionalPieceUpdate()
 		{
 			if (this.lastTriggerTime + this.triggerCooldown < Time.time)

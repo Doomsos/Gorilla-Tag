@@ -13,7 +13,7 @@ namespace GorillaTag.CosmeticSystem
 			return true;
 		}
 
-		// Token: 0x06006951 RID: 26961 RVA: 0x0022433B File Offset: 0x0022253B
+		// Token: 0x06006951 RID: 26961 RVA: 0x0022431B File Offset: 0x0022251B
 		public void OnEnable()
 		{
 			this.info.debugCosmeticSOName = base.name;

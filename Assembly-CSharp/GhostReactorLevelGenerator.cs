@@ -6,7 +6,7 @@ using UnityEngine;
 public class GhostReactorLevelGenerator : MonoBehaviourTick
 {
 	// Token: 0x170003EF RID: 1007
-	// (get) Token: 0x060028CE RID: 10446 RVA: 0x000D974C File Offset: 0x000D794C
+	// (get) Token: 0x060028CE RID: 10446 RVA: 0x000D972C File Offset: 0x000D792C
 	public List<GhostReactorLevelGeneratorV2.TreeLevelConfig> TreeLevels
 	{
 		get
@@ -19,7 +19,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x060028CF RID: 10447 RVA: 0x000D97BC File Offset: 0x000D79BC
+	// Token: 0x060028CF RID: 10447 RVA: 0x000D979C File Offset: 0x000D799C
 	private void Awake()
 	{
 		GameObject gameObject = new GameObject("TestColliderA");
@@ -35,13 +35,13 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		this.nextVisCheckNodeIndex = 0;
 	}
 
-	// Token: 0x060028D0 RID: 10448 RVA: 0x000D9850 File Offset: 0x000D7A50
+	// Token: 0x060028D0 RID: 10448 RVA: 0x000D9830 File Offset: 0x000D7A30
 	public void Init(GhostReactor reactor)
 	{
 		this.reactor = reactor;
 	}
 
-	// Token: 0x060028D1 RID: 10449 RVA: 0x000D985C File Offset: 0x000D7A5C
+	// Token: 0x060028D1 RID: 10449 RVA: 0x000D983C File Offset: 0x000D7A3C
 	public override void Tick()
 	{
 		Vector3 position = VRRig.LocalRig.transform.position;
@@ -82,7 +82,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x060028D2 RID: 10450 RVA: 0x000D99C0 File Offset: 0x000D7BC0
+	// Token: 0x060028D2 RID: 10450 RVA: 0x000D99A0 File Offset: 0x000D7BA0
 	private bool TestForCollision(GhostReactorLevelSection section, Vector3 position, Quaternion rotation, int selfi, int selfj, int selfk)
 	{
 		this.testColliderA.gameObject.SetActive(true);
@@ -159,13 +159,13 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		return false;
 	}
 
-	// Token: 0x060028D3 RID: 10451 RVA: 0x000D9F81 File Offset: 0x000D8181
+	// Token: 0x060028D3 RID: 10451 RVA: 0x000D9F61 File Offset: 0x000D8161
 	private void DebugGenerate()
 	{
 		this.Generate(this.seed);
 	}
 
-	// Token: 0x060028D4 RID: 10452 RVA: 0x000D9F90 File Offset: 0x000D8190
+	// Token: 0x060028D4 RID: 10452 RVA: 0x000D9F70 File Offset: 0x000D8170
 	public void Generate(int inputSeed)
 	{
 		this.ClearLevelSections();
@@ -351,13 +351,13 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x060028D5 RID: 10453 RVA: 0x000DA989 File Offset: 0x000D8B89
+	// Token: 0x060028D5 RID: 10453 RVA: 0x000DA969 File Offset: 0x000D8B69
 	private void DebugClear()
 	{
 		this.ClearLevelSections();
 	}
 
-	// Token: 0x060028D6 RID: 10454 RVA: 0x000DA994 File Offset: 0x000D8B94
+	// Token: 0x060028D6 RID: 10454 RVA: 0x000DA974 File Offset: 0x000D8B74
 	public void ClearLevelSections()
 	{
 		for (int i = 0; i < this.nodeList.Count; i++)
@@ -384,7 +384,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		this.treeParents.Clear();
 	}
 
-	// Token: 0x060028D7 RID: 10455 RVA: 0x000DAA98 File Offset: 0x000D8C98
+	// Token: 0x060028D7 RID: 10455 RVA: 0x000DAA78 File Offset: 0x000D8C78
 	public void SpawnEntitiesInEachSection(float respawnCount)
 	{
 		for (int i = 0; i < this.nodeTree.Count; i++)
@@ -415,7 +415,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x060028D8 RID: 10456 RVA: 0x000DAC0C File Offset: 0x000D8E0C
+	// Token: 0x060028D8 RID: 10456 RVA: 0x000DABEC File Offset: 0x000D8DEC
 	public void RespawnEntity(int entityId, long entityCreateData)
 	{
 		int sectionIndex = GhostReactor.EnemyEntityCreateData.Unpack(entityCreateData).sectionIndex;
@@ -425,7 +425,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x060028D9 RID: 10457 RVA: 0x000DAC68 File Offset: 0x000D8E68
+	// Token: 0x060028D9 RID: 10457 RVA: 0x000DAC48 File Offset: 0x000D8E48
 	public GRPatrolPath GetPatrolPath(long createData)
 	{
 		GhostReactor.EnemyEntityCreateData enemyEntityCreateData = GhostReactor.EnemyEntityCreateData.Unpack(createData);
@@ -438,7 +438,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		return this.nodeList[sectionIndex].sectionInstance.GetPatrolPath(patrolIndex);
 	}
 
-	// Token: 0x060028DA RID: 10458 RVA: 0x000DACB4 File Offset: 0x000D8EB4
+	// Token: 0x060028DA RID: 10458 RVA: 0x000DAC94 File Offset: 0x000D8E94
 	private void RandomizeIndices(ref List<int> list, int count)
 	{
 		list.Clear();
@@ -449,7 +449,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		this.randomGenerator.Shuffle<int>(list);
 	}
 
-	// Token: 0x060028DB RID: 10459 RVA: 0x000DACEC File Offset: 0x000D8EEC
+	// Token: 0x060028DB RID: 10459 RVA: 0x000DACCC File Offset: 0x000D8ECC
 	public bool GetExitFromCurrentSection(Vector3 pos, out Vector3 exitPos, out Quaternion exitRot, List<Vector3> connectorCorners)
 	{
 		exitPos = Vector3.zero;
@@ -479,7 +479,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		return true;
 	}
 
-	// Token: 0x060028DC RID: 10460 RVA: 0x000DADE8 File Offset: 0x000D8FE8
+	// Token: 0x060028DC RID: 10460 RVA: 0x000DADC8 File Offset: 0x000D8FC8
 	private GhostReactorLevelGenerator.Node GetCurrentNode(Vector3 pos)
 	{
 		float num = float.MaxValue;

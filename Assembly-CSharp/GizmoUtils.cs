@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000C4D RID: 3149
 public static class GizmoUtils
 {
-	// Token: 0x06004D14 RID: 19732 RVA: 0x00190068 File Offset: 0x0018E268
+	// Token: 0x06004D14 RID: 19732 RVA: 0x00190048 File Offset: 0x0018E248
 	[Conditional("UNITY_EDITOR")]
 	public unsafe static void DrawGizmo(this Collider c, Color color = default(Color))
 	{

@@ -10,7 +10,7 @@ using UnityEngine.UI;
 // Token: 0x020006EF RID: 1775
 public class GRResearchStation : MonoBehaviour
 {
-	// Token: 0x06002D74 RID: 11636 RVA: 0x000F5DFC File Offset: 0x000F3FFC
+	// Token: 0x06002D74 RID: 11636 RVA: 0x000F5DDC File Offset: 0x000F3FDC
 	public void Init(GRToolProgressionManager tree, GhostReactor ghostReactor)
 	{
 		this.toolProgressionManager = tree;
@@ -26,7 +26,7 @@ public class GRResearchStation : MonoBehaviour
 		this.SelectTool(0);
 	}
 
-	// Token: 0x06002D75 RID: 11637 RVA: 0x000F5E90 File Offset: 0x000F4090
+	// Token: 0x06002D75 RID: 11637 RVA: 0x000F5E70 File Offset: 0x000F4070
 	private void SelectTool(int index)
 	{
 		if (this.toolProgressionManager == null || this.totalTools == 0)
@@ -42,7 +42,7 @@ public class GRResearchStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002D76 RID: 11638 RVA: 0x000F5EF7 File Offset: 0x000F40F7
+	// Token: 0x06002D76 RID: 11638 RVA: 0x000F5ED7 File Offset: 0x000F40D7
 	public void ResearchTreeUpdated()
 	{
 		this.supportedTools = this.toolProgressionManager.GetSupportedTools();
@@ -51,7 +51,7 @@ public class GRResearchStation : MonoBehaviour
 		this.UpdateUI();
 	}
 
-	// Token: 0x06002D77 RID: 11639 RVA: 0x000F5F2D File Offset: 0x000F412D
+	// Token: 0x06002D77 RID: 11639 RVA: 0x000F5F0D File Offset: 0x000F410D
 	public void UpdateUI()
 	{
 		this.UpdateToolName();
@@ -62,7 +62,7 @@ public class GRResearchStation : MonoBehaviour
 		this.UpdateResearchPoints(this.toolProgressionManager.GetNumberOfResearchPoints());
 	}
 
-	// Token: 0x06002D78 RID: 11640 RVA: 0x000F5F60 File Offset: 0x000F4160
+	// Token: 0x06002D78 RID: 11640 RVA: 0x000F5F40 File Offset: 0x000F4140
 	public void SelectUpgrade(int UpgradeIndex)
 	{
 		if (this.toolProgressionManager == null)
@@ -80,7 +80,7 @@ public class GRResearchStation : MonoBehaviour
 		this.UpdateUI();
 	}
 
-	// Token: 0x06002D79 RID: 11641 RVA: 0x000F5FE4 File Offset: 0x000F41E4
+	// Token: 0x06002D79 RID: 11641 RVA: 0x000F5FC4 File Offset: 0x000F41C4
 	private void SetUpgradeTextColors(int index)
 	{
 		for (int i = 0; i < this.UpgradeTitlesText.Length; i++)
@@ -92,7 +92,7 @@ public class GRResearchStation : MonoBehaviour
 		this.UpgradeButton[index].UpdateColor();
 	}
 
-	// Token: 0x06002D7A RID: 11642 RVA: 0x000F603C File Offset: 0x000F423C
+	// Token: 0x06002D7A RID: 11642 RVA: 0x000F601C File Offset: 0x000F421C
 	private void UpdateUpgradeTitles()
 	{
 		for (int i = 0; i < this.UpgradeTitlesText.Length; i++)
@@ -108,7 +108,7 @@ public class GRResearchStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002D7B RID: 11643 RVA: 0x000F60AC File Offset: 0x000F42AC
+	// Token: 0x06002D7B RID: 11643 RVA: 0x000F608C File Offset: 0x000F428C
 	public void UpdateLocked()
 	{
 		if (this.currentlySelectedToolUpgrade.unlocked)
@@ -137,7 +137,7 @@ public class GRResearchStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002D7C RID: 11644 RVA: 0x000F61AC File Offset: 0x000F43AC
+	// Token: 0x06002D7C RID: 11644 RVA: 0x000F618C File Offset: 0x000F438C
 	public void UpdateRequiredLevel()
 	{
 		int requiredEmployeeLevel = this.toolProgressionManager.GetRequiredEmployeeLevel(this.currentlySelectedToolUpgrade.requiredEmployeeLevel);
@@ -154,13 +154,13 @@ public class GRResearchStation : MonoBehaviour
 		this.RequiredLevelText.color = ((num >= requiredEmployeeLevel) ? this.unlockedToolColor : this.lockedToolColor);
 	}
 
-	// Token: 0x06002D7D RID: 11645 RVA: 0x000F6257 File Offset: 0x000F4457
+	// Token: 0x06002D7D RID: 11645 RVA: 0x000F6237 File Offset: 0x000F4437
 	public void UpdateDescriptionText(string description)
 	{
 		this.DescriptionText.text = description;
 	}
 
-	// Token: 0x06002D7E RID: 11646 RVA: 0x000F6268 File Offset: 0x000F4468
+	// Token: 0x06002D7E RID: 11646 RVA: 0x000F6248 File Offset: 0x000F4448
 	public void UpdateCost()
 	{
 		if (this.selectedToolUpgrades != null && this.selectedToolUpgrades.Count > 0 && this.selectedToolUpgrades.Count > this.selectedUpgradeIndex)
@@ -172,7 +172,7 @@ public class GRResearchStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002D7F RID: 11647 RVA: 0x000F62FA File Offset: 0x000F44FA
+	// Token: 0x06002D7F RID: 11647 RVA: 0x000F62DA File Offset: 0x000F44DA
 	public void UpdateToolName()
 	{
 		if (this.supportedTools.Count > 0)
@@ -181,63 +181,63 @@ public class GRResearchStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002D80 RID: 11648 RVA: 0x000F632B File Offset: 0x000F452B
+	// Token: 0x06002D80 RID: 11648 RVA: 0x000F630B File Offset: 0x000F450B
 	public void UpdateResearchPoints(int ResearchPoints)
 	{
 		this.ResearchPointsTex.text = string.Format(this._researchPointsString, ResearchPoints);
 	}
 
-	// Token: 0x06002D81 RID: 11649 RVA: 0x000F6349 File Offset: 0x000F4549
+	// Token: 0x06002D81 RID: 11649 RVA: 0x000F6329 File Offset: 0x000F4529
 	public void MFDButton0Pressed()
 	{
 		this.SelectUpgrade(0);
 	}
 
-	// Token: 0x06002D82 RID: 11650 RVA: 0x000F6352 File Offset: 0x000F4552
+	// Token: 0x06002D82 RID: 11650 RVA: 0x000F6332 File Offset: 0x000F4532
 	public void MFDButton1Pressed()
 	{
 		this.SelectUpgrade(1);
 	}
 
-	// Token: 0x06002D83 RID: 11651 RVA: 0x000F635B File Offset: 0x000F455B
+	// Token: 0x06002D83 RID: 11651 RVA: 0x000F633B File Offset: 0x000F453B
 	public void MFDButton2Pressed()
 	{
 		this.SelectUpgrade(2);
 	}
 
-	// Token: 0x06002D84 RID: 11652 RVA: 0x000F6364 File Offset: 0x000F4564
+	// Token: 0x06002D84 RID: 11652 RVA: 0x000F6344 File Offset: 0x000F4544
 	public void MFDButton3Pressed()
 	{
 		this.SelectUpgrade(3);
 	}
 
-	// Token: 0x06002D85 RID: 11653 RVA: 0x000F636D File Offset: 0x000F456D
+	// Token: 0x06002D85 RID: 11653 RVA: 0x000F634D File Offset: 0x000F454D
 	public void MFDButton4Pressed()
 	{
 		this.SelectUpgrade(4);
 	}
 
-	// Token: 0x06002D86 RID: 11654 RVA: 0x000F6376 File Offset: 0x000F4576
+	// Token: 0x06002D86 RID: 11654 RVA: 0x000F6356 File Offset: 0x000F4556
 	public void MFDButton5Pressed()
 	{
 		this.SelectUpgrade(5);
 	}
 
-	// Token: 0x06002D87 RID: 11655 RVA: 0x000F637F File Offset: 0x000F457F
+	// Token: 0x06002D87 RID: 11655 RVA: 0x000F635F File Offset: 0x000F455F
 	public void NextToolButtonPressed()
 	{
 		this.selectedToolIndex = (this.selectedToolIndex + 1) % this.totalTools;
 		this.SelectTool(this.selectedToolIndex);
 	}
 
-	// Token: 0x06002D88 RID: 11656 RVA: 0x000F63A2 File Offset: 0x000F45A2
+	// Token: 0x06002D88 RID: 11656 RVA: 0x000F6382 File Offset: 0x000F4582
 	public void PreviousToolButtonPressed()
 	{
 		this.selectedToolIndex = (this.selectedToolIndex - 1).PositiveModulo(this.totalTools);
 		this.SelectTool(this.selectedToolIndex);
 	}
 
-	// Token: 0x06002D89 RID: 11657 RVA: 0x000F63C9 File Offset: 0x000F45C9
+	// Token: 0x06002D89 RID: 11657 RVA: 0x000F63A9 File Offset: 0x000F45A9
 	public void UpgradeButtonPressed()
 	{
 		UnityEvent onSucceeded = this.scanner.onSucceeded;
@@ -248,7 +248,7 @@ public class GRResearchStation : MonoBehaviour
 		GhostReactorProgression.instance.UnlockProgressionTreeNode(this.toolProgressionManager.GetTreeId(), this.currentlySelectedToolUpgrade.id, this.reactor);
 	}
 
-	// Token: 0x06002D8A RID: 11658 RVA: 0x000F6407 File Offset: 0x000F4607
+	// Token: 0x06002D8A RID: 11658 RVA: 0x000F63E7 File Offset: 0x000F45E7
 	public void ResearchCompleted(bool success, string researchID)
 	{
 		this.UpdateUI();

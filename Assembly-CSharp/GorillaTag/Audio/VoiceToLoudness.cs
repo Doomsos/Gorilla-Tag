@@ -9,13 +9,13 @@ namespace GorillaTag.Audio
 	[RequireComponent(typeof(Recorder))]
 	public class VoiceToLoudness : MonoBehaviour
 	{
-		// Token: 0x06006981 RID: 27009 RVA: 0x0022522D File Offset: 0x0022342D
+		// Token: 0x06006981 RID: 27009 RVA: 0x0022520D File Offset: 0x0022340D
 		protected void Awake()
 		{
 			this._recorder = base.GetComponent<Recorder>();
 		}
 
-		// Token: 0x06006982 RID: 27010 RVA: 0x0022523C File Offset: 0x0022343C
+		// Token: 0x06006982 RID: 27010 RVA: 0x0022521C File Offset: 0x0022341C
 		protected void PhotonVoiceCreated(PhotonVoiceCreatedParams photonVoiceCreatedParams)
 		{
 			VoiceInfo info = photonVoiceCreatedParams.Voice.Info;

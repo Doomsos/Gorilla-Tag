@@ -8,25 +8,25 @@ using UnityEngine;
 // Token: 0x02000475 RID: 1141
 public class CoconutMystic : MonoBehaviour
 {
-	// Token: 0x06001CF9 RID: 7417 RVA: 0x000993D0 File Offset: 0x000975D0
+	// Token: 0x06001CF9 RID: 7417 RVA: 0x000993B0 File Offset: 0x000975B0
 	private void Awake()
 	{
 		this.rig = base.GetComponentInParent<VRRig>();
 	}
 
-	// Token: 0x06001CFA RID: 7418 RVA: 0x000993DE File Offset: 0x000975DE
+	// Token: 0x06001CFA RID: 7418 RVA: 0x000993BE File Offset: 0x000975BE
 	private void OnEnable()
 	{
 		PhotonNetwork.NetworkingClient.EventReceived += new Action<EventData>(this.OnPhotonEvent);
 	}
 
-	// Token: 0x06001CFB RID: 7419 RVA: 0x000993F6 File Offset: 0x000975F6
+	// Token: 0x06001CFB RID: 7419 RVA: 0x000993D6 File Offset: 0x000975D6
 	private void OnDisable()
 	{
 		PhotonNetwork.NetworkingClient.EventReceived -= new Action<EventData>(this.OnPhotonEvent);
 	}
 
-	// Token: 0x06001CFC RID: 7420 RVA: 0x00099410 File Offset: 0x00097610
+	// Token: 0x06001CFC RID: 7420 RVA: 0x000993F0 File Offset: 0x000975F0
 	private void OnPhotonEvent(EventData evData)
 	{
 		if (evData.Code != 176)
@@ -56,14 +56,14 @@ public class CoconutMystic : MonoBehaviour
 		this.breakEffect.Play();
 	}
 
-	// Token: 0x06001CFD RID: 7421 RVA: 0x000994B4 File Offset: 0x000976B4
+	// Token: 0x06001CFD RID: 7421 RVA: 0x00099494 File Offset: 0x00097694
 	public void UpdateLabel()
 	{
 		bool flag = this.geodeItem.currentState == TransferrableObject.PositionState.InLeftHand;
 		this.label.rectTransform.localRotation = Quaternion.Euler(0f, flag ? 270f : 90f, 0f);
 	}
 
-	// Token: 0x06001CFE RID: 7422 RVA: 0x00099500 File Offset: 0x00097700
+	// Token: 0x06001CFE RID: 7422 RVA: 0x000994E0 File Offset: 0x000976E0
 	public void ShowAnswer()
 	{
 		this.answers.distinct = this.distinct;

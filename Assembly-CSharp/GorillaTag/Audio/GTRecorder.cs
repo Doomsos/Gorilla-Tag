@@ -9,30 +9,30 @@ namespace GorillaTag.Audio
 	public class GTRecorder : Recorder, ITickSystemPost
 	{
 		// Token: 0x170009F0 RID: 2544
-		// (get) Token: 0x06006995 RID: 27029 RVA: 0x00225C6E File Offset: 0x00223E6E
-		// (set) Token: 0x06006996 RID: 27030 RVA: 0x00225C76 File Offset: 0x00223E76
+		// (get) Token: 0x06006995 RID: 27029 RVA: 0x00225C4E File Offset: 0x00223E4E
+		// (set) Token: 0x06006996 RID: 27030 RVA: 0x00225C56 File Offset: 0x00223E56
 		public bool PostTickRunning { get; set; }
 
-		// Token: 0x06006997 RID: 27031 RVA: 0x00180819 File Offset: 0x0017EA19
+		// Token: 0x06006997 RID: 27031 RVA: 0x001807F9 File Offset: 0x0017E9F9
 		private void OnEnable()
 		{
 			TickSystem<object>.AddPostTickCallback(this);
 		}
 
-		// Token: 0x06006998 RID: 27032 RVA: 0x001338F3 File Offset: 0x00131AF3
+		// Token: 0x06006998 RID: 27032 RVA: 0x001338D3 File Offset: 0x00131AD3
 		private void OnDisable()
 		{
 			TickSystem<object>.RemovePostTickCallback(this);
 		}
 
-		// Token: 0x06006999 RID: 27033 RVA: 0x00225C7F File Offset: 0x00223E7F
+		// Token: 0x06006999 RID: 27033 RVA: 0x00225C5F File Offset: 0x00223E5F
 		protected override MicWrapper CreateMicWrapper(string micDev, int samplingRateInt, VoiceLogger logger)
 		{
 			this._micWrapper = new GTMicWrapper(micDev, samplingRateInt, this.AllowPitchAdjustment, this.PitchAdjustment, this.AllowVolumeAdjustment, this.VolumeAdjustment, logger);
 			return this._micWrapper;
 		}
 
-		// Token: 0x0600699A RID: 27034 RVA: 0x00225CAD File Offset: 0x00223EAD
+		// Token: 0x0600699A RID: 27034 RVA: 0x00225C8D File Offset: 0x00223E8D
 		private IEnumerator DoTestEcho()
 		{
 			base.DebugEchoMode = true;
@@ -43,7 +43,7 @@ namespace GorillaTag.Audio
 			yield break;
 		}
 
-		// Token: 0x0600699B RID: 27035 RVA: 0x00225CBC File Offset: 0x00223EBC
+		// Token: 0x0600699B RID: 27035 RVA: 0x00225C9C File Offset: 0x00223E9C
 		public void PostTick()
 		{
 			if (this._micWrapper != null)

@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000637 RID: 1591
 public class SuperInfectionSnapPointManager : MonoBehaviour
 {
-	// Token: 0x0600288E RID: 10382 RVA: 0x000D7C08 File Offset: 0x000D5E08
+	// Token: 0x0600288E RID: 10382 RVA: 0x000D7BE8 File Offset: 0x000D5DE8
 	public void Awake()
 	{
 		VRRig componentInParent = base.GetComponentInParent<VRRig>(true);
@@ -17,7 +17,7 @@ public class SuperInfectionSnapPointManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600288F RID: 10383 RVA: 0x000D7C3C File Offset: 0x000D5E3C
+	// Token: 0x0600288F RID: 10383 RVA: 0x000D7C1C File Offset: 0x000D5E1C
 	public void Start()
 	{
 		foreach (SuperInfectionSnapPoint superInfectionSnapPoint in this.SnapPoints)
@@ -27,7 +27,7 @@ public class SuperInfectionSnapPointManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002890 RID: 10384 RVA: 0x000D7CA0 File Offset: 0x000D5EA0
+	// Token: 0x06002890 RID: 10384 RVA: 0x000D7C80 File Offset: 0x000D5E80
 	public void Clear()
 	{
 		foreach (SuperInfectionSnapPoint superInfectionSnapPoint in this.SnapPoints)
@@ -37,7 +37,7 @@ public class SuperInfectionSnapPointManager : MonoBehaviour
 		this.snapPointDict.Clear();
 	}
 
-	// Token: 0x06002891 RID: 10385 RVA: 0x000D7CFC File Offset: 0x000D5EFC
+	// Token: 0x06002891 RID: 10385 RVA: 0x000D7CDC File Offset: 0x000D5EDC
 	public SuperInfectionSnapPoint FindSnapPoint(SnapJointType jointType)
 	{
 		if (jointType == SnapJointType.None)
@@ -51,7 +51,7 @@ public class SuperInfectionSnapPointManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x06002892 RID: 10386 RVA: 0x000D7D1F File Offset: 0x000D5F1F
+	// Token: 0x06002892 RID: 10386 RVA: 0x000D7CFF File Offset: 0x000D5EFF
 	public static SuperInfectionSnapPoint FindSnapPoint(GamePlayer player, SnapJointType jointType)
 	{
 		if (player == null)
@@ -61,7 +61,7 @@ public class SuperInfectionSnapPointManager : MonoBehaviour
 		return player.snapPointManager.FindSnapPoint(jointType);
 	}
 
-	// Token: 0x06002893 RID: 10387 RVA: 0x000D7D38 File Offset: 0x000D5F38
+	// Token: 0x06002893 RID: 10387 RVA: 0x000D7D18 File Offset: 0x000D5F18
 	public void DropAllSnappedAuthority()
 	{
 		for (int i = 0; i < this.SnapPoints.Count; i++)

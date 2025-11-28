@@ -7,13 +7,13 @@ using UnityEngine.Events;
 [Serializable]
 public class GameAbilityEvent
 {
-	// Token: 0x060029E5 RID: 10725 RVA: 0x000E279C File Offset: 0x000E099C
+	// Token: 0x060029E5 RID: 10725 RVA: 0x000E277C File Offset: 0x000E097C
 	public void Reset()
 	{
 		this.played = false;
 	}
 
-	// Token: 0x060029E6 RID: 10726 RVA: 0x000E27A8 File Offset: 0x000E09A8
+	// Token: 0x060029E6 RID: 10726 RVA: 0x000E2788 File Offset: 0x000E0988
 	public void TryPlay(float abilityTime, AudioSource audioSource)
 	{
 		if (abilityTime < this.time || this.played)

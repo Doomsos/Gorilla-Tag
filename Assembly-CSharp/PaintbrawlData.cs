@@ -10,7 +10,7 @@ using UnityEngine;
 public struct PaintbrawlData : INetworkStruct
 {
 	// Token: 0x1700037A RID: 890
-	// (get) Token: 0x060020FB RID: 8443 RVA: 0x000AE8D4 File Offset: 0x000ACAD4
+	// (get) Token: 0x060020FB RID: 8443 RVA: 0x000AE8B4 File Offset: 0x000ACAB4
 	[Networked]
 	[Capacity(10)]
 	[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterInt32))]
@@ -24,7 +24,7 @@ public struct PaintbrawlData : INetworkStruct
 	}
 
 	// Token: 0x1700037B RID: 891
-	// (get) Token: 0x060020FC RID: 8444 RVA: 0x000AE8FC File Offset: 0x000ACAFC
+	// (get) Token: 0x060020FC RID: 8444 RVA: 0x000AE8DC File Offset: 0x000ACADC
 	[Networked]
 	[Capacity(10)]
 	[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterInt32))]
@@ -38,7 +38,7 @@ public struct PaintbrawlData : INetworkStruct
 	}
 
 	// Token: 0x1700037C RID: 892
-	// (get) Token: 0x060020FD RID: 8445 RVA: 0x000AE924 File Offset: 0x000ACB24
+	// (get) Token: 0x060020FD RID: 8445 RVA: 0x000AE904 File Offset: 0x000ACB04
 	[Networked]
 	[Capacity(10)]
 	[NetworkedWeavedArray(10, 1, typeof(ReaderWriter@GorillaPaintbrawlManager__PaintbrawlStatus))]

@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x0200050E RID: 1294
 public sealed class CasualGameMode : GorillaGameManager
 {
-	// Token: 0x06002108 RID: 8456 RVA: 0x000AEC94 File Offset: 0x000ACE94
+	// Token: 0x06002108 RID: 8456 RVA: 0x000AEC74 File Offset: 0x000ACE74
 	public override int MyMatIndex(NetPlayer player)
 	{
 		if (this.GetMyMaterial == null)
@@ -44,19 +44,19 @@ public sealed class CasualGameMode : GorillaGameManager
 		return GameModeType.Casual;
 	}
 
-	// Token: 0x0600210E RID: 8462 RVA: 0x000AECAC File Offset: 0x000ACEAC
+	// Token: 0x0600210E RID: 8462 RVA: 0x000AEC8C File Offset: 0x000ACE8C
 	public override void AddFusionDataBehaviour(NetworkObject behaviour)
 	{
 		behaviour.AddBehaviour<CasualGameModeData>();
 	}
 
-	// Token: 0x0600210F RID: 8463 RVA: 0x000AECB5 File Offset: 0x000ACEB5
+	// Token: 0x0600210F RID: 8463 RVA: 0x000AEC95 File Offset: 0x000ACE95
 	public override string GameModeName()
 	{
 		return "CASUAL";
 	}
 
-	// Token: 0x06002110 RID: 8464 RVA: 0x000AECBC File Offset: 0x000ACEBC
+	// Token: 0x06002110 RID: 8464 RVA: 0x000AEC9C File Offset: 0x000ACE9C
 	public override string GameModeNameRoomLabel()
 	{
 		string result;

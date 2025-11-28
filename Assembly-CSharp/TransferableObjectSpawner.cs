@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000837 RID: 2103
 public class TransferableObjectSpawner : MonoBehaviour
 {
-	// Token: 0x0600375C RID: 14172 RVA: 0x0012A3A4 File Offset: 0x001285A4
+	// Token: 0x0600375C RID: 14172 RVA: 0x0012A384 File Offset: 0x00128584
 	public void Awake()
 	{
 		GameObject[] transferrableObjectsToSpawn = this.TransferrableObjectsToSpawn;
@@ -25,7 +25,7 @@ public class TransferableObjectSpawner : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600375D RID: 14173 RVA: 0x0012A404 File Offset: 0x00128604
+	// Token: 0x0600375D RID: 14173 RVA: 0x0012A3E4 File Offset: 0x001285E4
 	private void OnValidate()
 	{
 		if (Application.isPlaying)
@@ -62,7 +62,7 @@ public class TransferableObjectSpawner : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600375E RID: 14174 RVA: 0x0012A4E7 File Offset: 0x001286E7
+	// Token: 0x0600375E RID: 14174 RVA: 0x0012A4C7 File Offset: 0x001286C7
 	public void Update()
 	{
 		if (this.spawnTrigger == TransferableObjectSpawner.SpawnTrigger.Timer && PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient && PhotonNetwork.Time > this.lastSpawnTime + this.SpawnDelay)
@@ -72,7 +72,7 @@ public class TransferableObjectSpawner : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600375F RID: 14175 RVA: 0x0012A524 File Offset: 0x00128724
+	// Token: 0x0600375F RID: 14175 RVA: 0x0012A504 File Offset: 0x00128704
 	private bool SpawnOnGround()
 	{
 		RaycastHit raycastHit;
@@ -85,14 +85,14 @@ public class TransferableObjectSpawner : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06003760 RID: 14176 RVA: 0x0012A5A0 File Offset: 0x001287A0
+	// Token: 0x06003760 RID: 14176 RVA: 0x0012A580 File Offset: 0x00128780
 	private void SpawnAtCurrentLocation()
 	{
 		this.spawnPosition = base.transform.position;
 		this.spawnRotation = base.transform.rotation;
 	}
 
-	// Token: 0x06003761 RID: 14177 RVA: 0x0012A5C4 File Offset: 0x001287C4
+	// Token: 0x06003761 RID: 14177 RVA: 0x0012A5A4 File Offset: 0x001287A4
 	public void SpawnTransferrableObject()
 	{
 		if (!NetworkSystem.Instance.IsMasterClient)

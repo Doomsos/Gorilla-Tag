@@ -8,7 +8,7 @@ namespace GorillaNetworking.Store
 	[Serializable]
 	public class StoreItem
 	{
-		// Token: 0x0600622F RID: 25135 RVA: 0x001F9E98 File Offset: 0x001F8098
+		// Token: 0x0600622F RID: 25135 RVA: 0x001F9E78 File Offset: 0x001F8078
 		public static void SerializeItemsAsJSON(StoreItem[] items)
 		{
 			string text = "";
@@ -20,7 +20,7 @@ namespace GorillaNetworking.Store
 			File.WriteAllText(Application.dataPath + "/Resources/StoreItems/FeaturedStoreItemsList.json", text);
 		}
 
-		// Token: 0x06006230 RID: 25136 RVA: 0x001F9EEC File Offset: 0x001F80EC
+		// Token: 0x06006230 RID: 25136 RVA: 0x001F9ECC File Offset: 0x001F80CC
 		public static void ConvertCosmeticItemToSToreItem(CosmeticsController.CosmeticItem cosmeticItem, ref StoreItem storeItem)
 		{
 			storeItem.itemName = cosmeticItem.itemName;

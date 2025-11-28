@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000764 RID: 1892
 internal class RPCUtil
 {
-	// Token: 0x06003111 RID: 12561 RVA: 0x0010B1D4 File Offset: 0x001093D4
+	// Token: 0x06003111 RID: 12561 RVA: 0x0010B1B4 File Offset: 0x001093B4
 	public static bool NotSpam(string id, PhotonMessageInfoWrapped info, float delay)
 	{
 		RPCUtil.RPCCallID rpccallID = new RPCUtil.RPCCallID(id, info.senderID);
@@ -22,13 +22,13 @@ internal class RPCUtil
 		return false;
 	}
 
-	// Token: 0x06003112 RID: 12562 RVA: 0x0010B235 File Offset: 0x00109435
+	// Token: 0x06003112 RID: 12562 RVA: 0x0010B215 File Offset: 0x00109415
 	public static bool SafeValue(float v)
 	{
 		return !float.IsNaN(v) && float.IsFinite(v);
 	}
 
-	// Token: 0x06003113 RID: 12563 RVA: 0x0010B247 File Offset: 0x00109447
+	// Token: 0x06003113 RID: 12563 RVA: 0x0010B227 File Offset: 0x00109427
 	public static bool SafeValue(float v, float min, float max)
 	{
 		return RPCUtil.SafeValue(v) && v <= max && v >= min;
@@ -40,7 +40,7 @@ internal class RPCUtil
 	// Token: 0x02000765 RID: 1893
 	private struct RPCCallID : IEquatable<RPCUtil.RPCCallID>
 	{
-		// Token: 0x06003116 RID: 12566 RVA: 0x0010B26C File Offset: 0x0010946C
+		// Token: 0x06003116 RID: 12566 RVA: 0x0010B24C File Offset: 0x0010944C
 		public RPCCallID(string nameOfFunction, int senderId)
 		{
 			this._senderID = senderId;
@@ -48,7 +48,7 @@ internal class RPCUtil
 		}
 
 		// Token: 0x1700045B RID: 1115
-		// (get) Token: 0x06003117 RID: 12567 RVA: 0x0010B27C File Offset: 0x0010947C
+		// (get) Token: 0x06003117 RID: 12567 RVA: 0x0010B25C File Offset: 0x0010945C
 		public readonly int SenderID
 		{
 			get
@@ -58,7 +58,7 @@ internal class RPCUtil
 		}
 
 		// Token: 0x1700045C RID: 1116
-		// (get) Token: 0x06003118 RID: 12568 RVA: 0x0010B284 File Offset: 0x00109484
+		// (get) Token: 0x06003118 RID: 12568 RVA: 0x0010B264 File Offset: 0x00109464
 		public readonly string NameOfFunction
 		{
 			get
@@ -67,7 +67,7 @@ internal class RPCUtil
 			}
 		}
 
-		// Token: 0x06003119 RID: 12569 RVA: 0x0010B28C File Offset: 0x0010948C
+		// Token: 0x06003119 RID: 12569 RVA: 0x0010B26C File Offset: 0x0010946C
 		bool IEquatable<RPCUtil.RPCCallID>.Equals(RPCUtil.RPCCallID other)
 		{
 			return other.NameOfFunction.Equals(this.NameOfFunction) && other.SenderID.Equals(this.SenderID);

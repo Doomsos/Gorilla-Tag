@@ -23,8 +23,8 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 	}
 
 	// Token: 0x17000485 RID: 1157
-	// (get) Token: 0x0600331F RID: 13087 RVA: 0x00113D8F File Offset: 0x00111F8F
-	// (set) Token: 0x06003320 RID: 13088 RVA: 0x00113D97 File Offset: 0x00111F97
+	// (get) Token: 0x0600331F RID: 13087 RVA: 0x00113D6F File Offset: 0x00111F6F
+	// (set) Token: 0x06003320 RID: 13088 RVA: 0x00113D77 File Offset: 0x00111F77
 	private bool sendReport
 	{
 		get
@@ -41,8 +41,8 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 	}
 
 	// Token: 0x17000486 RID: 1158
-	// (get) Token: 0x06003321 RID: 13089 RVA: 0x00113DA8 File Offset: 0x00111FA8
-	// (set) Token: 0x06003322 RID: 13090 RVA: 0x00113DB0 File Offset: 0x00111FB0
+	// (get) Token: 0x06003321 RID: 13089 RVA: 0x00113D88 File Offset: 0x00111F88
+	// (set) Token: 0x06003322 RID: 13090 RVA: 0x00113D90 File Offset: 0x00111F90
 	private string suspiciousPlayerId
 	{
 		get
@@ -59,8 +59,8 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 	}
 
 	// Token: 0x17000487 RID: 1159
-	// (get) Token: 0x06003323 RID: 13091 RVA: 0x00113DCB File Offset: 0x00111FCB
-	// (set) Token: 0x06003324 RID: 13092 RVA: 0x00113DD3 File Offset: 0x00111FD3
+	// (get) Token: 0x06003323 RID: 13091 RVA: 0x00113DAB File Offset: 0x00111FAB
+	// (set) Token: 0x06003324 RID: 13092 RVA: 0x00113DB3 File Offset: 0x00111FB3
 	private string suspiciousPlayerName
 	{
 		get
@@ -77,8 +77,8 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 	}
 
 	// Token: 0x17000488 RID: 1160
-	// (get) Token: 0x06003325 RID: 13093 RVA: 0x00113DEE File Offset: 0x00111FEE
-	// (set) Token: 0x06003326 RID: 13094 RVA: 0x00113DF6 File Offset: 0x00111FF6
+	// (get) Token: 0x06003325 RID: 13093 RVA: 0x00113DCE File Offset: 0x00111FCE
+	// (set) Token: 0x06003326 RID: 13094 RVA: 0x00113DD6 File Offset: 0x00111FD6
 	private string suspiciousReason
 	{
 		get
@@ -106,13 +106,13 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06003329 RID: 13097 RVA: 0x00113E11 File Offset: 0x00112011
+	// Token: 0x06003329 RID: 13097 RVA: 0x00113DF1 File Offset: 0x00111FF1
 	public void SliceUpdate()
 	{
 		this.CheckReports();
 	}
 
-	// Token: 0x0600332A RID: 13098 RVA: 0x00113E1C File Offset: 0x0011201C
+	// Token: 0x0600332A RID: 13098 RVA: 0x00113DFC File Offset: 0x00111FFC
 	private void Start()
 	{
 		if (GorillaNot.instance == null)
@@ -133,7 +133,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		Application.logMessageReceived += new Application.LogCallback(this.LogErrorCount);
 	}
 
-	// Token: 0x0600332B RID: 13099 RVA: 0x00113EC0 File Offset: 0x001120C0
+	// Token: 0x0600332B RID: 13099 RVA: 0x00113EA0 File Offset: 0x001120A0
 	private void OnApplicationPause(bool paused)
 	{
 		if (paused || !RoomSystem.JoinedRoom)
@@ -144,7 +144,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		this.RefreshRPCs();
 	}
 
-	// Token: 0x0600332C RID: 13100 RVA: 0x00113EE4 File Offset: 0x001120E4
+	// Token: 0x0600332C RID: 13100 RVA: 0x00113EC4 File Offset: 0x001120C4
 	public void LogErrorCount(string logString, string stackTrace, LogType type)
 	{
 		if (type == null)
@@ -177,7 +177,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600332D RID: 13101 RVA: 0x00113FE8 File Offset: 0x001121E8
+	// Token: 0x0600332D RID: 13101 RVA: 0x00113FC8 File Offset: 0x001121C8
 	public void SendReport(string susReason, string susId, string susNick)
 	{
 		this.suspiciousReason = susReason;
@@ -186,7 +186,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		this.sendReport = true;
 	}
 
-	// Token: 0x0600332E RID: 13102 RVA: 0x00114008 File Offset: 0x00112208
+	// Token: 0x0600332E RID: 13102 RVA: 0x00113FE8 File Offset: 0x001121E8
 	[MethodImpl(256)]
 	private void DispatchReport()
 	{
@@ -234,7 +234,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		this._suspiciousReason = "";
 	}
 
-	// Token: 0x0600332F RID: 13103 RVA: 0x0011418C File Offset: 0x0011238C
+	// Token: 0x0600332F RID: 13103 RVA: 0x0011416C File Offset: 0x0011236C
 	private void CheckReports()
 	{
 		if (Time.time < this.lastCheck + this.reportCheckCooldown)
@@ -286,7 +286,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003330 RID: 13104 RVA: 0x00114314 File Offset: 0x00112514
+	// Token: 0x06003330 RID: 13104 RVA: 0x001142F4 File Offset: 0x001124F4
 	private void RefreshRPCs()
 	{
 		foreach (Dictionary<string, GorillaNot.RPCCallTracker> dictionary in this.userRPCCalls.Values)
@@ -298,7 +298,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003331 RID: 13105 RVA: 0x001143A4 File Offset: 0x001125A4
+	// Token: 0x06003331 RID: 13105 RVA: 0x00114384 File Offset: 0x00112584
 	private int LowestActorNumber()
 	{
 		this.lowestActorNumber = NetworkSystem.Instance.LocalPlayer.ActorNumber;
@@ -312,13 +312,13 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		return this.lowestActorNumber;
 	}
 
-	// Token: 0x06003332 RID: 13106 RVA: 0x001143FF File Offset: 0x001125FF
+	// Token: 0x06003332 RID: 13106 RVA: 0x001143DF File Offset: 0x001125DF
 	public void OnPlayerEnteredRoom(NetPlayer newPlayer)
 	{
 		this.cachedPlayerList = (NetworkSystem.Instance.AllNetPlayers ?? new NetPlayer[0]);
 	}
 
-	// Token: 0x06003333 RID: 13107 RVA: 0x0011441C File Offset: 0x0011261C
+	// Token: 0x06003333 RID: 13107 RVA: 0x001143FC File Offset: 0x001125FC
 	public void OnPlayerLeftRoom(NetPlayer otherPlayer)
 	{
 		this.cachedPlayerList = (NetworkSystem.Instance.AllNetPlayers ?? new NetPlayer[0]);
@@ -329,19 +329,19 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003334 RID: 13108 RVA: 0x0011446A File Offset: 0x0011266A
+	// Token: 0x06003334 RID: 13108 RVA: 0x0011444A File Offset: 0x0011264A
 	public static void IncrementRPCCall(PhotonMessageInfo info, [CallerMemberName] string callingMethod = "")
 	{
 		GorillaNot.IncrementRPCCall(new PhotonMessageInfoWrapped(info), callingMethod);
 	}
 
-	// Token: 0x06003335 RID: 13109 RVA: 0x00114478 File Offset: 0x00112678
+	// Token: 0x06003335 RID: 13109 RVA: 0x00114458 File Offset: 0x00112658
 	public static void IncrementRPCCall(PhotonMessageInfoWrapped infoWrapped, [CallerMemberName] string callingMethod = "")
 	{
 		GorillaNot.instance.IncrementRPCCallLocal(infoWrapped, callingMethod);
 	}
 
-	// Token: 0x06003336 RID: 13110 RVA: 0x00114488 File Offset: 0x00112688
+	// Token: 0x06003336 RID: 13110 RVA: 0x00114468 File Offset: 0x00112668
 	private void IncrementRPCCallLocal(PhotonMessageInfoWrapped infoWrapped, string rpcFunction)
 	{
 		if (infoWrapped.sentTick < this.lastServerTimestamp)
@@ -361,21 +361,21 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003337 RID: 13111 RVA: 0x001144F0 File Offset: 0x001126F0
+	// Token: 0x06003337 RID: 13111 RVA: 0x001144D0 File Offset: 0x001126D0
 	private bool IncrementRPCTracker(in NetPlayer sender, in string rpcFunction, in int callLimit)
 	{
 		string userId = sender.UserId;
 		return this.IncrementRPCTracker(userId, rpcFunction, callLimit);
 	}
 
-	// Token: 0x06003338 RID: 13112 RVA: 0x00114510 File Offset: 0x00112710
+	// Token: 0x06003338 RID: 13112 RVA: 0x001144F0 File Offset: 0x001126F0
 	private bool IncrementRPCTracker(in Player sender, in string rpcFunction, in int callLimit)
 	{
 		string userId = sender.UserId;
 		return this.IncrementRPCTracker(userId, rpcFunction, callLimit);
 	}
 
-	// Token: 0x06003339 RID: 13113 RVA: 0x00114530 File Offset: 0x00112730
+	// Token: 0x06003339 RID: 13113 RVA: 0x00114510 File Offset: 0x00112710
 	private bool IncrementRPCTracker(in string userId, in string rpcFunction, in int callLimit)
 	{
 		GorillaNot.RPCCallTracker rpccallTracker = this.GetRPCCallTracker(userId, rpcFunction);
@@ -391,7 +391,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		return rpccallTracker.RPCCalls <= callLimit;
 	}
 
-	// Token: 0x0600333A RID: 13114 RVA: 0x00114584 File Offset: 0x00112784
+	// Token: 0x0600333A RID: 13114 RVA: 0x00114564 File Offset: 0x00112764
 	private GorillaNot.RPCCallTracker GetRPCCallTracker(string userID, string rpcFunction)
 	{
 		if (userID == null)
@@ -423,7 +423,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		return rpccallTracker;
 	}
 
-	// Token: 0x0600333B RID: 13115 RVA: 0x00114601 File Offset: 0x00112801
+	// Token: 0x0600333B RID: 13115 RVA: 0x001145E1 File Offset: 0x001127E1
 	private IEnumerator QuitDelay()
 	{
 		yield return new WaitForSeconds(1f);
@@ -431,7 +431,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		yield break;
 	}
 
-	// Token: 0x0600333C RID: 13116 RVA: 0x0011460C File Offset: 0x0011280C
+	// Token: 0x0600333C RID: 13116 RVA: 0x001145EC File Offset: 0x001127EC
 	private void SetToRoomCreatorIfHere()
 	{
 		this.tempPlayer = PhotonNetwork.CurrentRoom.GetPlayer(1, false);
@@ -445,13 +445,13 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		this.suspiciousPlayerName = "n/a";
 	}
 
-	// Token: 0x0600333D RID: 13117 RVA: 0x00114674 File Offset: 0x00112874
+	// Token: 0x0600333D RID: 13117 RVA: 0x00114654 File Offset: 0x00112854
 	private bool ShouldDisconnectFromRoom()
 	{
 		return this._suspiciousReason.Contains("too many players") || this._suspiciousReason.Contains("invalid room name") || this._suspiciousReason.Contains("invalid game mode") || this._suspiciousReason.Contains("missing player ids");
 	}
 
-	// Token: 0x0600333E RID: 13118 RVA: 0x001146C9 File Offset: 0x001128C9
+	// Token: 0x0600333E RID: 13118 RVA: 0x001146A9 File Offset: 0x001128A9
 	private void CloseInvalidRoom()
 	{
 		PhotonNetwork.CurrentRoom.IsOpen = false;

@@ -4,7 +4,7 @@
 [Serializable]
 public struct GTSignalID : IEquatable<GTSignalID>, IEquatable<int>
 {
-	// Token: 0x0600357F RID: 13695 RVA: 0x001224D4 File Offset: 0x001206D4
+	// Token: 0x0600357F RID: 13695 RVA: 0x001224B4 File Offset: 0x001206B4
 	public override bool Equals(object obj)
 	{
 		if (obj is GTSignalID)
@@ -20,43 +20,43 @@ public struct GTSignalID : IEquatable<GTSignalID>, IEquatable<int>
 		return false;
 	}
 
-	// Token: 0x06003580 RID: 13696 RVA: 0x00122510 File Offset: 0x00120710
+	// Token: 0x06003580 RID: 13696 RVA: 0x001224F0 File Offset: 0x001206F0
 	public bool Equals(GTSignalID other)
 	{
 		return this._id == other._id;
 	}
 
-	// Token: 0x06003581 RID: 13697 RVA: 0x00122520 File Offset: 0x00120720
+	// Token: 0x06003581 RID: 13697 RVA: 0x00122500 File Offset: 0x00120700
 	public bool Equals(int other)
 	{
 		return this._id == other;
 	}
 
-	// Token: 0x06003582 RID: 13698 RVA: 0x0012252B File Offset: 0x0012072B
+	// Token: 0x06003582 RID: 13698 RVA: 0x0012250B File Offset: 0x0012070B
 	public override int GetHashCode()
 	{
 		return this._id;
 	}
 
-	// Token: 0x06003583 RID: 13699 RVA: 0x00122533 File Offset: 0x00120733
+	// Token: 0x06003583 RID: 13699 RVA: 0x00122513 File Offset: 0x00120713
 	public static bool operator ==(GTSignalID x, GTSignalID y)
 	{
 		return x.Equals(y);
 	}
 
-	// Token: 0x06003584 RID: 13700 RVA: 0x0012253D File Offset: 0x0012073D
+	// Token: 0x06003584 RID: 13700 RVA: 0x0012251D File Offset: 0x0012071D
 	public static bool operator !=(GTSignalID x, GTSignalID y)
 	{
 		return !x.Equals(y);
 	}
 
-	// Token: 0x06003585 RID: 13701 RVA: 0x0012252B File Offset: 0x0012072B
+	// Token: 0x06003585 RID: 13701 RVA: 0x0012250B File Offset: 0x0012070B
 	public static implicit operator int(GTSignalID sid)
 	{
 		return sid._id;
 	}
 
-	// Token: 0x06003586 RID: 13702 RVA: 0x0012254C File Offset: 0x0012074C
+	// Token: 0x06003586 RID: 13702 RVA: 0x0012252C File Offset: 0x0012072C
 	public static implicit operator GTSignalID(string s)
 	{
 		return new GTSignalID

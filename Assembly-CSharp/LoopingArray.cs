@@ -5,7 +5,7 @@ using GorillaTag;
 public class LoopingArray<T> : ObjectPoolEvents
 {
 	// Token: 0x1700073A RID: 1850
-	// (get) Token: 0x06004D47 RID: 19783 RVA: 0x00190904 File Offset: 0x0018EB04
+	// (get) Token: 0x06004D47 RID: 19783 RVA: 0x001908E4 File Offset: 0x0018EAE4
 	public int Length
 	{
 		get
@@ -15,7 +15,7 @@ public class LoopingArray<T> : ObjectPoolEvents
 	}
 
 	// Token: 0x1700073B RID: 1851
-	// (get) Token: 0x06004D48 RID: 19784 RVA: 0x0019090C File Offset: 0x0018EB0C
+	// (get) Token: 0x06004D48 RID: 19784 RVA: 0x001908EC File Offset: 0x0018EAEC
 	public int CurrentIndex
 	{
 		get
@@ -37,12 +37,12 @@ public class LoopingArray<T> : ObjectPoolEvents
 		}
 	}
 
-	// Token: 0x06004D4B RID: 19787 RVA: 0x00190931 File Offset: 0x0018EB31
+	// Token: 0x06004D4B RID: 19787 RVA: 0x00190911 File Offset: 0x0018EB11
 	public LoopingArray() : this(0)
 	{
 	}
 
-	// Token: 0x06004D4C RID: 19788 RVA: 0x0019093A File Offset: 0x0018EB3A
+	// Token: 0x06004D4C RID: 19788 RVA: 0x0019091A File Offset: 0x0018EB1A
 	public LoopingArray(int capicity)
 	{
 		this.m_length = capicity;
@@ -50,7 +50,7 @@ public class LoopingArray<T> : ObjectPoolEvents
 		this.Clear();
 	}
 
-	// Token: 0x06004D4D RID: 19789 RVA: 0x0019095B File Offset: 0x0018EB5B
+	// Token: 0x06004D4D RID: 19789 RVA: 0x0019093B File Offset: 0x0018EB3B
 	public int AddAndIncrement(in T value)
 	{
 		int currentIndex = this.m_currentIndex;
@@ -59,7 +59,7 @@ public class LoopingArray<T> : ObjectPoolEvents
 		return currentIndex;
 	}
 
-	// Token: 0x06004D4E RID: 19790 RVA: 0x0019098F File Offset: 0x0018EB8F
+	// Token: 0x06004D4E RID: 19790 RVA: 0x0019096F File Offset: 0x0018EB6F
 	public int IncrementAndAdd(in T value)
 	{
 		this.m_currentIndex = (this.m_currentIndex + 1) % this.m_length;
@@ -67,7 +67,7 @@ public class LoopingArray<T> : ObjectPoolEvents
 		return this.m_currentIndex;
 	}
 
-	// Token: 0x06004D4F RID: 19791 RVA: 0x001909C4 File Offset: 0x0018EBC4
+	// Token: 0x06004D4F RID: 19791 RVA: 0x001909A4 File Offset: 0x0018EBA4
 	public void Clear()
 	{
 		this.m_currentIndex = 0;
@@ -77,7 +77,7 @@ public class LoopingArray<T> : ObjectPoolEvents
 		}
 	}
 
-	// Token: 0x06004D50 RID: 19792 RVA: 0x00190A00 File Offset: 0x0018EC00
+	// Token: 0x06004D50 RID: 19792 RVA: 0x001909E0 File Offset: 0x0018EBE0
 	void ObjectPoolEvents.OnTaken()
 	{
 		this.Clear();
@@ -100,24 +100,24 @@ public class LoopingArray<T> : ObjectPoolEvents
 	// Token: 0x02000C58 RID: 3160
 	public class Pool : ObjectPool<LoopingArray<T>>
 	{
-		// Token: 0x06004D52 RID: 19794 RVA: 0x00190A08 File Offset: 0x0018EC08
+		// Token: 0x06004D52 RID: 19794 RVA: 0x001909E8 File Offset: 0x0018EBE8
 		private Pool(int amount) : base(amount)
 		{
 		}
 
-		// Token: 0x06004D53 RID: 19795 RVA: 0x00190A11 File Offset: 0x0018EC11
+		// Token: 0x06004D53 RID: 19795 RVA: 0x001909F1 File Offset: 0x0018EBF1
 		public Pool(int size, int amount) : this(size, amount, amount)
 		{
 		}
 
-		// Token: 0x06004D54 RID: 19796 RVA: 0x00190A1C File Offset: 0x0018EC1C
+		// Token: 0x06004D54 RID: 19796 RVA: 0x001909FC File Offset: 0x0018EBFC
 		public Pool(int size, int initialAmount, int maxAmount)
 		{
 			this.m_size = size;
 			base.InitializePool(initialAmount, maxAmount);
 		}
 
-		// Token: 0x06004D55 RID: 19797 RVA: 0x00190A33 File Offset: 0x0018EC33
+		// Token: 0x06004D55 RID: 19797 RVA: 0x00190A13 File Offset: 0x0018EC13
 		public override LoopingArray<T> CreateInstance()
 		{
 			return new LoopingArray<T>(this.m_size);

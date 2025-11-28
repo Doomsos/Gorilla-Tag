@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000AAD RID: 2733
 public class KIDUI_EmailSuccess : MonoBehaviour
 {
-	// Token: 0x06004481 RID: 17537 RVA: 0x0016AC6C File Offset: 0x00168E6C
+	// Token: 0x06004481 RID: 17537 RVA: 0x0016AC4C File Offset: 0x00168E4C
 	public void ShowSuccessScreen(string email)
 	{
 		this._emailTxt.text = email;
@@ -26,7 +26,7 @@ public class KIDUI_EmailSuccess : MonoBehaviour
 		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
-	// Token: 0x06004482 RID: 17538 RVA: 0x0016AD00 File Offset: 0x00168F00
+	// Token: 0x06004482 RID: 17538 RVA: 0x0016ACE0 File Offset: 0x00168EE0
 	public void ShowSuccessScreenAppeal(string email)
 	{
 		this._emailTxt.text = email;
@@ -46,14 +46,14 @@ public class KIDUI_EmailSuccess : MonoBehaviour
 		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
-	// Token: 0x06004483 RID: 17539 RVA: 0x0016AD93 File Offset: 0x00168F93
+	// Token: 0x06004483 RID: 17539 RVA: 0x0016AD73 File Offset: 0x00168F73
 	public void OnClose()
 	{
 		base.gameObject.SetActive(false);
 		this._mainScreen.ShowMainScreen(EMainScreenStatus.Pending);
 	}
 
-	// Token: 0x06004484 RID: 17540 RVA: 0x0016895E File Offset: 0x00166B5E
+	// Token: 0x06004484 RID: 17540 RVA: 0x0016893E File Offset: 0x00166B3E
 	public void OnCloseGame()
 	{
 		Application.Quit();

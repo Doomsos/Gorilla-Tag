@@ -9,8 +9,8 @@ using UnityEngine;
 public class VRRigAnchorOverrides : MonoBehaviour
 {
 	// Token: 0x17000347 RID: 839
-	// (get) Token: 0x06001EEF RID: 7919 RVA: 0x000A3F7D File Offset: 0x000A217D
-	// (set) Token: 0x06001EF0 RID: 7920 RVA: 0x000A3F88 File Offset: 0x000A2188
+	// (get) Token: 0x06001EEF RID: 7919 RVA: 0x000A3F5D File Offset: 0x000A215D
+	// (set) Token: 0x06001EF0 RID: 7920 RVA: 0x000A3F68 File Offset: 0x000A2168
 	[DebugOption]
 	public Transform CurrentBadgeTransform
 	{
@@ -32,7 +32,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 	}
 
 	// Token: 0x17000348 RID: 840
-	// (get) Token: 0x06001EF1 RID: 7921 RVA: 0x000A3FD8 File Offset: 0x000A21D8
+	// (get) Token: 0x06001EF1 RID: 7921 RVA: 0x000A3FB8 File Offset: 0x000A21B8
 	public Transform HuntDefaultAnchor
 	{
 		get
@@ -42,7 +42,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 	}
 
 	// Token: 0x17000349 RID: 841
-	// (get) Token: 0x06001EF2 RID: 7922 RVA: 0x000A3FE0 File Offset: 0x000A21E0
+	// (get) Token: 0x06001EF2 RID: 7922 RVA: 0x000A3FC0 File Offset: 0x000A21C0
 	public Transform HuntComputer
 	{
 		get
@@ -52,7 +52,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 	}
 
 	// Token: 0x1700034A RID: 842
-	// (get) Token: 0x06001EF3 RID: 7923 RVA: 0x000A3FE8 File Offset: 0x000A21E8
+	// (get) Token: 0x06001EF3 RID: 7923 RVA: 0x000A3FC8 File Offset: 0x000A21C8
 	public Transform BuilderWatchAnchor
 	{
 		get
@@ -62,7 +62,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 	}
 
 	// Token: 0x1700034B RID: 843
-	// (get) Token: 0x06001EF4 RID: 7924 RVA: 0x000A3FF0 File Offset: 0x000A21F0
+	// (get) Token: 0x06001EF4 RID: 7924 RVA: 0x000A3FD0 File Offset: 0x000A21D0
 	public Transform BuilderWatch
 	{
 		get
@@ -71,7 +71,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001EF5 RID: 7925 RVA: 0x000A3FF8 File Offset: 0x000A21F8
+	// Token: 0x06001EF5 RID: 7925 RVA: 0x000A3FD8 File Offset: 0x000A21D8
 	private void Awake()
 	{
 		for (int i = 0; i < 8; i++)
@@ -85,7 +85,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.activeAntiClippingOffsets = default(CosmeticAnchorAntiIntersectOffsets);
 	}
 
-	// Token: 0x06001EF6 RID: 7926 RVA: 0x000A4058 File Offset: 0x000A2258
+	// Token: 0x06001EF6 RID: 7926 RVA: 0x000A4038 File Offset: 0x000A2238
 	private void OnEnable()
 	{
 		if (this.nameDefaultAnchor && this.nameDefaultAnchor.parent)
@@ -114,7 +114,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		Debug.LogError("VRRigAnchorOverrides: could not set parent `builderResizeButton` because `builderResizeButtonDefaultAnchor` or its parent was null! Path: " + base.transform.GetPathQ(), this);
 	}
 
-	// Token: 0x06001EF7 RID: 7927 RVA: 0x000A4174 File Offset: 0x000A2374
+	// Token: 0x06001EF7 RID: 7927 RVA: 0x000A4154 File Offset: 0x000A2354
 	private int MapPositionToIndex(TransferrableObject.PositionState pos)
 	{
 		int num = (int)pos;
@@ -126,7 +126,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		return num2;
 	}
 
-	// Token: 0x06001EF8 RID: 7928 RVA: 0x000A4194 File Offset: 0x000A2394
+	// Token: 0x06001EF8 RID: 7928 RVA: 0x000A4174 File Offset: 0x000A2374
 	public void ApplyAntiClippingOffsets(TransferrableObject.PositionState pos, XformOffset offset, bool enable, Transform defaultAnchor)
 	{
 		int num = this.MapPositionToIndex(pos);
@@ -180,7 +180,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001EF9 RID: 7929 RVA: 0x000A4338 File Offset: 0x000A2538
+	// Token: 0x06001EF9 RID: 7929 RVA: 0x000A4318 File Offset: 0x000A2518
 	public void OverrideAnchor(TransferrableObject.PositionState pos, Transform anchor)
 	{
 		int num = this.MapPositionToIndex(pos);
@@ -211,7 +211,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.overrideAnchors[num] = anchor;
 	}
 
-	// Token: 0x06001EFA RID: 7930 RVA: 0x000A4444 File Offset: 0x000A2644
+	// Token: 0x06001EFA RID: 7930 RVA: 0x000A4424 File Offset: 0x000A2624
 	public Transform AnchorOverride(TransferrableObject.PositionState pos, Transform fallback)
 	{
 		int num = this.MapPositionToIndex(pos);
@@ -223,7 +223,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		return fallback;
 	}
 
-	// Token: 0x06001EFB RID: 7931 RVA: 0x000A4468 File Offset: 0x000A2668
+	// Token: 0x06001EFB RID: 7931 RVA: 0x000A4448 File Offset: 0x000A2648
 	public void UpdateHuntWatchOffset(XformOffset offset, bool enable)
 	{
 		this.activeAntiClippingOffsets.huntComputer.enabled = enable;
@@ -233,7 +233,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.huntComputer.localRotation = this.activeAntiClippingOffsets.huntComputer.offset.rot;
 	}
 
-	// Token: 0x06001EFC RID: 7932 RVA: 0x000A44F4 File Offset: 0x000A26F4
+	// Token: 0x06001EFC RID: 7932 RVA: 0x000A44D4 File Offset: 0x000A26D4
 	public void UpdateBuilderWatchOffset(XformOffset offset, bool enable)
 	{
 		this.activeAntiClippingOffsets.builderWatch.enabled = enable;
@@ -243,7 +243,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.BuilderWatch.localRotation = this.activeAntiClippingOffsets.builderWatch.offset.rot;
 	}
 
-	// Token: 0x06001EFD RID: 7933 RVA: 0x000A4580 File Offset: 0x000A2780
+	// Token: 0x06001EFD RID: 7933 RVA: 0x000A4560 File Offset: 0x000A2760
 	public void UpdateFriendshipBraceletOffset(XformOffset offset, bool left, bool enable)
 	{
 		if (left)
@@ -264,7 +264,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.friendshipBraceletRightAnchor.localScale = this.activeAntiClippingOffsets.friendshipBraceletRight.offset.scale;
 	}
 
-	// Token: 0x06001EFE RID: 7934 RVA: 0x000A46D0 File Offset: 0x000A28D0
+	// Token: 0x06001EFE RID: 7934 RVA: 0x000A46B0 File Offset: 0x000A28B0
 	public void UpdateNameTagOffset(XformOffset offset, bool enable, CosmeticsController.CosmeticSlots slot)
 	{
 		switch (slot)
@@ -306,7 +306,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.UpdateName();
 	}
 
-	// Token: 0x06001EFF RID: 7935 RVA: 0x000A4824 File Offset: 0x000A2A24
+	// Token: 0x06001EFF RID: 7935 RVA: 0x000A4804 File Offset: 0x000A2A04
 	[Obsolete("Use UpdateNameOffset", true)]
 	public void UpdateNameAnchor(GameObject nameAnchor, CosmeticsController.CosmeticSlots slot)
 	{
@@ -342,7 +342,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.UpdateName();
 	}
 
-	// Token: 0x06001F00 RID: 7936 RVA: 0x000A489C File Offset: 0x000A2A9C
+	// Token: 0x06001F00 RID: 7936 RVA: 0x000A487C File Offset: 0x000A2A7C
 	private void UpdateName()
 	{
 		for (int i = 0; i < this.nameOffsets.Length; i++)
@@ -365,7 +365,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		Debug.LogError("VRRigAnchorOverrides: could not set parent for `nameTransform` because `nameDefaultAnchor` or its parent was null! Path: " + base.transform.GetPathQ(), this);
 	}
 
-	// Token: 0x06001F01 RID: 7937 RVA: 0x000A4980 File Offset: 0x000A2B80
+	// Token: 0x06001F01 RID: 7937 RVA: 0x000A4960 File Offset: 0x000A2B60
 	public void UpdateBadgeOffset(XformOffset offset, bool enable, CosmeticsController.CosmeticSlots slot)
 	{
 		if (slot != CosmeticsController.CosmeticSlots.Hat)
@@ -406,7 +406,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.UpdateBadge();
 	}
 
-	// Token: 0x06001F02 RID: 7938 RVA: 0x000A4AA8 File Offset: 0x000A2CA8
+	// Token: 0x06001F02 RID: 7938 RVA: 0x000A4A88 File Offset: 0x000A2C88
 	[Obsolete("Use UpdateBadgeOffset", true)]
 	public void UpdateBadgeAnchor(GameObject badgeAnchor, CosmeticsController.CosmeticSlots slot)
 	{
@@ -428,7 +428,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.UpdateBadge();
 	}
 
-	// Token: 0x06001F03 RID: 7939 RVA: 0x000A4B00 File Offset: 0x000A2D00
+	// Token: 0x06001F03 RID: 7939 RVA: 0x000A4AE0 File Offset: 0x000A2CE0
 	private void UpdateBadge()
 	{
 		if (!this.currentBadgeTransform)
@@ -458,7 +458,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.ResetBadge();
 	}
 
-	// Token: 0x06001F04 RID: 7940 RVA: 0x000A4C22 File Offset: 0x000A2E22
+	// Token: 0x06001F04 RID: 7940 RVA: 0x000A4C02 File Offset: 0x000A2E02
 	private void ResetBadge()
 	{
 		if (!this.currentBadgeTransform)
@@ -469,7 +469,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		this.currentBadgeTransform.localPosition = this.badgeDefaultPos;
 	}
 
-	// Token: 0x06001F05 RID: 7941 RVA: 0x000A4C54 File Offset: 0x000A2E54
+	// Token: 0x06001F05 RID: 7941 RVA: 0x000A4C34 File Offset: 0x000A2E34
 	private void OnDestroy()
 	{
 		for (int i = 0; i < this.clippingOffsetTransforms.Length; i++)

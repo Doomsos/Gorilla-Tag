@@ -6,7 +6,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DCC RID: 3532
 	public struct BuilderPotentialPlacementData
 	{
-		// Token: 0x0600578F RID: 22415 RVA: 0x001BE4F0 File Offset: 0x001BC6F0
+		// Token: 0x0600578F RID: 22415 RVA: 0x001BE4D0 File Offset: 0x001BC6D0
 		public BuilderPotentialPlacement ToPotentialPlacement(BuilderTable table)
 		{
 			BuilderPotentialPlacement builderPotentialPlacement = new BuilderPotentialPlacement

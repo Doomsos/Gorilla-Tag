@@ -7,13 +7,13 @@ namespace GorillaNetworking
 	// Token: 0x02000EF6 RID: 3830
 	public class GhostReactorProgression : MonoBehaviour
 	{
-		// Token: 0x06006024 RID: 24612 RVA: 0x001F0272 File Offset: 0x001EE472
+		// Token: 0x06006024 RID: 24612 RVA: 0x001F0252 File Offset: 0x001EE452
 		public void Awake()
 		{
 			GhostReactorProgression.instance = this;
 		}
 
-		// Token: 0x06006025 RID: 24613 RVA: 0x001F027C File Offset: 0x001EE47C
+		// Token: 0x06006025 RID: 24613 RVA: 0x001F025C File Offset: 0x001EE45C
 		public void Start()
 		{
 			if (ProgressionManager.Instance != null)
@@ -29,7 +29,7 @@ namespace GorillaNetworking
 			Debug.Log("GRP: ProgressionManager is null!");
 		}
 
-		// Token: 0x06006026 RID: 24614 RVA: 0x001F02E4 File Offset: 0x001EE4E4
+		// Token: 0x06006026 RID: 24614 RVA: 0x001F02C4 File Offset: 0x001EE4C4
 		public void GetStartingProgression(GRPlayer grPlayer)
 		{
 			GhostReactorProgression.<GetStartingProgression>d__6 <GetStartingProgression>d__;
@@ -40,21 +40,21 @@ namespace GorillaNetworking
 			<GetStartingProgression>d__.<>t__builder.Start<GhostReactorProgression.<GetStartingProgression>d__6>(ref <GetStartingProgression>d__);
 		}
 
-		// Token: 0x06006027 RID: 24615 RVA: 0x001F0323 File Offset: 0x001EE523
+		// Token: 0x06006027 RID: 24615 RVA: 0x001F0303 File Offset: 0x001EE503
 		public void SetProgression(int progressionAmountToAdd, GRPlayer grPlayer)
 		{
 			this._grPlayer = grPlayer;
 			ProgressionManager.Instance.SetProgression(this.progressionTrackId, progressionAmountToAdd);
 		}
 
-		// Token: 0x06006028 RID: 24616 RVA: 0x001F033D File Offset: 0x001EE53D
+		// Token: 0x06006028 RID: 24616 RVA: 0x001F031D File Offset: 0x001EE51D
 		public void UnlockProgressionTreeNode(string treeId, string nodeId, GhostReactor reactor)
 		{
 			this._reactor = reactor;
 			ProgressionManager.Instance.UnlockNode(treeId, nodeId);
 		}
 
-		// Token: 0x06006029 RID: 24617 RVA: 0x001F0354 File Offset: 0x001EE554
+		// Token: 0x06006029 RID: 24617 RVA: 0x001F0334 File Offset: 0x001EE534
 		private void OnTrackRead(string trackId, int progress)
 		{
 			if (this._grPlayer == null)
@@ -70,7 +70,7 @@ namespace GorillaNetworking
 			this._grPlayer.SetProgressionData(progress, progress, false);
 		}
 
-		// Token: 0x0600602A RID: 24618 RVA: 0x001F03B3 File Offset: 0x001EE5B3
+		// Token: 0x0600602A RID: 24618 RVA: 0x001F0393 File Offset: 0x001EE593
 		private void OnTrackSet(string trackId, int progress)
 		{
 			if (this._grPlayer == null)
@@ -84,7 +84,7 @@ namespace GorillaNetworking
 			this._grPlayer.SetProgressionData(progress, this._grPlayer.CurrentProgression.redeemedPoints, false);
 		}
 
-		// Token: 0x0600602B RID: 24619 RVA: 0x001F03F0 File Offset: 0x001EE5F0
+		// Token: 0x0600602B RID: 24619 RVA: 0x001F03D0 File Offset: 0x001EE5D0
 		private void OnNodeUnlocked()
 		{
 			if (this._reactor != null && this._reactor.toolProgression != null)
@@ -95,7 +95,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x0600602C RID: 24620 RVA: 0x001F044C File Offset: 0x001EE64C
+		// Token: 0x0600602C RID: 24620 RVA: 0x001F042C File Offset: 0x001EE62C
 		[return: TupleElementNames(new string[]
 		{
 			"tier",
@@ -128,7 +128,7 @@ namespace GorillaNetworking
 			return new ValueTuple<int, int, int, int>(i, num3, pointsPerGrade, num4);
 		}
 
-		// Token: 0x0600602D RID: 24621 RVA: 0x001F04F4 File Offset: 0x001EE6F4
+		// Token: 0x0600602D RID: 24621 RVA: 0x001F04D4 File Offset: 0x001EE6D4
 		public static string GetTitleNameAndGrade(int points)
 		{
 			GhostReactorProgression.LoadGRPSO();
@@ -144,7 +144,7 @@ namespace GorillaNetworking
 			return "null";
 		}
 
-		// Token: 0x0600602E RID: 24622 RVA: 0x001F05C0 File Offset: 0x001EE7C0
+		// Token: 0x0600602E RID: 24622 RVA: 0x001F05A0 File Offset: 0x001EE7A0
 		public static string GetTitleName(int points)
 		{
 			GhostReactorProgression.LoadGRPSO();
@@ -160,7 +160,7 @@ namespace GorillaNetworking
 			return "null";
 		}
 
-		// Token: 0x0600602F RID: 24623 RVA: 0x001F063C File Offset: 0x001EE83C
+		// Token: 0x0600602F RID: 24623 RVA: 0x001F061C File Offset: 0x001EE81C
 		public static string GetTitleNameFromLevel(int level)
 		{
 			GhostReactorProgression.LoadGRPSO();
@@ -174,7 +174,7 @@ namespace GorillaNetworking
 			return "null";
 		}
 
-		// Token: 0x06006030 RID: 24624 RVA: 0x001F069C File Offset: 0x001EE89C
+		// Token: 0x06006030 RID: 24624 RVA: 0x001F067C File Offset: 0x001EE87C
 		public static int GetGrade(int points)
 		{
 			GhostReactorProgression.LoadGRPSO();
@@ -190,7 +190,7 @@ namespace GorillaNetworking
 			return -1;
 		}
 
-		// Token: 0x06006031 RID: 24625 RVA: 0x001F0738 File Offset: 0x001EE938
+		// Token: 0x06006031 RID: 24625 RVA: 0x001F0718 File Offset: 0x001EE918
 		public static int GetTitleLevel(int points)
 		{
 			GhostReactorProgression.LoadGRPSO();
@@ -206,7 +206,7 @@ namespace GorillaNetworking
 			return -1;
 		}
 
-		// Token: 0x06006032 RID: 24626 RVA: 0x001F07AF File Offset: 0x001EE9AF
+		// Token: 0x06006032 RID: 24626 RVA: 0x001F078F File Offset: 0x001EE98F
 		public static void LoadGRPSO()
 		{
 			if (GhostReactorProgression.grPSO == null)

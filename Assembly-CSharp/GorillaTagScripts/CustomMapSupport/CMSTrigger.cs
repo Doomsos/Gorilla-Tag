@@ -8,7 +8,7 @@ namespace GorillaTagScripts.CustomMapSupport
 	// Token: 0x02000E0F RID: 3599
 	public class CMSTrigger : MonoBehaviour
 	{
-		// Token: 0x060059D0 RID: 22992 RVA: 0x001CBABB File Offset: 0x001C9CBB
+		// Token: 0x060059D0 RID: 22992 RVA: 0x001CBA9B File Offset: 0x001C9C9B
 		public void OnEnable()
 		{
 			if (this.onEnableTriggerDelay > 0.0)
@@ -17,13 +17,13 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059D1 RID: 22993 RVA: 0x001CBADA File Offset: 0x001C9CDA
+		// Token: 0x060059D1 RID: 22993 RVA: 0x001CBABA File Offset: 0x001C9CBA
 		public byte GetID()
 		{
 			return this.id;
 		}
 
-		// Token: 0x060059D2 RID: 22994 RVA: 0x001CBAE4 File Offset: 0x001C9CE4
+		// Token: 0x060059D2 RID: 22994 RVA: 0x001CBAC4 File Offset: 0x001C9CC4
 		public virtual void CopyTriggerSettings(TriggerSettings settings)
 		{
 			this.id = settings.triggerId;
@@ -86,7 +86,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059D3 RID: 22995 RVA: 0x001CBCB5 File Offset: 0x001C9EB5
+		// Token: 0x060059D3 RID: 22995 RVA: 0x001CBC95 File Offset: 0x001C9E95
 		public void OnTriggerEnter(Collider triggeringCollider)
 		{
 			if (this.ValidateCollider(triggeringCollider) && this.CanTrigger())
@@ -95,7 +95,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059D4 RID: 22996 RVA: 0x001CBCD0 File Offset: 0x001C9ED0
+		// Token: 0x060059D4 RID: 22996 RVA: 0x001CBCB0 File Offset: 0x001C9EB0
 		private void OnTriggerStay(Collider other)
 		{
 			if (!this.retriggerAfterDuration)
@@ -116,7 +116,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059D5 RID: 22997 RVA: 0x001CBD28 File Offset: 0x001C9F28
+		// Token: 0x060059D5 RID: 22997 RVA: 0x001CBD08 File Offset: 0x001C9F08
 		private bool ValidateCollider(Collider other)
 		{
 			GameObject gameObject = other.gameObject;
@@ -134,7 +134,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			return flag || flag2 || flag3;
 		}
 
-		// Token: 0x060059D6 RID: 22998 RVA: 0x001CBE1A File Offset: 0x001CA01A
+		// Token: 0x060059D6 RID: 22998 RVA: 0x001CBDFA File Offset: 0x001C9FFA
 		private void OnTriggerActivation(Collider activatingCollider)
 		{
 			if (this.syncedToAllPlayers)
@@ -145,7 +145,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			this.Trigger(-1.0, true, false);
 		}
 
-		// Token: 0x060059D7 RID: 22999 RVA: 0x001CBE44 File Offset: 0x001CA044
+		// Token: 0x060059D7 RID: 22999 RVA: 0x001CBE24 File Offset: 0x001CA024
 		public bool CanTrigger()
 		{
 			if (this.numAllowedTriggers > 0 && this.numTimesTriggered >= this.numAllowedTriggers)
@@ -178,7 +178,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			return false;
 		}
 
-		// Token: 0x060059D8 RID: 23000 RVA: 0x001CBF10 File Offset: 0x001CA110
+		// Token: 0x060059D8 RID: 23000 RVA: 0x001CBEF0 File Offset: 0x001CA0F0
 		public virtual void Trigger(double triggerTime = -1.0, bool originatedLocally = false, bool ignoreTriggerCount = false)
 		{
 			if (!ignoreTriggerCount)
@@ -211,7 +211,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059D9 RID: 23001 RVA: 0x001CBFB4 File Offset: 0x001CA1B4
+		// Token: 0x060059D9 RID: 23001 RVA: 0x001CBF94 File Offset: 0x001CA194
 		public void ResetTrigger(bool onlyResetTriggerCount = false)
 		{
 			if (!onlyResetTriggerCount)
@@ -227,7 +227,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			CMSSerializer.ResetTrigger(this.id);
 		}
 
-		// Token: 0x060059DA RID: 23002 RVA: 0x001CC008 File Offset: 0x001CA208
+		// Token: 0x060059DA RID: 23002 RVA: 0x001CBFE8 File Offset: 0x001CA1E8
 		public void SetTriggerCount(byte value)
 		{
 			this.numTimesTriggered = Math.Min(value, this.numAllowedTriggers);
@@ -241,7 +241,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059DB RID: 23003 RVA: 0x001CC058 File Offset: 0x001CA258
+		// Token: 0x060059DB RID: 23003 RVA: 0x001CC038 File Offset: 0x001CA238
 		public void SetLastTriggerTime(double value)
 		{
 			this.lastTriggerTime = value;

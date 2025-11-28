@@ -14,13 +14,13 @@ namespace FXP
 	// Token: 0x02000E9C RID: 3740
 	public class CosmeticItemPrefab : MonoBehaviour
 	{
-		// Token: 0x06005D80 RID: 23936 RVA: 0x001E02C7 File Offset: 0x001DE4C7
+		// Token: 0x06005D80 RID: 23936 RVA: 0x001E02A7 File Offset: 0x001DE4A7
 		private void Awake()
 		{
 			this.JonsAwakeCode();
 		}
 
-		// Token: 0x06005D81 RID: 23937 RVA: 0x001E02D0 File Offset: 0x001DE4D0
+		// Token: 0x06005D81 RID: 23937 RVA: 0x001E02B0 File Offset: 0x001DE4B0
 		private void JonsAwakeCode()
 		{
 			this.lastUpdated = -this.updateClock;
@@ -39,7 +39,7 @@ namespace FXP
 			this.isValid = (this.goPreviewModeSFX && this.goAttractModeSFX && this.goPurchaseModeSFX);
 		}
 
-		// Token: 0x06005D82 RID: 23938 RVA: 0x001E0459 File Offset: 0x001DE659
+		// Token: 0x06005D82 RID: 23938 RVA: 0x001E0439 File Offset: 0x001DE639
 		private void OnDisable()
 		{
 			if (StoreUpdater.instance != null)
@@ -50,7 +50,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D83 RID: 23939 RVA: 0x001E0484 File Offset: 0x001DE684
+		// Token: 0x06005D83 RID: 23939 RVA: 0x001E0464 File Offset: 0x001DE664
 		private void OnEnable()
 		{
 			if (this.goPreviewModeSFX == null)
@@ -72,7 +72,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D84 RID: 23940 RVA: 0x001E0554 File Offset: 0x001DE754
+		// Token: 0x06005D84 RID: 23940 RVA: 0x001E0534 File Offset: 0x001DE734
 		public void SwitchDisplayMode(CosmeticItemPrefab.EDisplayMode NewDisplayMode)
 		{
 			if (!this.isValid)
@@ -181,7 +181,7 @@ namespace FXP
 			this.currentDisplayMode = NewDisplayMode;
 		}
 
-		// Token: 0x06005D85 RID: 23941 RVA: 0x001E08A2 File Offset: 0x001DEAA2
+		// Token: 0x06005D85 RID: 23941 RVA: 0x001E0882 File Offset: 0x001DEA82
 		private void Update()
 		{
 			if (Time.time > this.lastUpdated + this.updateClock)
@@ -191,7 +191,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D86 RID: 23942 RVA: 0x001E08CC File Offset: 0x001DEACC
+		// Token: 0x06005D86 RID: 23942 RVA: 0x001E08AC File Offset: 0x001DEAAC
 		private void UpdateClock()
 		{
 			if (this.currentUpdateEvent != null && this.clockTextMeshIsValid && this.clockTextMesh.isActiveAndEnabled)
@@ -201,7 +201,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D87 RID: 23943 RVA: 0x001E0930 File Offset: 0x001DEB30
+		// Token: 0x06005D87 RID: 23943 RVA: 0x001E0910 File Offset: 0x001DEB10
 		public void SetDefaultProperties()
 		{
 			if (!this.isValid)
@@ -220,13 +220,13 @@ namespace FXP
 			this.goPurchaseModeSFX.clip = this.defaultSFXPurchaseMode;
 		}
 
-		// Token: 0x06005D88 RID: 23944 RVA: 0x001E0A13 File Offset: 0x001DEC13
+		// Token: 0x06005D88 RID: 23944 RVA: 0x001E09F3 File Offset: 0x001DEBF3
 		private void ClearCosmeticMesh()
 		{
 			Object.Destroy(this.goCosmeticItemGameObject);
 		}
 
-		// Token: 0x06005D89 RID: 23945 RVA: 0x001E0A20 File Offset: 0x001DEC20
+		// Token: 0x06005D89 RID: 23945 RVA: 0x001E0A00 File Offset: 0x001DEC00
 		private void ClearCosmeticAtlas()
 		{
 			if (this.goCosmeticItemMeshAtlas.IsNotNull())
@@ -235,7 +235,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D8A RID: 23946 RVA: 0x001E0A3C File Offset: 0x001DEC3C
+		// Token: 0x06005D8A RID: 23946 RVA: 0x001E0A1C File Offset: 0x001DEC1C
 		public void SetCosmeticItemFromCosmeticController(CosmeticsController.CosmeticItem item)
 		{
 			if (!this.isValid)
@@ -255,7 +255,7 @@ namespace FXP
 			this.SetCosmeticStand();
 		}
 
-		// Token: 0x06005D8B RID: 23947 RVA: 0x001E0AB8 File Offset: 0x001DECB8
+		// Token: 0x06005D8B RID: 23947 RVA: 0x001E0A98 File Offset: 0x001DEC98
 		public void SetCosmeticStand()
 		{
 			this.cosmeticStand.thisCosmeticName = this.itemID;
@@ -270,7 +270,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D8C RID: 23948 RVA: 0x001E0B1C File Offset: 0x001DED1C
+		// Token: 0x06005D8C RID: 23948 RVA: 0x001E0AFC File Offset: 0x001DECFC
 		public void SetStoreUpdateEvent(StoreUpdateEvent storeUpdateEvent, bool playFX)
 		{
 			if (!this.isValid)
@@ -291,7 +291,7 @@ namespace FXP
 			this.UpdateClock();
 		}
 
-		// Token: 0x06005D8D RID: 23949 RVA: 0x001E0B8B File Offset: 0x001DED8B
+		// Token: 0x06005D8D RID: 23949 RVA: 0x001E0B6B File Offset: 0x001DED6B
 		private IEnumerator PlayCountdownTimer()
 		{
 			yield return new WaitForSeconds(Mathf.Clamp((float)((this.currentUpdateEvent.EndTimeUTC.ToUniversalTime() - StoreUpdater.instance.DateTimeNowServerAdjusted).TotalSeconds - 10.0), 0f, float.MaxValue));
@@ -299,7 +299,7 @@ namespace FXP
 			yield break;
 		}
 
-		// Token: 0x06005D8E RID: 23950 RVA: 0x001E0B9A File Offset: 0x001DED9A
+		// Token: 0x06005D8E RID: 23950 RVA: 0x001E0B7A File Offset: 0x001DED7A
 		public void StopCountdownCoroutine()
 		{
 			this.CountdownSFX.GTStop();
@@ -311,7 +311,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D8F RID: 23951 RVA: 0x001E0BD0 File Offset: 0x001DEDD0
+		// Token: 0x06005D8F RID: 23951 RVA: 0x001E0BB0 File Offset: 0x001DEDB0
 		private void PlaySFX()
 		{
 			if (this.currentUpdateEvent != null)
@@ -328,7 +328,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D90 RID: 23952 RVA: 0x001E0C5C File Offset: 0x001DEE5C
+		// Token: 0x06005D90 RID: 23952 RVA: 0x001E0C3C File Offset: 0x001DEE3C
 		public void SetCosmeticItemProperties(string WhichGUID, string Name, List<Transform> SocketsList, int Socket, string PedestalMesh = null, string MannequinMesh = null)
 		{
 			if (!this.isValid)
@@ -348,7 +348,7 @@ namespace FXP
 			}
 		}
 
-		// Token: 0x06005D91 RID: 23953 RVA: 0x001E0CB0 File Offset: 0x001DEEB0
+		// Token: 0x06005D91 RID: 23953 RVA: 0x001E0C90 File Offset: 0x001DEE90
 		private void StartPreviewTimer()
 		{
 			if (!this.isValid)
@@ -364,7 +364,7 @@ namespace FXP
 			base.StartCoroutine(this.coroutinePreviewTimer);
 		}
 
-		// Token: 0x06005D92 RID: 23954 RVA: 0x001E0D2F File Offset: 0x001DEF2F
+		// Token: 0x06005D92 RID: 23954 RVA: 0x001E0D0F File Offset: 0x001DEF0F
 		private void StopPreviewTimer()
 		{
 			if (!this.isValid)
@@ -379,7 +379,7 @@ namespace FXP
 			this.clockTextMesh.text = "Clock";
 		}
 
-		// Token: 0x06005D93 RID: 23955 RVA: 0x001E0D65 File Offset: 0x001DEF65
+		// Token: 0x06005D93 RID: 23955 RVA: 0x001E0D45 File Offset: 0x001DEF45
 		private IEnumerator DoPreviewTimer(DateTime ReleaseTime)
 		{
 			if (this.isValid)
@@ -428,7 +428,7 @@ namespace FXP
 			yield break;
 		}
 
-		// Token: 0x06005D94 RID: 23956 RVA: 0x001E0D7C File Offset: 0x001DEF7C
+		// Token: 0x06005D94 RID: 23956 RVA: 0x001E0D5C File Offset: 0x001DEF5C
 		public void StartAttractTimer()
 		{
 			if (!this.isValid)
@@ -444,7 +444,7 @@ namespace FXP
 			base.StartCoroutine(this.coroutineAttractTimer);
 		}
 
-		// Token: 0x06005D95 RID: 23957 RVA: 0x001E0DFB File Offset: 0x001DEFFB
+		// Token: 0x06005D95 RID: 23957 RVA: 0x001E0DDB File Offset: 0x001DEFDB
 		private void StopAttractTimer()
 		{
 			if (!this.isValid)
@@ -459,7 +459,7 @@ namespace FXP
 			this.goClock.GetComponent<TextMesh>().text = "Clock";
 		}
 
-		// Token: 0x06005D96 RID: 23958 RVA: 0x001E0E36 File Offset: 0x001DF036
+		// Token: 0x06005D96 RID: 23958 RVA: 0x001E0E16 File Offset: 0x001DF016
 		private IEnumerator DoAttractTimer(DateTime ReleaseTime)
 		{
 			if (this.isValid)

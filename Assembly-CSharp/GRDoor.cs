@@ -5,13 +5,13 @@ using UnityEngine;
 [Serializable]
 public class GRDoor
 {
-	// Token: 0x06002E14 RID: 11796 RVA: 0x000FA9DB File Offset: 0x000F8BDB
+	// Token: 0x06002E14 RID: 11796 RVA: 0x000FA9BB File Offset: 0x000F8BBB
 	public void Setup()
 	{
 		this.doorState = GRDoor.DoorState.Closed;
 	}
 
-	// Token: 0x06002E15 RID: 11797 RVA: 0x000FA9E4 File Offset: 0x000F8BE4
+	// Token: 0x06002E15 RID: 11797 RVA: 0x000FA9C4 File Offset: 0x000F8BC4
 	public void SetDoorState(GRDoor.DoorState newState)
 	{
 		if (newState == this.doorState)

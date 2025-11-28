@@ -14,7 +14,7 @@ namespace GorillaTagScripts.Builder
 	public class SharedBlocksTerminal : MonoBehaviour
 	{
 		// Token: 0x170008A0 RID: 2208
-		// (get) Token: 0x06005D1C RID: 23836 RVA: 0x001DE217 File Offset: 0x001DC417
+		// (get) Token: 0x06005D1C RID: 23836 RVA: 0x001DE1F7 File Offset: 0x001DC3F7
 		public SharedBlocksManager.SharedBlocksMap SelectedMap
 		{
 			get
@@ -24,7 +24,7 @@ namespace GorillaTagScripts.Builder
 		}
 
 		// Token: 0x170008A1 RID: 2209
-		// (get) Token: 0x06005D1D RID: 23837 RVA: 0x001DE21F File Offset: 0x001DC41F
+		// (get) Token: 0x06005D1D RID: 23837 RVA: 0x001DE1FF File Offset: 0x001DC3FF
 		public bool IsTerminalLocked
 		{
 			get
@@ -34,7 +34,7 @@ namespace GorillaTagScripts.Builder
 		}
 
 		// Token: 0x170008A2 RID: 2210
-		// (get) Token: 0x06005D1E RID: 23838 RVA: 0x001DE227 File Offset: 0x001DC427
+		// (get) Token: 0x06005D1E RID: 23838 RVA: 0x001DE207 File Offset: 0x001DC407
 		private int playersInLobby
 		{
 			get
@@ -44,7 +44,7 @@ namespace GorillaTagScripts.Builder
 		}
 
 		// Token: 0x170008A3 RID: 2211
-		// (get) Token: 0x06005D1F RID: 23839 RVA: 0x001DE239 File Offset: 0x001DC439
+		// (get) Token: 0x06005D1F RID: 23839 RVA: 0x001DE219 File Offset: 0x001DC419
 		public bool IsDriver
 		{
 			get
@@ -53,14 +53,14 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D20 RID: 23840 RVA: 0x001DE257 File Offset: 0x001DC457
+		// Token: 0x06005D20 RID: 23840 RVA: 0x001DE237 File Offset: 0x001DC437
 		public BuilderTable GetTable()
 		{
 			return this.linkedTable;
 		}
 
 		// Token: 0x170008A4 RID: 2212
-		// (get) Token: 0x06005D21 RID: 23841 RVA: 0x001DE25F File Offset: 0x001DC45F
+		// (get) Token: 0x06005D21 RID: 23841 RVA: 0x001DE23F File Offset: 0x001DC43F
 		public int GetDriverID
 		{
 			get
@@ -69,7 +69,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D22 RID: 23842 RVA: 0x001DE26C File Offset: 0x001DC46C
+		// Token: 0x06005D22 RID: 23842 RVA: 0x001DE24C File Offset: 0x001DC44C
 		public static string MapIDToDisplayedString(string mapID)
 		{
 			if (mapID.IsNullOrEmpty())
@@ -96,7 +96,7 @@ namespace GorillaTagScripts.Builder
 			return SharedBlocksTerminal.sb.ToString();
 		}
 
-		// Token: 0x06005D23 RID: 23843 RVA: 0x001DE338 File Offset: 0x001DC538
+		// Token: 0x06005D23 RID: 23843 RVA: 0x001DE318 File Offset: 0x001DC518
 		public void Init(BuilderTable table)
 		{
 			if (this.hasInitialized)
@@ -122,7 +122,7 @@ namespace GorillaTagScripts.Builder
 			this.hasInitialized = true;
 		}
 
-		// Token: 0x06005D24 RID: 23844 RVA: 0x001DE454 File Offset: 0x001DC654
+		// Token: 0x06005D24 RID: 23844 RVA: 0x001DE434 File Offset: 0x001DC634
 		private void Start()
 		{
 			BuilderTable table;
@@ -134,7 +134,7 @@ namespace GorillaTagScripts.Builder
 			Debug.LogWarning("Could not find builder table for zone " + this.tableZone.ToString());
 		}
 
-		// Token: 0x06005D25 RID: 23845 RVA: 0x001DE4A0 File Offset: 0x001DC6A0
+		// Token: 0x06005D25 RID: 23845 RVA: 0x001DE480 File Offset: 0x001DC680
 		private void LateUpdate()
 		{
 			if (this.localState.driverID == -2)
@@ -153,7 +153,7 @@ namespace GorillaTagScripts.Builder
 			this.RefreshDriverNickname();
 		}
 
-		// Token: 0x06005D26 RID: 23846 RVA: 0x001DE4FC File Offset: 0x001DC6FC
+		// Token: 0x06005D26 RID: 23846 RVA: 0x001DE4DC File Offset: 0x001DC6DC
 		private void OnDestroy()
 		{
 			GameEvents.OnSharedBlocksKeyboardButtonPressedEvent.RemoveListener(new UnityAction<SharedBlocksKeyboardBindings>(this.PressButton));
@@ -174,7 +174,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D27 RID: 23847 RVA: 0x001DE5FC File Offset: 0x001DC7FC
+		// Token: 0x06005D27 RID: 23847 RVA: 0x001DE5DC File Offset: 0x001DC7DC
 		private void RefreshActiveScreen()
 		{
 			if (this.localState.driverID == -2)
@@ -202,7 +202,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D28 RID: 23848 RVA: 0x001DE6B0 File Offset: 0x001DC8B0
+		// Token: 0x06005D28 RID: 23848 RVA: 0x001DE690 File Offset: 0x001DC890
 		private void SetTerminalState(SharedBlocksTerminal.TerminalState state)
 		{
 			this.localState.state = state;
@@ -282,7 +282,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D29 RID: 23849 RVA: 0x001DE817 File Offset: 0x001DCA17
+		// Token: 0x06005D29 RID: 23849 RVA: 0x001DE7F7 File Offset: 0x001DC9F7
 		public void SelectMapIDAndOpenInfo(string mapID)
 		{
 			if (this.awaitingWebRequest)
@@ -296,7 +296,7 @@ namespace GorillaTagScripts.Builder
 			SharedBlocksManager.instance.RequestMapDataFromID(mapID, new SharedBlocksManager.BlocksMapRequestCallback(this.OnPlayerMapRequestComplete));
 		}
 
-		// Token: 0x06005D2A RID: 23850 RVA: 0x001DE858 File Offset: 0x001DCA58
+		// Token: 0x06005D2A RID: 23850 RVA: 0x001DE838 File Offset: 0x001DCA38
 		private void OnPlayerMapRequestComplete(SharedBlocksManager.SharedBlocksMap response)
 		{
 			if (this.awaitingWebRequest)
@@ -316,7 +316,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D2B RID: 23851 RVA: 0x001DE8A4 File Offset: 0x001DCAA4
+		// Token: 0x06005D2B RID: 23851 RVA: 0x001DE884 File Offset: 0x001DCA84
 		private bool CanChangeMapState(bool load, out string disallowedReason)
 		{
 			disallowedReason = "";
@@ -348,26 +348,26 @@ namespace GorillaTagScripts.Builder
 			return true;
 		}
 
-		// Token: 0x06005D2C RID: 23852 RVA: 0x001DE97F File Offset: 0x001DCB7F
+		// Token: 0x06005D2C RID: 23852 RVA: 0x001DE95F File Offset: 0x001DCB5F
 		public void SetStatusText(string text)
 		{
 			this.statusMessageText.text = text;
 			this.statusMessageText.gameObject.SetActive(true);
 		}
 
-		// Token: 0x06005D2D RID: 23853 RVA: 0x001DE99E File Offset: 0x001DCB9E
+		// Token: 0x06005D2D RID: 23853 RVA: 0x001DE97E File Offset: 0x001DCB7E
 		private bool IsLocalPlayerInLobby()
 		{
 			return base.isActiveAndEnabled && this.lobbyTrigger.playerIDsCurrentlyTouching.Contains(VRRig.LocalRig.creator.UserId);
 		}
 
-		// Token: 0x06005D2E RID: 23854 RVA: 0x001DE9CE File Offset: 0x001DCBCE
+		// Token: 0x06005D2E RID: 23854 RVA: 0x001DE9AE File Offset: 0x001DCBAE
 		public bool AreAllPlayersInLobby()
 		{
 			return base.isActiveAndEnabled && this.playersInLobby == this.playersInRoom;
 		}
 
-		// Token: 0x06005D2F RID: 23855 RVA: 0x001DE9E8 File Offset: 0x001DCBE8
+		// Token: 0x06005D2F RID: 23855 RVA: 0x001DE9C8 File Offset: 0x001DCBC8
 		public string GetLobbyText()
 		{
 			string defaultResult = "PLAYERS IN ROOM {0}\nPLAYERS IN LOBBY {1}";
@@ -379,7 +379,7 @@ namespace GorillaTagScripts.Builder
 			return string.Format(text, this.playersInRoom, this.playersInLobby);
 		}
 
-		// Token: 0x06005D30 RID: 23856 RVA: 0x001DEA30 File Offset: 0x001DCC30
+		// Token: 0x06005D30 RID: 23856 RVA: 0x001DEA10 File Offset: 0x001DCC10
 		public void RefreshLobbyCount()
 		{
 			if (NetworkSystem.Instance != null && NetworkSystem.Instance.InRoom)
@@ -390,7 +390,7 @@ namespace GorillaTagScripts.Builder
 			this.playersInRoom = 0;
 		}
 
-		// Token: 0x06005D31 RID: 23857 RVA: 0x001DEA64 File Offset: 0x001DCC64
+		// Token: 0x06005D31 RID: 23857 RVA: 0x001DEA44 File Offset: 0x001DCC44
 		public void PressButton(SharedBlocksKeyboardBindings buttonPressed)
 		{
 			if (!this.IsDriver)
@@ -438,7 +438,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D32 RID: 23858 RVA: 0x001DEB19 File Offset: 0x001DCD19
+		// Token: 0x06005D32 RID: 23858 RVA: 0x001DEAF9 File Offset: 0x001DCCF9
 		private void OnUpButtonPressed()
 		{
 			if (this.currentScreen != null)
@@ -447,7 +447,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D33 RID: 23859 RVA: 0x001DEB34 File Offset: 0x001DCD34
+		// Token: 0x06005D33 RID: 23859 RVA: 0x001DEB14 File Offset: 0x001DCD14
 		private void OnDownButtonPressed()
 		{
 			if (this.currentScreen != null)
@@ -456,7 +456,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D34 RID: 23860 RVA: 0x001DEB4F File Offset: 0x001DCD4F
+		// Token: 0x06005D34 RID: 23860 RVA: 0x001DEB2F File Offset: 0x001DCD2F
 		private void OnSelectButtonPressed()
 		{
 			if (this.localState.state == SharedBlocksTerminal.TerminalState.Found)
@@ -470,7 +470,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D35 RID: 23861 RVA: 0x001DEB7F File Offset: 0x001DCD7F
+		// Token: 0x06005D35 RID: 23861 RVA: 0x001DEB5F File Offset: 0x001DCD5F
 		private void OnDeleteButtonPressed()
 		{
 			if (this.localState.state != SharedBlocksTerminal.TerminalState.Loading && this.localState.state != SharedBlocksTerminal.TerminalState.Searching)
@@ -488,7 +488,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005D37 RID: 23863 RVA: 0x001DEBBD File Offset: 0x001DCDBD
+		// Token: 0x06005D37 RID: 23863 RVA: 0x001DEB9D File Offset: 0x001DCD9D
 		private void OnNumberPressed(int number)
 		{
 			if (this.currentScreen != null)
@@ -497,7 +497,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D38 RID: 23864 RVA: 0x001DEBD9 File Offset: 0x001DCDD9
+		// Token: 0x06005D38 RID: 23864 RVA: 0x001DEBB9 File Offset: 0x001DCDB9
 		private void OnLetterPressed(string letter)
 		{
 			if (this.currentScreen != null)
@@ -506,7 +506,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D39 RID: 23865 RVA: 0x001DEBF8 File Offset: 0x001DCDF8
+		// Token: 0x06005D39 RID: 23865 RVA: 0x001DEBD8 File Offset: 0x001DCDD8
 		private void OnTerminalControlPressed()
 		{
 			if (this.isTerminalLocked)
@@ -533,7 +533,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D3A RID: 23866 RVA: 0x001DEC70 File Offset: 0x001DCE70
+		// Token: 0x06005D3A RID: 23866 RVA: 0x001DEC50 File Offset: 0x001DCE50
 		public void OnLoadMapPressed()
 		{
 			if (!this.IsDriver)
@@ -599,13 +599,13 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005D3B RID: 23867 RVA: 0x001DEE06 File Offset: 0x001DD006
+		// Token: 0x06005D3B RID: 23867 RVA: 0x001DEDE6 File Offset: 0x001DCFE6
 		public bool IsPlayerDriver(Player player)
 		{
 			return player.ActorNumber == this.localState.driverID;
 		}
 
-		// Token: 0x06005D3C RID: 23868 RVA: 0x001DEE1B File Offset: 0x001DD01B
+		// Token: 0x06005D3C RID: 23868 RVA: 0x001DEDFB File Offset: 0x001DCFFB
 		public bool ValidateTerminalControlRequest(bool locked, int playerNumber)
 		{
 			if (locked && playerNumber == -2)
@@ -619,13 +619,13 @@ namespace GorillaTagScripts.Builder
 			return this.localState.driverID == playerNumber;
 		}
 
-		// Token: 0x06005D3D RID: 23869 RVA: 0x001DEE46 File Offset: 0x001DD046
+		// Token: 0x06005D3D RID: 23869 RVA: 0x001DEE26 File Offset: 0x001DD026
 		private void OnDriverNameChanged()
 		{
 			this.RefreshDriverNickname();
 		}
 
-		// Token: 0x06005D3E RID: 23870 RVA: 0x001DEE50 File Offset: 0x001DD050
+		// Token: 0x06005D3E RID: 23870 RVA: 0x001DEE30 File Offset: 0x001DD030
 		public void SetTerminalDriver(int playerNum)
 		{
 			if (playerNum != -2)
@@ -678,7 +678,7 @@ namespace GorillaTagScripts.Builder
 			this.RefreshDriverNickname();
 		}
 
-		// Token: 0x06005D3F RID: 23871 RVA: 0x001DEFD0 File Offset: 0x001DD1D0
+		// Token: 0x06005D3F RID: 23871 RVA: 0x001DEFB0 File Offset: 0x001DD1B0
 		private void RefreshDriverNickname()
 		{
 			StringVariable stringVariable = this._currentDriverLoc.StringReference["playerName"] as StringVariable;
@@ -727,13 +727,13 @@ namespace GorillaTagScripts.Builder
 			this.currentDriverLabel.gameObject.SetActive(true);
 		}
 
-		// Token: 0x06005D40 RID: 23872 RVA: 0x001DF19E File Offset: 0x001DD39E
+		// Token: 0x06005D40 RID: 23872 RVA: 0x001DF17E File Offset: 0x001DD37E
 		public bool ValidateLoadMapRequest(string mapID, int playerNum)
 		{
 			return playerNum == this.localState.driverID && this.AreAllPlayersInLobby() && SharedBlocksManager.IsMapIDValid(mapID);
 		}
 
-		// Token: 0x06005D41 RID: 23873 RVA: 0x001DF1C0 File Offset: 0x001DD3C0
+		// Token: 0x06005D41 RID: 23873 RVA: 0x001DF1A0 File Offset: 0x001DD3A0
 		private void OnJoinedRoom()
 		{
 			GTDev.Log<string>("[SharedBlocksTerminal::OnJoinedRoom] Joined a multiplayer room, resetting terminal control", null);
@@ -741,7 +741,7 @@ namespace GorillaTagScripts.Builder
 			this.ResetTerminalControl();
 		}
 
-		// Token: 0x06005D42 RID: 23874 RVA: 0x001DF1E8 File Offset: 0x001DD3E8
+		// Token: 0x06005D42 RID: 23874 RVA: 0x001DF1C8 File Offset: 0x001DD3C8
 		private void OnReturnedToSinglePlayer()
 		{
 			if (this.localState.driverID != this.cachedLocalPlayerID)
@@ -755,7 +755,7 @@ namespace GorillaTagScripts.Builder
 			this.cachedLocalPlayerID = -1;
 		}
 
-		// Token: 0x06005D43 RID: 23875 RVA: 0x001DF226 File Offset: 0x001DD426
+		// Token: 0x06005D43 RID: 23875 RVA: 0x001DF206 File Offset: 0x001DD406
 		public void ResetTerminalControl()
 		{
 			this.localState.driverID = -2;
@@ -766,14 +766,14 @@ namespace GorillaTagScripts.Builder
 			this.UpdateTerminalButton();
 		}
 
-		// Token: 0x06005D44 RID: 23876 RVA: 0x001DF256 File Offset: 0x001DD456
+		// Token: 0x06005D44 RID: 23876 RVA: 0x001DF236 File Offset: 0x001DD436
 		private void UpdateTerminalButton()
 		{
 			this.terminalControlButton.isOn = this.isTerminalLocked;
 			this.terminalControlButton.UpdateColor();
 		}
 
-		// Token: 0x06005D45 RID: 23877 RVA: 0x001DF274 File Offset: 0x001DD474
+		// Token: 0x06005D45 RID: 23877 RVA: 0x001DF254 File Offset: 0x001DD454
 		private void OnSharedBlocksMapLoaded(string mapID)
 		{
 			if (!this.IsDriver)
@@ -791,7 +791,7 @@ namespace GorillaTagScripts.Builder
 			this.isLoadingMap = false;
 		}
 
-		// Token: 0x06005D46 RID: 23878 RVA: 0x001DF2C2 File Offset: 0x001DD4C2
+		// Token: 0x06005D46 RID: 23878 RVA: 0x001DF2A2 File Offset: 0x001DD4A2
 		private void OnSharedBlocksMapLoadFailed(string message)
 		{
 			this.SetTerminalState(SharedBlocksTerminal.TerminalState.LoadFail);
@@ -799,7 +799,7 @@ namespace GorillaTagScripts.Builder
 			this.isLoadingMap = false;
 		}
 
-		// Token: 0x06005D47 RID: 23879 RVA: 0x001DF2DC File Offset: 0x001DD4DC
+		// Token: 0x06005D47 RID: 23879 RVA: 0x001DF2BC File Offset: 0x001DD4BC
 		private void OnSharedBlocksMapLoadStart()
 		{
 			if (this.linkedTable == null)

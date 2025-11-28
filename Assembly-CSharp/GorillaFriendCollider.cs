@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000B8A RID: 2954
 public class GorillaFriendCollider : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06004910 RID: 18704 RVA: 0x00180090 File Offset: 0x0017E290
+	// Token: 0x06004910 RID: 18704 RVA: 0x00180070 File Offset: 0x0017E270
 	public void Awake()
 	{
 		this.thisCapsule = base.GetComponent<CapsuleCollider>();
@@ -34,7 +34,7 @@ public class GorillaFriendCollider : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06004913 RID: 18707 RVA: 0x001800F7 File Offset: 0x0017E2F7
+	// Token: 0x06004913 RID: 18707 RVA: 0x001800D7 File Offset: 0x0017E2D7
 	private void AddUserID(in string userID)
 	{
 		if (this.playerIDsCurrentlyTouching.Contains(userID))
@@ -44,7 +44,7 @@ public class GorillaFriendCollider : MonoBehaviour, IGorillaSliceableSimple
 		this.playerIDsCurrentlyTouching.Add(userID);
 	}
 
-	// Token: 0x06004914 RID: 18708 RVA: 0x00180118 File Offset: 0x0017E318
+	// Token: 0x06004914 RID: 18708 RVA: 0x001800F8 File Offset: 0x0017E2F8
 	public void SliceUpdate()
 	{
 		float time = Time.time;
@@ -64,7 +64,7 @@ public class GorillaFriendCollider : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06004915 RID: 18709 RVA: 0x00180180 File Offset: 0x0017E380
+	// Token: 0x06004915 RID: 18709 RVA: 0x00180160 File Offset: 0x0017E360
 	public void RefreshPlayersInSphere()
 	{
 		this.playerIDsCurrentlyTouching.Clear();

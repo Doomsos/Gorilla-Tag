@@ -13,12 +13,12 @@ namespace GorillaTagScripts
 	public struct FlowersDataStruct : INetworkStruct
 	{
 		// Token: 0x17000844 RID: 2116
-		// (get) Token: 0x06005853 RID: 22611 RVA: 0x001C38DB File Offset: 0x001C1ADB
-		// (set) Token: 0x06005854 RID: 22612 RVA: 0x001C38E3 File Offset: 0x001C1AE3
+		// (get) Token: 0x06005853 RID: 22611 RVA: 0x001C38BB File Offset: 0x001C1ABB
+		// (set) Token: 0x06005854 RID: 22612 RVA: 0x001C38C3 File Offset: 0x001C1AC3
 		public int FlowerCount { readonly get; set; }
 
 		// Token: 0x17000845 RID: 2117
-		// (get) Token: 0x06005855 RID: 22613 RVA: 0x001C38EC File Offset: 0x001C1AEC
+		// (get) Token: 0x06005855 RID: 22613 RVA: 0x001C38CC File Offset: 0x001C1ACC
 		[Networked]
 		[NetworkedWeavedLinkedList(1, 1, typeof(ElementReaderWriterByte))]
 		[NetworkedWeaved(1, 6)]
@@ -31,7 +31,7 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x17000846 RID: 2118
-		// (get) Token: 0x06005856 RID: 22614 RVA: 0x001C3910 File Offset: 0x001C1B10
+		// (get) Token: 0x06005856 RID: 22614 RVA: 0x001C38F0 File Offset: 0x001C1AF0
 		[Networked]
 		[NetworkedWeavedLinkedList(1, 1, typeof(ElementReaderWriterInt32))]
 		[NetworkedWeaved(7, 6)]
@@ -43,7 +43,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005857 RID: 22615 RVA: 0x001C3934 File Offset: 0x001C1B34
+		// Token: 0x06005857 RID: 22615 RVA: 0x001C3914 File Offset: 0x001C1B14
 		public FlowersDataStruct(List<Flower> allFlowers)
 		{
 			this.FlowerCount = allFlowers.Count;

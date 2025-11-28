@@ -3,7 +3,7 @@
 // Token: 0x0200074B RID: 1867
 public class GRUtils
 {
-	// Token: 0x0600303C RID: 12348 RVA: 0x00108254 File Offset: 0x00106454
+	// Token: 0x0600303C RID: 12348 RVA: 0x00108234 File Offset: 0x00106434
 	public static string GetToolName(GRTool.GRToolType toolType)
 	{
 		switch (toolType)
@@ -30,7 +30,7 @@ public class GRUtils
 		return "Unknown";
 	}
 
-	// Token: 0x0600303D RID: 12349 RVA: 0x001082D4 File Offset: 0x001064D4
+	// Token: 0x0600303D RID: 12349 RVA: 0x001082B4 File Offset: 0x001064B4
 	public static GRToolProgressionManager.ToolParts GetToolPart(GRTool.GRToolType toolType)
 	{
 		switch (toolType)

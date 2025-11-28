@@ -7,16 +7,16 @@ namespace Viveport
 	public class SubscriptionStatus
 	{
 		// Token: 0x17000799 RID: 1945
-		// (get) Token: 0x06005135 RID: 20789 RVA: 0x001A2306 File Offset: 0x001A0506
-		// (set) Token: 0x06005136 RID: 20790 RVA: 0x001A230E File Offset: 0x001A050E
+		// (get) Token: 0x06005135 RID: 20789 RVA: 0x001A22E6 File Offset: 0x001A04E6
+		// (set) Token: 0x06005136 RID: 20790 RVA: 0x001A22EE File Offset: 0x001A04EE
 		public List<SubscriptionStatus.Platform> Platforms { get; set; }
 
 		// Token: 0x1700079A RID: 1946
-		// (get) Token: 0x06005137 RID: 20791 RVA: 0x001A2317 File Offset: 0x001A0517
-		// (set) Token: 0x06005138 RID: 20792 RVA: 0x001A231F File Offset: 0x001A051F
+		// (get) Token: 0x06005137 RID: 20791 RVA: 0x001A22F7 File Offset: 0x001A04F7
+		// (set) Token: 0x06005138 RID: 20792 RVA: 0x001A22FF File Offset: 0x001A04FF
 		public SubscriptionStatus.TransactionType Type { get; set; }
 
-		// Token: 0x06005139 RID: 20793 RVA: 0x001A2328 File Offset: 0x001A0528
+		// Token: 0x06005139 RID: 20793 RVA: 0x001A2308 File Offset: 0x001A0508
 		public SubscriptionStatus()
 		{
 			this.Platforms = new List<SubscriptionStatus.Platform>();

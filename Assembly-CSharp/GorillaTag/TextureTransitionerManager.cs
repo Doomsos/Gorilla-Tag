@@ -9,11 +9,11 @@ namespace GorillaTag
 	public class TextureTransitionerManager : MonoBehaviour
 	{
 		// Token: 0x170009A7 RID: 2471
-		// (get) Token: 0x0600670C RID: 26380 RVA: 0x002185A2 File Offset: 0x002167A2
-		// (set) Token: 0x0600670D RID: 26381 RVA: 0x002185A9 File Offset: 0x002167A9
+		// (get) Token: 0x0600670C RID: 26380 RVA: 0x00218582 File Offset: 0x00216782
+		// (set) Token: 0x0600670D RID: 26381 RVA: 0x00218589 File Offset: 0x00216789
 		public static TextureTransitionerManager instance { get; private set; }
 
-		// Token: 0x0600670E RID: 26382 RVA: 0x002185B1 File Offset: 0x002167B1
+		// Token: 0x0600670E RID: 26382 RVA: 0x00218591 File Offset: 0x00216791
 		protected void Awake()
 		{
 			if (TextureTransitionerManager.instance != null)
@@ -29,7 +29,7 @@ namespace GorillaTag
 			this.matPropBlock = new MaterialPropertyBlock();
 		}
 
-		// Token: 0x0600670F RID: 26383 RVA: 0x002185F0 File Offset: 0x002167F0
+		// Token: 0x0600670F RID: 26383 RVA: 0x002185D0 File Offset: 0x002167D0
 		protected void LateUpdate()
 		{
 			foreach (TextureTransitioner textureTransitioner in TextureTransitionerManager.components)
@@ -71,7 +71,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006710 RID: 26384 RVA: 0x00218780 File Offset: 0x00216980
+		// Token: 0x06006710 RID: 26384 RVA: 0x00218760 File Offset: 0x00216960
 		public static void EnsureInstanceIsAvailable()
 		{
 			if (TextureTransitionerManager.instance != null)
@@ -83,13 +83,13 @@ namespace GorillaTag
 			gameObject.name = "TextureTransitionerManager (Singleton)";
 		}
 
-		// Token: 0x06006711 RID: 26385 RVA: 0x002187AA File Offset: 0x002169AA
+		// Token: 0x06006711 RID: 26385 RVA: 0x0021878A File Offset: 0x0021698A
 		public static void Register(TextureTransitioner component)
 		{
 			TextureTransitionerManager.components.Add(component);
 		}
 
-		// Token: 0x06006712 RID: 26386 RVA: 0x002187B7 File Offset: 0x002169B7
+		// Token: 0x06006712 RID: 26386 RVA: 0x00218797 File Offset: 0x00216997
 		public static void Unregister(TextureTransitioner component)
 		{
 			TextureTransitionerManager.components.Remove(component);

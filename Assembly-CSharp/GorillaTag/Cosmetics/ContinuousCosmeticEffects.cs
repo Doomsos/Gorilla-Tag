@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010C5 RID: 4293
 	public class ContinuousCosmeticEffects : MonoBehaviour
 	{
-		// Token: 0x06006BA9 RID: 27561 RVA: 0x002353AE File Offset: 0x002335AE
+		// Token: 0x06006BA9 RID: 27561 RVA: 0x0023538E File Offset: 0x0023358E
 		public void ApplyAll(float f)
 		{
 			this.continuousProperties.ApplyAll(f);

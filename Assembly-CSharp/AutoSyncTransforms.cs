@@ -6,7 +6,7 @@ using UnityEngine;
 public class AutoSyncTransforms : MonoBehaviour
 {
 	// Token: 0x17000390 RID: 912
-	// (get) Token: 0x060021B5 RID: 8629 RVA: 0x000B0382 File Offset: 0x000AE582
+	// (get) Token: 0x060021B5 RID: 8629 RVA: 0x000B0362 File Offset: 0x000AE562
 	public Transform TargetTransform
 	{
 		get
@@ -16,7 +16,7 @@ public class AutoSyncTransforms : MonoBehaviour
 	}
 
 	// Token: 0x17000391 RID: 913
-	// (get) Token: 0x060021B6 RID: 8630 RVA: 0x000B038A File Offset: 0x000AE58A
+	// (get) Token: 0x060021B6 RID: 8630 RVA: 0x000B036A File Offset: 0x000AE56A
 	public Rigidbody TargetRigidbody
 	{
 		get
@@ -25,7 +25,7 @@ public class AutoSyncTransforms : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060021B7 RID: 8631 RVA: 0x000B0394 File Offset: 0x000AE594
+	// Token: 0x060021B7 RID: 8631 RVA: 0x000B0374 File Offset: 0x000AE574
 	private void Awake()
 	{
 		if (this.m_transform.IsNull())
@@ -45,7 +45,7 @@ public class AutoSyncTransforms : MonoBehaviour
 		this.clean = true;
 	}
 
-	// Token: 0x060021B8 RID: 8632 RVA: 0x000B0407 File Offset: 0x000AE607
+	// Token: 0x060021B8 RID: 8632 RVA: 0x000B03E7 File Offset: 0x000AE5E7
 	private void OnEnable()
 	{
 		if (this.clean)
@@ -54,7 +54,7 @@ public class AutoSyncTransforms : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060021B9 RID: 8633 RVA: 0x000B0417 File Offset: 0x000AE617
+	// Token: 0x060021B9 RID: 8633 RVA: 0x000B03F7 File Offset: 0x000AE5F7
 	private void OnDisable()
 	{
 		if (this.clean)

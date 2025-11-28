@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010BB RID: 4283
 	public class EdibleWearable : MonoBehaviour
 	{
-		// Token: 0x06006B45 RID: 27461 RVA: 0x00233418 File Offset: 0x00231618
+		// Token: 0x06006B45 RID: 27461 RVA: 0x002333F8 File Offset: 0x002315F8
 		protected void Awake()
 		{
 			this.edibleState = 0;
@@ -19,7 +19,7 @@ namespace GorillaTag.Cosmetics
 			this.stateBitsWriteInfo = VRRig.WearablePackedStatesBitWriteInfos[(int)this.wearablePackedStateSlot];
 		}
 
-		// Token: 0x06006B46 RID: 27462 RVA: 0x002334A4 File Offset: 0x002316A4
+		// Token: 0x06006B46 RID: 27462 RVA: 0x00233484 File Offset: 0x00231684
 		protected void OnEnable()
 		{
 			if (this.ownerRig == null)
@@ -34,7 +34,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B47 RID: 27463 RVA: 0x0023351E File Offset: 0x0023171E
+		// Token: 0x06006B47 RID: 27463 RVA: 0x002334FE File Offset: 0x002316FE
 		protected virtual void LateUpdate()
 		{
 			if (this.isLocal)
@@ -48,7 +48,7 @@ namespace GorillaTag.Cosmetics
 			this.LateUpdateShared();
 		}
 
-		// Token: 0x06006B48 RID: 27464 RVA: 0x0023353C File Offset: 0x0023173C
+		// Token: 0x06006B48 RID: 27464 RVA: 0x0023351C File Offset: 0x0023171C
 		protected virtual void LateUpdateLocal()
 		{
 			if (this.edibleState == this.edibleStateInfos.Length - 1)
@@ -113,13 +113,13 @@ namespace GorillaTag.Cosmetics
 			this.ownerRig.WearablePackedStates = GTBitOps.WriteBits(this.ownerRig.WearablePackedStates, this.stateBitsWriteInfo, this.edibleState);
 		}
 
-		// Token: 0x06006B49 RID: 27465 RVA: 0x00233780 File Offset: 0x00231980
+		// Token: 0x06006B49 RID: 27465 RVA: 0x00233760 File Offset: 0x00231960
 		protected virtual void LateUpdateReplicated()
 		{
 			this.edibleState = GTBitOps.ReadBits(this.ownerRig.WearablePackedStates, this.stateBitsWriteInfo.index, this.stateBitsWriteInfo.valueMask);
 		}
 
-		// Token: 0x06006B4A RID: 27466 RVA: 0x002337B0 File Offset: 0x002319B0
+		// Token: 0x06006B4A RID: 27466 RVA: 0x00233790 File Offset: 0x00231990
 		protected virtual void LateUpdateShared()
 		{
 			int num = this.edibleState;
@@ -130,7 +130,7 @@ namespace GorillaTag.Cosmetics
 			this.previousEdibleState = num;
 		}
 
-		// Token: 0x06006B4B RID: 27467 RVA: 0x002337DC File Offset: 0x002319DC
+		// Token: 0x06006B4B RID: 27467 RVA: 0x002337BC File Offset: 0x002319BC
 		protected virtual void OnEdibleHoldableStateChange()
 		{
 			if (this.previousEdibleState >= 0 && this.previousEdibleState < this.edibleStateInfos.Length)

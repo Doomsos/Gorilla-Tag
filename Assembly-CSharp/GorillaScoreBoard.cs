@@ -9,8 +9,8 @@ using UnityEngine;
 public class GorillaScoreBoard : MonoBehaviour
 {
 	// Token: 0x17000497 RID: 1175
-	// (get) Token: 0x060033A8 RID: 13224 RVA: 0x00116458 File Offset: 0x00114658
-	// (set) Token: 0x060033A9 RID: 13225 RVA: 0x0011646F File Offset: 0x0011466F
+	// (get) Token: 0x060033A8 RID: 13224 RVA: 0x00116438 File Offset: 0x00114638
+	// (set) Token: 0x060033A9 RID: 13225 RVA: 0x0011644F File Offset: 0x0011464F
 	public bool IsDirty
 	{
 		get
@@ -23,7 +23,7 @@ public class GorillaScoreBoard : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060033AA RID: 13226 RVA: 0x00116478 File Offset: 0x00114678
+	// Token: 0x060033AA RID: 13226 RVA: 0x00116458 File Offset: 0x00114658
 	public void SetSleepState(bool awake)
 	{
 		this.boardText.enabled = awake;
@@ -39,13 +39,13 @@ public class GorillaScoreBoard : MonoBehaviour
 	{
 	}
 
-	// Token: 0x060033AC RID: 13228 RVA: 0x001164AC File Offset: 0x001146AC
+	// Token: 0x060033AC RID: 13228 RVA: 0x0011648C File Offset: 0x0011468C
 	public string GetBeginningString()
 	{
 		return "ROOM ID: " + (NetworkSystem.Instance.SessionIsPrivate ? "-PRIVATE- GAME: " : (NetworkSystem.Instance.RoomName + "   GAME: ")) + this.RoomType() + "\n  PLAYER     COLOR  MUTE   REPORT";
 	}
 
-	// Token: 0x060033AD RID: 13229 RVA: 0x001164EC File Offset: 0x001146EC
+	// Token: 0x060033AD RID: 13229 RVA: 0x001164CC File Offset: 0x001146CC
 	public string RoomType()
 	{
 		this.initialGameMode = RoomSystem.RoomGameMode;
@@ -64,7 +64,7 @@ public class GorillaScoreBoard : MonoBehaviour
 		return this.gmName;
 	}
 
-	// Token: 0x060033AE RID: 13230 RVA: 0x0011656C File Offset: 0x0011476C
+	// Token: 0x060033AE RID: 13230 RVA: 0x0011654C File Offset: 0x0011474C
 	public void RedrawPlayerLines()
 	{
 		this.stringBuilder.Clear();
@@ -109,7 +109,7 @@ public class GorillaScoreBoard : MonoBehaviour
 		this._isDirty = false;
 	}
 
-	// Token: 0x060033AF RID: 13231 RVA: 0x00116758 File Offset: 0x00114958
+	// Token: 0x060033AF RID: 13231 RVA: 0x00116738 File Offset: 0x00114938
 	public string NormalizeName(bool doIt, string text)
 	{
 		if (doIt)
@@ -124,20 +124,20 @@ public class GorillaScoreBoard : MonoBehaviour
 		return text;
 	}
 
-	// Token: 0x060033B0 RID: 13232 RVA: 0x001167B7 File Offset: 0x001149B7
+	// Token: 0x060033B0 RID: 13232 RVA: 0x00116797 File Offset: 0x00114997
 	private void Start()
 	{
 		GorillaScoreboardTotalUpdater.RegisterScoreboard(this);
 	}
 
-	// Token: 0x060033B1 RID: 13233 RVA: 0x001167BF File Offset: 0x001149BF
+	// Token: 0x060033B1 RID: 13233 RVA: 0x0011679F File Offset: 0x0011499F
 	private void OnEnable()
 	{
 		GorillaScoreboardTotalUpdater.RegisterScoreboard(this);
 		this._isDirty = true;
 	}
 
-	// Token: 0x060033B2 RID: 13234 RVA: 0x001167CE File Offset: 0x001149CE
+	// Token: 0x060033B2 RID: 13234 RVA: 0x001167AE File Offset: 0x001149AE
 	private void OnDisable()
 	{
 		GorillaScoreboardTotalUpdater.UnregisterScoreboard(this);

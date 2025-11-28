@@ -9,11 +9,11 @@ namespace NetSynchrony
 	public class RandomDispatcher : ScriptableObject
 	{
 		// Token: 0x140000AE RID: 174
-		// (add) Token: 0x0600626B RID: 25195 RVA: 0x001FB08C File Offset: 0x001F928C
-		// (remove) Token: 0x0600626C RID: 25196 RVA: 0x001FB0C4 File Offset: 0x001F92C4
+		// (add) Token: 0x0600626B RID: 25195 RVA: 0x001FB06C File Offset: 0x001F926C
+		// (remove) Token: 0x0600626C RID: 25196 RVA: 0x001FB0A4 File Offset: 0x001F92A4
 		public event RandomDispatcher.RandomDispatcherEvent Dispatch;
 
-		// Token: 0x0600626D RID: 25197 RVA: 0x001FB0FC File Offset: 0x001F92FC
+		// Token: 0x0600626D RID: 25197 RVA: 0x001FB0DC File Offset: 0x001F92DC
 		public void Init(double seconds)
 		{
 			seconds %= (double)(this.totalMinutes * 60f);
@@ -35,7 +35,7 @@ namespace NetSynchrony
 			Random.InitState((int)DateTime.Now.Ticks);
 		}
 
-		// Token: 0x0600626E RID: 25198 RVA: 0x001FB1A0 File Offset: 0x001F93A0
+		// Token: 0x0600626E RID: 25198 RVA: 0x001FB180 File Offset: 0x001F9380
 		public void Sync(double seconds)
 		{
 			seconds %= (double)(this.totalMinutes * 60f);
@@ -49,7 +49,7 @@ namespace NetSynchrony
 			}
 		}
 
-		// Token: 0x0600626F RID: 25199 RVA: 0x001FB1F4 File Offset: 0x001F93F4
+		// Token: 0x0600626F RID: 25199 RVA: 0x001FB1D4 File Offset: 0x001F93D4
 		public void Tick(double seconds)
 		{
 			seconds %= (double)(this.totalMinutes * 60f);

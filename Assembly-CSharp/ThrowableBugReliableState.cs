@@ -11,8 +11,8 @@ using UnityEngine;
 public class ThrowableBugReliableState : NetworkComponent, IRequestableOwnershipGuardCallbacks
 {
 	// Token: 0x1700076E RID: 1902
-	// (get) Token: 0x06004FFA RID: 20474 RVA: 0x0019B785 File Offset: 0x00199985
-	// (set) Token: 0x06004FFB RID: 20475 RVA: 0x0019B7AF File Offset: 0x001999AF
+	// (get) Token: 0x06004FFA RID: 20474 RVA: 0x0019B765 File Offset: 0x00199965
+	// (set) Token: 0x06004FFB RID: 20475 RVA: 0x0019B78F File Offset: 0x0019998F
 	[Networked]
 	[NetworkedWeaved(0, 3)]
 	public unsafe ThrowableBugReliableState.BugData Data
@@ -35,25 +35,25 @@ public class ThrowableBugReliableState : NetworkComponent, IRequestableOwnership
 		}
 	}
 
-	// Token: 0x06004FFC RID: 20476 RVA: 0x0019B7DA File Offset: 0x001999DA
+	// Token: 0x06004FFC RID: 20476 RVA: 0x0019B7BA File Offset: 0x001999BA
 	public override void WriteDataFusion()
 	{
 		this.Data = new ThrowableBugReliableState.BugData(this.travelingDirection);
 	}
 
-	// Token: 0x06004FFD RID: 20477 RVA: 0x0019B7F0 File Offset: 0x001999F0
+	// Token: 0x06004FFD RID: 20477 RVA: 0x0019B7D0 File Offset: 0x001999D0
 	public override void ReadDataFusion()
 	{
 		this.travelingDirection = this.Data.tDirection;
 	}
 
-	// Token: 0x06004FFE RID: 20478 RVA: 0x0019B811 File Offset: 0x00199A11
+	// Token: 0x06004FFE RID: 20478 RVA: 0x0019B7F1 File Offset: 0x001999F1
 	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
 		stream.SendNext(this.travelingDirection);
 	}
 
-	// Token: 0x06004FFF RID: 20479 RVA: 0x0019B824 File Offset: 0x00199A24
+	// Token: 0x06004FFF RID: 20479 RVA: 0x0019B804 File Offset: 0x00199A04
 	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
 		Vector3 vector = (Vector3)stream.ReceiveNext();
@@ -90,7 +90,7 @@ public class ThrowableBugReliableState : NetworkComponent, IRequestableOwnership
 		throw new NotImplementedException();
 	}
 
-	// Token: 0x06005006 RID: 20486 RVA: 0x0019B85D File Offset: 0x00199A5D
+	// Token: 0x06005006 RID: 20486 RVA: 0x0019B83D File Offset: 0x00199A3D
 	[WeaverGenerated]
 	public override void CopyBackingFieldsToState(bool A_1)
 	{
@@ -98,7 +98,7 @@ public class ThrowableBugReliableState : NetworkComponent, IRequestableOwnership
 		this.Data = this._Data;
 	}
 
-	// Token: 0x06005007 RID: 20487 RVA: 0x0019B875 File Offset: 0x00199A75
+	// Token: 0x06005007 RID: 20487 RVA: 0x0019B855 File Offset: 0x00199A55
 	[WeaverGenerated]
 	public override void CopyStateToBackingFields()
 	{
@@ -122,8 +122,8 @@ public class ThrowableBugReliableState : NetworkComponent, IRequestableOwnership
 	public struct BugData : INetworkStruct
 	{
 		// Token: 0x1700076F RID: 1903
-		// (get) Token: 0x06005008 RID: 20488 RVA: 0x0019B889 File Offset: 0x00199A89
-		// (set) Token: 0x06005009 RID: 20489 RVA: 0x0019B89B File Offset: 0x00199A9B
+		// (get) Token: 0x06005008 RID: 20488 RVA: 0x0019B869 File Offset: 0x00199A69
+		// (set) Token: 0x06005009 RID: 20489 RVA: 0x0019B87B File Offset: 0x00199A7B
 		[Networked]
 		[NetworkedWeaved(0, 3)]
 		public unsafe Vector3 tDirection
@@ -138,7 +138,7 @@ public class ThrowableBugReliableState : NetworkComponent, IRequestableOwnership
 			}
 		}
 
-		// Token: 0x0600500A RID: 20490 RVA: 0x0019B8AE File Offset: 0x00199AAE
+		// Token: 0x0600500A RID: 20490 RVA: 0x0019B88E File Offset: 0x00199A8E
 		public BugData(Vector3 dir)
 		{
 			this.tDirection = dir;

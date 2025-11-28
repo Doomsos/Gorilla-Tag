@@ -11,7 +11,7 @@ namespace GorillaTag
 	public class ContainerLiquid : MonoBehaviour
 	{
 		// Token: 0x17000997 RID: 2455
-		// (get) Token: 0x06006681 RID: 26241 RVA: 0x002163E8 File Offset: 0x002145E8
+		// (get) Token: 0x06006681 RID: 26241 RVA: 0x002163C8 File Offset: 0x002145C8
 		[DebugReadout]
 		public bool isEmpty
 		{
@@ -22,32 +22,32 @@ namespace GorillaTag
 		}
 
 		// Token: 0x17000998 RID: 2456
-		// (get) Token: 0x06006682 RID: 26242 RVA: 0x002163FB File Offset: 0x002145FB
-		// (set) Token: 0x06006683 RID: 26243 RVA: 0x00216403 File Offset: 0x00214603
+		// (get) Token: 0x06006682 RID: 26242 RVA: 0x002163DB File Offset: 0x002145DB
+		// (set) Token: 0x06006683 RID: 26243 RVA: 0x002163E3 File Offset: 0x002145E3
 		public Vector3 cupTopWorldPos { get; private set; }
 
 		// Token: 0x17000999 RID: 2457
-		// (get) Token: 0x06006684 RID: 26244 RVA: 0x0021640C File Offset: 0x0021460C
-		// (set) Token: 0x06006685 RID: 26245 RVA: 0x00216414 File Offset: 0x00214614
+		// (get) Token: 0x06006684 RID: 26244 RVA: 0x002163EC File Offset: 0x002145EC
+		// (set) Token: 0x06006685 RID: 26245 RVA: 0x002163F4 File Offset: 0x002145F4
 		public Vector3 bottomLipWorldPos { get; private set; }
 
 		// Token: 0x1700099A RID: 2458
-		// (get) Token: 0x06006686 RID: 26246 RVA: 0x0021641D File Offset: 0x0021461D
-		// (set) Token: 0x06006687 RID: 26247 RVA: 0x00216425 File Offset: 0x00214625
+		// (get) Token: 0x06006686 RID: 26246 RVA: 0x002163FD File Offset: 0x002145FD
+		// (set) Token: 0x06006687 RID: 26247 RVA: 0x00216405 File Offset: 0x00214605
 		public Vector3 liquidPlaneWorldPos { get; private set; }
 
 		// Token: 0x1700099B RID: 2459
-		// (get) Token: 0x06006688 RID: 26248 RVA: 0x0021642E File Offset: 0x0021462E
-		// (set) Token: 0x06006689 RID: 26249 RVA: 0x00216436 File Offset: 0x00214636
+		// (get) Token: 0x06006688 RID: 26248 RVA: 0x0021640E File Offset: 0x0021460E
+		// (set) Token: 0x06006689 RID: 26249 RVA: 0x00216416 File Offset: 0x00214616
 		public Vector3 liquidPlaneWorldNormal { get; private set; }
 
-		// Token: 0x0600668A RID: 26250 RVA: 0x00216440 File Offset: 0x00214640
+		// Token: 0x0600668A RID: 26250 RVA: 0x00216420 File Offset: 0x00214620
 		protected bool IsValidLiquidSurfaceValues()
 		{
 			return this.meshRenderer != null && this.meshFilter != null && this.spillParticleSystem != null && !string.IsNullOrEmpty(this.liquidColorShaderPropertyName) && !string.IsNullOrEmpty(this.liquidPlaneNormalShaderPropertyName) && !string.IsNullOrEmpty(this.liquidPlanePositionShaderPropertyName);
 		}
 
-		// Token: 0x0600668B RID: 26251 RVA: 0x002164A4 File Offset: 0x002146A4
+		// Token: 0x0600668B RID: 26251 RVA: 0x00216484 File Offset: 0x00214684
 		protected void InitializeLiquidSurface()
 		{
 			this.liquidColorShaderProp = Shader.PropertyToID(this.liquidColorShaderPropertyName);
@@ -56,20 +56,20 @@ namespace GorillaTag
 			this.localMeshBounds = this.meshFilter.sharedMesh.bounds;
 		}
 
-		// Token: 0x0600668C RID: 26252 RVA: 0x002164FC File Offset: 0x002146FC
+		// Token: 0x0600668C RID: 26252 RVA: 0x002164DC File Offset: 0x002146DC
 		protected void InitializeParticleSystem()
 		{
 			this.spillParticleSystem.main.startColor = this.liquidColor;
 		}
 
-		// Token: 0x0600668D RID: 26253 RVA: 0x00216527 File Offset: 0x00214727
+		// Token: 0x0600668D RID: 26253 RVA: 0x00216507 File Offset: 0x00214707
 		protected void Awake()
 		{
 			this.matPropBlock = new MaterialPropertyBlock();
 			this.topVerts = this.GetTopVerts();
 		}
 
-		// Token: 0x0600668E RID: 26254 RVA: 0x00216540 File Offset: 0x00214740
+		// Token: 0x0600668E RID: 26254 RVA: 0x00216520 File Offset: 0x00214720
 		protected void OnEnable()
 		{
 			if (Application.isPlaying)
@@ -84,7 +84,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600668F RID: 26255 RVA: 0x00216594 File Offset: 0x00214794
+		// Token: 0x0600668F RID: 26255 RVA: 0x00216574 File Offset: 0x00214774
 		protected void LateUpdate()
 		{
 			this.UpdateRefillTimer();
@@ -180,7 +180,7 @@ namespace GorillaTag
 			this.wasEmptyLastFrame = this.isEmpty;
 		}
 
-		// Token: 0x06006690 RID: 26256 RVA: 0x00216B20 File Offset: 0x00214D20
+		// Token: 0x06006690 RID: 26256 RVA: 0x00216B00 File Offset: 0x00214D00
 		public void UpdateRefillTimer()
 		{
 			if (this.refillDelay < 0f || !this.isEmpty)
@@ -196,7 +196,7 @@ namespace GorillaTag
 			this.refillTimer -= Time.deltaTime;
 		}
 
-		// Token: 0x06006691 RID: 26257 RVA: 0x00216B7C File Offset: 0x00214D7C
+		// Token: 0x06006691 RID: 26257 RVA: 0x00216B5C File Offset: 0x00214D5C
 		private Vector3[] GetTopVerts()
 		{
 			Vector3[] vertices = this.meshFilter.sharedMesh.vertices;

@@ -7,11 +7,11 @@ using UnityEngine.Events;
 public class EdibleHoldable : TransferrableObject
 {
 	// Token: 0x1700032E RID: 814
-	// (get) Token: 0x06001D2B RID: 7467 RVA: 0x00099E76 File Offset: 0x00098076
-	// (set) Token: 0x06001D2C RID: 7468 RVA: 0x00099E7E File Offset: 0x0009807E
+	// (get) Token: 0x06001D2B RID: 7467 RVA: 0x00099E56 File Offset: 0x00098056
+	// (set) Token: 0x06001D2C RID: 7468 RVA: 0x00099E5E File Offset: 0x0009805E
 	public int lastBiterActorID { get; private set; } = -1;
 
-	// Token: 0x06001D2D RID: 7469 RVA: 0x00099E87 File Offset: 0x00098087
+	// Token: 0x06001D2D RID: 7469 RVA: 0x00099E67 File Offset: 0x00098067
 	protected override void Start()
 	{
 		base.Start();
@@ -21,20 +21,20 @@ public class EdibleHoldable : TransferrableObject
 		this.iResettableItems = base.GetComponentsInChildren<IResettableItem>(true);
 	}
 
-	// Token: 0x06001D2E RID: 7470 RVA: 0x00099EBC File Offset: 0x000980BC
+	// Token: 0x06001D2E RID: 7470 RVA: 0x00099E9C File Offset: 0x0009809C
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		base.OnGrab(pointGrabbed, grabbingHand);
 		this.lastEatTime = Time.time - this.eatMinimumCooldown;
 	}
 
-	// Token: 0x06001D2F RID: 7471 RVA: 0x00099ED8 File Offset: 0x000980D8
+	// Token: 0x06001D2F RID: 7471 RVA: 0x00099EB8 File Offset: 0x000980B8
 	public override void OnActivate()
 	{
 		base.OnActivate();
 	}
 
-	// Token: 0x06001D30 RID: 7472 RVA: 0x00099EE0 File Offset: 0x000980E0
+	// Token: 0x06001D30 RID: 7472 RVA: 0x00099EC0 File Offset: 0x000980C0
 	internal override void OnEnable()
 	{
 		base.OnEnable();
@@ -46,19 +46,19 @@ public class EdibleHoldable : TransferrableObject
 		base.OnDisable();
 	}
 
-	// Token: 0x06001D32 RID: 7474 RVA: 0x00099EE8 File Offset: 0x000980E8
+	// Token: 0x06001D32 RID: 7474 RVA: 0x00099EC8 File Offset: 0x000980C8
 	public override void ResetToDefaultState()
 	{
 		base.ResetToDefaultState();
 	}
 
-	// Token: 0x06001D33 RID: 7475 RVA: 0x00099EF0 File Offset: 0x000980F0
+	// Token: 0x06001D33 RID: 7475 RVA: 0x00099ED0 File Offset: 0x000980D0
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		return base.OnRelease(zoneReleased, releasingHand) && !base.InHand();
 	}
 
-	// Token: 0x06001D34 RID: 7476 RVA: 0x00099F0C File Offset: 0x0009810C
+	// Token: 0x06001D34 RID: 7476 RVA: 0x00099EEC File Offset: 0x000980EC
 	protected override void LateUpdateLocal()
 	{
 		base.LateUpdateLocal();
@@ -167,7 +167,7 @@ public class EdibleHoldable : TransferrableObject
 		}
 	}
 
-	// Token: 0x06001D35 RID: 7477 RVA: 0x0009A18C File Offset: 0x0009838C
+	// Token: 0x06001D35 RID: 7477 RVA: 0x0009A16C File Offset: 0x0009836C
 	protected override void LateUpdateShared()
 	{
 		base.LateUpdateShared();
@@ -179,7 +179,7 @@ public class EdibleHoldable : TransferrableObject
 		this.previousEdibleState = itemState;
 	}
 
-	// Token: 0x06001D36 RID: 7478 RVA: 0x0009A1BC File Offset: 0x000983BC
+	// Token: 0x06001D36 RID: 7478 RVA: 0x0009A19C File Offset: 0x0009839C
 	protected virtual void OnEdibleHoldableStateChange()
 	{
 		float amplitude = GorillaTagger.Instance.tapHapticStrength / 4f;

@@ -6,7 +6,7 @@ namespace GorillaExtensions
 	// Token: 0x02000FB4 RID: 4020
 	public static class EnumerableExtensions
 	{
-		// Token: 0x060064EC RID: 25836 RVA: 0x0020F654 File Offset: 0x0020D854
+		// Token: 0x060064EC RID: 25836 RVA: 0x0020F634 File Offset: 0x0020D834
 		public static TValue MinBy<TValue, TKey>(this IEnumerable<TValue> ts, Func<TValue, TKey> keyGetter) where TKey : struct, IComparable<TKey>
 		{
 			TValue result = default(TValue);
@@ -27,7 +27,7 @@ namespace GorillaExtensions
 			return result;
 		}
 
-		// Token: 0x060064ED RID: 25837 RVA: 0x0020F6F0 File Offset: 0x0020D8F0
+		// Token: 0x060064ED RID: 25837 RVA: 0x0020F6D0 File Offset: 0x0020D8D0
 		public static IEnumerable<T> Peek<T>(this IEnumerable<T> ts, Action<T> action)
 		{
 			foreach (T t in ts)

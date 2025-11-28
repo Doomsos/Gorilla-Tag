@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x0200052A RID: 1322
 public class GorillaTriggerBoxShaderSettings : GorillaTriggerBox
 {
-	// Token: 0x0600216F RID: 8559 RVA: 0x000AF6FD File Offset: 0x000AD8FD
+	// Token: 0x0600216F RID: 8559 RVA: 0x000AF6DD File Offset: 0x000AD8DD
 	private void Awake()
 	{
 		if (this.sameSceneSettingsRef != null)
@@ -16,7 +16,7 @@ public class GorillaTriggerBoxShaderSettings : GorillaTriggerBox
 		this.settingsRef.TryResolve<ZoneShaderSettings>(out this.settings);
 	}
 
-	// Token: 0x06002170 RID: 8560 RVA: 0x000AF72C File Offset: 0x000AD92C
+	// Token: 0x06002170 RID: 8560 RVA: 0x000AF70C File Offset: 0x000AD90C
 	public override void OnBoxTriggered()
 	{
 		if (this.settings == null)

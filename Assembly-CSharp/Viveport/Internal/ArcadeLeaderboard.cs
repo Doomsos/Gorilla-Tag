@@ -6,7 +6,7 @@ namespace Viveport.Internal
 	// Token: 0x02000D41 RID: 3393
 	internal class ArcadeLeaderboard
 	{
-		// Token: 0x0600524A RID: 21066 RVA: 0x001A5083 File Offset: 0x001A3283
+		// Token: 0x0600524A RID: 21066 RVA: 0x001A5063 File Offset: 0x001A3263
 		static ArcadeLeaderboard()
 		{
 			Api.LoadLibraryManually("viveport_api");

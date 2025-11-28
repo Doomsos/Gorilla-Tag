@@ -6,14 +6,14 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityWatch : GRAbilityBase
 {
-	// Token: 0x06002A0C RID: 10764 RVA: 0x000E2FD8 File Offset: 0x000E11D8
+	// Token: 0x06002A0C RID: 10764 RVA: 0x000E2FB8 File Offset: 0x000E11B8
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
 		this.target = null;
 	}
 
-	// Token: 0x06002A0D RID: 10765 RVA: 0x000E2FF0 File Offset: 0x000E11F0
+	// Token: 0x06002A0D RID: 10765 RVA: 0x000E2FD0 File Offset: 0x000E11D0
 	public override void Start()
 	{
 		base.Start();
@@ -26,25 +26,25 @@ public class GRAbilityWatch : GRAbilityBase
 		this.agent.navAgent.isStopped = true;
 	}
 
-	// Token: 0x06002A0E RID: 10766 RVA: 0x000E305A File Offset: 0x000E125A
+	// Token: 0x06002A0E RID: 10766 RVA: 0x000E303A File Offset: 0x000E123A
 	public override void Stop()
 	{
 		this.agent.navAgent.isStopped = false;
 	}
 
-	// Token: 0x06002A0F RID: 10767 RVA: 0x000E306D File Offset: 0x000E126D
+	// Token: 0x06002A0F RID: 10767 RVA: 0x000E304D File Offset: 0x000E124D
 	public override bool IsDone()
 	{
 		return this.endTime > 0.0 && Time.timeAsDouble >= this.endTime;
 	}
 
-	// Token: 0x06002A10 RID: 10768 RVA: 0x000E3092 File Offset: 0x000E1292
+	// Token: 0x06002A10 RID: 10768 RVA: 0x000E3072 File Offset: 0x000E1272
 	protected override void UpdateShared(float dt)
 	{
 		GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
 	}
 
-	// Token: 0x06002A11 RID: 10769 RVA: 0x000E30B8 File Offset: 0x000E12B8
+	// Token: 0x06002A11 RID: 10769 RVA: 0x000E3098 File Offset: 0x000E1298
 	public void SetTargetPlayer(NetPlayer targetPlayer)
 	{
 		this.target = null;

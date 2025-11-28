@@ -5,19 +5,19 @@ using UnityEngine;
 // Token: 0x0200068D RID: 1677
 public class GRBonusSystem
 {
-	// Token: 0x06002AD5 RID: 10965 RVA: 0x000E6804 File Offset: 0x000E4A04
+	// Token: 0x06002AD5 RID: 10965 RVA: 0x000E67E4 File Offset: 0x000E49E4
 	public void Init(GRAttributes attributes)
 	{
 		this.defaultAttributes = attributes;
 	}
 
-	// Token: 0x06002AD6 RID: 10966 RVA: 0x000E680D File Offset: 0x000E4A0D
+	// Token: 0x06002AD6 RID: 10966 RVA: 0x000E67ED File Offset: 0x000E49ED
 	public GRAttributes GetDefaultAttributes()
 	{
 		return this.defaultAttributes;
 	}
 
-	// Token: 0x06002AD7 RID: 10967 RVA: 0x000E6818 File Offset: 0x000E4A18
+	// Token: 0x06002AD7 RID: 10967 RVA: 0x000E67F8 File Offset: 0x000E49F8
 	public void AddBonus(GRBonusEntry entry)
 	{
 		if (entry.bonusType == GRBonusEntry.GRBonusType.None)
@@ -43,7 +43,7 @@ public class GRBonusSystem
 		}
 	}
 
-	// Token: 0x06002AD8 RID: 10968 RVA: 0x000E68C4 File Offset: 0x000E4AC4
+	// Token: 0x06002AD8 RID: 10968 RVA: 0x000E68A4 File Offset: 0x000E4AA4
 	public void RemoveBonus(GRBonusEntry entry)
 	{
 		foreach (List<GRBonusEntry> list in this.currentAdditiveBonuses.Values)
@@ -56,13 +56,13 @@ public class GRBonusSystem
 		}
 	}
 
-	// Token: 0x06002AD9 RID: 10969 RVA: 0x000E6964 File Offset: 0x000E4B64
+	// Token: 0x06002AD9 RID: 10969 RVA: 0x000E6944 File Offset: 0x000E4B44
 	public bool HasValueForAttribute(GRAttributeType attributeType)
 	{
 		return this.defaultAttributes != null && this.defaultAttributes.defaultAttributes.ContainsKey(attributeType);
 	}
 
-	// Token: 0x06002ADA RID: 10970 RVA: 0x000E6988 File Offset: 0x000E4B88
+	// Token: 0x06002ADA RID: 10970 RVA: 0x000E6968 File Offset: 0x000E4B68
 	public int CalculateFinalValueForAttribute(GRAttributeType attributeType)
 	{
 		if (this.defaultAttributes == null)

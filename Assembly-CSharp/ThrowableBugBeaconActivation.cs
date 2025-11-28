@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000CCD RID: 3277
 public class ThrowableBugBeaconActivation : MonoBehaviour
 {
-	// Token: 0x06004FEF RID: 20463 RVA: 0x0019B654 File Offset: 0x00199854
+	// Token: 0x06004FEF RID: 20463 RVA: 0x0019B634 File Offset: 0x00199834
 	private void Awake()
 	{
 		this.tbb = base.GetComponent<ThrowableBugBeacon>();
 	}
 
-	// Token: 0x06004FF0 RID: 20464 RVA: 0x0019B662 File Offset: 0x00199862
+	// Token: 0x06004FF0 RID: 20464 RVA: 0x0019B642 File Offset: 0x00199842
 	private void OnEnable()
 	{
 		base.StartCoroutine(this.SendSignals());
@@ -23,7 +23,7 @@ public class ThrowableBugBeaconActivation : MonoBehaviour
 		base.StopAllCoroutines();
 	}
 
-	// Token: 0x06004FF2 RID: 20466 RVA: 0x0019B671 File Offset: 0x00199871
+	// Token: 0x06004FF2 RID: 20466 RVA: 0x0019B651 File Offset: 0x00199851
 	private IEnumerator SendSignals()
 	{
 		uint count = 0U;

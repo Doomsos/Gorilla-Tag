@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DF2 RID: 3570
 	public class GorillaTimerManager : MonoBehaviour
 	{
-		// Token: 0x06005914 RID: 22804 RVA: 0x001C7E7B File Offset: 0x001C607B
+		// Token: 0x06005914 RID: 22804 RVA: 0x001C7E5B File Offset: 0x001C605B
 		protected void Awake()
 		{
 			if (GorillaTimerManager.hasInstance && GorillaTimerManager.instance != null && GorillaTimerManager.instance != this)
@@ -18,13 +18,13 @@ namespace GorillaTagScripts
 			GorillaTimerManager.SetInstance(this);
 		}
 
-		// Token: 0x06005915 RID: 22805 RVA: 0x001C7EAB File Offset: 0x001C60AB
+		// Token: 0x06005915 RID: 22805 RVA: 0x001C7E8B File Offset: 0x001C608B
 		public static void CreateManager()
 		{
 			GorillaTimerManager.SetInstance(new GameObject("GorillaTimerManager").AddComponent<GorillaTimerManager>());
 		}
 
-		// Token: 0x06005916 RID: 22806 RVA: 0x001C7EC1 File Offset: 0x001C60C1
+		// Token: 0x06005916 RID: 22806 RVA: 0x001C7EA1 File Offset: 0x001C60A1
 		private static void SetInstance(GorillaTimerManager manager)
 		{
 			GorillaTimerManager.instance = manager;
@@ -35,7 +35,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005917 RID: 22807 RVA: 0x001C7EDC File Offset: 0x001C60DC
+		// Token: 0x06005917 RID: 22807 RVA: 0x001C7EBC File Offset: 0x001C60BC
 		public static void RegisterGorillaTimer(GorillaTimer gTimer)
 		{
 			if (!GorillaTimerManager.hasInstance)
@@ -48,7 +48,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005918 RID: 22808 RVA: 0x001C7F02 File Offset: 0x001C6102
+		// Token: 0x06005918 RID: 22808 RVA: 0x001C7EE2 File Offset: 0x001C60E2
 		public static void UnregisterGorillaTimer(GorillaTimer gTimer)
 		{
 			if (!GorillaTimerManager.hasInstance)
@@ -61,7 +61,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005919 RID: 22809 RVA: 0x001C7F2C File Offset: 0x001C612C
+		// Token: 0x06005919 RID: 22809 RVA: 0x001C7F0C File Offset: 0x001C610C
 		public void Update()
 		{
 			for (int i = 0; i < GorillaTimerManager.allTimers.Count; i++)

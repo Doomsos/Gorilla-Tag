@@ -8,7 +8,7 @@ using Valve.VR;
 // Token: 0x0200092F RID: 2351
 public class GorillaFireballControllerManager : MonoBehaviour
 {
-	// Token: 0x06003C1B RID: 15387 RVA: 0x0013D318 File Offset: 0x0013B518
+	// Token: 0x06003C1B RID: 15387 RVA: 0x0013D2F8 File Offset: 0x0013B4F8
 	private void Update()
 	{
 		if (!this.hasInitialized)
@@ -49,7 +49,7 @@ public class GorillaFireballControllerManager : MonoBehaviour
 		this.rightHandLastState = axis;
 	}
 
-	// Token: 0x06003C1C RID: 15388 RVA: 0x0013D41C File Offset: 0x0013B61C
+	// Token: 0x06003C1C RID: 15388 RVA: 0x0013D3FC File Offset: 0x0013B5FC
 	public void TryThrowFireball(bool isLeftHand)
 	{
 		if (isLeftHand && GorillaPlaySpace.Instance.myVRRig.leftHandTransform.GetComponentInChildren<GorillaFireball>() != null)
@@ -63,7 +63,7 @@ public class GorillaFireballControllerManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003C1D RID: 15389 RVA: 0x0013D49C File Offset: 0x0013B69C
+	// Token: 0x06003C1D RID: 15389 RVA: 0x0013D47C File Offset: 0x0013B67C
 	public void CreateFireball(bool isLeftHand)
 	{
 		object[] array = new object[1];

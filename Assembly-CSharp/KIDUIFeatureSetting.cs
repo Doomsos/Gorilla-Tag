@@ -10,11 +10,11 @@ using UnityEngine.UI;
 public class KIDUIFeatureSetting : MonoBehaviour
 {
 	// Token: 0x17000664 RID: 1636
-	// (get) Token: 0x060043AB RID: 17323 RVA: 0x0016722F File Offset: 0x0016542F
-	// (set) Token: 0x060043AC RID: 17324 RVA: 0x00167237 File Offset: 0x00165437
+	// (get) Token: 0x060043AB RID: 17323 RVA: 0x0016720F File Offset: 0x0016540F
+	// (set) Token: 0x060043AC RID: 17324 RVA: 0x00167217 File Offset: 0x00165417
 	public bool AlwaysCheckFeatureSetting { get; private set; }
 
-	// Token: 0x060043AD RID: 17325 RVA: 0x00167240 File Offset: 0x00165440
+	// Token: 0x060043AD RID: 17325 RVA: 0x00167220 File Offset: 0x00165420
 	public void CreateNewFeatureSettingGuardianManaged(KIDUI_MainScreen.FeatureToggleSetup feature, bool isEnabled)
 	{
 		this.CreateNewFeatureSettingWithoutToggle(feature, false);
@@ -22,7 +22,7 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		this._guardianManagedLocked.SetActive(!isEnabled);
 	}
 
-	// Token: 0x060043AE RID: 17326 RVA: 0x00167265 File Offset: 0x00165465
+	// Token: 0x060043AE RID: 17326 RVA: 0x00167245 File Offset: 0x00165445
 	public KIDUIToggle CreateNewFeatureSettingWithToggle(KIDUI_MainScreen.FeatureToggleSetup feature, bool initialState = false, bool alwaysCheckFeatureSetting = false)
 	{
 		this.SetFeatureData(feature, alwaysCheckFeatureSetting, true);
@@ -35,13 +35,13 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		return this._featureToggle;
 	}
 
-	// Token: 0x060043AF RID: 17327 RVA: 0x0016729F File Offset: 0x0016549F
+	// Token: 0x060043AF RID: 17327 RVA: 0x0016727F File Offset: 0x0016547F
 	public void CreateNewFeatureSettingWithoutToggle(KIDUI_MainScreen.FeatureToggleSetup feature, bool alwaysCheckFeatureSetting = false)
 	{
 		this.SetFeatureData(feature, alwaysCheckFeatureSetting, false);
 	}
 
-	// Token: 0x060043B0 RID: 17328 RVA: 0x001672AC File Offset: 0x001654AC
+	// Token: 0x060043B0 RID: 17328 RVA: 0x0016728C File Offset: 0x0016548C
 	private void SetFeatureData(KIDUI_MainScreen.FeatureToggleSetup feature, bool alwaysCheckFeatureSetting, bool featureToggleEnabled)
 	{
 		string text;
@@ -74,7 +74,7 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		this._feature = feature;
 	}
 
-	// Token: 0x060043B1 RID: 17329 RVA: 0x001673D4 File Offset: 0x001655D4
+	// Token: 0x060043B1 RID: 17329 RVA: 0x001673B4 File Offset: 0x001655B4
 	public void RefreshTextOnLanguageChanged()
 	{
 		string text;
@@ -99,37 +99,37 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		this.SetFeatureName();
 	}
 
-	// Token: 0x060043B2 RID: 17330 RVA: 0x001674DD File Offset: 0x001656DD
+	// Token: 0x060043B2 RID: 17330 RVA: 0x001674BD File Offset: 0x001656BD
 	public void UnregisterOnToggleChangeEvent(Action action)
 	{
 		this._featureToggle.UnregisterOnChangeEvent(action);
 	}
 
-	// Token: 0x060043B3 RID: 17331 RVA: 0x001674EB File Offset: 0x001656EB
+	// Token: 0x060043B3 RID: 17331 RVA: 0x001674CB File Offset: 0x001656CB
 	public void RegisterToggleOnEvent(Action action)
 	{
 		this._featureToggle.RegisterToggleOnEvent(action);
 	}
 
-	// Token: 0x060043B4 RID: 17332 RVA: 0x001674F9 File Offset: 0x001656F9
+	// Token: 0x060043B4 RID: 17332 RVA: 0x001674D9 File Offset: 0x001656D9
 	public void UnregisterToggleOnEvent(Action action)
 	{
 		this._featureToggle.UnregisterToggleOnEvent(action);
 	}
 
-	// Token: 0x060043B5 RID: 17333 RVA: 0x00167507 File Offset: 0x00165707
+	// Token: 0x060043B5 RID: 17333 RVA: 0x001674E7 File Offset: 0x001656E7
 	public void RegisterToggleOffEvent(Action action)
 	{
 		this._featureToggle.RegisterToggleOffEvent(action);
 	}
 
-	// Token: 0x060043B6 RID: 17334 RVA: 0x00167515 File Offset: 0x00165715
+	// Token: 0x060043B6 RID: 17334 RVA: 0x001674F5 File Offset: 0x001656F5
 	public void UnregisterToggleOffEvent(Action action)
 	{
 		this._featureToggle.UnregisterToggleOffEvent(action);
 	}
 
-	// Token: 0x060043B7 RID: 17335 RVA: 0x00167523 File Offset: 0x00165723
+	// Token: 0x060043B7 RID: 17335 RVA: 0x00167503 File Offset: 0x00165703
 	public bool GetFeatureToggleState()
 	{
 		if (this._hasToggle)
@@ -144,25 +144,25 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		return permissionDataByFeature.Enabled;
 	}
 
-	// Token: 0x060043B8 RID: 17336 RVA: 0x0016755C File Offset: 0x0016575C
+	// Token: 0x060043B8 RID: 17336 RVA: 0x0016753C File Offset: 0x0016573C
 	public bool GetHasToggle()
 	{
 		return this._hasToggle;
 	}
 
-	// Token: 0x060043B9 RID: 17337 RVA: 0x00167564 File Offset: 0x00165764
+	// Token: 0x060043B9 RID: 17337 RVA: 0x00167544 File Offset: 0x00165744
 	public void SetFeatureSettingVisible(bool visible)
 	{
 		base.gameObject.SetActive(visible);
 	}
 
-	// Token: 0x060043BA RID: 17338 RVA: 0x00167572 File Offset: 0x00165772
+	// Token: 0x060043BA RID: 17338 RVA: 0x00167552 File Offset: 0x00165752
 	public void SetFeatureToggle(bool enableToggle)
 	{
 		this._featureToggle.interactable = enableToggle;
 	}
 
-	// Token: 0x060043BB RID: 17339 RVA: 0x00167580 File Offset: 0x00165780
+	// Token: 0x060043BB RID: 17339 RVA: 0x00167560 File Offset: 0x00165760
 	public void SetGuardianManagedState(bool isEnabled)
 	{
 		this._featureToggle.gameObject.SetActive(false);
@@ -172,7 +172,7 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		this.SetFeatureName();
 	}
 
-	// Token: 0x060043BC RID: 17340 RVA: 0x001675BC File Offset: 0x001657BC
+	// Token: 0x060043BC RID: 17340 RVA: 0x0016759C File Offset: 0x0016579C
 	public void SetPlayerManagedState(bool isInteractable, bool isOptedIn)
 	{
 		this._featureToggle.gameObject.SetActive(true);
@@ -182,7 +182,7 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		this._featureToggle.SetValue(isOptedIn);
 	}
 
-	// Token: 0x060043BD RID: 17341 RVA: 0x0016760C File Offset: 0x0016580C
+	// Token: 0x060043BD RID: 17341 RVA: 0x001675EC File Offset: 0x001657EC
 	private void SetFeatureName()
 	{
 		string text = this.GetFeatureToggleState() ? ("<b>(" + this._enabledTextStr + ")</b>") : ("<b>(" + this._disabledTextStr + ")</b>");
@@ -190,14 +190,14 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		this._featureStatusTxt.text = (text ?? "");
 	}
 
-	// Token: 0x060043BE RID: 17342 RVA: 0x00167683 File Offset: 0x00165883
+	// Token: 0x060043BE RID: 17342 RVA: 0x00167663 File Offset: 0x00165863
 	private void SetupGuardianManagedClickHandlers()
 	{
 		this.AddDeniedSoundHandler(this._guardianManagedEnabled);
 		this.AddDeniedSoundHandler(this._guardianManagedLocked);
 	}
 
-	// Token: 0x060043BF RID: 17343 RVA: 0x001676A0 File Offset: 0x001658A0
+	// Token: 0x060043BF RID: 17343 RVA: 0x00167680 File Offset: 0x00165880
 	private void AddDeniedSoundHandler(GameObject obj)
 	{
 		if (obj == null)
@@ -226,7 +226,7 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		this.EnsureRaycastTarget(obj);
 	}
 
-	// Token: 0x060043C0 RID: 17344 RVA: 0x0016771C File Offset: 0x0016591C
+	// Token: 0x060043C0 RID: 17344 RVA: 0x001676FC File Offset: 0x001658FC
 	private void EnsureRaycastTarget(GameObject obj)
 	{
 		Graphic component = obj.GetComponent<Graphic>();

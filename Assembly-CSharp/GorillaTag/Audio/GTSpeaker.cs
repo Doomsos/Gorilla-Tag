@@ -10,7 +10,7 @@ namespace GorillaTag.Audio
 	// Token: 0x02001071 RID: 4209
 	public class GTSpeaker : Speaker
 	{
-		// Token: 0x060069A3 RID: 27043 RVA: 0x00225DB0 File Offset: 0x00223FB0
+		// Token: 0x060069A3 RID: 27043 RVA: 0x00225D90 File Offset: 0x00223F90
 		public void Start()
 		{
 			LoudSpeakerNetwork componentInChildren = base.transform.root.GetComponentInChildren<LoudSpeakerNetwork>();
@@ -20,7 +20,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069A4 RID: 27044 RVA: 0x00225DE3 File Offset: 0x00223FE3
+		// Token: 0x060069A4 RID: 27044 RVA: 0x00225DC3 File Offset: 0x00223FC3
 		public void AddExternalAudioSources(AudioSource[] audioSources)
 		{
 			if (this._initializedExternalAudioSources)
@@ -35,7 +35,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069A5 RID: 27045 RVA: 0x00225E1B File Offset: 0x0022401B
+		// Token: 0x060069A5 RID: 27045 RVA: 0x00225DFB File Offset: 0x00223FFB
 		protected override void Initialize()
 		{
 			if (base.IsInitialized)
@@ -49,7 +49,7 @@ namespace GorillaTag.Audio
 			base.Initialize();
 		}
 
-		// Token: 0x060069A6 RID: 27046 RVA: 0x00225E50 File Offset: 0x00224050
+		// Token: 0x060069A6 RID: 27046 RVA: 0x00225E30 File Offset: 0x00224030
 		private void InitializeExternalAudioSources()
 		{
 			this._initializedExternalAudioSources = true;
@@ -66,13 +66,13 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069A7 RID: 27047 RVA: 0x00225ED9 File Offset: 0x002240D9
+		// Token: 0x060069A7 RID: 27047 RVA: 0x00225EB9 File Offset: 0x002240B9
 		private Func<IAudioOut<float>> GetAudioOutFactoryFromSource(AudioSource source, AudioOutDelayControl.PlayDelayConfig pdc)
 		{
 			return () => new UnityAudioOut(source, pdc, this.Logger, string.Empty, this.Logger.IsDebugEnabled);
 		}
 
-		// Token: 0x060069A8 RID: 27048 RVA: 0x00225F00 File Offset: 0x00224100
+		// Token: 0x060069A8 RID: 27048 RVA: 0x00225EE0 File Offset: 0x002240E0
 		protected override void OnAudioFrame(FrameOut<float> frame)
 		{
 			base.OnAudioFrame(frame);
@@ -89,7 +89,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069A9 RID: 27049 RVA: 0x00225F78 File Offset: 0x00224178
+		// Token: 0x060069A9 RID: 27049 RVA: 0x00225F58 File Offset: 0x00224158
 		protected override void AudioOutputStart(int frequency, int channels, int frameSamplesPerChannel)
 		{
 			this._audioOutputStarted = true;
@@ -100,7 +100,7 @@ namespace GorillaTag.Audio
 			this.ExternalAudioOutputStart(frequency, channels, frameSamplesPerChannel);
 		}
 
-		// Token: 0x060069AA RID: 27050 RVA: 0x00225FA8 File Offset: 0x002241A8
+		// Token: 0x060069AA RID: 27050 RVA: 0x00225F88 File Offset: 0x00224188
 		private void ExternalAudioOutputStart(int frequency, int channels, int frameSamplesPerChannel)
 		{
 			if (this._externalAudioOutputs != null)
@@ -116,7 +116,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069AB RID: 27051 RVA: 0x00226014 File Offset: 0x00224214
+		// Token: 0x060069AB RID: 27051 RVA: 0x00225FF4 File Offset: 0x002241F4
 		protected override void AudioOutputStop()
 		{
 			this._audioOutputStarted = false;
@@ -130,7 +130,7 @@ namespace GorillaTag.Audio
 			base.AudioOutputStop();
 		}
 
-		// Token: 0x060069AC RID: 27052 RVA: 0x0022607C File Offset: 0x0022427C
+		// Token: 0x060069AC RID: 27052 RVA: 0x0022605C File Offset: 0x0022425C
 		protected override void AudioOutputService()
 		{
 			base.AudioOutputService();
@@ -146,7 +146,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069AD RID: 27053 RVA: 0x002260E4 File Offset: 0x002242E4
+		// Token: 0x060069AD RID: 27053 RVA: 0x002260C4 File Offset: 0x002242C4
 		public void ToggleAudioSource(bool toggle)
 		{
 			if (this._externalAudioOutputs == null)

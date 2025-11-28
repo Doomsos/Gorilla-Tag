@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	public class CosmeticsProximityReactorManager : MonoBehaviour, IGorillaSliceableSimple
 	{
 		// Token: 0x17000A47 RID: 2631
-		// (get) Token: 0x06006C4F RID: 27727 RVA: 0x00238599 File Offset: 0x00236799
+		// (get) Token: 0x06006C4F RID: 27727 RVA: 0x00238579 File Offset: 0x00236779
 		public static CosmeticsProximityReactorManager Instance
 		{
 			get
@@ -17,7 +17,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C50 RID: 27728 RVA: 0x002385A0 File Offset: 0x002367A0
+		// Token: 0x06006C50 RID: 27728 RVA: 0x00238580 File Offset: 0x00236780
 		private void Awake()
 		{
 			if (CosmeticsProximityReactorManager._instance != null && CosmeticsProximityReactorManager._instance != this)
@@ -34,7 +34,7 @@ namespace GorillaTag.Cosmetics
 			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 		}
 
-		// Token: 0x06006C52 RID: 27730 RVA: 0x002385CE File Offset: 0x002367CE
+		// Token: 0x06006C52 RID: 27730 RVA: 0x002385AE File Offset: 0x002367AE
 		public void OnDisable()
 		{
 			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
@@ -44,7 +44,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C53 RID: 27731 RVA: 0x002385EC File Offset: 0x002367EC
+		// Token: 0x06006C53 RID: 27731 RVA: 0x002385CC File Offset: 0x002367CC
 		public void Register(CosmeticsProximityReactor cosmetic)
 		{
 			if (cosmetic == null)
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C54 RID: 27732 RVA: 0x002386A4 File Offset: 0x002368A4
+		// Token: 0x06006C54 RID: 27732 RVA: 0x00238684 File Offset: 0x00236884
 		public void Unregister(CosmeticsProximityReactor cosmetic)
 		{
 			if (cosmetic == null)
@@ -103,7 +103,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C55 RID: 27733 RVA: 0x00238738 File Offset: 0x00236938
+		// Token: 0x06006C55 RID: 27733 RVA: 0x00238718 File Offset: 0x00236918
 		public void SliceUpdate()
 		{
 			if (this.cosmetics.Count == 0)
@@ -187,7 +187,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C56 RID: 27734 RVA: 0x00238943 File Offset: 0x00236B43
+		// Token: 0x06006C56 RID: 27734 RVA: 0x00238923 File Offset: 0x00236B23
 		private void ProcessOneGroup(List<CosmeticsProximityReactor> group)
 		{
 			if (!this.CheckProximity(group))
@@ -196,7 +196,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C57 RID: 27735 RVA: 0x00238958 File Offset: 0x00236B58
+		// Token: 0x06006C57 RID: 27735 RVA: 0x00238938 File Offset: 0x00236B38
 		private bool CheckProximity(List<CosmeticsProximityReactor> group)
 		{
 			bool result = false;
@@ -239,7 +239,7 @@ namespace GorillaTag.Cosmetics
 			return result;
 		}
 
-		// Token: 0x06006C58 RID: 27736 RVA: 0x00238A60 File Offset: 0x00236C60
+		// Token: 0x06006C58 RID: 27736 RVA: 0x00238A40 File Offset: 0x00236C40
 		private void BreakTheBoundForGroup(List<CosmeticsProximityReactor> group)
 		{
 			for (int i = 0; i < group.Count; i++)
@@ -263,7 +263,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C59 RID: 27737 RVA: 0x00238AD8 File Offset: 0x00236CD8
+		// Token: 0x06006C59 RID: 27737 RVA: 0x00238AB8 File Offset: 0x00236CB8
 		private bool TryFindAnyCosmeticPartner(CosmeticsProximityReactor a, out CosmeticsProximityReactor partner, out Vector3 contact)
 		{
 			partner = null;
@@ -302,13 +302,13 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006C5A RID: 27738 RVA: 0x00238BC0 File Offset: 0x00236DC0
+		// Token: 0x06006C5A RID: 27738 RVA: 0x00238BA0 File Offset: 0x00236DA0
 		private static bool ShouldSkipSameIdPair(CosmeticsProximityReactor a, CosmeticsProximityReactor b)
 		{
 			return (a.ignoreSameCosmeticInstances || b.ignoreSameCosmeticInstances) && !string.IsNullOrEmpty(a.PlayFabID) && !string.IsNullOrEmpty(b.PlayFabID) && string.Equals(a.PlayFabID, b.PlayFabID, 4);
 		}
 
-		// Token: 0x06006C5B RID: 27739 RVA: 0x00238C10 File Offset: 0x00236E10
+		// Token: 0x06006C5B RID: 27739 RVA: 0x00238BF0 File Offset: 0x00236DF0
 		private static bool AreCollidersWithinThreshold(CosmeticsProximityReactor a, CosmeticsProximityReactor b, float threshold, out Vector3 contactPoint)
 		{
 			Vector3 vector = (b.collider == null) ? b.transform.position : b.collider.ClosestPoint(a.transform.position);
@@ -317,7 +317,7 @@ namespace GorillaTag.Cosmetics
 			return Vector3.Distance(vector2, vector) <= threshold;
 		}
 
-		// Token: 0x06006C5C RID: 27740 RVA: 0x00238C9C File Offset: 0x00236E9C
+		// Token: 0x06006C5C RID: 27740 RVA: 0x00238C7C File Offset: 0x00236E7C
 		private bool AnyGroupHasTwo()
 		{
 			foreach (KeyValuePair<string, List<CosmeticsProximityReactor>> keyValuePair in this.byType)
@@ -331,7 +331,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006C5D RID: 27741 RVA: 0x00238D04 File Offset: 0x00236F04
+		// Token: 0x06006C5D RID: 27741 RVA: 0x00238CE4 File Offset: 0x00236EE4
 		private void RebuildTypeKeysCache()
 		{
 			this.typeKeysCache.Clear();

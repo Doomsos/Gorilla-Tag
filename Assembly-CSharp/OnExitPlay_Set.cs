@@ -6,13 +6,13 @@ using UnityEngine;
 [AttributeUsage(256)]
 public class OnExitPlay_Set : OnExitPlay_Attribute
 {
-	// Token: 0x06004DB9 RID: 19897 RVA: 0x001924F4 File Offset: 0x001906F4
+	// Token: 0x06004DB9 RID: 19897 RVA: 0x001924D4 File Offset: 0x001906D4
 	public OnExitPlay_Set(object value)
 	{
 		this.value = value;
 	}
 
-	// Token: 0x06004DBA RID: 19898 RVA: 0x00192503 File Offset: 0x00190703
+	// Token: 0x06004DBA RID: 19898 RVA: 0x001924E3 File Offset: 0x001906E3
 	public override void OnEnterPlay(FieldInfo field)
 	{
 		if (!field.IsStatic)

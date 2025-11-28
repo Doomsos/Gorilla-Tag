@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000C7B RID: 3195
 public class CatmullRomSpline : MonoBehaviour
 {
-	// Token: 0x06004E14 RID: 19988 RVA: 0x00194A0C File Offset: 0x00192C0C
+	// Token: 0x06004E14 RID: 19988 RVA: 0x001949EC File Offset: 0x00192BEC
 	private void RefreshControlPoints()
 	{
 		this.controlPoints.Clear();
@@ -17,13 +17,13 @@ public class CatmullRomSpline : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004E15 RID: 19989 RVA: 0x00194A72 File Offset: 0x00192C72
+	// Token: 0x06004E15 RID: 19989 RVA: 0x00194A52 File Offset: 0x00192C52
 	private void Awake()
 	{
 		this.RefreshControlPoints();
 	}
 
-	// Token: 0x06004E16 RID: 19990 RVA: 0x00194A7C File Offset: 0x00192C7C
+	// Token: 0x06004E16 RID: 19990 RVA: 0x00194A5C File Offset: 0x00192C5C
 	public static Vector3 Evaluate(List<Vector3> controlPoints, float t)
 	{
 		if (controlPoints.Count < 1)
@@ -58,13 +58,13 @@ public class CatmullRomSpline : MonoBehaviour
 		return Vector3.Lerp(controlPoints[1], controlPoints[2], (t - 0.5f) * 2f);
 	}
 
-	// Token: 0x06004E17 RID: 19991 RVA: 0x00194B6E File Offset: 0x00192D6E
+	// Token: 0x06004E17 RID: 19991 RVA: 0x00194B4E File Offset: 0x00192D4E
 	public Vector3 Evaluate(float t)
 	{
 		return CatmullRomSpline.Evaluate(this.controlPoints, t);
 	}
 
-	// Token: 0x06004E18 RID: 19992 RVA: 0x00194B7C File Offset: 0x00192D7C
+	// Token: 0x06004E18 RID: 19992 RVA: 0x00194B5C File Offset: 0x00192D5C
 	public static float GetClosestEvaluationOnSpline(List<Vector3> controlPoints, Vector3 worldPoint, out Vector3 linePoint)
 	{
 		float num = float.MaxValue;
@@ -114,13 +114,13 @@ public class CatmullRomSpline : MonoBehaviour
 		return Mathf.Clamp01(((float)(num3 - 1) + num2) / (float)(controlPoints.Count - 3));
 	}
 
-	// Token: 0x06004E19 RID: 19993 RVA: 0x00194CBF File Offset: 0x00192EBF
+	// Token: 0x06004E19 RID: 19993 RVA: 0x00194C9F File Offset: 0x00192E9F
 	public float GetClosestEvaluationOnSpline(Vector3 worldPoint, out Vector3 linePoint)
 	{
 		return CatmullRomSpline.GetClosestEvaluationOnSpline(this.controlPoints, worldPoint, out linePoint);
 	}
 
-	// Token: 0x06004E1A RID: 19994 RVA: 0x00194CD0 File Offset: 0x00192ED0
+	// Token: 0x06004E1A RID: 19994 RVA: 0x00194CB0 File Offset: 0x00192EB0
 	public static Vector3 GetForwardTangent(List<Vector3> controlPoints, float t, float step = 0.01f)
 	{
 		t = Mathf.Clamp(t, 0f, 1f - step - Mathf.Epsilon);
@@ -128,7 +128,7 @@ public class CatmullRomSpline : MonoBehaviour
 		return (CatmullRomSpline.Evaluate(controlPoints, t + step) - vector).normalized;
 	}
 
-	// Token: 0x06004E1B RID: 19995 RVA: 0x00194D18 File Offset: 0x00192F18
+	// Token: 0x06004E1B RID: 19995 RVA: 0x00194CF8 File Offset: 0x00192EF8
 	public Vector3 GetForwardTangent(float t, float step = 0.01f)
 	{
 		t = Mathf.Clamp(t, 0f, 1f - step - Mathf.Epsilon);
@@ -136,7 +136,7 @@ public class CatmullRomSpline : MonoBehaviour
 		return (this.Evaluate(t + step) - vector).normalized;
 	}
 
-	// Token: 0x06004E1C RID: 19996 RVA: 0x00194D60 File Offset: 0x00192F60
+	// Token: 0x06004E1C RID: 19996 RVA: 0x00194D40 File Offset: 0x00192F40
 	private static Vector3 CatmullRom(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
 	{
 		Vector3 vector = 2f * p1;
@@ -146,7 +146,7 @@ public class CatmullRomSpline : MonoBehaviour
 		return 0.5f * (vector + vector2 * t + vector3 * t * t + vector4 * t * t * t);
 	}
 
-	// Token: 0x06004E1D RID: 19997 RVA: 0x00194E24 File Offset: 0x00193024
+	// Token: 0x06004E1D RID: 19997 RVA: 0x00194E04 File Offset: 0x00193004
 	private void OnDrawGizmosSelected()
 	{
 		if (this.testFloat > 0f)
@@ -196,7 +196,7 @@ public class CatmullRomSpline : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004E1E RID: 19998 RVA: 0x00195008 File Offset: 0x00193208
+	// Token: 0x06004E1E RID: 19998 RVA: 0x00194FE8 File Offset: 0x001931E8
 	public static Matrix4x4 CatmullRom(float t, Matrix4x4 p0, Matrix4x4 p1, Matrix4x4 p2, Matrix4x4 p3)
 	{
 		Vector3 vector = CatmullRomSpline.CatmullRom(t, p0.GetColumn(3), p1.GetColumn(3), p2.GetColumn(3), p3.GetColumn(3));
@@ -205,7 +205,7 @@ public class CatmullRomSpline : MonoBehaviour
 		return Matrix4x4.TRS(vector, quaternion, vector2);
 	}
 
-	// Token: 0x06004E1F RID: 19999 RVA: 0x00195080 File Offset: 0x00193280
+	// Token: 0x06004E1F RID: 19999 RVA: 0x00195060 File Offset: 0x00193260
 	public static Matrix4x4 Evaluate(List<Matrix4x4> controlPoints, float t)
 	{
 		if (controlPoints.Count < 1)

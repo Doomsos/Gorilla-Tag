@@ -7,7 +7,7 @@ namespace Fusion.CodeGen
 	[WeaverGenerated]
 	internal struct ReaderWriter@GorillaPaintbrawlManager__PaintbrawlStatus : IElementReaderWriter<GorillaPaintbrawlManager.PaintbrawlStatus>
 	{
-		// Token: 0x0600730A RID: 29450 RVA: 0x0025AA2E File Offset: 0x00258C2E
+		// Token: 0x0600730A RID: 29450 RVA: 0x0025AA0E File Offset: 0x00258C0E
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe GorillaPaintbrawlManager.PaintbrawlStatus Read(byte* data, int index)
@@ -15,7 +15,7 @@ namespace Fusion.CodeGen
 			return *(GorillaPaintbrawlManager.PaintbrawlStatus*)(data + index * 4);
 		}
 
-		// Token: 0x0600730B RID: 29451 RVA: 0x0025A798 File Offset: 0x00258998
+		// Token: 0x0600730B RID: 29451 RVA: 0x0025A778 File Offset: 0x00258978
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe ref GorillaPaintbrawlManager.PaintbrawlStatus ReadRef(byte* data, int index)
@@ -23,7 +23,7 @@ namespace Fusion.CodeGen
 			return ref *(GorillaPaintbrawlManager.PaintbrawlStatus*)(data + index * 4);
 		}
 
-		// Token: 0x0600730C RID: 29452 RVA: 0x0025AA3E File Offset: 0x00258C3E
+		// Token: 0x0600730C RID: 29452 RVA: 0x0025AA1E File Offset: 0x00258C1E
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe void Write(byte* data, int index, GorillaPaintbrawlManager.PaintbrawlStatus val)
@@ -39,7 +39,7 @@ namespace Fusion.CodeGen
 			return 1;
 		}
 
-		// Token: 0x0600730E RID: 29454 RVA: 0x0025AA50 File Offset: 0x00258C50
+		// Token: 0x0600730E RID: 29454 RVA: 0x0025AA30 File Offset: 0x00258C30
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementHashCode(GorillaPaintbrawlManager.PaintbrawlStatus val)
@@ -47,7 +47,7 @@ namespace Fusion.CodeGen
 			return val.GetHashCode();
 		}
 
-		// Token: 0x0600730F RID: 29455 RVA: 0x0025AA6C File Offset: 0x00258C6C
+		// Token: 0x0600730F RID: 29455 RVA: 0x0025AA4C File Offset: 0x00258C4C
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public static IElementReaderWriter<GorillaPaintbrawlManager.PaintbrawlStatus> GetInstance()

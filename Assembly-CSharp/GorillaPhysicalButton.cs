@@ -9,16 +9,16 @@ using UnityEngine.Events;
 public class GorillaPhysicalButton : MonoBehaviour
 {
 	// Token: 0x14000075 RID: 117
-	// (add) Token: 0x06003B59 RID: 15193 RVA: 0x00139810 File Offset: 0x00137A10
-	// (remove) Token: 0x06003B5A RID: 15194 RVA: 0x00139848 File Offset: 0x00137A48
+	// (add) Token: 0x06003B59 RID: 15193 RVA: 0x001397F0 File Offset: 0x001379F0
+	// (remove) Token: 0x06003B5A RID: 15194 RVA: 0x00139828 File Offset: 0x00137A28
 	public event Action<GorillaPhysicalButton, bool> onPressedOn;
 
 	// Token: 0x14000076 RID: 118
-	// (add) Token: 0x06003B5B RID: 15195 RVA: 0x00139880 File Offset: 0x00137A80
-	// (remove) Token: 0x06003B5C RID: 15196 RVA: 0x001398B8 File Offset: 0x00137AB8
+	// (add) Token: 0x06003B5B RID: 15195 RVA: 0x00139860 File Offset: 0x00137A60
+	// (remove) Token: 0x06003B5C RID: 15196 RVA: 0x00139898 File Offset: 0x00137A98
 	public event Action<GorillaPhysicalButton, bool> onToggledOff;
 
-	// Token: 0x06003B5D RID: 15197 RVA: 0x001398F0 File Offset: 0x00137AF0
+	// Token: 0x06003B5D RID: 15197 RVA: 0x001398D0 File Offset: 0x00137AD0
 	public virtual void Start()
 	{
 		if (this.moveableChildren != null)
@@ -43,7 +43,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06003B60 RID: 15200 RVA: 0x00139968 File Offset: 0x00137B68
+	// Token: 0x06003B60 RID: 15200 RVA: 0x00139948 File Offset: 0x00137B48
 	private float GetSurfaceDistanceFromKeyToCollider(Collider collider)
 	{
 		if (collider == null)
@@ -60,7 +60,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 		return Vector3.Dot(base.transform.position - collider.transform.position, -base.transform.forward) - num - num2;
 	}
 
-	// Token: 0x06003B61 RID: 15201 RVA: 0x00139A30 File Offset: 0x00137C30
+	// Token: 0x06003B61 RID: 15201 RVA: 0x00139A10 File Offset: 0x00137C10
 	protected void OnTriggerEnter(Collider other)
 	{
 		if (!base.enabled)
@@ -78,7 +78,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B62 RID: 15202 RVA: 0x00139A6B File Offset: 0x00137C6B
+	// Token: 0x06003B62 RID: 15202 RVA: 0x00139A4B File Offset: 0x00137C4B
 	protected IEnumerator ButtonUpdate()
 	{
 		for (;;)
@@ -94,7 +94,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x06003B63 RID: 15203 RVA: 0x00139A7C File Offset: 0x00137C7C
+	// Token: 0x06003B63 RID: 15203 RVA: 0x00139A5C File Offset: 0x00137C5C
 	protected void UpdateButtonFromCollider()
 	{
 		if (this.recentFingerCollider != null)
@@ -120,7 +120,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 		this.UpdateButtonVisuals();
 	}
 
-	// Token: 0x06003B64 RID: 15204 RVA: 0x00139B1C File Offset: 0x00137D1C
+	// Token: 0x06003B64 RID: 15204 RVA: 0x00139AFC File Offset: 0x00137CFC
 	protected void TestForButtonStateChange()
 	{
 		if (this.waitingForReleaseAfterStateChange)
@@ -196,7 +196,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B65 RID: 15205 RVA: 0x00139DAC File Offset: 0x00137FAC
+	// Token: 0x06003B65 RID: 15205 RVA: 0x00139D8C File Offset: 0x00137F8C
 	protected void UpdateButtonVisuals()
 	{
 		float num = this.currentButtonDepthFromPressing;
@@ -215,7 +215,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 		this.UpdateColorWithState(this.isOn);
 	}
 
-	// Token: 0x06003B66 RID: 15206 RVA: 0x00139E6C File Offset: 0x0013806C
+	// Token: 0x06003B66 RID: 15206 RVA: 0x00139E4C File Offset: 0x0013804C
 	protected void UpdateColorWithState(bool state)
 	{
 		if (state)
@@ -257,7 +257,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06003B6B RID: 15211 RVA: 0x00139F11 File Offset: 0x00138111
+	// Token: 0x06003B6B RID: 15211 RVA: 0x00139EF1 File Offset: 0x001380F1
 	public virtual void ResetState()
 	{
 		this.isOn = false;
@@ -266,7 +266,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 		this.UpdateButtonVisuals();
 	}
 
-	// Token: 0x06003B6C RID: 15212 RVA: 0x00139F32 File Offset: 0x00138132
+	// Token: 0x06003B6C RID: 15212 RVA: 0x00139F12 File Offset: 0x00138112
 	public void SetText(string newText)
 	{
 		if (this.textField != null)
@@ -275,7 +275,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B6D RID: 15213 RVA: 0x00139F54 File Offset: 0x00138154
+	// Token: 0x06003B6D RID: 15213 RVA: 0x00139F34 File Offset: 0x00138134
 	public virtual void SetButtonState(bool setToOn)
 	{
 		if (this.canToggleOn || this.canToggleOff)

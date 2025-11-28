@@ -6,8 +6,8 @@ using UnityEngine.Events;
 public class RadialBounds : MonoBehaviour
 {
 	// Token: 0x17000550 RID: 1360
-	// (get) Token: 0x06003A03 RID: 14851 RVA: 0x00133006 File Offset: 0x00131206
-	// (set) Token: 0x06003A04 RID: 14852 RVA: 0x0013300E File Offset: 0x0013120E
+	// (get) Token: 0x06003A03 RID: 14851 RVA: 0x00132FE6 File Offset: 0x001311E6
+	// (set) Token: 0x06003A04 RID: 14852 RVA: 0x00132FEE File Offset: 0x001311EE
 	public Vector3 localCenter
 	{
 		get
@@ -21,8 +21,8 @@ public class RadialBounds : MonoBehaviour
 	}
 
 	// Token: 0x17000551 RID: 1361
-	// (get) Token: 0x06003A05 RID: 14853 RVA: 0x00133017 File Offset: 0x00131217
-	// (set) Token: 0x06003A06 RID: 14854 RVA: 0x0013301F File Offset: 0x0013121F
+	// (get) Token: 0x06003A05 RID: 14853 RVA: 0x00132FF7 File Offset: 0x001311F7
+	// (set) Token: 0x06003A06 RID: 14854 RVA: 0x00132FFF File Offset: 0x001311FF
 	public float localRadius
 	{
 		get
@@ -36,7 +36,7 @@ public class RadialBounds : MonoBehaviour
 	}
 
 	// Token: 0x17000552 RID: 1362
-	// (get) Token: 0x06003A07 RID: 14855 RVA: 0x00133028 File Offset: 0x00131228
+	// (get) Token: 0x06003A07 RID: 14855 RVA: 0x00133008 File Offset: 0x00131208
 	public Vector3 center
 	{
 		get
@@ -46,7 +46,7 @@ public class RadialBounds : MonoBehaviour
 	}
 
 	// Token: 0x17000553 RID: 1363
-	// (get) Token: 0x06003A08 RID: 14856 RVA: 0x0013303B File Offset: 0x0013123B
+	// (get) Token: 0x06003A08 RID: 14856 RVA: 0x0013301B File Offset: 0x0013121B
 	public float radius
 	{
 		get

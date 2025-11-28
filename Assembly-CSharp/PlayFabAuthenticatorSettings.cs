@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x02000B9E RID: 2974
 public class PlayFabAuthenticatorSettings
 {
-	// Token: 0x06004975 RID: 18805 RVA: 0x00181530 File Offset: 0x0017F730
+	// Token: 0x06004975 RID: 18805 RVA: 0x00181510 File Offset: 0x0017F710
 	static PlayFabAuthenticatorSettings()
 	{
 		PlayFabAuthenticatorSettings.Load("PlayFabAuthenticatorSettings");
 	}
 
-	// Token: 0x06004976 RID: 18806 RVA: 0x0018153C File Offset: 0x0017F73C
+	// Token: 0x06004976 RID: 18806 RVA: 0x0018151C File Offset: 0x0017F71C
 	public static void Load(string path)
 	{
 		PlayFabAuthenticatorSettingsScriptableObject playFabAuthenticatorSettingsScriptableObject = Resources.Load<PlayFabAuthenticatorSettingsScriptableObject>(path);

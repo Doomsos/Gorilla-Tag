@@ -6,7 +6,7 @@ using UnityEngine.Localization;
 [Serializable]
 public struct LocalizedStringContainer
 {
-	// Token: 0x06004598 RID: 17816 RVA: 0x00170B3C File Offset: 0x0016ED3C
+	// Token: 0x06004598 RID: 17816 RVA: 0x00170B1C File Offset: 0x0016ED1C
 	public string GetName()
 	{
 		string localizedString = this.StringReference.GetLocalizedString();

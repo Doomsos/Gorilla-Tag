@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001099 RID: 4249
 	public class RCCosmeticNetworkSync : MonoBehaviourPun, IPunObservable, IPunInstantiateMagicCallback
 	{
-		// Token: 0x06006A4B RID: 27211 RVA: 0x0022C190 File Offset: 0x0022A390
+		// Token: 0x06006A4B RID: 27211 RVA: 0x0022C170 File Offset: 0x0022A370
 		public void OnPhotonInstantiate(PhotonMessageInfo info)
 		{
 			if (info.Sender == null)
@@ -49,7 +49,7 @@ namespace GorillaTag.Cosmetics
 			this.DestroyThis();
 		}
 
-		// Token: 0x06006A4C RID: 27212 RVA: 0x0022C2C0 File Offset: 0x0022A4C0
+		// Token: 0x06006A4C RID: 27212 RVA: 0x0022C2A0 File Offset: 0x0022A4A0
 		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (info.Sender != base.photonView.Owner)
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A4D RID: 27213 RVA: 0x0022C474 File Offset: 0x0022A674
+		// Token: 0x06006A4D RID: 27213 RVA: 0x0022C454 File Offset: 0x0022A654
 		[PunRPC]
 		public void HitRCVehicleRPC(Vector3 hitVelocity, bool isProjectile, PhotonMessageInfo info)
 		{
@@ -101,7 +101,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A4E RID: 27214 RVA: 0x0022C4F8 File Offset: 0x0022A6F8
+		// Token: 0x06006A4E RID: 27214 RVA: 0x0022C4D8 File Offset: 0x0022A6D8
 		private void DestroyThis()
 		{
 			if (base.photonView.IsMine)

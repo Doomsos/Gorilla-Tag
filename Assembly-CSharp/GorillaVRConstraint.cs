@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020007EF RID: 2031
 public class GorillaVRConstraint : MonoBehaviourTick
 {
-	// Token: 0x06003562 RID: 13666 RVA: 0x00121EE0 File Offset: 0x001200E0
+	// Token: 0x06003562 RID: 13666 RVA: 0x00121EC0 File Offset: 0x001200C0
 	public override void Tick()
 	{
 		if (NetworkSystem.Instance.WrongVersion)

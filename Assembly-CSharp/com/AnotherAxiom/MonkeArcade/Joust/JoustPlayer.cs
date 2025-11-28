@@ -7,8 +7,8 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 	public class JoustPlayer : MonoBehaviour
 	{
 		// Token: 0x17000924 RID: 2340
-		// (get) Token: 0x060062BB RID: 25275 RVA: 0x001FD93D File Offset: 0x001FBB3D
-		// (set) Token: 0x060062BC RID: 25276 RVA: 0x001FD945 File Offset: 0x001FBB45
+		// (get) Token: 0x060062BB RID: 25275 RVA: 0x001FD91D File Offset: 0x001FBB1D
+		// (set) Token: 0x060062BC RID: 25276 RVA: 0x001FD925 File Offset: 0x001FBB25
 		public float HorizontalSpeed
 		{
 			get
@@ -21,7 +21,7 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 			}
 		}
 
-		// Token: 0x060062BD RID: 25277 RVA: 0x001FD950 File Offset: 0x001FBB50
+		// Token: 0x060062BD RID: 25277 RVA: 0x001FD930 File Offset: 0x001FBB30
 		private void LateUpdate()
 		{
 			this.velocity.x = this.HSpeed * 0.001f;
@@ -60,7 +60,7 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 			}
 		}
 
-		// Token: 0x060062BE RID: 25278 RVA: 0x001FDB36 File Offset: 0x001FBD36
+		// Token: 0x060062BE RID: 25278 RVA: 0x001FDB16 File Offset: 0x001FBD16
 		public void Flap()
 		{
 			this.flap = true;

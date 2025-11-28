@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200051B RID: 1307
 public class GorillaCameraFollow : MonoBehaviour
 {
-	// Token: 0x06002148 RID: 8520 RVA: 0x000AF258 File Offset: 0x000AD458
+	// Token: 0x06002148 RID: 8520 RVA: 0x000AF238 File Offset: 0x000AD438
 	private void Start()
 	{
 		if (Application.platform == 11)
@@ -23,7 +23,7 @@ public class GorillaCameraFollow : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002149 RID: 8521 RVA: 0x000AF2E0 File Offset: 0x000AD4E0
+	// Token: 0x06002149 RID: 8521 RVA: 0x000AF2C0 File Offset: 0x000AD4C0
 	private void LateUpdate()
 	{
 		if (this.cinemachineFollow != null)

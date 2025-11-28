@@ -11,13 +11,13 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 	// Token: 0x02000E20 RID: 3616
 	public class CustomMapModeSelector : GameModeSelectorButtonLayout
 	{
-		// Token: 0x06005A52 RID: 23122 RVA: 0x001CEC82 File Offset: 0x001CCE82
+		// Token: 0x06005A52 RID: 23122 RVA: 0x001CEC62 File Offset: 0x001CCE62
 		private void Awake()
 		{
 			CustomMapModeSelector.instances.AddIfNew(this);
 		}
 
-		// Token: 0x06005A53 RID: 23123 RVA: 0x001CEC90 File Offset: 0x001CCE90
+		// Token: 0x06005A53 RID: 23123 RVA: 0x001CEC70 File Offset: 0x001CCE70
 		public void OnEnable()
 		{
 			if (GorillaComputer.instance != null)
@@ -36,7 +36,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x06005A54 RID: 23124 RVA: 0x001CED70 File Offset: 0x001CCF70
+		// Token: 0x06005A54 RID: 23124 RVA: 0x001CED50 File Offset: 0x001CCF50
 		public void OnDisable()
 		{
 			RoomSystem.JoinedRoomEvent -= new Action(this.OnJoinedRoom);
@@ -44,13 +44,13 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnDisconnected);
 		}
 
-		// Token: 0x06005A55 RID: 23125 RVA: 0x001CEDDA File Offset: 0x001CCFDA
+		// Token: 0x06005A55 RID: 23125 RVA: 0x001CEDBA File Offset: 0x001CCFBA
 		private void OnJoinedRoom()
 		{
 			this.OnRoomHostSwitched(NetworkSystem.Instance.MasterClient);
 		}
 
-		// Token: 0x06005A56 RID: 23126 RVA: 0x001CEDEC File Offset: 0x001CCFEC
+		// Token: 0x06005A56 RID: 23126 RVA: 0x001CEDCC File Offset: 0x001CCFCC
 		private void OnRoomHostSwitched(NetPlayer newRoomHost)
 		{
 			if (!NetworkSystem.Instance.InRoom || !NetworkSystem.Instance.SessionIsPrivate)
@@ -79,14 +79,14 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			this.roomHostText.gameObject.SetActive(true);
 		}
 
-		// Token: 0x06005A57 RID: 23127 RVA: 0x001CEEB2 File Offset: 0x001CD0B2
+		// Token: 0x06005A57 RID: 23127 RVA: 0x001CEE92 File Offset: 0x001CD092
 		private void OnDisconnected()
 		{
 			this.roomHostText.gameObject.SetActive(false);
 			this.roomHostDescriptionText.SetActive(false);
 		}
 
-		// Token: 0x06005A58 RID: 23128 RVA: 0x001CEED4 File Offset: 0x001CD0D4
+		// Token: 0x06005A58 RID: 23128 RVA: 0x001CEEB4 File Offset: 0x001CD0B4
 		public static void ResetButtons()
 		{
 			List<GameModeType> list = new List<GameModeType>();
@@ -100,7 +100,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			GorillaComputer.instance.SetGameModeWithoutButton(CustomMapModeSelector.defaultGamemodeForLoadedMap.ToString());
 		}
 
-		// Token: 0x06005A59 RID: 23129 RVA: 0x001CEF58 File Offset: 0x001CD158
+		// Token: 0x06005A59 RID: 23129 RVA: 0x001CEF38 File Offset: 0x001CD138
 		public static void SetAvailableGameModes(int[] availableModes, int defaultMode)
 		{
 			CustomMapModeSelector.gamemodes.Clear();
@@ -120,7 +120,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			GorillaComputer.instance.SetGameModeWithoutButton(CustomMapModeSelector.defaultGamemodeForLoadedMap.ToString());
 		}
 
-		// Token: 0x06005A5A RID: 23130 RVA: 0x001CF000 File Offset: 0x001CD200
+		// Token: 0x06005A5A RID: 23130 RVA: 0x001CEFE0 File Offset: 0x001CD1E0
 		public override void SetupButtons()
 		{
 			CustomMapModeSelector.<SetupButtons>d__16 <SetupButtons>d__;
@@ -130,7 +130,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			<SetupButtons>d__.<>t__builder.Start<CustomMapModeSelector.<SetupButtons>d__16>(ref <SetupButtons>d__);
 		}
 
-		// Token: 0x06005A5B RID: 23131 RVA: 0x001CF038 File Offset: 0x001CD238
+		// Token: 0x06005A5B RID: 23131 RVA: 0x001CF018 File Offset: 0x001CD218
 		public static void RefreshHostName()
 		{
 			foreach (CustomMapModeSelector customMapModeSelector in CustomMapModeSelector.instances)
@@ -139,7 +139,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
-		// Token: 0x06005A5D RID: 23133 RVA: 0x001CF0B2 File Offset: 0x001CD2B2
+		// Token: 0x06005A5D RID: 23133 RVA: 0x001CF092 File Offset: 0x001CD292
 		// Note: this type is marked as 'beforefieldinit'.
 		static CustomMapModeSelector()
 		{

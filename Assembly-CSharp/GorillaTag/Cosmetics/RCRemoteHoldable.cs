@@ -13,7 +13,7 @@ namespace GorillaTag.Cosmetics
 	public class RCRemoteHoldable : TransferrableObject, ISnapTurnOverride
 	{
 		// Token: 0x170009FF RID: 2559
-		// (get) Token: 0x06006A6C RID: 27244 RVA: 0x0022E248 File Offset: 0x0022C448
+		// (get) Token: 0x06006A6C RID: 27244 RVA: 0x0022E228 File Offset: 0x0022C428
 		public XRNode XRNode
 		{
 			get
@@ -23,7 +23,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A00 RID: 2560
-		// (get) Token: 0x06006A6D RID: 27245 RVA: 0x0022E250 File Offset: 0x0022C450
+		// (get) Token: 0x06006A6D RID: 27245 RVA: 0x0022E230 File Offset: 0x0022C430
 		public RCVehicle Vehicle
 		{
 			get
@@ -32,13 +32,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A6E RID: 27246 RVA: 0x0022E258 File Offset: 0x0022C458
+		// Token: 0x06006A6E RID: 27246 RVA: 0x0022E238 File Offset: 0x0022C438
 		public bool TurnOverrideActive()
 		{
 			return base.gameObject.activeSelf && this.currentlyHeld && this.xrNode == 5;
 		}
 
-		// Token: 0x06006A6F RID: 27247 RVA: 0x0022E27C File Offset: 0x0022C47C
+		// Token: 0x06006A6F RID: 27247 RVA: 0x0022E25C File Offset: 0x0022C45C
 		protected override void Awake()
 		{
 			base.Awake();
@@ -51,7 +51,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A70 RID: 27248 RVA: 0x0022E2E4 File Offset: 0x0022C4E4
+		// Token: 0x06006A70 RID: 27248 RVA: 0x0022E2C4 File Offset: 0x0022C4C4
 		internal override void OnEnable()
 		{
 			base.OnEnable();
@@ -77,7 +77,7 @@ namespace GorillaTag.Cosmetics
 			this.WakeUpRemoteVehicle();
 		}
 
-		// Token: 0x06006A71 RID: 27249 RVA: 0x0022E3D4 File Offset: 0x0022C5D4
+		// Token: 0x06006A71 RID: 27249 RVA: 0x0022E3B4 File Offset: 0x0022C5B4
 		internal override void OnDisable()
 		{
 			base.OnDisable();
@@ -97,7 +97,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A72 RID: 27250 RVA: 0x0022E478 File Offset: 0x0022C678
+		// Token: 0x06006A72 RID: 27250 RVA: 0x0022E458 File Offset: 0x0022C658
 		protected override void OnDestroy()
 		{
 			base.OnDestroy();
@@ -108,7 +108,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A73 RID: 27251 RVA: 0x0022E4B8 File Offset: 0x0022C6B8
+		// Token: 0x06006A73 RID: 27251 RVA: 0x0022E498 File Offset: 0x0022C698
 		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 		{
 			base.OnGrab(pointGrabbed, grabbingHand);
@@ -148,7 +148,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A74 RID: 27252 RVA: 0x0022E608 File Offset: 0x0022C808
+		// Token: 0x06006A74 RID: 27252 RVA: 0x0022E5E8 File Offset: 0x0022C7E8
 		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 		{
 			if (!base.OnRelease(zoneReleased, releasingHand))
@@ -167,7 +167,7 @@ namespace GorillaTag.Cosmetics
 			return true;
 		}
 
-		// Token: 0x06006A75 RID: 27253 RVA: 0x0022E680 File Offset: 0x0022C880
+		// Token: 0x06006A75 RID: 27253 RVA: 0x0022E660 File Offset: 0x0022C860
 		private void Update()
 		{
 			if (this.currentlyHeld)
@@ -188,7 +188,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A76 RID: 27254 RVA: 0x0022E7DF File Offset: 0x0022C9DF
+		// Token: 0x06006A76 RID: 27254 RVA: 0x0022E7BF File Offset: 0x0022C9BF
 		public void OnStartConnectionEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -202,7 +202,7 @@ namespace GorillaTag.Cosmetics
 			this.WakeUpRemoteVehicle();
 		}
 
-		// Token: 0x06006A77 RID: 27255 RVA: 0x0022E806 File Offset: 0x0022CA06
+		// Token: 0x06006A77 RID: 27255 RVA: 0x0022E7E6 File Offset: 0x0022C9E6
 		public void WakeUpRemoteVehicle()
 		{
 			if (this.networkSync != null && this.targetVehicle.IsNotNull() && !this.targetVehicle.HasLocalAuthority)
@@ -211,7 +211,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A78 RID: 27256 RVA: 0x0022E844 File Offset: 0x0022CA44
+		// Token: 0x06006A78 RID: 27256 RVA: 0x0022E824 File Offset: 0x0022CA24
 		private bool _TryFindRemoteVehicle()
 		{
 			if (this.targetVehicle != null)
@@ -229,7 +229,7 @@ namespace GorillaTag.Cosmetics
 			return this._TryFindRemoteVehicle_InCosmeticInstanceArray(instanceID, cosmeticItemInstance.objects) || this._TryFindRemoteVehicle_InCosmeticInstanceArray(instanceID, cosmeticItemInstance.leftObjects) || this._TryFindRemoteVehicle_InCosmeticInstanceArray(instanceID, cosmeticItemInstance.rightObjects);
 		}
 
-		// Token: 0x06006A79 RID: 27257 RVA: 0x0022E8D0 File Offset: 0x0022CAD0
+		// Token: 0x06006A79 RID: 27257 RVA: 0x0022E8B0 File Offset: 0x0022CAB0
 		private bool _TryFindRemoteVehicle_InCosmeticInstanceArray(int thisGobjInstId, List<GameObject> gameObjects)
 		{
 			foreach (GameObject gameObject in gameObjects)

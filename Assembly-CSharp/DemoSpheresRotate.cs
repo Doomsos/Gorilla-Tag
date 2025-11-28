@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000C1D RID: 3101
 public class DemoSpheresRotate : TimeSliceLodBehaviour
 {
-	// Token: 0x06004C49 RID: 19529 RVA: 0x0018D0B9 File Offset: 0x0018B2B9
+	// Token: 0x06004C49 RID: 19529 RVA: 0x0018D099 File Offset: 0x0018B299
 	public void OnLod0Enter()
 	{
 		this._renderer.material = this._red;
@@ -13,7 +13,7 @@ public class DemoSpheresRotate : TimeSliceLodBehaviour
 		base.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06004C4A RID: 19530 RVA: 0x0018D0DF File Offset: 0x0018B2DF
+	// Token: 0x06004C4A RID: 19530 RVA: 0x0018D0BF File Offset: 0x0018B2BF
 	public void OnLod1Enter()
 	{
 		this._renderer.material = this._green;
@@ -21,7 +21,7 @@ public class DemoSpheresRotate : TimeSliceLodBehaviour
 		base.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06004C4B RID: 19531 RVA: 0x0018D105 File Offset: 0x0018B305
+	// Token: 0x06004C4B RID: 19531 RVA: 0x0018D0E5 File Offset: 0x0018B2E5
 	public void OnLod2Enter()
 	{
 		this._renderer.material = this._black;
@@ -35,13 +35,13 @@ public class DemoSpheresRotate : TimeSliceLodBehaviour
 		base.gameObject.SetActive(false);
 	}
 
-	// Token: 0x06004C4D RID: 19533 RVA: 0x0018D12B File Offset: 0x0018B32B
+	// Token: 0x06004C4D RID: 19533 RVA: 0x0018D10B File Offset: 0x0018B30B
 	public override void SliceUpdate(float deltaTime)
 	{
 		base.transform.Rotate(Vector3.up * this._rotationSpeed * deltaTime);
 	}
 
-	// Token: 0x06004C4E RID: 19534 RVA: 0x0018D14E File Offset: 0x0018B34E
+	// Token: 0x06004C4E RID: 19534 RVA: 0x0018D12E File Offset: 0x0018B32E
 	private void SwapToTimeSlicer(int index)
 	{
 		if (this._timeSliceControllerAssets[index] == this._timeSliceControllerAsset)

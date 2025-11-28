@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000CB5 RID: 3253
 public class SurfaceImpactFX : MonoBehaviour
 {
-	// Token: 0x06004F71 RID: 20337 RVA: 0x00199544 File Offset: 0x00197744
+	// Token: 0x06004F71 RID: 20337 RVA: 0x00199524 File Offset: 0x00197724
 	public void Awake()
 	{
 		if (this.particleFX == null)
@@ -20,7 +20,7 @@ public class SurfaceImpactFX : MonoBehaviour
 		this.fxMainModule = this.particleFX.main;
 	}
 
-	// Token: 0x06004F72 RID: 20338 RVA: 0x0019959D File Offset: 0x0019779D
+	// Token: 0x06004F72 RID: 20338 RVA: 0x0019957D File Offset: 0x0019777D
 	public void SetScale(float scale)
 	{
 		this.fxMainModule.gravityModifierMultiplier = this.startingGravityModifier * scale;

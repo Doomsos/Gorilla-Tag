@@ -9,7 +9,7 @@ namespace GameObjectScheduling
 	// Token: 0x02001159 RID: 4441
 	public class GameObjectScheduler : MonoBehaviour
 	{
-		// Token: 0x0600700A RID: 28682 RVA: 0x00247328 File Offset: 0x00245528
+		// Token: 0x0600700A RID: 28682 RVA: 0x00247308 File Offset: 0x00245508
 		private void Start()
 		{
 			this.schedule.Validate();
@@ -27,7 +27,7 @@ namespace GameObjectScheduling
 			this.monitor = base.StartCoroutine(this.MonitorTime());
 		}
 
-		// Token: 0x0600700B RID: 28683 RVA: 0x002473BE File Offset: 0x002455BE
+		// Token: 0x0600700B RID: 28683 RVA: 0x0024739E File Offset: 0x0024559E
 		private void OnEnable()
 		{
 			if (this.monitor == null && this.scheduledGameObject != null)
@@ -36,7 +36,7 @@ namespace GameObjectScheduling
 			}
 		}
 
-		// Token: 0x0600700C RID: 28684 RVA: 0x002473E2 File Offset: 0x002455E2
+		// Token: 0x0600700C RID: 28684 RVA: 0x002473C2 File Offset: 0x002455C2
 		private void OnDisable()
 		{
 			if (this.monitor != null)
@@ -46,7 +46,7 @@ namespace GameObjectScheduling
 			this.monitor = null;
 		}
 
-		// Token: 0x0600700D RID: 28685 RVA: 0x002473FF File Offset: 0x002455FF
+		// Token: 0x0600700D RID: 28685 RVA: 0x002473DF File Offset: 0x002455DF
 		private IEnumerator MonitorTime()
 		{
 			while (GorillaComputer.instance == null || GorillaComputer.instance.startupMillis == 0L)
@@ -71,7 +71,7 @@ namespace GameObjectScheduling
 			yield break;
 		}
 
-		// Token: 0x0600700E RID: 28686 RVA: 0x00247410 File Offset: 0x00245610
+		// Token: 0x0600700E RID: 28686 RVA: 0x002473F0 File Offset: 0x002455F0
 		private bool getActiveState()
 		{
 			this.currentNodeIndex = this.schedule.GetCurrentNodeIndex(this.getServerTime(), 0);
@@ -91,13 +91,13 @@ namespace GameObjectScheduling
 			return result;
 		}
 
-		// Token: 0x0600700F RID: 28687 RVA: 0x001FA0F7 File Offset: 0x001F82F7
+		// Token: 0x0600700F RID: 28687 RVA: 0x001FA0D7 File Offset: 0x001F82D7
 		private DateTime getServerTime()
 		{
 			return GorillaComputer.instance.GetServerTime();
 		}
 
-		// Token: 0x06007010 RID: 28688 RVA: 0x002474A0 File Offset: 0x002456A0
+		// Token: 0x06007010 RID: 28688 RVA: 0x00247480 File Offset: 0x00245680
 		private void changeActiveState(bool state)
 		{
 			if (state)

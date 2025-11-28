@@ -7,31 +7,31 @@ namespace GorillaTag.Reactions
 	// Token: 0x02001026 RID: 4134
 	public class FireInstance : MonoBehaviour
 	{
-		// Token: 0x06006880 RID: 26752 RVA: 0x002204B1 File Offset: 0x0021E6B1
+		// Token: 0x06006880 RID: 26752 RVA: 0x00220491 File Offset: 0x0021E691
 		protected void Awake()
 		{
 			FireManager.Register(this);
 		}
 
-		// Token: 0x06006881 RID: 26753 RVA: 0x002204B9 File Offset: 0x0021E6B9
+		// Token: 0x06006881 RID: 26753 RVA: 0x00220499 File Offset: 0x0021E699
 		protected void OnDestroy()
 		{
 			FireManager.Unregister(this);
 		}
 
-		// Token: 0x06006882 RID: 26754 RVA: 0x002204C1 File Offset: 0x0021E6C1
+		// Token: 0x06006882 RID: 26754 RVA: 0x002204A1 File Offset: 0x0021E6A1
 		protected void OnEnable()
 		{
 			FireManager.OnEnable(this);
 		}
 
-		// Token: 0x06006883 RID: 26755 RVA: 0x002204C9 File Offset: 0x0021E6C9
+		// Token: 0x06006883 RID: 26755 RVA: 0x002204A9 File Offset: 0x0021E6A9
 		protected void OnDisable()
 		{
 			FireManager.OnDisable(this);
 		}
 
-		// Token: 0x06006884 RID: 26756 RVA: 0x002204D1 File Offset: 0x0021E6D1
+		// Token: 0x06006884 RID: 26756 RVA: 0x002204B1 File Offset: 0x0021E6B1
 		protected void OnTriggerEnter(Collider other)
 		{
 			FireManager.OnTriggerEnter(this, other);

@@ -10,7 +10,7 @@ using UnityEngine;
 public class KIDAgeGate : MonoBehaviour
 {
 	// Token: 0x17000639 RID: 1593
-	// (get) Token: 0x06004214 RID: 16916 RVA: 0x0015D9EE File Offset: 0x0015BBEE
+	// (get) Token: 0x06004214 RID: 16916 RVA: 0x0015D9CE File Offset: 0x0015BBCE
 	public static int UserAge
 	{
 		get
@@ -20,11 +20,11 @@ public class KIDAgeGate : MonoBehaviour
 	}
 
 	// Token: 0x1700063A RID: 1594
-	// (get) Token: 0x06004215 RID: 16917 RVA: 0x0015D9F5 File Offset: 0x0015BBF5
-	// (set) Token: 0x06004216 RID: 16918 RVA: 0x0015D9FC File Offset: 0x0015BBFC
+	// (get) Token: 0x06004215 RID: 16917 RVA: 0x0015D9D5 File Offset: 0x0015BBD5
+	// (set) Token: 0x06004216 RID: 16918 RVA: 0x0015D9DC File Offset: 0x0015BBDC
 	public static bool DisplayedScreen { get; private set; }
 
-	// Token: 0x06004217 RID: 16919 RVA: 0x0015DA04 File Offset: 0x0015BC04
+	// Token: 0x06004217 RID: 16919 RVA: 0x0015D9E4 File Offset: 0x0015BBE4
 	private void Awake()
 	{
 		if (KIDAgeGate._activeReference != null)
@@ -36,7 +36,7 @@ public class KIDAgeGate : MonoBehaviour
 		KIDAgeGate._activeReference = this;
 	}
 
-	// Token: 0x06004218 RID: 16920 RVA: 0x0015DA30 File Offset: 0x0015BC30
+	// Token: 0x06004218 RID: 16920 RVA: 0x0015DA10 File Offset: 0x0015BC10
 	private void Start()
 	{
 		KIDAgeGate.<Start>d__29 <Start>d__;
@@ -45,13 +45,13 @@ public class KIDAgeGate : MonoBehaviour
 		<Start>d__.<>t__builder.Start<KIDAgeGate.<Start>d__29>(ref <Start>d__);
 	}
 
-	// Token: 0x06004219 RID: 16921 RVA: 0x0015DA5F File Offset: 0x0015BC5F
+	// Token: 0x06004219 RID: 16921 RVA: 0x0015DA3F File Offset: 0x0015BC3F
 	private void OnDestroy()
 	{
 		this.requestCancellationSource.Cancel();
 	}
 
-	// Token: 0x0600421A RID: 16922 RVA: 0x0015DA6C File Offset: 0x0015BC6C
+	// Token: 0x0600421A RID: 16922 RVA: 0x0015DA4C File Offset: 0x0015BC4C
 	public static Task BeginAgeGate()
 	{
 		KIDAgeGate.<BeginAgeGate>d__31 <BeginAgeGate>d__;
@@ -61,7 +61,7 @@ public class KIDAgeGate : MonoBehaviour
 		return <BeginAgeGate>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600421B RID: 16923 RVA: 0x0015DAA8 File Offset: 0x0015BCA8
+	// Token: 0x0600421B RID: 16923 RVA: 0x0015DA88 File Offset: 0x0015BC88
 	private Task StartAgeGate()
 	{
 		KIDAgeGate.<StartAgeGate>d__32 <StartAgeGate>d__;
@@ -72,7 +72,7 @@ public class KIDAgeGate : MonoBehaviour
 		return <StartAgeGate>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600421C RID: 16924 RVA: 0x0015DAEC File Offset: 0x0015BCEC
+	// Token: 0x0600421C RID: 16924 RVA: 0x0015DACC File Offset: 0x0015BCCC
 	private Task InitialiseAgeGate()
 	{
 		KIDAgeGate.<InitialiseAgeGate>d__33 <InitialiseAgeGate>d__;
@@ -83,7 +83,7 @@ public class KIDAgeGate : MonoBehaviour
 		return <InitialiseAgeGate>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600421D RID: 16925 RVA: 0x0015DB30 File Offset: 0x0015BD30
+	// Token: 0x0600421D RID: 16925 RVA: 0x0015DB10 File Offset: 0x0015BD10
 	private Task ProcessAgeGate()
 	{
 		KIDAgeGate.<ProcessAgeGate>d__34 <ProcessAgeGate>d__;
@@ -94,7 +94,7 @@ public class KIDAgeGate : MonoBehaviour
 		return <ProcessAgeGate>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600421E RID: 16926 RVA: 0x0015DB74 File Offset: 0x0015BD74
+	// Token: 0x0600421E RID: 16926 RVA: 0x0015DB54 File Offset: 0x0015BD54
 	private Task<bool> ProcessAgeGateConfirmation()
 	{
 		KIDAgeGate.<ProcessAgeGateConfirmation>d__35 <ProcessAgeGateConfirmation>d__;
@@ -105,7 +105,7 @@ public class KIDAgeGate : MonoBehaviour
 		return <ProcessAgeGateConfirmation>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600421F RID: 16927 RVA: 0x0015DBB8 File Offset: 0x0015BDB8
+	// Token: 0x0600421F RID: 16927 RVA: 0x0015DB98 File Offset: 0x0015BD98
 	private Task WaitForAgeChoice()
 	{
 		KIDAgeGate.<WaitForAgeChoice>d__36 <WaitForAgeChoice>d__;
@@ -116,19 +116,19 @@ public class KIDAgeGate : MonoBehaviour
 		return <WaitForAgeChoice>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004220 RID: 16928 RVA: 0x0015DBFB File Offset: 0x0015BDFB
+	// Token: 0x06004220 RID: 16928 RVA: 0x0015DBDB File Offset: 0x0015BDDB
 	public static void OnConfirmAgePressed(int currentAge)
 	{
 		KIDAgeGate._hasChosenAge = true;
 	}
 
-	// Token: 0x06004221 RID: 16929 RVA: 0x0015DC03 File Offset: 0x0015BE03
+	// Token: 0x06004221 RID: 16929 RVA: 0x0015DBE3 File Offset: 0x0015BDE3
 	private void OnAgeGateCompleted()
 	{
 		this.FinaliseAgeGateAndContinue();
 	}
 
-	// Token: 0x06004222 RID: 16930 RVA: 0x0015DC0B File Offset: 0x0015BE0B
+	// Token: 0x06004222 RID: 16930 RVA: 0x0015DBEB File Offset: 0x0015BDEB
 	private void FinaliseAgeGateAndContinue()
 	{
 		if (this.requestCancellationSource.IsCancellationRequested)
@@ -139,14 +139,14 @@ public class KIDAgeGate : MonoBehaviour
 		Object.Destroy(base.gameObject);
 	}
 
-	// Token: 0x06004223 RID: 16931 RVA: 0x0015DC30 File Offset: 0x0015BE30
+	// Token: 0x06004223 RID: 16931 RVA: 0x0015DC10 File Offset: 0x0015BE10
 	private void QuitGame()
 	{
 		Debug.Log("[KID] QUIT PRESSED");
 		Application.Quit();
 	}
 
-	// Token: 0x06004224 RID: 16932 RVA: 0x0015DC44 File Offset: 0x0015BE44
+	// Token: 0x06004224 RID: 16932 RVA: 0x0015DC24 File Offset: 0x0015BE24
 	private void AppealAge()
 	{
 		KIDAgeGate.<AppealAge>d__41 <AppealAge>d__;
@@ -156,7 +156,7 @@ public class KIDAgeGate : MonoBehaviour
 		<AppealAge>d__.<>t__builder.Start<KIDAgeGate.<AppealAge>d__41>(ref <AppealAge>d__);
 	}
 
-	// Token: 0x06004225 RID: 16933 RVA: 0x0015DC7C File Offset: 0x0015BE7C
+	// Token: 0x06004225 RID: 16933 RVA: 0x0015DC5C File Offset: 0x0015BE5C
 	private void AppealRejected()
 	{
 		Debug.Log("[KID] APPEAL REJECTED");
@@ -171,13 +171,13 @@ public class KIDAgeGate : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06004227 RID: 16935 RVA: 0x0015DCC9 File Offset: 0x0015BEC9
+	// Token: 0x06004227 RID: 16935 RVA: 0x0015DCA9 File Offset: 0x0015BEA9
 	public static void SetAgeGateConfig(GetRequirementsData response)
 	{
 		KIDAgeGate._ageGateConfig = response;
 	}
 
-	// Token: 0x06004228 RID: 16936 RVA: 0x0015DCD4 File Offset: 0x0015BED4
+	// Token: 0x06004228 RID: 16936 RVA: 0x0015DCB4 File Offset: 0x0015BEB4
 	public void OnWhyAgeGateButtonPressed()
 	{
 		TelemetryData telemetryData = default(TelemetryData);
@@ -198,7 +198,7 @@ public class KIDAgeGate : MonoBehaviour
 		this._whyAgeGateScreen.SetActive(true);
 	}
 
-	// Token: 0x06004229 RID: 16937 RVA: 0x0015DD77 File Offset: 0x0015BF77
+	// Token: 0x06004229 RID: 16937 RVA: 0x0015DD57 File Offset: 0x0015BF57
 	public void OnWhyAgeGateButtonBackPressed()
 	{
 		this._uiParent.SetActive(true);
@@ -206,7 +206,7 @@ public class KIDAgeGate : MonoBehaviour
 		this._whyAgeGateScreen.SetActive(false);
 	}
 
-	// Token: 0x0600422A RID: 16938 RVA: 0x0015DDA4 File Offset: 0x0015BFA4
+	// Token: 0x0600422A RID: 16938 RVA: 0x0015DD84 File Offset: 0x0015BF84
 	public void OnLearnMoreAboutKIDPressed()
 	{
 		this._metrics_LearnMorePressed = true;

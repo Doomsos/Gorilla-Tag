@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010BA RID: 4282
 	public class DrillFX : MonoBehaviour
 	{
-		// Token: 0x06006B3E RID: 27454 RVA: 0x002330E4 File Offset: 0x002312E4
+		// Token: 0x06006B3E RID: 27454 RVA: 0x002330C4 File Offset: 0x002312C4
 		protected void Awake()
 		{
 			if (!DrillFX.appIsQuittingHandlerIsSubscribed)
@@ -33,7 +33,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B3F RID: 27455 RVA: 0x002331C0 File Offset: 0x002313C0
+		// Token: 0x06006B3F RID: 27455 RVA: 0x002331A0 File Offset: 0x002313A0
 		protected void OnEnable()
 		{
 			if (DrillFX.appIsQuitting)
@@ -53,7 +53,7 @@ namespace GorillaTag.Cosmetics
 			this.ValidateLineCastPositions();
 		}
 
-		// Token: 0x06006B40 RID: 27456 RVA: 0x00233224 File Offset: 0x00231424
+		// Token: 0x06006B40 RID: 27456 RVA: 0x00233204 File Offset: 0x00231404
 		protected void OnDisable()
 		{
 			if (DrillFX.appIsQuitting)
@@ -71,7 +71,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B41 RID: 27457 RVA: 0x00233274 File Offset: 0x00231474
+		// Token: 0x06006B41 RID: 27457 RVA: 0x00233254 File Offset: 0x00231454
 		protected void LateUpdate()
 		{
 			if (DrillFX.appIsQuitting)
@@ -95,13 +95,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B42 RID: 27458 RVA: 0x0023338A File Offset: 0x0023158A
+		// Token: 0x06006B42 RID: 27458 RVA: 0x0023336A File Offset: 0x0023156A
 		private static void HandleApplicationQuitting()
 		{
 			DrillFX.appIsQuitting = true;
 		}
 
-		// Token: 0x06006B43 RID: 27459 RVA: 0x00233394 File Offset: 0x00231594
+		// Token: 0x06006B43 RID: 27459 RVA: 0x00233374 File Offset: 0x00231574
 		private bool ValidateLineCastPositions()
 		{
 			this.maxDepth = Vector3.Distance(this.lineCastStart, this.lineCastEnd);

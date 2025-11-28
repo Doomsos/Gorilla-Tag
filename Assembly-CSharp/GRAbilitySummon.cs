@@ -7,13 +7,13 @@ using UnityEngine.AI;
 [Serializable]
 public class GRAbilitySummon : GRAbilityBase
 {
-	// Token: 0x06002A6A RID: 10858 RVA: 0x000E49CE File Offset: 0x000E2BCE
+	// Token: 0x06002A6A RID: 10858 RVA: 0x000E49AE File Offset: 0x000E2BAE
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
 	}
 
-	// Token: 0x06002A6B RID: 10859 RVA: 0x000E49E0 File Offset: 0x000E2BE0
+	// Token: 0x06002A6B RID: 10859 RVA: 0x000E49C0 File Offset: 0x000E2BC0
 	public override void Start()
 	{
 		base.Start();
@@ -33,26 +33,26 @@ public class GRAbilitySummon : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A6C RID: 10860 RVA: 0x000E4ADA File Offset: 0x000E2CDA
+	// Token: 0x06002A6C RID: 10860 RVA: 0x000E4ABA File Offset: 0x000E2CBA
 	public override void Stop()
 	{
 		this.lookAtTarget = null;
 		this.agent.navAgent.isStopped = false;
 	}
 
-	// Token: 0x06002A6D RID: 10861 RVA: 0x000E4AF4 File Offset: 0x000E2CF4
+	// Token: 0x06002A6D RID: 10861 RVA: 0x000E4AD4 File Offset: 0x000E2CD4
 	public void SetLookAtTarget(Transform transform)
 	{
 		this.lookAtTarget = transform;
 	}
 
-	// Token: 0x06002A6E RID: 10862 RVA: 0x000E4AFD File Offset: 0x000E2CFD
+	// Token: 0x06002A6E RID: 10862 RVA: 0x000E4ADD File Offset: 0x000E2CDD
 	public override void Think(float dt)
 	{
 		this.UpdateState(dt);
 	}
 
-	// Token: 0x06002A6F RID: 10863 RVA: 0x000E4B06 File Offset: 0x000E2D06
+	// Token: 0x06002A6F RID: 10863 RVA: 0x000E4AE6 File Offset: 0x000E2CE6
 	protected override void UpdateShared(float dt)
 	{
 		if (this.lookAtTarget != null)
@@ -61,7 +61,7 @@ public class GRAbilitySummon : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A70 RID: 10864 RVA: 0x000E4B38 File Offset: 0x000E2D38
+	// Token: 0x06002A70 RID: 10864 RVA: 0x000E4B18 File Offset: 0x000E2D18
 	private void UpdateState(float dt)
 	{
 		double num = Time.timeAsDouble - this.startTime;
@@ -92,7 +92,7 @@ public class GRAbilitySummon : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A71 RID: 10865 RVA: 0x000E4BB2 File Offset: 0x000E2DB2
+	// Token: 0x06002A71 RID: 10865 RVA: 0x000E4B92 File Offset: 0x000E2D92
 	private void SetState(GRAbilitySummon.State newState)
 	{
 		GRAbilitySummon.State state = this.state;
@@ -104,7 +104,7 @@ public class GRAbilitySummon : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A72 RID: 10866 RVA: 0x000E4BD4 File Offset: 0x000E2DD4
+	// Token: 0x06002A72 RID: 10866 RVA: 0x000E4BB4 File Offset: 0x000E2DB4
 	private Vector3? GetSpawnLocation()
 	{
 		Vector3 position = this.root.position;
@@ -134,7 +134,7 @@ public class GRAbilitySummon : GRAbilityBase
 		return default(Vector3?);
 	}
 
-	// Token: 0x06002A73 RID: 10867 RVA: 0x000E4CD0 File Offset: 0x000E2ED0
+	// Token: 0x06002A73 RID: 10867 RVA: 0x000E4CB0 File Offset: 0x000E2EB0
 	private bool DoSpawn()
 	{
 		Vector3? spawnLocation = this.GetSpawnLocation();
@@ -160,7 +160,7 @@ public class GRAbilitySummon : GRAbilityBase
 		return false;
 	}
 
-	// Token: 0x06002A74 RID: 10868 RVA: 0x000E4D93 File Offset: 0x000E2F93
+	// Token: 0x06002A74 RID: 10868 RVA: 0x000E4D73 File Offset: 0x000E2F73
 	public override bool IsDone()
 	{
 		return this.state == GRAbilitySummon.State.Done;

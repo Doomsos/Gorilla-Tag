@@ -12,7 +12,7 @@ namespace GorillaNetworking.Store
 	public class StoreUpdater : MonoBehaviour
 	{
 		// Token: 0x1700091C RID: 2332
-		// (get) Token: 0x0600623D RID: 25149 RVA: 0x001FA0F7 File Offset: 0x001F82F7
+		// (get) Token: 0x0600623D RID: 25149 RVA: 0x001FA0D7 File Offset: 0x001F82D7
 		public DateTime DateTimeNowServerAdjusted
 		{
 			get
@@ -21,7 +21,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x0600623E RID: 25150 RVA: 0x001FA105 File Offset: 0x001F8305
+		// Token: 0x0600623E RID: 25150 RVA: 0x001FA0E5 File Offset: 0x001F82E5
 		public void Awake()
 		{
 			if (StoreUpdater.instance == null)
@@ -35,7 +35,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x0600623F RID: 25151 RVA: 0x001FA139 File Offset: 0x001F8339
+		// Token: 0x0600623F RID: 25151 RVA: 0x001FA119 File Offset: 0x001F8319
 		private void OnApplicationFocus(bool hasFocus)
 		{
 			if (hasFocus)
@@ -46,7 +46,7 @@ namespace GorillaNetworking.Store
 			this.HandleHMDUnmounted();
 		}
 
-		// Token: 0x06006240 RID: 25152 RVA: 0x001FA14C File Offset: 0x001F834C
+		// Token: 0x06006240 RID: 25152 RVA: 0x001FA12C File Offset: 0x001F832C
 		public void Initialize()
 		{
 			this.FindAllCosmeticItemPrefabs();
@@ -61,13 +61,13 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006241 RID: 25153 RVA: 0x001FA1C2 File Offset: 0x001F83C2
+		// Token: 0x06006241 RID: 25153 RVA: 0x001FA1A2 File Offset: 0x001F83A2
 		private void ServerTimeUpdater()
 		{
 			base.StartCoroutine(this.InitializeTitleData());
 		}
 
-		// Token: 0x06006242 RID: 25154 RVA: 0x001FA1D4 File Offset: 0x001F83D4
+		// Token: 0x06006242 RID: 25154 RVA: 0x001FA1B4 File Offset: 0x001F83B4
 		public void OnDestroy()
 		{
 			OVRManager.HMDMounted -= new Action(this.HandleHMDMounted);
@@ -76,7 +76,7 @@ namespace GorillaNetworking.Store
 			OVRManager.HMDAcquired -= new Action(this.HandleHMDMounted);
 		}
 
-		// Token: 0x06006243 RID: 25155 RVA: 0x001FA228 File Offset: 0x001F8428
+		// Token: 0x06006243 RID: 25155 RVA: 0x001FA208 File Offset: 0x001F8408
 		private void HandleHMDUnmounted()
 		{
 			foreach (string text in this.pedestalUpdateCoroutines.Keys)
@@ -95,7 +95,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006244 RID: 25156 RVA: 0x001FA300 File Offset: 0x001F8500
+		// Token: 0x06006244 RID: 25156 RVA: 0x001FA2E0 File Offset: 0x001F84E0
 		private void HandleHMDMounted()
 		{
 			foreach (string text in this.cosmeticItemPrefabsDictionary.Keys)
@@ -108,7 +108,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006245 RID: 25157 RVA: 0x001FA3A8 File Offset: 0x001F85A8
+		// Token: 0x06006245 RID: 25157 RVA: 0x001FA388 File Offset: 0x001F8588
 		private void FindAllCosmeticItemPrefabs()
 		{
 			foreach (CosmeticItemPrefab cosmeticItemPrefab in Object.FindObjectsByType<CosmeticItemPrefab>(0))
@@ -125,7 +125,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006246 RID: 25158 RVA: 0x001FA41F File Offset: 0x001F861F
+		// Token: 0x06006246 RID: 25158 RVA: 0x001FA3FF File Offset: 0x001F85FF
 		private IEnumerator HandlePedestalUpdate(StoreUpdateEvent updateEvent, bool playFX)
 		{
 			this.cosmeticItemPrefabsDictionary[updateEvent.PedestalID].SetStoreUpdateEvent(updateEvent, playFX);
@@ -150,7 +150,7 @@ namespace GorillaNetworking.Store
 			yield break;
 		}
 
-		// Token: 0x06006247 RID: 25159 RVA: 0x001FA43C File Offset: 0x001F863C
+		// Token: 0x06006247 RID: 25159 RVA: 0x001FA41C File Offset: 0x001F861C
 		private IEnumerator HandleClearCart(StoreUpdateEvent updateEvent)
 		{
 			float num = Math.Clamp((float)(updateEvent.EndTimeUTC.ToUniversalTime() - this.DateTimeNowServerAdjusted).TotalSeconds + 60f, 0f, 60f);
@@ -164,7 +164,7 @@ namespace GorillaNetworking.Store
 			yield break;
 		}
 
-		// Token: 0x06006248 RID: 25160 RVA: 0x001FA454 File Offset: 0x001F8654
+		// Token: 0x06006248 RID: 25160 RVA: 0x001FA434 File Offset: 0x001F8634
 		private void StartNextEvent(string pedestalID, bool playFX)
 		{
 			if (this.pedestalUpdateEvents[pedestalID].Count > 0)
@@ -195,7 +195,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006249 RID: 25161 RVA: 0x001FA52C File Offset: 0x001F872C
+		// Token: 0x06006249 RID: 25161 RVA: 0x001FA50C File Offset: 0x001F870C
 		private void GetStoreUpdateEventsPlaceHolder(string PedestalID)
 		{
 			List<StoreUpdateEvent> list = new List<StoreUpdateEvent>();
@@ -209,7 +209,7 @@ namespace GorillaNetworking.Store
 			this.pedestalUpdateEvents.Add(PedestalID, list);
 		}
 
-		// Token: 0x0600624A RID: 25162 RVA: 0x001FA580 File Offset: 0x001F8780
+		// Token: 0x0600624A RID: 25162 RVA: 0x001FA560 File Offset: 0x001F8760
 		private void CheckEvents(List<StoreUpdateEvent> updateEvents)
 		{
 			for (int i = 0; i < updateEvents.Count; i++)
@@ -222,7 +222,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x0600624B RID: 25163 RVA: 0x001FA5C8 File Offset: 0x001F87C8
+		// Token: 0x0600624B RID: 25163 RVA: 0x001FA5A8 File Offset: 0x001F87A8
 		private void CheckEventsOnResume(List<StoreUpdateEvent> updateEvents)
 		{
 			bool flag = false;
@@ -258,7 +258,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x0600624C RID: 25164 RVA: 0x001FA755 File Offset: 0x001F8955
+		// Token: 0x0600624C RID: 25164 RVA: 0x001FA735 File Offset: 0x001F8935
 		private IEnumerator InitializeTitleData()
 		{
 			yield return new WaitForSeconds(1f);
@@ -268,7 +268,7 @@ namespace GorillaNetworking.Store
 			yield break;
 		}
 
-		// Token: 0x0600624D RID: 25165 RVA: 0x001FA764 File Offset: 0x001F8964
+		// Token: 0x0600624D RID: 25165 RVA: 0x001FA744 File Offset: 0x001F8944
 		private void GetEventsFromTitleData()
 		{
 			Debug.Log("StoreUpdater - GetEventsFromTitleData");
@@ -291,7 +291,7 @@ namespace GorillaNetworking.Store
 			}, false);
 		}
 
-		// Token: 0x0600624E RID: 25166 RVA: 0x001FA7FC File Offset: 0x001F89FC
+		// Token: 0x0600624E RID: 25166 RVA: 0x001FA7DC File Offset: 0x001F89DC
 		private void HandleRecievingEventsFromTitleData(List<StoreUpdateEvent> updateEvents)
 		{
 			Debug.Log("StoreUpdater - HandleRecievingEventsFromTitleData");
@@ -334,7 +334,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x0600624F RID: 25167 RVA: 0x001FA9C0 File Offset: 0x001F8BC0
+		// Token: 0x0600624F RID: 25167 RVA: 0x001FA9A0 File Offset: 0x001F8BA0
 		private void PrintJSONEvents()
 		{
 			string text = StoreUpdateEvent.SerializeArrayAsJSon(this.CreateTempEvents("Pedestal1", 5, 28).ToArray());
@@ -354,7 +354,7 @@ namespace GorillaNetworking.Store
 			this.tempJson = text;
 		}
 
-		// Token: 0x06006250 RID: 25168 RVA: 0x001FAA8C File Offset: 0x001F8C8C
+		// Token: 0x06006250 RID: 25168 RVA: 0x001FAA6C File Offset: 0x001F8C6C
 		private List<StoreUpdateEvent> CreateTempEvents(string PedestalID, int minuteDelay, int totalEvents)
 		{
 			string[] array = new string[]
@@ -383,7 +383,7 @@ namespace GorillaNetworking.Store
 			return list;
 		}
 
-		// Token: 0x06006251 RID: 25169 RVA: 0x001FAB68 File Offset: 0x001F8D68
+		// Token: 0x06006251 RID: 25169 RVA: 0x001FAB48 File Offset: 0x001F8D48
 		private List<StoreUpdateEvent> CreateTempEvents(string PedestalID, int minuteDelay, int totalEvents, DateTime startTime)
 		{
 			string[] array = new string[]
@@ -412,7 +412,7 @@ namespace GorillaNetworking.Store
 			return list;
 		}
 
-		// Token: 0x06006252 RID: 25170 RVA: 0x001FAC3B File Offset: 0x001F8E3B
+		// Token: 0x06006252 RID: 25170 RVA: 0x001FAC1B File Offset: 0x001F8E1B
 		public void PedestalAsleep(CosmeticItemPrefab pedestal)
 		{
 			if (this.pedestalUpdateCoroutines.ContainsKey(pedestal.PedestalID) && this.pedestalUpdateCoroutines[pedestal.PedestalID] != null)
@@ -421,7 +421,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006253 RID: 25171 RVA: 0x001FAC7C File Offset: 0x001F8E7C
+		// Token: 0x06006253 RID: 25171 RVA: 0x001FAC5C File Offset: 0x001F8E5C
 		public void PedestalAwakened(CosmeticItemPrefab pedestal)
 		{
 			if (!this.cosmeticItemPrefabsDictionary.ContainsKey(pedestal.PedestalID))

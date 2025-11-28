@@ -6,7 +6,7 @@ namespace GorillaNetworking
 	// Token: 0x02000EDD RID: 3805
 	public class SafeAccountObjectSwapper : MonoBehaviour
 	{
-		// Token: 0x06005F1F RID: 24351 RVA: 0x001E93B6 File Offset: 0x001E75B6
+		// Token: 0x06005F1F RID: 24351 RVA: 0x001E9396 File Offset: 0x001E7596
 		public void Start()
 		{
 			if (PlayFabAuthenticator.instance.GetSafety())
@@ -17,7 +17,7 @@ namespace GorillaNetworking
 			instance.OnSafetyUpdate = (Action<bool>)Delegate.Combine(instance.OnSafetyUpdate, new Action<bool>(this.SafeAccountUpdated));
 		}
 
-		// Token: 0x06005F20 RID: 24352 RVA: 0x001E93F4 File Offset: 0x001E75F4
+		// Token: 0x06005F20 RID: 24352 RVA: 0x001E93D4 File Offset: 0x001E75D4
 		public void SafeAccountUpdated(bool isSafety)
 		{
 			if (isSafety)
@@ -26,7 +26,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005F21 RID: 24353 RVA: 0x001E9400 File Offset: 0x001E7600
+		// Token: 0x06005F21 RID: 24353 RVA: 0x001E93E0 File Offset: 0x001E75E0
 		public void SwitchToSafeMode()
 		{
 			foreach (GameObject gameObject in this.UnSafeGameObjects)

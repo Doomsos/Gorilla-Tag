@@ -7,11 +7,11 @@ namespace GorillaTag.Cosmetics
 	public class CloserCosmetic : MonoBehaviour, ITickSystemTick
 	{
 		// Token: 0x17000A14 RID: 2580
-		// (get) Token: 0x06006B9E RID: 27550 RVA: 0x00235160 File Offset: 0x00233360
-		// (set) Token: 0x06006B9F RID: 27551 RVA: 0x00235168 File Offset: 0x00233368
+		// (get) Token: 0x06006B9E RID: 27550 RVA: 0x00235140 File Offset: 0x00233340
+		// (set) Token: 0x06006B9F RID: 27551 RVA: 0x00235148 File Offset: 0x00233348
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006BA0 RID: 27552 RVA: 0x00235174 File Offset: 0x00233374
+		// Token: 0x06006BA0 RID: 27552 RVA: 0x00235154 File Offset: 0x00233354
 		private void OnEnable()
 		{
 			TickSystem<object>.AddCallbackTarget(this);
@@ -27,7 +27,7 @@ namespace GorillaTag.Cosmetics
 			TickSystem<object>.RemoveCallbackTarget(this);
 		}
 
-		// Token: 0x06006BA2 RID: 27554 RVA: 0x002351C8 File Offset: 0x002333C8
+		// Token: 0x06006BA2 RID: 27554 RVA: 0x002351A8 File Offset: 0x002333A8
 		public void Tick()
 		{
 			switch (this.currentState)
@@ -45,21 +45,21 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BA3 RID: 27555 RVA: 0x002351FC File Offset: 0x002333FC
+		// Token: 0x06006BA3 RID: 27555 RVA: 0x002351DC File Offset: 0x002333DC
 		public void Close(bool leftHand, float fingerFlexValue)
 		{
 			this.UpdateState(CloserCosmetic.State.Closing);
 			this.fingerValue = fingerFlexValue;
 		}
 
-		// Token: 0x06006BA4 RID: 27556 RVA: 0x0023520C File Offset: 0x0023340C
+		// Token: 0x06006BA4 RID: 27556 RVA: 0x002351EC File Offset: 0x002333EC
 		public void Open(bool leftHand, float fingerFlexValue)
 		{
 			this.UpdateState(CloserCosmetic.State.Opening);
 			this.fingerValue = fingerFlexValue;
 		}
 
-		// Token: 0x06006BA5 RID: 27557 RVA: 0x0023521C File Offset: 0x0023341C
+		// Token: 0x06006BA5 RID: 27557 RVA: 0x002351FC File Offset: 0x002333FC
 		private void Closing()
 		{
 			float num = this.useFingerFlexValueAsStrength ? Mathf.Clamp01(this.fingerValue) : 1f;
@@ -75,7 +75,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BA6 RID: 27558 RVA: 0x002352E0 File Offset: 0x002334E0
+		// Token: 0x06006BA6 RID: 27558 RVA: 0x002352C0 File Offset: 0x002334C0
 		private void Opening()
 		{
 			float num = this.useFingerFlexValueAsStrength ? Mathf.Clamp01(this.fingerValue) : 1f;
@@ -89,7 +89,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BA7 RID: 27559 RVA: 0x002353A5 File Offset: 0x002335A5
+		// Token: 0x06006BA7 RID: 27559 RVA: 0x00235385 File Offset: 0x00233585
 		private void UpdateState(CloserCosmetic.State newState)
 		{
 			this.currentState = newState;

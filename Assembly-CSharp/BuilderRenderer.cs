@@ -10,13 +10,13 @@ using UnityEngine.Jobs;
 // Token: 0x02000594 RID: 1428
 public class BuilderRenderer : MonoBehaviourPostTick
 {
-	// Token: 0x0600240B RID: 9227 RVA: 0x000BF62B File Offset: 0x000BD82B
+	// Token: 0x0600240B RID: 9227 RVA: 0x000BF60B File Offset: 0x000BD80B
 	private void Awake()
 	{
 		this.InitIfNeeded();
 	}
 
-	// Token: 0x0600240C RID: 9228 RVA: 0x000BF634 File Offset: 0x000BD834
+	// Token: 0x0600240C RID: 9228 RVA: 0x000BF614 File Offset: 0x000BD814
 	public void InitIfNeeded()
 	{
 		if (this.initialized)
@@ -71,13 +71,13 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		this.showing = false;
 	}
 
-	// Token: 0x0600240D RID: 9229 RVA: 0x000BF7EC File Offset: 0x000BD9EC
+	// Token: 0x0600240D RID: 9229 RVA: 0x000BF7CC File Offset: 0x000BD9CC
 	public void Show(bool show)
 	{
 		this.showing = show;
 	}
 
-	// Token: 0x0600240E RID: 9230 RVA: 0x000BF7F8 File Offset: 0x000BD9F8
+	// Token: 0x0600240E RID: 9230 RVA: 0x000BF7D8 File Offset: 0x000BD9D8
 	public void BuildRenderer(List<BuilderPiece> piecePrefabs)
 	{
 		this.InitIfNeeded();
@@ -101,7 +101,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		this.built = true;
 	}
 
-	// Token: 0x0600240F RID: 9231 RVA: 0x000BF86C File Offset: 0x000BDA6C
+	// Token: 0x0600240F RID: 9231 RVA: 0x000BF84C File Offset: 0x000BDA4C
 	public void LogDraws()
 	{
 		Debug.LogFormat("Builder Renderer Counts {0} {1} {2} {3}", new object[]
@@ -113,7 +113,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		});
 	}
 
-	// Token: 0x06002410 RID: 9232 RVA: 0x000BF8E9 File Offset: 0x000BDAE9
+	// Token: 0x06002410 RID: 9232 RVA: 0x000BF8C9 File Offset: 0x000BDAC9
 	public override void PostTick()
 	{
 		if (!this.built || !this.showing)
@@ -123,7 +123,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		this.RenderIndirect();
 	}
 
-	// Token: 0x06002411 RID: 9233 RVA: 0x000BF904 File Offset: 0x000BDB04
+	// Token: 0x06002411 RID: 9233 RVA: 0x000BF8E4 File Offset: 0x000BDAE4
 	public void WriteSerializedData()
 	{
 		if (this.renderData == null)
@@ -166,7 +166,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x06002412 RID: 9234 RVA: 0x000BFB78 File Offset: 0x000BDD78
+	// Token: 0x06002412 RID: 9234 RVA: 0x000BFB58 File Offset: 0x000BDD58
 	private void ApplySerializedData()
 	{
 		if (this.serializeSharedMesh != null)
@@ -209,7 +209,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x06002413 RID: 9235 RVA: 0x000BFD78 File Offset: 0x000BDF78
+	// Token: 0x06002413 RID: 9235 RVA: 0x000BFD58 File Offset: 0x000BDF58
 	public void AddPrefab(BuilderPiece prefab)
 	{
 		BuilderRenderer.meshRenderers.Clear();
@@ -276,7 +276,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x06002414 RID: 9236 RVA: 0x000BFF70 File Offset: 0x000BE170
+	// Token: 0x06002414 RID: 9236 RVA: 0x000BFF50 File Offset: 0x000BE150
 	private bool AddMaterial(Material material, bool suppressWarnings = false)
 	{
 		if (material == null)
@@ -366,7 +366,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		return true;
 	}
 
-	// Token: 0x06002415 RID: 9237 RVA: 0x000C0194 File Offset: 0x000BE394
+	// Token: 0x06002415 RID: 9237 RVA: 0x000C0174 File Offset: 0x000BE374
 	public void BuildSharedMaterial()
 	{
 		if (this.renderData.sharedTexArray != null)
@@ -396,7 +396,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x06002416 RID: 9238 RVA: 0x000C0320 File Offset: 0x000BE520
+	// Token: 0x06002416 RID: 9238 RVA: 0x000C0300 File Offset: 0x000BE500
 	public void BuildSharedMesh()
 	{
 		if (this.renderData.sharedMesh != null)
@@ -443,7 +443,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		this.renderData.sharedMesh.SetTriangles(BuilderRenderer.trianglesAll, 0);
 	}
 
-	// Token: 0x06002417 RID: 9239 RVA: 0x000C0524 File Offset: 0x000BE724
+	// Token: 0x06002417 RID: 9239 RVA: 0x000C0504 File Offset: 0x000BE704
 	public void BuildBuffer()
 	{
 		this.renderData.dynamicBatch = new BuilderTableDataRenderIndirectBatch();
@@ -452,7 +452,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		BuilderRenderer.BuildBatch(this.renderData.staticBatch, this.renderData.meshes.Count, 8192, this.renderData.sharedMaterialIndirect);
 	}
 
-	// Token: 0x06002418 RID: 9240 RVA: 0x000C05B4 File Offset: 0x000BE7B4
+	// Token: 0x06002418 RID: 9240 RVA: 0x000C0594 File Offset: 0x000BE794
 	public static void BuildBatch(BuilderTableDataRenderIndirectBatch indirectBatch, int meshCount, int maxInstances, Material sharedMaterialIndirect)
 	{
 		indirectBatch.totalInstances = 0;
@@ -495,21 +495,21 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		indirectBatch.rp.matProps.SetBuffer("_Tint", indirectBatch.tintBuf);
 	}
 
-	// Token: 0x06002419 RID: 9241 RVA: 0x000C07E7 File Offset: 0x000BE9E7
+	// Token: 0x06002419 RID: 9241 RVA: 0x000C07C7 File Offset: 0x000BE9C7
 	private void OnDestroy()
 	{
 		this.DestroyBuffer();
 		this.renderData.subMeshes.Dispose();
 	}
 
-	// Token: 0x0600241A RID: 9242 RVA: 0x000C07FF File Offset: 0x000BE9FF
+	// Token: 0x0600241A RID: 9242 RVA: 0x000C07DF File Offset: 0x000BE9DF
 	public void DestroyBuffer()
 	{
 		BuilderRenderer.DestroyBatch(this.renderData.staticBatch);
 		BuilderRenderer.DestroyBatch(this.renderData.dynamicBatch);
 	}
 
-	// Token: 0x0600241B RID: 9243 RVA: 0x000C0824 File Offset: 0x000BEA24
+	// Token: 0x0600241B RID: 9243 RVA: 0x000C0804 File Offset: 0x000BEA04
 	public static void DestroyBatch(BuilderTableDataRenderIndirectBatch indirectBatch)
 	{
 		indirectBatch.commandBuf.Dispose();
@@ -534,7 +534,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		indirectBatch.renderMeshes.Dispose();
 	}
 
-	// Token: 0x0600241C RID: 9244 RVA: 0x000C0914 File Offset: 0x000BEB14
+	// Token: 0x0600241C RID: 9244 RVA: 0x000C08F4 File Offset: 0x000BEAF4
 	public void PreRenderIndirect()
 	{
 		if (!this.built || !this.showing)
@@ -552,14 +552,14 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		JobHandle.ScheduleBatchedJobs();
 	}
 
-	// Token: 0x0600241D RID: 9245 RVA: 0x000C09C7 File Offset: 0x000BEBC7
+	// Token: 0x0600241D RID: 9245 RVA: 0x000C09A7 File Offset: 0x000BEBA7
 	public void RenderIndirect()
 	{
 		this.renderData.setupInstancesJobs.Complete();
 		this.RenderIndirectBatch(this.renderData.staticBatch);
 	}
 
-	// Token: 0x0600241E RID: 9246 RVA: 0x000C09EC File Offset: 0x000BEBEC
+	// Token: 0x0600241E RID: 9246 RVA: 0x000C09CC File Offset: 0x000BEBCC
 	private static void SetupIndirectBatchArgs(BuilderTableDataRenderIndirectBatch indirectBatch, NativeList<BuilderTableSubMesh> subMeshes)
 	{
 		uint num = 0U;
@@ -578,7 +578,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x0600241F RID: 9247 RVA: 0x000C0A8C File Offset: 0x000BEC8C
+	// Token: 0x0600241F RID: 9247 RVA: 0x000C0A6C File Offset: 0x000BEC6C
 	private void RenderIndirectBatch(BuilderTableDataRenderIndirectBatch indirectBatch)
 	{
 		indirectBatch.matrixBuf.SetData<Matrix4x4>(indirectBatch.instanceObjectToWorld);
@@ -588,7 +588,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		Graphics.RenderMeshIndirect(ref indirectBatch.rp, this.renderData.sharedMesh, indirectBatch.commandBuf, indirectBatch.commandCount, 0);
 	}
 
-	// Token: 0x06002420 RID: 9248 RVA: 0x000C0B00 File Offset: 0x000BED00
+	// Token: 0x06002420 RID: 9248 RVA: 0x000C0AE0 File Offset: 0x000BECE0
 	public void AddPiece(BuilderPiece piece)
 	{
 		bool isStatic = piece.isStatic;
@@ -712,7 +712,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x06002421 RID: 9249 RVA: 0x000C1004 File Offset: 0x000BF204
+	// Token: 0x06002421 RID: 9249 RVA: 0x000C0FE4 File Offset: 0x000BF1E4
 	public void RemovePiece(BuilderPiece piece)
 	{
 		bool isStatic = piece.isStatic;
@@ -843,7 +843,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		piece.renderingIndirectTransformIndex.Clear();
 	}
 
-	// Token: 0x06002422 RID: 9250 RVA: 0x000C1528 File Offset: 0x000BF728
+	// Token: 0x06002422 RID: 9250 RVA: 0x000C1508 File Offset: 0x000BF708
 	public void ChangePieceIndirectMaterial(BuilderPiece piece, List<MeshRenderer> targetRenderers, Material targetMaterial)
 	{
 		if (targetMaterial == null)
@@ -926,7 +926,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x06002423 RID: 9251 RVA: 0x000C172C File Offset: 0x000BF92C
+	// Token: 0x06002423 RID: 9251 RVA: 0x000C170C File Offset: 0x000BF90C
 	public static void RemoveAt(TransformAccessArray a, int i)
 	{
 		int length = a.length;
@@ -937,7 +937,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		a.RemoveAtSwapBack(length - 1);
 	}
 
-	// Token: 0x06002424 RID: 9252 RVA: 0x000C176C File Offset: 0x000BF96C
+	// Token: 0x06002424 RID: 9252 RVA: 0x000C174C File Offset: 0x000BF94C
 	public void SetPieceTint(BuilderPiece piece, float tint)
 	{
 		for (int i = 0; i < piece.renderingIndirect.Count; i++)
@@ -1151,7 +1151,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 	[BurstCompile]
 	public struct SetupInstanceDataForMesh : IJobParallelForTransform
 	{
-		// Token: 0x06002427 RID: 9255 RVA: 0x000C1998 File Offset: 0x000BFB98
+		// Token: 0x06002427 RID: 9255 RVA: 0x000C1978 File Offset: 0x000BFB78
 		public void Execute(int index, TransformAccess transform)
 		{
 			int num = index + (int)this.commandData.startInstance;
@@ -1201,7 +1201,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 	[BurstCompile]
 	public struct SetupInstanceDataForMeshStatic : IJobParallelForTransform
 	{
-		// Token: 0x06002428 RID: 9256 RVA: 0x000C19F8 File Offset: 0x000BFBF8
+		// Token: 0x06002428 RID: 9256 RVA: 0x000C19D8 File Offset: 0x000BFBD8
 		public void Execute(int index, TransformAccess transform)
 		{
 			if (transform.isValid)

@@ -8,7 +8,7 @@ namespace GorillaTag
 	[ExecuteAlways]
 	public class TextureTransitioner : MonoBehaviour, IResettableItem
 	{
-		// Token: 0x06006706 RID: 26374 RVA: 0x002183F7 File Offset: 0x002165F7
+		// Token: 0x06006706 RID: 26374 RVA: 0x002183D7 File Offset: 0x002165D7
 		protected void Awake()
 		{
 			if (Application.isPlaying || this.editorPreview)
@@ -20,7 +20,7 @@ namespace GorillaTag
 			this.ResetToDefaultState();
 		}
 
-		// Token: 0x06006707 RID: 26375 RVA: 0x0021842C File Offset: 0x0021662C
+		// Token: 0x06006707 RID: 26375 RVA: 0x0021840C File Offset: 0x0021660C
 		protected void OnEnable()
 		{
 			TextureTransitionerManager.Register(this);
@@ -49,13 +49,13 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006708 RID: 26376 RVA: 0x0021851A File Offset: 0x0021671A
+		// Token: 0x06006708 RID: 26376 RVA: 0x002184FA File Offset: 0x002166FA
 		protected void OnDisable()
 		{
 			TextureTransitionerManager.Unregister(this);
 		}
 
-		// Token: 0x06006709 RID: 26377 RVA: 0x00218522 File Offset: 0x00216722
+		// Token: 0x06006709 RID: 26377 RVA: 0x00218502 File Offset: 0x00216702
 		private void RefreshShaderParams()
 		{
 			this.texTransitionShaderParam = Shader.PropertyToID(this.texTransitionShaderParamName);
@@ -63,7 +63,7 @@ namespace GorillaTag
 			this.tex2ShaderParam = Shader.PropertyToID(this.tex2ShaderParamName);
 		}
 
-		// Token: 0x0600670A RID: 26378 RVA: 0x00218557 File Offset: 0x00216757
+		// Token: 0x0600670A RID: 26378 RVA: 0x00218537 File Offset: 0x00216737
 		public void ResetToDefaultState()
 		{
 			this.normalizedValue = 0f;

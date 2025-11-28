@@ -4,13 +4,13 @@ using UnityEngine.UI;
 // Token: 0x02000578 RID: 1400
 public class BuilderKioskButton : GorillaPressableButton
 {
-	// Token: 0x06002359 RID: 9049 RVA: 0x000B97E5 File Offset: 0x000B79E5
+	// Token: 0x06002359 RID: 9049 RVA: 0x000B97C5 File Offset: 0x000B79C5
 	public override void Start()
 	{
 		this.currentPieceSet = BuilderKiosk.nullItem;
 	}
 
-	// Token: 0x0600235A RID: 9050 RVA: 0x000B97F2 File Offset: 0x000B79F2
+	// Token: 0x0600235A RID: 9050 RVA: 0x000B97D2 File Offset: 0x000B79D2
 	public override void UpdateColor()
 	{
 		if (this.currentPieceSet.isNullItem)
@@ -22,7 +22,7 @@ public class BuilderKioskButton : GorillaPressableButton
 		base.UpdateColor();
 	}
 
-	// Token: 0x0600235B RID: 9051 RVA: 0x000B9829 File Offset: 0x000B7A29
+	// Token: 0x0600235B RID: 9051 RVA: 0x000B9809 File Offset: 0x000B7A09
 	public override void ButtonActivationWithHand(bool isLeftHand)
 	{
 		base.ButtonActivation();

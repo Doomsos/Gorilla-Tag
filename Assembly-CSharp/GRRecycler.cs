@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020006ED RID: 1773
 public class GRRecycler : MonoBehaviourTick
 {
-	// Token: 0x06002D69 RID: 11625 RVA: 0x000F58D8 File Offset: 0x000F3AD8
+	// Token: 0x06002D69 RID: 11625 RVA: 0x000F58B8 File Offset: 0x000F3AB8
 	public override void Tick()
 	{
 		if (this.closed && !this.anim.isPlaying)
@@ -30,25 +30,25 @@ public class GRRecycler : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002D6A RID: 11626 RVA: 0x000F599B File Offset: 0x000F3B9B
+	// Token: 0x06002D6A RID: 11626 RVA: 0x000F597B File Offset: 0x000F3B7B
 	public void Init(GhostReactor reactor)
 	{
 		this.reactor = reactor;
 	}
 
-	// Token: 0x06002D6B RID: 11627 RVA: 0x000F59A4 File Offset: 0x000F3BA4
+	// Token: 0x06002D6B RID: 11627 RVA: 0x000F5984 File Offset: 0x000F3B84
 	public int GetRecycleValue(GRTool.GRToolType type)
 	{
 		return this.reactor.toolProgression.GetRecycleShiftCredit(type);
 	}
 
-	// Token: 0x06002D6C RID: 11628 RVA: 0x000F59B7 File Offset: 0x000F3BB7
+	// Token: 0x06002D6C RID: 11628 RVA: 0x000F5997 File Offset: 0x000F3B97
 	public void ScanItem(GameEntityId id)
 	{
 		this.scanner.ScanItem(id);
 	}
 
-	// Token: 0x06002D6D RID: 11629 RVA: 0x000F59C8 File Offset: 0x000F3BC8
+	// Token: 0x06002D6D RID: 11629 RVA: 0x000F59A8 File Offset: 0x000F3BA8
 	public void RecycleItem()
 	{
 		if (this.anim != null)
@@ -65,7 +65,7 @@ public class GRRecycler : MonoBehaviourTick
 		this.timeRemaining = this.closeDuration;
 	}
 
-	// Token: 0x06002D6E RID: 11630 RVA: 0x000F5A40 File Offset: 0x000F3C40
+	// Token: 0x06002D6E RID: 11630 RVA: 0x000F5A20 File Offset: 0x000F3C20
 	private void OnTriggerEnter(Collider other)
 	{
 		if (this.reactor == null)

@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000A0A RID: 2570
 public class GetPlayerData_Data
 {
-	// Token: 0x060041B0 RID: 16816 RVA: 0x0015CCEC File Offset: 0x0015AEEC
+	// Token: 0x060041B0 RID: 16816 RVA: 0x0015CCCC File Offset: 0x0015AECC
 	public GetPlayerData_Data(GetSessionResponseType type, GetPlayerDataResponse response)
 	{
 		this.responseType = type;

@@ -9,7 +9,7 @@ namespace GorillaTagScripts.CustomMapSupport
 	// Token: 0x02000E0A RID: 3594
 	public class CMSObjectActivationTrigger : CMSTrigger
 	{
-		// Token: 0x060059AF RID: 22959 RVA: 0x001CAD04 File Offset: 0x001C8F04
+		// Token: 0x060059AF RID: 22959 RVA: 0x001CACE4 File Offset: 0x001C8EE4
 		public override void CopyTriggerSettings(TriggerSettings settings)
 		{
 			if (settings.GetType() == typeof(ObjectActivationTriggerSettings))
@@ -44,7 +44,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			base.CopyTriggerSettings(settings);
 		}
 
-		// Token: 0x060059B0 RID: 22960 RVA: 0x001CAE10 File Offset: 0x001C9010
+		// Token: 0x060059B0 RID: 22960 RVA: 0x001CADF0 File Offset: 0x001C8FF0
 		public override void Trigger(double triggerTime = -1.0, bool originatedLocally = false, bool ignoreTriggerCount = false)
 		{
 			base.Trigger(triggerTime, originatedLocally, ignoreTriggerCount);

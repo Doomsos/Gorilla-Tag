@@ -9,7 +9,7 @@ namespace GorillaTagScripts.CustomMapSupport
 	// Token: 0x02000E0B RID: 3595
 	public class CMSPlayAnimationTrigger : CMSTrigger
 	{
-		// Token: 0x060059B2 RID: 22962 RVA: 0x001CAF60 File Offset: 0x001C9160
+		// Token: 0x060059B2 RID: 22962 RVA: 0x001CAF40 File Offset: 0x001C9140
 		public override void CopyTriggerSettings(TriggerSettings settings)
 		{
 			if (settings.GetType() == typeof(PlayAnimationTriggerSettings))
@@ -28,7 +28,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			base.CopyTriggerSettings(settings);
 		}
 
-		// Token: 0x060059B3 RID: 22963 RVA: 0x001CAFE4 File Offset: 0x001C91E4
+		// Token: 0x060059B3 RID: 22963 RVA: 0x001CAFC4 File Offset: 0x001C91C4
 		public override void Trigger(double triggerTime = -1.0, bool originatedLocally = false, bool ignoreTriggerCount = false)
 		{
 			base.Trigger(triggerTime, originatedLocally, ignoreTriggerCount);

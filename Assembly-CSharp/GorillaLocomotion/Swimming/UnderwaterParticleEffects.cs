@@ -7,7 +7,7 @@ namespace GorillaLocomotion.Swimming
 	// Token: 0x02000F8D RID: 3981
 	public class UnderwaterParticleEffects : MonoBehaviour
 	{
-		// Token: 0x060063EC RID: 25580 RVA: 0x0020831C File Offset: 0x0020651C
+		// Token: 0x060063EC RID: 25580 RVA: 0x002082FC File Offset: 0x002064FC
 		public void UpdateParticleEffect(bool waterSurfaceDetected, ref WaterVolume.SurfaceQuery waterSurface)
 		{
 			GTPlayer instance = GTPlayer.Instance;
@@ -86,7 +86,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x060063ED RID: 25581 RVA: 0x00208851 File Offset: 0x00206A51
+		// Token: 0x060063ED RID: 25581 RVA: 0x00208831 File Offset: 0x00206A31
 		private bool IsValid(Vector3 vector)
 		{
 			return !float.IsNaN(vector.x) && !float.IsNaN(vector.y) && !float.IsNaN(vector.z);

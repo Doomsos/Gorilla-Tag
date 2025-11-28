@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020009BE RID: 2494
 public class ZoneBasedObject : MonoBehaviour
 {
-	// Token: 0x06003FBC RID: 16316 RVA: 0x00155BAC File Offset: 0x00153DAC
+	// Token: 0x06003FBC RID: 16316 RVA: 0x00155B8C File Offset: 0x00153D8C
 	public bool IsLocalPlayerInZone()
 	{
 		GTZone[] array = this.zones;
@@ -18,7 +18,7 @@ public class ZoneBasedObject : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06003FBD RID: 16317 RVA: 0x00155BDC File Offset: 0x00153DDC
+	// Token: 0x06003FBD RID: 16317 RVA: 0x00155BBC File Offset: 0x00153DBC
 	public static ZoneBasedObject SelectRandomEligible(ZoneBasedObject[] objects, string overrideChoice = "")
 	{
 		if (overrideChoice != "")

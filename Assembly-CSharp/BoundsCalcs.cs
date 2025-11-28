@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000CF3 RID: 3315
 public class BoundsCalcs : MonoBehaviour
 {
-	// Token: 0x0600507C RID: 20604 RVA: 0x0019E464 File Offset: 0x0019C664
+	// Token: 0x0600507C RID: 20604 RVA: 0x0019E444 File Offset: 0x0019C644
 	public void Compute()
 	{
 		MeshFilter[] array;

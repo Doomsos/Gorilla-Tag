@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // Token: 0x02000C93 RID: 3219
 public static class UnsafeUtils
 {
-	// Token: 0x06004EAC RID: 20140 RVA: 0x00197418 File Offset: 0x00195618
+	// Token: 0x06004EAC RID: 20140 RVA: 0x001973F8 File Offset: 0x001955F8
 	public unsafe static ref readonly T[] GetInternalArray<T>(this List<T> list)
 	{
 		if (list == null)
@@ -17,7 +17,7 @@ public static class UnsafeUtils
 		return ref Unsafe.As<List<T>, StrongBox<T[]>>(ref list)->Value;
 	}
 
-	// Token: 0x06004EAD RID: 20141 RVA: 0x00197430 File Offset: 0x00195630
+	// Token: 0x06004EAD RID: 20141 RVA: 0x00197410 File Offset: 0x00195610
 	public unsafe static ref readonly T[] GetInvocationListUnsafe<T>(this T @delegate) where T : MulticastDelegate
 	{
 		if (@delegate == null)

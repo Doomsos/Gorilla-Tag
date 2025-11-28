@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000805 RID: 2053
 public class HeightVolume : MonoBehaviour
 {
-	// Token: 0x06003609 RID: 13833 RVA: 0x001251DD File Offset: 0x001233DD
+	// Token: 0x06003609 RID: 13833 RVA: 0x001251BD File Offset: 0x001233BD
 	private void Awake()
 	{
 		if (this.targetTransform == null)
@@ -14,7 +14,7 @@ public class HeightVolume : MonoBehaviour
 		this.musicSource = this.audioSource.gameObject.GetComponent<MusicSource>();
 	}
 
-	// Token: 0x0600360A RID: 13834 RVA: 0x00125214 File Offset: 0x00123414
+	// Token: 0x0600360A RID: 13834 RVA: 0x001251F4 File Offset: 0x001233F4
 	private void Update()
 	{
 		if (this.audioSource.gameObject.activeSelf && (!(this.musicSource != null) || !this.musicSource.VolumeOverridden))

@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000407 RID: 1031
 public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 {
-	// Token: 0x06001939 RID: 6457 RVA: 0x00087230 File Offset: 0x00085430
+	// Token: 0x06001939 RID: 6457 RVA: 0x00087210 File Offset: 0x00085410
 	private void Awake()
 	{
 		this.rb = base.GetComponent<Rigidbody>();
@@ -14,14 +14,14 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		this.grabPtInitParent = this.grabPt.transform.parent;
 	}
 
-	// Token: 0x0600193A RID: 6458 RVA: 0x0008727C File Offset: 0x0008547C
+	// Token: 0x0600193A RID: 6458 RVA: 0x0008725C File Offset: 0x0008545C
 	private void Start()
 	{
 		this.airResistance = Mathf.Clamp(this.airResistance, 0f, 1f);
 		this.balloonCollider.enabled = false;
 	}
 
-	// Token: 0x0600193B RID: 6459 RVA: 0x000872A8 File Offset: 0x000854A8
+	// Token: 0x0600193B RID: 6459 RVA: 0x00087288 File Offset: 0x00085488
 	public void ReParent()
 	{
 		if (this.grabPt != null)
@@ -31,7 +31,7 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		this.bouyancyActualHeight = Random.Range(this.bouyancyMinHeight, this.bouyancyMaxHeight);
 	}
 
-	// Token: 0x0600193C RID: 6460 RVA: 0x000872F8 File Offset: 0x000854F8
+	// Token: 0x0600193C RID: 6460 RVA: 0x000872D8 File Offset: 0x000854D8
 	private void ApplyBouyancyForce()
 	{
 		float num = this.bouyancyActualHeight + Mathf.Sin(Time.time) * this.varianceMaxheight;
@@ -40,27 +40,27 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		this.rb.AddForce(new Vector3(0f, num3, 0f) * this.rb.mass, 0);
 	}
 
-	// Token: 0x0600193D RID: 6461 RVA: 0x00087370 File Offset: 0x00085570
+	// Token: 0x0600193D RID: 6461 RVA: 0x00087350 File Offset: 0x00085550
 	private void ApplyUpRightForce()
 	{
 		Vector3 vector = Vector3.Cross(base.transform.up, Vector3.up) * this.upRightTorque * this.balloonScale;
 		this.rb.AddTorque(vector);
 	}
 
-	// Token: 0x0600193E RID: 6462 RVA: 0x000873B8 File Offset: 0x000855B8
+	// Token: 0x0600193E RID: 6462 RVA: 0x00087398 File Offset: 0x00085598
 	private void ApplyAntiSpinForce()
 	{
 		Vector3 vector = this.rb.transform.InverseTransformDirection(this.rb.angularVelocity);
 		this.rb.AddRelativeTorque(0f, -vector.y * this.antiSpinTorque, 0f);
 	}
 
-	// Token: 0x0600193F RID: 6463 RVA: 0x00087404 File Offset: 0x00085604
+	// Token: 0x0600193F RID: 6463 RVA: 0x000873E4 File Offset: 0x000855E4
 	private void ApplyAirResistance()
 	{
 		this.rb.linearVelocity *= 1f - this.airResistance;
 	}
 
-	// Token: 0x06001940 RID: 6464 RVA: 0x00087428 File Offset: 0x00085628
+	// Token: 0x06001940 RID: 6464 RVA: 0x00087408 File Offset: 0x00085608
 	private void ApplyDistanceConstraint()
 	{
 		this.knot.transform.position - base.transform.position;
@@ -83,7 +83,7 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		}
 	}
 
-	// Token: 0x06001941 RID: 6465 RVA: 0x00087544 File Offset: 0x00085744
+	// Token: 0x06001941 RID: 6465 RVA: 0x00087524 File Offset: 0x00085724
 	public void EnableDynamics(bool enable, bool collider, bool kinematic)
 	{
 		bool flag = !this.enableDynamics && enable;
@@ -103,7 +103,7 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		}
 	}
 
-	// Token: 0x06001942 RID: 6466 RVA: 0x000875BF File Offset: 0x000857BF
+	// Token: 0x06001942 RID: 6466 RVA: 0x0008759F File Offset: 0x0008579F
 	public void EnableDistanceConstraints(bool enable, float scale = 1f)
 	{
 		this.enableDistanceConstraints = enable;
@@ -111,7 +111,7 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 	}
 
 	// Token: 0x170002B4 RID: 692
-	// (get) Token: 0x06001943 RID: 6467 RVA: 0x000875CF File Offset: 0x000857CF
+	// (get) Token: 0x06001943 RID: 6467 RVA: 0x000875AF File Offset: 0x000857AF
 	public bool ColliderEnabled
 	{
 		get
@@ -120,7 +120,7 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		}
 	}
 
-	// Token: 0x06001944 RID: 6468 RVA: 0x000875EC File Offset: 0x000857EC
+	// Token: 0x06001944 RID: 6468 RVA: 0x000875CC File Offset: 0x000857CC
 	private void FixedUpdate()
 	{
 		if (this.enableDynamics && !this.rb.isKinematic)
@@ -148,13 +148,13 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		throw new NotImplementedException();
 	}
 
-	// Token: 0x06001946 RID: 6470 RVA: 0x0008767F File Offset: 0x0008587F
+	// Token: 0x06001946 RID: 6470 RVA: 0x0008765F File Offset: 0x0008585F
 	bool ITetheredObjectBehavior.IsEnabled()
 	{
 		return base.enabled;
 	}
 
-	// Token: 0x06001947 RID: 6471 RVA: 0x00087688 File Offset: 0x00085888
+	// Token: 0x06001947 RID: 6471 RVA: 0x00087668 File Offset: 0x00085868
 	void ITetheredObjectBehavior.TriggerEnter(Collider other, ref Vector3 force, ref Vector3 collisionPt, ref bool transferOwnership)
 	{
 		if (!other.gameObject.IsOnLayer(UnityLayer.GorillaHand))

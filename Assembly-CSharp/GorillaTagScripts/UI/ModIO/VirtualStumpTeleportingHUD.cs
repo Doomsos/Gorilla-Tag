@@ -7,7 +7,7 @@ namespace GorillaTagScripts.UI.ModIO
 	// Token: 0x02000E2F RID: 3631
 	public class VirtualStumpTeleportingHUD : MonoBehaviour
 	{
-		// Token: 0x06005A99 RID: 23193 RVA: 0x001D0CA0 File Offset: 0x001CEEA0
+		// Token: 0x06005A99 RID: 23193 RVA: 0x001D0C80 File Offset: 0x001CEE80
 		public void Initialize(bool isEntering)
 		{
 			this.isEnteringVirtualStump = isEntering;
@@ -31,7 +31,7 @@ namespace GorillaTagScripts.UI.ModIO
 			this.teleportingStatusText.gameObject.SetActive(true);
 		}
 
-		// Token: 0x06005A9A RID: 23194 RVA: 0x001D0D58 File Offset: 0x001CEF58
+		// Token: 0x06005A9A RID: 23194 RVA: 0x001D0D38 File Offset: 0x001CEF38
 		private void Update()
 		{
 			if (Time.time - this.lastTextUpdateTime > this.textUpdateInterval)
@@ -47,7 +47,7 @@ namespace GorillaTagScripts.UI.ModIO
 			}
 		}
 
-		// Token: 0x06005A9B RID: 23195 RVA: 0x001D0DD7 File Offset: 0x001CEFD7
+		// Token: 0x06005A9B RID: 23195 RVA: 0x001D0DB7 File Offset: 0x001CEFB7
 		private void IncrementProgressDots()
 		{
 			this.numProgressDots++;

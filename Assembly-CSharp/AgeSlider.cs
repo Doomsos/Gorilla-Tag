@@ -7,8 +7,8 @@ using UnityEngine.Events;
 public class AgeSlider : MonoBehaviour, IBuildValidation
 {
 	// Token: 0x17000614 RID: 1556
-	// (get) Token: 0x06004182 RID: 16770 RVA: 0x0015C2B9 File Offset: 0x0015A4B9
-	// (set) Token: 0x06004183 RID: 16771 RVA: 0x0015C2C1 File Offset: 0x0015A4C1
+	// (get) Token: 0x06004182 RID: 16770 RVA: 0x0015C299 File Offset: 0x0015A499
+	// (set) Token: 0x06004183 RID: 16771 RVA: 0x0015C2A1 File Offset: 0x0015A4A1
 	public AgeSlider.SliderHeldEvent onHoldComplete
 	{
 		get
@@ -21,7 +21,7 @@ public class AgeSlider : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06004184 RID: 16772 RVA: 0x0015C2CA File Offset: 0x0015A4CA
+	// Token: 0x06004184 RID: 16772 RVA: 0x0015C2AA File Offset: 0x0015A4AA
 	private void OnEnable()
 	{
 		if (ControllerBehaviour.Instance)
@@ -30,7 +30,7 @@ public class AgeSlider : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06004185 RID: 16773 RVA: 0x0015C2EE File Offset: 0x0015A4EE
+	// Token: 0x06004185 RID: 16773 RVA: 0x0015C2CE File Offset: 0x0015A4CE
 	private void OnDisable()
 	{
 		if (ControllerBehaviour.Instance)
@@ -39,7 +39,7 @@ public class AgeSlider : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06004186 RID: 16774 RVA: 0x0015C314 File Offset: 0x0015A514
+	// Token: 0x06004186 RID: 16774 RVA: 0x0015C2F4 File Offset: 0x0015A4F4
 	protected void Update()
 	{
 		if (!AgeSlider._ageGateActive)
@@ -65,7 +65,7 @@ public class AgeSlider : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06004187 RID: 16775 RVA: 0x0015C420 File Offset: 0x0015A620
+	// Token: 0x06004187 RID: 16775 RVA: 0x0015C400 File Offset: 0x0015A600
 	private void PostUpdate()
 	{
 		if (!AgeSlider._ageGateActive)
@@ -86,13 +86,13 @@ public class AgeSlider : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06004188 RID: 16776 RVA: 0x0015C50D File Offset: 0x0015A70D
+	// Token: 0x06004188 RID: 16776 RVA: 0x0015C4ED File Offset: 0x0015A6ED
 	public static void ToggleAgeGate(bool state)
 	{
 		AgeSlider._ageGateActive = state;
 	}
 
-	// Token: 0x06004189 RID: 16777 RVA: 0x0015C515 File Offset: 0x0015A715
+	// Token: 0x06004189 RID: 16777 RVA: 0x0015C4F5 File Offset: 0x0015A6F5
 	public bool BuildValidationCheck()
 	{
 		if (this._confirmButton == null)

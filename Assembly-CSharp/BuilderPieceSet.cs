@@ -10,7 +10,7 @@ using UnityEngine.Serialization;
 public class BuilderPieceSet : ScriptableObject
 {
 	// Token: 0x1700039C RID: 924
-	// (get) Token: 0x06002400 RID: 9216 RVA: 0x000BF539 File Offset: 0x000BD739
+	// (get) Token: 0x06002400 RID: 9216 RVA: 0x000BF519 File Offset: 0x000BD719
 	public string SetName
 	{
 		get
@@ -19,13 +19,13 @@ public class BuilderPieceSet : ScriptableObject
 		}
 	}
 
-	// Token: 0x06002401 RID: 9217 RVA: 0x000BF541 File Offset: 0x000BD741
+	// Token: 0x06002401 RID: 9217 RVA: 0x000BF521 File Offset: 0x000BD721
 	public int GetIntIdentifier()
 	{
 		return this.playfabID.GetStaticHash();
 	}
 
-	// Token: 0x06002402 RID: 9218 RVA: 0x000BF550 File Offset: 0x000BD750
+	// Token: 0x06002402 RID: 9218 RVA: 0x000BF530 File Offset: 0x000BD730
 	public DateTime GetScheduleDateTime()
 	{
 		if (this.isScheduled)
@@ -106,7 +106,7 @@ public class BuilderPieceSet : ScriptableObject
 	[Serializable]
 	public class BuilderPieceSubset
 	{
-		// Token: 0x06002404 RID: 9220 RVA: 0x000BF5AB File Offset: 0x000BD7AB
+		// Token: 0x06002404 RID: 9220 RVA: 0x000BF58B File Offset: 0x000BD78B
 		public string GetShelfButtonName()
 		{
 			return this.shelfButtonName;
@@ -145,7 +145,7 @@ public class BuilderPieceSet : ScriptableObject
 	// Token: 0x0200058F RID: 1423
 	public class BuilderDisplayGroup
 	{
-		// Token: 0x06002406 RID: 9222 RVA: 0x000BF5B3 File Offset: 0x000BD7B3
+		// Token: 0x06002406 RID: 9222 RVA: 0x000BF593 File Offset: 0x000BD793
 		public BuilderDisplayGroup()
 		{
 			this.displayName = string.Empty;
@@ -155,7 +155,7 @@ public class BuilderPieceSet : ScriptableObject
 			this.uniqueGroupID = string.Empty;
 		}
 
-		// Token: 0x06002407 RID: 9223 RVA: 0x000BF5EE File Offset: 0x000BD7EE
+		// Token: 0x06002407 RID: 9223 RVA: 0x000BF5CE File Offset: 0x000BD7CE
 		public BuilderDisplayGroup(string groupName, string material, int inSetID, string groupID)
 		{
 			this.displayName = groupName;
@@ -165,7 +165,7 @@ public class BuilderPieceSet : ScriptableObject
 			this.uniqueGroupID = groupID;
 		}
 
-		// Token: 0x06002408 RID: 9224 RVA: 0x000BF61E File Offset: 0x000BD81E
+		// Token: 0x06002408 RID: 9224 RVA: 0x000BF5FE File Offset: 0x000BD7FE
 		public int GetDisplayGroupIdentifier()
 		{
 			return this.uniqueGroupID.GetStaticHash();

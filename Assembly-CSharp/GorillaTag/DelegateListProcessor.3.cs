@@ -5,17 +5,17 @@ namespace GorillaTag
 	// Token: 0x02001014 RID: 4116
 	public class DelegateListProcessor<T1, T2> : DelegateListProcessorPlusMinus<DelegateListProcessor<T1, T2>, Action<T1, T2>>
 	{
-		// Token: 0x06006827 RID: 26663 RVA: 0x0021F8F5 File Offset: 0x0021DAF5
+		// Token: 0x06006827 RID: 26663 RVA: 0x0021F8D5 File Offset: 0x0021DAD5
 		public DelegateListProcessor()
 		{
 		}
 
-		// Token: 0x06006828 RID: 26664 RVA: 0x0021F8FD File Offset: 0x0021DAFD
+		// Token: 0x06006828 RID: 26664 RVA: 0x0021F8DD File Offset: 0x0021DADD
 		public DelegateListProcessor(int capacity) : base(capacity)
 		{
 		}
 
-		// Token: 0x06006829 RID: 26665 RVA: 0x0021F906 File Offset: 0x0021DB06
+		// Token: 0x06006829 RID: 26665 RVA: 0x0021F8E6 File Offset: 0x0021DAE6
 		public void InvokeSafe(in T1 data1, in T2 data2)
 		{
 			this.SetData(data1, data2);
@@ -23,7 +23,7 @@ namespace GorillaTag
 			this.ResetData();
 		}
 
-		// Token: 0x0600682A RID: 26666 RVA: 0x0021F91C File Offset: 0x0021DB1C
+		// Token: 0x0600682A RID: 26666 RVA: 0x0021F8FC File Offset: 0x0021DAFC
 		public void Invoke(in T1 data1, in T2 data2)
 		{
 			this.SetData(data1, data2);
@@ -31,20 +31,20 @@ namespace GorillaTag
 			this.ResetData();
 		}
 
-		// Token: 0x0600682B RID: 26667 RVA: 0x0021F932 File Offset: 0x0021DB32
+		// Token: 0x0600682B RID: 26667 RVA: 0x0021F912 File Offset: 0x0021DB12
 		protected override void ProcessItem(in Action<T1, T2> item)
 		{
 			item.Invoke(this.m_data1, this.m_data2);
 		}
 
-		// Token: 0x0600682C RID: 26668 RVA: 0x0021F947 File Offset: 0x0021DB47
+		// Token: 0x0600682C RID: 26668 RVA: 0x0021F927 File Offset: 0x0021DB27
 		private void SetData(in T1 data1, in T2 data2)
 		{
 			this.m_data1 = data1;
 			this.m_data2 = data2;
 		}
 
-		// Token: 0x0600682D RID: 26669 RVA: 0x0021F961 File Offset: 0x0021DB61
+		// Token: 0x0600682D RID: 26669 RVA: 0x0021F941 File Offset: 0x0021DB41
 		private void ResetData()
 		{
 			this.m_data1 = default(T1);

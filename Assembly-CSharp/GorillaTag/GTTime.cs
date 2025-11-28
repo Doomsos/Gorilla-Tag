@@ -10,17 +10,17 @@ namespace GorillaTag
 	public static class GTTime
 	{
 		// Token: 0x170009A2 RID: 2466
-		// (get) Token: 0x060066B2 RID: 26290 RVA: 0x00217118 File Offset: 0x00215318
-		// (set) Token: 0x060066B3 RID: 26291 RVA: 0x0021711F File Offset: 0x0021531F
+		// (get) Token: 0x060066B2 RID: 26290 RVA: 0x002170F8 File Offset: 0x002152F8
+		// (set) Token: 0x060066B3 RID: 26291 RVA: 0x002170FF File Offset: 0x002152FF
 		public static TimeZoneInfo timeZoneInfoLA { get; private set; }
 
-		// Token: 0x060066B4 RID: 26292 RVA: 0x00217127 File Offset: 0x00215327
+		// Token: 0x060066B4 RID: 26292 RVA: 0x00217107 File Offset: 0x00215307
 		static GTTime()
 		{
 			GTTime._Init();
 		}
 
-		// Token: 0x060066B5 RID: 26293 RVA: 0x00217130 File Offset: 0x00215330
+		// Token: 0x060066B5 RID: 26293 RVA: 0x00217110 File Offset: 0x00215310
 		[RuntimeInitializeOnLoadMethod]
 		private static void _Init()
 		{
@@ -59,7 +59,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060066B6 RID: 26294 RVA: 0x002171CC File Offset: 0x002153CC
+		// Token: 0x060066B6 RID: 26294 RVA: 0x002171AC File Offset: 0x002153AC
 		private static bool _TryCreateCustomPST(out TimeZoneInfo out_tz)
 		{
 			TimeZoneInfo.AdjustmentRule[] array = new TimeZoneInfo.AdjustmentRule[]
@@ -82,25 +82,25 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009A3 RID: 2467
-		// (get) Token: 0x060066B7 RID: 26295 RVA: 0x00217290 File Offset: 0x00215490
-		// (set) Token: 0x060066B8 RID: 26296 RVA: 0x00217297 File Offset: 0x00215497
+		// (get) Token: 0x060066B7 RID: 26295 RVA: 0x00217270 File Offset: 0x00215470
+		// (set) Token: 0x060066B8 RID: 26296 RVA: 0x00217277 File Offset: 0x00215477
 		public static bool usingServerTime { get; private set; }
 
-		// Token: 0x060066B9 RID: 26297 RVA: 0x0021729F File Offset: 0x0021549F
+		// Token: 0x060066B9 RID: 26297 RVA: 0x0021727F File Offset: 0x0021547F
 		[MethodImpl(256)]
 		private static long GetServerStartupTimeAsMilliseconds()
 		{
 			return GorillaComputer.instance.startupMillis;
 		}
 
-		// Token: 0x060066BA RID: 26298 RVA: 0x002172B0 File Offset: 0x002154B0
+		// Token: 0x060066BA RID: 26298 RVA: 0x00217290 File Offset: 0x00215490
 		[MethodImpl(256)]
 		private static long GetDeviceStartupTimeAsMilliseconds()
 		{
 			return (long)(TimeSpan.FromTicks(DateTime.UtcNow.Ticks).TotalMilliseconds - Time.realtimeSinceStartupAsDouble * 1000.0);
 		}
 
-		// Token: 0x060066BB RID: 26299 RVA: 0x002172E8 File Offset: 0x002154E8
+		// Token: 0x060066BB RID: 26299 RVA: 0x002172C8 File Offset: 0x002154C8
 		[MethodImpl(256)]
 		public static long GetStartupTimeAsMilliseconds()
 		{
@@ -118,43 +118,43 @@ namespace GorillaTag
 			return num;
 		}
 
-		// Token: 0x060066BC RID: 26300 RVA: 0x0021731B File Offset: 0x0021551B
+		// Token: 0x060066BC RID: 26300 RVA: 0x002172FB File Offset: 0x002154FB
 		public static long TimeAsMilliseconds()
 		{
 			return GTTime.GetStartupTimeAsMilliseconds() + (long)(Time.realtimeSinceStartupAsDouble * 1000.0);
 		}
 
-		// Token: 0x060066BD RID: 26301 RVA: 0x00217333 File Offset: 0x00215533
+		// Token: 0x060066BD RID: 26301 RVA: 0x00217313 File Offset: 0x00215513
 		public static double TimeAsDouble()
 		{
 			return (double)GTTime.GetStartupTimeAsMilliseconds() / 1000.0 + Time.realtimeSinceStartupAsDouble;
 		}
 
-		// Token: 0x060066BE RID: 26302 RVA: 0x0021734B File Offset: 0x0021554B
+		// Token: 0x060066BE RID: 26302 RVA: 0x0021732B File Offset: 0x0021552B
 		public static DateTime GetAAxiomDateTime()
 		{
 			return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, GTTime.timeZoneInfoLA);
 		}
 
-		// Token: 0x060066BF RID: 26303 RVA: 0x0021735C File Offset: 0x0021555C
+		// Token: 0x060066BF RID: 26303 RVA: 0x0021733C File Offset: 0x0021553C
 		public static string GetAAxiomDateTimeAsStringForDisplay()
 		{
 			return GTTime.GetAAxiomDateTime().ToString("yyyy-MM-dd HH:mm:ss.fff");
 		}
 
-		// Token: 0x060066C0 RID: 26304 RVA: 0x0021737C File Offset: 0x0021557C
+		// Token: 0x060066C0 RID: 26304 RVA: 0x0021735C File Offset: 0x0021555C
 		public static string GetAAxiomDateTimeAsStringForFilename()
 		{
 			return GTTime.GetAAxiomDateTime().ToString("yyyy-MM-dd_HH-mm-ss-fff");
 		}
 
-		// Token: 0x060066C1 RID: 26305 RVA: 0x0021739C File Offset: 0x0021559C
+		// Token: 0x060066C1 RID: 26305 RVA: 0x0021737C File Offset: 0x0021557C
 		public static long GetAAxiomDateTimeAsHumanReadableLong()
 		{
 			return long.Parse(GTTime.GetAAxiomDateTime().ToString("yyyyMMddHHmmssfff00"));
 		}
 
-		// Token: 0x060066C2 RID: 26306 RVA: 0x002173C0 File Offset: 0x002155C0
+		// Token: 0x060066C2 RID: 26306 RVA: 0x002173A0 File Offset: 0x002155A0
 		public static DateTime ConvertDateTimeHumanReadableLongToDateTime(long humanReadableLong)
 		{
 			return DateTime.ParseExact(humanReadableLong.ToString(), "yyyyMMddHHmmssfff'00'", CultureInfo.InvariantCulture);

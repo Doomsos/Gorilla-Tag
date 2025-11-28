@@ -7,7 +7,7 @@ namespace GorillaTag.GuidedRefs
 	[Serializable]
 	public struct GuidedRefReceiverArrayInfo
 	{
-		// Token: 0x0600691B RID: 26907 RVA: 0x0022336E File Offset: 0x0022156E
+		// Token: 0x0600691B RID: 26907 RVA: 0x0022334E File Offset: 0x0022154E
 		public GuidedRefReceiverArrayInfo(bool useRecommendedDefaults)
 		{
 			this.resolveModes = (useRecommendedDefaults ? (GRef.EResolveModes.Runtime | GRef.EResolveModes.SceneProcessing) : GRef.EResolveModes.None);

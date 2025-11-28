@@ -8,7 +8,7 @@ namespace GameObjectScheduling
 	public class SchedulingOptions : ScriptableObject
 	{
 		// Token: 0x17000A7F RID: 2687
-		// (get) Token: 0x0600701C RID: 28700 RVA: 0x0024765D File Offset: 0x0024585D
+		// (get) Token: 0x0600701C RID: 28700 RVA: 0x0024763D File Offset: 0x0024583D
 		public DateTime DtDebugServerTime
 		{
 			get

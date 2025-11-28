@@ -11,7 +11,7 @@ using UnityEngine.Serialization;
 public class FriendDisplay : MonoBehaviour
 {
 	// Token: 0x170006CD RID: 1741
-	// (get) Token: 0x06004895 RID: 18581 RVA: 0x0017C7ED File Offset: 0x0017A9ED
+	// (get) Token: 0x06004895 RID: 18581 RVA: 0x0017C7CD File Offset: 0x0017A9CD
 	public bool InRemoveMode
 	{
 		get
@@ -20,7 +20,7 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004896 RID: 18582 RVA: 0x0017C7F8 File Offset: 0x0017A9F8
+	// Token: 0x06004896 RID: 18582 RVA: 0x0017C7D8 File Offset: 0x0017A9D8
 	private void Start()
 	{
 		this.InitFriendCards();
@@ -31,7 +31,7 @@ public class FriendDisplay : MonoBehaviour
 		NetworkSystem.Instance.OnJoinedRoomEvent += new Action(this.OnJoinedRoom);
 	}
 
-	// Token: 0x06004897 RID: 18583 RVA: 0x0017C868 File Offset: 0x0017AA68
+	// Token: 0x06004897 RID: 18583 RVA: 0x0017C848 File Offset: 0x0017AA48
 	private void OnDestroy()
 	{
 		if (NetworkSystem.Instance != null)
@@ -45,7 +45,7 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004898 RID: 18584 RVA: 0x0017C8E0 File Offset: 0x0017AAE0
+	// Token: 0x06004898 RID: 18584 RVA: 0x0017C8C0 File Offset: 0x0017AAC0
 	public void TriggerEntered(TriggerEventNotifier notifier, Collider other)
 	{
 		if (other == GTPlayer.Instance.headCollider)
@@ -61,7 +61,7 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004899 RID: 18585 RVA: 0x0017C940 File Offset: 0x0017AB40
+	// Token: 0x06004899 RID: 18585 RVA: 0x0017C920 File Offset: 0x0017AB20
 	public void TriggerExited(TriggerEventNotifier notifier, Collider other)
 	{
 		if (other == GTPlayer.Instance.headCollider)
@@ -78,13 +78,13 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600489A RID: 18586 RVA: 0x0017C99E File Offset: 0x0017AB9E
+	// Token: 0x0600489A RID: 18586 RVA: 0x0017C97E File Offset: 0x0017AB7E
 	private void OnJoinedRoom()
 	{
 		this.Refresh();
 	}
 
-	// Token: 0x0600489B RID: 18587 RVA: 0x0017C9A6 File Offset: 0x0017ABA6
+	// Token: 0x0600489B RID: 18587 RVA: 0x0017C986 File Offset: 0x0017AB86
 	private void Refresh()
 	{
 		if (this.localPlayerAtDisplay)
@@ -94,7 +94,7 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600489C RID: 18588 RVA: 0x0017C9C2 File Offset: 0x0017ABC2
+	// Token: 0x0600489C RID: 18588 RVA: 0x0017C9A2 File Offset: 0x0017ABA2
 	public void LocalPlayerFullyVisiblePress()
 	{
 		FriendSystem.Instance.SetLocalPlayerPrivacy(FriendSystem.PlayerPrivacy.Visible);
@@ -102,7 +102,7 @@ public class FriendDisplay : MonoBehaviour
 		this.PopulateLocalPlayerCard();
 	}
 
-	// Token: 0x0600489D RID: 18589 RVA: 0x0017C9DD File Offset: 0x0017ABDD
+	// Token: 0x0600489D RID: 18589 RVA: 0x0017C9BD File Offset: 0x0017ABBD
 	public void LocalPlayerPublicOnlyPress()
 	{
 		FriendSystem.Instance.SetLocalPlayerPrivacy(FriendSystem.PlayerPrivacy.PublicOnly);
@@ -110,7 +110,7 @@ public class FriendDisplay : MonoBehaviour
 		this.PopulateLocalPlayerCard();
 	}
 
-	// Token: 0x0600489E RID: 18590 RVA: 0x0017C9F8 File Offset: 0x0017ABF8
+	// Token: 0x0600489E RID: 18590 RVA: 0x0017C9D8 File Offset: 0x0017ABD8
 	public void LocalPlayerFullyHiddenPress()
 	{
 		FriendSystem.Instance.SetLocalPlayerPrivacy(FriendSystem.PlayerPrivacy.Hidden);
@@ -118,7 +118,7 @@ public class FriendDisplay : MonoBehaviour
 		this.PopulateLocalPlayerCard();
 	}
 
-	// Token: 0x0600489F RID: 18591 RVA: 0x0017CA14 File Offset: 0x0017AC14
+	// Token: 0x0600489F RID: 18591 RVA: 0x0017C9F4 File Offset: 0x0017ABF4
 	private void UpdateLocalPlayerPrivacyButtons()
 	{
 		FriendSystem.PlayerPrivacy localPlayerPrivacy = FriendSystem.Instance.LocalPlayerPrivacy;
@@ -127,7 +127,7 @@ public class FriendDisplay : MonoBehaviour
 		this.SetButtonAppearance(this._localPlayerFullyHiddenButton, localPlayerPrivacy == FriendSystem.PlayerPrivacy.Hidden);
 	}
 
-	// Token: 0x060048A0 RID: 18592 RVA: 0x0017CA60 File Offset: 0x0017AC60
+	// Token: 0x060048A0 RID: 18592 RVA: 0x0017CA40 File Offset: 0x0017AC40
 	private void UpdatePageButtons(int selectedPage)
 	{
 		for (int i = 0; i < this.totalPages; i++)
@@ -143,13 +143,13 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048A1 RID: 18593 RVA: 0x0017CAC6 File Offset: 0x0017ACC6
+	// Token: 0x060048A1 RID: 18593 RVA: 0x0017CAA6 File Offset: 0x0017ACA6
 	private void SetButtonAppearance(MeshRenderer buttonRenderer, bool active)
 	{
 		this.SetButtonAppearance(buttonRenderer, active ? FriendDisplay.ButtonState.Active : FriendDisplay.ButtonState.Default);
 	}
 
-	// Token: 0x060048A2 RID: 18594 RVA: 0x0017CAD8 File Offset: 0x0017ACD8
+	// Token: 0x060048A2 RID: 18594 RVA: 0x0017CAB8 File Offset: 0x0017ACB8
 	private void SetButtonAppearance(MeshRenderer buttonRenderer, FriendDisplay.ButtonState state)
 	{
 		Material[] sharedMaterials;
@@ -170,7 +170,7 @@ public class FriendDisplay : MonoBehaviour
 		buttonRenderer.sharedMaterials = sharedMaterials;
 	}
 
-	// Token: 0x060048A3 RID: 18595 RVA: 0x0017CB30 File Offset: 0x0017AD30
+	// Token: 0x060048A3 RID: 18595 RVA: 0x0017CB10 File Offset: 0x0017AD10
 	private void ClearPageButtons()
 	{
 		for (int i = 0; i < this.PageButtons.Length; i++)
@@ -179,13 +179,13 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048A4 RID: 18596 RVA: 0x0017CB5F File Offset: 0x0017AD5F
+	// Token: 0x060048A4 RID: 18596 RVA: 0x0017CB3F File Offset: 0x0017AD3F
 	private void SetPageButtonAppearance(MeshRenderer buttonRenderer, bool active)
 	{
 		this.SetPageButtonAppearance(buttonRenderer, active ? FriendDisplay.ButtonState.Active : FriendDisplay.ButtonState.Default);
 	}
 
-	// Token: 0x060048A5 RID: 18597 RVA: 0x0017CB70 File Offset: 0x0017AD70
+	// Token: 0x060048A5 RID: 18597 RVA: 0x0017CB50 File Offset: 0x0017AD50
 	private void SetPageButtonAppearance(MeshRenderer buttonRenderer, FriendDisplay.ButtonState state)
 	{
 		bool enabled;
@@ -255,7 +255,7 @@ public class FriendDisplay : MonoBehaviour
 		component.enabled = enabled;
 	}
 
-	// Token: 0x060048A6 RID: 18598 RVA: 0x0017CD0C File Offset: 0x0017AF0C
+	// Token: 0x060048A6 RID: 18598 RVA: 0x0017CCEC File Offset: 0x0017AEEC
 	public void ToggleRemoveFriendMode()
 	{
 		this.inRemoveMode = !this.inRemoveMode;
@@ -267,7 +267,7 @@ public class FriendDisplay : MonoBehaviour
 		this.SetButtonAppearance(this._removeFriendButton, this.inRemoveMode ? FriendDisplay.ButtonState.Alert : FriendDisplay.ButtonState.Default);
 	}
 
-	// Token: 0x060048A7 RID: 18599 RVA: 0x0017CD64 File Offset: 0x0017AF64
+	// Token: 0x060048A7 RID: 18599 RVA: 0x0017CD44 File Offset: 0x0017AF44
 	private void InitFriendCards()
 	{
 		float num = this.gridWidth / (float)this.gridDimension;
@@ -294,7 +294,7 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048A8 RID: 18600 RVA: 0x0017CF04 File Offset: 0x0017B104
+	// Token: 0x060048A8 RID: 18600 RVA: 0x0017CEE4 File Offset: 0x0017B0E4
 	public void RandomizeFriendCards()
 	{
 		for (int i = 0; i < this.friendCards.Length; i++)
@@ -303,7 +303,7 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048A9 RID: 18601 RVA: 0x0017CF34 File Offset: 0x0017B134
+	// Token: 0x060048A9 RID: 18601 RVA: 0x0017CF14 File Offset: 0x0017B114
 	private void ClearFriendCards()
 	{
 		for (int i = 0; i < this.friendCards.Length; i++)
@@ -312,7 +312,7 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048AA RID: 18602 RVA: 0x0017CF61 File Offset: 0x0017B161
+	// Token: 0x060048AA RID: 18602 RVA: 0x0017CF41 File Offset: 0x0017B141
 	public void OnGetFriendsReceived(List<FriendBackendController.Friend> friendsList)
 	{
 		this.PopulateFriendCards(friendsList);
@@ -321,7 +321,7 @@ public class FriendDisplay : MonoBehaviour
 		this.UpdatePageButtons(0);
 	}
 
-	// Token: 0x060048AB RID: 18603 RVA: 0x0017CF80 File Offset: 0x0017B180
+	// Token: 0x060048AB RID: 18603 RVA: 0x0017CF60 File Offset: 0x0017B160
 	private void PopulateFriendCards(List<FriendBackendController.Friend> friendsList)
 	{
 		int num = Mathf.Min(this.friendCards.Length, friendsList.Count);
@@ -333,7 +333,7 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048AC RID: 18604 RVA: 0x0017CFCC File Offset: 0x0017B1CC
+	// Token: 0x060048AC RID: 18604 RVA: 0x0017CFAC File Offset: 0x0017B1AC
 	public void GoToFriendPage(int currentPage)
 	{
 		this.UpdatePageButtons(currentPage);
@@ -353,14 +353,14 @@ public class FriendDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060048AD RID: 18605 RVA: 0x0017D078 File Offset: 0x0017B278
+	// Token: 0x060048AD RID: 18605 RVA: 0x0017D058 File Offset: 0x0017B258
 	private void InitLocalPlayerCard()
 	{
 		this._localPlayerCard.Init(this);
 		this.ClearLocalPlayerCard();
 	}
 
-	// Token: 0x060048AE RID: 18606 RVA: 0x0017D08C File Offset: 0x0017B28C
+	// Token: 0x060048AE RID: 18606 RVA: 0x0017D06C File Offset: 0x0017B26C
 	private void PopulateLocalPlayerCard()
 	{
 		string zone = PhotonNetworkController.Instance.CurrentRoomZone.GetName<GTZone>().ToUpper();
@@ -395,13 +395,13 @@ public class FriendDisplay : MonoBehaviour
 		this._localPlayerCard.SetZone(zone);
 	}
 
-	// Token: 0x060048AF RID: 18607 RVA: 0x0017D219 File Offset: 0x0017B419
+	// Token: 0x060048AF RID: 18607 RVA: 0x0017D1F9 File Offset: 0x0017B3F9
 	private void ClearLocalPlayerCard()
 	{
 		this._localPlayerCard.SetEmpty();
 	}
 
-	// Token: 0x060048B0 RID: 18608 RVA: 0x0017D228 File Offset: 0x0017B428
+	// Token: 0x060048B0 RID: 18608 RVA: 0x0017D208 File Offset: 0x0017B408
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.white;

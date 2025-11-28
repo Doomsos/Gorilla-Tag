@@ -5,13 +5,13 @@ using UnityEngine;
 [RequireComponent(typeof(GorillaVelocityEstimator))]
 public class VelocityBasedActivator : MonoBehaviour
 {
-	// Token: 0x0600505C RID: 20572 RVA: 0x0019D7EB File Offset: 0x0019B9EB
+	// Token: 0x0600505C RID: 20572 RVA: 0x0019D7CB File Offset: 0x0019B9CB
 	private void Start()
 	{
 		this.velocityEstimator = base.GetComponent<GorillaVelocityEstimator>();
 	}
 
-	// Token: 0x0600505D RID: 20573 RVA: 0x0019D7FC File Offset: 0x0019B9FC
+	// Token: 0x0600505D RID: 20573 RVA: 0x0019D7DC File Offset: 0x0019B9DC
 	private void Update()
 	{
 		this.k += this.velocityEstimator.linearVelocity.sqrMagnitude;
@@ -26,7 +26,7 @@ public class VelocityBasedActivator : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600505E RID: 20574 RVA: 0x0019D888 File Offset: 0x0019BA88
+	// Token: 0x0600505E RID: 20574 RVA: 0x0019D868 File Offset: 0x0019BA68
 	private void activate(bool v)
 	{
 		this.active = v;
@@ -36,7 +36,7 @@ public class VelocityBasedActivator : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600505F RID: 20575 RVA: 0x0019D8BD File Offset: 0x0019BABD
+	// Token: 0x0600505F RID: 20575 RVA: 0x0019D89D File Offset: 0x0019BA9D
 	private void OnDisable()
 	{
 		if (this.active)

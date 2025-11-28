@@ -11,7 +11,7 @@ using Valve.VR;
 public class PrivateUIRoom : MonoBehaviourTick
 {
 	// Token: 0x170002B3 RID: 691
-	// (get) Token: 0x06001921 RID: 6433 RVA: 0x00085C74 File Offset: 0x00083E74
+	// (get) Token: 0x06001921 RID: 6433 RVA: 0x00085C54 File Offset: 0x00083E54
 	private GTPlayer localPlayer
 	{
 		get
@@ -20,7 +20,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06001922 RID: 6434 RVA: 0x00086798 File Offset: 0x00084998
+	// Token: 0x06001922 RID: 6434 RVA: 0x00086778 File Offset: 0x00084978
 	private void Awake()
 	{
 		if (PrivateUIRoom.instance == null)
@@ -39,21 +39,21 @@ public class PrivateUIRoom : MonoBehaviourTick
 		Object.Destroy(this);
 	}
 
-	// Token: 0x06001923 RID: 6435 RVA: 0x00086830 File Offset: 0x00084A30
+	// Token: 0x06001923 RID: 6435 RVA: 0x00086810 File Offset: 0x00084A10
 	private new void OnEnable()
 	{
 		base.OnEnable();
 		SteamVR_Events.System(406).Listen(new UnityAction<VREvent_t>(this.ToggleHands));
 	}
 
-	// Token: 0x06001924 RID: 6436 RVA: 0x00086853 File Offset: 0x00084A53
+	// Token: 0x06001924 RID: 6436 RVA: 0x00086833 File Offset: 0x00084A33
 	private new void OnDisable()
 	{
 		base.OnDisable();
 		SteamVR_Events.System(406).Remove(new UnityAction<VREvent_t>(this.ToggleHands));
 	}
 
-	// Token: 0x06001925 RID: 6437 RVA: 0x00086878 File Offset: 0x00084A78
+	// Token: 0x06001925 RID: 6437 RVA: 0x00086858 File Offset: 0x00084A58
 	private static bool FindShoulderCamera()
 	{
 		if (PrivateUIRoom._shoulderCameraReference.IsNotNull())
@@ -74,7 +74,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		return true;
 	}
 
-	// Token: 0x06001926 RID: 6438 RVA: 0x000868E0 File Offset: 0x00084AE0
+	// Token: 0x06001926 RID: 6438 RVA: 0x000868C0 File Offset: 0x00084AC0
 	private void ToggleHands(VREvent_t ev)
 	{
 		Debug.Log(string.Format("[PrivateUIRoom::ToggleHands] Toggling hands visibility. Event: {0} ({1})", ev.eventType, ev.eventType));
@@ -87,7 +87,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		this.ShowHands();
 	}
 
-	// Token: 0x06001927 RID: 6439 RVA: 0x00086953 File Offset: 0x00084B53
+	// Token: 0x06001927 RID: 6439 RVA: 0x00086933 File Offset: 0x00084B33
 	private void HideHands()
 	{
 		Debug.Log("[PrivateUIRoom::OnSteamMenuShown] Steam menu shown, disabling hands.");
@@ -95,7 +95,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		PrivateUIRoom.instance.rightHandObject.SetActive(false);
 	}
 
-	// Token: 0x06001928 RID: 6440 RVA: 0x0008697F File Offset: 0x00084B7F
+	// Token: 0x06001928 RID: 6440 RVA: 0x0008695F File Offset: 0x00084B5F
 	private void ShowHands()
 	{
 		Debug.Log("[PrivateUIRoom::OnSteamMenuShown] Steam menu hidden, re-enabling hands.");
@@ -103,7 +103,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		PrivateUIRoom.instance.rightHandObject.SetActive(true);
 	}
 
-	// Token: 0x06001929 RID: 6441 RVA: 0x000869AC File Offset: 0x00084BAC
+	// Token: 0x06001929 RID: 6441 RVA: 0x0008698C File Offset: 0x00084B8C
 	private void ToggleLevelVisibility(bool levelShouldBeVisible)
 	{
 		Camera component = GorillaTagger.Instance.mainCamera.GetComponent<Camera>();
@@ -130,7 +130,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600192A RID: 6442 RVA: 0x00086A60 File Offset: 0x00084C60
+	// Token: 0x0600192A RID: 6442 RVA: 0x00086A40 File Offset: 0x00084C40
 	private static void StopOverlay()
 	{
 		PrivateUIRoom.instance.localPlayer.inOverlay = false;
@@ -146,7 +146,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		Debug.Log("[PrivateUIRoom::StopOverlay] Re-enabling Game Audio");
 	}
 
-	// Token: 0x0600192B RID: 6443 RVA: 0x00086B04 File Offset: 0x00084D04
+	// Token: 0x0600192B RID: 6443 RVA: 0x00086AE4 File Offset: 0x00084CE4
 	private void GetIdealScreenPositionRotation(out Vector3 position, out Quaternion rotation, out Vector3 scale)
 	{
 		GameObject mainCamera = GorillaTagger.Instance.mainCamera;
@@ -155,7 +155,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		position = mainCamera.transform.position + rotation * Vector3.zero * scale.x;
 	}
 
-	// Token: 0x0600192C RID: 6444 RVA: 0x00086B90 File Offset: 0x00084D90
+	// Token: 0x0600192C RID: 6444 RVA: 0x00086B70 File Offset: 0x00084D70
 	private static void AssignShoulderCameraToCanvases(Transform focus)
 	{
 		Debug.Log("[KID::PrivateUIRoom::CanvasCameraAssigner] setting up canvases with shoulder camera.");
@@ -173,7 +173,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		Debug.LogError("[KID::PrivateUIRoom::CanvasCameraAssigner] No Canvas component found on this GameObject.");
 	}
 
-	// Token: 0x0600192D RID: 6445 RVA: 0x00086BEC File Offset: 0x00084DEC
+	// Token: 0x0600192D RID: 6445 RVA: 0x00086BCC File Offset: 0x00084DCC
 	public static void AddUI(Transform focus)
 	{
 		if (PrivateUIRoom.instance.ui.Contains(focus))
@@ -199,7 +199,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		PrivateUIRoom.instance.UpdateUIPositionAndRotation();
 	}
 
-	// Token: 0x0600192E RID: 6446 RVA: 0x00086CD8 File Offset: 0x00084ED8
+	// Token: 0x0600192E RID: 6446 RVA: 0x00086CB8 File Offset: 0x00084EB8
 	public static void RemoveUI(Transform focus)
 	{
 		if (!PrivateUIRoom.instance.ui.Contains(focus))
@@ -233,7 +233,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600192F RID: 6447 RVA: 0x00086DD1 File Offset: 0x00084FD1
+	// Token: 0x0600192F RID: 6447 RVA: 0x00086DB1 File Offset: 0x00084FB1
 	public static void ForceStartOverlay()
 	{
 		if (PrivateUIRoom.instance == null)
@@ -248,7 +248,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		PrivateUIRoom.StartOverlay();
 	}
 
-	// Token: 0x06001930 RID: 6448 RVA: 0x00086DFE File Offset: 0x00084FFE
+	// Token: 0x06001930 RID: 6448 RVA: 0x00086DDE File Offset: 0x00084FDE
 	public static void StopForcedOverlay()
 	{
 		if (PrivateUIRoom.instance == null)
@@ -262,7 +262,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06001931 RID: 6449 RVA: 0x00086E3C File Offset: 0x0008503C
+	// Token: 0x06001931 RID: 6449 RVA: 0x00086E1C File Offset: 0x0008501C
 	private static void StartOverlay()
 	{
 		Vector3 vector;
@@ -284,7 +284,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		Debug.Log("[PrivateUIRoom::StartOverlay] Muting Game Audio");
 	}
 
-	// Token: 0x06001932 RID: 6450 RVA: 0x00086F24 File Offset: 0x00085124
+	// Token: 0x06001932 RID: 6450 RVA: 0x00086F04 File Offset: 0x00085104
 	public override void Tick()
 	{
 		if (!this.localPlayer.InReportMenu)
@@ -307,7 +307,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06001933 RID: 6451 RVA: 0x00086FD4 File Offset: 0x000851D4
+	// Token: 0x06001933 RID: 6451 RVA: 0x00086FB4 File Offset: 0x000851B4
 	private bool ShouldUpdateRotation()
 	{
 		float magnitude = (GorillaTagger.Instance.mainCamera.transform.position - this.lastStablePosition).X_Z().magnitude;
@@ -316,13 +316,13 @@ public class PrivateUIRoom : MonoBehaviourTick
 		return magnitude > this.lateralPlay || num >= this.rotationalPlay;
 	}
 
-	// Token: 0x06001934 RID: 6452 RVA: 0x00087061 File Offset: 0x00085261
+	// Token: 0x06001934 RID: 6452 RVA: 0x00087041 File Offset: 0x00085241
 	private bool ShouldUpdatePosition()
 	{
 		return Mathf.Abs(GorillaTagger.Instance.mainCamera.transform.position.y - this.lastStablePosition.y) > this.verticalPlay;
 	}
 
-	// Token: 0x06001935 RID: 6453 RVA: 0x00087098 File Offset: 0x00085298
+	// Token: 0x06001935 RID: 6453 RVA: 0x00087078 File Offset: 0x00085278
 	private void UpdateUIPositionAndRotation()
 	{
 		Transform transform = GorillaTagger.Instance.mainCamera.transform;
@@ -335,7 +335,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		this.backgroundRenderer.material.SetVector(this.backgroundDirectionPropertyID, this.backgroundRenderer.transform.InverseTransformDirection(normalized));
 	}
 
-	// Token: 0x06001936 RID: 6454 RVA: 0x00087168 File Offset: 0x00085368
+	// Token: 0x06001936 RID: 6454 RVA: 0x00087148 File Offset: 0x00085348
 	private void UpdateUIPosition()
 	{
 		Transform transform = GorillaTagger.Instance.mainCamera.transform;
@@ -344,7 +344,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		PrivateUIRoom._shoulderCameraReference.transform.position = this._uiRoot.position;
 	}
 
-	// Token: 0x06001937 RID: 6455 RVA: 0x000871E0 File Offset: 0x000853E0
+	// Token: 0x06001937 RID: 6455 RVA: 0x000871C0 File Offset: 0x000853C0
 	public static bool GetInOverlay()
 	{
 		return !(PrivateUIRoom.instance == null) && PrivateUIRoom.instance.inOverlay;

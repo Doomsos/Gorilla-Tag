@@ -10,7 +10,7 @@ using UnityEngine.AI;
 // Token: 0x020006AD RID: 1709
 public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySerialize, IGameHittable, IGameAgentComponent, IGameEntityDebugComponent
 {
-	// Token: 0x06002BB4 RID: 11188 RVA: 0x000EAB68 File Offset: 0x000E8D68
+	// Token: 0x06002BB4 RID: 11188 RVA: 0x000EAB48 File Offset: 0x000E8D48
 	private void Awake()
 	{
 		this.rigidBody = base.GetComponent<Rigidbody>();
@@ -30,7 +30,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviorStateChange;
 	}
 
-	// Token: 0x06002BB5 RID: 11189 RVA: 0x000EAC1C File Offset: 0x000E8E1C
+	// Token: 0x06002BB5 RID: 11189 RVA: 0x000EABFC File Offset: 0x000E8DFC
 	public void OnEntityInit()
 	{
 		this.abilityIdle.Setup(this.agent, this.anim, this.audioSource, null, null, null);
@@ -72,14 +72,14 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 	{
 	}
 
-	// Token: 0x06002BB9 RID: 11193 RVA: 0x000EAEA8 File Offset: 0x000E90A8
+	// Token: 0x06002BB9 RID: 11193 RVA: 0x000EAE88 File Offset: 0x000E9088
 	private void OnDestroy()
 	{
 		this.agent.onBodyStateChanged -= this.OnNetworkBodyStateChange;
 		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviorStateChange;
 	}
 
-	// Token: 0x06002BBA RID: 11194 RVA: 0x000EAED8 File Offset: 0x000E90D8
+	// Token: 0x06002BBA RID: 11194 RVA: 0x000EAEB8 File Offset: 0x000E90B8
 	public void Setup(long entityCreateData)
 	{
 		this.SetPatrolPath(entityCreateData);
@@ -99,14 +99,14 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.SetBodyState(GREnemyChaser.BodyState.Bones, true);
 	}
 
-	// Token: 0x06002BBB RID: 11195 RVA: 0x000EAF2B File Offset: 0x000E912B
+	// Token: 0x06002BBB RID: 11195 RVA: 0x000EAF0B File Offset: 0x000E910B
 	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
 	{
 		this.abilityJump.SetupJump(start, end, heightScale, speedScale);
 		this.SetBehavior(GREnemyChaser.Behavior.Jump, false);
 	}
 
-	// Token: 0x06002BBC RID: 11196 RVA: 0x000EAF46 File Offset: 0x000E9146
+	// Token: 0x06002BBC RID: 11196 RVA: 0x000EAF26 File Offset: 0x000E9126
 	public void OnNetworkBehaviorStateChange(byte newState)
 	{
 		if (newState < 0 || newState >= 10)
@@ -116,7 +116,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.SetBehavior((GREnemyChaser.Behavior)newState, false);
 	}
 
-	// Token: 0x06002BBD RID: 11197 RVA: 0x000EAF5A File Offset: 0x000E915A
+	// Token: 0x06002BBD RID: 11197 RVA: 0x000EAF3A File Offset: 0x000E913A
 	public void OnNetworkBodyStateChange(byte newState)
 	{
 		if (newState < 0 || newState >= 3)
@@ -126,26 +126,26 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.SetBodyState((GREnemyChaser.BodyState)newState, false);
 	}
 
-	// Token: 0x06002BBE RID: 11198 RVA: 0x000EAF70 File Offset: 0x000E9170
+	// Token: 0x06002BBE RID: 11198 RVA: 0x000EAF50 File Offset: 0x000E9150
 	public void SetPatrolPath(long entityCreateData)
 	{
 		GRPatrolPath grpatrolPath = GhostReactorManager.Get(this.entity).reactor.GetPatrolPath(entityCreateData);
 		this.abilityPatrol.SetPatrolPath(grpatrolPath);
 	}
 
-	// Token: 0x06002BBF RID: 11199 RVA: 0x000EAFA0 File Offset: 0x000E91A0
+	// Token: 0x06002BBF RID: 11199 RVA: 0x000EAF80 File Offset: 0x000E9180
 	public void SetNextPatrolNode(int nextPatrolNode)
 	{
 		this.abilityPatrol.SetNextPatrolNode(nextPatrolNode);
 	}
 
-	// Token: 0x06002BC0 RID: 11200 RVA: 0x000EAFAE File Offset: 0x000E91AE
+	// Token: 0x06002BC0 RID: 11200 RVA: 0x000EAF8E File Offset: 0x000E918E
 	public void SetHP(int hp)
 	{
 		this.hp = hp;
 	}
 
-	// Token: 0x06002BC1 RID: 11201 RVA: 0x000EAFB7 File Offset: 0x000E91B7
+	// Token: 0x06002BC1 RID: 11201 RVA: 0x000EAF97 File Offset: 0x000E9197
 	public bool TrySetBehavior(GREnemyChaser.Behavior newBehavior)
 	{
 		if (this.currBehavior == GREnemyChaser.Behavior.Jump && newBehavior == GREnemyChaser.Behavior.Stagger)
@@ -160,7 +160,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		return true;
 	}
 
-	// Token: 0x06002BC2 RID: 11202 RVA: 0x000EAFEC File Offset: 0x000E91EC
+	// Token: 0x06002BC2 RID: 11202 RVA: 0x000EAFCC File Offset: 0x000E91CC
 	public void SetBehavior(GREnemyChaser.Behavior newBehavior, bool force = false)
 	{
 		if (this.currBehavior == newBehavior && !force)
@@ -255,7 +255,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	// Token: 0x06002BC3 RID: 11203 RVA: 0x000EB298 File Offset: 0x000E9498
+	// Token: 0x06002BC3 RID: 11203 RVA: 0x000EB278 File Offset: 0x000E9478
 	private void PlayAnim(string animName, float blendTime, float speed)
 	{
 		if (this.anim != null)
@@ -265,7 +265,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	// Token: 0x06002BC4 RID: 11204 RVA: 0x000EB2C8 File Offset: 0x000E94C8
+	// Token: 0x06002BC4 RID: 11204 RVA: 0x000EB2A8 File Offset: 0x000E94A8
 	public void SetBodyState(GREnemyChaser.BodyState newBodyState, bool force = false)
 	{
 		if (this.currBodyState == newBodyState && !force)
@@ -301,7 +301,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	// Token: 0x06002BC5 RID: 11205 RVA: 0x000EB3A0 File Offset: 0x000E95A0
+	// Token: 0x06002BC5 RID: 11205 RVA: 0x000EB380 File Offset: 0x000E9580
 	private void RefreshBody()
 	{
 		switch (this.currBodyState)
@@ -326,13 +326,13 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	// Token: 0x06002BC6 RID: 11206 RVA: 0x000EB43A File Offset: 0x000E963A
+	// Token: 0x06002BC6 RID: 11206 RVA: 0x000EB41A File Offset: 0x000E961A
 	private void Update()
 	{
 		this.OnUpdate(Time.deltaTime);
 	}
 
-	// Token: 0x06002BC7 RID: 11207 RVA: 0x000EB448 File Offset: 0x000E9648
+	// Token: 0x06002BC7 RID: 11207 RVA: 0x000EB428 File Offset: 0x000E9628
 	public void OnEntityThink(float dt)
 	{
 		if (!this.entity.IsAuthority())
@@ -374,7 +374,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	// Token: 0x06002BC8 RID: 11208 RVA: 0x000EB544 File Offset: 0x000E9744
+	// Token: 0x06002BC8 RID: 11208 RVA: 0x000EB524 File Offset: 0x000E9724
 	private void ChooseNewBehavior()
 	{
 		if (!GhostReactorManager.AggroDisabled && this.senseNearby.IsAnyoneNearby())
@@ -418,7 +418,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.SetBehavior(GREnemyChaser.Behavior.Idle, false);
 	}
 
-	// Token: 0x06002BC9 RID: 11209 RVA: 0x000EB715 File Offset: 0x000E9915
+	// Token: 0x06002BC9 RID: 11209 RVA: 0x000EB6F5 File Offset: 0x000E98F5
 	public void OnUpdate(float dt)
 	{
 		if (this.entity.IsAuthority())
@@ -429,7 +429,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.OnUpdateRemote(dt);
 	}
 
-	// Token: 0x06002BCA RID: 11210 RVA: 0x000EB734 File Offset: 0x000E9934
+	// Token: 0x06002BCA RID: 11210 RVA: 0x000EB714 File Offset: 0x000E9914
 	public void OnUpdateAuthority(float dt)
 	{
 		switch (this.currBehavior)
@@ -529,7 +529,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	// Token: 0x06002BCB RID: 11211 RVA: 0x000EB948 File Offset: 0x000E9B48
+	// Token: 0x06002BCB RID: 11211 RVA: 0x000EB928 File Offset: 0x000E9B28
 	public void OnUpdateRemote(float dt)
 	{
 		switch (this.currBehavior)
@@ -569,7 +569,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	// Token: 0x06002BCC RID: 11212 RVA: 0x000EBA0C File Offset: 0x000E9C0C
+	// Token: 0x06002BCC RID: 11212 RVA: 0x000EB9EC File Offset: 0x000E9BEC
 	public void OnHitByClub(GRTool tool, GameHitData hit)
 	{
 		if (this.currBodyState != GREnemyChaser.BodyState.Bones)
@@ -607,7 +607,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.TrySetBehavior(GREnemyChaser.Behavior.Stagger);
 	}
 
-	// Token: 0x06002BCD RID: 11213 RVA: 0x000EBB84 File Offset: 0x000E9D84
+	// Token: 0x06002BCD RID: 11213 RVA: 0x000EBB64 File Offset: 0x000E9D64
 	public void OnHitByFlash(GRTool grTool, GameHitData hit)
 	{
 		if (this.currBodyState == GREnemyChaser.BodyState.Shell)
@@ -663,14 +663,14 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.TrySetBehavior(GREnemyChaser.Behavior.Flashed);
 	}
 
-	// Token: 0x06002BCE RID: 11214 RVA: 0x000EBD3E File Offset: 0x000E9F3E
+	// Token: 0x06002BCE RID: 11214 RVA: 0x000EBD1E File Offset: 0x000E9F1E
 	public void OnHitByShield(GRTool tool, GameHitData hit)
 	{
 		Debug.Log(string.Format("Chaser On Hit By Shield dmg:{0} impulse:{1} size:{2}", hit.hitAmount, hit.hitImpulse, hit.hitImpulse.magnitude));
 		this.OnHitByClub(tool, hit);
 	}
 
-	// Token: 0x06002BCF RID: 11215 RVA: 0x000EBD80 File Offset: 0x000E9F80
+	// Token: 0x06002BCF RID: 11215 RVA: 0x000EBD60 File Offset: 0x000E9F60
 	private void OnTriggerEnter(Collider collider)
 	{
 		if (this.currBodyState == GREnemyChaser.BodyState.Destroyed)
@@ -718,7 +718,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	// Token: 0x06002BD0 RID: 11216 RVA: 0x000EBED8 File Offset: 0x000EA0D8
+	// Token: 0x06002BD0 RID: 11216 RVA: 0x000EBEB8 File Offset: 0x000EA0B8
 	private IEnumerator TryHitPlayer(GRPlayer player)
 	{
 		yield return new WaitForUpdate();
@@ -730,7 +730,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		yield break;
 	}
 
-	// Token: 0x06002BD1 RID: 11217 RVA: 0x000EBEF0 File Offset: 0x000EA0F0
+	// Token: 0x06002BD1 RID: 11217 RVA: 0x000EBED0 File Offset: 0x000EA0D0
 	public void GetDebugTextLines(out List<string> strings)
 	{
 		strings = new List<string>();
@@ -738,7 +738,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		strings.Add(string.Format("speed: <color=\"yellow\">{0}<color=\"white\"> patrol node:<color=\"yellow\">{1}/{2}<color=\"white\">", this.navAgent.speed, this.abilityPatrol.nextPatrolNode, (this.abilityPatrol.GetPatrolPath() != null) ? this.abilityPatrol.GetPatrolPath().patrolNodes.Count : 0));
 	}
 
-	// Token: 0x06002BD2 RID: 11218 RVA: 0x000EBF94 File Offset: 0x000EA194
+	// Token: 0x06002BD2 RID: 11218 RVA: 0x000EBF74 File Offset: 0x000EA174
 	public void OnGameEntitySerialize(BinaryWriter writer)
 	{
 		byte b = (byte)this.currBehavior;
@@ -752,7 +752,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		writer.Write(num);
 	}
 
-	// Token: 0x06002BD3 RID: 11219 RVA: 0x000EC000 File Offset: 0x000EA200
+	// Token: 0x06002BD3 RID: 11219 RVA: 0x000EBFE0 File Offset: 0x000EA1E0
 	public void OnGameEntityDeserialize(BinaryReader reader)
 	{
 		GREnemyChaser.Behavior newBehavior = (GREnemyChaser.Behavior)reader.ReadByte();
@@ -774,7 +774,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		return true;
 	}
 
-	// Token: 0x06002BD5 RID: 11221 RVA: 0x000EC074 File Offset: 0x000EA274
+	// Token: 0x06002BD5 RID: 11221 RVA: 0x000EC054 File Offset: 0x000EA254
 	public void OnHit(GameHitData hit)
 	{
 		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;

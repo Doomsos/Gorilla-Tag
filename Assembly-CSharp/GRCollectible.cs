@@ -9,7 +9,7 @@ public class GRCollectible : MonoBehaviour, IGameEntityComponent
 	{
 	}
 
-	// Token: 0x06002AEC RID: 10988 RVA: 0x000E7020 File Offset: 0x000E5220
+	// Token: 0x06002AEC RID: 10988 RVA: 0x000E7000 File Offset: 0x000E5200
 	public void OnEntityInit()
 	{
 		GameEntityManager manager = this.entity.manager;
@@ -34,7 +34,7 @@ public class GRCollectible : MonoBehaviour, IGameEntityComponent
 	{
 	}
 
-	// Token: 0x06002AEF RID: 10991 RVA: 0x000E7070 File Offset: 0x000E5270
+	// Token: 0x06002AEF RID: 10991 RVA: 0x000E7050 File Offset: 0x000E5250
 	public void InvokeOnCollected()
 	{
 		Action onCollected = this.OnCollected;

@@ -8,7 +8,7 @@ using UnityEngine;
 [RequireComponent(typeof(PhotonView))]
 internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiateMagicCallback
 {
-	// Token: 0x0600308E RID: 12430 RVA: 0x00109C74 File Offset: 0x00107E74
+	// Token: 0x0600308E RID: 12430 RVA: 0x00109C54 File Offset: 0x00107E54
 	void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (!this.successfullInstantiate || this.serializeTarget == null || !this.ValidOnSerialize(stream, info))
@@ -23,7 +23,7 @@ internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiat
 		this.serializeTarget.OnSerializeWrite(stream, info);
 	}
 
-	// Token: 0x0600308F RID: 12431 RVA: 0x00109CC0 File Offset: 0x00107EC0
+	// Token: 0x0600308F RID: 12431 RVA: 0x00109CA0 File Offset: 0x00107EA0
 	public virtual void OnPhotonInstantiate(PhotonMessageInfo info)
 	{
 		if (this.photonView == null)
@@ -67,7 +67,7 @@ internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiat
 	{
 	}
 
-	// Token: 0x06003091 RID: 12433 RVA: 0x00109D96 File Offset: 0x00107F96
+	// Token: 0x06003091 RID: 12433 RVA: 0x00109D76 File Offset: 0x00107F76
 	protected virtual bool OnInstantiateSetup(PhotonMessageInfo info, out GameObject outTargetObject, out Type outTargetType)
 	{
 		outTargetType = typeof(IGorillaSerializeable);
@@ -75,13 +75,13 @@ internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiat
 		return true;
 	}
 
-	// Token: 0x06003092 RID: 12434 RVA: 0x00109DAD File Offset: 0x00107FAD
+	// Token: 0x06003092 RID: 12434 RVA: 0x00109D8D File Offset: 0x00107F8D
 	protected virtual bool ValidOnSerialize(PhotonStream stream, in PhotonMessageInfo info)
 	{
 		return info.Sender == info.photonView.Owner;
 	}
 
-	// Token: 0x06003093 RID: 12435 RVA: 0x00109DC5 File Offset: 0x00107FC5
+	// Token: 0x06003093 RID: 12435 RVA: 0x00109DA5 File Offset: 0x00107FA5
 	public virtual T AddRPCComponent<T>() where T : RPCNetworkBase
 	{
 		T result = base.gameObject.AddComponent<T>();
@@ -89,14 +89,14 @@ internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiat
 		return result;
 	}
 
-	// Token: 0x06003094 RID: 12436 RVA: 0x00109DE0 File Offset: 0x00107FE0
+	// Token: 0x06003094 RID: 12436 RVA: 0x00109DC0 File Offset: 0x00107FC0
 	public void SendRPC(string rpcName, bool targetOthers, params object[] data)
 	{
 		RpcTarget rpcTarget = targetOthers ? 1 : 2;
 		this.photonView.RPC(rpcName, rpcTarget, data);
 	}
 
-	// Token: 0x06003095 RID: 12437 RVA: 0x00109E03 File Offset: 0x00108003
+	// Token: 0x06003095 RID: 12437 RVA: 0x00109DE3 File Offset: 0x00107FE3
 	public void SendRPC(string rpcName, Player targetPlayer, params object[] data)
 	{
 		this.photonView.RPC(rpcName, targetPlayer, data);

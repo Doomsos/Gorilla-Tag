@@ -5,7 +5,7 @@ using UnityEngine;
 public class RangedFloat : MonoBehaviour, IRangedVariable<float>, IVariable<float>, IVariable
 {
 	// Token: 0x17000554 RID: 1364
-	// (get) Token: 0x06003A12 RID: 14866 RVA: 0x00133487 File Offset: 0x00131687
+	// (get) Token: 0x06003A12 RID: 14866 RVA: 0x00133467 File Offset: 0x00131667
 	public AnimationCurve Curve
 	{
 		get
@@ -15,7 +15,7 @@ public class RangedFloat : MonoBehaviour, IRangedVariable<float>, IVariable<floa
 	}
 
 	// Token: 0x17000555 RID: 1365
-	// (get) Token: 0x06003A13 RID: 14867 RVA: 0x0013348F File Offset: 0x0013168F
+	// (get) Token: 0x06003A13 RID: 14867 RVA: 0x0013346F File Offset: 0x0013166F
 	public float Range
 	{
 		get
@@ -25,8 +25,8 @@ public class RangedFloat : MonoBehaviour, IRangedVariable<float>, IVariable<floa
 	}
 
 	// Token: 0x17000556 RID: 1366
-	// (get) Token: 0x06003A14 RID: 14868 RVA: 0x0013349E File Offset: 0x0013169E
-	// (set) Token: 0x06003A15 RID: 14869 RVA: 0x001334A6 File Offset: 0x001316A6
+	// (get) Token: 0x06003A14 RID: 14868 RVA: 0x0013347E File Offset: 0x0013167E
+	// (set) Token: 0x06003A15 RID: 14869 RVA: 0x00133486 File Offset: 0x00131686
 	public float Min
 	{
 		get
@@ -40,8 +40,8 @@ public class RangedFloat : MonoBehaviour, IRangedVariable<float>, IVariable<floa
 	}
 
 	// Token: 0x17000557 RID: 1367
-	// (get) Token: 0x06003A16 RID: 14870 RVA: 0x001334AF File Offset: 0x001316AF
-	// (set) Token: 0x06003A17 RID: 14871 RVA: 0x001334B7 File Offset: 0x001316B7
+	// (get) Token: 0x06003A16 RID: 14870 RVA: 0x0013348F File Offset: 0x0013168F
+	// (set) Token: 0x06003A17 RID: 14871 RVA: 0x00133497 File Offset: 0x00131697
 	public float Max
 	{
 		get
@@ -55,8 +55,8 @@ public class RangedFloat : MonoBehaviour, IRangedVariable<float>, IVariable<floa
 	}
 
 	// Token: 0x17000558 RID: 1368
-	// (get) Token: 0x06003A18 RID: 14872 RVA: 0x001334C0 File Offset: 0x001316C0
-	// (set) Token: 0x06003A19 RID: 14873 RVA: 0x001334F5 File Offset: 0x001316F5
+	// (get) Token: 0x06003A18 RID: 14872 RVA: 0x001334A0 File Offset: 0x001316A0
+	// (set) Token: 0x06003A19 RID: 14873 RVA: 0x001334D5 File Offset: 0x001316D5
 	public float normalized
 	{
 		get
@@ -74,7 +74,7 @@ public class RangedFloat : MonoBehaviour, IRangedVariable<float>, IVariable<floa
 	}
 
 	// Token: 0x17000559 RID: 1369
-	// (get) Token: 0x06003A1A RID: 14874 RVA: 0x00133518 File Offset: 0x00131718
+	// (get) Token: 0x06003A1A RID: 14874 RVA: 0x001334F8 File Offset: 0x001316F8
 	public float curved
 	{
 		get
@@ -83,13 +83,13 @@ public class RangedFloat : MonoBehaviour, IRangedVariable<float>, IVariable<floa
 		}
 	}
 
-	// Token: 0x06003A1B RID: 14875 RVA: 0x00133540 File Offset: 0x00131740
+	// Token: 0x06003A1B RID: 14875 RVA: 0x00133520 File Offset: 0x00131720
 	public float Get()
 	{
 		return this._value;
 	}
 
-	// Token: 0x06003A1C RID: 14876 RVA: 0x00133548 File Offset: 0x00131748
+	// Token: 0x06003A1C RID: 14876 RVA: 0x00133528 File Offset: 0x00131728
 	public void Set(float f)
 	{
 		this._value = Mathf.Clamp(f, this._min, this._max);

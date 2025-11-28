@@ -8,7 +8,7 @@ using UnityEngine;
 [StructLayout(2, Size = 64)]
 public struct m4x4
 {
-	// Token: 0x0600408E RID: 16526 RVA: 0x00159674 File Offset: 0x00157874
+	// Token: 0x0600408E RID: 16526 RVA: 0x00159654 File Offset: 0x00157854
 	public m4x4(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33)
 	{
 		this = default(m4x4);
@@ -30,7 +30,7 @@ public struct m4x4
 		this.m33 = m33;
 	}
 
-	// Token: 0x0600408F RID: 16527 RVA: 0x00159705 File Offset: 0x00157905
+	// Token: 0x0600408F RID: 16527 RVA: 0x001596E5 File Offset: 0x001578E5
 	public m4x4(Vector4 row0, Vector4 row1, Vector4 row2, Vector4 row3)
 	{
 		this = default(m4x4);
@@ -40,7 +40,7 @@ public struct m4x4
 		this.r3 = row3;
 	}
 
-	// Token: 0x06004090 RID: 16528 RVA: 0x0015972C File Offset: 0x0015792C
+	// Token: 0x06004090 RID: 16528 RVA: 0x0015970C File Offset: 0x0015790C
 	public void Clear()
 	{
 		this.m00 = 0f;
@@ -61,7 +61,7 @@ public struct m4x4
 		this.m33 = 0f;
 	}
 
-	// Token: 0x06004091 RID: 16529 RVA: 0x001597E9 File Offset: 0x001579E9
+	// Token: 0x06004091 RID: 16529 RVA: 0x001597C9 File Offset: 0x001579C9
 	public void SetRow0(ref Vector4 v)
 	{
 		this.m00 = v.x;
@@ -70,7 +70,7 @@ public struct m4x4
 		this.m03 = v.w;
 	}
 
-	// Token: 0x06004092 RID: 16530 RVA: 0x0015981B File Offset: 0x00157A1B
+	// Token: 0x06004092 RID: 16530 RVA: 0x001597FB File Offset: 0x001579FB
 	public void SetRow1(ref Vector4 v)
 	{
 		this.m10 = v.x;
@@ -79,7 +79,7 @@ public struct m4x4
 		this.m13 = v.w;
 	}
 
-	// Token: 0x06004093 RID: 16531 RVA: 0x0015984D File Offset: 0x00157A4D
+	// Token: 0x06004093 RID: 16531 RVA: 0x0015982D File Offset: 0x00157A2D
 	public void SetRow2(ref Vector4 v)
 	{
 		this.m20 = v.x;
@@ -88,7 +88,7 @@ public struct m4x4
 		this.m23 = v.w;
 	}
 
-	// Token: 0x06004094 RID: 16532 RVA: 0x0015987F File Offset: 0x00157A7F
+	// Token: 0x06004094 RID: 16532 RVA: 0x0015985F File Offset: 0x00157A5F
 	public void SetRow3(ref Vector4 v)
 	{
 		this.m30 = v.x;
@@ -97,7 +97,7 @@ public struct m4x4
 		this.m33 = v.w;
 	}
 
-	// Token: 0x06004095 RID: 16533 RVA: 0x001598B4 File Offset: 0x00157AB4
+	// Token: 0x06004095 RID: 16533 RVA: 0x00159894 File Offset: 0x00157A94
 	public void Transpose()
 	{
 		float num = this.m01;
@@ -126,7 +126,7 @@ public struct m4x4
 		this.m32 = num9;
 	}
 
-	// Token: 0x06004096 RID: 16534 RVA: 0x00159979 File Offset: 0x00157B79
+	// Token: 0x06004096 RID: 16534 RVA: 0x00159959 File Offset: 0x00157B59
 	public void Set(ref Vector4 row0, ref Vector4 row1, ref Vector4 row2, ref Vector4 row3)
 	{
 		this.r0 = row0;
@@ -135,7 +135,7 @@ public struct m4x4
 		this.r3 = row3;
 	}
 
-	// Token: 0x06004097 RID: 16535 RVA: 0x001599AC File Offset: 0x00157BAC
+	// Token: 0x06004097 RID: 16535 RVA: 0x0015998C File Offset: 0x00157B8C
 	public void SetTransposed(ref Vector4 row0, ref Vector4 row1, ref Vector4 row2, ref Vector4 row3)
 	{
 		this.m00 = row0.x;
@@ -156,7 +156,7 @@ public struct m4x4
 		this.m33 = row3.w;
 	}
 
-	// Token: 0x06004098 RID: 16536 RVA: 0x00159A80 File Offset: 0x00157C80
+	// Token: 0x06004098 RID: 16536 RVA: 0x00159A60 File Offset: 0x00157C60
 	public void Set(ref Matrix4x4 x)
 	{
 		this.m00 = x.m00;
@@ -177,7 +177,7 @@ public struct m4x4
 		this.m33 = x.m33;
 	}
 
-	// Token: 0x06004099 RID: 16537 RVA: 0x00159B50 File Offset: 0x00157D50
+	// Token: 0x06004099 RID: 16537 RVA: 0x00159B30 File Offset: 0x00157D30
 	public void SetTransposed(ref Matrix4x4 x)
 	{
 		this.m00 = x.m00;
@@ -198,7 +198,7 @@ public struct m4x4
 		this.m33 = x.m33;
 	}
 
-	// Token: 0x0600409A RID: 16538 RVA: 0x00159C20 File Offset: 0x00157E20
+	// Token: 0x0600409A RID: 16538 RVA: 0x00159C00 File Offset: 0x00157E00
 	public void Push(ref Matrix4x4 x)
 	{
 		x.m00 = this.m00;
@@ -219,7 +219,7 @@ public struct m4x4
 		x.m33 = this.m33;
 	}
 
-	// Token: 0x0600409B RID: 16539 RVA: 0x00159CF0 File Offset: 0x00157EF0
+	// Token: 0x0600409B RID: 16539 RVA: 0x00159CD0 File Offset: 0x00157ED0
 	public void PushTransposed(ref Matrix4x4 x)
 	{
 		x.m00 = this.m00;
@@ -240,7 +240,7 @@ public struct m4x4
 		x.m33 = this.m33;
 	}
 
-	// Token: 0x0600409C RID: 16540 RVA: 0x00159DBD File Offset: 0x00157FBD
+	// Token: 0x0600409C RID: 16540 RVA: 0x00159D9D File Offset: 0x00157F9D
 	public static ref m4x4 From(ref Matrix4x4 src)
 	{
 		return Unsafe.As<Matrix4x4, m4x4>(ref src);

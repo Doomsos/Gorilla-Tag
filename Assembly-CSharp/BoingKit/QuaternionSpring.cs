@@ -7,8 +7,8 @@ namespace BoingKit
 	public struct QuaternionSpring
 	{
 		// Token: 0x17000AB5 RID: 2741
-		// (get) Token: 0x060072B2 RID: 29362 RVA: 0x00259B7B File Offset: 0x00257D7B
-		// (set) Token: 0x060072B3 RID: 29363 RVA: 0x00259B89 File Offset: 0x00257D89
+		// (get) Token: 0x060072B2 RID: 29362 RVA: 0x00259B5B File Offset: 0x00257D5B
+		// (set) Token: 0x060072B3 RID: 29363 RVA: 0x00259B69 File Offset: 0x00257D69
 		public Quaternion ValueQuat
 		{
 			get
@@ -21,42 +21,42 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x060072B4 RID: 29364 RVA: 0x00259B97 File Offset: 0x00257D97
+		// Token: 0x060072B4 RID: 29364 RVA: 0x00259B77 File Offset: 0x00257D77
 		public void Reset()
 		{
 			this.ValueVec = QuaternionUtil.ToVector4(Quaternion.identity);
 			this.VelocityVec = Vector4.zero;
 		}
 
-		// Token: 0x060072B5 RID: 29365 RVA: 0x00259BB4 File Offset: 0x00257DB4
+		// Token: 0x060072B5 RID: 29365 RVA: 0x00259B94 File Offset: 0x00257D94
 		public void Reset(Vector4 initValue)
 		{
 			this.ValueVec = initValue;
 			this.VelocityVec = Vector4.zero;
 		}
 
-		// Token: 0x060072B6 RID: 29366 RVA: 0x00259BC8 File Offset: 0x00257DC8
+		// Token: 0x060072B6 RID: 29366 RVA: 0x00259BA8 File Offset: 0x00257DA8
 		public void Reset(Vector4 initValue, Vector4 initVelocity)
 		{
 			this.ValueVec = initValue;
 			this.VelocityVec = initVelocity;
 		}
 
-		// Token: 0x060072B7 RID: 29367 RVA: 0x00259BD8 File Offset: 0x00257DD8
+		// Token: 0x060072B7 RID: 29367 RVA: 0x00259BB8 File Offset: 0x00257DB8
 		public void Reset(Quaternion initValue)
 		{
 			this.ValueVec = QuaternionUtil.ToVector4(initValue);
 			this.VelocityVec = Vector4.zero;
 		}
 
-		// Token: 0x060072B8 RID: 29368 RVA: 0x00259BF1 File Offset: 0x00257DF1
+		// Token: 0x060072B8 RID: 29368 RVA: 0x00259BD1 File Offset: 0x00257DD1
 		public void Reset(Quaternion initValue, Quaternion initVelocity)
 		{
 			this.ValueVec = QuaternionUtil.ToVector4(initValue);
 			this.VelocityVec = QuaternionUtil.ToVector4(initVelocity);
 		}
 
-		// Token: 0x060072B9 RID: 29369 RVA: 0x00259C0C File Offset: 0x00257E0C
+		// Token: 0x060072B9 RID: 29369 RVA: 0x00259BEC File Offset: 0x00257DEC
 		public Quaternion TrackDampingRatio(Vector4 targetValueVec, float angularFrequency, float dampingRatio, float deltaTime)
 		{
 			if (angularFrequency < MathUtil.Epsilon)
@@ -86,13 +86,13 @@ namespace BoingKit
 			return QuaternionUtil.FromVector4(this.ValueVec, true);
 		}
 
-		// Token: 0x060072BA RID: 29370 RVA: 0x00259D31 File Offset: 0x00257F31
+		// Token: 0x060072BA RID: 29370 RVA: 0x00259D11 File Offset: 0x00257F11
 		public Quaternion TrackDampingRatio(Quaternion targetValue, float angularFrequency, float dampingRatio, float deltaTime)
 		{
 			return this.TrackDampingRatio(QuaternionUtil.ToVector4(targetValue), angularFrequency, dampingRatio, deltaTime);
 		}
 
-		// Token: 0x060072BB RID: 29371 RVA: 0x00259D44 File Offset: 0x00257F44
+		// Token: 0x060072BB RID: 29371 RVA: 0x00259D24 File Offset: 0x00257F24
 		public Quaternion TrackHalfLife(Vector4 targetValueVec, float frequencyHz, float halfLife, float deltaTime)
 		{
 			if (halfLife < MathUtil.Epsilon)
@@ -106,7 +106,7 @@ namespace BoingKit
 			return this.TrackDampingRatio(targetValueVec, num, dampingRatio, deltaTime);
 		}
 
-		// Token: 0x060072BC RID: 29372 RVA: 0x00259D90 File Offset: 0x00257F90
+		// Token: 0x060072BC RID: 29372 RVA: 0x00259D70 File Offset: 0x00257F70
 		public Quaternion TrackHalfLife(Quaternion targetValue, float frequencyHz, float halfLife, float deltaTime)
 		{
 			if (halfLife < MathUtil.Epsilon)
@@ -120,7 +120,7 @@ namespace BoingKit
 			return this.TrackDampingRatio(targetValue, num, dampingRatio, deltaTime);
 		}
 
-		// Token: 0x060072BD RID: 29373 RVA: 0x00259DE0 File Offset: 0x00257FE0
+		// Token: 0x060072BD RID: 29373 RVA: 0x00259DC0 File Offset: 0x00257FC0
 		public Quaternion TrackExponential(Vector4 targetValueVec, float halfLife, float deltaTime)
 		{
 			if (halfLife < MathUtil.Epsilon)
@@ -134,7 +134,7 @@ namespace BoingKit
 			return this.TrackDampingRatio(targetValueVec, angularFrequency, dampingRatio, deltaTime);
 		}
 
-		// Token: 0x060072BE RID: 29374 RVA: 0x00259E28 File Offset: 0x00258028
+		// Token: 0x060072BE RID: 29374 RVA: 0x00259E08 File Offset: 0x00258008
 		public Quaternion TrackExponential(Quaternion targetValue, float halfLife, float deltaTime)
 		{
 			if (halfLife < MathUtil.Epsilon)

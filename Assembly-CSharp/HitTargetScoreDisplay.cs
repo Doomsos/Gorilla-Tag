@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000412 RID: 1042
 public class HitTargetScoreDisplay : MonoBehaviour
 {
-	// Token: 0x060019A7 RID: 6567 RVA: 0x00089288 File Offset: 0x00087488
+	// Token: 0x060019A7 RID: 6567 RVA: 0x00089268 File Offset: 0x00087468
 	protected void Awake()
 	{
 		this.rotateTimeTotal = 180f / (float)this.rotateSpeed;
@@ -21,13 +21,13 @@ public class HitTargetScoreDisplay : MonoBehaviour
 		this.hundredsRend.SetPropertyBlock(this.matPropBlock);
 	}
 
-	// Token: 0x060019A8 RID: 6568 RVA: 0x0008932E File Offset: 0x0008752E
+	// Token: 0x060019A8 RID: 6568 RVA: 0x0008930E File Offset: 0x0008750E
 	private void OnDestroy()
 	{
 		this.networkedScore.RemoveCallback(new Action<int>(this.OnScoreChanged));
 	}
 
-	// Token: 0x060019A9 RID: 6569 RVA: 0x00089348 File Offset: 0x00087548
+	// Token: 0x060019A9 RID: 6569 RVA: 0x00089328 File Offset: 0x00087528
 	private void ResetRotation()
 	{
 		Quaternion rotation = base.transform.rotation;
@@ -36,7 +36,7 @@ public class HitTargetScoreDisplay : MonoBehaviour
 		this.hundredsCard.rotation = rotation;
 	}
 
-	// Token: 0x060019AA RID: 6570 RVA: 0x00089385 File Offset: 0x00087585
+	// Token: 0x060019AA RID: 6570 RVA: 0x00089365 File Offset: 0x00087565
 	private IEnumerator RotatingCo()
 	{
 		float timeElapsedSinceHit = 0f;
@@ -92,7 +92,7 @@ public class HitTargetScoreDisplay : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060019AB RID: 6571 RVA: 0x00089394 File Offset: 0x00087594
+	// Token: 0x060019AB RID: 6571 RVA: 0x00089374 File Offset: 0x00087574
 	private void OnScoreChanged(int newScore)
 	{
 		if (newScore == this.currentScore)

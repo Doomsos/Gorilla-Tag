@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000621 RID: 1569
 public class GameHitter : MonoBehaviour, IGameEntityComponent
 {
-	// Token: 0x060027DB RID: 10203 RVA: 0x000D415A File Offset: 0x000D235A
+	// Token: 0x060027DB RID: 10203 RVA: 0x000D413A File Offset: 0x000D233A
 	private void Awake()
 	{
 		this.components = new List<IGameHitter>(1);
@@ -15,7 +15,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		this.attributes = base.GetComponent<GRAttributes>();
 	}
 
-	// Token: 0x060027DC RID: 10204 RVA: 0x000D4180 File Offset: 0x000D2380
+	// Token: 0x060027DC RID: 10204 RVA: 0x000D4160 File Offset: 0x000D2360
 	public void OnEntityInit()
 	{
 		GRTool component = base.GetComponent<GRTool>();
@@ -36,7 +36,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 	{
 	}
 
-	// Token: 0x060027DF RID: 10207 RVA: 0x000D41B6 File Offset: 0x000D23B6
+	// Token: 0x060027DF RID: 10207 RVA: 0x000D4196 File Offset: 0x000D2396
 	private void OnToolUpgraded(GRTool tool)
 	{
 		if (this.attributes.HasValueForAttribute(GRAttributeType.KnockbackMultiplier))
@@ -45,7 +45,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x060027E0 RID: 10208 RVA: 0x000D41DC File Offset: 0x000D23DC
+	// Token: 0x060027E0 RID: 10208 RVA: 0x000D41BC File Offset: 0x000D23BC
 	public void ApplyHit(GameHitData hitData)
 	{
 		if (this.hitFx.hitSound != null)
@@ -80,7 +80,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x060027E1 RID: 10209 RVA: 0x000D42F0 File Offset: 0x000D24F0
+	// Token: 0x060027E1 RID: 10209 RVA: 0x000D42D0 File Offset: 0x000D24D0
 	public void ApplyHitToPlayer(GRPlayer player, Vector3 hitPosition)
 	{
 		this.hitFx.hitSound.Play(null);
@@ -94,7 +94,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x060027E2 RID: 10210 RVA: 0x000D435C File Offset: 0x000D255C
+	// Token: 0x060027E2 RID: 10210 RVA: 0x000D433C File Offset: 0x000D253C
 	private void PlayVibration(float strength, float duration)
 	{
 		if (!this.gameEntity.IsHeldByLocalPlayer())
@@ -114,7 +114,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), strength, duration);
 	}
 
-	// Token: 0x060027E3 RID: 10211 RVA: 0x000D43BC File Offset: 0x000D25BC
+	// Token: 0x060027E3 RID: 10211 RVA: 0x000D439C File Offset: 0x000D259C
 	private T GetParentEnemy<T>(Collider collider) where T : MonoBehaviour
 	{
 		Transform transform = collider.transform;
@@ -130,7 +130,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		return default(T);
 	}
 
-	// Token: 0x060027E4 RID: 10212 RVA: 0x000D4404 File Offset: 0x000D2604
+	// Token: 0x060027E4 RID: 10212 RVA: 0x000D43E4 File Offset: 0x000D25E4
 	public int CalcHitAmount(GameHitType hitType, GameHittable hittable, GameEntity hitByEntity)
 	{
 		int result = 0;
@@ -156,7 +156,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		return result;
 	}
 
-	// Token: 0x060027E5 RID: 10213 RVA: 0x000D446C File Offset: 0x000D266C
+	// Token: 0x060027E5 RID: 10213 RVA: 0x000D444C File Offset: 0x000D264C
 	private void OnCollisionEnter(Collision collision)
 	{
 		if (!this.hitOnCollision)

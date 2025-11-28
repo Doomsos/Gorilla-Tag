@@ -11,12 +11,12 @@ using UnityEngine;
 public struct FlockingData : INetworkStruct
 {
 	// Token: 0x170003D1 RID: 977
-	// (get) Token: 0x06002620 RID: 9760 RVA: 0x000CBE68 File Offset: 0x000CA068
-	// (set) Token: 0x06002621 RID: 9761 RVA: 0x000CBE70 File Offset: 0x000CA070
+	// (get) Token: 0x06002620 RID: 9760 RVA: 0x000CBE48 File Offset: 0x000CA048
+	// (set) Token: 0x06002621 RID: 9761 RVA: 0x000CBE50 File Offset: 0x000CA050
 	public int count { readonly get; set; }
 
 	// Token: 0x170003D2 RID: 978
-	// (get) Token: 0x06002622 RID: 9762 RVA: 0x000CBE7C File Offset: 0x000CA07C
+	// (get) Token: 0x06002622 RID: 9762 RVA: 0x000CBE5C File Offset: 0x000CA05C
 	[Networked]
 	[Capacity(30)]
 	[NetworkedWeavedLinkedList(30, 3, typeof(ElementReaderWriterVector3))]
@@ -30,7 +30,7 @@ public struct FlockingData : INetworkStruct
 	}
 
 	// Token: 0x170003D3 RID: 979
-	// (get) Token: 0x06002623 RID: 9763 RVA: 0x000CBEA4 File Offset: 0x000CA0A4
+	// (get) Token: 0x06002623 RID: 9763 RVA: 0x000CBE84 File Offset: 0x000CA084
 	[Networked]
 	[Capacity(30)]
 	[NetworkedWeavedLinkedList(30, 4, typeof(ReaderWriter@UnityEngine_Quaternion))]
@@ -43,7 +43,7 @@ public struct FlockingData : INetworkStruct
 		}
 	}
 
-	// Token: 0x06002624 RID: 9764 RVA: 0x000CBECC File Offset: 0x000CA0CC
+	// Token: 0x06002624 RID: 9764 RVA: 0x000CBEAC File Offset: 0x000CA0AC
 	public FlockingData(List<Flocking> items)
 	{
 		this.count = items.Count;

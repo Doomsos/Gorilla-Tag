@@ -9,14 +9,14 @@ using Unity.Collections.LowLevel.Unsafe;
 // Token: 0x02000B53 RID: 2899
 public class LuauClassBuilder<[IsUnmanaged] T> where T : struct, ValueType
 {
-	// Token: 0x06004743 RID: 18243 RVA: 0x00178468 File Offset: 0x00176668
+	// Token: 0x06004743 RID: 18243 RVA: 0x00178448 File Offset: 0x00176648
 	public LuauClassBuilder(string className)
 	{
 		this._className = className;
 		this._classType = typeof(T);
 	}
 
-	// Token: 0x06004744 RID: 18244 RVA: 0x001784E0 File Offset: 0x001766E0
+	// Token: 0x06004744 RID: 18244 RVA: 0x001784C0 File Offset: 0x001766C0
 	public LuauClassBuilder<T> AddField(string luaName, string fieldName = null)
 	{
 		if (fieldName == null)
@@ -39,35 +39,35 @@ public class LuauClassBuilder<[IsUnmanaged] T> where T : struct, ValueType
 		return this;
 	}
 
-	// Token: 0x06004745 RID: 18245 RVA: 0x00178562 File Offset: 0x00176762
+	// Token: 0x06004745 RID: 18245 RVA: 0x00178542 File Offset: 0x00176742
 	public LuauClassBuilder<T> AddStaticFunction(string luaName, lua_CFunction function)
 	{
 		this._staticFunctions.TryAdd(luaName, function);
 		return this;
 	}
 
-	// Token: 0x06004746 RID: 18246 RVA: 0x00178573 File Offset: 0x00176773
+	// Token: 0x06004746 RID: 18246 RVA: 0x00178553 File Offset: 0x00176753
 	public LuauClassBuilder<T> AddStaticFunction(string luaName, FunctionPointer<lua_CFunction> function)
 	{
 		this._staticFunctionPtrs.TryAdd(luaName, function);
 		return this;
 	}
 
-	// Token: 0x06004747 RID: 18247 RVA: 0x00178584 File Offset: 0x00176784
+	// Token: 0x06004747 RID: 18247 RVA: 0x00178564 File Offset: 0x00176764
 	public LuauClassBuilder<T> AddProperty(string luaName, lua_CFunction function)
 	{
 		this._properties.TryAdd(luaName, function);
 		return this;
 	}
 
-	// Token: 0x06004748 RID: 18248 RVA: 0x00178595 File Offset: 0x00176795
+	// Token: 0x06004748 RID: 18248 RVA: 0x00178575 File Offset: 0x00176775
 	public LuauClassBuilder<T> AddProperty(string luaName, FunctionPointer<lua_CFunction> function)
 	{
 		this._propertyPtrs.TryAdd(luaName, function);
 		return this;
 	}
 
-	// Token: 0x06004749 RID: 18249 RVA: 0x001785A6 File Offset: 0x001767A6
+	// Token: 0x06004749 RID: 18249 RVA: 0x00178586 File Offset: 0x00176786
 	public LuauClassBuilder<T> AddFunction(string luaName, lua_CFunction function)
 	{
 		if (luaName.StartsWith("__"))
@@ -78,7 +78,7 @@ public class LuauClassBuilder<[IsUnmanaged] T> where T : struct, ValueType
 		return this;
 	}
 
-	// Token: 0x0600474A RID: 18250 RVA: 0x001785D7 File Offset: 0x001767D7
+	// Token: 0x0600474A RID: 18250 RVA: 0x001785B7 File Offset: 0x001767B7
 	public LuauClassBuilder<T> AddFunction(string luaName, FunctionPointer<lua_CFunction> function)
 	{
 		if (luaName.StartsWith("__"))
@@ -89,7 +89,7 @@ public class LuauClassBuilder<[IsUnmanaged] T> where T : struct, ValueType
 		return this;
 	}
 
-	// Token: 0x0600474B RID: 18251 RVA: 0x00178608 File Offset: 0x00176808
+	// Token: 0x0600474B RID: 18251 RVA: 0x001785E8 File Offset: 0x001767E8
 	public unsafe LuauClassBuilder<T> Build(lua_State* L, bool global)
 	{
 		BurstClassInfo.NewClass<T>(this._className, this._classFields, this._functions, this._functionPtrs);

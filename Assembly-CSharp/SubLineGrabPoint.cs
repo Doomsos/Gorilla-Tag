@@ -7,7 +7,7 @@ using UnityEngine;
 [Serializable]
 public class SubLineGrabPoint : SubGrabPoint
 {
-	// Token: 0x06001E35 RID: 7733 RVA: 0x0009FAF8 File Offset: 0x0009DCF8
+	// Token: 0x06001E35 RID: 7733 RVA: 0x0009FAD8 File Offset: 0x0009DCD8
 	public override Matrix4x4 GetTransformation_GripPointLocalToAdvOriginLocal(AdvancedItemState.PreData advancedItemState, SlotTransformOverride slotTransformOverride)
 	{
 		float distAlongLine = advancedItemState.distAlongLine;
@@ -16,7 +16,7 @@ public class SubLineGrabPoint : SubGrabPoint
 		return Matrix4x4.TRS(vector, quaternion, Vector3.one);
 	}
 
-	// Token: 0x06001E36 RID: 7734 RVA: 0x0009FB50 File Offset: 0x0009DD50
+	// Token: 0x06001E36 RID: 7734 RVA: 0x0009FB30 File Offset: 0x0009DD30
 	public override void InitializePoints(Transform anchor, Transform grabPointAnchor, Transform advancedGrabPointOrigin)
 	{
 		base.InitializePoints(anchor, grabPointAnchor, advancedGrabPointOrigin);
@@ -30,7 +30,7 @@ public class SubLineGrabPoint : SubGrabPoint
 		this.startPointRelativeTransformToGrabPointOrigin = advancedGrabPointOrigin.worldToLocalMatrix * this.startPoint.localToWorldMatrix;
 	}
 
-	// Token: 0x06001E37 RID: 7735 RVA: 0x0009FBE9 File Offset: 0x0009DDE9
+	// Token: 0x06001E37 RID: 7735 RVA: 0x0009FBC9 File Offset: 0x0009DDC9
 	public override AdvancedItemState.PreData GetPreData(Transform objectTransform, Transform handTransform, Transform targetDock, SlotTransformOverride slotTransformOverride)
 	{
 		return new AdvancedItemState.PreData
@@ -40,7 +40,7 @@ public class SubLineGrabPoint : SubGrabPoint
 		};
 	}
 
-	// Token: 0x06001E38 RID: 7736 RVA: 0x0009FC20 File Offset: 0x0009DE20
+	// Token: 0x06001E38 RID: 7736 RVA: 0x0009FC00 File Offset: 0x0009DE00
 	public override float EvaluateScore(Transform objectTransform, Transform handTransform, Transform targetDock)
 	{
 		float num = SubLineGrabPoint.<EvaluateScore>g__FindNearestFractionOnLine|9_0(objectTransform.TransformPoint(this.startPointRelativeToGrabPointOrigin), objectTransform.TransformPoint(this.endPointRelativeToGrabPointOrigin), handTransform.position);
@@ -49,7 +49,7 @@ public class SubLineGrabPoint : SubGrabPoint
 		return Vector3.SqrMagnitude(vector - vector2);
 	}
 
-	// Token: 0x06001E3A RID: 7738 RVA: 0x0009FC90 File Offset: 0x0009DE90
+	// Token: 0x06001E3A RID: 7738 RVA: 0x0009FC70 File Offset: 0x0009DE70
 	[CompilerGenerated]
 	internal static float <GetPreData>g__FindNearestFractionOnLine|8_0(Vector3 origin, Vector3 end, Vector3 point)
 	{
@@ -59,7 +59,7 @@ public class SubLineGrabPoint : SubGrabPoint
 		return Mathf.Clamp01(Vector3.Dot(point - origin, vector) / magnitude);
 	}
 
-	// Token: 0x06001E3B RID: 7739 RVA: 0x0009FCCC File Offset: 0x0009DECC
+	// Token: 0x06001E3B RID: 7739 RVA: 0x0009FCAC File Offset: 0x0009DEAC
 	[CompilerGenerated]
 	internal static float <EvaluateScore>g__FindNearestFractionOnLine|9_0(Vector3 origin, Vector3 end, Vector3 point)
 	{

@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200071E RID: 1822
 public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntityComponent
 {
-	// Token: 0x06002ECB RID: 11979 RVA: 0x000FE30F File Offset: 0x000FC50F
+	// Token: 0x06002ECB RID: 11979 RVA: 0x000FE2EF File Offset: 0x000FC4EF
 	private void Awake()
 	{
 		this.state = GRToolFlash.State.Idle;
@@ -14,14 +14,14 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		this.gameHitter = base.GetComponent<GameHitter>();
 	}
 
-	// Token: 0x06002ECC RID: 11980 RVA: 0x000FE32F File Offset: 0x000FC52F
+	// Token: 0x06002ECC RID: 11980 RVA: 0x000FE30F File Offset: 0x000FC50F
 	private void OnEnable()
 	{
 		this.StopFlash();
 		this.SetState(GRToolFlash.State.Idle);
 	}
 
-	// Token: 0x06002ECD RID: 11981 RVA: 0x000FE33E File Offset: 0x000FC53E
+	// Token: 0x06002ECD RID: 11981 RVA: 0x000FE31E File Offset: 0x000FC51E
 	public void OnEntityInit()
 	{
 		if (this.tool != null)
@@ -41,7 +41,7 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 	{
 	}
 
-	// Token: 0x06002ED0 RID: 11984 RVA: 0x000FE374 File Offset: 0x000FC574
+	// Token: 0x06002ED0 RID: 11984 RVA: 0x000FE354 File Offset: 0x000FC554
 	private void OnToolUpgraded(GRTool tool)
 	{
 		this.stunDuration = this.attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.FlashStunDuration);
@@ -64,13 +64,13 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		}
 	}
 
-	// Token: 0x06002ED1 RID: 11985 RVA: 0x000FE3F9 File Offset: 0x000FC5F9
+	// Token: 0x06002ED1 RID: 11985 RVA: 0x000FE3D9 File Offset: 0x000FC5D9
 	private bool IsHeldLocal()
 	{
 		return this.item.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
 	}
 
-	// Token: 0x06002ED2 RID: 11986 RVA: 0x000FE412 File Offset: 0x000FC612
+	// Token: 0x06002ED2 RID: 11986 RVA: 0x000FE3F2 File Offset: 0x000FC5F2
 	public void OnUpdate(float dt)
 	{
 		if (this.IsHeldLocal())
@@ -81,7 +81,7 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		this.OnUpdateRemote(dt);
 	}
 
-	// Token: 0x06002ED3 RID: 11987 RVA: 0x000FE42C File Offset: 0x000FC62C
+	// Token: 0x06002ED3 RID: 11987 RVA: 0x000FE40C File Offset: 0x000FC60C
 	public void Update()
 	{
 		float deltaTime = Time.deltaTime;
@@ -93,7 +93,7 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		this.OnUpdateRemote(deltaTime);
 	}
 
-	// Token: 0x06002ED4 RID: 11988 RVA: 0x000FE460 File Offset: 0x000FC660
+	// Token: 0x06002ED4 RID: 11988 RVA: 0x000FE440 File Offset: 0x000FC640
 	private void OnUpdateAuthority(float dt)
 	{
 		switch (this.state)
@@ -144,7 +144,7 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		}
 	}
 
-	// Token: 0x06002ED5 RID: 11989 RVA: 0x000FE548 File Offset: 0x000FC748
+	// Token: 0x06002ED5 RID: 11989 RVA: 0x000FE528 File Offset: 0x000FC728
 	private void OnUpdateRemote(float dt)
 	{
 		GRToolFlash.State state = (GRToolFlash.State)this.gameEntity.GetState();
@@ -170,14 +170,14 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		}
 	}
 
-	// Token: 0x06002ED6 RID: 11990 RVA: 0x000FE5B0 File Offset: 0x000FC7B0
+	// Token: 0x06002ED6 RID: 11990 RVA: 0x000FE590 File Offset: 0x000FC790
 	private void SetStateAuthority(GRToolFlash.State newState)
 	{
 		this.SetState(newState);
 		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
 	}
 
-	// Token: 0x06002ED7 RID: 11991 RVA: 0x000FE5D4 File Offset: 0x000FC7D4
+	// Token: 0x06002ED7 RID: 11991 RVA: 0x000FE5B4 File Offset: 0x000FC7B4
 	private void SetState(GRToolFlash.State newState)
 	{
 		if (!this.CanChangeState((long)newState))
@@ -207,7 +207,7 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		}
 	}
 
-	// Token: 0x06002ED8 RID: 11992 RVA: 0x000FE658 File Offset: 0x000FC858
+	// Token: 0x06002ED8 RID: 11992 RVA: 0x000FE638 File Offset: 0x000FC838
 	private void StartCharge()
 	{
 		this.audioSource.volume = this.chargeSoundVolume;
@@ -219,7 +219,7 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		}
 	}
 
-	// Token: 0x06002ED9 RID: 11993 RVA: 0x000FE6B0 File Offset: 0x000FC8B0
+	// Token: 0x06002ED9 RID: 11993 RVA: 0x000FE690 File Offset: 0x000FC890
 	private void StartFlash()
 	{
 		this.flash.SetActive(true);
@@ -257,13 +257,13 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		}
 	}
 
-	// Token: 0x06002EDA RID: 11994 RVA: 0x000FE860 File Offset: 0x000FCA60
+	// Token: 0x06002EDA RID: 11994 RVA: 0x000FE840 File Offset: 0x000FCA40
 	private void StopFlash()
 	{
 		this.flash.SetActive(false);
 	}
 
-	// Token: 0x06002EDB RID: 11995 RVA: 0x000FE870 File Offset: 0x000FCA70
+	// Token: 0x06002EDB RID: 11995 RVA: 0x000FE850 File Offset: 0x000FCA50
 	private bool IsButtonHeld()
 	{
 		if (!this.IsHeldLocal())
@@ -279,7 +279,7 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? 4 : 5) > 0.25f;
 	}
 
-	// Token: 0x06002EDC RID: 11996 RVA: 0x000FE8D0 File Offset: 0x000FCAD0
+	// Token: 0x06002EDC RID: 11996 RVA: 0x000FE8B0 File Offset: 0x000FCAB0
 	private void PlayVibration(float strength, float duration)
 	{
 		if (!this.IsHeldLocal())
@@ -299,13 +299,13 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 		GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), strength, duration);
 	}
 
-	// Token: 0x06002EDD RID: 11997 RVA: 0x000FE924 File Offset: 0x000FCB24
+	// Token: 0x06002EDD RID: 11997 RVA: 0x000FE904 File Offset: 0x000FCB04
 	public bool CanChangeState(long newStateIndex)
 	{
 		return newStateIndex >= 0L && newStateIndex < 4L && ((int)newStateIndex != 2 || Time.time > this.timeLastFlashed + this.cooldownMinimum);
 	}
 
-	// Token: 0x06002EDE RID: 11998 RVA: 0x000FE94D File Offset: 0x000FCB4D
+	// Token: 0x06002EDE RID: 11998 RVA: 0x000FE92D File Offset: 0x000FCB2D
 	public void GetDebugTextLines(out List<string> strings)
 	{
 		strings = new List<string>();

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000579 RID: 1401
 public class BuilderLaserSight : MonoBehaviour
 {
-	// Token: 0x0600235D RID: 9053 RVA: 0x000B9831 File Offset: 0x000B7A31
+	// Token: 0x0600235D RID: 9053 RVA: 0x000B9811 File Offset: 0x000B7A11
 	public void Awake()
 	{
 		if (this.lineRenderer == null)
@@ -17,7 +17,7 @@ public class BuilderLaserSight : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600235E RID: 9054 RVA: 0x000B9867 File Offset: 0x000B7A67
+	// Token: 0x0600235E RID: 9054 RVA: 0x000B9847 File Offset: 0x000B7A47
 	public void SetPoints(Vector3 start, Vector3 end)
 	{
 		this.lineRenderer.positionCount = 2;
@@ -25,7 +25,7 @@ public class BuilderLaserSight : MonoBehaviour
 		this.lineRenderer.SetPosition(1, end);
 	}
 
-	// Token: 0x0600235F RID: 9055 RVA: 0x000B988F File Offset: 0x000B7A8F
+	// Token: 0x0600235F RID: 9055 RVA: 0x000B986F File Offset: 0x000B7A6F
 	public void Show(bool show)
 	{
 		if (this.lineRenderer != null)

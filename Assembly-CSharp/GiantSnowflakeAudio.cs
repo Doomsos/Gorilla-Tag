@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000752 RID: 1874
 public class GiantSnowflakeAudio : MonoBehaviour
 {
-	// Token: 0x0600305F RID: 12383 RVA: 0x00108CA0 File Offset: 0x00106EA0
+	// Token: 0x0600305F RID: 12383 RVA: 0x00108C80 File Offset: 0x00106E80
 	private void Start()
 	{
 		foreach (GiantSnowflakeAudio.SnowflakeScaleOverride snowflakeScaleOverride in this.audioOverrides)

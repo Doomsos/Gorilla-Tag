@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000772 RID: 1906
 public class GorillaCaveCrystal : Tappable
 {
-	// Token: 0x060031B5 RID: 12725 RVA: 0x0010D8ED File Offset: 0x0010BAED
+	// Token: 0x060031B5 RID: 12725 RVA: 0x0010D8CD File Offset: 0x0010BACD
 	private void Awake()
 	{
 		if (this.tapScript == null)
@@ -13,14 +13,14 @@ public class GorillaCaveCrystal : Tappable
 		}
 	}
 
-	// Token: 0x060031B6 RID: 12726 RVA: 0x0010D909 File Offset: 0x0010BB09
+	// Token: 0x060031B6 RID: 12726 RVA: 0x0010D8E9 File Offset: 0x0010BAE9
 	public override void OnTapLocal(float tapStrength, float tapTime, PhotonMessageInfoWrapped info)
 	{
 		this._tapStrength = tapStrength;
 		this.AnimateCrystal();
 	}
 
-	// Token: 0x060031B7 RID: 12727 RVA: 0x0010D918 File Offset: 0x0010BB18
+	// Token: 0x060031B7 RID: 12727 RVA: 0x0010D8F8 File Offset: 0x0010BAF8
 	private void AnimateCrystal()
 	{
 		if (this.tapScript)

@@ -7,7 +7,7 @@ using UnityEngine;
 [StructLayout(2)]
 public struct GlobalObjectRef
 {
-	// Token: 0x0600403B RID: 16443 RVA: 0x00158BAC File Offset: 0x00156DAC
+	// Token: 0x0600403B RID: 16443 RVA: 0x00158B8C File Offset: 0x00156D8C
 	public static GlobalObjectRef ObjectToRefSlow(Object target)
 	{
 		return default(GlobalObjectRef);

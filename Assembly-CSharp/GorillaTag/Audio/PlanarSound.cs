@@ -6,7 +6,7 @@ namespace GorillaTag.Audio
 	// Token: 0x0200106A RID: 4202
 	public class PlanarSound : MonoBehaviour
 	{
-		// Token: 0x0600697E RID: 27006 RVA: 0x0022517E File Offset: 0x0022337E
+		// Token: 0x0600697E RID: 27006 RVA: 0x0022515E File Offset: 0x0022335E
 		protected void OnEnable()
 		{
 			if (Camera.main != null)
@@ -16,7 +16,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x0600697F RID: 27007 RVA: 0x002251A4 File Offset: 0x002233A4
+		// Token: 0x0600697F RID: 27007 RVA: 0x00225184 File Offset: 0x00223384
 		protected void LateUpdate()
 		{
 			if (!this.hasCamera)

@@ -7,16 +7,16 @@ namespace GorillaTagScripts.ObstacleCourse
 	public class ObstacleCourseZoneTrigger : MonoBehaviour
 	{
 		// Token: 0x14000096 RID: 150
-		// (add) Token: 0x06005AC4 RID: 23236 RVA: 0x001D15C8 File Offset: 0x001CF7C8
-		// (remove) Token: 0x06005AC5 RID: 23237 RVA: 0x001D1600 File Offset: 0x001CF800
+		// (add) Token: 0x06005AC4 RID: 23236 RVA: 0x001D15A8 File Offset: 0x001CF7A8
+		// (remove) Token: 0x06005AC5 RID: 23237 RVA: 0x001D15E0 File Offset: 0x001CF7E0
 		public event ObstacleCourseZoneTrigger.ObstacleCourseTriggerEvent OnPlayerTriggerEnter;
 
 		// Token: 0x14000097 RID: 151
-		// (add) Token: 0x06005AC6 RID: 23238 RVA: 0x001D1638 File Offset: 0x001CF838
-		// (remove) Token: 0x06005AC7 RID: 23239 RVA: 0x001D1670 File Offset: 0x001CF870
+		// (add) Token: 0x06005AC6 RID: 23238 RVA: 0x001D1618 File Offset: 0x001CF818
+		// (remove) Token: 0x06005AC7 RID: 23239 RVA: 0x001D1650 File Offset: 0x001CF850
 		public event ObstacleCourseZoneTrigger.ObstacleCourseTriggerEvent OnPlayerTriggerExit;
 
-		// Token: 0x06005AC8 RID: 23240 RVA: 0x001D16A5 File Offset: 0x001CF8A5
+		// Token: 0x06005AC8 RID: 23240 RVA: 0x001D1685 File Offset: 0x001CF885
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!other.GetComponent<SphereCollider>())
@@ -34,7 +34,7 @@ namespace GorillaTagScripts.ObstacleCourse
 			}
 		}
 
-		// Token: 0x06005AC9 RID: 23241 RVA: 0x001D16DD File Offset: 0x001CF8DD
+		// Token: 0x06005AC9 RID: 23241 RVA: 0x001D16BD File Offset: 0x001CF8BD
 		private void OnTriggerExit(Collider other)
 		{
 			if (!other.GetComponent<SphereCollider>())

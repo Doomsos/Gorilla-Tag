@@ -9,13 +9,13 @@ namespace GorillaTag.Cosmetics
 	[RequireComponent(typeof(Collider))]
 	public class OnCollisionEventsCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006D18 RID: 27928 RVA: 0x0023D1B1 File Offset: 0x0023B3B1
+		// Token: 0x06006D18 RID: 27928 RVA: 0x0023D191 File Offset: 0x0023B391
 		private bool IsMyItem()
 		{
 			return this.rig != null && this.rig.isOfflineVRRig;
 		}
 
-		// Token: 0x06006D19 RID: 27929 RVA: 0x0023D1D0 File Offset: 0x0023B3D0
+		// Token: 0x06006D19 RID: 27929 RVA: 0x0023D1B0 File Offset: 0x0023B3B0
 		private void Awake()
 		{
 			this.myCollider = base.GetComponent<Collider>();
@@ -69,7 +69,7 @@ namespace GorillaTag.Cosmetics
 			this.exitListeners = ((list3.Count > 0) ? list3.ToArray() : Array.Empty<OnCollisionEventsCosmetic.Listener>());
 		}
 
-		// Token: 0x06006D1A RID: 27930 RVA: 0x0023D347 File Offset: 0x0023B547
+		// Token: 0x06006D1A RID: 27930 RVA: 0x0023D327 File Offset: 0x0023B527
 		private void OnCollisionEnter(Collision collision)
 		{
 			if (!OnCollisionEventsCosmetic.IsCollisionUsable(collision))
@@ -79,7 +79,7 @@ namespace GorillaTag.Cosmetics
 			this.Dispatch(this.enterListeners, collision);
 		}
 
-		// Token: 0x06006D1B RID: 27931 RVA: 0x0023D35F File Offset: 0x0023B55F
+		// Token: 0x06006D1B RID: 27931 RVA: 0x0023D33F File Offset: 0x0023B53F
 		private void OnCollisionStay(Collision collision)
 		{
 			if (!OnCollisionEventsCosmetic.IsCollisionUsable(collision))
@@ -89,7 +89,7 @@ namespace GorillaTag.Cosmetics
 			this.Dispatch(this.stayListeners, collision);
 		}
 
-		// Token: 0x06006D1C RID: 27932 RVA: 0x0023D377 File Offset: 0x0023B577
+		// Token: 0x06006D1C RID: 27932 RVA: 0x0023D357 File Offset: 0x0023B557
 		private void OnCollisionExit(Collision collision)
 		{
 			if (!OnCollisionEventsCosmetic.IsCollisionUsable(collision))
@@ -99,7 +99,7 @@ namespace GorillaTag.Cosmetics
 			this.Dispatch(this.exitListeners, collision);
 		}
 
-		// Token: 0x06006D1D RID: 27933 RVA: 0x0023D390 File Offset: 0x0023B590
+		// Token: 0x06006D1D RID: 27933 RVA: 0x0023D370 File Offset: 0x0023B570
 		private static bool IsCollisionUsable(Collision collision)
 		{
 			if (collision == null)
@@ -115,7 +115,7 @@ namespace GorillaTag.Cosmetics
 			return !(gameObject == null) && gameObject.activeInHierarchy;
 		}
 
-		// Token: 0x06006D1E RID: 27934 RVA: 0x0023D3D0 File Offset: 0x0023B5D0
+		// Token: 0x06006D1E RID: 27934 RVA: 0x0023D3B0 File Offset: 0x0023B5B0
 		private void Dispatch(OnCollisionEventsCosmetic.Listener[] listeners, Collision collision)
 		{
 			if (listeners == null || listeners.Length == 0)
@@ -161,7 +161,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D1F RID: 27935 RVA: 0x0023D570 File Offset: 0x0023B770
+		// Token: 0x06006D1F RID: 27935 RVA: 0x0023D550 File Offset: 0x0023B750
 		private static bool CompareTagAny(GameObject go, HashSet<string> tagSet)
 		{
 			if (tagSet == null || tagSet.Count == 0)
@@ -178,7 +178,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006D20 RID: 27936 RVA: 0x0023D5DC File Offset: 0x0023B7DC
+		// Token: 0x06006D20 RID: 27936 RVA: 0x0023D5BC File Offset: 0x0023B7BC
 		private bool IsTagValid(GameObject obj, OnCollisionEventsCosmetic.Listener listener)
 		{
 			return listener == null || (listener.tagSet == null || listener.tagSet.Count == 0) || OnCollisionEventsCosmetic.CompareTagAny(obj, listener.tagSet);

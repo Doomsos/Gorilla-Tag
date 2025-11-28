@@ -7,17 +7,17 @@ using UnityEngine;
 public class ManipulatableSpinner : ManipulatableObject
 {
 	// Token: 0x17000335 RID: 821
-	// (get) Token: 0x06001DBE RID: 7614 RVA: 0x0009C8E1 File Offset: 0x0009AAE1
-	// (set) Token: 0x06001DBF RID: 7615 RVA: 0x0009C8E9 File Offset: 0x0009AAE9
+	// (get) Token: 0x06001DBE RID: 7614 RVA: 0x0009C8C1 File Offset: 0x0009AAC1
+	// (set) Token: 0x06001DBF RID: 7615 RVA: 0x0009C8C9 File Offset: 0x0009AAC9
 	public float angle { get; private set; }
 
-	// Token: 0x06001DC0 RID: 7616 RVA: 0x0009C8F2 File Offset: 0x0009AAF2
+	// Token: 0x06001DC0 RID: 7616 RVA: 0x0009C8D2 File Offset: 0x0009AAD2
 	private void Awake()
 	{
 		this.spline = base.GetComponent<BezierSpline>();
 	}
 
-	// Token: 0x06001DC1 RID: 7617 RVA: 0x0009C900 File Offset: 0x0009AB00
+	// Token: 0x06001DC1 RID: 7617 RVA: 0x0009C8E0 File Offset: 0x0009AAE0
 	protected override void OnStartManipulation(GameObject grabbingHand)
 	{
 		Vector3 position = grabbingHand.transform.position;
@@ -30,7 +30,7 @@ public class ManipulatableSpinner : ManipulatableObject
 	{
 	}
 
-	// Token: 0x06001DC3 RID: 7619 RVA: 0x0009C928 File Offset: 0x0009AB28
+	// Token: 0x06001DC3 RID: 7619 RVA: 0x0009C908 File Offset: 0x0009AB08
 	protected override bool ShouldHandDetach(GameObject hand)
 	{
 		if (!this.spline.Loop && (this.currentHandT >= 0.99f || this.currentHandT <= 0.01f))
@@ -42,7 +42,7 @@ public class ManipulatableSpinner : ManipulatableObject
 		return Vector3.SqrMagnitude(position - point) > this.breakDistance * this.breakDistance;
 	}
 
-	// Token: 0x06001DC4 RID: 7620 RVA: 0x0009C998 File Offset: 0x0009AB98
+	// Token: 0x06001DC4 RID: 7620 RVA: 0x0009C978 File Offset: 0x0009AB78
 	protected override void OnHeldUpdate(GameObject hand)
 	{
 		float angle = this.angle;
@@ -68,7 +68,7 @@ public class ManipulatableSpinner : ManipulatableObject
 		}
 	}
 
-	// Token: 0x06001DC5 RID: 7621 RVA: 0x0009CA54 File Offset: 0x0009AC54
+	// Token: 0x06001DC5 RID: 7621 RVA: 0x0009CA34 File Offset: 0x0009AC34
 	protected override void OnReleasedUpdate()
 	{
 		if (this.tVelocity != 0f)
@@ -83,7 +83,7 @@ public class ManipulatableSpinner : ManipulatableObject
 		}
 	}
 
-	// Token: 0x06001DC6 RID: 7622 RVA: 0x0009CADC File Offset: 0x0009ACDC
+	// Token: 0x06001DC6 RID: 7622 RVA: 0x0009CABC File Offset: 0x0009ACBC
 	private float FindPositionOnSpline(Vector3 grabPoint)
 	{
 		int i = 0;
@@ -107,13 +107,13 @@ public class ManipulatableSpinner : ManipulatableObject
 		return result;
 	}
 
-	// Token: 0x06001DC7 RID: 7623 RVA: 0x0009CB58 File Offset: 0x0009AD58
+	// Token: 0x06001DC7 RID: 7623 RVA: 0x0009CB38 File Offset: 0x0009AD38
 	public void SetAngle(float newAngle)
 	{
 		this.angle = newAngle;
 	}
 
-	// Token: 0x06001DC8 RID: 7624 RVA: 0x0009CB61 File Offset: 0x0009AD61
+	// Token: 0x06001DC8 RID: 7624 RVA: 0x0009CB41 File Offset: 0x0009AD41
 	public void SetVelocity(float newVelocity)
 	{
 		this.tVelocity = newVelocity;

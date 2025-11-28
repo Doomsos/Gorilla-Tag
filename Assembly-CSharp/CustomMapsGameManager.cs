@@ -9,7 +9,7 @@ using UnityEngine;
 // Token: 0x0200095F RID: 2399
 public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 {
-	// Token: 0x06003D6A RID: 15722 RVA: 0x00145E09 File Offset: 0x00144009
+	// Token: 0x06003D6A RID: 15722 RVA: 0x00145DE9 File Offset: 0x00143FE9
 	private void Awake()
 	{
 		if (CustomMapsGameManager.instance.IsNotNull())
@@ -27,7 +27,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 	{
 	}
 
-	// Token: 0x06003D6C RID: 15724 RVA: 0x00145E44 File Offset: 0x00144044
+	// Token: 0x06003D6C RID: 15724 RVA: 0x00145E24 File Offset: 0x00144024
 	public void CreatePlacedEntities(List<MapEntity> entities)
 	{
 		if (!this.gameEntityManager.IsAuthority())
@@ -85,14 +85,14 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		}
 	}
 
-	// Token: 0x06003D6D RID: 15725 RVA: 0x00146047 File Offset: 0x00144247
+	// Token: 0x06003D6D RID: 15725 RVA: 0x00146027 File Offset: 0x00144227
 	public void TEST_Spawning()
 	{
 		GTDev.Log<string>("CustomMapsGameManager::TEST_Spawn starting spawn", null);
 		base.StartCoroutine(this.TEST_Spawn());
 	}
 
-	// Token: 0x06003D6E RID: 15726 RVA: 0x00146061 File Offset: 0x00144261
+	// Token: 0x06003D6E RID: 15726 RVA: 0x00146041 File Offset: 0x00144241
 	private IEnumerator TEST_Spawn()
 	{
 		while (this.spawnCount < 10)
@@ -106,7 +106,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		yield break;
 	}
 
-	// Token: 0x06003D6F RID: 15727 RVA: 0x00146070 File Offset: 0x00144270
+	// Token: 0x06003D6F RID: 15727 RVA: 0x00146050 File Offset: 0x00144250
 	public GameEntityId SpawnEnemyFromPoint(string spawnPointId, int enemyTypeId)
 	{
 		AISpawnPoint aispawnPoint;
@@ -118,7 +118,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		return this.SpawnEnemyAtLocation(enemyTypeId, aispawnPoint.transform.position, aispawnPoint.transform.rotation);
 	}
 
-	// Token: 0x06003D70 RID: 15728 RVA: 0x001460BC File Offset: 0x001442BC
+	// Token: 0x06003D70 RID: 15728 RVA: 0x0014609C File Offset: 0x0014429C
 	public GameEntityId SpawnEnemyAtLocation(int enemyTypeId, Vector3 position, Quaternion rotation)
 	{
 		if (!this.gameEntityManager.IsAuthority())
@@ -140,7 +140,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		return this.gameEntityManager.RequestCreateItem(staticHash, position, rotation, (long)enemyTypeId);
 	}
 
-	// Token: 0x06003D71 RID: 15729 RVA: 0x00146158 File Offset: 0x00144358
+	// Token: 0x06003D71 RID: 15729 RVA: 0x00146138 File Offset: 0x00144338
 	public void SpawnEnemyClient(int enemyTypeId, int agentId)
 	{
 		if (this.gameEntityManager.IsAuthority())
@@ -168,7 +168,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		}
 	}
 
-	// Token: 0x06003D72 RID: 15730 RVA: 0x001461EC File Offset: 0x001443EC
+	// Token: 0x06003D72 RID: 15730 RVA: 0x001461CC File Offset: 0x001443CC
 	public GameEntityId SpawnGrabbableAtLocation(int enemyTypeId, Vector3 position, Quaternion rotation)
 	{
 		if (!this.gameEntityManager.IsAuthority())
@@ -190,7 +190,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		return this.gameEntityManager.RequestCreateItem(staticHash, position, rotation, (long)enemyTypeId);
 	}
 
-	// Token: 0x06003D73 RID: 15731 RVA: 0x000DF85B File Offset: 0x000DDA5B
+	// Token: 0x06003D73 RID: 15731 RVA: 0x000DF83B File Offset: 0x000DDA3B
 	public long ProcessMigratedGameEntityCreateData(GameEntity entity, long createData)
 	{
 		return createData;
@@ -202,13 +202,13 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		return false;
 	}
 
-	// Token: 0x06003D75 RID: 15733 RVA: 0x00146288 File Offset: 0x00144488
+	// Token: 0x06003D75 RID: 15733 RVA: 0x00146268 File Offset: 0x00144468
 	private bool IsAuthority()
 	{
 		return this.gameEntityManager.IsAuthority();
 	}
 
-	// Token: 0x06003D76 RID: 15734 RVA: 0x00146295 File Offset: 0x00144495
+	// Token: 0x06003D76 RID: 15734 RVA: 0x00146275 File Offset: 0x00144475
 	private bool IsDriver()
 	{
 		return CustomMapsTerminal.IsDriver;
@@ -219,7 +219,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 	{
 	}
 
-	// Token: 0x06003D78 RID: 15736 RVA: 0x0014629C File Offset: 0x0014449C
+	// Token: 0x06003D78 RID: 15736 RVA: 0x0014627C File Offset: 0x0014447C
 	public void OnZoneInit()
 	{
 		if (CustomMapsGameManager.agentsToCreateOnZoneInit.IsNullOrEmpty<MapEntity>())
@@ -241,7 +241,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		return true;
 	}
 
-	// Token: 0x06003D7B RID: 15739 RVA: 0x001462C0 File Offset: 0x001444C0
+	// Token: 0x06003D7B RID: 15739 RVA: 0x001462A0 File Offset: 0x001444A0
 	public bool IsZoneReady()
 	{
 		return CustomMapLoader.CanLoadEntities && NetworkSystem.Instance.InRoom;
@@ -287,7 +287,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 	{
 	}
 
-	// Token: 0x06003D84 RID: 15748 RVA: 0x001462D5 File Offset: 0x001444D5
+	// Token: 0x06003D84 RID: 15748 RVA: 0x001462B5 File Offset: 0x001444B5
 	public static GameEntityManager GetEntityManager()
 	{
 		if (CustomMapsGameManager.instance.IsNotNull())
@@ -297,7 +297,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		return null;
 	}
 
-	// Token: 0x06003D85 RID: 15749 RVA: 0x001462EF File Offset: 0x001444EF
+	// Token: 0x06003D85 RID: 15749 RVA: 0x001462CF File Offset: 0x001444CF
 	public static GameAgentManager GetAgentManager()
 	{
 		if (CustomMapsGameManager.instance.IsNotNull())
@@ -307,7 +307,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		return null;
 	}
 
-	// Token: 0x06003D86 RID: 15750 RVA: 0x0014630C File Offset: 0x0014450C
+	// Token: 0x06003D86 RID: 15750 RVA: 0x001462EC File Offset: 0x001444EC
 	public static CustomMapsAIBehaviourController GetBehaviorControllerForEntity(GameEntityId entityId)
 	{
 		GameEntityManager entityManager = CustomMapsGameManager.GetEntityManager();
@@ -323,7 +323,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		return gameEntity.gameObject.GetComponent<CustomMapsAIBehaviourController>();
 	}
 
-	// Token: 0x06003D87 RID: 15751 RVA: 0x00146346 File Offset: 0x00144546
+	// Token: 0x06003D87 RID: 15751 RVA: 0x00146326 File Offset: 0x00144526
 	public static void AddAgentsToCreate(List<MapEntity> entitiesToCreate)
 	{
 		if (CustomMapsGameManager.instance.IsNull())
@@ -337,7 +337,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 		CustomMapsGameManager.agentsToCreateOnZoneInit.AddRange(entitiesToCreate);
 	}
 
-	// Token: 0x06003D88 RID: 15752 RVA: 0x00146369 File Offset: 0x00144569
+	// Token: 0x06003D88 RID: 15752 RVA: 0x00146349 File Offset: 0x00144549
 	public void OnPlayerHit(GameEntityId hitByEntityId, GRPlayer player, Vector3 hitPosition)
 	{
 		this.ghostReactorManager.RequestEnemyHitPlayer(GhostReactor.EnemyType.CustomMapsEnemy, hitByEntityId, player, hitPosition);

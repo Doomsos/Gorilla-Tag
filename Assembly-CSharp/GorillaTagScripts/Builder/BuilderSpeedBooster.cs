@@ -7,7 +7,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E67 RID: 3687
 	public class BuilderSpeedBooster : MonoBehaviour
 	{
-		// Token: 0x06005C34 RID: 23604 RVA: 0x001D9A14 File Offset: 0x001D7C14
+		// Token: 0x06005C34 RID: 23604 RVA: 0x001D99F4 File Offset: 0x001D7BF4
 		private void Awake()
 		{
 			this.volume = base.GetComponent<Collider>();
@@ -15,7 +15,7 @@ namespace GorillaTagScripts.Builder
 			this.boosting = false;
 		}
 
-		// Token: 0x06005C35 RID: 23605 RVA: 0x001D9A38 File Offset: 0x001D7C38
+		// Token: 0x06005C35 RID: 23605 RVA: 0x001D9A18 File Offset: 0x001D7C18
 		private void LateUpdate()
 		{
 			if (this.audioSource && this.audioSource != null && !this.audioSource.isPlaying && this.audioSource.enabled)
@@ -24,7 +24,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C36 RID: 23606 RVA: 0x001D9A88 File Offset: 0x001D7C88
+		// Token: 0x06005C36 RID: 23606 RVA: 0x001D9A68 File Offset: 0x001D7C68
 		private bool TriggerFilter(Collider other, out Rigidbody rb, out Transform xf)
 		{
 			rb = null;
@@ -37,7 +37,7 @@ namespace GorillaTagScripts.Builder
 			return rb != null && xf != null;
 		}
 
-		// Token: 0x06005C37 RID: 23607 RVA: 0x001D9AE8 File Offset: 0x001D7CE8
+		// Token: 0x06005C37 RID: 23607 RVA: 0x001D9AC8 File Offset: 0x001D7CC8
 		private void CheckTableZone()
 		{
 			if (this.hasCheckedZone)
@@ -52,7 +52,7 @@ namespace GorillaTagScripts.Builder
 			this.hasCheckedZone = true;
 		}
 
-		// Token: 0x06005C38 RID: 23608 RVA: 0x001D9B34 File Offset: 0x001D7D34
+		// Token: 0x06005C38 RID: 23608 RVA: 0x001D9B14 File Offset: 0x001D7D14
 		public void OnTriggerEnter(Collider other)
 		{
 			Rigidbody rigidbody = null;
@@ -84,7 +84,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C39 RID: 23609 RVA: 0x001D9C24 File Offset: 0x001D7E24
+		// Token: 0x06005C39 RID: 23609 RVA: 0x001D9C04 File Offset: 0x001D7E04
 		public void OnTriggerExit(Collider other)
 		{
 			Rigidbody rigidbody = null;
@@ -108,7 +108,7 @@ namespace GorillaTagScripts.Builder
 			this.boosting = false;
 		}
 
-		// Token: 0x06005C3A RID: 23610 RVA: 0x001D9CC4 File Offset: 0x001D7EC4
+		// Token: 0x06005C3A RID: 23610 RVA: 0x001D9CA4 File Offset: 0x001D7EA4
 		public void OnTriggerStay(Collider other)
 		{
 			if (!this.boosting)
@@ -220,7 +220,7 @@ namespace GorillaTagScripts.Builder
 			rigidbody.linearVelocity = vector;
 		}
 
-		// Token: 0x06005C3B RID: 23611 RVA: 0x001DA0D8 File Offset: 0x001D82D8
+		// Token: 0x06005C3B RID: 23611 RVA: 0x001DA0B8 File Offset: 0x001D82B8
 		public void OnDrawGizmosSelected()
 		{
 			base.GetComponents<Collider>();

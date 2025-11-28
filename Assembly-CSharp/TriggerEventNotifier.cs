@@ -5,16 +5,16 @@ using UnityEngine;
 public class TriggerEventNotifier : MonoBehaviour
 {
 	// Token: 0x1400008B RID: 139
-	// (add) Token: 0x06004E81 RID: 20097 RVA: 0x00196DA0 File Offset: 0x00194FA0
-	// (remove) Token: 0x06004E82 RID: 20098 RVA: 0x00196DD8 File Offset: 0x00194FD8
+	// (add) Token: 0x06004E81 RID: 20097 RVA: 0x00196D80 File Offset: 0x00194F80
+	// (remove) Token: 0x06004E82 RID: 20098 RVA: 0x00196DB8 File Offset: 0x00194FB8
 	public event TriggerEventNotifier.TriggerEvent TriggerEnterEvent;
 
 	// Token: 0x1400008C RID: 140
-	// (add) Token: 0x06004E83 RID: 20099 RVA: 0x00196E10 File Offset: 0x00195010
-	// (remove) Token: 0x06004E84 RID: 20100 RVA: 0x00196E48 File Offset: 0x00195048
+	// (add) Token: 0x06004E83 RID: 20099 RVA: 0x00196DF0 File Offset: 0x00194FF0
+	// (remove) Token: 0x06004E84 RID: 20100 RVA: 0x00196E28 File Offset: 0x00195028
 	public event TriggerEventNotifier.TriggerEvent TriggerExitEvent;
 
-	// Token: 0x06004E85 RID: 20101 RVA: 0x00196E7D File Offset: 0x0019507D
+	// Token: 0x06004E85 RID: 20101 RVA: 0x00196E5D File Offset: 0x0019505D
 	private void OnTriggerEnter(Collider other)
 	{
 		TriggerEventNotifier.TriggerEvent triggerEnterEvent = this.TriggerEnterEvent;
@@ -25,7 +25,7 @@ public class TriggerEventNotifier : MonoBehaviour
 		triggerEnterEvent(this, other);
 	}
 
-	// Token: 0x06004E86 RID: 20102 RVA: 0x00196E91 File Offset: 0x00195091
+	// Token: 0x06004E86 RID: 20102 RVA: 0x00196E71 File Offset: 0x00195071
 	private void OnTriggerExit(Collider other)
 	{
 		TriggerEventNotifier.TriggerEvent triggerExitEvent = this.TriggerExitEvent;

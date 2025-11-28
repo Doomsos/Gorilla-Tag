@@ -7,25 +7,25 @@ using UnityEngine.Serialization;
 [Serializable]
 public class SubGrabPoint
 {
-	// Token: 0x06001E2B RID: 7723 RVA: 0x0009F76D File Offset: 0x0009D96D
+	// Token: 0x06001E2B RID: 7723 RVA: 0x0009F74D File Offset: 0x0009D94D
 	public virtual Matrix4x4 GetTransformation_GripPointLocalToAdvOriginLocal(AdvancedItemState.PreData advancedItemState, SlotTransformOverride slotTransformOverride)
 	{
 		return this.gripPointLocalToAdvOriginLocal;
 	}
 
-	// Token: 0x06001E2C RID: 7724 RVA: 0x0009F775 File Offset: 0x0009D975
+	// Token: 0x06001E2C RID: 7724 RVA: 0x0009F755 File Offset: 0x0009D955
 	public virtual Quaternion GetRotationRelativeToObjectAnchor(AdvancedItemState advancedItemState, SlotTransformOverride slotTransformOverride)
 	{
 		return this.gripRotation_ParentAnchorLocal;
 	}
 
-	// Token: 0x06001E2D RID: 7725 RVA: 0x0009F77D File Offset: 0x0009D97D
+	// Token: 0x06001E2D RID: 7725 RVA: 0x0009F75D File Offset: 0x0009D95D
 	public virtual Vector3 GetGrabPositionRelativeToGrabPointOrigin(AdvancedItemState advancedItemState, SlotTransformOverride slotTransformOverride)
 	{
 		return this.gripPoint_AdvOriginLocal;
 	}
 
-	// Token: 0x06001E2E RID: 7726 RVA: 0x0009F788 File Offset: 0x0009D988
+	// Token: 0x06001E2E RID: 7726 RVA: 0x0009F768 File Offset: 0x0009D968
 	public virtual void InitializePoints(Transform anchor, Transform grabPointAnchor, Transform advancedGrabPointOrigin)
 	{
 		if (this.gripPoint == null)
@@ -39,13 +39,13 @@ public class SubGrabPoint
 		this.gripPointLocalToAdvOriginLocal = advancedGrabPointOrigin.worldToLocalMatrix * this.gripPoint.localToWorldMatrix;
 	}
 
-	// Token: 0x06001E2F RID: 7727 RVA: 0x0009F835 File Offset: 0x0009DA35
+	// Token: 0x06001E2F RID: 7727 RVA: 0x0009F815 File Offset: 0x0009DA15
 	public Vector3 GetPositionOnObject(Transform transferableObject, SlotTransformOverride slotTransformOverride)
 	{
 		return transferableObject.TransformPoint(this.gripPoint_AdvOriginLocal);
 	}
 
-	// Token: 0x06001E30 RID: 7728 RVA: 0x0009F844 File Offset: 0x0009DA44
+	// Token: 0x06001E30 RID: 7728 RVA: 0x0009F824 File Offset: 0x0009DA24
 	public virtual Matrix4x4 GetTransformFromPositionState(AdvancedItemState advancedItemState, SlotTransformOverride slotTransformOverride, Transform targetDockXf)
 	{
 		Quaternion quaternion = advancedItemState.deltaRotation;
@@ -59,7 +59,7 @@ public class SubGrabPoint
 		return slotTransformOverride.AdvOriginLocalToParentAnchorLocal * matrix4x3;
 	}
 
-	// Token: 0x06001E31 RID: 7729 RVA: 0x0009F8B4 File Offset: 0x0009DAB4
+	// Token: 0x06001E31 RID: 7729 RVA: 0x0009F894 File Offset: 0x0009DA94
 	public AdvancedItemState GetAdvancedItemStateFromHand(Transform objectTransform, Transform handTransform, Transform targetDock, SlotTransformOverride slotTransformOverride)
 	{
 		AdvancedItemState.PreData preData = this.GetPreData(objectTransform, handTransform, targetDock, slotTransformOverride);
@@ -124,7 +124,7 @@ public class SubGrabPoint
 		};
 	}
 
-	// Token: 0x06001E32 RID: 7730 RVA: 0x0009FA78 File Offset: 0x0009DC78
+	// Token: 0x06001E32 RID: 7730 RVA: 0x0009FA58 File Offset: 0x0009DC58
 	public virtual AdvancedItemState.PreData GetPreData(Transform objectTransform, Transform handTransform, Transform targetDock, SlotTransformOverride slotTransformOverride)
 	{
 		return new AdvancedItemState.PreData
@@ -133,7 +133,7 @@ public class SubGrabPoint
 		};
 	}
 
-	// Token: 0x06001E33 RID: 7731 RVA: 0x0009FA88 File Offset: 0x0009DC88
+	// Token: 0x06001E33 RID: 7731 RVA: 0x0009FA68 File Offset: 0x0009DC68
 	public virtual float EvaluateScore(Transform objectTransform, Transform handTransform, Transform targetDock)
 	{
 		Vector3 vector = objectTransform.InverseTransformPoint(handTransform.position);

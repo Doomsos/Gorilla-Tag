@@ -8,7 +8,7 @@ namespace Fusion.CodeGen
 	[WeaverGenerated]
 	internal struct ReaderWriter@UnityEngine_Quaternion : IElementReaderWriter<Quaternion>
 	{
-		// Token: 0x060072F5 RID: 29429 RVA: 0x0025A91B File Offset: 0x00258B1B
+		// Token: 0x060072F5 RID: 29429 RVA: 0x0025A8FB File Offset: 0x00258AFB
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe Quaternion Read(byte* data, int index)
@@ -16,7 +16,7 @@ namespace Fusion.CodeGen
 			return *(Quaternion*)(data + index * 16);
 		}
 
-		// Token: 0x060072F6 RID: 29430 RVA: 0x0025A92B File Offset: 0x00258B2B
+		// Token: 0x060072F6 RID: 29430 RVA: 0x0025A90B File Offset: 0x00258B0B
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe ref Quaternion ReadRef(byte* data, int index)
@@ -24,7 +24,7 @@ namespace Fusion.CodeGen
 			return ref *(Quaternion*)(data + index * 16);
 		}
 
-		// Token: 0x060072F7 RID: 29431 RVA: 0x0025A936 File Offset: 0x00258B36
+		// Token: 0x060072F7 RID: 29431 RVA: 0x0025A916 File Offset: 0x00258B16
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe void Write(byte* data, int index, Quaternion val)
@@ -32,7 +32,7 @@ namespace Fusion.CodeGen
 			*(Quaternion*)(data + index * 16) = val;
 		}
 
-		// Token: 0x060072F8 RID: 29432 RVA: 0x00186623 File Offset: 0x00184823
+		// Token: 0x060072F8 RID: 29432 RVA: 0x00186603 File Offset: 0x00184803
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementWordCount()
@@ -40,7 +40,7 @@ namespace Fusion.CodeGen
 			return 4;
 		}
 
-		// Token: 0x060072F9 RID: 29433 RVA: 0x0025A948 File Offset: 0x00258B48
+		// Token: 0x060072F9 RID: 29433 RVA: 0x0025A928 File Offset: 0x00258B28
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementHashCode(Quaternion val)
@@ -48,7 +48,7 @@ namespace Fusion.CodeGen
 			return val.GetHashCode();
 		}
 
-		// Token: 0x060072FA RID: 29434 RVA: 0x0025A964 File Offset: 0x00258B64
+		// Token: 0x060072FA RID: 29434 RVA: 0x0025A944 File Offset: 0x00258B44
 		[MethodImpl(256)]
 		[WeaverGenerated]
 		public static IElementReaderWriter<Quaternion> GetInstance()

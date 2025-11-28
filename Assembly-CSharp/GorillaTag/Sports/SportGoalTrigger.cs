@@ -7,7 +7,7 @@ namespace GorillaTag.Sports
 	// Token: 0x02001021 RID: 4129
 	public class SportGoalTrigger : MonoBehaviour
 	{
-		// Token: 0x06006864 RID: 26724 RVA: 0x0021FDBF File Offset: 0x0021DFBF
+		// Token: 0x06006864 RID: 26724 RVA: 0x0021FD9F File Offset: 0x0021DF9F
 		public void BallExitedGoalTrigger(SportBall ball)
 		{
 			if (this.ballsPendingTriggerExit.Contains(ball))
@@ -16,7 +16,7 @@ namespace GorillaTag.Sports
 			}
 		}
 
-		// Token: 0x06006865 RID: 26725 RVA: 0x0021FDDC File Offset: 0x0021DFDC
+		// Token: 0x06006865 RID: 26725 RVA: 0x0021FDBC File Offset: 0x0021DFBC
 		private void PruneBallsPendingTriggerExitByDistance()
 		{
 			foreach (SportBall sportBall in this.ballsPendingTriggerExit)
@@ -28,7 +28,7 @@ namespace GorillaTag.Sports
 			}
 		}
 
-		// Token: 0x06006866 RID: 26726 RVA: 0x0021FE68 File Offset: 0x0021E068
+		// Token: 0x06006866 RID: 26726 RVA: 0x0021FE48 File Offset: 0x0021E048
 		private void OnTriggerEnter(Collider other)
 		{
 			SportBall componentInParent = other.GetComponentInParent<SportBall>();

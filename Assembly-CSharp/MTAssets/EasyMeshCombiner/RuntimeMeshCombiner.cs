@@ -9,7 +9,7 @@ namespace MTAssets.EasyMeshCombiner
 	[AddComponentMenu("MT Assets/Easy Mesh Combiner/Runtime Mesh Combiner")]
 	public class RuntimeMeshCombiner : MonoBehaviour
 	{
-		// Token: 0x06006288 RID: 25224 RVA: 0x001FB5CD File Offset: 0x001F97CD
+		// Token: 0x06006288 RID: 25224 RVA: 0x001FB5AD File Offset: 0x001F97AD
 		private void Awake()
 		{
 			if (this.combineMeshesAtStartUp == RuntimeMeshCombiner.CombineOnStart.OnAwake)
@@ -22,7 +22,7 @@ namespace MTAssets.EasyMeshCombiner
 			}
 		}
 
-		// Token: 0x06006289 RID: 25225 RVA: 0x001FB606 File Offset: 0x001F9806
+		// Token: 0x06006289 RID: 25225 RVA: 0x001FB5E6 File Offset: 0x001F97E6
 		private void Start()
 		{
 			if (this.combineMeshesAtStartUp == RuntimeMeshCombiner.CombineOnStart.OnStart)
@@ -35,7 +35,7 @@ namespace MTAssets.EasyMeshCombiner
 			}
 		}
 
-		// Token: 0x0600628A RID: 25226 RVA: 0x001FB640 File Offset: 0x001F9840
+		// Token: 0x0600628A RID: 25226 RVA: 0x001FB620 File Offset: 0x001F9820
 		private RuntimeMeshCombiner.GameObjectWithMesh[] GetValidatedTargetGameObjects()
 		{
 			List<Transform> list = new List<Transform>();
@@ -155,7 +155,7 @@ namespace MTAssets.EasyMeshCombiner
 			return list3.ToArray();
 		}
 
-		// Token: 0x0600628B RID: 25227 RVA: 0x001FBAE4 File Offset: 0x001F9CE4
+		// Token: 0x0600628B RID: 25227 RVA: 0x001FBAC4 File Offset: 0x001F9CC4
 		public bool CombineMeshes()
 		{
 			if (this.isTargetMeshesMerged())
@@ -321,7 +321,7 @@ namespace MTAssets.EasyMeshCombiner
 			return true;
 		}
 
-		// Token: 0x0600628C RID: 25228 RVA: 0x001FC118 File Offset: 0x001FA318
+		// Token: 0x0600628C RID: 25228 RVA: 0x001FC0F8 File Offset: 0x001FA2F8
 		public bool UndoMerge()
 		{
 			if (!this.isTargetMeshesMerged())
@@ -385,7 +385,7 @@ namespace MTAssets.EasyMeshCombiner
 			return false;
 		}
 
-		// Token: 0x0600628D RID: 25229 RVA: 0x001FC2CC File Offset: 0x001FA4CC
+		// Token: 0x0600628D RID: 25229 RVA: 0x001FC2AC File Offset: 0x001FA4AC
 		public bool isTargetMeshesMerged()
 		{
 			return this.targetMeshesMerged;
@@ -462,7 +462,7 @@ namespace MTAssets.EasyMeshCombiner
 		// Token: 0x02000F60 RID: 3936
 		private class GameObjectWithMesh
 		{
-			// Token: 0x0600628F RID: 25231 RVA: 0x001FC34C File Offset: 0x001FA54C
+			// Token: 0x0600628F RID: 25231 RVA: 0x001FC32C File Offset: 0x001FA52C
 			public GameObjectWithMesh(GameObject gameObject, MeshFilter meshFilter, MeshRenderer meshRenderer)
 			{
 				this.gameObject = gameObject;
@@ -483,7 +483,7 @@ namespace MTAssets.EasyMeshCombiner
 		// Token: 0x02000F61 RID: 3937
 		private class OriginalGameObjectWithMesh
 		{
-			// Token: 0x06006290 RID: 25232 RVA: 0x001FC369 File Offset: 0x001FA569
+			// Token: 0x06006290 RID: 25232 RVA: 0x001FC349 File Offset: 0x001FA549
 			public OriginalGameObjectWithMesh(GameObject gameObject, bool originalGoState, MeshRenderer meshRenderer, bool originalMrState)
 			{
 				this.gameObject = gameObject;
@@ -508,7 +508,7 @@ namespace MTAssets.EasyMeshCombiner
 		// Token: 0x02000F62 RID: 3938
 		private class SubMeshToCombine
 		{
-			// Token: 0x06006291 RID: 25233 RVA: 0x001FC38E File Offset: 0x001FA58E
+			// Token: 0x06006291 RID: 25233 RVA: 0x001FC36E File Offset: 0x001FA56E
 			public SubMeshToCombine(Transform transform, MeshFilter meshFilter, MeshRenderer meshRenderer, int subMeshIndex)
 			{
 				this.transform = transform;

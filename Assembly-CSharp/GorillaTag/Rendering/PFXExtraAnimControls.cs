@@ -6,7 +6,7 @@ namespace GorillaTag.Rendering
 	// Token: 0x02001082 RID: 4226
 	public class PFXExtraAnimControls : MonoBehaviour
 	{
-		// Token: 0x060069E7 RID: 27111 RVA: 0x002283CC File Offset: 0x002265CC
+		// Token: 0x060069E7 RID: 27111 RVA: 0x002283AC File Offset: 0x002265AC
 		protected void Awake()
 		{
 			this.emissionModules = new ParticleSystem.EmissionModule[this.particleSystems.Length];
@@ -26,7 +26,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x060069E8 RID: 27112 RVA: 0x002284AC File Offset: 0x002266AC
+		// Token: 0x060069E8 RID: 27112 RVA: 0x0022848C File Offset: 0x0022668C
 		protected void LateUpdate()
 		{
 			for (int i = 0; i < this.emissionModules.Length; i++)

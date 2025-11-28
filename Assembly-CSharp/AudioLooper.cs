@@ -5,13 +5,13 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class AudioLooper : MonoBehaviour
 {
-	// Token: 0x06004C70 RID: 19568 RVA: 0x0018D4FF File Offset: 0x0018B6FF
+	// Token: 0x06004C70 RID: 19568 RVA: 0x0018D4DF File Offset: 0x0018B6DF
 	protected virtual void Awake()
 	{
 		this.audioSource = base.GetComponent<AudioSource>();
 	}
 
-	// Token: 0x06004C71 RID: 19569 RVA: 0x0018D510 File Offset: 0x0018B710
+	// Token: 0x06004C71 RID: 19569 RVA: 0x0018D4F0 File Offset: 0x0018B6F0
 	private void Update()
 	{
 		if (!this.audioSource.isPlaying)

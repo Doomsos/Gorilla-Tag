@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010F6 RID: 4342
 	public class FingerFlexEvent2 : MonoBehaviour, ITickSystemTick
 	{
-		// Token: 0x06006CCE RID: 27854 RVA: 0x0023BAF4 File Offset: 0x00239CF4
+		// Token: 0x06006CCE RID: 27854 RVA: 0x0023BAD4 File Offset: 0x00239CD4
 		private bool TryLinkToNextEvent(int index)
 		{
 			if (index < this.list.Length - 1)
@@ -25,7 +25,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006CCF RID: 27855 RVA: 0x0023BB70 File Offset: 0x00239D70
+		// Token: 0x06006CCF RID: 27855 RVA: 0x0023BB50 File Offset: 0x00239D50
 		private void Awake()
 		{
 			this.myRig = base.GetComponentInParent<VRRig>();
@@ -50,7 +50,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CD0 RID: 27856 RVA: 0x0023BC34 File Offset: 0x00239E34
+		// Token: 0x06006CD0 RID: 27856 RVA: 0x0023BC14 File Offset: 0x00239E14
 		private void CalcFlex(bool disable)
 		{
 			for (int i = 0; i < this.list.Length; i++)
@@ -134,7 +134,7 @@ namespace GorillaTag.Cosmetics
 			TickSystem<object>.AddTickCallback(this);
 		}
 
-		// Token: 0x06006CD2 RID: 27858 RVA: 0x0023BEE6 File Offset: 0x0023A0E6
+		// Token: 0x06006CD2 RID: 27858 RVA: 0x0023BEC6 File Offset: 0x0023A0C6
 		public void OnDisable()
 		{
 			TickSystem<object>.RemoveTickCallback(this);
@@ -142,11 +142,11 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A56 RID: 2646
-		// (get) Token: 0x06006CD3 RID: 27859 RVA: 0x0023BEF5 File Offset: 0x0023A0F5
-		// (set) Token: 0x06006CD4 RID: 27860 RVA: 0x0023BEFD File Offset: 0x0023A0FD
+		// (get) Token: 0x06006CD3 RID: 27859 RVA: 0x0023BED5 File Offset: 0x0023A0D5
+		// (set) Token: 0x06006CD4 RID: 27860 RVA: 0x0023BEDD File Offset: 0x0023A0DD
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006CD5 RID: 27861 RVA: 0x0023BF06 File Offset: 0x0023A106
+		// Token: 0x06006CD5 RID: 27861 RVA: 0x0023BEE6 File Offset: 0x0023A0E6
 		public void Tick()
 		{
 			this.CalcFlex(false);
@@ -166,7 +166,7 @@ namespace GorillaTag.Cosmetics
 		public class FlexEvent
 		{
 			// Token: 0x17000A57 RID: 2647
-			// (get) Token: 0x06006CD7 RID: 27863 RVA: 0x0023BF0F File Offset: 0x0023A10F
+			// (get) Token: 0x06006CD7 RID: 27863 RVA: 0x0023BEEF File Offset: 0x0023A0EF
 			public bool IsFlexTrigger
 			{
 				get
@@ -176,7 +176,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A58 RID: 2648
-			// (get) Token: 0x06006CD8 RID: 27864 RVA: 0x0023BF1A File Offset: 0x0023A11A
+			// (get) Token: 0x06006CD8 RID: 27864 RVA: 0x0023BEFA File Offset: 0x0023A0FA
 			public bool IsReleaseTrigger
 			{
 				get
@@ -186,7 +186,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A59 RID: 2649
-			// (get) Token: 0x06006CD9 RID: 27865 RVA: 0x0023BF28 File Offset: 0x0023A128
+			// (get) Token: 0x06006CD9 RID: 27865 RVA: 0x0023BF08 File Offset: 0x0023A108
 			public bool UsesTransferrable
 			{
 				get
@@ -197,7 +197,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A5A RID: 2650
-			// (get) Token: 0x06006CDA RID: 27866 RVA: 0x0023BF4C File Offset: 0x0023A14C
+			// (get) Token: 0x06006CDA RID: 27866 RVA: 0x0023BF2C File Offset: 0x0023A12C
 			public bool HasValidLink
 			{
 				get
@@ -207,7 +207,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A5B RID: 2651
-			// (get) Token: 0x06006CDB RID: 27867 RVA: 0x0023BF5A File Offset: 0x0023A15A
+			// (get) Token: 0x06006CDB RID: 27867 RVA: 0x0023BF3A File Offset: 0x0023A13A
 			public bool IsLinked
 			{
 				get
@@ -217,7 +217,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A5C RID: 2652
-			// (get) Token: 0x06006CDC RID: 27868 RVA: 0x0023BF72 File Offset: 0x0023A172
+			// (get) Token: 0x06006CDC RID: 27868 RVA: 0x0023BF52 File Offset: 0x0023A152
 			private bool ShowMainProperties
 			{
 				get
@@ -227,7 +227,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A5D RID: 2653
-			// (get) Token: 0x06006CDD RID: 27869 RVA: 0x0023BF84 File Offset: 0x0023A184
+			// (get) Token: 0x06006CDD RID: 27869 RVA: 0x0023BF64 File Offset: 0x0023A164
 			private bool ShowFlexThreshold
 			{
 				get
@@ -237,7 +237,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A5E RID: 2654
-			// (get) Token: 0x06006CDE RID: 27870 RVA: 0x0023BF8C File Offset: 0x0023A18C
+			// (get) Token: 0x06006CDE RID: 27870 RVA: 0x0023BF6C File Offset: 0x0023A16C
 			private bool ShowReleaseThreshold
 			{
 				get
@@ -246,7 +246,7 @@ namespace GorillaTag.Cosmetics
 				}
 			}
 
-			// Token: 0x06006CDF RID: 27871 RVA: 0x0023BFAC File Offset: 0x0023A1AC
+			// Token: 0x06006CDF RID: 27871 RVA: 0x0023BF8C File Offset: 0x0023A18C
 			public void ProcessState(bool leftHand, float flexValue)
 			{
 				this.currentState = ((flexValue < this.releaseThreshold) ? FingerFlexEvent2.FlexEvent.RangeState.Below : ((flexValue >= this.flexThreshold) ? FingerFlexEvent2.FlexEvent.RangeState.Above : FingerFlexEvent2.FlexEvent.RangeState.Within));

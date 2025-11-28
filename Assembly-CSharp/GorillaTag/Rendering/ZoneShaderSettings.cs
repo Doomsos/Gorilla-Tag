@@ -9,29 +9,29 @@ namespace GorillaTag.Rendering
 	public class ZoneShaderSettings : MonoBehaviour, ITickSystemPost
 	{
 		// Token: 0x170009F6 RID: 2550
-		// (get) Token: 0x060069FA RID: 27130 RVA: 0x00228853 File Offset: 0x00226A53
-		// (set) Token: 0x060069FB RID: 27131 RVA: 0x0022885A File Offset: 0x00226A5A
+		// (get) Token: 0x060069FA RID: 27130 RVA: 0x00228833 File Offset: 0x00226A33
+		// (set) Token: 0x060069FB RID: 27131 RVA: 0x0022883A File Offset: 0x00226A3A
 		[DebugReadout]
 		public static ZoneShaderSettings defaultsInstance { get; private set; }
 
 		// Token: 0x170009F7 RID: 2551
-		// (get) Token: 0x060069FC RID: 27132 RVA: 0x00228862 File Offset: 0x00226A62
-		// (set) Token: 0x060069FD RID: 27133 RVA: 0x00228869 File Offset: 0x00226A69
+		// (get) Token: 0x060069FC RID: 27132 RVA: 0x00228842 File Offset: 0x00226A42
+		// (set) Token: 0x060069FD RID: 27133 RVA: 0x00228849 File Offset: 0x00226A49
 		public static bool hasDefaultsInstance { get; private set; }
 
 		// Token: 0x170009F8 RID: 2552
-		// (get) Token: 0x060069FE RID: 27134 RVA: 0x00228871 File Offset: 0x00226A71
-		// (set) Token: 0x060069FF RID: 27135 RVA: 0x00228878 File Offset: 0x00226A78
+		// (get) Token: 0x060069FE RID: 27134 RVA: 0x00228851 File Offset: 0x00226A51
+		// (set) Token: 0x060069FF RID: 27135 RVA: 0x00228858 File Offset: 0x00226A58
 		[DebugReadout]
 		public static ZoneShaderSettings activeInstance { get; private set; }
 
 		// Token: 0x170009F9 RID: 2553
-		// (get) Token: 0x06006A00 RID: 27136 RVA: 0x00228880 File Offset: 0x00226A80
-		// (set) Token: 0x06006A01 RID: 27137 RVA: 0x00228887 File Offset: 0x00226A87
+		// (get) Token: 0x06006A00 RID: 27136 RVA: 0x00228860 File Offset: 0x00226A60
+		// (set) Token: 0x06006A01 RID: 27137 RVA: 0x00228867 File Offset: 0x00226A67
 		public static bool hasActiveInstance { get; private set; }
 
 		// Token: 0x170009FA RID: 2554
-		// (get) Token: 0x06006A02 RID: 27138 RVA: 0x0022888F File Offset: 0x00226A8F
+		// (get) Token: 0x06006A02 RID: 27138 RVA: 0x0022886F File Offset: 0x00226A6F
 		public bool isActiveInstance
 		{
 			get
@@ -41,7 +41,7 @@ namespace GorillaTag.Rendering
 		}
 
 		// Token: 0x170009FB RID: 2555
-		// (get) Token: 0x06006A03 RID: 27139 RVA: 0x0022889C File Offset: 0x00226A9C
+		// (get) Token: 0x06006A03 RID: 27139 RVA: 0x0022887C File Offset: 0x00226A7C
 		[DebugReadout]
 		private float GroundFogDepthFadeSq
 		{
@@ -52,7 +52,7 @@ namespace GorillaTag.Rendering
 		}
 
 		// Token: 0x170009FC RID: 2556
-		// (get) Token: 0x06006A04 RID: 27140 RVA: 0x002288BB File Offset: 0x00226ABB
+		// (get) Token: 0x06006A04 RID: 27140 RVA: 0x0022889B File Offset: 0x00226A9B
 		[DebugReadout]
 		private float GroundFogHeightFade
 		{
@@ -62,7 +62,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A05 RID: 27141 RVA: 0x002288D4 File Offset: 0x00226AD4
+		// Token: 0x06006A05 RID: 27141 RVA: 0x002288B4 File Offset: 0x00226AB4
 		public void SetZoneLiquidTypeKeywordEnum(ZoneShaderSettings.EZoneLiquidType liquidType)
 		{
 			if (liquidType == ZoneShaderSettings.EZoneLiquidType.None)
@@ -89,7 +89,7 @@ namespace GorillaTag.Rendering
 			Shader.DisableKeyword("_GLOBAL_ZONE_LIQUID_TYPE__LAVA");
 		}
 
-		// Token: 0x06006A06 RID: 27142 RVA: 0x0022892D File Offset: 0x00226B2D
+		// Token: 0x06006A06 RID: 27142 RVA: 0x0022890D File Offset: 0x00226B0D
 		public void SetZoneLiquidShapeKeywordEnum(ZoneShaderSettings.ELiquidShape shape)
 		{
 			if (shape == ZoneShaderSettings.ELiquidShape.Plane)
@@ -109,17 +109,17 @@ namespace GorillaTag.Rendering
 		}
 
 		// Token: 0x170009FD RID: 2557
-		// (get) Token: 0x06006A07 RID: 27143 RVA: 0x00228961 File Offset: 0x00226B61
-		// (set) Token: 0x06006A08 RID: 27144 RVA: 0x00228968 File Offset: 0x00226B68
+		// (get) Token: 0x06006A07 RID: 27143 RVA: 0x00228941 File Offset: 0x00226B41
+		// (set) Token: 0x06006A08 RID: 27144 RVA: 0x00228948 File Offset: 0x00226B48
 		public static int shaderParam_ZoneLiquidPosRadiusSq { get; private set; } = Shader.PropertyToID("_ZoneLiquidPosRadiusSq");
 
-		// Token: 0x06006A09 RID: 27145 RVA: 0x00228970 File Offset: 0x00226B70
+		// Token: 0x06006A09 RID: 27145 RVA: 0x00228950 File Offset: 0x00226B50
 		public static float GetWaterY()
 		{
 			return ZoneShaderSettings.activeInstance.mainWaterSurfacePlane.position.y;
 		}
 
-		// Token: 0x06006A0A RID: 27146 RVA: 0x00228988 File Offset: 0x00226B88
+		// Token: 0x06006A0A RID: 27146 RVA: 0x00228968 File Offset: 0x00226B68
 		protected void Awake()
 		{
 			this.hasMainWaterSurfacePlane = (this.mainWaterSurfacePlane != null && (this.mainWaterSurfacePlane_overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues));
@@ -132,7 +132,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A0B RID: 27147 RVA: 0x00228A20 File Offset: 0x00226C20
+		// Token: 0x06006A0B RID: 27147 RVA: 0x00228A00 File Offset: 0x00226C00
 		protected void OnEnable()
 		{
 			if (this.hasDynamicWaterSurfacePlane)
@@ -141,13 +141,13 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A0C RID: 27148 RVA: 0x001338F3 File Offset: 0x00131AF3
+		// Token: 0x06006A0C RID: 27148 RVA: 0x001338D3 File Offset: 0x00131AD3
 		protected void OnDisable()
 		{
 			TickSystem<object>.RemovePostTickCallback(this);
 		}
 
-		// Token: 0x06006A0D RID: 27149 RVA: 0x00228A30 File Offset: 0x00226C30
+		// Token: 0x06006A0D RID: 27149 RVA: 0x00228A10 File Offset: 0x00226C10
 		protected void OnDestroy()
 		{
 			if (ZoneShaderSettings.defaultsInstance == this)
@@ -162,11 +162,11 @@ namespace GorillaTag.Rendering
 		}
 
 		// Token: 0x170009FE RID: 2558
-		// (get) Token: 0x06006A0E RID: 27150 RVA: 0x00228A5E File Offset: 0x00226C5E
-		// (set) Token: 0x06006A0F RID: 27151 RVA: 0x00228A66 File Offset: 0x00226C66
+		// (get) Token: 0x06006A0E RID: 27150 RVA: 0x00228A3E File Offset: 0x00226C3E
+		// (set) Token: 0x06006A0F RID: 27151 RVA: 0x00228A46 File Offset: 0x00226C46
 		bool ITickSystemPost.PostTickRunning { get; set; }
 
-		// Token: 0x06006A10 RID: 27152 RVA: 0x00228A6F File Offset: 0x00226C6F
+		// Token: 0x06006A10 RID: 27152 RVA: 0x00228A4F File Offset: 0x00226C4F
 		void ITickSystemPost.PostTick()
 		{
 			if (ZoneShaderSettings.activeInstance == this && Application.isPlaying && !ApplicationQuittingState.IsQuitting)
@@ -175,7 +175,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A11 RID: 27153 RVA: 0x00228A94 File Offset: 0x00226C94
+		// Token: 0x06006A11 RID: 27153 RVA: 0x00228A74 File Offset: 0x00226C74
 		private void UpdateMainPlaneShaderProperty()
 		{
 			Transform transform = null;
@@ -245,7 +245,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A12 RID: 27154 RVA: 0x00228C50 File Offset: 0x00226E50
+		// Token: 0x06006A12 RID: 27154 RVA: 0x00228C30 File Offset: 0x00226E30
 		private void CheckDefaultsInstance()
 		{
 			if (!this.isDefaultValues)
@@ -271,7 +271,7 @@ namespace GorillaTag.Rendering
 			this.BecomeActiveInstance(false);
 		}
 
-		// Token: 0x06006A13 RID: 27155 RVA: 0x00228CF4 File Offset: 0x00226EF4
+		// Token: 0x06006A13 RID: 27155 RVA: 0x00228CD4 File Offset: 0x00226ED4
 		public void BecomeActiveInstance(bool force = false)
 		{
 			if (ZoneShaderSettings.activeInstance == this && !force)
@@ -291,7 +291,7 @@ namespace GorillaTag.Rendering
 			ZoneShaderSettings.hasActiveInstance = true;
 		}
 
-		// Token: 0x06006A14 RID: 27156 RVA: 0x00228D48 File Offset: 0x00226F48
+		// Token: 0x06006A14 RID: 27156 RVA: 0x00228D28 File Offset: 0x00226F28
 		public static void ActivateDefaultSettings()
 		{
 			if (ZoneShaderSettings.hasDefaultsInstance)
@@ -300,7 +300,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A15 RID: 27157 RVA: 0x00228D5C File Offset: 0x00226F5C
+		// Token: 0x06006A15 RID: 27157 RVA: 0x00228D3C File Offset: 0x00226F3C
 		public void SetGroundFogValue(Color fogColor, float fogDepthFade, float fogHeight, float fogHeightFade)
 		{
 			this.groundFogColor_overrideMode = ZoneShaderSettings.EOverrideMode.ApplyNewValue;
@@ -314,7 +314,7 @@ namespace GorillaTag.Rendering
 			this.BecomeActiveInstance(true);
 		}
 
-		// Token: 0x06006A16 RID: 27158 RVA: 0x00228DAC File Offset: 0x00226FAC
+		// Token: 0x06006A16 RID: 27158 RVA: 0x00228D8C File Offset: 0x00226F8C
 		private void ApplyValues()
 		{
 			if (!ZoneShaderSettings.hasDefaultsInstance || ApplicationQuittingState.IsQuitting)
@@ -356,7 +356,7 @@ namespace GorillaTag.Rendering
 			ZoneShaderSettings.isInitialized = true;
 		}
 
-		// Token: 0x06006A17 RID: 27159 RVA: 0x00229001 File Offset: 0x00227201
+		// Token: 0x06006A17 RID: 27159 RVA: 0x00228FE1 File Offset: 0x002271E1
 		private void ApplyColor(int shaderProp, ZoneShaderSettings.EOverrideMode overrideMode, Color value, Color defaultValue)
 		{
 			if (overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues)
@@ -370,7 +370,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A18 RID: 27160 RVA: 0x0022902E File Offset: 0x0022722E
+		// Token: 0x06006A18 RID: 27160 RVA: 0x0022900E File Offset: 0x0022720E
 		private void ApplyFloat(int shaderProp, ZoneShaderSettings.EOverrideMode overrideMode, float value, float defaultValue)
 		{
 			if (overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues)
@@ -384,7 +384,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A19 RID: 27161 RVA: 0x00229050 File Offset: 0x00227250
+		// Token: 0x06006A19 RID: 27161 RVA: 0x00229030 File Offset: 0x00227230
 		private void ApplyVector(int shaderProp, ZoneShaderSettings.EOverrideMode overrideMode, Vector2 value, Vector2 defaultValue)
 		{
 			if (overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues)
@@ -398,7 +398,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A1A RID: 27162 RVA: 0x0022907C File Offset: 0x0022727C
+		// Token: 0x06006A1A RID: 27162 RVA: 0x0022905C File Offset: 0x0022725C
 		private void ApplyVector(int shaderProp, ZoneShaderSettings.EOverrideMode overrideMode, Vector3 value, Vector3 defaultValue)
 		{
 			if (overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues)
@@ -412,7 +412,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A1B RID: 27163 RVA: 0x002290A8 File Offset: 0x002272A8
+		// Token: 0x06006A1B RID: 27163 RVA: 0x00229088 File Offset: 0x00227288
 		private void ApplyVector(int shaderProp, ZoneShaderSettings.EOverrideMode overrideMode, Vector4 value, Vector4 defaultValue)
 		{
 			if (overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues)
@@ -426,7 +426,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A1C RID: 27164 RVA: 0x002290CA File Offset: 0x002272CA
+		// Token: 0x06006A1C RID: 27164 RVA: 0x002290AA File Offset: 0x002272AA
 		private void ApplyTexture(int shaderProp, ZoneShaderSettings.EOverrideMode overrideMode, Texture2D value, Texture2D defaultValue)
 		{
 			if (overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues)
@@ -440,7 +440,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A1D RID: 27165 RVA: 0x002290EC File Offset: 0x002272EC
+		// Token: 0x06006A1D RID: 27165 RVA: 0x002290CC File Offset: 0x002272CC
 		public void CopySettings(CMSZoneShaderSettings cmsZoneShaderSettings, bool rerunAwake = false)
 		{
 			this._activateOnAwake = cmsZoneShaderSettings.activateOnLoad;
@@ -526,7 +526,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A1E RID: 27166 RVA: 0x002293FC File Offset: 0x002275FC
+		// Token: 0x06006A1E RID: 27166 RVA: 0x002293DC File Offset: 0x002275DC
 		public void CopySettings(ZoneShaderSettings zoneShaderSettings, bool rerunAwake = false)
 		{
 			this._activateOnAwake = zoneShaderSettings._activateOnAwake;
@@ -572,7 +572,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A1F RID: 27167 RVA: 0x002295D0 File Offset: 0x002277D0
+		// Token: 0x06006A1F RID: 27167 RVA: 0x002295B0 File Offset: 0x002277B0
 		public void ReplaceDefaultValues(ZoneShaderSettings defaultZoneShaderSettings, bool rerunAwake = false)
 		{
 			if (this.groundFogColor_overrideMode == ZoneShaderSettings.EOverrideMode.ApplyDefaultValue)
@@ -666,7 +666,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x06006A20 RID: 27168 RVA: 0x002297C4 File Offset: 0x002279C4
+		// Token: 0x06006A20 RID: 27168 RVA: 0x002297A4 File Offset: 0x002279A4
 		public void ReplaceDefaultValues(CMSZoneShaderSettings.CMSZoneShaderProperties defaultZoneShaderProperties, bool rerunAwake = false)
 		{
 			if (this.groundFogColor_overrideMode == ZoneShaderSettings.EOverrideMode.ApplyDefaultValue)

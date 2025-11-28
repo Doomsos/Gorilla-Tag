@@ -6,7 +6,7 @@ using UnityEngine;
 public class SizeLayerMask
 {
 	// Token: 0x170004F8 RID: 1272
-	// (get) Token: 0x0600371D RID: 14109 RVA: 0x0012914C File Offset: 0x0012734C
+	// (get) Token: 0x0600371D RID: 14109 RVA: 0x0012912C File Offset: 0x0012732C
 	public int Mask
 	{
 		get

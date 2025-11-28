@@ -10,16 +10,16 @@ namespace GorillaTag.Reactions
 	public class FireManager : ITickSystemPost
 	{
 		// Token: 0x170009CE RID: 2510
-		// (get) Token: 0x06006886 RID: 26758 RVA: 0x0022052D File Offset: 0x0021E72D
-		// (set) Token: 0x06006887 RID: 26759 RVA: 0x00220534 File Offset: 0x0021E734
+		// (get) Token: 0x06006886 RID: 26758 RVA: 0x0022050D File Offset: 0x0021E70D
+		// (set) Token: 0x06006887 RID: 26759 RVA: 0x00220514 File Offset: 0x0021E714
 		internal static FireManager instance { get; private set; }
 
 		// Token: 0x170009CF RID: 2511
-		// (get) Token: 0x06006888 RID: 26760 RVA: 0x0022053C File Offset: 0x0021E73C
-		// (set) Token: 0x06006889 RID: 26761 RVA: 0x00220543 File Offset: 0x0021E743
+		// (get) Token: 0x06006888 RID: 26760 RVA: 0x0022051C File Offset: 0x0021E71C
+		// (set) Token: 0x06006889 RID: 26761 RVA: 0x00220523 File Offset: 0x0021E723
 		internal static bool hasInstance { get; private set; }
 
-		// Token: 0x0600688A RID: 26762 RVA: 0x0022054B File Offset: 0x0021E74B
+		// Token: 0x0600688A RID: 26762 RVA: 0x0022052B File Offset: 0x0021E72B
 		[RuntimeInitializeOnLoadMethod(0)]
 		private static void Initialize()
 		{
@@ -36,7 +36,7 @@ namespace GorillaTag.Reactions
 			TickSystem<object>.AddPostTickCallback(FireManager.instance);
 		}
 
-		// Token: 0x0600688B RID: 26763 RVA: 0x00220578 File Offset: 0x0021E778
+		// Token: 0x0600688B RID: 26763 RVA: 0x00220558 File Offset: 0x0021E758
 		[MethodImpl(256)]
 		internal static void Register(FireInstance f)
 		{
@@ -78,7 +78,7 @@ namespace GorillaTag.Reactions
 			}
 		}
 
-		// Token: 0x0600688C RID: 26764 RVA: 0x00220774 File Offset: 0x0021E974
+		// Token: 0x0600688C RID: 26764 RVA: 0x00220754 File Offset: 0x0021E954
 		[MethodImpl(256)]
 		internal static void Unregister(FireInstance reactable)
 		{
@@ -90,7 +90,7 @@ namespace GorillaTag.Reactions
 			FireManager._kGObjInstId_to_fire.Remove(instanceID);
 		}
 
-		// Token: 0x0600688D RID: 26765 RVA: 0x002207A4 File Offset: 0x0021E9A4
+		// Token: 0x0600688D RID: 26765 RVA: 0x00220784 File Offset: 0x0021E984
 		[MethodImpl(256)]
 		private static Vector3Int GetSpatialGridPos(Vector3 pos)
 		{
@@ -98,7 +98,7 @@ namespace GorillaTag.Reactions
 			return new Vector3Int((int)vector.x, (int)vector.y, (int)vector.z);
 		}
 
-		// Token: 0x0600688E RID: 26766 RVA: 0x002207D8 File Offset: 0x0021E9D8
+		// Token: 0x0600688E RID: 26766 RVA: 0x002207B8 File Offset: 0x0021E9B8
 		[MethodImpl(256)]
 		private static void ResetFireValues(FireInstance f)
 		{
@@ -109,7 +109,7 @@ namespace GorillaTag.Reactions
 			f._thermalVolume.celsius = f._defaultTemperature;
 		}
 
-		// Token: 0x0600688F RID: 26767 RVA: 0x0022082C File Offset: 0x0021EA2C
+		// Token: 0x0600688F RID: 26767 RVA: 0x0022080C File Offset: 0x0021EA0C
 		[MethodImpl(256)]
 		internal static void SpawnFire(SinglePool pool, Vector3 pos, Vector3 normal, float scale)
 		{
@@ -126,7 +126,7 @@ namespace GorillaTag.Reactions
 			gameObject.SetActive(true);
 		}
 
-		// Token: 0x06006890 RID: 26768 RVA: 0x0022089C File Offset: 0x0021EA9C
+		// Token: 0x06006890 RID: 26768 RVA: 0x0022087C File Offset: 0x0021EA7C
 		[MethodImpl(256)]
 		internal static void OnEnable(FireInstance f)
 		{
@@ -151,7 +151,7 @@ namespace GorillaTag.Reactions
 			f._loopingAudioSource.enabled = false;
 		}
 
-		// Token: 0x06006891 RID: 26769 RVA: 0x00220974 File Offset: 0x0021EB74
+		// Token: 0x06006891 RID: 26769 RVA: 0x00220954 File Offset: 0x0021EB54
 		[MethodImpl(256)]
 		internal static void OnDisable(FireInstance f)
 		{
@@ -164,7 +164,7 @@ namespace GorillaTag.Reactions
 			FireManager._activeAudioSources = Mathf.Min(FireManager._activeAudioSources - (f._loopingAudioSource.enabled ? 1 : 0), 0);
 		}
 
-		// Token: 0x06006892 RID: 26770 RVA: 0x002209C8 File Offset: 0x0021EBC8
+		// Token: 0x06006892 RID: 26770 RVA: 0x002209A8 File Offset: 0x0021EBA8
 		[MethodImpl(256)]
 		internal static void OnTriggerEnter(FireInstance f, Collider other)
 		{
@@ -178,7 +178,7 @@ namespace GorillaTag.Reactions
 			}
 		}
 
-		// Token: 0x06006893 RID: 26771 RVA: 0x002209F8 File Offset: 0x0021EBF8
+		// Token: 0x06006893 RID: 26771 RVA: 0x002209D8 File Offset: 0x0021EBD8
 		[MethodImpl(256)]
 		internal static void Extinguish(GameObject gObj, float extinguishAmount)
 		{
@@ -206,11 +206,11 @@ namespace GorillaTag.Reactions
 		}
 
 		// Token: 0x170009D0 RID: 2512
-		// (get) Token: 0x06006894 RID: 26772 RVA: 0x00220AAB File Offset: 0x0021ECAB
-		// (set) Token: 0x06006895 RID: 26773 RVA: 0x00220AB3 File Offset: 0x0021ECB3
+		// (get) Token: 0x06006894 RID: 26772 RVA: 0x00220A8B File Offset: 0x0021EC8B
+		// (set) Token: 0x06006895 RID: 26773 RVA: 0x00220A93 File Offset: 0x0021EC93
 		bool ITickSystemPost.PostTickRunning { get; set; }
 
-		// Token: 0x06006896 RID: 26774 RVA: 0x00220ABC File Offset: 0x0021ECBC
+		// Token: 0x06006896 RID: 26774 RVA: 0x00220A9C File Offset: 0x0021EC9C
 		void ITickSystemPost.PostTick()
 		{
 			if (ApplicationQuittingState.IsQuitting)

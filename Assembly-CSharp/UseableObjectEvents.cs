@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020004F8 RID: 1272
 public class UseableObjectEvents : MonoBehaviour
 {
-	// Token: 0x060020BB RID: 8379 RVA: 0x000AD990 File Offset: 0x000ABB90
+	// Token: 0x060020BB RID: 8379 RVA: 0x000AD970 File Offset: 0x000ABB70
 	public void Init(NetPlayer player)
 	{
 		bool isLocal = player.IsLocal;
@@ -28,7 +28,7 @@ public class UseableObjectEvents : MonoBehaviour
 		this.Deactivate.reliable = false;
 	}
 
-	// Token: 0x060020BC RID: 8380 RVA: 0x000ADA51 File Offset: 0x000ABC51
+	// Token: 0x060020BC RID: 8380 RVA: 0x000ADA31 File Offset: 0x000ABC31
 	private void OnEnable()
 	{
 		PhotonEvent activate = this.Activate;
@@ -44,7 +44,7 @@ public class UseableObjectEvents : MonoBehaviour
 		deactivate.Enable();
 	}
 
-	// Token: 0x060020BD RID: 8381 RVA: 0x000ADA74 File Offset: 0x000ABC74
+	// Token: 0x060020BD RID: 8381 RVA: 0x000ADA54 File Offset: 0x000ABC54
 	private void OnDisable()
 	{
 		PhotonEvent activate = this.Activate;
@@ -60,13 +60,13 @@ public class UseableObjectEvents : MonoBehaviour
 		deactivate.Disable();
 	}
 
-	// Token: 0x060020BE RID: 8382 RVA: 0x000ADA97 File Offset: 0x000ABC97
+	// Token: 0x060020BE RID: 8382 RVA: 0x000ADA77 File Offset: 0x000ABC77
 	private void OnDestroy()
 	{
 		this.DisposeEvents();
 	}
 
-	// Token: 0x060020BF RID: 8383 RVA: 0x000ADA9F File Offset: 0x000ABC9F
+	// Token: 0x060020BF RID: 8383 RVA: 0x000ADA7F File Offset: 0x000ABC7F
 	private void DisposeEvents()
 	{
 		PhotonEvent activate = this.Activate;

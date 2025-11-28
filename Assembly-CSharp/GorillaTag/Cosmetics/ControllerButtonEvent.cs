@@ -10,16 +10,16 @@ namespace GorillaTag.Cosmetics
 	public class ControllerButtonEvent : MonoBehaviour, ISpawnable
 	{
 		// Token: 0x17000A40 RID: 2624
-		// (get) Token: 0x06006C1C RID: 27676 RVA: 0x002375A6 File Offset: 0x002357A6
-		// (set) Token: 0x06006C1D RID: 27677 RVA: 0x002375AE File Offset: 0x002357AE
+		// (get) Token: 0x06006C1C RID: 27676 RVA: 0x00237586 File Offset: 0x00235786
+		// (set) Token: 0x06006C1D RID: 27677 RVA: 0x0023758E File Offset: 0x0023578E
 		public bool IsSpawned { get; set; }
 
 		// Token: 0x17000A41 RID: 2625
-		// (get) Token: 0x06006C1E RID: 27678 RVA: 0x002375B7 File Offset: 0x002357B7
-		// (set) Token: 0x06006C1F RID: 27679 RVA: 0x002375BF File Offset: 0x002357BF
+		// (get) Token: 0x06006C1E RID: 27678 RVA: 0x00237597 File Offset: 0x00235797
+		// (set) Token: 0x06006C1F RID: 27679 RVA: 0x0023759F File Offset: 0x0023579F
 		public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
 
-		// Token: 0x06006C20 RID: 27680 RVA: 0x002375C8 File Offset: 0x002357C8
+		// Token: 0x06006C20 RID: 27680 RVA: 0x002375A8 File Offset: 0x002357A8
 		public void OnSpawn(VRRig rig)
 		{
 			this.myRig = rig;
@@ -30,13 +30,13 @@ namespace GorillaTag.Cosmetics
 		{
 		}
 
-		// Token: 0x06006C22 RID: 27682 RVA: 0x002375D1 File Offset: 0x002357D1
+		// Token: 0x06006C22 RID: 27682 RVA: 0x002375B1 File Offset: 0x002357B1
 		private bool IsMyItem()
 		{
 			return this.myRig != null && this.myRig.isOfflineVRRig;
 		}
 
-		// Token: 0x06006C23 RID: 27683 RVA: 0x002375EE File Offset: 0x002357EE
+		// Token: 0x06006C23 RID: 27683 RVA: 0x002375CE File Offset: 0x002357CE
 		private void Awake()
 		{
 			this.triggerLastValue = 0f;
@@ -46,7 +46,7 @@ namespace GorillaTag.Cosmetics
 			this.frameCounter = 0;
 		}
 
-		// Token: 0x06006C24 RID: 27684 RVA: 0x0023761C File Offset: 0x0023581C
+		// Token: 0x06006C24 RID: 27684 RVA: 0x002375FC File Offset: 0x002357FC
 		public void LateUpdate()
 		{
 			if (!this.IsMyItem())

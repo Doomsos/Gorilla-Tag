@@ -6,7 +6,7 @@ namespace GorillaTag.Rendering
 	// Token: 0x02001083 RID: 4227
 	public sealed class ZoneLiquidEffectable : MonoBehaviour
 	{
-		// Token: 0x060069EA RID: 27114 RVA: 0x00228583 File Offset: 0x00226783
+		// Token: 0x060069EA RID: 27114 RVA: 0x00228563 File Offset: 0x00226763
 		private void Awake()
 		{
 			this.childRenderers = base.GetComponentsInChildren<Renderer>(false);

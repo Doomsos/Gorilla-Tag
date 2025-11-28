@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001094 RID: 4244
 	public class DiceHoldable : TransferrableObject
 	{
-		// Token: 0x06006A32 RID: 27186 RVA: 0x0022A570 File Offset: 0x00228770
+		// Token: 0x06006A32 RID: 27186 RVA: 0x0022A550 File Offset: 0x00228750
 		internal override void OnEnable()
 		{
 			base.OnEnable();
@@ -32,7 +32,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A33 RID: 27187 RVA: 0x0022A640 File Offset: 0x00228840
+		// Token: 0x06006A33 RID: 27187 RVA: 0x0022A620 File Offset: 0x00228820
 		internal override void OnDisable()
 		{
 			base.OnDisable();
@@ -44,7 +44,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A34 RID: 27188 RVA: 0x0022A698 File Offset: 0x00228898
+		// Token: 0x06006A34 RID: 27188 RVA: 0x0022A678 File Offset: 0x00228878
 		private void OnDiceEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			GorillaNot.IncrementRPCCall(info, "OnDiceEvent");
@@ -73,7 +73,7 @@ namespace GorillaTag.Cosmetics
 			this.dicePhysics.EndThrow();
 		}
 
-		// Token: 0x06006A35 RID: 27189 RVA: 0x0022A76C File Offset: 0x0022896C
+		// Token: 0x06006A35 RID: 27189 RVA: 0x0022A74C File Offset: 0x0022894C
 		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 		{
 			if (this.dicePhysics.enabled)
@@ -105,7 +105,7 @@ namespace GorillaTag.Cosmetics
 			base.OnGrab(pointGrabbed, grabbingHand);
 		}
 
-		// Token: 0x06006A36 RID: 27190 RVA: 0x0022A884 File Offset: 0x00228A84
+		// Token: 0x06006A36 RID: 27190 RVA: 0x0022A864 File Offset: 0x00228A64
 		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 		{
 			if (!base.OnRelease(zoneReleased, releasingHand))
@@ -138,7 +138,7 @@ namespace GorillaTag.Cosmetics
 			return true;
 		}
 
-		// Token: 0x06006A37 RID: 27191 RVA: 0x0022A999 File Offset: 0x00228B99
+		// Token: 0x06006A37 RID: 27191 RVA: 0x0022A979 File Offset: 0x00228B79
 		private void ThrowDiceLocal(Vector3 startPosition, Vector3 throwVelocity, float playerScale, int landingSide, double startTime)
 		{
 			this.dicePhysics.StartThrow(this, startPosition, throwVelocity, playerScale, landingSide, startTime);

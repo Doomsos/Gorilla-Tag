@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x02000BCA RID: 3018
 public class PUNErrorLogging : MonoBehaviour
 {
-	// Token: 0x06004AD0 RID: 19152 RVA: 0x00187AA8 File Offset: 0x00185CA8
+	// Token: 0x06004AD0 RID: 19152 RVA: 0x00187A88 File Offset: 0x00185C88
 	private void Start()
 	{
 		PhotonNetwork.InternalEventError = (Action<EventData, Exception>)Delegate.Combine(PhotonNetwork.InternalEventError, new Action<EventData, Exception>(this.PUNError));
@@ -33,7 +33,7 @@ public class PUNErrorLogging : MonoBehaviour
 		}, false);
 	}
 
-	// Token: 0x06004AD1 RID: 19153 RVA: 0x00187B10 File Offset: 0x00185D10
+	// Token: 0x06004AD1 RID: 19153 RVA: 0x00187AF0 File Offset: 0x00185CF0
 	private void PUNError(EventData data, Exception exception)
 	{
 		NetworkSystem.Instance.GetPlayer(data.Sender);
@@ -81,7 +81,7 @@ public class PUNErrorLogging : MonoBehaviour
 		this.PrintException(exception, true);
 	}
 
-	// Token: 0x06004AD2 RID: 19154 RVA: 0x00187BFE File Offset: 0x00185DFE
+	// Token: 0x06004AD2 RID: 19154 RVA: 0x00187BDE File Offset: 0x00185DDE
 	private void PrintException(Exception e, bool print)
 	{
 		if (print)

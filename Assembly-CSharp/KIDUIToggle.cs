@@ -9,12 +9,12 @@ using UnityEngine.UI;
 public class KIDUIToggle : Slider
 {
 	// Token: 0x17000667 RID: 1639
-	// (get) Token: 0x060043DB RID: 17371 RVA: 0x00167CCD File Offset: 0x00165ECD
-	// (set) Token: 0x060043DC RID: 17372 RVA: 0x00167CD5 File Offset: 0x00165ED5
+	// (get) Token: 0x060043DB RID: 17371 RVA: 0x00167CAD File Offset: 0x00165EAD
+	// (set) Token: 0x060043DC RID: 17372 RVA: 0x00167CB5 File Offset: 0x00165EB5
 	public bool CurrentValue { get; private set; }
 
 	// Token: 0x17000668 RID: 1640
-	// (get) Token: 0x060043DD RID: 17373 RVA: 0x00167CDE File Offset: 0x00165EDE
+	// (get) Token: 0x060043DD RID: 17373 RVA: 0x00167CBE File Offset: 0x00165EBE
 	public bool IsOn
 	{
 		get
@@ -23,21 +23,21 @@ public class KIDUIToggle : Slider
 		}
 	}
 
-	// Token: 0x060043DE RID: 17374 RVA: 0x00167CE6 File Offset: 0x00165EE6
+	// Token: 0x060043DE RID: 17374 RVA: 0x00167CC6 File Offset: 0x00165EC6
 	protected override void Awake()
 	{
 		base.Awake();
 		this.SetupToggleComponent();
 	}
 
-	// Token: 0x060043DF RID: 17375 RVA: 0x00167CF4 File Offset: 0x00165EF4
+	// Token: 0x060043DF RID: 17375 RVA: 0x00167CD4 File Offset: 0x00165ED4
 	protected override void Start()
 	{
 		base.Start();
 		base.interactable = false;
 	}
 
-	// Token: 0x060043E0 RID: 17376 RVA: 0x00167D03 File Offset: 0x00165F03
+	// Token: 0x060043E0 RID: 17376 RVA: 0x00167CE3 File Offset: 0x00165EE3
 	protected override void OnEnable()
 	{
 		base.OnEnable();
@@ -48,28 +48,28 @@ public class KIDUIToggle : Slider
 		}
 	}
 
-	// Token: 0x060043E1 RID: 17377 RVA: 0x00167D34 File Offset: 0x00165F34
+	// Token: 0x060043E1 RID: 17377 RVA: 0x00167D14 File Offset: 0x00165F14
 	public override void OnPointerDown(PointerEventData eventData)
 	{
 		base.OnPointerDown(eventData);
 		this.Toggle();
 	}
 
-	// Token: 0x060043E2 RID: 17378 RVA: 0x00167D43 File Offset: 0x00165F43
+	// Token: 0x060043E2 RID: 17378 RVA: 0x00167D23 File Offset: 0x00165F23
 	public override void OnPointerEnter(PointerEventData pointerEventData)
 	{
 		this.SetHighlighted();
 		this.inside = true;
 	}
 
-	// Token: 0x060043E3 RID: 17379 RVA: 0x00167D52 File Offset: 0x00165F52
+	// Token: 0x060043E3 RID: 17379 RVA: 0x00167D32 File Offset: 0x00165F32
 	public override void OnPointerExit(PointerEventData pointerEventData)
 	{
 		this.SetNormal();
 		this.inside = false;
 	}
 
-	// Token: 0x060043E4 RID: 17380 RVA: 0x00167D64 File Offset: 0x00165F64
+	// Token: 0x060043E4 RID: 17380 RVA: 0x00167D44 File Offset: 0x00165F44
 	protected virtual void SetupToggleComponent()
 	{
 		this.SetupSliderComponent();
@@ -79,7 +79,7 @@ public class KIDUIToggle : Slider
 		base.handleRect.sizeDelta = new Vector2(base.handleRect.sizeDelta.x, base.handleRect.sizeDelta.x);
 	}
 
-	// Token: 0x060043E5 RID: 17381 RVA: 0x00167DFC File Offset: 0x00165FFC
+	// Token: 0x060043E5 RID: 17381 RVA: 0x00167DDC File Offset: 0x00165FDC
 	protected virtual void SetupSliderComponent()
 	{
 		base.interactable = false;
@@ -88,7 +88,7 @@ public class KIDUIToggle : Slider
 		base.transition = 0;
 	}
 
-	// Token: 0x060043E6 RID: 17382 RVA: 0x00167E30 File Offset: 0x00166030
+	// Token: 0x060043E6 RID: 17382 RVA: 0x00167E10 File Offset: 0x00166010
 	public void RegisterOnChangeEvent(Action onChange)
 	{
 		this._onToggleChanged.AddListener(delegate()
@@ -102,7 +102,7 @@ public class KIDUIToggle : Slider
 		});
 	}
 
-	// Token: 0x060043E7 RID: 17383 RVA: 0x00167E64 File Offset: 0x00166064
+	// Token: 0x060043E7 RID: 17383 RVA: 0x00167E44 File Offset: 0x00166044
 	public void UnregisterOnChangeEvent(Action onChange)
 	{
 		this._onToggleChanged.RemoveListener(delegate()
@@ -116,7 +116,7 @@ public class KIDUIToggle : Slider
 		});
 	}
 
-	// Token: 0x060043E8 RID: 17384 RVA: 0x00167E98 File Offset: 0x00166098
+	// Token: 0x060043E8 RID: 17384 RVA: 0x00167E78 File Offset: 0x00166078
 	public void RegisterToggleOnEvent(Action onToggle)
 	{
 		this._onToggleOn.AddListener(delegate()
@@ -130,7 +130,7 @@ public class KIDUIToggle : Slider
 		});
 	}
 
-	// Token: 0x060043E9 RID: 17385 RVA: 0x00167ECC File Offset: 0x001660CC
+	// Token: 0x060043E9 RID: 17385 RVA: 0x00167EAC File Offset: 0x001660AC
 	public void UnregisterToggleOnEvent(Action onToggle)
 	{
 		this._onToggleOn.RemoveListener(delegate()
@@ -144,7 +144,7 @@ public class KIDUIToggle : Slider
 		});
 	}
 
-	// Token: 0x060043EA RID: 17386 RVA: 0x00167F00 File Offset: 0x00166100
+	// Token: 0x060043EA RID: 17386 RVA: 0x00167EE0 File Offset: 0x001660E0
 	public void RegisterToggleOffEvent(Action onToggle)
 	{
 		this._onToggleOff.AddListener(delegate()
@@ -158,7 +158,7 @@ public class KIDUIToggle : Slider
 		});
 	}
 
-	// Token: 0x060043EB RID: 17387 RVA: 0x00167F34 File Offset: 0x00166134
+	// Token: 0x060043EB RID: 17387 RVA: 0x00167F14 File Offset: 0x00166114
 	public void UnregisterToggleOffEvent(Action onToggle)
 	{
 		this._onToggleOff.RemoveListener(delegate()
@@ -172,13 +172,13 @@ public class KIDUIToggle : Slider
 		});
 	}
 
-	// Token: 0x060043EC RID: 17388 RVA: 0x00167F65 File Offset: 0x00166165
+	// Token: 0x060043EC RID: 17388 RVA: 0x00167F45 File Offset: 0x00166145
 	private void SetColors()
 	{
 		base.colors = this._fillColors;
 	}
 
-	// Token: 0x060043ED RID: 17389 RVA: 0x00167F73 File Offset: 0x00166173
+	// Token: 0x060043ED RID: 17389 RVA: 0x00167F53 File Offset: 0x00166153
 	private void Toggle()
 	{
 		if (this._isDisabled)
@@ -188,7 +188,7 @@ public class KIDUIToggle : Slider
 		this.SetStateAndStartAnimation(!this.CurrentValue, false);
 	}
 
-	// Token: 0x060043EE RID: 17390 RVA: 0x00167F8E File Offset: 0x0016618E
+	// Token: 0x060043EE RID: 17390 RVA: 0x00167F6E File Offset: 0x0016616E
 	public void SetValue(bool newValue)
 	{
 		if (newValue == this.CurrentValue)
@@ -198,7 +198,7 @@ public class KIDUIToggle : Slider
 		this.SetStateAndStartAnimation(newValue, false);
 	}
 
-	// Token: 0x060043EF RID: 17391 RVA: 0x00167FA4 File Offset: 0x001661A4
+	// Token: 0x060043EF RID: 17391 RVA: 0x00167F84 File Offset: 0x00166184
 	private void SetStateAndStartAnimation(bool state, bool skipAnim = false)
 	{
 		if (this.CurrentValue == state)
@@ -245,7 +245,7 @@ public class KIDUIToggle : Slider
 		this._animationCoroutine = base.StartCoroutine(this.AnimateSlider());
 	}
 
-	// Token: 0x060043F0 RID: 17392 RVA: 0x001680C3 File Offset: 0x001662C3
+	// Token: 0x060043F0 RID: 17392 RVA: 0x001680A3 File Offset: 0x001662A3
 	private IEnumerator AnimateSlider()
 	{
 		Debug.Log(string.Format("[KID::UI::TOGGLE] Toggle: [{0}] is {1}", base.name, this.CurrentValue));
@@ -270,7 +270,7 @@ public class KIDUIToggle : Slider
 		yield break;
 	}
 
-	// Token: 0x060043F1 RID: 17393 RVA: 0x001680D4 File Offset: 0x001662D4
+	// Token: 0x060043F1 RID: 17393 RVA: 0x001680B4 File Offset: 0x001662B4
 	private void PostUpdate()
 	{
 		if (!this.inside)
@@ -313,7 +313,7 @@ public class KIDUIToggle : Slider
 		}
 	}
 
-	// Token: 0x060043F2 RID: 17394 RVA: 0x00168200 File Offset: 0x00166400
+	// Token: 0x060043F2 RID: 17394 RVA: 0x001681E0 File Offset: 0x001663E0
 	private void LateUpdate()
 	{
 		if (KIDUIToggle._triggeredThisFrame)
@@ -342,7 +342,7 @@ public class KIDUIToggle : Slider
 		KIDUIToggle._triggeredThisFrame = false;
 	}
 
-	// Token: 0x060043F3 RID: 17395 RVA: 0x001682E5 File Offset: 0x001664E5
+	// Token: 0x060043F3 RID: 17395 RVA: 0x001682C5 File Offset: 0x001664C5
 	protected void OnDisable()
 	{
 		if (ControllerBehaviour.Instance)
@@ -352,7 +352,7 @@ public class KIDUIToggle : Slider
 		this.inside = false;
 	}
 
-	// Token: 0x060043F4 RID: 17396 RVA: 0x00168310 File Offset: 0x00166510
+	// Token: 0x060043F4 RID: 17396 RVA: 0x001682F0 File Offset: 0x001664F0
 	private void SetDisabled(bool isLockedButEnabled)
 	{
 		this.SetSwitchColors(this._borderColors.disabledColor, this._handleColors.disabledColor, this._fillColors.disabledColor);
@@ -360,7 +360,7 @@ public class KIDUIToggle : Slider
 		this.SetBackgroundActive(false);
 	}
 
-	// Token: 0x060043F5 RID: 17397 RVA: 0x0016834C File Offset: 0x0016654C
+	// Token: 0x060043F5 RID: 17397 RVA: 0x0016832C File Offset: 0x0016652C
 	private void SetNormal()
 	{
 		if (this._isDisabled)
@@ -372,7 +372,7 @@ public class KIDUIToggle : Slider
 		this.SetBackgroundActive(false);
 	}
 
-	// Token: 0x060043F6 RID: 17398 RVA: 0x0016839C File Offset: 0x0016659C
+	// Token: 0x060043F6 RID: 17398 RVA: 0x0016837C File Offset: 0x0016657C
 	private void SetSelected()
 	{
 		if (this._isDisabled)
@@ -384,7 +384,7 @@ public class KIDUIToggle : Slider
 		this.SetBackgroundActive(true);
 	}
 
-	// Token: 0x060043F7 RID: 17399 RVA: 0x001683EC File Offset: 0x001665EC
+	// Token: 0x060043F7 RID: 17399 RVA: 0x001683CC File Offset: 0x001665CC
 	private void SetHighlighted()
 	{
 		if (this._isDisabled)
@@ -396,7 +396,7 @@ public class KIDUIToggle : Slider
 		this.SetBackgroundActive(true);
 	}
 
-	// Token: 0x060043F8 RID: 17400 RVA: 0x0016843C File Offset: 0x0016663C
+	// Token: 0x060043F8 RID: 17400 RVA: 0x0016841C File Offset: 0x0016661C
 	private void SetPressed()
 	{
 		if (this._isDisabled)
@@ -408,21 +408,21 @@ public class KIDUIToggle : Slider
 		this.SetBackgroundActive(true);
 	}
 
-	// Token: 0x060043F9 RID: 17401 RVA: 0x0016848C File Offset: 0x0016668C
+	// Token: 0x060043F9 RID: 17401 RVA: 0x0016846C File Offset: 0x0016666C
 	private void SetSwitchColors(Color borderColor, Color handleColor, Color fillColor)
 	{
 		this._borderImg.color = borderColor;
 		this._handleImg.color = handleColor;
 	}
 
-	// Token: 0x060043FA RID: 17402 RVA: 0x001684A6 File Offset: 0x001666A6
+	// Token: 0x060043FA RID: 17402 RVA: 0x00168486 File Offset: 0x00166686
 	private void SetBorderSize(float borderScale)
 	{
 		this._borderImgRef.offsetMin = new Vector2(-borderScale, -borderScale * this._borderHeightRatio);
 		this._borderImgRef.offsetMax = new Vector2(borderScale, borderScale * this._borderHeightRatio);
 	}
 
-	// Token: 0x060043FB RID: 17403 RVA: 0x001684DC File Offset: 0x001666DC
+	// Token: 0x060043FB RID: 17403 RVA: 0x001684BC File Offset: 0x001666BC
 	private void SetBackgroundActive(bool isActive)
 	{
 		this._fillImg.gameObject.SetActive(isActive);
@@ -430,7 +430,7 @@ public class KIDUIToggle : Slider
 		this.SetBackgroundLocksActive(isActive);
 	}
 
-	// Token: 0x060043FC RID: 17404 RVA: 0x0016850C File Offset: 0x0016670C
+	// Token: 0x060043FC RID: 17404 RVA: 0x001684EC File Offset: 0x001666EC
 	private void SetBackgroundLocksActive(bool isActive)
 	{
 		Color color = isActive ? this._lockActiveColor : this._lockInactiveColor;

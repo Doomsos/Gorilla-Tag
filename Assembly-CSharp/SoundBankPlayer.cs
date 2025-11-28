@@ -6,7 +6,7 @@ using UnityEngine.Audio;
 public class SoundBankPlayer : MonoBehaviour
 {
 	// Token: 0x17000743 RID: 1859
-	// (get) Token: 0x06004DCF RID: 19919 RVA: 0x0019271C File Offset: 0x0019091C
+	// (get) Token: 0x06004DCF RID: 19919 RVA: 0x001926FC File Offset: 0x001908FC
 	public bool isPlaying
 	{
 		get
@@ -16,7 +16,7 @@ public class SoundBankPlayer : MonoBehaviour
 	}
 
 	// Token: 0x17000744 RID: 1860
-	// (get) Token: 0x06004DD0 RID: 19920 RVA: 0x0019272B File Offset: 0x0019092B
+	// (get) Token: 0x06004DD0 RID: 19920 RVA: 0x0019270B File Offset: 0x0019090B
 	public float NormalizedTime
 	{
 		get
@@ -30,7 +30,7 @@ public class SoundBankPlayer : MonoBehaviour
 	}
 
 	// Token: 0x17000745 RID: 1861
-	// (get) Token: 0x06004DD1 RID: 19921 RVA: 0x00192752 File Offset: 0x00190952
+	// (get) Token: 0x06004DD1 RID: 19921 RVA: 0x00192732 File Offset: 0x00190932
 	public float CurrentTime
 	{
 		get
@@ -39,7 +39,7 @@ public class SoundBankPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004DD2 RID: 19922 RVA: 0x00192760 File Offset: 0x00190960
+	// Token: 0x06004DD2 RID: 19922 RVA: 0x00192740 File Offset: 0x00190940
 	protected void Awake()
 	{
 		if (this.audioSource == null)
@@ -102,7 +102,7 @@ public class SoundBankPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004DD3 RID: 19923 RVA: 0x00192A59 File Offset: 0x00190C59
+	// Token: 0x06004DD3 RID: 19923 RVA: 0x00192A39 File Offset: 0x00190C39
 	protected void OnEnable()
 	{
 		if (this.playOnEnable)
@@ -111,13 +111,13 @@ public class SoundBankPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004DD4 RID: 19924 RVA: 0x00192A6C File Offset: 0x00190C6C
+	// Token: 0x06004DD4 RID: 19924 RVA: 0x00192A4C File Offset: 0x00190C4C
 	public void Play()
 	{
 		this.Play(default(float?), default(float?));
 	}
 
-	// Token: 0x06004DD5 RID: 19925 RVA: 0x00192A94 File Offset: 0x00190C94
+	// Token: 0x06004DD5 RID: 19925 RVA: 0x00192A74 File Offset: 0x00190C74
 	public void Play(float? volumeOverride = null, float? pitchOverride = null)
 	{
 		if (!base.enabled || this.soundBank.sounds.Length == 0 || this.playlist == null)
@@ -149,7 +149,7 @@ public class SoundBankPlayer : MonoBehaviour
 		});
 	}
 
-	// Token: 0x06004DD6 RID: 19926 RVA: 0x00192BD9 File Offset: 0x00190DD9
+	// Token: 0x06004DD6 RID: 19926 RVA: 0x00192BB9 File Offset: 0x00190DB9
 	public void RestartSequence()
 	{
 		this.nextIndex = 0;

@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DE5 RID: 3557
 	public class GameObjectManagerWithId : MonoBehaviour
 	{
-		// Token: 0x060058A4 RID: 22692 RVA: 0x001C6588 File Offset: 0x001C4788
+		// Token: 0x060058A4 RID: 22692 RVA: 0x001C6568 File Offset: 0x001C4768
 		private void Awake()
 		{
 			Transform[] componentsInChildren = this.objectsContainer.GetComponentsInChildren<Transform>(false);
@@ -20,13 +20,13 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058A5 RID: 22693 RVA: 0x001C65EE File Offset: 0x001C47EE
+		// Token: 0x060058A5 RID: 22693 RVA: 0x001C65CE File Offset: 0x001C47CE
 		private void OnDestroy()
 		{
 			this.objectData.Clear();
 		}
 
-		// Token: 0x060058A6 RID: 22694 RVA: 0x001C65FC File Offset: 0x001C47FC
+		// Token: 0x060058A6 RID: 22694 RVA: 0x001C65DC File Offset: 0x001C47DC
 		public void ReceiveEvent(string id, Transform _transform)
 		{
 			foreach (GameObjectManagerWithId.gameObjectData gameObjectData in this.objectData)
@@ -39,7 +39,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x060058A7 RID: 22695 RVA: 0x001C6664 File Offset: 0x001C4864
+		// Token: 0x060058A7 RID: 22695 RVA: 0x001C6644 File Offset: 0x001C4844
 		private void Update()
 		{
 			foreach (GameObjectManagerWithId.gameObjectData gameObjectData in this.objectData)

@@ -9,7 +9,7 @@ using UnityEngine;
 public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObservable, IGorillaSliceableSimple
 {
 	// Token: 0x17000477 RID: 1143
-	// (get) Token: 0x06003252 RID: 12882 RVA: 0x0010F66A File Offset: 0x0010D86A
+	// (get) Token: 0x06003252 RID: 12882 RVA: 0x0010F64A File Offset: 0x0010D84A
 	public NetPlayer CurrentGuardian
 	{
 		get
@@ -18,7 +18,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x06003253 RID: 12883 RVA: 0x0010F674 File Offset: 0x0010D874
+	// Token: 0x06003253 RID: 12883 RVA: 0x0010F654 File Offset: 0x0010D854
 	public void Awake()
 	{
 		GorillaGuardianZoneManager.zoneManagers.Add(this);
@@ -34,14 +34,14 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x06003254 RID: 12884 RVA: 0x0010F70C File Offset: 0x0010D90C
+	// Token: 0x06003254 RID: 12884 RVA: 0x0010F6EC File Offset: 0x0010D8EC
 	private void Start()
 	{
 		ZoneManagement instance = ZoneManagement.instance;
 		instance.onZoneChanged = (Action)Delegate.Combine(instance.onZoneChanged, new Action(this.OnZoneChanged));
 	}
 
-	// Token: 0x06003255 RID: 12885 RVA: 0x0010F734 File Offset: 0x0010D934
+	// Token: 0x06003255 RID: 12885 RVA: 0x0010F714 File Offset: 0x0010D914
 	public void OnDestroy()
 	{
 		ZoneManagement instance = ZoneManagement.instance;
@@ -49,21 +49,21 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		GorillaGuardianZoneManager.zoneManagers.Remove(this);
 	}
 
-	// Token: 0x06003256 RID: 12886 RVA: 0x0010F768 File Offset: 0x0010D968
+	// Token: 0x06003256 RID: 12886 RVA: 0x0010F748 File Offset: 0x0010D948
 	public override void OnEnable()
 	{
 		base.OnEnable();
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06003257 RID: 12887 RVA: 0x0010F777 File Offset: 0x0010D977
+	// Token: 0x06003257 RID: 12887 RVA: 0x0010F757 File Offset: 0x0010D957
 	public override void OnDisable()
 	{
 		base.OnDisable();
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06003258 RID: 12888 RVA: 0x0010F788 File Offset: 0x0010D988
+	// Token: 0x06003258 RID: 12888 RVA: 0x0010F768 File Offset: 0x0010D968
 	public void SliceUpdate()
 	{
 		float idolActivationDisplay = this._idolActivationDisplay;
@@ -85,14 +85,14 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x06003259 RID: 12889 RVA: 0x0010F81F File Offset: 0x0010DA1F
+	// Token: 0x06003259 RID: 12889 RVA: 0x0010F7FF File Offset: 0x0010D9FF
 	public override void OnLeftRoom()
 	{
 		base.OnLeftRoom();
 		this.StopPlaying();
 	}
 
-	// Token: 0x0600325A RID: 12890 RVA: 0x0010F82D File Offset: 0x0010DA2D
+	// Token: 0x0600325A RID: 12890 RVA: 0x0010F80D File Offset: 0x0010DA0D
 	public override void OnPlayerLeftRoom(Player otherPlayer)
 	{
 		if (this.guardianPlayer == null || this.guardianPlayer.GetPlayerRef() == otherPlayer)
@@ -106,7 +106,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x0600325B RID: 12891 RVA: 0x0010F868 File Offset: 0x0010DA68
+	// Token: 0x0600325B RID: 12891 RVA: 0x0010F848 File Offset: 0x0010DA48
 	private void OnZoneChanged()
 	{
 		bool flag = ZoneManagement.IsInZone(this.zone);
@@ -127,7 +127,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x0600325C RID: 12892 RVA: 0x0010F90C File Offset: 0x0010DB0C
+	// Token: 0x0600325C RID: 12892 RVA: 0x0010F8EC File Offset: 0x0010DAEC
 	public void StartPlaying()
 	{
 		if (!this.IsZoneValid())
@@ -145,7 +145,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		this.SetIdolPosition(this.currentIdol);
 	}
 
-	// Token: 0x0600325D RID: 12893 RVA: 0x0010F974 File Offset: 0x0010DB74
+	// Token: 0x0600325D RID: 12893 RVA: 0x0010F954 File Offset: 0x0010DB54
 	public void StopPlaying()
 	{
 		this._currentActivationTime = -1f;
@@ -157,13 +157,13 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		this._previousGuardian = null;
 	}
 
-	// Token: 0x0600325E RID: 12894 RVA: 0x0010F9C4 File Offset: 0x0010DBC4
+	// Token: 0x0600325E RID: 12894 RVA: 0x0010F9A4 File Offset: 0x0010DBA4
 	public void SetScaleCenterPoint(Transform scaleCenterPoint)
 	{
 		this.guardianSizeChanger.SetScaleCenterPoint(scaleCenterPoint);
 	}
 
-	// Token: 0x0600325F RID: 12895 RVA: 0x0010F9D2 File Offset: 0x0010DBD2
+	// Token: 0x0600325F RID: 12895 RVA: 0x0010F9B2 File Offset: 0x0010DBB2
 	public void IdolWasTapped(NetPlayer tapper)
 	{
 		if (tapper != null && (!GameMode.ParticipatingPlayers.Contains(tapper) || tapper == this.guardianPlayer))
@@ -180,13 +180,13 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x06003260 RID: 12896 RVA: 0x0010FA07 File Offset: 0x0010DC07
+	// Token: 0x06003260 RID: 12896 RVA: 0x0010F9E7 File Offset: 0x0010DBE7
 	public bool IsZoneValid()
 	{
 		return NetworkSystem.Instance.SessionIsPrivate || ZoneManagement.IsInZone(this.zone);
 	}
 
-	// Token: 0x06003261 RID: 12897 RVA: 0x0010FA24 File Offset: 0x0010DC24
+	// Token: 0x06003261 RID: 12897 RVA: 0x0010FA04 File Offset: 0x0010DC04
 	private bool UpdateTapCount(NetPlayer tapper)
 	{
 		if (this.guardianPlayer == null && this._previousGuardian == null)
@@ -211,7 +211,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		return false;
 	}
 
-	// Token: 0x06003262 RID: 12898 RVA: 0x0010FAB2 File Offset: 0x0010DCB2
+	// Token: 0x06003262 RID: 12898 RVA: 0x0010FA92 File Offset: 0x0010DC92
 	private void IdolActivated(NetPlayer activater)
 	{
 		this._currentActivationTime = -1f;
@@ -220,7 +220,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		this.MoveIdolPosition(this.currentIdol);
 	}
 
-	// Token: 0x06003263 RID: 12899 RVA: 0x0010FADC File Offset: 0x0010DCDC
+	// Token: 0x06003263 RID: 12899 RVA: 0x0010FABC File Offset: 0x0010DCBC
 	public void SetGuardian(NetPlayer newGuardian)
 	{
 		if (this.guardianPlayer == newGuardian)
@@ -276,13 +276,13 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x06003264 RID: 12900 RVA: 0x0010FC5F File Offset: 0x0010DE5F
+	// Token: 0x06003264 RID: 12900 RVA: 0x0010FC3F File Offset: 0x0010DE3F
 	public bool IsPlayerGuardian(NetPlayer player)
 	{
 		return player == this.guardianPlayer;
 	}
 
-	// Token: 0x06003265 RID: 12901 RVA: 0x0010FC6A File Offset: 0x0010DE6A
+	// Token: 0x06003265 RID: 12901 RVA: 0x0010FC4A File Offset: 0x0010DE4A
 	private int SelectNextIdol()
 	{
 		if (this.idolPositions == null || this.idolPositions.Count == 0)
@@ -294,7 +294,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		return this.currentIdol;
 	}
 
-	// Token: 0x06003266 RID: 12902 RVA: 0x0010FCA0 File Offset: 0x0010DEA0
+	// Token: 0x06003266 RID: 12902 RVA: 0x0010FC80 File Offset: 0x0010DE80
 	private int SelectRandomIdol()
 	{
 		int result;
@@ -309,7 +309,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		return result;
 	}
 
-	// Token: 0x06003267 RID: 12903 RVA: 0x0010FD00 File Offset: 0x0010DF00
+	// Token: 0x06003267 RID: 12903 RVA: 0x0010FCE0 File Offset: 0x0010DEE0
 	private int SelectFarthestFromGuardian()
 	{
 		if (!(GorillaGameManager.instance is GorillaGuardianManager))
@@ -339,7 +339,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		return this.SelectRandomIdol();
 	}
 
-	// Token: 0x06003268 RID: 12904 RVA: 0x0010FDA8 File Offset: 0x0010DFA8
+	// Token: 0x06003268 RID: 12904 RVA: 0x0010FD88 File Offset: 0x0010DF88
 	private int SelectFarFromNearestPlayer()
 	{
 		List<Transform> list = this.SortByDistanceToNearestPlayer();
@@ -352,7 +352,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		return this.idolPositions.IndexOf(transform);
 	}
 
-	// Token: 0x06003269 RID: 12905 RVA: 0x0010FE1C File Offset: 0x0010E01C
+	// Token: 0x06003269 RID: 12905 RVA: 0x0010FDFC File Offset: 0x0010DFFC
 	private List<Transform> SortByDistanceToNearestPlayer()
 	{
 		GorillaGuardianZoneManager.<>c__DisplayClass49_0 CS$<>8__locals1 = new GorillaGuardianZoneManager.<>c__DisplayClass49_0();
@@ -373,7 +373,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		return this._sortedIdolPositions;
 	}
 
-	// Token: 0x0600326A RID: 12906 RVA: 0x0010FF10 File Offset: 0x0010E110
+	// Token: 0x0600326A RID: 12906 RVA: 0x0010FEF0 File Offset: 0x0010E0F0
 	public void TriggerIdolKnockback()
 	{
 		if (!PhotonNetwork.IsMasterClient)
@@ -395,7 +395,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x0600326B RID: 12907 RVA: 0x0011000C File Offset: 0x0010E20C
+	// Token: 0x0600326B RID: 12907 RVA: 0x0010FFEC File Offset: 0x0010E1EC
 	private void SetIdolPosition(int index)
 	{
 		if (index < 0 || index >= this.idolPositions.Count)
@@ -407,7 +407,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		this.idol.SetPosition(this.idolPositions[index].position);
 	}
 
-	// Token: 0x0600326C RID: 12908 RVA: 0x00110064 File Offset: 0x0010E264
+	// Token: 0x0600326C RID: 12908 RVA: 0x00110044 File Offset: 0x0010E244
 	private void MoveIdolPosition(int index)
 	{
 		if (index < 0 || index >= this.idolPositions.Count)
@@ -423,7 +423,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		}
 	}
 
-	// Token: 0x0600326D RID: 12909 RVA: 0x001100D8 File Offset: 0x0010E2D8
+	// Token: 0x0600326D RID: 12909 RVA: 0x001100B8 File Offset: 0x0010E2B8
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.Sender);

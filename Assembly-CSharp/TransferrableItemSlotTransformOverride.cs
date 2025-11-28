@@ -11,16 +11,16 @@ using UnityEngine.Serialization;
 public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSliceableSimple, ISpawnable
 {
 	// Token: 0x1700033C RID: 828
-	// (get) Token: 0x06001E47 RID: 7751 RVA: 0x0009FF47 File Offset: 0x0009E147
-	// (set) Token: 0x06001E48 RID: 7752 RVA: 0x0009FF4F File Offset: 0x0009E14F
+	// (get) Token: 0x06001E47 RID: 7751 RVA: 0x0009FF27 File Offset: 0x0009E127
+	// (set) Token: 0x06001E48 RID: 7752 RVA: 0x0009FF2F File Offset: 0x0009E12F
 	bool ISpawnable.IsSpawned { get; set; }
 
 	// Token: 0x1700033D RID: 829
-	// (get) Token: 0x06001E49 RID: 7753 RVA: 0x0009FF58 File Offset: 0x0009E158
-	// (set) Token: 0x06001E4A RID: 7754 RVA: 0x0009FF60 File Offset: 0x0009E160
+	// (get) Token: 0x06001E49 RID: 7753 RVA: 0x0009FF38 File Offset: 0x0009E138
+	// (set) Token: 0x06001E4A RID: 7754 RVA: 0x0009FF40 File Offset: 0x0009E140
 	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
 
-	// Token: 0x06001E4B RID: 7755 RVA: 0x0009FF6C File Offset: 0x0009E16C
+	// Token: 0x06001E4B RID: 7755 RVA: 0x0009FF4C File Offset: 0x0009E14C
 	void ISpawnable.OnSpawn(VRRig rig)
 	{
 		this.defaultPosition = new SlotTransformOverride
@@ -39,7 +39,7 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 	{
 	}
 
-	// Token: 0x06001E4D RID: 7757 RVA: 0x0009FFDC File Offset: 0x0009E1DC
+	// Token: 0x06001E4D RID: 7757 RVA: 0x0009FFBC File Offset: 0x0009E1BC
 	public void AddGripPosition(TransferrableObject.PositionState state, TransferrableObjectGripPosition togp)
 	{
 		foreach (SlotTransformOverride slotTransformOverride in this.transformOverridesDeprecated)
@@ -70,7 +70,7 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06001E50 RID: 7760 RVA: 0x000A005C File Offset: 0x0009E25C
+	// Token: 0x06001E50 RID: 7760 RVA: 0x000A003C File Offset: 0x0009E23C
 	public void SliceUpdate()
 	{
 		if (this.followingTransferrableObject == null)
@@ -88,13 +88,13 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 		this.lastPosition = this.followingTransferrableObject.currentState;
 	}
 
-	// Token: 0x06001E51 RID: 7761 RVA: 0x000A00C6 File Offset: 0x0009E2C6
+	// Token: 0x06001E51 RID: 7761 RVA: 0x000A00A6 File Offset: 0x0009E2A6
 	private void Awake()
 	{
 		this.GenerateTransformFromPositionState();
 	}
 
-	// Token: 0x06001E52 RID: 7762 RVA: 0x000A00D0 File Offset: 0x0009E2D0
+	// Token: 0x06001E52 RID: 7762 RVA: 0x000A00B0 File Offset: 0x0009E2B0
 	public void GenerateTransformFromPositionState()
 	{
 		this.transformFromPosition = new Dictionary<TransferrableObject.PositionState, Transform>();
@@ -124,7 +124,7 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 		}
 	}
 
-	// Token: 0x06001E53 RID: 7763 RVA: 0x000A01CC File Offset: 0x0009E3CC
+	// Token: 0x06001E53 RID: 7763 RVA: 0x000A01AC File Offset: 0x0009E3AC
 	[CanBeNull]
 	public Transform GetTransformFromPositionState(TransferrableObject.PositionState currentState)
 	{
@@ -135,7 +135,7 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 		return this.transformFromPosition[currentState];
 	}
 
-	// Token: 0x06001E54 RID: 7764 RVA: 0x000A01E8 File Offset: 0x0009E3E8
+	// Token: 0x06001E54 RID: 7764 RVA: 0x000A01C8 File Offset: 0x0009E3C8
 	public bool GetTransformFromPositionState(TransferrableObject.PositionState currentState, AdvancedItemState advancedItemState, Transform targetDockXf, out Matrix4x4 matrix4X4)
 	{
 		if (currentState != TransferrableObject.PositionState.None)
@@ -171,7 +171,7 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 		return false;
 	}
 
-	// Token: 0x06001E55 RID: 7765 RVA: 0x000A02EC File Offset: 0x0009E4EC
+	// Token: 0x06001E55 RID: 7765 RVA: 0x000A02CC File Offset: 0x0009E4CC
 	public AdvancedItemState GetAdvancedItemStateFromHand(TransferrableObject.PositionState currentState, Transform handTransform, Transform targetDock)
 	{
 		foreach (SlotTransformOverride slotTransformOverride in this.transformOverridesDeprecated)
@@ -203,7 +203,7 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 		return new AdvancedItemState();
 	}
 
-	// Token: 0x06001E56 RID: 7766 RVA: 0x000A03EC File Offset: 0x0009E5EC
+	// Token: 0x06001E56 RID: 7766 RVA: 0x000A03CC File Offset: 0x0009E5CC
 	public void Edit()
 	{
 		if (TransferrableItemSlotTransformOverride.OnBringUpWindow != null)

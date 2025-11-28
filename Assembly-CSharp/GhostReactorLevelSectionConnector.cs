@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x0200064B RID: 1611
 public class GhostReactorLevelSectionConnector : MonoBehaviour
 {
-	// Token: 0x060028F7 RID: 10487 RVA: 0x000DB828 File Offset: 0x000D9A28
+	// Token: 0x060028F7 RID: 10487 RVA: 0x000DB808 File Offset: 0x000D9A08
 	private void Awake()
 	{
 		this.prePlacedGameEntities = new List<GameEntity>(128);
@@ -26,7 +26,7 @@ public class GhostReactorLevelSectionConnector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060028F8 RID: 10488 RVA: 0x000DB8D0 File Offset: 0x000D9AD0
+	// Token: 0x060028F8 RID: 10488 RVA: 0x000DB8B0 File Offset: 0x000D9AB0
 	public void Init(GhostReactorManager grManager)
 	{
 		if (grManager.IsAuthority())
@@ -63,7 +63,7 @@ public class GhostReactorLevelSectionConnector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060028F9 RID: 10489 RVA: 0x000DBA20 File Offset: 0x000D9C20
+	// Token: 0x060028F9 RID: 10489 RVA: 0x000DBA00 File Offset: 0x000D9C00
 	public void Hide(bool hide)
 	{
 		for (int i = 0; i < this.renderers.Count; i++)
@@ -75,7 +75,7 @@ public class GhostReactorLevelSectionConnector : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060028FA RID: 10490 RVA: 0x000DBA6C File Offset: 0x000D9C6C
+	// Token: 0x060028FA RID: 10490 RVA: 0x000DBA4C File Offset: 0x000D9C4C
 	public void UpdateDisable(Vector3 playerPos)
 	{
 		if (this.boundingCollider == null)

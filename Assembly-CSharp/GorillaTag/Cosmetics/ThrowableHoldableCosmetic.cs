@@ -12,7 +12,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010B7 RID: 4279
 	public class ThrowableHoldableCosmetic : TransferrableObject
 	{
-		// Token: 0x06006B27 RID: 27431 RVA: 0x00232384 File Offset: 0x00230584
+		// Token: 0x06006B27 RID: 27431 RVA: 0x00232364 File Offset: 0x00230564
 		internal override void OnEnable()
 		{
 			base.OnEnable();
@@ -31,7 +31,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B28 RID: 27432 RVA: 0x00232448 File Offset: 0x00230648
+		// Token: 0x06006B28 RID: 27432 RVA: 0x00232428 File Offset: 0x00230628
 		protected override void Awake()
 		{
 			base.Awake();
@@ -44,7 +44,7 @@ namespace GorillaTag.Cosmetics
 			this.playersEffect = base.GetComponentInChildren<CosmeticEffectsOnPlayers>();
 		}
 
-		// Token: 0x06006B29 RID: 27433 RVA: 0x002324A3 File Offset: 0x002306A3
+		// Token: 0x06006B29 RID: 27433 RVA: 0x00232483 File Offset: 0x00230683
 		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 		{
 			if (!this.disableWhenThrown.gameObject.activeSelf)
@@ -54,7 +54,7 @@ namespace GorillaTag.Cosmetics
 			base.OnGrab(pointGrabbed, grabbingHand);
 		}
 
-		// Token: 0x06006B2A RID: 27434 RVA: 0x002324C0 File Offset: 0x002306C0
+		// Token: 0x06006B2A RID: 27434 RVA: 0x002324A0 File Offset: 0x002306A0
 		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 		{
 			if (!base.OnRelease(zoneReleased, releasingHand))
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 			return true;
 		}
 
-		// Token: 0x06006B2B RID: 27435 RVA: 0x002325BC File Offset: 0x002307BC
+		// Token: 0x06006B2B RID: 27435 RVA: 0x0023259C File Offset: 0x0023079C
 		internal override void OnDisable()
 		{
 			base.OnDisable();
@@ -96,7 +96,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B2C RID: 27436 RVA: 0x00232611 File Offset: 0x00230811
+		// Token: 0x06006B2C RID: 27436 RVA: 0x002325F1 File Offset: 0x002307F1
 		public void UseAlternativeProjectile()
 		{
 			if (this.alternativeProjectilePrefab != null)
@@ -105,7 +105,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B2D RID: 27437 RVA: 0x00232630 File Offset: 0x00230830
+		// Token: 0x06006B2D RID: 27437 RVA: 0x00232610 File Offset: 0x00230810
 		private void OnThrowEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -159,7 +159,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B2E RID: 27438 RVA: 0x00232744 File Offset: 0x00230944
+		// Token: 0x06006B2E RID: 27438 RVA: 0x00232724 File Offset: 0x00230924
 		private void OnThrowLocal(Vector3 startPos, Quaternion rotation, Vector3 velocity, VRRig ownerRig)
 		{
 			this.disableWhenThrown.SetActive(false);
@@ -188,7 +188,7 @@ namespace GorillaTag.Cosmetics
 			this.currentProjectileHash = this.projectileHash;
 		}
 
-		// Token: 0x06006B2F RID: 27439 RVA: 0x0023280D File Offset: 0x00230A0D
+		// Token: 0x06006B2F RID: 27439 RVA: 0x002327ED File Offset: 0x002309ED
 		private void HitStart(FirecrackerProjectile firecracker, Vector3 contactPos)
 		{
 			if (firecracker == null)
@@ -202,7 +202,7 @@ namespace GorillaTag.Cosmetics
 			this.playersEffect.ApplyAllEffectsByDistance(contactPos);
 		}
 
-		// Token: 0x06006B30 RID: 27440 RVA: 0x00232834 File Offset: 0x00230A34
+		// Token: 0x06006B30 RID: 27440 RVA: 0x00232814 File Offset: 0x00230A14
 		private void HitComplete(IProjectile projectile)
 		{
 			if (projectile == null)

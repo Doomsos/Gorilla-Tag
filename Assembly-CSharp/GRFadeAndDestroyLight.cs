@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020006C5 RID: 1733
 public class GRFadeAndDestroyLight : MonoBehaviour
 {
-	// Token: 0x06002C8D RID: 11405 RVA: 0x000F1548 File Offset: 0x000EF748
+	// Token: 0x06002C8D RID: 11405 RVA: 0x000F1528 File Offset: 0x000EF728
 	private void Start()
 	{
 		if (this.gameLight != null)
@@ -24,7 +24,7 @@ public class GRFadeAndDestroyLight : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002C90 RID: 11408 RVA: 0x000F1580 File Offset: 0x000EF780
+	// Token: 0x06002C90 RID: 11408 RVA: 0x000F1560 File Offset: 0x000EF760
 	public void Update()
 	{
 		if (Time.time < this.timeSinceLastUpdate || Time.time > this.timeSinceLastUpdate + this.timeSlice)

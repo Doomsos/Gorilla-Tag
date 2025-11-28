@@ -8,7 +8,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DFC RID: 3580
 	public class PlayerTimerBoardLine : MonoBehaviour
 	{
-		// Token: 0x06005960 RID: 22880 RVA: 0x001C9687 File Offset: 0x001C7887
+		// Token: 0x06005960 RID: 22880 RVA: 0x001C9667 File Offset: 0x001C7867
 		public void ResetData()
 		{
 			this.linePlayer = null;
@@ -17,7 +17,7 @@ namespace GorillaTagScripts
 			this.playerTimeSeconds = 0f;
 		}
 
-		// Token: 0x06005961 RID: 22881 RVA: 0x001C96B4 File Offset: 0x001C78B4
+		// Token: 0x06005961 RID: 22881 RVA: 0x001C9694 File Offset: 0x001C7894
 		public void SetLineData(NetPlayer netPlayer)
 		{
 			if (!netPlayer.InRoom || netPlayer == this.linePlayer)
@@ -34,7 +34,7 @@ namespace GorillaTagScripts
 			this.InitializeLine();
 		}
 
-		// Token: 0x06005962 RID: 22882 RVA: 0x001C9702 File Offset: 0x001C7902
+		// Token: 0x06005962 RID: 22882 RVA: 0x001C96E2 File Offset: 0x001C78E2
 		public void InitializeLine()
 		{
 			this.currentNickname = string.Empty;
@@ -42,7 +42,7 @@ namespace GorillaTagScripts
 			this.UpdateTimeText();
 		}
 
-		// Token: 0x06005963 RID: 22883 RVA: 0x001C971C File Offset: 0x001C791C
+		// Token: 0x06005963 RID: 22883 RVA: 0x001C96FC File Offset: 0x001C78FC
 		public void UpdateLine()
 		{
 			if (this.linePlayer != null)
@@ -61,7 +61,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005964 RID: 22884 RVA: 0x001C9784 File Offset: 0x001C7984
+		// Token: 0x06005964 RID: 22884 RVA: 0x001C9764 File Offset: 0x001C7964
 		private void UpdatePlayerText()
 		{
 			try
@@ -87,7 +87,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005965 RID: 22885 RVA: 0x001C98B8 File Offset: 0x001C7AB8
+		// Token: 0x06005965 RID: 22885 RVA: 0x001C9898 File Offset: 0x001C7A98
 		private void UpdateTimeText()
 		{
 			if (this.linePlayer == null || !(PlayerTimerManager.instance != null))
@@ -104,7 +104,7 @@ namespace GorillaTagScripts
 			this.playerTimeStr = "--:--:--";
 		}
 
-		// Token: 0x06005966 RID: 22886 RVA: 0x001C993C File Offset: 0x001C7B3C
+		// Token: 0x06005966 RID: 22886 RVA: 0x001C991C File Offset: 0x001C7B1C
 		public string NormalizeName(bool doIt, string text)
 		{
 			if (doIt)
@@ -127,7 +127,7 @@ namespace GorillaTagScripts
 			return text;
 		}
 
-		// Token: 0x06005967 RID: 22887 RVA: 0x001C99E0 File Offset: 0x001C7BE0
+		// Token: 0x06005967 RID: 22887 RVA: 0x001C99C0 File Offset: 0x001C7BC0
 		public static int CompareByTotalTime(PlayerTimerBoardLine lineA, PlayerTimerBoardLine lineB)
 		{
 			if (lineA.playerTimeSeconds > 0f && lineB.playerTimeSeconds > 0f)

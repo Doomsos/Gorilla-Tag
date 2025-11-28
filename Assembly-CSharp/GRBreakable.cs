@@ -6,7 +6,7 @@ using UnityEngine;
 public class GRBreakable : MonoBehaviour, IGameHittable
 {
 	// Token: 0x17000405 RID: 1029
-	// (get) Token: 0x06002ADC RID: 10972 RVA: 0x000E6B06 File Offset: 0x000E4D06
+	// (get) Token: 0x06002ADC RID: 10972 RVA: 0x000E6AE6 File Offset: 0x000E4CE6
 	public bool BrokenLocal
 	{
 		get
@@ -15,13 +15,13 @@ public class GRBreakable : MonoBehaviour, IGameHittable
 		}
 	}
 
-	// Token: 0x06002ADD RID: 10973 RVA: 0x000E6B0E File Offset: 0x000E4D0E
+	// Token: 0x06002ADD RID: 10973 RVA: 0x000E6AEE File Offset: 0x000E4CEE
 	private void OnEnable()
 	{
 		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
 	}
 
-	// Token: 0x06002ADE RID: 10974 RVA: 0x000E6B27 File Offset: 0x000E4D27
+	// Token: 0x06002ADE RID: 10974 RVA: 0x000E6B07 File Offset: 0x000E4D07
 	private void OnDisable()
 	{
 		if (this.gameEntity != null)
@@ -30,7 +30,7 @@ public class GRBreakable : MonoBehaviour, IGameHittable
 		}
 	}
 
-	// Token: 0x06002ADF RID: 10975 RVA: 0x000E6B50 File Offset: 0x000E4D50
+	// Token: 0x06002ADF RID: 10975 RVA: 0x000E6B30 File Offset: 0x000E4D30
 	private void OnEntityStateChanged(long prevState, long nextState)
 	{
 		GRBreakable.BreakableState breakableState = (GRBreakable.BreakableState)nextState;
@@ -45,7 +45,7 @@ public class GRBreakable : MonoBehaviour, IGameHittable
 		}
 	}
 
-	// Token: 0x06002AE0 RID: 10976 RVA: 0x000E6B74 File Offset: 0x000E4D74
+	// Token: 0x06002AE0 RID: 10976 RVA: 0x000E6B54 File Offset: 0x000E4D54
 	public void BreakLocal()
 	{
 		if (!this.brokenLocal)
@@ -75,7 +75,7 @@ public class GRBreakable : MonoBehaviour, IGameHittable
 		}
 	}
 
-	// Token: 0x06002AE1 RID: 10977 RVA: 0x000E6C90 File Offset: 0x000E4E90
+	// Token: 0x06002AE1 RID: 10977 RVA: 0x000E6C70 File Offset: 0x000E4E70
 	public void RestoreLocal()
 	{
 		if (this.brokenLocal)
@@ -96,13 +96,13 @@ public class GRBreakable : MonoBehaviour, IGameHittable
 		}
 	}
 
-	// Token: 0x06002AE2 RID: 10978 RVA: 0x000E6D20 File Offset: 0x000E4F20
+	// Token: 0x06002AE2 RID: 10978 RVA: 0x000E6D00 File Offset: 0x000E4F00
 	public bool IsHitValid(GameHitData hit)
 	{
 		return !this.brokenLocal && hit.hitTypeId == 0;
 	}
 
-	// Token: 0x06002AE3 RID: 10979 RVA: 0x000E6D38 File Offset: 0x000E4F38
+	// Token: 0x06002AE3 RID: 10979 RVA: 0x000E6D18 File Offset: 0x000E4F18
 	public void OnHit(GameHitData hit)
 	{
 		if (hit.hitTypeId == 0 && (int)this.gameEntity.GetState() != 1)

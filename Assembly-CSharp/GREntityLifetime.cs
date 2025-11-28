@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020006C3 RID: 1731
 public class GREntityLifetime : MonoBehaviour
 {
-	// Token: 0x06002C88 RID: 11400 RVA: 0x000F14EB File Offset: 0x000EF6EB
+	// Token: 0x06002C88 RID: 11400 RVA: 0x000F14CB File Offset: 0x000EF6CB
 	private void Start()
 	{
 		this.entity = base.GetComponent<GameEntity>();
@@ -16,7 +16,7 @@ public class GREntityLifetime : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002C8A RID: 11402 RVA: 0x000F150A File Offset: 0x000EF70A
+	// Token: 0x06002C8A RID: 11402 RVA: 0x000F14EA File Offset: 0x000EF6EA
 	private void DestroySelf()
 	{
 		if (this.entity != null)

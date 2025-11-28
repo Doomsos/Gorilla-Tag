@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x0200070D RID: 1805
 public class GRSummonedEntity : MonoBehaviour, IGameEntityComponent
 {
-	// Token: 0x06002E57 RID: 11863 RVA: 0x000FBEED File Offset: 0x000FA0ED
+	// Token: 0x06002E57 RID: 11863 RVA: 0x000FBECD File Offset: 0x000FA0CD
 	private void Awake()
 	{
 		this.entity = base.GetComponent<GameEntity>();
 	}
 
-	// Token: 0x06002E58 RID: 11864 RVA: 0x000FBEFC File Offset: 0x000FA0FC
+	// Token: 0x06002E58 RID: 11864 RVA: 0x000FBEDC File Offset: 0x000FA0DC
 	public void OnEntityInit()
 	{
 		this.summonerNetID = (int)this.entity.createData;
@@ -24,13 +24,13 @@ public class GRSummonedEntity : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002E59 RID: 11865 RVA: 0x000FBF48 File Offset: 0x000FA148
+	// Token: 0x06002E59 RID: 11865 RVA: 0x000FBF28 File Offset: 0x000FA128
 	public int GetSummonerNetID()
 	{
 		return this.summonerNetID;
 	}
 
-	// Token: 0x06002E5A RID: 11866 RVA: 0x000FBF50 File Offset: 0x000FA150
+	// Token: 0x06002E5A RID: 11866 RVA: 0x000FBF30 File Offset: 0x000FA130
 	public void OnEntityDestroy()
 	{
 		if (this.summoner != null)
@@ -44,7 +44,7 @@ public class GRSummonedEntity : MonoBehaviour, IGameEntityComponent
 	{
 	}
 
-	// Token: 0x06002E5C RID: 11868 RVA: 0x000FBF6C File Offset: 0x000FA16C
+	// Token: 0x06002E5C RID: 11868 RVA: 0x000FBF4C File Offset: 0x000FA14C
 	private IGRSummoningEntity FindSummoner()
 	{
 		if (this.summonerNetID != 0)

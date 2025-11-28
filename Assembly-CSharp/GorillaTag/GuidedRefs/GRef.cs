@@ -7,14 +7,14 @@ namespace GorillaTag.GuidedRefs
 	// Token: 0x02001036 RID: 4150
 	public static class GRef
 	{
-		// Token: 0x060068D2 RID: 26834 RVA: 0x00222110 File Offset: 0x00220310
+		// Token: 0x060068D2 RID: 26834 RVA: 0x002220F0 File Offset: 0x002202F0
 		[MethodImpl(256)]
 		public static bool ShouldResolveNow(GRef.EResolveModes mode)
 		{
 			return Application.isPlaying && (mode & GRef.EResolveModes.Runtime) == GRef.EResolveModes.Runtime;
 		}
 
-		// Token: 0x060068D3 RID: 26835 RVA: 0x00222121 File Offset: 0x00220321
+		// Token: 0x060068D3 RID: 26835 RVA: 0x00222101 File Offset: 0x00220301
 		public static bool IsAnyResolveModeOn(GRef.EResolveModes mode)
 		{
 			return mode > GRef.EResolveModes.None;

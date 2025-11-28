@@ -19,7 +19,7 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		}
 	}
 
-	// Token: 0x0600439A RID: 17306 RVA: 0x00166CE2 File Offset: 0x00164EE2
+	// Token: 0x0600439A RID: 17306 RVA: 0x00166CC2 File Offset: 0x00164EC2
 	protected override void OnEnable()
 	{
 		base.OnEnable();
@@ -29,7 +29,7 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		}
 	}
 
-	// Token: 0x0600439B RID: 17307 RVA: 0x00166D0C File Offset: 0x00164F0C
+	// Token: 0x0600439B RID: 17307 RVA: 0x00166CEC File Offset: 0x00164EEC
 	private void PostUpdate()
 	{
 		if (!KIDUIButton._canTrigger)
@@ -72,7 +72,7 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		}
 	}
 
-	// Token: 0x0600439C RID: 17308 RVA: 0x00166E58 File Offset: 0x00165058
+	// Token: 0x0600439C RID: 17308 RVA: 0x00166E38 File Offset: 0x00165038
 	private void LateUpdate()
 	{
 		if (KIDUIButton._triggeredThisFrame)
@@ -101,21 +101,21 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		KIDUIButton._triggeredThisFrame = false;
 	}
 
-	// Token: 0x0600439D RID: 17309 RVA: 0x00166F3D File Offset: 0x0016513D
+	// Token: 0x0600439D RID: 17309 RVA: 0x00166F1D File Offset: 0x0016511D
 	public override void OnPointerExit(PointerEventData eventData)
 	{
 		base.OnPointerExit(eventData);
 		this.inside = false;
 	}
 
-	// Token: 0x0600439E RID: 17310 RVA: 0x00166F4D File Offset: 0x0016514D
+	// Token: 0x0600439E RID: 17310 RVA: 0x00166F2D File Offset: 0x0016512D
 	public void ResetButton()
 	{
 		this.inside = false;
 		KIDUIButton._triggeredThisFrame = false;
 	}
 
-	// Token: 0x0600439F RID: 17311 RVA: 0x00166F5C File Offset: 0x0016515C
+	// Token: 0x0600439F RID: 17311 RVA: 0x00166F3C File Offset: 0x0016513C
 	protected override void OnDisable()
 	{
 		this.FixStuckPressedState();
@@ -125,7 +125,7 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		}
 	}
 
-	// Token: 0x060043A0 RID: 17312 RVA: 0x00166F86 File Offset: 0x00165186
+	// Token: 0x060043A0 RID: 17312 RVA: 0x00166F66 File Offset: 0x00165166
 	private void FixStuckPressedState()
 	{
 		this.InstantClearState();
@@ -134,7 +134,7 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		KIDUIButton._triggeredThisFrame = false;
 	}
 
-	// Token: 0x060043A1 RID: 17313 RVA: 0x00166FBC File Offset: 0x001651BC
+	// Token: 0x060043A1 RID: 17313 RVA: 0x00166F9C File Offset: 0x0016519C
 	protected override void DoStateTransition(Selectable.SelectionState state, bool instant)
 	{
 		base.DoStateTransition(state, instant);
@@ -163,7 +163,7 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		}
 	}
 
-	// Token: 0x060043A2 RID: 17314 RVA: 0x0016706C File Offset: 0x0016526C
+	// Token: 0x060043A2 RID: 17314 RVA: 0x0016704C File Offset: 0x0016524C
 	private void SetIcons(bool normalEnabled, bool highlightedEnabled)
 	{
 		if (this._normalIcon == null || this._highlightedIcon == null)
@@ -183,7 +183,7 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		highlightedIcon.SetActive(highlightedEnabled);
 	}
 
-	// Token: 0x060043A3 RID: 17315 RVA: 0x001670BC File Offset: 0x001652BC
+	// Token: 0x060043A3 RID: 17315 RVA: 0x0016709C File Offset: 0x0016529C
 	public override void OnPointerEnter(PointerEventData eventData)
 	{
 		base.OnPointerEnter(eventData);
@@ -206,7 +206,7 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		xrrayInteractor.xrController.SendHapticImpulse(this._highlightedVibrationStrength, this._highlightedVibrationDuration);
 	}
 
-	// Token: 0x060043A4 RID: 17316 RVA: 0x0016713C File Offset: 0x0016533C
+	// Token: 0x060043A4 RID: 17316 RVA: 0x0016711C File Offset: 0x0016531C
 	public override void OnPointerDown(PointerEventData eventData)
 	{
 		base.OnPointerDown(eventData);
@@ -228,25 +228,25 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 		xrrayInteractor.xrController.SendHapticImpulse(this._pressedVibrationStrength, this._pressedVibrationDuration);
 	}
 
-	// Token: 0x060043A5 RID: 17317 RVA: 0x001671B6 File Offset: 0x001653B6
+	// Token: 0x060043A5 RID: 17317 RVA: 0x00167196 File Offset: 0x00165396
 	public void SetText(string text)
 	{
 		this._buttonText.SetText(text);
 	}
 
-	// Token: 0x060043A6 RID: 17318 RVA: 0x001671C4 File Offset: 0x001653C4
+	// Token: 0x060043A6 RID: 17318 RVA: 0x001671A4 File Offset: 0x001653A4
 	public void SetFont(TMP_FontAsset font)
 	{
 		this._buttonText.font = font;
 	}
 
-	// Token: 0x060043A7 RID: 17319 RVA: 0x001671D2 File Offset: 0x001653D2
+	// Token: 0x060043A7 RID: 17319 RVA: 0x001671B2 File Offset: 0x001653B2
 	public string GetText()
 	{
 		return this._buttonText.text;
 	}
 
-	// Token: 0x060043A8 RID: 17320 RVA: 0x001671DF File Offset: 0x001653DF
+	// Token: 0x060043A8 RID: 17320 RVA: 0x001671BF File Offset: 0x001653BF
 	public void SetBorderImage(Sprite newImg)
 	{
 		this._borderImage.sprite = newImg;

@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(SpawnWorldEffects))]
 public class SpawnWorldEffectsTrigger : MonoBehaviour
 {
-	// Token: 0x06004EF6 RID: 20214 RVA: 0x001984E6 File Offset: 0x001966E6
+	// Token: 0x06004EF6 RID: 20214 RVA: 0x001984C6 File Offset: 0x001966C6
 	private void OnEnable()
 	{
 		if (this.swe == null)
@@ -15,14 +15,14 @@ public class SpawnWorldEffectsTrigger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004EF7 RID: 20215 RVA: 0x00198502 File Offset: 0x00196702
+	// Token: 0x06004EF7 RID: 20215 RVA: 0x001984E2 File Offset: 0x001966E2
 	private void OnTriggerEnter(Collider other)
 	{
 		this.spawnTime = Time.time;
 		this.swe.RequestSpawn(base.transform.position);
 	}
 
-	// Token: 0x06004EF8 RID: 20216 RVA: 0x00198525 File Offset: 0x00196725
+	// Token: 0x06004EF8 RID: 20216 RVA: 0x00198505 File Offset: 0x00196705
 	private void OnTriggerStay(Collider other)
 	{
 		if (Time.time - this.spawnTime < this.spawnCooldown)

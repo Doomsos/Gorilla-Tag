@@ -9,7 +9,7 @@ using UnityEngine.Audio;
 public class KIDAudioManager : MonoBehaviour
 {
 	// Token: 0x1700063D RID: 1597
-	// (get) Token: 0x06004244 RID: 16964 RVA: 0x0015E905 File Offset: 0x0015CB05
+	// (get) Token: 0x06004244 RID: 16964 RVA: 0x0015E8E5 File Offset: 0x0015CAE5
 	public static KIDAudioManager Instance
 	{
 		get
@@ -26,7 +26,7 @@ public class KIDAudioManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004245 RID: 16965 RVA: 0x0015E92C File Offset: 0x0015CB2C
+	// Token: 0x06004245 RID: 16965 RVA: 0x0015E90C File Offset: 0x0015CB0C
 	private void Awake()
 	{
 		if (KIDAudioManager._instance == null)
@@ -45,7 +45,7 @@ public class KIDAudioManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004246 RID: 16966 RVA: 0x0015E9A0 File Offset: 0x0015CBA0
+	// Token: 0x06004246 RID: 16966 RVA: 0x0015E980 File Offset: 0x0015CB80
 	private void ConfigureAudioSource()
 	{
 		if (this.audioSource != null)
@@ -67,7 +67,7 @@ public class KIDAudioManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004247 RID: 16967 RVA: 0x0015EA68 File Offset: 0x0015CC68
+	// Token: 0x06004247 RID: 16967 RVA: 0x0015EA48 File Offset: 0x0015CC48
 	private void InitializeSoundClips()
 	{
 		Dictionary<KIDAudioManager.KIDSoundType, AudioClip> dictionary = new Dictionary<KIDAudioManager.KIDSoundType, AudioClip>();
@@ -82,7 +82,7 @@ public class KIDAudioManager : MonoBehaviour
 		this.soundClips = dictionary;
 	}
 
-	// Token: 0x06004248 RID: 16968 RVA: 0x0015EAE8 File Offset: 0x0015CCE8
+	// Token: 0x06004248 RID: 16968 RVA: 0x0015EAC8 File Offset: 0x0015CCC8
 	public void SetKIDUIAudioActive(bool active)
 	{
 		if (!this.IsInstanceValid() || this.isKIDUIActive == active)
@@ -102,7 +102,7 @@ public class KIDAudioManager : MonoBehaviour
 		this.normalSnapshot.TransitionTo(0f);
 	}
 
-	// Token: 0x06004249 RID: 16969 RVA: 0x0015EB3C File Offset: 0x0015CD3C
+	// Token: 0x06004249 RID: 16969 RVA: 0x0015EB1C File Offset: 0x0015CD1C
 	public void PlaySound(KIDAudioManager.KIDSoundType soundType)
 	{
 		if (!this.IsInstanceValid())
@@ -123,7 +123,7 @@ public class KIDAudioManager : MonoBehaviour
 		Debug.LogWarning(string.Format("[KIDAudioManager] Sound clip for {0} is null or not found!", soundType));
 	}
 
-	// Token: 0x0600424A RID: 16970 RVA: 0x0015EB9C File Offset: 0x0015CD9C
+	// Token: 0x0600424A RID: 16970 RVA: 0x0015EB7C File Offset: 0x0015CD7C
 	public void StartButtonHeldSound()
 	{
 		if (!this.IsInstanceValid() || this.buttonHeldSound == null || this.isHoldSoundPlaying)
@@ -135,7 +135,7 @@ public class KIDAudioManager : MonoBehaviour
 		this.isHoldSoundPlaying = true;
 	}
 
-	// Token: 0x0600424B RID: 16971 RVA: 0x0015EBEB File Offset: 0x0015CDEB
+	// Token: 0x0600424B RID: 16971 RVA: 0x0015EBCB File Offset: 0x0015CDCB
 	public void StopButtonHeldSound()
 	{
 		if (!this.IsInstanceValid() || !this.isHoldSoundPlaying)
@@ -149,25 +149,25 @@ public class KIDAudioManager : MonoBehaviour
 		this.isHoldSoundPlaying = false;
 	}
 
-	// Token: 0x0600424C RID: 16972 RVA: 0x0015EC28 File Offset: 0x0015CE28
+	// Token: 0x0600424C RID: 16972 RVA: 0x0015EC08 File Offset: 0x0015CE08
 	private bool IsInstanceValid()
 	{
 		return !(KIDAudioManager._instance == null) && !(KIDAudioManager._instance != this) && !(this.audioSource == null) && !(this.loopingAudioSource == null);
 	}
 
-	// Token: 0x0600424D RID: 16973 RVA: 0x0015EC63 File Offset: 0x0015CE63
+	// Token: 0x0600424D RID: 16973 RVA: 0x0015EC43 File Offset: 0x0015CE43
 	public bool IsKIDUIActive()
 	{
 		return this.isKIDUIActive;
 	}
 
-	// Token: 0x0600424E RID: 16974 RVA: 0x0015EC6B File Offset: 0x0015CE6B
+	// Token: 0x0600424E RID: 16974 RVA: 0x0015EC4B File Offset: 0x0015CE4B
 	public void PlaySoundWithDelay(KIDAudioManager.KIDSoundType soundType)
 	{
 		base.StartCoroutine(this.PlayDelayedSound(soundType, 0.05f));
 	}
 
-	// Token: 0x0600424F RID: 16975 RVA: 0x0015EC80 File Offset: 0x0015CE80
+	// Token: 0x0600424F RID: 16975 RVA: 0x0015EC60 File Offset: 0x0015CE60
 	private IEnumerator PlayDelayedSound(KIDAudioManager.KIDSoundType soundType, float delay)
 	{
 		yield return new WaitForSeconds(delay);

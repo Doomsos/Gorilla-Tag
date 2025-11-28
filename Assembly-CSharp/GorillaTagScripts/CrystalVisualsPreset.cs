@@ -9,7 +9,7 @@ namespace GorillaTagScripts
 	[CreateAssetMenu(fileName = "CrystalVisualsPreset", menuName = "ScriptableObjects/CrystalVisualsPreset", order = 0)]
 	public class CrystalVisualsPreset : ScriptableObject
 	{
-		// Token: 0x060057FE RID: 22526 RVA: 0x001C1FB0 File Offset: 0x001C01B0
+		// Token: 0x060057FE RID: 22526 RVA: 0x001C1F90 File Offset: 0x001C0190
 		public override int GetHashCode()
 		{
 			return new ValueTuple<CrystalVisualsPreset.VisualState, CrystalVisualsPreset.VisualState>(this.stateA, this.stateB).GetHashCode();
@@ -31,7 +31,7 @@ namespace GorillaTagScripts
 		[Serializable]
 		public struct VisualState
 		{
-			// Token: 0x06005801 RID: 22529 RVA: 0x001C1FDC File Offset: 0x001C01DC
+			// Token: 0x06005801 RID: 22529 RVA: 0x001C1FBC File Offset: 0x001C01BC
 			public override int GetHashCode()
 			{
 				int num = CrystalVisualsPreset.VisualState.<GetHashCode>g__GetColorHash|2_0(this.albedo);
@@ -39,7 +39,7 @@ namespace GorillaTagScripts
 				return new ValueTuple<int, int>(num, num2).GetHashCode();
 			}
 
-			// Token: 0x06005802 RID: 22530 RVA: 0x001C2014 File Offset: 0x001C0214
+			// Token: 0x06005802 RID: 22530 RVA: 0x001C1FF4 File Offset: 0x001C01F4
 			[CompilerGenerated]
 			internal static int <GetHashCode>g__GetColorHash|2_0(Color c)
 			{

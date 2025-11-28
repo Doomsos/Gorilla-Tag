@@ -9,7 +9,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E57 RID: 3671
 	public class BuilderPieceToggle : MonoBehaviour, IBuilderPieceFunctional, IBuilderPieceComponent, IBuilderTappable
 	{
-		// Token: 0x06005BAE RID: 23470 RVA: 0x001D6DCC File Offset: 0x001D4FCC
+		// Token: 0x06005BAE RID: 23470 RVA: 0x001D6DAC File Offset: 0x001D4FAC
 		private void Awake()
 		{
 			this.colliders.Clear();
@@ -36,7 +36,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BAF RID: 23471 RVA: 0x001D6E84 File Offset: 0x001D5084
+		// Token: 0x06005BAF RID: 23471 RVA: 0x001D6E64 File Offset: 0x001D5064
 		private void OnDestroy()
 		{
 			foreach (BuilderSmallHandTrigger builderSmallHandTrigger in this.handTriggers)
@@ -55,13 +55,13 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BB0 RID: 23472 RVA: 0x001D6F04 File Offset: 0x001D5104
+		// Token: 0x06005BB0 RID: 23472 RVA: 0x001D6EE4 File Offset: 0x001D50E4
 		private bool CanTap()
 		{
 			return (!this.onlySmallMonkeTaps || !this.myPiece.GetTable().isTableMutable || (double)VRRigCache.Instance.localRig.Rig.scaleFactor <= 0.99) && this.toggleType == BuilderPieceToggle.ToggleType.OnTap && this.myPiece.state == BuilderPiece.State.AttachedAndPlaced;
 		}
 
-		// Token: 0x06005BB1 RID: 23473 RVA: 0x001D6F65 File Offset: 0x001D5165
+		// Token: 0x06005BB1 RID: 23473 RVA: 0x001D6F45 File Offset: 0x001D5145
 		public void OnTapLocal(float tapStrength)
 		{
 			if (!this.CanTap())
@@ -73,13 +73,13 @@ namespace GorillaTagScripts.Builder
 			this.ToggleStateRequest();
 		}
 
-		// Token: 0x06005BB2 RID: 23474 RVA: 0x001D6F8A File Offset: 0x001D518A
+		// Token: 0x06005BB2 RID: 23474 RVA: 0x001D6F6A File Offset: 0x001D516A
 		private bool CanTrigger()
 		{
 			return this.toggleType == BuilderPieceToggle.ToggleType.OnTriggerEnter && this.myPiece.state == BuilderPiece.State.AttachedAndPlaced;
 		}
 
-		// Token: 0x06005BB3 RID: 23475 RVA: 0x001D6FA5 File Offset: 0x001D51A5
+		// Token: 0x06005BB3 RID: 23475 RVA: 0x001D6F85 File Offset: 0x001D5185
 		private void OnHandTriggerEntered()
 		{
 			if (this.CanTrigger())
@@ -90,7 +90,7 @@ namespace GorillaTagScripts.Builder
 			Debug.Log("BuilderPieceToggle Can't Trigger");
 		}
 
-		// Token: 0x06005BB4 RID: 23476 RVA: 0x001D6FC0 File Offset: 0x001D51C0
+		// Token: 0x06005BB4 RID: 23476 RVA: 0x001D6FA0 File Offset: 0x001D51A0
 		private void OnBodyTriggerEntered(int playerNumber)
 		{
 			if (!NetworkSystem.Instance.IsMasterClient)
@@ -110,7 +110,7 @@ namespace GorillaTagScripts.Builder
 			Debug.Log("BuilderPieceToggle Can't Trigger");
 		}
 
-		// Token: 0x06005BB5 RID: 23477 RVA: 0x001D700C File Offset: 0x001D520C
+		// Token: 0x06005BB5 RID: 23477 RVA: 0x001D6FEC File Offset: 0x001D51EC
 		private void ToggleStateRequest()
 		{
 			if (!NetworkSystem.Instance.InRoom)
@@ -122,7 +122,7 @@ namespace GorillaTagScripts.Builder
 			this.myPiece.GetTable().builderNetworking.RequestFunctionalPieceStateChange(this.myPiece.pieceId, (byte)toggleStates);
 		}
 
-		// Token: 0x06005BB6 RID: 23478 RVA: 0x001D7074 File Offset: 0x001D5274
+		// Token: 0x06005BB6 RID: 23478 RVA: 0x001D7054 File Offset: 0x001D5254
 		private void ToggleStateMaster(Player instigator)
 		{
 			BuilderPieceToggle.ToggleStates toggleStates = (this.toggleState == BuilderPieceToggle.ToggleStates.Off) ? BuilderPieceToggle.ToggleStates.On : BuilderPieceToggle.ToggleStates.Off;
@@ -130,7 +130,7 @@ namespace GorillaTagScripts.Builder
 			this.myPiece.GetTable().builderNetworking.FunctionalPieceStateChangeMaster(this.myPiece.pieceId, (byte)toggleStates, instigator, NetworkSystem.Instance.ServerTimestamp);
 		}
 
-		// Token: 0x06005BB7 RID: 23479 RVA: 0x001D70DC File Offset: 0x001D52DC
+		// Token: 0x06005BB7 RID: 23479 RVA: 0x001D70BC File Offset: 0x001D52BC
 		public void OnStateChanged(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!this.IsStateValid(newState))
@@ -159,7 +159,7 @@ namespace GorillaTagScripts.Builder
 			this.toggleState = (BuilderPieceToggle.ToggleStates)newState;
 		}
 
-		// Token: 0x06005BB8 RID: 23480 RVA: 0x001D7164 File Offset: 0x001D5364
+		// Token: 0x06005BB8 RID: 23480 RVA: 0x001D7144 File Offset: 0x001D5344
 		public void OnStateRequest(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!NetworkSystem.Instance.IsMasterClient)
@@ -180,7 +180,7 @@ namespace GorillaTagScripts.Builder
 			Debug.Log("BuilderPieceToggle Same State");
 		}
 
-		// Token: 0x06005BB9 RID: 23481 RVA: 0x001D71F1 File Offset: 0x001D53F1
+		// Token: 0x06005BB9 RID: 23481 RVA: 0x001D71D1 File Offset: 0x001D53D1
 		public bool IsStateValid(byte state)
 		{
 			Debug.Log(string.Format("Is State Valid? {0}", state));
@@ -207,7 +207,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005BBE RID: 23486 RVA: 0x001D7210 File Offset: 0x001D5410
+		// Token: 0x06005BBE RID: 23486 RVA: 0x001D71F0 File Offset: 0x001D53F0
 		public void OnPieceActivate()
 		{
 			foreach (Collider collider in this.colliders)
@@ -216,7 +216,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005BBF RID: 23487 RVA: 0x001D7264 File Offset: 0x001D5464
+		// Token: 0x06005BBF RID: 23487 RVA: 0x001D7244 File Offset: 0x001D5444
 		public void OnPieceDeactivate()
 		{
 			this.myPiece.SetFunctionalPieceState(0, NetworkSystem.Instance.LocalPlayer, NetworkSystem.Instance.ServerTimestamp);

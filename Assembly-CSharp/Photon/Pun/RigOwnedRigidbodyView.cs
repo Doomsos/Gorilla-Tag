@@ -9,17 +9,17 @@ namespace Photon.Pun
 	public class RigOwnedRigidbodyView : MonoBehaviourPun, IPunObservable
 	{
 		// Token: 0x17000818 RID: 2072
-		// (get) Token: 0x06005536 RID: 21814 RVA: 0x001ACFB4 File Offset: 0x001AB1B4
-		// (set) Token: 0x06005537 RID: 21815 RVA: 0x001ACFBC File Offset: 0x001AB1BC
+		// (get) Token: 0x06005536 RID: 21814 RVA: 0x001ACF94 File Offset: 0x001AB194
+		// (set) Token: 0x06005537 RID: 21815 RVA: 0x001ACF9C File Offset: 0x001AB19C
 		public bool IsMine { get; private set; }
 
-		// Token: 0x06005538 RID: 21816 RVA: 0x001ACFC5 File Offset: 0x001AB1C5
+		// Token: 0x06005538 RID: 21816 RVA: 0x001ACFA5 File Offset: 0x001AB1A5
 		public void SetIsMine(bool isMine)
 		{
 			this.IsMine = isMine;
 		}
 
-		// Token: 0x06005539 RID: 21817 RVA: 0x001ACFCE File Offset: 0x001AB1CE
+		// Token: 0x06005539 RID: 21817 RVA: 0x001ACFAE File Offset: 0x001AB1AE
 		public void Awake()
 		{
 			this.m_Body = base.GetComponent<Rigidbody>();
@@ -27,7 +27,7 @@ namespace Photon.Pun
 			this.m_NetworkRotation = default(Quaternion);
 		}
 
-		// Token: 0x0600553A RID: 21818 RVA: 0x001ACFF4 File Offset: 0x001AB1F4
+		// Token: 0x0600553A RID: 21818 RVA: 0x001ACFD4 File Offset: 0x001AB1D4
 		public void FixedUpdate()
 		{
 			if (!this.IsMine)
@@ -37,7 +37,7 @@ namespace Photon.Pun
 			}
 		}
 
-		// Token: 0x0600553B RID: 21819 RVA: 0x001AD074 File Offset: 0x001AB274
+		// Token: 0x0600553B RID: 21819 RVA: 0x001AD054 File Offset: 0x001AB254
 		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (info.Sender != info.photonView.Owner)

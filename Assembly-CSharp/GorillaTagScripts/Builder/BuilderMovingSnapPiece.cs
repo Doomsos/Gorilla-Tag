@@ -8,7 +8,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E49 RID: 3657
 	public class BuilderMovingSnapPiece : MonoBehaviour, IBuilderPieceComponent, IBuilderPieceFunctional
 	{
-		// Token: 0x06005B29 RID: 23337 RVA: 0x001D33D4 File Offset: 0x001D15D4
+		// Token: 0x06005B29 RID: 23337 RVA: 0x001D33B4 File Offset: 0x001D15B4
 		private void Awake()
 		{
 			this.myPiece = base.GetComponent<BuilderPiece>();
@@ -22,7 +22,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B2A RID: 23338 RVA: 0x001D3460 File Offset: 0x001D1660
+		// Token: 0x06005B2A RID: 23338 RVA: 0x001D3440 File Offset: 0x001D1640
 		public int GetTimeOffset()
 		{
 			if (this.myPiece.state != BuilderPiece.State.AttachedAndPlaced)
@@ -44,7 +44,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005B2C RID: 23340 RVA: 0x001D34D0 File Offset: 0x001D16D0
+		// Token: 0x06005B2C RID: 23340 RVA: 0x001D34B0 File Offset: 0x001D16B0
 		public void OnPieceDestroy()
 		{
 			foreach (BuilderMovingPart builderMovingPart in this.MovingParts)
@@ -53,7 +53,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B2D RID: 23341 RVA: 0x001D3520 File Offset: 0x001D1720
+		// Token: 0x06005B2D RID: 23341 RVA: 0x001D3500 File Offset: 0x001D1700
 		public void OnPiecePlacementDeserialized()
 		{
 			foreach (BuilderMovingPart builderMovingPart in this.MovingParts)
@@ -76,7 +76,7 @@ namespace GorillaTagScripts.Builder
 			this.OnStateChanged(this.myPiece.functionalPieceState, NetworkSystem.Instance.MasterClient, this.myPiece.activatedTimeStamp);
 		}
 
-		// Token: 0x06005B2E RID: 23342 RVA: 0x001D35F0 File Offset: 0x001D17F0
+		// Token: 0x06005B2E RID: 23342 RVA: 0x001D35D0 File Offset: 0x001D17D0
 		public void OnPieceActivate()
 		{
 			BuilderTable table = this.myPiece.GetTable();
@@ -122,7 +122,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B2F RID: 23343 RVA: 0x001D37A4 File Offset: 0x001D19A4
+		// Token: 0x06005B2F RID: 23343 RVA: 0x001D3784 File Offset: 0x001D1984
 		public void OnPieceDeactivate()
 		{
 			BuilderTable table = this.myPiece.GetTable();
@@ -137,7 +137,7 @@ namespace GorillaTagScripts.Builder
 			this.activated = false;
 		}
 
-		// Token: 0x06005B30 RID: 23344 RVA: 0x001D3828 File Offset: 0x001D1A28
+		// Token: 0x06005B30 RID: 23344 RVA: 0x001D3808 File Offset: 0x001D1A08
 		public void OnStateChanged(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!this.IsStateValid(newState))
@@ -193,19 +193,19 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005B32 RID: 23346 RVA: 0x001D3990 File Offset: 0x001D1B90
+		// Token: 0x06005B32 RID: 23346 RVA: 0x001D3970 File Offset: 0x001D1B70
 		public bool IsStateValid(byte state)
 		{
 			return (int)state <= BuilderMovingPart.NUM_PAUSE_NODES * 2 + 1;
 		}
 
-		// Token: 0x06005B33 RID: 23347 RVA: 0x001D39A1 File Offset: 0x001D1BA1
+		// Token: 0x06005B33 RID: 23347 RVA: 0x001D3981 File Offset: 0x001D1B81
 		public void FunctionalPieceUpdate()
 		{
 			this.UpdateMaster();
 		}
 
-		// Token: 0x06005B34 RID: 23348 RVA: 0x001D39AC File Offset: 0x001D1BAC
+		// Token: 0x06005B34 RID: 23348 RVA: 0x001D398C File Offset: 0x001D1B8C
 		public void FunctionalPieceFixedUpdate()
 		{
 			if (!this.moving)
@@ -221,7 +221,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B35 RID: 23349 RVA: 0x001D3A10 File Offset: 0x001D1C10
+		// Token: 0x06005B35 RID: 23349 RVA: 0x001D39F0 File Offset: 0x001D1BF0
 		private void UpdateMaster()
 		{
 			if (!NetworkSystem.Instance.IsMasterClient)

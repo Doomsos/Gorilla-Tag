@@ -6,7 +6,7 @@ using UnityEngine.UI;
 // Token: 0x02000460 RID: 1120
 public class CosmeticStand : GorillaPressableButton
 {
-	// Token: 0x06001C61 RID: 7265 RVA: 0x00096AEC File Offset: 0x00094CEC
+	// Token: 0x06001C61 RID: 7265 RVA: 0x00096ACC File Offset: 0x00094CCC
 	public void InitializeCosmetic()
 	{
 		this.thisCosmeticItem = CosmeticsController.instance.allCosmetics.Find((CosmeticsController.CosmeticItem x) => this.thisCosmeticName == x.displayName || this.thisCosmeticName == x.overrideDisplayName || this.thisCosmeticName == x.itemName);
@@ -16,7 +16,7 @@ public class CosmeticStand : GorillaPressableButton
 		}
 	}
 
-	// Token: 0x06001C62 RID: 7266 RVA: 0x00096B6A File Offset: 0x00094D6A
+	// Token: 0x06001C62 RID: 7266 RVA: 0x00096B4A File Offset: 0x00094D4A
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();

@@ -9,7 +9,7 @@ using UnityEngine;
 internal class VirtualStumpSerializer : GorillaSerializer
 {
 	// Token: 0x170005CB RID: 1483
-	// (get) Token: 0x06003F60 RID: 16224 RVA: 0x00109E41 File Offset: 0x00108041
+	// (get) Token: 0x06003F60 RID: 16224 RVA: 0x00109E21 File Offset: 0x00108021
 	internal bool HasAuthority
 	{
 		get
@@ -18,7 +18,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		}
 	}
 
-	// Token: 0x06003F61 RID: 16225 RVA: 0x00154110 File Offset: 0x00152310
+	// Token: 0x06003F61 RID: 16225 RVA: 0x001540F0 File Offset: 0x001522F0
 	protected void Start()
 	{
 		NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnJoinedRoom);
@@ -26,7 +26,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeftRoom);
 	}
 
-	// Token: 0x06003F62 RID: 16226 RVA: 0x00154180 File Offset: 0x00152380
+	// Token: 0x06003F62 RID: 16226 RVA: 0x00154160 File Offset: 0x00152360
 	private void OnPlayerLeftRoom(NetPlayer leavingPlayer)
 	{
 		if (!NetworkSystem.Instance.IsMasterClient)
@@ -40,7 +40,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		}
 	}
 
-	// Token: 0x06003F63 RID: 16227 RVA: 0x001541B2 File Offset: 0x001523B2
+	// Token: 0x06003F63 RID: 16227 RVA: 0x00154192 File Offset: 0x00152392
 	private void OnJoinedRoom()
 	{
 		if (NetworkSystem.Instance.IsMasterClient)
@@ -53,20 +53,20 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		base.SendRPC("RequestRoomInitialization_RPC", false, Array.Empty<object>());
 	}
 
-	// Token: 0x06003F64 RID: 16228 RVA: 0x001541E8 File Offset: 0x001523E8
+	// Token: 0x06003F64 RID: 16228 RVA: 0x001541C8 File Offset: 0x001523C8
 	private void OnLeftRoom()
 	{
 		Debug.Log("[VirtualStumpSerializer::OnLeftRoom]...");
 		VirtualStumpSerializer.roomInitialized = false;
 	}
 
-	// Token: 0x06003F65 RID: 16229 RVA: 0x001541FA File Offset: 0x001523FA
+	// Token: 0x06003F65 RID: 16229 RVA: 0x001541DA File Offset: 0x001523DA
 	public static bool IsWaitingForRoomInit()
 	{
 		return VirtualStumpSerializer.waitingForRoomInitialization || !VirtualStumpSerializer.roomInitialized;
 	}
 
-	// Token: 0x06003F66 RID: 16230 RVA: 0x00154210 File Offset: 0x00152410
+	// Token: 0x06003F66 RID: 16230 RVA: 0x001541F0 File Offset: 0x001523F0
 	[PunRPC]
 	private void RequestRoomInitialization_RPC(PhotonMessageInfo info)
 	{
@@ -91,7 +91,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		});
 	}
 
-	// Token: 0x06003F67 RID: 16231 RVA: 0x001542AC File Offset: 0x001524AC
+	// Token: 0x06003F67 RID: 16231 RVA: 0x0015428C File Offset: 0x0015248C
 	[PunRPC]
 	private void InitializeRoom_RPC(int currentScreen, int driverID, long modDetailsID, long loadedMapModID, PhotonMessageInfo info)
 	{
@@ -114,7 +114,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		Debug.Log("[VStumpSerializer.InitializeRPC] Room initialization finished.");
 	}
 
-	// Token: 0x06003F68 RID: 16232 RVA: 0x0015431C File Offset: 0x0015251C
+	// Token: 0x06003F68 RID: 16232 RVA: 0x001542FC File Offset: 0x001524FC
 	public void LoadMapSynced(long modId)
 	{
 		CustomMapManager.SetRoomMap(modId);
@@ -128,7 +128,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		}
 	}
 
-	// Token: 0x06003F69 RID: 16233 RVA: 0x0015436E File Offset: 0x0015256E
+	// Token: 0x06003F69 RID: 16233 RVA: 0x0015434E File Offset: 0x0015254E
 	public void UnloadMapSynced()
 	{
 		CustomMapManager.UnloadMap(true);
@@ -138,7 +138,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		}
 	}
 
-	// Token: 0x06003F6A RID: 16234 RVA: 0x001543A0 File Offset: 0x001525A0
+	// Token: 0x06003F6A RID: 16234 RVA: 0x00154380 File Offset: 0x00152580
 	[PunRPC]
 	private void SetRoomMap_RPC(long modId, PhotonMessageInfo info)
 	{
@@ -158,7 +158,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		CustomMapManager.SetRoomMap(modId);
 	}
 
-	// Token: 0x06003F6B RID: 16235 RVA: 0x00154408 File Offset: 0x00152608
+	// Token: 0x06003F6B RID: 16235 RVA: 0x001543E8 File Offset: 0x001525E8
 	[PunRPC]
 	private void UnloadMap_RPC(PhotonMessageInfo info)
 	{
@@ -174,7 +174,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		CustomMapManager.UnloadMap(true);
 	}
 
-	// Token: 0x06003F6C RID: 16236 RVA: 0x00154437 File Offset: 0x00152637
+	// Token: 0x06003F6C RID: 16236 RVA: 0x00154417 File Offset: 0x00152617
 	public void RequestTerminalControlStatusChange(bool lockedStatus)
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -187,7 +187,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		});
 	}
 
-	// Token: 0x06003F6D RID: 16237 RVA: 0x00154464 File Offset: 0x00152664
+	// Token: 0x06003F6D RID: 16237 RVA: 0x00154444 File Offset: 0x00152644
 	[PunRPC]
 	private void RequestTerminalControlStatusChange_RPC(bool lockedStatus, PhotonMessageInfo info)
 	{
@@ -208,7 +208,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		}
 	}
 
-	// Token: 0x06003F6E RID: 16238 RVA: 0x001544F9 File Offset: 0x001526F9
+	// Token: 0x06003F6E RID: 16238 RVA: 0x001544D9 File Offset: 0x001526D9
 	public void SetTerminalControlStatus(bool locked, int playerID)
 	{
 		if (!NetworkSystem.Instance.InRoom || !NetworkSystem.Instance.IsMasterClient)
@@ -222,7 +222,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		});
 	}
 
-	// Token: 0x06003F6F RID: 16239 RVA: 0x00154538 File Offset: 0x00152738
+	// Token: 0x06003F6F RID: 16239 RVA: 0x00154518 File Offset: 0x00152718
 	[PunRPC]
 	private void SetTerminalControlStatus_RPC(bool locked, int driverID, PhotonMessageInfo info)
 	{
@@ -244,7 +244,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		CustomMapsTerminal.SetTerminalControlStatus(locked, driverID, false);
 	}
 
-	// Token: 0x06003F70 RID: 16240 RVA: 0x001545BE File Offset: 0x001527BE
+	// Token: 0x06003F70 RID: 16240 RVA: 0x0015459E File Offset: 0x0015279E
 	public void SendTerminalStatus()
 	{
 		if (!NetworkSystem.Instance.InRoom || !CustomMapsTerminal.IsDriver)
@@ -258,7 +258,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		this.statusUpdateCoroutine = base.StartCoroutine(this.WaitToSendStatus());
 	}
 
-	// Token: 0x06003F71 RID: 16241 RVA: 0x001545FA File Offset: 0x001527FA
+	// Token: 0x06003F71 RID: 16241 RVA: 0x001545DA File Offset: 0x001527DA
 	private IEnumerator WaitToSendStatus()
 	{
 		yield return new WaitForSeconds(0.5f);
@@ -271,7 +271,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		yield break;
 	}
 
-	// Token: 0x06003F72 RID: 16242 RVA: 0x0015460C File Offset: 0x0015280C
+	// Token: 0x06003F72 RID: 16242 RVA: 0x001545EC File Offset: 0x001527EC
 	[PunRPC]
 	private void UpdateScreen_RPC(int currentScreen, long modDetailsID, int driverID, PhotonMessageInfo info)
 	{
@@ -297,7 +297,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		CustomMapsTerminal.UpdateFromDriver(currentScreen, modDetailsID, driverID);
 	}
 
-	// Token: 0x06003F73 RID: 16243 RVA: 0x001546B1 File Offset: 0x001528B1
+	// Token: 0x06003F73 RID: 16243 RVA: 0x00154691 File Offset: 0x00152891
 	public void RefreshDriverNickName()
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -307,7 +307,7 @@ internal class VirtualStumpSerializer : GorillaSerializer
 		base.SendRPC("RefreshDriverNickName_RPC", true, Array.Empty<object>());
 	}
 
-	// Token: 0x06003F74 RID: 16244 RVA: 0x001546D4 File Offset: 0x001528D4
+	// Token: 0x06003F74 RID: 16244 RVA: 0x001546B4 File Offset: 0x001528B4
 	[PunRPC]
 	private void RefreshDriverNickName_RPC(PhotonMessageInfo info)
 	{

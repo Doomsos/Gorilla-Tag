@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020009B2 RID: 2482
 public class VirtualStumpRevivePlayer : MonoBehaviour
 {
-	// Token: 0x06003F5E RID: 16222 RVA: 0x00154078 File Offset: 0x00152278
+	// Token: 0x06003F5E RID: 16222 RVA: 0x00154058 File Offset: 0x00152258
 	private void OnTriggerEnter(Collider collider)
 	{
 		Rigidbody attachedRigidbody = collider.attachedRigidbody;

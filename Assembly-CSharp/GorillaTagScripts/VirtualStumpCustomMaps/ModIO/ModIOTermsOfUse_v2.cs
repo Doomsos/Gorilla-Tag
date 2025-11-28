@@ -11,7 +11,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.ModIO
 	// Token: 0x02000E29 RID: 3625
 	public class ModIOTermsOfUse_v2 : LegalAgreements
 	{
-		// Token: 0x06005A7E RID: 23166 RVA: 0x001CFAEC File Offset: 0x001CDCEC
+		// Token: 0x06005A7E RID: 23166 RVA: 0x001CFACC File Offset: 0x001CDCCC
 		protected override void Awake()
 		{
 			if (ModIOTermsOfUse_v2.modioTermsInstance != null)
@@ -26,7 +26,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.ModIO
 			base.enabled = false;
 		}
 
-		// Token: 0x06005A7F RID: 23167 RVA: 0x001CFB44 File Offset: 0x001CDD44
+		// Token: 0x06005A7F RID: 23167 RVA: 0x001CFB24 File Offset: 0x001CDD24
 		public Task<Error> ShowTerms()
 		{
 			ModIOTermsOfUse_v2.<ShowTerms>d__7 <ShowTerms>d__;
@@ -37,7 +37,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.ModIO
 			return <ShowTerms>d__.<>t__builder.Task;
 		}
 
-		// Token: 0x06005A80 RID: 23168 RVA: 0x001CFB88 File Offset: 0x001CDD88
+		// Token: 0x06005A80 RID: 23168 RVA: 0x001CFB68 File Offset: 0x001CDD68
 		public override Task StartLegalAgreements()
 		{
 			ModIOTermsOfUse_v2.<StartLegalAgreements>d__8 <StartLegalAgreements>d__;
@@ -48,7 +48,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.ModIO
 			return <StartLegalAgreements>d__.<>t__builder.Task;
 		}
 
-		// Token: 0x06005A81 RID: 23169 RVA: 0x001CFBCC File Offset: 0x001CDDCC
+		// Token: 0x06005A81 RID: 23169 RVA: 0x001CFBAC File Offset: 0x001CDDAC
 		private void UpdateTextFromTerms()
 		{
 			this.tmpTitle.text = "Mod.io Terms of Use";
@@ -59,7 +59,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.ModIO
 			this.tmpBody.text = this.cachedTermsText;
 		}
 
-		// Token: 0x06005A82 RID: 23170 RVA: 0x001CFC64 File Offset: 0x001CDE64
+		// Token: 0x06005A82 RID: 23170 RVA: 0x001CFC44 File Offset: 0x001CDE44
 		private string FormatAgreementText(Agreement agreement)
 		{
 			string text = string.Concat(new string[]
@@ -153,7 +153,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.ModIO
 			return text.Replace("</center>", "");
 		}
 
-		// Token: 0x06005A83 RID: 23171 RVA: 0x001D00F0 File Offset: 0x001CE2F0
+		// Token: 0x06005A83 RID: 23171 RVA: 0x001D00D0 File Offset: 0x001CE2D0
 		private string GetStringForListItemIdx_LowerAlpha(int idx)
 		{
 			switch (idx)

@@ -5,7 +5,7 @@ using UnityEngine;
 public static class UberShader
 {
 	// Token: 0x1700056E RID: 1390
-	// (get) Token: 0x06003AC8 RID: 15048 RVA: 0x0013652D File Offset: 0x0013472D
+	// (get) Token: 0x06003AC8 RID: 15048 RVA: 0x0013650D File Offset: 0x0013470D
 	public static Material ReferenceMaterial
 	{
 		get
@@ -16,7 +16,7 @@ public static class UberShader
 	}
 
 	// Token: 0x1700056F RID: 1391
-	// (get) Token: 0x06003AC9 RID: 15049 RVA: 0x00136539 File Offset: 0x00134739
+	// (get) Token: 0x06003AC9 RID: 15049 RVA: 0x00136519 File Offset: 0x00134719
 	public static Shader ReferenceShader
 	{
 		get
@@ -27,7 +27,7 @@ public static class UberShader
 	}
 
 	// Token: 0x17000570 RID: 1392
-	// (get) Token: 0x06003ACA RID: 15050 RVA: 0x00136545 File Offset: 0x00134745
+	// (get) Token: 0x06003ACA RID: 15050 RVA: 0x00136525 File Offset: 0x00134725
 	public static Material ReferenceMaterialNonSRP
 	{
 		get
@@ -38,7 +38,7 @@ public static class UberShader
 	}
 
 	// Token: 0x17000571 RID: 1393
-	// (get) Token: 0x06003ACB RID: 15051 RVA: 0x00136551 File Offset: 0x00134751
+	// (get) Token: 0x06003ACB RID: 15051 RVA: 0x00136531 File Offset: 0x00134731
 	public static Shader ReferenceShaderNonSRP
 	{
 		get
@@ -49,7 +49,7 @@ public static class UberShader
 	}
 
 	// Token: 0x17000572 RID: 1394
-	// (get) Token: 0x06003ACC RID: 15052 RVA: 0x0013655D File Offset: 0x0013475D
+	// (get) Token: 0x06003ACC RID: 15052 RVA: 0x0013653D File Offset: 0x0013473D
 	public static UberShaderProperty[] AllProperties
 	{
 		get
@@ -59,7 +59,7 @@ public static class UberShader
 		}
 	}
 
-	// Token: 0x06003ACD RID: 15053 RVA: 0x0013656C File Offset: 0x0013476C
+	// Token: 0x06003ACD RID: 15053 RVA: 0x0013654C File Offset: 0x0013474C
 	public static bool IsAnimated(Material m)
 	{
 		if (m == null)
@@ -74,21 +74,21 @@ public static class UberShader
 		return value.x > 0f || value.y > 0f;
 	}
 
-	// Token: 0x06003ACE RID: 15054 RVA: 0x001365C7 File Offset: 0x001347C7
+	// Token: 0x06003ACE RID: 15054 RVA: 0x001365A7 File Offset: 0x001347A7
 	private static UberShaderProperty GetProperty(int i)
 	{
 		UberShader.InitDependencies();
 		return UberShader.kProperties[i];
 	}
 
-	// Token: 0x06003ACF RID: 15055 RVA: 0x001365C7 File Offset: 0x001347C7
+	// Token: 0x06003ACF RID: 15055 RVA: 0x001365A7 File Offset: 0x001347A7
 	private static UberShaderProperty GetProperty(int i, string expectedName)
 	{
 		UberShader.InitDependencies();
 		return UberShader.kProperties[i];
 	}
 
-	// Token: 0x06003AD0 RID: 15056 RVA: 0x001365D8 File Offset: 0x001347D8
+	// Token: 0x06003AD0 RID: 15056 RVA: 0x001365B8 File Offset: 0x001347B8
 	private static void InitDependencies()
 	{
 		if (UberShader.gInitialized)
@@ -103,14 +103,14 @@ public static class UberShader
 		UberShader.gInitialized = true;
 	}
 
-	// Token: 0x06003AD1 RID: 15057 RVA: 0x00136539 File Offset: 0x00134739
+	// Token: 0x06003AD1 RID: 15057 RVA: 0x00136519 File Offset: 0x00134719
 	public static Shader GetShader()
 	{
 		UberShader.InitDependencies();
 		return UberShader.kReferenceShader;
 	}
 
-	// Token: 0x06003AD2 RID: 15058 RVA: 0x00136640 File Offset: 0x00134840
+	// Token: 0x06003AD2 RID: 15058 RVA: 0x00136620 File Offset: 0x00134820
 	private static UberShaderProperty[] EnumerateAllProperties(Shader uberShader)
 	{
 		int propertyCount = uberShader.GetPropertyCount();

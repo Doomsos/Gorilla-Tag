@@ -9,7 +9,7 @@ namespace com.AnotherAxiom.Paddleball
 	// Token: 0x02000F68 RID: 3944
 	public class Paddleball : ArcadeGame
 	{
-		// Token: 0x060062A1 RID: 25249 RVA: 0x001FCA42 File Offset: 0x001FAC42
+		// Token: 0x060062A1 RID: 25249 RVA: 0x001FCA22 File Offset: 0x001FAC22
 		protected override void Awake()
 		{
 			base.Awake();
@@ -17,7 +17,7 @@ namespace com.AnotherAxiom.Paddleball
 			this.byteToYPosFactor = 1f / this.yPosToByteFactor;
 		}
 
-		// Token: 0x060062A2 RID: 25250 RVA: 0x001FCA7C File Offset: 0x001FAC7C
+		// Token: 0x060062A2 RID: 25250 RVA: 0x001FCA5C File Offset: 0x001FAC5C
 		private void Start()
 		{
 			this.whiteWinScreen.SetActive(false);
@@ -37,7 +37,7 @@ namespace com.AnotherAxiom.Paddleball
 			this.UpdateScore();
 		}
 
-		// Token: 0x060062A3 RID: 25251 RVA: 0x001FCB40 File Offset: 0x001FAD40
+		// Token: 0x060062A3 RID: 25251 RVA: 0x001FCB20 File Offset: 0x001FAD20
 		private void Update()
 		{
 			if (this.currentScreenMode == Paddleball.ScreenMode.Gameplay)
@@ -166,7 +166,7 @@ namespace com.AnotherAxiom.Paddleball
 			}
 		}
 
-		// Token: 0x060062A4 RID: 25252 RVA: 0x001FD1A8 File Offset: 0x001FB3A8
+		// Token: 0x060062A4 RID: 25252 RVA: 0x001FD188 File Offset: 0x001FB388
 		private void UpdateScore()
 		{
 			if (this.scoreFormat == null)
@@ -178,19 +178,19 @@ namespace com.AnotherAxiom.Paddleball
 			this.scoreDisplay.text = string.Format(this.scoreFormat, this.scoreL, this.scoreR);
 		}
 
-		// Token: 0x060062A5 RID: 25253 RVA: 0x001FD212 File Offset: 0x001FB412
+		// Token: 0x060062A5 RID: 25253 RVA: 0x001FD1F2 File Offset: 0x001FB3F2
 		private float ByteToYPos(byte Y)
 		{
 			return (float)Y / this.yPosToByteFactor - this.tableSizeBall.y;
 		}
 
-		// Token: 0x060062A6 RID: 25254 RVA: 0x001FD229 File Offset: 0x001FB429
+		// Token: 0x060062A6 RID: 25254 RVA: 0x001FD209 File Offset: 0x001FB409
 		private byte YPosToByte(float Y)
 		{
 			return (byte)Mathf.RoundToInt((Y + this.tableSizeBall.y) * this.yPosToByteFactor);
 		}
 
-		// Token: 0x060062A7 RID: 25255 RVA: 0x001FD248 File Offset: 0x001FB448
+		// Token: 0x060062A7 RID: 25255 RVA: 0x001FD228 File Offset: 0x001FB428
 		public override byte[] GetNetworkState()
 		{
 			this.netStateCur.P0LocY = this.YPosToByte(this.p[0].transform.localPosition.y);
@@ -214,7 +214,7 @@ namespace com.AnotherAxiom.Paddleball
 			return this.netStateBuffer;
 		}
 
-		// Token: 0x060062A8 RID: 25256 RVA: 0x001FD3FC File Offset: 0x001FB5FC
+		// Token: 0x060062A8 RID: 25256 RVA: 0x001FD3DC File Offset: 0x001FB5DC
 		public override void SetNetworkState(byte[] b)
 		{
 			Paddleball.PaddleballNetState paddleballNetState = (Paddleball.PaddleballNetState)ArcadeGame.UnwrapNetState(b);
@@ -253,7 +253,7 @@ namespace com.AnotherAxiom.Paddleball
 		{
 		}
 
-		// Token: 0x060062AB RID: 25259 RVA: 0x001FD578 File Offset: 0x001FB778
+		// Token: 0x060062AB RID: 25259 RVA: 0x001FD558 File Offset: 0x001FB758
 		private void ChangeScreen(Paddleball.ScreenMode mode)
 		{
 			if (this.currentScreenMode == mode)
@@ -305,19 +305,19 @@ namespace com.AnotherAxiom.Paddleball
 			}
 		}
 
-		// Token: 0x060062AC RID: 25260 RVA: 0x001FD6AF File Offset: 0x001FB8AF
+		// Token: 0x060062AC RID: 25260 RVA: 0x001FD68F File Offset: 0x001FB88F
 		public override void OnTimeout()
 		{
 			this.ChangeScreen(Paddleball.ScreenMode.Title);
 		}
 
-		// Token: 0x060062AD RID: 25261 RVA: 0x001FD6B8 File Offset: 0x001FB8B8
+		// Token: 0x060062AD RID: 25261 RVA: 0x001FD698 File Offset: 0x001FB898
 		public override void ReadPlayerDataPUN(int player, PhotonStream stream, PhotonMessageInfo info)
 		{
 			this.requestedPos[player] = this.ByteToYPos((byte)stream.ReceiveNext());
 		}
 
-		// Token: 0x060062AE RID: 25262 RVA: 0x001FD6D3 File Offset: 0x001FB8D3
+		// Token: 0x060062AE RID: 25262 RVA: 0x001FD6B3 File Offset: 0x001FB8B3
 		public override void WritePlayerDataPUN(int player, PhotonStream stream, PhotonMessageInfo info)
 		{
 			stream.SendNext(this.YPosToByte(this.requestedPos[player]));
@@ -458,7 +458,7 @@ namespace com.AnotherAxiom.Paddleball
 		[Serializable]
 		private struct PaddleballNetState : IEquatable<Paddleball.PaddleballNetState>
 		{
-			// Token: 0x060062B0 RID: 25264 RVA: 0x001FD748 File Offset: 0x001FB948
+			// Token: 0x060062B0 RID: 25264 RVA: 0x001FD728 File Offset: 0x001FB928
 			public bool Equals(Paddleball.PaddleballNetState other)
 			{
 				return this.P0LocY == other.P0LocY && this.P1LocY == other.P1LocY && this.P2LocY == other.P2LocY && this.P3LocY == other.P3LocY && this.BallLocX.Approx(other.BallLocX, 1E-06f) && this.BallLocY == other.BallLocY && this.BallTrajectoryX == other.BallTrajectoryX && this.BallTrajectoryY == other.BallTrajectoryY && this.BallSpeed.Approx(other.BallSpeed, 1E-06f) && this.ScoreLeft == other.ScoreLeft && this.ScoreRight == other.ScoreRight && this.ScreenMode == other.ScreenMode;

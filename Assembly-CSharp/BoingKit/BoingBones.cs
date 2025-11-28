@@ -8,19 +8,19 @@ namespace BoingKit
 	// Token: 0x02001180 RID: 4480
 	public class BoingBones : BoingReactor
 	{
-		// Token: 0x06007116 RID: 28950 RVA: 0x002507AB File Offset: 0x0024E9AB
+		// Token: 0x06007116 RID: 28950 RVA: 0x0025078B File Offset: 0x0024E98B
 		protected override void Register()
 		{
 			BoingManager.Register(this);
 		}
 
-		// Token: 0x06007117 RID: 28951 RVA: 0x002507B3 File Offset: 0x0024E9B3
+		// Token: 0x06007117 RID: 28951 RVA: 0x00250793 File Offset: 0x0024E993
 		protected override void Unregister()
 		{
 			BoingManager.Unregister(this);
 		}
 
-		// Token: 0x06007118 RID: 28952 RVA: 0x002507BB File Offset: 0x0024E9BB
+		// Token: 0x06007118 RID: 28952 RVA: 0x0025079B File Offset: 0x0024E99B
 		protected override void OnUpgrade(Version oldVersion, Version newVersion)
 		{
 			base.OnUpgrade(oldVersion, newVersion);
@@ -30,14 +30,14 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007119 RID: 28953 RVA: 0x002507D7 File Offset: 0x0024E9D7
+		// Token: 0x06007119 RID: 28953 RVA: 0x002507B7 File Offset: 0x0024E9B7
 		public void OnValidate()
 		{
 			this.RescanBoneChains();
 			this.UpdateCollisionRadius();
 		}
 
-		// Token: 0x0600711A RID: 28954 RVA: 0x002507E5 File Offset: 0x0024E9E5
+		// Token: 0x0600711A RID: 28954 RVA: 0x002507C5 File Offset: 0x0024E9C5
 		public override void OnEnable()
 		{
 			base.OnEnable();
@@ -45,14 +45,14 @@ namespace BoingKit
 			this.Reboot();
 		}
 
-		// Token: 0x0600711B RID: 28955 RVA: 0x002507F9 File Offset: 0x0024E9F9
+		// Token: 0x0600711B RID: 28955 RVA: 0x002507D9 File Offset: 0x0024E9D9
 		public override void OnDisable()
 		{
 			base.OnDisable();
 			this.Restore();
 		}
 
-		// Token: 0x0600711C RID: 28956 RVA: 0x00250808 File Offset: 0x0024EA08
+		// Token: 0x0600711C RID: 28956 RVA: 0x002507E8 File Offset: 0x0024E9E8
 		public void RescanBoneChains()
 		{
 			if (this.BoneChains == null)
@@ -204,7 +204,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x0600711D RID: 28957 RVA: 0x00250C24 File Offset: 0x0024EE24
+		// Token: 0x0600711D RID: 28957 RVA: 0x00250C04 File Offset: 0x0024EE04
 		private void UpdateCollisionRadius()
 		{
 			for (int i = 0; i < this.BoneData.Length; i++)
@@ -223,7 +223,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x0600711E RID: 28958 RVA: 0x00250CAC File Offset: 0x0024EEAC
+		// Token: 0x0600711E RID: 28958 RVA: 0x00250C8C File Offset: 0x0024EE8C
 		public override void Reboot()
 		{
 			base.Reboot();
@@ -233,7 +233,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x0600711F RID: 28959 RVA: 0x00250CDC File Offset: 0x0024EEDC
+		// Token: 0x0600711F RID: 28959 RVA: 0x00250CBC File Offset: 0x0024EEBC
 		public void Reboot(int iChain)
 		{
 			BoingBones.Bone[] array = this.BoneData[iChain];
@@ -255,7 +255,7 @@ namespace BoingKit
 		}
 
 		// Token: 0x17000A8F RID: 2703
-		// (get) Token: 0x06007120 RID: 28960 RVA: 0x00250D81 File Offset: 0x0024EF81
+		// (get) Token: 0x06007120 RID: 28960 RVA: 0x00250D61 File Offset: 0x0024EF61
 		internal float MinScale
 		{
 			get
@@ -264,7 +264,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007121 RID: 28961 RVA: 0x00250D8C File Offset: 0x0024EF8C
+		// Token: 0x06007121 RID: 28961 RVA: 0x00250D6C File Offset: 0x0024EF6C
 		public override void PrepareExecute()
 		{
 			base.PrepareExecute();
@@ -370,7 +370,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007122 RID: 28962 RVA: 0x00251344 File Offset: 0x0024F544
+		// Token: 0x06007122 RID: 28962 RVA: 0x00251324 File Offset: 0x0024F524
 		public void AccumulateTarget(ref BoingEffector.Params effector, float dt)
 		{
 			for (int i = 0; i < this.BoneData.Length; i++)
@@ -397,7 +397,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007123 RID: 28963 RVA: 0x0025142C File Offset: 0x0024F62C
+		// Token: 0x06007123 RID: 28963 RVA: 0x0025140C File Offset: 0x0024F60C
 		public void EndAccumulateTargets()
 		{
 			for (int i = 0; i < this.BoneData.Length; i++)
@@ -421,7 +421,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007124 RID: 28964 RVA: 0x002514B0 File Offset: 0x0024F6B0
+		// Token: 0x06007124 RID: 28964 RVA: 0x00251490 File Offset: 0x0024F690
 		public override void Restore()
 		{
 			if (!this.CachedTransformValid)
@@ -499,7 +499,7 @@ namespace BoingKit
 		public class Bone
 		{
 			// Token: 0x17000A90 RID: 2704
-			// (get) Token: 0x06007126 RID: 28966 RVA: 0x00251590 File Offset: 0x0024F790
+			// (get) Token: 0x06007126 RID: 28966 RVA: 0x00251570 File Offset: 0x0024F770
 			internal Vector3 Position
 			{
 				get
@@ -515,7 +515,7 @@ namespace BoingKit
 			}
 
 			// Token: 0x17000A91 RID: 2705
-			// (get) Token: 0x06007127 RID: 28967 RVA: 0x002515BE File Offset: 0x0024F7BE
+			// (get) Token: 0x06007127 RID: 28967 RVA: 0x0025159E File Offset: 0x0024F79E
 			internal Quaternion Rotation
 			{
 				get
@@ -531,7 +531,7 @@ namespace BoingKit
 			}
 
 			// Token: 0x17000A92 RID: 2706
-			// (get) Token: 0x06007128 RID: 28968 RVA: 0x002515EC File Offset: 0x0024F7EC
+			// (get) Token: 0x06007128 RID: 28968 RVA: 0x002515CC File Offset: 0x0024F7CC
 			internal Vector3 LocalScale
 			{
 				get
@@ -546,7 +546,7 @@ namespace BoingKit
 				}
 			}
 
-			// Token: 0x06007129 RID: 28969 RVA: 0x0025161C File Offset: 0x0024F81C
+			// Token: 0x06007129 RID: 28969 RVA: 0x002515FC File Offset: 0x0024F7FC
 			private void CheckResetFlags()
 			{
 				if (this.Transform.hasChanged)
@@ -556,13 +556,13 @@ namespace BoingKit
 				}
 			}
 
-			// Token: 0x0600712A RID: 28970 RVA: 0x0025165B File Offset: 0x0024F85B
+			// Token: 0x0600712A RID: 28970 RVA: 0x0025163B File Offset: 0x0024F83B
 			internal void UpdateBounds()
 			{
 				this.Bounds = new Bounds(this.Instance.PositionSpring.Value, 2f * this.CollisionRadius * Vector3.one);
 			}
 
-			// Token: 0x0600712B RID: 28971 RVA: 0x00251690 File Offset: 0x0024F890
+			// Token: 0x0600712B RID: 28971 RVA: 0x00251670 File Offset: 0x0024F870
 			internal Bone(Transform transform, int iParent, float lengthFromRoot)
 			{
 				this.Transform = transform;
@@ -686,7 +686,7 @@ namespace BoingKit
 		[Serializable]
 		public class Chain
 		{
-			// Token: 0x0600712C RID: 28972 RVA: 0x00251744 File Offset: 0x0024F944
+			// Token: 0x0600712C RID: 28972 RVA: 0x00251724 File Offset: 0x0024F924
 			public static float EvaluateCurve(BoingBones.Chain.CurveType type, float t, AnimationCurve curve)
 			{
 				switch (type)
@@ -851,7 +851,7 @@ namespace BoingKit
 		// Token: 0x02001184 RID: 4484
 		private class RescanEntry
 		{
-			// Token: 0x0600712E RID: 28974 RVA: 0x002518F4 File Offset: 0x0024FAF4
+			// Token: 0x0600712E RID: 28974 RVA: 0x002518D4 File Offset: 0x0024FAD4
 			internal RescanEntry(Transform transform, int iParent, float lengthFromRoot)
 			{
 				this.Transform = transform;

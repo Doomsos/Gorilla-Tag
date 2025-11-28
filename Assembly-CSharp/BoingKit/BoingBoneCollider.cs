@@ -7,7 +7,7 @@ namespace BoingKit
 	public class BoingBoneCollider : MonoBehaviour
 	{
 		// Token: 0x17000A8E RID: 2702
-		// (get) Token: 0x06007110 RID: 28944 RVA: 0x0025024C File Offset: 0x0024E44C
+		// (get) Token: 0x06007110 RID: 28944 RVA: 0x0025022C File Offset: 0x0024E42C
 		public Bounds Bounds
 		{
 			get
@@ -32,7 +32,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007111 RID: 28945 RVA: 0x0025035C File Offset: 0x0024E55C
+		// Token: 0x06007111 RID: 28945 RVA: 0x0025033C File Offset: 0x0024E53C
 		public bool Collide(Vector3 boneCenter, float boneRadius, out Vector3 push)
 		{
 			switch (this.Shape)
@@ -66,7 +66,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007112 RID: 28946 RVA: 0x00250480 File Offset: 0x0024E680
+		// Token: 0x06007112 RID: 28946 RVA: 0x00250460 File Offset: 0x0024E660
 		public void OnValidate()
 		{
 			this.Radius = Mathf.Max(0f, this.Radius);
@@ -75,13 +75,13 @@ namespace BoingKit
 			this.Dimensions.z = Mathf.Max(0f, this.Dimensions.z);
 		}
 
-		// Token: 0x06007113 RID: 28947 RVA: 0x00250503 File Offset: 0x0024E703
+		// Token: 0x06007113 RID: 28947 RVA: 0x002504E3 File Offset: 0x0024E6E3
 		public void OnDrawGizmos()
 		{
 			this.DrawGizmos();
 		}
 
-		// Token: 0x06007114 RID: 28948 RVA: 0x0025050C File Offset: 0x0024E70C
+		// Token: 0x06007114 RID: 28948 RVA: 0x002504EC File Offset: 0x0024E6EC
 		public void DrawGizmos()
 		{
 			switch (this.Shape)

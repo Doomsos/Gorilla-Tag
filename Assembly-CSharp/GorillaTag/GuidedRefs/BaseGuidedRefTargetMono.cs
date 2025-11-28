@@ -6,21 +6,21 @@ namespace GorillaTag.GuidedRefs
 	// Token: 0x02001035 RID: 4149
 	public abstract class BaseGuidedRefTargetMono : MonoBehaviour, IGuidedRefTargetMono, IGuidedRefMonoBehaviour, IGuidedRefObject
 	{
-		// Token: 0x060068C9 RID: 26825 RVA: 0x0010EB39 File Offset: 0x0010CD39
+		// Token: 0x060068C9 RID: 26825 RVA: 0x0010EB19 File Offset: 0x0010CD19
 		protected virtual void Awake()
 		{
 			((IGuidedRefObject)this).GuidedRefInitialize();
 		}
 
-		// Token: 0x060068CA RID: 26826 RVA: 0x002220E2 File Offset: 0x002202E2
+		// Token: 0x060068CA RID: 26826 RVA: 0x002220C2 File Offset: 0x002202C2
 		protected virtual void OnDestroy()
 		{
 			GuidedRefHub.UnregisterTarget<BaseGuidedRefTargetMono>(this, true);
 		}
 
 		// Token: 0x170009D7 RID: 2519
-		// (get) Token: 0x060068CB RID: 26827 RVA: 0x002220EB File Offset: 0x002202EB
-		// (set) Token: 0x060068CC RID: 26828 RVA: 0x002220F3 File Offset: 0x002202F3
+		// (get) Token: 0x060068CB RID: 26827 RVA: 0x002220CB File Offset: 0x002202CB
+		// (set) Token: 0x060068CC RID: 26828 RVA: 0x002220D3 File Offset: 0x002202D3
 		GuidedRefBasicTargetInfo IGuidedRefTargetMono.GRefTargetInfo
 		{
 			get
@@ -43,7 +43,7 @@ namespace GorillaTag.GuidedRefs
 			}
 		}
 
-		// Token: 0x060068CE RID: 26830 RVA: 0x002220FC File Offset: 0x002202FC
+		// Token: 0x060068CE RID: 26830 RVA: 0x002220DC File Offset: 0x002202DC
 		void IGuidedRefObject.GuidedRefInitialize()
 		{
 			GuidedRefHub.RegisterTarget<BaseGuidedRefTargetMono>(this, this.guidedRefTargetInfo.hubIds, this);

@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	[ExecuteAlways]
 	public class ScubaWatchWearable : MonoBehaviour
 	{
-		// Token: 0x06006A2D RID: 27181 RVA: 0x0022A39C File Offset: 0x0022859C
+		// Token: 0x06006A2D RID: 27181 RVA: 0x0022A37C File Offset: 0x0022857C
 		protected void Update()
 		{
 			GTPlayer instance = GTPlayer.Instance;

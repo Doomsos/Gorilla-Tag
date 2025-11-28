@@ -7,7 +7,7 @@ using UnityEngine;
 [Serializable]
 public class GRShuttleUI
 {
-	// Token: 0x06002E17 RID: 11799 RVA: 0x000FAA5D File Offset: 0x000F8C5D
+	// Token: 0x06002E17 RID: 11799 RVA: 0x000FAA3D File Offset: 0x000F8C3D
 	public void Setup(GhostReactor reactor, NetPlayer player)
 	{
 		this.reactor = reactor;
@@ -15,7 +15,7 @@ public class GRShuttleUI
 		this.RefreshUI();
 	}
 
-	// Token: 0x06002E18 RID: 11800 RVA: 0x000FAA74 File Offset: 0x000F8C74
+	// Token: 0x06002E18 RID: 11800 RVA: 0x000FAA54 File Offset: 0x000F8C54
 	public void RefreshUI()
 	{
 		if (this.playerName != null)

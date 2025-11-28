@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class SerializableBSPTree
 {
-	// Token: 0x060050D1 RID: 20689 RVA: 0x001A16A2 File Offset: 0x0019F8A2
+	// Token: 0x060050D1 RID: 20689 RVA: 0x001A1682 File Offset: 0x0019F882
 	public ZoneDef FindZone(Vector3 point)
 	{
 		if (this.nodes == null || this.rootIndex < 0 || this.rootIndex >= this.nodes.Length)
@@ -15,7 +15,7 @@ public class SerializableBSPTree
 		return this.FindZoneRecursive(point, this.rootIndex);
 	}
 
-	// Token: 0x060050D2 RID: 20690 RVA: 0x001A16D4 File Offset: 0x0019F8D4
+	// Token: 0x060050D2 RID: 20690 RVA: 0x001A16B4 File Offset: 0x0019F8B4
 	private ZoneDef FindZoneRecursive(Vector3 point, int nodeIndex)
 	{
 		if (nodeIndex < 0 || nodeIndex >= this.nodes.Length)
@@ -91,7 +91,7 @@ public class SerializableBSPTree
 		}
 	}
 
-	// Token: 0x060050D3 RID: 20691 RVA: 0x001A18C8 File Offset: 0x0019FAC8
+	// Token: 0x060050D3 RID: 20691 RVA: 0x001A18A8 File Offset: 0x0019FAA8
 	private float GetAxisValue(Vector3 point, SerializableBSPNode.Axis axis)
 	{
 		switch (axis)

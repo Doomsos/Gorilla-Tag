@@ -8,18 +8,18 @@ namespace GorillaTagScripts.AI.States
 	public class Chase_State : IState
 	{
 		// Token: 0x170008A7 RID: 2215
-		// (get) Token: 0x06005D6B RID: 23915 RVA: 0x001DFF30 File Offset: 0x001DE130
-		// (set) Token: 0x06005D6C RID: 23916 RVA: 0x001DFF38 File Offset: 0x001DE138
+		// (get) Token: 0x06005D6B RID: 23915 RVA: 0x001DFF10 File Offset: 0x001DE110
+		// (set) Token: 0x06005D6C RID: 23916 RVA: 0x001DFF18 File Offset: 0x001DE118
 		public Transform FollowTarget { get; set; }
 
-		// Token: 0x06005D6D RID: 23917 RVA: 0x001DFF41 File Offset: 0x001DE141
+		// Token: 0x06005D6D RID: 23917 RVA: 0x001DFF21 File Offset: 0x001DE121
 		public Chase_State(AIEntity entity)
 		{
 			this.entity = entity;
 			this.agent = this.entity.navMeshAgent;
 		}
 
-		// Token: 0x06005D6E RID: 23918 RVA: 0x001DFF61 File Offset: 0x001DE161
+		// Token: 0x06005D6E RID: 23918 RVA: 0x001DFF41 File Offset: 0x001DE141
 		public void Tick()
 		{
 			this.agent.SetDestination(this.FollowTarget.position);
@@ -29,7 +29,7 @@ namespace GorillaTagScripts.AI.States
 			}
 		}
 
-		// Token: 0x06005D6F RID: 23919 RVA: 0x001DFF99 File Offset: 0x001DE199
+		// Token: 0x06005D6F RID: 23919 RVA: 0x001DFF79 File Offset: 0x001DE179
 		public void OnEnter()
 		{
 			this.chaseOver = false;
@@ -38,7 +38,7 @@ namespace GorillaTagScripts.AI.States
 			Debug.Log(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null));
 		}
 
-		// Token: 0x06005D70 RID: 23920 RVA: 0x001DFFC7 File Offset: 0x001DE1C7
+		// Token: 0x06005D70 RID: 23920 RVA: 0x001DFFA7 File Offset: 0x001DE1A7
 		public void OnExit()
 		{
 			this.chaseOver = true;

@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x020004AE RID: 1198
 public class YorickLook : MonoBehaviour
 {
-	// Token: 0x06001F07 RID: 7943 RVA: 0x000A4D3F File Offset: 0x000A2F3F
+	// Token: 0x06001F07 RID: 7943 RVA: 0x000A4D1F File Offset: 0x000A2F1F
 	private void Awake()
 	{
 		this.overlapRigs = new VRRig[10];
 	}
 
-	// Token: 0x06001F08 RID: 7944 RVA: 0x000A4D50 File Offset: 0x000A2F50
+	// Token: 0x06001F08 RID: 7944 RVA: 0x000A4D30 File Offset: 0x000A2F30
 	private void LateUpdate()
 	{
 		if (NetworkSystem.Instance.InRoom)

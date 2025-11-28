@@ -12,12 +12,12 @@ using UnityEngine.Rendering;
 internal class VRRigCache : MonoBehaviour
 {
 	// Token: 0x1700045D RID: 1117
-	// (get) Token: 0x06003121 RID: 12577 RVA: 0x0010B2D2 File Offset: 0x001094D2
-	// (set) Token: 0x06003122 RID: 12578 RVA: 0x0010B2D9 File Offset: 0x001094D9
+	// (get) Token: 0x06003121 RID: 12577 RVA: 0x0010B2B2 File Offset: 0x001094B2
+	// (set) Token: 0x06003122 RID: 12578 RVA: 0x0010B2B9 File Offset: 0x001094B9
 	public static VRRigCache Instance { get; private set; }
 
 	// Token: 0x1700045E RID: 1118
-	// (get) Token: 0x06003123 RID: 12579 RVA: 0x0010B2E1 File Offset: 0x001094E1
+	// (get) Token: 0x06003123 RID: 12579 RVA: 0x0010B2C1 File Offset: 0x001094C1
 	public Transform NetworkParent
 	{
 		get
@@ -27,41 +27,41 @@ internal class VRRigCache : MonoBehaviour
 	}
 
 	// Token: 0x1700045F RID: 1119
-	// (get) Token: 0x06003124 RID: 12580 RVA: 0x0010B2E9 File Offset: 0x001094E9
-	// (set) Token: 0x06003125 RID: 12581 RVA: 0x0010B2F0 File Offset: 0x001094F0
+	// (get) Token: 0x06003124 RID: 12580 RVA: 0x0010B2C9 File Offset: 0x001094C9
+	// (set) Token: 0x06003125 RID: 12581 RVA: 0x0010B2D0 File Offset: 0x001094D0
 	public static bool isInitialized { get; private set; }
 
 	// Token: 0x14000051 RID: 81
-	// (add) Token: 0x06003126 RID: 12582 RVA: 0x0010B2F8 File Offset: 0x001094F8
-	// (remove) Token: 0x06003127 RID: 12583 RVA: 0x0010B32C File Offset: 0x0010952C
+	// (add) Token: 0x06003126 RID: 12582 RVA: 0x0010B2D8 File Offset: 0x001094D8
+	// (remove) Token: 0x06003127 RID: 12583 RVA: 0x0010B30C File Offset: 0x0010950C
 	public static event Action OnActiveRigsChanged;
 
 	// Token: 0x14000052 RID: 82
-	// (add) Token: 0x06003128 RID: 12584 RVA: 0x0010B360 File Offset: 0x00109560
-	// (remove) Token: 0x06003129 RID: 12585 RVA: 0x0010B394 File Offset: 0x00109594
+	// (add) Token: 0x06003128 RID: 12584 RVA: 0x0010B340 File Offset: 0x00109540
+	// (remove) Token: 0x06003129 RID: 12585 RVA: 0x0010B374 File Offset: 0x00109574
 	public static event Action OnPostInitialize;
 
 	// Token: 0x14000053 RID: 83
-	// (add) Token: 0x0600312A RID: 12586 RVA: 0x0010B3C8 File Offset: 0x001095C8
-	// (remove) Token: 0x0600312B RID: 12587 RVA: 0x0010B3FC File Offset: 0x001095FC
+	// (add) Token: 0x0600312A RID: 12586 RVA: 0x0010B3A8 File Offset: 0x001095A8
+	// (remove) Token: 0x0600312B RID: 12587 RVA: 0x0010B3DC File Offset: 0x001095DC
 	public static event Action OnPostSpawnRig;
 
 	// Token: 0x14000054 RID: 84
-	// (add) Token: 0x0600312C RID: 12588 RVA: 0x0010B430 File Offset: 0x00109630
-	// (remove) Token: 0x0600312D RID: 12589 RVA: 0x0010B464 File Offset: 0x00109664
+	// (add) Token: 0x0600312C RID: 12588 RVA: 0x0010B410 File Offset: 0x00109610
+	// (remove) Token: 0x0600312D RID: 12589 RVA: 0x0010B444 File Offset: 0x00109644
 	public static event Action<RigContainer> OnRigActivated;
 
 	// Token: 0x14000055 RID: 85
-	// (add) Token: 0x0600312E RID: 12590 RVA: 0x0010B498 File Offset: 0x00109698
-	// (remove) Token: 0x0600312F RID: 12591 RVA: 0x0010B4CC File Offset: 0x001096CC
+	// (add) Token: 0x0600312E RID: 12590 RVA: 0x0010B478 File Offset: 0x00109678
+	// (remove) Token: 0x0600312F RID: 12591 RVA: 0x0010B4AC File Offset: 0x001096AC
 	public static event Action<RigContainer> OnRigDeactivated;
 
 	// Token: 0x14000056 RID: 86
-	// (add) Token: 0x06003130 RID: 12592 RVA: 0x0010B500 File Offset: 0x00109700
-	// (remove) Token: 0x06003131 RID: 12593 RVA: 0x0010B534 File Offset: 0x00109734
+	// (add) Token: 0x06003130 RID: 12592 RVA: 0x0010B4E0 File Offset: 0x001096E0
+	// (remove) Token: 0x06003131 RID: 12593 RVA: 0x0010B514 File Offset: 0x00109714
 	public static event Action<RigContainer> OnRigNameChanged;
 
-	// Token: 0x06003132 RID: 12594 RVA: 0x0010B568 File Offset: 0x00109768
+	// Token: 0x06003132 RID: 12594 RVA: 0x0010B548 File Offset: 0x00109748
 	private void Awake()
 	{
 		this.InitializeVRRigCache();
@@ -78,7 +78,7 @@ internal class VRRigCache : MonoBehaviour
 		ensureNetworkObjectTimer.callback = (Action)Delegate.Combine(ensureNetworkObjectTimer.callback, new Action(this.InstantiateNetworkObject));
 	}
 
-	// Token: 0x06003133 RID: 12595 RVA: 0x0010B618 File Offset: 0x00109818
+	// Token: 0x06003133 RID: 12595 RVA: 0x0010B5F8 File Offset: 0x001097F8
 	private void OnDestroy()
 	{
 		if (VRRigCache.Instance == this)
@@ -93,7 +93,7 @@ internal class VRRigCache : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003134 RID: 12596 RVA: 0x0010B684 File Offset: 0x00109884
+	// Token: 0x06003134 RID: 12596 RVA: 0x0010B664 File Offset: 0x00109864
 	public void InitializeVRRigCache()
 	{
 		if (VRRigCache.isInitialized || ApplicationQuittingState.IsQuitting)
@@ -135,7 +135,7 @@ internal class VRRigCache : MonoBehaviour
 		onPostSpawnRig.Invoke();
 	}
 
-	// Token: 0x06003135 RID: 12597 RVA: 0x0010B75F File Offset: 0x0010995F
+	// Token: 0x06003135 RID: 12597 RVA: 0x0010B73F File Offset: 0x0010993F
 	private RigContainer SpawnRig()
 	{
 		if (this.rigTemplate.activeSelf)
@@ -150,19 +150,19 @@ internal class VRRigCache : MonoBehaviour
 		return gameObject.GetComponent<RigContainer>();
 	}
 
-	// Token: 0x06003136 RID: 12598 RVA: 0x0010B797 File Offset: 0x00109997
+	// Token: 0x06003136 RID: 12598 RVA: 0x0010B777 File Offset: 0x00109977
 	internal bool TryGetVrrig(Player targetPlayer, out RigContainer playerRig)
 	{
 		return this.TryGetVrrig(NetworkSystem.Instance.GetPlayer(targetPlayer.ActorNumber), out playerRig);
 	}
 
-	// Token: 0x06003137 RID: 12599 RVA: 0x0010B7B0 File Offset: 0x001099B0
+	// Token: 0x06003137 RID: 12599 RVA: 0x0010B790 File Offset: 0x00109990
 	internal bool TryGetVrrig(int targetPlayerId, out RigContainer playerRig)
 	{
 		return this.TryGetVrrig(NetworkSystem.Instance.GetPlayer(targetPlayerId), out playerRig);
 	}
 
-	// Token: 0x06003138 RID: 12600 RVA: 0x0010B7C4 File Offset: 0x001099C4
+	// Token: 0x06003138 RID: 12600 RVA: 0x0010B7A4 File Offset: 0x001099A4
 	internal bool TryGetVrrig(NetPlayer targetPlayer, out RigContainer playerRig)
 	{
 		playerRig = null;
@@ -214,7 +214,7 @@ internal class VRRigCache : MonoBehaviour
 		return true;
 	}
 
-	// Token: 0x06003139 RID: 12601 RVA: 0x0010B8DC File Offset: 0x00109ADC
+	// Token: 0x06003139 RID: 12601 RVA: 0x0010B8BC File Offset: 0x00109ABC
 	private void AddRigToGorillaParent(NetPlayer player, VRRig vrrig)
 	{
 		GorillaParent instance = GorillaParent.instance;
@@ -234,7 +234,7 @@ internal class VRRigCache : MonoBehaviour
 		instance.vrrigDict[player] = vrrig;
 	}
 
-	// Token: 0x0600313A RID: 12602 RVA: 0x0010B940 File Offset: 0x00109B40
+	// Token: 0x0600313A RID: 12602 RVA: 0x0010B920 File Offset: 0x00109B20
 	public void OnPlayerEnteredRoom(NetPlayer newPlayer)
 	{
 		if (newPlayer.ActorNumber == -1)
@@ -255,7 +255,7 @@ internal class VRRigCache : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600313B RID: 12603 RVA: 0x0010B98C File Offset: 0x00109B8C
+	// Token: 0x0600313B RID: 12603 RVA: 0x0010B96C File Offset: 0x00109B6C
 	public void OnJoinedRoom()
 	{
 		foreach (NetPlayer netPlayer in NetworkSystem.Instance.AllNetPlayers)
@@ -276,7 +276,7 @@ internal class VRRigCache : MonoBehaviour
 		onActiveRigsChanged.Invoke();
 	}
 
-	// Token: 0x0600313C RID: 12604 RVA: 0x0010B9F0 File Offset: 0x00109BF0
+	// Token: 0x0600313C RID: 12604 RVA: 0x0010B9D0 File Offset: 0x00109BD0
 	private void RemoveRigFromGorillaParent(NetPlayer player, VRRig vrrig)
 	{
 		GorillaParent instance = GorillaParent.instance;
@@ -294,7 +294,7 @@ internal class VRRigCache : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600313D RID: 12605 RVA: 0x0010BA48 File Offset: 0x00109C48
+	// Token: 0x0600313D RID: 12605 RVA: 0x0010BA28 File Offset: 0x00109C28
 	public void OnPlayerLeftRoom(NetPlayer leavingPlayer)
 	{
 		if (leavingPlayer.IsNull)
@@ -328,7 +328,7 @@ internal class VRRigCache : MonoBehaviour
 		onActiveRigsChanged.Invoke();
 	}
 
-	// Token: 0x0600313E RID: 12606 RVA: 0x0010BB08 File Offset: 0x00109D08
+	// Token: 0x0600313E RID: 12606 RVA: 0x0010BAE8 File Offset: 0x00109CE8
 	private void CheckForMissingPlayer()
 	{
 		foreach (KeyValuePair<NetPlayer, RigContainer> keyValuePair in VRRigCache.rigsInUse)
@@ -360,7 +360,7 @@ internal class VRRigCache : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600313F RID: 12607 RVA: 0x0010BC30 File Offset: 0x00109E30
+	// Token: 0x0600313F RID: 12607 RVA: 0x0010BC10 File Offset: 0x00109E10
 	public void OnLeftRoom()
 	{
 		this.m_ensureNetworkObjectTimer.Stop();
@@ -410,7 +410,7 @@ internal class VRRigCache : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003140 RID: 12608 RVA: 0x0010BE30 File Offset: 0x0010A030
+	// Token: 0x06003140 RID: 12608 RVA: 0x0010BE10 File Offset: 0x0010A010
 	[MethodImpl(256)]
 	internal VRRig[] GetAllRigs()
 	{
@@ -429,7 +429,7 @@ internal class VRRigCache : MonoBehaviour
 		return array;
 	}
 
-	// Token: 0x06003141 RID: 12609 RVA: 0x0010BEF8 File Offset: 0x0010A0F8
+	// Token: 0x06003141 RID: 12609 RVA: 0x0010BED8 File Offset: 0x0010A0D8
 	[MethodImpl(256)]
 	internal void GetAllUsedRigs(List<VRRig> rigs)
 	{
@@ -443,7 +443,7 @@ internal class VRRigCache : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003142 RID: 12610 RVA: 0x0010BF58 File Offset: 0x0010A158
+	// Token: 0x06003142 RID: 12610 RVA: 0x0010BF38 File Offset: 0x0010A138
 	[MethodImpl(256)]
 	internal void GetActiveRigs(List<VRRig> rigsListToUpdate)
 	{
@@ -463,7 +463,7 @@ internal class VRRigCache : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003143 RID: 12611 RVA: 0x0010BFDC File Offset: 0x0010A1DC
+	// Token: 0x06003143 RID: 12611 RVA: 0x0010BFBC File Offset: 0x0010A1BC
 	[MethodImpl(256)]
 	internal int GetAllRigsHash()
 	{
@@ -479,7 +479,7 @@ internal class VRRigCache : MonoBehaviour
 		return num;
 	}
 
-	// Token: 0x06003144 RID: 12612 RVA: 0x0010C080 File Offset: 0x0010A280
+	// Token: 0x06003144 RID: 12612 RVA: 0x0010C060 File Offset: 0x0010A260
 	internal void InstantiateNetworkObject()
 	{
 		if (this.localRig.netView.IsNotNull() || !NetworkSystem.Instance.InRoom)
@@ -500,7 +500,7 @@ internal class VRRigCache : MonoBehaviour
 		NetworkSystem.Instance.NetInstantiate(prefabType.prefab, gameObject.transform.position, gameObject.transform.rotation, false, 0, VRRigCache.rigRGBData, null);
 	}
 
-	// Token: 0x06003145 RID: 12613 RVA: 0x0010C163 File Offset: 0x0010A363
+	// Token: 0x06003145 RID: 12613 RVA: 0x0010C143 File Offset: 0x0010A343
 	internal void OnVrrigSerializerSuccesfullySpawned()
 	{
 		GamePlayer.UpdateStaticLookupCaches();

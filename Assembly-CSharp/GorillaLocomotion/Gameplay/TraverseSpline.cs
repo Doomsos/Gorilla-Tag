@@ -9,14 +9,14 @@ namespace GorillaLocomotion.Gameplay
 	[NetworkBehaviourWeaved(1)]
 	public class TraverseSpline : NetworkComponent
 	{
-		// Token: 0x060064A8 RID: 25768 RVA: 0x0020D225 File Offset: 0x0020B425
+		// Token: 0x060064A8 RID: 25768 RVA: 0x0020D205 File Offset: 0x0020B405
 		protected override void Awake()
 		{
 			base.Awake();
 			this.progress = this.SplineProgressOffet % 1f;
 		}
 
-		// Token: 0x060064A9 RID: 25769 RVA: 0x0020D240 File Offset: 0x0020B440
+		// Token: 0x060064A9 RID: 25769 RVA: 0x0020D220 File Offset: 0x0020B420
 		protected virtual void FixedUpdate()
 		{
 			if (!base.IsMine && this.progressLerpStartTime + 1f > Time.time)
@@ -72,8 +72,8 @@ namespace GorillaLocomotion.Gameplay
 		}
 
 		// Token: 0x1700098A RID: 2442
-		// (get) Token: 0x060064AA RID: 25770 RVA: 0x0020D409 File Offset: 0x0020B609
-		// (set) Token: 0x060064AB RID: 25771 RVA: 0x0020D42F File Offset: 0x0020B62F
+		// (get) Token: 0x060064AA RID: 25770 RVA: 0x0020D3E9 File Offset: 0x0020B5E9
+		// (set) Token: 0x060064AB RID: 25771 RVA: 0x0020D40F File Offset: 0x0020B60F
 		[Networked]
 		[NetworkedWeaved(0, 1)]
 		public unsafe float Data
@@ -96,33 +96,33 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x060064AC RID: 25772 RVA: 0x0020D456 File Offset: 0x0020B656
+		// Token: 0x060064AC RID: 25772 RVA: 0x0020D436 File Offset: 0x0020B636
 		public override void WriteDataFusion()
 		{
 			this.Data = this.progress + this.currentSpeedMultiplier * 1f / this.duration;
 		}
 
-		// Token: 0x060064AD RID: 25773 RVA: 0x0020D478 File Offset: 0x0020B678
+		// Token: 0x060064AD RID: 25773 RVA: 0x0020D458 File Offset: 0x0020B658
 		public override void ReadDataFusion()
 		{
 			this.progressLerpEnd = this.Data;
 			this.ReadDataShared();
 		}
 
-		// Token: 0x060064AE RID: 25774 RVA: 0x0020D48C File Offset: 0x0020B68C
+		// Token: 0x060064AE RID: 25774 RVA: 0x0020D46C File Offset: 0x0020B66C
 		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			stream.SendNext(this.progress + this.currentSpeedMultiplier * 1f / this.duration);
 		}
 
-		// Token: 0x060064AF RID: 25775 RVA: 0x0020D4B3 File Offset: 0x0020B6B3
+		// Token: 0x060064AF RID: 25775 RVA: 0x0020D493 File Offset: 0x0020B693
 		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			this.progressLerpEnd = (float)stream.ReceiveNext();
 			this.ReadDataShared();
 		}
 
-		// Token: 0x060064B0 RID: 25776 RVA: 0x0020D4CC File Offset: 0x0020B6CC
+		// Token: 0x060064B0 RID: 25776 RVA: 0x0020D4AC File Offset: 0x0020B6AC
 		private void ReadDataShared()
 		{
 			if (float.IsNaN(this.progressLerpEnd) || float.IsInfinity(this.progressLerpEnd))
@@ -141,19 +141,19 @@ namespace GorillaLocomotion.Gameplay
 			this.progressLerpStartTime = Time.time;
 		}
 
-		// Token: 0x060064B1 RID: 25777 RVA: 0x0020D587 File Offset: 0x0020B787
+		// Token: 0x060064B1 RID: 25777 RVA: 0x0020D567 File Offset: 0x0020B767
 		protected float GetProgress()
 		{
 			return this.progress;
 		}
 
-		// Token: 0x060064B2 RID: 25778 RVA: 0x0020D58F File Offset: 0x0020B78F
+		// Token: 0x060064B2 RID: 25778 RVA: 0x0020D56F File Offset: 0x0020B76F
 		public float GetCurrentSpeed()
 		{
 			return this.currentSpeedMultiplier;
 		}
 
-		// Token: 0x060064B4 RID: 25780 RVA: 0x0020D5E5 File Offset: 0x0020B7E5
+		// Token: 0x060064B4 RID: 25780 RVA: 0x0020D5C5 File Offset: 0x0020B7C5
 		[WeaverGenerated]
 		public override void CopyBackingFieldsToState(bool A_1)
 		{
@@ -161,7 +161,7 @@ namespace GorillaLocomotion.Gameplay
 			this.Data = this._Data;
 		}
 
-		// Token: 0x060064B5 RID: 25781 RVA: 0x0020D5FD File Offset: 0x0020B7FD
+		// Token: 0x060064B5 RID: 25781 RVA: 0x0020D5DD File Offset: 0x0020B7DD
 		[WeaverGenerated]
 		public override void CopyStateToBackingFields()
 		{

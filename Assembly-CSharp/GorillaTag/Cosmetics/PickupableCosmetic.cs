@@ -11,7 +11,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010B0 RID: 4272
 	public class PickupableCosmetic : PickupableVariant
 	{
-		// Token: 0x06006AE3 RID: 27363 RVA: 0x002310CC File Offset: 0x0022F2CC
+		// Token: 0x06006AE3 RID: 27363 RVA: 0x002310AC File Offset: 0x0022F2AC
 		private void Awake()
 		{
 			this.rigOwnedPhysicsBody = base.GetComponent<RigOwnedPhysicsBody>();
@@ -24,7 +24,7 @@ namespace GorillaTag.Cosmetics
 			base.enabled = false;
 		}
 
-		// Token: 0x06006AE5 RID: 27365 RVA: 0x002310E6 File Offset: 0x0022F2E6
+		// Token: 0x06006AE5 RID: 27365 RVA: 0x002310C6 File Offset: 0x0022F2C6
 		private void OnEnable()
 		{
 			if (this.rigOwnedPhysicsBody != null)
@@ -33,7 +33,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AE6 RID: 27366 RVA: 0x00231102 File Offset: 0x0022F302
+		// Token: 0x06006AE6 RID: 27366 RVA: 0x002310E2 File Offset: 0x0022F2E2
 		private void OnDisable()
 		{
 			if (this.rigOwnedPhysicsBody != null)
@@ -42,7 +42,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AE7 RID: 27367 RVA: 0x00231120 File Offset: 0x0022F320
+		// Token: 0x06006AE7 RID: 27367 RVA: 0x00231100 File Offset: 0x0022F300
 		protected internal override void Pickup(bool isAutoPickup = false)
 		{
 			if (!isAutoPickup)
@@ -85,13 +85,13 @@ namespace GorillaTag.Cosmetics
 			base.enabled = false;
 		}
 
-		// Token: 0x06006AE8 RID: 27368 RVA: 0x00231272 File Offset: 0x0022F472
+		// Token: 0x06006AE8 RID: 27368 RVA: 0x00231252 File Offset: 0x0022F452
 		protected internal override void DelayedPickup()
 		{
 			base.StartCoroutine(this.DelayedPickup_Internal());
 		}
 
-		// Token: 0x06006AE9 RID: 27369 RVA: 0x00231281 File Offset: 0x0022F481
+		// Token: 0x06006AE9 RID: 27369 RVA: 0x00231261 File Offset: 0x0022F461
 		private IEnumerator DelayedPickup_Internal()
 		{
 			yield return new WaitForSeconds(1f);
@@ -99,7 +99,7 @@ namespace GorillaTag.Cosmetics
 			yield break;
 		}
 
-		// Token: 0x06006AEA RID: 27370 RVA: 0x00231290 File Offset: 0x0022F490
+		// Token: 0x06006AEA RID: 27370 RVA: 0x00231270 File Offset: 0x0022F470
 		protected internal override void Release(HoldableObject holdable, Vector3 startPosition, Vector3 velocity, float playerScale)
 		{
 			this.holdableParent = holdable;
@@ -121,7 +121,7 @@ namespace GorillaTag.Cosmetics
 			this.frameCounter = 0;
 		}
 
-		// Token: 0x06006AEB RID: 27371 RVA: 0x00231354 File Offset: 0x0022F554
+		// Token: 0x06006AEB RID: 27371 RVA: 0x00231334 File Offset: 0x0022F534
 		private void FixedUpdate()
 		{
 			if (this.isBreakable && this.broken)
@@ -194,7 +194,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AEC RID: 27372 RVA: 0x00231594 File Offset: 0x0022F794
+		// Token: 0x06006AEC RID: 27372 RVA: 0x00231574 File Offset: 0x0022F774
 		private void SettleBanner(RaycastHit hitInfo)
 		{
 			this.rb.isKinematic = true;
@@ -206,7 +206,7 @@ namespace GorillaTag.Cosmetics
 			base.transform.rotation = rotation;
 		}
 
-		// Token: 0x06006AED RID: 27373 RVA: 0x0023161C File Offset: 0x0022F81C
+		// Token: 0x06006AED RID: 27373 RVA: 0x002315FC File Offset: 0x0022F7FC
 		private Vector3 GetFibonacciSphereDirection(int index, int total)
 		{
 			float num = Mathf.Acos(1f - 2f * ((float)index + 0.5f) / (float)total);
@@ -217,7 +217,7 @@ namespace GorillaTag.Cosmetics
 			return new Vector3(num3, num4, num5).normalized;
 		}
 
-		// Token: 0x06006AEE RID: 27374 RVA: 0x00231698 File Offset: 0x0022F898
+		// Token: 0x06006AEE RID: 27374 RVA: 0x00231678 File Offset: 0x0022F878
 		private Vector3[] GetCachedDirections(int count)
 		{
 			if (count <= 0)
@@ -238,7 +238,7 @@ namespace GorillaTag.Cosmetics
 			return array;
 		}
 
-		// Token: 0x06006AEF RID: 27375 RVA: 0x002316F0 File Offset: 0x0022F8F0
+		// Token: 0x06006AEF RID: 27375 RVA: 0x002316D0 File Offset: 0x0022F8D0
 		private Vector3 GetSafeRayOrigin(Vector3 rawOrigin, Vector3 dir)
 		{
 			float num = this.selfSkinOffset;
@@ -250,7 +250,7 @@ namespace GorillaTag.Cosmetics
 			return rawOrigin - dir.normalized * num;
 		}
 
-		// Token: 0x06006AF0 RID: 27376 RVA: 0x00231754 File Offset: 0x0022F954
+		// Token: 0x06006AF0 RID: 27376 RVA: 0x00231734 File Offset: 0x0022F934
 		public void BreakPlaceable()
 		{
 			if (!this.isBreakable || !this.placedOnFloor)
@@ -267,13 +267,13 @@ namespace GorillaTag.Cosmetics
 			GTDev.LogError<string>("PickupableCosmetic " + base.gameObject.name + " has no TransferrableObject parent. Break effects cannot be replicated", null);
 		}
 
-		// Token: 0x06006AF1 RID: 27377 RVA: 0x002317CE File Offset: 0x0022F9CE
+		// Token: 0x06006AF1 RID: 27377 RVA: 0x002317AE File Offset: 0x0022F9AE
 		private void OnBreakReplicated()
 		{
 			this.PlayBreakEffects();
 		}
 
-		// Token: 0x06006AF2 RID: 27378 RVA: 0x002317D8 File Offset: 0x0022F9D8
+		// Token: 0x06006AF2 RID: 27378 RVA: 0x002317B8 File Offset: 0x0022F9B8
 		protected virtual void PlayBreakEffects()
 		{
 			if (!this.isBreakable || !this.placedOnFloor || this.broken)
@@ -303,7 +303,7 @@ namespace GorillaTag.Cosmetics
 			onBrokenShared.Invoke();
 		}
 
-		// Token: 0x06006AF3 RID: 27379 RVA: 0x00231874 File Offset: 0x0022FA74
+		// Token: 0x06006AF3 RID: 27379 RVA: 0x00231854 File Offset: 0x0022FA54
 		protected virtual void ShowRenderers(bool visible)
 		{
 			if (this.hideOnBreak.IsNullOrEmpty<Renderer>())

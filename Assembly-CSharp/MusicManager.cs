@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000856 RID: 2134
 public class MusicManager : MonoBehaviour
 {
-	// Token: 0x06003834 RID: 14388 RVA: 0x0012D203 File Offset: 0x0012B403
+	// Token: 0x06003834 RID: 14388 RVA: 0x0012D1E3 File Offset: 0x0012B3E3
 	private void Awake()
 	{
 		if (MusicManager.Instance == null)
@@ -17,7 +17,7 @@ public class MusicManager : MonoBehaviour
 		Object.Destroy(this);
 	}
 
-	// Token: 0x06003835 RID: 14389 RVA: 0x0012D223 File Offset: 0x0012B423
+	// Token: 0x06003835 RID: 14389 RVA: 0x0012D203 File Offset: 0x0012B403
 	public void RegisterMusicSource(MusicSource musicSource)
 	{
 		if (!this.activeSources.Contains(musicSource))
@@ -26,7 +26,7 @@ public class MusicManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003836 RID: 14390 RVA: 0x0012D240 File Offset: 0x0012B440
+	// Token: 0x06003836 RID: 14390 RVA: 0x0012D220 File Offset: 0x0012B420
 	public void UnregisterMusicSource(MusicSource musicSource)
 	{
 		if (this.activeSources.Contains(musicSource))
@@ -36,7 +36,7 @@ public class MusicManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003837 RID: 14391 RVA: 0x0012D264 File Offset: 0x0012B464
+	// Token: 0x06003837 RID: 14391 RVA: 0x0012D244 File Offset: 0x0012B444
 	public void FadeOutMusic(float duration = 3f)
 	{
 		base.StopAllCoroutines();
@@ -51,7 +51,7 @@ public class MusicManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003838 RID: 14392 RVA: 0x0012D2D8 File Offset: 0x0012B4D8
+	// Token: 0x06003838 RID: 14392 RVA: 0x0012D2B8 File Offset: 0x0012B4B8
 	public void FadeInMusic(float duration = 3f)
 	{
 		base.StopAllCoroutines();
@@ -66,7 +66,7 @@ public class MusicManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003839 RID: 14393 RVA: 0x0012D348 File Offset: 0x0012B548
+	// Token: 0x06003839 RID: 14393 RVA: 0x0012D328 File Offset: 0x0012B528
 	private IEnumerator FadeInVolumeCoroutine(float duration)
 	{
 		bool complete = false;
@@ -98,7 +98,7 @@ public class MusicManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x0600383A RID: 14394 RVA: 0x0012D35E File Offset: 0x0012B55E
+	// Token: 0x0600383A RID: 14394 RVA: 0x0012D33E File Offset: 0x0012B53E
 	private IEnumerator FadeOutVolumeCoroutine(float duration)
 	{
 		bool complete = false;

@@ -12,11 +12,11 @@ using UnityEngine;
 internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 {
 	// Token: 0x17000702 RID: 1794
-	// (get) Token: 0x06004B43 RID: 19267 RVA: 0x00188EE6 File Offset: 0x001870E6
-	// (set) Token: 0x06004B44 RID: 19268 RVA: 0x00188EEE File Offset: 0x001870EE
+	// (get) Token: 0x06004B43 RID: 19267 RVA: 0x00188EC6 File Offset: 0x001870C6
+	// (set) Token: 0x06004B44 RID: 19268 RVA: 0x00188ECE File Offset: 0x001870CE
 	bool ITickSystemPre.PreTickRunning { get; set; }
 
-	// Token: 0x06004B45 RID: 19269 RVA: 0x00188EF8 File Offset: 0x001870F8
+	// Token: 0x06004B45 RID: 19269 RVA: 0x00188ED8 File Offset: 0x001870D8
 	private void Awake()
 	{
 		if (PlayerCosmeticsSystem.instance == null)
@@ -32,7 +32,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		Object.Destroy(this);
 	}
 
-	// Token: 0x06004B46 RID: 19270 RVA: 0x00188F68 File Offset: 0x00187168
+	// Token: 0x06004B46 RID: 19270 RVA: 0x00188F48 File Offset: 0x00187148
 	private void Start()
 	{
 		this.playerLookUpCooldown = Mathf.Max(this.playerLookUpCooldown, 3f);
@@ -50,7 +50,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}, false);
 	}
 
-	// Token: 0x06004B47 RID: 19271 RVA: 0x00188FD9 File Offset: 0x001871D9
+	// Token: 0x06004B47 RID: 19271 RVA: 0x00188FB9 File Offset: 0x001871B9
 	private void OnDestroy()
 	{
 		if (PlayerCosmeticsSystem.instance == this)
@@ -59,7 +59,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B48 RID: 19272 RVA: 0x00188FEE File Offset: 0x001871EE
+	// Token: 0x06004B48 RID: 19272 RVA: 0x00188FCE File Offset: 0x001871CE
 	private void LookUpPlayerCosmetics(bool wait = false)
 	{
 		if (!this.isLookingUp)
@@ -74,7 +74,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B49 RID: 19273 RVA: 0x00189018 File Offset: 0x00187218
+	// Token: 0x06004B49 RID: 19273 RVA: 0x00188FF8 File Offset: 0x001871F8
 	public void PreTick()
 	{
 		if (PlayerCosmeticsSystem.playersToLookUp.Count < 1)
@@ -131,7 +131,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		this.isLookingUp = false;
 	}
 
-	// Token: 0x06004B4A RID: 19274 RVA: 0x0018917D File Offset: 0x0018737D
+	// Token: 0x06004B4A RID: 19274 RVA: 0x0018915D File Offset: 0x0018735D
 	private void NewCosmeticsPath()
 	{
 		if (this.isLookingUpNew)
@@ -141,7 +141,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		base.StartCoroutine(this.NewCosmeticsPathCoroutine());
 	}
 
-	// Token: 0x06004B4B RID: 19275 RVA: 0x00189195 File Offset: 0x00187395
+	// Token: 0x06004B4B RID: 19275 RVA: 0x00189175 File Offset: 0x00187375
 	private IEnumerator NewCosmeticsPathCoroutine()
 	{
 		this.isLookingUpNew = true;
@@ -212,7 +212,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		yield break;
 	}
 
-	// Token: 0x06004B4C RID: 19276 RVA: 0x001891A4 File Offset: 0x001873A4
+	// Token: 0x06004B4C RID: 19276 RVA: 0x00189184 File Offset: 0x00187384
 	private void UpdatePlayersWaitingAndDoLookup(bool retrying)
 	{
 		if (PlayerCosmeticsSystem.playersWaiting.Count > 0)
@@ -237,7 +237,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B4D RID: 19277 RVA: 0x00189218 File Offset: 0x00187418
+	// Token: 0x06004B4D RID: 19277 RVA: 0x001891F8 File Offset: 0x001873F8
 	private void OnGetsharedGroupData(GetSharedGroupDataResult result)
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -283,7 +283,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		this.UpdatePlayersWaitingAndDoLookup(retrying);
 	}
 
-	// Token: 0x06004B4E RID: 19278 RVA: 0x0018935C File Offset: 0x0018755C
+	// Token: 0x06004B4E RID: 19278 RVA: 0x0018933C File Offset: 0x0018753C
 	private void OnNetEvent(byte code, object data, int source)
 	{
 		if (code != 199 || source < 0)
@@ -296,7 +296,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 	}
 
 	// Token: 0x17000703 RID: 1795
-	// (get) Token: 0x06004B4F RID: 19279 RVA: 0x00189395 File Offset: 0x00187595
+	// (get) Token: 0x06004B4F RID: 19279 RVA: 0x00189375 File Offset: 0x00187575
 	private static bool nullInstance
 	{
 		get
@@ -306,16 +306,16 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 	}
 
 	// Token: 0x17000704 RID: 1796
-	// (get) Token: 0x06004B50 RID: 19280 RVA: 0x001893AD File Offset: 0x001875AD
-	// (set) Token: 0x06004B51 RID: 19281 RVA: 0x001893B4 File Offset: 0x001875B4
+	// (get) Token: 0x06004B50 RID: 19280 RVA: 0x0018938D File Offset: 0x0018758D
+	// (set) Token: 0x06004B51 RID: 19281 RVA: 0x00189394 File Offset: 0x00187594
 	public static bool TempUnlocksEnabled { get; private set; } = false;
 
 	// Token: 0x17000705 RID: 1797
-	// (get) Token: 0x06004B52 RID: 19282 RVA: 0x001893BC File Offset: 0x001875BC
-	// (set) Token: 0x06004B53 RID: 19283 RVA: 0x001893C3 File Offset: 0x001875C3
+	// (get) Token: 0x06004B52 RID: 19282 RVA: 0x0018939C File Offset: 0x0018759C
+	// (set) Token: 0x06004B53 RID: 19283 RVA: 0x001893A3 File Offset: 0x001875A3
 	public static string[] TempUnlockCosmeticString { get; private set; } = Array.Empty<string>();
 
-	// Token: 0x06004B54 RID: 19284 RVA: 0x001893CC File Offset: 0x001875CC
+	// Token: 0x06004B54 RID: 19284 RVA: 0x001893AC File Offset: 0x001875AC
 	public static void RegisterCosmeticCallback(int playerID, IUserCosmeticsCallback callback)
 	{
 		PlayerCosmeticsSystem.userCosmeticCallback[playerID] = callback;
@@ -328,7 +328,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B55 RID: 19285 RVA: 0x0018940F File Offset: 0x0018760F
+	// Token: 0x06004B55 RID: 19285 RVA: 0x001893EF File Offset: 0x001875EF
 	public static void RemoveCosmeticCallback(int playerID)
 	{
 		if (PlayerCosmeticsSystem.userCosmeticCallback.ContainsKey(playerID))
@@ -337,7 +337,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B56 RID: 19286 RVA: 0x0018942C File Offset: 0x0018762C
+	// Token: 0x06004B56 RID: 19286 RVA: 0x0018940C File Offset: 0x0018760C
 	public static void UpdatePlayerCosmetics(NetPlayer player)
 	{
 		if (player == null || player.IsLocal)
@@ -356,7 +356,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B57 RID: 19287 RVA: 0x00189480 File Offset: 0x00187680
+	// Token: 0x06004B57 RID: 19287 RVA: 0x00189460 File Offset: 0x00187660
 	public static void UpdatePlayerCosmetics(List<NetPlayer> players)
 	{
 		foreach (NetPlayer netPlayer in players)
@@ -377,7 +377,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B58 RID: 19288 RVA: 0x0018950C File Offset: 0x0018770C
+	// Token: 0x06004B58 RID: 19288 RVA: 0x001894EC File Offset: 0x001876EC
 	public static void SetRigTryOn(bool inTryon, RigContainer rigRefg)
 	{
 		VRRig rig = rigRefg.Rig;
@@ -402,13 +402,13 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		rig.myBodyDockPositions.RefreshTransferrableItems();
 	}
 
-	// Token: 0x06004B59 RID: 19289 RVA: 0x001895BF File Offset: 0x001877BF
+	// Token: 0x06004B59 RID: 19289 RVA: 0x0018959F File Offset: 0x0018779F
 	public static void UnlockTemporaryCosmeticsForPlayer(RigContainer rigRef)
 	{
 		PlayerCosmeticsSystem.UnlockTemporaryCosmeticsForPlayer(rigRef, PlayerCosmeticsSystem.TempUnlockCosmeticString);
 	}
 
-	// Token: 0x06004B5A RID: 19290 RVA: 0x001895CC File Offset: 0x001877CC
+	// Token: 0x06004B5A RID: 19290 RVA: 0x001895AC File Offset: 0x001877AC
 	public static void UnlockTemporaryCosmeticsForPlayer(RigContainer rigRef, IReadOnlyList<string> cosmeticIds)
 	{
 		if (cosmeticIds == null)
@@ -432,13 +432,13 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		rig.RefreshCosmetics();
 	}
 
-	// Token: 0x06004B5B RID: 19291 RVA: 0x00189670 File Offset: 0x00187870
+	// Token: 0x06004B5B RID: 19291 RVA: 0x00189650 File Offset: 0x00187850
 	public static void LockTemporaryCosmeticsForPlayer(RigContainer rigRef)
 	{
 		PlayerCosmeticsSystem.LockTemporaryCosmeticsForPlayer(rigRef, PlayerCosmeticsSystem.TempUnlockCosmeticString);
 	}
 
-	// Token: 0x06004B5C RID: 19292 RVA: 0x00189680 File Offset: 0x00187880
+	// Token: 0x06004B5C RID: 19292 RVA: 0x00189660 File Offset: 0x00187860
 	public static void LockTemporaryCosmeticsForPlayer(RigContainer rigRef, IReadOnlyList<string> cosmeticIds)
 	{
 		if (cosmeticIds == null)
@@ -462,7 +462,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		rig.RefreshCosmetics();
 	}
 
-	// Token: 0x06004B5D RID: 19293 RVA: 0x00189724 File Offset: 0x00187924
+	// Token: 0x06004B5D RID: 19293 RVA: 0x00189704 File Offset: 0x00187904
 	internal static void UnlockTemporaryCosmeticsGlobal(IReadOnlyList<string> cosmeticIds)
 	{
 		int count = cosmeticIds.Count;
@@ -472,7 +472,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B5E RID: 19294 RVA: 0x00189750 File Offset: 0x00187950
+	// Token: 0x06004B5E RID: 19294 RVA: 0x00189730 File Offset: 0x00187930
 	internal static void UnlockTemporaryCosmeticGlobal(string cosmeticId)
 	{
 		int num = 0;
@@ -484,7 +484,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		PlayerCosmeticsSystem.k_tempUnlockedCosmetics[cosmeticId] = num;
 	}
 
-	// Token: 0x06004B5F RID: 19295 RVA: 0x00189788 File Offset: 0x00187988
+	// Token: 0x06004B5F RID: 19295 RVA: 0x00189768 File Offset: 0x00187968
 	internal static void LockTemporaryCosmeticsGlobal(IReadOnlyList<string> cosmeticIds)
 	{
 		int count = cosmeticIds.Count;
@@ -494,7 +494,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 	}
 
-	// Token: 0x06004B60 RID: 19296 RVA: 0x001897B4 File Offset: 0x001879B4
+	// Token: 0x06004B60 RID: 19296 RVA: 0x00189794 File Offset: 0x00187994
 	internal static void LockTemporaryCosmeticGlobal(string cosmeticId)
 	{
 		if (!PlayerCosmeticsSystem.k_tempUnlockedCosmetics.ContainsKey(cosmeticId))
@@ -507,14 +507,14 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		PlayerCosmeticsSystem.k_tempUnlockedCosmetics[cosmeticId] = num;
 	}
 
-	// Token: 0x06004B61 RID: 19297 RVA: 0x00189800 File Offset: 0x00187A00
+	// Token: 0x06004B61 RID: 19297 RVA: 0x001897E0 File Offset: 0x001879E0
 	public static bool IsTemporaryCosmeticAllowed(VRRig rigRef, string cosmeticId)
 	{
 		int num;
 		return rigRef.TemporaryCosmetics.Contains(cosmeticId) || (PlayerCosmeticsSystem.k_tempUnlockedCosmetics.TryGetValue(cosmeticId, ref num) && num > 0);
 	}
 
-	// Token: 0x06004B62 RID: 19298 RVA: 0x00189832 File Offset: 0x00187A32
+	// Token: 0x06004B62 RID: 19298 RVA: 0x00189812 File Offset: 0x00187A12
 	public static void StaticReset()
 	{
 		PlayerCosmeticsSystem.playersToLookUp.Clear();

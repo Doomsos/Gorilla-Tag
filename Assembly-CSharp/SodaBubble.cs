@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x020008E0 RID: 2272
 public class SodaBubble : MonoBehaviour
 {
-	// Token: 0x06003A31 RID: 14897 RVA: 0x0013392B File Offset: 0x00131B2B
+	// Token: 0x06003A31 RID: 14897 RVA: 0x0013390B File Offset: 0x00131B0B
 	public void Pop()
 	{
 		base.StartCoroutine(this.PopCoroutine());
 	}
 
-	// Token: 0x06003A32 RID: 14898 RVA: 0x0013393A File Offset: 0x00131B3A
+	// Token: 0x06003A32 RID: 14898 RVA: 0x0013391A File Offset: 0x00131B1A
 	private IEnumerator PopCoroutine()
 	{
 		this.audioSource.GTPlay();

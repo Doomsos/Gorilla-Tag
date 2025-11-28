@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000AA4 RID: 2724
 public class KIDUI_ConfirmScreen : MonoBehaviour
 {
-	// Token: 0x06004458 RID: 17496 RVA: 0x00169D78 File Offset: 0x00167F78
+	// Token: 0x06004458 RID: 17496 RVA: 0x00169D58 File Offset: 0x00167F58
 	private void Awake()
 	{
 		if (this._emailToConfirmTxt == null)
@@ -28,14 +28,14 @@ public class KIDUI_ConfirmScreen : MonoBehaviour
 		this._cancellationTokenSource = new CancellationTokenSource();
 	}
 
-	// Token: 0x06004459 RID: 17497 RVA: 0x00169DEA File Offset: 0x00167FEA
+	// Token: 0x06004459 RID: 17497 RVA: 0x00169DCA File Offset: 0x00167FCA
 	private void OnEnable()
 	{
 		this._confirmButton.interactable = true;
 		this._backButton.interactable = true;
 	}
 
-	// Token: 0x0600445A RID: 17498 RVA: 0x00169E04 File Offset: 0x00168004
+	// Token: 0x0600445A RID: 17498 RVA: 0x00169DE4 File Offset: 0x00167FE4
 	public void OnEmailSubmitted(string emailAddress)
 	{
 		this._submittedEmailAddress = emailAddress;
@@ -43,7 +43,7 @@ public class KIDUI_ConfirmScreen : MonoBehaviour
 		base.gameObject.SetActive(true);
 	}
 
-	// Token: 0x0600445B RID: 17499 RVA: 0x00169E2C File Offset: 0x0016802C
+	// Token: 0x0600445B RID: 17499 RVA: 0x00169E0C File Offset: 0x0016800C
 	public void OnConfirmPressed()
 	{
 		KIDUI_ConfirmScreen.<OnConfirmPressed>d__16 <OnConfirmPressed>d__;
@@ -53,7 +53,7 @@ public class KIDUI_ConfirmScreen : MonoBehaviour
 		<OnConfirmPressed>d__.<>t__builder.Start<KIDUI_ConfirmScreen.<OnConfirmPressed>d__16>(ref <OnConfirmPressed>d__);
 	}
 
-	// Token: 0x0600445C RID: 17500 RVA: 0x00169E64 File Offset: 0x00168064
+	// Token: 0x0600445C RID: 17500 RVA: 0x00169E44 File Offset: 0x00168044
 	public void OnBackPressed()
 	{
 		KIDUI_ConfirmScreen.<OnBackPressed>d__17 <OnBackPressed>d__;
@@ -63,14 +63,14 @@ public class KIDUI_ConfirmScreen : MonoBehaviour
 		<OnBackPressed>d__.<>t__builder.Start<KIDUI_ConfirmScreen.<OnBackPressed>d__17>(ref <OnBackPressed>d__);
 	}
 
-	// Token: 0x0600445D RID: 17501 RVA: 0x00169E9B File Offset: 0x0016809B
+	// Token: 0x0600445D RID: 17501 RVA: 0x00169E7B File Offset: 0x0016807B
 	public void NotifyOfResult(bool success)
 	{
 		this._hasCompletedSendEmailRequest = true;
 		this._emailRequestResult = success;
 	}
 
-	// Token: 0x0600445E RID: 17502 RVA: 0x00169EAC File Offset: 0x001680AC
+	// Token: 0x0600445E RID: 17502 RVA: 0x00169E8C File Offset: 0x0016808C
 	private void ShowErrorScreen(string errorMessage)
 	{
 		KIDUI_ConfirmScreen.<ShowErrorScreen>d__19 <ShowErrorScreen>d__;
@@ -81,7 +81,7 @@ public class KIDUI_ConfirmScreen : MonoBehaviour
 		<ShowErrorScreen>d__.<>t__builder.Start<KIDUI_ConfirmScreen.<ShowErrorScreen>d__19>(ref <ShowErrorScreen>d__);
 	}
 
-	// Token: 0x0600445F RID: 17503 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x0600445F RID: 17503 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;

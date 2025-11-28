@@ -6,7 +6,7 @@ using UnityEngine;
 public struct AnimHashId
 {
 	// Token: 0x17000727 RID: 1831
-	// (get) Token: 0x06004C59 RID: 19545 RVA: 0x0018D2D5 File Offset: 0x0018B4D5
+	// (get) Token: 0x06004C59 RID: 19545 RVA: 0x0018D2B5 File Offset: 0x0018B4B5
 	public string text
 	{
 		get
@@ -16,7 +16,7 @@ public struct AnimHashId
 	}
 
 	// Token: 0x17000728 RID: 1832
-	// (get) Token: 0x06004C5A RID: 19546 RVA: 0x0018D2DD File Offset: 0x0018B4DD
+	// (get) Token: 0x06004C5A RID: 19546 RVA: 0x0018D2BD File Offset: 0x0018B4BD
 	public int hash
 	{
 		get
@@ -25,32 +25,32 @@ public struct AnimHashId
 		}
 	}
 
-	// Token: 0x06004C5B RID: 19547 RVA: 0x0018D2E5 File Offset: 0x0018B4E5
+	// Token: 0x06004C5B RID: 19547 RVA: 0x0018D2C5 File Offset: 0x0018B4C5
 	public AnimHashId(string text)
 	{
 		this._text = text;
 		this._hash = Animator.StringToHash(text);
 	}
 
-	// Token: 0x06004C5C RID: 19548 RVA: 0x0018D2D5 File Offset: 0x0018B4D5
+	// Token: 0x06004C5C RID: 19548 RVA: 0x0018D2B5 File Offset: 0x0018B4B5
 	public override string ToString()
 	{
 		return this._text;
 	}
 
-	// Token: 0x06004C5D RID: 19549 RVA: 0x0018D2DD File Offset: 0x0018B4DD
+	// Token: 0x06004C5D RID: 19549 RVA: 0x0018D2BD File Offset: 0x0018B4BD
 	public override int GetHashCode()
 	{
 		return this._hash;
 	}
 
-	// Token: 0x06004C5E RID: 19550 RVA: 0x0018D2DD File Offset: 0x0018B4DD
+	// Token: 0x06004C5E RID: 19550 RVA: 0x0018D2BD File Offset: 0x0018B4BD
 	public static implicit operator int(AnimHashId h)
 	{
 		return h._hash;
 	}
 
-	// Token: 0x06004C5F RID: 19551 RVA: 0x0018D2FA File Offset: 0x0018B4FA
+	// Token: 0x06004C5F RID: 19551 RVA: 0x0018D2DA File Offset: 0x0018B4DA
 	public static implicit operator AnimHashId(string s)
 	{
 		return new AnimHashId(s);

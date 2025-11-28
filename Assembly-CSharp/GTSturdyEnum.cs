@@ -7,11 +7,11 @@ using UnityEngine;
 public struct GTSturdyEnum<TEnum> : ISerializationCallbackReceiver where TEnum : struct, Enum
 {
 	// Token: 0x170005F5 RID: 1525
-	// (get) Token: 0x0600403E RID: 16446 RVA: 0x00158C29 File Offset: 0x00156E29
-	// (set) Token: 0x0600403F RID: 16447 RVA: 0x00158C31 File Offset: 0x00156E31
+	// (get) Token: 0x0600403E RID: 16446 RVA: 0x00158C09 File Offset: 0x00156E09
+	// (set) Token: 0x0600403F RID: 16447 RVA: 0x00158C11 File Offset: 0x00156E11
 	public TEnum Value { readonly get; private set; }
 
-	// Token: 0x06004040 RID: 16448 RVA: 0x00158C3C File Offset: 0x00156E3C
+	// Token: 0x06004040 RID: 16448 RVA: 0x00158C1C File Offset: 0x00156E1C
 	public static implicit operator GTSturdyEnum<TEnum>(TEnum value)
 	{
 		return new GTSturdyEnum<TEnum>
@@ -20,13 +20,13 @@ public struct GTSturdyEnum<TEnum> : ISerializationCallbackReceiver where TEnum :
 		};
 	}
 
-	// Token: 0x06004041 RID: 16449 RVA: 0x00158C5A File Offset: 0x00156E5A
+	// Token: 0x06004041 RID: 16449 RVA: 0x00158C3A File Offset: 0x00156E3A
 	public static implicit operator TEnum(GTSturdyEnum<TEnum> sturdyEnum)
 	{
 		return sturdyEnum.Value;
 	}
 
-	// Token: 0x06004042 RID: 16450 RVA: 0x00158C64 File Offset: 0x00156E64
+	// Token: 0x06004042 RID: 16450 RVA: 0x00158C44 File Offset: 0x00156E44
 	public void OnBeforeSerialize()
 	{
 		EnumData<TEnum> shared = EnumData<TEnum>.Shared;
@@ -72,7 +72,7 @@ public struct GTSturdyEnum<TEnum> : ISerializationCallbackReceiver where TEnum :
 		this.m_stringValuePairs = list.ToArray();
 	}
 
-	// Token: 0x06004043 RID: 16451 RVA: 0x00158DAC File Offset: 0x00156FAC
+	// Token: 0x06004043 RID: 16451 RVA: 0x00158D8C File Offset: 0x00156F8C
 	public void OnAfterDeserialize()
 	{
 		EnumData<TEnum> shared = EnumData<TEnum>.Shared;

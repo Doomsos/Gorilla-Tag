@@ -35,7 +35,7 @@ namespace GorillaTag.Shared.Scripts.Utilities
 			}
 		}
 
-		// Token: 0x06006932 RID: 26930 RVA: 0x002238FC File Offset: 0x00221AFC
+		// Token: 0x06006932 RID: 26930 RVA: 0x002238DC File Offset: 0x00221ADC
 		public GTBitArray(int length)
 		{
 			this.Length = length;
@@ -46,7 +46,7 @@ namespace GorillaTag.Shared.Scripts.Utilities
 			}
 		}
 
-		// Token: 0x06006933 RID: 26931 RVA: 0x00223954 File Offset: 0x00221B54
+		// Token: 0x06006933 RID: 26931 RVA: 0x00223934 File Offset: 0x00221B34
 		public void Clear()
 		{
 			for (int i = 0; i < this._data.Length; i++)
@@ -55,7 +55,7 @@ namespace GorillaTag.Shared.Scripts.Utilities
 			}
 		}
 
-		// Token: 0x06006934 RID: 26932 RVA: 0x00223980 File Offset: 0x00221B80
+		// Token: 0x06006934 RID: 26932 RVA: 0x00223960 File Offset: 0x00221B60
 		public void CopyFrom(GTBitArray other)
 		{
 			if (this.Length != other.Length)

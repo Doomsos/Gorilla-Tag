@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200068A RID: 1674
 public class GRBay : MonoBehaviour
 {
-	// Token: 0x06002ACB RID: 10955 RVA: 0x000E63C6 File Offset: 0x000E45C6
+	// Token: 0x06002ACB RID: 10955 RVA: 0x000E63A6 File Offset: 0x000E45A6
 	private void Awake()
 	{
 		if (this.playerName != null)
@@ -19,7 +19,7 @@ public class GRBay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002ACC RID: 10956 RVA: 0x000E63FC File Offset: 0x000E45FC
+	// Token: 0x06002ACC RID: 10956 RVA: 0x000E63DC File Offset: 0x000E45DC
 	public void Setup(GhostReactor reactor)
 	{
 		this.reactor = reactor;
@@ -34,7 +34,7 @@ public class GRBay : MonoBehaviour
 		this.Refresh();
 	}
 
-	// Token: 0x06002ACD RID: 10957 RVA: 0x000E6468 File Offset: 0x000E4668
+	// Token: 0x06002ACD RID: 10957 RVA: 0x000E6448 File Offset: 0x000E4648
 	public void SetOpen(bool open)
 	{
 		if (this.hideWhenOpen != null)
@@ -103,7 +103,7 @@ public class GRBay : MonoBehaviour
 		this.isOpen = open;
 	}
 
-	// Token: 0x06002ACE RID: 10958 RVA: 0x000E65FC File Offset: 0x000E47FC
+	// Token: 0x06002ACE RID: 10958 RVA: 0x000E65DC File Offset: 0x000E47DC
 	public void Refresh()
 	{
 		bool open = true;

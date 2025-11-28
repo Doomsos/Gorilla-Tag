@@ -9,14 +9,14 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001117 RID: 4375
 	public class SnakeInCanHoldable : TransferrableObject
 	{
-		// Token: 0x06006D86 RID: 28038 RVA: 0x0023F766 File Offset: 0x0023D966
+		// Token: 0x06006D86 RID: 28038 RVA: 0x0023F746 File Offset: 0x0023D946
 		protected override void Awake()
 		{
 			base.Awake();
 			this.topRigPosition = this.topRigObject.transform.position;
 		}
 
-		// Token: 0x06006D87 RID: 28039 RVA: 0x0023F784 File Offset: 0x0023D984
+		// Token: 0x06006D87 RID: 28039 RVA: 0x0023F764 File Offset: 0x0023D964
 		internal override void OnEnable()
 		{
 			base.OnEnable();
@@ -40,7 +40,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D88 RID: 28040 RVA: 0x0023F87C File Offset: 0x0023DA7C
+		// Token: 0x06006D88 RID: 28040 RVA: 0x0023F85C File Offset: 0x0023DA5C
 		internal override void OnDisable()
 		{
 			base.OnDisable();
@@ -52,7 +52,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D89 RID: 28041 RVA: 0x0023F8D4 File Offset: 0x0023DAD4
+		// Token: 0x06006D89 RID: 28041 RVA: 0x0023F8B4 File Offset: 0x0023DAB4
 		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 		{
 			if (!base.OnRelease(zoneReleased, releasingHand))
@@ -74,7 +74,7 @@ namespace GorillaTag.Cosmetics
 			return true;
 		}
 
-		// Token: 0x06006D8A RID: 28042 RVA: 0x0023F95C File Offset: 0x0023DB5C
+		// Token: 0x06006D8A RID: 28042 RVA: 0x0023F93C File Offset: 0x0023DB3C
 		private void OnEnableObject(int sender, int target, object[] arg, PhotonMessageInfoWrapped info)
 		{
 			if (info.senderID != this.ownerRig.creator.ActorNumber)
@@ -98,7 +98,7 @@ namespace GorillaTag.Cosmetics
 			this.EnableObjectLocal(enable);
 		}
 
-		// Token: 0x06006D8B RID: 28043 RVA: 0x0023F9C8 File Offset: 0x0023DBC8
+		// Token: 0x06006D8B RID: 28043 RVA: 0x0023F9A8 File Offset: 0x0023DBA8
 		private void EnableObjectLocal(bool enable)
 		{
 			this.disableObjectBeforeTrigger.SetActive(enable);
@@ -118,7 +118,7 @@ namespace GorillaTag.Cosmetics
 			this.topRigObject.transform.position = this.topRigPosition;
 		}
 
-		// Token: 0x06006D8C RID: 28044 RVA: 0x0023FA40 File Offset: 0x0023DC40
+		// Token: 0x06006D8C RID: 28044 RVA: 0x0023FA20 File Offset: 0x0023DC20
 		private IEnumerator SmoothTransition()
 		{
 			while (Vector3.Distance(this.topRigObject.transform.position, this.stretchedPoint.position) > 0.01f)
@@ -130,7 +130,7 @@ namespace GorillaTag.Cosmetics
 			yield break;
 		}
 
-		// Token: 0x06006D8D RID: 28045 RVA: 0x0023FA4F File Offset: 0x0023DC4F
+		// Token: 0x06006D8D RID: 28045 RVA: 0x0023FA2F File Offset: 0x0023DC2F
 		public void OnButtonPressed()
 		{
 			this.EnableObjectLocal(true);

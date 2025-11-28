@@ -6,7 +6,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DC8 RID: 3528
 	public struct BuilderGridPlaneData
 	{
-		// Token: 0x0600578C RID: 22412 RVA: 0x001BE384 File Offset: 0x001BC584
+		// Token: 0x0600578C RID: 22412 RVA: 0x001BE364 File Offset: 0x001BC564
 		public BuilderGridPlaneData(BuilderAttachGridPlane gridPlane, int pieceIndex)
 		{
 			gridPlane.center.transform.GetPositionAndRotation(ref this.position, ref this.rotation);

@@ -9,13 +9,13 @@ namespace GorillaTagScripts.Builder
 	[RequireComponent(typeof(GorillaSurfaceOverride))]
 	public class BuilderPieceTappable : MonoBehaviour, IBuilderPieceComponent, IBuilderPieceFunctional, IBuilderTappable
 	{
-		// Token: 0x06005B92 RID: 23442 RVA: 0x001D6752 File Offset: 0x001D4952
+		// Token: 0x06005B92 RID: 23442 RVA: 0x001D6732 File Offset: 0x001D4932
 		public virtual bool CanTap()
 		{
 			return this.isPieceActive && Time.time > this.lastTapTime + this.tapCooldown;
 		}
 
-		// Token: 0x06005B93 RID: 23443 RVA: 0x001D6772 File Offset: 0x001D4972
+		// Token: 0x06005B93 RID: 23443 RVA: 0x001D6752 File Offset: 0x001D4952
 		public void OnTapLocal(float tapStrength)
 		{
 			if (!NetworkSystem.Instance.InRoom)
@@ -29,7 +29,7 @@ namespace GorillaTagScripts.Builder
 			this.myPiece.GetTable().builderNetworking.RequestFunctionalPieceStateChange(this.myPiece.pieceId, 1);
 		}
 
-		// Token: 0x06005B94 RID: 23444 RVA: 0x001D67AB File Offset: 0x001D49AB
+		// Token: 0x06005B94 RID: 23444 RVA: 0x001D678B File Offset: 0x001D498B
 		public virtual void OnTapReplicated()
 		{
 			UnityEvent onTapped = this.OnTapped;
@@ -40,7 +40,7 @@ namespace GorillaTagScripts.Builder
 			onTapped.Invoke();
 		}
 
-		// Token: 0x06005B95 RID: 23445 RVA: 0x001D67BD File Offset: 0x001D49BD
+		// Token: 0x06005B95 RID: 23445 RVA: 0x001D679D File Offset: 0x001D499D
 		public void OnPieceCreate(int pieceType, int pieceId)
 		{
 			this.currentState = BuilderPieceTappable.FunctionalState.Idle;
@@ -56,13 +56,13 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005B98 RID: 23448 RVA: 0x001D67C6 File Offset: 0x001D49C6
+		// Token: 0x06005B98 RID: 23448 RVA: 0x001D67A6 File Offset: 0x001D49A6
 		public void OnPieceActivate()
 		{
 			this.isPieceActive = true;
 		}
 
-		// Token: 0x06005B99 RID: 23449 RVA: 0x001D67D0 File Offset: 0x001D49D0
+		// Token: 0x06005B99 RID: 23449 RVA: 0x001D67B0 File Offset: 0x001D49B0
 		public void OnPieceDeactivate()
 		{
 			this.isPieceActive = false;
@@ -73,7 +73,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B9A RID: 23450 RVA: 0x001D6820 File Offset: 0x001D4A20
+		// Token: 0x06005B9A RID: 23450 RVA: 0x001D6800 File Offset: 0x001D4A00
 		public void OnStateChanged(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!this.IsStateValid(newState))
@@ -89,7 +89,7 @@ namespace GorillaTagScripts.Builder
 			this.currentState = (BuilderPieceTappable.FunctionalState)newState;
 		}
 
-		// Token: 0x06005B9B RID: 23451 RVA: 0x001D6870 File Offset: 0x001D4A70
+		// Token: 0x06005B9B RID: 23451 RVA: 0x001D6850 File Offset: 0x001D4A50
 		public void OnStateRequest(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!NetworkSystem.Instance.IsMasterClient)
@@ -106,13 +106,13 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B9C RID: 23452 RVA: 0x001D68CB File Offset: 0x001D4ACB
+		// Token: 0x06005B9C RID: 23452 RVA: 0x001D68AB File Offset: 0x001D4AAB
 		public bool IsStateValid(byte state)
 		{
 			return state <= 1;
 		}
 
-		// Token: 0x06005B9D RID: 23453 RVA: 0x001D68D4 File Offset: 0x001D4AD4
+		// Token: 0x06005B9D RID: 23453 RVA: 0x001D68B4 File Offset: 0x001D4AB4
 		public void FunctionalPieceUpdate()
 		{
 			if (this.lastTapTime + this.tapCooldown < Time.time)

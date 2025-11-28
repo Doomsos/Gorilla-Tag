@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public class RandomAnimationSelector : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x0600204C RID: 8268 RVA: 0x000AB588 File Offset: 0x000A9788
+	// Token: 0x0600204C RID: 8268 RVA: 0x000AB568 File Offset: 0x000A9768
 	private void Awake()
 	{
 		this.animator = base.GetComponent<Animator>();
@@ -13,7 +13,7 @@ public class RandomAnimationSelector : MonoBehaviour, IGorillaSliceableSimple
 		this.animationSelect = Animator.StringToHash(this.animationSelectName);
 	}
 
-	// Token: 0x0600204D RID: 8269 RVA: 0x000AB5B8 File Offset: 0x000A97B8
+	// Token: 0x0600204D RID: 8269 RVA: 0x000AB598 File Offset: 0x000A9798
 	public void OnEnable()
 	{
 		if (this.animator != null)
@@ -29,7 +29,7 @@ public class RandomAnimationSelector : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x0600204F RID: 8271 RVA: 0x000AB5DC File Offset: 0x000A97DC
+	// Token: 0x0600204F RID: 8271 RVA: 0x000AB5BC File Offset: 0x000A97BC
 	public void SliceUpdate()
 	{
 		float num = Time.time - this.lastSliceUpdateTime;

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000C16 RID: 3094
 public class KinematicTestMotion : MonoBehaviour
 {
-	// Token: 0x06004C3A RID: 19514 RVA: 0x0018CF4A File Offset: 0x0018B14A
+	// Token: 0x06004C3A RID: 19514 RVA: 0x0018CF2A File Offset: 0x0018B12A
 	private void FixedUpdate()
 	{
 		if (this.updateType != KinematicTestMotion.UpdateType.FixedUpdate)
@@ -14,7 +14,7 @@ public class KinematicTestMotion : MonoBehaviour
 		this.UpdatePosition(Time.time);
 	}
 
-	// Token: 0x06004C3B RID: 19515 RVA: 0x0018CF61 File Offset: 0x0018B161
+	// Token: 0x06004C3B RID: 19515 RVA: 0x0018CF41 File Offset: 0x0018B141
 	private void Update()
 	{
 		if (this.updateType != KinematicTestMotion.UpdateType.Update)
@@ -24,7 +24,7 @@ public class KinematicTestMotion : MonoBehaviour
 		this.UpdatePosition(Time.time);
 	}
 
-	// Token: 0x06004C3C RID: 19516 RVA: 0x0018CF77 File Offset: 0x0018B177
+	// Token: 0x06004C3C RID: 19516 RVA: 0x0018CF57 File Offset: 0x0018B157
 	private void LateUpdate()
 	{
 		if (this.updateType != KinematicTestMotion.UpdateType.LateUpdate)
@@ -34,7 +34,7 @@ public class KinematicTestMotion : MonoBehaviour
 		this.UpdatePosition(Time.time);
 	}
 
-	// Token: 0x06004C3D RID: 19517 RVA: 0x0018CF90 File Offset: 0x0018B190
+	// Token: 0x06004C3D RID: 19517 RVA: 0x0018CF70 File Offset: 0x0018B170
 	private void UpdatePosition(float time)
 	{
 		float num = Mathf.Sin(time * 2f * 3.1415927f * this.period) * 0.5f + 0.5f;

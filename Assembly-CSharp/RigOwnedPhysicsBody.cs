@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000BC9 RID: 3017
 public class RigOwnedPhysicsBody : MonoBehaviour
 {
-	// Token: 0x06004ACA RID: 19146 RVA: 0x001876C0 File Offset: 0x001858C0
+	// Token: 0x06004ACA RID: 19146 RVA: 0x001876A0 File Offset: 0x001858A0
 	private void Awake()
 	{
 		this.hasTransformView = (this.transformView != null);
@@ -29,7 +29,7 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004ACB RID: 19147 RVA: 0x00187750 File Offset: 0x00185950
+	// Token: 0x06004ACB RID: 19147 RVA: 0x00187730 File Offset: 0x00185930
 	private void OnEnable()
 	{
 		if (!base.gameObject.activeInHierarchy)
@@ -62,7 +62,7 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 		this.OnNetDisconnect();
 	}
 
-	// Token: 0x06004ACC RID: 19148 RVA: 0x00187828 File Offset: 0x00185A28
+	// Token: 0x06004ACC RID: 19148 RVA: 0x00187808 File Offset: 0x00185A08
 	private void OnDisable()
 	{
 		NetworkSystem.Instance.OnJoinedRoomEvent -= new Action(this.OnNetConnect);
@@ -81,7 +81,7 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 		this.OnNetDisconnect();
 	}
 
-	// Token: 0x06004ACD RID: 19149 RVA: 0x001878BC File Offset: 0x00185ABC
+	// Token: 0x06004ACD RID: 19149 RVA: 0x0018789C File Offset: 0x00185A9C
 	private void OnNetConnect()
 	{
 		if (this.hasTransformView)
@@ -128,7 +128,7 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004ACE RID: 19150 RVA: 0x001879D4 File Offset: 0x00185BD4
+	// Token: 0x06004ACE RID: 19150 RVA: 0x001879B4 File Offset: 0x00185BB4
 	private void OnNetDisconnect()
 	{
 		if (ApplicationQuittingState.IsQuitting)

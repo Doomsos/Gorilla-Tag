@@ -7,7 +7,7 @@ using UnityEngine.Events;
 public class SizeChanger : GorillaTriggerBox
 {
 	// Token: 0x170004F0 RID: 1264
-	// (get) Token: 0x060036EA RID: 14058 RVA: 0x00128A24 File Offset: 0x00126C24
+	// (get) Token: 0x060036EA RID: 14058 RVA: 0x00128A04 File Offset: 0x00126C04
 	public int SizeLayerMask
 	{
 		get
@@ -34,7 +34,7 @@ public class SizeChanger : GorillaTriggerBox
 	}
 
 	// Token: 0x170004F1 RID: 1265
-	// (get) Token: 0x060036EB RID: 14059 RVA: 0x00128A64 File Offset: 0x00126C64
+	// (get) Token: 0x060036EB RID: 14059 RVA: 0x00128A44 File Offset: 0x00126C44
 	public SizeChanger.ChangerType MyType
 	{
 		get
@@ -44,7 +44,7 @@ public class SizeChanger : GorillaTriggerBox
 	}
 
 	// Token: 0x170004F2 RID: 1266
-	// (get) Token: 0x060036EC RID: 14060 RVA: 0x00128A6C File Offset: 0x00126C6C
+	// (get) Token: 0x060036EC RID: 14060 RVA: 0x00128A4C File Offset: 0x00126C4C
 	public float MaxScale
 	{
 		get
@@ -54,7 +54,7 @@ public class SizeChanger : GorillaTriggerBox
 	}
 
 	// Token: 0x170004F3 RID: 1267
-	// (get) Token: 0x060036ED RID: 14061 RVA: 0x00128A74 File Offset: 0x00126C74
+	// (get) Token: 0x060036ED RID: 14061 RVA: 0x00128A54 File Offset: 0x00126C54
 	public float MinScale
 	{
 		get
@@ -64,7 +64,7 @@ public class SizeChanger : GorillaTriggerBox
 	}
 
 	// Token: 0x170004F4 RID: 1268
-	// (get) Token: 0x060036EE RID: 14062 RVA: 0x00128A7C File Offset: 0x00126C7C
+	// (get) Token: 0x060036EE RID: 14062 RVA: 0x00128A5C File Offset: 0x00126C5C
 	public Transform StartPos
 	{
 		get
@@ -74,7 +74,7 @@ public class SizeChanger : GorillaTriggerBox
 	}
 
 	// Token: 0x170004F5 RID: 1269
-	// (get) Token: 0x060036EF RID: 14063 RVA: 0x00128A84 File Offset: 0x00126C84
+	// (get) Token: 0x060036EF RID: 14063 RVA: 0x00128A64 File Offset: 0x00126C64
 	public Transform EndPos
 	{
 		get
@@ -84,7 +84,7 @@ public class SizeChanger : GorillaTriggerBox
 	}
 
 	// Token: 0x170004F6 RID: 1270
-	// (get) Token: 0x060036F0 RID: 14064 RVA: 0x00128A8C File Offset: 0x00126C8C
+	// (get) Token: 0x060036F0 RID: 14064 RVA: 0x00128A6C File Offset: 0x00126C6C
 	public float StaticEasing
 	{
 		get
@@ -93,14 +93,14 @@ public class SizeChanger : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x060036F1 RID: 14065 RVA: 0x00128A94 File Offset: 0x00126C94
+	// Token: 0x060036F1 RID: 14065 RVA: 0x00128A74 File Offset: 0x00126C74
 	private void Awake()
 	{
 		this.minScale = Mathf.Max(this.minScale, 0.01f);
 		this.myCollider = base.GetComponent<Collider>();
 	}
 
-	// Token: 0x060036F2 RID: 14066 RVA: 0x00128AB8 File Offset: 0x00126CB8
+	// Token: 0x060036F2 RID: 14066 RVA: 0x00128A98 File Offset: 0x00126C98
 	public void OnEnable()
 	{
 		if (this.enterTrigger)
@@ -117,7 +117,7 @@ public class SizeChanger : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x060036F3 RID: 14067 RVA: 0x00128B34 File Offset: 0x00126D34
+	// Token: 0x060036F3 RID: 14067 RVA: 0x00128B14 File Offset: 0x00126D14
 	public void OnDisable()
 	{
 		if (this.enterTrigger)
@@ -134,7 +134,7 @@ public class SizeChanger : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x060036F4 RID: 14068 RVA: 0x00128BAD File Offset: 0x00126DAD
+	// Token: 0x060036F4 RID: 14068 RVA: 0x00128B8D File Offset: 0x00126D8D
 	public void AddEnterTrigger(SizeChangerTrigger trigger)
 	{
 		if (trigger)
@@ -143,7 +143,7 @@ public class SizeChanger : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x060036F5 RID: 14069 RVA: 0x00128BC9 File Offset: 0x00126DC9
+	// Token: 0x060036F5 RID: 14069 RVA: 0x00128BA9 File Offset: 0x00126DA9
 	public void RemoveEnterTrigger(SizeChangerTrigger trigger)
 	{
 		if (trigger)
@@ -152,7 +152,7 @@ public class SizeChanger : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x060036F6 RID: 14070 RVA: 0x00128BE5 File Offset: 0x00126DE5
+	// Token: 0x060036F6 RID: 14070 RVA: 0x00128BC5 File Offset: 0x00126DC5
 	public void AddExitOnEnterTrigger(SizeChangerTrigger trigger)
 	{
 		if (trigger)
@@ -161,7 +161,7 @@ public class SizeChanger : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x060036F7 RID: 14071 RVA: 0x00128C01 File Offset: 0x00126E01
+	// Token: 0x060036F7 RID: 14071 RVA: 0x00128BE1 File Offset: 0x00126DE1
 	public void RemoveExitOnEnterTrigger(SizeChangerTrigger trigger)
 	{
 		if (trigger)
@@ -170,7 +170,7 @@ public class SizeChanger : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x060036F8 RID: 14072 RVA: 0x00128C20 File Offset: 0x00126E20
+	// Token: 0x060036F8 RID: 14072 RVA: 0x00128C00 File Offset: 0x00126E00
 	public void OnTriggerEnter(Collider other)
 	{
 		if (!other.GetComponent<SphereCollider>())
@@ -185,7 +185,7 @@ public class SizeChanger : GorillaTriggerBox
 		this.acceptRig(component);
 	}
 
-	// Token: 0x060036F9 RID: 14073 RVA: 0x00128C5D File Offset: 0x00126E5D
+	// Token: 0x060036F9 RID: 14073 RVA: 0x00128C3D File Offset: 0x00126E3D
 	public void acceptRig(VRRig rig)
 	{
 		if (!rig.sizeManager.touchingChangers.Contains(this))
@@ -200,7 +200,7 @@ public class SizeChanger : GorillaTriggerBox
 		onEnter.Invoke();
 	}
 
-	// Token: 0x060036FA RID: 14074 RVA: 0x00128C94 File Offset: 0x00126E94
+	// Token: 0x060036FA RID: 14074 RVA: 0x00128C74 File Offset: 0x00126E74
 	public void OnTriggerExit(Collider other)
 	{
 		if (!other.GetComponent<SphereCollider>())
@@ -215,7 +215,7 @@ public class SizeChanger : GorillaTriggerBox
 		this.unacceptRig(component);
 	}
 
-	// Token: 0x060036FB RID: 14075 RVA: 0x00128CD1 File Offset: 0x00126ED1
+	// Token: 0x060036FB RID: 14075 RVA: 0x00128CB1 File Offset: 0x00126EB1
 	public void unacceptRig(VRRig rig)
 	{
 		rig.sizeManager.touchingChangers.Remove(this);
@@ -227,7 +227,7 @@ public class SizeChanger : GorillaTriggerBox
 		onExit.Invoke();
 	}
 
-	// Token: 0x060036FC RID: 14076 RVA: 0x00128CF8 File Offset: 0x00126EF8
+	// Token: 0x060036FC RID: 14076 RVA: 0x00128CD8 File Offset: 0x00126ED8
 	public Vector3 ClosestPoint(Vector3 position)
 	{
 		if (this.enterTrigger && this.exitTrigger)
@@ -250,13 +250,13 @@ public class SizeChanger : GorillaTriggerBox
 		}
 	}
 
-	// Token: 0x060036FD RID: 14077 RVA: 0x00128D68 File Offset: 0x00126F68
+	// Token: 0x060036FD RID: 14077 RVA: 0x00128D48 File Offset: 0x00126F48
 	public void SetScaleCenterPoint(Transform centerPoint)
 	{
 		this.scaleAwayFromPoint = centerPoint;
 	}
 
-	// Token: 0x060036FE RID: 14078 RVA: 0x00128D71 File Offset: 0x00126F71
+	// Token: 0x060036FE RID: 14078 RVA: 0x00128D51 File Offset: 0x00126F51
 	public bool TryGetScaleCenterPoint(out Vector3 centerPoint)
 	{
 		if (this.scaleAwayFromPoint != null)

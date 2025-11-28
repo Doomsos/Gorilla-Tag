@@ -5,7 +5,7 @@ using UnityEngine.XR;
 // Token: 0x020005FE RID: 1534
 public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 {
-	// Token: 0x060026BB RID: 9915 RVA: 0x000CDED4 File Offset: 0x000CC0D4
+	// Token: 0x060026BB RID: 9915 RVA: 0x000CDEB4 File Offset: 0x000CC0B4
 	public bool CheckInput(XRNode xrNode, float sensitivity = 0.25f)
 	{
 		switch (this.inputButton)
@@ -25,7 +25,7 @@ public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 		}
 	}
 
-	// Token: 0x060026BC RID: 9916 RVA: 0x000CDF34 File Offset: 0x000CC134
+	// Token: 0x060026BC RID: 9916 RVA: 0x000CDF14 File Offset: 0x000CC114
 	public bool CheckInput(bool checkHeld = true, bool checkSnapped = true, float sensitivity = 0.25f, bool checkHeldActivatable = true, bool checkTriggerInteractable = true)
 	{
 		int num = -1;
@@ -71,7 +71,7 @@ public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 		return this.CheckInput(xrNode, sensitivity);
 	}
 
-	// Token: 0x060026BD RID: 9917 RVA: 0x000CE06C File Offset: 0x000CC26C
+	// Token: 0x060026BD RID: 9917 RVA: 0x000CE04C File Offset: 0x000CC24C
 	private float GetFloatInput(XRNode xrNode, float sensitivity = 0.25f)
 	{
 		float num;
@@ -104,7 +104,7 @@ public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 		return num2;
 	}
 
-	// Token: 0x060026BE RID: 9918 RVA: 0x000CE0EC File Offset: 0x000CC2EC
+	// Token: 0x060026BE RID: 9918 RVA: 0x000CE0CC File Offset: 0x000CC2CC
 	public float GetFloatInput(bool checkHeld = true, bool checkSnapped = true, float sensitivity = 0.25f, bool checkHeldActivatable = true)
 	{
 		int num = -1;
@@ -135,7 +135,7 @@ public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 		return this.GetFloatInput(xrNode, sensitivity);
 	}
 
-	// Token: 0x060026BF RID: 9919 RVA: 0x000CE1B9 File Offset: 0x000CC3B9
+	// Token: 0x060026BF RID: 9919 RVA: 0x000CE199 File Offset: 0x000CC399
 	protected bool IsEquippedLocal()
 	{
 		return this.gameEntity.IsHeldByLocalPlayer() || this.gameEntity.IsSnappedByLocalPlayer();

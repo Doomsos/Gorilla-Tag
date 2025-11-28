@@ -9,8 +9,8 @@ namespace Fusion.CodeGen
 	internal class UnityValueSurrogate@ElementReaderWriterInt32 : UnityValueSurrogate<int, ElementReaderWriterInt32>
 	{
 		// Token: 0x17000ABD RID: 2749
-		// (get) Token: 0x060072FE RID: 29438 RVA: 0x0025A9A9 File Offset: 0x00258BA9
-		// (set) Token: 0x060072FF RID: 29439 RVA: 0x0025A9B1 File Offset: 0x00258BB1
+		// (get) Token: 0x060072FE RID: 29438 RVA: 0x0025A989 File Offset: 0x00258B89
+		// (set) Token: 0x060072FF RID: 29439 RVA: 0x0025A991 File Offset: 0x00258B91
 		[WeaverGenerated]
 		public override int DataProperty
 		{
@@ -26,7 +26,7 @@ namespace Fusion.CodeGen
 			}
 		}
 
-		// Token: 0x06007300 RID: 29440 RVA: 0x0025A9BA File Offset: 0x00258BBA
+		// Token: 0x06007300 RID: 29440 RVA: 0x0025A99A File Offset: 0x00258B9A
 		[WeaverGenerated]
 		public UnityValueSurrogate@ElementReaderWriterInt32()
 		{

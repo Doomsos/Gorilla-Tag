@@ -14,14 +14,14 @@ public class GRDebugGodmodeButton : GorillaPressableReleaseButton
 	{
 	}
 
-	// Token: 0x06002B07 RID: 11015 RVA: 0x000E7683 File Offset: 0x000E5883
+	// Token: 0x06002B07 RID: 11015 RVA: 0x000E7663 File Offset: 0x000E5863
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();
 		this.UpdateColor();
 	}
 
-	// Token: 0x06002B08 RID: 11016 RVA: 0x000E7691 File Offset: 0x000E5891
+	// Token: 0x06002B08 RID: 11016 RVA: 0x000E7671 File Offset: 0x000E5871
 	public override void ButtonDeactivation()
 	{
 		base.ButtonDeactivation();

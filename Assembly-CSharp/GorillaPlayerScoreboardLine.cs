@@ -10,7 +10,7 @@ using UnityEngine.UI;
 // Token: 0x0200091B RID: 2331
 public class GorillaPlayerScoreboardLine : MonoBehaviour
 {
-	// Token: 0x06003B82 RID: 15234 RVA: 0x0013A382 File Offset: 0x00138582
+	// Token: 0x06003B82 RID: 15234 RVA: 0x0013A362 File Offset: 0x00138562
 	public void Start()
 	{
 		this.emptyRigCount = 0;
@@ -19,7 +19,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		this.reportedToxicity = false;
 	}
 
-	// Token: 0x06003B83 RID: 15235 RVA: 0x0013A3A0 File Offset: 0x001385A0
+	// Token: 0x06003B83 RID: 15235 RVA: 0x0013A380 File Offset: 0x00138580
 	public void InitializeLine()
 	{
 		this.currentNickname = string.Empty;
@@ -66,7 +66,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B84 RID: 15236 RVA: 0x0013A59C File Offset: 0x0013879C
+	// Token: 0x06003B84 RID: 15236 RVA: 0x0013A57C File Offset: 0x0013877C
 	public void SetLineData(NetPlayer netPlayer)
 	{
 		if (!netPlayer.InRoom || netPlayer == this.linePlayer)
@@ -89,7 +89,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		this.InitializeLine();
 	}
 
-	// Token: 0x06003B85 RID: 15237 RVA: 0x0013A624 File Offset: 0x00138824
+	// Token: 0x06003B85 RID: 15237 RVA: 0x0013A604 File Offset: 0x00138804
 	public void UpdateLine()
 	{
 		if (this.linePlayer != null)
@@ -180,7 +180,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B86 RID: 15238 RVA: 0x0013A91C File Offset: 0x00138B1C
+	// Token: 0x06003B86 RID: 15238 RVA: 0x0013A8FC File Offset: 0x00138AFC
 	private void UpdatePlayerText()
 	{
 		try
@@ -209,7 +209,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B87 RID: 15239 RVA: 0x0013AA94 File Offset: 0x00138C94
+	// Token: 0x06003B87 RID: 15239 RVA: 0x0013AA74 File Offset: 0x00138C74
 	public void PressButton(bool isOn, GorillaPlayerLineButton.ButtonType buttonType)
 	{
 		if (buttonType != GorillaPlayerLineButton.ButtonType.Mute)
@@ -239,7 +239,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B88 RID: 15240 RVA: 0x0013AB6C File Offset: 0x00138D6C
+	// Token: 0x06003B88 RID: 15240 RVA: 0x0013AB4C File Offset: 0x00138D4C
 	public void SetReportState(bool reportState, GorillaPlayerLineButton.ButtonType buttonType)
 	{
 		this.canPressNextReportButton = (buttonType != GorillaPlayerLineButton.ButtonType.Toxicity && buttonType != GorillaPlayerLineButton.ButtonType.Report);
@@ -272,7 +272,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		this.parentScoreboard.RedrawPlayerLines();
 	}
 
-	// Token: 0x06003B89 RID: 15241 RVA: 0x0013AC78 File Offset: 0x00138E78
+	// Token: 0x06003B89 RID: 15241 RVA: 0x0013AC58 File Offset: 0x00138E58
 	public static void ReportPlayer(string PlayerID, GorillaPlayerLineButton.ButtonType buttonType, string OtherPlayerNickName)
 	{
 		if (OtherPlayerNickName.Length > 12)
@@ -298,7 +298,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		NetworkSystemRaiseEvent.RaiseEvent(code, data, options, true);
 	}
 
-	// Token: 0x06003B8A RID: 15242 RVA: 0x0013AD10 File Offset: 0x00138F10
+	// Token: 0x06003B8A RID: 15242 RVA: 0x0013ACF0 File Offset: 0x00138EF0
 	public static void MutePlayer(string PlayerID, string OtherPlayerNickName, int muting)
 	{
 		if (OtherPlayerNickName.Length > 12)
@@ -324,7 +324,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		NetworkSystemRaiseEvent.RaiseEvent(code, data, options, true);
 	}
 
-	// Token: 0x06003B8B RID: 15243 RVA: 0x0013ADA8 File Offset: 0x00138FA8
+	// Token: 0x06003B8B RID: 15243 RVA: 0x0013AD88 File Offset: 0x00138F88
 	public string NormalizeName(bool doIt, string text)
 	{
 		if (doIt)
@@ -349,7 +349,7 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		return text;
 	}
 
-	// Token: 0x06003B8C RID: 15244 RVA: 0x0013AE5F File Offset: 0x0013905F
+	// Token: 0x06003B8C RID: 15244 RVA: 0x0013AE3F File Offset: 0x0013903F
 	public void ResetData()
 	{
 		this.emptyRigCount = 0;
@@ -359,19 +359,19 @@ public class GorillaPlayerScoreboardLine : MonoBehaviour
 		this.currentNickname = string.Empty;
 	}
 
-	// Token: 0x06003B8D RID: 15245 RVA: 0x0013AE8C File Offset: 0x0013908C
+	// Token: 0x06003B8D RID: 15245 RVA: 0x0013AE6C File Offset: 0x0013906C
 	private void OnEnable()
 	{
 		GorillaScoreboardTotalUpdater.RegisterSL(this);
 	}
 
-	// Token: 0x06003B8E RID: 15246 RVA: 0x0013AE94 File Offset: 0x00139094
+	// Token: 0x06003B8E RID: 15246 RVA: 0x0013AE74 File Offset: 0x00139074
 	private void OnDisable()
 	{
 		GorillaScoreboardTotalUpdater.UnregisterSL(this);
 	}
 
-	// Token: 0x06003B8F RID: 15247 RVA: 0x0013AE9C File Offset: 0x0013909C
+	// Token: 0x06003B8F RID: 15247 RVA: 0x0013AE7C File Offset: 0x0013907C
 	private void SwapToReportState(bool reportInProgress)
 	{
 		this.reportButton.gameObject.SetActive(!reportInProgress);

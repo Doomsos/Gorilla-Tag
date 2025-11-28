@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000434 RID: 1076
 public class TransferrableObjectHoldablePart_Slide : TransferrableObjectHoldablePart
 {
-	// Token: 0x06001A62 RID: 6754 RVA: 0x0008C5F4 File Offset: 0x0008A7F4
+	// Token: 0x06001A62 RID: 6754 RVA: 0x0008C5D4 File Offset: 0x0008A7D4
 	protected override void UpdateHeld(VRRig rig, bool isHeldLeftHand)
 	{
 		int num = isHeldLeftHand ? 0 : 1;

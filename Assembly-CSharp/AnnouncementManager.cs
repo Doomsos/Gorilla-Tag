@@ -7,24 +7,24 @@ using UnityEngine;
 // Token: 0x02000A05 RID: 2565
 public class AnnouncementManager : MonoBehaviour
 {
-	// Token: 0x060041A0 RID: 16800 RVA: 0x0015CA0E File Offset: 0x0015AC0E
+	// Token: 0x060041A0 RID: 16800 RVA: 0x0015C9EE File Offset: 0x0015ABEE
 	public bool ShowAnnouncement()
 	{
 		return this._showAnnouncement;
 	}
 
 	// Token: 0x1700061A RID: 1562
-	// (get) Token: 0x060041A1 RID: 16801 RVA: 0x0015CA16 File Offset: 0x0015AC16
-	// (set) Token: 0x060041A2 RID: 16802 RVA: 0x0015CA1E File Offset: 0x0015AC1E
+	// (get) Token: 0x060041A1 RID: 16801 RVA: 0x0015C9F6 File Offset: 0x0015ABF6
+	// (set) Token: 0x060041A2 RID: 16802 RVA: 0x0015C9FE File Offset: 0x0015ABFE
 	public bool _completedSetup { get; private set; }
 
 	// Token: 0x1700061B RID: 1563
-	// (get) Token: 0x060041A3 RID: 16803 RVA: 0x0015CA27 File Offset: 0x0015AC27
-	// (set) Token: 0x060041A4 RID: 16804 RVA: 0x0015CA2F File Offset: 0x0015AC2F
+	// (get) Token: 0x060041A3 RID: 16803 RVA: 0x0015CA07 File Offset: 0x0015AC07
+	// (set) Token: 0x060041A4 RID: 16804 RVA: 0x0015CA0F File Offset: 0x0015AC0F
 	public bool _announcementActive { get; private set; }
 
 	// Token: 0x1700061C RID: 1564
-	// (get) Token: 0x060041A5 RID: 16805 RVA: 0x0015CA38 File Offset: 0x0015AC38
+	// (get) Token: 0x060041A5 RID: 16805 RVA: 0x0015CA18 File Offset: 0x0015AC18
 	public static AnnouncementManager Instance
 	{
 		get
@@ -38,7 +38,7 @@ public class AnnouncementManager : MonoBehaviour
 	}
 
 	// Token: 0x1700061D RID: 1565
-	// (get) Token: 0x060041A6 RID: 16806 RVA: 0x0015CA56 File Offset: 0x0015AC56
+	// (get) Token: 0x060041A6 RID: 16806 RVA: 0x0015CA36 File Offset: 0x0015AC36
 	private static string AnnouncementDPlayerPref
 	{
 		get
@@ -51,7 +51,7 @@ public class AnnouncementManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060041A7 RID: 16807 RVA: 0x0015CA84 File Offset: 0x0015AC84
+	// Token: 0x060041A7 RID: 16807 RVA: 0x0015CA64 File Offset: 0x0015AC64
 	private void Awake()
 	{
 		if (AnnouncementManager._instance != null)
@@ -66,7 +66,7 @@ public class AnnouncementManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060041A8 RID: 16808 RVA: 0x0015CABC File Offset: 0x0015ACBC
+	// Token: 0x060041A8 RID: 16808 RVA: 0x0015CA9C File Offset: 0x0015AC9C
 	private void Start()
 	{
 		if (this._announcementMessageBox == null)
@@ -78,7 +78,7 @@ public class AnnouncementManager : MonoBehaviour
 		PlayFabTitleDataCache.Instance.GetTitleData("AnnouncementData", new Action<string>(this.ConfigureAnnouncement), new Action<PlayFabError>(this.OnError), false);
 	}
 
-	// Token: 0x060041A9 RID: 16809 RVA: 0x0015CB20 File Offset: 0x0015AD20
+	// Token: 0x060041A9 RID: 16809 RVA: 0x0015CB00 File Offset: 0x0015AD00
 	public void OnContinuePressed()
 	{
 		HandRayController.Instance.DisableHandRays();
@@ -93,14 +93,14 @@ public class AnnouncementManager : MonoBehaviour
 		PlayerPrefs.Save();
 	}
 
-	// Token: 0x060041AA RID: 16810 RVA: 0x0015CB81 File Offset: 0x0015AD81
+	// Token: 0x060041AA RID: 16810 RVA: 0x0015CB61 File Offset: 0x0015AD61
 	private void OnError(PlayFabError error)
 	{
 		Debug.LogError("[ANNOUNCEMENT] Failed to Get Title Data for key [AnnouncementData]. Error:\n[" + error.ErrorMessage);
 		this._completedSetup = true;
 	}
 
-	// Token: 0x060041AB RID: 16811 RVA: 0x0015CBA0 File Offset: 0x0015ADA0
+	// Token: 0x060041AB RID: 16811 RVA: 0x0015CB80 File Offset: 0x0015AD80
 	private void ConfigureAnnouncement(string data)
 	{
 		this._announcementString = data;

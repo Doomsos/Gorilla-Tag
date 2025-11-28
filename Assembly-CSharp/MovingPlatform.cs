@@ -6,19 +6,19 @@ using UnityEngine;
 // Token: 0x02000827 RID: 2087
 public class MovingPlatform : BasePlatform
 {
-	// Token: 0x060036D8 RID: 14040 RVA: 0x001284D0 File Offset: 0x001266D0
+	// Token: 0x060036D8 RID: 14040 RVA: 0x001284B0 File Offset: 0x001266B0
 	public float InitTimeOffset()
 	{
 		return this.startPercentage * this.cycleLength;
 	}
 
-	// Token: 0x060036D9 RID: 14041 RVA: 0x001284DF File Offset: 0x001266DF
+	// Token: 0x060036D9 RID: 14041 RVA: 0x001284BF File Offset: 0x001266BF
 	private long InitTimeOffsetMs()
 	{
 		return (long)(this.InitTimeOffset() * 1000f);
 	}
 
-	// Token: 0x060036DA RID: 14042 RVA: 0x001284EE File Offset: 0x001266EE
+	// Token: 0x060036DA RID: 14042 RVA: 0x001284CE File Offset: 0x001266CE
 	private long NetworkTimeMs()
 	{
 		if (PhotonNetwork.InRoom)
@@ -28,13 +28,13 @@ public class MovingPlatform : BasePlatform
 		return (long)(Time.time * 1000f);
 	}
 
-	// Token: 0x060036DB RID: 14043 RVA: 0x00128517 File Offset: 0x00126717
+	// Token: 0x060036DB RID: 14043 RVA: 0x001284F7 File Offset: 0x001266F7
 	private long CycleLengthMs()
 	{
 		return (long)(this.cycleLength * 1000f);
 	}
 
-	// Token: 0x060036DC RID: 14044 RVA: 0x00128528 File Offset: 0x00126728
+	// Token: 0x060036DC RID: 14044 RVA: 0x00128508 File Offset: 0x00126708
 	public double PlatformTime()
 	{
 		long num = this.NetworkTimeMs();
@@ -42,13 +42,13 @@ public class MovingPlatform : BasePlatform
 		return (double)(num - num / num2 * num2) / 1000.0;
 	}
 
-	// Token: 0x060036DD RID: 14045 RVA: 0x00128553 File Offset: 0x00126753
+	// Token: 0x060036DD RID: 14045 RVA: 0x00128533 File Offset: 0x00126733
 	public int CycleCount()
 	{
 		return (int)(this.NetworkTimeMs() / this.CycleLengthMs());
 	}
 
-	// Token: 0x060036DE RID: 14046 RVA: 0x00128564 File Offset: 0x00126764
+	// Token: 0x060036DE RID: 14046 RVA: 0x00128544 File Offset: 0x00126744
 	public float CycleCompletionPercent()
 	{
 		float num = (float)(this.PlatformTime() / (double)this.cycleLength);
@@ -68,13 +68,13 @@ public class MovingPlatform : BasePlatform
 		return num;
 	}
 
-	// Token: 0x060036DF RID: 14047 RVA: 0x001285C6 File Offset: 0x001267C6
+	// Token: 0x060036DF RID: 14047 RVA: 0x001285A6 File Offset: 0x001267A6
 	public bool CycleForward()
 	{
 		return (this.CycleCount() + (this.startNextCycle ? 1 : 0)) % 2 == 0;
 	}
 
-	// Token: 0x060036E0 RID: 14048 RVA: 0x001285E0 File Offset: 0x001267E0
+	// Token: 0x060036E0 RID: 14048 RVA: 0x001285C0 File Offset: 0x001267C0
 	private void Awake()
 	{
 		if (this.platformType == MovingPlatform.PlatformType.Child)
@@ -95,7 +95,7 @@ public class MovingPlatform : BasePlatform
 		this.currT = this.startPercentage;
 	}
 
-	// Token: 0x060036E1 RID: 14049 RVA: 0x001286B0 File Offset: 0x001268B0
+	// Token: 0x060036E1 RID: 14049 RVA: 0x00128690 File Offset: 0x00126890
 	private void OnEnable()
 	{
 		if (this.platformType == MovingPlatform.PlatformType.Child)
@@ -111,13 +111,13 @@ public class MovingPlatform : BasePlatform
 		this.currT = this.startPercentage;
 	}
 
-	// Token: 0x060036E2 RID: 14050 RVA: 0x00128739 File Offset: 0x00126939
+	// Token: 0x060036E2 RID: 14050 RVA: 0x00128719 File Offset: 0x00126919
 	private Vector3 UpdatePointToPoint()
 	{
 		return Vector3.Lerp(this.startPos, this.endPos, this.smoothedPercent);
 	}
 
-	// Token: 0x060036E3 RID: 14051 RVA: 0x00128754 File Offset: 0x00126954
+	// Token: 0x060036E3 RID: 14051 RVA: 0x00128734 File Offset: 0x00126934
 	private Vector3 UpdateArc()
 	{
 		float num = Mathf.Lerp(this.rotateStartAmt, this.rotateStartAmt + this.rotateAmt, this.smoothedPercent);
@@ -126,19 +126,19 @@ public class MovingPlatform : BasePlatform
 		return this.pivot.transform.position + vector;
 	}
 
-	// Token: 0x060036E4 RID: 14052 RVA: 0x001287B2 File Offset: 0x001269B2
+	// Token: 0x060036E4 RID: 14052 RVA: 0x00128792 File Offset: 0x00126992
 	private Quaternion UpdateRotation()
 	{
 		return Quaternion.Slerp(this.startRot, this.endRot, this.smoothedPercent);
 	}
 
-	// Token: 0x060036E5 RID: 14053 RVA: 0x001287CB File Offset: 0x001269CB
+	// Token: 0x060036E5 RID: 14053 RVA: 0x001287AB File Offset: 0x001269AB
 	private Quaternion UpdateContinuousRotation()
 	{
 		return Quaternion.AngleAxis(this.smoothedPercent * 360f, Vector3.up) * base.transform.parent.rotation;
 	}
 
-	// Token: 0x060036E6 RID: 14054 RVA: 0x001287F8 File Offset: 0x001269F8
+	// Token: 0x060036E6 RID: 14054 RVA: 0x001287D8 File Offset: 0x001269D8
 	private void SetupContext()
 	{
 		double time = PhotonNetwork.Time;
@@ -168,7 +168,7 @@ public class MovingPlatform : BasePlatform
 		this.lastT = Time.time;
 	}
 
-	// Token: 0x060036E7 RID: 14055 RVA: 0x001288C8 File Offset: 0x00126AC8
+	// Token: 0x060036E7 RID: 14055 RVA: 0x001288A8 File Offset: 0x00126AA8
 	private void Update()
 	{
 		if (this.platformType == MovingPlatform.PlatformType.Child)
@@ -223,7 +223,7 @@ public class MovingPlatform : BasePlatform
 		this.deltaPosition = vector - this.lastPos;
 	}
 
-	// Token: 0x060036E8 RID: 14056 RVA: 0x001289E9 File Offset: 0x00126BE9
+	// Token: 0x060036E8 RID: 14056 RVA: 0x001289C9 File Offset: 0x00126BC9
 	public Vector3 ThisFrameMovement()
 	{
 		return this.deltaPosition;

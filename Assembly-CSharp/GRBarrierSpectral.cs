@@ -5,14 +5,14 @@ using UnityEngine;
 // Token: 0x02000689 RID: 1673
 public class GRBarrierSpectral : MonoBehaviour, IGameEntityComponent, IGameHittable
 {
-	// Token: 0x06002AC1 RID: 10945 RVA: 0x000E6198 File Offset: 0x000E4398
+	// Token: 0x06002AC1 RID: 10945 RVA: 0x000E6178 File Offset: 0x000E4378
 	public void Awake()
 	{
 		this.hitFx.SetActive(false);
 		this.destroyedFx.SetActive(false);
 	}
 
-	// Token: 0x06002AC2 RID: 10946 RVA: 0x000E61B4 File Offset: 0x000E43B4
+	// Token: 0x06002AC2 RID: 10946 RVA: 0x000E6194 File Offset: 0x000E4394
 	public void OnEntityInit()
 	{
 		this.entity.SetState((long)this.health);
@@ -25,14 +25,14 @@ public class GRBarrierSpectral : MonoBehaviour, IGameEntityComponent, IGameHitta
 	{
 	}
 
-	// Token: 0x06002AC4 RID: 10948 RVA: 0x000E61F0 File Offset: 0x000E43F0
+	// Token: 0x06002AC4 RID: 10948 RVA: 0x000E61D0 File Offset: 0x000E43D0
 	public void OnEntityStateChange(long prevState, long newState)
 	{
 		int nextHealth = (int)newState;
 		this.ChangeHealth(nextHealth);
 	}
 
-	// Token: 0x06002AC5 RID: 10949 RVA: 0x000E6208 File Offset: 0x000E4408
+	// Token: 0x06002AC5 RID: 10949 RVA: 0x000E61E8 File Offset: 0x000E43E8
 	public void OnImpact(GameHitType hitType)
 	{
 		if (hitType == GameHitType.Flash)
@@ -46,7 +46,7 @@ public class GRBarrierSpectral : MonoBehaviour, IGameEntityComponent, IGameHitta
 		}
 	}
 
-	// Token: 0x06002AC6 RID: 10950 RVA: 0x000E625C File Offset: 0x000E445C
+	// Token: 0x06002AC6 RID: 10950 RVA: 0x000E623C File Offset: 0x000E443C
 	private void ChangeHealth(int nextHealth)
 	{
 		if (this.health != nextHealth)
@@ -76,7 +76,7 @@ public class GRBarrierSpectral : MonoBehaviour, IGameEntityComponent, IGameHitta
 		return true;
 	}
 
-	// Token: 0x06002AC8 RID: 10952 RVA: 0x000E6304 File Offset: 0x000E4504
+	// Token: 0x06002AC8 RID: 10952 RVA: 0x000E62E4 File Offset: 0x000E44E4
 	public void OnHit(GameHitData hit)
 	{
 		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
@@ -86,7 +86,7 @@ public class GRBarrierSpectral : MonoBehaviour, IGameEntityComponent, IGameHitta
 		}
 	}
 
-	// Token: 0x06002AC9 RID: 10953 RVA: 0x000E6340 File Offset: 0x000E4540
+	// Token: 0x06002AC9 RID: 10953 RVA: 0x000E6320 File Offset: 0x000E4520
 	public void RefreshVisuals()
 	{
 		if (this.lastVisualUpdateHealth != this.health)

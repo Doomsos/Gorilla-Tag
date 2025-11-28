@@ -5,7 +5,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DC9 RID: 3529
 	public struct BuilderPieceData
 	{
-		// Token: 0x0600578D RID: 22413 RVA: 0x001BE41C File Offset: 0x001BC61C
+		// Token: 0x0600578D RID: 22413 RVA: 0x001BE3FC File Offset: 0x001BC5FC
 		public BuilderPieceData(BuilderPiece piece)
 		{
 			this.pieceId = piece.pieceId;

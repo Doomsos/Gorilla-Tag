@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 // Token: 0x020008E5 RID: 2277
 public class SpawnPooledObject : MonoBehaviour
 {
-	// Token: 0x06003A51 RID: 14929 RVA: 0x00133E2E File Offset: 0x0013202E
+	// Token: 0x06003A51 RID: 14929 RVA: 0x00133E0E File Offset: 0x0013200E
 	private void Awake()
 	{
 		if (this._pooledObject == null)
@@ -16,7 +16,7 @@ public class SpawnPooledObject : MonoBehaviour
 		this._pooledObjectHash = PoolUtils.GameObjHashCode(this._pooledObject);
 	}
 
-	// Token: 0x06003A52 RID: 14930 RVA: 0x00133E50 File Offset: 0x00132050
+	// Token: 0x06003A52 RID: 14930 RVA: 0x00133E30 File Offset: 0x00132030
 	public void SpawnObject()
 	{
 		if (!this.ShouldSpawn())
@@ -33,13 +33,13 @@ public class SpawnPooledObject : MonoBehaviour
 		gameObject.transform.localScale = base.transform.lossyScale;
 	}
 
-	// Token: 0x06003A53 RID: 14931 RVA: 0x00133ECB File Offset: 0x001320CB
+	// Token: 0x06003A53 RID: 14931 RVA: 0x00133EAB File Offset: 0x001320AB
 	private Vector3 SpawnLocation()
 	{
 		return this._spawnLocation.transform.position + this.offset;
 	}
 
-	// Token: 0x06003A54 RID: 14932 RVA: 0x00133EE8 File Offset: 0x001320E8
+	// Token: 0x06003A54 RID: 14932 RVA: 0x00133EC8 File Offset: 0x001320C8
 	private Quaternion SpawnRotation()
 	{
 		Quaternion result = this._spawnLocation.transform.rotation;
@@ -54,7 +54,7 @@ public class SpawnPooledObject : MonoBehaviour
 		return result;
 	}
 
-	// Token: 0x06003A55 RID: 14933 RVA: 0x00133F68 File Offset: 0x00132168
+	// Token: 0x06003A55 RID: 14933 RVA: 0x00133F48 File Offset: 0x00132148
 	private bool ShouldSpawn()
 	{
 		return Random.Range(0, 100) < this.chanceToSpawn;

@@ -10,7 +10,7 @@ namespace GorillaTag.Cosmetics
 	public class EvolvingCosmetic : MonoBehaviour, ITickSystemTick
 	{
 		// Token: 0x17000A4C RID: 2636
-		// (get) Token: 0x06006C94 RID: 27796 RVA: 0x0023A9F9 File Offset: 0x00238BF9
+		// (get) Token: 0x06006C94 RID: 27796 RVA: 0x0023A9D9 File Offset: 0x00238BD9
 		private int LoopMaxValue
 		{
 			get
@@ -19,7 +19,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C95 RID: 27797 RVA: 0x0023AA04 File Offset: 0x00238C04
+		// Token: 0x06006C95 RID: 27797 RVA: 0x0023A9E4 File Offset: 0x00238BE4
 		private void Awake()
 		{
 			base.gameObject.GetOrAddComponent(ref this.networkEvents);
@@ -41,7 +41,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C96 RID: 27798 RVA: 0x0023AAA8 File Offset: 0x00238CA8
+		// Token: 0x06006C96 RID: 27798 RVA: 0x0023AA88 File Offset: 0x00238C88
 		private void OnEnable()
 		{
 			if (this.stages.Length == 0)
@@ -61,7 +61,7 @@ namespace GorillaTag.Cosmetics
 			Debug.LogError("Failed to get a reference to the Photon Player needed to hook up the cosmetic event");
 		}
 
-		// Token: 0x06006C97 RID: 27799 RVA: 0x0023AB44 File Offset: 0x00238D44
+		// Token: 0x06006C97 RID: 27799 RVA: 0x0023AB24 File Offset: 0x00238D24
 		private void OnDisable()
 		{
 			if (this.networkEvents != null)
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 		{
 		}
 
-		// Token: 0x06006C99 RID: 27801 RVA: 0x0023ABC0 File Offset: 0x00238DC0
+		// Token: 0x06006C99 RID: 27801 RVA: 0x0023ABA0 File Offset: 0x00238DA0
 		private void FirstStage()
 		{
 			this.activeStageIndex = 0;
@@ -96,7 +96,7 @@ namespace GorillaTag.Cosmetics
 			this.HandleStages();
 		}
 
-		// Token: 0x06006C9A RID: 27802 RVA: 0x0023AC18 File Offset: 0x00238E18
+		// Token: 0x06006C9A RID: 27802 RVA: 0x0023ABF8 File Offset: 0x00238DF8
 		private void HandleStages()
 		{
 			for (;;)
@@ -158,18 +158,18 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A4D RID: 2637
-		// (get) Token: 0x06006C9B RID: 27803 RVA: 0x0023ADCC File Offset: 0x00238FCC
-		// (set) Token: 0x06006C9C RID: 27804 RVA: 0x0023ADD4 File Offset: 0x00238FD4
+		// (get) Token: 0x06006C9B RID: 27803 RVA: 0x0023ADAC File Offset: 0x00238FAC
+		// (set) Token: 0x06006C9C RID: 27804 RVA: 0x0023ADB4 File Offset: 0x00238FB4
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006C9D RID: 27805 RVA: 0x0023ADE0 File Offset: 0x00238FE0
+		// Token: 0x06006C9D RID: 27805 RVA: 0x0023ADC0 File Offset: 0x00238FC0
 		public void Tick()
 		{
 			this.totalElapsedTime = Mathf.Clamp(this.totalElapsedTime + Mathf.Max(this.activeStage.DeltaTime(Time.deltaTime), 0f), 0f, this.totalDuration * 1.01f);
 			this.HandleStages();
 		}
 
-		// Token: 0x06006C9E RID: 27806 RVA: 0x0023AE30 File Offset: 0x00239030
+		// Token: 0x06006C9E RID: 27806 RVA: 0x0023AE10 File Offset: 0x00239010
 		public void CompleteManualStage()
 		{
 			if (!this.activeStage.HasDuration)
@@ -178,14 +178,14 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C9F RID: 27807 RVA: 0x0023AE45 File Offset: 0x00239045
+		// Token: 0x06006C9F RID: 27807 RVA: 0x0023AE25 File Offset: 0x00239025
 		public void ForceNextStage()
 		{
 			this.totalElapsedTime = this.totalTimeOfPreviousStages + this.activeStage.Duration;
 			this.HandleStages();
 		}
 
-		// Token: 0x06006CA0 RID: 27808 RVA: 0x0023AE65 File Offset: 0x00239065
+		// Token: 0x06006CA0 RID: 27808 RVA: 0x0023AE45 File Offset: 0x00239045
 		private void SendElapsedTime(NetPlayer player)
 		{
 			if (this.sendProgressDelayCoroutine != null)
@@ -195,7 +195,7 @@ namespace GorillaTag.Cosmetics
 			this.sendProgressDelayCoroutine = base.StartCoroutine(this.SendElapsedTimeDelayed());
 		}
 
-		// Token: 0x06006CA1 RID: 27809 RVA: 0x0023AE8D File Offset: 0x0023908D
+		// Token: 0x06006CA1 RID: 27809 RVA: 0x0023AE6D File Offset: 0x0023906D
 		private IEnumerator SendElapsedTimeDelayed()
 		{
 			yield return new WaitForSeconds(1f);
@@ -207,7 +207,7 @@ namespace GorillaTag.Cosmetics
 			yield break;
 		}
 
-		// Token: 0x06006CA2 RID: 27810 RVA: 0x0023AE9C File Offset: 0x0023909C
+		// Token: 0x06006CA2 RID: 27810 RVA: 0x0023AE7C File Offset: 0x0023907C
 		private void ReceiveElapsedTime(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -286,14 +286,14 @@ namespace GorillaTag.Cosmetics
 		[Serializable]
 		private class EvolutionStage
 		{
-			// Token: 0x06006CA4 RID: 27812 RVA: 0x0023AF4B File Offset: 0x0023914B
+			// Token: 0x06006CA4 RID: 27812 RVA: 0x0023AF2B File Offset: 0x0023912B
 			private bool HasAnyFlag(EvolvingCosmetic.EvolutionStage.ProgressionFlags flag)
 			{
 				return (this.progressionFlags & flag) > EvolvingCosmetic.EvolutionStage.ProgressionFlags.None;
 			}
 
 			// Token: 0x17000A4E RID: 2638
-			// (get) Token: 0x06006CA5 RID: 27813 RVA: 0x0023AF58 File Offset: 0x00239158
+			// (get) Token: 0x06006CA5 RID: 27813 RVA: 0x0023AF38 File Offset: 0x00239138
 			public bool HasDuration
 			{
 				get
@@ -303,7 +303,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A4F RID: 2639
-			// (get) Token: 0x06006CA6 RID: 27814 RVA: 0x0023AF61 File Offset: 0x00239161
+			// (get) Token: 0x06006CA6 RID: 27814 RVA: 0x0023AF41 File Offset: 0x00239141
 			public bool HasTime
 			{
 				get
@@ -313,7 +313,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A50 RID: 2640
-			// (get) Token: 0x06006CA7 RID: 27815 RVA: 0x0023AF6A File Offset: 0x0023916A
+			// (get) Token: 0x06006CA7 RID: 27815 RVA: 0x0023AF4A File Offset: 0x0023914A
 			public bool HasTemperature
 			{
 				get
@@ -323,7 +323,7 @@ namespace GorillaTag.Cosmetics
 			}
 
 			// Token: 0x17000A51 RID: 2641
-			// (get) Token: 0x06006CA8 RID: 27816 RVA: 0x0023AF73 File Offset: 0x00239173
+			// (get) Token: 0x06006CA8 RID: 27816 RVA: 0x0023AF53 File Offset: 0x00239153
 			public float Duration
 			{
 				get
@@ -336,13 +336,13 @@ namespace GorillaTag.Cosmetics
 				}
 			}
 
-			// Token: 0x06006CA9 RID: 27817 RVA: 0x0023AF89 File Offset: 0x00239189
+			// Token: 0x06006CA9 RID: 27817 RVA: 0x0023AF69 File Offset: 0x00239169
 			public float DeltaTime(float deltaTime)
 			{
 				return (this.HasTime ? deltaTime : 0f) + (this.HasTemperature ? (deltaTime * this.celsiusSpeedupMult.Evaluate(this.thermalReceiver.celsius)) : 0f);
 			}
 
-			// Token: 0x06006CAA RID: 27818 RVA: 0x0023AFC3 File Offset: 0x002391C3
+			// Token: 0x06006CAA RID: 27818 RVA: 0x0023AFA3 File Offset: 0x002391A3
 			public EvolvingCosmetic.EvolutionStage.EventAtTime GetEventOrNull(int index)
 			{
 				if (this.events == null || index < 0 || index >= this.events.Length)
@@ -395,7 +395,7 @@ namespace GorillaTag.Cosmetics
 			public class EventAtTime : IComparable<EvolvingCosmetic.EvolutionStage.EventAtTime>
 			{
 				// Token: 0x17000A52 RID: 2642
-				// (get) Token: 0x06006CAC RID: 27820 RVA: 0x0023B01F File Offset: 0x0023921F
+				// (get) Token: 0x06006CAC RID: 27820 RVA: 0x0023AFFF File Offset: 0x002391FF
 				private string DynamicTimeLabel
 				{
 					get
@@ -408,7 +408,7 @@ namespace GorillaTag.Cosmetics
 					}
 				}
 
-				// Token: 0x06006CAD RID: 27821 RVA: 0x0023B035 File Offset: 0x00239235
+				// Token: 0x06006CAD RID: 27821 RVA: 0x0023B015 File Offset: 0x00239215
 				public int CompareTo(EvolvingCosmetic.EvolutionStage.EventAtTime other)
 				{
 					return this.absoluteTime.CompareTo(other.absoluteTime);

@@ -20,7 +20,7 @@ namespace GorillaNetworking.Store
 			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 		}
 
-		// Token: 0x0600619A RID: 24986 RVA: 0x001F6CA4 File Offset: 0x001F4EA4
+		// Token: 0x0600619A RID: 24986 RVA: 0x001F6C84 File Offset: 0x001F4E84
 		public void SliceUpdate()
 		{
 			if (NetworkSystem.Instance != null && NetworkSystem.Instance.WrongVersion && !this.bError)
@@ -32,7 +32,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x0600619B RID: 24987 RVA: 0x001F6D07 File Offset: 0x001F4F07
+		// Token: 0x0600619B RID: 24987 RVA: 0x001F6CE7 File Offset: 0x001F4EE7
 		public override void ButtonActivation()
 		{
 			if (this.bError)
@@ -44,7 +44,7 @@ namespace GorillaNetworking.Store
 			base.StartCoroutine(this.ButtonColorUpdate());
 		}
 
-		// Token: 0x0600619C RID: 24988 RVA: 0x001F6D40 File Offset: 0x001F4F40
+		// Token: 0x0600619C RID: 24988 RVA: 0x001F6D20 File Offset: 0x001F4F20
 		public void AlreadyOwn()
 		{
 			if (this.bError)
@@ -59,7 +59,7 @@ namespace GorillaNetworking.Store
 			this.isOn = true;
 		}
 
-		// Token: 0x0600619D RID: 24989 RVA: 0x001F6D9E File Offset: 0x001F4F9E
+		// Token: 0x0600619D RID: 24989 RVA: 0x001F6D7E File Offset: 0x001F4F7E
 		public void ResetButton()
 		{
 			if (this.bError)
@@ -73,7 +73,7 @@ namespace GorillaNetworking.Store
 			this.isOn = false;
 		}
 
-		// Token: 0x0600619E RID: 24990 RVA: 0x001F6DDD File Offset: 0x001F4FDD
+		// Token: 0x0600619E RID: 24990 RVA: 0x001F6DBD File Offset: 0x001F4FBD
 		private IEnumerator ButtonColorUpdate()
 		{
 			this.buttonRenderer.material = this.pressedMaterial;
@@ -82,7 +82,7 @@ namespace GorillaNetworking.Store
 			yield break;
 		}
 
-		// Token: 0x0600619F RID: 24991 RVA: 0x001F6DEC File Offset: 0x001F4FEC
+		// Token: 0x0600619F RID: 24991 RVA: 0x001F6DCC File Offset: 0x001F4FCC
 		public void ErrorHappened()
 		{
 			this.bError = true;
@@ -94,7 +94,7 @@ namespace GorillaNetworking.Store
 			this.isOn = false;
 		}
 
-		// Token: 0x060061A0 RID: 24992 RVA: 0x001F6E48 File Offset: 0x001F5048
+		// Token: 0x060061A0 RID: 24992 RVA: 0x001F6E28 File Offset: 0x001F5028
 		public void InitializeData()
 		{
 			if (this.bError)
@@ -107,7 +107,7 @@ namespace GorillaNetworking.Store
 			this.isOn = false;
 		}
 
-		// Token: 0x060061A1 RID: 24993 RVA: 0x001F6E7B File Offset: 0x001F507B
+		// Token: 0x060061A1 RID: 24993 RVA: 0x001F6E5B File Offset: 0x001F505B
 		public void UpdatePurchaseButtonText(string purchaseText)
 		{
 			if (!this.bError)

@@ -6,7 +6,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x0200109C RID: 4252
 	public class RCHelicopter : RCVehicle
 	{
-		// Token: 0x06006A5E RID: 27230 RVA: 0x0022D128 File Offset: 0x0022B328
+		// Token: 0x06006A5E RID: 27230 RVA: 0x0022D108 File Offset: 0x0022B308
 		protected override void AuthorityBeginDocked()
 		{
 			base.AuthorityBeginDocked();
@@ -19,7 +19,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A5F RID: 27231 RVA: 0x0022D184 File Offset: 0x0022B384
+		// Token: 0x06006A5F RID: 27231 RVA: 0x0022D164 File Offset: 0x0022B364
 		protected override void Awake()
 		{
 			base.Awake();
@@ -30,7 +30,7 @@ namespace GorillaTag.Cosmetics
 			this.horizontalAccel = this.maxHorizontalSpeed / this.horizontalAccelTime;
 		}
 
-		// Token: 0x06006A60 RID: 27232 RVA: 0x0022D1F4 File Offset: 0x0022B3F4
+		// Token: 0x06006A60 RID: 27232 RVA: 0x0022D1D4 File Offset: 0x0022B3D4
 		protected override void SharedUpdate(float dt)
 		{
 			if (this.localState == RCVehicle.State.Mobilized)
@@ -41,7 +41,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A61 RID: 27233 RVA: 0x0022D284 File Offset: 0x0022B484
+		// Token: 0x06006A61 RID: 27233 RVA: 0x0022D264 File Offset: 0x0022B464
 		private void FixedUpdate()
 		{
 			if (!base.HasLocalAuthority || this.localState != RCVehicle.State.Mobilized)
@@ -74,7 +74,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A62 RID: 27234 RVA: 0x0022D482 File Offset: 0x0022B682
+		// Token: 0x06006A62 RID: 27234 RVA: 0x0022D462 File Offset: 0x0022B662
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!other.isTrigger && base.HasLocalAuthority && this.localState == RCVehicle.State.Mobilized)

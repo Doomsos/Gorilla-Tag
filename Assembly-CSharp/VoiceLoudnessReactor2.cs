@@ -6,7 +6,7 @@ using UnityEngine;
 public class VoiceLoudnessReactor2 : MonoBehaviour, ITickSystemTick
 {
 	// Token: 0x17000374 RID: 884
-	// (get) Token: 0x060020C1 RID: 8385 RVA: 0x000ADAD1 File Offset: 0x000ABCD1
+	// (get) Token: 0x060020C1 RID: 8385 RVA: 0x000ADAB1 File Offset: 0x000ABCB1
 	private float Loudness
 	{
 		get
@@ -15,7 +15,7 @@ public class VoiceLoudnessReactor2 : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x060020C2 RID: 8386 RVA: 0x000ADAE8 File Offset: 0x000ABCE8
+	// Token: 0x060020C2 RID: 8386 RVA: 0x000ADAC8 File Offset: 0x000ABCC8
 	private void OnEnable()
 	{
 		if (this.continuousProperties.Count == 0)
@@ -48,11 +48,11 @@ public class VoiceLoudnessReactor2 : MonoBehaviour, ITickSystemTick
 	}
 
 	// Token: 0x17000375 RID: 885
-	// (get) Token: 0x060020C4 RID: 8388 RVA: 0x000ADB62 File Offset: 0x000ABD62
-	// (set) Token: 0x060020C5 RID: 8389 RVA: 0x000ADB6A File Offset: 0x000ABD6A
+	// (get) Token: 0x060020C4 RID: 8388 RVA: 0x000ADB42 File Offset: 0x000ABD42
+	// (set) Token: 0x060020C5 RID: 8389 RVA: 0x000ADB4A File Offset: 0x000ABD4A
 	public bool TickRunning { get; set; }
 
-	// Token: 0x060020C6 RID: 8390 RVA: 0x000ADB73 File Offset: 0x000ABD73
+	// Token: 0x060020C6 RID: 8390 RVA: 0x000ADB53 File Offset: 0x000ABD53
 	public void Tick()
 	{
 		this.continuousProperties.ApplyAll(this.Loudness);

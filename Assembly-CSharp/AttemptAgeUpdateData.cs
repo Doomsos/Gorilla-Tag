@@ -3,7 +3,7 @@
 // Token: 0x02000A06 RID: 2566
 public class AttemptAgeUpdateData
 {
-	// Token: 0x060041AE RID: 16814 RVA: 0x0015CCDB File Offset: 0x0015AEDB
+	// Token: 0x060041AE RID: 16814 RVA: 0x0015CCBB File Offset: 0x0015AEBB
 	public AttemptAgeUpdateData(SessionStatus status)
 	{
 		this.status = status;

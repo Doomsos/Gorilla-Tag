@@ -8,13 +8,13 @@ using UnityEngine.UI;
 // Token: 0x020005D2 RID: 1490
 public class GorillaPlayerCounter : MonoBehaviour
 {
-	// Token: 0x060025AB RID: 9643 RVA: 0x000C95A0 File Offset: 0x000C77A0
+	// Token: 0x060025AB RID: 9643 RVA: 0x000C9580 File Offset: 0x000C7780
 	private void Awake()
 	{
 		this.text = base.gameObject.GetComponent<Text>();
 	}
 
-	// Token: 0x060025AC RID: 9644 RVA: 0x000C95B4 File Offset: 0x000C77B4
+	// Token: 0x060025AC RID: 9644 RVA: 0x000C9594 File Offset: 0x000C7794
 	private void Update()
 	{
 		if (PhotonNetwork.CurrentRoom != null)

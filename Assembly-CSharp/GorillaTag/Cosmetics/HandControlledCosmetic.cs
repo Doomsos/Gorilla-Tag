@@ -6,7 +6,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010FD RID: 4349
 	public class HandControlledCosmetic : MonoBehaviour, ITickSystemTick
 	{
-		// Token: 0x06006CEB RID: 27883 RVA: 0x0023C4F4 File Offset: 0x0023A6F4
+		// Token: 0x06006CEB RID: 27883 RVA: 0x0023C4D4 File Offset: 0x0023A6D4
 		public void Awake()
 		{
 			this.myRig = base.GetComponentInParent<VRRig>();
@@ -22,7 +22,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CEC RID: 27884 RVA: 0x0023C564 File Offset: 0x0023A764
+		// Token: 0x06006CEC RID: 27884 RVA: 0x0023C544 File Offset: 0x0023A744
 		private void SetControlIndicatorPoints()
 		{
 			if (this.myRig.isOfflineVRRig && this.controllingHand != null && this.controlIndicatorCurve != null && this.controlIndicatorCurve.points != null)
@@ -33,13 +33,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CED RID: 27885 RVA: 0x0023C62A File Offset: 0x0023A82A
+		// Token: 0x06006CED RID: 27885 RVA: 0x0023C60A File Offset: 0x0023A80A
 		private Vector3 GetRelativeHandPosition()
 		{
 			return this.controllingHand.TransformPoint(this.handPositionOffset) - this.myRig.bodyTransform.position;
 		}
 
-		// Token: 0x06006CEE RID: 27886 RVA: 0x0023C654 File Offset: 0x0023A854
+		// Token: 0x06006CEE RID: 27886 RVA: 0x0023C634 File Offset: 0x0023A834
 		public void StartControl(bool leftHand, float flexValue)
 		{
 			if (!base.enabled || !base.gameObject.activeInHierarchy)
@@ -57,7 +57,7 @@ namespace GorillaTag.Cosmetics
 			TickSystem<object>.AddTickCallback(this);
 		}
 
-		// Token: 0x06006CEF RID: 27887 RVA: 0x0023C734 File Offset: 0x0023A934
+		// Token: 0x06006CEF RID: 27887 RVA: 0x0023C714 File Offset: 0x0023A914
 		public void StopControl()
 		{
 			this.localEuler = base.transform.localRotation.eulerAngles;
@@ -70,7 +70,7 @@ namespace GorillaTag.Cosmetics
 		{
 		}
 
-		// Token: 0x06006CF1 RID: 27889 RVA: 0x0023C767 File Offset: 0x0023A967
+		// Token: 0x06006CF1 RID: 27889 RVA: 0x0023C747 File Offset: 0x0023A947
 		public void OnDisable()
 		{
 			base.transform.localRotation = this.initialRotation;
@@ -78,7 +78,7 @@ namespace GorillaTag.Cosmetics
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006CF2 RID: 27890 RVA: 0x0023C786 File Offset: 0x0023A986
+		// Token: 0x06006CF2 RID: 27890 RVA: 0x0023C766 File Offset: 0x0023A966
 		private float ReverseClampDegrees(float value, float low, float high)
 		{
 			value = Mathf.Repeat(value, 360f);
@@ -94,11 +94,11 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A5F RID: 2655
-		// (get) Token: 0x06006CF3 RID: 27891 RVA: 0x0023C7AA File Offset: 0x0023A9AA
-		// (set) Token: 0x06006CF4 RID: 27892 RVA: 0x0023C7B2 File Offset: 0x0023A9B2
+		// (get) Token: 0x06006CF3 RID: 27891 RVA: 0x0023C78A File Offset: 0x0023A98A
+		// (set) Token: 0x06006CF4 RID: 27892 RVA: 0x0023C792 File Offset: 0x0023A992
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006CF5 RID: 27893 RVA: 0x0023C7BC File Offset: 0x0023A9BC
+		// Token: 0x06006CF5 RID: 27893 RVA: 0x0023C79C File Offset: 0x0023A99C
 		public void Tick()
 		{
 			if (this.isActive)

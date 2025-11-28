@@ -6,7 +6,7 @@ using UnityEngine;
 [AttributeUsage(64)]
 public class OnExitPlay_Run : OnExitPlay_Attribute
 {
-	// Token: 0x06004DBF RID: 19903 RVA: 0x00192423 File Offset: 0x00190623
+	// Token: 0x06004DBF RID: 19903 RVA: 0x00192403 File Offset: 0x00190603
 	public override void OnEnterPlay(MethodInfo method)
 	{
 		if (!method.IsStatic)

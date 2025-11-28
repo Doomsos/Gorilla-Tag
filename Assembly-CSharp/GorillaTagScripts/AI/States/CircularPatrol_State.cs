@@ -6,13 +6,13 @@ namespace GorillaTagScripts.AI.States
 	// Token: 0x02000E99 RID: 3737
 	public class CircularPatrol_State : IState
 	{
-		// Token: 0x06005D71 RID: 23921 RVA: 0x001DFFD0 File Offset: 0x001DE1D0
+		// Token: 0x06005D71 RID: 23921 RVA: 0x001DFFB0 File Offset: 0x001DE1B0
 		public CircularPatrol_State(AIEntity entity)
 		{
 			this.entity = entity;
 		}
 
-		// Token: 0x06005D72 RID: 23922 RVA: 0x001DFFE0 File Offset: 0x001DE1E0
+		// Token: 0x06005D72 RID: 23922 RVA: 0x001DFFC0 File Offset: 0x001DE1C0
 		public void Tick()
 		{
 			Vector3 position = this.entity.circleCenter.position;

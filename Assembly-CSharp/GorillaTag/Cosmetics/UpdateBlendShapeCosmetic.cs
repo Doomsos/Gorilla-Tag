@@ -6,45 +6,45 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001120 RID: 4384
 	public class UpdateBlendShapeCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006DB5 RID: 28085 RVA: 0x00240563 File Offset: 0x0023E763
+		// Token: 0x06006DB5 RID: 28085 RVA: 0x00240543 File Offset: 0x0023E743
 		private void Awake()
 		{
 			this.targetWeight = this.blendStartWeight;
 			this.currentWeight = 0f;
 		}
 
-		// Token: 0x06006DB6 RID: 28086 RVA: 0x0024057C File Offset: 0x0023E77C
+		// Token: 0x06006DB6 RID: 28086 RVA: 0x0024055C File Offset: 0x0023E75C
 		private void Update()
 		{
 			this.currentWeight = Mathf.Lerp(this.currentWeight, this.targetWeight, Time.deltaTime * this.blendSpeed);
 			this.skinnedMeshRenderer.SetBlendShapeWeight(this.blendShapeIndex, this.currentWeight);
 		}
 
-		// Token: 0x06006DB7 RID: 28087 RVA: 0x002405B8 File Offset: 0x0023E7B8
+		// Token: 0x06006DB7 RID: 28087 RVA: 0x00240598 File Offset: 0x0023E798
 		public void SetBlendValue(bool leftHand, float value)
 		{
 			this.targetWeight = Mathf.Clamp01(this.invertPassedBlend ? (1f - value) : value) * this.maxBlendShapeWeight;
 		}
 
-		// Token: 0x06006DB8 RID: 28088 RVA: 0x002405DE File Offset: 0x0023E7DE
+		// Token: 0x06006DB8 RID: 28088 RVA: 0x002405BE File Offset: 0x0023E7BE
 		public void SetBlendValue(float value)
 		{
 			this.targetWeight = Mathf.Clamp01(this.invertPassedBlend ? (1f - value) : value) * this.maxBlendShapeWeight;
 		}
 
-		// Token: 0x06006DB9 RID: 28089 RVA: 0x00240604 File Offset: 0x0023E804
+		// Token: 0x06006DB9 RID: 28089 RVA: 0x002405E4 File Offset: 0x0023E7E4
 		public void FullyBlend()
 		{
 			this.targetWeight = this.maxBlendShapeWeight;
 		}
 
-		// Token: 0x06006DBA RID: 28090 RVA: 0x00240612 File Offset: 0x0023E812
+		// Token: 0x06006DBA RID: 28090 RVA: 0x002405F2 File Offset: 0x0023E7F2
 		public void ResetBlend()
 		{
 			this.targetWeight = 0f;
 		}
 
-		// Token: 0x06006DBB RID: 28091 RVA: 0x0024061F File Offset: 0x0023E81F
+		// Token: 0x06006DBB RID: 28091 RVA: 0x002405FF File Offset: 0x0023E7FF
 		public float GetBlendValue()
 		{
 			return this.skinnedMeshRenderer.GetBlendShapeWeight(this.blendShapeIndex);

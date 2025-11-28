@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000CAD RID: 3245
 public class Firework : MonoBehaviour
 {
-	// Token: 0x06004F4D RID: 20301 RVA: 0x00198BD2 File Offset: 0x00196DD2
+	// Token: 0x06004F4D RID: 20301 RVA: 0x00198BB2 File Offset: 0x00196DB2
 	private void Launch()
 	{
 		if (!Application.isPlaying)
@@ -18,7 +18,7 @@ public class Firework : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004F4E RID: 20302 RVA: 0x00198BF8 File Offset: 0x00196DF8
+	// Token: 0x06004F4E RID: 20302 RVA: 0x00198BD8 File Offset: 0x00196DD8
 	private void OnValidate()
 	{
 		if (!this._controller)
@@ -41,7 +41,7 @@ public class Firework : MonoBehaviour
 		this._controller.fireworks = array;
 	}
 
-	// Token: 0x06004F4F RID: 20303 RVA: 0x00198C88 File Offset: 0x00196E88
+	// Token: 0x06004F4F RID: 20303 RVA: 0x00198C68 File Offset: 0x00196E68
 	private void OnDrawGizmos()
 	{
 		if (!this._controller)
@@ -51,7 +51,7 @@ public class Firework : MonoBehaviour
 		this._controller.RenderGizmo(this, Color.cyan);
 	}
 
-	// Token: 0x06004F50 RID: 20304 RVA: 0x00198CA9 File Offset: 0x00196EA9
+	// Token: 0x06004F50 RID: 20304 RVA: 0x00198C89 File Offset: 0x00196E89
 	private void OnDrawGizmosSelected()
 	{
 		if (!this._controller)

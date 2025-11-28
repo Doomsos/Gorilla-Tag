@@ -5,12 +5,12 @@ using UnityEngine;
 public class RigDuplicationZone : MonoBehaviour
 {
 	// Token: 0x14000038 RID: 56
-	// (add) Token: 0x06001AA2 RID: 6818 RVA: 0x0008CEB4 File Offset: 0x0008B0B4
-	// (remove) Token: 0x06001AA3 RID: 6819 RVA: 0x0008CEE8 File Offset: 0x0008B0E8
+	// (add) Token: 0x06001AA2 RID: 6818 RVA: 0x0008CE94 File Offset: 0x0008B094
+	// (remove) Token: 0x06001AA3 RID: 6819 RVA: 0x0008CEC8 File Offset: 0x0008B0C8
 	public static event RigDuplicationZone.RigDuplicationZoneAction OnEnabled;
 
 	// Token: 0x170002D0 RID: 720
-	// (get) Token: 0x06001AA4 RID: 6820 RVA: 0x0008CF1B File Offset: 0x0008B11B
+	// (get) Token: 0x06001AA4 RID: 6820 RVA: 0x0008CEFB File Offset: 0x0008B0FB
 	public string Id
 	{
 		get
@@ -19,7 +19,7 @@ public class RigDuplicationZone : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001AA5 RID: 6821 RVA: 0x0008CF23 File Offset: 0x0008B123
+	// Token: 0x06001AA5 RID: 6821 RVA: 0x0008CF03 File Offset: 0x0008B103
 	private void OnEnable()
 	{
 		RigDuplicationZone.OnEnabled += this.RigDuplicationZone_OnEnabled;
@@ -29,13 +29,13 @@ public class RigDuplicationZone : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001AA6 RID: 6822 RVA: 0x0008CF48 File Offset: 0x0008B148
+	// Token: 0x06001AA6 RID: 6822 RVA: 0x0008CF28 File Offset: 0x0008B128
 	private void OnDisable()
 	{
 		RigDuplicationZone.OnEnabled -= this.RigDuplicationZone_OnEnabled;
 	}
 
-	// Token: 0x06001AA7 RID: 6823 RVA: 0x0008CF5B File Offset: 0x0008B15B
+	// Token: 0x06001AA7 RID: 6823 RVA: 0x0008CF3B File Offset: 0x0008B13B
 	private void RigDuplicationZone_OnEnabled(RigDuplicationZone z)
 	{
 		if (z == this)
@@ -50,14 +50,14 @@ public class RigDuplicationZone : MonoBehaviour
 		z.setOtherZone(this);
 	}
 
-	// Token: 0x06001AA8 RID: 6824 RVA: 0x0008CF89 File Offset: 0x0008B189
+	// Token: 0x06001AA8 RID: 6824 RVA: 0x0008CF69 File Offset: 0x0008B169
 	private void setOtherZone(RigDuplicationZone z)
 	{
 		this.otherZone = z;
 		this.offsetToOtherZone = z.transform.position - base.transform.position;
 	}
 
-	// Token: 0x06001AA9 RID: 6825 RVA: 0x0008CFB4 File Offset: 0x0008B1B4
+	// Token: 0x06001AA9 RID: 6825 RVA: 0x0008CF94 File Offset: 0x0008B194
 	private void OnTriggerEnter(Collider other)
 	{
 		VRRig component = other.GetComponent<VRRig>();
@@ -73,7 +73,7 @@ public class RigDuplicationZone : MonoBehaviour
 		component.SetDuplicationZone(this);
 	}
 
-	// Token: 0x06001AAA RID: 6826 RVA: 0x0008CFEC File Offset: 0x0008B1EC
+	// Token: 0x06001AAA RID: 6826 RVA: 0x0008CFCC File Offset: 0x0008B1CC
 	private void OnTriggerExit(Collider other)
 	{
 		VRRig component = other.GetComponent<VRRig>();
@@ -90,7 +90,7 @@ public class RigDuplicationZone : MonoBehaviour
 	}
 
 	// Token: 0x170002D1 RID: 721
-	// (get) Token: 0x06001AAB RID: 6827 RVA: 0x0008D021 File Offset: 0x0008B221
+	// (get) Token: 0x06001AAB RID: 6827 RVA: 0x0008D001 File Offset: 0x0008B201
 	public Vector3 VisualOffsetForRigs
 	{
 		get
@@ -104,7 +104,7 @@ public class RigDuplicationZone : MonoBehaviour
 	}
 
 	// Token: 0x170002D2 RID: 722
-	// (get) Token: 0x06001AAC RID: 6828 RVA: 0x0008D03C File Offset: 0x0008B23C
+	// (get) Token: 0x06001AAC RID: 6828 RVA: 0x0008D01C File Offset: 0x0008B21C
 	public bool IsApplyingDisplacement
 	{
 		get

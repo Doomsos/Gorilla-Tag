@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	public class ContinuousPropertyArray
 	{
 		// Token: 0x17000A39 RID: 2617
-		// (get) Token: 0x06006BEA RID: 27626 RVA: 0x002369E6 File Offset: 0x00234BE6
+		// (get) Token: 0x06006BEA RID: 27626 RVA: 0x002369C6 File Offset: 0x00234BC6
 		public int Count
 		{
 			get
@@ -18,7 +18,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BEB RID: 27627 RVA: 0x002369F0 File Offset: 0x00234BF0
+		// Token: 0x06006BEB RID: 27627 RVA: 0x002369D0 File Offset: 0x00234BD0
 		private void InitIfNeeded()
 		{
 			if (this.initialized)
@@ -61,13 +61,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BEC RID: 27628 RVA: 0x00236B21 File Offset: 0x00234D21
+		// Token: 0x06006BEC RID: 27628 RVA: 0x00236B01 File Offset: 0x00234D01
 		public void ApplyAll(bool leftHand, float f)
 		{
 			this.ApplyAll(f);
 		}
 
-		// Token: 0x06006BED RID: 27629 RVA: 0x00236B2C File Offset: 0x00234D2C
+		// Token: 0x06006BED RID: 27629 RVA: 0x00236B0C File Offset: 0x00234D0C
 		public void ApplyAll(float f)
 		{
 			if (this.list.Length == 0)
@@ -144,7 +144,7 @@ namespace GorillaTag.Cosmetics
 		// Token: 0x020010D0 RID: 4304
 		private class PropertyComparer : IComparer<ContinuousProperty>
 		{
-			// Token: 0x06006BEF RID: 27631 RVA: 0x00236CD8 File Offset: 0x00234ED8
+			// Token: 0x06006BEF RID: 27631 RVA: 0x00236CB8 File Offset: 0x00234EB8
 			public int Compare(ContinuousProperty x, ContinuousProperty y)
 			{
 				if (!x.IsShaderProperty_Cached || !y.IsShaderProperty_Cached)

@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x02000B63 RID: 2915
 public class LuauScriptRunner
 {
-	// Token: 0x060047C8 RID: 18376 RVA: 0x00179C64 File Offset: 0x00177E64
+	// Token: 0x060047C8 RID: 18376 RVA: 0x00179C44 File Offset: 0x00177E44
 	public unsafe static bool ErrorCheck(lua_State* L, int status)
 	{
 		if (status != 0)
@@ -24,7 +24,7 @@ public class LuauScriptRunner
 		return false;
 	}
 
-	// Token: 0x060047C9 RID: 18377 RVA: 0x00179CC8 File Offset: 0x00177EC8
+	// Token: 0x060047C9 RID: 18377 RVA: 0x00179CA8 File Offset: 0x00177EA8
 	public bool Tick(float deltaTime)
 	{
 		if (!this.ShouldTick)
@@ -57,7 +57,7 @@ public class LuauScriptRunner
 		return false;
 	}
 
-	// Token: 0x060047CA RID: 18378 RVA: 0x00179DB8 File Offset: 0x00177FB8
+	// Token: 0x060047CA RID: 18378 RVA: 0x00179D98 File Offset: 0x00177F98
 	public unsafe LuauScriptRunner(string script, string name, [CanBeNull] lua_CFunction bindings = null, [CanBeNull] lua_CFunction preTick = null, [CanBeNull] lua_CFunction postTick = null)
 	{
 		this.Script = script;
@@ -82,13 +82,13 @@ public class LuauScriptRunner
 		this.ShouldTick = !LuauScriptRunner.ErrorCheck(this.L, status);
 	}
 
-	// Token: 0x060047CB RID: 18379 RVA: 0x00179E9F File Offset: 0x0017809F
+	// Token: 0x060047CB RID: 18379 RVA: 0x00179E7F File Offset: 0x0017807F
 	public LuauScriptRunner FromFile(string filePath, [CanBeNull] lua_CFunction bindings = null, [CanBeNull] lua_CFunction tick = null)
 	{
 		return new LuauScriptRunner(File.ReadAllText(Path.Join(Application.persistentDataPath, "Scripts", filePath)), filePath, bindings, tick, null);
 	}
 
-	// Token: 0x060047CC RID: 18380 RVA: 0x00179ED0 File Offset: 0x001780D0
+	// Token: 0x060047CC RID: 18380 RVA: 0x00179EB0 File Offset: 0x001780B0
 	~LuauScriptRunner()
 	{
 		LuauVm.ClassBuilders.Clear();

@@ -10,7 +10,7 @@ namespace GorillaNetworking.Store
 	public class BundleStand : MonoBehaviour, IBuildValidation
 	{
 		// Token: 0x1700090F RID: 2319
-		// (get) Token: 0x060061A9 RID: 25001 RVA: 0x001F6F5F File Offset: 0x001F515F
+		// (get) Token: 0x060061A9 RID: 25001 RVA: 0x001F6F3F File Offset: 0x001F513F
 		public string playfabBundleID
 		{
 			get
@@ -19,7 +19,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061AA RID: 25002 RVA: 0x001F6F6C File Offset: 0x001F516C
+		// Token: 0x060061AA RID: 25002 RVA: 0x001F6F4C File Offset: 0x001F514C
 		bool IBuildValidation.BuildValidationCheck()
 		{
 			ICreatorCodeProvider creatorCodeProvider;
@@ -31,7 +31,7 @@ namespace GorillaNetworking.Store
 			return true;
 		}
 
-		// Token: 0x060061AB RID: 25003 RVA: 0x001F6FB0 File Offset: 0x001F51B0
+		// Token: 0x060061AB RID: 25003 RVA: 0x001F6F90 File Offset: 0x001F5190
 		public void Awake()
 		{
 			this._bundlePurchaseButton.playfabID = this.playfabBundleID;
@@ -42,26 +42,26 @@ namespace GorillaNetworking.Store
 			this._bundlePurchaseButton.codeProvider = this.creatorCodeProvider.GetComponent<ICreatorCodeProvider>();
 		}
 
-		// Token: 0x060061AC RID: 25004 RVA: 0x001F7029 File Offset: 0x001F5229
+		// Token: 0x060061AC RID: 25004 RVA: 0x001F7009 File Offset: 0x001F5209
 		public void InitializeEventListeners()
 		{
 			this.AlreadyOwnEvent.AddListener(new UnityAction(this._bundlePurchaseButton.AlreadyOwn));
 			this.ErrorHappenedEvent.AddListener(new UnityAction(this._bundlePurchaseButton.ErrorHappened));
 		}
 
-		// Token: 0x060061AD RID: 25005 RVA: 0x001F7063 File Offset: 0x001F5263
+		// Token: 0x060061AD RID: 25005 RVA: 0x001F7043 File Offset: 0x001F5243
 		public void NotifyAlreadyOwn()
 		{
 			this.AlreadyOwnEvent.Invoke();
 		}
 
-		// Token: 0x060061AE RID: 25006 RVA: 0x001F7070 File Offset: 0x001F5270
+		// Token: 0x060061AE RID: 25006 RVA: 0x001F7050 File Offset: 0x001F5250
 		public void ErrorHappened()
 		{
 			this.ErrorHappenedEvent.Invoke();
 		}
 
-		// Token: 0x060061AF RID: 25007 RVA: 0x001F707D File Offset: 0x001F527D
+		// Token: 0x060061AF RID: 25007 RVA: 0x001F705D File Offset: 0x001F525D
 		public void UpdatePurchaseButtonText(string purchaseText)
 		{
 			if (this._bundlePurchaseButton != null)
@@ -70,7 +70,7 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x060061B0 RID: 25008 RVA: 0x001F7099 File Offset: 0x001F5299
+		// Token: 0x060061B0 RID: 25008 RVA: 0x001F7079 File Offset: 0x001F5279
 		public void UpdateDescriptionText(string descriptionText)
 		{
 			if (this._bundleDescriptionText != null)

@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000682 RID: 1666
 public class GRAttributes : MonoBehaviour
 {
-	// Token: 0x06002AA0 RID: 10912 RVA: 0x000E5B7C File Offset: 0x000E3D7C
+	// Token: 0x06002AA0 RID: 10912 RVA: 0x000E5B5C File Offset: 0x000E3D5C
 	private void Awake()
 	{
 		foreach (GRAttributes.GRAttributePair grattributePair in this.startingAttributes)
@@ -15,31 +15,31 @@ public class GRAttributes : MonoBehaviour
 		this.bonusSystem.Init(this);
 	}
 
-	// Token: 0x06002AA1 RID: 10913 RVA: 0x000E5BF4 File Offset: 0x000E3DF4
+	// Token: 0x06002AA1 RID: 10913 RVA: 0x000E5BD4 File Offset: 0x000E3DD4
 	public bool HasBeenInitialized()
 	{
 		return this.bonusSystem.GetDefaultAttributes() != null;
 	}
 
-	// Token: 0x06002AA2 RID: 10914 RVA: 0x000E5C07 File Offset: 0x000E3E07
+	// Token: 0x06002AA2 RID: 10914 RVA: 0x000E5BE7 File Offset: 0x000E3DE7
 	public void AddAttribute(GRAttributeType type, float value)
 	{
 		this.defaultAttributes[type] = (int)(value * 100f);
 	}
 
-	// Token: 0x06002AA3 RID: 10915 RVA: 0x000E5C1D File Offset: 0x000E3E1D
+	// Token: 0x06002AA3 RID: 10915 RVA: 0x000E5BFD File Offset: 0x000E3DFD
 	public void AddBonus(GRBonusEntry entry)
 	{
 		this.bonusSystem.AddBonus(entry);
 	}
 
-	// Token: 0x06002AA4 RID: 10916 RVA: 0x000E5C2B File Offset: 0x000E3E2B
+	// Token: 0x06002AA4 RID: 10916 RVA: 0x000E5C0B File Offset: 0x000E3E0B
 	public void RemoveBonus(GRBonusEntry entry)
 	{
 		this.bonusSystem.RemoveBonus(entry);
 	}
 
-	// Token: 0x06002AA5 RID: 10917 RVA: 0x000E5C3C File Offset: 0x000E3E3C
+	// Token: 0x06002AA5 RID: 10917 RVA: 0x000E5C1C File Offset: 0x000E3E1C
 	public float CalculateFinalFloatValueForAttribute(GRAttributeType attributeType)
 	{
 		int num = this.bonusSystem.CalculateFinalValueForAttribute(attributeType);
@@ -51,7 +51,7 @@ public class GRAttributes : MonoBehaviour
 		return result;
 	}
 
-	// Token: 0x06002AA6 RID: 10918 RVA: 0x000E5C6C File Offset: 0x000E3E6C
+	// Token: 0x06002AA6 RID: 10918 RVA: 0x000E5C4C File Offset: 0x000E3E4C
 	public int CalculateFinalValueForAttribute(GRAttributeType attributeType)
 	{
 		int num = this.bonusSystem.CalculateFinalValueForAttribute(attributeType);
@@ -62,7 +62,7 @@ public class GRAttributes : MonoBehaviour
 		return num;
 	}
 
-	// Token: 0x06002AA7 RID: 10919 RVA: 0x000E5C90 File Offset: 0x000E3E90
+	// Token: 0x06002AA7 RID: 10919 RVA: 0x000E5C70 File Offset: 0x000E3E70
 	public bool HasValueForAttribute(GRAttributeType attributeType)
 	{
 		return this.bonusSystem.HasValueForAttribute(attributeType);

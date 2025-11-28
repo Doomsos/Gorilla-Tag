@@ -12,21 +12,21 @@ namespace UnityChan
 		{
 		}
 
-		// Token: 0x060070D8 RID: 28888 RVA: 0x0024EEEE File Offset: 0x0024D0EE
+		// Token: 0x060070D8 RID: 28888 RVA: 0x0024EECE File Offset: 0x0024D0CE
 		private void Start()
 		{
 			this.ResetTimer();
 			base.StartCoroutine("RandomChange");
 		}
 
-		// Token: 0x060070D9 RID: 28889 RVA: 0x0024EF02 File Offset: 0x0024D102
+		// Token: 0x060070D9 RID: 28889 RVA: 0x0024EEE2 File Offset: 0x0024D0E2
 		private void ResetTimer()
 		{
 			this.timeRemining = this.timeBlink;
 			this.timerStarted = false;
 		}
 
-		// Token: 0x060070DA RID: 28890 RVA: 0x0024EF18 File Offset: 0x0024D118
+		// Token: 0x060070DA RID: 28890 RVA: 0x0024EEF8 File Offset: 0x0024D0F8
 		private void Update()
 		{
 			if (!this.timerStarted)
@@ -50,7 +50,7 @@ namespace UnityChan
 			}
 		}
 
-		// Token: 0x060070DB RID: 28891 RVA: 0x0024EF8C File Offset: 0x0024D18C
+		// Token: 0x060070DB RID: 28891 RVA: 0x0024EF6C File Offset: 0x0024D16C
 		private void LateUpdate()
 		{
 			if (this.isActive && this.isBlink)
@@ -73,28 +73,28 @@ namespace UnityChan
 			}
 		}
 
-		// Token: 0x060070DC RID: 28892 RVA: 0x0024EFDE File Offset: 0x0024D1DE
+		// Token: 0x060070DC RID: 28892 RVA: 0x0024EFBE File Offset: 0x0024D1BE
 		private void SetCloseEyes()
 		{
 			this.ref_SMR_EYE_DEF.SetBlendShapeWeight(6, this.ratio_Close);
 			this.ref_SMR_EL_DEF.SetBlendShapeWeight(6, this.ratio_Close);
 		}
 
-		// Token: 0x060070DD RID: 28893 RVA: 0x0024F004 File Offset: 0x0024D204
+		// Token: 0x060070DD RID: 28893 RVA: 0x0024EFE4 File Offset: 0x0024D1E4
 		private void SetHalfCloseEyes()
 		{
 			this.ref_SMR_EYE_DEF.SetBlendShapeWeight(6, this.ratio_HalfClose);
 			this.ref_SMR_EL_DEF.SetBlendShapeWeight(6, this.ratio_HalfClose);
 		}
 
-		// Token: 0x060070DE RID: 28894 RVA: 0x0024F02A File Offset: 0x0024D22A
+		// Token: 0x060070DE RID: 28894 RVA: 0x0024F00A File Offset: 0x0024D20A
 		private void SetOpenEyes()
 		{
 			this.ref_SMR_EYE_DEF.SetBlendShapeWeight(6, this.ratio_Open);
 			this.ref_SMR_EL_DEF.SetBlendShapeWeight(6, this.ratio_Open);
 		}
 
-		// Token: 0x060070DF RID: 28895 RVA: 0x0024F050 File Offset: 0x0024D250
+		// Token: 0x060070DF RID: 28895 RVA: 0x0024F030 File Offset: 0x0024D230
 		private IEnumerator RandomChange()
 		{
 			for (;;)

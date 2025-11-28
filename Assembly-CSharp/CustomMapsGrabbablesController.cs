@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000961 RID: 2401
 public class CustomMapsGrabbablesController : MonoBehaviour, IGameEntityComponent
 {
-	// Token: 0x06003D91 RID: 15761 RVA: 0x0014644C File Offset: 0x0014464C
+	// Token: 0x06003D91 RID: 15761 RVA: 0x0014642C File Offset: 0x0014462C
 	private void Awake()
 	{
 		this.isGrabbed = false;
@@ -16,7 +16,7 @@ public class CustomMapsGrabbablesController : MonoBehaviour, IGameEntityComponen
 		gameEntity2.OnReleased = (Action)Delegate.Combine(gameEntity2.OnReleased, new Action(this.OnReleased));
 	}
 
-	// Token: 0x06003D92 RID: 15762 RVA: 0x001464B0 File Offset: 0x001446B0
+	// Token: 0x06003D92 RID: 15762 RVA: 0x00146490 File Offset: 0x00144690
 	private void OnDestroy()
 	{
 		GameEntity gameEntity = this.entity;
@@ -25,7 +25,7 @@ public class CustomMapsGrabbablesController : MonoBehaviour, IGameEntityComponen
 		gameEntity2.OnReleased = (Action)Delegate.Remove(gameEntity2.OnReleased, new Action(this.OnReleased));
 	}
 
-	// Token: 0x06003D93 RID: 15763 RVA: 0x0014650C File Offset: 0x0014470C
+	// Token: 0x06003D93 RID: 15763 RVA: 0x001464EC File Offset: 0x001446EC
 	public void OnEntityInit()
 	{
 		GTDev.Log<string>("CustomMapsGrabbablesController::OnEntityInit", null);
@@ -65,7 +65,7 @@ public class CustomMapsGrabbablesController : MonoBehaviour, IGameEntityComponen
 		}
 	}
 
-	// Token: 0x06003D94 RID: 15764 RVA: 0x00146679 File Offset: 0x00144879
+	// Token: 0x06003D94 RID: 15764 RVA: 0x00146659 File Offset: 0x00144859
 	public int GetGrabbingActor()
 	{
 		if (!this.isGrabbed)
@@ -85,13 +85,13 @@ public class CustomMapsGrabbablesController : MonoBehaviour, IGameEntityComponen
 	{
 	}
 
-	// Token: 0x06003D97 RID: 15767 RVA: 0x00146690 File Offset: 0x00144890
+	// Token: 0x06003D97 RID: 15767 RVA: 0x00146670 File Offset: 0x00144870
 	private void OnGrabbed()
 	{
 		this.isGrabbed = true;
 	}
 
-	// Token: 0x06003D98 RID: 15768 RVA: 0x00146699 File Offset: 0x00144899
+	// Token: 0x06003D98 RID: 15768 RVA: 0x00146679 File Offset: 0x00144879
 	private void OnReleased()
 	{
 		this.isGrabbed = false;

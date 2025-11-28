@@ -7,11 +7,11 @@ namespace GorillaTagScripts.ObstacleCourse
 	public class ObstacleEndLineTrigger : MonoBehaviour
 	{
 		// Token: 0x14000098 RID: 152
-		// (add) Token: 0x06005ACF RID: 23247 RVA: 0x001D1718 File Offset: 0x001CF918
-		// (remove) Token: 0x06005AD0 RID: 23248 RVA: 0x001D1750 File Offset: 0x001CF950
+		// (add) Token: 0x06005ACF RID: 23247 RVA: 0x001D16F8 File Offset: 0x001CF8F8
+		// (remove) Token: 0x06005AD0 RID: 23248 RVA: 0x001D1730 File Offset: 0x001CF930
 		public event ObstacleEndLineTrigger.ObstacleCourseTriggerEvent OnPlayerTriggerEnter;
 
-		// Token: 0x06005AD1 RID: 23249 RVA: 0x001D1788 File Offset: 0x001CF988
+		// Token: 0x06005AD1 RID: 23249 RVA: 0x001D1768 File Offset: 0x001CF968
 		private void OnTriggerEnter(Collider other)
 		{
 			VRRig vrrig;

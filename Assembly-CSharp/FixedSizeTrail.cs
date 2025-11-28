@@ -6,7 +6,7 @@ using UnityEngine;
 public class FixedSizeTrail : MonoBehaviour
 {
 	// Token: 0x170003CC RID: 972
-	// (get) Token: 0x060025D9 RID: 9689 RVA: 0x000CA522 File Offset: 0x000C8722
+	// (get) Token: 0x060025D9 RID: 9689 RVA: 0x000CA502 File Offset: 0x000C8702
 	public LineRenderer renderer
 	{
 		get
@@ -16,8 +16,8 @@ public class FixedSizeTrail : MonoBehaviour
 	}
 
 	// Token: 0x170003CD RID: 973
-	// (get) Token: 0x060025DA RID: 9690 RVA: 0x000CA52A File Offset: 0x000C872A
-	// (set) Token: 0x060025DB RID: 9691 RVA: 0x000CA532 File Offset: 0x000C8732
+	// (get) Token: 0x060025DA RID: 9690 RVA: 0x000CA50A File Offset: 0x000C870A
+	// (set) Token: 0x060025DB RID: 9691 RVA: 0x000CA512 File Offset: 0x000C8712
 	public float length
 	{
 		get
@@ -31,7 +31,7 @@ public class FixedSizeTrail : MonoBehaviour
 	}
 
 	// Token: 0x170003CE RID: 974
-	// (get) Token: 0x060025DC RID: 9692 RVA: 0x000CA54A File Offset: 0x000C874A
+	// (get) Token: 0x060025DC RID: 9692 RVA: 0x000CA52A File Offset: 0x000C872A
 	public Vector3[] points
 	{
 		get
@@ -40,25 +40,25 @@ public class FixedSizeTrail : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060025DD RID: 9693 RVA: 0x000CA552 File Offset: 0x000C8752
+	// Token: 0x060025DD RID: 9693 RVA: 0x000CA532 File Offset: 0x000C8732
 	private void Reset()
 	{
 		this.Setup();
 	}
 
-	// Token: 0x060025DE RID: 9694 RVA: 0x000CA552 File Offset: 0x000C8752
+	// Token: 0x060025DE RID: 9694 RVA: 0x000CA532 File Offset: 0x000C8732
 	private void Awake()
 	{
 		this.Setup();
 	}
 
-	// Token: 0x060025DF RID: 9695 RVA: 0x000CA552 File Offset: 0x000C8752
+	// Token: 0x060025DF RID: 9695 RVA: 0x000CA532 File Offset: 0x000C8732
 	private void OnEnable()
 	{
 		this.Setup();
 	}
 
-	// Token: 0x060025E0 RID: 9696 RVA: 0x000CA55C File Offset: 0x000C875C
+	// Token: 0x060025E0 RID: 9696 RVA: 0x000CA53C File Offset: 0x000C873C
 	public void Setup()
 	{
 		this._transform = base.transform;
@@ -85,7 +85,7 @@ public class FixedSizeTrail : MonoBehaviour
 		this.Update();
 	}
 
-	// Token: 0x060025E1 RID: 9697 RVA: 0x000CA63A File Offset: 0x000C883A
+	// Token: 0x060025E1 RID: 9697 RVA: 0x000CA61A File Offset: 0x000C881A
 	private void Update()
 	{
 		if (!this.manualUpdate)
@@ -94,7 +94,7 @@ public class FixedSizeTrail : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060025E2 RID: 9698 RVA: 0x000CA650 File Offset: 0x000C8850
+	// Token: 0x060025E2 RID: 9698 RVA: 0x000CA630 File Offset: 0x000C8830
 	private void FixedUpdate()
 	{
 		if (!this.applyPhysics)
@@ -114,7 +114,7 @@ public class FixedSizeTrail : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060025E3 RID: 9699 RVA: 0x000CA6F4 File Offset: 0x000C88F4
+	// Token: 0x060025E3 RID: 9699 RVA: 0x000CA6D4 File Offset: 0x000C88D4
 	public void Update(float dt)
 	{
 		float num = this._length / (float)(this._segments - 1);
@@ -151,7 +151,7 @@ public class FixedSizeTrail : MonoBehaviour
 		this._lineRenderer.SetPositions(this._points);
 	}
 
-	// Token: 0x060025E4 RID: 9700 RVA: 0x000CA8AC File Offset: 0x000C8AAC
+	// Token: 0x060025E4 RID: 9700 RVA: 0x000CA88C File Offset: 0x000C8A8C
 	private static float CalcLength(in Vector3[] positions)
 	{
 		float num = 0f;

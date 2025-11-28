@@ -11,7 +11,7 @@ public class CallLimiter
 	{
 	}
 
-	// Token: 0x06004AFA RID: 19194 RVA: 0x001881EC File Offset: 0x001863EC
+	// Token: 0x06004AFA RID: 19194 RVA: 0x001881CC File Offset: 0x001863CC
 	public CallLimiter(int historyLength, float coolDown, float latencyMax = 0.5f)
 	{
 		this.callTimeHistory = new float[historyLength];
@@ -24,7 +24,7 @@ public class CallLimiter
 		this.maxLatency = (double)latencyMax;
 	}
 
-	// Token: 0x06004AFB RID: 19195 RVA: 0x0018823C File Offset: 0x0018643C
+	// Token: 0x06004AFB RID: 19195 RVA: 0x0018821C File Offset: 0x0018641C
 	public bool CheckCallServerTime(double time)
 	{
 		double currentTime = PhotonNetwork.CurrentTime;
@@ -65,7 +65,7 @@ public class CallLimiter
 		return this.CheckCallTime((float)time);
 	}
 
-	// Token: 0x06004AFC RID: 19196 RVA: 0x00188304 File Offset: 0x00186504
+	// Token: 0x06004AFC RID: 19196 RVA: 0x001882E4 File Offset: 0x001864E4
 	public virtual bool CheckCallTime(float time)
 	{
 		if (this.callTimeHistory[this.oldTimeIndex] > time)
@@ -82,7 +82,7 @@ public class CallLimiter
 		return true;
 	}
 
-	// Token: 0x06004AFD RID: 19197 RVA: 0x0018836C File Offset: 0x0018656C
+	// Token: 0x06004AFD RID: 19197 RVA: 0x0018834C File Offset: 0x0018654C
 	public virtual void Reset()
 	{
 		if (this.callTimeHistory == null)

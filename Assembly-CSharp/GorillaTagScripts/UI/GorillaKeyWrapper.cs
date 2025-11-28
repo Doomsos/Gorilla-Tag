@@ -9,7 +9,7 @@ namespace GorillaTagScripts.UI
 	// Token: 0x02000E2C RID: 3628
 	public class GorillaKeyWrapper<TBinding> : MonoBehaviour where TBinding : Enum
 	{
-		// Token: 0x06005A89 RID: 23177 RVA: 0x001D0628 File Offset: 0x001CE828
+		// Token: 0x06005A89 RID: 23177 RVA: 0x001D0608 File Offset: 0x001CE808
 		public void Start()
 		{
 			if (!this.defineButtonsManually)
@@ -33,7 +33,7 @@ namespace GorillaTagScripts.UI
 			}
 		}
 
-		// Token: 0x06005A8A RID: 23178 RVA: 0x001D06B4 File Offset: 0x001CE8B4
+		// Token: 0x06005A8A RID: 23178 RVA: 0x001D0694 File Offset: 0x001CE894
 		public void OnDestroy()
 		{
 			for (int i = 0; i < this.buttons.Count; i++)
@@ -45,7 +45,7 @@ namespace GorillaTagScripts.UI
 			}
 		}
 
-		// Token: 0x06005A8B RID: 23179 RVA: 0x001D070C File Offset: 0x001CE90C
+		// Token: 0x06005A8B RID: 23179 RVA: 0x001D06EC File Offset: 0x001CE8EC
 		public void FindMatchingButtons(GameObject obj)
 		{
 			if (obj.IsNull())
@@ -68,7 +68,7 @@ namespace GorillaTagScripts.UI
 			}
 		}
 
-		// Token: 0x06005A8C RID: 23180 RVA: 0x001D0799 File Offset: 0x001CE999
+		// Token: 0x06005A8C RID: 23180 RVA: 0x001D0779 File Offset: 0x001CE979
 		private void OnKeyButtonPressed(TBinding binding)
 		{
 			UnityEvent<TBinding> onKeyPressed = this.OnKeyPressed;

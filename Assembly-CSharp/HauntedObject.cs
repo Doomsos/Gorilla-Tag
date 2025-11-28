@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 // Token: 0x02000802 RID: 2050
 public class HauntedObject : MonoBehaviour
 {
-	// Token: 0x060035F5 RID: 13813 RVA: 0x00124DA0 File Offset: 0x00122FA0
+	// Token: 0x060035F5 RID: 13813 RVA: 0x00124D80 File Offset: 0x00122F80
 	private void Awake()
 	{
 		this.lurkerGhost = GameObject.FindGameObjectWithTag("LurkerGhost");
@@ -28,7 +28,7 @@ public class HauntedObject : MonoBehaviour
 		this.animators = base.transform.GetComponentsInChildren<Animator>();
 	}
 
-	// Token: 0x060035F6 RID: 13814 RVA: 0x00124E5C File Offset: 0x0012305C
+	// Token: 0x060035F6 RID: 13814 RVA: 0x00124E3C File Offset: 0x0012303C
 	private void OnDestroy()
 	{
 		LurkerGhost lurkerGhost;
@@ -45,7 +45,7 @@ public class HauntedObject : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060035F7 RID: 13815 RVA: 0x00124EE7 File Offset: 0x001230E7
+	// Token: 0x060035F7 RID: 13815 RVA: 0x00124EC7 File Offset: 0x001230C7
 	private void Start()
 	{
 		this.initialPos = base.transform.position;
@@ -53,7 +53,7 @@ public class HauntedObject : MonoBehaviour
 		this.lightPassedTime = 0f;
 	}
 
-	// Token: 0x060035F8 RID: 13816 RVA: 0x00124F10 File Offset: 0x00123110
+	// Token: 0x060035F8 RID: 13816 RVA: 0x00124EF0 File Offset: 0x001230F0
 	private void TriggerEffects(GameObject go)
 	{
 		if (base.gameObject != go)
@@ -85,7 +85,7 @@ public class HauntedObject : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060035F9 RID: 13817 RVA: 0x00124FE2 File Offset: 0x001231E2
+	// Token: 0x060035F9 RID: 13817 RVA: 0x00124FC2 File Offset: 0x001231C2
 	private IEnumerator Shake()
 	{
 		while (this.passedTime < this.duration)
@@ -98,7 +98,7 @@ public class HauntedObject : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060035FA RID: 13818 RVA: 0x00124FF1 File Offset: 0x001231F1
+	// Token: 0x060035FA RID: 13818 RVA: 0x00124FD1 File Offset: 0x001231D1
 	private IEnumerator TurnOff()
 	{
 		this.TurnOffLight.gameObject.SetActive(false);

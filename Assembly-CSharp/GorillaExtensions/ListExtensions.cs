@@ -7,7 +7,7 @@ namespace GorillaExtensions
 	// Token: 0x02000FB8 RID: 4024
 	public static class ListExtensions
 	{
-		// Token: 0x06006505 RID: 25861 RVA: 0x0020FB90 File Offset: 0x0020DD90
+		// Token: 0x06006505 RID: 25861 RVA: 0x0020FB70 File Offset: 0x0020DD70
 		public static TCol ShuffleIntoCollection<TCol, TVal>(this List<TVal> list) where TCol : ICollection<TVal>, new()
 		{
 			List<TVal> list2 = new List<TVal>(list);

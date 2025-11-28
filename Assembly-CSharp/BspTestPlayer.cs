@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000CF8 RID: 3320
 public class BspTestPlayer : MonoBehaviour
 {
-	// Token: 0x060050A4 RID: 20644 RVA: 0x0019F2F2 File Offset: 0x0019D4F2
+	// Token: 0x060050A4 RID: 20644 RVA: 0x0019F2D2 File Offset: 0x0019D4D2
 	private void Start()
 	{
 		if (this.bspSystem == null)
@@ -18,7 +18,7 @@ public class BspTestPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060050A5 RID: 20645 RVA: 0x0019F321 File Offset: 0x0019D521
+	// Token: 0x060050A5 RID: 20645 RVA: 0x0019F301 File Offset: 0x0019D501
 	private void Update()
 	{
 		this.HandleMovement();
@@ -26,7 +26,7 @@ public class BspTestPlayer : MonoBehaviour
 		this.UpdateUI();
 	}
 
-	// Token: 0x060050A6 RID: 20646 RVA: 0x0019F338 File Offset: 0x0019D538
+	// Token: 0x060050A6 RID: 20646 RVA: 0x0019F318 File Offset: 0x0019D518
 	private void HandleMovement()
 	{
 		Vector3 vector = Vector3.zero;
@@ -78,7 +78,7 @@ public class BspTestPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060050A7 RID: 20647 RVA: 0x0019F490 File Offset: 0x0019D690
+	// Token: 0x060050A7 RID: 20647 RVA: 0x0019F470 File Offset: 0x0019D670
 	private void UpdateZoneInfo()
 	{
 		if (this.bspSystem == null)
@@ -99,7 +99,7 @@ public class BspTestPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060050A8 RID: 20648 RVA: 0x0019F524 File Offset: 0x0019D724
+	// Token: 0x060050A8 RID: 20648 RVA: 0x0019F504 File Offset: 0x0019D704
 	private void UpdateUI()
 	{
 		if (this.zoneDisplayText != null)
@@ -113,7 +113,7 @@ public class BspTestPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060050A9 RID: 20649 RVA: 0x0019F5AC File Offset: 0x0019D7AC
+	// Token: 0x060050A9 RID: 20649 RVA: 0x0019F58C File Offset: 0x0019D78C
 	private void CreateUI()
 	{
 		GameObject gameObject = new GameObject("Zone Display");
@@ -136,7 +136,7 @@ public class BspTestPlayer : MonoBehaviour
 		gameObject2.transform.Rotate(0f, 180f, 0f);
 	}
 
-	// Token: 0x060050AA RID: 20650 RVA: 0x0019F780 File Offset: 0x0019D980
+	// Token: 0x060050AA RID: 20650 RVA: 0x0019F760 File Offset: 0x0019D960
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = ((this.currentZone != null) ? Color.green : Color.red);
@@ -152,7 +152,7 @@ public class BspTestPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060050AB RID: 20651 RVA: 0x0019F830 File Offset: 0x0019DA30
+	// Token: 0x060050AB RID: 20651 RVA: 0x0019F810 File Offset: 0x0019DA10
 	private void DrawBSPSplits()
 	{
 		SerializableBSPTree bsptree = this.bspSystem.GetBSPTree();
@@ -175,7 +175,7 @@ public class BspTestPlayer : MonoBehaviour
 		this.DrawPlayerPath(bsptree, base.transform.position, bsptree.rootIndex, bounds, 0);
 	}
 
-	// Token: 0x060050AC RID: 20652 RVA: 0x0019F8DC File Offset: 0x0019DADC
+	// Token: 0x060050AC RID: 20652 RVA: 0x0019F8BC File Offset: 0x0019DABC
 	private void DrawPlayerPath(SerializableBSPTree tree, Vector3 playerPos, int nodeIndex, Bounds bounds, int depth)
 	{
 		if (nodeIndex >= tree.nodes.Length || depth >= tree.nodes.Length)
@@ -241,7 +241,7 @@ public class BspTestPlayer : MonoBehaviour
 		this.DrawPlayerPath(tree, playerPos, (int)serializableBSPNode.rightChildIndex, bounds3, depth + 1);
 	}
 
-	// Token: 0x060050AD RID: 20653 RVA: 0x0019FC34 File Offset: 0x0019DE34
+	// Token: 0x060050AD RID: 20653 RVA: 0x0019FC14 File Offset: 0x0019DE14
 	private float GetAxisValue(Vector3 point, SerializableBSPNode.Axis axis)
 	{
 		switch (axis)
@@ -263,7 +263,7 @@ public class BspTestPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060050AE RID: 20654 RVA: 0x0019FC90 File Offset: 0x0019DE90
+	// Token: 0x060050AE RID: 20654 RVA: 0x0019FC70 File Offset: 0x0019DE70
 	private void DrawSplitPlane(SerializableBSPNode.Axis axis, float splitValue, Bounds bounds)
 	{
 		Vector3 center = bounds.center;
@@ -290,7 +290,7 @@ public class BspTestPlayer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060050AF RID: 20655 RVA: 0x0019FE60 File Offset: 0x0019E060
+	// Token: 0x060050AF RID: 20655 RVA: 0x0019FE40 File Offset: 0x0019E040
 	private Color GetAxisColor(SerializableBSPNode.Axis axis, int depth)
 	{
 		float num = 1f - (float)depth * 0.15f;

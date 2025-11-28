@@ -5,7 +5,7 @@ using UnityEngine;
 public class TapInnerGlow : MonoBehaviour
 {
 	// Token: 0x170004FB RID: 1275
-	// (get) Token: 0x06003735 RID: 14133 RVA: 0x001298B8 File Offset: 0x00127AB8
+	// (get) Token: 0x06003735 RID: 14133 RVA: 0x00129898 File Offset: 0x00127A98
 	private Material targetMaterial
 	{
 		get
@@ -18,7 +18,7 @@ public class TapInnerGlow : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003736 RID: 14134 RVA: 0x001298F4 File Offset: 0x00127AF4
+	// Token: 0x06003736 RID: 14134 RVA: 0x001298D4 File Offset: 0x00127AD4
 	public void Tap()
 	{
 		if (!this._renderer)

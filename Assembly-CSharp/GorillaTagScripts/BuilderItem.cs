@@ -7,13 +7,13 @@ namespace GorillaTagScripts
 	// Token: 0x02000DB3 RID: 3507
 	public class BuilderItem : TransferrableObject
 	{
-		// Token: 0x06005648 RID: 22088 RVA: 0x001B245C File Offset: 0x001B065C
+		// Token: 0x06005648 RID: 22088 RVA: 0x001B243C File Offset: 0x001B063C
 		public override bool ShouldBeKinematic()
 		{
 			return this.itemState == TransferrableObject.ItemStates.State2 || this.itemState == TransferrableObject.ItemStates.State4 || base.ShouldBeKinematic();
 		}
 
-		// Token: 0x06005649 RID: 22089 RVA: 0x001B247C File Offset: 0x001B067C
+		// Token: 0x06005649 RID: 22089 RVA: 0x001B245C File Offset: 0x001B065C
 		protected override void Awake()
 		{
 			base.Awake();
@@ -24,7 +24,7 @@ namespace GorillaTagScripts
 			this.initialGrabInteractorScale = this.gripInteractor.transform.localScale;
 		}
 
-		// Token: 0x0600564A RID: 22090 RVA: 0x00099EE0 File Offset: 0x000980E0
+		// Token: 0x0600564A RID: 22090 RVA: 0x00099EC0 File Offset: 0x000980C0
 		internal override void OnEnable()
 		{
 			base.OnEnable();
@@ -36,7 +36,7 @@ namespace GorillaTagScripts
 			base.OnDisable();
 		}
 
-		// Token: 0x0600564C RID: 22092 RVA: 0x001B24DF File Offset: 0x001B06DF
+		// Token: 0x0600564C RID: 22092 RVA: 0x001B24BF File Offset: 0x001B06BF
 		protected override void Start()
 		{
 			base.Start();
@@ -44,7 +44,7 @@ namespace GorillaTagScripts
 			this.currentState = TransferrableObject.PositionState.Dropped;
 		}
 
-		// Token: 0x0600564D RID: 22093 RVA: 0x001B24FC File Offset: 0x001B06FC
+		// Token: 0x0600564D RID: 22093 RVA: 0x001B24DC File Offset: 0x001B06DC
 		public void AttachPiece(BuilderPiece piece)
 		{
 			base.transform.SetPositionAndRotation(piece.transform.position, piece.transform.rotation);
@@ -58,7 +58,7 @@ namespace GorillaTagScripts
 			this.attachedPiece = piece;
 		}
 
-		// Token: 0x0600564E RID: 22094 RVA: 0x001B2594 File Offset: 0x001B0794
+		// Token: 0x0600564E RID: 22094 RVA: 0x001B2574 File Offset: 0x001B0774
 		public void DetachPiece(BuilderPiece piece)
 		{
 			if (piece != this.attachedPiece)
@@ -79,7 +79,7 @@ namespace GorillaTagScripts
 			this.attachedPiece = null;
 		}
 
-		// Token: 0x0600564F RID: 22095 RVA: 0x001B263C File Offset: 0x001B083C
+		// Token: 0x0600564F RID: 22095 RVA: 0x001B261C File Offset: 0x001B081C
 		private new void OnStateChanged()
 		{
 			if (this.itemState == TransferrableObject.ItemStates.State2)
@@ -94,7 +94,7 @@ namespace GorillaTagScripts
 			this.handsFreeOfCollidersTime = 0f;
 		}
 
-		// Token: 0x06005650 RID: 22096 RVA: 0x001B26B0 File Offset: 0x001B08B0
+		// Token: 0x06005650 RID: 22096 RVA: 0x001B2690 File Offset: 0x001B0890
 		public override Matrix4x4 GetDefaultTransformationMatrix()
 		{
 			if (this.reliableState.dirty)
@@ -105,7 +105,7 @@ namespace GorillaTagScripts
 			return base.GetDefaultTransformationMatrix();
 		}
 
-		// Token: 0x06005651 RID: 22097 RVA: 0x001B2710 File Offset: 0x001B0910
+		// Token: 0x06005651 RID: 22097 RVA: 0x001B26F0 File Offset: 0x001B08F0
 		protected override void LateUpdateShared()
 		{
 			base.LateUpdateShared();
@@ -131,7 +131,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005652 RID: 22098 RVA: 0x001B27C8 File Offset: 0x001B09C8
+		// Token: 0x06005652 RID: 22098 RVA: 0x001B27A8 File Offset: 0x001B09A8
 		private bool IsOverlapping(List<InteractionPoint> interactionPoints)
 		{
 			if (interactionPoints == null)
@@ -148,13 +148,13 @@ namespace GorillaTagScripts
 			return false;
 		}
 
-		// Token: 0x06005653 RID: 22099 RVA: 0x001B2802 File Offset: 0x001B0A02
+		// Token: 0x06005653 RID: 22099 RVA: 0x001B27E2 File Offset: 0x001B09E2
 		protected override void LateUpdateLocal()
 		{
 			base.LateUpdateLocal();
 		}
 
-		// Token: 0x06005654 RID: 22100 RVA: 0x001B280A File Offset: 0x001B0A0A
+		// Token: 0x06005654 RID: 22100 RVA: 0x001B27EA File Offset: 0x001B09EA
 		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 		{
 			if (GorillaTagger.Instance.offlineVRRig.scaleFactor < 1f)
@@ -165,7 +165,7 @@ namespace GorillaTagScripts
 			this.itemState = TransferrableObject.ItemStates.State0;
 		}
 
-		// Token: 0x06005655 RID: 22101 RVA: 0x001B2832 File Offset: 0x001B0A32
+		// Token: 0x06005655 RID: 22101 RVA: 0x001B2812 File Offset: 0x001B0A12
 		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 		{
 			if (!base.OnRelease(zoneReleased, releasingHand))
@@ -179,25 +179,25 @@ namespace GorillaTagScripts
 			return true;
 		}
 
-		// Token: 0x06005656 RID: 22102 RVA: 0x001B286D File Offset: 0x001B0A6D
+		// Token: 0x06005656 RID: 22102 RVA: 0x001B284D File Offset: 0x001B0A4D
 		public void OnHoverOverTableStart(BuilderTable table)
 		{
 			this.currTable = table;
 		}
 
-		// Token: 0x06005657 RID: 22103 RVA: 0x001B2876 File Offset: 0x001B0A76
+		// Token: 0x06005657 RID: 22103 RVA: 0x001B2856 File Offset: 0x001B0A56
 		public void OnHoverOverTableEnd(BuilderTable table)
 		{
 			this.currTable = null;
 		}
 
-		// Token: 0x06005658 RID: 22104 RVA: 0x001B287F File Offset: 0x001B0A7F
+		// Token: 0x06005658 RID: 22104 RVA: 0x001B285F File Offset: 0x001B0A5F
 		public override void OnJoinedRoom()
 		{
 			base.OnJoinedRoom();
 		}
 
-		// Token: 0x06005659 RID: 22105 RVA: 0x001B2888 File Offset: 0x001B0A88
+		// Token: 0x06005659 RID: 22105 RVA: 0x001B2868 File Offset: 0x001B0A68
 		public override void OnLeftRoom()
 		{
 			base.OnLeftRoom();
@@ -212,13 +212,13 @@ namespace GorillaTagScripts
 			this.currentState = TransferrableObject.PositionState.Dropped;
 		}
 
-		// Token: 0x0600565A RID: 22106 RVA: 0x000BB586 File Offset: 0x000B9786
+		// Token: 0x0600565A RID: 22106 RVA: 0x000BB566 File Offset: 0x000B9766
 		private void PlayVFX(GameObject vfx)
 		{
 			ObjectPools.instance.Instantiate(vfx, base.transform.position, true);
 		}
 
-		// Token: 0x0600565B RID: 22107 RVA: 0x001B290A File Offset: 0x001B0B0A
+		// Token: 0x0600565B RID: 22107 RVA: 0x001B28EA File Offset: 0x001B0AEA
 		private bool Reparent(Transform _transform)
 		{
 			if (!this.allowReparenting)
@@ -234,13 +234,13 @@ namespace GorillaTagScripts
 			return false;
 		}
 
-		// Token: 0x0600565C RID: 22108 RVA: 0x001B2943 File Offset: 0x001B0B43
+		// Token: 0x0600565C RID: 22108 RVA: 0x001B2923 File Offset: 0x001B0B23
 		private bool ShouldPlayFX()
 		{
 			return this.previousItemState == BuilderItem.BuilderItemState.isHeld || this.previousItemState == BuilderItem.BuilderItemState.dropped;
 		}
 
-		// Token: 0x0600565D RID: 22109 RVA: 0x001B295A File Offset: 0x001B0B5A
+		// Token: 0x0600565D RID: 22109 RVA: 0x001B293A File Offset: 0x001B0B3A
 		public static GameObject BuildEnvItem(int prefabHash, Vector3 position, Quaternion rotation)
 		{
 			GameObject gameObject = ObjectPools.instance.Instantiate(prefabHash, true);
@@ -248,7 +248,7 @@ namespace GorillaTagScripts
 			return gameObject;
 		}
 
-		// Token: 0x0600565E RID: 22110 RVA: 0x001B2978 File Offset: 0x001B0B78
+		// Token: 0x0600565E RID: 22110 RVA: 0x001B2958 File Offset: 0x001B0B58
 		protected override void OnHandMatrixUpdate(Vector3 localPosition, Quaternion localRotation, bool leftHand)
 		{
 			if (leftHand)
@@ -264,7 +264,7 @@ namespace GorillaTagScripts
 			this.reliableState.dirty = true;
 		}
 
-		// Token: 0x0600565F RID: 22111 RVA: 0x001B29C6 File Offset: 0x001B0BC6
+		// Token: 0x0600565F RID: 22111 RVA: 0x001B29A6 File Offset: 0x001B0BA6
 		public int GetPhotonViewId()
 		{
 			if (this.worldShareableInstance == null)

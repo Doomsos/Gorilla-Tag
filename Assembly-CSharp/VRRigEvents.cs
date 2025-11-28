@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(RigContainer))]
 public class VRRigEvents : MonoBehaviour, IPreDisable
 {
-	// Token: 0x06001C19 RID: 7193 RVA: 0x000956D6 File Offset: 0x000938D6
+	// Token: 0x06001C19 RID: 7193 RVA: 0x000956B6 File Offset: 0x000938B6
 	public void PreDisable()
 	{
 		DelegateListProcessor<RigContainer> delegateListProcessor = this.disableEvent;
@@ -17,7 +17,7 @@ public class VRRigEvents : MonoBehaviour, IPreDisable
 		delegateListProcessor.InvokeSafe(this.rigRef);
 	}
 
-	// Token: 0x06001C1A RID: 7194 RVA: 0x000956EE File Offset: 0x000938EE
+	// Token: 0x06001C1A RID: 7194 RVA: 0x000956CE File Offset: 0x000938CE
 	public void SendPostEnableEvent()
 	{
 		DelegateListProcessor<RigContainer> delegateListProcessor = this.enableEvent;

@@ -7,7 +7,7 @@ using UnityEngine.Events;
 // Token: 0x020004EB RID: 1259
 public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 {
-	// Token: 0x06002059 RID: 8281 RVA: 0x000AB7B4 File Offset: 0x000A99B4
+	// Token: 0x06002059 RID: 8281 RVA: 0x000AB794 File Offset: 0x000A9994
 	private void Awake()
 	{
 		this.stickyPart.GetLocalPositionAndRotation(ref this.stickyPartLocalPosition, ref this.stickyPartLocalRotation);
@@ -27,7 +27,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 		onReset.Invoke();
 	}
 
-	// Token: 0x0600205A RID: 8282 RVA: 0x000AB868 File Offset: 0x000A9A68
+	// Token: 0x0600205A RID: 8282 RVA: 0x000AB848 File Offset: 0x000A9A48
 	public void Launch(Vector3 startPosition, Quaternion startRotation, Vector3 velocity, float chargeFrac, VRRig ownerRig, int progress)
 	{
 		UnityEvent onLaunch = this.OnLaunch;
@@ -61,7 +61,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 		}
 	}
 
-	// Token: 0x0600205B RID: 8283 RVA: 0x000AB9A4 File Offset: 0x000A9BA4
+	// Token: 0x0600205B RID: 8283 RVA: 0x000AB984 File Offset: 0x000A9B84
 	private void StickTo(Transform otherTransform, Vector3 position, Quaternion rotation)
 	{
 		this.stickyPart.parent = otherTransform;
@@ -71,7 +71,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 		this.collider.enabled = false;
 	}
 
-	// Token: 0x0600205C RID: 8284 RVA: 0x000ABA0C File Offset: 0x000A9C0C
+	// Token: 0x0600205C RID: 8284 RVA: 0x000AB9EC File Offset: 0x000A9BEC
 	private void OnCollisionEnter(Collision collision)
 	{
 		TickSystem<object>.RemoveTickCallback(this);
@@ -80,7 +80,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 		this.stickEvents.InvokeAll(StickyProjectile.StickFlags.Wall, false);
 	}
 
-	// Token: 0x0600205D RID: 8285 RVA: 0x000ABA70 File Offset: 0x000A9C70
+	// Token: 0x0600205D RID: 8285 RVA: 0x000ABA50 File Offset: 0x000A9C50
 	private void OnTriggerEnter(Collider other)
 	{
 		if (other.gameObject.layer != this.triggerLayer)
@@ -141,13 +141,13 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 		this.StickTo(other.transform, vector3, rotation);
 	}
 
-	// Token: 0x0600205E RID: 8286 RVA: 0x000ABC8D File Offset: 0x000A9E8D
+	// Token: 0x0600205E RID: 8286 RVA: 0x000ABC6D File Offset: 0x000A9E6D
 	private void OnEnable()
 	{
 		this.stickyPart.gameObject.SetActive(true);
 	}
 
-	// Token: 0x0600205F RID: 8287 RVA: 0x000ABCA0 File Offset: 0x000A9EA0
+	// Token: 0x0600205F RID: 8287 RVA: 0x000ABC80 File Offset: 0x000A9E80
 	private void OnDisable()
 	{
 		this.stickyPart.gameObject.SetActive(false);
@@ -160,11 +160,11 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 	}
 
 	// Token: 0x1700036A RID: 874
-	// (get) Token: 0x06002060 RID: 8288 RVA: 0x000ABCC3 File Offset: 0x000A9EC3
-	// (set) Token: 0x06002061 RID: 8289 RVA: 0x000ABCCB File Offset: 0x000A9ECB
+	// (get) Token: 0x06002060 RID: 8288 RVA: 0x000ABCA3 File Offset: 0x000A9EA3
+	// (set) Token: 0x06002061 RID: 8289 RVA: 0x000ABCAB File Offset: 0x000A9EAB
 	public bool TickRunning { get; set; }
 
-	// Token: 0x06002062 RID: 8290 RVA: 0x000ABCD4 File Offset: 0x000A9ED4
+	// Token: 0x06002062 RID: 8290 RVA: 0x000ABCB4 File Offset: 0x000A9EB4
 	public void Tick()
 	{
 		this.rb.rotation = Quaternion.LookRotation(this.rb.linearVelocity);

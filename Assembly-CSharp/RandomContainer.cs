@@ -5,7 +5,7 @@ using UnityEngine;
 public abstract class RandomContainer<T> : ScriptableObject
 {
 	// Token: 0x170006EF RID: 1775
-	// (get) Token: 0x06004AE1 RID: 19169 RVA: 0x00187E8C File Offset: 0x0018608C
+	// (get) Token: 0x06004AE1 RID: 19169 RVA: 0x00187E6C File Offset: 0x0018606C
 	public T lastItem
 	{
 		get
@@ -15,7 +15,7 @@ public abstract class RandomContainer<T> : ScriptableObject
 	}
 
 	// Token: 0x170006F0 RID: 1776
-	// (get) Token: 0x06004AE2 RID: 19170 RVA: 0x00187E94 File Offset: 0x00186094
+	// (get) Token: 0x06004AE2 RID: 19170 RVA: 0x00187E74 File Offset: 0x00186074
 	public int lastItemIndex
 	{
 		get
@@ -24,7 +24,7 @@ public abstract class RandomContainer<T> : ScriptableObject
 		}
 	}
 
-	// Token: 0x06004AE3 RID: 19171 RVA: 0x00187E9C File Offset: 0x0018609C
+	// Token: 0x06004AE3 RID: 19171 RVA: 0x00187E7C File Offset: 0x0018607C
 	public void ResetRandom(int? seedValue = null)
 	{
 		if (!this.staticSeed)
@@ -38,7 +38,7 @@ public abstract class RandomContainer<T> : ScriptableObject
 		this._rnd = new SRand(this._seed);
 	}
 
-	// Token: 0x06004AE4 RID: 19172 RVA: 0x00187EFC File Offset: 0x001860FC
+	// Token: 0x06004AE4 RID: 19172 RVA: 0x00187EDC File Offset: 0x001860DC
 	public void Reset()
 	{
 		this.ResetRandom(default(int?));
@@ -46,19 +46,19 @@ public abstract class RandomContainer<T> : ScriptableObject
 		this._lastItemIndex = -1;
 	}
 
-	// Token: 0x06004AE5 RID: 19173 RVA: 0x00187F2B File Offset: 0x0018612B
+	// Token: 0x06004AE5 RID: 19173 RVA: 0x00187F0B File Offset: 0x0018610B
 	private void Awake()
 	{
 		this.Reset();
 	}
 
-	// Token: 0x06004AE6 RID: 19174 RVA: 0x00187F33 File Offset: 0x00186133
+	// Token: 0x06004AE6 RID: 19174 RVA: 0x00187F13 File Offset: 0x00186113
 	public virtual T GetItem(int index)
 	{
 		return this.items[index];
 	}
 
-	// Token: 0x06004AE7 RID: 19175 RVA: 0x00187F44 File Offset: 0x00186144
+	// Token: 0x06004AE7 RID: 19175 RVA: 0x00187F24 File Offset: 0x00186124
 	public virtual T NextItem()
 	{
 		this._lastItemIndex = (this.distinct ? this._rnd.NextIntWithExclusion(0, this.items.Length, this._lastItemIndex) : this._rnd.NextInt(0, this.items.Length));

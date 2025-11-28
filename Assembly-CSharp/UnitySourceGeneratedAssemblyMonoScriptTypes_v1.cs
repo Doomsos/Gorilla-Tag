@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 [GeneratedCode("Unity.MonoScriptGenerator.MonoScriptInfoGenerator", null)]
 internal class UnitySourceGeneratedAssemblyMonoScriptTypes_v1
 {
-	// Token: 0x060050EA RID: 20714 RVA: 0x001A1BE0 File Offset: 0x0019FDE0
+	// Token: 0x060050EA RID: 20714 RVA: 0x001A1BC0 File Offset: 0x0019FDC0
 	[MethodImpl(256)]
 	private static UnitySourceGeneratedAssemblyMonoScriptTypes_v1.MonoScriptData Get()
 	{

@@ -6,7 +6,7 @@ namespace Viveport.Internal
 	// Token: 0x02000D42 RID: 3394
 	internal class Api
 	{
-		// Token: 0x0600525A RID: 21082 RVA: 0x001A5083 File Offset: 0x001A3283
+		// Token: 0x0600525A RID: 21082 RVA: 0x001A5063 File Offset: 0x001A3263
 		static Api()
 		{
 			Api.LoadLibraryManually("viveport_api");
@@ -56,7 +56,7 @@ namespace Viveport.Internal
 		[DllImport("kernel32.dll")]
 		internal static extern IntPtr LoadLibrary(string dllToLoad);
 
-		// Token: 0x06005266 RID: 21094 RVA: 0x001A5090 File Offset: 0x001A3290
+		// Token: 0x06005266 RID: 21094 RVA: 0x001A5070 File Offset: 0x001A3270
 		internal static void LoadLibraryManually(string dllName)
 		{
 			if (string.IsNullOrEmpty(dllName))

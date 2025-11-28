@@ -15,7 +15,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class LocalisationManager : MonoBehaviour
 {
 	// Token: 0x17000684 RID: 1668
-	// (get) Token: 0x06004557 RID: 17751 RVA: 0x0016F8AC File Offset: 0x0016DAAC
+	// (get) Token: 0x06004557 RID: 17751 RVA: 0x0016F88C File Offset: 0x0016DA8C
 	public static LocalisationManager Instance
 	{
 		get
@@ -25,7 +25,7 @@ public class LocalisationManager : MonoBehaviour
 	}
 
 	// Token: 0x17000685 RID: 1669
-	// (get) Token: 0x06004558 RID: 17752 RVA: 0x0016F8B3 File Offset: 0x0016DAB3
+	// (get) Token: 0x06004558 RID: 17752 RVA: 0x0016F893 File Offset: 0x0016DA93
 	public static bool IsReady
 	{
 		get
@@ -35,7 +35,7 @@ public class LocalisationManager : MonoBehaviour
 	}
 
 	// Token: 0x17000686 RID: 1670
-	// (get) Token: 0x06004559 RID: 17753 RVA: 0x0016F8D1 File Offset: 0x0016DAD1
+	// (get) Token: 0x06004559 RID: 17753 RVA: 0x0016F8B1 File Offset: 0x0016DAB1
 	public static bool LanguageSet
 	{
 		get
@@ -45,7 +45,7 @@ public class LocalisationManager : MonoBehaviour
 	}
 
 	// Token: 0x17000687 RID: 1671
-	// (get) Token: 0x0600455A RID: 17754 RVA: 0x0016F8E1 File Offset: 0x0016DAE1
+	// (get) Token: 0x0600455A RID: 17754 RVA: 0x0016F8C1 File Offset: 0x0016DAC1
 	public static Locale CurrentLanguage
 	{
 		get
@@ -55,7 +55,7 @@ public class LocalisationManager : MonoBehaviour
 	}
 
 	// Token: 0x17000688 RID: 1672
-	// (get) Token: 0x0600455B RID: 17755 RVA: 0x0016F8E8 File Offset: 0x0016DAE8
+	// (get) Token: 0x0600455B RID: 17755 RVA: 0x0016F8C8 File Offset: 0x0016DAC8
 	private static string LanugageSetPlayerPrefKey
 	{
 		get
@@ -65,7 +65,7 @@ public class LocalisationManager : MonoBehaviour
 	}
 
 	// Token: 0x17000689 RID: 1673
-	// (get) Token: 0x0600455C RID: 17756 RVA: 0x0016F8EF File Offset: 0x0016DAEF
+	// (get) Token: 0x0600455C RID: 17756 RVA: 0x0016F8CF File Offset: 0x0016DACF
 	public static bool ApplicationRunning
 	{
 		get
@@ -74,7 +74,7 @@ public class LocalisationManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600455D RID: 17757 RVA: 0x0016F904 File Offset: 0x0016DB04
+	// Token: 0x0600455D RID: 17757 RVA: 0x0016F8E4 File Offset: 0x0016DAE4
 	private void Awake()
 	{
 		if (LocalisationManager._instance != null)
@@ -100,7 +100,7 @@ public class LocalisationManager : MonoBehaviour
 		LocalisationManager._requestCancellationSource = new CancellationTokenSource();
 	}
 
-	// Token: 0x0600455E RID: 17758 RVA: 0x0016FA7C File Offset: 0x0016DC7C
+	// Token: 0x0600455E RID: 17758 RVA: 0x0016FA5C File Offset: 0x0016DC5C
 	private void Start()
 	{
 		LocalisationManager.<Start>d__32 <Start>d__;
@@ -110,14 +110,14 @@ public class LocalisationManager : MonoBehaviour
 		<Start>d__.<>t__builder.Start<LocalisationManager.<Start>d__32>(ref <Start>d__);
 	}
 
-	// Token: 0x0600455F RID: 17759 RVA: 0x0016FAB3 File Offset: 0x0016DCB3
+	// Token: 0x0600455F RID: 17759 RVA: 0x0016FA93 File Offset: 0x0016DC93
 	private void OnDestroy()
 	{
 		LocalisationManager._requestCancellationSource.Cancel();
 		LocalisationManager._onLanguageChanged = null;
 	}
 
-	// Token: 0x06004560 RID: 17760 RVA: 0x0016FAC5 File Offset: 0x0016DCC5
+	// Token: 0x06004560 RID: 17760 RVA: 0x0016FAA5 File Offset: 0x0016DCA5
 	[RuntimeInitializeOnLoadMethod(3)]
 	private static void InitialiseLocTables()
 	{
@@ -125,7 +125,7 @@ public class LocalisationManager : MonoBehaviour
 		LocalisationManager.CacheLocTables();
 	}
 
-	// Token: 0x06004561 RID: 17761 RVA: 0x0016FADC File Offset: 0x0016DCDC
+	// Token: 0x06004561 RID: 17761 RVA: 0x0016FABC File Offset: 0x0016DCBC
 	[RuntimeInitializeOnLoadMethod(1)]
 	private static void InitialiseLanguage()
 	{
@@ -145,7 +145,7 @@ public class LocalisationManager : MonoBehaviour
 		LocalisationManager._hasInitialised = true;
 	}
 
-	// Token: 0x06004562 RID: 17762 RVA: 0x0016FB40 File Offset: 0x0016DD40
+	// Token: 0x06004562 RID: 17762 RVA: 0x0016FB20 File Offset: 0x0016DD20
 	private static void CacheLocTables()
 	{
 		LocalisationManager._localeTablePairs.Clear();
@@ -163,7 +163,7 @@ public class LocalisationManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004563 RID: 17763 RVA: 0x0016FBF0 File Offset: 0x0016DDF0
+	// Token: 0x06004563 RID: 17763 RVA: 0x0016FBD0 File Offset: 0x0016DDD0
 	public void OnLanguageButtonPressed(string langCode, bool saveLanguage)
 	{
 		Locale newLocale;
@@ -174,7 +174,7 @@ public class LocalisationManager : MonoBehaviour
 		this.TryUpdateLanguage(newLocale, saveLanguage);
 	}
 
-	// Token: 0x06004564 RID: 17764 RVA: 0x0016FC10 File Offset: 0x0016DE10
+	// Token: 0x06004564 RID: 17764 RVA: 0x0016FBF0 File Offset: 0x0016DDF0
 	private void ReconstructBindings()
 	{
 		int num = 1;
@@ -186,7 +186,7 @@ public class LocalisationManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004565 RID: 17765 RVA: 0x0016FC7C File Offset: 0x0016DE7C
+	// Token: 0x06004565 RID: 17765 RVA: 0x0016FC5C File Offset: 0x0016DE5C
 	private static void LoadPreviousLanguage(string languageCode, out Locale result)
 	{
 		if (!LocalisationManager.TryGetLocaleFromCode(languageCode, out result))
@@ -199,7 +199,7 @@ public class LocalisationManager : MonoBehaviour
 		PlayerPrefs.Save();
 	}
 
-	// Token: 0x06004566 RID: 17766 RVA: 0x0016FCC4 File Offset: 0x0016DEC4
+	// Token: 0x06004566 RID: 17766 RVA: 0x0016FCA4 File Offset: 0x0016DEA4
 	private static void DefaultLocaleFallback(out Locale result)
 	{
 		if (LocalisationManager.SysLangToLoc(Application.systemLanguage, out result))
@@ -210,7 +210,7 @@ public class LocalisationManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004567 RID: 17767 RVA: 0x0016FD08 File Offset: 0x0016DF08
+	// Token: 0x06004567 RID: 17767 RVA: 0x0016FCE8 File Offset: 0x0016DEE8
 	private static bool SysLangToLoc(SystemLanguage sysLanguage, out Locale language)
 	{
 		if (sysLanguage <= 14)
@@ -244,7 +244,7 @@ public class LocalisationManager : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06004568 RID: 17768 RVA: 0x0016FDE8 File Offset: 0x0016DFE8
+	// Token: 0x06004568 RID: 17768 RVA: 0x0016FDC8 File Offset: 0x0016DFC8
 	private void TryUpdateLanguage(Locale newLocale, bool saveLanguage = true)
 	{
 		if (this._updateLangCoroutine != null)
@@ -254,7 +254,7 @@ public class LocalisationManager : MonoBehaviour
 		this._updateLangCoroutine = base.StartCoroutine(this.UpdateLanguage(newLocale, saveLanguage));
 	}
 
-	// Token: 0x06004569 RID: 17769 RVA: 0x0016FE12 File Offset: 0x0016E012
+	// Token: 0x06004569 RID: 17769 RVA: 0x0016FDF2 File Offset: 0x0016DFF2
 	private IEnumerator UpdateLanguage(Locale newLocale, bool saveLanguage)
 	{
 		if (!this._cachedHasInitialised)
@@ -298,26 +298,26 @@ public class LocalisationManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x0600456A RID: 17770 RVA: 0x0016FE2F File Offset: 0x0016E02F
+	// Token: 0x0600456A RID: 17770 RVA: 0x0016FE0F File Offset: 0x0016E00F
 	public static bool TryGetLocaleFromCode(string code, out Locale result)
 	{
 		result = LocalizationSettings.AvailableLocales.GetLocale(code);
 		return result != null;
 	}
 
-	// Token: 0x0600456B RID: 17771 RVA: 0x0016FE4B File Offset: 0x0016E04B
+	// Token: 0x0600456B RID: 17771 RVA: 0x0016FE2B File Offset: 0x0016E02B
 	public static void RegisterOnLanguageChanged(Action callback)
 	{
 		LocalisationManager._onLanguageChanged = (Action)Delegate.Combine(LocalisationManager._onLanguageChanged, callback);
 	}
 
-	// Token: 0x0600456C RID: 17772 RVA: 0x0016FE62 File Offset: 0x0016E062
+	// Token: 0x0600456C RID: 17772 RVA: 0x0016FE42 File Offset: 0x0016E042
 	public static void UnregisterOnLanguageChanged(Action callback)
 	{
 		LocalisationManager._onLanguageChanged = (Action)Delegate.Remove(LocalisationManager._onLanguageChanged, callback);
 	}
 
-	// Token: 0x0600456D RID: 17773 RVA: 0x0016FE7C File Offset: 0x0016E07C
+	// Token: 0x0600456D RID: 17773 RVA: 0x0016FE5C File Offset: 0x0016E05C
 	public static bool GetFontAssetForCurrentLocale(out LocalisationFontPair result)
 	{
 		result = default(LocalisationFontPair);
@@ -335,7 +335,7 @@ public class LocalisationManager : MonoBehaviour
 		return true;
 	}
 
-	// Token: 0x0600456E RID: 17774 RVA: 0x0016FEF4 File Offset: 0x0016E0F4
+	// Token: 0x0600456E RID: 17774 RVA: 0x0016FED4 File Offset: 0x0016E0D4
 	public static void OnSaveLanguage()
 	{
 		PlayerPrefs.SetString(LocalisationManager.LanugageSetPlayerPrefKey, LocalisationManager.CurrentLanguage.Identifier.Code);
@@ -343,7 +343,7 @@ public class LocalisationManager : MonoBehaviour
 		PlayerPrefs.Save();
 	}
 
-	// Token: 0x0600456F RID: 17775 RVA: 0x0016FF30 File Offset: 0x0016E130
+	// Token: 0x0600456F RID: 17775 RVA: 0x0016FF10 File Offset: 0x0016E110
 	public static bool TryGetLocaleBinding(int binding, out Locale loc)
 	{
 		loc = null;
@@ -358,7 +358,7 @@ public class LocalisationManager : MonoBehaviour
 		return LocalisationManager._localeDisplayBinding.TryGetValue(binding, ref loc);
 	}
 
-	// Token: 0x06004570 RID: 17776 RVA: 0x0016FF80 File Offset: 0x0016E180
+	// Token: 0x06004570 RID: 17776 RVA: 0x0016FF60 File Offset: 0x0016E160
 	public static Dictionary<int, Locale> GetAllBindings()
 	{
 		if (LocalisationManager._localeDisplayBinding.Count != LocalizationSettings.AvailableLocales.Locales.Count)
@@ -368,7 +368,7 @@ public class LocalisationManager : MonoBehaviour
 		return LocalisationManager._localeDisplayBinding;
 	}
 
-	// Token: 0x06004571 RID: 17777 RVA: 0x0016FFAC File Offset: 0x0016E1AC
+	// Token: 0x06004571 RID: 17777 RVA: 0x0016FF8C File Offset: 0x0016E18C
 	public static bool TryGetKeyForCurrentLocale(string key, out string result, string defaultResult = "")
 	{
 		result = defaultResult;
@@ -395,7 +395,7 @@ public class LocalisationManager : MonoBehaviour
 		return true;
 	}
 
-	// Token: 0x06004572 RID: 17778 RVA: 0x00170014 File Offset: 0x0016E214
+	// Token: 0x06004572 RID: 17778 RVA: 0x0016FFF4 File Offset: 0x0016E1F4
 	public static bool TryGetKeyForEnglishString(string englishString, out string result)
 	{
 		result = "";
@@ -419,7 +419,7 @@ public class LocalisationManager : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06004573 RID: 17779 RVA: 0x001700A4 File Offset: 0x0016E2A4
+	// Token: 0x06004573 RID: 17779 RVA: 0x00170084 File Offset: 0x0016E284
 	public static bool TryGetTranslationForCurrentLocaleWithLocString(LocalizedString key, out string result, string defaultResult = "", Object context = null)
 	{
 		result = defaultResult;
@@ -438,7 +438,7 @@ public class LocalisationManager : MonoBehaviour
 		return true;
 	}
 
-	// Token: 0x06004574 RID: 17780 RVA: 0x001700F8 File Offset: 0x0016E2F8
+	// Token: 0x06004574 RID: 17780 RVA: 0x001700D8 File Offset: 0x0016E2D8
 	public static string LocaleToFriendlyString(Locale locale = null, bool forceEnglishChars = false)
 	{
 		if (locale == null)
@@ -473,7 +473,7 @@ public class LocalisationManager : MonoBehaviour
 		return "日本語";
 	}
 
-	// Token: 0x06004575 RID: 17781 RVA: 0x00170194 File Offset: 0x0016E394
+	// Token: 0x06004575 RID: 17781 RVA: 0x00170174 File Offset: 0x0016E374
 	public static string LocaleDisplayNameToFriendlyString(string locTextName, bool forceEnglishChar = false)
 	{
 		uint num = <PrivateImplementationDetails>.ComputeStringHash(locTextName);

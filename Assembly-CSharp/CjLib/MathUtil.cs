@@ -6,19 +6,19 @@ namespace CjLib
 	// Token: 0x0200116D RID: 4461
 	public class MathUtil
 	{
-		// Token: 0x0600708F RID: 28815 RVA: 0x0024DD58 File Offset: 0x0024BF58
+		// Token: 0x0600708F RID: 28815 RVA: 0x0024DD38 File Offset: 0x0024BF38
 		public static float AsinSafe(float x)
 		{
 			return Mathf.Asin(Mathf.Clamp(x, -1f, 1f));
 		}
 
-		// Token: 0x06007090 RID: 28816 RVA: 0x0024DD6F File Offset: 0x0024BF6F
+		// Token: 0x06007090 RID: 28816 RVA: 0x0024DD4F File Offset: 0x0024BF4F
 		public static float AcosSafe(float x)
 		{
 			return Mathf.Acos(Mathf.Clamp(x, -1f, 1f));
 		}
 
-		// Token: 0x06007091 RID: 28817 RVA: 0x0024DD88 File Offset: 0x0024BF88
+		// Token: 0x06007091 RID: 28817 RVA: 0x0024DD68 File Offset: 0x0024BF68
 		public static float CatmullRom(float p0, float p1, float p2, float p3, float t)
 		{
 			float num = t * t;

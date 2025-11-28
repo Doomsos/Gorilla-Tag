@@ -7,11 +7,11 @@ namespace GorillaTag
 	internal class ReportMuteTimer : TickSystemTimerAbstract, ObjectPoolEvents
 	{
 		// Token: 0x170009C2 RID: 2498
-		// (get) Token: 0x060067E4 RID: 26596 RVA: 0x0021EF05 File Offset: 0x0021D105
-		// (set) Token: 0x060067E5 RID: 26597 RVA: 0x0021EF0D File Offset: 0x0021D10D
+		// (get) Token: 0x060067E4 RID: 26596 RVA: 0x0021EEE5 File Offset: 0x0021D0E5
+		// (set) Token: 0x060067E5 RID: 26597 RVA: 0x0021EEED File Offset: 0x0021D0ED
 		public int Muted { get; set; }
 
-		// Token: 0x060067E6 RID: 26598 RVA: 0x0021EF18 File Offset: 0x0021D118
+		// Token: 0x060067E6 RID: 26598 RVA: 0x0021EEF8 File Offset: 0x0021D0F8
 		public override void OnTimedEvent()
 		{
 			if (!NetworkSystem.Instance.InRoom)
@@ -29,7 +29,7 @@ namespace GorillaTag
 			this.Stop();
 		}
 
-		// Token: 0x060067E7 RID: 26599 RVA: 0x0021EFDA File Offset: 0x0021D1DA
+		// Token: 0x060067E7 RID: 26599 RVA: 0x0021EFBA File Offset: 0x0021D1BA
 		public void SetReportData(string id, string name, int muted)
 		{
 			this.Muted = muted;
@@ -42,7 +42,7 @@ namespace GorillaTag
 		{
 		}
 
-		// Token: 0x060067E9 RID: 26601 RVA: 0x0021EFF1 File Offset: 0x0021D1F1
+		// Token: 0x060067E9 RID: 26601 RVA: 0x0021EFD1 File Offset: 0x0021D1D1
 		void ObjectPoolEvents.OnReturned()
 		{
 			if (base.Running)

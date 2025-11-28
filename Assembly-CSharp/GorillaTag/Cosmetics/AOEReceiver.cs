@@ -6,7 +6,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010A3 RID: 4259
 	public class AOEReceiver : MonoBehaviour
 	{
-		// Token: 0x06006A97 RID: 27287 RVA: 0x0022F397 File Offset: 0x0022D597
+		// Token: 0x06006A97 RID: 27287 RVA: 0x0022F377 File Offset: 0x0022D577
 		public void ReceiveAOE(in AOEReceiver.AOEContext AOEContext)
 		{
 			if (!this.enabledForAOE)

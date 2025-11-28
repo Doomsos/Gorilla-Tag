@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x0200054B RID: 1355
 public class MonkeBallBallKillZone : MonoBehaviour
 {
-	// Token: 0x0600222C RID: 8748 RVA: 0x000B2C3C File Offset: 0x000B0E3C
+	// Token: 0x0600222C RID: 8748 RVA: 0x000B2C1C File Offset: 0x000B0E1C
 	private void OnTriggerEnter(Collider other)
 	{
 		GameBall component = other.transform.GetComponent<GameBall>();

@@ -7,8 +7,8 @@ namespace LitJson
 	internal struct ObjectMetadata
 	{
 		// Token: 0x170007EE RID: 2030
-		// (get) Token: 0x06005387 RID: 21383 RVA: 0x001A6714 File Offset: 0x001A4914
-		// (set) Token: 0x06005388 RID: 21384 RVA: 0x001A6735 File Offset: 0x001A4935
+		// (get) Token: 0x06005387 RID: 21383 RVA: 0x001A66F4 File Offset: 0x001A48F4
+		// (set) Token: 0x06005388 RID: 21384 RVA: 0x001A6715 File Offset: 0x001A4915
 		public Type ElementType
 		{
 			get
@@ -26,8 +26,8 @@ namespace LitJson
 		}
 
 		// Token: 0x170007EF RID: 2031
-		// (get) Token: 0x06005389 RID: 21385 RVA: 0x001A673E File Offset: 0x001A493E
-		// (set) Token: 0x0600538A RID: 21386 RVA: 0x001A6746 File Offset: 0x001A4946
+		// (get) Token: 0x06005389 RID: 21385 RVA: 0x001A671E File Offset: 0x001A491E
+		// (set) Token: 0x0600538A RID: 21386 RVA: 0x001A6726 File Offset: 0x001A4926
 		public bool IsDictionary
 		{
 			get
@@ -41,8 +41,8 @@ namespace LitJson
 		}
 
 		// Token: 0x170007F0 RID: 2032
-		// (get) Token: 0x0600538B RID: 21387 RVA: 0x001A674F File Offset: 0x001A494F
-		// (set) Token: 0x0600538C RID: 21388 RVA: 0x001A6757 File Offset: 0x001A4957
+		// (get) Token: 0x0600538B RID: 21387 RVA: 0x001A672F File Offset: 0x001A492F
+		// (set) Token: 0x0600538C RID: 21388 RVA: 0x001A6737 File Offset: 0x001A4937
 		public IDictionary<string, PropertyMetadata> Properties
 		{
 			get

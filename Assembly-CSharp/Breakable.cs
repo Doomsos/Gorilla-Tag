@@ -7,7 +7,7 @@ using UnityEngine.Events;
 // Token: 0x02000559 RID: 1369
 public class Breakable : MonoBehaviour
 {
-	// Token: 0x06002297 RID: 8855 RVA: 0x000B4D78 File Offset: 0x000B2F78
+	// Token: 0x06002297 RID: 8855 RVA: 0x000B4D58 File Offset: 0x000B2F58
 	private void Awake()
 	{
 		this._breakSignal.OnSignal += this.BreakRPC;
@@ -17,7 +17,7 @@ public class Breakable : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002298 RID: 8856 RVA: 0x000B4DB0 File Offset: 0x000B2FB0
+	// Token: 0x06002298 RID: 8856 RVA: 0x000B4D90 File Offset: 0x000B2F90
 	private void BreakRPC(int owner, PhotonSignalInfo info)
 	{
 		VRRig vrrig = base.GetComponent<OwnerRig>();
@@ -36,7 +36,7 @@ public class Breakable : MonoBehaviour
 		this.OnBreak(true, false);
 	}
 
-	// Token: 0x06002299 RID: 8857 RVA: 0x000B4E00 File Offset: 0x000B3000
+	// Token: 0x06002299 RID: 8857 RVA: 0x000B4DE0 File Offset: 0x000B2FE0
 	private void Setup()
 	{
 		if (this._collider == null)
@@ -62,31 +62,31 @@ public class Breakable : MonoBehaviour
 		this._renderers = this.rendererRoot.GetComponentsInChildren<Renderer>();
 	}
 
-	// Token: 0x0600229A RID: 8858 RVA: 0x000B4EA7 File Offset: 0x000B30A7
+	// Token: 0x0600229A RID: 8858 RVA: 0x000B4E87 File Offset: 0x000B3087
 	private void OnCollisionEnter(Collision col)
 	{
 		this.OnBreak(true, true);
 	}
 
-	// Token: 0x0600229B RID: 8859 RVA: 0x000B4EA7 File Offset: 0x000B30A7
+	// Token: 0x0600229B RID: 8859 RVA: 0x000B4E87 File Offset: 0x000B3087
 	private void OnCollisionStay(Collision col)
 	{
 		this.OnBreak(true, true);
 	}
 
-	// Token: 0x0600229C RID: 8860 RVA: 0x000B4EA7 File Offset: 0x000B30A7
+	// Token: 0x0600229C RID: 8860 RVA: 0x000B4E87 File Offset: 0x000B3087
 	private void OnTriggerEnter(Collider col)
 	{
 		this.OnBreak(true, true);
 	}
 
-	// Token: 0x0600229D RID: 8861 RVA: 0x000B4EA7 File Offset: 0x000B30A7
+	// Token: 0x0600229D RID: 8861 RVA: 0x000B4E87 File Offset: 0x000B3087
 	private void OnTriggerStay(Collider col)
 	{
 		this.OnBreak(true, true);
 	}
 
-	// Token: 0x0600229E RID: 8862 RVA: 0x000B4EB1 File Offset: 0x000B30B1
+	// Token: 0x0600229E RID: 8862 RVA: 0x000B4E91 File Offset: 0x000B3091
 	private void OnEnable()
 	{
 		this._breakSignal.Enable();
@@ -94,7 +94,7 @@ public class Breakable : MonoBehaviour
 		this.OnSpawn(true);
 	}
 
-	// Token: 0x0600229F RID: 8863 RVA: 0x000B4ECC File Offset: 0x000B30CC
+	// Token: 0x0600229F RID: 8863 RVA: 0x000B4EAC File Offset: 0x000B30AC
 	private void OnDisable()
 	{
 		this._breakSignal.Disable();
@@ -103,19 +103,19 @@ public class Breakable : MonoBehaviour
 		this.ShowRenderers(false);
 	}
 
-	// Token: 0x060022A0 RID: 8864 RVA: 0x000B4EA7 File Offset: 0x000B30A7
+	// Token: 0x060022A0 RID: 8864 RVA: 0x000B4E87 File Offset: 0x000B3087
 	public void Break()
 	{
 		this.OnBreak(true, true);
 	}
 
-	// Token: 0x060022A1 RID: 8865 RVA: 0x000B4EEE File Offset: 0x000B30EE
+	// Token: 0x060022A1 RID: 8865 RVA: 0x000B4ECE File Offset: 0x000B30CE
 	public void Reset()
 	{
 		this.OnReset(true);
 	}
 
-	// Token: 0x060022A2 RID: 8866 RVA: 0x000B4EF8 File Offset: 0x000B30F8
+	// Token: 0x060022A2 RID: 8866 RVA: 0x000B4ED8 File Offset: 0x000B30D8
 	protected virtual void ShowRenderers(bool visible)
 	{
 		if (this._renderers.IsNullOrEmpty<Renderer>())
@@ -132,7 +132,7 @@ public class Breakable : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060022A3 RID: 8867 RVA: 0x000B4F44 File Offset: 0x000B3144
+	// Token: 0x060022A3 RID: 8867 RVA: 0x000B4F24 File Offset: 0x000B3124
 	protected virtual void OnReset(bool callback = true)
 	{
 		if (this._breakEffect && this._breakEffect.isPlaying)
@@ -152,7 +152,7 @@ public class Breakable : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060022A4 RID: 8868 RVA: 0x000B4F98 File Offset: 0x000B3198
+	// Token: 0x060022A4 RID: 8868 RVA: 0x000B4F78 File Offset: 0x000B3178
 	protected virtual void OnSpawn(bool callback = true)
 	{
 		this.startTime = Time.time;
@@ -174,7 +174,7 @@ public class Breakable : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060022A5 RID: 8869 RVA: 0x000B5008 File Offset: 0x000B3208
+	// Token: 0x060022A5 RID: 8869 RVA: 0x000B4FE8 File Offset: 0x000B31E8
 	protected virtual void OnBreak(bool callback = true, bool signal = true)
 	{
 		if (this._broken)
@@ -219,7 +219,7 @@ public class Breakable : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060022A6 RID: 8870 RVA: 0x000B50D8 File Offset: 0x000B32D8
+	// Token: 0x060022A6 RID: 8870 RVA: 0x000B50B8 File Offset: 0x000B32B8
 	private void UpdatePhysMasks()
 	{
 		int physicsMask = (int)this._physicsMask;

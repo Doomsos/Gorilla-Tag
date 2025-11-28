@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000957 RID: 2391
 public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 {
-	// Token: 0x06003D29 RID: 15657 RVA: 0x00144B60 File Offset: 0x00142D60
+	// Token: 0x06003D29 RID: 15657 RVA: 0x00144B40 File Offset: 0x00142D40
 	public CustomMapsAttackBehaviour(CustomMapsAIBehaviourController AIController, AIAgent agentSettings)
 	{
 		this.attackType = agentSettings.attackType;
@@ -29,20 +29,20 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 		this.state = CustomMapsAttackBehaviour.State.Idle;
 	}
 
-	// Token: 0x06003D2A RID: 15658 RVA: 0x00144C5F File Offset: 0x00142E5F
+	// Token: 0x06003D2A RID: 15658 RVA: 0x00144C3F File Offset: 0x00142E3F
 	public override bool CanExecute()
 	{
 		return !this.controller.IsNull() && !this.controller.TargetPlayer.IsNull() && this.IsTargetInAttackRange(null) && this.IsTargetVisible();
 	}
 
-	// Token: 0x06003D2B RID: 15659 RVA: 0x00144C98 File Offset: 0x00142E98
+	// Token: 0x06003D2B RID: 15659 RVA: 0x00144C78 File Offset: 0x00142E78
 	private bool IsTargetVisible()
 	{
 		Vector3 startPos = this.controller.transform.position + this.controller.transform.TransformVector(this.sightOffset);
 		return this.controller.IsTargetVisible(startPos, this.controller.TargetPlayer, this.attackDist);
 	}
 
-	// Token: 0x06003D2C RID: 15660 RVA: 0x00144CF0 File Offset: 0x00142EF0
+	// Token: 0x06003D2C RID: 15660 RVA: 0x00144CD0 File Offset: 0x00142ED0
 	private bool IsTargetInAttackRange(GRPlayer target = null)
 	{
 		if (target.IsNull() && this.controller.TargetPlayer.IsNull())
@@ -58,7 +58,7 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 		return this.controller.IsTargetInRange(this.controller.transform.position, this.controller.TargetPlayer, this.attackDistSq, out vector2);
 	}
 
-	// Token: 0x06003D2D RID: 15661 RVA: 0x00144D74 File Offset: 0x00142F74
+	// Token: 0x06003D2D RID: 15661 RVA: 0x00144D54 File Offset: 0x00142F54
 	public override bool CanContinueExecuting()
 	{
 		if (this.state != CustomMapsAttackBehaviour.State.Idle && this.controller.IsAnimationPlaying(this.attackAnimName))
@@ -77,7 +77,7 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 		return this.CanExecute();
 	}
 
-	// Token: 0x06003D2E RID: 15662 RVA: 0x00144DEA File Offset: 0x00142FEA
+	// Token: 0x06003D2E RID: 15662 RVA: 0x00144DCA File Offset: 0x00142FCA
 	public override void Execute()
 	{
 		if (this.controller.IsNull())
@@ -92,7 +92,7 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 		this.controller.agent.RequestBehaviorChange(2);
 	}
 
-	// Token: 0x06003D2F RID: 15663 RVA: 0x00144E24 File Offset: 0x00143024
+	// Token: 0x06003D2F RID: 15663 RVA: 0x00144E04 File Offset: 0x00143004
 	public override void NetExecute()
 	{
 		if (this.controller.IsNull())
@@ -136,13 +136,13 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 		}
 	}
 
-	// Token: 0x06003D30 RID: 15664 RVA: 0x00144F19 File Offset: 0x00143119
+	// Token: 0x06003D30 RID: 15664 RVA: 0x00144EF9 File Offset: 0x001430F9
 	public override void ResetBehavior()
 	{
 		this.state = CustomMapsAttackBehaviour.State.Idle;
 	}
 
-	// Token: 0x06003D31 RID: 15665 RVA: 0x00144F24 File Offset: 0x00143124
+	// Token: 0x06003D31 RID: 15665 RVA: 0x00144F04 File Offset: 0x00143104
 	private void FaceTarget()
 	{
 		if (this.controller.TargetPlayer.IsNull())
@@ -152,7 +152,7 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 		GameAgent.UpdateFacingTarget(this.controller.transform, this.controller.agent.navAgent, this.controller.TargetPlayer.transform, this.turnSpeed);
 	}
 
-	// Token: 0x06003D32 RID: 15666 RVA: 0x00144F7C File Offset: 0x0014317C
+	// Token: 0x06003D32 RID: 15666 RVA: 0x00144F5C File Offset: 0x0014315C
 	public override void OnTriggerEnter(Collider otherCollider)
 	{
 		if (!this.useColliders)
@@ -179,7 +179,7 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 		this.TriggerAttack(componentInParent);
 	}
 
-	// Token: 0x06003D33 RID: 15667 RVA: 0x00144FEC File Offset: 0x001431EC
+	// Token: 0x06003D33 RID: 15667 RVA: 0x00144FCC File Offset: 0x001431CC
 	private void TriggerAttack(GRPlayer targetPlayer = null)
 	{
 		this.lastAttackTime = Time.time;

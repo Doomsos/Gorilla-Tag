@@ -14,32 +14,32 @@ namespace GorillaLocomotion.Swimming
 	public class WaterVolume : BaseGuidedRefTargetMono, ITickSystemTick
 	{
 		// Token: 0x1700097A RID: 2426
-		// (get) Token: 0x060063FF RID: 25599 RVA: 0x0020925C File Offset: 0x0020745C
-		// (set) Token: 0x06006400 RID: 25600 RVA: 0x00209264 File Offset: 0x00207464
+		// (get) Token: 0x060063FF RID: 25599 RVA: 0x0020923C File Offset: 0x0020743C
+		// (set) Token: 0x06006400 RID: 25600 RVA: 0x00209244 File Offset: 0x00207444
 		public bool TickRunning { get; set; }
 
 		// Token: 0x140000B0 RID: 176
-		// (add) Token: 0x06006401 RID: 25601 RVA: 0x00209270 File Offset: 0x00207470
-		// (remove) Token: 0x06006402 RID: 25602 RVA: 0x002092A8 File Offset: 0x002074A8
+		// (add) Token: 0x06006401 RID: 25601 RVA: 0x00209250 File Offset: 0x00207450
+		// (remove) Token: 0x06006402 RID: 25602 RVA: 0x00209288 File Offset: 0x00207488
 		public event WaterVolume.WaterVolumeEvent ColliderEnteredVolume;
 
 		// Token: 0x140000B1 RID: 177
-		// (add) Token: 0x06006403 RID: 25603 RVA: 0x002092E0 File Offset: 0x002074E0
-		// (remove) Token: 0x06006404 RID: 25604 RVA: 0x00209318 File Offset: 0x00207518
+		// (add) Token: 0x06006403 RID: 25603 RVA: 0x002092C0 File Offset: 0x002074C0
+		// (remove) Token: 0x06006404 RID: 25604 RVA: 0x002092F8 File Offset: 0x002074F8
 		public event WaterVolume.WaterVolumeEvent ColliderExitedVolume;
 
 		// Token: 0x140000B2 RID: 178
-		// (add) Token: 0x06006405 RID: 25605 RVA: 0x00209350 File Offset: 0x00207550
-		// (remove) Token: 0x06006406 RID: 25606 RVA: 0x00209388 File Offset: 0x00207588
+		// (add) Token: 0x06006405 RID: 25605 RVA: 0x00209330 File Offset: 0x00207530
+		// (remove) Token: 0x06006406 RID: 25606 RVA: 0x00209368 File Offset: 0x00207568
 		public event WaterVolume.WaterVolumeEvent ColliderEnteredWater;
 
 		// Token: 0x140000B3 RID: 179
-		// (add) Token: 0x06006407 RID: 25607 RVA: 0x002093C0 File Offset: 0x002075C0
-		// (remove) Token: 0x06006408 RID: 25608 RVA: 0x002093F8 File Offset: 0x002075F8
+		// (add) Token: 0x06006407 RID: 25607 RVA: 0x002093A0 File Offset: 0x002075A0
+		// (remove) Token: 0x06006408 RID: 25608 RVA: 0x002093D8 File Offset: 0x002075D8
 		public event WaterVolume.WaterVolumeEvent ColliderExitedWater;
 
 		// Token: 0x1700097B RID: 2427
-		// (get) Token: 0x06006409 RID: 25609 RVA: 0x0020942D File Offset: 0x0020762D
+		// (get) Token: 0x06006409 RID: 25609 RVA: 0x0020940D File Offset: 0x0020760D
 		public GTPlayer.LiquidType LiquidType
 		{
 			get
@@ -49,7 +49,7 @@ namespace GorillaLocomotion.Swimming
 		}
 
 		// Token: 0x1700097C RID: 2428
-		// (get) Token: 0x0600640A RID: 25610 RVA: 0x00209435 File Offset: 0x00207635
+		// (get) Token: 0x0600640A RID: 25610 RVA: 0x00209415 File Offset: 0x00207615
 		public WaterCurrent Current
 		{
 			get
@@ -59,7 +59,7 @@ namespace GorillaLocomotion.Swimming
 		}
 
 		// Token: 0x1700097D RID: 2429
-		// (get) Token: 0x0600640B RID: 25611 RVA: 0x0020943D File Offset: 0x0020763D
+		// (get) Token: 0x0600640B RID: 25611 RVA: 0x0020941D File Offset: 0x0020761D
 		public WaterParameters Parameters
 		{
 			get
@@ -69,7 +69,7 @@ namespace GorillaLocomotion.Swimming
 		}
 
 		// Token: 0x1700097E RID: 2430
-		// (get) Token: 0x0600640C RID: 25612 RVA: 0x00209448 File Offset: 0x00207648
+		// (get) Token: 0x0600640C RID: 25612 RVA: 0x00209428 File Offset: 0x00207628
 		private VRRig PlayerVRRig
 		{
 			get
@@ -86,7 +86,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x0600640D RID: 25613 RVA: 0x00209484 File Offset: 0x00207684
+		// Token: 0x0600640D RID: 25613 RVA: 0x00209464 File Offset: 0x00207664
 		public bool GetSurfaceQueryForPoint(Vector3 point, out WaterVolume.SurfaceQuery result, bool debugDraw = false)
 		{
 			result = default(WaterVolume.SurfaceQuery);
@@ -179,7 +179,7 @@ namespace GorillaLocomotion.Swimming
 			return flag;
 		}
 
-		// Token: 0x0600640E RID: 25614 RVA: 0x00209864 File Offset: 0x00207A64
+		// Token: 0x0600640E RID: 25614 RVA: 0x00209844 File Offset: 0x00207A44
 		private bool HitOutsideSurfaceOfMesh(Vector3 castDir, MeshCollider meshCollider, RaycastHit hit)
 		{
 			if (!WaterVolume.meshTrianglesDict.TryGetValue(meshCollider.sharedMesh, ref this.sharedMeshTris))
@@ -205,7 +205,7 @@ namespace GorillaLocomotion.Swimming
 			return flag;
 		}
 
-		// Token: 0x0600640F RID: 25615 RVA: 0x002099D8 File Offset: 0x00207BD8
+		// Token: 0x0600640F RID: 25615 RVA: 0x002099B8 File Offset: 0x00207BB8
 		private void DebugDrawMeshColliderHitTriangle(RaycastHit hit)
 		{
 			MeshCollider meshCollider = hit.collider as MeshCollider;
@@ -228,7 +228,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x06006410 RID: 25616 RVA: 0x00209B24 File Offset: 0x00207D24
+		// Token: 0x06006410 RID: 25616 RVA: 0x00209B04 File Offset: 0x00207D04
 		public bool RaycastWater(Vector3 origin, Vector3 direction, out RaycastHit hit, float distance, int layerMask)
 		{
 			if (this.triggerCollider != null)
@@ -239,7 +239,7 @@ namespace GorillaLocomotion.Swimming
 			return false;
 		}
 
-		// Token: 0x06006411 RID: 25617 RVA: 0x00209B50 File Offset: 0x00207D50
+		// Token: 0x06006411 RID: 25617 RVA: 0x00209B30 File Offset: 0x00207D30
 		public bool CheckColliderInVolume(Collider collider, out bool inWater, out bool surfaceDetected)
 		{
 			for (int i = 0; i < this.persistentColliders.Count; i++)
@@ -256,7 +256,7 @@ namespace GorillaLocomotion.Swimming
 			return false;
 		}
 
-		// Token: 0x06006412 RID: 25618 RVA: 0x00209BBB File Offset: 0x00207DBB
+		// Token: 0x06006412 RID: 25618 RVA: 0x00209B9B File Offset: 0x00207D9B
 		protected override void Awake()
 		{
 			base.Awake();
@@ -269,7 +269,7 @@ namespace GorillaLocomotion.Swimming
 			TickSystem<object>.AddTickCallback(this);
 		}
 
-		// Token: 0x06006414 RID: 25620 RVA: 0x00209BCC File Offset: 0x00207DCC
+		// Token: 0x06006414 RID: 25620 RVA: 0x00209BAC File Offset: 0x00207DAC
 		public void RefreshColliders()
 		{
 			this.triggerCollider = base.GetComponent<Collider>();
@@ -297,7 +297,7 @@ namespace GorillaLocomotion.Swimming
 			this.volumeMinHeight = num2;
 		}
 
-		// Token: 0x06006415 RID: 25621 RVA: 0x00209C9C File Offset: 0x00207E9C
+		// Token: 0x06006415 RID: 25621 RVA: 0x00209C7C File Offset: 0x00207E7C
 		private void OnDisable()
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -320,7 +320,7 @@ namespace GorillaLocomotion.Swimming
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006416 RID: 25622 RVA: 0x00209D1C File Offset: 0x00207F1C
+		// Token: 0x06006416 RID: 25622 RVA: 0x00209CFC File Offset: 0x00207EFC
 		public void Tick()
 		{
 			if (this.persistentColliders.Count < 1)
@@ -369,7 +369,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x06006417 RID: 25623 RVA: 0x00209E1C File Offset: 0x0020801C
+		// Token: 0x06006417 RID: 25623 RVA: 0x00209DFC File Offset: 0x00207FFC
 		private void RemoveCollidersOutsideVolume(float currentTime)
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -392,7 +392,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x06006418 RID: 25624 RVA: 0x00209EFC File Offset: 0x002080FC
+		// Token: 0x06006418 RID: 25624 RVA: 0x00209EDC File Offset: 0x002080DC
 		private void CheckColliderAgainstWater(ref WaterOverlappingCollider persistentCollider, float currentTime)
 		{
 			Vector3 position = persistentCollider.collider.transform.position;
@@ -431,7 +431,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x06006419 RID: 25625 RVA: 0x0020A0E4 File Offset: 0x002082E4
+		// Token: 0x06006419 RID: 25625 RVA: 0x0020A0C4 File Offset: 0x002082C4
 		private Vector3 GetColliderVelocity(ref WaterOverlappingCollider persistentCollider)
 		{
 			GTPlayer instance = GTPlayer.Instance;
@@ -451,7 +451,7 @@ namespace GorillaLocomotion.Swimming
 			return result;
 		}
 
-		// Token: 0x0600641A RID: 25626 RVA: 0x0020A19C File Offset: 0x0020839C
+		// Token: 0x0600641A RID: 25626 RVA: 0x0020A17C File Offset: 0x0020837C
 		private void OnWaterSurfaceEnter(ref WaterOverlappingCollider persistentCollider)
 		{
 			WaterVolume.WaterVolumeEvent colliderEnteredWater = this.ColliderEnteredWater;
@@ -477,7 +477,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x0600641B RID: 25627 RVA: 0x0020A2E8 File Offset: 0x002084E8
+		// Token: 0x0600641B RID: 25627 RVA: 0x0020A2C8 File Offset: 0x002084C8
 		private void OnWaterSurfaceExit(ref WaterOverlappingCollider persistentCollider, float currentTime)
 		{
 			WaterVolume.WaterVolumeEvent colliderExitedWater = this.ColliderExitedWater;
@@ -504,7 +504,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x0600641C RID: 25628 RVA: 0x0020A454 File Offset: 0x00208654
+		// Token: 0x0600641C RID: 25628 RVA: 0x0020A434 File Offset: 0x00208634
 		private void ColliderOutOfWaterUpdate(ref WaterOverlappingCollider persistentCollider, float currentTime)
 		{
 			if (currentTime < persistentCollider.lastInWaterTime + this.waterParams.postExitDripDuration && currentTime > persistentCollider.nextDripTime && persistentCollider.playDripEffect)
@@ -515,7 +515,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x0600641D RID: 25629 RVA: 0x0020A53C File Offset: 0x0020873C
+		// Token: 0x0600641D RID: 25629 RVA: 0x0020A51C File Offset: 0x0020871C
 		private void ColliderInWaterUpdate(ref WaterOverlappingCollider persistentCollider, float currentTime)
 		{
 			Vector3 vector = Vector3.ProjectOnPlane(persistentCollider.collider.transform.position - persistentCollider.lastSurfaceQuery.surfacePoint, persistentCollider.lastSurfaceQuery.surfaceNormal) + persistentCollider.lastSurfaceQuery.surfacePoint;
@@ -545,7 +545,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x0600641E RID: 25630 RVA: 0x0020A68C File Offset: 0x0020888C
+		// Token: 0x0600641E RID: 25630 RVA: 0x0020A66C File Offset: 0x0020886C
 		private void TryRegisterOwnershipOfCollider(Collider collider, bool isInWater, bool isSurfaceDetected)
 		{
 			WaterVolume waterVolume;
@@ -570,7 +570,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x0600641F RID: 25631 RVA: 0x0020A6EE File Offset: 0x002088EE
+		// Token: 0x0600641F RID: 25631 RVA: 0x0020A6CE File Offset: 0x002088CE
 		private void UnregisterOwnershipOfCollider(Collider collider)
 		{
 			if (WaterVolume.sharedColliderRegistry.ContainsKey(collider))
@@ -579,14 +579,14 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x06006420 RID: 25632 RVA: 0x0020A70C File Offset: 0x0020890C
+		// Token: 0x06006420 RID: 25632 RVA: 0x0020A6EC File Offset: 0x002088EC
 		private bool HasOwnershipOfCollider(Collider collider)
 		{
 			WaterVolume waterVolume;
 			return WaterVolume.sharedColliderRegistry.TryGetValue(collider, ref waterVolume) && waterVolume == this;
 		}
 
-		// Token: 0x06006421 RID: 25633 RVA: 0x0020A734 File Offset: 0x00208934
+		// Token: 0x06006421 RID: 25633 RVA: 0x0020A714 File Offset: 0x00208914
 		protected virtual bool CanPlayerSwim()
 		{
 			if (this.isMonkeblock && this.PlayerVRRig != null)
@@ -604,7 +604,7 @@ namespace GorillaLocomotion.Swimming
 			return true;
 		}
 
-		// Token: 0x06006422 RID: 25634 RVA: 0x0020A790 File Offset: 0x00208990
+		// Token: 0x06006422 RID: 25634 RVA: 0x0020A770 File Offset: 0x00208970
 		public void OnTriggerEnter(Collider other)
 		{
 			if (!this.CanPlayerSwim())
@@ -678,7 +678,7 @@ namespace GorillaLocomotion.Swimming
 			this.persistentColliders.Add(waterOverlappingCollider2);
 		}
 
-		// Token: 0x06006423 RID: 25635 RVA: 0x0020A9B0 File Offset: 0x00208BB0
+		// Token: 0x06006423 RID: 25635 RVA: 0x0020A990 File Offset: 0x00208B90
 		private void OnTriggerExit(Collider other)
 		{
 			if (!this.CanPlayerSwim())
@@ -706,7 +706,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x06006424 RID: 25636 RVA: 0x0020AA43 File Offset: 0x00208C43
+		// Token: 0x06006424 RID: 25636 RVA: 0x0020AA23 File Offset: 0x00208C23
 		public void SetPropertiesFromPlaceholder(WaterVolumeProperties properties, List<Collider> waterVolumeColliders, WaterParameters parameters)
 		{
 			this.surfacePlane = properties.surfacePlane;
@@ -799,7 +799,7 @@ namespace GorillaLocomotion.Swimming
 		public struct SurfaceQuery
 		{
 			// Token: 0x1700097F RID: 2431
-			// (get) Token: 0x06006427 RID: 25639 RVA: 0x0020AAE3 File Offset: 0x00208CE3
+			// (get) Token: 0x06006427 RID: 25639 RVA: 0x0020AAC3 File Offset: 0x00208CC3
 			public Plane surfacePlane
 			{
 				get

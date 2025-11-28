@@ -8,7 +8,7 @@ namespace Cosmetics
 	public class CreatorCodeTerminal : MonoBehaviour, ICreatorCodeProvider, IBuildValidation
 	{
 		// Token: 0x17000992 RID: 2450
-		// (get) Token: 0x0600665A RID: 26202 RVA: 0x00215E7E File Offset: 0x0021407E
+		// (get) Token: 0x0600665A RID: 26202 RVA: 0x00215E5E File Offset: 0x0021405E
 		public NexusGroupId[] NexusGroups
 		{
 			get
@@ -18,7 +18,7 @@ namespace Cosmetics
 		}
 
 		// Token: 0x17000993 RID: 2451
-		// (get) Token: 0x0600665B RID: 26203 RVA: 0x00215E86 File Offset: 0x00214086
+		// (get) Token: 0x0600665B RID: 26203 RVA: 0x00215E66 File Offset: 0x00214066
 		public string TerminalId
 		{
 			get
@@ -27,7 +27,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x0600665C RID: 26204 RVA: 0x00215E90 File Offset: 0x00214090
+		// Token: 0x0600665C RID: 26204 RVA: 0x00215E70 File Offset: 0x00214070
 		public void Awake()
 		{
 			this.termId = string.Empty;
@@ -38,13 +38,13 @@ namespace Cosmetics
 			this.HookupToCreatorCodes();
 		}
 
-		// Token: 0x0600665D RID: 26205 RVA: 0x00215EDF File Offset: 0x002140DF
+		// Token: 0x0600665D RID: 26205 RVA: 0x00215EBF File Offset: 0x002140BF
 		private void OnDestroy()
 		{
 			this.UnhookFromCreatorCodes();
 		}
 
-		// Token: 0x0600665E RID: 26206 RVA: 0x00215EE8 File Offset: 0x002140E8
+		// Token: 0x0600665E RID: 26206 RVA: 0x00215EC8 File Offset: 0x002140C8
 		public void HookupToCreatorCodes()
 		{
 			CreatorCodes.InitializedEvent += new Action(this.OnCreatorCodesInitialized);
@@ -56,7 +56,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x0600665F RID: 26207 RVA: 0x00215F35 File Offset: 0x00214135
+		// Token: 0x0600665F RID: 26207 RVA: 0x00215F15 File Offset: 0x00214115
 		public void UnhookFromCreatorCodes()
 		{
 			CreatorCodes.InitializedEvent -= new Action(this.OnCreatorCodesInitialized);
@@ -64,13 +64,13 @@ namespace Cosmetics
 			CreatorCodes.OnCreatorCodeFailureEvent -= new Action<string>(this.OnCreatorCodeFailure);
 		}
 
-		// Token: 0x06006660 RID: 26208 RVA: 0x00215F6A File Offset: 0x0021416A
+		// Token: 0x06006660 RID: 26208 RVA: 0x00215F4A File Offset: 0x0021414A
 		private void OnCreatorCodesInitialized()
 		{
 			this.OnCreatorCodeChanged(this.termId);
 		}
 
-		// Token: 0x06006661 RID: 26209 RVA: 0x00215F78 File Offset: 0x00214178
+		// Token: 0x06006661 RID: 26209 RVA: 0x00215F58 File Offset: 0x00214158
 		public void OnCreatorCodeChanged(string id)
 		{
 			if (id != this.termId)
@@ -94,19 +94,19 @@ namespace Cosmetics
 			this.creatorCodeTitle.text = text;
 		}
 
-		// Token: 0x06006662 RID: 26210 RVA: 0x00215FEA File Offset: 0x002141EA
+		// Token: 0x06006662 RID: 26210 RVA: 0x00215FCA File Offset: 0x002141CA
 		public void CreatorCodeInput(string character)
 		{
 			CreatorCodes.AppendKey(this.termId, character);
 		}
 
-		// Token: 0x06006663 RID: 26211 RVA: 0x00215FF8 File Offset: 0x002141F8
+		// Token: 0x06006663 RID: 26211 RVA: 0x00215FD8 File Offset: 0x002141D8
 		public void CreatorCodeDelete()
 		{
 			CreatorCodes.DeleteCharacter(this.termId);
 		}
 
-		// Token: 0x06006664 RID: 26212 RVA: 0x00216005 File Offset: 0x00214205
+		// Token: 0x06006664 RID: 26212 RVA: 0x00215FE5 File Offset: 0x002141E5
 		public void OnCreatorCodeValid(string id, string s, NexusGroupId ngid)
 		{
 			if (id != this.termId)
@@ -116,7 +116,7 @@ namespace Cosmetics
 			this.creatorCodeTitle.text = "CREATOR CODE: VALID";
 		}
 
-		// Token: 0x06006665 RID: 26213 RVA: 0x00216026 File Offset: 0x00214226
+		// Token: 0x06006665 RID: 26213 RVA: 0x00216006 File Offset: 0x00214206
 		public void OnCreatorCodeValidating(string id)
 		{
 			if (id != this.termId)
@@ -126,7 +126,7 @@ namespace Cosmetics
 			this.creatorCodeTitle.text = "CREATOR CODE: VALIDATING";
 		}
 
-		// Token: 0x06006666 RID: 26214 RVA: 0x00216047 File Offset: 0x00214247
+		// Token: 0x06006666 RID: 26214 RVA: 0x00216027 File Offset: 0x00214227
 		public void CreatorCodeInvalid(string id)
 		{
 			if (id != this.termId)
@@ -136,7 +136,7 @@ namespace Cosmetics
 			this.creatorCodeTitle.text = "CREATOR CODE: INVALID";
 		}
 
-		// Token: 0x06006667 RID: 26215 RVA: 0x00216047 File Offset: 0x00214247
+		// Token: 0x06006667 RID: 26215 RVA: 0x00216027 File Offset: 0x00214227
 		public void OnCreatorCodeFailure(string id)
 		{
 			if (id != this.termId)
@@ -146,7 +146,7 @@ namespace Cosmetics
 			this.creatorCodeTitle.text = "CREATOR CODE: INVALID";
 		}
 
-		// Token: 0x06006668 RID: 26216 RVA: 0x00216068 File Offset: 0x00214268
+		// Token: 0x06006668 RID: 26216 RVA: 0x00216048 File Offset: 0x00214248
 		bool IBuildValidation.BuildValidationCheck()
 		{
 			if (this.nexusGroups.Length == 0)
@@ -157,7 +157,7 @@ namespace Cosmetics
 			return true;
 		}
 
-		// Token: 0x06006669 RID: 26217 RVA: 0x00216090 File Offset: 0x00214290
+		// Token: 0x06006669 RID: 26217 RVA: 0x00216070 File Offset: 0x00214270
 		public void GetCreatorCode(out string code, out NexusGroupId[] groups)
 		{
 			code = CreatorCodes.getCurrentCreatorCode(this.termId);

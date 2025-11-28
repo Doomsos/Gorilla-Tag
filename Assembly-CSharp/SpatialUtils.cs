@@ -6,21 +6,21 @@ using UnityEngine;
 // Token: 0x02000C76 RID: 3190
 public static class SpatialUtils
 {
-	// Token: 0x06004DD9 RID: 19929 RVA: 0x00192C98 File Offset: 0x00190E98
+	// Token: 0x06004DD9 RID: 19929 RVA: 0x00192C78 File Offset: 0x00190E78
 	[MethodImpl(256)]
 	public static int XYZToFlatIndex(int x, int y, int z, int xMax, int yMax)
 	{
 		return z * xMax * yMax + y * xMax + x;
 	}
 
-	// Token: 0x06004DDA RID: 19930 RVA: 0x00192CA6 File Offset: 0x00190EA6
+	// Token: 0x06004DDA RID: 19930 RVA: 0x00192C86 File Offset: 0x00190E86
 	[MethodImpl(256)]
 	public static int XYZToFlatIndex(Vector3Int xyz, int xMax, int yMax)
 	{
 		return xyz.z * xMax * yMax + xyz.y * xMax + xyz.x;
 	}
 
-	// Token: 0x06004DDB RID: 19931 RVA: 0x00192CC5 File Offset: 0x00190EC5
+	// Token: 0x06004DDB RID: 19931 RVA: 0x00192CA5 File Offset: 0x00190EA5
 	[MethodImpl(256)]
 	public static void FlatIndexToXYZ(int idx, int xMax, int yMax, out int x, out int y, out int z)
 	{
@@ -30,7 +30,7 @@ public static class SpatialUtils
 		x = idx % xMax;
 	}
 
-	// Token: 0x06004DDC RID: 19932 RVA: 0x00192CE8 File Offset: 0x00190EE8
+	// Token: 0x06004DDC RID: 19932 RVA: 0x00192CC8 File Offset: 0x00190EC8
 	[MethodImpl(256)]
 	public static Vector3Int FlatIndexToXYZ(int idx, int xMax, int yMax)
 	{
@@ -40,7 +40,7 @@ public static class SpatialUtils
 		return new Vector3Int(idx % xMax, num2, num);
 	}
 
-	// Token: 0x06004DDD RID: 19933 RVA: 0x00192D14 File Offset: 0x00190F14
+	// Token: 0x06004DDD RID: 19933 RVA: 0x00192CF4 File Offset: 0x00190EF4
 	[MethodImpl(256)]
 	public static int CompareByZOrder(Vector3Int a, Vector3Int b)
 	{
@@ -51,14 +51,14 @@ public static class SpatialUtils
 		return num.CompareTo(num2);
 	}
 
-	// Token: 0x06004DDE RID: 19934 RVA: 0x00192D61 File Offset: 0x00190F61
+	// Token: 0x06004DDE RID: 19934 RVA: 0x00192D41 File Offset: 0x00190F41
 	[MethodImpl(256)]
 	public static void ZOrderEncode64(uint x, uint y, uint z, out ulong code)
 	{
 		code = (SpatialUtils.Encode64((ulong)x) | SpatialUtils.Encode64((ulong)y) << 1 | SpatialUtils.Encode64((ulong)z) << 2);
 	}
 
-	// Token: 0x06004DDF RID: 19935 RVA: 0x00192D80 File Offset: 0x00190F80
+	// Token: 0x06004DDF RID: 19935 RVA: 0x00192D60 File Offset: 0x00190F60
 	[MethodImpl(256)]
 	public static void ZOrderDecode64(ulong code, out uint x, out uint y, out uint z)
 	{
@@ -67,7 +67,7 @@ public static class SpatialUtils
 		z = SpatialUtils.Decode64(code >> 2);
 	}
 
-	// Token: 0x06004DE0 RID: 19936 RVA: 0x00192DA0 File Offset: 0x00190FA0
+	// Token: 0x06004DE0 RID: 19936 RVA: 0x00192D80 File Offset: 0x00190F80
 	[MethodImpl(256)]
 	private static ulong Encode64(ulong w)
 	{
@@ -80,7 +80,7 @@ public static class SpatialUtils
 		return w;
 	}
 
-	// Token: 0x06004DE1 RID: 19937 RVA: 0x00192E10 File Offset: 0x00191010
+	// Token: 0x06004DE1 RID: 19937 RVA: 0x00192DF0 File Offset: 0x00190FF0
 	[MethodImpl(256)]
 	private static uint Decode64(ulong w)
 	{
@@ -93,7 +93,7 @@ public static class SpatialUtils
 		return (uint)w;
 	}
 
-	// Token: 0x06004DE2 RID: 19938 RVA: 0x00192E80 File Offset: 0x00191080
+	// Token: 0x06004DE2 RID: 19938 RVA: 0x00192E60 File Offset: 0x00191060
 	[MethodImpl(256)]
 	public static uint ZOrderEncode(uint x, uint y)
 	{
@@ -110,7 +110,7 @@ public static class SpatialUtils
 		return x | y << 1;
 	}
 
-	// Token: 0x06004DE3 RID: 19939 RVA: 0x00192F18 File Offset: 0x00191118
+	// Token: 0x06004DE3 RID: 19939 RVA: 0x00192EF8 File Offset: 0x001910F8
 	[MethodImpl(256)]
 	public static void ZOrderDecode(uint code, out uint x, out uint y)
 	{
@@ -126,7 +126,7 @@ public static class SpatialUtils
 		y = ((y ^ y >> 8) & 65535U);
 	}
 
-	// Token: 0x06004DE4 RID: 19940 RVA: 0x00192FB4 File Offset: 0x001911B4
+	// Token: 0x06004DE4 RID: 19940 RVA: 0x00192F94 File Offset: 0x00191194
 	[MethodImpl(256)]
 	public static uint ZOrderEncode(uint x, uint y, uint z)
 	{
@@ -145,7 +145,7 @@ public static class SpatialUtils
 		return x | y << 1 | z << 2;
 	}
 
-	// Token: 0x06004DE5 RID: 19941 RVA: 0x0019306C File Offset: 0x0019126C
+	// Token: 0x06004DE5 RID: 19941 RVA: 0x0019304C File Offset: 0x0019124C
 	[MethodImpl(256)]
 	public static void ZOrderDecode(uint code, out uint x, out uint y, out uint z)
 	{
@@ -166,7 +166,7 @@ public static class SpatialUtils
 		z = ((z ^ z >> 16) & 1023U);
 	}
 
-	// Token: 0x06004DE6 RID: 19942 RVA: 0x00193150 File Offset: 0x00191350
+	// Token: 0x06004DE6 RID: 19942 RVA: 0x00193130 File Offset: 0x00191330
 	public static bool TryGetBounds(IList<Renderer> renderers, out Bounds result)
 	{
 		result = default(Bounds);
@@ -206,7 +206,7 @@ public static class SpatialUtils
 		return num > 0;
 	}
 
-	// Token: 0x06004DE7 RID: 19943 RVA: 0x001931EC File Offset: 0x001913EC
+	// Token: 0x06004DE7 RID: 19943 RVA: 0x001931CC File Offset: 0x001913CC
 	public static bool TryGetBounds(IList<Collider> colliders, out Bounds result)
 	{
 		result = default(Bounds);
@@ -246,7 +246,7 @@ public static class SpatialUtils
 		return num > 0;
 	}
 
-	// Token: 0x06004DE8 RID: 19944 RVA: 0x00193288 File Offset: 0x00191488
+	// Token: 0x06004DE8 RID: 19944 RVA: 0x00193268 File Offset: 0x00191468
 	public static bool TryGetBounds(Transform x, out Bounds result, bool includeRenderers = true, bool includeColliders = true, bool fallbackToXforms = false)
 	{
 		result = default(Bounds);
@@ -295,7 +295,7 @@ public static class SpatialUtils
 		return true;
 	}
 
-	// Token: 0x06004DE9 RID: 19945 RVA: 0x00193334 File Offset: 0x00191534
+	// Token: 0x06004DE9 RID: 19945 RVA: 0x00193314 File Offset: 0x00191514
 	public static BoundingSphere GetRadialBounds(ref Bounds bounds, ref Matrix4x4 xform)
 	{
 		Vector3 center = bounds.center;
@@ -359,7 +359,7 @@ public static class SpatialUtils
 		return new BoundingSphere(vector12, Mathf.Sqrt(num));
 	}
 
-	// Token: 0x06004DEA RID: 19946 RVA: 0x00193574 File Offset: 0x00191774
+	// Token: 0x06004DEA RID: 19946 RVA: 0x00193554 File Offset: 0x00191754
 	[MethodImpl(256)]
 	private static float DistSq(Vector3 a, Vector3 b)
 	{
@@ -369,14 +369,14 @@ public static class SpatialUtils
 		return num * num + num2 * num2 + num3 * num3;
 	}
 
-	// Token: 0x06004DEB RID: 19947 RVA: 0x001935B4 File Offset: 0x001917B4
+	// Token: 0x06004DEB RID: 19947 RVA: 0x00193594 File Offset: 0x00191794
 	[MethodImpl(256)]
 	public static Vector3[] GetCorners(this Bounds b)
 	{
 		return SpatialUtils.GetCorners(b.min, b.max);
 	}
 
-	// Token: 0x06004DEC RID: 19948 RVA: 0x001935CC File Offset: 0x001917CC
+	// Token: 0x06004DEC RID: 19948 RVA: 0x001935AC File Offset: 0x001917AC
 	[MethodImpl(256)]
 	public static Vector3[] GetCorners(Vector3 min, Vector3 max)
 	{
@@ -393,7 +393,7 @@ public static class SpatialUtils
 		};
 	}
 
-	// Token: 0x06004DED RID: 19949 RVA: 0x001936D0 File Offset: 0x001918D0
+	// Token: 0x06004DED RID: 19949 RVA: 0x001936B0 File Offset: 0x001918B0
 	[MethodImpl(256)]
 	public static Vector3[] GetCorners(this Bounds b, Matrix4x4 transform)
 	{
@@ -405,7 +405,7 @@ public static class SpatialUtils
 		return corners;
 	}
 
-	// Token: 0x06004DEE RID: 19950 RVA: 0x00193708 File Offset: 0x00191908
+	// Token: 0x06004DEE RID: 19950 RVA: 0x001936E8 File Offset: 0x001918E8
 	[MethodImpl(256)]
 	public static Bounds TransformedBy(this Bounds b, Matrix4x4 transform)
 	{
@@ -425,7 +425,7 @@ public static class SpatialUtils
 		return b;
 	}
 
-	// Token: 0x06004DEF RID: 19951 RVA: 0x00193808 File Offset: 0x00191A08
+	// Token: 0x06004DEF RID: 19951 RVA: 0x001937E8 File Offset: 0x001919E8
 	public static bool BoxIntersectsBox(ref Bounds a, ref Bounds b)
 	{
 		Vector3 min = a.min;
@@ -435,7 +435,7 @@ public static class SpatialUtils
 		return min.x <= max2.x && min2.x <= max.x && min.y <= max2.y && min2.y <= max.y && min.z <= max2.z && min2.z <= max.z;
 	}
 
-	// Token: 0x06004DF0 RID: 19952 RVA: 0x0019388C File Offset: 0x00191A8C
+	// Token: 0x06004DF0 RID: 19952 RVA: 0x0019386C File Offset: 0x00191A6C
 	public static void ComputeBoundingSphere2Pass(Vector3[] points, out Vector3 center, out float radius)
 	{
 		center = default(Vector3);
@@ -459,7 +459,7 @@ public static class SpatialUtils
 		radius = (flag ? num : num2);
 	}
 
-	// Token: 0x06004DF1 RID: 19953 RVA: 0x00193924 File Offset: 0x00191B24
+	// Token: 0x06004DF1 RID: 19953 RVA: 0x00193904 File Offset: 0x00191B04
 	public static void ComputeBoundingSphereRitter(Vector3[] points, out Vector3 center, out float radius)
 	{
 		center = default(Vector3);

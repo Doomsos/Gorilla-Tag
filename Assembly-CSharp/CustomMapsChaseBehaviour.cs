@@ -7,7 +7,7 @@ using UnityEngine.AI;
 // Token: 0x02000959 RID: 2393
 public class CustomMapsChaseBehaviour : CustomMapsBehaviourBase
 {
-	// Token: 0x06003D34 RID: 15668 RVA: 0x0014516C File Offset: 0x0014336C
+	// Token: 0x06003D34 RID: 15668 RVA: 0x0014514C File Offset: 0x0014334C
 	public CustomMapsChaseBehaviour(CustomMapsAIBehaviourController AIController, AIAgent agentSettings)
 	{
 		this.sightOffset = agentSettings.sightOffset;
@@ -18,13 +18,13 @@ public class CustomMapsChaseBehaviour : CustomMapsBehaviourBase
 		this.controller = AIController;
 	}
 
-	// Token: 0x06003D35 RID: 15669 RVA: 0x001451D0 File Offset: 0x001433D0
+	// Token: 0x06003D35 RID: 15669 RVA: 0x001451B0 File Offset: 0x001433B0
 	public override bool CanExecute()
 	{
 		return !this.controller.IsNull() && !this.controller.TargetPlayer.IsNull();
 	}
 
-	// Token: 0x06003D36 RID: 15670 RVA: 0x001451F8 File Offset: 0x001433F8
+	// Token: 0x06003D36 RID: 15670 RVA: 0x001451D8 File Offset: 0x001433D8
 	public override bool CanContinueExecuting()
 	{
 		if (!this.CanExecute())
@@ -44,7 +44,7 @@ public class CustomMapsChaseBehaviour : CustomMapsBehaviourBase
 		return false;
 	}
 
-	// Token: 0x06003D37 RID: 15671 RVA: 0x00145250 File Offset: 0x00143450
+	// Token: 0x06003D37 RID: 15671 RVA: 0x00145230 File Offset: 0x00143430
 	public override void Execute()
 	{
 		bool flag;
@@ -78,14 +78,14 @@ public class CustomMapsChaseBehaviour : CustomMapsBehaviourBase
 		this.controller.RequestDestination(this.controller.TargetPlayer.transform.position);
 	}
 
-	// Token: 0x06003D38 RID: 15672 RVA: 0x00145300 File Offset: 0x00143500
+	// Token: 0x06003D38 RID: 15672 RVA: 0x001452E0 File Offset: 0x001434E0
 	private bool IsTargetVisible()
 	{
 		Vector3 startPos = this.controller.transform.position + this.controller.transform.TransformVector(this.sightOffset);
 		return this.controller.IsTargetVisible(startPos, this.controller.TargetPlayer, this.loseSightDist);
 	}
 
-	// Token: 0x06003D39 RID: 15673 RVA: 0x00145358 File Offset: 0x00143558
+	// Token: 0x06003D39 RID: 15673 RVA: 0x00145338 File Offset: 0x00143538
 	private bool IsTargetInChaseRange(out bool withinStopDist)
 	{
 		withinStopDist = false;
@@ -106,7 +106,7 @@ public class CustomMapsChaseBehaviour : CustomMapsBehaviourBase
 	{
 	}
 
-	// Token: 0x06003D3B RID: 15675 RVA: 0x001453AD File Offset: 0x001435AD
+	// Token: 0x06003D3B RID: 15675 RVA: 0x0014538D File Offset: 0x0014358D
 	public override void ResetBehavior()
 	{
 		this.isChasing = false;

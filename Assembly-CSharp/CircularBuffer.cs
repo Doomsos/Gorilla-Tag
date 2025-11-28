@@ -4,16 +4,16 @@
 internal class CircularBuffer<T>
 {
 	// Token: 0x1700072F RID: 1839
-	// (get) Token: 0x06004CB6 RID: 19638 RVA: 0x0018E809 File Offset: 0x0018CA09
-	// (set) Token: 0x06004CB7 RID: 19639 RVA: 0x0018E811 File Offset: 0x0018CA11
+	// (get) Token: 0x06004CB6 RID: 19638 RVA: 0x0018E7E9 File Offset: 0x0018C9E9
+	// (set) Token: 0x06004CB7 RID: 19639 RVA: 0x0018E7F1 File Offset: 0x0018C9F1
 	public int Count { get; private set; }
 
 	// Token: 0x17000730 RID: 1840
-	// (get) Token: 0x06004CB8 RID: 19640 RVA: 0x0018E81A File Offset: 0x0018CA1A
-	// (set) Token: 0x06004CB9 RID: 19641 RVA: 0x0018E822 File Offset: 0x0018CA22
+	// (get) Token: 0x06004CB8 RID: 19640 RVA: 0x0018E7FA File Offset: 0x0018C9FA
+	// (set) Token: 0x06004CB9 RID: 19641 RVA: 0x0018E802 File Offset: 0x0018CA02
 	public int Capacity { get; private set; }
 
-	// Token: 0x06004CBA RID: 19642 RVA: 0x0018E82B File Offset: 0x0018CA2B
+	// Token: 0x06004CBA RID: 19642 RVA: 0x0018E80B File Offset: 0x0018CA0B
 	public CircularBuffer(int capacity)
 	{
 		this.backingArray = new T[capacity];
@@ -21,7 +21,7 @@ internal class CircularBuffer<T>
 		this.Count = 0;
 	}
 
-	// Token: 0x06004CBB RID: 19643 RVA: 0x0018E850 File Offset: 0x0018CA50
+	// Token: 0x06004CBB RID: 19643 RVA: 0x0018E830 File Offset: 0x0018CA30
 	public void Add(T value)
 	{
 		this.backingArray[this.nextWriteIdx] = value;
@@ -34,13 +34,13 @@ internal class CircularBuffer<T>
 		}
 	}
 
-	// Token: 0x06004CBC RID: 19644 RVA: 0x0018E8AE File Offset: 0x0018CAAE
+	// Token: 0x06004CBC RID: 19644 RVA: 0x0018E88E File Offset: 0x0018CA8E
 	public void Clear()
 	{
 		this.Count = 0;
 	}
 
-	// Token: 0x06004CBD RID: 19645 RVA: 0x0018E8B7 File Offset: 0x0018CAB7
+	// Token: 0x06004CBD RID: 19645 RVA: 0x0018E897 File Offset: 0x0018CA97
 	public T Last()
 	{
 		return this.backingArray[this.lastWriteIdx];

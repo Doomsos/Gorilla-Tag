@@ -5,19 +5,19 @@ using System.Reflection;
 // Token: 0x02000CAA RID: 3242
 public class ProxyType : Type
 {
-	// Token: 0x06004F1C RID: 20252 RVA: 0x00198838 File Offset: 0x00196A38
+	// Token: 0x06004F1C RID: 20252 RVA: 0x00198818 File Offset: 0x00196A18
 	public ProxyType()
 	{
 	}
 
-	// Token: 0x06004F1D RID: 20253 RVA: 0x00198850 File Offset: 0x00196A50
+	// Token: 0x06004F1D RID: 20253 RVA: 0x00198830 File Offset: 0x00196A30
 	public ProxyType(string typeName)
 	{
 		this._typeName = typeName;
 	}
 
 	// Token: 0x17000758 RID: 1880
-	// (get) Token: 0x06004F1E RID: 20254 RVA: 0x0019886F File Offset: 0x00196A6F
+	// (get) Token: 0x06004F1E RID: 20254 RVA: 0x0019884F File Offset: 0x00196A4F
 	public override string Name
 	{
 		get
@@ -27,7 +27,7 @@ public class ProxyType : Type
 	}
 
 	// Token: 0x17000759 RID: 1881
-	// (get) Token: 0x06004F1F RID: 20255 RVA: 0x00198877 File Offset: 0x00196A77
+	// (get) Token: 0x06004F1F RID: 20255 RVA: 0x00198857 File Offset: 0x00196A57
 	public override string FullName
 	{
 		get
@@ -36,7 +36,7 @@ public class ProxyType : Type
 		}
 	}
 
-	// Token: 0x06004F20 RID: 20256 RVA: 0x0019888C File Offset: 0x00196A8C
+	// Token: 0x06004F20 RID: 20256 RVA: 0x0019886C File Offset: 0x00196A6C
 	public static ProxyType Parse(string input)
 	{
 		if (string.IsNullOrWhiteSpace(input))
@@ -64,32 +64,32 @@ public class ProxyType : Type
 		return new ProxyType(text);
 	}
 
-	// Token: 0x06004F21 RID: 20257 RVA: 0x00198918 File Offset: 0x00196B18
+	// Token: 0x06004F21 RID: 20257 RVA: 0x001988F8 File Offset: 0x00196AF8
 	public override string ToString()
 	{
 		return base.ToString() + "." + this._typeName;
 	}
 
-	// Token: 0x06004F22 RID: 20258 RVA: 0x00198930 File Offset: 0x00196B30
+	// Token: 0x06004F22 RID: 20258 RVA: 0x00198910 File Offset: 0x00196B10
 	public override object[] GetCustomAttributes(bool inherit)
 	{
 		return this._self.GetCustomAttributes(inherit);
 	}
 
-	// Token: 0x06004F23 RID: 20259 RVA: 0x0019893E File Offset: 0x00196B3E
+	// Token: 0x06004F23 RID: 20259 RVA: 0x0019891E File Offset: 0x00196B1E
 	public override object[] GetCustomAttributes(Type attributeType, bool inherit)
 	{
 		return this._self.GetCustomAttributes(attributeType, inherit);
 	}
 
-	// Token: 0x06004F24 RID: 20260 RVA: 0x0019894D File Offset: 0x00196B4D
+	// Token: 0x06004F24 RID: 20260 RVA: 0x0019892D File Offset: 0x00196B2D
 	public override bool IsDefined(Type attributeType, bool inherit)
 	{
 		return this._self.IsDefined(attributeType, inherit);
 	}
 
 	// Token: 0x1700075A RID: 1882
-	// (get) Token: 0x06004F25 RID: 20261 RVA: 0x0019895C File Offset: 0x00196B5C
+	// (get) Token: 0x06004F25 RID: 20261 RVA: 0x0019893C File Offset: 0x00196B3C
 	public override Module Module
 	{
 		get
@@ -99,7 +99,7 @@ public class ProxyType : Type
 	}
 
 	// Token: 0x1700075B RID: 1883
-	// (get) Token: 0x06004F26 RID: 20262 RVA: 0x00198969 File Offset: 0x00196B69
+	// (get) Token: 0x06004F26 RID: 20262 RVA: 0x00198949 File Offset: 0x00196B49
 	public override string Namespace
 	{
 		get
@@ -120,43 +120,43 @@ public class ProxyType : Type
 		return null;
 	}
 
-	// Token: 0x06004F29 RID: 20265 RVA: 0x00198976 File Offset: 0x00196B76
+	// Token: 0x06004F29 RID: 20265 RVA: 0x00198956 File Offset: 0x00196B56
 	public override ConstructorInfo[] GetConstructors(BindingFlags bindingAttr)
 	{
 		return this._self.GetConstructors(bindingAttr);
 	}
 
-	// Token: 0x06004F2A RID: 20266 RVA: 0x00198984 File Offset: 0x00196B84
+	// Token: 0x06004F2A RID: 20266 RVA: 0x00198964 File Offset: 0x00196B64
 	public override Type GetElementType()
 	{
 		return this._self.GetElementType();
 	}
 
-	// Token: 0x06004F2B RID: 20267 RVA: 0x00198991 File Offset: 0x00196B91
+	// Token: 0x06004F2B RID: 20267 RVA: 0x00198971 File Offset: 0x00196B71
 	public override EventInfo GetEvent(string name, BindingFlags bindingAttr)
 	{
 		return this._self.GetEvent(name, bindingAttr);
 	}
 
-	// Token: 0x06004F2C RID: 20268 RVA: 0x001989A0 File Offset: 0x00196BA0
+	// Token: 0x06004F2C RID: 20268 RVA: 0x00198980 File Offset: 0x00196B80
 	public override EventInfo[] GetEvents(BindingFlags bindingAttr)
 	{
 		return this._self.GetEvents(bindingAttr);
 	}
 
-	// Token: 0x06004F2D RID: 20269 RVA: 0x001989AE File Offset: 0x00196BAE
+	// Token: 0x06004F2D RID: 20269 RVA: 0x0019898E File Offset: 0x00196B8E
 	public override FieldInfo GetField(string name, BindingFlags bindingAttr)
 	{
 		return this._self.GetField(name, bindingAttr);
 	}
 
-	// Token: 0x06004F2E RID: 20270 RVA: 0x001989BD File Offset: 0x00196BBD
+	// Token: 0x06004F2E RID: 20270 RVA: 0x0019899D File Offset: 0x00196B9D
 	public override FieldInfo[] GetFields(BindingFlags bindingAttr)
 	{
 		return this._self.GetFields(bindingAttr);
 	}
 
-	// Token: 0x06004F2F RID: 20271 RVA: 0x001989CB File Offset: 0x00196BCB
+	// Token: 0x06004F2F RID: 20271 RVA: 0x001989AB File Offset: 0x00196BAB
 	public override MemberInfo[] GetMembers(BindingFlags bindingAttr)
 	{
 		return this._self.GetMembers(bindingAttr);
@@ -168,26 +168,26 @@ public class ProxyType : Type
 		return null;
 	}
 
-	// Token: 0x06004F31 RID: 20273 RVA: 0x001989D9 File Offset: 0x00196BD9
+	// Token: 0x06004F31 RID: 20273 RVA: 0x001989B9 File Offset: 0x00196BB9
 	public override MethodInfo[] GetMethods(BindingFlags bindingAttr)
 	{
 		return this._self.GetMethods(bindingAttr);
 	}
 
-	// Token: 0x06004F32 RID: 20274 RVA: 0x001989E7 File Offset: 0x00196BE7
+	// Token: 0x06004F32 RID: 20274 RVA: 0x001989C7 File Offset: 0x00196BC7
 	public override PropertyInfo[] GetProperties(BindingFlags bindingAttr)
 	{
 		return this._self.GetProperties(bindingAttr);
 	}
 
-	// Token: 0x06004F33 RID: 20275 RVA: 0x001989F8 File Offset: 0x00196BF8
+	// Token: 0x06004F33 RID: 20275 RVA: 0x001989D8 File Offset: 0x00196BD8
 	public override object InvokeMember(string name, BindingFlags invokeAttr, Binder binder, object target, object[] args, ParameterModifier[] modifiers, CultureInfo culture, string[] namedParameters)
 	{
 		return this._self.InvokeMember(name, invokeAttr, binder, target, args, modifiers, culture, namedParameters);
 	}
 
 	// Token: 0x1700075C RID: 1884
-	// (get) Token: 0x06004F34 RID: 20276 RVA: 0x00198A1D File Offset: 0x00196C1D
+	// (get) Token: 0x06004F34 RID: 20276 RVA: 0x001989FD File Offset: 0x00196BFD
 	public override Type UnderlyingSystemType
 	{
 		get
@@ -227,7 +227,7 @@ public class ProxyType : Type
 	}
 
 	// Token: 0x1700075D RID: 1885
-	// (get) Token: 0x06004F3A RID: 20282 RVA: 0x00198A2A File Offset: 0x00196C2A
+	// (get) Token: 0x06004F3A RID: 20282 RVA: 0x00198A0A File Offset: 0x00196C0A
 	public override Assembly Assembly
 	{
 		get
@@ -237,7 +237,7 @@ public class ProxyType : Type
 	}
 
 	// Token: 0x1700075E RID: 1886
-	// (get) Token: 0x06004F3B RID: 20283 RVA: 0x00198A37 File Offset: 0x00196C37
+	// (get) Token: 0x06004F3B RID: 20283 RVA: 0x00198A17 File Offset: 0x00196C17
 	public override string AssemblyQualifiedName
 	{
 		get
@@ -247,7 +247,7 @@ public class ProxyType : Type
 	}
 
 	// Token: 0x1700075F RID: 1887
-	// (get) Token: 0x06004F3C RID: 20284 RVA: 0x00198A54 File Offset: 0x00196C54
+	// (get) Token: 0x06004F3C RID: 20284 RVA: 0x00198A34 File Offset: 0x00196C34
 	public override Type BaseType
 	{
 		get
@@ -257,7 +257,7 @@ public class ProxyType : Type
 	}
 
 	// Token: 0x17000760 RID: 1888
-	// (get) Token: 0x06004F3D RID: 20285 RVA: 0x00198A61 File Offset: 0x00196C61
+	// (get) Token: 0x06004F3D RID: 20285 RVA: 0x00198A41 File Offset: 0x00196C41
 	public override Guid GUID
 	{
 		get
@@ -278,25 +278,25 @@ public class ProxyType : Type
 		return false;
 	}
 
-	// Token: 0x06004F40 RID: 20288 RVA: 0x00198A6E File Offset: 0x00196C6E
+	// Token: 0x06004F40 RID: 20288 RVA: 0x00198A4E File Offset: 0x00196C4E
 	public override Type GetNestedType(string name, BindingFlags bindingAttr)
 	{
 		return this._self.GetNestedType(name, bindingAttr);
 	}
 
-	// Token: 0x06004F41 RID: 20289 RVA: 0x00198A7D File Offset: 0x00196C7D
+	// Token: 0x06004F41 RID: 20289 RVA: 0x00198A5D File Offset: 0x00196C5D
 	public override Type[] GetNestedTypes(BindingFlags bindingAttr)
 	{
 		return this._self.GetNestedTypes(bindingAttr);
 	}
 
-	// Token: 0x06004F42 RID: 20290 RVA: 0x00198A8B File Offset: 0x00196C8B
+	// Token: 0x06004F42 RID: 20290 RVA: 0x00198A6B File Offset: 0x00196C6B
 	public override Type GetInterface(string name, bool ignoreCase)
 	{
 		return this._self.GetInterface(name, ignoreCase);
 	}
 
-	// Token: 0x06004F43 RID: 20291 RVA: 0x00198A9A File Offset: 0x00196C9A
+	// Token: 0x06004F43 RID: 20291 RVA: 0x00198A7A File Offset: 0x00196C7A
 	public override Type[] GetInterfaces()
 	{
 		return this._self.GetInterfaces();

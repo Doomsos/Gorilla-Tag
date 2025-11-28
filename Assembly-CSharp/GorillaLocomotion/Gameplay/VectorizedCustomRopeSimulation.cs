@@ -10,25 +10,25 @@ namespace GorillaLocomotion.Gameplay
 	// Token: 0x02000FA9 RID: 4009
 	public class VectorizedCustomRopeSimulation : MonoBehaviour
 	{
-		// Token: 0x060064B6 RID: 25782 RVA: 0x0020D611 File Offset: 0x0020B811
+		// Token: 0x060064B6 RID: 25782 RVA: 0x0020D5F1 File Offset: 0x0020B7F1
 		private void Awake()
 		{
 			VectorizedCustomRopeSimulation.instance = this;
 		}
 
-		// Token: 0x060064B7 RID: 25783 RVA: 0x0020D619 File Offset: 0x0020B819
+		// Token: 0x060064B7 RID: 25783 RVA: 0x0020D5F9 File Offset: 0x0020B7F9
 		public static void Register(GorillaRopeSwing rope)
 		{
 			VectorizedCustomRopeSimulation.registerQueue.Add(rope);
 		}
 
-		// Token: 0x060064B8 RID: 25784 RVA: 0x0020D626 File Offset: 0x0020B826
+		// Token: 0x060064B8 RID: 25784 RVA: 0x0020D606 File Offset: 0x0020B806
 		public static void Unregister(GorillaRopeSwing rope)
 		{
 			VectorizedCustomRopeSimulation.deregisterQueue.Add(rope);
 		}
 
-		// Token: 0x060064B9 RID: 25785 RVA: 0x0020D634 File Offset: 0x0020B834
+		// Token: 0x060064B9 RID: 25785 RVA: 0x0020D614 File Offset: 0x0020B814
 		private void RegenerateData()
 		{
 			this.Dispose();
@@ -116,7 +116,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x060064BA RID: 25786 RVA: 0x0020DA50 File Offset: 0x0020BC50
+		// Token: 0x060064BA RID: 25786 RVA: 0x0020DA30 File Offset: 0x0020BC30
 		private void Dispose()
 		{
 			if (!this.burstData.posX.IsCreated)
@@ -134,13 +134,13 @@ namespace GorillaLocomotion.Gameplay
 			this.burstData.nodeMass.Dispose();
 		}
 
-		// Token: 0x060064BB RID: 25787 RVA: 0x0020DB00 File Offset: 0x0020BD00
+		// Token: 0x060064BB RID: 25787 RVA: 0x0020DAE0 File Offset: 0x0020BCE0
 		private void OnDestroy()
 		{
 			this.Dispose();
 		}
 
-		// Token: 0x060064BC RID: 25788 RVA: 0x0020DB08 File Offset: 0x0020BD08
+		// Token: 0x060064BC RID: 25788 RVA: 0x0020DAE8 File Offset: 0x0020BCE8
 		public void SetRopePos(GorillaRopeSwing ropeTarget, Vector3[] positions, bool setCurPos, bool setLastPos, int onlySetIndex = -1)
 		{
 			if (!this.ropes.Contains(ropeTarget))
@@ -181,7 +181,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x060064BD RID: 25789 RVA: 0x0020DCBC File Offset: 0x0020BEBC
+		// Token: 0x060064BD RID: 25789 RVA: 0x0020DC9C File Offset: 0x0020BE9C
 		public void SetVelocity(GorillaRopeSwing ropeTarget, Vector3 velocity, bool wholeRope, int boneIndex = 1)
 		{
 			List<Vector3> list = new List<Vector3>();
@@ -215,7 +215,7 @@ namespace GorillaLocomotion.Gameplay
 			this.SetRopePos(ropeTarget, list.ToArray(), true, false, onlySetIndex);
 		}
 
-		// Token: 0x060064BE RID: 25790 RVA: 0x0020DE00 File Offset: 0x0020C000
+		// Token: 0x060064BE RID: 25790 RVA: 0x0020DDE0 File Offset: 0x0020BFE0
 		public Vector3 GetNodeVelocity(GorillaRopeSwing ropeTarget, int nodeIndex)
 		{
 			int num = ropeTarget.ropeDataStartIndex + nodeIndex;
@@ -231,7 +231,7 @@ namespace GorillaLocomotion.Gameplay
 			return vector3;
 		}
 
-		// Token: 0x060064BF RID: 25791 RVA: 0x0020DEF8 File Offset: 0x0020C0F8
+		// Token: 0x060064BF RID: 25791 RVA: 0x0020DED8 File Offset: 0x0020C0D8
 		public void SetMassForPlayers(GorillaRopeSwing ropeTarget, bool hasPlayers, int furthestBoneIndex = 0)
 		{
 			if (!this.ropes.Contains(ropeTarget))
@@ -255,7 +255,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x060064C0 RID: 25792 RVA: 0x0020DF7C File Offset: 0x0020C17C
+		// Token: 0x060064C0 RID: 25792 RVA: 0x0020DF5C File Offset: 0x0020C15C
 		private void Update()
 		{
 			if (VectorizedCustomRopeSimulation.registerQueue.Count > 0 || VectorizedCustomRopeSimulation.deregisterQueue.Count > 0)

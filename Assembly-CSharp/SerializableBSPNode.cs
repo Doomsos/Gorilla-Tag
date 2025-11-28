@@ -6,7 +6,7 @@ using UnityEngine;
 public struct SerializableBSPNode
 {
 	// Token: 0x17000784 RID: 1924
-	// (get) Token: 0x060050CE RID: 20686 RVA: 0x001A1692 File Offset: 0x0019F892
+	// (get) Token: 0x060050CE RID: 20686 RVA: 0x001A1672 File Offset: 0x0019F872
 	public int matrixIndex
 	{
 		get
@@ -16,7 +16,7 @@ public struct SerializableBSPNode
 	}
 
 	// Token: 0x17000785 RID: 1925
-	// (get) Token: 0x060050CF RID: 20687 RVA: 0x001A169A File Offset: 0x0019F89A
+	// (get) Token: 0x060050CF RID: 20687 RVA: 0x001A167A File Offset: 0x0019F87A
 	public int outsideChildIndex
 	{
 		get
@@ -26,7 +26,7 @@ public struct SerializableBSPNode
 	}
 
 	// Token: 0x17000786 RID: 1926
-	// (get) Token: 0x060050D0 RID: 20688 RVA: 0x001A1692 File Offset: 0x0019F892
+	// (get) Token: 0x060050D0 RID: 20688 RVA: 0x001A1672 File Offset: 0x0019F872
 	public int zoneIndex
 	{
 		get

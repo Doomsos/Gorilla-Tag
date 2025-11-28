@@ -6,7 +6,7 @@ namespace GorillaTag.Rendering
 	// Token: 0x02001078 RID: 4216
 	public class RendererCullerByTriggers : MonoBehaviour, IBuildValidation
 	{
-		// Token: 0x060069CF RID: 27087 RVA: 0x00226B98 File Offset: 0x00224D98
+		// Token: 0x060069CF RID: 27087 RVA: 0x00226B78 File Offset: 0x00224D78
 		protected void OnEnable()
 		{
 			this.camWasTouching = false;
@@ -23,7 +23,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x060069D0 RID: 27088 RVA: 0x00226BF4 File Offset: 0x00224DF4
+		// Token: 0x060069D0 RID: 27088 RVA: 0x00226BD4 File Offset: 0x00224DD4
 		protected void LateUpdate()
 		{
 			if (this.mainCameraTransform == null)
@@ -54,7 +54,7 @@ namespace GorillaTag.Rendering
 			}
 		}
 
-		// Token: 0x060069D1 RID: 27089 RVA: 0x00226CB4 File Offset: 0x00224EB4
+		// Token: 0x060069D1 RID: 27089 RVA: 0x00226C94 File Offset: 0x00224E94
 		public bool BuildValidationCheck()
 		{
 			for (int i = 0; i < this.renderers.Length; i++)

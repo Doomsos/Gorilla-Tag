@@ -10,7 +10,7 @@ namespace GorillaTag.Cosmetics
 	[Serializable]
 	public class ContinuousProperty
 	{
-		// Token: 0x06006BAB RID: 27563 RVA: 0x002353BC File Offset: 0x002335BC
+		// Token: 0x06006BAB RID: 27563 RVA: 0x0023539C File Offset: 0x0023359C
 		private static ContinuousProperty.Cast GetTargetCast(Object o)
 		{
 			ContinuousProperty.Cast result;
@@ -88,7 +88,7 @@ namespace GorillaTag.Cosmetics
 			return result;
 		}
 
-		// Token: 0x06006BAC RID: 27564 RVA: 0x00235470 File Offset: 0x00233670
+		// Token: 0x06006BAC RID: 27564 RVA: 0x00235450 File Offset: 0x00233650
 		public static bool CastMatches(ContinuousProperty.Cast cast, ContinuousProperty.Cast test)
 		{
 			if (cast <= ContinuousProperty.Cast.Any)
@@ -116,19 +116,19 @@ namespace GorillaTag.Cosmetics
 			return test == cast;
 		}
 
-		// Token: 0x06006BAD RID: 27565 RVA: 0x002354E9 File Offset: 0x002336E9
+		// Token: 0x06006BAD RID: 27565 RVA: 0x002354C9 File Offset: 0x002336C9
 		public static bool HasAllFlags(ContinuousProperty.DataFlags flags, ContinuousProperty.DataFlags test)
 		{
 			return (flags & test) == test;
 		}
 
-		// Token: 0x06006BAE RID: 27566 RVA: 0x002354F1 File Offset: 0x002336F1
+		// Token: 0x06006BAE RID: 27566 RVA: 0x002354D1 File Offset: 0x002336D1
 		public static bool HasAnyFlag(ContinuousProperty.DataFlags flags, ContinuousProperty.DataFlags test)
 		{
 			return (flags & test) > ContinuousProperty.DataFlags.None;
 		}
 
-		// Token: 0x06006BAF RID: 27567 RVA: 0x002354FC File Offset: 0x002336FC
+		// Token: 0x06006BAF RID: 27567 RVA: 0x002354DC File Offset: 0x002336DC
 		private static void GetAllValidObjectsNonAlloc(Transform t, List<Object> objects)
 		{
 			objects.Clear();
@@ -142,18 +142,18 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BB0 RID: 27568 RVA: 0x00235548 File Offset: 0x00233748
+		// Token: 0x06006BB0 RID: 27568 RVA: 0x00235528 File Offset: 0x00233728
 		private static bool IsValidObject(System.Type t)
 		{
 			return t != typeof(Renderer) && t != typeof(ParticleSystemRenderer);
 		}
 
-		// Token: 0x06006BB1 RID: 27569 RVA: 0x00235570 File Offset: 0x00233770
+		// Token: 0x06006BB1 RID: 27569 RVA: 0x00235550 File Offset: 0x00233750
 		public ContinuousProperty()
 		{
 		}
 
-		// Token: 0x06006BB2 RID: 27570 RVA: 0x002355D4 File Offset: 0x002337D4
+		// Token: 0x06006BB2 RID: 27570 RVA: 0x002355B4 File Offset: 0x002337B4
 		public ContinuousProperty(ContinuousPropertyModeSO mode, Transform initialTarget, Vector2 range = default(Vector2))
 		{
 			this.mode = mode;
@@ -163,7 +163,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A15 RID: 2581
-		// (get) Token: 0x06006BB3 RID: 27571 RVA: 0x00235654 File Offset: 0x00233854
+		// (get) Token: 0x06006BB3 RID: 27571 RVA: 0x00235634 File Offset: 0x00233834
 		private string ModeTooltip
 		{
 			get
@@ -177,7 +177,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A16 RID: 2582
-		// (get) Token: 0x06006BB4 RID: 27572 RVA: 0x002356A4 File Offset: 0x002338A4
+		// (get) Token: 0x06006BB4 RID: 27572 RVA: 0x00235684 File Offset: 0x00233884
 		private bool ModeInfoVisible
 		{
 			get
@@ -187,7 +187,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A17 RID: 2583
-		// (get) Token: 0x06006BB5 RID: 27573 RVA: 0x002356B2 File Offset: 0x002338B2
+		// (get) Token: 0x06006BB5 RID: 27573 RVA: 0x00235692 File Offset: 0x00233892
 		private bool ModeErrorVisible
 		{
 			get
@@ -197,7 +197,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A18 RID: 2584
-		// (get) Token: 0x06006BB6 RID: 27574 RVA: 0x002356BD File Offset: 0x002338BD
+		// (get) Token: 0x06006BB6 RID: 27574 RVA: 0x0023569D File Offset: 0x0023389D
 		private string ModeErrorMessage
 		{
 			get
@@ -211,7 +211,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A19 RID: 2585
-		// (get) Token: 0x06006BB7 RID: 27575 RVA: 0x002356F8 File Offset: 0x002338F8
+		// (get) Token: 0x06006BB7 RID: 27575 RVA: 0x002356D8 File Offset: 0x002338D8
 		public ContinuousPropertyModeSO Mode
 		{
 			get
@@ -221,7 +221,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A1A RID: 2586
-		// (get) Token: 0x06006BB8 RID: 27576 RVA: 0x00235700 File Offset: 0x00233900
+		// (get) Token: 0x06006BB8 RID: 27576 RVA: 0x002356E0 File Offset: 0x002338E0
 		public ContinuousProperty.Type MyType
 		{
 			get
@@ -235,7 +235,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A1B RID: 2587
-		// (get) Token: 0x06006BB9 RID: 27577 RVA: 0x0023571D File Offset: 0x0023391D
+		// (get) Token: 0x06006BB9 RID: 27577 RVA: 0x002356FD File Offset: 0x002338FD
 		private bool HasTarget
 		{
 			get
@@ -245,7 +245,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A1C RID: 2588
-		// (get) Token: 0x06006BBA RID: 27578 RVA: 0x0023572C File Offset: 0x0023392C
+		// (get) Token: 0x06006BBA RID: 27578 RVA: 0x0023570C File Offset: 0x0023390C
 		private bool TargetInfoVisible
 		{
 			get
@@ -255,7 +255,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A1D RID: 2589
-		// (get) Token: 0x06006BBB RID: 27579 RVA: 0x00235744 File Offset: 0x00233944
+		// (get) Token: 0x06006BBB RID: 27579 RVA: 0x00235724 File Offset: 0x00233924
 		private string TargetTooltip
 		{
 			get
@@ -269,7 +269,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A1E RID: 2590
-		// (get) Token: 0x06006BBC RID: 27580 RVA: 0x00235765 File Offset: 0x00233965
+		// (get) Token: 0x06006BBC RID: 27580 RVA: 0x00235745 File Offset: 0x00233945
 		private bool ShiftButtonsVisible
 		{
 			get
@@ -279,7 +279,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A1F RID: 2591
-		// (get) Token: 0x06006BBD RID: 27581 RVA: 0x00235773 File Offset: 0x00233973
+		// (get) Token: 0x06006BBD RID: 27581 RVA: 0x00235753 File Offset: 0x00233953
 		public Object Target
 		{
 			get
@@ -288,19 +288,19 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BBE RID: 27582 RVA: 0x0023577B File Offset: 0x0023397B
+		// Token: 0x06006BBE RID: 27582 RVA: 0x0023575B File Offset: 0x0023395B
 		private void PreviousTarget()
 		{
 			this.ShiftTarget(-1);
 		}
 
-		// Token: 0x06006BBF RID: 27583 RVA: 0x00235785 File Offset: 0x00233985
+		// Token: 0x06006BBF RID: 27583 RVA: 0x00235765 File Offset: 0x00233965
 		private void NextTarget()
 		{
 			this.ShiftTarget(1);
 		}
 
-		// Token: 0x06006BC0 RID: 27584 RVA: 0x00235790 File Offset: 0x00233990
+		// Token: 0x06006BC0 RID: 27584 RVA: 0x00235770 File Offset: 0x00233970
 		public bool ShiftTarget(int shiftAmount)
 		{
 			if (this.mode == null)
@@ -360,7 +360,7 @@ namespace GorillaTag.Cosmetics
 			return true;
 		}
 
-		// Token: 0x06006BC1 RID: 27585 RVA: 0x00235910 File Offset: 0x00233B10
+		// Token: 0x06006BC1 RID: 27585 RVA: 0x002358F0 File Offset: 0x00233AF0
 		private void OnModeOrTargetChanged()
 		{
 			if (!this.IsValid())
@@ -370,41 +370,41 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A20 RID: 2592
-		// (get) Token: 0x06006BC2 RID: 27586 RVA: 0x00235922 File Offset: 0x00233B22
-		// (set) Token: 0x06006BC3 RID: 27587 RVA: 0x0023592A File Offset: 0x00233B2A
+		// (get) Token: 0x06006BC2 RID: 27586 RVA: 0x00235902 File Offset: 0x00233B02
+		// (set) Token: 0x06006BC3 RID: 27587 RVA: 0x0023590A File Offset: 0x00233B0A
 		public bool IsShaderProperty_Cached { get; private set; }
 
 		// Token: 0x17000A21 RID: 2593
-		// (get) Token: 0x06006BC4 RID: 27588 RVA: 0x00235933 File Offset: 0x00233B33
-		// (set) Token: 0x06006BC5 RID: 27589 RVA: 0x0023593B File Offset: 0x00233B3B
+		// (get) Token: 0x06006BC4 RID: 27588 RVA: 0x00235913 File Offset: 0x00233B13
+		// (set) Token: 0x06006BC5 RID: 27589 RVA: 0x0023591B File Offset: 0x00233B1B
 		public bool UsesThreshold_Cached { get; private set; }
 
-		// Token: 0x06006BC6 RID: 27590 RVA: 0x00235944 File Offset: 0x00233B44
+		// Token: 0x06006BC6 RID: 27590 RVA: 0x00235924 File Offset: 0x00233B24
 		public bool IsValid()
 		{
 			return this.mode == null || this.target == null || this.mode.IsCastValid(ContinuousProperty.GetTargetCast(this.target));
 		}
 
-		// Token: 0x06006BC7 RID: 27591 RVA: 0x0023597A File Offset: 0x00233B7A
+		// Token: 0x06006BC7 RID: 27591 RVA: 0x0023595A File Offset: 0x00233B5A
 		public int GetTargetInstanceID()
 		{
 			return this.target.GetInstanceID();
 		}
 
-		// Token: 0x06006BC8 RID: 27592 RVA: 0x00235987 File Offset: 0x00233B87
+		// Token: 0x06006BC8 RID: 27592 RVA: 0x00235967 File Offset: 0x00233B67
 		private bool HasAllFlags(ContinuousProperty.DataFlags test)
 		{
 			return this.mode != null && ContinuousProperty.HasAllFlags(this.mode.GetFlagsForClosestCast(ContinuousProperty.GetTargetCast(this.target)), test);
 		}
 
-		// Token: 0x06006BC9 RID: 27593 RVA: 0x002359B5 File Offset: 0x00233BB5
+		// Token: 0x06006BC9 RID: 27593 RVA: 0x00235995 File Offset: 0x00233B95
 		private bool HasAnyFlag(ContinuousProperty.DataFlags test)
 		{
 			return this.mode != null && ContinuousProperty.HasAnyFlag(this.mode.GetFlagsForClosestCast(ContinuousProperty.GetTargetCast(this.target)), test);
 		}
 
 		// Token: 0x17000A22 RID: 2594
-		// (get) Token: 0x06006BCA RID: 27594 RVA: 0x002359E3 File Offset: 0x00233BE3
+		// (get) Token: 0x06006BCA RID: 27594 RVA: 0x002359C3 File Offset: 0x00233BC3
 		private bool HasGradient
 		{
 			get
@@ -414,7 +414,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A23 RID: 2595
-		// (get) Token: 0x06006BCB RID: 27595 RVA: 0x002359EC File Offset: 0x00233BEC
+		// (get) Token: 0x06006BCB RID: 27595 RVA: 0x002359CC File Offset: 0x00233BCC
 		private bool HasCurve
 		{
 			get
@@ -423,7 +423,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BCC RID: 27596 RVA: 0x002359F8 File Offset: 0x00233BF8
+		// Token: 0x06006BCC RID: 27596 RVA: 0x002359D8 File Offset: 0x00233BD8
 		private string DynamicIntLabel()
 		{
 			if (!this.HasAllFlags(ContinuousProperty.DataFlags.IsShaderProperty))
@@ -438,7 +438,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A24 RID: 2596
-		// (get) Token: 0x06006BCD RID: 27597 RVA: 0x00235A28 File Offset: 0x00233C28
+		// (get) Token: 0x06006BCD RID: 27597 RVA: 0x00235A08 File Offset: 0x00233C08
 		private bool HasInt
 		{
 			get
@@ -448,7 +448,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A25 RID: 2597
-		// (get) Token: 0x06006BCE RID: 27598 RVA: 0x00235A31 File Offset: 0x00233C31
+		// (get) Token: 0x06006BCE RID: 27598 RVA: 0x00235A11 File Offset: 0x00233C11
 		public int IntValue
 		{
 			get
@@ -457,7 +457,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BCF RID: 27599 RVA: 0x00235A39 File Offset: 0x00233C39
+		// Token: 0x06006BCF RID: 27599 RVA: 0x00235A19 File Offset: 0x00233C19
 		private string DynamicStringLabel()
 		{
 			if (this.HasAllFlags(ContinuousProperty.DataFlags.IsShaderProperty))
@@ -472,7 +472,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A26 RID: 2598
-		// (get) Token: 0x06006BD0 RID: 27600 RVA: 0x00235A60 File Offset: 0x00233C60
+		// (get) Token: 0x06006BD0 RID: 27600 RVA: 0x00235A40 File Offset: 0x00233C40
 		private bool HasString
 		{
 			get
@@ -482,7 +482,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A27 RID: 2599
-		// (get) Token: 0x06006BD1 RID: 27601 RVA: 0x00235A6A File Offset: 0x00233C6A
+		// (get) Token: 0x06006BD1 RID: 27601 RVA: 0x00235A4A File Offset: 0x00233C4A
 		public string StringValue
 		{
 			get
@@ -492,7 +492,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A28 RID: 2600
-		// (get) Token: 0x06006BD2 RID: 27602 RVA: 0x00235A72 File Offset: 0x00233C72
+		// (get) Token: 0x06006BD2 RID: 27602 RVA: 0x00235A52 File Offset: 0x00233C52
 		private bool HasBezier
 		{
 			get
@@ -502,7 +502,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A29 RID: 2601
-		// (get) Token: 0x06006BD3 RID: 27603 RVA: 0x00235A7D File Offset: 0x00233C7D
+		// (get) Token: 0x06006BD3 RID: 27603 RVA: 0x00235A5D File Offset: 0x00233C5D
 		private bool MissingBezier
 		{
 			get
@@ -512,7 +512,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A2A RID: 2602
-		// (get) Token: 0x06006BD4 RID: 27604 RVA: 0x00235A8B File Offset: 0x00233C8B
+		// (get) Token: 0x06006BD4 RID: 27604 RVA: 0x00235A6B File Offset: 0x00233C6B
 		private bool AxisError
 		{
 			get
@@ -522,7 +522,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A2B RID: 2603
-		// (get) Token: 0x06006BD5 RID: 27605 RVA: 0x00235AAA File Offset: 0x00233CAA
+		// (get) Token: 0x06006BD5 RID: 27605 RVA: 0x00235A8A File Offset: 0x00233C8A
 		private bool HasAxisMode
 		{
 			get
@@ -532,7 +532,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A2C RID: 2604
-		// (get) Token: 0x06006BD6 RID: 27606 RVA: 0x00235AB3 File Offset: 0x00233CB3
+		// (get) Token: 0x06006BD6 RID: 27606 RVA: 0x00235A93 File Offset: 0x00233C93
 		private bool InterpolationError
 		{
 			get
@@ -542,7 +542,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A2D RID: 2605
-		// (get) Token: 0x06006BD7 RID: 27607 RVA: 0x00235AD2 File Offset: 0x00233CD2
+		// (get) Token: 0x06006BD7 RID: 27607 RVA: 0x00235AB2 File Offset: 0x00233CB2
 		private bool HasInterpolationMode
 		{
 			get
@@ -552,7 +552,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A2E RID: 2606
-		// (get) Token: 0x06006BD8 RID: 27608 RVA: 0x00235ADC File Offset: 0x00233CDC
+		// (get) Token: 0x06006BD8 RID: 27608 RVA: 0x00235ABC File Offset: 0x00233CBC
 		private bool HasStopAction
 		{
 			get
@@ -562,7 +562,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A2F RID: 2607
-		// (get) Token: 0x06006BD9 RID: 27609 RVA: 0x00235AF8 File Offset: 0x00233CF8
+		// (get) Token: 0x06006BD9 RID: 27609 RVA: 0x00235AD8 File Offset: 0x00233CD8
 		private bool HasXforms
 		{
 			get
@@ -572,7 +572,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A30 RID: 2608
-		// (get) Token: 0x06006BDA RID: 27610 RVA: 0x00235B03 File Offset: 0x00233D03
+		// (get) Token: 0x06006BDA RID: 27610 RVA: 0x00235AE3 File Offset: 0x00233CE3
 		private bool MissingXforms
 		{
 			get
@@ -582,7 +582,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A31 RID: 2609
-		// (get) Token: 0x06006BDB RID: 27611 RVA: 0x00235B21 File Offset: 0x00233D21
+		// (get) Token: 0x06006BDB RID: 27611 RVA: 0x00235B01 File Offset: 0x00233D01
 		private bool HasOffsets
 		{
 			get
@@ -592,7 +592,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A32 RID: 2610
-		// (get) Token: 0x06006BDC RID: 27612 RVA: 0x00235B2D File Offset: 0x00233D2D
+		// (get) Token: 0x06006BDC RID: 27612 RVA: 0x00235B0D File Offset: 0x00233D0D
 		private string ThresholdErrorMessage
 		{
 			get
@@ -602,7 +602,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A33 RID: 2611
-		// (get) Token: 0x06006BDD RID: 27613 RVA: 0x00235B6C File Offset: 0x00233D6C
+		// (get) Token: 0x06006BDD RID: 27613 RVA: 0x00235B4C File Offset: 0x00233D4C
 		private string ThresholdTooltip
 		{
 			get
@@ -616,7 +616,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A34 RID: 2612
-		// (get) Token: 0x06006BDE RID: 27614 RVA: 0x00235CDE File Offset: 0x00233EDE
+		// (get) Token: 0x06006BDE RID: 27614 RVA: 0x00235CBE File Offset: 0x00233EBE
 		private bool HasThreshold
 		{
 			get
@@ -626,7 +626,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A35 RID: 2613
-		// (get) Token: 0x06006BDF RID: 27615 RVA: 0x00235CEC File Offset: 0x00233EEC
+		// (get) Token: 0x06006BDF RID: 27615 RVA: 0x00235CCC File Offset: 0x00233ECC
 		private bool ThresholdError
 		{
 			get
@@ -636,7 +636,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A36 RID: 2614
-		// (get) Token: 0x06006BE0 RID: 27616 RVA: 0x00235D3A File Offset: 0x00233F3A
+		// (get) Token: 0x06006BE0 RID: 27616 RVA: 0x00235D1A File Offset: 0x00233F1A
 		private bool HasEventMode
 		{
 			get
@@ -646,7 +646,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A37 RID: 2615
-		// (get) Token: 0x06006BE1 RID: 27617 RVA: 0x00235D56 File Offset: 0x00233F56
+		// (get) Token: 0x06006BE1 RID: 27617 RVA: 0x00235D36 File Offset: 0x00233F36
 		private bool HasUnityEvent
 		{
 			get
@@ -656,7 +656,7 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A38 RID: 2616
-		// (get) Token: 0x06006BE2 RID: 27618 RVA: 0x00235D62 File Offset: 0x00233F62
+		// (get) Token: 0x06006BE2 RID: 27618 RVA: 0x00235D42 File Offset: 0x00233F42
 		public bool RunOnlyLocally
 		{
 			get
@@ -665,13 +665,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BE3 RID: 27619 RVA: 0x00235D6A File Offset: 0x00233F6A
+		// Token: 0x06006BE3 RID: 27619 RVA: 0x00235D4A File Offset: 0x00233F4A
 		public void SetRigIsLocal(bool v)
 		{
 			this.rigLocal = v;
 		}
 
-		// Token: 0x06006BE4 RID: 27620 RVA: 0x00235D74 File Offset: 0x00233F74
+		// Token: 0x06006BE4 RID: 27620 RVA: 0x00235D54 File Offset: 0x00233F54
 		public void Init()
 		{
 			if (this.mode == null)
@@ -725,7 +725,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BE5 RID: 27621 RVA: 0x00235F43 File Offset: 0x00234143
+		// Token: 0x06006BE5 RID: 27621 RVA: 0x00235F23 File Offset: 0x00234123
 		public void InitThreshold()
 		{
 			if (!this.UsesThreshold_Cached)
@@ -741,7 +741,7 @@ namespace GorillaTag.Cosmetics
 			this.Apply(0f, 0f, null);
 		}
 
-		// Token: 0x06006BE6 RID: 27622 RVA: 0x00235F84 File Offset: 0x00234184
+		// Token: 0x06006BE6 RID: 27622 RVA: 0x00235F64 File Offset: 0x00234164
 		public void Apply(float f, float deltaTime, MaterialPropertyBlock mpb)
 		{
 			if (this.runOnlyLocally && !this.rigLocal)
@@ -1093,7 +1093,7 @@ namespace GorillaTag.Cosmetics
 			((GameObject)this.target).SetActive(this.previousBoolValue);
 		}
 
-		// Token: 0x06006BE7 RID: 27623 RVA: 0x00236858 File Offset: 0x00234A58
+		// Token: 0x06006BE7 RID: 27623 RVA: 0x00236838 File Offset: 0x00234A38
 		private ParticleSystem.MinMaxCurve ScaleCurve(in ParticleSystem.MinMaxCurve inCurve, float scale)
 		{
 			ParticleSystem.MinMaxCurve result = inCurve;
@@ -1114,7 +1114,7 @@ namespace GorillaTag.Cosmetics
 			return result;
 		}
 
-		// Token: 0x06006BE8 RID: 27624 RVA: 0x002368D0 File Offset: 0x00234AD0
+		// Token: 0x06006BE8 RID: 27624 RVA: 0x002368B0 File Offset: 0x00234AB0
 		private bool CheckContinuousEvent(float f, float deltaTime)
 		{
 			ContinuousProperty.EventMode eventMode = this.eventMode;
@@ -1143,7 +1143,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006BE9 RID: 27625 RVA: 0x0023694C File Offset: 0x00234B4C
+		// Token: 0x06006BE9 RID: 27625 RVA: 0x0023692C File Offset: 0x00234B2C
 		private ContinuousProperty.ThresholdResult CheckThreshold(float f)
 		{
 			if (!this.UsesThreshold_Cached)

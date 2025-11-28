@@ -18,18 +18,18 @@ public abstract class RankedMultiplayerStatistic
 	// Token: 0x0600378F RID: 14223
 	public abstract bool TrySetValue(string valAsString);
 
-	// Token: 0x06003790 RID: 14224 RVA: 0x0012B4F7 File Offset: 0x001296F7
+	// Token: 0x06003790 RID: 14224 RVA: 0x0012B4D7 File Offset: 0x001296D7
 	public virtual string WriteToJson()
 	{
 		return string.Format("{{{0}:\"{1}\"}}", this.name, this.ToString());
 	}
 
 	// Token: 0x17000500 RID: 1280
-	// (get) Token: 0x06003791 RID: 14225 RVA: 0x0012B50F File Offset: 0x0012970F
-	// (set) Token: 0x06003792 RID: 14226 RVA: 0x0012B517 File Offset: 0x00129717
+	// (get) Token: 0x06003791 RID: 14225 RVA: 0x0012B4EF File Offset: 0x001296EF
+	// (set) Token: 0x06003792 RID: 14226 RVA: 0x0012B4F7 File Offset: 0x001296F7
 	public bool IsValid { get; protected set; }
 
-	// Token: 0x06003793 RID: 14227 RVA: 0x0012B520 File Offset: 0x00129720
+	// Token: 0x06003793 RID: 14227 RVA: 0x0012B500 File Offset: 0x00129700
 	public RankedMultiplayerStatistic(string n, RankedMultiplayerStatistic.SerializationType sType = RankedMultiplayerStatistic.SerializationType.Mothership)
 	{
 		this.serializationType = sType;
@@ -38,7 +38,7 @@ public abstract class RankedMultiplayerStatistic
 		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
 	}
 
-	// Token: 0x06003794 RID: 14228 RVA: 0x0012B558 File Offset: 0x00129758
+	// Token: 0x06003794 RID: 14228 RVA: 0x0012B538 File Offset: 0x00129738
 	protected virtual void HandleUserDataSetSuccess(string keyName)
 	{
 		if (keyName == this.name)
@@ -47,7 +47,7 @@ public abstract class RankedMultiplayerStatistic
 		}
 	}
 
-	// Token: 0x06003795 RID: 14229 RVA: 0x0012B56F File Offset: 0x0012976F
+	// Token: 0x06003795 RID: 14229 RVA: 0x0012B54F File Offset: 0x0012974F
 	protected virtual void HandleUserDataGetSuccess(string keyName, string value)
 	{
 		if (keyName == this.name)
@@ -61,7 +61,7 @@ public abstract class RankedMultiplayerStatistic
 		}
 	}
 
-	// Token: 0x06003796 RID: 14230 RVA: 0x0012B596 File Offset: 0x00129796
+	// Token: 0x06003796 RID: 14230 RVA: 0x0012B576 File Offset: 0x00129776
 	protected void HandleUserDataGetFailure(string keyName)
 	{
 		if (keyName == this.name)
@@ -71,7 +71,7 @@ public abstract class RankedMultiplayerStatistic
 		}
 	}
 
-	// Token: 0x06003797 RID: 14231 RVA: 0x0012B5B3 File Offset: 0x001297B3
+	// Token: 0x06003797 RID: 14231 RVA: 0x0012B593 File Offset: 0x00129793
 	protected void HandleUserDataSetFailure(string keyName)
 	{
 		if (keyName == this.name)

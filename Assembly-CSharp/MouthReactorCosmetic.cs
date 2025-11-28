@@ -6,7 +6,7 @@ using UnityEngine.Events;
 // Token: 0x02000851 RID: 2129
 public class MouthReactorCosmetic : MonoBehaviour, ITickSystemTick
 {
-	// Token: 0x06003816 RID: 14358 RVA: 0x0012CC15 File Offset: 0x0012AE15
+	// Token: 0x06003816 RID: 14358 RVA: 0x0012CBF5 File Offset: 0x0012ADF5
 	private void ResetReactorTransform()
 	{
 		if (this.reactorTransform == null)
@@ -15,14 +15,14 @@ public class MouthReactorCosmetic : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06003817 RID: 14359 RVA: 0x0012CC31 File Offset: 0x0012AE31
+	// Token: 0x06003817 RID: 14359 RVA: 0x0012CC11 File Offset: 0x0012AE11
 	private void ResetRadius()
 	{
 		this.reactorRadius = 0.1666667f;
 	}
 
 	// Token: 0x17000509 RID: 1289
-	// (get) Token: 0x06003818 RID: 14360 RVA: 0x0012CC3E File Offset: 0x0012AE3E
+	// (get) Token: 0x06003818 RID: 14360 RVA: 0x0012CC1E File Offset: 0x0012AE1E
 	private bool IsRadiusChanged
 	{
 		get
@@ -31,14 +31,14 @@ public class MouthReactorCosmetic : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06003819 RID: 14361 RVA: 0x0012CC50 File Offset: 0x0012AE50
+	// Token: 0x06003819 RID: 14361 RVA: 0x0012CC30 File Offset: 0x0012AE30
 	private void ResetOffset()
 	{
 		this.mouthOffset = MouthReactorCosmetic.DEFAULT_OFFSET;
 	}
 
 	// Token: 0x1700050A RID: 1290
-	// (get) Token: 0x0600381A RID: 14362 RVA: 0x0012CC5D File Offset: 0x0012AE5D
+	// (get) Token: 0x0600381A RID: 14362 RVA: 0x0012CC3D File Offset: 0x0012AE3D
 	private bool IsOffsetChanged
 	{
 		get
@@ -47,7 +47,7 @@ public class MouthReactorCosmetic : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x0600381B RID: 14363 RVA: 0x0012CC6F File Offset: 0x0012AE6F
+	// Token: 0x0600381B RID: 14363 RVA: 0x0012CC4F File Offset: 0x0012AE4F
 	private void OnEnable()
 	{
 		if (this.myRig == null)
@@ -64,11 +64,11 @@ public class MouthReactorCosmetic : MonoBehaviour, ITickSystemTick
 	}
 
 	// Token: 0x1700050B RID: 1291
-	// (get) Token: 0x0600381D RID: 14365 RVA: 0x0012CC8B File Offset: 0x0012AE8B
-	// (set) Token: 0x0600381E RID: 14366 RVA: 0x0012CC93 File Offset: 0x0012AE93
+	// (get) Token: 0x0600381D RID: 14365 RVA: 0x0012CC6B File Offset: 0x0012AE6B
+	// (set) Token: 0x0600381E RID: 14366 RVA: 0x0012CC73 File Offset: 0x0012AE73
 	public bool TickRunning { get; set; }
 
-	// Token: 0x0600381F RID: 14367 RVA: 0x0012CC9C File Offset: 0x0012AE9C
+	// Token: 0x0600381F RID: 14367 RVA: 0x0012CC7C File Offset: 0x0012AE7C
 	public void Tick()
 	{
 		Vector3 vector = this.myRig.head.rigTarget.TransformPoint(this.mouthOffset);

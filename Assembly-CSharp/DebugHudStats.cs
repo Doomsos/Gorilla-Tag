@@ -12,7 +12,7 @@ using UnityEngine;
 public class DebugHudStats : MonoBehaviour
 {
 	// Token: 0x17000733 RID: 1843
-	// (get) Token: 0x06004CF5 RID: 19701 RVA: 0x0018F576 File Offset: 0x0018D776
+	// (get) Token: 0x06004CF5 RID: 19701 RVA: 0x0018F556 File Offset: 0x0018D756
 	public static DebugHudStats Instance
 	{
 		get
@@ -21,7 +21,7 @@ public class DebugHudStats : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004CF6 RID: 19702 RVA: 0x0018F57D File Offset: 0x0018D77D
+	// Token: 0x06004CF6 RID: 19702 RVA: 0x0018F55D File Offset: 0x0018D75D
 	private void Awake()
 	{
 		if (DebugHudStats._instance != null && DebugHudStats._instance != this)
@@ -35,7 +35,7 @@ public class DebugHudStats : MonoBehaviour
 		base.gameObject.SetActive(false);
 	}
 
-	// Token: 0x06004CF7 RID: 19703 RVA: 0x0018F5B8 File Offset: 0x0018D7B8
+	// Token: 0x06004CF7 RID: 19703 RVA: 0x0018F598 File Offset: 0x0018D798
 	private void OnDestroy()
 	{
 		if (DebugHudStats._instance == this)
@@ -52,7 +52,7 @@ public class DebugHudStats : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004CF8 RID: 19704 RVA: 0x0018F608 File Offset: 0x0018D808
+	// Token: 0x06004CF8 RID: 19704 RVA: 0x0018F5E8 File Offset: 0x0018D7E8
 	private void LateUpdate()
 	{
 		base.transform.LookAt(Camera.main.transform.position, Vector3.up);
@@ -226,7 +226,7 @@ public class DebugHudStats : MonoBehaviour
 		this.updateTimer = 0f;
 	}
 
-	// Token: 0x06004CF9 RID: 19705 RVA: 0x0018FD31 File Offset: 0x0018DF31
+	// Token: 0x06004CF9 RID: 19705 RVA: 0x0018FD11 File Offset: 0x0018DF11
 	private string colorFromState(DebugHudStats.State s)
 	{
 		switch (s)
@@ -244,7 +244,7 @@ public class DebugHudStats : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004CFA RID: 19706 RVA: 0x0018FD6A File Offset: 0x0018DF6A
+	// Token: 0x06004CFA RID: 19706 RVA: 0x0018FD4A File Offset: 0x0018DF4A
 	private void OnPlayerSwam(float distance, float speed)
 	{
 		if (distance > 0.005f)
@@ -253,7 +253,7 @@ public class DebugHudStats : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004CFB RID: 19707 RVA: 0x0018FD82 File Offset: 0x0018DF82
+	// Token: 0x06004CFB RID: 19707 RVA: 0x0018FD62 File Offset: 0x0018DF62
 	private void OnPlayerMoved(float distance, float speed)
 	{
 		if (distance > 0.005f)
@@ -262,13 +262,13 @@ public class DebugHudStats : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004CFC RID: 19708 RVA: 0x0018FD9A File Offset: 0x0018DF9A
+	// Token: 0x06004CFC RID: 19708 RVA: 0x0018FD7A File Offset: 0x0018DF7A
 	private void OnDisable()
 	{
 		Application.logMessageReceived -= new Application.LogCallback(this.LogMessageReceived);
 	}
 
-	// Token: 0x06004CFD RID: 19709 RVA: 0x0018FDB0 File Offset: 0x0018DFB0
+	// Token: 0x06004CFD RID: 19709 RVA: 0x0018FD90 File Offset: 0x0018DF90
 	private void LogMessageReceived(string condition, string stackTrace, LogType type)
 	{
 		if (this.logVerbosity == 1 && type != 4 && type != 1 && type != null)
@@ -291,7 +291,7 @@ public class DebugHudStats : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004CFE RID: 19710 RVA: 0x0018FE46 File Offset: 0x0018E046
+	// Token: 0x06004CFE RID: 19710 RVA: 0x0018FE26 File Offset: 0x0018E026
 	private string getColorStringFromLogType(LogType type)
 	{
 		switch (type)
@@ -306,7 +306,7 @@ public class DebugHudStats : MonoBehaviour
 		return "<color=\"white\">";
 	}
 
-	// Token: 0x06004CFF RID: 19711 RVA: 0x0018FE78 File Offset: 0x0018E078
+	// Token: 0x06004CFF RID: 19711 RVA: 0x0018FE58 File Offset: 0x0018E058
 	private void OnZoneChanged(ZoneData[] zoneData)
 	{
 		this.zones = string.Empty;

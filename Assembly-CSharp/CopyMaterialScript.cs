@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000BD3 RID: 3027
 public class CopyMaterialScript : MonoBehaviour
 {
-	// Token: 0x06004AED RID: 19181 RVA: 0x00187FEE File Offset: 0x001861EE
+	// Token: 0x06004AED RID: 19181 RVA: 0x00187FCE File Offset: 0x001861CE
 	private void Start()
 	{
 		if (Application.platform == 11)
@@ -13,7 +13,7 @@ public class CopyMaterialScript : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004AEE RID: 19182 RVA: 0x00188005 File Offset: 0x00186205
+	// Token: 0x06004AEE RID: 19182 RVA: 0x00187FE5 File Offset: 0x001861E5
 	private void Update()
 	{
 		if (this.sourceToCopyMaterialFrom.material != this.mySkinnedMeshRenderer.material)

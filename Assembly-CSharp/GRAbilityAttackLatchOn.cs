@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityAttackLatchOn : GRAbilityBase
 {
-	// Token: 0x06002A30 RID: 10800 RVA: 0x000E38FB File Offset: 0x000E1AFB
+	// Token: 0x06002A30 RID: 10800 RVA: 0x000E38DB File Offset: 0x000E1ADB
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -16,7 +16,7 @@ public class GRAbilityAttackLatchOn : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A31 RID: 10801 RVA: 0x000E3930 File Offset: 0x000E1B30
+	// Token: 0x06002A31 RID: 10801 RVA: 0x000E3910 File Offset: 0x000E1B10
 	public override void Start()
 	{
 		base.Start();
@@ -29,7 +29,7 @@ public class GRAbilityAttackLatchOn : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A32 RID: 10802 RVA: 0x000E3995 File Offset: 0x000E1B95
+	// Token: 0x06002A32 RID: 10802 RVA: 0x000E3975 File Offset: 0x000E1B75
 	public override void Stop()
 	{
 		this.agent.transform.SetParent(null);
@@ -40,26 +40,26 @@ public class GRAbilityAttackLatchOn : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A33 RID: 10803 RVA: 0x000E39CF File Offset: 0x000E1BCF
+	// Token: 0x06002A33 RID: 10803 RVA: 0x000E39AF File Offset: 0x000E1BAF
 	public override bool IsDone()
 	{
 		return Time.timeAsDouble - this.startTime >= (double)this.duration;
 	}
 
-	// Token: 0x06002A34 RID: 10804 RVA: 0x000E39E9 File Offset: 0x000E1BE9
+	// Token: 0x06002A34 RID: 10804 RVA: 0x000E39C9 File Offset: 0x000E1BC9
 	public override void Update(float dt)
 	{
 		this.UpdateNavSpeed();
 		GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
 	}
 
-	// Token: 0x06002A35 RID: 10805 RVA: 0x000E3A13 File Offset: 0x000E1C13
+	// Token: 0x06002A35 RID: 10805 RVA: 0x000E39F3 File Offset: 0x000E1BF3
 	public override void UpdateRemote(float dt)
 	{
 		this.UpdateNavSpeed();
 	}
 
-	// Token: 0x06002A36 RID: 10806 RVA: 0x000E3A1C File Offset: 0x000E1C1C
+	// Token: 0x06002A36 RID: 10806 RVA: 0x000E39FC File Offset: 0x000E1BFC
 	private void UpdateNavSpeed()
 	{
 		if (Time.timeAsDouble - this.startTime > (double)this.tellDuration)
@@ -73,7 +73,7 @@ public class GRAbilityAttackLatchOn : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A37 RID: 10807 RVA: 0x000E3AA4 File Offset: 0x000E1CA4
+	// Token: 0x06002A37 RID: 10807 RVA: 0x000E3A84 File Offset: 0x000E1C84
 	public void SetTargetPlayer(NetPlayer targetPlayer)
 	{
 		this.target = null;

@@ -11,13 +11,13 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010B8 RID: 4280
 	public class ThrowablePickupableCosmetic : TransferrableObject
 	{
-		// Token: 0x06006B32 RID: 27442 RVA: 0x0023291D File Offset: 0x00230B1D
+		// Token: 0x06006B32 RID: 27442 RVA: 0x002328FD File Offset: 0x00230AFD
 		private new void Awake()
 		{
 			this.transferrableObject = base.GetComponent<TransferrableObject>();
 		}
 
-		// Token: 0x06006B33 RID: 27443 RVA: 0x0023292C File Offset: 0x00230B2C
+		// Token: 0x06006B33 RID: 27443 RVA: 0x0023290C File Offset: 0x00230B0C
 		internal override void OnEnable()
 		{
 			base.OnEnable();
@@ -40,7 +40,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B34 RID: 27444 RVA: 0x00232A60 File Offset: 0x00230C60
+		// Token: 0x06006B34 RID: 27444 RVA: 0x00232A40 File Offset: 0x00230C40
 		internal override void OnDisable()
 		{
 			base.OnDisable();
@@ -57,7 +57,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B35 RID: 27445 RVA: 0x00232B00 File Offset: 0x00230D00
+		// Token: 0x06006B35 RID: 27445 RVA: 0x00232AE0 File Offset: 0x00230CE0
 		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 		{
 			if (VRRigCache.Instance.localRig.Rig != this.ownerRig)
@@ -97,7 +97,7 @@ namespace GorillaTag.Cosmetics
 			base.OnGrab(pointGrabbed, grabbingHand);
 		}
 
-		// Token: 0x06006B36 RID: 27446 RVA: 0x00232C44 File Offset: 0x00230E44
+		// Token: 0x06006B36 RID: 27446 RVA: 0x00232C24 File Offset: 0x00230E24
 		public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 		{
 			if (!base.OnRelease(zoneReleased, releasingHand))
@@ -155,7 +155,7 @@ namespace GorillaTag.Cosmetics
 			return true;
 		}
 
-		// Token: 0x06006B37 RID: 27447 RVA: 0x00232DAC File Offset: 0x00230FAC
+		// Token: 0x06006B37 RID: 27447 RVA: 0x00232D8C File Offset: 0x00230F8C
 		private void OnReleaseEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -210,7 +210,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B38 RID: 27448 RVA: 0x00232ECC File Offset: 0x002310CC
+		// Token: 0x06006B38 RID: 27448 RVA: 0x00232EAC File Offset: 0x002310AC
 		private void OnReturnToDockEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -234,13 +234,13 @@ namespace GorillaTag.Cosmetics
 			onReturnToDockPositionShared.Invoke();
 		}
 
-		// Token: 0x06006B39 RID: 27449 RVA: 0x00232F27 File Offset: 0x00231127
+		// Token: 0x06006B39 RID: 27449 RVA: 0x00232F07 File Offset: 0x00231107
 		private void OnReleaseEventLocal(Vector3 startPosition, Vector3 releaseVelocity, float playerScale)
 		{
 			this.pickupableVariant.Release(this, startPosition, releaseVelocity, playerScale);
 		}
 
-		// Token: 0x06006B3A RID: 27450 RVA: 0x00232F38 File Offset: 0x00231138
+		// Token: 0x06006B3A RID: 27450 RVA: 0x00232F18 File Offset: 0x00231118
 		private float DistanceToDock()
 		{
 			float result = 0f;

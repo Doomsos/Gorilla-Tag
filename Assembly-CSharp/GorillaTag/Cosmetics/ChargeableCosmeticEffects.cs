@@ -7,20 +7,20 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010C0 RID: 4288
 	public class ChargeableCosmeticEffects : MonoBehaviour, ITickSystemTick
 	{
-		// Token: 0x06006B7E RID: 27518 RVA: 0x00234986 File Offset: 0x00232B86
+		// Token: 0x06006B7E RID: 27518 RVA: 0x00234966 File Offset: 0x00232B66
 		private bool HasFractionals()
 		{
 			return this.continuousProperties.Count > 0 || this.whileCharging.GetPersistentEventCount() > 0;
 		}
 
-		// Token: 0x06006B7F RID: 27519 RVA: 0x002349A6 File Offset: 0x00232BA6
+		// Token: 0x06006B7F RID: 27519 RVA: 0x00234986 File Offset: 0x00232B86
 		private void Awake()
 		{
 			this.inverseMaxChargeSeconds = 1f / this.maxChargeSeconds;
 			this.hasFractionalsCached = this.HasFractionals();
 		}
 
-		// Token: 0x06006B80 RID: 27520 RVA: 0x002349C6 File Offset: 0x00232BC6
+		// Token: 0x06006B80 RID: 27520 RVA: 0x002349A6 File Offset: 0x00232BA6
 		public void SetMaxChargeSeconds(float s)
 		{
 			this.maxChargeSeconds = s;
@@ -28,7 +28,7 @@ namespace GorillaTag.Cosmetics
 			this.SetChargeTime(this.chargeTime);
 		}
 
-		// Token: 0x06006B81 RID: 27521 RVA: 0x002349ED File Offset: 0x00232BED
+		// Token: 0x06006B81 RID: 27521 RVA: 0x002349CD File Offset: 0x00232BCD
 		public void SetChargeState(bool state)
 		{
 			if (this.isCharging != state)
@@ -38,25 +38,25 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B82 RID: 27522 RVA: 0x00234A05 File Offset: 0x00232C05
+		// Token: 0x06006B82 RID: 27522 RVA: 0x002349E5 File Offset: 0x00232BE5
 		public void StartCharging()
 		{
 			this.SetChargeState(true);
 		}
 
-		// Token: 0x06006B83 RID: 27523 RVA: 0x00234A0E File Offset: 0x00232C0E
+		// Token: 0x06006B83 RID: 27523 RVA: 0x002349EE File Offset: 0x00232BEE
 		public void StopCharging()
 		{
 			this.SetChargeState(false);
 		}
 
-		// Token: 0x06006B84 RID: 27524 RVA: 0x00234A17 File Offset: 0x00232C17
+		// Token: 0x06006B84 RID: 27524 RVA: 0x002349F7 File Offset: 0x00232BF7
 		public void ToggleCharging()
 		{
 			this.SetChargeState(!this.isCharging);
 		}
 
-		// Token: 0x06006B85 RID: 27525 RVA: 0x00234A28 File Offset: 0x00232C28
+		// Token: 0x06006B85 RID: 27525 RVA: 0x00234A08 File Offset: 0x00232C08
 		public void SetChargeTime(float t)
 		{
 			if (t >= this.maxChargeSeconds)
@@ -86,53 +86,53 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B86 RID: 27526 RVA: 0x00234A8A File Offset: 0x00232C8A
+		// Token: 0x06006B86 RID: 27526 RVA: 0x00234A6A File Offset: 0x00232C6A
 		public void SetChargeFrac(float f)
 		{
 			this.SetChargeTime(f * this.maxChargeSeconds);
 		}
 
-		// Token: 0x06006B87 RID: 27527 RVA: 0x00234A9A File Offset: 0x00232C9A
+		// Token: 0x06006B87 RID: 27527 RVA: 0x00234A7A File Offset: 0x00232C7A
 		public void EmptyCharge()
 		{
 			this.SetChargeTime(0f);
 		}
 
-		// Token: 0x06006B88 RID: 27528 RVA: 0x00234AA7 File Offset: 0x00232CA7
+		// Token: 0x06006B88 RID: 27528 RVA: 0x00234A87 File Offset: 0x00232C87
 		public void FillCharge()
 		{
 			this.SetChargeTime(this.maxChargeSeconds);
 		}
 
-		// Token: 0x06006B89 RID: 27529 RVA: 0x00234AB5 File Offset: 0x00232CB5
+		// Token: 0x06006B89 RID: 27529 RVA: 0x00234A95 File Offset: 0x00232C95
 		public void EmptyAndStop()
 		{
 			this.isCharging = false;
 			this.EmptyCharge();
 		}
 
-		// Token: 0x06006B8A RID: 27530 RVA: 0x00234AC4 File Offset: 0x00232CC4
+		// Token: 0x06006B8A RID: 27530 RVA: 0x00234AA4 File Offset: 0x00232CA4
 		public void FillAndStop()
 		{
 			this.StopCharging();
 			this.FillCharge();
 		}
 
-		// Token: 0x06006B8B RID: 27531 RVA: 0x00234AD2 File Offset: 0x00232CD2
+		// Token: 0x06006B8B RID: 27531 RVA: 0x00234AB2 File Offset: 0x00232CB2
 		public void EmptyAndStart()
 		{
 			this.StartCharging();
 			this.EmptyCharge();
 		}
 
-		// Token: 0x06006B8C RID: 27532 RVA: 0x00234AE0 File Offset: 0x00232CE0
+		// Token: 0x06006B8C RID: 27532 RVA: 0x00234AC0 File Offset: 0x00232CC0
 		public void FillAndStart()
 		{
 			this.isCharging = true;
 			this.FillCharge();
 		}
 
-		// Token: 0x06006B8D RID: 27533 RVA: 0x00234AF0 File Offset: 0x00232CF0
+		// Token: 0x06006B8D RID: 27533 RVA: 0x00234AD0 File Offset: 0x00232CD0
 		private void OnEnable()
 		{
 			if ((this.chargeTime <= 0f && this.isCharging) || (this.chargeTime >= this.maxChargeSeconds && !this.isCharging) || (this.chargeTime > 0f && this.chargeTime < this.maxChargeSeconds))
@@ -147,7 +147,7 @@ namespace GorillaTag.Cosmetics
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006B8F RID: 27535 RVA: 0x00234B4C File Offset: 0x00232D4C
+		// Token: 0x06006B8F RID: 27535 RVA: 0x00234B2C File Offset: 0x00232D2C
 		private void RunMaxCharge()
 		{
 			if (this.isCharging)
@@ -172,7 +172,7 @@ namespace GorillaTag.Cosmetics
 			this.continuousProperties.ApplyAll(1f);
 		}
 
-		// Token: 0x06006B90 RID: 27536 RVA: 0x00234BB4 File Offset: 0x00232DB4
+		// Token: 0x06006B90 RID: 27536 RVA: 0x00234B94 File Offset: 0x00232D94
 		private void RunNoCharge()
 		{
 			if (!this.isCharging)
@@ -197,7 +197,7 @@ namespace GorillaTag.Cosmetics
 			this.continuousProperties.ApplyAll(0f);
 		}
 
-		// Token: 0x06006B91 RID: 27537 RVA: 0x00234C1C File Offset: 0x00232E1C
+		// Token: 0x06006B91 RID: 27537 RVA: 0x00234BFC File Offset: 0x00232DFC
 		private void RunChargeFrac()
 		{
 			float num = this.masterChargeRemapCurve.Evaluate(this.chargeTime * this.inverseMaxChargeSeconds);
@@ -210,11 +210,11 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A13 RID: 2579
-		// (get) Token: 0x06006B92 RID: 27538 RVA: 0x00234C60 File Offset: 0x00232E60
-		// (set) Token: 0x06006B93 RID: 27539 RVA: 0x00234C68 File Offset: 0x00232E68
+		// (get) Token: 0x06006B92 RID: 27538 RVA: 0x00234C40 File Offset: 0x00232E40
+		// (set) Token: 0x06006B93 RID: 27539 RVA: 0x00234C48 File Offset: 0x00232E48
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006B94 RID: 27540 RVA: 0x00234C74 File Offset: 0x00232E74
+		// Token: 0x06006B94 RID: 27540 RVA: 0x00234C54 File Offset: 0x00232E54
 		public void Tick()
 		{
 			if (this.isCharging && this.chargeTime < this.maxChargeSeconds)

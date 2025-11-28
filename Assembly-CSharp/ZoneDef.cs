@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 public class ZoneDef : MonoBehaviour
 {
 	// Token: 0x1700077D RID: 1917
-	// (get) Token: 0x06005084 RID: 20612 RVA: 0x0019E844 File Offset: 0x0019CA44
+	// (get) Token: 0x06005084 RID: 20612 RVA: 0x0019E824 File Offset: 0x0019CA24
 	public GroupJoinZoneAB groupZoneAB
 	{
 		get
@@ -19,7 +19,7 @@ public class ZoneDef : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06005085 RID: 20613 RVA: 0x0019E874 File Offset: 0x0019CA74
+	// Token: 0x06005085 RID: 20613 RVA: 0x0019E854 File Offset: 0x0019CA54
 	public bool IsSameZone(ZoneDef other)
 	{
 		return !(other == null) && this.zoneId == other.zoneId && this.subZoneId == other.subZoneId;

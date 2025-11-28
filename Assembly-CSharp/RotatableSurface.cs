@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020004CF RID: 1231
 public class RotatableSurface : MonoBehaviour
 {
-	// Token: 0x06001FCA RID: 8138 RVA: 0x000A9800 File Offset: 0x000A7A00
+	// Token: 0x06001FCA RID: 8138 RVA: 0x000A97E0 File Offset: 0x000A79E0
 	private void LateUpdate()
 	{
 		float angle = this.spinner.angle;

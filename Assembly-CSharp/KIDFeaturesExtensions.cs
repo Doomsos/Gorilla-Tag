@@ -3,7 +3,7 @@
 // Token: 0x02000A2E RID: 2606
 public static class KIDFeaturesExtensions
 {
-	// Token: 0x0600420C RID: 16908 RVA: 0x0015D684 File Offset: 0x0015B884
+	// Token: 0x0600420C RID: 16908 RVA: 0x0015D664 File Offset: 0x0015B864
 	public static string ToStandardisedString(this EKIDFeatures feature)
 	{
 		switch (feature)
@@ -23,7 +23,7 @@ public static class KIDFeaturesExtensions
 		}
 	}
 
-	// Token: 0x0600420D RID: 16909 RVA: 0x0015D6D8 File Offset: 0x0015B8D8
+	// Token: 0x0600420D RID: 16909 RVA: 0x0015D6B8 File Offset: 0x0015B8B8
 	public static EKIDFeatures? FromString(string name)
 	{
 		string text = name.ToLower();
@@ -50,7 +50,7 @@ public static class KIDFeaturesExtensions
 		return new EKIDFeatures?(EKIDFeatures.Groups);
 	}
 
-	// Token: 0x0600420E RID: 16910 RVA: 0x0015D75C File Offset: 0x0015B95C
+	// Token: 0x0600420E RID: 16910 RVA: 0x0015D73C File Offset: 0x0015B93C
 	public static bool TryGetFromString(string name, out EKIDFeatures result)
 	{
 		EKIDFeatures? ekidfeatures = KIDFeaturesExtensions.FromString(name);

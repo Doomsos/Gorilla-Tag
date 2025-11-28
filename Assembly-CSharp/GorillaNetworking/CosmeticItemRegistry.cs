@@ -8,7 +8,7 @@ namespace GorillaNetworking
 	// Token: 0x02000EBB RID: 3771
 	public class CosmeticItemRegistry
 	{
-		// Token: 0x06005E03 RID: 24067 RVA: 0x001E1B2C File Offset: 0x001DFD2C
+		// Token: 0x06005E03 RID: 24067 RVA: 0x001E1B0C File Offset: 0x001DFD0C
 		public void Initialize(GameObject[] cosmeticGObjs)
 		{
 			if (this._isInitialized)
@@ -70,7 +70,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E04 RID: 24068 RVA: 0x001E1CE4 File Offset: 0x001DFEE4
+		// Token: 0x06005E04 RID: 24068 RVA: 0x001E1CC4 File Offset: 0x001DFEC4
 		public CosmeticItemInstance Cosmetic(string itemName)
 		{
 			if (!this._isInitialized)

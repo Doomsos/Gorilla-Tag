@@ -5,14 +5,14 @@ using UnityEngine;
 public class FPSController : MonoBehaviour
 {
 	// Token: 0x14000085 RID: 133
-	// (add) Token: 0x06004C30 RID: 19504 RVA: 0x0018CDB8 File Offset: 0x0018AFB8
-	// (remove) Token: 0x06004C31 RID: 19505 RVA: 0x0018CDF0 File Offset: 0x0018AFF0
+	// (add) Token: 0x06004C30 RID: 19504 RVA: 0x0018CD98 File Offset: 0x0018AF98
+	// (remove) Token: 0x06004C31 RID: 19505 RVA: 0x0018CDD0 File Offset: 0x0018AFD0
 	[HideInInspector]
 	public event FPSController.OnStateChangeEventHandler OnStartEvent;
 
 	// Token: 0x14000086 RID: 134
-	// (add) Token: 0x06004C32 RID: 19506 RVA: 0x0018CE28 File Offset: 0x0018B028
-	// (remove) Token: 0x06004C33 RID: 19507 RVA: 0x0018CE60 File Offset: 0x0018B060
+	// (add) Token: 0x06004C32 RID: 19506 RVA: 0x0018CE08 File Offset: 0x0018B008
+	// (remove) Token: 0x06004C33 RID: 19507 RVA: 0x0018CE40 File Offset: 0x0018B040
 	public event FPSController.OnStateChangeEventHandler OnStopEvent;
 
 	// Token: 0x04005C1A RID: 23578

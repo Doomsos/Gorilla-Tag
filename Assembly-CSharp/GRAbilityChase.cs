@@ -7,7 +7,7 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityChase : GRAbilityBase
 {
-	// Token: 0x06002A1D RID: 10781 RVA: 0x000E32C0 File Offset: 0x000E14C0
+	// Token: 0x06002A1D RID: 10781 RVA: 0x000E32A0 File Offset: 0x000E14A0
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -37,7 +37,7 @@ public class GRAbilityChase : GRAbilityBase
 		}
 	}
 
-	// Token: 0x06002A1E RID: 10782 RVA: 0x000E33DC File Offset: 0x000E15DC
+	// Token: 0x06002A1E RID: 10782 RVA: 0x000E33BC File Offset: 0x000E15BC
 	public override void Start()
 	{
 		base.Start();
@@ -47,19 +47,19 @@ public class GRAbilityChase : GRAbilityBase
 		this.movementSound.Play(null);
 	}
 
-	// Token: 0x06002A1F RID: 10783 RVA: 0x000E3433 File Offset: 0x000E1633
+	// Token: 0x06002A1F RID: 10783 RVA: 0x000E3413 File Offset: 0x000E1613
 	public override void Stop()
 	{
 		base.Stop();
 	}
 
-	// Token: 0x06002A20 RID: 10784 RVA: 0x000E343B File Offset: 0x000E163B
+	// Token: 0x06002A20 RID: 10784 RVA: 0x000E341B File Offset: 0x000E161B
 	public override bool IsDone()
 	{
 		return this.targetPlayer == null || Time.timeAsDouble - this.lastSeenTargetTime >= (double)this.giveUpDelay;
 	}
 
-	// Token: 0x06002A21 RID: 10785 RVA: 0x000E3460 File Offset: 0x000E1660
+	// Token: 0x06002A21 RID: 10785 RVA: 0x000E3440 File Offset: 0x000E1640
 	public override void Think(float dt)
 	{
 		GRPlayer grplayer = GRPlayer.Get(this.targetPlayer);
@@ -79,19 +79,19 @@ public class GRAbilityChase : GRAbilityBase
 		this.agent.RequestDestination(this.lastSeenTargetPosition);
 	}
 
-	// Token: 0x06002A22 RID: 10786 RVA: 0x000E34FC File Offset: 0x000E16FC
+	// Token: 0x06002A22 RID: 10786 RVA: 0x000E34DC File Offset: 0x000E16DC
 	protected override void UpdateShared(float dt)
 	{
 		GameAgent.UpdateFacing(this.root, this.agent.navAgent, this.targetPlayer, this.maxTurnSpeed);
 	}
 
-	// Token: 0x06002A23 RID: 10787 RVA: 0x000E3520 File Offset: 0x000E1720
+	// Token: 0x06002A23 RID: 10787 RVA: 0x000E3500 File Offset: 0x000E1700
 	public void SetTargetPlayer(NetPlayer targetPlayer)
 	{
 		this.targetPlayer = targetPlayer;
 	}
 
-	// Token: 0x06002A24 RID: 10788 RVA: 0x000E352C File Offset: 0x000E172C
+	// Token: 0x06002A24 RID: 10788 RVA: 0x000E350C File Offset: 0x000E170C
 	public static Vector3 GetMoveTargetOffset(Vector3 targetPos, GameEntity attackingEntity)
 	{
 		int num = attackingEntity.id.index % GRAbilityChase.targetOffsets.Count;

@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020004BB RID: 1211
 public class SmoothLoop : MonoBehaviour, IGorillaSliceableSimple, IBuildValidation
 {
-	// Token: 0x06001F38 RID: 7992 RVA: 0x000A5775 File Offset: 0x000A3975
+	// Token: 0x06001F38 RID: 7992 RVA: 0x000A5755 File Offset: 0x000A3955
 	public bool BuildValidationCheck()
 	{
 		if (this.source == null)
@@ -17,7 +17,7 @@ public class SmoothLoop : MonoBehaviour, IGorillaSliceableSimple, IBuildValidati
 		return true;
 	}
 
-	// Token: 0x06001F39 RID: 7993 RVA: 0x000A5798 File Offset: 0x000A3998
+	// Token: 0x06001F39 RID: 7993 RVA: 0x000A5778 File Offset: 0x000A3978
 	private void Start()
 	{
 		if (this.delay != 0f && !this.randomStart)
@@ -36,7 +36,7 @@ public class SmoothLoop : MonoBehaviour, IGorillaSliceableSimple, IBuildValidati
 		}
 	}
 
-	// Token: 0x06001F3A RID: 7994 RVA: 0x000A5818 File Offset: 0x000A3A18
+	// Token: 0x06001F3A RID: 7994 RVA: 0x000A57F8 File Offset: 0x000A39F8
 	public void SliceUpdate()
 	{
 		if (!base.enabled)
@@ -49,7 +49,7 @@ public class SmoothLoop : MonoBehaviour, IGorillaSliceableSimple, IBuildValidati
 		}
 	}
 
-	// Token: 0x06001F3B RID: 7995 RVA: 0x000A5858 File Offset: 0x000A3A58
+	// Token: 0x06001F3B RID: 7995 RVA: 0x000A5838 File Offset: 0x000A3A38
 	public void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
@@ -73,7 +73,7 @@ public class SmoothLoop : MonoBehaviour, IGorillaSliceableSimple, IBuildValidati
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06001F3D RID: 7997 RVA: 0x000A58BC File Offset: 0x000A3ABC
+	// Token: 0x06001F3D RID: 7997 RVA: 0x000A589C File Offset: 0x000A3A9C
 	private bool sourceCheck()
 	{
 		if (!this.source || !this.source.clip)
@@ -86,7 +86,7 @@ public class SmoothLoop : MonoBehaviour, IGorillaSliceableSimple, IBuildValidati
 		return true;
 	}
 
-	// Token: 0x06001F3E RID: 7998 RVA: 0x000A5913 File Offset: 0x000A3B13
+	// Token: 0x06001F3E RID: 7998 RVA: 0x000A58F3 File Offset: 0x000A3AF3
 	public IEnumerator DelayedStart()
 	{
 		if (!this.sourceCheck())

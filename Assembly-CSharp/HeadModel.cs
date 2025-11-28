@@ -11,26 +11,26 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 // Token: 0x0200046E RID: 1134
 public class HeadModel : MonoBehaviour, IDelayedExecListener
 {
-	// Token: 0x06001CAB RID: 7339 RVA: 0x00097C38 File Offset: 0x00095E38
+	// Token: 0x06001CAB RID: 7339 RVA: 0x00097C18 File Offset: 0x00095E18
 	protected void Awake()
 	{
 		this.RefreshRenderer();
 	}
 
-	// Token: 0x06001CAC RID: 7340 RVA: 0x00097C40 File Offset: 0x00095E40
+	// Token: 0x06001CAC RID: 7340 RVA: 0x00097C20 File Offset: 0x00095E20
 	protected void RefreshRenderer()
 	{
 		this._mannequinRenderer = base.GetComponentInChildren<Renderer>(true);
 	}
 
-	// Token: 0x06001CAD RID: 7341 RVA: 0x00097C4F File Offset: 0x00095E4F
+	// Token: 0x06001CAD RID: 7341 RVA: 0x00097C2F File Offset: 0x00095E2F
 	public void SetCosmeticActive(string playFabId, bool forRightSide = false)
 	{
 		this._ClearCurrent();
 		this._AddPreviewCosmetic(playFabId, forRightSide);
 	}
 
-	// Token: 0x06001CAE RID: 7342 RVA: 0x00097C60 File Offset: 0x00095E60
+	// Token: 0x06001CAE RID: 7342 RVA: 0x00097C40 File Offset: 0x00095E40
 	public void SetCosmeticActiveArray(string[] playFabIds, bool[] forRightSideArray)
 	{
 		this._ClearCurrent();
@@ -40,7 +40,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 		}
 	}
 
-	// Token: 0x06001CAF RID: 7343 RVA: 0x00097C90 File Offset: 0x00095E90
+	// Token: 0x06001CAF RID: 7343 RVA: 0x00097C70 File Offset: 0x00095E70
 	private void _AddPreviewCosmetic(string playFabId, bool forRightSide)
 	{
 		CosmeticInfoV2 cosmeticInfoV;
@@ -92,7 +92,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 		}
 	}
 
-	// Token: 0x06001CB0 RID: 7344 RVA: 0x00097E64 File Offset: 0x00096064
+	// Token: 0x06001CB0 RID: 7344 RVA: 0x00097E44 File Offset: 0x00096044
 	private void _HandleLoadOpOnCompleted(AsyncOperationHandle<GameObject> loadOp)
 	{
 		int num;
@@ -118,7 +118,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 		cosmeticPartLoadInfo.xform.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06001CB1 RID: 7345 RVA: 0x00097F60 File Offset: 0x00096160
+	// Token: 0x06001CB1 RID: 7345 RVA: 0x00097F40 File Offset: 0x00096140
 	void IDelayedExecListener.OnDelayedAction(int partLoadInfosIndex)
 	{
 		if (partLoadInfosIndex < 0 || partLoadInfosIndex >= this._currentPartLoadInfos.Count)
@@ -135,7 +135,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 		this._loadOp_to_partInfoIndex[cosmeticPartLoadInfo.loadOp] = partLoadInfosIndex;
 	}
 
-	// Token: 0x06001CB2 RID: 7346 RVA: 0x00097FE8 File Offset: 0x000961E8
+	// Token: 0x06001CB2 RID: 7346 RVA: 0x00097FC8 File Offset: 0x000961C8
 	protected void _ClearCurrent()
 	{
 		for (int i = 0; i < this._currentPartLoadInfos.Count; i++)
@@ -151,7 +151,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 		this._mannequinRenderer.enabled = true;
 	}
 
-	// Token: 0x06001CB3 RID: 7347 RVA: 0x00098060 File Offset: 0x00096260
+	// Token: 0x06001CB3 RID: 7347 RVA: 0x00098040 File Offset: 0x00096240
 	private void _EnsureCapacityAndClear<T>(List<T> list)
 	{
 		if (list.Count > list.Capacity)
@@ -161,7 +161,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 		list.Clear();
 	}
 
-	// Token: 0x06001CB4 RID: 7348 RVA: 0x00098082 File Offset: 0x00096282
+	// Token: 0x06001CB4 RID: 7348 RVA: 0x00098062 File Offset: 0x00096262
 	private void _EnsureCapacityAndClear<T1, T2>(Dictionary<T1, T2> dict)
 	{
 		dict.EnsureCapacity(dict.Count);

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000C56 RID: 3158
 public class LookAtTransform : MonoBehaviour
 {
-	// Token: 0x06004D45 RID: 19781 RVA: 0x001908D7 File Offset: 0x0018EAD7
+	// Token: 0x06004D45 RID: 19781 RVA: 0x001908B7 File Offset: 0x0018EAB7
 	private void Update()
 	{
 		base.transform.rotation = Quaternion.LookRotation(this.lookAt.position - base.transform.position);

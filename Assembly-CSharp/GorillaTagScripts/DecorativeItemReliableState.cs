@@ -9,7 +9,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DDB RID: 3547
 	public class DecorativeItemReliableState : MonoBehaviour, IPunObservable
 	{
-		// Token: 0x06005814 RID: 22548 RVA: 0x001C23A8 File Offset: 0x001C05A8
+		// Token: 0x06005814 RID: 22548 RVA: 0x001C2388 File Offset: 0x001C0588
 		public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (stream.IsWriting)

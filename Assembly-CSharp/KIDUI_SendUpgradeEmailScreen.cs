@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000AB8 RID: 2744
 public class KIDUI_SendUpgradeEmailScreen : MonoBehaviour
 {
-	// Token: 0x060044CD RID: 17613 RVA: 0x0016C9D4 File Offset: 0x0016ABD4
+	// Token: 0x060044CD RID: 17613 RVA: 0x0016C9B4 File Offset: 0x0016ABB4
 	public Task SendUpgradeEmail(List<string> requestedPermissions)
 	{
 		KIDUI_SendUpgradeEmailScreen.<SendUpgradeEmail>d__4 <SendUpgradeEmail>d__;
@@ -19,21 +19,21 @@ public class KIDUI_SendUpgradeEmailScreen : MonoBehaviour
 		return <SendUpgradeEmail>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x060044CE RID: 17614 RVA: 0x0016CA1F File Offset: 0x0016AC1F
+	// Token: 0x060044CE RID: 17614 RVA: 0x0016C9FF File Offset: 0x0016ABFF
 	public void OnCancel()
 	{
 		base.gameObject.SetActive(false);
 		this._mainScreen.ShowMainScreen(EMainScreenStatus.None);
 	}
 
-	// Token: 0x060044CF RID: 17615 RVA: 0x0016CA39 File Offset: 0x0016AC39
+	// Token: 0x060044CF RID: 17615 RVA: 0x0016CA19 File Offset: 0x0016AC19
 	private void OnSuccess()
 	{
 		base.gameObject.SetActive(false);
 		this._successScreen.Show(null);
 	}
 
-	// Token: 0x060044D0 RID: 17616 RVA: 0x0016CA53 File Offset: 0x0016AC53
+	// Token: 0x060044D0 RID: 17616 RVA: 0x0016CA33 File Offset: 0x0016AC33
 	private void OnFailure(string errorMessage)
 	{
 		base.gameObject.SetActive(false);

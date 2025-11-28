@@ -6,18 +6,18 @@ using UnityEngine;
 public class CosmeticButton : GorillaPressableButton
 {
 	// Token: 0x1700035E RID: 862
-	// (get) Token: 0x06001F94 RID: 8084 RVA: 0x000A7DFB File Offset: 0x000A5FFB
-	// (set) Token: 0x06001F95 RID: 8085 RVA: 0x000A7E03 File Offset: 0x000A6003
+	// (get) Token: 0x06001F94 RID: 8084 RVA: 0x000A7DDB File Offset: 0x000A5FDB
+	// (set) Token: 0x06001F95 RID: 8085 RVA: 0x000A7DE3 File Offset: 0x000A5FE3
 	public bool Initialized { get; private set; }
 
-	// Token: 0x06001F96 RID: 8086 RVA: 0x000A7E0C File Offset: 0x000A600C
+	// Token: 0x06001F96 RID: 8086 RVA: 0x000A7DEC File Offset: 0x000A5FEC
 	public void Awake()
 	{
 		this.startingPos = base.transform.localPosition;
 		this.Initialized = true;
 	}
 
-	// Token: 0x06001F97 RID: 8087 RVA: 0x000A7E28 File Offset: 0x000A6028
+	// Token: 0x06001F97 RID: 8087 RVA: 0x000A7E08 File Offset: 0x000A6008
 	public override void UpdateColor()
 	{
 		if (!base.enabled)
@@ -38,7 +38,7 @@ public class CosmeticButton : GorillaPressableButton
 		this.UpdatePosition();
 	}
 
-	// Token: 0x06001F98 RID: 8088 RVA: 0x000A7EC0 File Offset: 0x000A60C0
+	// Token: 0x06001F98 RID: 8088 RVA: 0x000A7EA0 File Offset: 0x000A60A0
 	public virtual void UpdatePosition()
 	{
 		Vector3 vector = this.startingPos;

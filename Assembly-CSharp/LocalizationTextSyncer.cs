@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x02000AE8 RID: 2792
 public class LocalizationTextSyncer : MonoBehaviour
 {
-	// Token: 0x0600458F RID: 17807 RVA: 0x001708FB File Offset: 0x0016EAFB
+	// Token: 0x0600458F RID: 17807 RVA: 0x001708DB File Offset: 0x0016EADB
 	private void Start()
 	{
 		this.OnLanguageChanged();
 	}
 
-	// Token: 0x06004590 RID: 17808 RVA: 0x00170903 File Offset: 0x0016EB03
+	// Token: 0x06004590 RID: 17808 RVA: 0x001708E3 File Offset: 0x0016EAE3
 	private void OnEnable()
 	{
 		LocalisationManager.RegisterOnLanguageChanged(new Action(this.OnLanguageChanged));
@@ -23,19 +23,19 @@ public class LocalizationTextSyncer : MonoBehaviour
 		this.OnLanguageChanged();
 	}
 
-	// Token: 0x06004591 RID: 17809 RVA: 0x0017092A File Offset: 0x0016EB2A
+	// Token: 0x06004591 RID: 17809 RVA: 0x0017090A File Offset: 0x0016EB0A
 	private void OnDisable()
 	{
 		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.OnLanguageChanged));
 	}
 
-	// Token: 0x06004592 RID: 17810 RVA: 0x0017092A File Offset: 0x0016EB2A
+	// Token: 0x06004592 RID: 17810 RVA: 0x0017090A File Offset: 0x0016EB0A
 	private void OnDestroy()
 	{
 		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.OnLanguageChanged));
 	}
 
-	// Token: 0x06004593 RID: 17811 RVA: 0x00170940 File Offset: 0x0016EB40
+	// Token: 0x06004593 RID: 17811 RVA: 0x00170920 File Offset: 0x0016EB20
 	private void OnLanguageChanged()
 	{
 		LocalisationFontPair localisationFontPair;
@@ -76,7 +76,7 @@ public class LocalizationTextSyncer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004594 RID: 17812 RVA: 0x00170A68 File Offset: 0x0016EC68
+	// Token: 0x06004594 RID: 17812 RVA: 0x00170A48 File Offset: 0x0016EC48
 	private bool TryGetFontDataOverride(out LocalisationFontPair fontDataOverride)
 	{
 		fontDataOverride = default(LocalisationFontPair);
@@ -105,7 +105,7 @@ public class LocalizationTextSyncer : MonoBehaviour
 	[Serializable]
 	public struct TextCompSyncData
 	{
-		// Token: 0x06004596 RID: 17814 RVA: 0x00170AE0 File Offset: 0x0016ECE0
+		// Token: 0x06004596 RID: 17814 RVA: 0x00170AC0 File Offset: 0x0016ECC0
 		public bool GetOverrideForLanguage(out LocalisationFontPair fontData)
 		{
 			fontData = default(LocalisationFontPair);

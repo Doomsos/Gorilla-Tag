@@ -10,7 +10,7 @@ using UnityEngine;
 // Token: 0x020004E3 RID: 1251
 public class PaperPlaneThrowable : TransferrableObject
 {
-	// Token: 0x0600202C RID: 8236 RVA: 0x000AAB08 File Offset: 0x000A8D08
+	// Token: 0x0600202C RID: 8236 RVA: 0x000AAAE8 File Offset: 0x000A8CE8
 	private void OnLaunchRPC(int sender, int receiver, object[] args, PhotonMessageInfoWrapped info)
 	{
 		if (info.senderID != this.ownerRig.creator.ActorNumber)
@@ -61,7 +61,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		}
 	}
 
-	// Token: 0x0600202D RID: 8237 RVA: 0x000AABDE File Offset: 0x000A8DDE
+	// Token: 0x0600202D RID: 8237 RVA: 0x000AABBE File Offset: 0x000A8DBE
 	internal override void OnEnable()
 	{
 		PhotonNetwork.NetworkingClient.EventReceived += new Action<EventData>(this.OnPhotonEvent);
@@ -70,14 +70,14 @@ public class PaperPlaneThrowable : TransferrableObject
 		base.OnEnable();
 	}
 
-	// Token: 0x0600202E RID: 8238 RVA: 0x000AAC19 File Offset: 0x000A8E19
+	// Token: 0x0600202E RID: 8238 RVA: 0x000AABF9 File Offset: 0x000A8DF9
 	internal override void OnDisable()
 	{
 		PhotonNetwork.NetworkingClient.EventReceived -= new Action<EventData>(this.OnPhotonEvent);
 		base.OnDisable();
 	}
 
-	// Token: 0x0600202F RID: 8239 RVA: 0x000AAC38 File Offset: 0x000A8E38
+	// Token: 0x0600202F RID: 8239 RVA: 0x000AAC18 File Offset: 0x000A8E18
 	private void OnPhotonEvent(EventData evData)
 	{
 		if (evData.Code != 176)
@@ -140,7 +140,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		}
 	}
 
-	// Token: 0x06002030 RID: 8240 RVA: 0x000AAD7B File Offset: 0x000A8F7B
+	// Token: 0x06002030 RID: 8240 RVA: 0x000AAD5B File Offset: 0x000A8F5B
 	protected override void Start()
 	{
 		base.Start();
@@ -150,7 +150,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		}
 	}
 
-	// Token: 0x06002031 RID: 8241 RVA: 0x000AAD9A File Offset: 0x000A8F9A
+	// Token: 0x06002031 RID: 8241 RVA: 0x000AAD7A File Offset: 0x000A8F7A
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		if (this._renderer.forceRenderingOff)
@@ -160,7 +160,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		base.OnGrab(pointGrabbed, grabbingHand);
 	}
 
-	// Token: 0x06002032 RID: 8242 RVA: 0x000AADB4 File Offset: 0x000A8FB4
+	// Token: 0x06002032 RID: 8242 RVA: 0x000AAD94 File Offset: 0x000A8F94
 	private static int FetchViewID(PaperPlaneThrowable ppt)
 	{
 		NetPlayer netPlayer = (ppt.myOnlineRig != null) ? ppt.myOnlineRig.creator : ((ppt.myRig != null) ? ((ppt.myRig.creator != null) ? ppt.myRig.creator : NetworkSystem.Instance.LocalPlayer) : null);
@@ -180,7 +180,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		return rigContainer.Rig.netView.ViewID;
 	}
 
-	// Token: 0x06002033 RID: 8243 RVA: 0x000AAE50 File Offset: 0x000A9050
+	// Token: 0x06002033 RID: 8243 RVA: 0x000AAE30 File Offset: 0x000A9030
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		TransferrableObject.PositionState currentState = this.currentState;
@@ -218,7 +218,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		return true;
 	}
 
-	// Token: 0x06002034 RID: 8244 RVA: 0x000AAF7C File Offset: 0x000A917C
+	// Token: 0x06002034 RID: 8244 RVA: 0x000AAF5C File Offset: 0x000A915C
 	private int GetThrowableId()
 	{
 		int num = this._throwableIdHash.GetValueOrDefault();
@@ -231,7 +231,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		return num;
 	}
 
-	// Token: 0x06002035 RID: 8245 RVA: 0x000AAFC0 File Offset: 0x000A91C0
+	// Token: 0x06002035 RID: 8245 RVA: 0x000AAFA0 File Offset: 0x000A91A0
 	private void LaunchProjectileLocal(Vector3 launchPos, Quaternion launchRot, Vector3 releaseVel)
 	{
 		if (releaseVel.sqrMagnitude <= this.minThrowSpeed * base.transform.lossyScale.z * base.transform.lossyScale.z)
@@ -253,7 +253,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		this._renderer.forceRenderingOff = true;
 	}
 
-	// Token: 0x06002036 RID: 8246 RVA: 0x000AB08C File Offset: 0x000A928C
+	// Token: 0x06002036 RID: 8246 RVA: 0x000AB06C File Offset: 0x000A926C
 	private void OnProjectileHit(Vector3 endPoint)
 	{
 		this._renderer.forceRenderingOff = false;
@@ -273,7 +273,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		}
 	}
 
-	// Token: 0x06002037 RID: 8247 RVA: 0x000AB0DC File Offset: 0x000A92DC
+	// Token: 0x06002037 RID: 8247 RVA: 0x000AB0BC File Offset: 0x000A92BC
 	protected override void LateUpdateLocal()
 	{
 		base.LateUpdateLocal();
@@ -286,7 +286,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		this._lastWorldPos = position;
 	}
 
-	// Token: 0x06002038 RID: 8248 RVA: 0x000AB144 File Offset: 0x000A9344
+	// Token: 0x06002038 RID: 8248 RVA: 0x000AB124 File Offset: 0x000A9324
 	private static Vector3 CalcAngularVelocity(Quaternion from, Quaternion to, float dt)
 	{
 		Vector3 vector = (to * Quaternion.Inverse(from)).eulerAngles;
@@ -306,7 +306,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		return vector;
 	}
 
-	// Token: 0x06002039 RID: 8249 RVA: 0x000AB1CC File Offset: 0x000A93CC
+	// Token: 0x06002039 RID: 8249 RVA: 0x000AB1AC File Offset: 0x000A93AC
 	public override void DropItem()
 	{
 		base.DropItem();

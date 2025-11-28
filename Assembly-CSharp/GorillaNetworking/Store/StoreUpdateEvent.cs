@@ -14,7 +14,7 @@ namespace GorillaNetworking.Store
 		{
 		}
 
-		// Token: 0x06006233 RID: 25139 RVA: 0x001FA03C File Offset: 0x001F823C
+		// Token: 0x06006233 RID: 25139 RVA: 0x001FA01C File Offset: 0x001F821C
 		public StoreUpdateEvent(string pedestalID, string itemName, DateTime startTimeUTC, DateTime endTimeUTC)
 		{
 			this.PedestalID = pedestalID;
@@ -23,25 +23,25 @@ namespace GorillaNetworking.Store
 			this.EndTimeUTC = endTimeUTC;
 		}
 
-		// Token: 0x06006234 RID: 25140 RVA: 0x001FA061 File Offset: 0x001F8261
+		// Token: 0x06006234 RID: 25140 RVA: 0x001FA041 File Offset: 0x001F8241
 		public static string SerializeAsJSon(StoreUpdateEvent storeEvent)
 		{
 			return JsonUtility.ToJson(storeEvent);
 		}
 
-		// Token: 0x06006235 RID: 25141 RVA: 0x001FA069 File Offset: 0x001F8269
+		// Token: 0x06006235 RID: 25141 RVA: 0x001FA049 File Offset: 0x001F8249
 		public static string SerializeArrayAsJSon(StoreUpdateEvent[] storeEvents)
 		{
 			return JsonConvert.SerializeObject(storeEvents);
 		}
 
-		// Token: 0x06006236 RID: 25142 RVA: 0x001FA071 File Offset: 0x001F8271
+		// Token: 0x06006236 RID: 25142 RVA: 0x001FA051 File Offset: 0x001F8251
 		public static StoreUpdateEvent DeserializeFromJSon(string json)
 		{
 			return JsonUtility.FromJson<StoreUpdateEvent>(json);
 		}
 
-		// Token: 0x06006237 RID: 25143 RVA: 0x001FA079 File Offset: 0x001F8279
+		// Token: 0x06006237 RID: 25143 RVA: 0x001FA059 File Offset: 0x001F8259
 		public static StoreUpdateEvent[] DeserializeFromJSonArray(string json)
 		{
 			List<StoreUpdateEvent> list = JsonMapper.ToObject<List<StoreUpdateEvent>>(json);
@@ -49,7 +49,7 @@ namespace GorillaNetworking.Store
 			return list.ToArray();
 		}
 
-		// Token: 0x06006238 RID: 25144 RVA: 0x001FA0AB File Offset: 0x001F82AB
+		// Token: 0x06006238 RID: 25144 RVA: 0x001FA08B File Offset: 0x001F828B
 		public static List<StoreUpdateEvent> DeserializeFromJSonList(string json)
 		{
 			List<StoreUpdateEvent> list = JsonMapper.ToObject<List<StoreUpdateEvent>>(json);

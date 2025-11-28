@@ -6,8 +6,8 @@ using UnityEngine;
 public class CustomMapsTerminalControlButton : CustomMapsScreenTouchPoint
 {
 	// Token: 0x17000594 RID: 1428
-	// (get) Token: 0x06003C67 RID: 15463 RVA: 0x0013F077 File Offset: 0x0013D277
-	// (set) Token: 0x06003C68 RID: 15464 RVA: 0x0013F07F File Offset: 0x0013D27F
+	// (get) Token: 0x06003C67 RID: 15463 RVA: 0x0013F057 File Offset: 0x0013D257
+	// (set) Token: 0x06003C68 RID: 15464 RVA: 0x0013F05F File Offset: 0x0013D25F
 	public bool IsLocked
 	{
 		get
@@ -20,7 +20,7 @@ public class CustomMapsTerminalControlButton : CustomMapsScreenTouchPoint
 		}
 	}
 
-	// Token: 0x06003C69 RID: 15465 RVA: 0x0013F088 File Offset: 0x0013D288
+	// Token: 0x06003C69 RID: 15465 RVA: 0x0013F068 File Offset: 0x0013D268
 	protected override void OnButtonPressedEvent()
 	{
 		GTDev.Log<string>("terminal control pressed", null);
@@ -31,7 +31,7 @@ public class CustomMapsTerminalControlButton : CustomMapsScreenTouchPoint
 		this.mapsTerminal.HandleTerminalControlButtonPressed();
 	}
 
-	// Token: 0x06003C6A RID: 15466 RVA: 0x0013F0AF File Offset: 0x0013D2AF
+	// Token: 0x06003C6A RID: 15466 RVA: 0x0013F08F File Offset: 0x0013D28F
 	public void LockTerminalControl()
 	{
 		if (this.IsLocked)
@@ -42,7 +42,7 @@ public class CustomMapsTerminalControlButton : CustomMapsScreenTouchPoint
 		this.PressButtonColourUpdate();
 	}
 
-	// Token: 0x06003C6B RID: 15467 RVA: 0x0013F0C7 File Offset: 0x0013D2C7
+	// Token: 0x06003C6B RID: 15467 RVA: 0x0013F0A7 File Offset: 0x0013D2A7
 	public void UnlockTerminalControl()
 	{
 		if (!this.IsLocked)
@@ -53,7 +53,7 @@ public class CustomMapsTerminalControlButton : CustomMapsScreenTouchPoint
 		this.PressButtonColourUpdate();
 	}
 
-	// Token: 0x06003C6C RID: 15468 RVA: 0x0013F0E0 File Offset: 0x0013D2E0
+	// Token: 0x06003C6C RID: 15468 RVA: 0x0013F0C0 File Offset: 0x0013D2C0
 	public override void PressButtonColourUpdate()
 	{
 		this.bttnText.fontSize = (this.isLocked ? this.lockedFontSize : this.unlockedFontSize);

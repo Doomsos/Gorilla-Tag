@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000ADC RID: 2780
 public class LightningManager : MonoBehaviour
 {
-	// Token: 0x06004549 RID: 17737 RVA: 0x0016F51E File Offset: 0x0016D71E
+	// Token: 0x06004549 RID: 17737 RVA: 0x0016F4FE File Offset: 0x0016D6FE
 	private void Start()
 	{
 		this.lightningAudio = base.GetComponent<AudioSource>();
@@ -15,7 +15,7 @@ public class LightningManager : MonoBehaviour
 		instance.OnServerTimeUpdated = (Action)Delegate.Combine(instance.OnServerTimeUpdated, new Action(this.OnTimeChanged));
 	}
 
-	// Token: 0x0600454A RID: 17738 RVA: 0x0016F554 File Offset: 0x0016D754
+	// Token: 0x0600454A RID: 17738 RVA: 0x0016F534 File Offset: 0x0016D734
 	private void OnTimeChanged()
 	{
 		this.InitializeRng();
@@ -26,7 +26,7 @@ public class LightningManager : MonoBehaviour
 		this.lightningRunner = base.StartCoroutine(this.LightningEffectRunner());
 	}
 
-	// Token: 0x0600454B RID: 17739 RVA: 0x0016F584 File Offset: 0x0016D784
+	// Token: 0x0600454B RID: 17739 RVA: 0x0016F564 File Offset: 0x0016D764
 	private void GetHourStart(out long seed, out float timestampRealtime)
 	{
 		DateTime serverTime = GorillaComputer.instance.GetServerTime();
@@ -36,7 +36,7 @@ public class LightningManager : MonoBehaviour
 		seed = dateTime.Ticks;
 	}
 
-	// Token: 0x0600454C RID: 17740 RVA: 0x0016F5E4 File Offset: 0x0016D7E4
+	// Token: 0x0600454C RID: 17740 RVA: 0x0016F5C4 File Offset: 0x0016D7C4
 	private void InitializeRng()
 	{
 		long seed;
@@ -63,7 +63,7 @@ public class LightningManager : MonoBehaviour
 		this.lightningTimestampsRealtime[this.lightningTimestampsRealtime.Count - 1] = num + 3605f;
 	}
 
-	// Token: 0x0600454D RID: 17741 RVA: 0x0016F6A8 File Offset: 0x0016D8A8
+	// Token: 0x0600454D RID: 17741 RVA: 0x0016F688 File Offset: 0x0016D888
 	internal void DoLightningStrike()
 	{
 		BetterDayNightManager.instance.AnimateLightFlash(this.lightMapIndex, this.flashFadeInDuration, this.flashHoldDuration, this.flashFadeOutDuration);
@@ -71,7 +71,7 @@ public class LightningManager : MonoBehaviour
 		this.lightningAudio.GTPlay();
 	}
 
-	// Token: 0x0600454E RID: 17742 RVA: 0x0016F705 File Offset: 0x0016D905
+	// Token: 0x0600454E RID: 17742 RVA: 0x0016F6E5 File Offset: 0x0016D8E5
 	private IEnumerator LightningEffectRunner()
 	{
 		for (;;)

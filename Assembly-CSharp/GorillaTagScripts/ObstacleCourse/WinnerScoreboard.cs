@@ -7,7 +7,7 @@ namespace GorillaTagScripts.ObstacleCourse
 	// Token: 0x02000E3A RID: 3642
 	public class WinnerScoreboard : MonoBehaviour
 	{
-		// Token: 0x06005ADF RID: 23263 RVA: 0x001D1888 File Offset: 0x001CFA88
+		// Token: 0x06005ADF RID: 23263 RVA: 0x001D1868 File Offset: 0x001CFA68
 		public void UpdateBoard(string winner, ObstacleCourse.RaceState _currentState)
 		{
 			if (this.output == null)

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 // Token: 0x020008D4 RID: 2260
 public class ProgressionUtil
 {
-	// Token: 0x060039FF RID: 14847 RVA: 0x00132E84 File Offset: 0x00131084
+	// Token: 0x060039FF RID: 14847 RVA: 0x00132E64 File Offset: 0x00131064
 	public static Task WaitForMothershipSessionToken()
 	{
 		ProgressionUtil.<WaitForMothershipSessionToken>d__0 <WaitForMothershipSessionToken>d__;

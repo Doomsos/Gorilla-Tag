@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000C25 RID: 3109
 public class AverageVector3
 {
-	// Token: 0x06004C73 RID: 19571 RVA: 0x0018D5A9 File Offset: 0x0018B7A9
+	// Token: 0x06004C73 RID: 19571 RVA: 0x0018D589 File Offset: 0x0018B789
 	public AverageVector3(float averagingWindow = 0.1f)
 	{
 		this.timeWindow = averagingWindow;
 	}
 
-	// Token: 0x06004C74 RID: 19572 RVA: 0x0018D5D0 File Offset: 0x0018B7D0
+	// Token: 0x06004C74 RID: 19572 RVA: 0x0018D5B0 File Offset: 0x0018B7B0
 	public void AddSample(Vector3 sample, float time)
 	{
 		this.samples.Add(new AverageVector3.Sample
@@ -22,7 +22,7 @@ public class AverageVector3
 		this.RefreshSamples();
 	}
 
-	// Token: 0x06004C75 RID: 19573 RVA: 0x0018D608 File Offset: 0x0018B808
+	// Token: 0x06004C75 RID: 19573 RVA: 0x0018D5E8 File Offset: 0x0018B7E8
 	public Vector3 GetAverage()
 	{
 		this.RefreshSamples();
@@ -34,13 +34,13 @@ public class AverageVector3
 		return vector / (float)this.samples.Count;
 	}
 
-	// Token: 0x06004C76 RID: 19574 RVA: 0x0018D663 File Offset: 0x0018B863
+	// Token: 0x06004C76 RID: 19574 RVA: 0x0018D643 File Offset: 0x0018B843
 	public void Clear()
 	{
 		this.samples.Clear();
 	}
 
-	// Token: 0x06004C77 RID: 19575 RVA: 0x0018D670 File Offset: 0x0018B870
+	// Token: 0x06004C77 RID: 19575 RVA: 0x0018D650 File Offset: 0x0018B850
 	private void RefreshSamples()
 	{
 		float num = Time.time - this.timeWindow;

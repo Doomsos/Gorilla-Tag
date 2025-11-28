@@ -8,8 +8,8 @@ namespace LitJson
 	public class JsonReader
 	{
 		// Token: 0x170007F1 RID: 2033
-		// (get) Token: 0x060053DB RID: 21467 RVA: 0x001A7DF4 File Offset: 0x001A5FF4
-		// (set) Token: 0x060053DC RID: 21468 RVA: 0x001A7E01 File Offset: 0x001A6001
+		// (get) Token: 0x060053DB RID: 21467 RVA: 0x001A7DD4 File Offset: 0x001A5FD4
+		// (set) Token: 0x060053DC RID: 21468 RVA: 0x001A7DE1 File Offset: 0x001A5FE1
 		public bool AllowComments
 		{
 			get
@@ -23,8 +23,8 @@ namespace LitJson
 		}
 
 		// Token: 0x170007F2 RID: 2034
-		// (get) Token: 0x060053DD RID: 21469 RVA: 0x001A7E0F File Offset: 0x001A600F
-		// (set) Token: 0x060053DE RID: 21470 RVA: 0x001A7E1C File Offset: 0x001A601C
+		// (get) Token: 0x060053DD RID: 21469 RVA: 0x001A7DEF File Offset: 0x001A5FEF
+		// (set) Token: 0x060053DE RID: 21470 RVA: 0x001A7DFC File Offset: 0x001A5FFC
 		public bool AllowSingleQuotedStrings
 		{
 			get
@@ -38,7 +38,7 @@ namespace LitJson
 		}
 
 		// Token: 0x170007F3 RID: 2035
-		// (get) Token: 0x060053DF RID: 21471 RVA: 0x001A7E2A File Offset: 0x001A602A
+		// (get) Token: 0x060053DF RID: 21471 RVA: 0x001A7E0A File Offset: 0x001A600A
 		public bool EndOfInput
 		{
 			get
@@ -48,7 +48,7 @@ namespace LitJson
 		}
 
 		// Token: 0x170007F4 RID: 2036
-		// (get) Token: 0x060053E0 RID: 21472 RVA: 0x001A7E32 File Offset: 0x001A6032
+		// (get) Token: 0x060053E0 RID: 21472 RVA: 0x001A7E12 File Offset: 0x001A6012
 		public bool EndOfJson
 		{
 			get
@@ -58,7 +58,7 @@ namespace LitJson
 		}
 
 		// Token: 0x170007F5 RID: 2037
-		// (get) Token: 0x060053E1 RID: 21473 RVA: 0x001A7E3A File Offset: 0x001A603A
+		// (get) Token: 0x060053E1 RID: 21473 RVA: 0x001A7E1A File Offset: 0x001A601A
 		public JsonToken Token
 		{
 			get
@@ -68,7 +68,7 @@ namespace LitJson
 		}
 
 		// Token: 0x170007F6 RID: 2038
-		// (get) Token: 0x060053E2 RID: 21474 RVA: 0x001A7E42 File Offset: 0x001A6042
+		// (get) Token: 0x060053E2 RID: 21474 RVA: 0x001A7E22 File Offset: 0x001A6022
 		public object Value
 		{
 			get
@@ -77,23 +77,23 @@ namespace LitJson
 			}
 		}
 
-		// Token: 0x060053E3 RID: 21475 RVA: 0x001A7E4A File Offset: 0x001A604A
+		// Token: 0x060053E3 RID: 21475 RVA: 0x001A7E2A File Offset: 0x001A602A
 		static JsonReader()
 		{
 			JsonReader.PopulateParseTable();
 		}
 
-		// Token: 0x060053E4 RID: 21476 RVA: 0x001A7E51 File Offset: 0x001A6051
+		// Token: 0x060053E4 RID: 21476 RVA: 0x001A7E31 File Offset: 0x001A6031
 		public JsonReader(string json_text) : this(new StringReader(json_text), true)
 		{
 		}
 
-		// Token: 0x060053E5 RID: 21477 RVA: 0x001A7E60 File Offset: 0x001A6060
+		// Token: 0x060053E5 RID: 21477 RVA: 0x001A7E40 File Offset: 0x001A6040
 		public JsonReader(TextReader reader) : this(reader, false)
 		{
 		}
 
-		// Token: 0x060053E6 RID: 21478 RVA: 0x001A7E6C File Offset: 0x001A606C
+		// Token: 0x060053E6 RID: 21478 RVA: 0x001A7E4C File Offset: 0x001A604C
 		private JsonReader(TextReader reader, bool owned)
 		{
 			if (reader == null)
@@ -113,7 +113,7 @@ namespace LitJson
 			this.reader_is_owned = owned;
 		}
 
-		// Token: 0x060053E7 RID: 21479 RVA: 0x001A7EF8 File Offset: 0x001A60F8
+		// Token: 0x060053E7 RID: 21479 RVA: 0x001A7ED8 File Offset: 0x001A60D8
 		private static void PopulateParseTable()
 		{
 			JsonReader.parse_table = new Dictionary<int, IDictionary<int, int[]>>();
@@ -263,19 +263,19 @@ namespace LitJson
 			});
 		}
 
-		// Token: 0x060053E8 RID: 21480 RVA: 0x001A8271 File Offset: 0x001A6471
+		// Token: 0x060053E8 RID: 21480 RVA: 0x001A8251 File Offset: 0x001A6451
 		private static void TableAddCol(ParserToken row, int col, params int[] symbols)
 		{
 			JsonReader.parse_table[(int)row].Add(col, symbols);
 		}
 
-		// Token: 0x060053E9 RID: 21481 RVA: 0x001A8285 File Offset: 0x001A6485
+		// Token: 0x060053E9 RID: 21481 RVA: 0x001A8265 File Offset: 0x001A6465
 		private static void TableAddRow(ParserToken rule)
 		{
 			JsonReader.parse_table.Add((int)rule, new Dictionary<int, int[]>());
 		}
 
-		// Token: 0x060053EA RID: 21482 RVA: 0x001A8298 File Offset: 0x001A6498
+		// Token: 0x060053EA RID: 21482 RVA: 0x001A8278 File Offset: 0x001A6478
 		private void ProcessNumber(string number)
 		{
 			double num;
@@ -303,7 +303,7 @@ namespace LitJson
 			this.token_value = 0;
 		}
 
-		// Token: 0x060053EB RID: 21483 RVA: 0x001A8334 File Offset: 0x001A6534
+		// Token: 0x060053EB RID: 21483 RVA: 0x001A8314 File Offset: 0x001A6514
 		private void ProcessSymbol()
 		{
 			if (this.current_symbol == 91)
@@ -386,7 +386,7 @@ namespace LitJson
 			}
 		}
 
-		// Token: 0x060053EC RID: 21484 RVA: 0x001A84A6 File Offset: 0x001A66A6
+		// Token: 0x060053EC RID: 21484 RVA: 0x001A8486 File Offset: 0x001A6686
 		private bool ReadToken()
 		{
 			if (this.end_of_input)
@@ -403,7 +403,7 @@ namespace LitJson
 			return true;
 		}
 
-		// Token: 0x060053ED RID: 21485 RVA: 0x001A84E5 File Offset: 0x001A66E5
+		// Token: 0x060053ED RID: 21485 RVA: 0x001A84C5 File Offset: 0x001A66C5
 		public void Close()
 		{
 			if (this.end_of_input)
@@ -419,7 +419,7 @@ namespace LitJson
 			this.reader = null;
 		}
 
-		// Token: 0x060053EE RID: 21486 RVA: 0x001A8518 File Offset: 0x001A6718
+		// Token: 0x060053EE RID: 21486 RVA: 0x001A84F8 File Offset: 0x001A66F8
 		public bool Read()
 		{
 			if (this.end_of_input)

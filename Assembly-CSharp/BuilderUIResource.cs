@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020005B0 RID: 1456
 public class BuilderUIResource : MonoBehaviour
 {
-	// Token: 0x060024B4 RID: 9396 RVA: 0x000C5D54 File Offset: 0x000C3F54
+	// Token: 0x060024B4 RID: 9396 RVA: 0x000C5D34 File Offset: 0x000C3F34
 	public void SetResourceCost(BuilderResourceQuantity resourceCost, BuilderTable table)
 	{
 		BuilderResourceType type = resourceCost.type;
@@ -26,7 +26,7 @@ public class BuilderUIResource : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060024B5 RID: 9397 RVA: 0x000C5DD7 File Offset: 0x000C3FD7
+	// Token: 0x060024B5 RID: 9397 RVA: 0x000C5DB7 File Offset: 0x000C3FB7
 	private string GetResourceName(BuilderResourceType type)
 	{
 		switch (type)

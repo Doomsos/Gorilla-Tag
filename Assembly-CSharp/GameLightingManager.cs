@@ -7,13 +7,13 @@ using UnityEngine;
 // Token: 0x02000623 RID: 1571
 public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 {
-	// Token: 0x060027EE RID: 10222 RVA: 0x000D4733 File Offset: 0x000D2933
+	// Token: 0x060027EE RID: 10222 RVA: 0x000D4713 File Offset: 0x000D2913
 	private void Awake()
 	{
 		this.InitData();
 	}
 
-	// Token: 0x060027EF RID: 10223 RVA: 0x000D473C File Offset: 0x000D293C
+	// Token: 0x060027EF RID: 10223 RVA: 0x000D471C File Offset: 0x000D291C
 	private void InitData()
 	{
 		GameLightingManager.instance = this;
@@ -32,7 +32,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		this.SetMaxLights(20);
 	}
 
-	// Token: 0x060027F0 RID: 10224 RVA: 0x000D47D7 File Offset: 0x000D29D7
+	// Token: 0x060027F0 RID: 10224 RVA: 0x000D47B7 File Offset: 0x000D29B7
 	private void OnDestroy()
 	{
 		this.ClearGameLights();
@@ -42,21 +42,21 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		this.lightData.Dispose();
 	}
 
-	// Token: 0x060027F1 RID: 10225 RVA: 0x000D4808 File Offset: 0x000D2A08
+	// Token: 0x060027F1 RID: 10225 RVA: 0x000D47E8 File Offset: 0x000D29E8
 	public new void OnEnable()
 	{
 		base.OnEnable();
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x060027F2 RID: 10226 RVA: 0x000D4817 File Offset: 0x000D2A17
+	// Token: 0x060027F2 RID: 10226 RVA: 0x000D47F7 File Offset: 0x000D29F7
 	public new void OnDisable()
 	{
 		base.OnDisable();
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x060027F3 RID: 10227 RVA: 0x000D4828 File Offset: 0x000D2A28
+	// Token: 0x060027F3 RID: 10227 RVA: 0x000D4808 File Offset: 0x000D2A08
 	public void ZoneEnableCustomDynamicLighting(bool enable)
 	{
 		if (enable)
@@ -83,7 +83,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060027F4 RID: 10228 RVA: 0x000D48A1 File Offset: 0x000D2AA1
+	// Token: 0x060027F4 RID: 10228 RVA: 0x000D4881 File Offset: 0x000D2A81
 	public void SetCustomDynamicLightingEnabled(bool enable)
 	{
 		this.customVertexLightingEnabled = enable;
@@ -95,13 +95,13 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		Shader.DisableKeyword("_ZONE_DYNAMIC_LIGHTS__CUSTOMVERTEX");
 	}
 
-	// Token: 0x060027F5 RID: 10229 RVA: 0x000D48C7 File Offset: 0x000D2AC7
+	// Token: 0x060027F5 RID: 10229 RVA: 0x000D48A7 File Offset: 0x000D2AA7
 	public void SetAmbientLightDynamic(Color color)
 	{
 		Shader.SetGlobalColor("_GT_GameLight_Ambient_Color", color);
 	}
 
-	// Token: 0x060027F6 RID: 10230 RVA: 0x000D48D4 File Offset: 0x000D2AD4
+	// Token: 0x060027F6 RID: 10230 RVA: 0x000D48B4 File Offset: 0x000D2AB4
 	public void SetMaxLights(int maxLights)
 	{
 		maxLights = Mathf.Min(maxLights, 50);
@@ -109,7 +109,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		Shader.SetGlobalInteger("_GT_GameLight_UseMaxLights", maxLights);
 	}
 
-	// Token: 0x060027F7 RID: 10231 RVA: 0x000D48F2 File Offset: 0x000D2AF2
+	// Token: 0x060027F7 RID: 10231 RVA: 0x000D48D2 File Offset: 0x000D2AD2
 	public void SetDesaturateAndTintEnabled(bool enable, Color tint)
 	{
 		Shader.SetGlobalColor("_GT_DesaturateAndTint_TintColor", tint);
@@ -117,7 +117,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		this.desaturateAndTintEnabled = enable;
 	}
 
-	// Token: 0x060027F8 RID: 10232 RVA: 0x000D491F File Offset: 0x000D2B1F
+	// Token: 0x060027F8 RID: 10232 RVA: 0x000D48FF File Offset: 0x000D2AFF
 	public void SliceUpdate()
 	{
 		if (this.skipNextSlice)
@@ -129,7 +129,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		this.SortLights();
 	}
 
-	// Token: 0x060027F9 RID: 10233 RVA: 0x000D4940 File Offset: 0x000D2B40
+	// Token: 0x060027F9 RID: 10233 RVA: 0x000D4920 File Offset: 0x000D2B20
 	public void SortLights()
 	{
 		if (this.gameLights.Count <= this.maxUseTestLights)
@@ -144,7 +144,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		this.gameLights.Sort(new Comparison<GameLight>(this.CompareDistFromCamera));
 	}
 
-	// Token: 0x060027FA RID: 10234 RVA: 0x000D49A8 File Offset: 0x000D2BA8
+	// Token: 0x060027FA RID: 10234 RVA: 0x000D4988 File Offset: 0x000D2B88
 	private int CompareDistFromCamera(GameLight a, GameLight b)
 	{
 		if (a == null || a.light == null)
@@ -169,13 +169,13 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060027FB RID: 10235 RVA: 0x000D4AA8 File Offset: 0x000D2CA8
+	// Token: 0x060027FB RID: 10235 RVA: 0x000D4A88 File Offset: 0x000D2C88
 	public override void Tick()
 	{
 		this.RefreshLightData();
 	}
 
-	// Token: 0x060027FC RID: 10236 RVA: 0x000D4AB0 File Offset: 0x000D2CB0
+	// Token: 0x060027FC RID: 10236 RVA: 0x000D4A90 File Offset: 0x000D2C90
 	private void RefreshLightData()
 	{
 		NativeArray<GameLightingManager.LightData> nativeArray = this.lightData;
@@ -201,7 +201,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060027FD RID: 10237 RVA: 0x000D4B2C File Offset: 0x000D2D2C
+	// Token: 0x060027FD RID: 10237 RVA: 0x000D4B0C File Offset: 0x000D2D0C
 	public void CacheAllLightData()
 	{
 		for (int i = 0; i < this.gameLights.Count; i++)
@@ -215,7 +215,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060027FE RID: 10238 RVA: 0x000D4BCC File Offset: 0x000D2DCC
+	// Token: 0x060027FE RID: 10238 RVA: 0x000D4BAC File Offset: 0x000D2DAC
 	public void CacheLightDataForNonCloseLights(int numLightsToUpdateCache)
 	{
 		int num = this.gameLights.Count - this.maxUseTestLights;
@@ -235,7 +235,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060027FF RID: 10239 RVA: 0x000D4C98 File Offset: 0x000D2E98
+	// Token: 0x060027FF RID: 10239 RVA: 0x000D4C78 File Offset: 0x000D2E78
 	public void PullLightData(int numLightsToPull)
 	{
 		for (int i = 0; i < this.maxUseTestLights; i++)
@@ -262,7 +262,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002800 RID: 10240 RVA: 0x000D4D7C File Offset: 0x000D2F7C
+	// Token: 0x06002800 RID: 10240 RVA: 0x000D4D5C File Offset: 0x000D2F5C
 	public int AddGameLight(GameLight light, bool ignoreUnityLightDisable = false)
 	{
 		if (light == null || !light.gameObject.activeInHierarchy || light.light == null || !light.light.enabled)
@@ -282,7 +282,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		return this.gameLights.Count - 1;
 	}
 
-	// Token: 0x06002801 RID: 10241 RVA: 0x000D4DFC File Offset: 0x000D2FFC
+	// Token: 0x06002801 RID: 10241 RVA: 0x000D4DDC File Offset: 0x000D2FDC
 	public void RemoveGameLight(GameLight light)
 	{
 		if (light != null && light.light != null)
@@ -296,7 +296,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06002802 RID: 10242 RVA: 0x000D4E4C File Offset: 0x000D304C
+	// Token: 0x06002802 RID: 10242 RVA: 0x000D4E2C File Offset: 0x000D302C
 	public void ClearGameLights()
 	{
 		if (this.gameLights != null)
@@ -312,7 +312,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		Shader.SetGlobalBuffer("_GT_GameLight_Lights", this.lightDataBuffer);
 	}
 
-	// Token: 0x06002803 RID: 10243 RVA: 0x000D4EB4 File Offset: 0x000D30B4
+	// Token: 0x06002803 RID: 10243 RVA: 0x000D4E94 File Offset: 0x000D3094
 	public void GetFromLight(int lightIndex, int gameLightIndex)
 	{
 		NativeArray<GameLightingManager.LightData> nativeArray = this.lightData;
@@ -340,7 +340,7 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		this.lightData[lightIndex] = lightData;
 	}
 
-	// Token: 0x06002804 RID: 10244 RVA: 0x000D4FB4 File Offset: 0x000D31B4
+	// Token: 0x06002804 RID: 10244 RVA: 0x000D4F94 File Offset: 0x000D3194
 	private void ResetLight(int lightIndex)
 	{
 		GameLightingManager.LightData lightData = new GameLightingManager.LightData

@@ -25,7 +25,7 @@ using UnityEngine.XR;
 public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMonoBehaviour, IGuidedRefObject
 {
 	// Token: 0x170004B1 RID: 1201
-	// (get) Token: 0x0600349C RID: 13468 RVA: 0x0011A5A4 File Offset: 0x001187A4
+	// (get) Token: 0x0600349C RID: 13468 RVA: 0x0011A584 File Offset: 0x00118784
 	public static GorillaTagger Instance
 	{
 		get
@@ -34,7 +34,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x0600349D RID: 13469 RVA: 0x0011A5AC File Offset: 0x001187AC
+	// Token: 0x0600349D RID: 13469 RVA: 0x0011A58C File Offset: 0x0011878C
 	public void SetExtraHandPosition(StiltID stiltID, Vector3 position, bool canTag, bool canStun)
 	{
 		this.stiltTagData[(int)stiltID].currentPositionForTag = position;
@@ -44,7 +44,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	}
 
 	// Token: 0x170004B2 RID: 1202
-	// (get) Token: 0x0600349E RID: 13470 RVA: 0x0011A602 File Offset: 0x00118802
+	// (get) Token: 0x0600349E RID: 13470 RVA: 0x0011A5E2 File Offset: 0x001187E2
 	public NetworkView myVRRig
 	{
 		get
@@ -54,7 +54,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	}
 
 	// Token: 0x170004B3 RID: 1203
-	// (get) Token: 0x0600349F RID: 13471 RVA: 0x0011A60F File Offset: 0x0011880F
+	// (get) Token: 0x0600349F RID: 13471 RVA: 0x0011A5EF File Offset: 0x001187EF
 	internal VRRigSerializer rigSerializer
 	{
 		get
@@ -64,12 +64,12 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	}
 
 	// Token: 0x170004B4 RID: 1204
-	// (get) Token: 0x060034A0 RID: 13472 RVA: 0x0011A61C File Offset: 0x0011881C
-	// (set) Token: 0x060034A1 RID: 13473 RVA: 0x0011A624 File Offset: 0x00118824
+	// (get) Token: 0x060034A0 RID: 13472 RVA: 0x0011A5FC File Offset: 0x001187FC
+	// (set) Token: 0x060034A1 RID: 13473 RVA: 0x0011A604 File Offset: 0x00118804
 	public Rigidbody rigidbody { get; private set; }
 
 	// Token: 0x170004B5 RID: 1205
-	// (get) Token: 0x060034A2 RID: 13474 RVA: 0x0011A62D File Offset: 0x0011882D
+	// (get) Token: 0x060034A2 RID: 13474 RVA: 0x0011A60D File Offset: 0x0011880D
 	public float DefaultHandTapVolume
 	{
 		get
@@ -79,12 +79,12 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	}
 
 	// Token: 0x170004B6 RID: 1206
-	// (get) Token: 0x060034A3 RID: 13475 RVA: 0x0011A635 File Offset: 0x00118835
-	// (set) Token: 0x060034A4 RID: 13476 RVA: 0x0011A63D File Offset: 0x0011883D
+	// (get) Token: 0x060034A3 RID: 13475 RVA: 0x0011A615 File Offset: 0x00118815
+	// (set) Token: 0x060034A4 RID: 13476 RVA: 0x0011A61D File Offset: 0x0011881D
 	public Recorder myRecorder { get; private set; }
 
 	// Token: 0x170004B7 RID: 1207
-	// (get) Token: 0x060034A5 RID: 13477 RVA: 0x0011A646 File Offset: 0x00118846
+	// (get) Token: 0x060034A5 RID: 13477 RVA: 0x0011A626 File Offset: 0x00118826
 	public float sphereCastRadius
 	{
 		get
@@ -98,29 +98,29 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	}
 
 	// Token: 0x1400005F RID: 95
-	// (add) Token: 0x060034A6 RID: 13478 RVA: 0x0011A668 File Offset: 0x00118868
-	// (remove) Token: 0x060034A7 RID: 13479 RVA: 0x0011A6A0 File Offset: 0x001188A0
+	// (add) Token: 0x060034A6 RID: 13478 RVA: 0x0011A648 File Offset: 0x00118848
+	// (remove) Token: 0x060034A7 RID: 13479 RVA: 0x0011A680 File Offset: 0x00118880
 	public event Action<bool, Vector3, Vector3> OnHandTap;
 
 	// Token: 0x170004B8 RID: 1208
-	// (get) Token: 0x060034A8 RID: 13480 RVA: 0x0011A6D5 File Offset: 0x001188D5
-	// (set) Token: 0x060034A9 RID: 13481 RVA: 0x0011A6DD File Offset: 0x001188DD
+	// (get) Token: 0x060034A8 RID: 13480 RVA: 0x0011A6B5 File Offset: 0x001188B5
+	// (set) Token: 0x060034A9 RID: 13481 RVA: 0x0011A6BD File Offset: 0x001188BD
 	public bool hasTappedSurface { get; private set; }
 
-	// Token: 0x060034AA RID: 13482 RVA: 0x0011A6E6 File Offset: 0x001188E6
+	// Token: 0x060034AA RID: 13482 RVA: 0x0011A6C6 File Offset: 0x001188C6
 	public void ResetTappedSurfaceCheck()
 	{
 		this.hasTappedSurface = false;
 	}
 
-	// Token: 0x060034AB RID: 13483 RVA: 0x0011A6EF File Offset: 0x001188EF
+	// Token: 0x060034AB RID: 13483 RVA: 0x0011A6CF File Offset: 0x001188CF
 	public void SetTagRadiusOverrideThisFrame(float radius)
 	{
 		this.tagRadiusOverride = new float?(radius);
 		this.tagRadiusOverrideFrame = Time.frameCount;
 	}
 
-	// Token: 0x060034AC RID: 13484 RVA: 0x0011A708 File Offset: 0x00118908
+	// Token: 0x060034AC RID: 13484 RVA: 0x0011A6E8 File Offset: 0x001188E8
 	protected void Awake()
 	{
 		this.GuidedRefInitialize();
@@ -191,7 +191,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		this._rightHandDown = new GorillaTagger.DebouncedBool(this._framesForHandTrigger, false);
 	}
 
-	// Token: 0x060034AD RID: 13485 RVA: 0x0011AA27 File Offset: 0x00118C27
+	// Token: 0x060034AD RID: 13485 RVA: 0x0011AA07 File Offset: 0x00118C07
 	protected void OnDestroy()
 	{
 		if (GorillaTagger._instance == this)
@@ -201,7 +201,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034AE RID: 13486 RVA: 0x0011AA44 File Offset: 0x00118C44
+	// Token: 0x060034AE RID: 13486 RVA: 0x0011AA24 File Offset: 0x00118C24
 	private void IsXRSubsystemActive()
 	{
 		this.loadedDeviceName = XRSettings.loadedDeviceName;
@@ -221,7 +221,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		this.xrSubsystemIsActive = false;
 	}
 
-	// Token: 0x060034AF RID: 13487 RVA: 0x0011AAB8 File Offset: 0x00118CB8
+	// Token: 0x060034AF RID: 13487 RVA: 0x0011AA98 File Offset: 0x00118C98
 	protected void Start()
 	{
 		this.IsXRSubsystemActive();
@@ -241,13 +241,13 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034B0 RID: 13488 RVA: 0x0011ABEE File Offset: 0x00118DEE
+	// Token: 0x060034B0 RID: 13488 RVA: 0x0011ABCE File Offset: 0x00118DCE
 	private void OnGameOverlayActivated(GameOverlayActivated_t pCallback)
 	{
 		this.isGameOverlayActive = (pCallback.m_bActive > 0);
 	}
 
-	// Token: 0x060034B1 RID: 13489 RVA: 0x0011AC00 File Offset: 0x00118E00
+	// Token: 0x060034B1 RID: 13489 RVA: 0x0011ABE0 File Offset: 0x00118DE0
 	protected void LateUpdate()
 	{
 		GorillaTagger.<>c__DisplayClass133_0 CS$<>8__locals1;
@@ -617,7 +617,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034B2 RID: 13490 RVA: 0x0011BAF4 File Offset: 0x00119CF4
+	// Token: 0x060034B2 RID: 13490 RVA: 0x0011BAD4 File Offset: 0x00119CD4
 	private bool TryToTag(VRRig rig, Vector3 hitObjectPos, bool isBodyTag, bool canStun, float maxTagDistance, out NetPlayer taggedPlayer, out NetPlayer touchedPlayer)
 	{
 		taggedPlayer = null;
@@ -647,7 +647,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		return false;
 	}
 
-	// Token: 0x060034B3 RID: 13491 RVA: 0x0011BC54 File Offset: 0x00119E54
+	// Token: 0x060034B3 RID: 13491 RVA: 0x0011BC34 File Offset: 0x00119E34
 	private bool TryToTag(Collider hitCollider, bool isBodyTag, bool canStun, float maxTagDistance, out NetPlayer taggedPlayer, out NetPlayer touchedNetPlayer)
 	{
 		VRRig vrrig;
@@ -676,7 +676,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		return this.TryToTag(vrrig, hitCollider.transform.position, isBodyTag, canStun, maxTagDistance, out taggedPlayer, out touchedNetPlayer);
 	}
 
-	// Token: 0x060034B4 RID: 13492 RVA: 0x0011BCF0 File Offset: 0x00119EF0
+	// Token: 0x060034B4 RID: 13492 RVA: 0x0011BCD0 File Offset: 0x00119ED0
 	private void HitWithKnockBack(NetPlayer taggedPlayer, NetPlayer taggingPlayer, bool leftHand)
 	{
 		Vector3 averageVelocity = GTPlayer.Instance.GetHandVelocityTracker(leftHand).GetAverageVelocity(true, 0.15f, false);
@@ -695,13 +695,13 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034B5 RID: 13493 RVA: 0x0011BD9B File Offset: 0x00119F9B
+	// Token: 0x060034B5 RID: 13493 RVA: 0x0011BD7B File Offset: 0x00119F7B
 	public void StartVibration(bool forLeftController, float amplitude, float duration)
 	{
 		base.StartCoroutine(this.HapticPulses(forLeftController, amplitude, duration));
 	}
 
-	// Token: 0x060034B6 RID: 13494 RVA: 0x0011BDAD File Offset: 0x00119FAD
+	// Token: 0x060034B6 RID: 13494 RVA: 0x0011BD8D File Offset: 0x00119F8D
 	private IEnumerator HapticPulses(bool forLeftController, float amplitude, float duration)
 	{
 		float startTime = Time.time;
@@ -723,7 +723,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		yield break;
 	}
 
-	// Token: 0x060034B7 RID: 13495 RVA: 0x0011BDD4 File Offset: 0x00119FD4
+	// Token: 0x060034B7 RID: 13495 RVA: 0x0011BDB4 File Offset: 0x00119FB4
 	public void PlayHapticClip(bool forLeftController, AudioClip clip, float strength)
 	{
 		if (forLeftController)
@@ -742,7 +742,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		this.rightHapticsRoutine = base.StartCoroutine(this.AudioClipHapticPulses(forLeftController, clip, strength));
 	}
 
-	// Token: 0x060034B8 RID: 13496 RVA: 0x0011BE37 File Offset: 0x0011A037
+	// Token: 0x060034B8 RID: 13496 RVA: 0x0011BE17 File Offset: 0x0011A017
 	public void StopHapticClip(bool forLeftController)
 	{
 		if (forLeftController)
@@ -761,7 +761,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034B9 RID: 13497 RVA: 0x0011BE73 File Offset: 0x0011A073
+	// Token: 0x060034B9 RID: 13497 RVA: 0x0011BE53 File Offset: 0x0011A053
 	private IEnumerator AudioClipHapticPulses(bool forLeftController, AudioClip clip, float strength)
 	{
 		uint channel = 0U;
@@ -825,7 +825,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		yield break;
 	}
 
-	// Token: 0x060034BA RID: 13498 RVA: 0x0011BE98 File Offset: 0x0011A098
+	// Token: 0x060034BA RID: 13498 RVA: 0x0011BE78 File Offset: 0x0011A078
 	public void DoVibration(XRNode node, float amplitude, float duration)
 	{
 		InputDevice deviceAtXRNode = InputDevices.GetDeviceAtXRNode(node);
@@ -835,7 +835,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034BB RID: 13499 RVA: 0x0011BEC0 File Offset: 0x0011A0C0
+	// Token: 0x060034BB RID: 13499 RVA: 0x0011BEA0 File Offset: 0x0011A0A0
 	public void UpdateColor(float red, float green, float blue)
 	{
 		this.offlineVRRig.InitializeNoobMaterialLocal(red, green, blue);
@@ -845,7 +845,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034BC RID: 13500 RVA: 0x0011BEFC File Offset: 0x0011A0FC
+	// Token: 0x060034BC RID: 13500 RVA: 0x0011BEDC File Offset: 0x0011A0DC
 	protected void OnTriggerEnter(Collider other)
 	{
 		GorillaTriggerBox gorillaTriggerBox;
@@ -855,7 +855,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034BD RID: 13501 RVA: 0x0011BF1C File Offset: 0x0011A11C
+	// Token: 0x060034BD RID: 13501 RVA: 0x0011BEFC File Offset: 0x0011A0FC
 	protected void OnTriggerExit(Collider other)
 	{
 		GorillaTriggerBox gorillaTriggerBox;
@@ -865,7 +865,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034BE RID: 13502 RVA: 0x0011BF3C File Offset: 0x0011A13C
+	// Token: 0x060034BE RID: 13502 RVA: 0x0011BF1C File Offset: 0x0011A11C
 	public void ShowCosmeticParticles(bool showParticles)
 	{
 		if (showParticles)
@@ -878,7 +878,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		this.MirrorCameraCullingMask.value &= ~UnityLayer.GorillaCosmeticParticle.ToLayerMask();
 	}
 
-	// Token: 0x060034BF RID: 13503 RVA: 0x0011BFBD File Offset: 0x0011A1BD
+	// Token: 0x060034BF RID: 13503 RVA: 0x0011BF9D File Offset: 0x0011A19D
 	public void ApplyStatusEffect(GorillaTagger.StatusEffect newStatus, float duration)
 	{
 		this.EndStatusEffect(this.currentStatus);
@@ -897,7 +897,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034C0 RID: 13504 RVA: 0x0011BFFD File Offset: 0x0011A1FD
+	// Token: 0x060034C0 RID: 13504 RVA: 0x0011BFDD File Offset: 0x0011A1DD
 	private void CheckEndStatusEffect()
 	{
 		if (Time.time > this.statusEndTime)
@@ -906,7 +906,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034C1 RID: 13505 RVA: 0x0011C018 File Offset: 0x0011A218
+	// Token: 0x060034C1 RID: 13505 RVA: 0x0011BFF8 File Offset: 0x0011A1F8
 	private void EndStatusEffect(GorillaTagger.StatusEffect effectToEnd)
 	{
 		switch (effectToEnd)
@@ -925,13 +925,13 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034C2 RID: 13506 RVA: 0x0011C047 File Offset: 0x0011A247
+	// Token: 0x060034C2 RID: 13506 RVA: 0x0011C027 File Offset: 0x0011A227
 	private float CalcSlideControl(float fps)
 	{
 		return Mathf.Pow(Mathf.Pow(1f - this.baseSlideControl, 120f), 1f / fps);
 	}
 
-	// Token: 0x060034C3 RID: 13507 RVA: 0x0011C06B File Offset: 0x0011A26B
+	// Token: 0x060034C3 RID: 13507 RVA: 0x0011C04B File Offset: 0x0011A24B
 	public static void OnPlayerSpawned(Action action)
 	{
 		if (GorillaTagger._instance)
@@ -942,7 +942,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		GorillaTagger.onPlayerSpawnedRootCallback = (Action)Delegate.Combine(GorillaTagger.onPlayerSpawnedRootCallback, action);
 	}
 
-	// Token: 0x060034C4 RID: 13508 RVA: 0x0011C098 File Offset: 0x0011A298
+	// Token: 0x060034C4 RID: 13508 RVA: 0x0011C078 File Offset: 0x0011A278
 	private void ProcessHandTapping(in bool isLeftHand, in StiltID stiltID, ref float lastTapTime, ref float lastTapUpTime, ref bool wasHandTouching, in AudioSource handSlideSource)
 	{
 		bool flag;
@@ -1086,7 +1086,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034C5 RID: 13509 RVA: 0x0011C5CC File Offset: 0x0011A7CC
+	// Token: 0x060034C5 RID: 13509 RVA: 0x0011C5AC File Offset: 0x0011A7AC
 	public void DebugDrawTagCasts(Color color)
 	{
 		float num = this.sphereCastRadius * GTPlayer.Instance.scale;
@@ -1096,13 +1096,13 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		this.DrawSphereCast(this.headCollider.transform.position, this.rightHeadRaycastSweep.normalized, num, Mathf.Max(this.rightHeadRaycastSweep.magnitude, num), color);
 	}
 
-	// Token: 0x060034C6 RID: 13510 RVA: 0x0011C6A7 File Offset: 0x0011A8A7
+	// Token: 0x060034C6 RID: 13510 RVA: 0x0011C687 File Offset: 0x0011A887
 	private void DrawSphereCast(Vector3 start, Vector3 dir, float radius, float dist, Color color)
 	{
 		DebugUtil.DrawCapsule(start, start + dir * dist, radius, 16, 16, color, true, DebugUtil.Style.Wireframe);
 	}
 
-	// Token: 0x060034C7 RID: 13511 RVA: 0x0011C6C6 File Offset: 0x0011A8C6
+	// Token: 0x060034C7 RID: 13511 RVA: 0x0011C6A6 File Offset: 0x0011A8A6
 	private void RecoverMissingRefs()
 	{
 		if (!this.offlineVRRig)
@@ -1112,7 +1112,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034C8 RID: 13512 RVA: 0x0011C704 File Offset: 0x0011A904
+	// Token: 0x060034C8 RID: 13512 RVA: 0x0011C6E4 File Offset: 0x0011A8E4
 	private void RecoverMissingRefs_Asdf<T>(ref T objRef, string objFieldName, string recoveryPath) where T : Object
 	{
 		if (objRef)
@@ -1145,7 +1145,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034C9 RID: 13513 RVA: 0x0011C7BA File Offset: 0x0011A9BA
+	// Token: 0x060034C9 RID: 13513 RVA: 0x0011C79A File Offset: 0x0011A99A
 	public void GuidedRefInitialize()
 	{
 		GuidedRefHub.RegisterReceiverField<GorillaTagger>(this, "offlineVRRig", ref this.offlineVRRig_gRef);
@@ -1153,11 +1153,11 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	}
 
 	// Token: 0x170004B9 RID: 1209
-	// (get) Token: 0x060034CA RID: 13514 RVA: 0x0011C7D3 File Offset: 0x0011A9D3
-	// (set) Token: 0x060034CB RID: 13515 RVA: 0x0011C7DB File Offset: 0x0011A9DB
+	// (get) Token: 0x060034CA RID: 13514 RVA: 0x0011C7B3 File Offset: 0x0011A9B3
+	// (set) Token: 0x060034CB RID: 13515 RVA: 0x0011C7BB File Offset: 0x0011A9BB
 	int IGuidedRefReceiverMono.GuidedRefsWaitingToResolveCount { get; set; }
 
-	// Token: 0x060034CC RID: 13516 RVA: 0x0011C7E4 File Offset: 0x0011A9E4
+	// Token: 0x060034CC RID: 13516 RVA: 0x0011C7C4 File Offset: 0x0011A9C4
 	bool IGuidedRefReceiverMono.GuidedRefTryResolveReference(GuidedRefTryResolveInfo target)
 	{
 		if (this.offlineVRRig_gRef.fieldId == target.fieldId && this.offlineVRRig == null)
@@ -1190,7 +1190,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		return base.GetInstanceID();
 	}
 
-	// Token: 0x060034D3 RID: 13523 RVA: 0x0011C934 File Offset: 0x0011AB34
+	// Token: 0x060034D3 RID: 13523 RVA: 0x0011C914 File Offset: 0x0011AB14
 	[CompilerGenerated]
 	private void <LateUpdate>g__TryTaggingAllHitsOverlap|133_0(bool isLeftHand, float maxTagDistance, bool canTag = true, bool canStun = false, ref GorillaTagger.<>c__DisplayClass133_0 A_5)
 	{
@@ -1216,7 +1216,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	// Token: 0x060034D4 RID: 13524 RVA: 0x0011C9F8 File Offset: 0x0011ABF8
+	// Token: 0x060034D4 RID: 13524 RVA: 0x0011C9D8 File Offset: 0x0011ABD8
 	[CompilerGenerated]
 	private void <LateUpdate>g__TryTaggingAllHitsCapsulecast|133_1(float maxTagDistance, bool canTag = true, bool canStun = false, ref GorillaTagger.<>c__DisplayClass133_0 A_4)
 	{
@@ -1598,21 +1598,21 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	private class DebouncedBool
 	{
 		// Token: 0x170004BA RID: 1210
-		// (get) Token: 0x060034D5 RID: 13525 RVA: 0x0011CACB File Offset: 0x0011ACCB
-		// (set) Token: 0x060034D6 RID: 13526 RVA: 0x0011CAD3 File Offset: 0x0011ACD3
+		// (get) Token: 0x060034D5 RID: 13525 RVA: 0x0011CAAB File Offset: 0x0011ACAB
+		// (set) Token: 0x060034D6 RID: 13526 RVA: 0x0011CAB3 File Offset: 0x0011ACB3
 		public bool Value { get; private set; }
 
 		// Token: 0x170004BB RID: 1211
-		// (get) Token: 0x060034D7 RID: 13527 RVA: 0x0011CADC File Offset: 0x0011ACDC
-		// (set) Token: 0x060034D8 RID: 13528 RVA: 0x0011CAE4 File Offset: 0x0011ACE4
+		// (get) Token: 0x060034D7 RID: 13527 RVA: 0x0011CABC File Offset: 0x0011ACBC
+		// (set) Token: 0x060034D8 RID: 13528 RVA: 0x0011CAC4 File Offset: 0x0011ACC4
 		public bool JustEnabled { get; private set; }
 
 		// Token: 0x170004BC RID: 1212
-		// (get) Token: 0x060034D9 RID: 13529 RVA: 0x0011CAED File Offset: 0x0011ACED
-		// (set) Token: 0x060034DA RID: 13530 RVA: 0x0011CAF5 File Offset: 0x0011ACF5
+		// (get) Token: 0x060034D9 RID: 13529 RVA: 0x0011CACD File Offset: 0x0011ACCD
+		// (set) Token: 0x060034DA RID: 13530 RVA: 0x0011CAD5 File Offset: 0x0011ACD5
 		public bool WasStablyEnabled { get; private set; }
 
-		// Token: 0x060034DB RID: 13531 RVA: 0x0011CAFE File Offset: 0x0011ACFE
+		// Token: 0x060034DB RID: 13531 RVA: 0x0011CADE File Offset: 0x0011ACDE
 		public DebouncedBool(int callsUntilDisable, bool initialValue = false)
 		{
 			this._callsUntilStable = callsUntilDisable;
@@ -1620,7 +1620,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 			this._lastValue = initialValue;
 		}
 
-		// Token: 0x060034DC RID: 13532 RVA: 0x0011CB1C File Offset: 0x0011AD1C
+		// Token: 0x060034DC RID: 13532 RVA: 0x0011CAFC File Offset: 0x0011ACFC
 		public void Set(bool value)
 		{
 			this._lastValue = this.Value;

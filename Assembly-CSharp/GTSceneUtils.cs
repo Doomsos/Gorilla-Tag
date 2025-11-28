@@ -11,13 +11,13 @@ public static class GTSceneUtils
 	{
 	}
 
-	// Token: 0x06004F0F RID: 20239 RVA: 0x0019870D File Offset: 0x0019690D
+	// Token: 0x06004F0F RID: 20239 RVA: 0x001986ED File Offset: 0x001968ED
 	public static bool Equals(GTScene x, Scene y)
 	{
 		return !(x == null) && y.IsValid() && x.Equals(y);
 	}
 
-	// Token: 0x06004F10 RID: 20240 RVA: 0x00198731 File Offset: 0x00196931
+	// Token: 0x06004F10 RID: 20240 RVA: 0x00198711 File Offset: 0x00196911
 	public static GTScene[] ScenesInBuild()
 	{
 		return Array.Empty<GTScene>();

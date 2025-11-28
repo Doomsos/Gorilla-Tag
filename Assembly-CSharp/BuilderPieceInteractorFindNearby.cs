@@ -8,7 +8,7 @@ public class BuilderPieceInteractorFindNearby : MonoBehaviourPostTick
 	{
 	}
 
-	// Token: 0x060022B8 RID: 8888 RVA: 0x000B5AEA File Offset: 0x000B3CEA
+	// Token: 0x060022B8 RID: 8888 RVA: 0x000B5ACA File Offset: 0x000B3CCA
 	public override void PostTick()
 	{
 		if (this.pieceInteractor != null)

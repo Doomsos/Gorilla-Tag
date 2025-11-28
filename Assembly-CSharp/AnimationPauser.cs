@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000A7A RID: 2682
 public class AnimationPauser : StateMachineBehaviour
 {
-	// Token: 0x0600436B RID: 17259 RVA: 0x00165FA4 File Offset: 0x001641A4
+	// Token: 0x0600436B RID: 17259 RVA: 0x00165F84 File Offset: 0x00164184
 	public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
 		AnimationPauser.<OnStateEnter>d__4 <OnStateEnter>d__;

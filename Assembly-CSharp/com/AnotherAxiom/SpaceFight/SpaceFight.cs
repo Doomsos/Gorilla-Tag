@@ -6,7 +6,7 @@ namespace com.AnotherAxiom.SpaceFight
 	// Token: 0x02000F66 RID: 3942
 	public class SpaceFight : ArcadeGame
 	{
-		// Token: 0x06006296 RID: 25238 RVA: 0x001FC448 File Offset: 0x001FA648
+		// Token: 0x06006296 RID: 25238 RVA: 0x001FC428 File Offset: 0x001FA628
 		private void Update()
 		{
 			for (int i = 0; i < 2; i++)
@@ -46,13 +46,13 @@ namespace com.AnotherAxiom.SpaceFight
 			}
 		}
 
-		// Token: 0x06006297 RID: 25239 RVA: 0x001FC5D8 File Offset: 0x001FA7D8
+		// Token: 0x06006297 RID: 25239 RVA: 0x001FC5B8 File Offset: 0x001FA7B8
 		private void clamp(Transform tr)
 		{
 			tr.localPosition = new Vector2(Mathf.Clamp(tr.localPosition.x, -this.tableSize.x, this.tableSize.x), Mathf.Clamp(tr.localPosition.y, -this.tableSize.y, this.tableSize.y));
 		}
 
-		// Token: 0x06006298 RID: 25240 RVA: 0x001FC643 File Offset: 0x001FA843
+		// Token: 0x06006298 RID: 25240 RVA: 0x001FC623 File Offset: 0x001FA823
 		protected override void ButtonDown(int player, ArcadeButtons button)
 		{
 			if (button == ArcadeButtons.TRIGGER)
@@ -65,19 +65,19 @@ namespace com.AnotherAxiom.SpaceFight
 			}
 		}
 
-		// Token: 0x06006299 RID: 25241 RVA: 0x001FC668 File Offset: 0x001FA868
+		// Token: 0x06006299 RID: 25241 RVA: 0x001FC648 File Offset: 0x001FA848
 		private void move(Transform p, float speed)
 		{
 			p.Translate(p.up * Time.deltaTime * speed, 0);
 		}
 
-		// Token: 0x0600629A RID: 25242 RVA: 0x001FC687 File Offset: 0x001FA887
+		// Token: 0x0600629A RID: 25242 RVA: 0x001FC667 File Offset: 0x001FA867
 		private void turn(Transform p, bool cw)
 		{
 			p.Rotate(0f, 0f, (float)(cw ? 180 : -180) * Time.deltaTime);
 		}
 
-		// Token: 0x0600629B RID: 25243 RVA: 0x001FC6B0 File Offset: 0x001FA8B0
+		// Token: 0x0600629B RID: 25243 RVA: 0x001FC690 File Offset: 0x001FA890
 		public override byte[] GetNetworkState()
 		{
 			this.netStateCur.P1LocX = this.player[0].localPosition.x;
@@ -99,7 +99,7 @@ namespace com.AnotherAxiom.SpaceFight
 			return this.netStateBuffer;
 		}
 
-		// Token: 0x0600629C RID: 25244 RVA: 0x001FC830 File Offset: 0x001FAA30
+		// Token: 0x0600629C RID: 25244 RVA: 0x001FC810 File Offset: 0x001FAA10
 		public override void SetNetworkState(byte[] b)
 		{
 			SpaceFight.SpaceFlightNetState spaceFlightNetState = (SpaceFight.SpaceFlightNetState)ArcadeGame.UnwrapNetState(b);
@@ -146,7 +146,7 @@ namespace com.AnotherAxiom.SpaceFight
 		[Serializable]
 		private struct SpaceFlightNetState : IEquatable<SpaceFight.SpaceFlightNetState>
 		{
-			// Token: 0x060062A0 RID: 25248 RVA: 0x001FC930 File Offset: 0x001FAB30
+			// Token: 0x060062A0 RID: 25248 RVA: 0x001FC910 File Offset: 0x001FAB10
 			public bool Equals(SpaceFight.SpaceFlightNetState other)
 			{
 				return this.P1LocX.Approx(other.P1LocX, 1E-06f) && this.P1LocY.Approx(other.P1LocY, 1E-06f) && this.P1Rot.Approx(other.P1Rot, 1E-06f) && this.P2LocX.Approx(other.P2LocX, 1E-06f) && this.P2LocY.Approx(other.P2LocY, 1E-06f) && this.P1Rot.Approx(other.P1Rot, 1E-06f) && this.P1PrLocX.Approx(other.P1PrLocX, 1E-06f) && this.P1PrLocY.Approx(other.P1PrLocY, 1E-06f) && this.P2PrLocX.Approx(other.P2PrLocX, 1E-06f) && this.P2PrLocY.Approx(other.P2PrLocY, 1E-06f);

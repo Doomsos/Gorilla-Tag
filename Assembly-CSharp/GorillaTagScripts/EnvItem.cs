@@ -17,7 +17,7 @@ namespace GorillaTagScripts
 		{
 		}
 
-		// Token: 0x0600582E RID: 22574 RVA: 0x001C2E2C File Offset: 0x001C102C
+		// Token: 0x0600582E RID: 22574 RVA: 0x001C2E0C File Offset: 0x001C100C
 		public void OnPhotonInstantiate(PhotonMessageInfo info)
 		{
 			object[] instantiationData = info.photonView.InstantiationData;

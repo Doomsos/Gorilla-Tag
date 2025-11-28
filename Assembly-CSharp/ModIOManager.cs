@@ -24,7 +24,7 @@ using UnityEngine.Networking;
 // Token: 0x02000967 RID: 2407
 public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCredentialProvider
 {
-	// Token: 0x06003DA4 RID: 15780 RVA: 0x0014683C File Offset: 0x00144A3C
+	// Token: 0x06003DA4 RID: 15780 RVA: 0x0014681C File Offset: 0x00144A1C
 	private void Awake()
 	{
 		if (ModIOManager.instance == null)
@@ -45,13 +45,13 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 	}
 
-	// Token: 0x06003DA5 RID: 15781 RVA: 0x00146906 File Offset: 0x00144B06
+	// Token: 0x06003DA5 RID: 15781 RVA: 0x001468E6 File Offset: 0x00144AE6
 	private void Start()
 	{
 		NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnJoinedRoom);
 	}
 
-	// Token: 0x06003DA6 RID: 15782 RVA: 0x0014692C File Offset: 0x00144B2C
+	// Token: 0x06003DA6 RID: 15782 RVA: 0x0014690C File Offset: 0x00144B0C
 	private void OnDestroy()
 	{
 		if (ModIOManager.instance == this)
@@ -64,7 +64,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		NetworkSystem.Instance.OnMultiplayerStarted -= new Action(this.OnJoinedRoom);
 	}
 
-	// Token: 0x06003DA7 RID: 15783 RVA: 0x00146999 File Offset: 0x00144B99
+	// Token: 0x06003DA7 RID: 15783 RVA: 0x00146979 File Offset: 0x00144B79
 	private void Update()
 	{
 		bool flag = ModIOManager.hasInstance;
@@ -80,13 +80,13 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 	{
 	}
 
-	// Token: 0x06003DAA RID: 15786 RVA: 0x001469A1 File Offset: 0x00144BA1
+	// Token: 0x06003DAA RID: 15786 RVA: 0x00146981 File Offset: 0x00144B81
 	public static bool IsInitialized()
 	{
 		return ModIOManager.initialized;
 	}
 
-	// Token: 0x06003DAB RID: 15787 RVA: 0x001469A8 File Offset: 0x00144BA8
+	// Token: 0x06003DAB RID: 15787 RVA: 0x00146988 File Offset: 0x00144B88
 	public static Task<Error> Initialize()
 	{
 		ModIOManager.<Initialize>d__47 <Initialize>d__;
@@ -96,7 +96,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <Initialize>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DAC RID: 15788 RVA: 0x001469E4 File Offset: 0x00144BE4
+	// Token: 0x06003DAC RID: 15788 RVA: 0x001469C4 File Offset: 0x00144BC4
 	private static Task<Error> InitInternal()
 	{
 		ModIOManager.<InitInternal>d__48 <InitInternal>d__;
@@ -106,7 +106,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <InitInternal>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DAD RID: 15789 RVA: 0x00146A20 File Offset: 0x00144C20
+	// Token: 0x06003DAD RID: 15789 RVA: 0x00146A00 File Offset: 0x00144C00
 	private Task<ValueTuple<Error, bool, bool>> HasAcceptedLatestTerms()
 	{
 		ModIOManager.<HasAcceptedLatestTerms>d__49 <HasAcceptedLatestTerms>d__;
@@ -116,7 +116,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <HasAcceptedLatestTerms>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DAE RID: 15790 RVA: 0x00146A5C File Offset: 0x00144C5C
+	// Token: 0x06003DAE RID: 15790 RVA: 0x00146A3C File Offset: 0x00144C3C
 	private Task<Error> ShowModIOTermsOfUse()
 	{
 		ModIOManager.<ShowModIOTermsOfUse>d__50 <ShowModIOTermsOfUse>d__;
@@ -127,7 +127,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <ShowModIOTermsOfUse>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DAF RID: 15791 RVA: 0x00146AA0 File Offset: 0x00144CA0
+	// Token: 0x06003DAF RID: 15791 RVA: 0x00146A80 File Offset: 0x00144C80
 	private void OnModIOTermsOfUseAcknowledged(bool accepted)
 	{
 		if (accepted)
@@ -150,7 +150,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		ModIOManager.modIOTermsAcknowledgedCallback = null;
 	}
 
-	// Token: 0x06003DB0 RID: 15792 RVA: 0x00146AEE File Offset: 0x00144CEE
+	// Token: 0x06003DB0 RID: 15792 RVA: 0x00146ACE File Offset: 0x00144CCE
 	private static void EnableModManagement()
 	{
 		if (!ModIOManager.modManagementEnabled)
@@ -167,7 +167,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 	}
 
-	// Token: 0x06003DB1 RID: 15793 RVA: 0x00146B27 File Offset: 0x00144D27
+	// Token: 0x06003DB1 RID: 15793 RVA: 0x00146B07 File Offset: 0x00144D07
 	private static void DisableModManagement()
 	{
 		if (ModIOManager.modManagementEnabled)
@@ -183,7 +183,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 	}
 
-	// Token: 0x06003DB2 RID: 15794 RVA: 0x00146B64 File Offset: 0x00144D64
+	// Token: 0x06003DB2 RID: 15794 RVA: 0x00146B44 File Offset: 0x00144D44
 	private static void HandleModManagementEvent(Mod mod, Modfile modfile, ModInstallationManagement.OperationType jobType, ModInstallationManagement.OperationPhase jobPhase)
 	{
 		ModioLog verbose = ModioLog.Verbose;
@@ -219,7 +219,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		onModManagementEvent.Invoke(mod, modfile, jobType, jobPhase);
 	}
 
-	// Token: 0x06003DB3 RID: 15795 RVA: 0x00146C60 File Offset: 0x00144E60
+	// Token: 0x06003DB3 RID: 15795 RVA: 0x00146C40 File Offset: 0x00144E40
 	public static Task RefreshModCache()
 	{
 		ModIOManager.<RefreshModCache>d__55 <RefreshModCache>d__;
@@ -229,13 +229,13 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <RefreshModCache>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DB4 RID: 15796 RVA: 0x00146C9B File Offset: 0x00144E9B
+	// Token: 0x06003DB4 RID: 15796 RVA: 0x00146C7B File Offset: 0x00144E7B
 	public static bool IsRefreshing()
 	{
 		return ModIOManager.refreshingModCache;
 	}
 
-	// Token: 0x06003DB5 RID: 15797 RVA: 0x00146CA4 File Offset: 0x00144EA4
+	// Token: 0x06003DB5 RID: 15797 RVA: 0x00146C84 File Offset: 0x00144E84
 	public static Task<ValueTuple<bool, int>> IsModOutdated(ModId modId)
 	{
 		ModIOManager.<IsModOutdated>d__57 <IsModOutdated>d__;
@@ -246,7 +246,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <IsModOutdated>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DB6 RID: 15798 RVA: 0x00146CE8 File Offset: 0x00144EE8
+	// Token: 0x06003DB6 RID: 15798 RVA: 0x00146CC8 File Offset: 0x00144EC8
 	public static ValueTuple<bool, int> IsModOutdated(Mod mod)
 	{
 		int num;
@@ -280,7 +280,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return new ValueTuple<bool, int>(false, -1);
 	}
 
-	// Token: 0x06003DB7 RID: 15799 RVA: 0x00146DB0 File Offset: 0x00144FB0
+	// Token: 0x06003DB7 RID: 15799 RVA: 0x00146D90 File Offset: 0x00144F90
 	public static void SaveFavoriteMods()
 	{
 		if (!ModIOManager.initialized || !ModIOManager.modManagementEnabled)
@@ -315,7 +315,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 	}
 
-	// Token: 0x06003DB8 RID: 15800 RVA: 0x00146E98 File Offset: 0x00145098
+	// Token: 0x06003DB8 RID: 15800 RVA: 0x00146E78 File Offset: 0x00145078
 	[return: TupleElementNames(new string[]
 	{
 		"error",
@@ -331,7 +331,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetFavoriteMods>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DB9 RID: 15801 RVA: 0x00146EDC File Offset: 0x001450DC
+	// Token: 0x06003DB9 RID: 15801 RVA: 0x00146EBC File Offset: 0x001450BC
 	public static Task<Error> AddFavorite(ModId modId, Action<Error> callback = null)
 	{
 		ModIOManager.<AddFavorite>d__61 <AddFavorite>d__;
@@ -343,7 +343,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <AddFavorite>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DBA RID: 15802 RVA: 0x00146F27 File Offset: 0x00145127
+	// Token: 0x06003DBA RID: 15802 RVA: 0x00146F07 File Offset: 0x00145107
 	public static Error RemoveFavorite(ModId modId)
 	{
 		if (!ModIOManager.favoriteMods.ContainsKey(modId))
@@ -355,13 +355,13 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return Error.None;
 	}
 
-	// Token: 0x06003DBB RID: 15803 RVA: 0x00146F5D File Offset: 0x0014515D
+	// Token: 0x06003DBB RID: 15803 RVA: 0x00146F3D File Offset: 0x0014513D
 	public static bool IsModFavorited(ModId modId)
 	{
 		return ModIOManager.favoriteMods.ContainsKey(modId);
 	}
 
-	// Token: 0x06003DBC RID: 15804 RVA: 0x00146F6C File Offset: 0x0014516C
+	// Token: 0x06003DBC RID: 15804 RVA: 0x00146F4C File Offset: 0x0014514C
 	[return: TupleElementNames(new string[]
 	{
 		"error",
@@ -377,13 +377,13 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetInstalledMods>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DBD RID: 15805 RVA: 0x00146FAF File Offset: 0x001451AF
+	// Token: 0x06003DBD RID: 15805 RVA: 0x00146F8F File Offset: 0x0014518F
 	public static bool ValidateInstalledMod(Mod mod)
 	{
 		return ModIOManager.initialized && ModInstallationManagement.ValidateInstalledMod(mod);
 	}
 
-	// Token: 0x06003DBE RID: 15806 RVA: 0x00146FC0 File Offset: 0x001451C0
+	// Token: 0x06003DBE RID: 15806 RVA: 0x00146FA0 File Offset: 0x001451A0
 	private static ValueTuple<bool, int> IsInstalledModOutdated(Mod mod)
 	{
 		int num = -1;
@@ -453,7 +453,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return new ValueTuple<bool, int>(false, num);
 	}
 
-	// Token: 0x06003DBF RID: 15807 RVA: 0x00147178 File Offset: 0x00145378
+	// Token: 0x06003DBF RID: 15807 RVA: 0x00147158 File Offset: 0x00145358
 	public static Task RefreshUserProfile(Action<bool> callback = null, bool force = false)
 	{
 		ModIOManager.<RefreshUserProfile>d__67 <RefreshUserProfile>d__;
@@ -465,7 +465,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <RefreshUserProfile>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DC0 RID: 15808 RVA: 0x001471C4 File Offset: 0x001453C4
+	// Token: 0x06003DC0 RID: 15808 RVA: 0x001471A4 File Offset: 0x001453A4
 	[return: TupleElementNames(new string[]
 	{
 		"error",
@@ -483,7 +483,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetMods>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DC1 RID: 15809 RVA: 0x00147218 File Offset: 0x00145418
+	// Token: 0x06003DC1 RID: 15809 RVA: 0x001471F8 File Offset: 0x001453F8
 	[return: TupleElementNames(new string[]
 	{
 		"error",
@@ -501,7 +501,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetMod>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DC2 RID: 15810 RVA: 0x0014726C File Offset: 0x0014546C
+	// Token: 0x06003DC2 RID: 15810 RVA: 0x0014724C File Offset: 0x0014544C
 	[return: TupleElementNames(new string[]
 	{
 		"error",
@@ -518,7 +518,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetModLogo>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DC3 RID: 15811 RVA: 0x001472B8 File Offset: 0x001454B8
+	// Token: 0x06003DC3 RID: 15811 RVA: 0x00147298 File Offset: 0x00145498
 	[return: TupleElementNames(new string[]
 	{
 		"error",
@@ -534,7 +534,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetMods>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DC4 RID: 15812 RVA: 0x001472FC File Offset: 0x001454FC
+	// Token: 0x06003DC4 RID: 15812 RVA: 0x001472DC File Offset: 0x001454DC
 	private static void ModIOUserChanged(User currentUser)
 	{
 		ModioLog verbose = ModioLog.Verbose;
@@ -550,7 +550,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		onModIOUserChanged.Invoke(currentUser);
 	}
 
-	// Token: 0x06003DC5 RID: 15813 RVA: 0x00147348 File Offset: 0x00145548
+	// Token: 0x06003DC5 RID: 15813 RVA: 0x00147328 File Offset: 0x00145528
 	private static void ModIOUserSyncComplete()
 	{
 		ModioLog verbose = ModioLog.Verbose;
@@ -561,25 +561,25 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		ModIOManager.RefreshModCache();
 	}
 
-	// Token: 0x06003DC6 RID: 15814 RVA: 0x00147365 File Offset: 0x00145565
+	// Token: 0x06003DC6 RID: 15814 RVA: 0x00147345 File Offset: 0x00145545
 	public static bool IsLoggedIn()
 	{
 		return User.Current != null && User.Current.IsAuthenticated;
 	}
 
-	// Token: 0x06003DC7 RID: 15815 RVA: 0x0014737A File Offset: 0x0014557A
+	// Token: 0x06003DC7 RID: 15815 RVA: 0x0014735A File Offset: 0x0014555A
 	public static bool IsLoggingIn()
 	{
 		return ModIOManager.loggingIn;
 	}
 
-	// Token: 0x06003DC8 RID: 15816 RVA: 0x00147381 File Offset: 0x00145581
+	// Token: 0x06003DC8 RID: 15816 RVA: 0x00147361 File Offset: 0x00145561
 	public static bool IsLoggingOut()
 	{
 		return ModIOManager.loggingOut;
 	}
 
-	// Token: 0x06003DC9 RID: 15817 RVA: 0x00147388 File Offset: 0x00145588
+	// Token: 0x06003DC9 RID: 15817 RVA: 0x00147368 File Offset: 0x00145568
 	public static string GetCurrentUsername()
 	{
 		if (!ModIOManager.IsLoggedIn())
@@ -594,7 +594,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return User.Current.Profile.Username;
 	}
 
-	// Token: 0x06003DCA RID: 15818 RVA: 0x001473DC File Offset: 0x001455DC
+	// Token: 0x06003DCA RID: 15818 RVA: 0x001473BC File Offset: 0x001455BC
 	public static string GetCurrentUserId()
 	{
 		if (!ModIOManager.IsLoggedIn())
@@ -609,7 +609,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return User.Current.Profile.UserId.ToString();
 	}
 
-	// Token: 0x06003DCB RID: 15819 RVA: 0x0014743B File Offset: 0x0014563B
+	// Token: 0x06003DCB RID: 15819 RVA: 0x0014741B File Offset: 0x0014561B
 	public static string GetCurrentAuthToken()
 	{
 		if (!ModIOManager.IsLoggedIn())
@@ -619,7 +619,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return User.Current.Token;
 	}
 
-	// Token: 0x06003DCC RID: 15820 RVA: 0x00147454 File Offset: 0x00145654
+	// Token: 0x06003DCC RID: 15820 RVA: 0x00147434 File Offset: 0x00145634
 	public static bool IsAuthenticated(bool sendEvents = false)
 	{
 		if (!ModIOManager.hasInstance)
@@ -679,7 +679,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return isAuthenticated;
 	}
 
-	// Token: 0x06003DCD RID: 15821 RVA: 0x00147524 File Offset: 0x00145724
+	// Token: 0x06003DCD RID: 15821 RVA: 0x00147504 File Offset: 0x00145704
 	public static void LogoutFromModIO()
 	{
 		if (!ModIOManager.hasInstance || ModIOManager.loggingIn || !ModIOManager.IsLoggedIn())
@@ -715,7 +715,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		ModIOManager.RefreshModCache();
 	}
 
-	// Token: 0x06003DCE RID: 15822 RVA: 0x001475C8 File Offset: 0x001457C8
+	// Token: 0x06003DCE RID: 15822 RVA: 0x001475A8 File Offset: 0x001457A8
 	public static void SetAccountLinkPrompter(IWssAuthPrompter prompter)
 	{
 		if (ModIOManager.accountLinkingAuthService != null)
@@ -724,7 +724,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 	}
 
-	// Token: 0x06003DCF RID: 15823 RVA: 0x001475DC File Offset: 0x001457DC
+	// Token: 0x06003DCF RID: 15823 RVA: 0x001475BC File Offset: 0x001457BC
 	public static Task<Error> RequestAccountLinkCode()
 	{
 		ModIOManager.<RequestAccountLinkCode>d__83 <RequestAccountLinkCode>d__;
@@ -734,7 +734,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <RequestAccountLinkCode>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DD0 RID: 15824 RVA: 0x00147617 File Offset: 0x00145817
+	// Token: 0x06003DD0 RID: 15824 RVA: 0x001475F7 File Offset: 0x001457F7
 	public static void CancelExternalAuthentication()
 	{
 		if (!ModIOManager.hasInstance)
@@ -752,7 +752,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 	}
 
-	// Token: 0x06003DD1 RID: 15825 RVA: 0x00147654 File Offset: 0x00145854
+	// Token: 0x06003DD1 RID: 15825 RVA: 0x00147634 File Offset: 0x00145834
 	public static Task<Error> RequestPlatformLogin()
 	{
 		ModIOManager.<RequestPlatformLogin>d__85 <RequestPlatformLogin>d__;
@@ -762,7 +762,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <RequestPlatformLogin>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DD2 RID: 15826 RVA: 0x00147690 File Offset: 0x00145890
+	// Token: 0x06003DD2 RID: 15826 RVA: 0x00147670 File Offset: 0x00145870
 	private Task<Error> InitiatePlatformLogin()
 	{
 		ModIOManager.<InitiatePlatformLogin>d__86 <InitiatePlatformLogin>d__;
@@ -773,7 +773,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <InitiatePlatformLogin>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DD3 RID: 15827 RVA: 0x001476D4 File Offset: 0x001458D4
+	// Token: 0x06003DD3 RID: 15827 RVA: 0x001476B4 File Offset: 0x001458B4
 	private Task<Error> ContinuePlatformLogin()
 	{
 		ModIOManager.<ContinuePlatformLogin>d__87 <ContinuePlatformLogin>d__;
@@ -784,7 +784,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <ContinuePlatformLogin>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DD4 RID: 15828 RVA: 0x00147718 File Offset: 0x00145918
+	// Token: 0x06003DD4 RID: 15828 RVA: 0x001476F8 File Offset: 0x001458F8
 	public void RequestEncryptedAppTicket(Action<bool, string> callback)
 	{
 		if (this.requestEncryptedAppTicketCallback != null)
@@ -814,7 +814,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		ModIOManager.requestEncryptedAppTicketResponse.Set(steamAPICall_t, null);
 	}
 
-	// Token: 0x06003DD5 RID: 15829 RVA: 0x001477A0 File Offset: 0x001459A0
+	// Token: 0x06003DD5 RID: 15829 RVA: 0x00147780 File Offset: 0x00145980
 	private void OnRequestEncryptedAppTicketFinished(EncryptedAppTicketResponse_t response, bool bIOFailure)
 	{
 		if (bIOFailure)
@@ -932,7 +932,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		this.requestEncryptedAppTicketCallback = null;
 	}
 
-	// Token: 0x06003DD6 RID: 15830 RVA: 0x001479B8 File Offset: 0x00145BB8
+	// Token: 0x06003DD6 RID: 15830 RVA: 0x00147998 File Offset: 0x00145B98
 	public Task<ValueTuple<Error, string>> GetOculusUserId()
 	{
 		ModIOManager.<GetOculusUserId>d__90 <GetOculusUserId>d__;
@@ -942,7 +942,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetOculusUserId>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DD7 RID: 15831 RVA: 0x001479F4 File Offset: 0x00145BF4
+	// Token: 0x06003DD7 RID: 15831 RVA: 0x001479D4 File Offset: 0x00145BD4
 	public Task<string> GetOculusAccessToken()
 	{
 		ModIOManager.<GetOculusAccessToken>d__91 <GetOculusAccessToken>d__;
@@ -952,7 +952,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetOculusAccessToken>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DD8 RID: 15832 RVA: 0x00147A30 File Offset: 0x00145C30
+	// Token: 0x06003DD8 RID: 15832 RVA: 0x00147A10 File Offset: 0x00145C10
 	public Task<string> GetOculusUserProof()
 	{
 		ModIOManager.<GetOculusUserProof>d__92 <GetOculusUserProof>d__;
@@ -962,13 +962,13 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetOculusUserProof>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DD9 RID: 15833 RVA: 0x00147A6B File Offset: 0x00145C6B
+	// Token: 0x06003DD9 RID: 15833 RVA: 0x00147A4B File Offset: 0x00145C4B
 	public string GetOculusDevice()
 	{
 		return "";
 	}
 
-	// Token: 0x06003DDA RID: 15834 RVA: 0x00147A72 File Offset: 0x00145C72
+	// Token: 0x06003DDA RID: 15834 RVA: 0x00147A52 File Offset: 0x00145C52
 	private static void OnAuthenticationComplete(Error error)
 	{
 		ModIOManager.loggingIn = false;
@@ -994,7 +994,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 	}
 
-	// Token: 0x06003DDB RID: 15835 RVA: 0x00147AAC File Offset: 0x00145CAC
+	// Token: 0x06003DDB RID: 15835 RVA: 0x00147A8C File Offset: 0x00145C8C
 	public static ModIOManager.ModIOAuthMethod GetLastAuthMethod()
 	{
 		int @int = PlayerPrefs.GetInt("modIOLassSuccessfulAuthMethod", -1);
@@ -1005,7 +1005,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return (ModIOManager.ModIOAuthMethod)@int;
 	}
 
-	// Token: 0x06003DDC RID: 15836 RVA: 0x00147ACC File Offset: 0x00145CCC
+	// Token: 0x06003DDC RID: 15836 RVA: 0x00147AAC File Offset: 0x00145CAC
 	public static Task<ValueTuple<Error, Mod[]>> GetSubscribedMods()
 	{
 		ModIOManager.<GetSubscribedMods>d__96 <GetSubscribedMods>d__;
@@ -1015,7 +1015,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetSubscribedMods>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DDD RID: 15837 RVA: 0x00147B08 File Offset: 0x00145D08
+	// Token: 0x06003DDD RID: 15837 RVA: 0x00147AE8 File Offset: 0x00145CE8
 	public static Task<Error> SubscribeToMod(ModId modId, Action<Error> callback)
 	{
 		ModIOManager.<SubscribeToMod>d__97 <SubscribeToMod>d__;
@@ -1027,7 +1027,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <SubscribeToMod>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DDE RID: 15838 RVA: 0x00147B54 File Offset: 0x00145D54
+	// Token: 0x06003DDE RID: 15838 RVA: 0x00147B34 File Offset: 0x00145D34
 	public static Task<Error> UnsubscribeFromMod(ModId modId, Action<Error> callback)
 	{
 		ModIOManager.<UnsubscribeFromMod>d__98 <UnsubscribeFromMod>d__;
@@ -1039,7 +1039,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <UnsubscribeFromMod>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DDF RID: 15839 RVA: 0x00147BA0 File Offset: 0x00145DA0
+	// Token: 0x06003DDF RID: 15839 RVA: 0x00147B80 File Offset: 0x00145D80
 	public static Task<ValueTuple<bool, ModFileState>> GetSubscribedModStatus(ModId modId)
 	{
 		ModIOManager.<GetSubscribedModStatus>d__99 <GetSubscribedModStatus>d__;
@@ -1050,7 +1050,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetSubscribedModStatus>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DE0 RID: 15840 RVA: 0x00147BE4 File Offset: 0x00145DE4
+	// Token: 0x06003DE0 RID: 15840 RVA: 0x00147BC4 File Offset: 0x00145DC4
 	public static Task<ValueTuple<bool, Mod>> GetSubscribedModProfile(ModId modId, Action<bool, Mod> callback = null)
 	{
 		ModIOManager.<GetSubscribedModProfile>d__100 <GetSubscribedModProfile>d__;
@@ -1062,7 +1062,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetSubscribedModProfile>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DE1 RID: 15841 RVA: 0x00147C30 File Offset: 0x00145E30
+	// Token: 0x06003DE1 RID: 15841 RVA: 0x00147C10 File Offset: 0x00145E10
 	public static Task<ModFileState> GetModStatus(ModId modId)
 	{
 		ModIOManager.<GetModStatus>d__101 <GetModStatus>d__;
@@ -1073,7 +1073,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <GetModStatus>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DE2 RID: 15842 RVA: 0x00147C74 File Offset: 0x00145E74
+	// Token: 0x06003DE2 RID: 15842 RVA: 0x00147C54 File Offset: 0x00145E54
 	public static Task<bool> DownloadMod(ModId modId, Action<bool> callback = null)
 	{
 		ModIOManager.<DownloadMod>d__102 <DownloadMod>d__;
@@ -1085,7 +1085,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return <DownloadMod>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06003DE3 RID: 15843 RVA: 0x00147CC0 File Offset: 0x00145EC0
+	// Token: 0x06003DE3 RID: 15843 RVA: 0x00147CA0 File Offset: 0x00145EA0
 	private void OnJoinedRoom()
 	{
 		if (NetworkSystem.Instance.RoomName.Contains(GorillaComputer.instance.VStumpRoomPrepend) && !GorillaComputer.instance.IsPlayerInVirtualStump() && !CustomMapManager.IsLocalPlayerInVirtualStump())
@@ -1095,7 +1095,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 	}
 
-	// Token: 0x06003DE4 RID: 15844 RVA: 0x00147D14 File Offset: 0x00145F14
+	// Token: 0x06003DE4 RID: 15844 RVA: 0x00147CF4 File Offset: 0x00145EF4
 	public static bool TryGetNewMapsModId(out ModId newMapsModId)
 	{
 		newMapsModId = ModId.Null;
@@ -1107,7 +1107,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		return true;
 	}
 
-	// Token: 0x06003DE5 RID: 15845 RVA: 0x00147D42 File Offset: 0x00145F42
+	// Token: 0x06003DE5 RID: 15845 RVA: 0x00147D22 File Offset: 0x00145F22
 	public static IEnumerator AssociateMothershipAndModIOAccounts(AssociateMotherhsipAndModIOAccountsRequest data, Action<AssociateMotherhsipAndModIOAccountsResponse> callback)
 	{
 		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.AuthApiBaseUrl + "/api/AssociatePlayFabAndModIO", "POST");

@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000684 RID: 1668
 public class GRBadge : MonoBehaviour, IGameEntityComponent
 {
-	// Token: 0x06002AA9 RID: 10921 RVA: 0x000E5CBC File Offset: 0x000E3EBC
+	// Token: 0x06002AA9 RID: 10921 RVA: 0x000E5C9C File Offset: 0x000E3E9C
 	public void OnEntityInit()
 	{
 		this.gameEntity.manager.ghostReactorManager.reactor.employeeBadges.LinkBadgeToDispenser(this, (long)((int)this.gameEntity.createData));
@@ -23,7 +23,7 @@ public class GRBadge : MonoBehaviour, IGameEntityComponent
 	{
 	}
 
-	// Token: 0x06002AAC RID: 10924 RVA: 0x000E5CEC File Offset: 0x000E3EEC
+	// Token: 0x06002AAC RID: 10924 RVA: 0x000E5CCC File Offset: 0x000E3ECC
 	private void OnDestroy()
 	{
 		GhostReactor ghostReactor = GhostReactor.Get(this.gameEntity);
@@ -33,7 +33,7 @@ public class GRBadge : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002AAD RID: 10925 RVA: 0x000E5D28 File Offset: 0x000E3F28
+	// Token: 0x06002AAD RID: 10925 RVA: 0x000E5D08 File Offset: 0x000E3F08
 	public void Setup(NetPlayer player, int index)
 	{
 		this.gameEntity.onlyGrabActorNumber = player.ActorNumber;
@@ -53,7 +53,7 @@ public class GRBadge : MonoBehaviour, IGameEntityComponent
 		this.RefreshText(player);
 	}
 
-	// Token: 0x06002AAE RID: 10926 RVA: 0x000E5DC8 File Offset: 0x000E3FC8
+	// Token: 0x06002AAE RID: 10926 RVA: 0x000E5DA8 File Offset: 0x000E3FA8
 	public void RefreshText(NetPlayer player)
 	{
 		this.playerName.text = player.SanitizedNickName;
@@ -66,7 +66,7 @@ public class GRBadge : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
-	// Token: 0x06002AAF RID: 10927 RVA: 0x000E5E60 File Offset: 0x000E4060
+	// Token: 0x06002AAF RID: 10927 RVA: 0x000E5E40 File Offset: 0x000E4040
 	public void Hide()
 	{
 		this.badgeMesh.enabled = false;
@@ -75,7 +75,7 @@ public class GRBadge : MonoBehaviour, IGameEntityComponent
 		this.playerLevel.gameObject.SetActive(false);
 	}
 
-	// Token: 0x06002AB0 RID: 10928 RVA: 0x000E5EAC File Offset: 0x000E40AC
+	// Token: 0x06002AB0 RID: 10928 RVA: 0x000E5E8C File Offset: 0x000E408C
 	public void UnHide()
 	{
 		this.badgeMesh.enabled = true;
@@ -84,13 +84,13 @@ public class GRBadge : MonoBehaviour, IGameEntityComponent
 		this.playerLevel.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06002AB1 RID: 10929 RVA: 0x000E5EF8 File Offset: 0x000E40F8
+	// Token: 0x06002AB1 RID: 10929 RVA: 0x000E5ED8 File Offset: 0x000E40D8
 	public bool IsAttachedToPlayer()
 	{
 		return (int)this.gameEntity.GetState() == 1;
 	}
 
-	// Token: 0x06002AB2 RID: 10930 RVA: 0x000E5F0C File Offset: 0x000E410C
+	// Token: 0x06002AB2 RID: 10930 RVA: 0x000E5EEC File Offset: 0x000E40EC
 	public void StartRetracting()
 	{
 		this.gameEntity.RequestState(this.gameEntity.id, 1L);
@@ -102,7 +102,7 @@ public class GRBadge : MonoBehaviour, IGameEntityComponent
 		this.retractCoroutine = base.StartCoroutine(this.RetractCoroutine());
 	}
 
-	// Token: 0x06002AB3 RID: 10931 RVA: 0x000E5F5D File Offset: 0x000E415D
+	// Token: 0x06002AB3 RID: 10931 RVA: 0x000E5F3D File Offset: 0x000E413D
 	private IEnumerator RetractCoroutine()
 	{
 		base.transform.localRotation = Quaternion.identity;
@@ -118,7 +118,7 @@ public class GRBadge : MonoBehaviour, IGameEntityComponent
 		yield break;
 	}
 
-	// Token: 0x06002AB4 RID: 10932 RVA: 0x000E5F6C File Offset: 0x000E416C
+	// Token: 0x06002AB4 RID: 10932 RVA: 0x000E5F4C File Offset: 0x000E414C
 	private void PlayAttachFx()
 	{
 		if (this.audioSource != null)

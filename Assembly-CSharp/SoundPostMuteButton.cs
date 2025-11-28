@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000932 RID: 2354
 public class SoundPostMuteButton : GorillaPressableButton
 {
-	// Token: 0x06003C2C RID: 15404 RVA: 0x0013DE4C File Offset: 0x0013C04C
+	// Token: 0x06003C2C RID: 15404 RVA: 0x0013DE2C File Offset: 0x0013C02C
 	public override void ButtonActivation()
 	{
 		base.ButtonActivation();

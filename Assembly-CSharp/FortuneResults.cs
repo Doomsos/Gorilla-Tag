@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020005E9 RID: 1513
 public class FortuneResults : ScriptableObject
 {
-	// Token: 0x06002625 RID: 9765 RVA: 0x000CBF48 File Offset: 0x000CA148
+	// Token: 0x06002625 RID: 9765 RVA: 0x000CBF28 File Offset: 0x000CA128
 	private void OnValidate()
 	{
 		this.totalChance = 0f;
@@ -14,7 +14,7 @@ public class FortuneResults : ScriptableObject
 		}
 	}
 
-	// Token: 0x06002626 RID: 9766 RVA: 0x000CBF94 File Offset: 0x000CA194
+	// Token: 0x06002626 RID: 9766 RVA: 0x000CBF74 File Offset: 0x000CA174
 	public FortuneResults.FortuneResult GetResult()
 	{
 		float num = Random.Range(0f, this.totalChance);
@@ -40,7 +40,7 @@ public class FortuneResults : ScriptableObject
 		return new FortuneResults.FortuneResult(FortuneResults.FortuneCategoryType.Invalid, -1);
 	}
 
-	// Token: 0x06002627 RID: 9767 RVA: 0x000CC018 File Offset: 0x000CA218
+	// Token: 0x06002627 RID: 9767 RVA: 0x000CBFF8 File Offset: 0x000CA1F8
 	public string GetResultText(FortuneResults.FortuneResult result)
 	{
 		for (int i = 0; i < this.fortuneResults.Length; i++)
@@ -93,7 +93,7 @@ public class FortuneResults : ScriptableObject
 	// Token: 0x020005EC RID: 1516
 	public struct FortuneResult
 	{
-		// Token: 0x06002629 RID: 9769 RVA: 0x000CC093 File Offset: 0x000CA293
+		// Token: 0x06002629 RID: 9769 RVA: 0x000CC073 File Offset: 0x000CA273
 		public FortuneResult(FortuneResults.FortuneCategoryType fortuneType, int resultIndex)
 		{
 			this.fortuneType = fortuneType;

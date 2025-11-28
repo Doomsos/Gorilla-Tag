@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x02000400 RID: 1024
 public class PlayerPrefFlags
 {
-	// Token: 0x060018FE RID: 6398 RVA: 0x00085B5B File Offset: 0x00083D5B
+	// Token: 0x060018FE RID: 6398 RVA: 0x00085B3B File Offset: 0x00083D3B
 	internal static bool Check(PlayerPrefFlags.Flag flag)
 	{
 		return (PlayerPrefs.GetInt("PlayerPrefFlags0", 1) & (int)flag) == (int)flag;
 	}
 
-	// Token: 0x060018FF RID: 6399 RVA: 0x00085B70 File Offset: 0x00083D70
+	// Token: 0x060018FF RID: 6399 RVA: 0x00085B50 File Offset: 0x00083D50
 	internal static void Touch(PlayerPrefFlags.Flag flag)
 	{
 		bool flag2 = (PlayerPrefs.GetInt("PlayerPrefFlags0", 1) & (int)flag) == (int)flag;
@@ -20,7 +20,7 @@ public class PlayerPrefFlags
 		}
 	}
 
-	// Token: 0x06001900 RID: 6400 RVA: 0x00085BA4 File Offset: 0x00083DA4
+	// Token: 0x06001900 RID: 6400 RVA: 0x00085B84 File Offset: 0x00083D84
 	internal static void TouchIf(PlayerPrefFlags.Flag flag, bool value)
 	{
 		int @int = PlayerPrefs.GetInt("PlayerPrefFlags0", 1);
@@ -30,7 +30,7 @@ public class PlayerPrefFlags
 		}
 	}
 
-	// Token: 0x06001901 RID: 6401 RVA: 0x00085BDC File Offset: 0x00083DDC
+	// Token: 0x06001901 RID: 6401 RVA: 0x00085BBC File Offset: 0x00083DBC
 	internal static void Set(PlayerPrefFlags.Flag flag, bool value)
 	{
 		int num = PlayerPrefs.GetInt("PlayerPrefFlags0", 1);
@@ -49,7 +49,7 @@ public class PlayerPrefFlags
 		}
 	}
 
-	// Token: 0x06001902 RID: 6402 RVA: 0x00085C24 File Offset: 0x00083E24
+	// Token: 0x06001902 RID: 6402 RVA: 0x00085C04 File Offset: 0x00083E04
 	internal static bool Flip(PlayerPrefFlags.Flag flag)
 	{
 		int num = PlayerPrefs.GetInt("PlayerPrefFlags0", 1);

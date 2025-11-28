@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000744 RID: 1860
 public class GRUIScoreboard : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x0600301A RID: 12314 RVA: 0x0010717A File Offset: 0x0010537A
+	// Token: 0x0600301A RID: 12314 RVA: 0x0010715A File Offset: 0x0010535A
 	public void SliceUpdate()
 	{
 		if (this.currentScreen == GRUIScoreboard.ScoreboardScreen.ShiftCutCalculation)
@@ -27,7 +27,7 @@ public class GRUIScoreboard : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x0600301D RID: 12317 RVA: 0x00107198 File Offset: 0x00105398
+	// Token: 0x0600301D RID: 12317 RVA: 0x00107178 File Offset: 0x00105378
 	public void Refresh(List<VRRig> vrRigs)
 	{
 		if (this.currentScreen == GRUIScoreboard.ScoreboardScreen.ShiftCutCalculation)
@@ -51,7 +51,7 @@ public class GRUIScoreboard : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x0600301E RID: 12318 RVA: 0x00107278 File Offset: 0x00105478
+	// Token: 0x0600301E RID: 12318 RVA: 0x00107258 File Offset: 0x00105458
 	public void SwitchToScreen(GRUIScoreboard.ScoreboardScreen screenType)
 	{
 		this.currentScreen = screenType;
@@ -72,7 +72,7 @@ public class GRUIScoreboard : MonoBehaviour, IGorillaSliceableSimple
 		this.buttonText.text = "SHOW INFO";
 	}
 
-	// Token: 0x0600301F RID: 12319 RVA: 0x001072EC File Offset: 0x001054EC
+	// Token: 0x0600301F RID: 12319 RVA: 0x001072CC File Offset: 0x001054CC
 	public void SwitchState()
 	{
 		if (this.currentScreen == GRUIScoreboard.ScoreboardScreen.DefaultInfo)
@@ -87,7 +87,7 @@ public class GRUIScoreboard : MonoBehaviour, IGorillaSliceableSimple
 		GhostReactor.instance.UpdateRemoteScoreboardScreen(this.currentScreen);
 	}
 
-	// Token: 0x06003020 RID: 12320 RVA: 0x00107326 File Offset: 0x00105526
+	// Token: 0x06003020 RID: 12320 RVA: 0x00107306 File Offset: 0x00105506
 	public static bool ValidPage(GRUIScoreboard.ScoreboardScreen screen)
 	{
 		return screen == GRUIScoreboard.ScoreboardScreen.DefaultInfo || screen == GRUIScoreboard.ScoreboardScreen.ShiftCutCalculation;

@@ -4,14 +4,14 @@ using UnityEngine;
 // Token: 0x02000491 RID: 1169
 public class PlantableObject : TransferrableObject
 {
-	// Token: 0x06001DF5 RID: 7669 RVA: 0x0009DC9F File Offset: 0x0009BE9F
+	// Token: 0x06001DF5 RID: 7669 RVA: 0x0009DC7F File Offset: 0x0009BE7F
 	protected override void Awake()
 	{
 		base.Awake();
 		this.materialPropertyBlock = new MaterialPropertyBlock();
 	}
 
-	// Token: 0x06001DF6 RID: 7670 RVA: 0x0009DCB4 File Offset: 0x0009BEB4
+	// Token: 0x06001DF6 RID: 7670 RVA: 0x0009DC94 File Offset: 0x0009BE94
 	public override void OnSpawn(VRRig rig)
 	{
 		base.OnSpawn(rig);
@@ -21,7 +21,7 @@ public class PlantableObject : TransferrableObject
 		this.dippedColors = new PlantableObject.AppliedColors[20];
 	}
 
-	// Token: 0x06001DF7 RID: 7671 RVA: 0x0009DD14 File Offset: 0x0009BF14
+	// Token: 0x06001DF7 RID: 7671 RVA: 0x0009DCF4 File Offset: 0x0009BEF4
 	private void AssureShaderStuff()
 	{
 		if (!this.flagRenderer)
@@ -48,8 +48,8 @@ public class PlantableObject : TransferrableObject
 	}
 
 	// Token: 0x17000337 RID: 823
-	// (get) Token: 0x06001DF8 RID: 7672 RVA: 0x0009DDE4 File Offset: 0x0009BFE4
-	// (set) Token: 0x06001DF9 RID: 7673 RVA: 0x0009DDEC File Offset: 0x0009BFEC
+	// (get) Token: 0x06001DF8 RID: 7672 RVA: 0x0009DDC4 File Offset: 0x0009BFC4
+	// (set) Token: 0x06001DF9 RID: 7673 RVA: 0x0009DDCC File Offset: 0x0009BFCC
 	public Color colorR
 	{
 		get
@@ -64,8 +64,8 @@ public class PlantableObject : TransferrableObject
 	}
 
 	// Token: 0x17000338 RID: 824
-	// (get) Token: 0x06001DFA RID: 7674 RVA: 0x0009DDFB File Offset: 0x0009BFFB
-	// (set) Token: 0x06001DFB RID: 7675 RVA: 0x0009DE03 File Offset: 0x0009C003
+	// (get) Token: 0x06001DFA RID: 7674 RVA: 0x0009DDDB File Offset: 0x0009BFDB
+	// (set) Token: 0x06001DFB RID: 7675 RVA: 0x0009DDE3 File Offset: 0x0009BFE3
 	public Color colorG
 	{
 		get
@@ -80,11 +80,11 @@ public class PlantableObject : TransferrableObject
 	}
 
 	// Token: 0x17000339 RID: 825
-	// (get) Token: 0x06001DFC RID: 7676 RVA: 0x0009DE12 File Offset: 0x0009C012
-	// (set) Token: 0x06001DFD RID: 7677 RVA: 0x0009DE1A File Offset: 0x0009C01A
+	// (get) Token: 0x06001DFC RID: 7676 RVA: 0x0009DDF2 File Offset: 0x0009BFF2
+	// (set) Token: 0x06001DFD RID: 7677 RVA: 0x0009DDFA File Offset: 0x0009BFFA
 	public bool planted { get; private set; }
 
-	// Token: 0x06001DFE RID: 7678 RVA: 0x0009DE24 File Offset: 0x0009C024
+	// Token: 0x06001DFE RID: 7678 RVA: 0x0009DE04 File Offset: 0x0009C004
 	public void SetPlanted(bool newPlanted)
 	{
 		if (this.planted != newPlanted)
@@ -105,31 +105,31 @@ public class PlantableObject : TransferrableObject
 		}
 	}
 
-	// Token: 0x06001DFF RID: 7679 RVA: 0x0009DE7C File Offset: 0x0009C07C
+	// Token: 0x06001DFF RID: 7679 RVA: 0x0009DE5C File Offset: 0x0009C05C
 	private void AddRed()
 	{
 		this.AddColor(PlantableObject.AppliedColors.Red);
 	}
 
-	// Token: 0x06001E00 RID: 7680 RVA: 0x0009DE85 File Offset: 0x0009C085
+	// Token: 0x06001E00 RID: 7680 RVA: 0x0009DE65 File Offset: 0x0009C065
 	private void AddGreen()
 	{
 		this.AddColor(PlantableObject.AppliedColors.Blue);
 	}
 
-	// Token: 0x06001E01 RID: 7681 RVA: 0x0009DE8E File Offset: 0x0009C08E
+	// Token: 0x06001E01 RID: 7681 RVA: 0x0009DE6E File Offset: 0x0009C06E
 	private void AddBlue()
 	{
 		this.AddColor(PlantableObject.AppliedColors.Green);
 	}
 
-	// Token: 0x06001E02 RID: 7682 RVA: 0x0009DE97 File Offset: 0x0009C097
+	// Token: 0x06001E02 RID: 7682 RVA: 0x0009DE77 File Offset: 0x0009C077
 	private void AddBlack()
 	{
 		this.AddColor(PlantableObject.AppliedColors.Black);
 	}
 
-	// Token: 0x06001E03 RID: 7683 RVA: 0x0009DEA0 File Offset: 0x0009C0A0
+	// Token: 0x06001E03 RID: 7683 RVA: 0x0009DE80 File Offset: 0x0009C080
 	public void AddColor(PlantableObject.AppliedColors color)
 	{
 		this.dippedColors[this.currentDipIndex] = color;
@@ -141,7 +141,7 @@ public class PlantableObject : TransferrableObject
 		this.UpdateDisplayedDippedColor();
 	}
 
-	// Token: 0x06001E04 RID: 7684 RVA: 0x0009DEDC File Offset: 0x0009C0DC
+	// Token: 0x06001E04 RID: 7684 RVA: 0x0009DEBC File Offset: 0x0009C0BC
 	public void ClearColors()
 	{
 		for (int i = 0; i < this.dippedColors.Length; i++)
@@ -152,7 +152,7 @@ public class PlantableObject : TransferrableObject
 		this.UpdateDisplayedDippedColor();
 	}
 
-	// Token: 0x06001E05 RID: 7685 RVA: 0x0009DF14 File Offset: 0x0009C114
+	// Token: 0x06001E05 RID: 7685 RVA: 0x0009DEF4 File Offset: 0x0009C0F4
 	public Color CalculateOutputColor()
 	{
 		Color color = Color.black;
@@ -207,13 +207,13 @@ public class PlantableObject : TransferrableObject
 		return color;
 	}
 
-	// Token: 0x06001E06 RID: 7686 RVA: 0x0009E01D File Offset: 0x0009C21D
+	// Token: 0x06001E06 RID: 7686 RVA: 0x0009DFFD File Offset: 0x0009C1FD
 	public void UpdateDisplayedDippedColor()
 	{
 		this.colorR = this.CalculateOutputColor();
 	}
 
-	// Token: 0x06001E07 RID: 7687 RVA: 0x0009E02B File Offset: 0x0009C22B
+	// Token: 0x06001E07 RID: 7687 RVA: 0x0009E00B File Offset: 0x0009C20B
 	public override void DropItem()
 	{
 		base.DropItem();
@@ -223,7 +223,7 @@ public class PlantableObject : TransferrableObject
 		}
 	}
 
-	// Token: 0x06001E08 RID: 7688 RVA: 0x0009E058 File Offset: 0x0009C258
+	// Token: 0x06001E08 RID: 7688 RVA: 0x0009E038 File Offset: 0x0009C238
 	protected override void LateUpdateLocal()
 	{
 		base.LateUpdateLocal();
@@ -235,7 +235,7 @@ public class PlantableObject : TransferrableObject
 		}
 	}
 
-	// Token: 0x06001E09 RID: 7689 RVA: 0x0009E0A8 File Offset: 0x0009C2A8
+	// Token: 0x06001E09 RID: 7689 RVA: 0x0009E088 File Offset: 0x0009C288
 	protected override void LateUpdateShared()
 	{
 		base.LateUpdateShared();
@@ -245,19 +245,19 @@ public class PlantableObject : TransferrableObject
 		}
 	}
 
-	// Token: 0x06001E0A RID: 7690 RVA: 0x0009E0D2 File Offset: 0x0009C2D2
+	// Token: 0x06001E0A RID: 7690 RVA: 0x0009E0B2 File Offset: 0x0009C2B2
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		base.OnGrab(pointGrabbed, grabbingHand);
 	}
 
-	// Token: 0x06001E0B RID: 7691 RVA: 0x0009E0DC File Offset: 0x0009C2DC
+	// Token: 0x06001E0B RID: 7691 RVA: 0x0009E0BC File Offset: 0x0009C2BC
 	public override bool ShouldBeKinematic()
 	{
 		return base.ShouldBeKinematic() || this.itemState == TransferrableObject.ItemStates.State1;
 	}
 
-	// Token: 0x06001E0C RID: 7692 RVA: 0x0009E0F4 File Offset: 0x0009C2F4
+	// Token: 0x06001E0C RID: 7692 RVA: 0x0009E0D4 File Offset: 0x0009C2D4
 	public override void OnOwnershipTransferred(NetPlayer toPlayer, NetPlayer fromPlayer)
 	{
 		base.OnOwnershipTransferred(toPlayer, fromPlayer);

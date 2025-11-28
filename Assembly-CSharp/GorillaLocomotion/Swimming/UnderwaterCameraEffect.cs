@@ -9,21 +9,21 @@ namespace GorillaLocomotion.Swimming
 	[ExecuteAlways]
 	public class UnderwaterCameraEffect : MonoBehaviour
 	{
-		// Token: 0x060063E1 RID: 25569 RVA: 0x00207A44 File Offset: 0x00205C44
+		// Token: 0x060063E1 RID: 25569 RVA: 0x00207A24 File Offset: 0x00205C24
 		private void SetOffScreenPosition()
 		{
 			base.transform.localScale = new Vector3(2f * (this.frustumPlaneExtents.x + 0.04f), 0f, 1f);
 			base.transform.localPosition = new Vector3(0f, -(this.frustumPlaneExtents.y + 0.04f), this.distanceFromCamera);
 		}
 
-		// Token: 0x060063E2 RID: 25570 RVA: 0x00207AB0 File Offset: 0x00205CB0
+		// Token: 0x060063E2 RID: 25570 RVA: 0x00207A90 File Offset: 0x00205C90
 		private void SetFullScreenPosition()
 		{
 			base.transform.localScale = new Vector3(2f * (this.frustumPlaneExtents.x + 0.04f), 2f * (this.frustumPlaneExtents.y + 0.04f), 1f);
 			base.transform.localPosition = new Vector3(0f, 0f, this.distanceFromCamera);
 		}
 
-		// Token: 0x060063E3 RID: 25571 RVA: 0x00207B20 File Offset: 0x00205D20
+		// Token: 0x060063E3 RID: 25571 RVA: 0x00207B00 File Offset: 0x00205D00
 		private void OnEnable()
 		{
 			if (this.targetCamera == null)
@@ -34,7 +34,7 @@ namespace GorillaLocomotion.Swimming
 			this.InitializeShaderProperties();
 		}
 
-		// Token: 0x060063E4 RID: 25572 RVA: 0x00207B54 File Offset: 0x00205D54
+		// Token: 0x060063E4 RID: 25572 RVA: 0x00207B34 File Offset: 0x00205D34
 		private void Start()
 		{
 			this.player = GTPlayer.Instance;
@@ -44,7 +44,7 @@ namespace GorillaLocomotion.Swimming
 			this.SetOffScreenPosition();
 		}
 
-		// Token: 0x060063E5 RID: 25573 RVA: 0x00207BA8 File Offset: 0x00205DA8
+		// Token: 0x060063E5 RID: 25573 RVA: 0x00207B88 File Offset: 0x00205D88
 		private void LateUpdate()
 		{
 			if (!this.hasTargetCamera)
@@ -157,7 +157,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x060063E6 RID: 25574 RVA: 0x00207FE0 File Offset: 0x002061E0
+		// Token: 0x060063E6 RID: 25574 RVA: 0x00207FC0 File Offset: 0x002061C0
 		[DebugOption]
 		private void InitializeShaderProperties()
 		{
@@ -167,7 +167,7 @@ namespace GorillaLocomotion.Swimming
 			Shader.SetGlobalVector(this.shaderParam_GlobalCameraOverlapWaterSurfacePlane, new Vector4(this.waterSurface.surfaceNormal.x, this.waterSurface.surfaceNormal.y, this.waterSurface.surfaceNormal.z, num));
 		}
 
-		// Token: 0x060063E7 RID: 25575 RVA: 0x00208060 File Offset: 0x00206260
+		// Token: 0x060063E7 RID: 25575 RVA: 0x00208040 File Offset: 0x00206240
 		private void SetCameraOverlapState(UnderwaterCameraEffect.CameraOverlapWaterState state)
 		{
 			if (state != this.cameraOverlapWaterState || state == UnderwaterCameraEffect.CameraOverlapWaterState.Uninitialized)
@@ -198,7 +198,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x060063E8 RID: 25576 RVA: 0x00208140 File Offset: 0x00206340
+		// Token: 0x060063E8 RID: 25576 RVA: 0x00208120 File Offset: 0x00206320
 		private void CalculateFrustumPlaneBounds(float fieldOfView, float aspectRatio)
 		{
 			float num = Mathf.Tan(0.017453292f * fieldOfView * 0.5f) * this.distanceFromCamera;
@@ -211,7 +211,7 @@ namespace GorillaLocomotion.Swimming
 			this.frustumPlaneCornersLocal[3] = new Vector3(num2, -num3, this.distanceFromCamera);
 		}
 
-		// Token: 0x060063E9 RID: 25577 RVA: 0x002081F8 File Offset: 0x002063F8
+		// Token: 0x060063E9 RID: 25577 RVA: 0x002081D8 File Offset: 0x002063D8
 		private bool IntersectPlanes(Plane p1, Plane p2, out Vector3 point, out Vector3 direction)
 		{
 			direction = Vector3.Cross(p1.normal, p2.normal);
@@ -225,7 +225,7 @@ namespace GorillaLocomotion.Swimming
 			return true;
 		}
 
-		// Token: 0x060063EA RID: 25578 RVA: 0x0020828C File Offset: 0x0020648C
+		// Token: 0x060063EA RID: 25578 RVA: 0x0020826C File Offset: 0x0020646C
 		private float GetFrustumCoverageDistance(Vector3 localDirection)
 		{
 			float num = float.MinValue;

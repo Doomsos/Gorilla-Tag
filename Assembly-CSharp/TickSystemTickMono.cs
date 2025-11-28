@@ -5,8 +5,8 @@ using UnityEngine;
 internal abstract class TickSystemTickMono : MonoBehaviour, ITickSystemTick
 {
 	// Token: 0x17000724 RID: 1828
-	// (get) Token: 0x06004C1C RID: 19484 RVA: 0x0018C967 File Offset: 0x0018AB67
-	// (set) Token: 0x06004C1D RID: 19485 RVA: 0x0018C96F File Offset: 0x0018AB6F
+	// (get) Token: 0x06004C1C RID: 19484 RVA: 0x0018C947 File Offset: 0x0018AB47
+	// (set) Token: 0x06004C1D RID: 19485 RVA: 0x0018C94F File Offset: 0x0018AB4F
 	public bool TickRunning { get; set; }
 
 	// Token: 0x06004C1E RID: 19486 RVA: 0x0001877F File Offset: 0x0001697F

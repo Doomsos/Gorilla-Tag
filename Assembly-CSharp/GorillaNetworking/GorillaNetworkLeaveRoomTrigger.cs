@@ -8,7 +8,7 @@ namespace GorillaNetworking
 	// Token: 0x02000EFB RID: 3835
 	public class GorillaNetworkLeaveRoomTrigger : GorillaTriggerBox
 	{
-		// Token: 0x0600604D RID: 24653 RVA: 0x001F1068 File Offset: 0x001EF268
+		// Token: 0x0600604D RID: 24653 RVA: 0x001F1048 File Offset: 0x001EF248
 		public override void OnBoxTriggered()
 		{
 			base.OnBoxTriggered();
@@ -24,7 +24,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x0600604E RID: 24654 RVA: 0x001F10C8 File Offset: 0x001EF2C8
+		// Token: 0x0600604E RID: 24654 RVA: 0x001F10A8 File Offset: 0x001EF2A8
 		private void DisconnectAfterDelay(float seconds)
 		{
 			GorillaNetworkLeaveRoomTrigger.<DisconnectAfterDelay>d__2 <DisconnectAfterDelay>d__;

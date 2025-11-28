@@ -6,19 +6,19 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityFlashed : GRAbilityBase
 {
-	// Token: 0x06002A8E RID: 10894 RVA: 0x000E49CE File Offset: 0x000E2BCE
+	// Token: 0x06002A8E RID: 10894 RVA: 0x000E49AE File Offset: 0x000E2BAE
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
 	}
 
-	// Token: 0x06002A8F RID: 10895 RVA: 0x000E56F4 File Offset: 0x000E38F4
+	// Token: 0x06002A8F RID: 10895 RVA: 0x000E56D4 File Offset: 0x000E38D4
 	public void SetStunTime(float time)
 	{
 		this.stunTime = time;
 	}
 
-	// Token: 0x06002A90 RID: 10896 RVA: 0x000E5700 File Offset: 0x000E3900
+	// Token: 0x06002A90 RID: 10896 RVA: 0x000E56E0 File Offset: 0x000E38E0
 	public override void Start()
 	{
 		base.Start();
@@ -37,14 +37,14 @@ public class GRAbilityFlashed : GRAbilityBase
 		this.agent.SetDisableNetworkSync(true);
 	}
 
-	// Token: 0x06002A91 RID: 10897 RVA: 0x000E4143 File Offset: 0x000E2343
+	// Token: 0x06002A91 RID: 10897 RVA: 0x000E4123 File Offset: 0x000E2323
 	public override void Stop()
 	{
 		this.agent.SetIsPathing(true, true);
 		this.agent.SetDisableNetworkSync(false);
 	}
 
-	// Token: 0x06002A92 RID: 10898 RVA: 0x000E57F0 File Offset: 0x000E39F0
+	// Token: 0x06002A92 RID: 10898 RVA: 0x000E57D0 File Offset: 0x000E39D0
 	public override bool IsDone()
 	{
 		return Time.timeAsDouble >= this.behaviorEndTime;

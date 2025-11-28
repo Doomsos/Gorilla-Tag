@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x020008DE RID: 2270
 public class ScienceExperimentSceneElements : MonoBehaviour
 {
-	// Token: 0x06003A2E RID: 14894 RVA: 0x001338FB File Offset: 0x00131AFB
+	// Token: 0x06003A2E RID: 14894 RVA: 0x001338DB File Offset: 0x00131ADB
 	private void Awake()
 	{
 		ScienceExperimentManager.instance.InitElements(this);
 	}
 
-	// Token: 0x06003A2F RID: 14895 RVA: 0x0013390A File Offset: 0x00131B0A
+	// Token: 0x06003A2F RID: 14895 RVA: 0x001338EA File Offset: 0x00131AEA
 	private void OnDestroy()
 	{
 		ScienceExperimentManager.instance.DeInitElements();

@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020003F9 RID: 1017
 public class NonCosmeticHandItem : MonoBehaviour
 {
-	// Token: 0x060018EE RID: 6382 RVA: 0x000858AB File Offset: 0x00083AAB
+	// Token: 0x060018EE RID: 6382 RVA: 0x0008588B File Offset: 0x00083A8B
 	public void EnableItem(bool enable)
 	{
 		if (this.itemPrefab)
@@ -15,7 +15,7 @@ public class NonCosmeticHandItem : MonoBehaviour
 	}
 
 	// Token: 0x170002AF RID: 687
-	// (get) Token: 0x060018EF RID: 6383 RVA: 0x000858CB File Offset: 0x00083ACB
+	// (get) Token: 0x060018EF RID: 6383 RVA: 0x000858AB File Offset: 0x00083AAB
 	public bool IsEnabled
 	{
 		get

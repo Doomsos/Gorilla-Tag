@@ -9,7 +9,7 @@ using UnityEngine;
 [AddComponentMenu("Scripts/MRTK/Core/MaterialInstance")]
 public class MaterialInstance : MonoBehaviour
 {
-	// Token: 0x0600409F RID: 16543 RVA: 0x00159DD5 File Offset: 0x00157FD5
+	// Token: 0x0600409F RID: 16543 RVA: 0x00159DB5 File Offset: 0x00157FB5
 	public Material AcquireMaterial(Object owner = null, bool instance = true)
 	{
 		if (owner != null)
@@ -28,7 +28,7 @@ public class MaterialInstance : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060040A0 RID: 16544 RVA: 0x00159E13 File Offset: 0x00158013
+	// Token: 0x060040A0 RID: 16544 RVA: 0x00159DF3 File Offset: 0x00157FF3
 	public Material[] AcquireMaterials(Object owner = null, bool instance = true)
 	{
 		if (owner != null)
@@ -43,7 +43,7 @@ public class MaterialInstance : MonoBehaviour
 		return this.instanceMaterials;
 	}
 
-	// Token: 0x060040A1 RID: 16545 RVA: 0x00159E46 File Offset: 0x00158046
+	// Token: 0x060040A1 RID: 16545 RVA: 0x00159E26 File Offset: 0x00158026
 	public void ReleaseMaterial(Object owner, bool autoDestroy = true)
 	{
 		this.materialOwners.Remove(owner);
@@ -58,7 +58,7 @@ public class MaterialInstance : MonoBehaviour
 	}
 
 	// Token: 0x170005F9 RID: 1529
-	// (get) Token: 0x060040A2 RID: 16546 RVA: 0x00159E7E File Offset: 0x0015807E
+	// (get) Token: 0x060040A2 RID: 16546 RVA: 0x00159E5E File Offset: 0x0015805E
 	public Material Material
 	{
 		get
@@ -68,7 +68,7 @@ public class MaterialInstance : MonoBehaviour
 	}
 
 	// Token: 0x170005FA RID: 1530
-	// (get) Token: 0x060040A3 RID: 16547 RVA: 0x00159E88 File Offset: 0x00158088
+	// (get) Token: 0x060040A3 RID: 16547 RVA: 0x00159E68 File Offset: 0x00158068
 	public Material[] Materials
 	{
 		get
@@ -78,8 +78,8 @@ public class MaterialInstance : MonoBehaviour
 	}
 
 	// Token: 0x170005FB RID: 1531
-	// (get) Token: 0x060040A4 RID: 16548 RVA: 0x00159E92 File Offset: 0x00158092
-	// (set) Token: 0x060040A5 RID: 16549 RVA: 0x00159E9A File Offset: 0x0015809A
+	// (get) Token: 0x060040A4 RID: 16548 RVA: 0x00159E72 File Offset: 0x00158072
+	// (set) Token: 0x060040A5 RID: 16549 RVA: 0x00159E7A File Offset: 0x0015807A
 	public bool CacheSharedMaterialsFromRenderer
 	{
 		get
@@ -104,7 +104,7 @@ public class MaterialInstance : MonoBehaviour
 	}
 
 	// Token: 0x170005FC RID: 1532
-	// (get) Token: 0x060040A6 RID: 16550 RVA: 0x00159EC9 File Offset: 0x001580C9
+	// (get) Token: 0x060040A6 RID: 16550 RVA: 0x00159EA9 File Offset: 0x001580A9
 	private Renderer CachedRenderer
 	{
 		get
@@ -122,8 +122,8 @@ public class MaterialInstance : MonoBehaviour
 	}
 
 	// Token: 0x170005FD RID: 1533
-	// (get) Token: 0x060040A7 RID: 16551 RVA: 0x00159F04 File Offset: 0x00158104
-	// (set) Token: 0x060040A8 RID: 16552 RVA: 0x00159F39 File Offset: 0x00158139
+	// (get) Token: 0x060040A7 RID: 16551 RVA: 0x00159EE4 File Offset: 0x001580E4
+	// (set) Token: 0x060040A8 RID: 16552 RVA: 0x00159F19 File Offset: 0x00158119
 	private Material[] CachedRendererSharedMaterials
 	{
 		get
@@ -148,19 +148,19 @@ public class MaterialInstance : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040A9 RID: 16553 RVA: 0x00159F56 File Offset: 0x00158156
+	// Token: 0x060040A9 RID: 16553 RVA: 0x00159F36 File Offset: 0x00158136
 	private void Awake()
 	{
 		this.Initialize();
 	}
 
-	// Token: 0x060040AA RID: 16554 RVA: 0x00159F5E File Offset: 0x0015815E
+	// Token: 0x060040AA RID: 16554 RVA: 0x00159F3E File Offset: 0x0015813E
 	private void OnDestroy()
 	{
 		this.RestoreRenderer();
 	}
 
-	// Token: 0x060040AB RID: 16555 RVA: 0x00159F66 File Offset: 0x00158166
+	// Token: 0x060040AB RID: 16555 RVA: 0x00159F46 File Offset: 0x00158146
 	private void RestoreRenderer()
 	{
 		if (this.CachedRenderer != null && this.defaultMaterials != null)
@@ -171,7 +171,7 @@ public class MaterialInstance : MonoBehaviour
 		this.instanceMaterials = null;
 	}
 
-	// Token: 0x060040AC RID: 16556 RVA: 0x00159F9C File Offset: 0x0015819C
+	// Token: 0x060040AC RID: 16556 RVA: 0x00159F7C File Offset: 0x0015817C
 	private void Initialize()
 	{
 		if (!this.initialized && this.CachedRenderer != null)
@@ -188,7 +188,7 @@ public class MaterialInstance : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040AD RID: 16557 RVA: 0x00159FF5 File Offset: 0x001581F5
+	// Token: 0x060040AD RID: 16557 RVA: 0x00159FD5 File Offset: 0x001581D5
 	private void AcquireInstances()
 	{
 		if (this.CachedRenderer != null && !MaterialInstance.MaterialsMatch(this.CachedRendererSharedMaterials, this.instanceMaterials))
@@ -197,7 +197,7 @@ public class MaterialInstance : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040AE RID: 16558 RVA: 0x0015A020 File Offset: 0x00158220
+	// Token: 0x060040AE RID: 16558 RVA: 0x0015A000 File Offset: 0x00158200
 	private void CreateInstances()
 	{
 		this.Initialize();
@@ -210,7 +210,7 @@ public class MaterialInstance : MonoBehaviour
 		this.materialsInstanced = true;
 	}
 
-	// Token: 0x060040AF RID: 16559 RVA: 0x0015A078 File Offset: 0x00158278
+	// Token: 0x060040AF RID: 16559 RVA: 0x0015A058 File Offset: 0x00158258
 	private static bool MaterialsMatch(Material[] a, Material[] b)
 	{
 		int? num = (a != null) ? new int?(a.Length) : default(int?);
@@ -237,7 +237,7 @@ public class MaterialInstance : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x060040B0 RID: 16560 RVA: 0x0015A11C File Offset: 0x0015831C
+	// Token: 0x060040B0 RID: 16560 RVA: 0x0015A0FC File Offset: 0x001582FC
 	private static Material[] InstanceMaterials(Material[] source)
 	{
 		if (source == null)
@@ -261,7 +261,7 @@ public class MaterialInstance : MonoBehaviour
 		return array;
 	}
 
-	// Token: 0x060040B1 RID: 16561 RVA: 0x0015A19C File Offset: 0x0015839C
+	// Token: 0x060040B1 RID: 16561 RVA: 0x0015A17C File Offset: 0x0015837C
 	private static void DestroyMaterials(Material[] materials)
 	{
 		if (materials != null)
@@ -273,13 +273,13 @@ public class MaterialInstance : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040B2 RID: 16562 RVA: 0x0015A1C2 File Offset: 0x001583C2
+	// Token: 0x060040B2 RID: 16562 RVA: 0x0015A1A2 File Offset: 0x001583A2
 	private static bool IsInstanceMaterial(Material material)
 	{
 		return material != null && material.name.Contains(" (Instance)");
 	}
 
-	// Token: 0x060040B3 RID: 16563 RVA: 0x0015A1E0 File Offset: 0x001583E0
+	// Token: 0x060040B3 RID: 16563 RVA: 0x0015A1C0 File Offset: 0x001583C0
 	private static bool HasValidMaterial(Material[] materials)
 	{
 		if (materials != null)
@@ -295,7 +295,7 @@ public class MaterialInstance : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x060040B4 RID: 16564 RVA: 0x0015A20E File Offset: 0x0015840E
+	// Token: 0x060040B4 RID: 16564 RVA: 0x0015A1EE File Offset: 0x001583EE
 	private static void DestroySafe(Object toDestroy)
 	{
 		if (toDestroy != null && Application.isPlaying)

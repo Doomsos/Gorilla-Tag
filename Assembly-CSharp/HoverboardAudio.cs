@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x0200080D RID: 2061
 public class HoverboardAudio : MonoBehaviour
 {
-	// Token: 0x0600363E RID: 13886 RVA: 0x0012638F File Offset: 0x0012458F
+	// Token: 0x0600363E RID: 13886 RVA: 0x0012636F File Offset: 0x0012456F
 	private void Start()
 	{
 		this.Stop();
 	}
 
-	// Token: 0x0600363F RID: 13887 RVA: 0x00126397 File Offset: 0x00124597
+	// Token: 0x0600363F RID: 13887 RVA: 0x00126377 File Offset: 0x00124577
 	public void PlayTurnSound(float angle)
 	{
 		if (Time.time > this.turnSoundCooldownUntilTimestamp && angle > this.minAngleDeltaForTurnSound)
@@ -20,7 +20,7 @@ public class HoverboardAudio : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003640 RID: 13888 RVA: 0x001263CC File Offset: 0x001245CC
+	// Token: 0x06003640 RID: 13888 RVA: 0x001263AC File Offset: 0x001245AC
 	public void UpdateAudioLoop(float speed, float airspeed, float strainLevel, float grindLevel)
 	{
 		this.motorAnimator.UpdateValue(speed, false);
@@ -42,7 +42,7 @@ public class HoverboardAudio : MonoBehaviour
 		this.hum1.volume = Mathf.MoveTowards(this.hum1.volume, this.hum1BaseVolume * strainLevel, this.fadeSpeed * Time.deltaTime);
 	}
 
-	// Token: 0x06003641 RID: 13889 RVA: 0x00126488 File Offset: 0x00124688
+	// Token: 0x06003641 RID: 13889 RVA: 0x00126468 File Offset: 0x00124668
 	public void Stop()
 	{
 		if (!this.didInitHum1BaseVolume)

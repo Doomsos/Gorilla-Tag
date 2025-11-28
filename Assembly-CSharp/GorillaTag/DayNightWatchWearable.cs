@@ -7,7 +7,7 @@ namespace GorillaTag
 	// Token: 0x02000FF2 RID: 4082
 	public class DayNightWatchWearable : MonoBehaviour
 	{
-		// Token: 0x06006720 RID: 26400 RVA: 0x00218984 File Offset: 0x00216B84
+		// Token: 0x06006720 RID: 26400 RVA: 0x00218964 File Offset: 0x00216B64
 		private void Start()
 		{
 			if (!this.dayNightManager)
@@ -21,7 +21,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006721 RID: 26401 RVA: 0x002189D4 File Offset: 0x00216BD4
+		// Token: 0x06006721 RID: 26401 RVA: 0x002189B4 File Offset: 0x00216BB4
 		private void Update()
 		{
 			this.currentTimeOfDay = this.dayNightManager.currentTimeOfDay;

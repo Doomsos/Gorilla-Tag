@@ -7,20 +7,20 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010F2 RID: 4338
 	public class FingerFlexEvent : MonoBehaviourTick
 	{
-		// Token: 0x06006CC5 RID: 27845 RVA: 0x0023B6B3 File Offset: 0x002398B3
+		// Token: 0x06006CC5 RID: 27845 RVA: 0x0023B693 File Offset: 0x00239893
 		private void Awake()
 		{
 			this._rig = base.GetComponentInParent<VRRig>();
 			this.parentTransferable = base.GetComponentInParent<TransferrableObject>();
 		}
 
-		// Token: 0x06006CC6 RID: 27846 RVA: 0x0023B6CD File Offset: 0x002398CD
+		// Token: 0x06006CC6 RID: 27846 RVA: 0x0023B6AD File Offset: 0x002398AD
 		private bool IsMyItem()
 		{
 			return this._rig != null && this._rig.isOfflineVRRig;
 		}
 
-		// Token: 0x06006CC7 RID: 27847 RVA: 0x0023B6EC File Offset: 0x002398EC
+		// Token: 0x06006CC7 RID: 27847 RVA: 0x0023B6CC File Offset: 0x002398CC
 		public override void Tick()
 		{
 			for (int i = 0; i < this.eventListeners.Length; i++)
@@ -30,7 +30,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CC8 RID: 27848 RVA: 0x0023B71C File Offset: 0x0023991C
+		// Token: 0x06006CC8 RID: 27848 RVA: 0x0023B6FC File Offset: 0x002398FC
 		private void FireEvents(FingerFlexEvent.Listener listener)
 		{
 			if (!listener.syncForEveryoneInRoom && !this.IsMyItem())
@@ -97,7 +97,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006CC9 RID: 27849 RVA: 0x0023B900 File Offset: 0x00239B00
+		// Token: 0x06006CC9 RID: 27849 RVA: 0x0023B8E0 File Offset: 0x00239AE0
 		private void FireEvents(FingerFlexEvent.Listener listener, float leftFinger, float rightFinger)
 		{
 			if ((this.ignoreTransferable && listener.checkLeftHand) || (this.parentTransferable && this.FingerFlexValidation(true)))
@@ -114,7 +114,7 @@ namespace GorillaTag.Cosmetics
 			this.CheckFingerValue(listener, rightFinger, false, ref listener.fingerRightLastValue);
 		}
 
-		// Token: 0x06006CCA RID: 27850 RVA: 0x0023B998 File Offset: 0x00239B98
+		// Token: 0x06006CCA RID: 27850 RVA: 0x0023B978 File Offset: 0x00239B78
 		private void CheckFingerValue(FingerFlexEvent.Listener listener, float fingerValue, bool isLeft, ref float lastValue)
 		{
 			if (fingerValue > listener.fingerFlexValue)
@@ -159,7 +159,7 @@ namespace GorillaTag.Cosmetics
 			lastValue = fingerValue;
 		}
 
-		// Token: 0x06006CCB RID: 27851 RVA: 0x0023BA7A File Offset: 0x00239C7A
+		// Token: 0x06006CCB RID: 27851 RVA: 0x0023BA5A File Offset: 0x00239C5A
 		private bool FingerFlexValidation(bool isLeftHand)
 		{
 			return (!this.parentTransferable.InLeftHand() || isLeftHand) && (this.parentTransferable.InLeftHand() || !isLeftHand);

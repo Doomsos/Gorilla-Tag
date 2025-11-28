@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001121 RID: 4385
 	public class VelocityBasedAudioTriggerCosmetic : MonoBehaviour
 	{
-		// Token: 0x06006DBD RID: 28093 RVA: 0x00240650 File Offset: 0x0023E850
+		// Token: 0x06006DBD RID: 28093 RVA: 0x00240630 File Offset: 0x0023E830
 		private void Awake()
 		{
 			if (this.audioClip != null)
@@ -20,7 +20,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DBE RID: 28094 RVA: 0x002406AC File Offset: 0x0023E8AC
+		// Token: 0x06006DBE RID: 28094 RVA: 0x0024068C File Offset: 0x0023E88C
 		private void Update()
 		{
 			Vector3 averageVelocity = this.velocityTracker.GetAverageVelocity(true, 0.15f, false);

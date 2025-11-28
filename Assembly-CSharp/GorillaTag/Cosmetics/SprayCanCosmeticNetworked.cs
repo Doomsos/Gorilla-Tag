@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001119 RID: 4377
 	public class SprayCanCosmeticNetworked : MonoBehaviour
 	{
-		// Token: 0x06006D95 RID: 28053 RVA: 0x0023FB54 File Offset: 0x0023DD54
+		// Token: 0x06006D95 RID: 28053 RVA: 0x0023FB34 File Offset: 0x0023DD34
 		private void OnEnable()
 		{
 			if (this._events == null)
@@ -27,7 +27,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D96 RID: 28054 RVA: 0x0023FC1C File Offset: 0x0023DE1C
+		// Token: 0x06006D96 RID: 28054 RVA: 0x0023FBFC File Offset: 0x0023DDFC
 		private void OnDisable()
 		{
 			if (this._events != null)
@@ -38,7 +38,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D97 RID: 28055 RVA: 0x0023FC6C File Offset: 0x0023DE6C
+		// Token: 0x06006D97 RID: 28055 RVA: 0x0023FC4C File Offset: 0x0023DE4C
 		private void OnShakeEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D98 RID: 28056 RVA: 0x0023FCF8 File Offset: 0x0023DEF8
+		// Token: 0x06006D98 RID: 28056 RVA: 0x0023FCD8 File Offset: 0x0023DED8
 		public void OnShakeStart()
 		{
 			if (PhotonNetwork.InRoom && this._events != null && this._events.Activate != null)
@@ -102,7 +102,7 @@ namespace GorillaTag.Cosmetics
 			handleOnShakeStart.Invoke();
 		}
 
-		// Token: 0x06006D99 RID: 28057 RVA: 0x0023FD5C File Offset: 0x0023DF5C
+		// Token: 0x06006D99 RID: 28057 RVA: 0x0023FD3C File Offset: 0x0023DF3C
 		public void OnShakeEnd()
 		{
 			if (PhotonNetwork.InRoom && this._events != null && this._events.Activate != null)

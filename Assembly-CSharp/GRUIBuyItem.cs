@@ -6,7 +6,7 @@ using UnityEngine.UI;
 // Token: 0x0200073F RID: 1855
 public class GRUIBuyItem : MonoBehaviour
 {
-	// Token: 0x06002FE4 RID: 12260 RVA: 0x00105EFE File Offset: 0x001040FE
+	// Token: 0x06002FE4 RID: 12260 RVA: 0x00105EDE File Offset: 0x001040DE
 	public void Setup(int standId)
 	{
 		this.standId = standId;
@@ -19,7 +19,7 @@ public class GRUIBuyItem : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002FE6 RID: 12262 RVA: 0x00105F3E File Offset: 0x0010413E
+	// Token: 0x06002FE6 RID: 12262 RVA: 0x00105F1E File Offset: 0x0010411E
 	public Transform GetSpawnMarker()
 	{
 		return this.spawnMarker;

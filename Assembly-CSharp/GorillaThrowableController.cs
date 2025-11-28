@@ -6,7 +6,7 @@ using Valve.VR;
 // Token: 0x02000924 RID: 2340
 public class GorillaThrowableController : MonoBehaviour
 {
-	// Token: 0x06003BD8 RID: 15320 RVA: 0x0013C0E9 File Offset: 0x0013A2E9
+	// Token: 0x06003BD8 RID: 15320 RVA: 0x0013C0C9 File Offset: 0x0013A2C9
 	protected void Awake()
 	{
 		this.gorillaThrowableLayerMask = LayerMask.GetMask(new string[]
@@ -15,7 +15,7 @@ public class GorillaThrowableController : MonoBehaviour
 		});
 	}
 
-	// Token: 0x06003BD9 RID: 15321 RVA: 0x0013C104 File Offset: 0x0013A304
+	// Token: 0x06003BD9 RID: 15321 RVA: 0x0013C0E4 File Offset: 0x0013A2E4
 	private void LateUpdate()
 	{
 		if (this.testCanGrab)
@@ -69,7 +69,7 @@ public class GorillaThrowableController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003BDA RID: 15322 RVA: 0x0013C250 File Offset: 0x0013A450
+	// Token: 0x06003BDA RID: 15322 RVA: 0x0013C230 File Offset: 0x0013A430
 	private bool CheckIfHandHasReleased(XRNode node)
 	{
 		this.inputDevice = InputDevices.GetDeviceAtXRNode(node);
@@ -85,7 +85,7 @@ public class GorillaThrowableController : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06003BDB RID: 15323 RVA: 0x0013C2CC File Offset: 0x0013A4CC
+	// Token: 0x06003BDB RID: 15323 RVA: 0x0013C2AC File Offset: 0x0013A4AC
 	private bool CheckIfHandHasGrabbed(XRNode node)
 	{
 		this.inputDevice = InputDevices.GetDeviceAtXRNode(node);
@@ -98,7 +98,7 @@ public class GorillaThrowableController : MonoBehaviour
 		return this.triggerValue > 0.75f;
 	}
 
-	// Token: 0x06003BDC RID: 15324 RVA: 0x0013C348 File Offset: 0x0013A548
+	// Token: 0x06003BDC RID: 15324 RVA: 0x0013C328 File Offset: 0x0013A528
 	private bool CanGrabAnObject(Transform handTransform, out Collider returnCollider)
 	{
 		this.magnitude = 100f;
@@ -126,7 +126,7 @@ public class GorillaThrowableController : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06003BDD RID: 15325 RVA: 0x0013C431 File Offset: 0x0013A631
+	// Token: 0x06003BDD RID: 15325 RVA: 0x0013C411 File Offset: 0x0013A611
 	public void GrabbableObjectHover(bool isLeft)
 	{
 		GorillaTagger.Instance.StartVibration(isLeft, this.hoverVibrationStrength, this.hoverVibrationDuration);

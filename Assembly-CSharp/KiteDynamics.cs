@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000416 RID: 1046
 public class KiteDynamics : MonoBehaviour, ITetheredObjectBehavior
 {
-	// Token: 0x060019CC RID: 6604 RVA: 0x00089BCC File Offset: 0x00087DCC
+	// Token: 0x060019CC RID: 6604 RVA: 0x00089BAC File Offset: 0x00087DAC
 	private void Awake()
 	{
 		this.rb = base.GetComponent<Rigidbody>();
@@ -14,14 +14,14 @@ public class KiteDynamics : MonoBehaviour, ITetheredObjectBehavior
 		this.grabPtInitParent = this.grabPt.transform.parent;
 	}
 
-	// Token: 0x060019CD RID: 6605 RVA: 0x00089C29 File Offset: 0x00087E29
+	// Token: 0x060019CD RID: 6605 RVA: 0x00089C09 File Offset: 0x00087E09
 	private void Start()
 	{
 		this.airResistance = Mathf.Clamp(this.airResistance, 0f, 1f);
 		this.balloonCollider.enabled = false;
 	}
 
-	// Token: 0x060019CE RID: 6606 RVA: 0x00089C54 File Offset: 0x00087E54
+	// Token: 0x060019CE RID: 6606 RVA: 0x00089C34 File Offset: 0x00087E34
 	public void ReParent()
 	{
 		if (this.grabPt != null)
@@ -31,7 +31,7 @@ public class KiteDynamics : MonoBehaviour, ITetheredObjectBehavior
 		this.bouyancyActualHeight = Random.Range(this.bouyancyMinHeight, this.bouyancyMaxHeight);
 	}
 
-	// Token: 0x060019CF RID: 6607 RVA: 0x00089CA4 File Offset: 0x00087EA4
+	// Token: 0x060019CF RID: 6607 RVA: 0x00089C84 File Offset: 0x00087E84
 	public void EnableDynamics(bool enable, bool collider, bool kinematic)
 	{
 		this.enableDynamics = enable;
@@ -50,7 +50,7 @@ public class KiteDynamics : MonoBehaviour, ITetheredObjectBehavior
 		}
 	}
 
-	// Token: 0x060019D0 RID: 6608 RVA: 0x00089D0E File Offset: 0x00087F0E
+	// Token: 0x060019D0 RID: 6608 RVA: 0x00089CEE File Offset: 0x00087EEE
 	public void EnableDistanceConstraints(bool enable, float scale = 1f)
 	{
 		this.rb.useGravity = !enable;
@@ -59,7 +59,7 @@ public class KiteDynamics : MonoBehaviour, ITetheredObjectBehavior
 	}
 
 	// Token: 0x170002C5 RID: 709
-	// (get) Token: 0x060019D1 RID: 6609 RVA: 0x00089D37 File Offset: 0x00087F37
+	// (get) Token: 0x060019D1 RID: 6609 RVA: 0x00089D17 File Offset: 0x00087F17
 	public bool ColliderEnabled
 	{
 		get
@@ -68,7 +68,7 @@ public class KiteDynamics : MonoBehaviour, ITetheredObjectBehavior
 		}
 	}
 
-	// Token: 0x060019D2 RID: 6610 RVA: 0x00089D54 File Offset: 0x00087F54
+	// Token: 0x060019D2 RID: 6610 RVA: 0x00089D34 File Offset: 0x00087F34
 	private void FixedUpdate()
 	{
 		if (this.rb.isKinematic || this.rb.useGravity)
@@ -93,19 +93,19 @@ public class KiteDynamics : MonoBehaviour, ITetheredObjectBehavior
 		throw new NotImplementedException();
 	}
 
-	// Token: 0x060019D4 RID: 6612 RVA: 0x0008767F File Offset: 0x0008587F
+	// Token: 0x060019D4 RID: 6612 RVA: 0x0008765F File Offset: 0x0008585F
 	bool ITetheredObjectBehavior.IsEnabled()
 	{
 		return base.enabled;
 	}
 
-	// Token: 0x060019D5 RID: 6613 RVA: 0x00089E2E File Offset: 0x0008802E
+	// Token: 0x060019D5 RID: 6613 RVA: 0x00089E0E File Offset: 0x0008800E
 	void ITetheredObjectBehavior.TriggerEnter(Collider other, ref Vector3 force, ref Vector3 collisionPt, ref bool transferOwnership)
 	{
 		transferOwnership = false;
 	}
 
-	// Token: 0x060019D6 RID: 6614 RVA: 0x00089E34 File Offset: 0x00088034
+	// Token: 0x060019D6 RID: 6614 RVA: 0x00089E14 File Offset: 0x00088014
 	public bool ReturnStep()
 	{
 		this.rb.isKinematic = true;

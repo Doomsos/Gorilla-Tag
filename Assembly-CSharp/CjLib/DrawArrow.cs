@@ -7,7 +7,7 @@ namespace CjLib
 	[ExecuteInEditMode]
 	public class DrawArrow : DrawBase
 	{
-		// Token: 0x0600702B RID: 28715 RVA: 0x0024786C File Offset: 0x00245A6C
+		// Token: 0x0600702B RID: 28715 RVA: 0x0024784C File Offset: 0x00245A4C
 		private void OnValidate()
 		{
 			this.ConeRadius = Mathf.Max(0f, this.ConeRadius);
@@ -16,7 +16,7 @@ namespace CjLib
 			this.NumSegments = Mathf.Max(4, this.NumSegments);
 		}
 
-		// Token: 0x0600702C RID: 28716 RVA: 0x002478D0 File Offset: 0x00245AD0
+		// Token: 0x0600702C RID: 28716 RVA: 0x002478B0 File Offset: 0x00245AB0
 		protected override void Draw(Color color, DebugUtil.Style style, bool depthTest)
 		{
 			DebugUtil.DrawArrow(base.transform.position, base.transform.position + base.transform.TransformVector(this.LocalEndVector), this.ConeRadius, this.ConeHeight, this.NumSegments, this.StemThickness, color, depthTest, style);

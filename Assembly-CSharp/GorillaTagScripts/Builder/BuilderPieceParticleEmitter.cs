@@ -7,7 +7,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E53 RID: 3667
 	public class BuilderPieceParticleEmitter : MonoBehaviour, IBuilderPieceComponent
 	{
-		// Token: 0x06005B89 RID: 23433 RVA: 0x001D65C0 File Offset: 0x001D47C0
+		// Token: 0x06005B89 RID: 23433 RVA: 0x001D65A0 File Offset: 0x001D47A0
 		private void OnZoneChanged()
 		{
 			this.inBuilderZone = ZoneManagement.instance.IsZoneActive(this.myPiece.GetTable().tableZone);
@@ -22,7 +22,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B8A RID: 23434 RVA: 0x001D6614 File Offset: 0x001D4814
+		// Token: 0x06005B8A RID: 23434 RVA: 0x001D65F4 File Offset: 0x001D47F4
 		private void StopParticles()
 		{
 			foreach (ParticleSystem particleSystem in this.particles)
@@ -35,7 +35,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B8B RID: 23435 RVA: 0x001D6674 File Offset: 0x001D4874
+		// Token: 0x06005B8B RID: 23435 RVA: 0x001D6654 File Offset: 0x001D4854
 		private void StartParticles()
 		{
 			foreach (ParticleSystem particleSystem in this.particles)
@@ -47,7 +47,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B8C RID: 23436 RVA: 0x001D66D0 File Offset: 0x001D48D0
+		// Token: 0x06005B8C RID: 23436 RVA: 0x001D66B0 File Offset: 0x001D48B0
 		public void OnPieceCreate(int pieceType, int pieceId)
 		{
 			this.StopParticles();
@@ -56,7 +56,7 @@ namespace GorillaTagScripts.Builder
 			this.OnZoneChanged();
 		}
 
-		// Token: 0x06005B8D RID: 23437 RVA: 0x001D6704 File Offset: 0x001D4904
+		// Token: 0x06005B8D RID: 23437 RVA: 0x001D66E4 File Offset: 0x001D48E4
 		public void OnPieceDestroy()
 		{
 			ZoneManagement instance = ZoneManagement.instance;
@@ -68,7 +68,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005B8F RID: 23439 RVA: 0x001D672C File Offset: 0x001D492C
+		// Token: 0x06005B8F RID: 23439 RVA: 0x001D670C File Offset: 0x001D490C
 		public void OnPieceActivate()
 		{
 			this.isPieceActive = true;
@@ -78,7 +78,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B90 RID: 23440 RVA: 0x001D6743 File Offset: 0x001D4943
+		// Token: 0x06005B90 RID: 23440 RVA: 0x001D6723 File Offset: 0x001D4923
 		public void OnPieceDeactivate()
 		{
 			this.isPieceActive = false;

@@ -4,14 +4,14 @@ using Photon.Pun;
 // Token: 0x02000BE3 RID: 3043
 internal class GorillaTagCompetitiveRPCs : RPCNetworkBase
 {
-	// Token: 0x06004B24 RID: 19236 RVA: 0x0018884D File Offset: 0x00186A4D
+	// Token: 0x06004B24 RID: 19236 RVA: 0x0018882D File Offset: 0x00186A2D
 	public override void SetClassTarget(IWrappedSerializable target, GorillaWrappedSerializer netHandler)
 	{
 		this.tagCompManager = (GorillaTagCompetitiveManager)target;
 		this.serializer = (GameModeSerializer)netHandler;
 	}
 
-	// Token: 0x06004B25 RID: 19237 RVA: 0x00188868 File Offset: 0x00186A68
+	// Token: 0x06004B25 RID: 19237 RVA: 0x00188848 File Offset: 0x00186A48
 	[PunRPC]
 	public void SendScoresToLateJoinerRPC(int[] playerId, int[] numTags, float[] pointsOnDefense, float[] joinTime, bool[] infected, float[] taggedTime, PhotonMessageInfo info)
 	{

@@ -6,28 +6,28 @@ namespace CjLib
 	// Token: 0x02001170 RID: 4464
 	public struct Vector3Spring
 	{
-		// Token: 0x060070A2 RID: 28834 RVA: 0x0024E22F File Offset: 0x0024C42F
+		// Token: 0x060070A2 RID: 28834 RVA: 0x0024E20F File Offset: 0x0024C40F
 		public void Reset()
 		{
 			this.Value = Vector3.zero;
 			this.Velocity = Vector3.zero;
 		}
 
-		// Token: 0x060070A3 RID: 28835 RVA: 0x0024E247 File Offset: 0x0024C447
+		// Token: 0x060070A3 RID: 28835 RVA: 0x0024E227 File Offset: 0x0024C427
 		public void Reset(Vector3 initValue)
 		{
 			this.Value = initValue;
 			this.Velocity = Vector3.zero;
 		}
 
-		// Token: 0x060070A4 RID: 28836 RVA: 0x0024E25B File Offset: 0x0024C45B
+		// Token: 0x060070A4 RID: 28836 RVA: 0x0024E23B File Offset: 0x0024C43B
 		public void Reset(Vector3 initValue, Vector3 initVelocity)
 		{
 			this.Value = initValue;
 			this.Velocity = initVelocity;
 		}
 
-		// Token: 0x060070A5 RID: 28837 RVA: 0x0024E26C File Offset: 0x0024C46C
+		// Token: 0x060070A5 RID: 28837 RVA: 0x0024E24C File Offset: 0x0024C44C
 		public Vector3 TrackDampingRatio(Vector3 targetValue, float angularFrequency, float dampingRatio, float deltaTime)
 		{
 			if (angularFrequency < MathUtil.Epsilon)
@@ -53,7 +53,7 @@ namespace CjLib
 			return this.Value;
 		}
 
-		// Token: 0x060070A6 RID: 28838 RVA: 0x0024E368 File Offset: 0x0024C568
+		// Token: 0x060070A6 RID: 28838 RVA: 0x0024E348 File Offset: 0x0024C548
 		public Vector3 TrackHalfLife(Vector3 targetValue, float frequencyHz, float halfLife, float deltaTime)
 		{
 			if (halfLife < MathUtil.Epsilon)
@@ -67,7 +67,7 @@ namespace CjLib
 			return this.TrackDampingRatio(targetValue, num, dampingRatio, deltaTime);
 		}
 
-		// Token: 0x060070A7 RID: 28839 RVA: 0x0024E3B4 File Offset: 0x0024C5B4
+		// Token: 0x060070A7 RID: 28839 RVA: 0x0024E394 File Offset: 0x0024C594
 		public Vector3 TrackExponential(Vector3 targetValue, float halfLife, float deltaTime)
 		{
 			if (halfLife < MathUtil.Epsilon)

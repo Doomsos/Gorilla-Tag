@@ -3,7 +3,7 @@
 // Token: 0x0200079E RID: 1950
 public class GorillaModifyDayNightTrigger : GorillaTriggerBox
 {
-	// Token: 0x060032FB RID: 13051 RVA: 0x0011354C File Offset: 0x0011174C
+	// Token: 0x060032FB RID: 13051 RVA: 0x0011352C File Offset: 0x0011172C
 	public override void OnBoxTriggered()
 	{
 		base.OnBoxTriggered();

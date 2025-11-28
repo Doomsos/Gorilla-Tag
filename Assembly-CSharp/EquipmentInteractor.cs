@@ -8,7 +8,7 @@ using UnityEngine.XR;
 public class EquipmentInteractor : MonoBehaviour
 {
 	// Token: 0x170002B6 RID: 694
-	// (get) Token: 0x06001973 RID: 6515 RVA: 0x000885EB File Offset: 0x000867EB
+	// (get) Token: 0x06001973 RID: 6515 RVA: 0x000885CB File Offset: 0x000867CB
 	public GorillaHandClimber BodyClimber
 	{
 		get
@@ -18,7 +18,7 @@ public class EquipmentInteractor : MonoBehaviour
 	}
 
 	// Token: 0x170002B7 RID: 695
-	// (get) Token: 0x06001974 RID: 6516 RVA: 0x000885F3 File Offset: 0x000867F3
+	// (get) Token: 0x06001974 RID: 6516 RVA: 0x000885D3 File Offset: 0x000867D3
 	public GorillaHandClimber LeftClimber
 	{
 		get
@@ -28,7 +28,7 @@ public class EquipmentInteractor : MonoBehaviour
 	}
 
 	// Token: 0x170002B8 RID: 696
-	// (get) Token: 0x06001975 RID: 6517 RVA: 0x000885FB File Offset: 0x000867FB
+	// (get) Token: 0x06001975 RID: 6517 RVA: 0x000885DB File Offset: 0x000867DB
 	public GorillaHandClimber RightClimber
 	{
 		get
@@ -37,7 +37,7 @@ public class EquipmentInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001976 RID: 6518 RVA: 0x00088604 File Offset: 0x00086804
+	// Token: 0x06001976 RID: 6518 RVA: 0x000885E4 File Offset: 0x000867E4
 	private void Awake()
 	{
 		if (EquipmentInteractor.instance == null)
@@ -53,7 +53,7 @@ public class EquipmentInteractor : MonoBehaviour
 		this.autoGrabRight = true;
 	}
 
-	// Token: 0x06001977 RID: 6519 RVA: 0x00088658 File Offset: 0x00086858
+	// Token: 0x06001977 RID: 6519 RVA: 0x00088638 File Offset: 0x00086838
 	private void OnDestroy()
 	{
 		if (EquipmentInteractor.instance == this)
@@ -63,7 +63,7 @@ public class EquipmentInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001978 RID: 6520 RVA: 0x00088677 File Offset: 0x00086877
+	// Token: 0x06001978 RID: 6520 RVA: 0x00088657 File Offset: 0x00086857
 	public void ReleaseRightHand()
 	{
 		if (this.rightHandHeldEquipment != null)
@@ -77,7 +77,7 @@ public class EquipmentInteractor : MonoBehaviour
 		this.autoGrabRight = true;
 	}
 
-	// Token: 0x06001979 RID: 6521 RVA: 0x000886B6 File Offset: 0x000868B6
+	// Token: 0x06001979 RID: 6521 RVA: 0x00088696 File Offset: 0x00086896
 	public void ReleaseLeftHand()
 	{
 		if (this.rightHandHeldEquipment != null)
@@ -91,7 +91,7 @@ public class EquipmentInteractor : MonoBehaviour
 		this.autoGrabLeft = true;
 	}
 
-	// Token: 0x0600197A RID: 6522 RVA: 0x000886F5 File Offset: 0x000868F5
+	// Token: 0x0600197A RID: 6522 RVA: 0x000886D5 File Offset: 0x000868D5
 	public void ForceStopClimbing()
 	{
 		this.bodyClimber.ForceStopClimbing(false, false);
@@ -99,7 +99,7 @@ public class EquipmentInteractor : MonoBehaviour
 		this.rightClimber.ForceStopClimbing(false, false);
 	}
 
-	// Token: 0x0600197B RID: 6523 RVA: 0x0008871E File Offset: 0x0008691E
+	// Token: 0x0600197B RID: 6523 RVA: 0x000886FE File Offset: 0x000868FE
 	public bool GetIsHolding(XRNode node)
 	{
 		if (node == 4)
@@ -109,7 +109,7 @@ public class EquipmentInteractor : MonoBehaviour
 		return this.rightHandHeldEquipment != null;
 	}
 
-	// Token: 0x0600197C RID: 6524 RVA: 0x00088737 File Offset: 0x00086937
+	// Token: 0x0600197C RID: 6524 RVA: 0x00088717 File Offset: 0x00086917
 	public bool IsGrabDisabled(XRNode node)
 	{
 		if (node == 4)
@@ -119,7 +119,7 @@ public class EquipmentInteractor : MonoBehaviour
 		return this.disableRightGrab;
 	}
 
-	// Token: 0x0600197D RID: 6525 RVA: 0x0008874C File Offset: 0x0008694C
+	// Token: 0x0600197D RID: 6525 RVA: 0x0008872C File Offset: 0x0008692C
 	public void InteractionPointDisabled(InteractionPoint interactionPoint)
 	{
 		if (this.iteratingInteractionPoints)
@@ -137,19 +137,19 @@ public class EquipmentInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600197E RID: 6526 RVA: 0x00088798 File Offset: 0x00086998
+	// Token: 0x0600197E RID: 6526 RVA: 0x00088778 File Offset: 0x00086978
 	public bool CanGrabLeft()
 	{
 		return !this.disableLeftGrab && this.leftHandHeldEquipment == null && this.builderPieceInteractor.heldPiece[0] == null;
 	}
 
-	// Token: 0x0600197F RID: 6527 RVA: 0x000887C3 File Offset: 0x000869C3
+	// Token: 0x0600197F RID: 6527 RVA: 0x000887A3 File Offset: 0x000869A3
 	public bool CanGrabRight()
 	{
 		return !this.disableRightGrab && this.rightHandHeldEquipment == null && this.builderPieceInteractor.heldPiece[1] == null;
 	}
 
-	// Token: 0x06001980 RID: 6528 RVA: 0x000887F0 File Offset: 0x000869F0
+	// Token: 0x06001980 RID: 6528 RVA: 0x000887D0 File Offset: 0x000869D0
 	private void LateUpdate()
 	{
 		if (ApplicationQuittingState.IsQuitting)
@@ -195,7 +195,7 @@ public class EquipmentInteractor : MonoBehaviour
 		this.wasRightGrabPressed = this.isRightGrabbing;
 	}
 
-	// Token: 0x06001981 RID: 6529 RVA: 0x000889C0 File Offset: 0x00086BC0
+	// Token: 0x06001981 RID: 6529 RVA: 0x000889A0 File Offset: 0x00086BA0
 	private void FireHandInteractions(GameObject interactingHand, bool isLeftHand, BuilderPiece pieceInHand)
 	{
 		if (isLeftHand)
@@ -261,7 +261,7 @@ public class EquipmentInteractor : MonoBehaviour
 		this.interactionPointsToRemove.Clear();
 	}
 
-	// Token: 0x06001982 RID: 6530 RVA: 0x00088C18 File Offset: 0x00086E18
+	// Token: 0x06001982 RID: 6530 RVA: 0x00088BF8 File Offset: 0x00086DF8
 	public void UpdateHandEquipment(IHoldableObject newEquipment, bool forLeftHand)
 	{
 		if (forLeftHand)
@@ -290,7 +290,7 @@ public class EquipmentInteractor : MonoBehaviour
 		this.autoGrabRight = false;
 	}
 
-	// Token: 0x06001983 RID: 6531 RVA: 0x00088CA4 File Offset: 0x00086EA4
+	// Token: 0x06001983 RID: 6531 RVA: 0x00088C84 File Offset: 0x00086E84
 	public void CheckInputValue(bool isLeftHand)
 	{
 		if (isLeftHand)
@@ -306,7 +306,7 @@ public class EquipmentInteractor : MonoBehaviour
 		this.grabValue = Mathf.Max(this.grabValue, this.tempValue);
 	}
 
-	// Token: 0x06001984 RID: 6532 RVA: 0x00088CFD File Offset: 0x00086EFD
+	// Token: 0x06001984 RID: 6532 RVA: 0x00088CDD File Offset: 0x00086EDD
 	public void ForceDropEquipment(IHoldableObject equipment)
 	{
 		if (this.rightHandHeldEquipment == equipment)
@@ -319,14 +319,14 @@ public class EquipmentInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001985 RID: 6533 RVA: 0x00088D1F File Offset: 0x00086F1F
+	// Token: 0x06001985 RID: 6533 RVA: 0x00088CFF File Offset: 0x00086EFF
 	public void ForceDropAnyEquipment()
 	{
 		this.rightHandHeldEquipment = null;
 		this.leftHandHeldEquipment = null;
 	}
 
-	// Token: 0x06001986 RID: 6534 RVA: 0x00088D30 File Offset: 0x00086F30
+	// Token: 0x06001986 RID: 6534 RVA: 0x00088D10 File Offset: 0x00086F10
 	public void ForceDropManipulatableObject(HoldableObject manipulatableObject)
 	{
 		if ((HoldableObject)this.rightHandHeldEquipment == manipulatableObject)

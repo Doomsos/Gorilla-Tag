@@ -15,7 +15,7 @@ public class BuilderWaterVolume : MonoBehaviour, IBuilderPieceComponent
 	{
 	}
 
-	// Token: 0x060022D4 RID: 8916 RVA: 0x000B5F68 File Offset: 0x000B4168
+	// Token: 0x060022D4 RID: 8916 RVA: 0x000B5F48 File Offset: 0x000B4148
 	public void OnPiecePlacementDeserialized()
 	{
 		bool flag = (double)Vector3.Dot(Vector3.up, base.transform.up) > 0.5 && !this.piece.IsPieceMoving();
@@ -27,7 +27,7 @@ public class BuilderWaterVolume : MonoBehaviour, IBuilderPieceComponent
 		}
 	}
 
-	// Token: 0x060022D5 RID: 8917 RVA: 0x000B5FF4 File Offset: 0x000B41F4
+	// Token: 0x060022D5 RID: 8917 RVA: 0x000B5FD4 File Offset: 0x000B41D4
 	public void OnPieceActivate()
 	{
 		bool flag = (double)Vector3.Dot(Vector3.up, base.transform.up) > 0.5 && !this.piece.IsPieceMoving();
@@ -39,7 +39,7 @@ public class BuilderWaterVolume : MonoBehaviour, IBuilderPieceComponent
 		}
 	}
 
-	// Token: 0x060022D6 RID: 8918 RVA: 0x000B6080 File Offset: 0x000B4280
+	// Token: 0x060022D6 RID: 8918 RVA: 0x000B6060 File Offset: 0x000B4260
 	public void OnPieceDeactivate()
 	{
 		this.waterVolume.SetActive(false);

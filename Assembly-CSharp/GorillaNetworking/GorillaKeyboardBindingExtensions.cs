@@ -5,7 +5,7 @@ namespace GorillaNetworking
 	// Token: 0x02000EF3 RID: 3827
 	public static class GorillaKeyboardBindingExtensions
 	{
-		// Token: 0x0600601A RID: 24602 RVA: 0x001F003C File Offset: 0x001EE23C
+		// Token: 0x0600601A RID: 24602 RVA: 0x001F001C File Offset: 0x001EE21C
 		public static bool FromNumberBindingToInt(this GorillaKeyboardBindings binding, out int result)
 		{
 			result = -1;

@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001098 RID: 4248
 	public class RCBlimp : RCVehicle
 	{
-		// Token: 0x06006A42 RID: 27202 RVA: 0x0022B700 File Offset: 0x00229900
+		// Token: 0x06006A42 RID: 27202 RVA: 0x0022B6E0 File Offset: 0x002298E0
 		protected override void AuthorityBeginDocked()
 		{
 			base.AuthorityBeginDocked();
@@ -21,7 +21,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A43 RID: 27203 RVA: 0x0022B770 File Offset: 0x00229970
+		// Token: 0x06006A43 RID: 27203 RVA: 0x0022B750 File Offset: 0x00229950
 		protected override void Awake()
 		{
 			base.Awake();
@@ -31,14 +31,14 @@ namespace GorillaTag.Cosmetics
 			this.tiltAccel = this.maxHorizontalTiltAngle / this.horizontalTiltTime;
 		}
 
-		// Token: 0x06006A44 RID: 27204 RVA: 0x0022B7CF File Offset: 0x002299CF
+		// Token: 0x06006A44 RID: 27204 RVA: 0x0022B7AF File Offset: 0x002299AF
 		protected override void OnDisable()
 		{
 			base.OnDisable();
 			this.audioSource.GTStop();
 		}
 
-		// Token: 0x06006A45 RID: 27205 RVA: 0x0022B7E4 File Offset: 0x002299E4
+		// Token: 0x06006A45 RID: 27205 RVA: 0x0022B7C4 File Offset: 0x002299C4
 		protected override void AuthorityUpdate(float dt)
 		{
 			base.AuthorityUpdate(dt);
@@ -53,7 +53,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A46 RID: 27206 RVA: 0x0022B88C File Offset: 0x00229A8C
+		// Token: 0x06006A46 RID: 27206 RVA: 0x0022B86C File Offset: 0x00229A6C
 		protected override void RemoteUpdate(float dt)
 		{
 			base.RemoteUpdate(dt);
@@ -63,7 +63,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A47 RID: 27207 RVA: 0x0022B8DC File Offset: 0x00229ADC
+		// Token: 0x06006A47 RID: 27207 RVA: 0x0022B8BC File Offset: 0x00229ABC
 		protected override void SharedUpdate(float dt)
 		{
 			base.SharedUpdate(dt);
@@ -141,7 +141,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A48 RID: 27208 RVA: 0x0022BD2C File Offset: 0x00229F2C
+		// Token: 0x06006A48 RID: 27208 RVA: 0x0022BD0C File Offset: 0x00229F0C
 		private void FixedUpdate()
 		{
 			if (!base.HasLocalAuthority)
@@ -188,7 +188,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A49 RID: 27209 RVA: 0x0022BFBC File Offset: 0x0022A1BC
+		// Token: 0x06006A49 RID: 27209 RVA: 0x0022BF9C File Offset: 0x0022A19C
 		private void OnTriggerEnter(Collider other)
 		{
 			bool flag = other.gameObject.IsOnLayer(UnityLayer.GorillaThrowable);

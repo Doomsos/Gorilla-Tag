@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000A95 RID: 2709
 public class KIDUI_AgeAppealEmailScreen : MonoBehaviour
 {
-	// Token: 0x0600441A RID: 17434 RVA: 0x00168968 File Offset: 0x00166B68
+	// Token: 0x0600441A RID: 17434 RVA: 0x00168948 File Offset: 0x00166B48
 	public void ShowAgeAppealEmailScreen(bool receivedChallenge, int newAge)
 	{
 		this.newAgeToAppeal = newAge;
@@ -34,7 +34,7 @@ public class KIDUI_AgeAppealEmailScreen : MonoBehaviour
 		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
-	// Token: 0x0600441B RID: 17435 RVA: 0x00168A5C File Offset: 0x00166C5C
+	// Token: 0x0600441B RID: 17435 RVA: 0x00168A3C File Offset: 0x00166C3C
 	public void OnInputChanged(string newVal)
 	{
 		bool flag = !string.IsNullOrEmpty(newVal);
@@ -45,7 +45,7 @@ public class KIDUI_AgeAppealEmailScreen : MonoBehaviour
 		this._confirmButton.interactable = flag;
 	}
 
-	// Token: 0x0600441C RID: 17436 RVA: 0x00168A90 File Offset: 0x00166C90
+	// Token: 0x0600441C RID: 17436 RVA: 0x00168A70 File Offset: 0x00166C70
 	public void OnConfirmPressed()
 	{
 		if (string.IsNullOrEmpty(this._emailText.text))
@@ -57,7 +57,7 @@ public class KIDUI_AgeAppealEmailScreen : MonoBehaviour
 		base.gameObject.SetActive(false);
 	}
 
-	// Token: 0x0600441D RID: 17437 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x0600441D RID: 17437 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;

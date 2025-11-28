@@ -8,7 +8,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DB7 RID: 3511
 	public class BuilderPool : MonoBehaviour
 	{
-		// Token: 0x06005669 RID: 22121 RVA: 0x001B2B8A File Offset: 0x001B0D8A
+		// Token: 0x06005669 RID: 22121 RVA: 0x001B2B6A File Offset: 0x001B0D6A
 		private void Awake()
 		{
 			if (BuilderPool.instance == null)
@@ -19,7 +19,7 @@ namespace GorillaTagScripts
 			Object.Destroy(this);
 		}
 
-		// Token: 0x0600566A RID: 22122 RVA: 0x001B2BA8 File Offset: 0x001B0DA8
+		// Token: 0x0600566A RID: 22122 RVA: 0x001B2B88 File Offset: 0x001B0D88
 		public void Setup()
 		{
 			if (this.isSetup)
@@ -35,7 +35,7 @@ namespace GorillaTagScripts
 			this.isSetup = true;
 		}
 
-		// Token: 0x0600566B RID: 22123 RVA: 0x001B2C1C File Offset: 0x001B0E1C
+		// Token: 0x0600566B RID: 22123 RVA: 0x001B2BFC File Offset: 0x001B0DFC
 		public void BuildFromShelves(List<BuilderShelf> shelves)
 		{
 			for (int i = 0; i < shelves.Count; i++)
@@ -49,7 +49,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600566C RID: 22124 RVA: 0x001B2C81 File Offset: 0x001B0E81
+		// Token: 0x0600566C RID: 22124 RVA: 0x001B2C61 File Offset: 0x001B0E61
 		public IEnumerator BuildFromPieceSets()
 		{
 			if (this.hasBuiltPieceSets)
@@ -96,7 +96,7 @@ namespace GorillaTagScripts
 			yield break;
 		}
 
-		// Token: 0x0600566D RID: 22125 RVA: 0x001B2C90 File Offset: 0x001B0E90
+		// Token: 0x0600566D RID: 22125 RVA: 0x001B2C70 File Offset: 0x001B0E70
 		private void AddToPool(int pieceType, int count)
 		{
 			int count2;
@@ -126,7 +126,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600566E RID: 22126 RVA: 0x001B2D54 File Offset: 0x001B0F54
+		// Token: 0x0600566E RID: 22126 RVA: 0x001B2D34 File Offset: 0x001B0F34
 		public BuilderPiece CreatePiece(int pieceType, bool assertNotEmpty)
 		{
 			int count;
@@ -159,7 +159,7 @@ namespace GorillaTagScripts
 			return result;
 		}
 
-		// Token: 0x0600566F RID: 22127 RVA: 0x001B2DF8 File Offset: 0x001B0FF8
+		// Token: 0x0600566F RID: 22127 RVA: 0x001B2DD8 File Offset: 0x001B0FD8
 		public void DestroyPiece(BuilderPiece piece)
 		{
 			if (piece == null)
@@ -190,7 +190,7 @@ namespace GorillaTagScripts
 			list.Add(piece);
 		}
 
-		// Token: 0x06005670 RID: 22128 RVA: 0x001B2EC0 File Offset: 0x001B10C0
+		// Token: 0x06005670 RID: 22128 RVA: 0x001B2EA0 File Offset: 0x001B10A0
 		private void AddToGlowBumpPool(int count)
 		{
 			if (this.bumpGlowPrefab == null)
@@ -205,7 +205,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005671 RID: 22129 RVA: 0x001B2F0C File Offset: 0x001B110C
+		// Token: 0x06005671 RID: 22129 RVA: 0x001B2EEC File Offset: 0x001B10EC
 		public BuilderBumpGlow CreateGlowBump()
 		{
 			if (this.bumpGlowPool.Count == 0)
@@ -217,7 +217,7 @@ namespace GorillaTagScripts
 			return result;
 		}
 
-		// Token: 0x06005672 RID: 22130 RVA: 0x001B2F60 File Offset: 0x001B1160
+		// Token: 0x06005672 RID: 22130 RVA: 0x001B2F40 File Offset: 0x001B1140
 		public void DestroyBumpGlow(BuilderBumpGlow bump)
 		{
 			if (bump == null)
@@ -229,7 +229,7 @@ namespace GorillaTagScripts
 			this.bumpGlowPool.Add(bump);
 		}
 
-		// Token: 0x06005673 RID: 22131 RVA: 0x001B2FB0 File Offset: 0x001B11B0
+		// Token: 0x06005673 RID: 22131 RVA: 0x001B2F90 File Offset: 0x001B1190
 		private void AddToSnapOverlapPool(int count)
 		{
 			this.snapOverlapPool.Capacity = this.snapOverlapPool.Capacity + count;
@@ -239,7 +239,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005674 RID: 22132 RVA: 0x001B2FF4 File Offset: 0x001B11F4
+		// Token: 0x06005674 RID: 22132 RVA: 0x001B2FD4 File Offset: 0x001B11D4
 		public SnapOverlap CreateSnapOverlap(BuilderAttachGridPlane otherPlane, SnapBounds bounds)
 		{
 			if (this.snapOverlapPool.Count == 0)
@@ -254,7 +254,7 @@ namespace GorillaTagScripts
 			return snapOverlap;
 		}
 
-		// Token: 0x06005675 RID: 22133 RVA: 0x001B305E File Offset: 0x001B125E
+		// Token: 0x06005675 RID: 22133 RVA: 0x001B303E File Offset: 0x001B123E
 		public void DestroySnapOverlap(SnapOverlap snapOverlap)
 		{
 			snapOverlap.otherPlane = null;
@@ -262,7 +262,7 @@ namespace GorillaTagScripts
 			this.snapOverlapPool.Add(snapOverlap);
 		}
 
-		// Token: 0x06005676 RID: 22134 RVA: 0x001B307C File Offset: 0x001B127C
+		// Token: 0x06005676 RID: 22134 RVA: 0x001B305C File Offset: 0x001B125C
 		private void OnDestroy()
 		{
 			for (int i = 0; i < this.piecePools.Count; i++)

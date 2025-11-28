@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020005DB RID: 1499
 public class FingerFlexReactor : MonoBehaviour
 {
-	// Token: 0x060025C2 RID: 9666 RVA: 0x000C9A7C File Offset: 0x000C7C7C
+	// Token: 0x060025C2 RID: 9666 RVA: 0x000C9A5C File Offset: 0x000C7C5C
 	private void Setup()
 	{
 		this._rig = base.GetComponentInParent<VRRig>();
@@ -23,19 +23,19 @@ public class FingerFlexReactor : MonoBehaviour
 		};
 	}
 
-	// Token: 0x060025C3 RID: 9667 RVA: 0x000C9B03 File Offset: 0x000C7D03
+	// Token: 0x060025C3 RID: 9667 RVA: 0x000C9AE3 File Offset: 0x000C7CE3
 	private void Awake()
 	{
 		this.Setup();
 	}
 
-	// Token: 0x060025C4 RID: 9668 RVA: 0x000C9B0B File Offset: 0x000C7D0B
+	// Token: 0x060025C4 RID: 9668 RVA: 0x000C9AEB File Offset: 0x000C7CEB
 	private void FixedUpdate()
 	{
 		this.UpdateBlendShapes();
 	}
 
-	// Token: 0x060025C5 RID: 9669 RVA: 0x000C9B14 File Offset: 0x000C7D14
+	// Token: 0x060025C5 RID: 9669 RVA: 0x000C9AF4 File Offset: 0x000C7CF4
 	public void UpdateBlendShapes()
 	{
 		if (!this._rig)
@@ -73,7 +73,7 @@ public class FingerFlexReactor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060025C6 RID: 9670 RVA: 0x000C9BE8 File Offset: 0x000C7DE8
+	// Token: 0x060025C6 RID: 9670 RVA: 0x000C9BC8 File Offset: 0x000C7DC8
 	private static float GetLerpValue(VRMap map)
 	{
 		VRMapThumb vrmapThumb = map as VRMapThumb;

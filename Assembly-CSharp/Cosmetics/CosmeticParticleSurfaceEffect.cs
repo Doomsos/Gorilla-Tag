@@ -11,7 +11,7 @@ namespace Cosmetics
 	[RequireComponent(typeof(TransferrableObject))]
 	public class CosmeticParticleSurfaceEffect : MonoBehaviour, ITickSystemTick
 	{
-		// Token: 0x0600663F RID: 26175 RVA: 0x00214DEF File Offset: 0x00212FEF
+		// Token: 0x0600663F RID: 26175 RVA: 0x00214DCF File Offset: 0x00212FCF
 		private void Awake()
 		{
 			this.transferrableObject = base.GetComponent<TransferrableObject>();
@@ -21,7 +21,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x06006640 RID: 26176 RVA: 0x00214E1C File Offset: 0x0021301C
+		// Token: 0x06006640 RID: 26176 RVA: 0x00214DFC File Offset: 0x00212FFC
 		private void OnEnable()
 		{
 			if (this._events == null)
@@ -62,7 +62,7 @@ namespace Cosmetics
 			this.lastHitTime = float.MinValue;
 		}
 
-		// Token: 0x06006641 RID: 26177 RVA: 0x00214FD4 File Offset: 0x002131D4
+		// Token: 0x06006641 RID: 26177 RVA: 0x00214FB4 File Offset: 0x002131B4
 		private void OnDisable()
 		{
 			this.StopParticles();
@@ -84,14 +84,14 @@ namespace Cosmetics
 			this.surfaceEffects.Clear();
 		}
 
-		// Token: 0x06006642 RID: 26178 RVA: 0x002150C0 File Offset: 0x002132C0
+		// Token: 0x06006642 RID: 26178 RVA: 0x002150A0 File Offset: 0x002132A0
 		private void OnDestroy()
 		{
 			this.surfaceEffectNum.Clear();
 			this.surfaceEffects.Clear();
 		}
 
-		// Token: 0x06006643 RID: 26179 RVA: 0x002150D8 File Offset: 0x002132D8
+		// Token: 0x06006643 RID: 26179 RVA: 0x002150B8 File Offset: 0x002132B8
 		public void StartParticles()
 		{
 			if (!this.isSpawning)
@@ -109,7 +109,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x06006644 RID: 26180 RVA: 0x00215128 File Offset: 0x00213328
+		// Token: 0x06006644 RID: 26180 RVA: 0x00215108 File Offset: 0x00213308
 		public void StopParticles()
 		{
 			if (this.TickRunning)
@@ -126,11 +126,11 @@ namespace Cosmetics
 		}
 
 		// Token: 0x17000991 RID: 2449
-		// (get) Token: 0x06006645 RID: 26181 RVA: 0x00215178 File Offset: 0x00213378
-		// (set) Token: 0x06006646 RID: 26182 RVA: 0x00215180 File Offset: 0x00213380
+		// (get) Token: 0x06006645 RID: 26181 RVA: 0x00215158 File Offset: 0x00213358
+		// (set) Token: 0x06006646 RID: 26182 RVA: 0x00215160 File Offset: 0x00213360
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006647 RID: 26183 RVA: 0x0021518C File Offset: 0x0021338C
+		// Token: 0x06006647 RID: 26183 RVA: 0x0021516C File Offset: 0x0021336C
 		public void Tick()
 		{
 			if (this.transferrableObject == null || !this.transferrableObject.InHand())
@@ -169,7 +169,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x06006648 RID: 26184 RVA: 0x002152D8 File Offset: 0x002134D8
+		// Token: 0x06006648 RID: 26184 RVA: 0x002152B8 File Offset: 0x002134B8
 		private void SpawnEffect()
 		{
 			if (!this.isLocal)
@@ -192,7 +192,7 @@ namespace Cosmetics
 			this.SpawnLocal(this.hitPoint.point, this.hitPoint.normal, num3);
 		}
 
-		// Token: 0x06006649 RID: 26185 RVA: 0x0021539C File Offset: 0x0021359C
+		// Token: 0x06006649 RID: 26185 RVA: 0x0021537C File Offset: 0x0021357C
 		private void OnSpawnReplicated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (!this || sender != target || this.owner == null || info.senderID != this.owner.ActorNumber)
@@ -228,7 +228,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x0600664A RID: 26186 RVA: 0x002154A4 File Offset: 0x002136A4
+		// Token: 0x0600664A RID: 26186 RVA: 0x00215484 File Offset: 0x00213684
 		private void SpawnLocal(Vector3 position, Vector3 up, int identifier)
 		{
 			if (this.surfaceEffectHash != 0 && !this.foundPool)
@@ -264,7 +264,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x0600664B RID: 26187 RVA: 0x00215588 File Offset: 0x00213788
+		// Token: 0x0600664B RID: 26187 RVA: 0x00215568 File Offset: 0x00213768
 		private void ClearOldObjects()
 		{
 			for (int i = this.surfaceEffects.Count - 1; i >= 0; i--)
@@ -283,7 +283,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x0600664C RID: 26188 RVA: 0x00215634 File Offset: 0x00213834
+		// Token: 0x0600664C RID: 26188 RVA: 0x00215614 File Offset: 0x00213814
 		private void OnTriggerEffectLocal(SeedPacketTriggerHandler seedPacketTriggerHandlerTriggerHandlerEvent)
 		{
 			int num = this.surfaceEffects.IndexOf(seedPacketTriggerHandlerTriggerHandlerEvent);
@@ -302,7 +302,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x0600664D RID: 26189 RVA: 0x002156CC File Offset: 0x002138CC
+		// Token: 0x0600664D RID: 26189 RVA: 0x002156AC File Offset: 0x002138AC
 		private void OnTriggerEffectReplicated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)

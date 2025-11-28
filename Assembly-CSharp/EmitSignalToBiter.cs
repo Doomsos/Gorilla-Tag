@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020005D8 RID: 1496
 public class EmitSignalToBiter : GTSignalEmitter
 {
-	// Token: 0x060025BA RID: 9658 RVA: 0x000C9968 File Offset: 0x000C7B68
+	// Token: 0x060025BA RID: 9658 RVA: 0x000C9948 File Offset: 0x000C7B48
 	public override void Emit()
 	{
 		if (this.onEdibleState == EmitSignalToBiter.EdibleState.None)

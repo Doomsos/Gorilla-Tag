@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020005DE RID: 1502
 public class FishingRod : TransferrableObject
 {
-	// Token: 0x060025C9 RID: 9673 RVA: 0x000C9C9C File Offset: 0x000C7E9C
+	// Token: 0x060025C9 RID: 9673 RVA: 0x000C9C7C File Offset: 0x000C7E7C
 	public override void OnActivate()
 	{
 		base.OnActivate();
@@ -15,7 +15,7 @@ public class FishingRod : TransferrableObject
 		this.ReelOut();
 	}
 
-	// Token: 0x060025CA RID: 9674 RVA: 0x000C9CF5 File Offset: 0x000C7EF5
+	// Token: 0x060025CA RID: 9674 RVA: 0x000C9CD5 File Offset: 0x000C7ED5
 	public override void OnDeactivate()
 	{
 		base.OnDeactivate();
@@ -23,14 +23,14 @@ public class FishingRod : TransferrableObject
 		this.ReelStop();
 	}
 
-	// Token: 0x060025CB RID: 9675 RVA: 0x000C9D13 File Offset: 0x000C7F13
+	// Token: 0x060025CB RID: 9675 RVA: 0x000C9CF3 File Offset: 0x000C7EF3
 	protected override void Start()
 	{
 		base.Start();
 		this.rig = base.GetComponentInParent<VRRig>();
 	}
 
-	// Token: 0x060025CC RID: 9676 RVA: 0x000C9D27 File Offset: 0x000C7F27
+	// Token: 0x060025CC RID: 9676 RVA: 0x000C9D07 File Offset: 0x000C7F07
 	public void SetBobFloat(bool enable)
 	{
 		if (!this.bobRigidbody)
@@ -41,7 +41,7 @@ public class FishingRod : TransferrableObject
 		this._bobFloating = enable;
 	}
 
-	// Token: 0x060025CD RID: 9677 RVA: 0x000C9D54 File Offset: 0x000C7F54
+	// Token: 0x060025CD RID: 9677 RVA: 0x000C9D34 File Offset: 0x000C7F34
 	private void QuickReel()
 	{
 		if (this._lineResizing)
@@ -52,7 +52,7 @@ public class FishingRod : TransferrableObject
 		this.ReelIn();
 	}
 
-	// Token: 0x060025CE RID: 9678 RVA: 0x000C9D74 File Offset: 0x000C7F74
+	// Token: 0x060025CE RID: 9678 RVA: 0x000C9D54 File Offset: 0x000C7F54
 	public bool IsFreeHandGripping()
 	{
 		bool flag = base.InLeftHand();
@@ -75,7 +75,7 @@ public class FishingRod : TransferrableObject
 		return flag3;
 	}
 
-	// Token: 0x060025CF RID: 9679 RVA: 0x000C9E8D File Offset: 0x000C808D
+	// Token: 0x060025CF RID: 9679 RVA: 0x000C9E6D File Offset: 0x000C806D
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		if (!base.OnRelease(zoneReleased, releasingHand))
@@ -90,7 +90,7 @@ public class FishingRod : TransferrableObject
 		return true;
 	}
 
-	// Token: 0x060025D0 RID: 9680 RVA: 0x000C9EC4 File Offset: 0x000C80C4
+	// Token: 0x060025D0 RID: 9680 RVA: 0x000C9EA4 File Offset: 0x000C80A4
 	public void ReelIn()
 	{
 		this._manualReeling = false;
@@ -102,7 +102,7 @@ public class FishingRod : TransferrableObject
 		this.line.segmentMaxLength = (this._targetSegmentMax = this.lineLengthMax / num);
 	}
 
-	// Token: 0x060025D1 RID: 9681 RVA: 0x000C9F44 File Offset: 0x000C8144
+	// Token: 0x060025D1 RID: 9681 RVA: 0x000C9F24 File Offset: 0x000C8124
 	public void ReelOut()
 	{
 		this._manualReeling = false;
@@ -114,7 +114,7 @@ public class FishingRod : TransferrableObject
 		this.line.segmentMaxLength = (this._targetSegmentMax = this.lineLengthMax / num);
 	}
 
-	// Token: 0x060025D2 RID: 9682 RVA: 0x000C9FC4 File Offset: 0x000C81C4
+	// Token: 0x060025D2 RID: 9682 RVA: 0x000C9FA4 File Offset: 0x000C81A4
 	public void ReelStop()
 	{
 		if (this._manualReeling)
@@ -134,7 +134,7 @@ public class FishingRod : TransferrableObject
 		this._lineExpanding = false;
 	}
 
-	// Token: 0x060025D3 RID: 9683 RVA: 0x000CA030 File Offset: 0x000C8230
+	// Token: 0x060025D3 RID: 9683 RVA: 0x000CA010 File Offset: 0x000C8210
 	private static void SetHandleMotorUse(bool useMotor, float spinRate, HingeJoint handleJoint, bool reverse)
 	{
 		JointMotor motor = handleJoint.motor;
@@ -143,7 +143,7 @@ public class FishingRod : TransferrableObject
 		handleJoint.motor = motor;
 	}
 
-	// Token: 0x060025D4 RID: 9684 RVA: 0x000CA080 File Offset: 0x000C8280
+	// Token: 0x060025D4 RID: 9684 RVA: 0x000CA060 File Offset: 0x000C8260
 	public override void TriggeredLateUpdate()
 	{
 		base.TriggeredLateUpdate();
@@ -160,7 +160,7 @@ public class FishingRod : TransferrableObject
 		this.handleTransform.localPosition = this.reelFreezeLocalPosition;
 	}
 
-	// Token: 0x060025D5 RID: 9685 RVA: 0x000CA113 File Offset: 0x000C8313
+	// Token: 0x060025D5 RID: 9685 RVA: 0x000CA0F3 File Offset: 0x000C82F3
 	private void ResetLineLength(float length)
 	{
 		if (!this.line)
@@ -173,7 +173,7 @@ public class FishingRod : TransferrableObject
 		this._sinceReset = TimeSince.Now();
 	}
 
-	// Token: 0x060025D6 RID: 9686 RVA: 0x000CA150 File Offset: 0x000C8350
+	// Token: 0x060025D6 RID: 9686 RVA: 0x000CA130 File Offset: 0x000C8330
 	private void FixedUpdate()
 	{
 		Transform transform = base.transform;
@@ -267,7 +267,7 @@ public class FishingRod : TransferrableObject
 		this.ReelStop();
 	}
 
-	// Token: 0x060025D7 RID: 9687 RVA: 0x000CA448 File Offset: 0x000C8648
+	// Token: 0x060025D7 RID: 9687 RVA: 0x000CA428 File Offset: 0x000C8628
 	private static float GetSignedDeltaYZ(ref Quaternion a, ref Quaternion b)
 	{
 		Vector3 forward = Vector3.forward;

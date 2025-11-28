@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GhostReactorLevelGenConfig", menuName = "ScriptableObjects/GhostReactorLevelGenConfig")]
 public class GhostReactorLevelGenConfig : ScriptableObject
 {
-	// Token: 0x060028CB RID: 10443 RVA: 0x000D95A0 File Offset: 0x000D77A0
+	// Token: 0x060028CB RID: 10443 RVA: 0x000D9580 File Offset: 0x000D7780
 	private void OnValidate()
 	{
 		for (int i = 0; i < this.treeLevels.Count; i++)

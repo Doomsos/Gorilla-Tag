@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class TitleDataLocalization
 {
-	// Token: 0x060045B3 RID: 17843 RVA: 0x00171310 File Offset: 0x0016F510
+	// Token: 0x060045B3 RID: 17843 RVA: 0x001712F0 File Offset: 0x0016F4F0
 	public string GetLocalizedText()
 	{
 		Debug.Log("TODO: JH - Review localization method");

@@ -9,22 +9,22 @@ using UnityEngine;
 public class RankedProgressionManager : MonoBehaviour
 {
 	// Token: 0x17000501 RID: 1281
-	// (get) Token: 0x060037B4 RID: 14260 RVA: 0x0012B966 File Offset: 0x00129B66
-	// (set) Token: 0x060037B5 RID: 14261 RVA: 0x0012B96E File Offset: 0x00129B6E
+	// (get) Token: 0x060037B4 RID: 14260 RVA: 0x0012B946 File Offset: 0x00129B46
+	// (set) Token: 0x060037B5 RID: 14261 RVA: 0x0012B94E File Offset: 0x00129B4E
 	public int MaxRank { get; private set; }
 
 	// Token: 0x17000502 RID: 1282
-	// (get) Token: 0x060037B6 RID: 14262 RVA: 0x0012B977 File Offset: 0x00129B77
-	// (set) Token: 0x060037B7 RID: 14263 RVA: 0x0012B97F File Offset: 0x00129B7F
+	// (get) Token: 0x060037B6 RID: 14262 RVA: 0x0012B957 File Offset: 0x00129B57
+	// (set) Token: 0x060037B7 RID: 14263 RVA: 0x0012B95F File Offset: 0x00129B5F
 	public float LowTierThreshold { get; set; }
 
 	// Token: 0x17000503 RID: 1283
-	// (get) Token: 0x060037B8 RID: 14264 RVA: 0x0012B988 File Offset: 0x00129B88
-	// (set) Token: 0x060037B9 RID: 14265 RVA: 0x0012B990 File Offset: 0x00129B90
+	// (get) Token: 0x060037B8 RID: 14264 RVA: 0x0012B968 File Offset: 0x00129B68
+	// (set) Token: 0x060037B9 RID: 14265 RVA: 0x0012B970 File Offset: 0x00129B70
 	public float HighTierThreshold { get; set; }
 
 	// Token: 0x17000504 RID: 1284
-	// (get) Token: 0x060037BA RID: 14266 RVA: 0x0012B999 File Offset: 0x00129B99
+	// (get) Token: 0x060037BA RID: 14266 RVA: 0x0012B979 File Offset: 0x00129B79
 	// (set) Token: 0x060037BB RID: 14267 RVA: 0x00002789 File Offset: 0x00000989
 	public List<RankedProgressionManager.RankedProgressionTier> MajorTiers
 	{
@@ -48,7 +48,7 @@ public class RankedProgressionManager : MonoBehaviour
 	{
 	}
 
-	// Token: 0x060037BE RID: 14270 RVA: 0x0012B9A1 File Offset: 0x00129BA1
+	// Token: 0x060037BE RID: 14270 RVA: 0x0012B981 File Offset: 0x00129B81
 	private void Awake()
 	{
 		if (RankedProgressionManager.Instance)
@@ -60,7 +60,7 @@ public class RankedProgressionManager : MonoBehaviour
 		RankedProgressionManager.Instance = this;
 	}
 
-	// Token: 0x060037BF RID: 14271 RVA: 0x0012B9D0 File Offset: 0x00129BD0
+	// Token: 0x060037BF RID: 14271 RVA: 0x0012B9B0 File Offset: 0x00129BB0
 	private void Start()
 	{
 		if (this.majorTiers.Count < 3)
@@ -92,14 +92,14 @@ public class RankedProgressionManager : MonoBehaviour
 		this.NewTierGracePeriodIdxQuest = new RankedMultiplayerStatisticInt(RankedProgressionManager.RANKED_PROGRESSION_GRACE_PERIOD_PC_KEY, 0, -1, int.MaxValue, RankedMultiplayerStatistic.SerializationType.PlayerPrefs);
 	}
 
-	// Token: 0x060037C0 RID: 14272 RVA: 0x0012BB82 File Offset: 0x00129D82
+	// Token: 0x060037C0 RID: 14272 RVA: 0x0012BB62 File Offset: 0x00129D62
 	private void OnDestroy()
 	{
 		GameMode.OnStartGameMode += this.OnJoinedRoom;
 		RoomSystem.PlayerJoinedEvent -= new Action<NetPlayer>(this.OnPlayerJoined);
 	}
 
-	// Token: 0x060037C1 RID: 14273 RVA: 0x0012BBB0 File Offset: 0x00129DB0
+	// Token: 0x060037C1 RID: 14273 RVA: 0x0012BB90 File Offset: 0x00129D90
 	public void RequestUnlockCompetitiveQueue(bool unlock)
 	{
 		GorillaTagCompetitiveServerApi.Instance.RequestUnlockCompetitiveQueue(unlock, delegate
@@ -108,7 +108,7 @@ public class RankedProgressionManager : MonoBehaviour
 		});
 	}
 
-	// Token: 0x060037C2 RID: 14274 RVA: 0x0012BBC9 File Offset: 0x00129DC9
+	// Token: 0x060037C2 RID: 14274 RVA: 0x0012BBA9 File Offset: 0x00129DA9
 	public IEnumerator LoadStatsWhenReady()
 	{
 		yield return new WaitUntil(() => NetworkSystem.Instance.LocalPlayer.UserId != null);
@@ -123,7 +123,7 @@ public class RankedProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060037C3 RID: 14275 RVA: 0x0012BBD8 File Offset: 0x00129DD8
+	// Token: 0x060037C3 RID: 14275 RVA: 0x0012BBB8 File Offset: 0x00129DB8
 	private void OnJoinedRoom(GameModeType newGameModeType)
 	{
 		if (newGameModeType == GameModeType.InfectionCompetitive)
@@ -132,7 +132,7 @@ public class RankedProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060037C4 RID: 14276 RVA: 0x0012BBE6 File Offset: 0x00129DE6
+	// Token: 0x060037C4 RID: 14276 RVA: 0x0012BBC6 File Offset: 0x00129DC6
 	private void OnPlayerJoined(NetPlayer player)
 	{
 		if (GorillaGameManager.instance != null && GorillaGameManager.instance.GameType() == GameModeType.InfectionCompetitive)
@@ -141,7 +141,7 @@ public class RankedProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060037C5 RID: 14277 RVA: 0x0012BC0C File Offset: 0x00129E0C
+	// Token: 0x060037C5 RID: 14277 RVA: 0x0012BBEC File Offset: 0x00129DEC
 	private void AcquireLocalPlayerRankInformation()
 	{
 		List<string> list = new List<string>();
@@ -149,7 +149,7 @@ public class RankedProgressionManager : MonoBehaviour
 		GorillaTagCompetitiveServerApi.Instance.RequestGetRankInformation(list, new Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData>(this.OnLocalPlayerRankedInformationAcquired));
 	}
 
-	// Token: 0x060037C6 RID: 14278 RVA: 0x0012BC4C File Offset: 0x00129E4C
+	// Token: 0x060037C6 RID: 14278 RVA: 0x0012BC2C File Offset: 0x00129E2C
 	private void AcquireSinglePlayerRankInformation(NetPlayer player)
 	{
 		if (player == null)
@@ -161,7 +161,7 @@ public class RankedProgressionManager : MonoBehaviour
 		GorillaTagCompetitiveServerApi.Instance.RequestGetRankInformation(list, new Action<GorillaTagCompetitiveServerApi.RankedModeProgressionData>(this.OnPlayersRankedInformationAcquired));
 	}
 
-	// Token: 0x060037C7 RID: 14279 RVA: 0x0012BC88 File Offset: 0x00129E88
+	// Token: 0x060037C7 RID: 14279 RVA: 0x0012BC68 File Offset: 0x00129E68
 	public void AcquireRoomRankInformation(bool includeLocalPlayer = true)
 	{
 		List<string> list = new List<string>();
@@ -178,7 +178,7 @@ public class RankedProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060037C8 RID: 14280 RVA: 0x0012BD10 File Offset: 0x00129F10
+	// Token: 0x060037C8 RID: 14280 RVA: 0x0012BCF0 File Offset: 0x00129EF0
 	private void OnPlayersRankedInformationAcquired(GorillaTagCompetitiveServerApi.RankedModeProgressionData rankedModeProgressionData)
 	{
 		foreach (GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData rankedModePlayerProgressionData in rankedModeProgressionData.playerData)
@@ -225,7 +225,7 @@ public class RankedProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060037C9 RID: 14281 RVA: 0x0012BEA0 File Offset: 0x0012A0A0
+	// Token: 0x060037C9 RID: 14281 RVA: 0x0012BE80 File Offset: 0x0012A080
 	private void OnLocalPlayerRankedInformationAcquired(GorillaTagCompetitiveServerApi.RankedModeProgressionData rankedModeProgressionData)
 	{
 		if (rankedModeProgressionData.playerData.Count > 0)
@@ -240,13 +240,13 @@ public class RankedProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060037CA RID: 14282 RVA: 0x0012BF0B File Offset: 0x0012A10B
+	// Token: 0x060037CA RID: 14282 RVA: 0x0012BEEB File Offset: 0x0012A0EB
 	public bool AreValuesValid(float elo, int questTier, int pcTier)
 	{
 		return elo >= 100f && elo <= 4000f && questTier >= 0 && questTier <= this.MaxRank && pcTier >= 0 && pcTier <= this.MaxRank;
 	}
 
-	// Token: 0x060037CB RID: 14283 RVA: 0x0012BF3A File Offset: 0x0012A13A
+	// Token: 0x060037CB RID: 14283 RVA: 0x0012BF1A File Offset: 0x0012A11A
 	public void HandlePlayerRankedInfoReceived(int actorNum, float elo, int tier)
 	{
 		Action<int, float, int> onPlayerEloAcquired = this.OnPlayerEloAcquired;
@@ -257,25 +257,25 @@ public class RankedProgressionManager : MonoBehaviour
 		onPlayerEloAcquired.Invoke(actorNum, elo, tier);
 	}
 
-	// Token: 0x060037CC RID: 14284 RVA: 0x0012BF4F File Offset: 0x0012A14F
+	// Token: 0x060037CC RID: 14284 RVA: 0x0012BF2F File Offset: 0x0012A12F
 	public void SetLocalProgressionData(GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData data)
 	{
 		this.ProgressionData = data;
 	}
 
-	// Token: 0x060037CD RID: 14285 RVA: 0x0012BF58 File Offset: 0x0012A158
+	// Token: 0x060037CD RID: 14285 RVA: 0x0012BF38 File Offset: 0x0012A138
 	public void LoadStats()
 	{
 		base.StartCoroutine(this.LoadStatsWhenReady());
 	}
 
-	// Token: 0x060037CE RID: 14286 RVA: 0x0012BF67 File Offset: 0x0012A167
+	// Token: 0x060037CE RID: 14286 RVA: 0x0012BF47 File Offset: 0x0012A147
 	public float GetEloScore()
 	{
 		return this.GetEloScorePC();
 	}
 
-	// Token: 0x060037CF RID: 14287 RVA: 0x0012BF6F File Offset: 0x0012A16F
+	// Token: 0x060037CF RID: 14287 RVA: 0x0012BF4F File Offset: 0x0012A14F
 	public void SetEloScore(float val)
 	{
 		GorillaTagCompetitiveServerApi.Instance.RequestSetEloValue(val, delegate
@@ -284,7 +284,7 @@ public class RankedProgressionManager : MonoBehaviour
 		});
 	}
 
-	// Token: 0x060037D0 RID: 14288 RVA: 0x0012BF88 File Offset: 0x0012A188
+	// Token: 0x060037D0 RID: 14288 RVA: 0x0012BF68 File Offset: 0x0012A168
 	public float GetEloScorePC()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -294,7 +294,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.ProgressionData.platformData[0].elo;
 	}
 
-	// Token: 0x060037D1 RID: 14289 RVA: 0x0012BFC7 File Offset: 0x0012A1C7
+	// Token: 0x060037D1 RID: 14289 RVA: 0x0012BFA7 File Offset: 0x0012A1A7
 	public float GetEloScoreQuest()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -304,25 +304,25 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.ProgressionData.platformData[1].elo;
 	}
 
-	// Token: 0x060037D2 RID: 14290 RVA: 0x0012C006 File Offset: 0x0012A206
+	// Token: 0x060037D2 RID: 14290 RVA: 0x0012BFE6 File Offset: 0x0012A1E6
 	private int GetNewTierGracePeriodIdx()
 	{
 		return this.NewTierGracePeriodIdxPC;
 	}
 
-	// Token: 0x060037D3 RID: 14291 RVA: 0x0012C013 File Offset: 0x0012A213
+	// Token: 0x060037D3 RID: 14291 RVA: 0x0012BFF3 File Offset: 0x0012A1F3
 	private void SetNewTierGracePeriodIdx(int val)
 	{
 		this.NewTierGracePeriodIdxPC.Set(val);
 	}
 
-	// Token: 0x060037D4 RID: 14292 RVA: 0x0012C021 File Offset: 0x0012A221
+	// Token: 0x060037D4 RID: 14292 RVA: 0x0012C001 File Offset: 0x0012A201
 	private void IncrementNewTierGracePeriodIdx()
 	{
 		this.NewTierGracePeriodIdxPC.Increment();
 	}
 
-	// Token: 0x060037D5 RID: 14293 RVA: 0x0012C02E File Offset: 0x0012A22E
+	// Token: 0x060037D5 RID: 14293 RVA: 0x0012C00E File Offset: 0x0012A20E
 	public bool TryGetProgressionSubTier(out RankedProgressionManager.RankedProgressionSubTier subTier, out int index)
 	{
 		subTier = null;
@@ -330,7 +330,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.TryGetProgressionSubTier(this.GetEloScore(), out subTier, out index);
 	}
 
-	// Token: 0x060037D6 RID: 14294 RVA: 0x0012C044 File Offset: 0x0012A244
+	// Token: 0x060037D6 RID: 14294 RVA: 0x0012C024 File Offset: 0x0012A224
 	public bool TryGetProgressionSubTier(float elo, out RankedProgressionManager.RankedProgressionSubTier subTier, out int index)
 	{
 		int num = 0;
@@ -363,7 +363,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x060037D7 RID: 14295 RVA: 0x0012C148 File Offset: 0x0012A348
+	// Token: 0x060037D7 RID: 14295 RVA: 0x0012C128 File Offset: 0x0012A328
 	private RankedProgressionManager.RankedProgressionTier GetProgressionMajorTierBySubTierIndex(int idx)
 	{
 		int num = 0;
@@ -383,7 +383,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060037D8 RID: 14296 RVA: 0x0012C1A4 File Offset: 0x0012A3A4
+	// Token: 0x060037D8 RID: 14296 RVA: 0x0012C184 File Offset: 0x0012A384
 	private RankedProgressionManager.RankedProgressionSubTier GetProgressionSubTierByIndex(int idx)
 	{
 		int num = 0;
@@ -403,7 +403,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060037D9 RID: 14297 RVA: 0x0012C20C File Offset: 0x0012A40C
+	// Token: 0x060037D9 RID: 14297 RVA: 0x0012C1EC File Offset: 0x0012A3EC
 	private RankedProgressionManager.RankedProgressionSubTier GetNextProgressionSubTierByIndex(int idx)
 	{
 		RankedProgressionManager.RankedProgressionSubTier progressionSubTierByIndex = this.GetProgressionSubTierByIndex(idx + 1);
@@ -414,7 +414,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.GetProgressionSubTierByIndex(idx);
 	}
 
-	// Token: 0x060037DA RID: 14298 RVA: 0x0012C230 File Offset: 0x0012A430
+	// Token: 0x060037DA RID: 14298 RVA: 0x0012C210 File Offset: 0x0012A410
 	private RankedProgressionManager.RankedProgressionSubTier GetPrevProgressionSubTierByIndex(int idx)
 	{
 		if (idx > 0)
@@ -428,13 +428,13 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.GetProgressionSubTierByIndex(idx);
 	}
 
-	// Token: 0x060037DB RID: 14299 RVA: 0x0012C257 File Offset: 0x0012A457
+	// Token: 0x060037DB RID: 14299 RVA: 0x0012C237 File Offset: 0x0012A437
 	public string GetProgressionRankName()
 	{
 		return this.GetProgressionRankName(this.GetEloScore());
 	}
 
-	// Token: 0x060037DC RID: 14300 RVA: 0x0012C268 File Offset: 0x0012A468
+	// Token: 0x060037DC RID: 14300 RVA: 0x0012C248 File Offset: 0x0012A448
 	public string GetProgressionRankName(float elo)
 	{
 		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier;
@@ -446,7 +446,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return string.Empty;
 	}
 
-	// Token: 0x060037DD RID: 14301 RVA: 0x0012C290 File Offset: 0x0012A490
+	// Token: 0x060037DD RID: 14301 RVA: 0x0012C270 File Offset: 0x0012A470
 	public string GetNextProgressionRankName(int subTierIdx)
 	{
 		RankedProgressionManager.RankedProgressionSubTier nextProgressionSubTierByIndex = this.GetNextProgressionSubTierByIndex(subTierIdx);
@@ -457,7 +457,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060037DE RID: 14302 RVA: 0x0012C2B0 File Offset: 0x0012A4B0
+	// Token: 0x060037DE RID: 14302 RVA: 0x0012C290 File Offset: 0x0012A490
 	public string GetPrevProgressionRankName(int subTierIdx)
 	{
 		RankedProgressionManager.RankedProgressionSubTier prevProgressionSubTierByIndex = this.GetPrevProgressionSubTierByIndex(subTierIdx);
@@ -468,19 +468,19 @@ public class RankedProgressionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060037DF RID: 14303 RVA: 0x0012C2D0 File Offset: 0x0012A4D0
+	// Token: 0x060037DF RID: 14303 RVA: 0x0012C2B0 File Offset: 0x0012A4B0
 	public int GetProgressionRankIndex()
 	{
 		return this.GetProgressionRankIndexPC();
 	}
 
-	// Token: 0x060037E0 RID: 14304 RVA: 0x0012C2D8 File Offset: 0x0012A4D8
+	// Token: 0x060037E0 RID: 14304 RVA: 0x0012C2B8 File Offset: 0x0012A4B8
 	public RankedProgressionManager.RankedProgressionSubTier GetProgressionSubTier()
 	{
 		return this.GetProgressionSubTierByIndex(this.GetProgressionRankIndex());
 	}
 
-	// Token: 0x060037E1 RID: 14305 RVA: 0x0012C2E8 File Offset: 0x0012A4E8
+	// Token: 0x060037E1 RID: 14305 RVA: 0x0012C2C8 File Offset: 0x0012A4C8
 	public int GetProgressionRankIndexQuest()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -491,7 +491,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.GetRankFromTiers(rankedModeProgressionPlatformData.majorTier, rankedModeProgressionPlatformData.minorTier);
 	}
 
-	// Token: 0x060037E2 RID: 14306 RVA: 0x0012C33C File Offset: 0x0012A53C
+	// Token: 0x060037E2 RID: 14306 RVA: 0x0012C31C File Offset: 0x0012A51C
 	public int GetProgressionRankIndexPC()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -502,7 +502,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.GetRankFromTiers(rankedModeProgressionPlatformData.majorTier, rankedModeProgressionPlatformData.minorTier);
 	}
 
-	// Token: 0x060037E3 RID: 14307 RVA: 0x0012C390 File Offset: 0x0012A590
+	// Token: 0x060037E3 RID: 14307 RVA: 0x0012C370 File Offset: 0x0012A570
 	public int GetRankFromTiers(int majorTier, int minorTier)
 	{
 		int num = 0;
@@ -520,7 +520,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return -1;
 	}
 
-	// Token: 0x060037E4 RID: 14308 RVA: 0x0012C3E8 File Offset: 0x0012A5E8
+	// Token: 0x060037E4 RID: 14308 RVA: 0x0012C3C8 File Offset: 0x0012A5C8
 	public int GetProgressionRankIndex(float elo)
 	{
 		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier;
@@ -532,13 +532,13 @@ public class RankedProgressionManager : MonoBehaviour
 		return -1;
 	}
 
-	// Token: 0x060037E5 RID: 14309 RVA: 0x0012C405 File Offset: 0x0012A605
+	// Token: 0x060037E5 RID: 14309 RVA: 0x0012C3E5 File Offset: 0x0012A5E5
 	public float GetProgressionRankProgress()
 	{
 		return this.GetProgressionRankProgressPC();
 	}
 
-	// Token: 0x060037E6 RID: 14310 RVA: 0x0012C40D File Offset: 0x0012A60D
+	// Token: 0x060037E6 RID: 14310 RVA: 0x0012C3ED File Offset: 0x0012A5ED
 	public float GetProgressionRankProgressQuest()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -548,7 +548,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.ProgressionData.platformData[1].rankProgress;
 	}
 
-	// Token: 0x060037E7 RID: 14311 RVA: 0x0012C44C File Offset: 0x0012A64C
+	// Token: 0x060037E7 RID: 14311 RVA: 0x0012C42C File Offset: 0x0012A62C
 	public float GetProgressionRankProgressPC()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -558,7 +558,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return this.ProgressionData.platformData[0].rankProgress;
 	}
 
-	// Token: 0x060037E8 RID: 14312 RVA: 0x0012C48C File Offset: 0x0012A68C
+	// Token: 0x060037E8 RID: 14312 RVA: 0x0012C46C File Offset: 0x0012A66C
 	public int ClampProgressionRankIndex(int subTierIdx)
 	{
 		if (subTierIdx < 0)
@@ -582,7 +582,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return num - 1;
 	}
 
-	// Token: 0x060037E9 RID: 14313 RVA: 0x0012C4E8 File Offset: 0x0012A6E8
+	// Token: 0x060037E9 RID: 14313 RVA: 0x0012C4C8 File Offset: 0x0012A6C8
 	public Sprite GetProgressionRankIcon()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -599,7 +599,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return rankedProgressionSubTier.icon;
 	}
 
-	// Token: 0x060037EA RID: 14314 RVA: 0x0012C580 File Offset: 0x0012A780
+	// Token: 0x060037EA RID: 14314 RVA: 0x0012C560 File Offset: 0x0012A760
 	public string GetRankedProgressionTierName()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -616,7 +616,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return "None";
 	}
 
-	// Token: 0x060037EB RID: 14315 RVA: 0x0012C60C File Offset: 0x0012A80C
+	// Token: 0x060037EB RID: 14315 RVA: 0x0012C5EC File Offset: 0x0012A7EC
 	public Sprite GetProgressionRankIcon(float elo)
 	{
 		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier;
@@ -628,7 +628,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060037EC RID: 14316 RVA: 0x0012C630 File Offset: 0x0012A830
+	// Token: 0x060037EC RID: 14316 RVA: 0x0012C610 File Offset: 0x0012A810
 	public Sprite GetProgressionRankIcon(int subTierIdx)
 	{
 		RankedProgressionManager.RankedProgressionSubTier progressionSubTierByIndex = this.GetProgressionSubTierByIndex(subTierIdx);
@@ -639,7 +639,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060037ED RID: 14317 RVA: 0x0012C650 File Offset: 0x0012A850
+	// Token: 0x060037ED RID: 14317 RVA: 0x0012C630 File Offset: 0x0012A830
 	public Sprite GetNextProgressionRankIcon(int subTierIdx)
 	{
 		RankedProgressionManager.RankedProgressionSubTier nextProgressionSubTierByIndex = this.GetNextProgressionSubTierByIndex(subTierIdx);
@@ -650,7 +650,7 @@ public class RankedProgressionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060037EE RID: 14318 RVA: 0x0012C670 File Offset: 0x0012A870
+	// Token: 0x060037EE RID: 14318 RVA: 0x0012C650 File Offset: 0x0012A850
 	public Sprite GetPrevProgressionRankIcon(int subTierIdx)
 	{
 		RankedProgressionManager.RankedProgressionSubTier prevProgressionSubTierByIndex = this.GetPrevProgressionSubTierByIndex(subTierIdx);
@@ -661,13 +661,13 @@ public class RankedProgressionManager : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060037EF RID: 14319 RVA: 0x0012C690 File Offset: 0x0012A890
+	// Token: 0x060037EF RID: 14319 RVA: 0x0012C670 File Offset: 0x0012A870
 	public float GetCurrentELO()
 	{
 		return this.GetEloScore();
 	}
 
-	// Token: 0x060037F0 RID: 14320 RVA: 0x0012C698 File Offset: 0x0012A898
+	// Token: 0x060037F0 RID: 14320 RVA: 0x0012C678 File Offset: 0x0012A878
 	public void GetSubtierRankThresholds(int subTierIdx, out float minThreshold, out float maxThreshold)
 	{
 		minThreshold = 0f;
@@ -704,19 +704,19 @@ public class RankedProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060037F1 RID: 14321 RVA: 0x0012C726 File Offset: 0x0012A926
+	// Token: 0x060037F1 RID: 14321 RVA: 0x0012C706 File Offset: 0x0012A906
 	public static float GetEloWinProbability(float ratingPlayer1, float ratingPlayer2)
 	{
 		return 1f / (1f + Mathf.Pow(10f, (ratingPlayer1 - ratingPlayer2) / 400f));
 	}
 
-	// Token: 0x060037F2 RID: 14322 RVA: 0x0012C747 File Offset: 0x0012A947
+	// Token: 0x060037F2 RID: 14322 RVA: 0x0012C727 File Offset: 0x0012A927
 	public static float UpdateEloScore(float eloScore, float expectedResult, float actualResult, float k)
 	{
 		return Mathf.Clamp(eloScore + k * (actualResult - expectedResult), 100f, 4000f);
 	}
 
-	// Token: 0x060037F3 RID: 14323 RVA: 0x0012C75F File Offset: 0x0012A95F
+	// Token: 0x060037F3 RID: 14323 RVA: 0x0012C73F File Offset: 0x0012A93F
 	public RankedProgressionManager.ERankedMatchmakingTier GetRankedMatchmakingTier()
 	{
 		if (this.ProgressionData == null || this.ProgressionData.platformData == null || this.ProgressionData.platformData.Length < 2)
@@ -727,7 +727,7 @@ public class RankedProgressionManager : MonoBehaviour
 	}
 
 	// Token: 0x17000505 RID: 1285
-	// (get) Token: 0x060037F4 RID: 14324 RVA: 0x0012C79A File Offset: 0x0012A99A
+	// (get) Token: 0x060037F4 RID: 14324 RVA: 0x0012C77A File Offset: 0x0012A97A
 	public float CompetitiveQueueEloFloor
 	{
 		get
@@ -736,7 +736,7 @@ public class RankedProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060037F5 RID: 14325 RVA: 0x0012C7A2 File Offset: 0x0012A9A2
+	// Token: 0x060037F5 RID: 14325 RVA: 0x0012C782 File Offset: 0x0012A982
 	private bool HasUnlockedCompetitiveQueue()
 	{
 		return GorillaComputer.instance.allowedInCompetitive;
@@ -836,7 +836,7 @@ public class RankedProgressionManager : MonoBehaviour
 	// Token: 0x02000849 RID: 2121
 	public class RankedProgressionEvent
 	{
-		// Token: 0x060037FA RID: 14330 RVA: 0x0012C810 File Offset: 0x0012AA10
+		// Token: 0x060037FA RID: 14330 RVA: 0x0012C7F0 File Offset: 0x0012A9F0
 		public override string ToString()
 		{
 			string text = "Progression Info\n";
@@ -887,13 +887,13 @@ public class RankedProgressionManager : MonoBehaviour
 	// Token: 0x0200084A RID: 2122
 	public abstract class RankedProgressionTierBase
 	{
-		// Token: 0x060037FC RID: 14332 RVA: 0x0012C900 File Offset: 0x0012AB00
+		// Token: 0x060037FC RID: 14332 RVA: 0x0012C8E0 File Offset: 0x0012AAE0
 		public void SetMinThreshold(float val)
 		{
 			this.thresholdMin = val;
 		}
 
-		// Token: 0x060037FD RID: 14333 RVA: 0x0012C909 File Offset: 0x0012AB09
+		// Token: 0x060037FD RID: 14333 RVA: 0x0012C8E9 File Offset: 0x0012AAE9
 		public float GetMinThreshold()
 		{
 			if (this.thresholdMin < 0f)
@@ -928,7 +928,7 @@ public class RankedProgressionManager : MonoBehaviour
 	[Serializable]
 	public class RankedProgressionTier : RankedProgressionManager.RankedProgressionTierBase
 	{
-		// Token: 0x06003800 RID: 14336 RVA: 0x0012C950 File Offset: 0x0012AB50
+		// Token: 0x06003800 RID: 14336 RVA: 0x0012C930 File Offset: 0x0012AB30
 		public void InsertSubTierAt(int idx, float tierMin)
 		{
 			RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier = new RankedProgressionManager.RankedProgressionSubTier
@@ -939,7 +939,7 @@ public class RankedProgressionManager : MonoBehaviour
 			this.EnforceSubTierValidity(tierMin);
 		}
 
-		// Token: 0x06003801 RID: 14337 RVA: 0x0012C984 File Offset: 0x0012AB84
+		// Token: 0x06003801 RID: 14337 RVA: 0x0012C964 File Offset: 0x0012AB64
 		public void EnforceSubTierValidity(float thresholdMin)
 		{
 			float num = (((this.thresholdMax == 0f) ? 4000f : this.thresholdMax) - thresholdMin) / (float)this.subTiers.Count;

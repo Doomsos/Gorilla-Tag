@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(GameEntity))]
 public class GameTriggerInteractable : MonoBehaviour
 {
-	// Token: 0x0600287F RID: 10367 RVA: 0x000D7908 File Offset: 0x000D5B08
+	// Token: 0x0600287F RID: 10367 RVA: 0x000D78E8 File Offset: 0x000D5AE8
 	private void OnEnable()
 	{
 		if (this.gameEntity == null)
@@ -29,32 +29,32 @@ public class GameTriggerInteractable : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002880 RID: 10368 RVA: 0x000D79DB File Offset: 0x000D5BDB
+	// Token: 0x06002880 RID: 10368 RVA: 0x000D79BB File Offset: 0x000D5BBB
 	public void StartHolding()
 	{
 		GameTriggerInteractable.LocalInteractableTriggers.AddIfNew(this);
 	}
 
-	// Token: 0x06002881 RID: 10369 RVA: 0x000D79E8 File Offset: 0x000D5BE8
+	// Token: 0x06002881 RID: 10369 RVA: 0x000D79C8 File Offset: 0x000D5BC8
 	public void StopHolding()
 	{
 		GameTriggerInteractable.LocalInteractableTriggers.RemoveIfContains(this);
 	}
 
-	// Token: 0x06002882 RID: 10370 RVA: 0x000D79F8 File Offset: 0x000D5BF8
+	// Token: 0x06002882 RID: 10370 RVA: 0x000D79D8 File Offset: 0x000D5BD8
 	public bool PointWithinInteractableArea(Vector3 point)
 	{
 		return (this.interactableCenter.position - point).magnitude < this.interactableRadius;
 	}
 
-	// Token: 0x06002883 RID: 10371 RVA: 0x000D7A26 File Offset: 0x000D5C26
+	// Token: 0x06002883 RID: 10371 RVA: 0x000D7A06 File Offset: 0x000D5C06
 	public void BeginTriggerInteraction(int _handIndex)
 	{
 		this.triggerInteractionActive = true;
 		this.handIndex = _handIndex;
 	}
 
-	// Token: 0x06002884 RID: 10372 RVA: 0x000D7A36 File Offset: 0x000D5C36
+	// Token: 0x06002884 RID: 10372 RVA: 0x000D7A16 File Offset: 0x000D5C16
 	public void EndTriggerInteraction()
 	{
 		this.triggerInteractionActive = false;

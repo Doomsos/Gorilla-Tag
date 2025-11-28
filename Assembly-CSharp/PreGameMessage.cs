@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000A73 RID: 2675
 public class PreGameMessage : MonoBehaviour
 {
-	// Token: 0x06004346 RID: 17222 RVA: 0x0016541A File Offset: 0x0016361A
+	// Token: 0x06004346 RID: 17222 RVA: 0x001653FA File Offset: 0x001635FA
 	private void OnEnable()
 	{
 		if (ControllerBehaviour.Instance)
@@ -16,7 +16,7 @@ public class PreGameMessage : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004347 RID: 17223 RVA: 0x0016543E File Offset: 0x0016363E
+	// Token: 0x06004347 RID: 17223 RVA: 0x0016541E File Offset: 0x0016361E
 	private void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;
@@ -30,7 +30,7 @@ public class PreGameMessage : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004348 RID: 17224 RVA: 0x00165474 File Offset: 0x00163674
+	// Token: 0x06004348 RID: 17224 RVA: 0x00165454 File Offset: 0x00163654
 	public void ShowMessage(string messageTitle, string messageBody, string messageConfirmation, Action onConfirmationAction, float bodyFontSize = 0.5f, float buttonHideTimer = 0f)
 	{
 		this._alternativeAction = null;
@@ -52,7 +52,7 @@ public class PreGameMessage : MonoBehaviour
 		PrivateUIRoom.AddUI(this._uiParent.transform);
 	}
 
-	// Token: 0x06004349 RID: 17225 RVA: 0x00165518 File Offset: 0x00163718
+	// Token: 0x06004349 RID: 17225 RVA: 0x001654F8 File Offset: 0x001636F8
 	public void ShowMessage(string messageTitle, string messageBody, string messageConfirmationButton, string messageAlternativeButton, Action onConfirmationAction, Action onAlternativeAction, float bodyFontSize = 0.5f)
 	{
 		this._confirmButtonRoot.SetActive(false);
@@ -76,7 +76,7 @@ public class PreGameMessage : MonoBehaviour
 		PrivateUIRoom.AddUI(this._uiParent.transform);
 	}
 
-	// Token: 0x0600434A RID: 17226 RVA: 0x001655F0 File Offset: 0x001637F0
+	// Token: 0x0600434A RID: 17226 RVA: 0x001655D0 File Offset: 0x001637D0
 	public Task ShowMessageWithAwait(string messageTitle, string messageBody, string messageConfirmation, Action onConfirmationAction, float bodyFontSize = 0.5f, float buttonHideTimer = 0f)
 	{
 		PreGameMessage.<ShowMessageWithAwait>d__20 <ShowMessageWithAwait>d__;
@@ -92,7 +92,7 @@ public class PreGameMessage : MonoBehaviour
 		return <ShowMessageWithAwait>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600434B RID: 17227 RVA: 0x00165660 File Offset: 0x00163860
+	// Token: 0x0600434B RID: 17227 RVA: 0x00165640 File Offset: 0x00163840
 	public void UpdateMessage(string newMessageBody, string newConfirmButton)
 	{
 		this._messageBodyTxt.text = newMessageBody;
@@ -108,13 +108,13 @@ public class PreGameMessage : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600434C RID: 17228 RVA: 0x001656B8 File Offset: 0x001638B8
+	// Token: 0x0600434C RID: 17228 RVA: 0x00165698 File Offset: 0x00163898
 	public void CloseMessage()
 	{
 		PrivateUIRoom.RemoveUI(this._uiParent.transform);
 	}
 
-	// Token: 0x0600434D RID: 17229 RVA: 0x001656CC File Offset: 0x001638CC
+	// Token: 0x0600434D RID: 17229 RVA: 0x001656AC File Offset: 0x001638AC
 	private Task WaitForCompletion()
 	{
 		PreGameMessage.<WaitForCompletion>d__23 <WaitForCompletion>d__;
@@ -125,7 +125,7 @@ public class PreGameMessage : MonoBehaviour
 		return <WaitForCompletion>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600434E RID: 17230 RVA: 0x00165710 File Offset: 0x00163910
+	// Token: 0x0600434E RID: 17230 RVA: 0x001656F0 File Offset: 0x001638F0
 	private void PostUpdate()
 	{
 		bool isLeftStick = ControllerBehaviour.Instance.IsLeftStick;
@@ -189,7 +189,7 @@ public class PreGameMessage : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600434F RID: 17231 RVA: 0x001659E7 File Offset: 0x00163BE7
+	// Token: 0x0600434F RID: 17231 RVA: 0x001659C7 File Offset: 0x00163BC7
 	private void OnConfirmedPressed()
 	{
 		PrivateUIRoom.RemoveUI(this._uiParent.transform);
@@ -202,7 +202,7 @@ public class PreGameMessage : MonoBehaviour
 		confirmationAction.Invoke();
 	}
 
-	// Token: 0x06004350 RID: 17232 RVA: 0x00165A10 File Offset: 0x00163C10
+	// Token: 0x06004350 RID: 17232 RVA: 0x001659F0 File Offset: 0x00163BF0
 	private void OnAlternativePressed()
 	{
 		PrivateUIRoom.RemoveUI(this._uiParent.transform);

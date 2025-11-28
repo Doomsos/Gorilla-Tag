@@ -6,14 +6,14 @@ namespace MTAssets.EasyMeshCombiner
 	// Token: 0x02000F5A RID: 3930
 	public class EnviromentMovement : MonoBehaviour
 	{
-		// Token: 0x0600627F RID: 25215 RVA: 0x001FB46F File Offset: 0x001F966F
+		// Token: 0x0600627F RID: 25215 RVA: 0x001FB44F File Offset: 0x001F964F
 		private void Start()
 		{
 			this.thisTransform = base.gameObject.GetComponent<Transform>();
 			this.nextPosition = this.pos1;
 		}
 
-		// Token: 0x06006280 RID: 25216 RVA: 0x001FB490 File Offset: 0x001F9690
+		// Token: 0x06006280 RID: 25216 RVA: 0x001FB470 File Offset: 0x001F9670
 		private void Update()
 		{
 			if (Vector3.Distance(this.thisTransform.position, this.nextPosition) > 0.5f)

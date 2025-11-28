@@ -43,13 +43,13 @@ public class Luau
 	[DllImport("luau")]
 	public unsafe static extern void lua_pushcclosurek(lua_State* L, FunctionPointer<lua_CFunction> fn, byte* debugname, int nup, int* cont);
 
-	// Token: 0x0600475C RID: 18268 RVA: 0x001788C8 File Offset: 0x00176AC8
+	// Token: 0x0600475C RID: 18268 RVA: 0x001788A8 File Offset: 0x00176AA8
 	public unsafe static void lua_pushcfunction(lua_State* L, FunctionPointer<lua_CFunction> fn, [MarshalAs(20)] string debugname)
 	{
 		Luau.lua_pushcclosurek(L, fn, debugname, 0, null);
 	}
 
-	// Token: 0x0600475D RID: 18269 RVA: 0x001788D4 File Offset: 0x00176AD4
+	// Token: 0x0600475D RID: 18269 RVA: 0x001788B4 File Offset: 0x00176AB4
 	public unsafe static void lua_pushcfunction(lua_State* L, lua_CFunction fn, [MarshalAs(20)] string debugname)
 	{
 		Luau.lua_pushcclosurek(L, fn, debugname, 0, null);
@@ -79,13 +79,13 @@ public class Luau
 	[DllImport("luau")]
 	public unsafe static extern void lua_setfield(lua_State* L, int index, byte* k);
 
-	// Token: 0x06004764 RID: 18276 RVA: 0x001788E0 File Offset: 0x00176AE0
+	// Token: 0x06004764 RID: 18276 RVA: 0x001788C0 File Offset: 0x00176AC0
 	public unsafe static void lua_setglobal(lua_State* L, string s)
 	{
 		Luau.lua_setfield(L, -10002, s);
 	}
 
-	// Token: 0x06004765 RID: 18277 RVA: 0x001788F0 File Offset: 0x00176AF0
+	// Token: 0x06004765 RID: 18277 RVA: 0x001788D0 File Offset: 0x00176AD0
 	public unsafe static void lua_register(lua_State* L, lua_CFunction f, string n)
 	{
 		lua_Continuation cont = null;
@@ -93,13 +93,13 @@ public class Luau
 		Luau.lua_setglobal(L, n);
 	}
 
-	// Token: 0x06004766 RID: 18278 RVA: 0x00178910 File Offset: 0x00176B10
+	// Token: 0x06004766 RID: 18278 RVA: 0x001788F0 File Offset: 0x00176AF0
 	public unsafe static void lua_pop(lua_State* L, int n)
 	{
 		Luau.lua_settop(L, -n - 1);
 	}
 
-	// Token: 0x06004767 RID: 18279 RVA: 0x0017891C File Offset: 0x00176B1C
+	// Token: 0x06004767 RID: 18279 RVA: 0x001788FC File Offset: 0x00176AFC
 	public unsafe static sbyte* lua_tostring(lua_State* L, int idx)
 	{
 		return Luau.lua_tolstring(L, idx, null);
@@ -153,7 +153,7 @@ public class Luau
 	[DllImport("luau")]
 	public unsafe static extern void lua_unref(lua_State* L, int rid);
 
-	// Token: 0x06004774 RID: 18292 RVA: 0x00178927 File Offset: 0x00176B27
+	// Token: 0x06004774 RID: 18292 RVA: 0x00178907 File Offset: 0x00176B07
 	public unsafe static void lua_getref(lua_State* L, int rid)
 	{
 		Luau.lua_rawgeti(L, -10000, rid);
@@ -203,19 +203,19 @@ public class Luau
 	[DllImport("luau")]
 	public unsafe static extern int luaL_getmetafield(lua_State* L, int idx, [MarshalAs(20)] string k);
 
-	// Token: 0x06004780 RID: 18304 RVA: 0x00178935 File Offset: 0x00176B35
+	// Token: 0x06004780 RID: 18304 RVA: 0x00178915 File Offset: 0x00176B15
 	public unsafe static void luaL_getmetatable(lua_State* L, string n)
 	{
 		Luau.lua_getfield(L, -10000, n);
 	}
 
-	// Token: 0x06004781 RID: 18305 RVA: 0x00178944 File Offset: 0x00176B44
+	// Token: 0x06004781 RID: 18305 RVA: 0x00178924 File Offset: 0x00176B24
 	public unsafe static void luaL_getmetatable(lua_State* L, byte* n)
 	{
 		Luau.lua_getfield(L, -10000, n);
 	}
 
-	// Token: 0x06004782 RID: 18306 RVA: 0x00178953 File Offset: 0x00176B53
+	// Token: 0x06004782 RID: 18306 RVA: 0x00178933 File Offset: 0x00176B33
 	public unsafe static void lua_getglobal(lua_State* L, string n)
 	{
 		Luau.lua_getfield(L, -10002, n);
@@ -233,7 +233,7 @@ public class Luau
 	[DllImport("luau")]
 	public unsafe static extern byte* luaL_checklstring(lua_State* L, int numArg, int* l);
 
-	// Token: 0x06004786 RID: 18310 RVA: 0x00178962 File Offset: 0x00176B62
+	// Token: 0x06004786 RID: 18310 RVA: 0x00178942 File Offset: 0x00176B42
 	public unsafe static byte* luaL_checkstring(lua_State* L, int n)
 	{
 		return Luau.luaL_checklstring(L, n, null);
@@ -331,19 +331,19 @@ public class Luau
 	[DllImport("luau")]
 	public unsafe static extern int lua_rawequal(lua_State* L, int a, int b);
 
-	// Token: 0x0600479E RID: 18334 RVA: 0x0017896D File Offset: 0x00176B6D
+	// Token: 0x0600479E RID: 18334 RVA: 0x0017894D File Offset: 0x00176B4D
 	public unsafe static void* lua_newuserdata(lua_State* L, int size)
 	{
 		return Luau.lua_newuserdatatagged(L, size, 0);
 	}
 
-	// Token: 0x0600479F RID: 18335 RVA: 0x00178977 File Offset: 0x00176B77
+	// Token: 0x0600479F RID: 18335 RVA: 0x00178957 File Offset: 0x00176B57
 	public unsafe static double lua_tonumber(lua_State* L, int index)
 	{
 		return Luau.lua_tonumberx(L, index, null);
 	}
 
-	// Token: 0x060047A0 RID: 18336 RVA: 0x00178984 File Offset: 0x00176B84
+	// Token: 0x060047A0 RID: 18336 RVA: 0x00178964 File Offset: 0x00176B64
 	public unsafe static T* lua_class_push<[IsUnmanaged] T>(lua_State* L) where T : struct, ValueType
 	{
 		T* result = (T*)Luau.lua_newuserdata(L, sizeof(T) + 4);
@@ -353,7 +353,7 @@ public class Luau
 		return result;
 	}
 
-	// Token: 0x060047A1 RID: 18337 RVA: 0x001789C0 File Offset: 0x00176BC0
+	// Token: 0x060047A1 RID: 18337 RVA: 0x001789A0 File Offset: 0x00176BA0
 	public unsafe static T* lua_class_push<[IsUnmanaged] T>(lua_State* L, FixedString32Bytes name) where T : struct, ValueType
 	{
 		T* result = (T*)Luau.lua_newuserdata(L, sizeof(T) + 4);
@@ -362,7 +362,7 @@ public class Luau
 		return result;
 	}
 
-	// Token: 0x060047A2 RID: 18338 RVA: 0x001789F8 File Offset: 0x00176BF8
+	// Token: 0x060047A2 RID: 18338 RVA: 0x001789D8 File Offset: 0x00176BD8
 	public unsafe static void lua_class_push(lua_State* L, FixedString32Bytes name, IntPtr ptr)
 	{
 		FixedString32Bytes fixedString32Bytes = "__ptr";
@@ -373,7 +373,7 @@ public class Luau
 		Luau.lua_setmetatable(L, -2);
 	}
 
-	// Token: 0x060047A3 RID: 18339 RVA: 0x00178A50 File Offset: 0x00176C50
+	// Token: 0x060047A3 RID: 18339 RVA: 0x00178A30 File Offset: 0x00176C30
 	public unsafe static T* lua_class_get<[IsUnmanaged] T>(lua_State* L, int idx) where T : struct, ValueType
 	{
 		int num = Luau.lua_type(L, idx);
@@ -413,7 +413,7 @@ public class Luau
 		return null;
 	}
 
-	// Token: 0x060047A4 RID: 18340 RVA: 0x00178B08 File Offset: 0x00176D08
+	// Token: 0x060047A4 RID: 18340 RVA: 0x00178AE8 File Offset: 0x00176CE8
 	public unsafe static T* lua_class_get<[IsUnmanaged] T>(lua_State* L, int idx, FixedString32Bytes name) where T : struct, ValueType
 	{
 		int num = Luau.lua_type(L, idx);
@@ -453,7 +453,7 @@ public class Luau
 		return null;
 	}
 
-	// Token: 0x060047A5 RID: 18341 RVA: 0x00178BC8 File Offset: 0x00176DC8
+	// Token: 0x060047A5 RID: 18341 RVA: 0x00178BA8 File Offset: 0x00176DA8
 	public unsafe static byte* lua_class_get(lua_State* L, int idx, FixedString32Bytes name)
 	{
 		int num = Luau.lua_type(L, idx);
@@ -493,7 +493,7 @@ public class Luau
 		return null;
 	}
 
-	// Token: 0x060047A6 RID: 18342 RVA: 0x00178C88 File Offset: 0x00176E88
+	// Token: 0x060047A6 RID: 18342 RVA: 0x00178C68 File Offset: 0x00176E68
 	public unsafe static IntPtr lua_light_ptr(lua_State* L, int idx)
 	{
 		FixedString32Bytes fixedString32Bytes = "__ptr";
@@ -510,13 +510,13 @@ public class Luau
 		return IntPtr.Zero;
 	}
 
-	// Token: 0x060047A7 RID: 18343 RVA: 0x00178CDB File Offset: 0x00176EDB
+	// Token: 0x060047A7 RID: 18343 RVA: 0x00178CBB File Offset: 0x00176EBB
 	public unsafe static bool lua_class_check<[IsUnmanaged] T>(lua_State* L, int idx) where T : struct, ValueType
 	{
 		return Luau.lua_objlen(L, idx) == sizeof(T);
 	}
 
-	// Token: 0x060047A8 RID: 18344 RVA: 0x00178CEC File Offset: 0x00176EEC
+	// Token: 0x060047A8 RID: 18344 RVA: 0x00178CCC File Offset: 0x00176ECC
 	[MonoPInvokeCallback(typeof(lua_CFunction))]
 	public unsafe static int lua_print(lua_State* L)
 	{
@@ -631,7 +631,7 @@ public class Luau
 	// Token: 0x02000B5C RID: 2908
 	public static class lua_TypeID
 	{
-		// Token: 0x060047AA RID: 18346 RVA: 0x00178D88 File Offset: 0x00176F88
+		// Token: 0x060047AA RID: 18346 RVA: 0x00178D68 File Offset: 0x00176F68
 		public static string get(Type t)
 		{
 			string result;
@@ -642,7 +642,7 @@ public class Luau
 			return "";
 		}
 
-		// Token: 0x060047AB RID: 18347 RVA: 0x00178DAB File Offset: 0x00176FAB
+		// Token: 0x060047AB RID: 18347 RVA: 0x00178D8B File Offset: 0x00176F8B
 		public static void push(Type t, string name)
 		{
 			Luau.lua_TypeID.names.TryAdd(t, name);
@@ -655,7 +655,7 @@ public class Luau
 	// Token: 0x02000B5D RID: 2909
 	public static class lua_ClassFields<T>
 	{
-		// Token: 0x060047AD RID: 18349 RVA: 0x00178DC8 File Offset: 0x00176FC8
+		// Token: 0x060047AD RID: 18349 RVA: 0x00178DA8 File Offset: 0x00176FA8
 		public static FieldInfo Get(string name)
 		{
 			Dictionary<int, FieldInfo> dictionary;
@@ -667,7 +667,7 @@ public class Luau
 			return null;
 		}
 
-		// Token: 0x060047AE RID: 18350 RVA: 0x00178E08 File Offset: 0x00177008
+		// Token: 0x060047AE RID: 18350 RVA: 0x00178DE8 File Offset: 0x00176FE8
 		public static void Add(string name, FieldInfo field)
 		{
 			Dictionary<int, FieldInfo> dictionary;
@@ -688,7 +688,7 @@ public class Luau
 	// Token: 0x02000B5E RID: 2910
 	public static class lua_ClassProperties<T>
 	{
-		// Token: 0x060047B0 RID: 18352 RVA: 0x00178E7C File Offset: 0x0017707C
+		// Token: 0x060047B0 RID: 18352 RVA: 0x00178E5C File Offset: 0x0017705C
 		public static lua_CFunction Get(string name)
 		{
 			Dictionary<string, lua_CFunction> dictionary;
@@ -700,7 +700,7 @@ public class Luau
 			return null;
 		}
 
-		// Token: 0x060047B1 RID: 18353 RVA: 0x00178EB0 File Offset: 0x001770B0
+		// Token: 0x060047B1 RID: 18353 RVA: 0x00178E90 File Offset: 0x00177090
 		public static void Add(string name, lua_CFunction field)
 		{
 			Dictionary<string, lua_CFunction> dictionary;
@@ -721,7 +721,7 @@ public class Luau
 	// Token: 0x02000B5F RID: 2911
 	public static class lua_ClassFunctions<T>
 	{
-		// Token: 0x060047B3 RID: 18355 RVA: 0x00178F10 File Offset: 0x00177110
+		// Token: 0x060047B3 RID: 18355 RVA: 0x00178EF0 File Offset: 0x001770F0
 		public static lua_CFunction Get(string name)
 		{
 			Dictionary<string, lua_CFunction> dictionary;
@@ -733,7 +733,7 @@ public class Luau
 			return null;
 		}
 
-		// Token: 0x060047B4 RID: 18356 RVA: 0x00178F44 File Offset: 0x00177144
+		// Token: 0x060047B4 RID: 18356 RVA: 0x00178F24 File Offset: 0x00177124
 		public static void Add(string name, lua_CFunction field)
 		{
 			Dictionary<string, lua_CFunction> dictionary;

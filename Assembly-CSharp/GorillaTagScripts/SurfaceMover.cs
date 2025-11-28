@@ -9,14 +9,14 @@ namespace GorillaTagScripts
 	// Token: 0x02000DAD RID: 3501
 	public class SurfaceMover : MonoBehaviour
 	{
-		// Token: 0x06005611 RID: 22033 RVA: 0x001B0A41 File Offset: 0x001AEC41
+		// Token: 0x06005611 RID: 22033 RVA: 0x001B0A21 File Offset: 0x001AEC21
 		private void Start()
 		{
 			MovingSurfaceManager.instance == null;
 			MovingSurfaceManager.instance.RegisterSurfaceMover(this);
 		}
 
-		// Token: 0x06005612 RID: 22034 RVA: 0x001B0A5A File Offset: 0x001AEC5A
+		// Token: 0x06005612 RID: 22034 RVA: 0x001B0A3A File Offset: 0x001AEC3A
 		private void OnDestroy()
 		{
 			if (MovingSurfaceManager.instance != null)
@@ -25,7 +25,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005613 RID: 22035 RVA: 0x001B0A74 File Offset: 0x001AEC74
+		// Token: 0x06005613 RID: 22035 RVA: 0x001B0A54 File Offset: 0x001AEC54
 		public void InitMovingSurface()
 		{
 			if (this.moveType == BuilderMovingPart.BuilderMovingPartType.Translation)
@@ -70,7 +70,7 @@ namespace GorillaTagScripts
 			this.startPercentageCycleOffset = num6 + num4 + num4 - num5;
 		}
 
-		// Token: 0x06005614 RID: 22036 RVA: 0x001B0C1E File Offset: 0x001AEE1E
+		// Token: 0x06005614 RID: 22036 RVA: 0x001B0BFE File Offset: 0x001AEDFE
 		private long NetworkTimeMs()
 		{
 			if (PhotonNetwork.InRoom)
@@ -80,13 +80,13 @@ namespace GorillaTagScripts
 			return (long)(Time.time * 1000f);
 		}
 
-		// Token: 0x06005615 RID: 22037 RVA: 0x001B0C47 File Offset: 0x001AEE47
+		// Token: 0x06005615 RID: 22037 RVA: 0x001B0C27 File Offset: 0x001AEE27
 		private long CycleLengthMs()
 		{
 			return (long)(this.cycleDuration * 1000f);
 		}
 
-		// Token: 0x06005616 RID: 22038 RVA: 0x001B0C58 File Offset: 0x001AEE58
+		// Token: 0x06005616 RID: 22038 RVA: 0x001B0C38 File Offset: 0x001AEE38
 		public double PlatformTime()
 		{
 			long num = this.NetworkTimeMs();
@@ -94,25 +94,25 @@ namespace GorillaTagScripts
 			return (double)(num - num / num2 * num2) / 1000.0;
 		}
 
-		// Token: 0x06005617 RID: 22039 RVA: 0x001B0C83 File Offset: 0x001AEE83
+		// Token: 0x06005617 RID: 22039 RVA: 0x001B0C63 File Offset: 0x001AEE63
 		public int CycleCount()
 		{
 			return (int)(this.NetworkTimeMs() / this.CycleLengthMs());
 		}
 
-		// Token: 0x06005618 RID: 22040 RVA: 0x001B0C93 File Offset: 0x001AEE93
+		// Token: 0x06005618 RID: 22040 RVA: 0x001B0C73 File Offset: 0x001AEE73
 		public float CycleCompletionPercent()
 		{
 			return Mathf.Clamp((float)(this.PlatformTime() / (double)this.cycleDuration), 0f, 1f);
 		}
 
-		// Token: 0x06005619 RID: 22041 RVA: 0x001B0CB3 File Offset: 0x001AEEB3
+		// Token: 0x06005619 RID: 22041 RVA: 0x001B0C93 File Offset: 0x001AEE93
 		public bool IsEvenCycle()
 		{
 			return this.CycleCount() % 2 == 0;
 		}
 
-		// Token: 0x0600561A RID: 22042 RVA: 0x001B0CC0 File Offset: 0x001AEEC0
+		// Token: 0x0600561A RID: 22042 RVA: 0x001B0CA0 File Offset: 0x001AEEA0
 		public void Move()
 		{
 			this.Progress();
@@ -129,14 +129,14 @@ namespace GorillaTagScripts
 			this.UpdateRotation(this.percent);
 		}
 
-		// Token: 0x0600561B RID: 22043 RVA: 0x001B0D08 File Offset: 0x001AEF08
+		// Token: 0x0600561B RID: 22043 RVA: 0x001B0CE8 File Offset: 0x001AEEE8
 		private Vector3 UpdatePointToPoint(float perc)
 		{
 			float num = this.lerpAlpha.Evaluate(perc);
 			return Vector3.Lerp(this.startXf.localPosition, this.endXf.localPosition, num);
 		}
 
-		// Token: 0x0600561C RID: 22044 RVA: 0x001B0D40 File Offset: 0x001AEF40
+		// Token: 0x0600561C RID: 22044 RVA: 0x001B0D20 File Offset: 0x001AEF20
 		private void UpdateRotation(float perc)
 		{
 			float num = this.lerpAlpha.Evaluate(perc) * this.rotationAmount;
@@ -174,7 +174,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600561D RID: 22045 RVA: 0x001B0E24 File Offset: 0x001AF024
+		// Token: 0x0600561D RID: 22045 RVA: 0x001B0E04 File Offset: 0x001AF004
 		private void Progress()
 		{
 			this.currT = this.CycleCompletionPercent();
@@ -190,7 +190,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600561E RID: 22046 RVA: 0x001B0E9C File Offset: 0x001AF09C
+		// Token: 0x0600561E RID: 22046 RVA: 0x001B0E7C File Offset: 0x001AF07C
 		public void CopySettings(SurfaceMoverSettings settings)
 		{
 			this.moveType = settings.moveType;

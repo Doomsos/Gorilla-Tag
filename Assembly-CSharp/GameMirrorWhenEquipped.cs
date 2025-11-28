@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000626 RID: 1574
 public class GameMirrorWhenEquipped : MonoBehaviour
 {
-	// Token: 0x06002806 RID: 10246 RVA: 0x000D5057 File Offset: 0x000D3257
+	// Token: 0x06002806 RID: 10246 RVA: 0x000D5037 File Offset: 0x000D3237
 	private void Awake()
 	{
 		if (this.m_gameEntity == null)
@@ -17,7 +17,7 @@ public class GameMirrorWhenEquipped : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002807 RID: 10247 RVA: 0x000D5088 File Offset: 0x000D3288
+	// Token: 0x06002807 RID: 10247 RVA: 0x000D5068 File Offset: 0x000D3268
 	protected void OnEnable()
 	{
 		GameEntity gameEntity = this.m_gameEntity;
@@ -30,7 +30,7 @@ public class GameMirrorWhenEquipped : MonoBehaviour
 		gameEntity4.OnUnsnapped = (Action)Delegate.Combine(gameEntity4.OnUnsnapped, new Action(this._HandleGameEntityOnEquipChanged));
 	}
 
-	// Token: 0x06002808 RID: 10248 RVA: 0x000D5134 File Offset: 0x000D3334
+	// Token: 0x06002808 RID: 10248 RVA: 0x000D5114 File Offset: 0x000D3314
 	protected void OnDisable()
 	{
 		GameEntity gameEntity = this.m_gameEntity;
@@ -43,7 +43,7 @@ public class GameMirrorWhenEquipped : MonoBehaviour
 		gameEntity4.OnUnsnapped = (Action)Delegate.Remove(gameEntity4.OnUnsnapped, new Action(this._HandleGameEntityOnEquipChanged));
 	}
 
-	// Token: 0x06002809 RID: 10249 RVA: 0x000D51E0 File Offset: 0x000D33E0
+	// Token: 0x06002809 RID: 10249 RVA: 0x000D51C0 File Offset: 0x000D33C0
 	private void _HandleGameEntityOnEquipChanged()
 	{
 		if (this.m_shouldOnlyMirrorWhenSnapped && this.m_gameEntity.snappedJoint == SnapJointType.None)

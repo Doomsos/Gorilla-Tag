@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000789 RID: 1929
 public class GorillaHasUITransformFollow : MonoBehaviour
 {
-	// Token: 0x06003291 RID: 12945 RVA: 0x001107BC File Offset: 0x0010E9BC
+	// Token: 0x06003291 RID: 12945 RVA: 0x0011079C File Offset: 0x0010E99C
 	private void Awake()
 	{
 		GorillaUITransformFollow[] array = this.transformFollowers;
@@ -14,7 +14,7 @@ public class GorillaHasUITransformFollow : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003292 RID: 12946 RVA: 0x001107F8 File Offset: 0x0010E9F8
+	// Token: 0x06003292 RID: 12946 RVA: 0x001107D8 File Offset: 0x0010E9D8
 	private void OnDestroy()
 	{
 		GorillaUITransformFollow[] array = this.transformFollowers;
@@ -24,7 +24,7 @@ public class GorillaHasUITransformFollow : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003293 RID: 12947 RVA: 0x00110828 File Offset: 0x0010EA28
+	// Token: 0x06003293 RID: 12947 RVA: 0x00110808 File Offset: 0x0010EA08
 	private void OnEnable()
 	{
 		GorillaUITransformFollow[] array = this.transformFollowers;
@@ -34,7 +34,7 @@ public class GorillaHasUITransformFollow : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003294 RID: 12948 RVA: 0x00110858 File Offset: 0x0010EA58
+	// Token: 0x06003294 RID: 12948 RVA: 0x00110838 File Offset: 0x0010EA38
 	private void OnDisable()
 	{
 		GorillaUITransformFollow[] array = this.transformFollowers;

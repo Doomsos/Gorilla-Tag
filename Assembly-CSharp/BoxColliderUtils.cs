@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000CF7 RID: 3319
 public static class BoxColliderUtils
 {
-	// Token: 0x060050A0 RID: 20640 RVA: 0x0019EEF4 File Offset: 0x0019D0F4
+	// Token: 0x060050A0 RID: 20640 RVA: 0x0019EED4 File Offset: 0x0019D0D4
 	public static Matrix4x4 GetWorldToNormalizedBoxMatrix(BoxCollider boxCollider)
 	{
 		Transform transform = boxCollider.transform;
@@ -15,14 +15,14 @@ public static class BoxColliderUtils
 		return Matrix4x4.Scale(new Vector3((size.x != 0f) ? (2f / size.x) : 1f, (size.y != 0f) ? (2f / size.y) : 1f, (size.z != 0f) ? (2f / size.z) : 1f)) * matrix4x * worldToLocalMatrix;
 	}
 
-	// Token: 0x060050A1 RID: 20641 RVA: 0x0019EFA0 File Offset: 0x0019D1A0
+	// Token: 0x060050A1 RID: 20641 RVA: 0x0019EF80 File Offset: 0x0019D180
 	public static bool DoesBoxContainPoint(BoxCollider boxCollider, Vector3 worldPoint)
 	{
 		Vector3 vector = BoxColliderUtils.GetWorldToNormalizedBoxMatrix(boxCollider).MultiplyPoint3x4(worldPoint);
 		return Mathf.Abs(vector.x) <= 1f && Mathf.Abs(vector.y) <= 1f && Mathf.Abs(vector.z) <= 1f;
 	}
 
-	// Token: 0x060050A2 RID: 20642 RVA: 0x0019EFF8 File Offset: 0x0019D1F8
+	// Token: 0x060050A2 RID: 20642 RVA: 0x0019EFD8 File Offset: 0x0019D1D8
 	public static bool DoesBoxContainBox(BoxCollider containerBox, BoxCollider containedBox)
 	{
 		Transform transform = containedBox.transform;
@@ -34,7 +34,7 @@ public static class BoxColliderUtils
 		return BoxColliderUtils.DoesBoxContainPoint(containerBox, vector - vector3 - vector4 - vector5) && BoxColliderUtils.DoesBoxContainPoint(containerBox, vector + vector3 - vector4 - vector5) && BoxColliderUtils.DoesBoxContainPoint(containerBox, vector - vector3 + vector4 - vector5) && BoxColliderUtils.DoesBoxContainPoint(containerBox, vector + vector3 + vector4 - vector5) && BoxColliderUtils.DoesBoxContainPoint(containerBox, vector - vector3 - vector4 + vector5) && BoxColliderUtils.DoesBoxContainPoint(containerBox, vector + vector3 - vector4 + vector5) && BoxColliderUtils.DoesBoxContainPoint(containerBox, vector - vector3 + vector4 + vector5) && BoxColliderUtils.DoesBoxContainPoint(containerBox, vector + vector3 + vector4 + vector5);
 	}
 
-	// Token: 0x060050A3 RID: 20643 RVA: 0x0019F16C File Offset: 0x0019D36C
+	// Token: 0x060050A3 RID: 20643 RVA: 0x0019F14C File Offset: 0x0019D34C
 	public static bool DoesBoxContainRegion(BoxCollider box, BoundsInt regionBounds)
 	{
 		Matrix4x4 worldToNormalizedBoxMatrix = BoxColliderUtils.GetWorldToNormalizedBoxMatrix(box);

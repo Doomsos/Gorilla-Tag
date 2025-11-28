@@ -6,7 +6,7 @@ namespace GorillaNetworking.Store
 	// Token: 0x02000F3F RID: 3903
 	public class StoreBundleData : ScriptableObject
 	{
-		// Token: 0x060061C5 RID: 25029 RVA: 0x001F7534 File Offset: 0x001F5734
+		// Token: 0x060061C5 RID: 25029 RVA: 0x001F7514 File Offset: 0x001F5714
 		public void OnValidate()
 		{
 			if (this.playfabBundleID.Contains(' '))

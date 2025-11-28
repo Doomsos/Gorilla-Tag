@@ -7,7 +7,7 @@ namespace GorillaLocomotion.Climbing
 	public class HandHoldXSceneRef : MonoBehaviour
 	{
 		// Token: 0x1700098B RID: 2443
-		// (get) Token: 0x060064CA RID: 25802 RVA: 0x0020ECA4 File Offset: 0x0020CEA4
+		// (get) Token: 0x060064CA RID: 25802 RVA: 0x0020EC84 File Offset: 0x0020CE84
 		public HandHold target
 		{
 			get
@@ -22,7 +22,7 @@ namespace GorillaLocomotion.Climbing
 		}
 
 		// Token: 0x1700098C RID: 2444
-		// (get) Token: 0x060064CB RID: 25803 RVA: 0x0020ECC4 File Offset: 0x0020CEC4
+		// (get) Token: 0x060064CB RID: 25803 RVA: 0x0020ECA4 File Offset: 0x0020CEA4
 		public GameObject targetObject
 		{
 			get

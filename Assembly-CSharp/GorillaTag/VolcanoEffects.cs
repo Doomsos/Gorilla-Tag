@@ -10,7 +10,7 @@ namespace GorillaTag
 	// Token: 0x02001006 RID: 4102
 	public class VolcanoEffects : BaseGuidedRefTargetMono
 	{
-		// Token: 0x060067CC RID: 26572 RVA: 0x0021E42C File Offset: 0x0021C62C
+		// Token: 0x060067CC RID: 26572 RVA: 0x0021E40C File Offset: 0x0021C60C
 		protected override void Awake()
 		{
 			base.Awake();
@@ -61,7 +61,7 @@ namespace GorillaTag
 			this.UpdateDrainedState(0f);
 		}
 
-		// Token: 0x060067CD RID: 26573 RVA: 0x0021E6BC File Offset: 0x0021C8BC
+		// Token: 0x060067CD RID: 26573 RVA: 0x0021E69C File Offset: 0x0021C89C
 		public void OnVolcanoBellyEmpty()
 		{
 			if (!this.hasForestSpeakerAudioSrc)
@@ -76,7 +76,7 @@ namespace GorillaTag
 			this.forestSpeakerAudioSrc.GTPlayOneShot(this.warnVolcanoBellyEmptied, 1f);
 		}
 
-		// Token: 0x060067CE RID: 26574 RVA: 0x0021E714 File Offset: 0x0021C914
+		// Token: 0x060067CE RID: 26574 RVA: 0x0021E6F4 File Offset: 0x0021C8F4
 		public void OnStoneAccepted(double activationProgress)
 		{
 			if (!this.hasVolcanoAudioSrc)
@@ -92,7 +92,7 @@ namespace GorillaTag
 			this.volcanoAudioSource.GTPlayOneShot(this.volcanoAcceptStone, 1f);
 		}
 
-		// Token: 0x060067CF RID: 26575 RVA: 0x0021E774 File Offset: 0x0021C974
+		// Token: 0x060067CF RID: 26575 RVA: 0x0021E754 File Offset: 0x0021C954
 		private void InitState(VolcanoEffects.LavaStateFX fx)
 		{
 			fx.startSoundExists = (fx.startSound != null);
@@ -111,7 +111,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067D0 RID: 26576 RVA: 0x0021E81C File Offset: 0x0021CA1C
+		// Token: 0x060067D0 RID: 26576 RVA: 0x0021E7FC File Offset: 0x0021C9FC
 		private void SetLavaAudioEnabled(bool toEnable)
 		{
 			AudioSource[] array = this.lavaSurfaceAudioSrcs;
@@ -121,7 +121,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067D1 RID: 26577 RVA: 0x0021E84C File Offset: 0x0021CA4C
+		// Token: 0x060067D1 RID: 26577 RVA: 0x0021E82C File Offset: 0x0021CA2C
 		private void SetLavaAudioEnabled(bool toEnable, float volume)
 		{
 			foreach (AudioSource audioSource in this.lavaSurfaceAudioSrcs)
@@ -131,7 +131,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067D2 RID: 26578 RVA: 0x0021E884 File Offset: 0x0021CA84
+		// Token: 0x060067D2 RID: 26578 RVA: 0x0021E864 File Offset: 0x0021CA64
 		private void ResetState()
 		{
 			if (this.currentStateFX == null)
@@ -158,7 +158,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067D3 RID: 26579 RVA: 0x0021E940 File Offset: 0x0021CB40
+		// Token: 0x060067D3 RID: 26579 RVA: 0x0021E920 File Offset: 0x0021CB20
 		private void UpdateState(float time, float timeRemaining, float progress)
 		{
 			if (this.currentStateFX == null)
@@ -208,7 +208,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067D4 RID: 26580 RVA: 0x0021EC15 File Offset: 0x0021CE15
+		// Token: 0x060067D4 RID: 26580 RVA: 0x0021EBF5 File Offset: 0x0021CDF5
 		public void SetDrainedState()
 		{
 			this.ResetState();
@@ -216,14 +216,14 @@ namespace GorillaTag
 			this.currentStateFX = this.drainedStateFX;
 		}
 
-		// Token: 0x060067D5 RID: 26581 RVA: 0x0021EC30 File Offset: 0x0021CE30
+		// Token: 0x060067D5 RID: 26581 RVA: 0x0021EC10 File Offset: 0x0021CE10
 		public void UpdateDrainedState(float time)
 		{
 			this.ResetState();
 			this.UpdateState(time, float.MaxValue, float.MinValue);
 		}
 
-		// Token: 0x060067D6 RID: 26582 RVA: 0x0021EC49 File Offset: 0x0021CE49
+		// Token: 0x060067D6 RID: 26582 RVA: 0x0021EC29 File Offset: 0x0021CE29
 		public void SetEruptingState()
 		{
 			this.ResetState();
@@ -231,13 +231,13 @@ namespace GorillaTag
 			this.currentStateFX = this.eruptingStateFX;
 		}
 
-		// Token: 0x060067D7 RID: 26583 RVA: 0x0021EC69 File Offset: 0x0021CE69
+		// Token: 0x060067D7 RID: 26583 RVA: 0x0021EC49 File Offset: 0x0021CE49
 		public void UpdateEruptingState(float time, float timeRemaining, float progress)
 		{
 			this.UpdateState(time, timeRemaining, progress);
 		}
 
-		// Token: 0x060067D8 RID: 26584 RVA: 0x0021EC74 File Offset: 0x0021CE74
+		// Token: 0x060067D8 RID: 26584 RVA: 0x0021EC54 File Offset: 0x0021CE54
 		public void SetRisingState()
 		{
 			this.ResetState();
@@ -245,7 +245,7 @@ namespace GorillaTag
 			this.currentStateFX = this.risingStateFX;
 		}
 
-		// Token: 0x060067D9 RID: 26585 RVA: 0x0021EC94 File Offset: 0x0021CE94
+		// Token: 0x060067D9 RID: 26585 RVA: 0x0021EC74 File Offset: 0x0021CE74
 		public void UpdateRisingState(float time, float timeRemaining, float progress)
 		{
 			this.UpdateState(time, timeRemaining, progress);
@@ -256,7 +256,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067DA RID: 26586 RVA: 0x0021ECDC File Offset: 0x0021CEDC
+		// Token: 0x060067DA RID: 26586 RVA: 0x0021ECBC File Offset: 0x0021CEBC
 		public void SetFullState()
 		{
 			this.ResetState();
@@ -264,13 +264,13 @@ namespace GorillaTag
 			this.currentStateFX = this.fullStateFX;
 		}
 
-		// Token: 0x060067DB RID: 26587 RVA: 0x0021EC69 File Offset: 0x0021CE69
+		// Token: 0x060067DB RID: 26587 RVA: 0x0021EC49 File Offset: 0x0021CE49
 		public void UpdateFullState(float time, float timeRemaining, float progress)
 		{
 			this.UpdateState(time, timeRemaining, progress);
 		}
 
-		// Token: 0x060067DC RID: 26588 RVA: 0x0021ECFC File Offset: 0x0021CEFC
+		// Token: 0x060067DC RID: 26588 RVA: 0x0021ECDC File Offset: 0x0021CEDC
 		public void SetDrainingState()
 		{
 			this.ResetState();
@@ -278,7 +278,7 @@ namespace GorillaTag
 			this.currentStateFX = this.drainingStateFX;
 		}
 
-		// Token: 0x060067DD RID: 26589 RVA: 0x0021ED1C File Offset: 0x0021CF1C
+		// Token: 0x060067DD RID: 26589 RVA: 0x0021ECFC File Offset: 0x0021CEFC
 		public void UpdateDrainingState(float time, float timeRemaining, float progress)
 		{
 			this.UpdateState(time, timeRemaining, progress);
@@ -289,7 +289,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067DE RID: 26590 RVA: 0x0021ED60 File Offset: 0x0021CF60
+		// Token: 0x060067DE RID: 26590 RVA: 0x0021ED40 File Offset: 0x0021CF40
 		private void SetParticleEmissionRateAndBurst(float multiplier, ParticleSystem.EmissionModule[] emissionModules, float[] defaultRateMultipliers, ParticleSystem.Burst[][] defaultEmitBursts, ParticleSystem.Burst[][] adjustedEmitBursts)
 		{
 			for (int i = 0; i < emissionModules.Length; i++)
@@ -304,7 +304,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060067DF RID: 26591 RVA: 0x0021EDE0 File Offset: 0x0021CFE0
+		// Token: 0x060067DF RID: 26591 RVA: 0x0021EDC0 File Offset: 0x0021CFC0
 		private bool RemoveNullsFromArray<T>(ref T[] array) where T : Object
 		{
 			List<T> list = new List<T>(array.Length);
@@ -320,7 +320,7 @@ namespace GorillaTag
 			return num != array.Length;
 		}
 
-		// Token: 0x060067E0 RID: 26592 RVA: 0x0021EE3A File Offset: 0x0021D03A
+		// Token: 0x060067E0 RID: 26592 RVA: 0x0021EE1A File Offset: 0x0021D01A
 		private void LogNullsFoundInArray(string nameOfArray)
 		{
 			Debug.LogError(string.Concat(new string[]

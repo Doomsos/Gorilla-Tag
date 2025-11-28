@@ -9,17 +9,17 @@ using UnityEngine;
 public class GorillaNetworkPublicTestsJoin : GorillaTriggerBox, ITickSystemPost
 {
 	// Token: 0x170006D6 RID: 1750
-	// (get) Token: 0x06004923 RID: 18723 RVA: 0x00180808 File Offset: 0x0017EA08
-	// (set) Token: 0x06004924 RID: 18724 RVA: 0x00180810 File Offset: 0x0017EA10
+	// (get) Token: 0x06004923 RID: 18723 RVA: 0x001807E8 File Offset: 0x0017E9E8
+	// (set) Token: 0x06004924 RID: 18724 RVA: 0x001807F0 File Offset: 0x0017E9F0
 	public bool PostTickRunning { get; set; }
 
-	// Token: 0x06004925 RID: 18725 RVA: 0x00180819 File Offset: 0x0017EA19
+	// Token: 0x06004925 RID: 18725 RVA: 0x001807F9 File Offset: 0x0017E9F9
 	public void Awake()
 	{
 		TickSystem<object>.AddPostTickCallback(this);
 	}
 
-	// Token: 0x06004926 RID: 18726 RVA: 0x00180824 File Offset: 0x0017EA24
+	// Token: 0x06004926 RID: 18726 RVA: 0x00180804 File Offset: 0x0017EA04
 	public void PostTick()
 	{
 		try
@@ -43,7 +43,7 @@ public class GorillaNetworkPublicTestsJoin : GorillaTriggerBox, ITickSystemPost
 		}
 	}
 
-	// Token: 0x06004927 RID: 18727 RVA: 0x00180958 File Offset: 0x0017EB58
+	// Token: 0x06004927 RID: 18727 RVA: 0x00180938 File Offset: 0x0017EB38
 	private IEnumerator GracePeriod()
 	{
 		this.waiting = true;

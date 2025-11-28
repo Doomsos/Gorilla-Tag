@@ -8,7 +8,7 @@ using UnityEngine;
 // Token: 0x02000730 RID: 1840
 public class GRToolShieldGun : MonoBehaviour
 {
-	// Token: 0x06002F6E RID: 12142 RVA: 0x00101DE1 File Offset: 0x000FFFE1
+	// Token: 0x06002F6E RID: 12142 RVA: 0x00101DC1 File Offset: 0x000FFFC1
 	private void Awake()
 	{
 		if (this.tool != null)
@@ -18,7 +18,7 @@ public class GRToolShieldGun : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F6F RID: 12143 RVA: 0x00101E14 File Offset: 0x00100014
+	// Token: 0x06002F6F RID: 12143 RVA: 0x00101DF4 File Offset: 0x000FFFF4
 	private void OnToolUpgraded(GRTool tool)
 	{
 		if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.ShieldGunStrength1))
@@ -37,13 +37,13 @@ public class GRToolShieldGun : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F70 RID: 12144 RVA: 0x00101E65 File Offset: 0x00100065
+	// Token: 0x06002F70 RID: 12144 RVA: 0x00101E45 File Offset: 0x00100045
 	private bool IsHeldLocal()
 	{
 		return this.gameEntity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
 	}
 
-	// Token: 0x06002F71 RID: 12145 RVA: 0x00101E80 File Offset: 0x00100080
+	// Token: 0x06002F71 RID: 12145 RVA: 0x00101E60 File Offset: 0x00100060
 	public void Update()
 	{
 		float deltaTime = Time.deltaTime;
@@ -55,7 +55,7 @@ public class GRToolShieldGun : MonoBehaviour
 		this.OnUpdateRemote(deltaTime);
 	}
 
-	// Token: 0x06002F72 RID: 12146 RVA: 0x00101EB4 File Offset: 0x001000B4
+	// Token: 0x06002F72 RID: 12146 RVA: 0x00101E94 File Offset: 0x00100094
 	private void OnUpdateAuthority(float dt)
 	{
 		switch (this.state)
@@ -106,7 +106,7 @@ public class GRToolShieldGun : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F73 RID: 12147 RVA: 0x00101F9C File Offset: 0x0010019C
+	// Token: 0x06002F73 RID: 12147 RVA: 0x00101F7C File Offset: 0x0010017C
 	private void OnUpdateRemote(float dt)
 	{
 		GRToolShieldGun.State state = (GRToolShieldGun.State)this.gameEntity.GetState();
@@ -116,14 +116,14 @@ public class GRToolShieldGun : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F74 RID: 12148 RVA: 0x00101FC6 File Offset: 0x001001C6
+	// Token: 0x06002F74 RID: 12148 RVA: 0x00101FA6 File Offset: 0x001001A6
 	private void SetStateAuthority(GRToolShieldGun.State newState)
 	{
 		this.SetState(newState);
 		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
 	}
 
-	// Token: 0x06002F75 RID: 12149 RVA: 0x00101FE8 File Offset: 0x001001E8
+	// Token: 0x06002F75 RID: 12149 RVA: 0x00101FC8 File Offset: 0x001001C8
 	private void SetState(GRToolShieldGun.State newState)
 	{
 		if (newState == this.state || !this.CanChangeState((long)newState))
@@ -152,7 +152,7 @@ public class GRToolShieldGun : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F76 RID: 12150 RVA: 0x0010206C File Offset: 0x0010026C
+	// Token: 0x06002F76 RID: 12150 RVA: 0x0010204C File Offset: 0x0010024C
 	private void StartCharge()
 	{
 		if (this.chargeSound != null)
@@ -165,7 +165,7 @@ public class GRToolShieldGun : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F77 RID: 12151 RVA: 0x001020BC File Offset: 0x001002BC
+	// Token: 0x06002F77 RID: 12151 RVA: 0x0010209C File Offset: 0x0010029C
 	private void StartFiring()
 	{
 		if (this.firingSound != null)
@@ -201,7 +201,7 @@ public class GRToolShieldGun : MonoBehaviour
 		this.firedProjectile.Launch(position, velocity, NetworkSystem.Instance.LocalPlayer, false, false, 1, scale, true, this.projectileColor);
 	}
 
-	// Token: 0x06002F78 RID: 12152 RVA: 0x00102240 File Offset: 0x00100440
+	// Token: 0x06002F78 RID: 12152 RVA: 0x00102220 File Offset: 0x00100420
 	private void AttachTrail(int trailHash, GameObject newProjectile, Vector3 location, bool blueTeam, bool orangeTeam)
 	{
 		GameObject gameObject = ObjectPools.instance.Instantiate(trailHash, true);
@@ -214,7 +214,7 @@ public class GRToolShieldGun : MonoBehaviour
 		component.AttachTrail(newProjectile, blueTeam, orangeTeam, false, default(Color));
 	}
 
-	// Token: 0x06002F79 RID: 12153 RVA: 0x00102294 File Offset: 0x00100494
+	// Token: 0x06002F79 RID: 12153 RVA: 0x00102274 File Offset: 0x00100474
 	private void OnProjectileImpact(SlingshotProjectile projectile, Vector3 impactPos, NetPlayer hitPlayer)
 	{
 		projectile.OnImpact -= this.OnProjectileImpact;
@@ -264,7 +264,7 @@ public class GRToolShieldGun : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F7A RID: 12154 RVA: 0x001023F8 File Offset: 0x001005F8
+	// Token: 0x06002F7A RID: 12154 RVA: 0x001023D8 File Offset: 0x001005D8
 	private bool IsButtonHeld()
 	{
 		if (!this.IsHeldLocal())
@@ -280,7 +280,7 @@ public class GRToolShieldGun : MonoBehaviour
 		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? 4 : 5) > 0.25f;
 	}
 
-	// Token: 0x06002F7B RID: 12155 RVA: 0x00102458 File Offset: 0x00100658
+	// Token: 0x06002F7B RID: 12155 RVA: 0x00102438 File Offset: 0x00100638
 	private void PlayVibration(float strength, float duration)
 	{
 		if (!this.IsHeldLocal())
@@ -300,7 +300,7 @@ public class GRToolShieldGun : MonoBehaviour
 		GorillaTagger.Instance.StartVibration(GamePlayer.IsLeftHand(num), strength, duration);
 	}
 
-	// Token: 0x06002F7C RID: 12156 RVA: 0x001024AC File Offset: 0x001006AC
+	// Token: 0x06002F7C RID: 12156 RVA: 0x0010248C File Offset: 0x0010068C
 	public bool CanChangeState(long newStateIndex)
 	{
 		return newStateIndex >= 0L && newStateIndex < 4L && ((int)newStateIndex != 2 || Time.time > this.timeLastFired + this.cooldownMinimum);

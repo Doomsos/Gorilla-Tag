@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020006F4 RID: 1780
 public class GRSconce : MonoBehaviour
 {
-	// Token: 0x06002D9F RID: 11679 RVA: 0x000F67E8 File Offset: 0x000F49E8
+	// Token: 0x06002D9F RID: 11679 RVA: 0x000F67C8 File Offset: 0x000F49C8
 	private void Awake()
 	{
 		if (this.tool != null)
@@ -19,13 +19,13 @@ public class GRSconce : MonoBehaviour
 		this.StopLight();
 	}
 
-	// Token: 0x06002DA0 RID: 11680 RVA: 0x000F684C File Offset: 0x000F4A4C
+	// Token: 0x06002DA0 RID: 11680 RVA: 0x000F682C File Offset: 0x000F4A2C
 	private bool IsAuthority()
 	{
 		return this.gameEntity.IsAuthority();
 	}
 
-	// Token: 0x06002DA1 RID: 11681 RVA: 0x000F685C File Offset: 0x000F4A5C
+	// Token: 0x06002DA1 RID: 11681 RVA: 0x000F683C File Offset: 0x000F4A3C
 	private void SetState(GRSconce.State newState)
 	{
 		this.state = newState;
@@ -47,7 +47,7 @@ public class GRSconce : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DA2 RID: 11682 RVA: 0x000F68B0 File Offset: 0x000F4AB0
+	// Token: 0x06002DA2 RID: 11682 RVA: 0x000F6890 File Offset: 0x000F4A90
 	private void StartLight()
 	{
 		this.gameLight.gameObject.SetActive(true);
@@ -57,14 +57,14 @@ public class GRSconce : MonoBehaviour
 		this.meshRenderer.material = this.onMaterial;
 	}
 
-	// Token: 0x06002DA3 RID: 11683 RVA: 0x000F690C File Offset: 0x000F4B0C
+	// Token: 0x06002DA3 RID: 11683 RVA: 0x000F68EC File Offset: 0x000F4AEC
 	private void StopLight()
 	{
 		this.gameLight.gameObject.SetActive(false);
 		this.meshRenderer.material = this.offMaterial;
 	}
 
-	// Token: 0x06002DA4 RID: 11684 RVA: 0x000F6930 File Offset: 0x000F4B30
+	// Token: 0x06002DA4 RID: 11684 RVA: 0x000F6910 File Offset: 0x000F4B10
 	private void OnEnergyChange(GRTool tool, int energy, GameEntityId chargingEntityId)
 	{
 		if (this.IsAuthority() && this.state == GRSconce.State.Off && tool.IsEnergyFull())
@@ -73,7 +73,7 @@ public class GRSconce : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002DA5 RID: 11685 RVA: 0x000F6954 File Offset: 0x000F4B54
+	// Token: 0x06002DA5 RID: 11685 RVA: 0x000F6934 File Offset: 0x000F4B34
 	private void OnStateChange(long prevState, long nextState)
 	{
 		if (!this.IsAuthority())

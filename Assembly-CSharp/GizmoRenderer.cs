@@ -6,13 +6,13 @@ using UnityEngine;
 // Token: 0x020009D1 RID: 2513
 public class GizmoRenderer : MonoBehaviour
 {
-	// Token: 0x0600402B RID: 16427 RVA: 0x001586DC File Offset: 0x001568DC
+	// Token: 0x0600402B RID: 16427 RVA: 0x001586BC File Offset: 0x001568BC
 	private void Update()
 	{
 		this.RenderGizmos();
 	}
 
-	// Token: 0x0600402C RID: 16428 RVA: 0x001586E4 File Offset: 0x001568E4
+	// Token: 0x0600402C RID: 16428 RVA: 0x001586C4 File Offset: 0x001568C4
 	private unsafe void RenderGizmos()
 	{
 		if (this.renderMode == GizmoRenderer.RenderMode.Never)
@@ -47,43 +47,43 @@ public class GizmoRenderer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600402D RID: 16429 RVA: 0x001587D0 File Offset: 0x001569D0
+	// Token: 0x0600402D RID: 16429 RVA: 0x001587B0 File Offset: 0x001569B0
 	private static void RenderPlaneWire(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		draw.WirePlane(gizmo.center, gizmo.rotation, gizmo.size.xz, gizmo.color);
 	}
 
-	// Token: 0x0600402E RID: 16430 RVA: 0x001587F6 File Offset: 0x001569F6
+	// Token: 0x0600402E RID: 16430 RVA: 0x001587D6 File Offset: 0x001569D6
 	private static void RenderPlaneSolid(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		draw.SolidPlane(gizmo.center, gizmo.rotation, gizmo.size.xz, gizmo.color);
 	}
 
-	// Token: 0x0600402F RID: 16431 RVA: 0x0015881C File Offset: 0x00156A1C
+	// Token: 0x0600402F RID: 16431 RVA: 0x001587FC File Offset: 0x001569FC
 	private static void RenderGridWire(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		draw.WireGrid(gizmo.center, gizmo.rotation, gizmo.gridCells, gizmo.size.xz, gizmo.color);
 	}
 
-	// Token: 0x06004030 RID: 16432 RVA: 0x00158848 File Offset: 0x00156A48
+	// Token: 0x06004030 RID: 16432 RVA: 0x00158828 File Offset: 0x00156A28
 	private static void RenderBoxWire(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		draw.WireBox(gizmo.center, gizmo.rotation, gizmo.size, gizmo.color);
 	}
 
-	// Token: 0x06004031 RID: 16433 RVA: 0x00158869 File Offset: 0x00156A69
+	// Token: 0x06004031 RID: 16433 RVA: 0x00158849 File Offset: 0x00156A49
 	private static void RenderBoxSolid(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		draw.SolidBox(gizmo.center, gizmo.rotation, gizmo.size, gizmo.color);
 	}
 
-	// Token: 0x06004032 RID: 16434 RVA: 0x0015888A File Offset: 0x00156A8A
+	// Token: 0x06004032 RID: 16434 RVA: 0x0015886A File Offset: 0x00156A6A
 	private static void RenderSphereWire(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		draw.WireSphere(gizmo.center, gizmo.radius * 0.5f, gizmo.color);
 	}
 
-	// Token: 0x06004033 RID: 16435 RVA: 0x001588AC File Offset: 0x00156AAC
+	// Token: 0x06004033 RID: 16435 RVA: 0x0015888C File Offset: 0x00156A8C
 	private static void RenderSphereSolid(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		Matrix4x4 matrix4x = Matrix4x4.TRS(gizmo.center, quaternion.identity, new float3(gizmo.radius));
@@ -93,26 +93,26 @@ public class GizmoRenderer : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004034 RID: 16436 RVA: 0x00158920 File Offset: 0x00156B20
+	// Token: 0x06004034 RID: 16436 RVA: 0x00158900 File Offset: 0x00156B00
 	private static void RenderLabel3D(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		draw.Label3D(gizmo.center, gizmo.rotation, gizmo.text, gizmo.textSize * 0.1f, GizmoRenderer.gLabelAligns[(int)gizmo.textAlign], gizmo.color);
 	}
 
-	// Token: 0x06004035 RID: 16437 RVA: 0x0015895D File Offset: 0x00156B5D
+	// Token: 0x06004035 RID: 16437 RVA: 0x0015893D File Offset: 0x00156B3D
 	private static void RenderLabel2D(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
 		draw.Label2D(gizmo.center, gizmo.text, gizmo.textSize * gizmo.textPPU, GizmoRenderer.gLabelAligns[(int)gizmo.textAlign], gizmo.color);
 	}
 
-	// Token: 0x06004036 RID: 16438 RVA: 0x00158997 File Offset: 0x00156B97
+	// Token: 0x06004036 RID: 16438 RVA: 0x00158977 File Offset: 0x00156B77
 	[RuntimeInitializeOnLoadMethod(1)]
 	private static void InitializeOnLoad()
 	{
 		GizmoRenderer.gSphereMesh = Resources.GetBuiltinResource<Mesh>("New-Sphere.fbx");
 	}
 
-	// Token: 0x06004037 RID: 16439 RVA: 0x001589A8 File Offset: 0x00156BA8
+	// Token: 0x06004037 RID: 16439 RVA: 0x00158988 File Offset: 0x00156B88
 	private static Color GetRandomColor()
 	{
 		Color result = Color.HSVToRGB((float)(DateTime.UtcNow.Ticks % 65536L) / 65535f, 1f, 1f, true);

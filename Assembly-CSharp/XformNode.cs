@@ -6,7 +6,7 @@ using UnityEngine;
 public class XformNode
 {
 	// Token: 0x17000612 RID: 1554
-	// (get) Token: 0x0600417D RID: 16765 RVA: 0x0015C244 File Offset: 0x0015A444
+	// (get) Token: 0x0600417D RID: 16765 RVA: 0x0015C224 File Offset: 0x0015A424
 	public Vector4 worldPosition
 	{
 		get
@@ -23,8 +23,8 @@ public class XformNode
 	}
 
 	// Token: 0x17000613 RID: 1555
-	// (get) Token: 0x0600417E RID: 16766 RVA: 0x0015C282 File Offset: 0x0015A482
-	// (set) Token: 0x0600417F RID: 16767 RVA: 0x0015C28F File Offset: 0x0015A48F
+	// (get) Token: 0x0600417E RID: 16766 RVA: 0x0015C262 File Offset: 0x0015A462
+	// (set) Token: 0x0600417F RID: 16767 RVA: 0x0015C26F File Offset: 0x0015A46F
 	public float radius
 	{
 		get
@@ -37,7 +37,7 @@ public class XformNode
 		}
 	}
 
-	// Token: 0x06004180 RID: 16768 RVA: 0x0015C29D File Offset: 0x0015A49D
+	// Token: 0x06004180 RID: 16768 RVA: 0x0015C27D File Offset: 0x0015A47D
 	public Matrix4x4 LocalTRS()
 	{
 		return Matrix4x4.TRS(this.localPosition, Quaternion.identity, Vector3.one);

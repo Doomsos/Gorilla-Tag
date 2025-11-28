@@ -7,24 +7,24 @@ using UnityEngine;
 public class ThrowableSetDressing : TransferrableObject
 {
 	// Token: 0x17000770 RID: 1904
-	// (get) Token: 0x0600500B RID: 20491 RVA: 0x0019B8B7 File Offset: 0x00199AB7
-	// (set) Token: 0x0600500C RID: 20492 RVA: 0x0019B8BF File Offset: 0x00199ABF
+	// (get) Token: 0x0600500B RID: 20491 RVA: 0x0019B897 File Offset: 0x00199A97
+	// (set) Token: 0x0600500C RID: 20492 RVA: 0x0019B89F File Offset: 0x00199A9F
 	public bool inInitialPose { get; private set; } = true;
 
-	// Token: 0x0600500D RID: 20493 RVA: 0x0019B8C8 File Offset: 0x00199AC8
+	// Token: 0x0600500D RID: 20493 RVA: 0x0019B8A8 File Offset: 0x00199AA8
 	public override bool ShouldBeKinematic()
 	{
 		return this.inInitialPose || base.ShouldBeKinematic();
 	}
 
-	// Token: 0x0600500E RID: 20494 RVA: 0x0019B8DA File Offset: 0x00199ADA
+	// Token: 0x0600500E RID: 20494 RVA: 0x0019B8BA File Offset: 0x00199ABA
 	protected override void Awake()
 	{
 		base.Awake();
 		this.netView = base.GetComponent<NetworkView>();
 	}
 
-	// Token: 0x0600500F RID: 20495 RVA: 0x0019B8EE File Offset: 0x00199AEE
+	// Token: 0x0600500F RID: 20495 RVA: 0x0019B8CE File Offset: 0x00199ACE
 	protected override void Start()
 	{
 		base.Start();
@@ -33,7 +33,7 @@ public class ThrowableSetDressing : TransferrableObject
 		this.currentState = TransferrableObject.PositionState.Dropped;
 	}
 
-	// Token: 0x06005010 RID: 20496 RVA: 0x0019B923 File Offset: 0x00199B23
+	// Token: 0x06005010 RID: 20496 RVA: 0x0019B903 File Offset: 0x00199B03
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		base.OnGrab(pointGrabbed, grabbingHand);
@@ -41,7 +41,7 @@ public class ThrowableSetDressing : TransferrableObject
 		this.StopRespawnTimer();
 	}
 
-	// Token: 0x06005011 RID: 20497 RVA: 0x0019B93A File Offset: 0x00199B3A
+	// Token: 0x06005011 RID: 20497 RVA: 0x0019B91A File Offset: 0x00199B1A
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		if (!base.OnRelease(zoneReleased, releasingHand))
@@ -52,14 +52,14 @@ public class ThrowableSetDressing : TransferrableObject
 		return true;
 	}
 
-	// Token: 0x06005012 RID: 20498 RVA: 0x0019B954 File Offset: 0x00199B54
+	// Token: 0x06005012 RID: 20498 RVA: 0x0019B934 File Offset: 0x00199B34
 	public override void DropItem()
 	{
 		base.DropItem();
 		this.StartRespawnTimer(-1f);
 	}
 
-	// Token: 0x06005013 RID: 20499 RVA: 0x0019B967 File Offset: 0x00199B67
+	// Token: 0x06005013 RID: 20499 RVA: 0x0019B947 File Offset: 0x00199B47
 	private void StopRespawnTimer()
 	{
 		if (this.respawnTimer != null)
@@ -69,13 +69,13 @@ public class ThrowableSetDressing : TransferrableObject
 		}
 	}
 
-	// Token: 0x06005014 RID: 20500 RVA: 0x0019B984 File Offset: 0x00199B84
+	// Token: 0x06005014 RID: 20500 RVA: 0x0019B964 File Offset: 0x00199B64
 	public void SetWillTeleport()
 	{
 		this.worldShareableInstance.SetWillTeleport();
 	}
 
-	// Token: 0x06005015 RID: 20501 RVA: 0x0019B994 File Offset: 0x00199B94
+	// Token: 0x06005015 RID: 20501 RVA: 0x0019B974 File Offset: 0x00199B74
 	public void StartRespawnTimer(float overrideTimer = -1f)
 	{
 		float timerDuration = (overrideTimer != -1f) ? overrideTimer : this.respawnTimerDuration;
@@ -86,7 +86,7 @@ public class ThrowableSetDressing : TransferrableObject
 		}
 	}
 
-	// Token: 0x06005016 RID: 20502 RVA: 0x0019B9F3 File Offset: 0x00199BF3
+	// Token: 0x06005016 RID: 20502 RVA: 0x0019B9D3 File Offset: 0x00199BD3
 	private IEnumerator RespawnTimerCoroutine(float timerDuration)
 	{
 		yield return new WaitForSeconds(timerDuration);

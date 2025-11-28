@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000AB6 RID: 2742
 public class KIDUI_MessageScreen : MonoBehaviour
 {
-	// Token: 0x060044C5 RID: 17605 RVA: 0x0016C8EE File Offset: 0x0016AAEE
+	// Token: 0x060044C5 RID: 17605 RVA: 0x0016C8CE File Offset: 0x0016AACE
 	public void Show(string errorMessage)
 	{
 		base.gameObject.SetActive(true);
@@ -15,14 +15,14 @@ public class KIDUI_MessageScreen : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060044C6 RID: 17606 RVA: 0x0016C914 File Offset: 0x0016AB14
+	// Token: 0x060044C6 RID: 17606 RVA: 0x0016C8F4 File Offset: 0x0016AAF4
 	public void OnClose()
 	{
 		base.gameObject.SetActive(false);
 		this._mainScreen.ShowMainScreen(EMainScreenStatus.Pending);
 	}
 
-	// Token: 0x060044C7 RID: 17607 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x060044C7 RID: 17607 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;

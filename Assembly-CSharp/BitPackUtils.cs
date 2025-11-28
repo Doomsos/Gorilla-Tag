@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000C33 RID: 3123
 public static class BitPackUtils
 {
-	// Token: 0x06004C99 RID: 19609 RVA: 0x0018DA38 File Offset: 0x0018BC38
+	// Token: 0x06004C99 RID: 19609 RVA: 0x0018DA18 File Offset: 0x0018BC18
 	public static ushort PackRelativePos16(Vector3 pos, Vector3 center, float radius)
 	{
 		Vector3 vector = pos - center;
@@ -90,7 +90,7 @@ public static class BitPackUtils
 		return (ushort)(num6 << 10 | num7 << 5 | num8);
 	}
 
-	// Token: 0x06004C9A RID: 19610 RVA: 0x0018DBE8 File Offset: 0x0018BDE8
+	// Token: 0x06004C9A RID: 19610 RVA: 0x0018DBC8 File Offset: 0x0018BDC8
 	public static Vector3 UnpackRelativePos16(ushort data, Vector3 center, float radius, bool snapToRadius = false)
 	{
 		if (data == 0)
@@ -118,7 +118,7 @@ public static class BitPackUtils
 		return new Vector3(center.x + num4, center.y + num5, center.z + num6);
 	}
 
-	// Token: 0x06004C9B RID: 19611 RVA: 0x0018DC98 File Offset: 0x0018BE98
+	// Token: 0x06004C9B RID: 19611 RVA: 0x0018DC78 File Offset: 0x0018BE78
 	public static uint PackRelativePos(Vector3 pos, Vector3 min, Vector3 max)
 	{
 		Vector3 d = max - min;
@@ -129,7 +129,7 @@ public static class BitPackUtils
 		return num << 20 | num2 << 10 | num3;
 	}
 
-	// Token: 0x06004C9C RID: 19612 RVA: 0x0018DD1C File Offset: 0x0018BF1C
+	// Token: 0x06004C9C RID: 19612 RVA: 0x0018DCFC File Offset: 0x0018BEFC
 	public static Vector3 UnpackRelativePos(uint data, Vector3 min, Vector3 max)
 	{
 		Vector3 vector = max - min;
@@ -139,7 +139,7 @@ public static class BitPackUtils
 		return new Vector3(num * 0.0009775171f * vector.x + min.x, num2 * 0.0009775171f * vector.y + min.y, num3 * 0.0009775171f * vector.z + min.z);
 	}
 
-	// Token: 0x06004C9D RID: 19613 RVA: 0x0018DD98 File Offset: 0x0018BF98
+	// Token: 0x06004C9D RID: 19613 RVA: 0x0018DD78 File Offset: 0x0018BF78
 	public static uint PackRotation(Quaternion q, bool normalize = true)
 	{
 		if (normalize)
@@ -199,7 +199,7 @@ public static class BitPackUtils
 		return (uint)(num5 << 30 | (int)((int)num7 << 20) | (int)((int)num8 << 10) | (int)num9);
 	}
 
-	// Token: 0x06004C9E RID: 19614 RVA: 0x0018DF58 File Offset: 0x0018C158
+	// Token: 0x06004C9E RID: 19614 RVA: 0x0018DF38 File Offset: 0x0018C138
 	public static Quaternion UnpackRotation(uint data)
 	{
 		uint num = data >> 30;
@@ -225,7 +225,7 @@ public static class BitPackUtils
 		return new Quaternion(num5, num6, num7, num8);
 	}
 
-	// Token: 0x06004C9F RID: 19615 RVA: 0x0018E024 File Offset: 0x0018C224
+	// Token: 0x06004C9F RID: 19615 RVA: 0x0018E004 File Offset: 0x0018C204
 	static BitPackUtils()
 	{
 		for (int i = 0; i < 16; i++)
@@ -235,7 +235,7 @@ public static class BitPackUtils
 		}
 	}
 
-	// Token: 0x06004CA0 RID: 19616 RVA: 0x0018E084 File Offset: 0x0018C284
+	// Token: 0x06004CA0 RID: 19616 RVA: 0x0018E064 File Offset: 0x0018C264
 	public static int PackQuaternionForNetwork(Quaternion q)
 	{
 		q.Normalize();
@@ -301,7 +301,7 @@ public static class BitPackUtils
 		return (int)(num9 + (num10 << 9) + (num11 << 18) + ((int)qaxis << 27));
 	}
 
-	// Token: 0x06004CA1 RID: 19617 RVA: 0x0018E22C File Offset: 0x0018C42C
+	// Token: 0x06004CA1 RID: 19617 RVA: 0x0018E20C File Offset: 0x0018C40C
 	public static Quaternion UnpackQuaternionFromNetwork(int data)
 	{
 		float num = (float)(data & 511) * 0.0027675421f - 0.707107f;
@@ -320,7 +320,7 @@ public static class BitPackUtils
 		return new Quaternion(num, num2, num3, num4);
 	}
 
-	// Token: 0x06004CA2 RID: 19618 RVA: 0x0018E2E4 File Offset: 0x0018C4E4
+	// Token: 0x06004CA2 RID: 19618 RVA: 0x0018E2C4 File Offset: 0x0018C4C4
 	public static long PackHandPosRotForNetwork(Vector3 localPos, Quaternion rot)
 	{
 		long num = (long)Mathf.Clamp(Mathf.RoundToInt(localPos.x * 512f) + 1024, 0, 2047);
@@ -330,7 +330,7 @@ public static class BitPackUtils
 		return num + (num2 << 11) + (num3 << 22) + (num4 << 33);
 	}
 
-	// Token: 0x06004CA3 RID: 19619 RVA: 0x0018E374 File Offset: 0x0018C574
+	// Token: 0x06004CA3 RID: 19619 RVA: 0x0018E354 File Offset: 0x0018C554
 	public static void UnpackHandPosRotFromNetwork(long data, out Vector3 localPos, out Quaternion handRot)
 	{
 		long num = data & 2047L;
@@ -341,7 +341,7 @@ public static class BitPackUtils
 		handRot = BitPackUtils.UnpackQuaternionFromNetwork(data2);
 	}
 
-	// Token: 0x06004CA4 RID: 19620 RVA: 0x0018E3EC File Offset: 0x0018C5EC
+	// Token: 0x06004CA4 RID: 19620 RVA: 0x0018E3CC File Offset: 0x0018C5CC
 	public static long PackAnchoredPosRotForNetwork(Vector3 worldPos, Quaternion rot)
 	{
 		Vector3Int parityForWorldPos = BitPackUtils.GetParityForWorldPos(worldPos);
@@ -354,7 +354,7 @@ public static class BitPackUtils
 		return num + (num2 << 5) + (num3 << 14) + (num4 << 23) + (num5 << 32);
 	}
 
-	// Token: 0x06004CA5 RID: 19621 RVA: 0x0018E4E0 File Offset: 0x0018C6E0
+	// Token: 0x06004CA5 RID: 19621 RVA: 0x0018E4C0 File Offset: 0x0018C6C0
 	public static void UnpackAnchoredPosRotForNetwork(long packed, Vector3 anchorPos, out Vector3 pos, out Quaternion rot)
 	{
 		Vector3Int parityForWorldPos = BitPackUtils.GetParityForWorldPos(anchorPos);
@@ -365,19 +365,19 @@ public static class BitPackUtils
 		rot = BitPackUtils.UnpackQuaternionFromNetwork((int)(packed >> 32));
 	}
 
-	// Token: 0x06004CA6 RID: 19622 RVA: 0x0018E5B5 File Offset: 0x0018C7B5
+	// Token: 0x06004CA6 RID: 19622 RVA: 0x0018E595 File Offset: 0x0018C795
 	private static Vector3Int GetParityForWorldPos(Vector3 worldPos)
 	{
 		return new Vector3Int(BitPackUtils.GetParityForAxis(worldPos.x), BitPackUtils.GetParityForAxis(worldPos.y), BitPackUtils.GetParityForAxis(worldPos.z));
 	}
 
-	// Token: 0x06004CA7 RID: 19623 RVA: 0x0018E5DD File Offset: 0x0018C7DD
+	// Token: 0x06004CA7 RID: 19623 RVA: 0x0018E5BD File Offset: 0x0018C7BD
 	private static int GetParityForAxis(float axisPos)
 	{
 		return Mathf.FloorToInt(axisPos % 15f / 5f + 3f) % 3;
 	}
 
-	// Token: 0x06004CA8 RID: 19624 RVA: 0x0018E5FC File Offset: 0x0018C7FC
+	// Token: 0x06004CA8 RID: 19624 RVA: 0x0018E5DC File Offset: 0x0018C7DC
 	private static float GetParityOffset(float anchorAxisPos, int anchorParity, int incomingParity)
 	{
 		float num = anchorAxisPos - (anchorAxisPos % 5f + 5f) % 5f;
@@ -393,7 +393,7 @@ public static class BitPackUtils
 		return num;
 	}
 
-	// Token: 0x06004CA9 RID: 19625 RVA: 0x0018E654 File Offset: 0x0018C854
+	// Token: 0x06004CA9 RID: 19625 RVA: 0x0018E634 File Offset: 0x0018C834
 	public static long PackWorldPosForNetwork(Vector3 worldPos)
 	{
 		long num = (long)Mathf.Clamp(Mathf.RoundToInt(worldPos.x * 1024f) + 1048576, 0, 2097151);
@@ -402,7 +402,7 @@ public static class BitPackUtils
 		return num + (num2 << 21) + (num3 << 42);
 	}
 
-	// Token: 0x06004CAA RID: 19626 RVA: 0x0018E6D8 File Offset: 0x0018C8D8
+	// Token: 0x06004CAA RID: 19626 RVA: 0x0018E6B8 File Offset: 0x0018C8B8
 	public static Vector3 UnpackWorldPosFromNetwork(long data)
 	{
 		float num = (float)(data & 2097151L);
@@ -411,37 +411,37 @@ public static class BitPackUtils
 		return new Vector3((float)((long)num - 1048576L) * 0.0009765625f, (float)(num2 - 1048576L) * 0.0009765625f, (float)(num3 - 1048576L) * 0.0009765625f);
 	}
 
-	// Token: 0x06004CAB RID: 19627 RVA: 0x0018E736 File Offset: 0x0018C936
+	// Token: 0x06004CAB RID: 19627 RVA: 0x0018E716 File Offset: 0x0018C916
 	public static short PackColorForNetwork(Color col)
 	{
 		return (short)(Mathf.RoundToInt(col.r * 900f) + Mathf.RoundToInt(col.g * 90f) + Mathf.RoundToInt(col.b * 9f));
 	}
 
-	// Token: 0x06004CAC RID: 19628 RVA: 0x0018E76E File Offset: 0x0018C96E
+	// Token: 0x06004CAC RID: 19628 RVA: 0x0018E74E File Offset: 0x0018C94E
 	public static Color UnpackColorFromNetwork(short data)
 	{
 		return new Color((float)(data / 100) / 9f, (float)(data / 10 % 10) / 9f, (float)(data % 10) / 9f);
 	}
 
-	// Token: 0x06004CAD RID: 19629 RVA: 0x0018E799 File Offset: 0x0018C999
+	// Token: 0x06004CAD RID: 19629 RVA: 0x0018E779 File Offset: 0x0018C979
 	public static long PackIntsIntoLong(int value1, int value2)
 	{
 		return ((long)value1 & (long)((ulong)-1)) | ((long)value2 & (long)((ulong)-1)) << 32;
 	}
 
-	// Token: 0x06004CAE RID: 19630 RVA: 0x0018E7A9 File Offset: 0x0018C9A9
+	// Token: 0x06004CAE RID: 19630 RVA: 0x0018E789 File Offset: 0x0018C989
 	public static int UnpackValue1FromLong(long value)
 	{
 		return (int)(value & (long)((ulong)-1));
 	}
 
-	// Token: 0x06004CAF RID: 19631 RVA: 0x0018E7B0 File Offset: 0x0018C9B0
+	// Token: 0x06004CAF RID: 19631 RVA: 0x0018E790 File Offset: 0x0018C990
 	public static int UnpackValue2FromLong(long value)
 	{
 		return (int)(value >> 32 & (long)((ulong)-1));
 	}
 
-	// Token: 0x06004CB0 RID: 19632 RVA: 0x0018E7BA File Offset: 0x0018C9BA
+	// Token: 0x06004CB0 RID: 19632 RVA: 0x0018E79A File Offset: 0x0018C99A
 	public static void UnpackIntsFromLong(long value, out int value1, out int value2)
 	{
 		value1 = BitPackUtils.UnpackValue1FromLong(value);

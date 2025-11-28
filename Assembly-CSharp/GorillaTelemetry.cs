@@ -16,7 +16,7 @@ using UnityEngine;
 // Token: 0x020007E4 RID: 2020
 public static class GorillaTelemetry
 {
-	// Token: 0x0600351A RID: 13594 RVA: 0x0011E1D0 File Offset: 0x0011C3D0
+	// Token: 0x0600351A RID: 13594 RVA: 0x0011E1B0 File Offset: 0x0011C3B0
 	static GorillaTelemetry()
 	{
 		Dictionary<string, object> dictionary = new Dictionary<string, object>();
@@ -286,7 +286,7 @@ public static class GorillaTelemetry
 		gameObject.AddComponent<GorillaTelemetry.BatchRunner>();
 	}
 
-	// Token: 0x0600351B RID: 13595 RVA: 0x0011ED3C File Offset: 0x0011CF3C
+	// Token: 0x0600351B RID: 13595 RVA: 0x0011ED1C File Offset: 0x0011CF1C
 	public static void EnqueueTelemetryEvent(string eventName, object content, [CanBeNull] string[] customTags = null)
 	{
 		if (content == null || string.IsNullOrWhiteSpace(eventName) || !GorillaServer.Instance.CheckIsMothershipTelemetryEnabled())
@@ -307,7 +307,7 @@ public static class GorillaTelemetry
 		});
 	}
 
-	// Token: 0x0600351C RID: 13596 RVA: 0x0011EDE2 File Offset: 0x0011CFE2
+	// Token: 0x0600351C RID: 13596 RVA: 0x0011EDC2 File Offset: 0x0011CFC2
 	[Obsolete("EnqueueTelemetryEventPlayFab is deprecated. Use EnqueueTelemetryEvent instead.")]
 	private static void EnqueueTelemetryEventPlayFab(EventContents eventContent)
 	{
@@ -318,7 +318,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.telemetryEventsQueuePlayFab.Enqueue(eventContent);
 	}
 
-	// Token: 0x0600351D RID: 13597 RVA: 0x0011EE00 File Offset: 0x0011D000
+	// Token: 0x0600351D RID: 13597 RVA: 0x0011EDE0 File Offset: 0x0011CFE0
 	private static void FlushPlayFabTelemetry()
 	{
 		int count = GorillaTelemetry.telemetryEventsQueuePlayFab.Count;
@@ -356,7 +356,7 @@ public static class GorillaTelemetry
 		}
 	}
 
-	// Token: 0x0600351E RID: 13598 RVA: 0x0011EED0 File Offset: 0x0011D0D0
+	// Token: 0x0600351E RID: 13598 RVA: 0x0011EEB0 File Offset: 0x0011D0B0
 	private static void FlushMothershipTelemetry()
 	{
 		int count = GorillaTelemetry.telemetryEventsQueueMothership.Count;
@@ -399,7 +399,7 @@ public static class GorillaTelemetry
 		}
 	}
 
-	// Token: 0x0600351F RID: 13599 RVA: 0x0011EFD0 File Offset: 0x0011D1D0
+	// Token: 0x0600351F RID: 13599 RVA: 0x0011EFB0 File Offset: 0x0011D1B0
 	private static List<EventContents> GetEventListForArrayPlayFab(EventContents[] array, int count)
 	{
 		int num = 0;
@@ -430,7 +430,7 @@ public static class GorillaTelemetry
 		return list;
 	}
 
-	// Token: 0x06003520 RID: 13600 RVA: 0x0011F03C File Offset: 0x0011D23C
+	// Token: 0x06003520 RID: 13600 RVA: 0x0011F01C File Offset: 0x0011D21C
 	private static List<MothershipAnalyticsEvent> GetEventListForArrayMothership(MothershipAnalyticsEvent[] array, int count)
 	{
 		int num = 0;
@@ -462,7 +462,7 @@ public static class GorillaTelemetry
 		return list;
 	}
 
-	// Token: 0x06003521 RID: 13601 RVA: 0x0011F0BF File Offset: 0x0011D2BF
+	// Token: 0x06003521 RID: 13601 RVA: 0x0011F09F File Offset: 0x0011D29F
 	private static bool IsConnected()
 	{
 		if (!NetworkSystem.Instance.InRoom)
@@ -476,7 +476,7 @@ public static class GorillaTelemetry
 		return !(GorillaTelemetry.gPlayFabAuth == null);
 	}
 
-	// Token: 0x06003522 RID: 13602 RVA: 0x0011F0F2 File Offset: 0x0011D2F2
+	// Token: 0x06003522 RID: 13602 RVA: 0x0011F0D2 File Offset: 0x0011D2D2
 	private static bool IsConnectedToPlayfab()
 	{
 		if (GorillaTelemetry.gPlayFabAuth == null)
@@ -486,7 +486,7 @@ public static class GorillaTelemetry
 		return !(GorillaTelemetry.gPlayFabAuth == null);
 	}
 
-	// Token: 0x06003523 RID: 13603 RVA: 0x0011F0F2 File Offset: 0x0011D2F2
+	// Token: 0x06003523 RID: 13603 RVA: 0x0011F0D2 File Offset: 0x0011D2D2
 	private static bool IsConnectedIgnoreRoom()
 	{
 		if (GorillaTelemetry.gPlayFabAuth == null)
@@ -496,13 +496,13 @@ public static class GorillaTelemetry
 		return !(GorillaTelemetry.gPlayFabAuth == null);
 	}
 
-	// Token: 0x06003524 RID: 13604 RVA: 0x0011F117 File Offset: 0x0011D317
+	// Token: 0x06003524 RID: 13604 RVA: 0x0011F0F7 File Offset: 0x0011D2F7
 	private static string PlayFabUserId()
 	{
 		return GorillaTelemetry.gPlayFabAuth.GetPlayFabPlayerId();
 	}
 
-	// Token: 0x06003525 RID: 13605 RVA: 0x0011F124 File Offset: 0x0011D324
+	// Token: 0x06003525 RID: 13605 RVA: 0x0011F104 File Offset: 0x0011D304
 	private static string SerializeCustomTags(string[] customTags)
 	{
 		string result = string.Empty;
@@ -518,7 +518,7 @@ public static class GorillaTelemetry
 		return result;
 	}
 
-	// Token: 0x06003526 RID: 13606 RVA: 0x0011F178 File Offset: 0x0011D378
+	// Token: 0x06003526 RID: 13606 RVA: 0x0011F158 File Offset: 0x0011D358
 	public static void EnqueueZoneEvent(ZoneDef zone, GTZoneEventType zoneEventType)
 	{
 		if (zoneEventType == GTZoneEventType.zone_stay && Time.realtimeSinceStartup < GorillaTelemetry.nextStayTimestamp)
@@ -554,7 +554,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent("telemetry_zone_event", dictionary, null);
 	}
 
-	// Token: 0x06003527 RID: 13607 RVA: 0x0011F274 File Offset: 0x0011D474
+	// Token: 0x06003527 RID: 13607 RVA: 0x0011F254 File Offset: 0x0011D454
 	public static void PostGameModeEvent(GTGameModeEventType gameModeEvent, GameModeType gameMode)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -577,7 +577,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent("game_mode_played_event", dictionary, null);
 	}
 
-	// Token: 0x06003528 RID: 13608 RVA: 0x0011F2FA File Offset: 0x0011D4FA
+	// Token: 0x06003528 RID: 13608 RVA: 0x0011F2DA File Offset: 0x0011D4DA
 	public static void PostShopEvent(VRRig playerRig, GTShopEventType shopEvent, CosmeticsController.CosmeticItem item)
 	{
 		GorillaTelemetry.gSingleItemParam[0] = item;
@@ -585,7 +585,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.gSingleItemParam[0] = default(CosmeticsController.CosmeticItem);
 	}
 
-	// Token: 0x06003529 RID: 13609 RVA: 0x0011F328 File Offset: 0x0011D528
+	// Token: 0x06003529 RID: 13609 RVA: 0x0011F308 File Offset: 0x0011D508
 	private static string[] FetchItemArgs(IList<CosmeticsController.CosmeticItem> items)
 	{
 		int count = items.Count;
@@ -612,7 +612,7 @@ public static class GorillaTelemetry
 		return array;
 	}
 
-	// Token: 0x0600352A RID: 13610 RVA: 0x0011F3B4 File Offset: 0x0011D5B4
+	// Token: 0x0600352A RID: 13610 RVA: 0x0011F394 File Offset: 0x0011D594
 	public static void PostShopEvent(VRRig playerRig, GTShopEventType shopEvent, IList<CosmeticsController.CosmeticItem> items)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -649,7 +649,7 @@ public static class GorillaTelemetry
 	{
 	}
 
-	// Token: 0x0600352D RID: 13613 RVA: 0x0011F443 File Offset: 0x0011D643
+	// Token: 0x0600352D RID: 13613 RVA: 0x0011F423 File Offset: 0x0011D623
 	public static void PostBuilderKioskEvent(VRRig playerRig, GTShopEventType shopEvent, BuilderSetManager.BuilderSetStoreItem item)
 	{
 		GorillaTelemetry.gSingleItemBuilderParam[0] = item;
@@ -657,7 +657,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.gSingleItemBuilderParam[0] = default(BuilderSetManager.BuilderSetStoreItem);
 	}
 
-	// Token: 0x0600352E RID: 13614 RVA: 0x0011F470 File Offset: 0x0011D670
+	// Token: 0x0600352E RID: 13614 RVA: 0x0011F450 File Offset: 0x0011D650
 	private static string[] BuilderItemsToStrings(IList<BuilderSetManager.BuilderSetStoreItem> items)
 	{
 		int count = items.Count;
@@ -684,7 +684,7 @@ public static class GorillaTelemetry
 		return array;
 	}
 
-	// Token: 0x0600352F RID: 13615 RVA: 0x0011F4FC File Offset: 0x0011D6FC
+	// Token: 0x0600352F RID: 13615 RVA: 0x0011F4DC File Offset: 0x0011D6DC
 	public static void PostBuilderKioskEvent(VRRig playerRig, GTShopEventType shopEvent, IList<BuilderSetManager.BuilderSetStoreItem> items)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -711,7 +711,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent("telemetry_shop_event", dictionary, null);
 	}
 
-	// Token: 0x06003530 RID: 13616 RVA: 0x0011F58C File Offset: 0x0011D78C
+	// Token: 0x06003530 RID: 13616 RVA: 0x0011F56C File Offset: 0x0011D76C
 	public static void PostKidEvent(bool joinGroupsEnabled, bool voiceChatEnabled, bool customUsernamesEnabled, AgeStatusType ageCategory, GTKidEventType kidEvent)
 	{
 		if ((double)Random.value < 0.1)
@@ -744,7 +744,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent("telemetry_kid_event", dictionary, null);
 	}
 
-	// Token: 0x06003531 RID: 13617 RVA: 0x0011F688 File Offset: 0x0011D888
+	// Token: 0x06003531 RID: 13617 RVA: 0x0011F668 File Offset: 0x0011D868
 	public static void WamGameStart(string playerId, string gameId, string machineId)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -763,7 +763,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent("telemetry_wam_gameStartEvent", GorillaTelemetry.gWamGameStartArgs, null);
 	}
 
-	// Token: 0x06003532 RID: 13618 RVA: 0x0011F708 File Offset: 0x0011D908
+	// Token: 0x06003532 RID: 13618 RVA: 0x0011F6E8 File Offset: 0x0011D8E8
 	public static void WamLevelEnd(string playerId, int gameId, string machineId, int currentLevelNumber, int levelGoodMolesShown, int levelHazardMolesShown, int levelMinScore, int currentScore, int levelHazardMolesHit, string currentGameResult)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -789,7 +789,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent("telemetry_wam_levelEndEvent", GorillaTelemetry.gWamLevelEndArgs, null);
 	}
 
-	// Token: 0x06003533 RID: 13619 RVA: 0x0011F824 File Offset: 0x0011DA24
+	// Token: 0x06003533 RID: 13619 RVA: 0x0011F804 File Offset: 0x0011DA04
 	public static void PostCustomMapPerformance(string mapName, long mapModId, int lowestFPS, int lowestDC, int lowestPC, int avgFPS, int avgDC, int avgPC, int highestFPS, int highestDC, int highestPC, int playtime)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -818,7 +818,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent("CustomMapPerformance", dictionary, null);
 	}
 
-	// Token: 0x06003534 RID: 13620 RVA: 0x0011F944 File Offset: 0x0011DB44
+	// Token: 0x06003534 RID: 13620 RVA: 0x0011F924 File Offset: 0x0011DB24
 	public static void PostCustomMapTracking(string mapName, long mapModId, string mapCreatorUsername, int minPlayers, int maxPlayers, int playtime, bool privateRoom)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -854,7 +854,7 @@ public static class GorillaTelemetry
 	{
 	}
 
-	// Token: 0x06003536 RID: 13622 RVA: 0x0011FA64 File Offset: 0x0011DC64
+	// Token: 0x06003536 RID: 13622 RVA: 0x0011FA44 File Offset: 0x0011DC44
 	public static void GhostReactorShiftStart(string gameId, int initialCores, float timeIntoShift, bool wasPlayerInAtStart, int numPlayers, int floorJoined, string playerRank)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -899,7 +899,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003537 RID: 13623 RVA: 0x0011FC84 File Offset: 0x0011DE84
+	// Token: 0x06003537 RID: 13623 RVA: 0x0011FC64 File Offset: 0x0011DE64
 	public static void GhostReactorGameEnd(string gameId, int finalCores, int totalCoresCollectedByPlayer, int totalCoresCollectedByGroup, int totalCoresSpentByPlayer, int totalCoresSpentByGroup, int gatesUnlocked, int deaths, List<string> itemsPurchased, int shiftCut, bool isShiftActuallyEnding, float timeIntoShiftAtJoin, float playDuration, bool wasPlayerInAtStart, ZoneClearReason zoneClearReason, int maxNumberOfPlayersInShift, int endNumberOfPlayers, Dictionary<string, int> itemTypesHeldThisShift, int revives, int numShiftsPlayed)
 	{
 		if (!GorillaTelemetry.IsConnectedToPlayfab())
@@ -978,7 +978,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003538 RID: 13624 RVA: 0x00120074 File Offset: 0x0011E274
+	// Token: 0x06003538 RID: 13624 RVA: 0x00120054 File Offset: 0x0011E254
 	public static void GhostReactorFloorStart(string gameId, int initialCores, float timeIntoShift, bool wasPlayerInAtStart, int numPlayers, string playerRank, int floor, string preset, string modifier)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1027,7 +1027,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003539 RID: 13625 RVA: 0x001202E4 File Offset: 0x0011E4E4
+	// Token: 0x06003539 RID: 13625 RVA: 0x001202C4 File Offset: 0x0011E4C4
 	public static void GhostReactorFloorComplete(string gameId, int finalCores, int totalCoresCollectedByPlayer, int totalCoresCollectedByGroup, int totalCoresSpentByPlayer, int totalCoresSpentByGroup, int gatesUnlocked, int deaths, List<string> itemsPurchased, int shiftCut, bool isShiftActuallyEnding, float timeIntoShiftAtJoin, float playDuration, bool wasPlayerInAtStart, ZoneClearReason zoneClearReason, int maxNumberOfPlayersInShift, int endNumberOfPlayers, Dictionary<string, int> itemTypesHeldThisShift, int revives, int floor, string preset, string modifier, int chaosSeedsCollected, bool objectivesCompleted, string section, int xpGained)
 	{
 		if (!GorillaTelemetry.IsConnectedToPlayfab())
@@ -1118,7 +1118,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x0600353A RID: 13626 RVA: 0x001207A4 File Offset: 0x0011E9A4
+	// Token: 0x0600353A RID: 13626 RVA: 0x00120784 File Offset: 0x0011E984
 	public static void GhostReactorToolPurchased(string gameId, string toolName, int toolLevel, int coresSpent, int shinyRocksSpent, int floor, string preset)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1161,7 +1161,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x0600353B RID: 13627 RVA: 0x00120978 File Offset: 0x0011EB78
+	// Token: 0x0600353B RID: 13627 RVA: 0x00120958 File Offset: 0x0011EB58
 	public static void GhostReactorRankUp(string gameId, string newRank, int floor, string preset)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1198,7 +1198,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x0600353C RID: 13628 RVA: 0x00120AD4 File Offset: 0x0011ECD4
+	// Token: 0x0600353C RID: 13628 RVA: 0x00120AB4 File Offset: 0x0011ECB4
 	public static void GhostReactorToolUnlock(string gameId, string toolName)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1231,7 +1231,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x0600353D RID: 13629 RVA: 0x00120BEC File Offset: 0x0011EDEC
+	// Token: 0x0600353D RID: 13629 RVA: 0x00120BCC File Offset: 0x0011EDCC
 	public static void GhostReactorPodUpgradePurchased(string gameId, string toolName, int level, int shinyRocksSpent, int juiceSpent)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1270,7 +1270,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x0600353E RID: 13630 RVA: 0x00120D7C File Offset: 0x0011EF7C
+	// Token: 0x0600353E RID: 13630 RVA: 0x00120D5C File Offset: 0x0011EF5C
 	public static void GhostReactorToolUpgrade(string gameId, string upgradeType, string toolName, int newLevel, int juiceSpent, int griftSpent, int coresSpent, int floor, string preset)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1317,7 +1317,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x0600353F RID: 13631 RVA: 0x00120F94 File Offset: 0x0011F194
+	// Token: 0x0600353F RID: 13631 RVA: 0x00120F74 File Offset: 0x0011F174
 	public static void GhostReactorChaosSeedStart(string gameId, string unlockTime, int chaosSeedsInQueue, int floor, string preset)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1356,7 +1356,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003540 RID: 13632 RVA: 0x00121118 File Offset: 0x0011F318
+	// Token: 0x06003540 RID: 13632 RVA: 0x001210F8 File Offset: 0x0011F2F8
 	public static void GhostReactorChaosJuiceCollected(string gameId, int juiceCollected, int coresProcessedByOverdrive)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1391,7 +1391,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003541 RID: 13633 RVA: 0x00121264 File Offset: 0x0011F464
+	// Token: 0x06003541 RID: 13633 RVA: 0x00121244 File Offset: 0x0011F444
 	public static void GhostReactorOverdrivePurchased(string gameId, int shinyRocksUsed, int chaosSeedsInQueue, int floor, string preset)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1430,7 +1430,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003542 RID: 13634 RVA: 0x001213F4 File Offset: 0x0011F5F4
+	// Token: 0x06003542 RID: 13634 RVA: 0x001213D4 File Offset: 0x0011F5D4
 	public static void GhostReactorCreditsRefillPurchased(string gameId, int shinyRocksSpent, int finalCredits, int floor, string preset)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -1469,7 +1469,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003543 RID: 13635 RVA: 0x00121584 File Offset: 0x0011F784
+	// Token: 0x06003543 RID: 13635 RVA: 0x00121564 File Offset: 0x0011F764
 	public static void SuperInfectionEvent(bool roomDisconnect, float totalPlayTime, float roomPlayTime, float sessionPlayTime, float intervalPlayTime, float terminalTotalTime, float terminalIntervalTime, Dictionary<SITechTreePageId, float> timeUsingGadgetsTotal, Dictionary<SITechTreePageId, float> timeUsingGadgetsInterval, float timeUsingOwnGadgetsTotal, float timeUsingOwnGadgetsInterval, float timeUsingOthersGadgetsTotal, float timeUsingOthersGadgetsInterval, Dictionary<SITechTreePageId, int> tagsUsingGadgetsTotal, Dictionary<SITechTreePageId, int> tagsUsingGadgetsInterval, int tagsHoldingOwnGadgetsTotal, int tagsHoldingOwnGadgetsInterval, int tagsHoldingOthersGadgetsTotal, int tagsHoldingOthersGadgetsInterval, Dictionary<SIResource.ResourceType, int> resourcesGatheredTotal, Dictionary<SIResource.ResourceType, int> resourcesGatheredInterval, int roundsPlayedTotal, int roundsPlayedInterval, bool[][] unlockedNodes, int numberOfPlayers)
 	{
 		if (!GorillaTelemetry.IsConnectedIgnoreRoom())
@@ -1595,7 +1595,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003544 RID: 13636 RVA: 0x00121B80 File Offset: 0x0011FD80
+	// Token: 0x06003544 RID: 13636 RVA: 0x00121B60 File Offset: 0x0011FD60
 	public static void SuperInfectionEvent(string purchaseType, int shinyRockCost, int techPointsPurchased, float totalPlayTime, float roomPlayTime, float sessionPlayTime)
 	{
 		if (!GorillaTelemetry.IsConnectedIgnoreRoom())
@@ -1636,7 +1636,7 @@ public static class GorillaTelemetry
 		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
-	// Token: 0x06003545 RID: 13637 RVA: 0x00121D48 File Offset: 0x0011FF48
+	// Token: 0x06003545 RID: 13637 RVA: 0x00121D28 File Offset: 0x0011FF28
 	public static void PostNotificationEvent(string notificationType)
 	{
 		if (!GorillaTelemetry.IsConnected())
@@ -2215,7 +2215,7 @@ public static class GorillaTelemetry
 	// Token: 0x020007E6 RID: 2022
 	private class BatchRunner : MonoBehaviour
 	{
-		// Token: 0x06003546 RID: 13638 RVA: 0x00121DB4 File Offset: 0x0011FFB4
+		// Token: 0x06003546 RID: 13638 RVA: 0x00121D94 File Offset: 0x0011FF94
 		private IEnumerator Start()
 		{
 			for (;;)

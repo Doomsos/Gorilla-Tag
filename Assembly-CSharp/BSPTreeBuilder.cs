@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000CF9 RID: 3321
 public static class BSPTreeBuilder
 {
-	// Token: 0x060050B1 RID: 20657 RVA: 0x0019FF64 File Offset: 0x0019E164
+	// Token: 0x060050B1 RID: 20657 RVA: 0x0019FF44 File Offset: 0x0019E144
 	public static SerializableBSPTree BuildTree(ZoneDef[] zones)
 	{
 		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
@@ -127,7 +127,7 @@ public static class BSPTreeBuilder
 		return serializableBSPTree;
 	}
 
-	// Token: 0x060050B2 RID: 20658 RVA: 0x001A0310 File Offset: 0x0019E510
+	// Token: 0x060050B2 RID: 20658 RVA: 0x001A02F0 File Offset: 0x0019E4F0
 	private static int BuildTreeRecursive(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, int depth, SerializableBSPNode.Axis axis, List<SerializableBSPNode> nodeList, List<MatrixBSPNode> matrixNodeList, [TupleElementNames(new string[]
 	{
 		"matrixIndex",
@@ -245,7 +245,7 @@ public static class BSPTreeBuilder
 		return count;
 	}
 
-	// Token: 0x060050B3 RID: 20659 RVA: 0x001A07E4 File Offset: 0x0019E9E4
+	// Token: 0x060050B3 RID: 20659 RVA: 0x001A07C4 File Offset: 0x0019E9C4
 	private static SerializableBSPNode.Axis FindBestAxis(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis preferredAxis, out int bestSplitValue)
 	{
 		SerializableBSPNode.Axis[] array = new SerializableBSPNode.Axis[]
@@ -273,7 +273,7 @@ public static class BSPTreeBuilder
 		return axis;
 	}
 
-	// Token: 0x060050B4 RID: 20660 RVA: 0x001A0894 File Offset: 0x0019EA94
+	// Token: 0x060050B4 RID: 20660 RVA: 0x001A0874 File Offset: 0x0019EA74
 	private static int EvaluateBestSplit(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis axis, int splitValue)
 	{
 		BoundsInt boundsInt = bounds;
@@ -296,7 +296,7 @@ public static class BSPTreeBuilder
 		return BSPTreeBuilder.EvaluateSplit(boxes, splitValue, axis, bounds);
 	}
 
-	// Token: 0x060050B5 RID: 20661 RVA: 0x001A09D0 File Offset: 0x0019EBD0
+	// Token: 0x060050B5 RID: 20661 RVA: 0x001A09B0 File Offset: 0x0019EBB0
 	private static int FindOptimalSplit(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis axis, out int bestScore)
 	{
 		List<int> list = new List<int>();
@@ -341,7 +341,7 @@ public static class BSPTreeBuilder
 		return num;
 	}
 
-	// Token: 0x060050B6 RID: 20662 RVA: 0x001A0BA0 File Offset: 0x0019EDA0
+	// Token: 0x060050B6 RID: 20662 RVA: 0x001A0B80 File Offset: 0x0019ED80
 	private static int GetFallbackSplit(BoundsInt bounds, SerializableBSPNode.Axis axis)
 	{
 		switch (axis)
@@ -357,7 +357,7 @@ public static class BSPTreeBuilder
 		}
 	}
 
-	// Token: 0x060050B7 RID: 20663 RVA: 0x001A0BF4 File Offset: 0x0019EDF4
+	// Token: 0x060050B7 RID: 20663 RVA: 0x001A0BD4 File Offset: 0x0019EDD4
 	private static int EvaluateSplit(List<BSPTreeBuilder.BoxMetadata> boxes, int splitValue, SerializableBSPNode.Axis axis, BoundsInt bounds)
 	{
 		BoundsInt region = bounds;
@@ -399,7 +399,7 @@ public static class BSPTreeBuilder
 		return -((num + 1) * (num2 + 1));
 	}
 
-	// Token: 0x060050B8 RID: 20664 RVA: 0x001A0DC0 File Offset: 0x0019EFC0
+	// Token: 0x060050B8 RID: 20664 RVA: 0x001A0DA0 File Offset: 0x0019EFA0
 	private static List<BSPTreeBuilder.BoxMetadata> GetEffectiveBoxes(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt region)
 	{
 		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
@@ -431,7 +431,7 @@ public static class BSPTreeBuilder
 		return list;
 	}
 
-	// Token: 0x060050B9 RID: 20665 RVA: 0x001A0F14 File Offset: 0x0019F114
+	// Token: 0x060050B9 RID: 20665 RVA: 0x001A0EF4 File Offset: 0x0019F0F4
 	private static List<BSPTreeBuilder.BoxMetadata> GetEffectiveSpanningBoxes(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt leftBounds, BoundsInt rightBounds)
 	{
 		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
@@ -451,7 +451,7 @@ public static class BSPTreeBuilder
 		return list;
 	}
 
-	// Token: 0x060050BA RID: 20666 RVA: 0x001A0FD4 File Offset: 0x0019F1D4
+	// Token: 0x060050BA RID: 20666 RVA: 0x001A0FB4 File Offset: 0x0019F1B4
 	private static SerializableBSPNode.Axis GetNextAxis(SerializableBSPNode.Axis currentAxis)
 	{
 		switch (currentAxis)
@@ -467,7 +467,7 @@ public static class BSPTreeBuilder
 		}
 	}
 
-	// Token: 0x060050BB RID: 20667 RVA: 0x001A0FF1 File Offset: 0x0019F1F1
+	// Token: 0x060050BB RID: 20667 RVA: 0x001A0FD1 File Offset: 0x0019F1D1
 	private static int GetAxisValue(Vector3Int point, SerializableBSPNode.Axis axis)
 	{
 		switch (axis)
@@ -483,7 +483,7 @@ public static class BSPTreeBuilder
 		}
 	}
 
-	// Token: 0x060050BC RID: 20668 RVA: 0x001A1020 File Offset: 0x0019F220
+	// Token: 0x060050BC RID: 20668 RVA: 0x001A1000 File Offset: 0x0019F200
 	private static BoundsInt CalculateWorldBounds(List<BSPTreeBuilder.BoxMetadata> boxes)
 	{
 		if (boxes.Count == 0)
@@ -498,7 +498,7 @@ public static class BSPTreeBuilder
 		return bounds;
 	}
 
-	// Token: 0x060050BD RID: 20669 RVA: 0x001A1074 File Offset: 0x0019F274
+	// Token: 0x060050BD RID: 20669 RVA: 0x001A1054 File Offset: 0x0019F254
 	private static float CalculateIntersectionVolume(BoundsInt box, BoundsInt region)
 	{
 		if (!box.Intersects(region))
@@ -508,7 +508,7 @@ public static class BSPTreeBuilder
 		return box.GetIntersection(region).VolumeFloat();
 	}
 
-	// Token: 0x060050BE RID: 20670 RVA: 0x001A10A4 File Offset: 0x0019F2A4
+	// Token: 0x060050BE RID: 20670 RVA: 0x001A1084 File Offset: 0x0019F284
 	private static int CreateMatrixNodeTree(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, List<MatrixBSPNode> matrixNodeList, BoundsInt bounds, [TupleElementNames(new string[]
 	{
 		"matrixIndex",
@@ -575,7 +575,7 @@ public static class BSPTreeBuilder
 		return BSPTreeBuilder.CreateSequentialMatrixNodes(zones, list3, matrixNodeList, 0, zones, matrixNodeCache, ref matrixNodeCacheHits);
 	}
 
-	// Token: 0x060050BF RID: 20671 RVA: 0x001A12AC File Offset: 0x0019F4AC
+	// Token: 0x060050BF RID: 20671 RVA: 0x001A128C File Offset: 0x0019F48C
 	private static int CreateSequentialMatrixNodes(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, List<MatrixBSPNode> matrixNodeList, int boxIndex, ZoneDef[] allZones, [TupleElementNames(new string[]
 	{
 		"matrixIndex",
@@ -609,7 +609,7 @@ public static class BSPTreeBuilder
 		return BSPTreeBuilder.AddMatrixNodeWithCache(matrixNode2, matrixNodeList, matrixNodeCache, ref matrixNodeCacheHits);
 	}
 
-	// Token: 0x060050C0 RID: 20672 RVA: 0x001A1398 File Offset: 0x0019F598
+	// Token: 0x060050C0 RID: 20672 RVA: 0x001A1378 File Offset: 0x0019F578
 	private static int AddMatrixNodeWithCache(MatrixBSPNode matrixNode, List<MatrixBSPNode> matrixNodeList, [TupleElementNames(new string[]
 	{
 		"matrixIndex",
@@ -629,7 +629,7 @@ public static class BSPTreeBuilder
 		return -count;
 	}
 
-	// Token: 0x060050C1 RID: 20673 RVA: 0x001A13E4 File Offset: 0x0019F5E4
+	// Token: 0x060050C1 RID: 20673 RVA: 0x001A13C4 File Offset: 0x0019F5C4
 	private static List<BSPTreeBuilder.BoxMetadata> SortBoxesByPriority(List<BSPTreeBuilder.BoxMetadata> boxes)
 	{
 		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>(boxes);
@@ -637,7 +637,7 @@ public static class BSPTreeBuilder
 		return list;
 	}
 
-	// Token: 0x060050C2 RID: 20674 RVA: 0x001A1414 File Offset: 0x0019F614
+	// Token: 0x060050C2 RID: 20674 RVA: 0x001A13F4 File Offset: 0x0019F5F4
 	private static void CleanupUnreferencedMatrices(List<MatrixBSPNode> matrixNodeList, List<MatrixZonePair> matricesList)
 	{
 		HashSet<int> hashSet = new HashSet<int>();
@@ -693,7 +693,7 @@ public static class BSPTreeBuilder
 	// Token: 0x02000CFA RID: 3322
 	public class BoxMetadata
 	{
-		// Token: 0x060050C4 RID: 20676 RVA: 0x001A156B File Offset: 0x0019F76B
+		// Token: 0x060050C4 RID: 20676 RVA: 0x001A154B File Offset: 0x0019F74B
 		public BoxMetadata(BoxCollider boxCollider, ZoneDef zoneData, int matrixIdx, int priority)
 		{
 			this.box = boxCollider;
@@ -703,7 +703,7 @@ public static class BSPTreeBuilder
 			this.priority = priority;
 		}
 
-		// Token: 0x060050C5 RID: 20677 RVA: 0x001A15A4 File Offset: 0x0019F7A4
+		// Token: 0x060050C5 RID: 20677 RVA: 0x001A1584 File Offset: 0x0019F784
 		public bool ContainsPoint(Vector3 worldPoint)
 		{
 			Vector3 vector = this.box.transform.InverseTransformPoint(worldPoint);
@@ -714,7 +714,7 @@ public static class BSPTreeBuilder
 			return vector.x >= vector2.x && vector.x <= vector3.x && vector.y >= vector2.y && vector.y <= vector3.y && vector.z >= vector2.z && vector.z <= vector3.z;
 		}
 
-		// Token: 0x060050C6 RID: 20678 RVA: 0x001A1656 File Offset: 0x0019F856
+		// Token: 0x060050C6 RID: 20678 RVA: 0x001A1636 File Offset: 0x0019F836
 		public BoundsInt GetWorldBounds()
 		{
 			return this.bounds;

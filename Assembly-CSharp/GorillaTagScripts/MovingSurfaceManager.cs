@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DAB RID: 3499
 	public class MovingSurfaceManager : MonoBehaviour
 	{
-		// Token: 0x06005609 RID: 22025 RVA: 0x001B0900 File Offset: 0x001AEB00
+		// Token: 0x06005609 RID: 22025 RVA: 0x001B08E0 File Offset: 0x001AEAE0
 		private void Awake()
 		{
 			if (MovingSurfaceManager.instance != null && MovingSurfaceManager.instance != this)
@@ -22,19 +22,19 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600560A RID: 22026 RVA: 0x001B094C File Offset: 0x001AEB4C
+		// Token: 0x0600560A RID: 22026 RVA: 0x001B092C File Offset: 0x001AEB2C
 		public void RegisterMovingSurface(MovingSurface ms)
 		{
 			this.movingSurfaces.TryAdd(ms.GetID(), ms);
 		}
 
-		// Token: 0x0600560B RID: 22027 RVA: 0x001B0961 File Offset: 0x001AEB61
+		// Token: 0x0600560B RID: 22027 RVA: 0x001B0941 File Offset: 0x001AEB41
 		public void UnregisterMovingSurface(MovingSurface ms)
 		{
 			this.movingSurfaces.Remove(ms.GetID());
 		}
 
-		// Token: 0x0600560C RID: 22028 RVA: 0x001B0975 File Offset: 0x001AEB75
+		// Token: 0x0600560C RID: 22028 RVA: 0x001B0955 File Offset: 0x001AEB55
 		public void RegisterSurfaceMover(SurfaceMover sm)
 		{
 			if (!this.surfaceMovers.Contains(sm))
@@ -44,19 +44,19 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600560D RID: 22029 RVA: 0x001B0997 File Offset: 0x001AEB97
+		// Token: 0x0600560D RID: 22029 RVA: 0x001B0977 File Offset: 0x001AEB77
 		public void UnregisterSurfaceMover(SurfaceMover sm)
 		{
 			this.surfaceMovers.Remove(sm);
 		}
 
-		// Token: 0x0600560E RID: 22030 RVA: 0x001B09A6 File Offset: 0x001AEBA6
+		// Token: 0x0600560E RID: 22030 RVA: 0x001B0986 File Offset: 0x001AEB86
 		public bool TryGetMovingSurface(int id, out MovingSurface result)
 		{
 			return this.movingSurfaces.TryGetValue(id, ref result) && result != null;
 		}
 
-		// Token: 0x0600560F RID: 22031 RVA: 0x001B09C4 File Offset: 0x001AEBC4
+		// Token: 0x0600560F RID: 22031 RVA: 0x001B09A4 File Offset: 0x001AEBA4
 		private void FixedUpdate()
 		{
 			foreach (SurfaceMover surfaceMover in this.surfaceMovers)

@@ -15,7 +15,7 @@ public class KIDUI_AgeAppealScreen : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06004381 RID: 17281 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x06004381 RID: 17281 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;
@@ -26,7 +26,7 @@ public class KIDUI_AgeAppealScreen : MonoBehaviour
 		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
 	}
 
-	// Token: 0x06004382 RID: 17282 RVA: 0x00166492 File Offset: 0x00164692
+	// Token: 0x06004382 RID: 17282 RVA: 0x00166472 File Offset: 0x00164672
 	public void ShowRestrictedAccessScreen()
 	{
 		base.gameObject.SetActive(true);

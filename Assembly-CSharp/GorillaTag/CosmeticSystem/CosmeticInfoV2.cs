@@ -9,7 +9,7 @@ namespace GorillaTag.CosmeticSystem
 	public struct CosmeticInfoV2 : ISerializationCallbackReceiver
 	{
 		// Token: 0x170009E8 RID: 2536
-		// (get) Token: 0x06006946 RID: 26950 RVA: 0x00224100 File Offset: 0x00222300
+		// (get) Token: 0x06006946 RID: 26950 RVA: 0x002240E0 File Offset: 0x002222E0
 		public bool hasHoldableParts
 		{
 			get
@@ -20,7 +20,7 @@ namespace GorillaTag.CosmeticSystem
 		}
 
 		// Token: 0x170009E9 RID: 2537
-		// (get) Token: 0x06006947 RID: 26951 RVA: 0x00224120 File Offset: 0x00222320
+		// (get) Token: 0x06006947 RID: 26951 RVA: 0x00224100 File Offset: 0x00222300
 		public bool hasWardrobeParts
 		{
 			get
@@ -31,7 +31,7 @@ namespace GorillaTag.CosmeticSystem
 		}
 
 		// Token: 0x170009EA RID: 2538
-		// (get) Token: 0x06006948 RID: 26952 RVA: 0x00224140 File Offset: 0x00222340
+		// (get) Token: 0x06006948 RID: 26952 RVA: 0x00224120 File Offset: 0x00222320
 		public bool hasStoreParts
 		{
 			get
@@ -42,7 +42,7 @@ namespace GorillaTag.CosmeticSystem
 		}
 
 		// Token: 0x170009EB RID: 2539
-		// (get) Token: 0x06006949 RID: 26953 RVA: 0x00224160 File Offset: 0x00222360
+		// (get) Token: 0x06006949 RID: 26953 RVA: 0x00224140 File Offset: 0x00222340
 		public bool hasFunctionalParts
 		{
 			get
@@ -53,7 +53,7 @@ namespace GorillaTag.CosmeticSystem
 		}
 
 		// Token: 0x170009EC RID: 2540
-		// (get) Token: 0x0600694A RID: 26954 RVA: 0x00224180 File Offset: 0x00222380
+		// (get) Token: 0x0600694A RID: 26954 RVA: 0x00224160 File Offset: 0x00222360
 		public bool hasFirstPersonViewParts
 		{
 			get
@@ -64,7 +64,7 @@ namespace GorillaTag.CosmeticSystem
 		}
 
 		// Token: 0x170009ED RID: 2541
-		// (get) Token: 0x0600694B RID: 26955 RVA: 0x002241A0 File Offset: 0x002223A0
+		// (get) Token: 0x0600694B RID: 26955 RVA: 0x00224180 File Offset: 0x00222380
 		public bool hasLocalRigParts
 		{
 			get
@@ -74,7 +74,7 @@ namespace GorillaTag.CosmeticSystem
 			}
 		}
 
-		// Token: 0x0600694C RID: 26956 RVA: 0x002241C0 File Offset: 0x002223C0
+		// Token: 0x0600694C RID: 26956 RVA: 0x002241A0 File Offset: 0x002223A0
 		public CosmeticInfoV2(string displayName)
 		{
 			this.enabled = true;
@@ -103,7 +103,7 @@ namespace GorillaTag.CosmeticSystem
 		{
 		}
 
-		// Token: 0x0600694E RID: 26958 RVA: 0x00224288 File Offset: 0x00222488
+		// Token: 0x0600694E RID: 26958 RVA: 0x00224268 File Offset: 0x00222468
 		void ISerializationCallbackReceiver.OnAfterDeserialize()
 		{
 			this._OnAfterDeserialize_InitializePartsArray(ref this.holdableParts, ECosmeticPartType.Holdable);
@@ -118,7 +118,7 @@ namespace GorillaTag.CosmeticSystem
 			}
 		}
 
-		// Token: 0x0600694F RID: 26959 RVA: 0x002242F8 File Offset: 0x002224F8
+		// Token: 0x0600694F RID: 26959 RVA: 0x002242D8 File Offset: 0x002224D8
 		private void _OnAfterDeserialize_InitializePartsArray(ref CosmeticPart[] parts, ECosmeticPartType partType)
 		{
 			for (int i = 0; i < parts.Length; i++)

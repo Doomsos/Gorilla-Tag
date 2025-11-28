@@ -7,13 +7,13 @@ using UnityEngine;
 // Token: 0x02000468 RID: 1128
 public class FriendshipCharm : HoldableObject
 {
-	// Token: 0x06001C8C RID: 7308 RVA: 0x000976C0 File Offset: 0x000958C0
+	// Token: 0x06001C8C RID: 7308 RVA: 0x000976A0 File Offset: 0x000958A0
 	private void Awake()
 	{
 		this.parent = base.transform.parent;
 	}
 
-	// Token: 0x06001C8D RID: 7309 RVA: 0x000976D4 File Offset: 0x000958D4
+	// Token: 0x06001C8D RID: 7309 RVA: 0x000976B4 File Offset: 0x000958B4
 	private void LateUpdate()
 	{
 		if (!this.isBroken && (this.lineStart.transform.position - this.lineEnd.transform.position).IsLongerThan(this.breakBraceletLength * GTPlayer.Instance.scale))
@@ -22,7 +22,7 @@ public class FriendshipCharm : HoldableObject
 		}
 	}
 
-	// Token: 0x06001C8E RID: 7310 RVA: 0x0009772C File Offset: 0x0009592C
+	// Token: 0x06001C8E RID: 7310 RVA: 0x0009770C File Offset: 0x0009590C
 	public void OnEnable()
 	{
 		this.interactionPoint.enabled = true;
@@ -31,7 +31,7 @@ public class FriendshipCharm : HoldableObject
 		this.UpdatePosition();
 	}
 
-	// Token: 0x06001C8F RID: 7311 RVA: 0x00097753 File Offset: 0x00095953
+	// Token: 0x06001C8F RID: 7311 RVA: 0x00097733 File Offset: 0x00095933
 	private void DestroyBracelet()
 	{
 		this.interactionPoint.enabled = false;
@@ -40,7 +40,7 @@ public class FriendshipCharm : HoldableObject
 		FriendshipGroupDetection.Instance.LeaveParty();
 	}
 
-	// Token: 0x06001C90 RID: 7312 RVA: 0x0009777C File Offset: 0x0009597C
+	// Token: 0x06001C90 RID: 7312 RVA: 0x0009775C File Offset: 0x0009595C
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		bool flag = grabbingHand == EquipmentInteractor.instance.leftHand;
@@ -50,7 +50,7 @@ public class FriendshipCharm : HoldableObject
 		base.transform.localPosition = Vector3.zero;
 	}
 
-	// Token: 0x06001C91 RID: 7313 RVA: 0x00097804 File Offset: 0x00095A04
+	// Token: 0x06001C91 RID: 7313 RVA: 0x000977E4 File Offset: 0x000959E4
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		bool forLeftHand = releasingHand == EquipmentInteractor.instance.leftHand;
@@ -59,7 +59,7 @@ public class FriendshipCharm : HoldableObject
 		return base.OnRelease(zoneReleased, releasingHand);
 	}
 
-	// Token: 0x06001C92 RID: 7314 RVA: 0x00097840 File Offset: 0x00095A40
+	// Token: 0x06001C92 RID: 7314 RVA: 0x00097820 File Offset: 0x00095A20
 	private void UpdatePosition()
 	{
 		base.transform.SetParent(this.parent);
@@ -67,7 +67,7 @@ public class FriendshipCharm : HoldableObject
 		base.transform.localRotation = this.releasePosition.localRotation;
 	}
 
-	// Token: 0x06001C93 RID: 7315 RVA: 0x00097880 File Offset: 0x00095A80
+	// Token: 0x06001C93 RID: 7315 RVA: 0x00097860 File Offset: 0x00095A60
 	private void OnCollisionEnter(Collision other)
 	{
 		if (!this.isBroken)

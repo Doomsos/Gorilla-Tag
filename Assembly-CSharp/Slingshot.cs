@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 // Token: 0x0200041B RID: 1051
 public class Slingshot : ProjectileWeapon
 {
-	// Token: 0x060019E3 RID: 6627 RVA: 0x0008A248 File Offset: 0x00088448
+	// Token: 0x060019E3 RID: 6627 RVA: 0x0008A228 File Offset: 0x00088428
 	private void DestroyDummyProjectile()
 	{
 		if (this.hasDummyProjectile)
@@ -21,7 +21,7 @@ public class Slingshot : ProjectileWeapon
 		}
 	}
 
-	// Token: 0x060019E4 RID: 6628 RVA: 0x0008A2AC File Offset: 0x000884AC
+	// Token: 0x060019E4 RID: 6628 RVA: 0x0008A28C File Offset: 0x0008848C
 	protected override void Awake()
 	{
 		base.Awake();
@@ -31,14 +31,14 @@ public class Slingshot : ProjectileWeapon
 		}
 	}
 
-	// Token: 0x060019E5 RID: 6629 RVA: 0x0008A2D2 File Offset: 0x000884D2
+	// Token: 0x060019E5 RID: 6629 RVA: 0x0008A2B2 File Offset: 0x000884B2
 	public override void OnSpawn(VRRig rig)
 	{
 		base.OnSpawn(rig);
 		this.myRig = rig;
 	}
 
-	// Token: 0x060019E6 RID: 6630 RVA: 0x0008A2E4 File Offset: 0x000884E4
+	// Token: 0x060019E6 RID: 6630 RVA: 0x0008A2C4 File Offset: 0x000884C4
 	internal override void OnEnable()
 	{
 		this.leftHandSnap = this.myRig.cosmeticReferences.Get(CosmeticRefID.SlingshotSnapLeft).transform;
@@ -57,14 +57,14 @@ public class Slingshot : ProjectileWeapon
 		base.OnEnable();
 	}
 
-	// Token: 0x060019E7 RID: 6631 RVA: 0x0008A377 File Offset: 0x00088577
+	// Token: 0x060019E7 RID: 6631 RVA: 0x0008A357 File Offset: 0x00088557
 	internal override void OnDisable()
 	{
 		this.DestroyDummyProjectile();
 		base.OnDisable();
 	}
 
-	// Token: 0x060019E8 RID: 6632 RVA: 0x0008A388 File Offset: 0x00088588
+	// Token: 0x060019E8 RID: 6632 RVA: 0x0008A368 File Offset: 0x00088568
 	protected override void LateUpdateShared()
 	{
 		base.LateUpdateShared();
@@ -148,7 +148,7 @@ public class Slingshot : ProjectileWeapon
 		}
 	}
 
-	// Token: 0x060019E9 RID: 6633 RVA: 0x0008A6A8 File Offset: 0x000888A8
+	// Token: 0x060019E9 RID: 6633 RVA: 0x0008A688 File Offset: 0x00088888
 	protected override void LateUpdateLocal()
 	{
 		base.LateUpdateLocal();
@@ -185,7 +185,7 @@ public class Slingshot : ProjectileWeapon
 		}
 	}
 
-	// Token: 0x060019EA RID: 6634 RVA: 0x0008A763 File Offset: 0x00088963
+	// Token: 0x060019EA RID: 6634 RVA: 0x0008A743 File Offset: 0x00088943
 	protected override void LateUpdateReplicated()
 	{
 		base.LateUpdateReplicated();
@@ -200,13 +200,13 @@ public class Slingshot : ProjectileWeapon
 		}
 	}
 
-	// Token: 0x060019EB RID: 6635 RVA: 0x0008A79E File Offset: 0x0008899E
+	// Token: 0x060019EB RID: 6635 RVA: 0x0008A77E File Offset: 0x0008897E
 	public static bool IsSlingShotEnabled()
 	{
 		return !(GorillaTagger.Instance == null) && !(GorillaTagger.Instance.offlineVRRig == null) && GorillaTagger.Instance.offlineVRRig.cosmeticSet.HasItemOfCategory(CosmeticsController.CosmeticCategory.Chest);
 	}
 
-	// Token: 0x060019EC RID: 6636 RVA: 0x0008A7D8 File Offset: 0x000889D8
+	// Token: 0x060019EC RID: 6636 RVA: 0x0008A7B8 File Offset: 0x000889B8
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		if (!this.IsMyItem())
@@ -246,7 +246,7 @@ public class Slingshot : ProjectileWeapon
 		}
 	}
 
-	// Token: 0x060019ED RID: 6637 RVA: 0x0008A8B4 File Offset: 0x00088AB4
+	// Token: 0x060019ED RID: 6637 RVA: 0x0008A894 File Offset: 0x00088A94
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		base.OnRelease(zoneReleased, releasingHand);
@@ -283,7 +283,7 @@ public class Slingshot : ProjectileWeapon
 		return true;
 	}
 
-	// Token: 0x060019EE RID: 6638 RVA: 0x0008A9CC File Offset: 0x00088BCC
+	// Token: 0x060019EE RID: 6638 RVA: 0x0008A9AC File Offset: 0x00088BAC
 	public override void DropItemCleanup()
 	{
 		base.DropItemCleanup();
@@ -297,25 +297,25 @@ public class Slingshot : ProjectileWeapon
 		return true;
 	}
 
-	// Token: 0x060019F0 RID: 6640 RVA: 0x0008A9E3 File Offset: 0x00088BE3
+	// Token: 0x060019F0 RID: 6640 RVA: 0x0008A9C3 File Offset: 0x00088BC3
 	private bool ForLeftHandSlingshot()
 	{
 		return this.itemState == TransferrableObject.ItemStates.State2 || this.currentState == TransferrableObject.PositionState.InLeftHand;
 	}
 
-	// Token: 0x060019F1 RID: 6641 RVA: 0x0008A9F9 File Offset: 0x00088BF9
+	// Token: 0x060019F1 RID: 6641 RVA: 0x0008A9D9 File Offset: 0x00088BD9
 	private bool InDrawingState()
 	{
 		return this.itemState == TransferrableObject.ItemStates.State2 || this.itemState == TransferrableObject.ItemStates.State3;
 	}
 
-	// Token: 0x060019F2 RID: 6642 RVA: 0x0008AA0F File Offset: 0x00088C0F
+	// Token: 0x060019F2 RID: 6642 RVA: 0x0008A9EF File Offset: 0x00088BEF
 	protected override Vector3 GetLaunchPosition()
 	{
 		return this.dummyProjectile.transform.position;
 	}
 
-	// Token: 0x060019F3 RID: 6643 RVA: 0x0008AA24 File Offset: 0x00088C24
+	// Token: 0x060019F3 RID: 6643 RVA: 0x0008AA04 File Offset: 0x00088C04
 	protected override Vector3 GetLaunchVelocity()
 	{
 		float num = Mathf.Abs(base.transform.lossyScale.x);

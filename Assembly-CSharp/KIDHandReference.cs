@@ -5,7 +5,7 @@ using UnityEngine;
 public class KIDHandReference : MonoBehaviour
 {
 	// Token: 0x17000640 RID: 1600
-	// (get) Token: 0x06004257 RID: 16983 RVA: 0x0015ED0D File Offset: 0x0015CF0D
+	// (get) Token: 0x06004257 RID: 16983 RVA: 0x0015ECED File Offset: 0x0015CEED
 	public static GameObject LeftHand
 	{
 		get
@@ -15,7 +15,7 @@ public class KIDHandReference : MonoBehaviour
 	}
 
 	// Token: 0x17000641 RID: 1601
-	// (get) Token: 0x06004258 RID: 16984 RVA: 0x0015ED14 File Offset: 0x0015CF14
+	// (get) Token: 0x06004258 RID: 16984 RVA: 0x0015ECF4 File Offset: 0x0015CEF4
 	public static GameObject RightHand
 	{
 		get
@@ -24,7 +24,7 @@ public class KIDHandReference : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004259 RID: 16985 RVA: 0x0015ED1B File Offset: 0x0015CF1B
+	// Token: 0x06004259 RID: 16985 RVA: 0x0015ECFB File Offset: 0x0015CEFB
 	private void Awake()
 	{
 		KIDHandReference._leftHandRef = this._leftHand;

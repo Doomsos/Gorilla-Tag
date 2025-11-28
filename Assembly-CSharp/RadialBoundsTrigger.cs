@@ -5,13 +5,13 @@ using UnityEngine.Events;
 // Token: 0x020008D7 RID: 2263
 public class RadialBoundsTrigger : MonoBehaviour
 {
-	// Token: 0x06003A0A RID: 14858 RVA: 0x00133066 File Offset: 0x00131266
+	// Token: 0x06003A0A RID: 14858 RVA: 0x00133046 File Offset: 0x00131246
 	public void TestOverlap()
 	{
 		this.TestOverlap(this._raiseEvents);
 	}
 
-	// Token: 0x06003A0B RID: 14859 RVA: 0x00133074 File Offset: 0x00131274
+	// Token: 0x06003A0B RID: 14859 RVA: 0x00133054 File Offset: 0x00131254
 	public void TestOverlap(bool raiseEvents)
 	{
 		if (!this.object1 || !this.object2)
@@ -94,13 +94,13 @@ public class RadialBoundsTrigger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003A0C RID: 14860 RVA: 0x00133260 File Offset: 0x00131460
+	// Token: 0x06003A0C RID: 14860 RVA: 0x00133240 File Offset: 0x00131440
 	private void FixedUpdate()
 	{
 		this.TestOverlap();
 	}
 
-	// Token: 0x06003A0D RID: 14861 RVA: 0x00133268 File Offset: 0x00131468
+	// Token: 0x06003A0D RID: 14861 RVA: 0x00133248 File Offset: 0x00131448
 	private void OnDisable()
 	{
 		if (this._raiseEvents && this.object1 && this.object2 && this._overlapping)

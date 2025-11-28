@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020009FB RID: 2555
 public class VelocityHelperTest : MonoBehaviour
 {
-	// Token: 0x0600416F RID: 16751 RVA: 0x0015BBD9 File Offset: 0x00159DD9
+	// Token: 0x0600416F RID: 16751 RVA: 0x0015BBB9 File Offset: 0x00159DB9
 	private void Setup()
 	{
 		this.lastPosition = base.transform.position;
@@ -13,13 +13,13 @@ public class VelocityHelperTest : MonoBehaviour
 		this.speed = 0f;
 	}
 
-	// Token: 0x06004170 RID: 16752 RVA: 0x0015BC0D File Offset: 0x00159E0D
+	// Token: 0x06004170 RID: 16752 RVA: 0x0015BBED File Offset: 0x00159DED
 	private void Start()
 	{
 		this.Setup();
 	}
 
-	// Token: 0x06004171 RID: 16753 RVA: 0x0015BC18 File Offset: 0x00159E18
+	// Token: 0x06004171 RID: 16753 RVA: 0x0015BBF8 File Offset: 0x00159DF8
 	private void FixedUpdate()
 	{
 		float deltaTime = Time.deltaTime;

@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x0200109B RID: 4251
 	public class RCDragon : RCVehicle
 	{
-		// Token: 0x06006A50 RID: 27216 RVA: 0x0022C520 File Offset: 0x0022A720
+		// Token: 0x06006A50 RID: 27216 RVA: 0x0022C500 File Offset: 0x0022A700
 		protected override void AuthorityBeginDocked()
 		{
 			base.AuthorityBeginDocked();
@@ -22,7 +22,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A51 RID: 27217 RVA: 0x0022C590 File Offset: 0x0022A790
+		// Token: 0x06006A51 RID: 27217 RVA: 0x0022C570 File Offset: 0x0022A770
 		protected override void Awake()
 		{
 			base.Awake();
@@ -43,14 +43,14 @@ namespace GorillaTag.Cosmetics
 			this.nextFlapEventAnimTime = this.flapAnimEventTime;
 		}
 
-		// Token: 0x06006A52 RID: 27218 RVA: 0x0022C683 File Offset: 0x0022A883
+		// Token: 0x06006A52 RID: 27218 RVA: 0x0022C663 File Offset: 0x0022A863
 		protected override void OnDisable()
 		{
 			base.OnDisable();
 			this.audioSource.GTStop();
 		}
 
-		// Token: 0x06006A53 RID: 27219 RVA: 0x0022C698 File Offset: 0x0022A898
+		// Token: 0x06006A53 RID: 27219 RVA: 0x0022C678 File Offset: 0x0022A878
 		public void StartBreathFire()
 		{
 			if (!string.IsNullOrEmpty(this.mouthBreathFireAnimName))
@@ -65,7 +65,7 @@ namespace GorillaTag.Cosmetics
 			this.fireBreathTimeRemaining = this.fireBreathDuration;
 		}
 
-		// Token: 0x06006A54 RID: 27220 RVA: 0x0022C700 File Offset: 0x0022A900
+		// Token: 0x06006A54 RID: 27220 RVA: 0x0022C6E0 File Offset: 0x0022A8E0
 		public void StopBreathFire()
 		{
 			if (!string.IsNullOrEmpty(this.mouthClosedAnimName))
@@ -79,13 +79,13 @@ namespace GorillaTag.Cosmetics
 			this.fireBreathTimeRemaining = -1f;
 		}
 
-		// Token: 0x06006A55 RID: 27221 RVA: 0x0022C755 File Offset: 0x0022A955
+		// Token: 0x06006A55 RID: 27221 RVA: 0x0022C735 File Offset: 0x0022A935
 		public bool IsBreathingFire()
 		{
 			return this.fireBreathTimeRemaining >= 0f;
 		}
 
-		// Token: 0x06006A56 RID: 27222 RVA: 0x0022C767 File Offset: 0x0022A967
+		// Token: 0x06006A56 RID: 27222 RVA: 0x0022C747 File Offset: 0x0022A947
 		private void PlayRandomSound(List<AudioClip> clips, float volume)
 		{
 			if (clips == null || clips.Count == 0)
@@ -95,7 +95,7 @@ namespace GorillaTag.Cosmetics
 			this.PlaySound(clips[Random.Range(0, clips.Count)], volume);
 		}
 
-		// Token: 0x06006A57 RID: 27223 RVA: 0x0022C790 File Offset: 0x0022A990
+		// Token: 0x06006A57 RID: 27223 RVA: 0x0022C770 File Offset: 0x0022A970
 		private void PlaySound(AudioClip clip, float volume)
 		{
 			if (this.audioSource == null || clip == null)
@@ -109,7 +109,7 @@ namespace GorillaTag.Cosmetics
 			this.audioSource.GTPlayOneShot(clip, 1f);
 		}
 
-		// Token: 0x06006A58 RID: 27224 RVA: 0x0022C7F8 File Offset: 0x0022A9F8
+		// Token: 0x06006A58 RID: 27224 RVA: 0x0022C7D8 File Offset: 0x0022A9D8
 		protected override void AuthorityUpdate(float dt)
 		{
 			base.AuthorityUpdate(dt);
@@ -130,7 +130,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A59 RID: 27225 RVA: 0x0022C8F4 File Offset: 0x0022AAF4
+		// Token: 0x06006A59 RID: 27225 RVA: 0x0022C8D4 File Offset: 0x0022AAD4
 		protected override void RemoteUpdate(float dt)
 		{
 			base.RemoteUpdate(dt);
@@ -145,7 +145,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A5A RID: 27226 RVA: 0x0022C97C File Offset: 0x0022AB7C
+		// Token: 0x06006A5A RID: 27226 RVA: 0x0022C95C File Offset: 0x0022AB5C
 		protected override void SharedUpdate(float dt)
 		{
 			base.SharedUpdate(dt);
@@ -238,7 +238,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A5B RID: 27227 RVA: 0x0022CC18 File Offset: 0x0022AE18
+		// Token: 0x06006A5B RID: 27227 RVA: 0x0022CBF8 File Offset: 0x0022ADF8
 		private void FixedUpdate()
 		{
 			if (!base.HasLocalAuthority)
@@ -296,7 +296,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006A5C RID: 27228 RVA: 0x0022CF2C File Offset: 0x0022B12C
+		// Token: 0x06006A5C RID: 27228 RVA: 0x0022CF0C File Offset: 0x0022B10C
 		private void OnTriggerEnter(Collider other)
 		{
 			bool flag = other.gameObject.IsOnLayer(UnityLayer.GorillaThrowable);

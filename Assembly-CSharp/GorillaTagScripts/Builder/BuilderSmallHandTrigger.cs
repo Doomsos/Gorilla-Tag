@@ -10,7 +10,7 @@ namespace GorillaTagScripts.Builder
 	public class BuilderSmallHandTrigger : MonoBehaviour
 	{
 		// Token: 0x17000884 RID: 2180
-		// (get) Token: 0x06005C25 RID: 23589 RVA: 0x001D944C File Offset: 0x001D764C
+		// (get) Token: 0x06005C25 RID: 23589 RVA: 0x001D942C File Offset: 0x001D762C
 		public bool TriggeredThisFrame
 		{
 			get
@@ -19,7 +19,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C26 RID: 23590 RVA: 0x001D945C File Offset: 0x001D765C
+		// Token: 0x06005C26 RID: 23590 RVA: 0x001D943C File Offset: 0x001D763C
 		private void OnTriggerEnter(Collider other)
 		{
 			if (!base.enabled)

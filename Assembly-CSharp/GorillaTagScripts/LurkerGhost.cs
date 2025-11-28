@@ -15,7 +15,7 @@ namespace GorillaTagScripts
 	[NetworkBehaviourWeaved(6)]
 	public class LurkerGhost : NetworkComponent
 	{
-		// Token: 0x06005924 RID: 22820 RVA: 0x001C8186 File Offset: 0x001C6386
+		// Token: 0x06005924 RID: 22820 RVA: 0x001C8166 File Offset: 0x001C6366
 		protected override void Awake()
 		{
 			base.Awake();
@@ -25,7 +25,7 @@ namespace GorillaTagScripts
 			this.targetVRRig = null;
 		}
 
-		// Token: 0x06005925 RID: 22821 RVA: 0x001C81AE File Offset: 0x001C63AE
+		// Token: 0x06005925 RID: 22821 RVA: 0x001C818E File Offset: 0x001C638E
 		protected override void Start()
 		{
 			base.Start();
@@ -34,14 +34,14 @@ namespace GorillaTagScripts
 			this.ChangeState(LurkerGhost.ghostState.patrol);
 		}
 
-		// Token: 0x06005926 RID: 22822 RVA: 0x001C81D4 File Offset: 0x001C63D4
+		// Token: 0x06005926 RID: 22822 RVA: 0x001C81B4 File Offset: 0x001C63B4
 		private void LateUpdate()
 		{
 			this.UpdateState();
 			this.UpdateGhostVisibility();
 		}
 
-		// Token: 0x06005927 RID: 22823 RVA: 0x001C81E4 File Offset: 0x001C63E4
+		// Token: 0x06005927 RID: 22823 RVA: 0x001C81C4 File Offset: 0x001C63C4
 		private void PickNextWaypoint()
 		{
 			if (this.waypoints.Count == 0 || this.lastWaypointRegion == null || !this.lastWaypointRegion.IsLocalPlayerInZone())
@@ -69,7 +69,7 @@ namespace GorillaTagScripts
 			this.waypoints.RemoveAt(num);
 		}
 
-		// Token: 0x06005928 RID: 22824 RVA: 0x001C8304 File Offset: 0x001C6504
+		// Token: 0x06005928 RID: 22824 RVA: 0x001C82E4 File Offset: 0x001C64E4
 		private void Patrol()
 		{
 			Transform transform = this.currentWaypoint;
@@ -80,7 +80,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005929 RID: 22825 RVA: 0x001C837C File Offset: 0x001C657C
+		// Token: 0x06005929 RID: 22825 RVA: 0x001C835C File Offset: 0x001C655C
 		private void PlaySound(AudioClip clip, bool loop)
 		{
 			if (this.audioSource && this.audioSource.isPlaying)
@@ -95,7 +95,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600592A RID: 22826 RVA: 0x001C83E8 File Offset: 0x001C65E8
+		// Token: 0x0600592A RID: 22826 RVA: 0x001C83C8 File Offset: 0x001C65C8
 		private bool PickPlayer(float maxDistance)
 		{
 			if (base.IsMine)
@@ -126,7 +126,7 @@ namespace GorillaTagScripts
 			return this.targetPlayer != null && this.targetTransform != null;
 		}
 
-		// Token: 0x0600592B RID: 22827 RVA: 0x001C8518 File Offset: 0x001C6718
+		// Token: 0x0600592B RID: 22827 RVA: 0x001C84F8 File Offset: 0x001C66F8
 		private void PickPlayer(NetPlayer player)
 		{
 			int num = GorillaParent.instance.vrrigs.FindIndex((VRRig x) => x.creator != null && x.creator == player);
@@ -138,7 +138,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600592C RID: 22828 RVA: 0x001C85C0 File Offset: 0x001C67C0
+		// Token: 0x0600592C RID: 22828 RVA: 0x001C85A0 File Offset: 0x001C67A0
 		private void SeekPlayer()
 		{
 			if (this.targetTransform == null)
@@ -152,14 +152,14 @@ namespace GorillaTagScripts
 			base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, this.targetRotation, 720f * Time.deltaTime);
 		}
 
-		// Token: 0x0600592D RID: 22829 RVA: 0x001C8694 File Offset: 0x001C6894
+		// Token: 0x0600592D RID: 22829 RVA: 0x001C8674 File Offset: 0x001C6874
 		private void ChargeAtPlayer()
 		{
 			base.transform.position = Vector3.MoveTowards(base.transform.position, this.targetPosition, this.chargeSpeed * Time.deltaTime);
 			base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, this.targetRotation, 720f * Time.deltaTime);
 		}
 
-		// Token: 0x0600592E RID: 22830 RVA: 0x001C86FC File Offset: 0x001C68FC
+		// Token: 0x0600592E RID: 22830 RVA: 0x001C86DC File Offset: 0x001C68DC
 		private void UpdateGhostVisibility()
 		{
 			switch (this.currentState)
@@ -194,7 +194,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600592F RID: 22831 RVA: 0x001C8820 File Offset: 0x001C6A20
+		// Token: 0x0600592F RID: 22831 RVA: 0x001C8800 File Offset: 0x001C6A00
 		private void HauntObjects()
 		{
 			Collider[] array = new Collider[20];
@@ -212,7 +212,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005930 RID: 22832 RVA: 0x001C8884 File Offset: 0x001C6A84
+		// Token: 0x06005930 RID: 22832 RVA: 0x001C8864 File Offset: 0x001C6A64
 		private void ChangeState(LurkerGhost.ghostState newState)
 		{
 			this.currentState = newState;
@@ -253,14 +253,14 @@ namespace GorillaTagScripts
 			this.UpdateGhostVisibility();
 		}
 
-		// Token: 0x06005931 RID: 22833 RVA: 0x001C8A02 File Offset: 0x001C6C02
+		// Token: 0x06005931 RID: 22833 RVA: 0x001C89E2 File Offset: 0x001C6BE2
 		private void OnDestroy()
 		{
 			NetworkBehaviourUtils.InternalOnDestroy(this);
 			Shader.SetGlobalFloat(this._BlackAndWhite, 0f);
 		}
 
-		// Token: 0x06005932 RID: 22834 RVA: 0x001C8A20 File Offset: 0x001C6C20
+		// Token: 0x06005932 RID: 22834 RVA: 0x001C8A00 File Offset: 0x001C6C00
 		private void UpdateState()
 		{
 			switch (this.currentState)
@@ -339,8 +339,8 @@ namespace GorillaTagScripts
 		}
 
 		// Token: 0x17000859 RID: 2137
-		// (get) Token: 0x06005933 RID: 22835 RVA: 0x001C8D2D File Offset: 0x001C6F2D
-		// (set) Token: 0x06005934 RID: 22836 RVA: 0x001C8D57 File Offset: 0x001C6F57
+		// (get) Token: 0x06005933 RID: 22835 RVA: 0x001C8D0D File Offset: 0x001C6F0D
+		// (set) Token: 0x06005934 RID: 22836 RVA: 0x001C8D37 File Offset: 0x001C6F37
 		[Networked]
 		[NetworkedWeaved(0, 6)]
 		private unsafe LurkerGhost.LurkerGhostData Data
@@ -363,19 +363,19 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x06005935 RID: 22837 RVA: 0x001C8D82 File Offset: 0x001C6F82
+		// Token: 0x06005935 RID: 22837 RVA: 0x001C8D62 File Offset: 0x001C6F62
 		public override void WriteDataFusion()
 		{
 			this.Data = new LurkerGhost.LurkerGhostData(this.currentState, this.currentIndex, this.targetPlayer.ActorNumber, this.targetPosition);
 		}
 
-		// Token: 0x06005936 RID: 22838 RVA: 0x001C8DAC File Offset: 0x001C6FAC
+		// Token: 0x06005936 RID: 22838 RVA: 0x001C8D8C File Offset: 0x001C6F8C
 		public override void ReadDataFusion()
 		{
 			this.ReadDataShared(this.Data.CurrentState, this.Data.CurrentIndex, this.Data.TargetActor, this.Data.TargetPos);
 		}
 
-		// Token: 0x06005937 RID: 22839 RVA: 0x001C8DF8 File Offset: 0x001C6FF8
+		// Token: 0x06005937 RID: 22839 RVA: 0x001C8DD8 File Offset: 0x001C6FD8
 		protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (info.Sender != PhotonNetwork.MasterClient)
@@ -395,7 +395,7 @@ namespace GorillaTagScripts
 			stream.SendNext(this.targetPosition);
 		}
 
-		// Token: 0x06005938 RID: 22840 RVA: 0x001C8E74 File Offset: 0x001C7074
+		// Token: 0x06005938 RID: 22840 RVA: 0x001C8E54 File Offset: 0x001C7054
 		protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 		{
 			if (info.Sender != PhotonNetwork.MasterClient)
@@ -409,7 +409,7 @@ namespace GorillaTagScripts
 			this.ReadDataShared(state, index, targetActorNumber, targetPos);
 		}
 
-		// Token: 0x06005939 RID: 22841 RVA: 0x001C8ECC File Offset: 0x001C70CC
+		// Token: 0x06005939 RID: 22841 RVA: 0x001C8EAC File Offset: 0x001C70AC
 		private void ReadDataShared(LurkerGhost.ghostState state, int index, int targetActorNumber, Vector3 targetPos)
 		{
 			LurkerGhost.ghostState ghostState = this.currentState;
@@ -441,7 +441,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600593A RID: 22842 RVA: 0x001C8FAD File Offset: 0x001C71AD
+		// Token: 0x0600593A RID: 22842 RVA: 0x001C8F8D File Offset: 0x001C718D
 		public override void OnOwnerChange(Player newOwner, Player previousOwner)
 		{
 			base.OnOwnerChange(newOwner, previousOwner);
@@ -451,7 +451,7 @@ namespace GorillaTagScripts
 			}
 		}
 
-		// Token: 0x0600593C RID: 22844 RVA: 0x001C90D0 File Offset: 0x001C72D0
+		// Token: 0x0600593C RID: 22844 RVA: 0x001C90B0 File Offset: 0x001C72B0
 		[WeaverGenerated]
 		public override void CopyBackingFieldsToState(bool A_1)
 		{
@@ -459,7 +459,7 @@ namespace GorillaTagScripts
 			this.Data = this._Data;
 		}
 
-		// Token: 0x0600593D RID: 22845 RVA: 0x001C90E8 File Offset: 0x001C72E8
+		// Token: 0x0600593D RID: 22845 RVA: 0x001C90C8 File Offset: 0x001C72C8
 		[WeaverGenerated]
 		public override void CopyStateToBackingFields()
 		{
@@ -668,23 +668,23 @@ namespace GorillaTagScripts
 		private struct LurkerGhostData : INetworkStruct
 		{
 			// Token: 0x1700085A RID: 2138
-			// (get) Token: 0x0600593E RID: 22846 RVA: 0x001C90FC File Offset: 0x001C72FC
-			// (set) Token: 0x0600593F RID: 22847 RVA: 0x001C9104 File Offset: 0x001C7304
+			// (get) Token: 0x0600593E RID: 22846 RVA: 0x001C90DC File Offset: 0x001C72DC
+			// (set) Token: 0x0600593F RID: 22847 RVA: 0x001C90E4 File Offset: 0x001C72E4
 			public LurkerGhost.ghostState CurrentState { readonly get; set; }
 
 			// Token: 0x1700085B RID: 2139
-			// (get) Token: 0x06005940 RID: 22848 RVA: 0x001C910D File Offset: 0x001C730D
-			// (set) Token: 0x06005941 RID: 22849 RVA: 0x001C9115 File Offset: 0x001C7315
+			// (get) Token: 0x06005940 RID: 22848 RVA: 0x001C90ED File Offset: 0x001C72ED
+			// (set) Token: 0x06005941 RID: 22849 RVA: 0x001C90F5 File Offset: 0x001C72F5
 			public int CurrentIndex { readonly get; set; }
 
 			// Token: 0x1700085C RID: 2140
-			// (get) Token: 0x06005942 RID: 22850 RVA: 0x001C911E File Offset: 0x001C731E
-			// (set) Token: 0x06005943 RID: 22851 RVA: 0x001C9126 File Offset: 0x001C7326
+			// (get) Token: 0x06005942 RID: 22850 RVA: 0x001C90FE File Offset: 0x001C72FE
+			// (set) Token: 0x06005943 RID: 22851 RVA: 0x001C9106 File Offset: 0x001C7306
 			public int TargetActor { readonly get; set; }
 
 			// Token: 0x1700085D RID: 2141
-			// (get) Token: 0x06005944 RID: 22852 RVA: 0x001C912F File Offset: 0x001C732F
-			// (set) Token: 0x06005945 RID: 22853 RVA: 0x001C9141 File Offset: 0x001C7341
+			// (get) Token: 0x06005944 RID: 22852 RVA: 0x001C910F File Offset: 0x001C730F
+			// (set) Token: 0x06005945 RID: 22853 RVA: 0x001C9121 File Offset: 0x001C7321
 			[Networked]
 			[NetworkedWeaved(3, 3)]
 			public unsafe Vector3 TargetPos
@@ -699,7 +699,7 @@ namespace GorillaTagScripts
 				}
 			}
 
-			// Token: 0x06005946 RID: 22854 RVA: 0x001C9154 File Offset: 0x001C7354
+			// Token: 0x06005946 RID: 22854 RVA: 0x001C9134 File Offset: 0x001C7334
 			public LurkerGhostData(LurkerGhost.ghostState state, int index, int actor, Vector3 pos)
 			{
 				this.CurrentState = state;

@@ -8,7 +8,7 @@ namespace BoingKit
 	public class ConditionalFieldAttribute : PropertyAttribute
 	{
 		// Token: 0x17000AB4 RID: 2740
-		// (get) Token: 0x06007274 RID: 29300 RVA: 0x00258DD7 File Offset: 0x00256FD7
+		// (get) Token: 0x06007274 RID: 29300 RVA: 0x00258DB7 File Offset: 0x00256FB7
 		public bool ShowRange
 		{
 			get
@@ -17,7 +17,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007275 RID: 29301 RVA: 0x00258DEC File Offset: 0x00256FEC
+		// Token: 0x06007275 RID: 29301 RVA: 0x00258DCC File Offset: 0x00256FCC
 		public ConditionalFieldAttribute(string propertyToCheck = null, object compareValue = null, object compareValue2 = null, object compareValue3 = null, object compareValue4 = null, object compareValue5 = null, object compareValue6 = null)
 		{
 			this.PropertyToCheck = propertyToCheck;

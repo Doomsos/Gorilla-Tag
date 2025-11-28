@@ -6,8 +6,8 @@ using UnityEngine;
 public class OptionalRef<T> where T : Object
 {
 	// Token: 0x170005FF RID: 1535
-	// (get) Token: 0x060040C2 RID: 16578 RVA: 0x0015A52D File Offset: 0x0015872D
-	// (set) Token: 0x060040C3 RID: 16579 RVA: 0x0015A535 File Offset: 0x00158735
+	// (get) Token: 0x060040C2 RID: 16578 RVA: 0x0015A50D File Offset: 0x0015870D
+	// (set) Token: 0x060040C3 RID: 16579 RVA: 0x0015A515 File Offset: 0x00158715
 	public bool enabled
 	{
 		get
@@ -21,8 +21,8 @@ public class OptionalRef<T> where T : Object
 	}
 
 	// Token: 0x17000600 RID: 1536
-	// (get) Token: 0x060040C4 RID: 16580 RVA: 0x0015A540 File Offset: 0x00158740
-	// (set) Token: 0x060040C5 RID: 16581 RVA: 0x0015A568 File Offset: 0x00158768
+	// (get) Token: 0x060040C4 RID: 16580 RVA: 0x0015A520 File Offset: 0x00158720
+	// (set) Token: 0x060040C5 RID: 16581 RVA: 0x0015A548 File Offset: 0x00158748
 	public T Value
 	{
 		get
@@ -39,7 +39,7 @@ public class OptionalRef<T> where T : Object
 		}
 	}
 
-	// Token: 0x060040C6 RID: 16582 RVA: 0x0015A594 File Offset: 0x00158794
+	// Token: 0x060040C6 RID: 16582 RVA: 0x0015A574 File Offset: 0x00158774
 	public static implicit operator bool(OptionalRef<T> r)
 	{
 		if (r == null)
@@ -54,7 +54,7 @@ public class OptionalRef<T> where T : Object
 		return @object != null && @object;
 	}
 
-	// Token: 0x060040C7 RID: 16583 RVA: 0x0015A5C8 File Offset: 0x001587C8
+	// Token: 0x060040C7 RID: 16583 RVA: 0x0015A5A8 File Offset: 0x001587A8
 	public static implicit operator T(OptionalRef<T> r)
 	{
 		if (r == null)
@@ -77,7 +77,7 @@ public class OptionalRef<T> where T : Object
 		return @object as T;
 	}
 
-	// Token: 0x060040C8 RID: 16584 RVA: 0x0015A62C File Offset: 0x0015882C
+	// Token: 0x060040C8 RID: 16584 RVA: 0x0015A60C File Offset: 0x0015880C
 	public static implicit operator Object(OptionalRef<T> r)
 	{
 		if (r == null)

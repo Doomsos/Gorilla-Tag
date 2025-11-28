@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020006EE RID: 1774
 public class GRRecyclerScanner : MonoBehaviour
 {
-	// Token: 0x06002D70 RID: 11632 RVA: 0x000F5BDC File Offset: 0x000F3DDC
+	// Token: 0x06002D70 RID: 11632 RVA: 0x000F5BBC File Offset: 0x000F3DBC
 	private void Awake()
 	{
 		this.titleText.text = "";
@@ -15,7 +15,7 @@ public class GRRecyclerScanner : MonoBehaviour
 		this.recycleValueText.text = "";
 	}
 
-	// Token: 0x06002D71 RID: 11633 RVA: 0x000F5C2C File Offset: 0x000F3E2C
+	// Token: 0x06002D71 RID: 11633 RVA: 0x000F5C0C File Offset: 0x000F3E0C
 	public void ScanItem(GameEntityId id)
 	{
 		if (this.recycler != null && this.recycler.reactor != null && this.recycler.reactor.grManager != null && this.recycler.reactor.grManager.gameEntityManager != null)
@@ -39,7 +39,7 @@ public class GRRecyclerScanner : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002D72 RID: 11634 RVA: 0x000F5D78 File Offset: 0x000F3F78
+	// Token: 0x06002D72 RID: 11634 RVA: 0x000F5D58 File Offset: 0x000F3F58
 	private void OnTriggerEnter(Collider other)
 	{
 		if (this.recycler.reactor == null)

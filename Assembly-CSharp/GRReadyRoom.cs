@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020006EC RID: 1772
 public class GRReadyRoom : MonoBehaviour
 {
-	// Token: 0x06002D67 RID: 11623 RVA: 0x000F585C File Offset: 0x000F3A5C
+	// Token: 0x06002D67 RID: 11623 RVA: 0x000F583C File Offset: 0x000F3A3C
 	public void RefreshRigs(List<VRRig> vrRigs)
 	{
 		for (int i = 0; i < this.nameDisplayPlates.Count; i++)

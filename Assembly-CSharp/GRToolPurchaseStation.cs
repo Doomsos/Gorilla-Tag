@@ -8,7 +8,7 @@ using UnityEngine.Events;
 public class GRToolPurchaseStation : MonoBehaviour
 {
 	// Token: 0x17000433 RID: 1075
-	// (get) Token: 0x06002F4A RID: 12106 RVA: 0x001011E9 File Offset: 0x000FF3E9
+	// (get) Token: 0x06002F4A RID: 12106 RVA: 0x001011C9 File Offset: 0x000FF3C9
 	public int ActiveEntryIndex
 	{
 		get
@@ -17,14 +17,14 @@ public class GRToolPurchaseStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F4B RID: 12107 RVA: 0x001011F1 File Offset: 0x000FF3F1
+	// Token: 0x06002F4B RID: 12107 RVA: 0x001011D1 File Offset: 0x000FF3D1
 	public void Init(GhostReactorManager grManager, GhostReactor reactor)
 	{
 		this.grManager = grManager;
 		this.reactor = reactor;
 	}
 
-	// Token: 0x06002F4C RID: 12108 RVA: 0x00101201 File Offset: 0x000FF401
+	// Token: 0x06002F4C RID: 12108 RVA: 0x001011E1 File Offset: 0x000FF3E1
 	public void RequestPurchaseButton(int actorNumber)
 	{
 		if (actorNumber == NetworkSystem.Instance.LocalPlayer.ActorNumber)
@@ -33,31 +33,31 @@ public class GRToolPurchaseStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F4D RID: 12109 RVA: 0x00101227 File Offset: 0x000FF427
+	// Token: 0x06002F4D RID: 12109 RVA: 0x00101207 File Offset: 0x000FF407
 	public void ShiftRightButton()
 	{
 		this.grManager.ToolPurchaseStationRequest(this.PurchaseStationId, GhostReactorManager.ToolPurchaseStationAction.ShiftRight);
 	}
 
-	// Token: 0x06002F4E RID: 12110 RVA: 0x0010123B File Offset: 0x000FF43B
+	// Token: 0x06002F4E RID: 12110 RVA: 0x0010121B File Offset: 0x000FF41B
 	public void ShiftLeftButton()
 	{
 		this.grManager.ToolPurchaseStationRequest(this.PurchaseStationId, GhostReactorManager.ToolPurchaseStationAction.ShiftLeft);
 	}
 
-	// Token: 0x06002F4F RID: 12111 RVA: 0x0010124F File Offset: 0x000FF44F
+	// Token: 0x06002F4F RID: 12111 RVA: 0x0010122F File Offset: 0x000FF42F
 	public void ShiftRightAuthority()
 	{
 		this.activeEntryIndex = (this.activeEntryIndex + 1) % this.toolEntries.Count;
 	}
 
-	// Token: 0x06002F50 RID: 12112 RVA: 0x0010126B File Offset: 0x000FF46B
+	// Token: 0x06002F50 RID: 12112 RVA: 0x0010124B File Offset: 0x000FF44B
 	public void ShiftLeftAuthority()
 	{
 		this.activeEntryIndex = ((this.activeEntryIndex > 0) ? (this.activeEntryIndex - 1) : (this.toolEntries.Count - 1));
 	}
 
-	// Token: 0x06002F51 RID: 12113 RVA: 0x00101294 File Offset: 0x000FF494
+	// Token: 0x06002F51 RID: 12113 RVA: 0x00101274 File Offset: 0x000FF474
 	public void DebugPurchase()
 	{
 		int entityTypeId = this.toolEntries[this.activeEntryIndex].GetEntityTypeId();
@@ -69,7 +69,7 @@ public class GRToolPurchaseStation : MonoBehaviour
 		this.OnPurchaseSucceeded();
 	}
 
-	// Token: 0x06002F52 RID: 12114 RVA: 0x00101354 File Offset: 0x000FF554
+	// Token: 0x06002F52 RID: 12114 RVA: 0x00101334 File Offset: 0x000FF534
 	public bool TryPurchaseAuthority(GRPlayer player, out int itemCost)
 	{
 		int entityTypeId = this.toolEntries[this.activeEntryIndex].GetEntityTypeId();
@@ -86,7 +86,7 @@ public class GRToolPurchaseStation : MonoBehaviour
 		return false;
 	}
 
-	// Token: 0x06002F53 RID: 12115 RVA: 0x00101434 File Offset: 0x000FF634
+	// Token: 0x06002F53 RID: 12115 RVA: 0x00101414 File Offset: 0x000FF614
 	public void OnSelectionUpdate(int newSelectedIndex)
 	{
 		this.activeEntryIndex = Mathf.Clamp(newSelectedIndex % this.toolEntries.Count, 0, this.toolEntries.Count - 1);
@@ -95,7 +95,7 @@ public class GRToolPurchaseStation : MonoBehaviour
 		this.displayItemCostText.text = this.toolEntries[this.activeEntryIndex].toolCost.ToString();
 	}
 
-	// Token: 0x06002F54 RID: 12116 RVA: 0x001014C8 File Offset: 0x000FF6C8
+	// Token: 0x06002F54 RID: 12116 RVA: 0x001014A8 File Offset: 0x000FF6A8
 	public void OnPurchaseSucceeded()
 	{
 		this.animatingDeposit = true;
@@ -112,7 +112,7 @@ public class GRToolPurchaseStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002F55 RID: 12117 RVA: 0x0010153C File Offset: 0x000FF73C
+	// Token: 0x06002F55 RID: 12117 RVA: 0x0010151C File Offset: 0x000FF71C
 	public void OnPurchaseFailed()
 	{
 		this.audioSource.PlayOneShot(this.purchaseFailedAudio, this.purchaseFailedVolume);
@@ -124,19 +124,19 @@ public class GRToolPurchaseStation : MonoBehaviour
 		onFailed.Invoke();
 	}
 
-	// Token: 0x06002F56 RID: 12118 RVA: 0x0010156A File Offset: 0x000FF76A
+	// Token: 0x06002F56 RID: 12118 RVA: 0x0010154A File Offset: 0x000FF74A
 	public Transform GetSpawnMarker()
 	{
 		return this.toolSpawnLocation;
 	}
 
-	// Token: 0x06002F57 RID: 12119 RVA: 0x00101572 File Offset: 0x000FF772
+	// Token: 0x06002F57 RID: 12119 RVA: 0x00101552 File Offset: 0x000FF752
 	public string GetCurrentToolName()
 	{
 		return this.toolEntries[this.activeEntryIndex].toolName;
 	}
 
-	// Token: 0x06002F58 RID: 12120 RVA: 0x0010158A File Offset: 0x000FF78A
+	// Token: 0x06002F58 RID: 12120 RVA: 0x0010156A File Offset: 0x000FF76A
 	private void Awake()
 	{
 		this.depositLidOpenRot = Quaternion.Euler(this.depositLidOpenEuler);
@@ -144,7 +144,7 @@ public class GRToolPurchaseStation : MonoBehaviour
 		this.toolExitRot = Quaternion.Euler(this.toolExitRotEuler);
 	}
 
-	// Token: 0x06002F59 RID: 12121 RVA: 0x001015C0 File Offset: 0x000FF7C0
+	// Token: 0x06002F59 RID: 12121 RVA: 0x001015A0 File Offset: 0x000FF7A0
 	private void Update()
 	{
 		if (!this.animatingSwap && !this.animatingDeposit && this.activeEntryIndex != this.displayedEntryIndex)
@@ -373,7 +373,7 @@ public class GRToolPurchaseStation : MonoBehaviour
 	[Serializable]
 	public struct ToolEntry
 	{
-		// Token: 0x06002F5B RID: 12123 RVA: 0x0010197D File Offset: 0x000FFB7D
+		// Token: 0x06002F5B RID: 12123 RVA: 0x0010195D File Offset: 0x000FFB5D
 		public int GetEntityTypeId()
 		{
 			if (!this.entityTypeIdSet)

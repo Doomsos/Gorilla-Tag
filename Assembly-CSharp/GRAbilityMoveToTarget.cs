@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class GRAbilityMoveToTarget : GRAbilityBase
 {
-	// Token: 0x06002A13 RID: 10771 RVA: 0x000E30F8 File Offset: 0x000E12F8
+	// Token: 0x06002A13 RID: 10771 RVA: 0x000E30D8 File Offset: 0x000E12D8
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
@@ -13,7 +13,7 @@ public class GRAbilityMoveToTarget : GRAbilityBase
 		this.targetPos = agent.transform.position;
 	}
 
-	// Token: 0x06002A14 RID: 10772 RVA: 0x000E3124 File Offset: 0x000E1324
+	// Token: 0x06002A14 RID: 10772 RVA: 0x000E3104 File Offset: 0x000E1304
 	public override void Start()
 	{
 		base.Start();
@@ -27,20 +27,20 @@ public class GRAbilityMoveToTarget : GRAbilityBase
 		this.movementSound.Play(null);
 	}
 
-	// Token: 0x06002A15 RID: 10773 RVA: 0x000E31B3 File Offset: 0x000E13B3
+	// Token: 0x06002A15 RID: 10773 RVA: 0x000E3193 File Offset: 0x000E1393
 	public override void Stop()
 	{
 		base.Stop();
 		this.movementSound.Stop();
 	}
 
-	// Token: 0x06002A16 RID: 10774 RVA: 0x000E31C8 File Offset: 0x000E13C8
+	// Token: 0x06002A16 RID: 10774 RVA: 0x000E31A8 File Offset: 0x000E13A8
 	public override bool IsDone()
 	{
 		return (this.targetPos - this.root.position).sqrMagnitude < 0.25f;
 	}
 
-	// Token: 0x06002A17 RID: 10775 RVA: 0x000E31FC File Offset: 0x000E13FC
+	// Token: 0x06002A17 RID: 10775 RVA: 0x000E31DC File Offset: 0x000E13DC
 	protected override void UpdateShared(float dt)
 	{
 		if (this.target != null)
@@ -52,26 +52,26 @@ public class GRAbilityMoveToTarget : GRAbilityBase
 		GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, transform, this.maxTurnSpeed);
 	}
 
-	// Token: 0x06002A18 RID: 10776 RVA: 0x000E3273 File Offset: 0x000E1473
+	// Token: 0x06002A18 RID: 10776 RVA: 0x000E3253 File Offset: 0x000E1453
 	public void SetTarget(Transform transform)
 	{
 		this.target = transform;
 	}
 
-	// Token: 0x06002A19 RID: 10777 RVA: 0x000E327C File Offset: 0x000E147C
+	// Token: 0x06002A19 RID: 10777 RVA: 0x000E325C File Offset: 0x000E145C
 	public void SetTargetPos(Vector3 targetPos)
 	{
 		this.targetPos = targetPos;
 		this.agent.RequestDestination(targetPos);
 	}
 
-	// Token: 0x06002A1A RID: 10778 RVA: 0x000E3291 File Offset: 0x000E1491
+	// Token: 0x06002A1A RID: 10778 RVA: 0x000E3271 File Offset: 0x000E1471
 	public Vector3 GetTargetPos()
 	{
 		return this.targetPos;
 	}
 
-	// Token: 0x06002A1B RID: 10779 RVA: 0x000E3299 File Offset: 0x000E1499
+	// Token: 0x06002A1B RID: 10779 RVA: 0x000E3279 File Offset: 0x000E1479
 	public void SetLookAtTarget(Transform transform)
 	{
 		this.lookAtTarget = transform;

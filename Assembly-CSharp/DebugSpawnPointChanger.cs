@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x020004FC RID: 1276
 public class DebugSpawnPointChanger : MonoBehaviour
 {
-	// Token: 0x060020CE RID: 8398 RVA: 0x000ADD8C File Offset: 0x000ABF8C
+	// Token: 0x060020CE RID: 8398 RVA: 0x000ADD6C File Offset: 0x000ABF6C
 	private void AttachSpawnPoint(VRRig rig, Transform[] spawnPts, int locationIndex)
 	{
 		if (spawnPts == null)
@@ -48,7 +48,7 @@ public class DebugSpawnPointChanger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060020CF RID: 8399 RVA: 0x000ADE80 File Offset: 0x000AC080
+	// Token: 0x060020CF RID: 8399 RVA: 0x000ADE60 File Offset: 0x000AC060
 	private void ChangePoint(int index)
 	{
 		SpawnManager spawnManager = Object.FindAnyObjectByType<SpawnManager>();
@@ -62,20 +62,20 @@ public class DebugSpawnPointChanger : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060020D0 RID: 8400 RVA: 0x000ADEC7 File Offset: 0x000AC0C7
+	// Token: 0x060020D0 RID: 8400 RVA: 0x000ADEA7 File Offset: 0x000AC0A7
 	public List<string> GetPlausibleJumpLocation()
 	{
 		return Enumerable.ToList<string>(Enumerable.Select<int, string>(this.levelTriggers[this.lastLocationIndex].canJumpToIndex, (int index) => this.levelTriggers[index].levelName));
 	}
 
-	// Token: 0x060020D1 RID: 8401 RVA: 0x000ADEF8 File Offset: 0x000AC0F8
+	// Token: 0x060020D1 RID: 8401 RVA: 0x000ADED8 File Offset: 0x000AC0D8
 	public void JumpTo(int canJumpIndex)
 	{
 		DebugSpawnPointChanger.GeoTriggersGroup geoTriggersGroup = this.levelTriggers[this.lastLocationIndex];
 		this.ChangePoint(geoTriggersGroup.canJumpToIndex[canJumpIndex]);
 	}
 
-	// Token: 0x060020D2 RID: 8402 RVA: 0x000ADF28 File Offset: 0x000AC128
+	// Token: 0x060020D2 RID: 8402 RVA: 0x000ADF08 File Offset: 0x000AC108
 	public void SetLastLocation(string levelName)
 	{
 		for (int i = 0; i < this.levelTriggers.Length; i++)

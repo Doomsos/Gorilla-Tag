@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200056B RID: 1387
 public class BuilderActions
 {
-	// Token: 0x060022DC RID: 8924 RVA: 0x000B6308 File Offset: 0x000B4508
+	// Token: 0x060022DC RID: 8924 RVA: 0x000B62E8 File Offset: 0x000B44E8
 	public static BuilderAction CreateAttachToPlayer(int cmdId, int pieceId, Vector3 localPosition, Quaternion localRotation, int actorNumber, bool leftHand)
 	{
 		return new BuilderAction
@@ -19,13 +19,13 @@ public class BuilderActions
 		};
 	}
 
-	// Token: 0x060022DD RID: 8925 RVA: 0x000B6358 File Offset: 0x000B4558
+	// Token: 0x060022DD RID: 8925 RVA: 0x000B6338 File Offset: 0x000B4538
 	public static BuilderAction CreateAttachToPlayerRollback(int cmdId, BuilderPiece piece)
 	{
 		return BuilderActions.CreateAttachToPlayer(cmdId, piece.pieceId, piece.transform.localPosition, piece.transform.localRotation, piece.heldByPlayerActorNumber, piece.heldInLeftHand);
 	}
 
-	// Token: 0x060022DE RID: 8926 RVA: 0x000B6388 File Offset: 0x000B4588
+	// Token: 0x060022DE RID: 8926 RVA: 0x000B6368 File Offset: 0x000B4568
 	public static BuilderAction CreateDetachFromPlayer(int cmdId, int pieceId, int actorNumber)
 	{
 		return new BuilderAction
@@ -37,7 +37,7 @@ public class BuilderActions
 		};
 	}
 
-	// Token: 0x060022DF RID: 8927 RVA: 0x000B63C0 File Offset: 0x000B45C0
+	// Token: 0x060022DF RID: 8927 RVA: 0x000B63A0 File Offset: 0x000B45A0
 	public static BuilderAction CreateAttachToPiece(int cmdId, int pieceId, int parentPieceId, int attachIndex, int parentAttachIndex, sbyte bumpOffsetX, sbyte bumpOffsetZ, byte twist, int actorNumber, int timeStamp)
 	{
 		return new BuilderAction
@@ -56,7 +56,7 @@ public class BuilderActions
 		};
 	}
 
-	// Token: 0x060022E0 RID: 8928 RVA: 0x000B6434 File Offset: 0x000B4634
+	// Token: 0x060022E0 RID: 8928 RVA: 0x000B6414 File Offset: 0x000B4614
 	public static BuilderAction CreateAttachToPieceRollback(int cmdId, BuilderPiece piece, int actorNumber)
 	{
 		byte pieceTwist = piece.GetPieceTwist();
@@ -66,7 +66,7 @@ public class BuilderActions
 		return BuilderActions.CreateAttachToPiece(cmdId, piece.pieceId, piece.parentPiece.pieceId, piece.attachIndex, piece.parentAttachIndex, bumpOffsetX, bumpOffsetZ, pieceTwist, actorNumber, piece.activatedTimeStamp);
 	}
 
-	// Token: 0x060022E1 RID: 8929 RVA: 0x000B6480 File Offset: 0x000B4680
+	// Token: 0x060022E1 RID: 8929 RVA: 0x000B6460 File Offset: 0x000B4660
 	public static BuilderAction CreateDetachFromPiece(int cmdId, int pieceId, int actorNumber)
 	{
 		return new BuilderAction
@@ -78,7 +78,7 @@ public class BuilderActions
 		};
 	}
 
-	// Token: 0x060022E2 RID: 8930 RVA: 0x000B64B8 File Offset: 0x000B46B8
+	// Token: 0x060022E2 RID: 8930 RVA: 0x000B6498 File Offset: 0x000B4698
 	public static BuilderAction CreateMakeRoot(int cmdId, int pieceId)
 	{
 		return new BuilderAction
@@ -89,7 +89,7 @@ public class BuilderActions
 		};
 	}
 
-	// Token: 0x060022E3 RID: 8931 RVA: 0x000B64E8 File Offset: 0x000B46E8
+	// Token: 0x060022E3 RID: 8931 RVA: 0x000B64C8 File Offset: 0x000B46C8
 	public static BuilderAction CreateDropPiece(int cmdId, int pieceId, Vector3 localPosition, Quaternion localRotation, Vector3 velocity, Vector3 angVelocity, int actorNumber)
 	{
 		return new BuilderAction
@@ -105,7 +105,7 @@ public class BuilderActions
 		};
 	}
 
-	// Token: 0x060022E4 RID: 8932 RVA: 0x000B6544 File Offset: 0x000B4744
+	// Token: 0x060022E4 RID: 8932 RVA: 0x000B6524 File Offset: 0x000B4724
 	public static BuilderAction CreateDropPieceRollback(int cmdId, BuilderPiece rootPiece, int actorNumber)
 	{
 		Vector3 position = rootPiece.transform.position;
@@ -123,7 +123,7 @@ public class BuilderActions
 		return BuilderActions.CreateDropPiece(cmdId, rootPiece.pieceId, position, rotation, velocity, angVelocity, actorNumber);
 	}
 
-	// Token: 0x060022E5 RID: 8933 RVA: 0x000B65B8 File Offset: 0x000B47B8
+	// Token: 0x060022E5 RID: 8933 RVA: 0x000B6598 File Offset: 0x000B4798
 	public static BuilderAction CreateAttachToShelfRollback(int cmdId, BuilderPiece piece, int shelfID, bool isConveyor, int timestamp = 0, float splineTime = 0f)
 	{
 		return new BuilderAction

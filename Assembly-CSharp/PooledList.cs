@@ -10,7 +10,7 @@ public class PooledList<T> : ObjectPoolEvents
 	{
 	}
 
-	// Token: 0x06004EB4 RID: 20148 RVA: 0x00197473 File Offset: 0x00195673
+	// Token: 0x06004EB4 RID: 20148 RVA: 0x00197453 File Offset: 0x00195653
 	void ObjectPoolEvents.OnReturned()
 	{
 		this.List.Clear();

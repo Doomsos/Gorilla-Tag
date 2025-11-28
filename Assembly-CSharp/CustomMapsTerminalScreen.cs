@@ -9,7 +9,7 @@ public abstract class CustomMapsTerminalScreen : MonoBehaviour
 	// Token: 0x06003F39 RID: 16185
 	public abstract void Initialize();
 
-	// Token: 0x06003F3A RID: 16186 RVA: 0x00153254 File Offset: 0x00151454
+	// Token: 0x06003F3A RID: 16186 RVA: 0x00153234 File Offset: 0x00151434
 	public virtual void Show()
 	{
 		if (!base.gameObject.activeSelf)
@@ -24,7 +24,7 @@ public abstract class CustomMapsTerminalScreen : MonoBehaviour
 		this.showTime = Time.time;
 	}
 
-	// Token: 0x06003F3B RID: 16187 RVA: 0x001532A8 File Offset: 0x001514A8
+	// Token: 0x06003F3B RID: 16187 RVA: 0x00153288 File Offset: 0x00151488
 	public virtual void Hide()
 	{
 		if (base.gameObject.activeSelf)

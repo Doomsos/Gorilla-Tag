@@ -8,7 +8,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 	// Token: 0x02000E22 RID: 3618
 	public class VirtualStumpModeSelectButton : ModeSelectButton
 	{
-		// Token: 0x06005A60 RID: 23136 RVA: 0x001CF38C File Offset: 0x001CD58C
+		// Token: 0x06005A60 RID: 23136 RVA: 0x001CF36C File Offset: 0x001CD56C
 		public override void ButtonActivationWithHand(bool isLeftHand)
 		{
 			if (this.warningScreen.ShouldShowWarning)

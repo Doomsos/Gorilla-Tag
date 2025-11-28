@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000C41 RID: 3137
 public class DelayedDestroyPooledObj : MonoBehaviour
 {
-	// Token: 0x06004D01 RID: 19713 RVA: 0x0018FEFB File Offset: 0x0018E0FB
+	// Token: 0x06004D01 RID: 19713 RVA: 0x0018FEDB File Offset: 0x0018E0DB
 	protected void OnEnable()
 	{
 		if (ObjectPools.instance == null || !ObjectPools.instance.initialized)
@@ -14,7 +14,7 @@ public class DelayedDestroyPooledObj : MonoBehaviour
 		this.timeToDie = Time.time + this.destroyDelay;
 	}
 
-	// Token: 0x06004D02 RID: 19714 RVA: 0x0018FF29 File Offset: 0x0018E129
+	// Token: 0x06004D02 RID: 19714 RVA: 0x0018FF09 File Offset: 0x0018E109
 	protected void LateUpdate()
 	{
 		if (Time.time > this.timeToDie)

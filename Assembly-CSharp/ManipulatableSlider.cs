@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200048A RID: 1162
 public class ManipulatableSlider : ManipulatableObject
 {
-	// Token: 0x06001DB3 RID: 7603 RVA: 0x0009C4B2 File Offset: 0x0009A6B2
+	// Token: 0x06001DB3 RID: 7603 RVA: 0x0009C492 File Offset: 0x0009A692
 	private void Awake()
 	{
 		this.localSpace = base.transform.worldToLocalMatrix;
@@ -16,7 +16,7 @@ public class ManipulatableSlider : ManipulatableObject
 	{
 	}
 
-	// Token: 0x06001DB5 RID: 7605 RVA: 0x0009C4D6 File Offset: 0x0009A6D6
+	// Token: 0x06001DB5 RID: 7605 RVA: 0x0009C4B6 File Offset: 0x0009A6B6
 	protected override void OnStopManipulation(GameObject releasingHand, Vector3 releaseVelocity)
 	{
 		if (this.applyReleaseVelocity)
@@ -25,7 +25,7 @@ public class ManipulatableSlider : ManipulatableObject
 		}
 	}
 
-	// Token: 0x06001DB6 RID: 7606 RVA: 0x0009C4F4 File Offset: 0x0009A6F4
+	// Token: 0x06001DB6 RID: 7606 RVA: 0x0009C4D4 File Offset: 0x0009A6D4
 	protected override bool ShouldHandDetach(GameObject hand)
 	{
 		Vector3 position = base.transform.position;
@@ -33,7 +33,7 @@ public class ManipulatableSlider : ManipulatableObject
 		return Vector3.SqrMagnitude(position - position2) > this.breakDistance * this.breakDistance;
 	}
 
-	// Token: 0x06001DB7 RID: 7607 RVA: 0x0009C534 File Offset: 0x0009A734
+	// Token: 0x06001DB7 RID: 7607 RVA: 0x0009C514 File Offset: 0x0009A714
 	protected override void OnHeldUpdate(GameObject hand)
 	{
 		Vector3 vector = this.localSpace.MultiplyPoint3x4(hand.transform.position);
@@ -44,7 +44,7 @@ public class ManipulatableSlider : ManipulatableObject
 		base.transform.localPosition = vector;
 	}
 
-	// Token: 0x06001DB8 RID: 7608 RVA: 0x0009C5CC File Offset: 0x0009A7CC
+	// Token: 0x06001DB8 RID: 7608 RVA: 0x0009C5AC File Offset: 0x0009A7AC
 	protected override void OnReleasedUpdate()
 	{
 		if (this.velocity != Vector3.zero)
@@ -91,7 +91,7 @@ public class ManipulatableSlider : ManipulatableObject
 		}
 	}
 
-	// Token: 0x06001DB9 RID: 7609 RVA: 0x0009C780 File Offset: 0x0009A980
+	// Token: 0x06001DB9 RID: 7609 RVA: 0x0009C760 File Offset: 0x0009A960
 	public void SetProgress(float x, float y, float z)
 	{
 		x = Mathf.Clamp(x, 0f, 1f);
@@ -104,19 +104,19 @@ public class ManipulatableSlider : ManipulatableObject
 		base.transform.localPosition = localPosition;
 	}
 
-	// Token: 0x06001DBA RID: 7610 RVA: 0x0009C82D File Offset: 0x0009AA2D
+	// Token: 0x06001DBA RID: 7610 RVA: 0x0009C80D File Offset: 0x0009AA0D
 	public float GetProgressX()
 	{
 		return ((base.transform.localPosition - this.startingPos).x - this.minXOffset) / (this.maxXOffset - this.minXOffset);
 	}
 
-	// Token: 0x06001DBB RID: 7611 RVA: 0x0009C85F File Offset: 0x0009AA5F
+	// Token: 0x06001DBB RID: 7611 RVA: 0x0009C83F File Offset: 0x0009AA3F
 	public float GetProgressY()
 	{
 		return ((base.transform.localPosition - this.startingPos).y - this.minYOffset) / (this.maxYOffset - this.minYOffset);
 	}
 
-	// Token: 0x06001DBC RID: 7612 RVA: 0x0009C891 File Offset: 0x0009AA91
+	// Token: 0x06001DBC RID: 7612 RVA: 0x0009C871 File Offset: 0x0009AA71
 	public float GetProgressZ()
 	{
 		return ((base.transform.localPosition - this.startingPos).z - this.minZOffset) / (this.maxZOffset - this.minZOffset);

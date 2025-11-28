@@ -11,7 +11,7 @@ using UnityEngine.Localization;
 // Token: 0x02000AB0 RID: 2736
 public class KIDUI_MainScreen : MonoBehaviour
 {
-	// Token: 0x06004497 RID: 17559 RVA: 0x0016B2C9 File Offset: 0x001694C9
+	// Token: 0x06004497 RID: 17559 RVA: 0x0016B2A9 File Offset: 0x001694A9
 	private void Awake()
 	{
 		KIDUI_MainScreen._featuresList.Clear();
@@ -27,7 +27,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		this.InitialiseMainScreen();
 	}
 
-	// Token: 0x06004498 RID: 17560 RVA: 0x0016B302 File Offset: 0x00169502
+	// Token: 0x06004498 RID: 17560 RVA: 0x0016B2E2 File Offset: 0x001694E2
 	private void OnEnable()
 	{
 		KIDManager.RegisterSessionUpdateCallback_AnyPermission(new Action(this.UpdatePermissionsAndFeaturesScreen));
@@ -35,7 +35,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		this.UpdatePermissionsAndFeaturesScreen();
 	}
 
-	// Token: 0x06004499 RID: 17561 RVA: 0x0016B32C File Offset: 0x0016952C
+	// Token: 0x06004499 RID: 17561 RVA: 0x0016B30C File Offset: 0x0016950C
 	private void OnDisable()
 	{
 		KIDManager.UnregisterSessionUpdateCallback_AnyPermission(new Action(this.UpdatePermissionsAndFeaturesScreen));
@@ -52,7 +52,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 	{
 	}
 
-	// Token: 0x0600449B RID: 17563 RVA: 0x0016B364 File Offset: 0x00169564
+	// Token: 0x0600449B RID: 17563 RVA: 0x0016B344 File Offset: 0x00169544
 	private void ConstructFeatureSettings()
 	{
 		for (int i = 0; i < this._displayOrder.Length; i++)
@@ -69,7 +69,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		this.UpdatePermissionsAndFeaturesScreen();
 	}
 
-	// Token: 0x0600449C RID: 17564 RVA: 0x0016B3D0 File Offset: 0x001695D0
+	// Token: 0x0600449C RID: 17564 RVA: 0x0016B3B0 File Offset: 0x001695B0
 	private void CreateNewFeatureDisplay(KIDUI_MainScreen.FeatureToggleSetup setup)
 	{
 		Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(setup.linkedFeature);
@@ -126,12 +126,12 @@ public class KIDUI_MainScreen : MonoBehaviour
 		this.ConstructAdditionalSetup(setup.linkedFeature, gameObject);
 	}
 
-	// Token: 0x0600449D RID: 17565 RVA: 0x0016B56C File Offset: 0x0016976C
+	// Token: 0x0600449D RID: 17565 RVA: 0x0016B54C File Offset: 0x0016974C
 	private void ConstructAdditionalSetup(EKIDFeatures feature, GameObject featureObject)
 	{
 	}
 
-	// Token: 0x0600449E RID: 17566 RVA: 0x0016B574 File Offset: 0x00169774
+	// Token: 0x0600449E RID: 17566 RVA: 0x0016B554 File Offset: 0x00169754
 	private void UpdatePermissionsAndFeaturesScreen()
 	{
 		int num = 0;
@@ -192,7 +192,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600449F RID: 17567 RVA: 0x0016B7FC File Offset: 0x001699FC
+	// Token: 0x0600449F RID: 17567 RVA: 0x0016B7DC File Offset: 0x001699DC
 	private bool IsFeatureToggledOn(EKIDFeatures permissionFeature)
 	{
 		List<KIDUIFeatureSetting> list;
@@ -209,7 +209,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		return kiduifeatureSetting.GetFeatureToggleState();
 	}
 
-	// Token: 0x060044A0 RID: 17568 RVA: 0x0016B84C File Offset: 0x00169A4C
+	// Token: 0x060044A0 RID: 17568 RVA: 0x0016B82C File Offset: 0x00169A2C
 	public void InitialiseMainScreen()
 	{
 		if (this._initialised)
@@ -228,7 +228,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		this._initialised = true;
 	}
 
-	// Token: 0x060044A1 RID: 17569 RVA: 0x0016B8D0 File Offset: 0x00169AD0
+	// Token: 0x060044A1 RID: 17569 RVA: 0x0016B8B0 File Offset: 0x00169AB0
 	public void ShowMainScreen(EMainScreenStatus showStatus, KIDUI_Controller.Metrics_ShowReason reason)
 	{
 		this.ShowMainScreen(showStatus);
@@ -255,7 +255,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
-	// Token: 0x060044A2 RID: 17570 RVA: 0x0016BA1C File Offset: 0x00169C1C
+	// Token: 0x060044A2 RID: 17570 RVA: 0x0016B9FC File Offset: 0x00169BFC
 	public void ShowMainScreen(EMainScreenStatus showStatus)
 	{
 		KIDUI_MainScreen.ShownSettingsScreen = true;
@@ -264,7 +264,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		this.UpdateScreenStatus(showStatus, false);
 	}
 
-	// Token: 0x060044A3 RID: 17571 RVA: 0x0016BA40 File Offset: 0x00169C40
+	// Token: 0x060044A3 RID: 17571 RVA: 0x0016BA20 File Offset: 0x00169C20
 	public void UpdateScreenStatus(EMainScreenStatus showStatus, bool sendMetrics = false)
 	{
 		if (sendMetrics && showStatus == EMainScreenStatus.Updated)
@@ -353,7 +353,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		base.gameObject.SetActive(false);
 	}
 
-	// Token: 0x060044A5 RID: 17573 RVA: 0x0016BCDC File Offset: 0x00169EDC
+	// Token: 0x060044A5 RID: 17573 RVA: 0x0016BCBC File Offset: 0x00169EBC
 	public void OnAskForPermission()
 	{
 		KIDUI_MainScreen.<OnAskForPermission>d__52 <OnAskForPermission>d__;
@@ -363,7 +363,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		<OnAskForPermission>d__.<>t__builder.Start<KIDUI_MainScreen.<OnAskForPermission>d__52>(ref <OnAskForPermission>d__);
 	}
 
-	// Token: 0x060044A6 RID: 17574 RVA: 0x0016BD14 File Offset: 0x00169F14
+	// Token: 0x060044A6 RID: 17574 RVA: 0x0016BCF4 File Offset: 0x00169EF4
 	public void OnSaveAndExit()
 	{
 		if (KIDManager.CurrentSession == null)
@@ -442,7 +442,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		KIDUI_Controller.Instance.CloseKIDScreens();
 	}
 
-	// Token: 0x060044A7 RID: 17575 RVA: 0x0016BF40 File Offset: 0x0016A140
+	// Token: 0x060044A7 RID: 17575 RVA: 0x0016BF20 File Offset: 0x0016A120
 	public int GetFeatureListingCount()
 	{
 		int num = 0;
@@ -453,7 +453,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		return num;
 	}
 
-	// Token: 0x060044A8 RID: 17576 RVA: 0x0016BF9C File Offset: 0x0016A19C
+	// Token: 0x060044A8 RID: 17576 RVA: 0x0016BF7C File Offset: 0x0016A17C
 	private Task<bool> UpdateAndCheckForMissingPermissions()
 	{
 		KIDUI_MainScreen.<UpdateAndCheckForMissingPermissions>d__55 <UpdateAndCheckForMissingPermissions>d__;
@@ -464,7 +464,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		return <UpdateAndCheckForMissingPermissions>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x060044A9 RID: 17577 RVA: 0x0016BFE0 File Offset: 0x0016A1E0
+	// Token: 0x060044A9 RID: 17577 RVA: 0x0016BFC0 File Offset: 0x0016A1C0
 	private void OnLanguageChanged()
 	{
 		foreach (KeyValuePair<EKIDFeatures, List<KIDUIFeatureSetting>> keyValuePair in KIDUI_MainScreen._featuresList)
@@ -483,7 +483,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060044AA RID: 17578 RVA: 0x0016C064 File Offset: 0x0016A264
+	// Token: 0x060044AA RID: 17578 RVA: 0x0016C044 File Offset: 0x0016A244
 	private void UpdateOptInSetting(Permission permissionData, EKIDFeatures feature, Action<bool, Permission, bool> onOptedIn)
 	{
 		bool item = KIDManager.CheckFeatureOptIn(feature, permissionData).Item2;
@@ -496,20 +496,20 @@ public class KIDUI_MainScreen : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060044AB RID: 17579 RVA: 0x0016C0C1 File Offset: 0x0016A2C1
+	// Token: 0x060044AB RID: 17579 RVA: 0x0016C0A1 File Offset: 0x0016A2A1
 	public void OnConfirmedEmailAddress(string emailAddress)
 	{
 		this._emailAddress = emailAddress;
 		Debug.LogFormat("[KID::UI::Main] Email has been confirmed: " + this._emailAddress, Array.Empty<object>());
 	}
 
-	// Token: 0x060044AC RID: 17580 RVA: 0x0016C0E4 File Offset: 0x0016A2E4
+	// Token: 0x060044AC RID: 17580 RVA: 0x0016C0C4 File Offset: 0x0016A2C4
 	private IEnumerable<string> CollectPermissionsToUpgrade()
 	{
 		return Enumerable.Select<Permission, string>(Enumerable.Where<Permission>(KIDManager.GetAllPermissionsData(), (Permission permission) => permission.ManagedBy == 2 && !permission.Enabled), (Permission permission) => permission.Name);
 	}
 
-	// Token: 0x060044AD RID: 17581 RVA: 0x0016C140 File Offset: 0x0016A340
+	// Token: 0x060044AD RID: 17581 RVA: 0x0016C120 File Offset: 0x0016A320
 	private void ConfigurePermissionsButtons()
 	{
 		Debug.Log("[KID::MAIN_SCREEN] CONFIGURE BUTTONS");
@@ -522,7 +522,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		this.SetButtonContainersVisibility(KIDUI_MainScreen.GetPermissionState());
 	}
 
-	// Token: 0x060044AE RID: 17582 RVA: 0x0016C1B4 File Offset: 0x0016A3B4
+	// Token: 0x060044AE RID: 17582 RVA: 0x0016C194 File Offset: 0x0016A394
 	private void SetButtonContainersVisibility(EGetPermissionsStatus permissionStatus)
 	{
 		Debug.Log("[KID::MAIN_SCREEN] CONFIGURE BUTTONS - PERMISSION STATE: [" + permissionStatus.ToString() + "]");
@@ -531,7 +531,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		this._permissionsRequestedButtonContainer.SetActive(permissionStatus == EGetPermissionsStatus.RequestedPermission);
 	}
 
-	// Token: 0x060044AF RID: 17583 RVA: 0x0016C210 File Offset: 0x0016A410
+	// Token: 0x060044AF RID: 17583 RVA: 0x0016C1F0 File Offset: 0x0016A3F0
 	private GameObject GetActiveStatusObject()
 	{
 		List<GameObject> list = new List<GameObject>();
@@ -551,7 +551,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x060044B0 RID: 17584 RVA: 0x0016C2B4 File Offset: 0x0016A4B4
+	// Token: 0x060044B0 RID: 17584 RVA: 0x0016C294 File Offset: 0x0016A494
 	private static EGetPermissionsStatus GetPermissionState()
 	{
 		if (!KIDManager.CurrentSession.IsDefault)
@@ -568,7 +568,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		return EGetPermissionsStatus.RequestingPermission;
 	}
 
-	// Token: 0x060044B1 RID: 17585 RVA: 0x0016C2F4 File Offset: 0x0016A4F4
+	// Token: 0x060044B1 RID: 17585 RVA: 0x0016C2D4 File Offset: 0x0016A4D4
 	private void OnFeatureToggleChanged(EKIDFeatures feature)
 	{
 		switch (feature)
@@ -594,31 +594,31 @@ public class KIDUI_MainScreen : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060044B2 RID: 17586 RVA: 0x0016C366 File Offset: 0x0016A566
+	// Token: 0x060044B2 RID: 17586 RVA: 0x0016C346 File Offset: 0x0016A546
 	private void OnMultiplayerToggled()
 	{
 		Debug.LogErrorFormat("[KID::UI::MAIN_SCREEN] MULTIPLAYER Toggle NOT YET IMPLEMENTED.", Array.Empty<object>());
 	}
 
-	// Token: 0x060044B3 RID: 17587 RVA: 0x0016C377 File Offset: 0x0016A577
+	// Token: 0x060044B3 RID: 17587 RVA: 0x0016C357 File Offset: 0x0016A557
 	private void OnVoiceChatToggled()
 	{
 		Debug.LogErrorFormat("[KID::UI::MAIN_SCREEN] VOICE CHAT Toggle NOT YET IMPLEMENTED.", Array.Empty<object>());
 	}
 
-	// Token: 0x060044B4 RID: 17588 RVA: 0x0016C388 File Offset: 0x0016A588
+	// Token: 0x060044B4 RID: 17588 RVA: 0x0016C368 File Offset: 0x0016A568
 	private void OnGroupToggleChanged()
 	{
 		Debug.LogErrorFormat("[KID::UI::MAIN_SCREEN] GROUPS Toggle NOT YET IMPLEMENTED.", Array.Empty<object>());
 	}
 
-	// Token: 0x060044B5 RID: 17589 RVA: 0x0016C399 File Offset: 0x0016A599
+	// Token: 0x060044B5 RID: 17589 RVA: 0x0016C379 File Offset: 0x0016A579
 	private void OnModToggleChanged()
 	{
 		Debug.LogErrorFormat("[KID::UI::MAIN_SCREEN] MODS Toggle NOT YET IMPLEMENTED.", Array.Empty<object>());
 	}
 
-	// Token: 0x060044B6 RID: 17590 RVA: 0x0016C3AA File Offset: 0x0016A5AA
+	// Token: 0x060044B6 RID: 17590 RVA: 0x0016C38A File Offset: 0x0016A58A
 	private void OnCustomNametagsToggled()
 	{
 		Debug.LogErrorFormat("[KID::UI::MAIN_SCREEN] CUSTOM USERNAMES Toggle NOT YET IMPLEMENTED.", Array.Empty<object>());

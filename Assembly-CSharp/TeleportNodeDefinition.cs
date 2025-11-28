@@ -6,7 +6,7 @@ using UnityEngine;
 public class TeleportNodeDefinition : ScriptableObject
 {
 	// Token: 0x17000767 RID: 1895
-	// (get) Token: 0x06004F7D RID: 20349 RVA: 0x00199741 File Offset: 0x00197941
+	// (get) Token: 0x06004F7D RID: 20349 RVA: 0x00199721 File Offset: 0x00197921
 	public TeleportNode Forward
 	{
 		get
@@ -16,7 +16,7 @@ public class TeleportNodeDefinition : ScriptableObject
 	}
 
 	// Token: 0x17000768 RID: 1896
-	// (get) Token: 0x06004F7E RID: 20350 RVA: 0x00199749 File Offset: 0x00197949
+	// (get) Token: 0x06004F7E RID: 20350 RVA: 0x00199729 File Offset: 0x00197929
 	public TeleportNode Backward
 	{
 		get
@@ -25,14 +25,14 @@ public class TeleportNodeDefinition : ScriptableObject
 		}
 	}
 
-	// Token: 0x06004F7F RID: 20351 RVA: 0x00199751 File Offset: 0x00197951
+	// Token: 0x06004F7F RID: 20351 RVA: 0x00199731 File Offset: 0x00197931
 	public void SetForward(TeleportNode node)
 	{
 		Debug.Log("registered fwd node " + node.name);
 		this.forward = node;
 	}
 
-	// Token: 0x06004F80 RID: 20352 RVA: 0x0019976F File Offset: 0x0019796F
+	// Token: 0x06004F80 RID: 20352 RVA: 0x0019974F File Offset: 0x0019794F
 	public void SetBackward(TeleportNode node)
 	{
 		Debug.Log("registered bkwd node " + node.name);

@@ -11,17 +11,17 @@ namespace GorillaLocomotion.Gameplay
 	public class OldGorillaRopeSwing : MonoBehaviourPun
 	{
 		// Token: 0x17000986 RID: 2438
-		// (get) Token: 0x06006478 RID: 25720 RVA: 0x0020C40C File Offset: 0x0020A60C
-		// (set) Token: 0x06006479 RID: 25721 RVA: 0x0020C414 File Offset: 0x0020A614
+		// (get) Token: 0x06006478 RID: 25720 RVA: 0x0020C3EC File Offset: 0x0020A5EC
+		// (set) Token: 0x06006479 RID: 25721 RVA: 0x0020C3F4 File Offset: 0x0020A5F4
 		public bool isIdle { get; private set; }
 
-		// Token: 0x0600647A RID: 25722 RVA: 0x0020C41D File Offset: 0x0020A61D
+		// Token: 0x0600647A RID: 25722 RVA: 0x0020C3FD File Offset: 0x0020A5FD
 		private void Awake()
 		{
 			this.SetIsIdle(true);
 		}
 
-		// Token: 0x0600647B RID: 25723 RVA: 0x0020C426 File Offset: 0x0020A626
+		// Token: 0x0600647B RID: 25723 RVA: 0x0020C406 File Offset: 0x0020A606
 		private void OnDisable()
 		{
 			if (!this.isIdle)
@@ -30,7 +30,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x0600647C RID: 25724 RVA: 0x0020C438 File Offset: 0x0020A638
+		// Token: 0x0600647C RID: 25724 RVA: 0x0020C418 File Offset: 0x0020A618
 		private void Update()
 		{
 			if (this.localPlayerOn && this.localGrabbedRigid)
@@ -85,7 +85,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x0600647D RID: 25725 RVA: 0x0020C5E4 File Offset: 0x0020A7E4
+		// Token: 0x0600647D RID: 25725 RVA: 0x0020C5C4 File Offset: 0x0020A7C4
 		private void SetIsIdle(bool idle)
 		{
 			this.isIdle = idle;
@@ -101,7 +101,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x0600647E RID: 25726 RVA: 0x0020C650 File Offset: 0x0020A850
+		// Token: 0x0600647E RID: 25726 RVA: 0x0020C630 File Offset: 0x0020A830
 		private void ToggleIsKinematic(bool kinematic)
 		{
 			for (int i = 0; i < this.bones.Length; i++)
@@ -118,7 +118,7 @@ namespace GorillaLocomotion.Gameplay
 			}
 		}
 
-		// Token: 0x0600647F RID: 25727 RVA: 0x0020C69F File Offset: 0x0020A89F
+		// Token: 0x0600647F RID: 25727 RVA: 0x0020C67F File Offset: 0x0020A87F
 		public Rigidbody GetBone(int index)
 		{
 			if (index >= this.bones.Length)
@@ -128,7 +128,7 @@ namespace GorillaLocomotion.Gameplay
 			return this.bones[index];
 		}
 
-		// Token: 0x06006480 RID: 25728 RVA: 0x0020C6C0 File Offset: 0x0020A8C0
+		// Token: 0x06006480 RID: 25728 RVA: 0x0020C6A0 File Offset: 0x0020A8A0
 		public int GetBoneIndex(Rigidbody r)
 		{
 			for (int i = 0; i < this.bones.Length; i++)
@@ -141,7 +141,7 @@ namespace GorillaLocomotion.Gameplay
 			return this.bones.Length - 1;
 		}
 
-		// Token: 0x06006481 RID: 25729 RVA: 0x0020C6FC File Offset: 0x0020A8FC
+		// Token: 0x06006481 RID: 25729 RVA: 0x0020C6DC File Offset: 0x0020A8DC
 		public void AttachLocalPlayer(XRNode xrNode, Rigidbody rigid, Vector3 offset, Vector3 velocity)
 		{
 			int boneIndex = this.GetBoneIndex(rigid);
@@ -175,7 +175,7 @@ namespace GorillaLocomotion.Gameplay
 			this.localGrabbedRigid = rigid;
 		}
 
-		// Token: 0x06006482 RID: 25730 RVA: 0x0020C87F File Offset: 0x0020AA7F
+		// Token: 0x06006482 RID: 25730 RVA: 0x0020C85F File Offset: 0x0020AA5F
 		public void DetachLocalPlayer()
 		{
 			if (GorillaTagger.hasInstance && GorillaTagger.Instance.offlineVRRig)
@@ -186,7 +186,7 @@ namespace GorillaLocomotion.Gameplay
 			this.localGrabbedRigid = null;
 		}
 
-		// Token: 0x06006483 RID: 25731 RVA: 0x0020C8B8 File Offset: 0x0020AAB8
+		// Token: 0x06006483 RID: 25731 RVA: 0x0020C898 File Offset: 0x0020AA98
 		public bool AttachRemotePlayer(int playerId, int boneIndex, Transform offsetTransform, Vector3 offset)
 		{
 			Rigidbody bone = this.GetBone(boneIndex);
@@ -206,13 +206,13 @@ namespace GorillaLocomotion.Gameplay
 			return true;
 		}
 
-		// Token: 0x06006484 RID: 25732 RVA: 0x0020C91F File Offset: 0x0020AB1F
+		// Token: 0x06006484 RID: 25732 RVA: 0x0020C8FF File Offset: 0x0020AAFF
 		public void DetachRemotePlayer(int playerId)
 		{
 			this.remotePlayers.Remove(playerId);
 		}
 
-		// Token: 0x06006485 RID: 25733 RVA: 0x0020C930 File Offset: 0x0020AB30
+		// Token: 0x06006485 RID: 25733 RVA: 0x0020C910 File Offset: 0x0020AB10
 		public void SetVelocity_RPC(int boneIndex, Vector3 velocity, bool wholeRope = true, Vector3[] ropeRotations = null, Vector3[] ropeVelocities = null)
 		{
 			if (NetworkSystem.Instance.InRoom)
@@ -230,7 +230,7 @@ namespace GorillaLocomotion.Gameplay
 			this.SetVelocity(boneIndex, velocity, wholeRope, ropeRotations, ropeVelocities);
 		}
 
-		// Token: 0x06006486 RID: 25734 RVA: 0x0020C994 File Offset: 0x0020AB94
+		// Token: 0x06006486 RID: 25734 RVA: 0x0020C974 File Offset: 0x0020AB74
 		[PunRPC]
 		public void SetVelocity(int boneIndex, Vector3 velocity, bool wholeRope = true, Vector3[] ropeRotations = null, Vector3[] ropeVelocities = null)
 		{

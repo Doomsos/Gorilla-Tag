@@ -9,7 +9,7 @@ public class GRMeterEnergy : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002CD1 RID: 11473 RVA: 0x000F2DAC File Offset: 0x000F0FAC
+	// Token: 0x06002CD1 RID: 11473 RVA: 0x000F2D8C File Offset: 0x000F0F8C
 	public void Refresh()
 	{
 		float num = 0f;

@@ -6,7 +6,7 @@ namespace BuildSafe
 	// Token: 0x02000EB6 RID: 3766
 	public static class SceneViewUtils
 	{
-		// Token: 0x06005DF4 RID: 24052 RVA: 0x001E1A55 File Offset: 0x001DFC55
+		// Token: 0x06005DF4 RID: 24052 RVA: 0x001E1A35 File Offset: 0x001DFC35
 		private static bool RaycastWorldSafe(Vector2 screenPos, out RaycastHit hit)
 		{
 			hit = default(RaycastHit);

@@ -6,43 +6,43 @@ namespace AA
 	// Token: 0x02000D79 RID: 3449
 	public class Spring
 	{
-		// Token: 0x0600548A RID: 21642 RVA: 0x001AAD76 File Offset: 0x001A8F76
+		// Token: 0x0600548A RID: 21642 RVA: 0x001AAD56 File Offset: 0x001A8F56
 		public static float Damper(float x, float g, float factor)
 		{
 			return Mathf.Lerp(x, g, factor);
 		}
 
-		// Token: 0x0600548B RID: 21643 RVA: 0x001AAD80 File Offset: 0x001A8F80
+		// Token: 0x0600548B RID: 21643 RVA: 0x001AAD60 File Offset: 0x001A8F60
 		public static float DamperExponential(float x, float g, float damping, float dt, float ft = 0.016666668f)
 		{
 			return Mathf.Lerp(x, g, 1f - Mathf.Pow(1f / (1f - ft * damping), -dt / ft));
 		}
 
-		// Token: 0x0600548C RID: 21644 RVA: 0x001AADA9 File Offset: 0x001A8FA9
+		// Token: 0x0600548C RID: 21644 RVA: 0x001AAD89 File Offset: 0x001A8F89
 		public static float FastNegExp(float x)
 		{
 			return 1f / (1f + x + 0.48f * x * x + 0.235f * x * x * x);
 		}
 
-		// Token: 0x0600548D RID: 21645 RVA: 0x001AADCE File Offset: 0x001A8FCE
+		// Token: 0x0600548D RID: 21645 RVA: 0x001AADAE File Offset: 0x001A8FAE
 		public static float DamperExact(float x, float g, float halflife, float dt, float eps = 1E-05f)
 		{
 			return Mathf.Lerp(x, g, 1f - Spring.FastNegExp(0.6931472f * dt / (halflife + eps)));
 		}
 
-		// Token: 0x0600548E RID: 21646 RVA: 0x001AADEE File Offset: 0x001A8FEE
+		// Token: 0x0600548E RID: 21646 RVA: 0x001AADCE File Offset: 0x001A8FCE
 		public static float DamperDecayExact(float x, float halflife, float dt, float eps = 1E-05f)
 		{
 			return x * Spring.FastNegExp(0.6931472f * dt / (halflife + eps));
 		}
 
-		// Token: 0x0600548F RID: 21647 RVA: 0x001AAE02 File Offset: 0x001A9002
+		// Token: 0x0600548F RID: 21647 RVA: 0x001AADE2 File Offset: 0x001A8FE2
 		public static float CopySign(float a, float s)
 		{
 			return Mathf.Abs(a) * Mathf.Sign(s);
 		}
 
-		// Token: 0x06005490 RID: 21648 RVA: 0x001AAE14 File Offset: 0x001A9014
+		// Token: 0x06005490 RID: 21648 RVA: 0x001AADF4 File Offset: 0x001A8FF4
 		public static float FastAtan(float x)
 		{
 			float num = Mathf.Abs(x);
@@ -51,13 +51,13 @@ namespace AA
 			return Spring.CopySign((num > 1f) ? (1.5707964f - num3) : num3, x);
 		}
 
-		// Token: 0x06005491 RID: 21649 RVA: 0x001AAE73 File Offset: 0x001A9073
+		// Token: 0x06005491 RID: 21649 RVA: 0x001AAE53 File Offset: 0x001A9053
 		public static float Square(float x)
 		{
 			return x * x;
 		}
 
-		// Token: 0x06005492 RID: 21650 RVA: 0x001AAE78 File Offset: 0x001A9078
+		// Token: 0x06005492 RID: 21650 RVA: 0x001AAE58 File Offset: 0x001A9058
 		public static void SpringDamperExactStiffnessDamping(ref float x, ref float v, float x_goal, float v_goal, float stiffness, float damping, float dt, float eps = 1E-05f)
 		{
 			float num = x_goal + damping * v_goal / (stiffness + eps);
@@ -95,43 +95,43 @@ namespace AA
 			}
 		}
 
-		// Token: 0x06005493 RID: 21651 RVA: 0x001AB082 File Offset: 0x001A9282
+		// Token: 0x06005493 RID: 21651 RVA: 0x001AB062 File Offset: 0x001A9262
 		public static float HalflifeToDamping(float halflife, float eps = 1E-05f)
 		{
 			return 2.7725887f / (halflife + eps);
 		}
 
-		// Token: 0x06005494 RID: 21652 RVA: 0x001AB082 File Offset: 0x001A9282
+		// Token: 0x06005494 RID: 21652 RVA: 0x001AB062 File Offset: 0x001A9262
 		public static float DampingToHalflife(float damping, float eps = 1E-05f)
 		{
 			return 2.7725887f / (damping + eps);
 		}
 
-		// Token: 0x06005495 RID: 21653 RVA: 0x001AB08D File Offset: 0x001A928D
+		// Token: 0x06005495 RID: 21653 RVA: 0x001AB06D File Offset: 0x001A926D
 		public static float FrequencyToStiffness(float frequency)
 		{
 			return Spring.Square(6.2831855f * frequency);
 		}
 
-		// Token: 0x06005496 RID: 21654 RVA: 0x001AB09B File Offset: 0x001A929B
+		// Token: 0x06005496 RID: 21654 RVA: 0x001AB07B File Offset: 0x001A927B
 		public static float stiffness_to_frequency(float stiffness)
 		{
 			return Mathf.Sqrt(stiffness) / 6.2831855f;
 		}
 
-		// Token: 0x06005497 RID: 21655 RVA: 0x001AB0A9 File Offset: 0x001A92A9
+		// Token: 0x06005497 RID: 21655 RVA: 0x001AB089 File Offset: 0x001A9289
 		public static float critical_halflife(float frequency)
 		{
 			return Spring.DampingToHalflife(Mathf.Sqrt(Spring.FrequencyToStiffness(frequency) * 4f), 1E-05f);
 		}
 
-		// Token: 0x06005498 RID: 21656 RVA: 0x001AB0C6 File Offset: 0x001A92C6
+		// Token: 0x06005498 RID: 21656 RVA: 0x001AB0A6 File Offset: 0x001A92A6
 		public static float critical_frequency(float halflife)
 		{
 			return Spring.stiffness_to_frequency(Spring.Square(Spring.HalflifeToDamping(halflife, 1E-05f)) / 4f);
 		}
 
-		// Token: 0x06005499 RID: 21657 RVA: 0x001AB0E4 File Offset: 0x001A92E4
+		// Token: 0x06005499 RID: 21657 RVA: 0x001AB0C4 File Offset: 0x001A92C4
 		public static void SpringDamperExact(ref float x, ref float v, float x_goal, float v_goal, float frequency, float halflife, float dt, float eps = 1E-05f)
 		{
 			float num = Spring.FrequencyToStiffness(frequency);
@@ -171,19 +171,19 @@ namespace AA
 			}
 		}
 
-		// Token: 0x0600549A RID: 21658 RVA: 0x001AB2FD File Offset: 0x001A94FD
+		// Token: 0x0600549A RID: 21658 RVA: 0x001AB2DD File Offset: 0x001A94DD
 		public static float DampingRatioToStiffness(float ratio, float damping)
 		{
 			return Spring.Square(damping / (ratio * 2f));
 		}
 
-		// Token: 0x0600549B RID: 21659 RVA: 0x001AB30D File Offset: 0x001A950D
+		// Token: 0x0600549B RID: 21659 RVA: 0x001AB2ED File Offset: 0x001A94ED
 		public static float DampingRatioToDamping(float ratio, float stiffness)
 		{
 			return ratio * 2f * Mathf.Sqrt(stiffness);
 		}
 
-		// Token: 0x0600549C RID: 21660 RVA: 0x001AB320 File Offset: 0x001A9520
+		// Token: 0x0600549C RID: 21660 RVA: 0x001AB300 File Offset: 0x001A9500
 		public static void SpringDamperExactRatio(ref float x, ref float v, float x_goal, float v_goal, float damping_ratio, float halflife, float dt, float eps = 1E-05f)
 		{
 			float num = Spring.HalflifeToDamping(halflife, 1E-05f);
@@ -223,7 +223,7 @@ namespace AA
 			}
 		}
 
-		// Token: 0x0600549D RID: 21661 RVA: 0x001AB53C File Offset: 0x001A973C
+		// Token: 0x0600549D RID: 21661 RVA: 0x001AB51C File Offset: 0x001A971C
 		public static void CriticalSpringDamperExact(ref float x, ref float v, float x_goal, float v_goal, float halflife, float dt)
 		{
 			float num = Spring.HalflifeToDamping(halflife, 1E-05f);
@@ -236,7 +236,7 @@ namespace AA
 			v = num6 * (v - num5 * num3 * dt);
 		}
 
-		// Token: 0x0600549E RID: 21662 RVA: 0x001AB5A8 File Offset: 0x001A97A8
+		// Token: 0x0600549E RID: 21662 RVA: 0x001AB588 File Offset: 0x001A9788
 		public static void SimpleSpringDamperExact(ref float x, ref float v, float x_goal, float halflife, float dt)
 		{
 			float num = Spring.HalflifeToDamping(halflife, 1E-05f) / 2f;
@@ -247,7 +247,7 @@ namespace AA
 			v = num4 * (v - num3 * num * dt);
 		}
 
-		// Token: 0x0600549F RID: 21663 RVA: 0x001AB5F8 File Offset: 0x001A97F8
+		// Token: 0x0600549F RID: 21663 RVA: 0x001AB5D8 File Offset: 0x001A97D8
 		public static void DecaySringDamperExact(ref float x, ref float v, float halflife, float dt)
 		{
 			float num = Spring.HalflifeToDamping(halflife, 1E-05f) / 2f;

@@ -6,11 +6,11 @@ using UnityEngine;
 public class HangingClaw : MonoBehaviourPostTick
 {
 	// Token: 0x17000413 RID: 1043
-	// (get) Token: 0x06002CA8 RID: 11432 RVA: 0x000F2163 File Offset: 0x000F0363
-	// (set) Token: 0x06002CA9 RID: 11433 RVA: 0x000F216B File Offset: 0x000F036B
+	// (get) Token: 0x06002CA8 RID: 11432 RVA: 0x000F2143 File Offset: 0x000F0343
+	// (set) Token: 0x06002CA9 RID: 11433 RVA: 0x000F214B File Offset: 0x000F034B
 	public new bool PostTickRunning { get; set; }
 
-	// Token: 0x06002CAA RID: 11434 RVA: 0x000F2174 File Offset: 0x000F0374
+	// Token: 0x06002CAA RID: 11434 RVA: 0x000F2154 File Offset: 0x000F0354
 	protected void Awake()
 	{
 		this.lineRenderer = base.GetComponent<LineRenderer>();
@@ -34,7 +34,7 @@ public class HangingClaw : MonoBehaviourPostTick
 		this.invMass[this.segmentCount - 1] = 1f / Mathf.Max(0.0001f, this.endMassKg);
 	}
 
-	// Token: 0x06002CAB RID: 11435 RVA: 0x000F22A8 File Offset: 0x000F04A8
+	// Token: 0x06002CAB RID: 11435 RVA: 0x000F2288 File Offset: 0x000F0488
 	public override void PostTick()
 	{
 		this.Simulate();
@@ -44,7 +44,7 @@ public class HangingClaw : MonoBehaviourPostTick
 		this.endTransform.position = this.ropeSegs[num].pos;
 	}
 
-	// Token: 0x06002CAC RID: 11436 RVA: 0x000F22F0 File Offset: 0x000F04F0
+	// Token: 0x06002CAC RID: 11436 RVA: 0x000F22D0 File Offset: 0x000F04D0
 	private void Simulate()
 	{
 		float num = this.baseSegLen;
@@ -68,7 +68,7 @@ public class HangingClaw : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x06002CAD RID: 11437 RVA: 0x000F242C File Offset: 0x000F062C
+	// Token: 0x06002CAD RID: 11437 RVA: 0x000F240C File Offset: 0x000F060C
 	private void ApplyConstraints(Vector3 topPos)
 	{
 		this.ropeSegs[0].pos = topPos;
@@ -80,7 +80,7 @@ public class HangingClaw : MonoBehaviourPostTick
 		}
 	}
 
-	// Token: 0x06002CAE RID: 11438 RVA: 0x000F24B0 File Offset: 0x000F06B0
+	// Token: 0x06002CAE RID: 11438 RVA: 0x000F2490 File Offset: 0x000F0690
 	private void ApplyConstraintSegment(ref HangingClaw.RopeSegment a, ref HangingClaw.RopeSegment b, float wA, float wB, float stiffness)
 	{
 		Vector3 vector = b.pos - a.pos;
@@ -105,7 +105,7 @@ public class HangingClaw : MonoBehaviourPostTick
 		b.pos += -vector3 * (wB / num2);
 	}
 
-	// Token: 0x06002CAF RID: 11439 RVA: 0x000F2564 File Offset: 0x000F0764
+	// Token: 0x06002CAF RID: 11439 RVA: 0x000F2544 File Offset: 0x000F0744
 	private void DrawRope()
 	{
 		if (this.lineRenderer == null)
@@ -172,7 +172,7 @@ public class HangingClaw : MonoBehaviourPostTick
 	// Token: 0x020006CC RID: 1740
 	public struct RopeSegment
 	{
-		// Token: 0x06002CB1 RID: 11441 RVA: 0x000F267B File Offset: 0x000F087B
+		// Token: 0x06002CB1 RID: 11441 RVA: 0x000F265B File Offset: 0x000F085B
 		public RopeSegment(Vector3 p)
 		{
 			this.pos = p;

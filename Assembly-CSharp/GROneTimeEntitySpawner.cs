@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020006D9 RID: 1753
 public class GROneTimeEntitySpawner : MonoBehaviour
 {
-	// Token: 0x06002CE1 RID: 11489 RVA: 0x000F31BF File Offset: 0x000F13BF
+	// Token: 0x06002CE1 RID: 11489 RVA: 0x000F319F File Offset: 0x000F139F
 	private void Start()
 	{
 		if (this.EntityPrefab == null)
@@ -19,7 +19,7 @@ public class GROneTimeEntitySpawner : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002CE3 RID: 11491 RVA: 0x000F31EC File Offset: 0x000F13EC
+	// Token: 0x06002CE3 RID: 11491 RVA: 0x000F31CC File Offset: 0x000F13CC
 	private void TrySpawn()
 	{
 		if (!this.bHasSpawned && this.EntityPrefab != null)

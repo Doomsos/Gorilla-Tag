@@ -9,7 +9,7 @@ namespace GorillaTag.Audio
 	public class LoudSpeakerNetwork : MonoBehaviour
 	{
 		// Token: 0x170009F3 RID: 2547
-		// (get) Token: 0x060069B7 RID: 27063 RVA: 0x00226418 File Offset: 0x00224618
+		// (get) Token: 0x060069B7 RID: 27063 RVA: 0x002263F8 File Offset: 0x002245F8
 		public AudioSource[] SpeakerSources
 		{
 			get
@@ -18,7 +18,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069B8 RID: 27064 RVA: 0x00226420 File Offset: 0x00224620
+		// Token: 0x060069B8 RID: 27064 RVA: 0x00226400 File Offset: 0x00224600
 		private void Awake()
 		{
 			if (this._speakerSources == null || this._speakerSources.Length == 0)
@@ -28,7 +28,7 @@ namespace GorillaTag.Audio
 			this._currentSpeakers = new List<Speaker>();
 		}
 
-		// Token: 0x060069B9 RID: 27065 RVA: 0x00226450 File Offset: 0x00224650
+		// Token: 0x060069B9 RID: 27065 RVA: 0x00226430 File Offset: 0x00224630
 		private void Start()
 		{
 			RigContainer rigContainer;
@@ -42,7 +42,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069BA RID: 27066 RVA: 0x0022649B File Offset: 0x0022469B
+		// Token: 0x060069BA RID: 27066 RVA: 0x0022647B File Offset: 0x0022467B
 		private bool GetParentRigContainer(out RigContainer rigContainer)
 		{
 			if (this._rigContainer == null)
@@ -53,7 +53,7 @@ namespace GorillaTag.Audio
 			return rigContainer != null;
 		}
 
-		// Token: 0x060069BB RID: 27067 RVA: 0x002264CC File Offset: 0x002246CC
+		// Token: 0x060069BB RID: 27067 RVA: 0x002264AC File Offset: 0x002246AC
 		private void OnEnable()
 		{
 			RigContainer rigContainer;
@@ -63,7 +63,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069BC RID: 27068 RVA: 0x002264EC File Offset: 0x002246EC
+		// Token: 0x060069BC RID: 27068 RVA: 0x002264CC File Offset: 0x002246CC
 		private void OnDisable()
 		{
 			RigContainer rigContainer;
@@ -73,7 +73,7 @@ namespace GorillaTag.Audio
 			}
 		}
 
-		// Token: 0x060069BD RID: 27069 RVA: 0x0022650A File Offset: 0x0022470A
+		// Token: 0x060069BD RID: 27069 RVA: 0x002264EA File Offset: 0x002246EA
 		public void AddSpeaker(Speaker speaker)
 		{
 			if (this._currentSpeakers.Contains(speaker))
@@ -83,19 +83,19 @@ namespace GorillaTag.Audio
 			this._currentSpeakers.Add(speaker);
 		}
 
-		// Token: 0x060069BE RID: 27070 RVA: 0x00226527 File Offset: 0x00224727
+		// Token: 0x060069BE RID: 27070 RVA: 0x00226507 File Offset: 0x00224707
 		public void RemoveSpeaker(Speaker speaker)
 		{
 			this._currentSpeakers.Remove(speaker);
 		}
 
-		// Token: 0x060069BF RID: 27071 RVA: 0x00226536 File Offset: 0x00224736
+		// Token: 0x060069BF RID: 27071 RVA: 0x00226516 File Offset: 0x00224716
 		public void StartBroadcastSpeakerOutput(VRRig player)
 		{
 			GorillaTagger.Instance.rigSerializer.BroadcastLoudSpeakerNetwork(true, player.OwningNetPlayer.ActorNumber);
 		}
 
-		// Token: 0x060069C0 RID: 27072 RVA: 0x00226554 File Offset: 0x00224754
+		// Token: 0x060069C0 RID: 27072 RVA: 0x00226534 File Offset: 0x00224734
 		public void BroadcastLoudSpeakerNetwork(int actorNumber, bool isLocal = false)
 		{
 			if (isLocal)
@@ -135,13 +135,13 @@ namespace GorillaTag.Audio
 			this._currentSpeakerActor = actorNumber;
 		}
 
-		// Token: 0x060069C1 RID: 27073 RVA: 0x00226674 File Offset: 0x00224874
+		// Token: 0x060069C1 RID: 27073 RVA: 0x00226654 File Offset: 0x00224854
 		public void StopBroadcastSpeakerOutput(VRRig player)
 		{
 			GorillaTagger.Instance.rigSerializer.BroadcastLoudSpeakerNetwork(false, player.OwningNetPlayer.ActorNumber);
 		}
 
-		// Token: 0x060069C2 RID: 27074 RVA: 0x00226694 File Offset: 0x00224894
+		// Token: 0x060069C2 RID: 27074 RVA: 0x00226674 File Offset: 0x00224874
 		public void StopBroadcastLoudSpeakerNetwork(int actorNumber, bool isLocal = false)
 		{
 			if (isLocal)

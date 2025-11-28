@@ -10,7 +10,7 @@ using UnityEngine;
 public struct HuntData : INetworkStruct
 {
 	// Token: 0x17000382 RID: 898
-	// (get) Token: 0x06002122 RID: 8482 RVA: 0x000AED80 File Offset: 0x000ACF80
+	// (get) Token: 0x06002122 RID: 8482 RVA: 0x000AED60 File Offset: 0x000ACF60
 	[Networked]
 	[Capacity(10)]
 	[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterInt32))]
@@ -24,7 +24,7 @@ public struct HuntData : INetworkStruct
 	}
 
 	// Token: 0x17000383 RID: 899
-	// (get) Token: 0x06002123 RID: 8483 RVA: 0x000AEDA8 File Offset: 0x000ACFA8
+	// (get) Token: 0x06002123 RID: 8483 RVA: 0x000AED88 File Offset: 0x000ACF88
 	[Networked]
 	[Capacity(10)]
 	[NetworkedWeavedArray(10, 1, typeof(ElementReaderWriterInt32))]

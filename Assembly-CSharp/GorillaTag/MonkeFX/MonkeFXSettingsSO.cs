@@ -7,7 +7,7 @@ namespace GorillaTag.MonkeFX
 	[CreateAssetMenu(fileName = "MeshGenerator", menuName = "ScriptableObjects/MeshGenerator", order = 1)]
 	public class MonkeFXSettingsSO : ScriptableObject
 	{
-		// Token: 0x060068C7 RID: 26823 RVA: 0x002220DA File Offset: 0x002202DA
+		// Token: 0x060068C7 RID: 26823 RVA: 0x002220BA File Offset: 0x002202BA
 		protected void Awake()
 		{
 			MonkeFX.Register(this);

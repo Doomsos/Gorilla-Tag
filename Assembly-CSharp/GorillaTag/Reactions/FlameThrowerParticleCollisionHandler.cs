@@ -9,7 +9,7 @@ namespace GorillaTag.Reactions
 	// Token: 0x02001028 RID: 4136
 	public class FlameThrowerParticleCollisionHandler : MonoBehaviour
 	{
-		// Token: 0x06006899 RID: 26777 RVA: 0x00220E00 File Offset: 0x0021F000
+		// Token: 0x06006899 RID: 26777 RVA: 0x00220DE0 File Offset: 0x0021EFE0
 		protected void OnEnable()
 		{
 			if (GorillaComputer.instance == null)
@@ -52,7 +52,7 @@ namespace GorillaTag.Reactions
 			}
 		}
 
-		// Token: 0x0600689A RID: 26778 RVA: 0x00220F78 File Offset: 0x0021F178
+		// Token: 0x0600689A RID: 26778 RVA: 0x00220F58 File Offset: 0x0021F158
 		protected void OnParticleCollision(GameObject other)
 		{
 			if (this._maxParticleHitReactionRate < 1E-05f || !FireManager.hasInstance)

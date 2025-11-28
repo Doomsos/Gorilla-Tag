@@ -9,25 +9,25 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x0200110F RID: 4367
 	public class ProjectileShooterCosmetic : MonoBehaviour, ITickSystemTick
 	{
-		// Token: 0x06006D56 RID: 27990 RVA: 0x0023E208 File Offset: 0x0023C408
+		// Token: 0x06006D56 RID: 27990 RVA: 0x0023E1E8 File Offset: 0x0023C3E8
 		private bool IsMovementShoot()
 		{
 			return this.shootActivatorType == ProjectileShooterCosmetic.ShootActivator.VelocityEstimatorThreshold;
 		}
 
-		// Token: 0x06006D57 RID: 27991 RVA: 0x0023E213 File Offset: 0x0023C413
+		// Token: 0x06006D57 RID: 27991 RVA: 0x0023E1F3 File Offset: 0x0023C3F3
 		private bool IsRigDirection()
 		{
 			return this.shootDirectionType == ProjectileShooterCosmetic.ShootDirection.LineFromRigToLaunchTransform;
 		}
 
 		// Token: 0x17000A62 RID: 2658
-		// (get) Token: 0x06006D58 RID: 27992 RVA: 0x0023E21E File Offset: 0x0023C41E
-		// (set) Token: 0x06006D59 RID: 27993 RVA: 0x0023E226 File Offset: 0x0023C426
+		// (get) Token: 0x06006D58 RID: 27992 RVA: 0x0023E1FE File Offset: 0x0023C3FE
+		// (set) Token: 0x06006D59 RID: 27993 RVA: 0x0023E206 File Offset: 0x0023C406
 		public bool shootingAllowed { get; set; } = true;
 
 		// Token: 0x17000A63 RID: 2659
-		// (get) Token: 0x06006D5A RID: 27994 RVA: 0x0023E22F File Offset: 0x0023C42F
+		// (get) Token: 0x06006D5A RID: 27994 RVA: 0x0023E20F File Offset: 0x0023C40F
 		private bool IsCoolingDown
 		{
 			get
@@ -36,7 +36,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D5B RID: 27995 RVA: 0x0023E240 File Offset: 0x0023C440
+		// Token: 0x06006D5B RID: 27995 RVA: 0x0023E220 File Offset: 0x0023C420
 		private void Awake()
 		{
 			this.transferrableObject = base.GetComponent<TransferrableObject>();
@@ -50,11 +50,11 @@ namespace GorillaTag.Cosmetics
 		}
 
 		// Token: 0x17000A64 RID: 2660
-		// (get) Token: 0x06006D5C RID: 27996 RVA: 0x0023E2E1 File Offset: 0x0023C4E1
-		// (set) Token: 0x06006D5D RID: 27997 RVA: 0x0023E2E9 File Offset: 0x0023C4E9
+		// (get) Token: 0x06006D5C RID: 27996 RVA: 0x0023E2C1 File Offset: 0x0023C4C1
+		// (set) Token: 0x06006D5D RID: 27997 RVA: 0x0023E2C9 File Offset: 0x0023C4C9
 		public bool TickRunning { get; set; }
 
-		// Token: 0x06006D5E RID: 27998 RVA: 0x0023E2F4 File Offset: 0x0023C4F4
+		// Token: 0x06006D5E RID: 27998 RVA: 0x0023E2D4 File Offset: 0x0023C4D4
 		public void Tick()
 		{
 			if (this.IsCoolingDown)
@@ -182,13 +182,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D5F RID: 27999 RVA: 0x0023E5D1 File Offset: 0x0023C7D1
+		// Token: 0x06006D5F RID: 27999 RVA: 0x0023E5B1 File Offset: 0x0023C7B1
 		private Vector3 GetVectorFromBodyToLaunchPosition()
 		{
 			return this.shootFromTransform.position - this.rig.bodyTransform.TransformPoint(this.offsetRigPosition);
 		}
 
-		// Token: 0x06006D60 RID: 28000 RVA: 0x0023E5FC File Offset: 0x0023C7FC
+		// Token: 0x06006D60 RID: 28000 RVA: 0x0023E5DC File Offset: 0x0023C7DC
 		private void GetShootPositionAndRotation(out Vector3 position, out Quaternion rotation)
 		{
 			ProjectileShooterCosmetic.ShootDirection shootDirection = this.shootDirectionType;
@@ -201,7 +201,7 @@ namespace GorillaTag.Cosmetics
 			this.shootFromTransform.GetPositionAndRotation(ref position, ref rotation);
 		}
 
-		// Token: 0x06006D61 RID: 28001 RVA: 0x0023E664 File Offset: 0x0023C864
+		// Token: 0x06006D61 RID: 28001 RVA: 0x0023E644 File Offset: 0x0023C844
 		private void Shoot()
 		{
 			float chargeFrac = this.GetChargeFrac();
@@ -256,7 +256,7 @@ namespace GorillaTag.Cosmetics
 			TickSystem<object>.AddTickCallback(this);
 		}
 
-		// Token: 0x06006D62 RID: 28002 RVA: 0x0023E7F0 File Offset: 0x0023C9F0
+		// Token: 0x06006D62 RID: 28002 RVA: 0x0023E7D0 File Offset: 0x0023C9D0
 		private bool TryShoot()
 		{
 			if ((!this.IsCoolingDown && this.shootingAllowed && this.shootActivatorType != ProjectileShooterCosmetic.ShootActivator.ButtonReleasedFullCharge) || (this.shootActivatorType == ProjectileShooterCosmetic.ShootActivator.ButtonReleasedFullCharge && this.chargeTime >= this.maxChargeSeconds))
@@ -267,7 +267,7 @@ namespace GorillaTag.Cosmetics
 			return false;
 		}
 
-		// Token: 0x06006D63 RID: 28003 RVA: 0x0023E82C File Offset: 0x0023CA2C
+		// Token: 0x06006D63 RID: 28003 RVA: 0x0023E80C File Offset: 0x0023CA0C
 		private void TryRunHaptics(float intensity, float duration)
 		{
 			if (!this.enableHaptics || !this.isLocal || intensity <= 0f)
@@ -282,7 +282,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D64 RID: 28004 RVA: 0x0023E894 File Offset: 0x0023CA94
+		// Token: 0x06006D64 RID: 28004 RVA: 0x0023E874 File Offset: 0x0023CA74
 		private float GetChargeFrac()
 		{
 			if (!this.allowCharging)
@@ -300,14 +300,14 @@ namespace GorillaTag.Cosmetics
 			return 1f;
 		}
 
-		// Token: 0x06006D65 RID: 28005 RVA: 0x0023E8EE File Offset: 0x0023CAEE
+		// Token: 0x06006D65 RID: 28005 RVA: 0x0023E8CE File Offset: 0x0023CACE
 		private void SetPressState(bool pressed)
 		{
 			this.isPressed = pressed;
 			this.velocityEstimatorThresholdMet = false;
 		}
 
-		// Token: 0x06006D66 RID: 28006 RVA: 0x0023E8FE File Offset: 0x0023CAFE
+		// Token: 0x06006D66 RID: 28006 RVA: 0x0023E8DE File Offset: 0x0023CADE
 		public void OnButtonPressed()
 		{
 			this.SetPressState(true);
@@ -322,7 +322,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D67 RID: 28007 RVA: 0x0023E930 File Offset: 0x0023CB30
+		// Token: 0x06006D67 RID: 28007 RVA: 0x0023E910 File Offset: 0x0023CB10
 		public void OnButtonReleased()
 		{
 			if (this.shootActivatorType == ProjectileShooterCosmetic.ShootActivator.VelocityEstimatorThreshold && this.velocityEstimatorThresholdMet)
@@ -355,7 +355,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006D68 RID: 28008 RVA: 0x0023E9B3 File Offset: 0x0023CBB3
+		// Token: 0x06006D68 RID: 28008 RVA: 0x0023E993 File Offset: 0x0023CB93
 		public void ResetShoot()
 		{
 			this.isPressed = false;
@@ -365,7 +365,7 @@ namespace GorillaTag.Cosmetics
 			TickSystem<object>.RemoveTickCallback(this);
 		}
 
-		// Token: 0x06006D69 RID: 28009 RVA: 0x0023E9D8 File Offset: 0x0023CBD8
+		// Token: 0x06006D69 RID: 28009 RVA: 0x0023E9B8 File Offset: 0x0023CBB8
 		private void AttachTrail(int trailHash, GameObject newProjectile, Vector3 location, bool blueTeam, bool orangeTeam)
 		{
 			GameObject gameObject = ObjectPools.instance.Instantiate(trailHash, true);

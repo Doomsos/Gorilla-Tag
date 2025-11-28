@@ -3,7 +3,7 @@
 // Token: 0x0200072F RID: 1839
 public class GRToolScannable : GRScannable
 {
-	// Token: 0x06002F68 RID: 12136 RVA: 0x00101CD4 File Offset: 0x000FFED4
+	// Token: 0x06002F68 RID: 12136 RVA: 0x00101CB4 File Offset: 0x000FFEB4
 	public override void Start()
 	{
 		base.Start();
@@ -14,7 +14,7 @@ public class GRToolScannable : GRScannable
 		}
 	}
 
-	// Token: 0x06002F69 RID: 12137 RVA: 0x00101D0C File Offset: 0x000FFF0C
+	// Token: 0x06002F69 RID: 12137 RVA: 0x00101CEC File Offset: 0x000FFEEC
 	private void FetchMetadata(GhostReactor reactor)
 	{
 		if (this.metadata == null)
@@ -35,7 +35,7 @@ public class GRToolScannable : GRScannable
 		}
 	}
 
-	// Token: 0x06002F6A RID: 12138 RVA: 0x00101D73 File Offset: 0x000FFF73
+	// Token: 0x06002F6A RID: 12138 RVA: 0x00101D53 File Offset: 0x000FFF53
 	public override string GetTitleText(GhostReactor reactor)
 	{
 		this.FetchMetadata(reactor);
@@ -46,7 +46,7 @@ public class GRToolScannable : GRScannable
 		return this.metadata.name;
 	}
 
-	// Token: 0x06002F6B RID: 12139 RVA: 0x00101D95 File Offset: 0x000FFF95
+	// Token: 0x06002F6B RID: 12139 RVA: 0x00101D75 File Offset: 0x000FFF75
 	public override string GetBodyText(GhostReactor reactor)
 	{
 		this.FetchMetadata(reactor);
@@ -57,7 +57,7 @@ public class GRToolScannable : GRScannable
 		return this.metadata.description;
 	}
 
-	// Token: 0x06002F6C RID: 12140 RVA: 0x00101DB7 File Offset: 0x000FFFB7
+	// Token: 0x06002F6C RID: 12140 RVA: 0x00101D97 File Offset: 0x000FFF97
 	public override string GetAnnotationText(GhostReactor reactor)
 	{
 		this.FetchMetadata(reactor);

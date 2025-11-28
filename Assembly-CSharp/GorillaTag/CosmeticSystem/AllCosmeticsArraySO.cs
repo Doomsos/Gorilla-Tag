@@ -6,7 +6,7 @@ namespace GorillaTag.CosmeticSystem
 	// Token: 0x02001052 RID: 4178
 	public class AllCosmeticsArraySO : ScriptableObject
 	{
-		// Token: 0x06006940 RID: 26944 RVA: 0x00223FB0 File Offset: 0x002221B0
+		// Token: 0x06006940 RID: 26944 RVA: 0x00223F90 File Offset: 0x00222190
 		public CosmeticSO SearchForCosmeticSO(string playfabId)
 		{
 			GTDirectAssetRef<CosmeticSO>[] array = this.sturdyAssetRefs;

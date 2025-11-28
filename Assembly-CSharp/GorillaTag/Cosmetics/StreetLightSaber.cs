@@ -11,7 +11,7 @@ namespace GorillaTag.Cosmetics
 	public class StreetLightSaber : MonoBehaviour
 	{
 		// Token: 0x17000A69 RID: 2665
-		// (get) Token: 0x06006DA3 RID: 28067 RVA: 0x00240157 File Offset: 0x0023E357
+		// (get) Token: 0x06006DA3 RID: 28067 RVA: 0x00240137 File Offset: 0x0023E337
 		private StreetLightSaber.State CurrentState
 		{
 			get
@@ -20,7 +20,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DA4 RID: 28068 RVA: 0x00240168 File Offset: 0x0023E368
+		// Token: 0x06006DA4 RID: 28068 RVA: 0x00240148 File Offset: 0x0023E348
 		private void Awake()
 		{
 			foreach (StreetLightSaber.StaffStates staffStates in this.allStates)
@@ -40,7 +40,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DA5 RID: 28069 RVA: 0x00240230 File Offset: 0x0023E430
+		// Token: 0x06006DA5 RID: 28069 RVA: 0x00240210 File Offset: 0x0023E410
 		private void Update()
 		{
 			if (this.autoSwitch && Time.time - this.autoSwitchEnabledTime > this.autoSwitchTimer)
@@ -49,26 +49,26 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DA6 RID: 28070 RVA: 0x00240254 File Offset: 0x0023E454
+		// Token: 0x06006DA6 RID: 28070 RVA: 0x00240234 File Offset: 0x0023E434
 		private void OnDestroy()
 		{
 			this.allStatesDict.Clear();
 		}
 
-		// Token: 0x06006DA7 RID: 28071 RVA: 0x00240261 File Offset: 0x0023E461
+		// Token: 0x06006DA7 RID: 28071 RVA: 0x00240241 File Offset: 0x0023E441
 		private void OnEnable()
 		{
 			this.ForceSwitchTo(StreetLightSaber.State.Off);
 		}
 
-		// Token: 0x06006DA8 RID: 28072 RVA: 0x0024026C File Offset: 0x0023E46C
+		// Token: 0x06006DA8 RID: 28072 RVA: 0x0024024C File Offset: 0x0023E44C
 		public void UpdateStateManual()
 		{
 			int newIndex = (this.currentIndex + 1) % StreetLightSaber.values.Length;
 			this.SwitchState(newIndex);
 		}
 
-		// Token: 0x06006DA9 RID: 28073 RVA: 0x00240294 File Offset: 0x0023E494
+		// Token: 0x06006DA9 RID: 28073 RVA: 0x00240274 File Offset: 0x0023E474
 		private void UpdateStateAuto()
 		{
 			StreetLightSaber.State state = (this.CurrentState == StreetLightSaber.State.Green) ? StreetLightSaber.State.Red : StreetLightSaber.State.Green;
@@ -77,19 +77,19 @@ namespace GorillaTag.Cosmetics
 			this.autoSwitchEnabledTime = Time.time;
 		}
 
-		// Token: 0x06006DAA RID: 28074 RVA: 0x002402CD File Offset: 0x0023E4CD
+		// Token: 0x06006DAA RID: 28074 RVA: 0x002402AD File Offset: 0x0023E4AD
 		public void EnableAutoSwitch(bool enable)
 		{
 			this.autoSwitch = enable;
 		}
 
-		// Token: 0x06006DAB RID: 28075 RVA: 0x00240261 File Offset: 0x0023E461
+		// Token: 0x06006DAB RID: 28075 RVA: 0x00240241 File Offset: 0x0023E441
 		public void ResetStaff()
 		{
 			this.ForceSwitchTo(StreetLightSaber.State.Off);
 		}
 
-		// Token: 0x06006DAC RID: 28076 RVA: 0x002402D8 File Offset: 0x0023E4D8
+		// Token: 0x06006DAC RID: 28076 RVA: 0x002402B8 File Offset: 0x0023E4B8
 		public void HitReceived(Vector3 contact)
 		{
 			if (this.velocityTracker != null && this.velocityTracker.GetLatestVelocity(true).magnitude >= this.minHitVelocityThreshold)
@@ -103,7 +103,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DAD RID: 28077 RVA: 0x00240330 File Offset: 0x0023E530
+		// Token: 0x06006DAD RID: 28077 RVA: 0x00240310 File Offset: 0x0023E510
 		private void SwitchState(int newIndex)
 		{
 			if (newIndex == this.currentIndex)
@@ -141,7 +141,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DAE RID: 28078 RVA: 0x002403E4 File Offset: 0x0023E5E4
+		// Token: 0x06006DAE RID: 28078 RVA: 0x002403C4 File Offset: 0x0023E5C4
 		private void ForceSwitchTo(StreetLightSaber.State targetState)
 		{
 			int num = Array.IndexOf<StreetLightSaber.State>(StreetLightSaber.values, targetState);

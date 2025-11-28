@@ -11,11 +11,11 @@ namespace GorillaNetworking
 	public class TitleDataFeatureFlags
 	{
 		// Token: 0x170008E6 RID: 2278
-		// (get) Token: 0x06006087 RID: 24711 RVA: 0x001F1CCC File Offset: 0x001EFECC
-		// (set) Token: 0x06006088 RID: 24712 RVA: 0x001F1CD4 File Offset: 0x001EFED4
+		// (get) Token: 0x06006087 RID: 24711 RVA: 0x001F1CAC File Offset: 0x001EFEAC
+		// (set) Token: 0x06006088 RID: 24712 RVA: 0x001F1CB4 File Offset: 0x001EFEB4
 		public bool ready { get; private set; }
 
-		// Token: 0x06006089 RID: 24713 RVA: 0x001F1CDD File Offset: 0x001EFEDD
+		// Token: 0x06006089 RID: 24713 RVA: 0x001F1CBD File Offset: 0x001EFEBD
 		public void FetchFeatureFlags()
 		{
 			PlayFabTitleDataCache.Instance.GetTitleData(this.TitleDataKey, delegate(string json)
@@ -42,7 +42,7 @@ namespace GorillaNetworking
 			}, false);
 		}
 
-		// Token: 0x0600608A RID: 24714 RVA: 0x001F1D08 File Offset: 0x001EFF08
+		// Token: 0x0600608A RID: 24714 RVA: 0x001F1CE8 File Offset: 0x001EFEE8
 		public bool IsEnabledForUser(string flagName)
 		{
 			bool flag;
@@ -106,7 +106,7 @@ namespace GorillaNetworking
 			return (ulong)num2 < (ulong)((long)num);
 		}
 
-		// Token: 0x0600608B RID: 24715 RVA: 0x001F1E80 File Offset: 0x001F0080
+		// Token: 0x0600608B RID: 24715 RVA: 0x001F1E60 File Offset: 0x001F0060
 		public TitleDataFeatureFlags()
 		{
 			Dictionary<string, bool> dictionary = new Dictionary<string, bool>();

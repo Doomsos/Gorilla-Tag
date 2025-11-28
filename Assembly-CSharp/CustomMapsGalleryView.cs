@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000998 RID: 2456
 public class CustomMapsGalleryView : MonoBehaviour
 {
-	// Token: 0x06003EA4 RID: 16036 RVA: 0x0014F330 File Offset: 0x0014D530
+	// Token: 0x06003EA4 RID: 16036 RVA: 0x0014F310 File Offset: 0x0014D510
 	public void ResetGallery()
 	{
 		for (int i = 0; i < this.modTiles.Count; i++)
@@ -15,7 +15,7 @@ public class CustomMapsGalleryView : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003EA5 RID: 16037 RVA: 0x0014F364 File Offset: 0x0014D564
+	// Token: 0x06003EA5 RID: 16037 RVA: 0x0014F344 File Offset: 0x0014D544
 	public bool DisplayGallery(List<Mod> mods, bool useMapName, out string error)
 	{
 		if (mods.Count > this.modTiles.Count)
@@ -32,7 +32,7 @@ public class CustomMapsGalleryView : MonoBehaviour
 		return true;
 	}
 
-	// Token: 0x06003EA6 RID: 16038 RVA: 0x0014F3CC File Offset: 0x0014D5CC
+	// Token: 0x06003EA6 RID: 16038 RVA: 0x0014F3AC File Offset: 0x0014D5AC
 	public void ShowTileText(bool show, bool useMapName)
 	{
 		for (int i = 0; i < this.modTiles.Count; i++)
@@ -41,7 +41,7 @@ public class CustomMapsGalleryView : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003EA7 RID: 16039 RVA: 0x0014F402 File Offset: 0x0014D602
+	// Token: 0x06003EA7 RID: 16039 RVA: 0x0014F3E2 File Offset: 0x0014D5E2
 	public void ShowDetailsForEntry(int entryIndex)
 	{
 		if (this.modTiles.Count > entryIndex)
@@ -50,7 +50,7 @@ public class CustomMapsGalleryView : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003EA8 RID: 16040 RVA: 0x0014F423 File Offset: 0x0014D623
+	// Token: 0x06003EA8 RID: 16040 RVA: 0x0014F403 File Offset: 0x0014D603
 	public void HighlightTileAtIndex(int tileIndex)
 	{
 		if (tileIndex > this.modTiles.Count)

@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x0200071C RID: 1820
 public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 {
-	// Token: 0x06002EBB RID: 11963 RVA: 0x000FDD5C File Offset: 0x000FBF5C
+	// Token: 0x06002EBB RID: 11963 RVA: 0x000FDD3C File Offset: 0x000FBF3C
 	private void Awake()
 	{
 		this.hitter = base.GetComponent<GameHitter>();
@@ -18,7 +18,7 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 		}
 	}
 
-	// Token: 0x06002EBC RID: 11964 RVA: 0x000FDDB4 File Offset: 0x000FBFB4
+	// Token: 0x06002EBC RID: 11964 RVA: 0x000FDD94 File Offset: 0x000FBF94
 	private void OnToolUpgraded(GRTool tool)
 	{
 		if (tool.HasUpgradeInstalled(GRToolProgressionManager.ToolParts.DirectionalShieldSize1))
@@ -45,25 +45,25 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 		this.reflectsProjectiles = false;
 	}
 
-	// Token: 0x06002EBD RID: 11965 RVA: 0x000FDE46 File Offset: 0x000FC046
+	// Token: 0x06002EBD RID: 11965 RVA: 0x000FDE26 File Offset: 0x000FC026
 	public void OnEnable()
 	{
 		this.SetState(GRToolDirectionalShield.State.Closed);
 	}
 
-	// Token: 0x06002EBE RID: 11966 RVA: 0x000FDE4F File Offset: 0x000FC04F
+	// Token: 0x06002EBE RID: 11966 RVA: 0x000FDE2F File Offset: 0x000FC02F
 	private bool IsHeldLocal()
 	{
 		return this.gameEntity.heldByActorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
 	}
 
-	// Token: 0x06002EBF RID: 11967 RVA: 0x000FDE68 File Offset: 0x000FC068
+	// Token: 0x06002EBF RID: 11967 RVA: 0x000FDE48 File Offset: 0x000FC048
 	private bool IsHeld()
 	{
 		return this.gameEntity.heldByActorNumber != -1;
 	}
 
-	// Token: 0x06002EC0 RID: 11968 RVA: 0x000FDE7C File Offset: 0x000FC07C
+	// Token: 0x06002EC0 RID: 11968 RVA: 0x000FDE5C File Offset: 0x000FC05C
 	public void BlockHittable(Vector3 enemyPosition, Vector3 enemyAttackDirection, GameHittable hittable, GRShieldCollider shieldCollider)
 	{
 		if (this.IsHeldLocal())
@@ -100,14 +100,14 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 		}
 	}
 
-	// Token: 0x06002EC1 RID: 11969 RVA: 0x000FDFC4 File Offset: 0x000FC1C4
+	// Token: 0x06002EC1 RID: 11969 RVA: 0x000FDFA4 File Offset: 0x000FC1A4
 	public void OnEnemyBlocked(Vector3 enemyPosition)
 	{
 		this.tool.UseEnergy();
 		this.PlayBlockEffects(enemyPosition);
 	}
 
-	// Token: 0x06002EC2 RID: 11970 RVA: 0x000FDFD8 File Offset: 0x000FC1D8
+	// Token: 0x06002EC2 RID: 11970 RVA: 0x000FDFB8 File Offset: 0x000FC1B8
 	private void PlayBlockEffects(Vector3 enemyPosition)
 	{
 		this.audioSource.PlayOneShot(this.deflectAudio, this.deflectVolume);
@@ -118,14 +118,14 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 		this.shieldDeflectImpactPointVFX.Play();
 	}
 
-	// Token: 0x06002EC3 RID: 11971 RVA: 0x000FE052 File Offset: 0x000FC252
+	// Token: 0x06002EC3 RID: 11971 RVA: 0x000FE032 File Offset: 0x000FC232
 	public void OnSuccessfulHit(GameHitData hitData)
 	{
 		this.tool.UseEnergy();
 		this.PlayBlockEffects(hitData.hitEntityPosition);
 	}
 
-	// Token: 0x06002EC4 RID: 11972 RVA: 0x000FE06C File Offset: 0x000FC26C
+	// Token: 0x06002EC4 RID: 11972 RVA: 0x000FE04C File Offset: 0x000FC24C
 	public void Update()
 	{
 		float deltaTime = Time.deltaTime;
@@ -142,7 +142,7 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 		this.OnUpdateRemote(deltaTime);
 	}
 
-	// Token: 0x06002EC5 RID: 11973 RVA: 0x000FE0A8 File Offset: 0x000FC2A8
+	// Token: 0x06002EC5 RID: 11973 RVA: 0x000FE088 File Offset: 0x000FC288
 	private void OnUpdateAuthority(float dt)
 	{
 		GRToolDirectionalShield.State state = this.state;
@@ -164,7 +164,7 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 		}
 	}
 
-	// Token: 0x06002EC6 RID: 11974 RVA: 0x000FE108 File Offset: 0x000FC308
+	// Token: 0x06002EC6 RID: 11974 RVA: 0x000FE0E8 File Offset: 0x000FC2E8
 	private void OnUpdateRemote(float dt)
 	{
 		GRToolDirectionalShield.State state = (GRToolDirectionalShield.State)this.gameEntity.GetState();
@@ -174,14 +174,14 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 		}
 	}
 
-	// Token: 0x06002EC7 RID: 11975 RVA: 0x000FE132 File Offset: 0x000FC332
+	// Token: 0x06002EC7 RID: 11975 RVA: 0x000FE112 File Offset: 0x000FC312
 	private void SetStateAuthority(GRToolDirectionalShield.State newState)
 	{
 		this.SetState(newState);
 		this.gameEntity.RequestState(this.gameEntity.id, (long)newState);
 	}
 
-	// Token: 0x06002EC8 RID: 11976 RVA: 0x000FE154 File Offset: 0x000FC354
+	// Token: 0x06002EC8 RID: 11976 RVA: 0x000FE134 File Offset: 0x000FC334
 	private void SetState(GRToolDirectionalShield.State newState)
 	{
 		if (this.state == newState)
@@ -220,7 +220,7 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 		this.hitter != null;
 	}
 
-	// Token: 0x06002EC9 RID: 11977 RVA: 0x000FE278 File Offset: 0x000FC478
+	// Token: 0x06002EC9 RID: 11977 RVA: 0x000FE258 File Offset: 0x000FC458
 	private bool IsButtonHeld()
 	{
 		if (!this.IsHeldLocal())

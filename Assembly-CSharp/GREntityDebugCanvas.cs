@@ -7,13 +7,13 @@ using UnityEngine;
 // Token: 0x020006C1 RID: 1729
 public class GREntityDebugCanvas : MonoBehaviour
 {
-	// Token: 0x06002C80 RID: 11392 RVA: 0x000F12EC File Offset: 0x000EF4EC
+	// Token: 0x06002C80 RID: 11392 RVA: 0x000F12CC File Offset: 0x000EF4CC
 	private void Awake()
 	{
 		this.builder = new StringBuilder(50);
 	}
 
-	// Token: 0x06002C81 RID: 11393 RVA: 0x000F12FC File Offset: 0x000EF4FC
+	// Token: 0x06002C81 RID: 11393 RVA: 0x000F12DC File Offset: 0x000EF4DC
 	private void Start()
 	{
 		if (this.text == null && this.textPanelPrefab != null)
@@ -27,7 +27,7 @@ public class GREntityDebugCanvas : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002C82 RID: 11394 RVA: 0x000F1380 File Offset: 0x000EF580
+	// Token: 0x06002C82 RID: 11394 RVA: 0x000F1360 File Offset: 0x000EF560
 	private bool UpdateActive()
 	{
 		bool entityDebugEnabled = GhostReactorManager.entityDebugEnabled;
@@ -43,7 +43,7 @@ public class GREntityDebugCanvas : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002C84 RID: 11396 RVA: 0x000F13B4 File Offset: 0x000EF5B4
+	// Token: 0x06002C84 RID: 11396 RVA: 0x000F1394 File Offset: 0x000EF594
 	private void UpdateText()
 	{
 		if (this.text)

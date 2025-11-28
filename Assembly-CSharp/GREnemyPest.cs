@@ -10,11 +10,11 @@ using UnityEngine.AI;
 public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySerialize, IGameHittable, IGameAgentComponent, IGameEntityDebugComponent, ITickSystemTick
 {
 	// Token: 0x17000410 RID: 1040
-	// (get) Token: 0x06002BDE RID: 11230 RVA: 0x000EC238 File Offset: 0x000EA438
-	// (set) Token: 0x06002BDF RID: 11231 RVA: 0x000EC240 File Offset: 0x000EA440
+	// (get) Token: 0x06002BDE RID: 11230 RVA: 0x000EC218 File Offset: 0x000EA418
+	// (set) Token: 0x06002BDF RID: 11231 RVA: 0x000EC220 File Offset: 0x000EA420
 	public bool TickRunning { get; set; }
 
-	// Token: 0x06002BE0 RID: 11232 RVA: 0x000EC24C File Offset: 0x000EA44C
+	// Token: 0x06002BE0 RID: 11232 RVA: 0x000EC22C File Offset: 0x000EA42C
 	private void Awake()
 	{
 		this.rigidBody = base.GetComponent<Rigidbody>();
@@ -47,13 +47,13 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		TickSystem<object>.RemoveTickCallback(this);
 	}
 
-	// Token: 0x06002BE3 RID: 11235 RVA: 0x000EC338 File Offset: 0x000EA538
+	// Token: 0x06002BE3 RID: 11235 RVA: 0x000EC318 File Offset: 0x000EA518
 	private void PlaySpawnAudio()
 	{
 		this.spawnSound.Play(null);
 	}
 
-	// Token: 0x06002BE4 RID: 11236 RVA: 0x000EC348 File Offset: 0x000EA548
+	// Token: 0x06002BE4 RID: 11236 RVA: 0x000EC328 File Offset: 0x000EA528
 	public void OnEntityInit()
 	{
 		this.abilityIdle.Setup(this.agent, this.anim, this.audioSource, base.transform, this.headTransform, this.senseLineOfSight);
@@ -97,20 +97,20 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 	{
 	}
 
-	// Token: 0x06002BE7 RID: 11239 RVA: 0x000EC694 File Offset: 0x000EA894
+	// Token: 0x06002BE7 RID: 11239 RVA: 0x000EC674 File Offset: 0x000EA874
 	private void OnDestroy()
 	{
 		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviorStateChange;
 	}
 
-	// Token: 0x06002BE8 RID: 11240 RVA: 0x000EC6AD File Offset: 0x000EA8AD
+	// Token: 0x06002BE8 RID: 11240 RVA: 0x000EC68D File Offset: 0x000EA88D
 	private void OnAgentJumpRequested(Vector3 start, Vector3 end, float heightScale, float speedScale)
 	{
 		this.abilityJump.SetupJump(start, end, heightScale, speedScale);
 		this.SetBehavior(GREnemyPest.Behavior.Jump, false);
 	}
 
-	// Token: 0x06002BE9 RID: 11241 RVA: 0x000EC6C8 File Offset: 0x000EA8C8
+	// Token: 0x06002BE9 RID: 11241 RVA: 0x000EC6A8 File Offset: 0x000EA8A8
 	public void OnNetworkBehaviorStateChange(byte newState)
 	{
 		if (newState < 0 || newState >= 11)
@@ -120,13 +120,13 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.SetBehavior((GREnemyPest.Behavior)newState, false);
 	}
 
-	// Token: 0x06002BEA RID: 11242 RVA: 0x000EC6DC File Offset: 0x000EA8DC
+	// Token: 0x06002BEA RID: 11242 RVA: 0x000EC6BC File Offset: 0x000EA8BC
 	public void SetHP(int hp)
 	{
 		this.hp = hp;
 	}
 
-	// Token: 0x06002BEB RID: 11243 RVA: 0x000EC6E5 File Offset: 0x000EA8E5
+	// Token: 0x06002BEB RID: 11243 RVA: 0x000EC6C5 File Offset: 0x000EA8C5
 	public bool TrySetBehavior(GREnemyPest.Behavior newBehavior)
 	{
 		if (this.currBehavior == GREnemyPest.Behavior.Jump && newBehavior == GREnemyPest.Behavior.Stagger)
@@ -137,7 +137,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		return true;
 	}
 
-	// Token: 0x06002BEC RID: 11244 RVA: 0x000EC700 File Offset: 0x000EA900
+	// Token: 0x06002BEC RID: 11244 RVA: 0x000EC6E0 File Offset: 0x000EA8E0
 	public void SetBehavior(GREnemyPest.Behavior newBehavior, bool force = false)
 	{
 		if (this.currBehavior == newBehavior && !force)
@@ -226,7 +226,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	// Token: 0x06002BED RID: 11245 RVA: 0x000EC916 File Offset: 0x000EAB16
+	// Token: 0x06002BED RID: 11245 RVA: 0x000EC8F6 File Offset: 0x000EAAF6
 	private void OnGrabbed()
 	{
 		if (this.currBehavior == GREnemyPest.Behavior.Destroyed)
@@ -236,7 +236,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.SetBehavior(GREnemyPest.Behavior.Grabbed, false);
 	}
 
-	// Token: 0x06002BEE RID: 11246 RVA: 0x000EC92A File Offset: 0x000EAB2A
+	// Token: 0x06002BEE RID: 11246 RVA: 0x000EC90A File Offset: 0x000EAB0A
 	private void OnReleased()
 	{
 		if (this.currBehavior == GREnemyPest.Behavior.Destroyed)
@@ -246,13 +246,13 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.SetBehavior(GREnemyPest.Behavior.Thrown, false);
 	}
 
-	// Token: 0x06002BEF RID: 11247 RVA: 0x000EC93E File Offset: 0x000EAB3E
+	// Token: 0x06002BEF RID: 11247 RVA: 0x000EC91E File Offset: 0x000EAB1E
 	public void Tick()
 	{
 		this.OnUpdate(Time.deltaTime);
 	}
 
-	// Token: 0x06002BF0 RID: 11248 RVA: 0x000EC94C File Offset: 0x000EAB4C
+	// Token: 0x06002BF0 RID: 11248 RVA: 0x000EC92C File Offset: 0x000EAB2C
 	public void OnEntityThink(float dt)
 	{
 		if (!this.entity.IsAuthority())
@@ -294,7 +294,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	// Token: 0x06002BF1 RID: 11249 RVA: 0x000ECA4C File Offset: 0x000EAC4C
+	// Token: 0x06002BF1 RID: 11249 RVA: 0x000ECA2C File Offset: 0x000EAC2C
 	private void ChooseNewBehavior()
 	{
 		if (!GhostReactorManager.AggroDisabled && this.senseNearby.IsAnyoneNearby())
@@ -313,7 +313,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.SetBehavior(GREnemyPest.Behavior.Wander, false);
 	}
 
-	// Token: 0x06002BF2 RID: 11250 RVA: 0x000ECAD8 File Offset: 0x000EACD8
+	// Token: 0x06002BF2 RID: 11250 RVA: 0x000ECAB8 File Offset: 0x000EACB8
 	public void OnUpdate(float dt)
 	{
 		if (this.entity.IsAuthority())
@@ -324,7 +324,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.OnUpdateRemote(dt);
 	}
 
-	// Token: 0x06002BF3 RID: 11251 RVA: 0x000ECAF8 File Offset: 0x000EACF8
+	// Token: 0x06002BF3 RID: 11251 RVA: 0x000ECAD8 File Offset: 0x000EACD8
 	public void OnUpdateAuthority(float dt)
 	{
 		switch (this.currBehavior)
@@ -406,7 +406,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	// Token: 0x06002BF4 RID: 11252 RVA: 0x000ECC94 File Offset: 0x000EAE94
+	// Token: 0x06002BF4 RID: 11252 RVA: 0x000ECC74 File Offset: 0x000EAE74
 	public void OnUpdateRemote(float dt)
 	{
 		switch (this.currBehavior)
@@ -443,7 +443,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	// Token: 0x06002BF5 RID: 11253 RVA: 0x000ECD40 File Offset: 0x000EAF40
+	// Token: 0x06002BF5 RID: 11253 RVA: 0x000ECD20 File Offset: 0x000EAF20
 	public void OnGameEntitySerialize(BinaryWriter writer)
 	{
 		byte b = (byte)this.currBehavior;
@@ -453,7 +453,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		writer.Write(b2);
 	}
 
-	// Token: 0x06002BF6 RID: 11254 RVA: 0x000ECD78 File Offset: 0x000EAF78
+	// Token: 0x06002BF6 RID: 11254 RVA: 0x000ECD58 File Offset: 0x000EAF58
 	public void OnGameEntityDeserialize(BinaryReader reader)
 	{
 		GREnemyPest.Behavior newBehavior = (GREnemyPest.Behavior)reader.ReadByte();
@@ -470,7 +470,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		return true;
 	}
 
-	// Token: 0x06002BF8 RID: 11256 RVA: 0x000ECDB4 File Offset: 0x000EAFB4
+	// Token: 0x06002BF8 RID: 11256 RVA: 0x000ECD94 File Offset: 0x000EAF94
 	public void OnHit(GameHitData hit)
 	{
 		GameHitType hitTypeId = (GameHitType)hit.hitTypeId;
@@ -494,7 +494,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	// Token: 0x06002BF9 RID: 11257 RVA: 0x000ECE14 File Offset: 0x000EB014
+	// Token: 0x06002BF9 RID: 11257 RVA: 0x000ECDF4 File Offset: 0x000EAFF4
 	public void OnHitByClub(GameHitData hit)
 	{
 		if (this.currBodyState != GREnemyPest.BodyState.Bones)
@@ -520,7 +520,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.TrySetBehavior(GREnemyPest.Behavior.Stagger);
 	}
 
-	// Token: 0x06002BFA RID: 11258 RVA: 0x000ECEB8 File Offset: 0x000EB0B8
+	// Token: 0x06002BFA RID: 11258 RVA: 0x000ECE98 File Offset: 0x000EB098
 	public void OnHitByFlash(GRTool tool, GameHitData hit)
 	{
 		this.abilityFlashed.SetStaggerVelocity(hit.hitImpulse);
@@ -564,13 +564,13 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.TrySetBehavior(GREnemyPest.Behavior.Flashed);
 	}
 
-	// Token: 0x06002BFB RID: 11259 RVA: 0x000ECFE0 File Offset: 0x000EB1E0
+	// Token: 0x06002BFB RID: 11259 RVA: 0x000ECFC0 File Offset: 0x000EB1C0
 	public void OnHitByShield(GameHitData hit)
 	{
 		this.OnHitByClub(hit);
 	}
 
-	// Token: 0x06002BFC RID: 11260 RVA: 0x000ECFEC File Offset: 0x000EB1EC
+	// Token: 0x06002BFC RID: 11260 RVA: 0x000ECFCC File Offset: 0x000EB1CC
 	private void OnTriggerEnter(Collider collider)
 	{
 		if (this.currBehavior != GREnemyPest.Behavior.Attack)
@@ -615,7 +615,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	// Token: 0x06002BFD RID: 11261 RVA: 0x000ED151 File Offset: 0x000EB351
+	// Token: 0x06002BFD RID: 11261 RVA: 0x000ED131 File Offset: 0x000EB331
 	private IEnumerator TryHitPlayer(GRPlayer player)
 	{
 		yield return new WaitForUpdate();
@@ -627,7 +627,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		yield break;
 	}
 
-	// Token: 0x06002BFE RID: 11262 RVA: 0x000ED168 File Offset: 0x000EB368
+	// Token: 0x06002BFE RID: 11262 RVA: 0x000ED148 File Offset: 0x000EB348
 	private void RefreshBody()
 	{
 		switch (this.currBodyState)
@@ -650,7 +650,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	// Token: 0x06002BFF RID: 11263 RVA: 0x000ED1EC File Offset: 0x000EB3EC
+	// Token: 0x06002BFF RID: 11263 RVA: 0x000ED1CC File Offset: 0x000EB3CC
 	public void SetBodyState(GREnemyPest.BodyState newBodyState, bool force = false)
 	{
 		if (this.currBodyState == newBodyState && !force)
@@ -686,7 +686,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	// Token: 0x06002C00 RID: 11264 RVA: 0x000ED2C4 File Offset: 0x000EB4C4
+	// Token: 0x06002C00 RID: 11264 RVA: 0x000ED2A4 File Offset: 0x000EB4A4
 	public void GetDebugTextLines(out List<string> strings)
 	{
 		strings = new List<string>();

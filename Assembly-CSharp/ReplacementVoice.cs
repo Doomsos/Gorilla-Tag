@@ -17,7 +17,7 @@ public class ReplacementVoice : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
-	// Token: 0x06003A26 RID: 14886 RVA: 0x00133658 File Offset: 0x00131858
+	// Token: 0x06003A26 RID: 14886 RVA: 0x00133638 File Offset: 0x00131838
 	public void SliceUpdate()
 	{
 		if (!this.replacementVoiceSource.isPlaying && this.myVRRig.ShouldPlayReplacementVoice())

@@ -10,7 +10,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010AD RID: 4269
 	public class MedusaEyeLantern : MonoBehaviour
 	{
-		// Token: 0x06006AD4 RID: 27348 RVA: 0x00230840 File Offset: 0x0022EA40
+		// Token: 0x06006AD4 RID: 27348 RVA: 0x00230820 File Offset: 0x0022EA20
 		private void Awake()
 		{
 			foreach (MedusaEyeLantern.EyeState eyeState in this.allStates)
@@ -19,13 +19,13 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AD5 RID: 27349 RVA: 0x00230878 File Offset: 0x0022EA78
+		// Token: 0x06006AD5 RID: 27349 RVA: 0x00230858 File Offset: 0x0022EA58
 		private void OnDestroy()
 		{
 			this.allStatesDict.Clear();
 		}
 
-		// Token: 0x06006AD6 RID: 27350 RVA: 0x00230885 File Offset: 0x0022EA85
+		// Token: 0x06006AD6 RID: 27350 RVA: 0x00230865 File Offset: 0x0022EA65
 		private void Start()
 		{
 			if (this.rotatingObjectTransform == null)
@@ -36,7 +36,7 @@ namespace GorillaTag.Cosmetics
 			this.SwitchState(MedusaEyeLantern.State.DORMANT);
 		}
 
-		// Token: 0x06006AD7 RID: 27351 RVA: 0x002308BC File Offset: 0x0022EABC
+		// Token: 0x06006AD7 RID: 27351 RVA: 0x0023089C File Offset: 0x0022EA9C
 		private void Update()
 		{
 			if (!this.transferableParent.InHand() && this.currentState != MedusaEyeLantern.State.DORMANT)
@@ -74,7 +74,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AD8 RID: 27352 RVA: 0x00230A1A File Offset: 0x0022EC1A
+		// Token: 0x06006AD8 RID: 27352 RVA: 0x002309FA File Offset: 0x0022EBFA
 		public void HandleOnNoOneInRange()
 		{
 			this.SwitchState(MedusaEyeLantern.State.RESET);
@@ -82,7 +82,7 @@ namespace GorillaTag.Cosmetics
 			this.rotatingObjectTransform.localRotation = this.initialRotation;
 		}
 
-		// Token: 0x06006AD9 RID: 27353 RVA: 0x00230A3F File Offset: 0x0022EC3F
+		// Token: 0x06006AD9 RID: 27353 RVA: 0x00230A1F File Offset: 0x0022EC1F
 		public void HandleOnNewPlayerDetected(VRRig target, float distance)
 		{
 			this.targetRig = target;
@@ -92,7 +92,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006ADA RID: 27354 RVA: 0x00230A58 File Offset: 0x0022EC58
+		// Token: 0x06006ADA RID: 27354 RVA: 0x00230A38 File Offset: 0x0022EC38
 		private void Sloshing()
 		{
 			Vector3 averageVelocity = this.velocityTracker.GetAverageVelocity(true, 0.15f, false);
@@ -104,7 +104,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006ADB RID: 27355 RVA: 0x00230AAC File Offset: 0x0022ECAC
+		// Token: 0x06006ADB RID: 27355 RVA: 0x00230A8C File Offset: 0x0022EC8C
 		private void FaceTarget()
 		{
 			if (this.targetRig == null || this.rotatingObjectTransform == null)
@@ -128,7 +128,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006ADC RID: 27356 RVA: 0x00230C10 File Offset: 0x0022EE10
+		// Token: 0x06006ADC RID: 27356 RVA: 0x00230BF0 File Offset: 0x0022EDF0
 		private bool IsTargetLookingAtEye()
 		{
 			if (this.targetRig == null || this.rotatingObjectTransform == null)
@@ -143,7 +143,7 @@ namespace GorillaTag.Cosmetics
 			return num < this.lookAtEyeAngleThreshold;
 		}
 
-		// Token: 0x06006ADD RID: 27357 RVA: 0x00230CF8 File Offset: 0x0022EEF8
+		// Token: 0x06006ADD RID: 27357 RVA: 0x00230CD8 File Offset: 0x0022EED8
 		private void UpdateState()
 		{
 			switch (this.currentState)
@@ -208,7 +208,7 @@ namespace GorillaTag.Cosmetics
 			this.PlayHaptic(this.currentState);
 		}
 
-		// Token: 0x06006ADE RID: 27358 RVA: 0x00230EA8 File Offset: 0x0022F0A8
+		// Token: 0x06006ADE RID: 27358 RVA: 0x00230E88 File Offset: 0x0022F088
 		private void SwitchState(MedusaEyeLantern.State newState)
 		{
 			this.lastState = this.currentState;
@@ -234,7 +234,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006ADF RID: 27359 RVA: 0x00230F2C File Offset: 0x0022F12C
+		// Token: 0x06006ADF RID: 27359 RVA: 0x00230F0C File Offset: 0x0022F10C
 		private void PlayHaptic(MedusaEyeLantern.State state)
 		{
 			if (!this.transferableParent.IsMyItem())
@@ -262,7 +262,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006AE0 RID: 27360 RVA: 0x00230FE5 File Offset: 0x0022F1E5
+		// Token: 0x06006AE0 RID: 27360 RVA: 0x00230FC5 File Offset: 0x0022F1C5
 		private bool EyeIsLockedOn()
 		{
 			return this.currentState == MedusaEyeLantern.State.TRACKING || this.currentState == MedusaEyeLantern.State.WARMUP || this.currentState == MedusaEyeLantern.State.PRIMING;

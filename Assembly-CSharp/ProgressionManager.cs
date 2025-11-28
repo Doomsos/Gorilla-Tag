@@ -12,86 +12,86 @@ using UnityEngine.Networking;
 public class ProgressionManager : MonoBehaviour
 {
 	// Token: 0x17000517 RID: 1303
-	// (get) Token: 0x06003864 RID: 14436 RVA: 0x0012D8F8 File Offset: 0x0012BAF8
-	// (set) Token: 0x06003865 RID: 14437 RVA: 0x0012D8FF File Offset: 0x0012BAFF
+	// (get) Token: 0x06003864 RID: 14436 RVA: 0x0012D8D8 File Offset: 0x0012BAD8
+	// (set) Token: 0x06003865 RID: 14437 RVA: 0x0012D8DF File Offset: 0x0012BADF
 	public static ProgressionManager Instance { get; private set; }
 
 	// Token: 0x14000064 RID: 100
-	// (add) Token: 0x06003866 RID: 14438 RVA: 0x0012D908 File Offset: 0x0012BB08
-	// (remove) Token: 0x06003867 RID: 14439 RVA: 0x0012D940 File Offset: 0x0012BB40
+	// (add) Token: 0x06003866 RID: 14438 RVA: 0x0012D8E8 File Offset: 0x0012BAE8
+	// (remove) Token: 0x06003867 RID: 14439 RVA: 0x0012D920 File Offset: 0x0012BB20
 	public event Action OnTreeUpdated;
 
 	// Token: 0x14000065 RID: 101
-	// (add) Token: 0x06003868 RID: 14440 RVA: 0x0012D978 File Offset: 0x0012BB78
-	// (remove) Token: 0x06003869 RID: 14441 RVA: 0x0012D9B0 File Offset: 0x0012BBB0
+	// (add) Token: 0x06003868 RID: 14440 RVA: 0x0012D958 File Offset: 0x0012BB58
+	// (remove) Token: 0x06003869 RID: 14441 RVA: 0x0012D990 File Offset: 0x0012BB90
 	public event Action OnInventoryUpdated;
 
 	// Token: 0x14000066 RID: 102
-	// (add) Token: 0x0600386A RID: 14442 RVA: 0x0012D9E8 File Offset: 0x0012BBE8
-	// (remove) Token: 0x0600386B RID: 14443 RVA: 0x0012DA20 File Offset: 0x0012BC20
+	// (add) Token: 0x0600386A RID: 14442 RVA: 0x0012D9C8 File Offset: 0x0012BBC8
+	// (remove) Token: 0x0600386B RID: 14443 RVA: 0x0012DA00 File Offset: 0x0012BC00
 	public event Action<string, int> OnTrackRead;
 
 	// Token: 0x14000067 RID: 103
-	// (add) Token: 0x0600386C RID: 14444 RVA: 0x0012DA58 File Offset: 0x0012BC58
-	// (remove) Token: 0x0600386D RID: 14445 RVA: 0x0012DA90 File Offset: 0x0012BC90
+	// (add) Token: 0x0600386C RID: 14444 RVA: 0x0012DA38 File Offset: 0x0012BC38
+	// (remove) Token: 0x0600386D RID: 14445 RVA: 0x0012DA70 File Offset: 0x0012BC70
 	public event Action<string, int> OnTrackSet;
 
 	// Token: 0x14000068 RID: 104
-	// (add) Token: 0x0600386E RID: 14446 RVA: 0x0012DAC8 File Offset: 0x0012BCC8
-	// (remove) Token: 0x0600386F RID: 14447 RVA: 0x0012DB00 File Offset: 0x0012BD00
+	// (add) Token: 0x0600386E RID: 14446 RVA: 0x0012DAA8 File Offset: 0x0012BCA8
+	// (remove) Token: 0x0600386F RID: 14447 RVA: 0x0012DAE0 File Offset: 0x0012BCE0
 	public event Action<string, string> OnNodeUnlocked;
 
 	// Token: 0x14000069 RID: 105
-	// (add) Token: 0x06003870 RID: 14448 RVA: 0x0012DB38 File Offset: 0x0012BD38
-	// (remove) Token: 0x06003871 RID: 14449 RVA: 0x0012DB70 File Offset: 0x0012BD70
+	// (add) Token: 0x06003870 RID: 14448 RVA: 0x0012DB18 File Offset: 0x0012BD18
+	// (remove) Token: 0x06003871 RID: 14449 RVA: 0x0012DB50 File Offset: 0x0012BD50
 	public event Action<string, int> OnGetShiftCredit;
 
 	// Token: 0x1400006A RID: 106
-	// (add) Token: 0x06003872 RID: 14450 RVA: 0x0012DBA8 File Offset: 0x0012BDA8
-	// (remove) Token: 0x06003873 RID: 14451 RVA: 0x0012DBE0 File Offset: 0x0012BDE0
+	// (add) Token: 0x06003872 RID: 14450 RVA: 0x0012DB88 File Offset: 0x0012BD88
+	// (remove) Token: 0x06003873 RID: 14451 RVA: 0x0012DBC0 File Offset: 0x0012BDC0
 	public event Action<string, int, int> OnGetShiftCreditCapData;
 
 	// Token: 0x1400006B RID: 107
-	// (add) Token: 0x06003874 RID: 14452 RVA: 0x0012DC18 File Offset: 0x0012BE18
-	// (remove) Token: 0x06003875 RID: 14453 RVA: 0x0012DC50 File Offset: 0x0012BE50
+	// (add) Token: 0x06003874 RID: 14452 RVA: 0x0012DBF8 File Offset: 0x0012BDF8
+	// (remove) Token: 0x06003875 RID: 14453 RVA: 0x0012DC30 File Offset: 0x0012BE30
 	public event Action<bool> OnPurchaseShiftCreditCapIncrease;
 
 	// Token: 0x1400006C RID: 108
-	// (add) Token: 0x06003876 RID: 14454 RVA: 0x0012DC88 File Offset: 0x0012BE88
-	// (remove) Token: 0x06003877 RID: 14455 RVA: 0x0012DCC0 File Offset: 0x0012BEC0
+	// (add) Token: 0x06003876 RID: 14454 RVA: 0x0012DC68 File Offset: 0x0012BE68
+	// (remove) Token: 0x06003877 RID: 14455 RVA: 0x0012DCA0 File Offset: 0x0012BEA0
 	public event Action<bool> OnPurchaseShiftCredit;
 
 	// Token: 0x1400006D RID: 109
-	// (add) Token: 0x06003878 RID: 14456 RVA: 0x0012DCF8 File Offset: 0x0012BEF8
-	// (remove) Token: 0x06003879 RID: 14457 RVA: 0x0012DD30 File Offset: 0x0012BF30
+	// (add) Token: 0x06003878 RID: 14456 RVA: 0x0012DCD8 File Offset: 0x0012BED8
+	// (remove) Token: 0x06003879 RID: 14457 RVA: 0x0012DD10 File Offset: 0x0012BF10
 	public event Action<bool> OnChaosDepositSuccess;
 
 	// Token: 0x1400006E RID: 110
-	// (add) Token: 0x0600387A RID: 14458 RVA: 0x0012DD68 File Offset: 0x0012BF68
-	// (remove) Token: 0x0600387B RID: 14459 RVA: 0x0012DDA0 File Offset: 0x0012BFA0
+	// (add) Token: 0x0600387A RID: 14458 RVA: 0x0012DD48 File Offset: 0x0012BF48
+	// (remove) Token: 0x0600387B RID: 14459 RVA: 0x0012DD80 File Offset: 0x0012BF80
 	public event Action<ProgressionManager.JuicerStatusResponse> OnJucierStatusUpdated;
 
 	// Token: 0x1400006F RID: 111
-	// (add) Token: 0x0600387C RID: 14460 RVA: 0x0012DDD8 File Offset: 0x0012BFD8
-	// (remove) Token: 0x0600387D RID: 14461 RVA: 0x0012DE10 File Offset: 0x0012C010
+	// (add) Token: 0x0600387C RID: 14460 RVA: 0x0012DDB8 File Offset: 0x0012BFB8
+	// (remove) Token: 0x0600387D RID: 14461 RVA: 0x0012DDF0 File Offset: 0x0012BFF0
 	public event Action<bool> OnPurchaseOverdrive;
 
 	// Token: 0x14000070 RID: 112
-	// (add) Token: 0x0600387E RID: 14462 RVA: 0x0012DE48 File Offset: 0x0012C048
-	// (remove) Token: 0x0600387F RID: 14463 RVA: 0x0012DE80 File Offset: 0x0012C080
+	// (add) Token: 0x0600387E RID: 14462 RVA: 0x0012DE28 File Offset: 0x0012C028
+	// (remove) Token: 0x0600387F RID: 14463 RVA: 0x0012DE60 File Offset: 0x0012C060
 	public event Action<ProgressionManager.DockWristStatusResponse> OnDockWristStatusUpdated;
 
 	// Token: 0x14000071 RID: 113
-	// (add) Token: 0x06003880 RID: 14464 RVA: 0x0012DEB8 File Offset: 0x0012C0B8
-	// (remove) Token: 0x06003881 RID: 14465 RVA: 0x0012DEF0 File Offset: 0x0012C0F0
+	// (add) Token: 0x06003880 RID: 14464 RVA: 0x0012DE98 File Offset: 0x0012C098
+	// (remove) Token: 0x06003881 RID: 14465 RVA: 0x0012DED0 File Offset: 0x0012C0D0
 	public event Action<ProgressionManager.GhostReactorStatsResponse> OnGhostReactorStatsUpdated;
 
 	// Token: 0x14000072 RID: 114
-	// (add) Token: 0x06003882 RID: 14466 RVA: 0x0012DF28 File Offset: 0x0012C128
-	// (remove) Token: 0x06003883 RID: 14467 RVA: 0x0012DF60 File Offset: 0x0012C160
+	// (add) Token: 0x06003882 RID: 14466 RVA: 0x0012DF08 File Offset: 0x0012C108
+	// (remove) Token: 0x06003883 RID: 14467 RVA: 0x0012DF40 File Offset: 0x0012C140
 	public event Action<ProgressionManager.GhostReactorInventoryResponse> OnGhostReactorInventoryUpdated;
 
-	// Token: 0x06003884 RID: 14468 RVA: 0x0012DF95 File Offset: 0x0012C195
+	// Token: 0x06003884 RID: 14468 RVA: 0x0012DF75 File Offset: 0x0012C175
 	private void Awake()
 	{
 		if (ProgressionManager.Instance == null)
@@ -100,7 +100,7 @@ public class ProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003885 RID: 14469 RVA: 0x0012DFAC File Offset: 0x0012C1AC
+	// Token: 0x06003885 RID: 14469 RVA: 0x0012DF8C File Offset: 0x0012C18C
 	public void RefreshProgressionTree()
 	{
 		ProgressionManager.<RefreshProgressionTree>d__60 <RefreshProgressionTree>d__;
@@ -110,7 +110,7 @@ public class ProgressionManager : MonoBehaviour
 		<RefreshProgressionTree>d__.<>t__builder.Start<ProgressionManager.<RefreshProgressionTree>d__60>(ref <RefreshProgressionTree>d__);
 	}
 
-	// Token: 0x06003886 RID: 14470 RVA: 0x0012DFE4 File Offset: 0x0012C1E4
+	// Token: 0x06003886 RID: 14470 RVA: 0x0012DFC4 File Offset: 0x0012C1C4
 	public void RefreshUserInventory()
 	{
 		ProgressionManager.<RefreshUserInventory>d__61 <RefreshUserInventory>d__;
@@ -120,7 +120,7 @@ public class ProgressionManager : MonoBehaviour
 		<RefreshUserInventory>d__.<>t__builder.Start<ProgressionManager.<RefreshUserInventory>d__61>(ref <RefreshUserInventory>d__);
 	}
 
-	// Token: 0x06003887 RID: 14471 RVA: 0x0012E01C File Offset: 0x0012C21C
+	// Token: 0x06003887 RID: 14471 RVA: 0x0012DFFC File Offset: 0x0012C1FC
 	public UserHydratedProgressionTreeResponse GetTree(string treeName)
 	{
 		UserHydratedProgressionTreeResponse result;
@@ -128,13 +128,13 @@ public class ProgressionManager : MonoBehaviour
 		return result;
 	}
 
-	// Token: 0x06003888 RID: 14472 RVA: 0x0012E039 File Offset: 0x0012C239
+	// Token: 0x06003888 RID: 14472 RVA: 0x0012E019 File Offset: 0x0012C219
 	public bool GetInventoryItem(string inventoryKey, out ProgressionManager.MothershipItemSummary item)
 	{
 		return this._inventory.TryGetValue((inventoryKey != null) ? inventoryKey.Trim() : null, ref item);
 	}
 
-	// Token: 0x06003889 RID: 14473 RVA: 0x0012E054 File Offset: 0x0012C254
+	// Token: 0x06003889 RID: 14473 RVA: 0x0012E034 File Offset: 0x0012C234
 	public int GetNodeCost(string treeName, string nodeId, string currencyKey)
 	{
 		UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse;
@@ -164,7 +164,7 @@ public class ProgressionManager : MonoBehaviour
 		return 0;
 	}
 
-	// Token: 0x0600388A RID: 14474 RVA: 0x0012E158 File Offset: 0x0012C358
+	// Token: 0x0600388A RID: 14474 RVA: 0x0012E138 File Offset: 0x0012C338
 	public void GetProgression(string trackId)
 	{
 		ProgressionManager.<GetProgression>d__65 <GetProgression>d__;
@@ -175,7 +175,7 @@ public class ProgressionManager : MonoBehaviour
 		<GetProgression>d__.<>t__builder.Start<ProgressionManager.<GetProgression>d__65>(ref <GetProgression>d__);
 	}
 
-	// Token: 0x0600388B RID: 14475 RVA: 0x0012E198 File Offset: 0x0012C398
+	// Token: 0x0600388B RID: 14475 RVA: 0x0012E178 File Offset: 0x0012C378
 	public void SetProgression(string trackId, int progress)
 	{
 		ProgressionManager.<SetProgression>d__66 <SetProgression>d__;
@@ -187,7 +187,7 @@ public class ProgressionManager : MonoBehaviour
 		<SetProgression>d__.<>t__builder.Start<ProgressionManager.<SetProgression>d__66>(ref <SetProgression>d__);
 	}
 
-	// Token: 0x0600388C RID: 14476 RVA: 0x0012E1E0 File Offset: 0x0012C3E0
+	// Token: 0x0600388C RID: 14476 RVA: 0x0012E1C0 File Offset: 0x0012C3C0
 	public void UnlockNode(string treeId, string nodeId)
 	{
 		ProgressionManager.<UnlockNode>d__67 <UnlockNode>d__;
@@ -199,7 +199,7 @@ public class ProgressionManager : MonoBehaviour
 		<UnlockNode>d__.<>t__builder.Start<ProgressionManager.<UnlockNode>d__67>(ref <UnlockNode>d__);
 	}
 
-	// Token: 0x0600388D RID: 14477 RVA: 0x0012E228 File Offset: 0x0012C428
+	// Token: 0x0600388D RID: 14477 RVA: 0x0012E208 File Offset: 0x0012C408
 	public void IncrementSIResource(string resourceName, Action<string> OnSuccess = null, Action<string> OnFailure = null)
 	{
 		ProgressionManager.<IncrementSIResource>d__68 <IncrementSIResource>d__;
@@ -212,7 +212,7 @@ public class ProgressionManager : MonoBehaviour
 		<IncrementSIResource>d__.<>t__builder.Start<ProgressionManager.<IncrementSIResource>d__68>(ref <IncrementSIResource>d__);
 	}
 
-	// Token: 0x0600388E RID: 14478 RVA: 0x0012E278 File Offset: 0x0012C478
+	// Token: 0x0600388E RID: 14478 RVA: 0x0012E258 File Offset: 0x0012C458
 	public void CompleteSIQuest(int questID, Action<ProgressionManager.UserQuestsStatusResponse> OnSuccess = null, Action<string> OnFailure = null)
 	{
 		ProgressionManager.<CompleteSIQuest>d__69 <CompleteSIQuest>d__;
@@ -225,7 +225,7 @@ public class ProgressionManager : MonoBehaviour
 		<CompleteSIQuest>d__.<>t__builder.Start<ProgressionManager.<CompleteSIQuest>d__69>(ref <CompleteSIQuest>d__);
 	}
 
-	// Token: 0x0600388F RID: 14479 RVA: 0x0012E2C8 File Offset: 0x0012C4C8
+	// Token: 0x0600388F RID: 14479 RVA: 0x0012E2A8 File Offset: 0x0012C4A8
 	public void CompleteSIBonus(Action<ProgressionManager.UserQuestsStatusResponse> OnSuccess = null, Action<string> OnFailure = null)
 	{
 		ProgressionManager.<CompleteSIBonus>d__70 <CompleteSIBonus>d__;
@@ -237,7 +237,7 @@ public class ProgressionManager : MonoBehaviour
 		<CompleteSIBonus>d__.<>t__builder.Start<ProgressionManager.<CompleteSIBonus>d__70>(ref <CompleteSIBonus>d__);
 	}
 
-	// Token: 0x06003890 RID: 14480 RVA: 0x0012E310 File Offset: 0x0012C510
+	// Token: 0x06003890 RID: 14480 RVA: 0x0012E2F0 File Offset: 0x0012C4F0
 	public void CollectSIIdol(Action<ProgressionManager.UserQuestsStatusResponse> OnSuccess = null, Action<string> OnFailure = null)
 	{
 		ProgressionManager.<CollectSIIdol>d__71 <CollectSIIdol>d__;
@@ -249,7 +249,7 @@ public class ProgressionManager : MonoBehaviour
 		<CollectSIIdol>d__.<>t__builder.Start<ProgressionManager.<CollectSIIdol>d__71>(ref <CollectSIIdol>d__);
 	}
 
-	// Token: 0x06003891 RID: 14481 RVA: 0x0012E358 File Offset: 0x0012C558
+	// Token: 0x06003891 RID: 14481 RVA: 0x0012E338 File Offset: 0x0012C538
 	public void GetActiveSIQuests(Action<List<RotatingQuest>> OnSuccess = null, Action<string> OnFailure = null)
 	{
 		ProgressionManager.<GetActiveSIQuests>d__72 <GetActiveSIQuests>d__;
@@ -261,7 +261,7 @@ public class ProgressionManager : MonoBehaviour
 		<GetActiveSIQuests>d__.<>t__builder.Start<ProgressionManager.<GetActiveSIQuests>d__72>(ref <GetActiveSIQuests>d__);
 	}
 
-	// Token: 0x06003892 RID: 14482 RVA: 0x0012E3A0 File Offset: 0x0012C5A0
+	// Token: 0x06003892 RID: 14482 RVA: 0x0012E380 File Offset: 0x0012C580
 	public void GetSIQuestStatus(Action<ProgressionManager.UserQuestsStatusResponse> OnSuccess = null, Action<string> OnFailure = null)
 	{
 		ProgressionManager.<GetSIQuestStatus>d__73 <GetSIQuestStatus>d__;
@@ -273,7 +273,7 @@ public class ProgressionManager : MonoBehaviour
 		<GetSIQuestStatus>d__.<>t__builder.Start<ProgressionManager.<GetSIQuestStatus>d__73>(ref <GetSIQuestStatus>d__);
 	}
 
-	// Token: 0x06003893 RID: 14483 RVA: 0x0012E3E8 File Offset: 0x0012C5E8
+	// Token: 0x06003893 RID: 14483 RVA: 0x0012E3C8 File Offset: 0x0012C5C8
 	public void PurchaseTechPoints(int amount, Action OnSuccess = null, Action<string> OnFailure = null)
 	{
 		ProgressionManager.<PurchaseTechPoints>d__74 <PurchaseTechPoints>d__;
@@ -286,7 +286,7 @@ public class ProgressionManager : MonoBehaviour
 		<PurchaseTechPoints>d__.<>t__builder.Start<ProgressionManager.<PurchaseTechPoints>d__74>(ref <PurchaseTechPoints>d__);
 	}
 
-	// Token: 0x06003894 RID: 14484 RVA: 0x0012E438 File Offset: 0x0012C638
+	// Token: 0x06003894 RID: 14484 RVA: 0x0012E418 File Offset: 0x0012C618
 	public void PurchaseResources(Action<ProgressionManager.UserInventory> OnSuccess = null, Action<string> OnFailure = null)
 	{
 		ProgressionManager.<PurchaseResources>d__75 <PurchaseResources>d__;
@@ -298,13 +298,13 @@ public class ProgressionManager : MonoBehaviour
 		<PurchaseResources>d__.<>t__builder.Start<ProgressionManager.<PurchaseResources>d__75>(ref <PurchaseResources>d__);
 	}
 
-	// Token: 0x06003895 RID: 14485 RVA: 0x0012E47F File Offset: 0x0012C67F
+	// Token: 0x06003895 RID: 14485 RVA: 0x0012E45F File Offset: 0x0012C65F
 	public void PurchaseShiftCreditCapIncrease()
 	{
 		this.PurchaseShiftCreditCapIncreaseInternal(false);
 	}
 
-	// Token: 0x06003896 RID: 14486 RVA: 0x0012E488 File Offset: 0x0012C688
+	// Token: 0x06003896 RID: 14486 RVA: 0x0012E468 File Offset: 0x0012C668
 	private void PurchaseShiftCreditCapIncreaseInternal(bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoPurchaseShiftCreditCapIncrease(new ProgressionManager.PurchaseShiftCreditCapIncreaseRequest
@@ -318,13 +318,13 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x06003897 RID: 14487 RVA: 0x0012E4E5 File Offset: 0x0012C6E5
+	// Token: 0x06003897 RID: 14487 RVA: 0x0012E4C5 File Offset: 0x0012C6C5
 	public void PurchaseShiftCredit()
 	{
 		this.PurchaseShiftCreditInternal(false);
 	}
 
-	// Token: 0x06003898 RID: 14488 RVA: 0x0012E4F0 File Offset: 0x0012C6F0
+	// Token: 0x06003898 RID: 14488 RVA: 0x0012E4D0 File Offset: 0x0012C6D0
 	private void PurchaseShiftCreditInternal(bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoPurchaseShiftCredit(new ProgressionManager.PurchaseShiftCreditRequest
@@ -338,7 +338,7 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x06003899 RID: 14489 RVA: 0x0012E550 File Offset: 0x0012C750
+	// Token: 0x06003899 RID: 14489 RVA: 0x0012E530 File Offset: 0x0012C730
 	public void GetShiftCredit(string mothershipId)
 	{
 		base.StartCoroutine(this.DoGetShiftCredit(new ProgressionManager.GetShiftCreditRequest
@@ -352,13 +352,13 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x0600389A RID: 14490 RVA: 0x0012E5AD File Offset: 0x0012C7AD
+	// Token: 0x0600389A RID: 14490 RVA: 0x0012E58D File Offset: 0x0012C78D
 	public void GetJuicerStatus()
 	{
 		this.GetJuicerStatusInternal(false);
 	}
 
-	// Token: 0x0600389B RID: 14491 RVA: 0x0012E5B8 File Offset: 0x0012C7B8
+	// Token: 0x0600389B RID: 14491 RVA: 0x0012E598 File Offset: 0x0012C798
 	private void GetJuicerStatusInternal(bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoGetJuicerStatus(new ProgressionManager.GetJuicerStatusRequest
@@ -372,13 +372,13 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x0600389C RID: 14492 RVA: 0x0012E615 File Offset: 0x0012C815
+	// Token: 0x0600389C RID: 14492 RVA: 0x0012E5F5 File Offset: 0x0012C7F5
 	public void DepositCore(ProgressionManager.CoreType coreType)
 	{
 		this.DepositCoreInternal(coreType, false);
 	}
 
-	// Token: 0x0600389D RID: 14493 RVA: 0x0012E620 File Offset: 0x0012C820
+	// Token: 0x0600389D RID: 14493 RVA: 0x0012E600 File Offset: 0x0012C800
 	private void DepositCoreInternal(ProgressionManager.CoreType coreType, bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoDepositCore(new ProgressionManager.DepositCoreRequest
@@ -393,13 +393,13 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x0600389E RID: 14494 RVA: 0x0012E684 File Offset: 0x0012C884
+	// Token: 0x0600389E RID: 14494 RVA: 0x0012E664 File Offset: 0x0012C864
 	public void PurchaseOverdrive()
 	{
 		this.PurchaseOverdriveInternal(false);
 	}
 
-	// Token: 0x0600389F RID: 14495 RVA: 0x0012E690 File Offset: 0x0012C890
+	// Token: 0x0600389F RID: 14495 RVA: 0x0012E670 File Offset: 0x0012C870
 	private void PurchaseOverdriveInternal(bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoPurchaseOverdrive(new ProgressionManager.PurchaseOverdriveRequest
@@ -413,13 +413,13 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038A0 RID: 14496 RVA: 0x0012E6ED File Offset: 0x0012C8ED
+	// Token: 0x060038A0 RID: 14496 RVA: 0x0012E6CD File Offset: 0x0012C8CD
 	public void SubtractShiftCredit(int creditsToSubtract)
 	{
 		this.SubtractShiftCreditInternal(creditsToSubtract, false);
 	}
 
-	// Token: 0x060038A1 RID: 14497 RVA: 0x0012E6F8 File Offset: 0x0012C8F8
+	// Token: 0x060038A1 RID: 14497 RVA: 0x0012E6D8 File Offset: 0x0012C8D8
 	private void SubtractShiftCreditInternal(int creditsToSubtract, bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoSubtractShiftCredit(new ProgressionManager.SubtractShiftCreditRequest
@@ -434,13 +434,13 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038A2 RID: 14498 RVA: 0x0012E75C File Offset: 0x0012C95C
+	// Token: 0x060038A2 RID: 14498 RVA: 0x0012E73C File Offset: 0x0012C93C
 	public void AdvanceDockWristUpgradeLevel(ProgressionManager.WristDockUpgradeType upgrade)
 	{
 		this.AdvanceDockWristUpgradeLevelInternal(upgrade, false);
 	}
 
-	// Token: 0x060038A3 RID: 14499 RVA: 0x0012E768 File Offset: 0x0012C968
+	// Token: 0x060038A3 RID: 14499 RVA: 0x0012E748 File Offset: 0x0012C948
 	private void AdvanceDockWristUpgradeLevelInternal(ProgressionManager.WristDockUpgradeType upgrade, bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoAdvanceDockWristUpgradeLevel(new ProgressionManager.AdvanceDockWristUpgradeRequest
@@ -455,7 +455,7 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038A4 RID: 14500 RVA: 0x0012E7CC File Offset: 0x0012C9CC
+	// Token: 0x060038A4 RID: 14500 RVA: 0x0012E7AC File Offset: 0x0012C9AC
 	public void GetDockWristUpgradeStatus()
 	{
 		base.StartCoroutine(this.DoGetDockWristUpgradeStatus(new ProgressionManager.DockWristUpgradeStatusRequest
@@ -468,7 +468,7 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038A5 RID: 14501 RVA: 0x0012E824 File Offset: 0x0012CA24
+	// Token: 0x060038A5 RID: 14501 RVA: 0x0012E804 File Offset: 0x0012CA04
 	public void PurchaseDrillUpgrade(ProgressionManager.DrillUpgradeLevel upgrade)
 	{
 		base.StartCoroutine(this.DoPurchaseDrillUpgrade(new ProgressionManager.PurchaseDrillUpgradeRequest
@@ -482,7 +482,7 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038A6 RID: 14502 RVA: 0x0012E884 File Offset: 0x0012CA84
+	// Token: 0x060038A6 RID: 14502 RVA: 0x0012E864 File Offset: 0x0012CA64
 	public void RecycleTool(GRTool.GRToolType toolBeingRecycled, int numberOfPlayers)
 	{
 		base.StartCoroutine(this.DoRecycleTool(new ProgressionManager.RecycleToolRequest
@@ -497,7 +497,7 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038A7 RID: 14503 RVA: 0x0012E8E8 File Offset: 0x0012CAE8
+	// Token: 0x060038A7 RID: 14503 RVA: 0x0012E8C8 File Offset: 0x0012CAC8
 	public void StartOfShift(string shiftId, int coresRequired, int numberOfPlayers, int depth)
 	{
 		base.StartCoroutine(this.DoStartOfShift(new ProgressionManager.StartOfShiftRequest
@@ -514,13 +514,13 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038A8 RID: 14504 RVA: 0x0012E95B File Offset: 0x0012CB5B
+	// Token: 0x060038A8 RID: 14504 RVA: 0x0012E93B File Offset: 0x0012CB3B
 	public void EndOfShiftReward(string shiftId)
 	{
 		this.EndOfShiftRewardInternal(shiftId, false);
 	}
 
-	// Token: 0x060038A9 RID: 14505 RVA: 0x0012E968 File Offset: 0x0012CB68
+	// Token: 0x060038A9 RID: 14505 RVA: 0x0012E948 File Offset: 0x0012CB48
 	private void EndOfShiftRewardInternal(string shiftId, bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoEndOfShiftReward(new ProgressionManager.EndOfShiftRewardRequest
@@ -535,7 +535,7 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038AA RID: 14506 RVA: 0x0012E9CC File Offset: 0x0012CBCC
+	// Token: 0x060038AA RID: 14506 RVA: 0x0012E9AC File Offset: 0x0012CBAC
 	public void GetGhostReactorStats()
 	{
 		base.StartCoroutine(this.DoGetGhostReactorStats(new ProgressionManager.GhostReactorStatsRequest
@@ -548,7 +548,7 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038AB RID: 14507 RVA: 0x0012EA24 File Offset: 0x0012CC24
+	// Token: 0x060038AB RID: 14507 RVA: 0x0012EA04 File Offset: 0x0012CC04
 	public void GetGhostReactorInventory()
 	{
 		base.StartCoroutine(this.DoGetGhostReactorInventory(new ProgressionManager.GhostReactorInventoryRequest
@@ -561,13 +561,13 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038AC RID: 14508 RVA: 0x0012EA7A File Offset: 0x0012CC7A
+	// Token: 0x060038AC RID: 14508 RVA: 0x0012EA5A File Offset: 0x0012CC5A
 	public void SetGhostReactorInventory(string jsonInventory)
 	{
 		this.SetGhostReactorInventoryInternal(jsonInventory, false);
 	}
 
-	// Token: 0x060038AD RID: 14509 RVA: 0x0012EA84 File Offset: 0x0012CC84
+	// Token: 0x060038AD RID: 14509 RVA: 0x0012EA64 File Offset: 0x0012CC64
 	private void SetGhostReactorInventoryInternal(string jsonInventory, bool skipUserDataCache = false)
 	{
 		base.StartCoroutine(this.DoSetGhostReactorInventory(new ProgressionManager.SetGhostReactorInventoryRequest
@@ -582,7 +582,7 @@ public class ProgressionManager : MonoBehaviour
 		}));
 	}
 
-	// Token: 0x060038AE RID: 14510 RVA: 0x0012EAE8 File Offset: 0x0012CCE8
+	// Token: 0x060038AE RID: 14510 RVA: 0x0012EAC8 File Offset: 0x0012CCC8
 	private IEnumerator HandleWebRequestRetries<T>(ProgressionManager.RequestType requestType, T data, Action<T> actionToTake, Action failureActionToTake = null)
 	{
 		if (!this.retryCounters.ContainsKey(requestType))
@@ -611,7 +611,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038AF RID: 14511 RVA: 0x0012EB14 File Offset: 0x0012CD14
+	// Token: 0x060038AF RID: 14511 RVA: 0x0012EAF4 File Offset: 0x0012CCF4
 	private bool HandleWebRequestFailures(UnityWebRequest request, bool retryOnConflict = false)
 	{
 		bool result = false;
@@ -648,7 +648,7 @@ public class ProgressionManager : MonoBehaviour
 		return result;
 	}
 
-	// Token: 0x060038B0 RID: 14512 RVA: 0x0012EBC4 File Offset: 0x0012CDC4
+	// Token: 0x060038B0 RID: 14512 RVA: 0x0012EBA4 File Offset: 0x0012CDA4
 	private IEnumerator DoGetProgression(ProgressionManager.GetProgressionRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GetProgressionRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetProgression);
@@ -677,7 +677,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B1 RID: 14513 RVA: 0x0012EBDA File Offset: 0x0012CDDA
+	// Token: 0x060038B1 RID: 14513 RVA: 0x0012EBBA File Offset: 0x0012CDBA
 	private IEnumerator DoSetProgression(ProgressionManager.SetProgressionRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SetProgressionRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.SetProgression);
@@ -709,7 +709,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B2 RID: 14514 RVA: 0x0012EBF0 File Offset: 0x0012CDF0
+	// Token: 0x060038B2 RID: 14514 RVA: 0x0012EBD0 File Offset: 0x0012CDD0
 	private IEnumerator DoUnlockNode(ProgressionManager.UnlockNodeRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.UnlockNodeRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.UnlockProgressionTreeNode);
@@ -741,7 +741,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B3 RID: 14515 RVA: 0x0012EC06 File Offset: 0x0012CE06
+	// Token: 0x060038B3 RID: 14515 RVA: 0x0012EBE6 File Offset: 0x0012CDE6
 	private IEnumerator DoIncrementSIResource(ProgressionManager.IncrementSIResourceRequest data, Action<string> OnSuccess, Action<string> OnFailure)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.IncrementSIResourceRequest>(PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl, data, ProgressionManager.RequestType.IncrementSIResource);
@@ -780,7 +780,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B4 RID: 14516 RVA: 0x0012EC2A File Offset: 0x0012CE2A
+	// Token: 0x060038B4 RID: 14516 RVA: 0x0012EC0A File Offset: 0x0012CE0A
 	private IEnumerator DoQuestCompleteReward(ProgressionManager.SetSIQuestCompleteRequest data, Action<ProgressionManager.UserQuestsStatusResponse> OnSuccess, Action<string> OnFailure)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SetSIQuestCompleteRequest>(PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl, data, ProgressionManager.RequestType.CompleteSIQuest);
@@ -819,7 +819,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B5 RID: 14517 RVA: 0x0012EC4E File Offset: 0x0012CE4E
+	// Token: 0x060038B5 RID: 14517 RVA: 0x0012EC2E File Offset: 0x0012CE2E
 	private IEnumerator DoBonusCompleteReward(ProgressionManager.SetSIBonusCompleteRequest data, Action<ProgressionManager.UserQuestsStatusResponse> OnSuccess, Action<string> OnFailure)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SetSIBonusCompleteRequest>(PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl, data, ProgressionManager.RequestType.CompleteSIBonus);
@@ -858,7 +858,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B6 RID: 14518 RVA: 0x0012EC72 File Offset: 0x0012CE72
+	// Token: 0x060038B6 RID: 14518 RVA: 0x0012EC52 File Offset: 0x0012CE52
 	private IEnumerator DoIdolCollectReward(ProgressionManager.SetSIIdolCollectRequest data, Action<ProgressionManager.UserQuestsStatusResponse> OnSuccess, Action<string> OnFailure)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SetSIIdolCollectRequest>(PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl, data, ProgressionManager.RequestType.CollectSIIdol);
@@ -897,7 +897,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B7 RID: 14519 RVA: 0x0012EC96 File Offset: 0x0012CE96
+	// Token: 0x060038B7 RID: 14519 RVA: 0x0012EC76 File Offset: 0x0012CE76
 	private IEnumerator DoGetActiveSIQuests(ProgressionManager.GetActiveSIQuestsRequest data, Action<List<RotatingQuest>> OnSuccess, Action<string> OnFailure)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GetActiveSIQuestsRequest>(PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl, data, ProgressionManager.RequestType.GetActiveSIQuests);
@@ -936,7 +936,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B8 RID: 14520 RVA: 0x0012ECBA File Offset: 0x0012CEBA
+	// Token: 0x060038B8 RID: 14520 RVA: 0x0012EC9A File Offset: 0x0012CE9A
 	private IEnumerator DoGetSIQuestsStatus(ProgressionManager.GetSIQuestsStatusRequest data, Action<ProgressionManager.UserQuestsStatusResponse> OnSuccess, Action<string> OnFailure)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GetSIQuestsStatusRequest>(PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl, data, ProgressionManager.RequestType.GetSIQuestsStatus);
@@ -975,7 +975,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038B9 RID: 14521 RVA: 0x0012ECDE File Offset: 0x0012CEDE
+	// Token: 0x060038B9 RID: 14521 RVA: 0x0012ECBE File Offset: 0x0012CEBE
 	private IEnumerator DoPurchaseTechPoints(ProgressionManager.PurchaseTechPointsRequest data, Action OnSuccess, Action<string> OnFailure)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseTechPointsRequest>(PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl, data, ProgressionManager.RequestType.PurchaseTechPoints);
@@ -1013,7 +1013,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038BA RID: 14522 RVA: 0x0012ED02 File Offset: 0x0012CF02
+	// Token: 0x060038BA RID: 14522 RVA: 0x0012ECE2 File Offset: 0x0012CEE2
 	private IEnumerator DoPurchaseResources(ProgressionManager.PurchaseResourcesRequest data, Action<ProgressionManager.UserInventory> OnSuccess, Action<string> OnFailure)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseResourcesRequest>(PlayFabAuthenticatorSettings.DailyQuestsApiBaseUrl, data, ProgressionManager.RequestType.PurchaseResources);
@@ -1052,7 +1052,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038BB RID: 14523 RVA: 0x0012ED26 File Offset: 0x0012CF26
+	// Token: 0x060038BB RID: 14523 RVA: 0x0012ED06 File Offset: 0x0012CF06
 	private IEnumerator DoPurchaseShiftCreditCapIncrease(ProgressionManager.PurchaseShiftCreditCapIncreaseRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseShiftCreditCapIncreaseRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.PurchaseShiftCreditCapIncrease);
@@ -1094,7 +1094,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038BC RID: 14524 RVA: 0x0012ED3C File Offset: 0x0012CF3C
+	// Token: 0x060038BC RID: 14524 RVA: 0x0012ED1C File Offset: 0x0012CF1C
 	private IEnumerator DoPurchaseShiftCredit(ProgressionManager.PurchaseShiftCreditRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseShiftCreditRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.PurchaseShiftCredit);
@@ -1141,7 +1141,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038BD RID: 14525 RVA: 0x0012ED52 File Offset: 0x0012CF52
+	// Token: 0x060038BD RID: 14525 RVA: 0x0012ED32 File Offset: 0x0012CF32
 	private IEnumerator DoGetShiftCredit(ProgressionManager.GetShiftCreditRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GetShiftCreditRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetShiftCredit);
@@ -1173,7 +1173,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038BE RID: 14526 RVA: 0x0012ED68 File Offset: 0x0012CF68
+	// Token: 0x060038BE RID: 14526 RVA: 0x0012ED48 File Offset: 0x0012CF48
 	private IEnumerator DoGetJuicerStatus(ProgressionManager.GetJuicerStatusRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GetJuicerStatusRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetJuicerStatus);
@@ -1200,7 +1200,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038BF RID: 14527 RVA: 0x0012ED7E File Offset: 0x0012CF7E
+	// Token: 0x060038BF RID: 14527 RVA: 0x0012ED5E File Offset: 0x0012CF5E
 	private IEnumerator DoDepositCore(ProgressionManager.DepositCoreRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.DepositCoreRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.DepositCore);
@@ -1252,7 +1252,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C0 RID: 14528 RVA: 0x0012ED94 File Offset: 0x0012CF94
+	// Token: 0x060038C0 RID: 14528 RVA: 0x0012ED74 File Offset: 0x0012CF74
 	private IEnumerator DoPurchaseOverdrive(ProgressionManager.PurchaseOverdriveRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseOverdriveRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.PurchaseOverdrive);
@@ -1289,7 +1289,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C1 RID: 14529 RVA: 0x0012EDAA File Offset: 0x0012CFAA
+	// Token: 0x060038C1 RID: 14529 RVA: 0x0012ED8A File Offset: 0x0012CF8A
 	private IEnumerator DoSubtractShiftCredit(ProgressionManager.SubtractShiftCreditRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SubtractShiftCreditRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.SubtractShiftCredit);
@@ -1321,7 +1321,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C2 RID: 14530 RVA: 0x0012EDC0 File Offset: 0x0012CFC0
+	// Token: 0x060038C2 RID: 14530 RVA: 0x0012EDA0 File Offset: 0x0012CFA0
 	private IEnumerator DoAdvanceDockWristUpgradeLevel(ProgressionManager.AdvanceDockWristUpgradeRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.AdvanceDockWristUpgradeRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.AdvanceDockWristUpgrade);
@@ -1348,7 +1348,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C3 RID: 14531 RVA: 0x0012EDD6 File Offset: 0x0012CFD6
+	// Token: 0x060038C3 RID: 14531 RVA: 0x0012EDB6 File Offset: 0x0012CFB6
 	private IEnumerator DoGetDockWristUpgradeStatus(ProgressionManager.DockWristUpgradeStatusRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.DockWristUpgradeStatusRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetDockWristUpgradeStatus);
@@ -1375,7 +1375,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C4 RID: 14532 RVA: 0x0012EDEC File Offset: 0x0012CFEC
+	// Token: 0x060038C4 RID: 14532 RVA: 0x0012EDCC File Offset: 0x0012CFCC
 	private IEnumerator DoPurchaseDrillUpgrade(ProgressionManager.PurchaseDrillUpgradeRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseDrillUpgradeRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.PurchaseDrillUpgrade);
@@ -1410,7 +1410,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C5 RID: 14533 RVA: 0x0012EE02 File Offset: 0x0012D002
+	// Token: 0x060038C5 RID: 14533 RVA: 0x0012EDE2 File Offset: 0x0012CFE2
 	private IEnumerator DoRecycleTool(ProgressionManager.RecycleToolRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.RecycleToolRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.RecycleTool);
@@ -1442,7 +1442,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C6 RID: 14534 RVA: 0x0012EE18 File Offset: 0x0012D018
+	// Token: 0x060038C6 RID: 14534 RVA: 0x0012EDF8 File Offset: 0x0012CFF8
 	private IEnumerator DoStartOfShift(ProgressionManager.StartOfShiftRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.StartOfShiftRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.StartOfShift);
@@ -1463,7 +1463,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C7 RID: 14535 RVA: 0x0012EE2E File Offset: 0x0012D02E
+	// Token: 0x060038C7 RID: 14535 RVA: 0x0012EE0E File Offset: 0x0012D00E
 	private IEnumerator DoEndOfShiftReward(ProgressionManager.EndOfShiftRewardRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.EndOfShiftRewardRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.EndOfShiftReward);
@@ -1499,7 +1499,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C8 RID: 14536 RVA: 0x0012EE44 File Offset: 0x0012D044
+	// Token: 0x060038C8 RID: 14536 RVA: 0x0012EE24 File Offset: 0x0012D024
 	private IEnumerator DoGetGhostReactorStats(ProgressionManager.GhostReactorStatsRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GhostReactorStatsRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetGhostReactorStats);
@@ -1526,7 +1526,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038C9 RID: 14537 RVA: 0x0012EE5A File Offset: 0x0012D05A
+	// Token: 0x060038C9 RID: 14537 RVA: 0x0012EE3A File Offset: 0x0012D03A
 	private IEnumerator DoGetGhostReactorInventory(ProgressionManager.GhostReactorInventoryRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GhostReactorInventoryRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetGhostReactorInventory);
@@ -1553,7 +1553,7 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038CA RID: 14538 RVA: 0x0012EE70 File Offset: 0x0012D070
+	// Token: 0x060038CA RID: 14538 RVA: 0x0012EE50 File Offset: 0x0012D050
 	private IEnumerator DoSetGhostReactorInventory(ProgressionManager.SetGhostReactorInventoryRequest data)
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SetGhostReactorInventoryRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.SetGhostReactorInventory);
@@ -1574,13 +1574,13 @@ public class ProgressionManager : MonoBehaviour
 		yield break;
 	}
 
-	// Token: 0x060038CB RID: 14539 RVA: 0x0012EE86 File Offset: 0x0012D086
+	// Token: 0x060038CB RID: 14539 RVA: 0x0012EE66 File Offset: 0x0012D066
 	private bool IsSuccessResponse(long code)
 	{
 		return code >= 200L && code < 300L;
 	}
 
-	// Token: 0x060038CC RID: 14540 RVA: 0x0012EE9C File Offset: 0x0012D09C
+	// Token: 0x060038CC RID: 14540 RVA: 0x0012EE7C File Offset: 0x0012D07C
 	private UnityWebRequest FormatWebRequest<T>(string url, T pendingRequest, ProgressionManager.RequestType type)
 	{
 		string text = "";
@@ -1679,7 +1679,7 @@ public class ProgressionManager : MonoBehaviour
 		return unityWebRequest;
 	}
 
-	// Token: 0x060038CD RID: 14541 RVA: 0x0012F07C File Offset: 0x0012D27C
+	// Token: 0x060038CD RID: 14541 RVA: 0x0012F05C File Offset: 0x0012D25C
 	private void OnGetTrees(GetProgressionTreesForPlayerResponse response)
 	{
 		if (((response != null) ? response.Results : null) == null)
@@ -1703,7 +1703,7 @@ public class ProgressionManager : MonoBehaviour
 		onTreeUpdated.Invoke();
 	}
 
-	// Token: 0x060038CE RID: 14542 RVA: 0x0012F130 File Offset: 0x0012D330
+	// Token: 0x060038CE RID: 14542 RVA: 0x0012F110 File Offset: 0x0012D310
 	private void OnGetInventory(MothershipGetInventoryResponse response)
 	{
 		if (((response != null) ? response.Results : null) == null)
@@ -1738,7 +1738,7 @@ public class ProgressionManager : MonoBehaviour
 		onInventoryUpdated.Invoke();
 	}
 
-	// Token: 0x060038CF RID: 14543 RVA: 0x0012F258 File Offset: 0x0012D458
+	// Token: 0x060038CF RID: 14543 RVA: 0x0012F238 File Offset: 0x0012D438
 	public int GetShinyRocksTotal()
 	{
 		if (CosmeticsController.instance != null)
@@ -1748,7 +1748,7 @@ public class ProgressionManager : MonoBehaviour
 		return 0;
 	}
 
-	// Token: 0x060038D0 RID: 14544 RVA: 0x0012F277 File Offset: 0x0012D477
+	// Token: 0x060038D0 RID: 14544 RVA: 0x0012F257 File Offset: 0x0012D457
 	public void RefreshShinyRocksTotal()
 	{
 		if (CosmeticsController.instance != null)
@@ -1757,7 +1757,7 @@ public class ProgressionManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060038D1 RID: 14545 RVA: 0x0012F294 File Offset: 0x0012D494
+	// Token: 0x060038D1 RID: 14545 RVA: 0x0012F274 File Offset: 0x0012D474
 	public static void GetMothershipFailure(MothershipError callError, int errorCode)
 	{
 		Debug.LogError("Progression: GetMothershipFailure: " + callError.MothershipErrorCode + ":" + callError.Message);

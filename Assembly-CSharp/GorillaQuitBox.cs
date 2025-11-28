@@ -9,7 +9,7 @@ public class GorillaQuitBox : GorillaTriggerBox
 	{
 	}
 
-	// Token: 0x06002162 RID: 8546 RVA: 0x000AF65D File Offset: 0x000AD85D
+	// Token: 0x06002162 RID: 8546 RVA: 0x000AF63D File Offset: 0x000AD83D
 	public override void OnBoxTriggered()
 	{
 		Debug.Log("quitbox hit! hopefully you expected this to happen!");

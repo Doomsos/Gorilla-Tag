@@ -5,31 +5,31 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider))]
 public class HapticsWithDistance : MonoBehaviour, ITickSystemTick
 {
-	// Token: 0x06001FF5 RID: 8181 RVA: 0x000A9E47 File Offset: 0x000A8047
+	// Token: 0x06001FF5 RID: 8181 RVA: 0x000A9E27 File Offset: 0x000A8027
 	private bool OnWrongLayer()
 	{
 		return base.gameObject.layer != 18;
 	}
 
-	// Token: 0x06001FF6 RID: 8182 RVA: 0x000A9E5B File Offset: 0x000A805B
+	// Token: 0x06001FF6 RID: 8182 RVA: 0x000A9E3B File Offset: 0x000A803B
 	public void SetVibrationMult(float mult)
 	{
 		this.vibrationMult = mult;
 	}
 
-	// Token: 0x06001FF7 RID: 8183 RVA: 0x000A9E64 File Offset: 0x000A8064
+	// Token: 0x06001FF7 RID: 8183 RVA: 0x000A9E44 File Offset: 0x000A8044
 	public void FingerFlexVibrationMult(bool dummy, float mult)
 	{
 		this.SetVibrationMult(mult);
 	}
 
-	// Token: 0x06001FF8 RID: 8184 RVA: 0x000A9E6D File Offset: 0x000A806D
+	// Token: 0x06001FF8 RID: 8184 RVA: 0x000A9E4D File Offset: 0x000A804D
 	private void Awake()
 	{
 		this.inverseColliderRadius = 1f / base.GetComponent<SphereCollider>().radius;
 	}
 
-	// Token: 0x06001FF9 RID: 8185 RVA: 0x000A9E88 File Offset: 0x000A8088
+	// Token: 0x06001FF9 RID: 8185 RVA: 0x000A9E68 File Offset: 0x000A8068
 	private void OnTriggerEnter(Collider other)
 	{
 		GorillaGrabber gorillaGrabber;
@@ -49,7 +49,7 @@ public class HapticsWithDistance : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06001FFA RID: 8186 RVA: 0x000A9EDC File Offset: 0x000A80DC
+	// Token: 0x06001FFA RID: 8186 RVA: 0x000A9EBC File Offset: 0x000A80BC
 	private void OnTriggerExit(Collider other)
 	{
 		if (this.leftOfflineHand == other.transform)
@@ -71,7 +71,7 @@ public class HapticsWithDistance : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06001FFB RID: 8187 RVA: 0x000A9F44 File Offset: 0x000A8144
+	// Token: 0x06001FFB RID: 8187 RVA: 0x000A9F24 File Offset: 0x000A8124
 	private void OnDisable()
 	{
 		this.leftOfflineHand = null;
@@ -80,11 +80,11 @@ public class HapticsWithDistance : MonoBehaviour, ITickSystemTick
 	}
 
 	// Token: 0x17000363 RID: 867
-	// (get) Token: 0x06001FFC RID: 8188 RVA: 0x000A9F5A File Offset: 0x000A815A
-	// (set) Token: 0x06001FFD RID: 8189 RVA: 0x000A9F62 File Offset: 0x000A8162
+	// (get) Token: 0x06001FFC RID: 8188 RVA: 0x000A9F3A File Offset: 0x000A813A
+	// (set) Token: 0x06001FFD RID: 8189 RVA: 0x000A9F42 File Offset: 0x000A8142
 	public bool TickRunning { get; set; }
 
-	// Token: 0x06001FFE RID: 8190 RVA: 0x000A9F6C File Offset: 0x000A816C
+	// Token: 0x06001FFE RID: 8190 RVA: 0x000A9F4C File Offset: 0x000A814C
 	public void Tick()
 	{
 		Vector3 position = base.transform.position;

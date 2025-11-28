@@ -8,7 +8,7 @@ using UnityEngine.Events;
 // Token: 0x020004CD RID: 1229
 public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06001FB8 RID: 8120 RVA: 0x000A8EFC File Offset: 0x000A70FC
+	// Token: 0x06001FB8 RID: 8120 RVA: 0x000A8EDC File Offset: 0x000A70DC
 	private void Start()
 	{
 		if (!this.setPlayerColor)
@@ -21,7 +21,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		this.LoadPlayerColor(@float, float2, float3);
 	}
 
-	// Token: 0x06001FB9 RID: 8121 RVA: 0x000A8F4C File Offset: 0x000A714C
+	// Token: 0x06001FB9 RID: 8121 RVA: 0x000A8F2C File Offset: 0x000A712C
 	private void LoadPlayerColor(float r, float g, float b)
 	{
 		this.Segment1 = Mathf.RoundToInt(Mathf.Lerp(0f, 9f, r));
@@ -33,7 +33,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		this.UpdateDisplay();
 	}
 
-	// Token: 0x06001FBA RID: 8122 RVA: 0x000A8FD4 File Offset: 0x000A71D4
+	// Token: 0x06001FBA RID: 8122 RVA: 0x000A8FB4 File Offset: 0x000A71B4
 	public void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
@@ -48,7 +48,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06001FBB RID: 8123 RVA: 0x000A904C File Offset: 0x000A724C
+	// Token: 0x06001FBB RID: 8123 RVA: 0x000A902C File Offset: 0x000A722C
 	public void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
@@ -63,7 +63,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06001FBC RID: 8124 RVA: 0x000A90C4 File Offset: 0x000A72C4
+	// Token: 0x06001FBC RID: 8124 RVA: 0x000A90A4 File Offset: 0x000A72A4
 	public void SliceUpdate()
 	{
 		float num = Vector3.Distance(base.transform.position, GTPlayer.Instance.transform.position);
@@ -104,7 +104,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06001FBD RID: 8125 RVA: 0x000A9294 File Offset: 0x000A7494
+	// Token: 0x06001FBD RID: 8125 RVA: 0x000A9274 File Offset: 0x000A7474
 	private void SetPlayerColor()
 	{
 		PlayerPrefs.SetFloat("redValue", (float)this.Segment1 / 9f);
@@ -124,7 +124,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06001FBE RID: 8126 RVA: 0x000A93B8 File Offset: 0x000A75B8
+	// Token: 0x06001FBE RID: 8126 RVA: 0x000A9398 File Offset: 0x000A7598
 	private void SetSliderColors(float r, float g, float b)
 	{
 		if (!this.hasUpdated)
@@ -139,13 +139,13 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06001FBF RID: 8127 RVA: 0x000A9448 File Offset: 0x000A7648
+	// Token: 0x06001FBF RID: 8127 RVA: 0x000A9428 File Offset: 0x000A7628
 	private void HandleLocalColorChanged(Color newColor)
 	{
 		this.SetSliderColors(newColor.r, newColor.g, newColor.b);
 	}
 
-	// Token: 0x06001FC0 RID: 8128 RVA: 0x000A9464 File Offset: 0x000A7664
+	// Token: 0x06001FC0 RID: 8128 RVA: 0x000A9444 File Offset: 0x000A7644
 	private void UpdateDisplay()
 	{
 		this.textR.text = this.Segment1.ToString();
@@ -164,7 +164,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06001FC1 RID: 8129 RVA: 0x000A9520 File Offset: 0x000A7720
+	// Token: 0x06001FC1 RID: 8129 RVA: 0x000A9500 File Offset: 0x000A7700
 	public void ResetSliders(Vector3 v)
 	{
 		this.SetSliderColors(v.x, v.y, v.z);

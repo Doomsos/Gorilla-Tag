@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000B64 RID: 2916
 public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x060047CE RID: 18382 RVA: 0x00179F7C File Offset: 0x0017817C
+	// Token: 0x060047CE RID: 18382 RVA: 0x00179F5C File Offset: 0x0017815C
 	private void Awake()
 	{
 		this.volume = base.GetComponent<Collider>();
@@ -26,7 +26,7 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
-	// Token: 0x060047D1 RID: 18385 RVA: 0x00179F94 File Offset: 0x00178194
+	// Token: 0x060047D1 RID: 18385 RVA: 0x00179F74 File Offset: 0x00178174
 	public void SliceUpdate()
 	{
 		if (this.audioSource && this.audioSource != null && !this.audioSource.isPlaying && this.audioSource.enabled)
@@ -35,7 +35,7 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060047D2 RID: 18386 RVA: 0x00179FE4 File Offset: 0x001781E4
+	// Token: 0x060047D2 RID: 18386 RVA: 0x00179FC4 File Offset: 0x001781C4
 	private bool TriggerFilter(Collider other, out Rigidbody rb, out Transform xf)
 	{
 		rb = null;
@@ -48,7 +48,7 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 		return rb != null && xf != null;
 	}
 
-	// Token: 0x060047D3 RID: 18387 RVA: 0x0017A044 File Offset: 0x00178244
+	// Token: 0x060047D3 RID: 18387 RVA: 0x0017A024 File Offset: 0x00178224
 	public void OnTriggerEnter(Collider other)
 	{
 		Rigidbody rigidbody = null;
@@ -70,7 +70,7 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 		this.enterPos = transform.position;
 	}
 
-	// Token: 0x060047D4 RID: 18388 RVA: 0x0017A0B4 File Offset: 0x001782B4
+	// Token: 0x060047D4 RID: 18388 RVA: 0x0017A094 File Offset: 0x00178294
 	public void OnTriggerExit(Collider other)
 	{
 		Rigidbody rigidbody = null;
@@ -87,7 +87,7 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060047D5 RID: 18389 RVA: 0x0017A10C File Offset: 0x0017830C
+	// Token: 0x060047D5 RID: 18389 RVA: 0x0017A0EC File Offset: 0x001782EC
 	public void OnTriggerStay(Collider other)
 	{
 		Rigidbody rigidbody = null;
@@ -203,7 +203,7 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 		rigidbody.linearVelocity = vector;
 	}
 
-	// Token: 0x060047D6 RID: 18390 RVA: 0x0017A530 File Offset: 0x00178730
+	// Token: 0x060047D6 RID: 18390 RVA: 0x0017A510 File Offset: 0x00178710
 	public void OnDrawGizmosSelected()
 	{
 		base.GetComponents<Collider>();
@@ -212,7 +212,7 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 		Gizmos.DrawWireCube(Vector3.zero, new Vector3(this.pullTOCenterMinDistance / base.transform.lossyScale.x, 1f, this.pullTOCenterMinDistance / base.transform.lossyScale.z));
 	}
 
-	// Token: 0x060047D7 RID: 18391 RVA: 0x0017A5A0 File Offset: 0x001787A0
+	// Token: 0x060047D7 RID: 18391 RVA: 0x0017A580 File Offset: 0x00178780
 	public void SetPropertiesFromPlaceholder(ForceVolumeProperties properties, AudioSource volumeAudioSource, Collider colliderVolume)
 	{
 		this.accel = properties.accel;

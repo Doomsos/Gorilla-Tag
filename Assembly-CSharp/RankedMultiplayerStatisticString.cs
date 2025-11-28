@@ -5,13 +5,13 @@ using UnityEngine;
 [Serializable]
 public class RankedMultiplayerStatisticString : RankedMultiplayerStatistic
 {
-	// Token: 0x060037AC RID: 14252 RVA: 0x0012B893 File Offset: 0x00129A93
+	// Token: 0x060037AC RID: 14252 RVA: 0x0012B873 File Offset: 0x00129A73
 	public RankedMultiplayerStatisticString(string n, string val, RankedMultiplayerStatistic.SerializationType s = RankedMultiplayerStatistic.SerializationType.None) : base(n, s)
 	{
 		this.stringValue = val;
 	}
 
-	// Token: 0x060037AD RID: 14253 RVA: 0x0012B8A4 File Offset: 0x00129AA4
+	// Token: 0x060037AD RID: 14253 RVA: 0x0012B884 File Offset: 0x00129A84
 	public static implicit operator string(RankedMultiplayerStatisticString stat)
 	{
 		if (stat.IsValid)
@@ -22,27 +22,27 @@ public class RankedMultiplayerStatisticString : RankedMultiplayerStatistic
 		return string.Empty;
 	}
 
-	// Token: 0x060037AE RID: 14254 RVA: 0x0012B8CF File Offset: 0x00129ACF
+	// Token: 0x060037AE RID: 14254 RVA: 0x0012B8AF File Offset: 0x00129AAF
 	public void Set(string val)
 	{
 		this.stringValue = val;
 		this.Save();
 	}
 
-	// Token: 0x060037AF RID: 14255 RVA: 0x0012B8DE File Offset: 0x00129ADE
+	// Token: 0x060037AF RID: 14255 RVA: 0x0012B8BE File Offset: 0x00129ABE
 	public string Get()
 	{
 		return this.stringValue;
 	}
 
-	// Token: 0x060037B0 RID: 14256 RVA: 0x0012B8E6 File Offset: 0x00129AE6
+	// Token: 0x060037B0 RID: 14256 RVA: 0x0012B8C6 File Offset: 0x00129AC6
 	public override bool TrySetValue(string valAsString)
 	{
 		this.stringValue = valAsString;
 		return true;
 	}
 
-	// Token: 0x060037B1 RID: 14257 RVA: 0x0012B8F0 File Offset: 0x00129AF0
+	// Token: 0x060037B1 RID: 14257 RVA: 0x0012B8D0 File Offset: 0x00129AD0
 	protected override void Save()
 	{
 		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
@@ -53,7 +53,7 @@ public class RankedMultiplayerStatisticString : RankedMultiplayerStatistic
 		}
 	}
 
-	// Token: 0x060037B2 RID: 14258 RVA: 0x0012B924 File Offset: 0x00129B24
+	// Token: 0x060037B2 RID: 14258 RVA: 0x0012B904 File Offset: 0x00129B04
 	public override void Load()
 	{
 		RankedMultiplayerStatistic.SerializationType serializationType = this.serializationType;
@@ -72,7 +72,7 @@ public class RankedMultiplayerStatisticString : RankedMultiplayerStatistic
 		}
 	}
 
-	// Token: 0x060037B3 RID: 14259 RVA: 0x0012B8DE File Offset: 0x00129ADE
+	// Token: 0x060037B3 RID: 14259 RVA: 0x0012B8BE File Offset: 0x00129ABE
 	public override string ToString()
 	{
 		return this.stringValue;

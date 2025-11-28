@@ -6,7 +6,7 @@ namespace GorillaLocomotion.Climbing
 	// Token: 0x02000FAD RID: 4013
 	public class GorillaClimbable : MonoBehaviour
 	{
-		// Token: 0x060064CD RID: 25805 RVA: 0x0020ECE3 File Offset: 0x0020CEE3
+		// Token: 0x060064CD RID: 25805 RVA: 0x0020ECC3 File Offset: 0x0020CEC3
 		private void Awake()
 		{
 			this.colliderCache = base.GetComponent<Collider>();

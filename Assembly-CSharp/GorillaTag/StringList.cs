@@ -8,7 +8,7 @@ namespace GorillaTag
 	public class StringList : ScriptableObject
 	{
 		// Token: 0x170009A9 RID: 2473
-		// (get) Token: 0x0600672C RID: 26412 RVA: 0x00218EB6 File Offset: 0x002170B6
+		// (get) Token: 0x0600672C RID: 26412 RVA: 0x00218E96 File Offset: 0x00217096
 		public string[] Strings
 		{
 			get

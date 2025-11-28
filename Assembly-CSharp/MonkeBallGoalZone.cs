@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000551 RID: 1361
 public class MonkeBallGoalZone : MonoBehaviourTick
 {
-	// Token: 0x06002273 RID: 8819 RVA: 0x000B47AC File Offset: 0x000B29AC
+	// Token: 0x06002273 RID: 8819 RVA: 0x000B478C File Offset: 0x000B298C
 	public override void Tick()
 	{
 		if (!PhotonNetwork.IsMasterClient)
@@ -38,7 +38,7 @@ public class MonkeBallGoalZone : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002274 RID: 8820 RVA: 0x000B488C File Offset: 0x000B2A8C
+	// Token: 0x06002274 RID: 8820 RVA: 0x000B486C File Offset: 0x000B2A6C
 	private void OnTriggerEnter(Collider other)
 	{
 		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(other, true);
@@ -53,7 +53,7 @@ public class MonkeBallGoalZone : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002275 RID: 8821 RVA: 0x000B48DC File Offset: 0x000B2ADC
+	// Token: 0x06002275 RID: 8821 RVA: 0x000B48BC File Offset: 0x000B2ABC
 	private void OnTriggerExit(Collider other)
 	{
 		GameBallPlayer gamePlayer = GameBallPlayer.GetGamePlayer(other, true);
@@ -68,7 +68,7 @@ public class MonkeBallGoalZone : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002276 RID: 8822 RVA: 0x000B492C File Offset: 0x000B2B2C
+	// Token: 0x06002276 RID: 8822 RVA: 0x000B490C File Offset: 0x000B2B0C
 	public void CleanupPlayer(MonkeBallPlayer player)
 	{
 		this.playersInGoalZone.Remove(player);

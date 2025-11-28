@@ -7,7 +7,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x020010BF RID: 4287
 	public class BackpackGrabbableCosmetic : HoldableObject
 	{
-		// Token: 0x06006B71 RID: 27505 RVA: 0x0023476B File Offset: 0x0023296B
+		// Token: 0x06006B71 RID: 27505 RVA: 0x0023474B File Offset: 0x0023294B
 		private void Awake()
 		{
 			this.currentItemsCount = this.startItemsCount;
@@ -24,7 +24,7 @@ namespace GorillaTag.Cosmetics
 		{
 		}
 
-		// Token: 0x06006B74 RID: 27508 RVA: 0x00234780 File Offset: 0x00232980
+		// Token: 0x06006B74 RID: 27508 RVA: 0x00234760 File Offset: 0x00232960
 		public void Update()
 		{
 			if (!this.canGrab && Time.time - this.lastGrabTime >= this.coolDownTimer)
@@ -33,7 +33,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006B75 RID: 27509 RVA: 0x002347A8 File Offset: 0x002329A8
+		// Token: 0x06006B75 RID: 27509 RVA: 0x00234788 File Offset: 0x00232988
 		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 		{
 			if (this.IsEmpty())
@@ -52,7 +52,7 @@ namespace GorillaTag.Cosmetics
 			this.RemoveItem();
 		}
 
-		// Token: 0x06006B76 RID: 27510 RVA: 0x00234817 File Offset: 0x00232A17
+		// Token: 0x06006B76 RID: 27510 RVA: 0x002347F7 File Offset: 0x002329F7
 		public void AddItem()
 		{
 			if (!this.useCapacity)
@@ -68,7 +68,7 @@ namespace GorillaTag.Cosmetics
 			this.UpdateState();
 		}
 
-		// Token: 0x06006B77 RID: 27511 RVA: 0x0023484F File Offset: 0x00232A4F
+		// Token: 0x06006B77 RID: 27511 RVA: 0x0023482F File Offset: 0x00232A2F
 		public void RemoveItem()
 		{
 			if (!this.useCapacity)
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 			this.UpdateState();
 		}
 
-		// Token: 0x06006B78 RID: 27512 RVA: 0x00234882 File Offset: 0x00232A82
+		// Token: 0x06006B78 RID: 27512 RVA: 0x00234862 File Offset: 0x00232A62
 		public void RefillBackpack()
 		{
 			if (!this.useCapacity)
@@ -99,7 +99,7 @@ namespace GorillaTag.Cosmetics
 			this.UpdateState();
 		}
 
-		// Token: 0x06006B79 RID: 27513 RVA: 0x002348AE File Offset: 0x00232AAE
+		// Token: 0x06006B79 RID: 27513 RVA: 0x0023488E File Offset: 0x00232A8E
 		public void EmptyBackpack()
 		{
 			if (!this.useCapacity)
@@ -114,19 +114,19 @@ namespace GorillaTag.Cosmetics
 			this.UpdateState();
 		}
 
-		// Token: 0x06006B7A RID: 27514 RVA: 0x002348CF File Offset: 0x00232ACF
+		// Token: 0x06006B7A RID: 27514 RVA: 0x002348AF File Offset: 0x00232AAF
 		public bool IsFull()
 		{
 			return !this.useCapacity || this.maxCapacity == this.currentItemsCount;
 		}
 
-		// Token: 0x06006B7B RID: 27515 RVA: 0x002348EA File Offset: 0x00232AEA
+		// Token: 0x06006B7B RID: 27515 RVA: 0x002348CA File Offset: 0x00232ACA
 		public bool IsEmpty()
 		{
 			return this.useCapacity && this.currentItemsCount == 0;
 		}
 
-		// Token: 0x06006B7C RID: 27516 RVA: 0x00234900 File Offset: 0x00232B00
+		// Token: 0x06006B7C RID: 27516 RVA: 0x002348E0 File Offset: 0x00232AE0
 		private void UpdateState()
 		{
 			if (!this.useCapacity)

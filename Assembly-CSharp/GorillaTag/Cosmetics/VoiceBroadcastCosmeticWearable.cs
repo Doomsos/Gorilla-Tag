@@ -8,7 +8,7 @@ namespace GorillaTag.Cosmetics
 	// Token: 0x02001126 RID: 4390
 	public class VoiceBroadcastCosmeticWearable : MonoBehaviour, IGorillaSliceableSimple
 	{
-		// Token: 0x06006DD6 RID: 28118 RVA: 0x00241074 File Offset: 0x0023F274
+		// Token: 0x06006DD6 RID: 28118 RVA: 0x00241054 File Offset: 0x0023F254
 		private void Start()
 		{
 			VoiceBroadcastCosmetic[] componentsInChildren = base.GetComponentInParent<VRRig>().GetComponentsInChildren<VoiceBroadcastCosmetic>(true);
@@ -23,7 +23,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DD7 RID: 28119 RVA: 0x002410CC File Offset: 0x0023F2CC
+		// Token: 0x06006DD7 RID: 28119 RVA: 0x002410AC File Offset: 0x0023F2AC
 		public void OnEnable()
 		{
 			if (this.playerHeadCollider == null)
@@ -43,7 +43,7 @@ namespace GorillaTag.Cosmetics
 			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 		}
 
-		// Token: 0x06006DD9 RID: 28121 RVA: 0x00241124 File Offset: 0x0023F324
+		// Token: 0x06006DD9 RID: 28121 RVA: 0x00241104 File Offset: 0x0023F304
 		public void SliceUpdate()
 		{
 			if (Time.time - this.lastToggleTime >= this.toggleCooldown)
@@ -77,7 +77,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DDA RID: 28122 RVA: 0x002411ED File Offset: 0x0023F3ED
+		// Token: 0x06006DDA RID: 28122 RVA: 0x002411CD File Offset: 0x0023F3CD
 		public void OnCosmeticStartListening()
 		{
 			if (this.headDistanceActivation)
@@ -92,7 +92,7 @@ namespace GorillaTag.Cosmetics
 			unityEvent.Invoke();
 		}
 
-		// Token: 0x06006DDB RID: 28123 RVA: 0x00241208 File Offset: 0x0023F408
+		// Token: 0x06006DDB RID: 28123 RVA: 0x002411E8 File Offset: 0x0023F3E8
 		public void OnCosmeticStopListening()
 		{
 			if (this.headDistanceActivation)

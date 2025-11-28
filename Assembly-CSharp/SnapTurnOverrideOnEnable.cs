@@ -5,7 +5,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 // Token: 0x02000CA0 RID: 3232
 public class SnapTurnOverrideOnEnable : MonoBehaviour, ISnapTurnOverride
 {
-	// Token: 0x06004EEF RID: 20207 RVA: 0x00198448 File Offset: 0x00196648
+	// Token: 0x06004EEF RID: 20207 RVA: 0x00198428 File Offset: 0x00196628
 	private void OnEnable()
 	{
 		if (this.snapTurn == null && GorillaTagger.Instance != null)
@@ -19,7 +19,7 @@ public class SnapTurnOverrideOnEnable : MonoBehaviour, ISnapTurnOverride
 		}
 	}
 
-	// Token: 0x06004EF0 RID: 20208 RVA: 0x001984A1 File Offset: 0x001966A1
+	// Token: 0x06004EF0 RID: 20208 RVA: 0x00198481 File Offset: 0x00196681
 	private void OnDisable()
 	{
 		if (this.snapTurnOverride)
@@ -29,7 +29,7 @@ public class SnapTurnOverrideOnEnable : MonoBehaviour, ISnapTurnOverride
 		}
 	}
 
-	// Token: 0x06004EF1 RID: 20209 RVA: 0x001984BE File Offset: 0x001966BE
+	// Token: 0x06004EF1 RID: 20209 RVA: 0x0019849E File Offset: 0x0019669E
 	bool ISnapTurnOverride.TurnOverrideActive()
 	{
 		return this.snapTurnOverride;

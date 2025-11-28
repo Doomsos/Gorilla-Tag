@@ -6,7 +6,7 @@ using UnityEngine.Events;
 // Token: 0x02000780 RID: 1920
 public class GorillaGuardianEjectWatch : MonoBehaviour
 {
-	// Token: 0x0600322F RID: 12847 RVA: 0x0010ECA8 File Offset: 0x0010CEA8
+	// Token: 0x0600322F RID: 12847 RVA: 0x0010EC88 File Offset: 0x0010CE88
 	private void Start()
 	{
 		if (this.ejectButton != null)
@@ -15,7 +15,7 @@ public class GorillaGuardianEjectWatch : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003230 RID: 12848 RVA: 0x0010ECD4 File Offset: 0x0010CED4
+	// Token: 0x06003230 RID: 12848 RVA: 0x0010ECB4 File Offset: 0x0010CEB4
 	private void OnDestroy()
 	{
 		if (this.ejectButton != null)
@@ -24,7 +24,7 @@ public class GorillaGuardianEjectWatch : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003231 RID: 12849 RVA: 0x0010ED00 File Offset: 0x0010CF00
+	// Token: 0x06003231 RID: 12849 RVA: 0x0010ECE0 File Offset: 0x0010CEE0
 	private void OnEjectButtonPressed()
 	{
 		GorillaGuardianManager gorillaGuardianManager = GameMode.ActiveGameMode as GorillaGuardianManager;

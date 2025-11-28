@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x020006A0 RID: 1696
 public class GRElevator : MonoBehaviour
 {
-	// Token: 0x06002B50 RID: 11088 RVA: 0x000E8304 File Offset: 0x000E6504
+	// Token: 0x06002B50 RID: 11088 RVA: 0x000E82E4 File Offset: 0x000E64E4
 	private void OnEnable()
 	{
 		GRElevatorManager.RegisterElevator(this);
@@ -15,13 +15,13 @@ public class GRElevator : MonoBehaviour
 		this.ambientAudio.Play();
 	}
 
-	// Token: 0x06002B51 RID: 11089 RVA: 0x000E8328 File Offset: 0x000E6528
+	// Token: 0x06002B51 RID: 11089 RVA: 0x000E8308 File Offset: 0x000E6508
 	private void OnDisable()
 	{
 		GRElevatorManager.DeregisterElevator(this);
 	}
 
-	// Token: 0x06002B52 RID: 11090 RVA: 0x000E8330 File Offset: 0x000E6530
+	// Token: 0x06002B52 RID: 11090 RVA: 0x000E8310 File Offset: 0x000E6510
 	private void Awake()
 	{
 		this.typeButtonDict = new Dictionary<GRElevator.ButtonType, GRElevatorButton>();
@@ -36,31 +36,31 @@ public class GRElevator : MonoBehaviour
 		this.UpdateLocalState(this.state);
 	}
 
-	// Token: 0x06002B53 RID: 11091 RVA: 0x000E83E9 File Offset: 0x000E65E9
+	// Token: 0x06002B53 RID: 11091 RVA: 0x000E83C9 File Offset: 0x000E65C9
 	public void PressButton(int type)
 	{
 		GRElevatorManager.ElevatorButtonPressed((GRElevator.ButtonType)type, this.location);
 	}
 
-	// Token: 0x06002B54 RID: 11092 RVA: 0x000E83F7 File Offset: 0x000E65F7
+	// Token: 0x06002B54 RID: 11092 RVA: 0x000E83D7 File Offset: 0x000E65D7
 	public void PressButtonVisuals(GRElevator.ButtonType type)
 	{
 		this.typeButtonDict[type].Pressed();
 	}
 
-	// Token: 0x06002B55 RID: 11093 RVA: 0x000E840A File Offset: 0x000E660A
+	// Token: 0x06002B55 RID: 11093 RVA: 0x000E83EA File Offset: 0x000E65EA
 	public void PlayDing()
 	{
 		this.ambientAudio.PlayOneShot(this.dingClip);
 	}
 
-	// Token: 0x06002B56 RID: 11094 RVA: 0x000E841D File Offset: 0x000E661D
+	// Token: 0x06002B56 RID: 11094 RVA: 0x000E83FD File Offset: 0x000E65FD
 	public void PlayButtonPress()
 	{
 		this.buttonBank.Play();
 	}
 
-	// Token: 0x06002B57 RID: 11095 RVA: 0x000E842C File Offset: 0x000E662C
+	// Token: 0x06002B57 RID: 11095 RVA: 0x000E840C File Offset: 0x000E660C
 	public void PlayElevatorMoving()
 	{
 		if (this.ambientAudio.isPlaying && this.ambientAudio.clip == this.travellingLoopClip)
@@ -73,7 +73,7 @@ public class GRElevator : MonoBehaviour
 		this.ambientAudio.Play();
 	}
 
-	// Token: 0x06002B58 RID: 11096 RVA: 0x000E8498 File Offset: 0x000E6698
+	// Token: 0x06002B58 RID: 11096 RVA: 0x000E8478 File Offset: 0x000E6678
 	public void PlayElevatorStopped()
 	{
 		if (this.ambientAudio.isPlaying && this.ambientAudio.clip == this.ambientLoopClip)
@@ -86,7 +86,7 @@ public class GRElevator : MonoBehaviour
 		this.ambientAudio.Play();
 	}
 
-	// Token: 0x06002B59 RID: 11097 RVA: 0x000E8503 File Offset: 0x000E6703
+	// Token: 0x06002B59 RID: 11097 RVA: 0x000E84E3 File Offset: 0x000E66E3
 	public void PlayElevatorMusic(float time = 0f)
 	{
 		if (this.musicAudio.isPlaying)
@@ -97,7 +97,7 @@ public class GRElevator : MonoBehaviour
 		this.musicAudio.Play();
 	}
 
-	// Token: 0x06002B5A RID: 11098 RVA: 0x000E852A File Offset: 0x000E672A
+	// Token: 0x06002B5A RID: 11098 RVA: 0x000E850A File Offset: 0x000E670A
 	public void PlayDoorOpenBegin()
 	{
 		this.doorAudio.clip = this.doorOpenClip;
@@ -105,7 +105,7 @@ public class GRElevator : MonoBehaviour
 		this.doorAudio.Play();
 	}
 
-	// Token: 0x06002B5B RID: 11099 RVA: 0x000E8558 File Offset: 0x000E6758
+	// Token: 0x06002B5B RID: 11099 RVA: 0x000E8538 File Offset: 0x000E6738
 	public void PlayDoorCloseBegin()
 	{
 		this.doorAudio.clip = this.doorCloseClip;
@@ -113,31 +113,31 @@ public class GRElevator : MonoBehaviour
 		this.doorAudio.Play();
 	}
 
-	// Token: 0x06002B5C RID: 11100 RVA: 0x000E8586 File Offset: 0x000E6786
+	// Token: 0x06002B5C RID: 11100 RVA: 0x000E8566 File Offset: 0x000E6766
 	public void PlayDoorOpenTravel()
 	{
 		this.doorAudio.time = this.adjustedOffsetTime + this.openBeginDuration;
 	}
 
-	// Token: 0x06002B5D RID: 11101 RVA: 0x000E85A0 File Offset: 0x000E67A0
+	// Token: 0x06002B5D RID: 11101 RVA: 0x000E8580 File Offset: 0x000E6780
 	public void PlayDoorCloseTravel()
 	{
 		this.doorAudio.time = this.adjustedOffsetTime + this.closeBeginDuration;
 	}
 
-	// Token: 0x06002B5E RID: 11102 RVA: 0x000E85BC File Offset: 0x000E67BC
+	// Token: 0x06002B5E RID: 11102 RVA: 0x000E859C File Offset: 0x000E679C
 	public bool DoorsFullyClosed()
 	{
 		return (this.upperDoor.position - this.closedTargetTop.position).sqrMagnitude < 0.0001f;
 	}
 
-	// Token: 0x06002B5F RID: 11103 RVA: 0x000E85F4 File Offset: 0x000E67F4
+	// Token: 0x06002B5F RID: 11103 RVA: 0x000E85D4 File Offset: 0x000E67D4
 	public bool DoorsFullyOpen()
 	{
 		return (this.upperDoor.position - this.openTargetTop.position).sqrMagnitude < 0.0001f;
 	}
 
-	// Token: 0x06002B60 RID: 11104 RVA: 0x000E862C File Offset: 0x000E682C
+	// Token: 0x06002B60 RID: 11104 RVA: 0x000E860C File Offset: 0x000E680C
 	public void UpdateLocalState(GRElevator.ElevatorState newState)
 	{
 		if (newState == this.state)
@@ -189,7 +189,7 @@ public class GRElevator : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002B61 RID: 11105 RVA: 0x000E8728 File Offset: 0x000E6928
+	// Token: 0x06002B61 RID: 11105 RVA: 0x000E8708 File Offset: 0x000E6908
 	public void UpdateRemoteState(GRElevator.ElevatorState remoteNewState)
 	{
 		if (GRElevator.StateIsOpeningState(remoteNewState) && GRElevator.StateIsClosingState(this.state))
@@ -203,45 +203,45 @@ public class GRElevator : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002B62 RID: 11106 RVA: 0x000E8764 File Offset: 0x000E6964
+	// Token: 0x06002B62 RID: 11106 RVA: 0x000E8744 File Offset: 0x000E6944
 	public void SetDoorOpenBeginTime()
 	{
 		float num = (this.travelDistance - (this.upperDoor.position - this.openTargetTop.position).magnitude) / this.travelDistance;
 		this.adjustedOffsetTime = num * this.openTravelDuration;
 	}
 
-	// Token: 0x06002B63 RID: 11107 RVA: 0x000E87B4 File Offset: 0x000E69B4
+	// Token: 0x06002B63 RID: 11107 RVA: 0x000E8794 File Offset: 0x000E6994
 	public void SetDoorClosedBeginTime()
 	{
 		float num = (this.travelDistance - (this.upperDoor.position - this.closedTargetTop.position).magnitude) / this.travelDistance;
 		this.adjustedOffsetTime = num * this.closeTravelDuration;
 	}
 
-	// Token: 0x06002B64 RID: 11108 RVA: 0x000E8801 File Offset: 0x000E6A01
+	// Token: 0x06002B64 RID: 11108 RVA: 0x000E87E1 File Offset: 0x000E69E1
 	public static bool StateIsOpeningState(GRElevator.ElevatorState checkState)
 	{
 		return checkState == GRElevator.ElevatorState.DoorMovingOpening || checkState == GRElevator.ElevatorState.DoorBeginOpening || checkState == GRElevator.ElevatorState.DoorEndOpening || checkState == GRElevator.ElevatorState.DoorOpen;
 	}
 
-	// Token: 0x06002B65 RID: 11109 RVA: 0x000E8815 File Offset: 0x000E6A15
+	// Token: 0x06002B65 RID: 11109 RVA: 0x000E87F5 File Offset: 0x000E69F5
 	public static bool StateIsClosingState(GRElevator.ElevatorState checkState)
 	{
 		return checkState == GRElevator.ElevatorState.DoorMovingClosing || checkState == GRElevator.ElevatorState.DoorBeginClosing || checkState == GRElevator.ElevatorState.DoorEndClosing || checkState == GRElevator.ElevatorState.DoorClosed;
 	}
 
-	// Token: 0x06002B66 RID: 11110 RVA: 0x000E8828 File Offset: 0x000E6A28
+	// Token: 0x06002B66 RID: 11110 RVA: 0x000E8808 File Offset: 0x000E6A08
 	public bool DoorIsOpening()
 	{
 		return GRElevator.StateIsOpeningState(this.state);
 	}
 
-	// Token: 0x06002B67 RID: 11111 RVA: 0x000E8835 File Offset: 0x000E6A35
+	// Token: 0x06002B67 RID: 11111 RVA: 0x000E8815 File Offset: 0x000E6A15
 	public bool DoorIsClosing()
 	{
 		return GRElevator.StateIsClosingState(this.state);
 	}
 
-	// Token: 0x06002B68 RID: 11112 RVA: 0x000E8844 File Offset: 0x000E6A44
+	// Token: 0x06002B68 RID: 11112 RVA: 0x000E8824 File Offset: 0x000E6A24
 	public void PhysicalElevatorUpdate()
 	{
 		switch (this.state)

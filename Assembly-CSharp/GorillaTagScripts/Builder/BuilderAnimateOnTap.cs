@@ -6,7 +6,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E44 RID: 3652
 	public class BuilderAnimateOnTap : BuilderPieceTappable
 	{
-		// Token: 0x06005AFF RID: 23295 RVA: 0x001D260F File Offset: 0x001D080F
+		// Token: 0x06005AFF RID: 23295 RVA: 0x001D25EF File Offset: 0x001D07EF
 		public override void OnTapReplicated()
 		{
 			base.OnTapReplicated();

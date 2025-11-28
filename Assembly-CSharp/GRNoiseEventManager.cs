@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x020006D8 RID: 1752
 public class GRNoiseEventManager : MonoBehaviourTick
 {
-	// Token: 0x06002CD7 RID: 11479 RVA: 0x000F2F1C File Offset: 0x000F111C
+	// Token: 0x06002CD7 RID: 11479 RVA: 0x000F2EFC File Offset: 0x000F10FC
 	public void Awake()
 	{
 		GRNoiseEventManager.instance = this;
@@ -18,7 +18,7 @@ public class GRNoiseEventManager : MonoBehaviourTick
 	{
 	}
 
-	// Token: 0x06002CD9 RID: 11481 RVA: 0x000F2F24 File Offset: 0x000F1124
+	// Token: 0x06002CD9 RID: 11481 RVA: 0x000F2F04 File Offset: 0x000F1104
 	public override void Tick()
 	{
 		this.RemoveExpiredEvents();
@@ -28,13 +28,13 @@ public class GRNoiseEventManager : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002CDA RID: 11482 RVA: 0x000F2F39 File Offset: 0x000F1139
+	// Token: 0x06002CDA RID: 11482 RVA: 0x000F2F19 File Offset: 0x000F1119
 	private int FindUnusedEventEntry()
 	{
 		return -1;
 	}
 
-	// Token: 0x06002CDB RID: 11483 RVA: 0x000F2F3C File Offset: 0x000F113C
+	// Token: 0x06002CDB RID: 11483 RVA: 0x000F2F1C File Offset: 0x000F111C
 	public void AddNoiseEvent(Vector3 position, float magnitude = 1f, float duration = 1f)
 	{
 		GameNoiseEvent gameNoiseEvent = new GameNoiseEvent
@@ -53,7 +53,7 @@ public class GRNoiseEventManager : MonoBehaviourTick
 		this.noiseEvents[num] = gameNoiseEvent;
 	}
 
-	// Token: 0x06002CDC RID: 11484 RVA: 0x000F2F9C File Offset: 0x000F119C
+	// Token: 0x06002CDC RID: 11484 RVA: 0x000F2F7C File Offset: 0x000F117C
 	public List<GameNoiseEvent> GetNoiseEventsInRadius(Vector3 origin, float radius)
 	{
 		List<GameNoiseEvent> list = new List<GameNoiseEvent>();
@@ -73,7 +73,7 @@ public class GRNoiseEventManager : MonoBehaviourTick
 		return list;
 	}
 
-	// Token: 0x06002CDD RID: 11485 RVA: 0x000F3030 File Offset: 0x000F1230
+	// Token: 0x06002CDD RID: 11485 RVA: 0x000F3010 File Offset: 0x000F1210
 	public bool GetMostRecentNoiseEventInRadius(Vector3 origin, float radius, out GameNoiseEvent outEvent)
 	{
 		double timeAsDouble = Time.timeAsDouble;
@@ -107,7 +107,7 @@ public class GRNoiseEventManager : MonoBehaviourTick
 		return true;
 	}
 
-	// Token: 0x06002CDE RID: 11486 RVA: 0x000F30EC File Offset: 0x000F12EC
+	// Token: 0x06002CDE RID: 11486 RVA: 0x000F30CC File Offset: 0x000F12CC
 	public void RenderDebug()
 	{
 		int num = 0;
@@ -124,7 +124,7 @@ public class GRNoiseEventManager : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002CDF RID: 11487 RVA: 0x000F3158 File Offset: 0x000F1358
+	// Token: 0x06002CDF RID: 11487 RVA: 0x000F3138 File Offset: 0x000F1338
 	private void RemoveExpiredEvents()
 	{
 		for (int i = 0; i < this.noiseEvents.Count; i++)

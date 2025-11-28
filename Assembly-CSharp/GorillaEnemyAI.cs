@@ -11,7 +11,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(Rigidbody))]
 public class GorillaEnemyAI : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 {
-	// Token: 0x06003C06 RID: 15366 RVA: 0x0013CEF0 File Offset: 0x0013B0F0
+	// Token: 0x06003C06 RID: 15366 RVA: 0x0013CED0 File Offset: 0x0013B0D0
 	private void Start()
 	{
 		this.agent = base.GetComponent<NavMeshAgent>();
@@ -24,7 +24,7 @@ public class GorillaEnemyAI : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 		}
 	}
 
-	// Token: 0x06003C07 RID: 15367 RVA: 0x0013CF48 File Offset: 0x0013B148
+	// Token: 0x06003C07 RID: 15367 RVA: 0x0013CF28 File Offset: 0x0013B128
 	void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (stream.IsWriting)
@@ -39,7 +39,7 @@ public class GorillaEnemyAI : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 		ref this.targetRotation.SetValueSafe(vector);
 	}
 
-	// Token: 0x06003C08 RID: 15368 RVA: 0x0013CFBC File Offset: 0x0013B1BC
+	// Token: 0x06003C08 RID: 15368 RVA: 0x0013CF9C File Offset: 0x0013B19C
 	private void Update()
 	{
 		if (PhotonNetwork.IsMasterClient)
@@ -57,7 +57,7 @@ public class GorillaEnemyAI : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 		base.transform.eulerAngles = Vector3.Lerp(base.transform.eulerAngles, this.targetRotation, this.lerpValue);
 	}
 
-	// Token: 0x06003C09 RID: 15369 RVA: 0x0013D0AC File Offset: 0x0013B2AC
+	// Token: 0x06003C09 RID: 15369 RVA: 0x0013D08C File Offset: 0x0013B28C
 	private void FindClosestPlayer()
 	{
 		VRRig[] array = Object.FindObjectsByType<VRRig>(0);
@@ -75,7 +75,7 @@ public class GorillaEnemyAI : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 		this.playerTransform = vrrig.transform;
 	}
 
-	// Token: 0x06003C0A RID: 15370 RVA: 0x0013D11E File Offset: 0x0013B31E
+	// Token: 0x06003C0A RID: 15370 RVA: 0x0013D0FE File Offset: 0x0013B2FE
 	private void OnCollisionEnter(Collision collision)
 	{
 		if (collision.gameObject.layer == 19)
@@ -84,7 +84,7 @@ public class GorillaEnemyAI : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 		}
 	}
 
-	// Token: 0x06003C0B RID: 15371 RVA: 0x0013D13A File Offset: 0x0013B33A
+	// Token: 0x06003C0B RID: 15371 RVA: 0x0013D11A File Offset: 0x0013B31A
 	void IInRoomCallbacks.OnMasterClientSwitched(Player newMasterClient)
 	{
 		if (PhotonNetwork.IsMasterClient)

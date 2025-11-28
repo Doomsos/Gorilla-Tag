@@ -6,13 +6,13 @@ using Photon.Realtime;
 // Token: 0x02000B98 RID: 2968
 internal class OwnershipGaurdHandler : IPunOwnershipCallbacks
 {
-	// Token: 0x06004954 RID: 18772 RVA: 0x00181315 File Offset: 0x0017F515
+	// Token: 0x06004954 RID: 18772 RVA: 0x001812F5 File Offset: 0x0017F4F5
 	static OwnershipGaurdHandler()
 	{
 		PhotonNetwork.AddCallbackTarget(OwnershipGaurdHandler.callbackInstance);
 	}
 
-	// Token: 0x06004955 RID: 18773 RVA: 0x00181335 File Offset: 0x0017F535
+	// Token: 0x06004955 RID: 18773 RVA: 0x00181315 File Offset: 0x0017F515
 	internal static void RegisterView(PhotonView view)
 	{
 		if (view == null || OwnershipGaurdHandler.gaurdedViews.Contains(view))
@@ -22,7 +22,7 @@ internal class OwnershipGaurdHandler : IPunOwnershipCallbacks
 		OwnershipGaurdHandler.gaurdedViews.Add(view);
 	}
 
-	// Token: 0x06004956 RID: 18774 RVA: 0x0018135C File Offset: 0x0017F55C
+	// Token: 0x06004956 RID: 18774 RVA: 0x0018133C File Offset: 0x0017F53C
 	internal static void RegisterViews(PhotonView[] photonViews)
 	{
 		for (int i = 0; i < photonViews.Length; i++)
@@ -31,7 +31,7 @@ internal class OwnershipGaurdHandler : IPunOwnershipCallbacks
 		}
 	}
 
-	// Token: 0x06004957 RID: 18775 RVA: 0x00181381 File Offset: 0x0017F581
+	// Token: 0x06004957 RID: 18775 RVA: 0x00181361 File Offset: 0x0017F561
 	internal static void RemoveView(PhotonView view)
 	{
 		if (view == null)
@@ -41,7 +41,7 @@ internal class OwnershipGaurdHandler : IPunOwnershipCallbacks
 		OwnershipGaurdHandler.gaurdedViews.Remove(view);
 	}
 
-	// Token: 0x06004958 RID: 18776 RVA: 0x0018139C File Offset: 0x0017F59C
+	// Token: 0x06004958 RID: 18776 RVA: 0x0018137C File Offset: 0x0017F57C
 	internal static void RemoveViews(PhotonView[] photonViews)
 	{
 		for (int i = 0; i < photonViews.Length; i++)
@@ -50,7 +50,7 @@ internal class OwnershipGaurdHandler : IPunOwnershipCallbacks
 		}
 	}
 
-	// Token: 0x06004959 RID: 18777 RVA: 0x001813C4 File Offset: 0x0017F5C4
+	// Token: 0x06004959 RID: 18777 RVA: 0x001813A4 File Offset: 0x0017F5A4
 	void IPunOwnershipCallbacks.OnOwnershipTransfered(PhotonView targetView, Player previousOwner)
 	{
 		if (!OwnershipGaurdHandler.gaurdedViews.Contains(targetView))

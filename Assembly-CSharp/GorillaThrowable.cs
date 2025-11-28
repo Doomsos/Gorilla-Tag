@@ -8,7 +8,7 @@ using UnityEngine.XR;
 // Token: 0x02000930 RID: 2352
 public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCallback
 {
-	// Token: 0x06003C1F RID: 15391 RVA: 0x0013D518 File Offset: 0x0013B718
+	// Token: 0x06003C1F RID: 15391 RVA: 0x0013D4F8 File Offset: 0x0013B6F8
 	public virtual void Start()
 	{
 		this.offset = Vector3.zero;
@@ -30,7 +30,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		this.rigidbody = base.GetComponentInChildren<Rigidbody>();
 	}
 
-	// Token: 0x06003C20 RID: 15392 RVA: 0x0013D638 File Offset: 0x0013B838
+	// Token: 0x06003C20 RID: 15392 RVA: 0x0013D618 File Offset: 0x0013B818
 	public virtual void LateUpdate()
 	{
 		if (this.isHeld && base.photonView.IsMine)
@@ -60,7 +60,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 	{
 	}
 
-	// Token: 0x06003C22 RID: 15394 RVA: 0x0013D7A4 File Offset: 0x0013B9A4
+	// Token: 0x06003C22 RID: 15394 RVA: 0x0013D784 File Offset: 0x0013B984
 	private void StoreHistories()
 	{
 		this.previousPosition = this.positionHistory[this.currentIndex];
@@ -88,7 +88,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		this.rotationalVelocityHistory[this.currentIndex] = this.currentRotationalVelocity;
 	}
 
-	// Token: 0x06003C23 RID: 15395 RVA: 0x0013D9D0 File Offset: 0x0013BBD0
+	// Token: 0x06003C23 RID: 15395 RVA: 0x0013D9B0 File Offset: 0x0013BBB0
 	public virtual void Grabbed(Transform grabTransform)
 	{
 		this.grabbingTransform = grabTransform;
@@ -101,7 +101,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		base.photonView.RequestOwnership();
 	}
 
-	// Token: 0x06003C24 RID: 15396 RVA: 0x0013DA48 File Offset: 0x0013BC48
+	// Token: 0x06003C24 RID: 15396 RVA: 0x0013DA28 File Offset: 0x0013BC28
 	public virtual void ThrowThisThingo()
 	{
 		this.transformToFollow = null;
@@ -129,7 +129,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		this.rigidbody.MovePosition(this.rigidbody.transform.position + this.rigidbody.linearVelocity * Time.deltaTime);
 	}
 
-	// Token: 0x06003C25 RID: 15397 RVA: 0x0013DBE4 File Offset: 0x0013BDE4
+	// Token: 0x06003C25 RID: 15397 RVA: 0x0013DBC4 File Offset: 0x0013BDC4
 	void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (stream.IsWriting)
@@ -149,7 +149,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		this.rigidbody.linearVelocity = linearVelocity;
 	}
 
-	// Token: 0x06003C26 RID: 15398 RVA: 0x0013DC9C File Offset: 0x0013BE9C
+	// Token: 0x06003C26 RID: 15398 RVA: 0x0013DC7C File Offset: 0x0013BE7C
 	public virtual void OnCollisionEnter(Collision collision)
 	{
 		if (collision.collider.GetComponent<GorillaSurfaceOverride>() != null)
@@ -166,7 +166,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		}
 	}
 
-	// Token: 0x06003C27 RID: 15399 RVA: 0x0013DD18 File Offset: 0x0013BF18
+	// Token: 0x06003C27 RID: 15399 RVA: 0x0013DCF8 File Offset: 0x0013BEF8
 	public void PlaySurfaceHit(int soundIndex, float tapVolume)
 	{
 		if (soundIndex > -1 && soundIndex < GTPlayer.Instance.materialData.Count)
@@ -177,7 +177,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		}
 	}
 
-	// Token: 0x06003C28 RID: 15400 RVA: 0x0013DDB4 File Offset: 0x0013BFB4
+	// Token: 0x06003C28 RID: 15400 RVA: 0x0013DD94 File Offset: 0x0013BF94
 	public float InterpolateVolume()
 	{
 		return (Mathf.Clamp(this.rigidbody.linearVelocity.magnitude, this.minVelocity, this.maxVelocity) - this.minVelocity) / (this.maxVelocity - this.minVelocity) * (this.maxVolume - this.minVolume) + this.minVolume;

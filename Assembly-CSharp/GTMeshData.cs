@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 // Token: 0x02000CD5 RID: 3285
 public class GTMeshData
 {
-	// Token: 0x06005026 RID: 20518 RVA: 0x0019BF14 File Offset: 0x0019A114
+	// Token: 0x06005026 RID: 20518 RVA: 0x0019BEF4 File Offset: 0x0019A0F4
 	public GTMeshData(Mesh m)
 	{
 		this.mesh = m;
@@ -26,7 +26,7 @@ public class GTMeshData
 		this.uv8 = m.uv8;
 	}
 
-	// Token: 0x06005027 RID: 20519 RVA: 0x0019BFE4 File Offset: 0x0019A1E4
+	// Token: 0x06005027 RID: 20519 RVA: 0x0019BFC4 File Offset: 0x0019A1C4
 	public Mesh ExtractSubmesh(int subMeshIndex, bool optimize = false)
 	{
 		if (subMeshIndex < 0 || subMeshIndex >= this.subMeshCount)
@@ -89,7 +89,7 @@ public class GTMeshData
 		return mesh;
 	}
 
-	// Token: 0x06005028 RID: 20520 RVA: 0x0019C1B2 File Offset: 0x0019A3B2
+	// Token: 0x06005028 RID: 20520 RVA: 0x0019C192 File Offset: 0x0019A392
 	public static GTMeshData Parse(Mesh mesh)
 	{
 		if (mesh == null)

@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020005B1 RID: 1457
 public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x060024B7 RID: 9399 RVA: 0x000C5E04 File Offset: 0x000C4004
+	// Token: 0x060024B7 RID: 9399 RVA: 0x000C5DE4 File Offset: 0x000C3FE4
 	private void Start()
 	{
 		this.lastAngleBottom = 0f;
@@ -36,7 +36,7 @@ public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
-	// Token: 0x060024BA RID: 9402 RVA: 0x000C5EF0 File Offset: 0x000C40F0
+	// Token: 0x060024BA RID: 9402 RVA: 0x000C5ED0 File Offset: 0x000C40D0
 	public void SliceUpdate()
 	{
 		if (BetterDayNightManager.instance == null)
@@ -76,7 +76,7 @@ public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 		this.lastTime = Time.time;
 	}
 
-	// Token: 0x060024BB RID: 9403 RVA: 0x000C60F4 File Offset: 0x000C42F4
+	// Token: 0x060024BB RID: 9403 RVA: 0x000C60D4 File Offset: 0x000C42D4
 	private void Flap(ref float perlinValue, float perlinStep, ref float lastAngle, ref Transform flameTransform, float range, float multiplier, ref bool isMerged)
 	{
 		perlinValue += perlinStep;
@@ -108,7 +108,7 @@ public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 		flameTransform.localEulerAngles = this.tempVec;
 	}
 
-	// Token: 0x060024BC RID: 9404 RVA: 0x000C623C File Offset: 0x000C443C
+	// Token: 0x060024BC RID: 9404 RVA: 0x000C621C File Offset: 0x000C441C
 	private void ReturnToOff(ref Transform startTransform, float targetAngle, ref bool isMerged)
 	{
 		this.tempVec.x = targetAngle;

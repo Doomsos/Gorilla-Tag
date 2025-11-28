@@ -7,7 +7,7 @@ namespace Critters.Scripts
 	// Token: 0x0200114D RID: 4429
 	public class CrittersSpawningData : MonoBehaviour
 	{
-		// Token: 0x06006FCF RID: 28623 RVA: 0x0024671C File Offset: 0x0024491C
+		// Token: 0x06006FCF RID: 28623 RVA: 0x002466FC File Offset: 0x002448FC
 		public void InitializeSpawnCollection()
 		{
 			for (int i = 0; i < this.SpawnParametersList.Count; i++)
@@ -19,7 +19,7 @@ namespace Critters.Scripts
 			}
 		}
 
-		// Token: 0x06006FD0 RID: 28624 RVA: 0x00246768 File Offset: 0x00244968
+		// Token: 0x06006FD0 RID: 28624 RVA: 0x00246748 File Offset: 0x00244948
 		public int GetRandomTemplate()
 		{
 			int num = Random.Range(0, this.templateCollection.Count - 1);

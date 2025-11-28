@@ -4,13 +4,13 @@ using UnityEngine;
 // Token: 0x020006C9 RID: 1737
 public class GRGameEntityInteractionPoint : MonoBehaviour
 {
-	// Token: 0x06002C9C RID: 11420 RVA: 0x000F1B33 File Offset: 0x000EFD33
+	// Token: 0x06002C9C RID: 11420 RVA: 0x000F1B13 File Offset: 0x000EFD13
 	public void Start()
 	{
 		base.transform.parent = this.targetParent;
 	}
 
-	// Token: 0x06002C9D RID: 11421 RVA: 0x000F1B48 File Offset: 0x000EFD48
+	// Token: 0x06002C9D RID: 11421 RVA: 0x000F1B28 File Offset: 0x000EFD28
 	public void OnEnable()
 	{
 		GameEntity gameEntity = this.gameEntity;
@@ -19,7 +19,7 @@ public class GRGameEntityInteractionPoint : MonoBehaviour
 		gameEntity2.OnReleased = (Action)Delegate.Combine(gameEntity2.OnReleased, new Action(this.OnReleased));
 	}
 
-	// Token: 0x06002C9E RID: 11422 RVA: 0x000F1BA4 File Offset: 0x000EFDA4
+	// Token: 0x06002C9E RID: 11422 RVA: 0x000F1B84 File Offset: 0x000EFD84
 	public void OnDisable()
 	{
 		GameEntity gameEntity = this.gameEntity;
@@ -28,7 +28,7 @@ public class GRGameEntityInteractionPoint : MonoBehaviour
 		gameEntity2.OnReleased = (Action)Delegate.Remove(gameEntity2.OnReleased, new Action(this.OnReleased));
 	}
 
-	// Token: 0x06002C9F RID: 11423 RVA: 0x000F1BFF File Offset: 0x000EFDFF
+	// Token: 0x06002C9F RID: 11423 RVA: 0x000F1BDF File Offset: 0x000EFDDF
 	public void OnGrabbed()
 	{
 		GameEntity gameEntity = this.gameEntity;
@@ -41,7 +41,7 @@ public class GRGameEntityInteractionPoint : MonoBehaviour
 		onGrabStart.Invoke();
 	}
 
-	// Token: 0x06002CA0 RID: 11424 RVA: 0x000F1C38 File Offset: 0x000EFE38
+	// Token: 0x06002CA0 RID: 11424 RVA: 0x000F1C18 File Offset: 0x000EFE18
 	public void OnReleased()
 	{
 		GameEntity gameEntity = this.gameEntity;
@@ -52,7 +52,7 @@ public class GRGameEntityInteractionPoint : MonoBehaviour
 		this.OnGrabEnd.Invoke();
 	}
 
-	// Token: 0x06002CA1 RID: 11425 RVA: 0x000F1CB8 File Offset: 0x000EFEB8
+	// Token: 0x06002CA1 RID: 11425 RVA: 0x000F1C98 File Offset: 0x000EFE98
 	public void TickWhileHeld()
 	{
 		if (this.targetParent != null)

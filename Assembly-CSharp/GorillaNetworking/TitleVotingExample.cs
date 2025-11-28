@@ -16,7 +16,7 @@ namespace GorillaNetworking
 	// Token: 0x02000F2B RID: 3883
 	public class TitleVotingExample : MonoBehaviour
 	{
-		// Token: 0x0600614B RID: 24907 RVA: 0x001F576C File Offset: 0x001F396C
+		// Token: 0x0600614B RID: 24907 RVA: 0x001F574C File Offset: 0x001F394C
 		public void Start()
 		{
 			TitleVotingExample.<Start>d__8 <Start>d__;
@@ -31,7 +31,7 @@ namespace GorillaNetworking
 		{
 		}
 
-		// Token: 0x0600614D RID: 24909 RVA: 0x001F57A4 File Offset: 0x001F39A4
+		// Token: 0x0600614D RID: 24909 RVA: 0x001F5784 File Offset: 0x001F3984
 		private Task WaitForSessionToken()
 		{
 			TitleVotingExample.<WaitForSessionToken>d__10 <WaitForSessionToken>d__;
@@ -41,7 +41,7 @@ namespace GorillaNetworking
 			return <WaitForSessionToken>d__.<>t__builder.Task;
 		}
 
-		// Token: 0x0600614E RID: 24910 RVA: 0x001F57E0 File Offset: 0x001F39E0
+		// Token: 0x0600614E RID: 24910 RVA: 0x001F57C0 File Offset: 0x001F39C0
 		public void FetchPollsAndVote()
 		{
 			base.StartCoroutine(this.DoFetchPolls(new TitleVotingExample.FetchPollsRequest
@@ -53,7 +53,7 @@ namespace GorillaNetworking
 			}, new Action<List<TitleVotingExample.FetchPollsResponse>>(this.OnFetchPollsResponse)));
 		}
 
-		// Token: 0x0600614F RID: 24911 RVA: 0x001F5848 File Offset: 0x001F3A48
+		// Token: 0x0600614F RID: 24911 RVA: 0x001F5828 File Offset: 0x001F3A28
 		private void GetNonceForVotingCallback([CanBeNull] Message<UserProof> message)
 		{
 			if (message != null)
@@ -75,13 +75,13 @@ namespace GorillaNetworking
 			}, new Action<TitleVotingExample.VoteResponse>(this.OnVoteSuccess)));
 		}
 
-		// Token: 0x06006150 RID: 24912 RVA: 0x001F5916 File Offset: 0x001F3B16
+		// Token: 0x06006150 RID: 24912 RVA: 0x001F58F6 File Offset: 0x001F3AF6
 		public void Vote()
 		{
 			this.GetNonceForVotingCallback(null);
 		}
 
-		// Token: 0x06006151 RID: 24913 RVA: 0x001F591F File Offset: 0x001F3B1F
+		// Token: 0x06006151 RID: 24913 RVA: 0x001F58FF File Offset: 0x001F3AFF
 		private IEnumerator DoFetchPolls(TitleVotingExample.FetchPollsRequest data, Action<List<TitleVotingExample.FetchPollsResponse>> callback)
 		{
 			UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.VotingApiBaseUrl + "/api/FetchPoll", "POST");
@@ -130,7 +130,7 @@ namespace GorillaNetworking
 			yield break;
 		}
 
-		// Token: 0x06006152 RID: 24914 RVA: 0x001F593C File Offset: 0x001F3B3C
+		// Token: 0x06006152 RID: 24914 RVA: 0x001F591C File Offset: 0x001F3B1C
 		private IEnumerator DoVote(TitleVotingExample.VoteRequest data, Action<TitleVotingExample.VoteResponse> callback)
 		{
 			UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.VotingApiBaseUrl + "/api/Vote", "POST");
@@ -183,7 +183,7 @@ namespace GorillaNetworking
 			yield break;
 		}
 
-		// Token: 0x06006153 RID: 24915 RVA: 0x001F5959 File Offset: 0x001F3B59
+		// Token: 0x06006153 RID: 24915 RVA: 0x001F5939 File Offset: 0x001F3B39
 		private void OnFetchPollsResponse([CanBeNull] List<TitleVotingExample.FetchPollsResponse> response)
 		{
 			if (response != null)
@@ -195,7 +195,7 @@ namespace GorillaNetworking
 			Debug.LogError("Error: Could not fetch polls!");
 		}
 
-		// Token: 0x06006154 RID: 24916 RVA: 0x001F5984 File Offset: 0x001F3B84
+		// Token: 0x06006154 RID: 24916 RVA: 0x001F5964 File Offset: 0x001F3B64
 		private void OnVoteSuccess([CanBeNull] TitleVotingExample.VoteResponse response)
 		{
 			if (response != null)
@@ -310,28 +310,28 @@ namespace GorillaNetworking
 		private class VoteResponse
 		{
 			// Token: 0x17000904 RID: 2308
-			// (get) Token: 0x06006159 RID: 24921 RVA: 0x001F59D1 File Offset: 0x001F3BD1
-			// (set) Token: 0x0600615A RID: 24922 RVA: 0x001F59D9 File Offset: 0x001F3BD9
+			// (get) Token: 0x06006159 RID: 24921 RVA: 0x001F59B1 File Offset: 0x001F3BB1
+			// (set) Token: 0x0600615A RID: 24922 RVA: 0x001F59B9 File Offset: 0x001F3BB9
 			public int PollId { get; set; }
 
 			// Token: 0x17000905 RID: 2309
-			// (get) Token: 0x0600615B RID: 24923 RVA: 0x001F59E2 File Offset: 0x001F3BE2
-			// (set) Token: 0x0600615C RID: 24924 RVA: 0x001F59EA File Offset: 0x001F3BEA
+			// (get) Token: 0x0600615B RID: 24923 RVA: 0x001F59C2 File Offset: 0x001F3BC2
+			// (set) Token: 0x0600615C RID: 24924 RVA: 0x001F59CA File Offset: 0x001F3BCA
 			public string TitleId { get; set; }
 
 			// Token: 0x17000906 RID: 2310
-			// (get) Token: 0x0600615D RID: 24925 RVA: 0x001F59F3 File Offset: 0x001F3BF3
-			// (set) Token: 0x0600615E RID: 24926 RVA: 0x001F59FB File Offset: 0x001F3BFB
+			// (get) Token: 0x0600615D RID: 24925 RVA: 0x001F59D3 File Offset: 0x001F3BD3
+			// (set) Token: 0x0600615E RID: 24926 RVA: 0x001F59DB File Offset: 0x001F3BDB
 			public List<string> VoteOptions { get; set; }
 
 			// Token: 0x17000907 RID: 2311
-			// (get) Token: 0x0600615F RID: 24927 RVA: 0x001F5A04 File Offset: 0x001F3C04
-			// (set) Token: 0x06006160 RID: 24928 RVA: 0x001F5A0C File Offset: 0x001F3C0C
+			// (get) Token: 0x0600615F RID: 24927 RVA: 0x001F59E4 File Offset: 0x001F3BE4
+			// (set) Token: 0x06006160 RID: 24928 RVA: 0x001F59EC File Offset: 0x001F3BEC
 			public List<int> VoteCount { get; set; }
 
 			// Token: 0x17000908 RID: 2312
-			// (get) Token: 0x06006161 RID: 24929 RVA: 0x001F5A15 File Offset: 0x001F3C15
-			// (set) Token: 0x06006162 RID: 24930 RVA: 0x001F5A1D File Offset: 0x001F3C1D
+			// (get) Token: 0x06006161 RID: 24929 RVA: 0x001F59F5 File Offset: 0x001F3BF5
+			// (set) Token: 0x06006162 RID: 24930 RVA: 0x001F59FD File Offset: 0x001F3BFD
 			public List<int> PredictionCount { get; set; }
 		}
 	}

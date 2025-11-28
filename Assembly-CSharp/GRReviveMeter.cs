@@ -9,7 +9,7 @@ public class GRReviveMeter : MonoBehaviourTick
 	{
 	}
 
-	// Token: 0x06002D8D RID: 11661 RVA: 0x000F6480 File Offset: 0x000F4680
+	// Token: 0x06002D8D RID: 11661 RVA: 0x000F6460 File Offset: 0x000F4660
 	public override void Tick()
 	{
 		float num = 0f;

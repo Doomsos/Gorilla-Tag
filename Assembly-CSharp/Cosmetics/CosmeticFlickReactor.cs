@@ -8,7 +8,7 @@ namespace Cosmetics
 	// Token: 0x02000FC3 RID: 4035
 	public class CosmeticFlickReactor : MonoBehaviour
 	{
-		// Token: 0x0600664F RID: 26191 RVA: 0x0021583F File Offset: 0x00213A3F
+		// Token: 0x0600664F RID: 26191 RVA: 0x0021581F File Offset: 0x00213A1F
 		private void Reset()
 		{
 			if (this.speedTracker == null)
@@ -21,7 +21,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x06006650 RID: 26192 RVA: 0x00215878 File Offset: 0x00213A78
+		// Token: 0x06006650 RID: 26192 RVA: 0x00215858 File Offset: 0x00213A58
 		private void Awake()
 		{
 			this.rig = base.GetComponentInParent<VRRig>();
@@ -35,7 +35,7 @@ namespace Cosmetics
 			this.hasLastPosition = false;
 		}
 
-		// Token: 0x06006651 RID: 26193 RVA: 0x002158FC File Offset: 0x00213AFC
+		// Token: 0x06006651 RID: 26193 RVA: 0x002158DC File Offset: 0x00213ADC
 		private void Update()
 		{
 			Vector3 axis = this.ResolveAxisDirection();
@@ -80,7 +80,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x06006652 RID: 26194 RVA: 0x00215A48 File Offset: 0x00213C48
+		// Token: 0x06006652 RID: 26194 RVA: 0x00215A28 File Offset: 0x00213C28
 		private Vector3 ResolveAxisDirection()
 		{
 			switch (this.axisMode)
@@ -126,7 +126,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x06006653 RID: 26195 RVA: 0x00215B38 File Offset: 0x00213D38
+		// Token: 0x06006653 RID: 26195 RVA: 0x00215B18 File Offset: 0x00213D18
 		private float GetSignedSpeedAlong(Vector3 axis)
 		{
 			Vector3 vector;
@@ -154,7 +154,7 @@ namespace Cosmetics
 			return Vector3.Dot(vector, axis.normalized);
 		}
 
-		// Token: 0x06006654 RID: 26196 RVA: 0x00215C00 File Offset: 0x00213E00
+		// Token: 0x06006654 RID: 26196 RVA: 0x00215BE0 File Offset: 0x00213DE0
 		private void FireEvents(float currentAbsSpeed)
 		{
 			if (this.isLocal)
@@ -182,7 +182,7 @@ namespace Cosmetics
 			}
 		}
 
-		// Token: 0x06006655 RID: 26197 RVA: 0x00215C6D File Offset: 0x00213E6D
+		// Token: 0x06006655 RID: 26197 RVA: 0x00215C4D File Offset: 0x00213E4D
 		private void ResetState()
 		{
 			this.lastPeakSign = 0;

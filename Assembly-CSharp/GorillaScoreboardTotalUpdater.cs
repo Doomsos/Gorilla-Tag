@@ -7,7 +7,7 @@ using UnityEngine;
 // Token: 0x02000921 RID: 2337
 public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x06003BBC RID: 15292 RVA: 0x0013B948 File Offset: 0x00139B48
+	// Token: 0x06003BBC RID: 15292 RVA: 0x0013B928 File Offset: 0x00139B28
 	public void UpdateLineState(GorillaPlayerScoreboardLine line)
 	{
 		if (line.playerActorNumber == -1)
@@ -22,7 +22,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		this.reportDict.Add(line.playerActorNumber, new GorillaScoreboardTotalUpdater.PlayerReports(line));
 	}
 
-	// Token: 0x06003BBD RID: 15293 RVA: 0x0013B9B2 File Offset: 0x00139BB2
+	// Token: 0x06003BBD RID: 15293 RVA: 0x0013B992 File Offset: 0x00139B92
 	protected void Awake()
 	{
 		if (GorillaScoreboardTotalUpdater.hasInstance && GorillaScoreboardTotalUpdater.instance != this)
@@ -33,7 +33,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		GorillaScoreboardTotalUpdater.SetInstance(this);
 	}
 
-	// Token: 0x06003BBE RID: 15294 RVA: 0x0013B9D8 File Offset: 0x00139BD8
+	// Token: 0x06003BBE RID: 15294 RVA: 0x0013B9B8 File Offset: 0x00139BB8
 	private void Start()
 	{
 		RoomSystem.JoinedRoomEvent += new Action(this.JoinedRoom);
@@ -42,13 +42,13 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(this.OnPlayerLeftRoom);
 	}
 
-	// Token: 0x06003BBF RID: 15295 RVA: 0x0013BA51 File Offset: 0x00139C51
+	// Token: 0x06003BBF RID: 15295 RVA: 0x0013BA31 File Offset: 0x00139C31
 	public static void CreateManager()
 	{
 		GorillaScoreboardTotalUpdater.SetInstance(new GameObject("GorillaScoreboardTotalUpdater").AddComponent<GorillaScoreboardTotalUpdater>());
 	}
 
-	// Token: 0x06003BC0 RID: 15296 RVA: 0x0013BA67 File Offset: 0x00139C67
+	// Token: 0x06003BC0 RID: 15296 RVA: 0x0013BA47 File Offset: 0x00139C47
 	private static void SetInstance(GorillaScoreboardTotalUpdater manager)
 	{
 		GorillaScoreboardTotalUpdater.instance = manager;
@@ -59,7 +59,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BC1 RID: 15297 RVA: 0x0013BA82 File Offset: 0x00139C82
+	// Token: 0x06003BC1 RID: 15297 RVA: 0x0013BA62 File Offset: 0x00139C62
 	public static void RegisterSL(GorillaPlayerScoreboardLine sL)
 	{
 		if (!GorillaScoreboardTotalUpdater.hasInstance)
@@ -72,7 +72,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BC2 RID: 15298 RVA: 0x0013BAA8 File Offset: 0x00139CA8
+	// Token: 0x06003BC2 RID: 15298 RVA: 0x0013BA88 File Offset: 0x00139C88
 	public static void UnregisterSL(GorillaPlayerScoreboardLine sL)
 	{
 		if (!GorillaScoreboardTotalUpdater.hasInstance)
@@ -85,7 +85,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BC3 RID: 15299 RVA: 0x0013BACF File Offset: 0x00139CCF
+	// Token: 0x06003BC3 RID: 15299 RVA: 0x0013BAAF File Offset: 0x00139CAF
 	public static void RegisterScoreboard(GorillaScoreBoard sB)
 	{
 		if (!GorillaScoreboardTotalUpdater.hasInstance)
@@ -99,7 +99,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BC4 RID: 15300 RVA: 0x0013BB00 File Offset: 0x00139D00
+	// Token: 0x06003BC4 RID: 15300 RVA: 0x0013BAE0 File Offset: 0x00139CE0
 	public static void UnregisterScoreboard(GorillaScoreBoard sB)
 	{
 		if (!GorillaScoreboardTotalUpdater.hasInstance)
@@ -112,7 +112,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BC5 RID: 15301 RVA: 0x0013BB28 File Offset: 0x00139D28
+	// Token: 0x06003BC5 RID: 15301 RVA: 0x0013BB08 File Offset: 0x00139D08
 	public void UpdateActiveScoreboards()
 	{
 		for (int i = 0; i < GorillaScoreboardTotalUpdater.allScoreboards.Count; i++)
@@ -121,21 +121,21 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BC6 RID: 15302 RVA: 0x0013BB5B File Offset: 0x00139D5B
+	// Token: 0x06003BC6 RID: 15302 RVA: 0x0013BB3B File Offset: 0x00139D3B
 	public void SetOfflineFailureText(string failureText)
 	{
 		this.offlineTextErrorString = failureText;
 		this.UpdateActiveScoreboards();
 	}
 
-	// Token: 0x06003BC7 RID: 15303 RVA: 0x0013BB6A File Offset: 0x00139D6A
+	// Token: 0x06003BC7 RID: 15303 RVA: 0x0013BB4A File Offset: 0x00139D4A
 	public void ClearOfflineFailureText()
 	{
 		this.offlineTextErrorString = null;
 		this.UpdateActiveScoreboards();
 	}
 
-	// Token: 0x06003BC8 RID: 15304 RVA: 0x0013BB7C File Offset: 0x00139D7C
+	// Token: 0x06003BC8 RID: 15304 RVA: 0x0013BB5C File Offset: 0x00139D5C
 	public void UpdateScoreboard(GorillaScoreBoard sB)
 	{
 		sB.SetSleepState(this.joinedRoom);
@@ -189,7 +189,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
-	// Token: 0x06003BCB RID: 15307 RVA: 0x0013BCA4 File Offset: 0x00139EA4
+	// Token: 0x06003BCB RID: 15307 RVA: 0x0013BC84 File Offset: 0x00139E84
 	public void SliceUpdate()
 	{
 		if (GorillaScoreboardTotalUpdater.allScoreboardLines.Count == 0)
@@ -214,7 +214,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BCC RID: 15308 RVA: 0x0013BD3D File Offset: 0x00139F3D
+	// Token: 0x06003BCC RID: 15308 RVA: 0x0013BD1D File Offset: 0x00139F1D
 	private void OnPlayerEnteredRoom(NetPlayer netPlayer)
 	{
 		if (netPlayer == null)
@@ -228,7 +228,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		this.UpdateActiveScoreboards();
 	}
 
-	// Token: 0x06003BCD RID: 15309 RVA: 0x0013BD6C File Offset: 0x00139F6C
+	// Token: 0x06003BCD RID: 15309 RVA: 0x0013BD4C File Offset: 0x00139F4C
 	private void OnPlayerLeftRoom(NetPlayer netPlayer)
 	{
 		if (netPlayer == null)
@@ -245,7 +245,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BCE RID: 15310 RVA: 0x0013BDCC File Offset: 0x00139FCC
+	// Token: 0x06003BCE RID: 15310 RVA: 0x0013BDAC File Offset: 0x00139FAC
 	internal void JoinedRoom()
 	{
 		this.joinedRoom = true;
@@ -260,7 +260,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		}
 	}
 
-	// Token: 0x06003BCF RID: 15311 RVA: 0x0013BE7C File Offset: 0x0013A07C
+	// Token: 0x06003BCF RID: 15311 RVA: 0x0013BE5C File Offset: 0x0013A05C
 	private void OnLeftRoom()
 	{
 		this.joinedRoom = false;
@@ -277,7 +277,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.Clear();
 	}
 
-	// Token: 0x06003BD0 RID: 15312 RVA: 0x0013BF40 File Offset: 0x0013A140
+	// Token: 0x06003BD0 RID: 15312 RVA: 0x0013BF20 File Offset: 0x0013A120
 	public static void ReportMute(NetPlayer player, int muted)
 	{
 		ReportMuteTimer reportMuteTimer;
@@ -346,7 +346,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 	// Token: 0x02000922 RID: 2338
 	public struct PlayerReports
 	{
-		// Token: 0x06003BD3 RID: 15315 RVA: 0x0013C02C File Offset: 0x0013A22C
+		// Token: 0x06003BD3 RID: 15315 RVA: 0x0013C00C File Offset: 0x0013A20C
 		public PlayerReports(GorillaScoreboardTotalUpdater.PlayerReports reportToUpdate, GorillaPlayerScoreboardLine lineToUpdate)
 		{
 			this.cheating = (reportToUpdate.cheating || lineToUpdate.reportedCheating);
@@ -355,7 +355,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 			this.pressedReport = lineToUpdate.reportInProgress;
 		}
 
-		// Token: 0x06003BD4 RID: 15316 RVA: 0x0013C08A File Offset: 0x0013A28A
+		// Token: 0x06003BD4 RID: 15316 RVA: 0x0013C06A File Offset: 0x0013A26A
 		public PlayerReports(GorillaPlayerScoreboardLine lineToUpdate)
 		{
 			this.cheating = lineToUpdate.reportedCheating;

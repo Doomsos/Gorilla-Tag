@@ -7,7 +7,7 @@ using UnityEngine;
 public struct BoundsInfo
 {
 	// Token: 0x1700077B RID: 1915
-	// (get) Token: 0x0600507F RID: 20607 RVA: 0x0019E5D3 File Offset: 0x0019C7D3
+	// (get) Token: 0x0600507F RID: 20607 RVA: 0x0019E5B3 File Offset: 0x0019C7B3
 	public Vector3 sizeComputed
 	{
 		get
@@ -17,7 +17,7 @@ public struct BoundsInfo
 	}
 
 	// Token: 0x1700077C RID: 1916
-	// (get) Token: 0x06005080 RID: 20608 RVA: 0x0019E5F1 File Offset: 0x0019C7F1
+	// (get) Token: 0x06005080 RID: 20608 RVA: 0x0019E5D1 File Offset: 0x0019C7D1
 	public Vector3 sizeComputedAA
 	{
 		get
@@ -26,7 +26,7 @@ public struct BoundsInfo
 		}
 	}
 
-	// Token: 0x06005081 RID: 20609 RVA: 0x0019E610 File Offset: 0x0019C810
+	// Token: 0x06005081 RID: 20609 RVA: 0x0019E5F0 File Offset: 0x0019C7F0
 	public static BoundsInfo ComputeBounds(Vector3[] vertices)
 	{
 		if (vertices.Length == 0)
@@ -53,7 +53,7 @@ public struct BoundsInfo
 		return result;
 	}
 
-	// Token: 0x06005082 RID: 20610 RVA: 0x0019E714 File Offset: 0x0019C914
+	// Token: 0x06005082 RID: 20610 RVA: 0x0019E6F4 File Offset: 0x0019C8F4
 	public static BoxCollider CreateBoxCollider(BoundsInfo bounds)
 	{
 		int hashCode = bounds.center.QuantizedId128().GetHashCode();
@@ -68,7 +68,7 @@ public struct BoundsInfo
 		return boxCollider;
 	}
 
-	// Token: 0x06005083 RID: 20611 RVA: 0x0019E7C0 File Offset: 0x0019C9C0
+	// Token: 0x06005083 RID: 20611 RVA: 0x0019E7A0 File Offset: 0x0019C9A0
 	public static BoxCollider CreateBoxColliderAA(BoundsInfo bounds)
 	{
 		int hashCode = bounds.center.QuantizedId128().GetHashCode();

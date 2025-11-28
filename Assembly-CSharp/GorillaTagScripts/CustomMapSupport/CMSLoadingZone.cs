@@ -10,13 +10,13 @@ namespace GorillaTagScripts.CustomMapSupport
 	// Token: 0x02000E07 RID: 3591
 	public class CMSLoadingZone : MonoBehaviour
 	{
-		// Token: 0x060059A3 RID: 22947 RVA: 0x001CA9F6 File Offset: 0x001C8BF6
+		// Token: 0x060059A3 RID: 22947 RVA: 0x001CA9D6 File Offset: 0x001C8BD6
 		private void Start()
 		{
 			base.gameObject.layer = UnityLayer.GorillaTrigger.ToLayerIndex();
 		}
 
-		// Token: 0x060059A4 RID: 22948 RVA: 0x001CAA0C File Offset: 0x001C8C0C
+		// Token: 0x060059A4 RID: 22948 RVA: 0x001CA9EC File Offset: 0x001C8BEC
 		public void SetupLoadingZone(LoadZoneSettings settings, in string[] assetBundleSceneFilePaths)
 		{
 			this.scenesToLoad = this.GetSceneIndexes(settings.scenesToLoad, assetBundleSceneFilePaths);
@@ -31,7 +31,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059A5 RID: 22949 RVA: 0x001CAA94 File Offset: 0x001C8C94
+		// Token: 0x060059A5 RID: 22949 RVA: 0x001CAA74 File Offset: 0x001C8C74
 		private int[] GetSceneIndexes(List<string> sceneNames, in string[] assetBundleSceneFilePaths)
 		{
 			int[] array = new int[sceneNames.Count];
@@ -49,7 +49,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			return array;
 		}
 
-		// Token: 0x060059A6 RID: 22950 RVA: 0x001CAAEC File Offset: 0x001C8CEC
+		// Token: 0x060059A6 RID: 22950 RVA: 0x001CAACC File Offset: 0x001C8CCC
 		private int[] CleanSceneUnloadArray(List<string> unload, List<string> load, in string[] assetBundleSceneFilePaths)
 		{
 			for (int i = 0; i < load.Count; i++)
@@ -62,7 +62,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			return this.GetSceneIndexes(unload, assetBundleSceneFilePaths);
 		}
 
-		// Token: 0x060059A7 RID: 22951 RVA: 0x001CAB30 File Offset: 0x001C8D30
+		// Token: 0x060059A7 RID: 22951 RVA: 0x001CAB10 File Offset: 0x001C8D10
 		public void OnTriggerEnter(Collider other)
 		{
 			if (other == GTPlayer.Instance.bodyCollider)
@@ -81,7 +81,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 		}
 
-		// Token: 0x060059A8 RID: 22952 RVA: 0x001CABA7 File Offset: 0x001C8DA7
+		// Token: 0x060059A8 RID: 22952 RVA: 0x001CAB87 File Offset: 0x001C8D87
 		private string GetSceneNameFromFilePath(string filePath)
 		{
 			string[] array = filePath.Split("/", 0);

@@ -8,14 +8,14 @@ using UnityEngine.AI;
 [Serializable]
 public class GRAbilityJump : GRAbilityBase
 {
-	// Token: 0x06002A02 RID: 10754 RVA: 0x000E2CA6 File Offset: 0x000E0EA6
+	// Token: 0x06002A02 RID: 10754 RVA: 0x000E2C86 File Offset: 0x000E0E86
 	public override void Setup(GameAgent agent, Animation anim, AudioSource audioSource, Transform root, Transform head, GRSenseLineOfSight lineOfSight)
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
 		this.isActive = false;
 	}
 
-	// Token: 0x06002A03 RID: 10755 RVA: 0x000E2CC0 File Offset: 0x000E0EC0
+	// Token: 0x06002A03 RID: 10755 RVA: 0x000E2CA0 File Offset: 0x000E0EA0
 	public void SetupJump(Vector3 start, Vector3 end, float heightScale = 1f, float speedScale = 1f)
 	{
 		this.elapsedTime = 0f;
@@ -26,7 +26,7 @@ public class GRAbilityJump : GRAbilityBase
 		this.jumpTime = magnitude / (this.jumpSpeed * speedScale);
 	}
 
-	// Token: 0x06002A04 RID: 10756 RVA: 0x000E2D4C File Offset: 0x000E0F4C
+	// Token: 0x06002A04 RID: 10756 RVA: 0x000E2D2C File Offset: 0x000E0F2C
 	public void SetupJumpFromLinkData(OffMeshLinkData linkData)
 	{
 		if ((this.root.position - linkData.startPos).sqrMagnitude < (this.root.position - linkData.endPos).sqrMagnitude)
@@ -37,7 +37,7 @@ public class GRAbilityJump : GRAbilityBase
 		this.SetupJump(linkData.endPos, linkData.startPos, 1f, 1f);
 	}
 
-	// Token: 0x06002A05 RID: 10757 RVA: 0x000E2DD8 File Offset: 0x000E0FD8
+	// Token: 0x06002A05 RID: 10757 RVA: 0x000E2DB8 File Offset: 0x000E0FB8
 	public override void Start()
 	{
 		base.Start();
@@ -50,7 +50,7 @@ public class GRAbilityJump : GRAbilityBase
 		this.soundJump.Play(this.audioSource);
 	}
 
-	// Token: 0x06002A06 RID: 10758 RVA: 0x000E2E58 File Offset: 0x000E1058
+	// Token: 0x06002A06 RID: 10758 RVA: 0x000E2E38 File Offset: 0x000E1038
 	public override void Stop()
 	{
 		base.Stop();
@@ -62,19 +62,19 @@ public class GRAbilityJump : GRAbilityBase
 		this.agent.pauseEntityThink = false;
 	}
 
-	// Token: 0x06002A07 RID: 10759 RVA: 0x000E2EC2 File Offset: 0x000E10C2
+	// Token: 0x06002A07 RID: 10759 RVA: 0x000E2EA2 File Offset: 0x000E10A2
 	public override bool IsDone()
 	{
 		return this.elapsedTime >= this.jumpTime;
 	}
 
-	// Token: 0x06002A08 RID: 10760 RVA: 0x000E2ED5 File Offset: 0x000E10D5
+	// Token: 0x06002A08 RID: 10760 RVA: 0x000E2EB5 File Offset: 0x000E10B5
 	public bool IsActive()
 	{
 		return this.isActive;
 	}
 
-	// Token: 0x06002A09 RID: 10761 RVA: 0x000E2EE0 File Offset: 0x000E10E0
+	// Token: 0x06002A09 RID: 10761 RVA: 0x000E2EC0 File Offset: 0x000E10C0
 	protected override void UpdateShared(float dt)
 	{
 		if (GhostReactorManager.entityDebugEnabled)
@@ -92,7 +92,7 @@ public class GRAbilityJump : GRAbilityBase
 		this.elapsedTime += dt;
 	}
 
-	// Token: 0x06002A0A RID: 10762 RVA: 0x000E2FA0 File Offset: 0x000E11A0
+	// Token: 0x06002A0A RID: 10762 RVA: 0x000E2F80 File Offset: 0x000E1180
 	public static Vector3 EvaluateQuadratic(Vector3 p0, Vector3 p1, Vector3 p2, float t)
 	{
 		Vector3 vector = Vector3.Lerp(p0, p1, t);

@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000A99 RID: 2713
 public class KIDUI_AgeAppealEmailError : MonoBehaviour
 {
-	// Token: 0x0600442D RID: 17453 RVA: 0x001691F2 File Offset: 0x001673F2
+	// Token: 0x0600442D RID: 17453 RVA: 0x001691D2 File Offset: 0x001673D2
 	public void ShowAgeAppealEmailErrorScreen(bool hasChallenge, int newAge, string email)
 	{
 		this.hasChallenge = hasChallenge;
@@ -14,7 +14,7 @@ public class KIDUI_AgeAppealEmailError : MonoBehaviour
 		base.gameObject.SetActive(true);
 	}
 
-	// Token: 0x0600442E RID: 17454 RVA: 0x0016921A File Offset: 0x0016741A
+	// Token: 0x0600442E RID: 17454 RVA: 0x001691FA File Offset: 0x001673FA
 	public void onBackPressed()
 	{
 		base.gameObject.SetActive(false);

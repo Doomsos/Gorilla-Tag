@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020004F3 RID: 1267
 public class RubberDuckEvents : MonoBehaviour
 {
-	// Token: 0x06002096 RID: 8342 RVA: 0x000AD2A4 File Offset: 0x000AB4A4
+	// Token: 0x06002096 RID: 8342 RVA: 0x000AD284 File Offset: 0x000AB484
 	public void Init(NetPlayer player)
 	{
 		string text = player.UserId;
@@ -31,7 +31,7 @@ public class RubberDuckEvents : MonoBehaviour
 		this.Deactivate.reliable = true;
 	}
 
-	// Token: 0x06002097 RID: 8343 RVA: 0x000AD37E File Offset: 0x000AB57E
+	// Token: 0x06002097 RID: 8343 RVA: 0x000AD35E File Offset: 0x000AB55E
 	private void OnEnable()
 	{
 		PhotonEvent activate = this.Activate;
@@ -47,7 +47,7 @@ public class RubberDuckEvents : MonoBehaviour
 		deactivate.Enable();
 	}
 
-	// Token: 0x06002098 RID: 8344 RVA: 0x000AD3A1 File Offset: 0x000AB5A1
+	// Token: 0x06002098 RID: 8344 RVA: 0x000AD381 File Offset: 0x000AB581
 	private void OnDisable()
 	{
 		PhotonEvent activate = this.Activate;
@@ -63,13 +63,13 @@ public class RubberDuckEvents : MonoBehaviour
 		deactivate.Disable();
 	}
 
-	// Token: 0x06002099 RID: 8345 RVA: 0x000AD3C4 File Offset: 0x000AB5C4
+	// Token: 0x06002099 RID: 8345 RVA: 0x000AD3A4 File Offset: 0x000AB5A4
 	private void OnDestroy()
 	{
 		this.Dispose();
 	}
 
-	// Token: 0x0600209A RID: 8346 RVA: 0x000AD3CC File Offset: 0x000AB5CC
+	// Token: 0x0600209A RID: 8346 RVA: 0x000AD3AC File Offset: 0x000AB5AC
 	public void Dispose()
 	{
 		PhotonEvent activate = this.Activate;

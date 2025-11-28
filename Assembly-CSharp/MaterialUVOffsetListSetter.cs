@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer))]
 public class MaterialUVOffsetListSetter : MonoBehaviour, IBuildValidation
 {
-	// Token: 0x06004D56 RID: 19798 RVA: 0x00190A40 File Offset: 0x0018EC40
+	// Token: 0x06004D56 RID: 19798 RVA: 0x00190A20 File Offset: 0x0018EC20
 	private void Awake()
 	{
 		this.matPropertyBlock = new MaterialPropertyBlock();
@@ -15,7 +15,7 @@ public class MaterialUVOffsetListSetter : MonoBehaviour, IBuildValidation
 		this.meshRenderer.GetPropertyBlock(this.matPropertyBlock);
 	}
 
-	// Token: 0x06004D57 RID: 19799 RVA: 0x00190A6C File Offset: 0x0018EC6C
+	// Token: 0x06004D57 RID: 19799 RVA: 0x00190A4C File Offset: 0x0018EC4C
 	public void SetUVOffset(int listIndex)
 	{
 		if (listIndex >= this.uvOffsetList.Count || listIndex < 0)
@@ -34,7 +34,7 @@ public class MaterialUVOffsetListSetter : MonoBehaviour, IBuildValidation
 		this.meshRenderer.SetPropertyBlock(this.matPropertyBlock);
 	}
 
-	// Token: 0x06004D58 RID: 19800 RVA: 0x00190B0C File Offset: 0x0018ED0C
+	// Token: 0x06004D58 RID: 19800 RVA: 0x00190AEC File Offset: 0x0018ECEC
 	public bool BuildValidationCheck()
 	{
 		if (base.GetComponent<MeshRenderer>() == null)

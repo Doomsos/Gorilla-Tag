@@ -8,7 +8,7 @@ namespace GorillaTag.CosmeticSystem
 	public struct CosmeticAttachInfo
 	{
 		// Token: 0x170009E7 RID: 2535
-		// (get) Token: 0x06006944 RID: 26948 RVA: 0x002240A0 File Offset: 0x002222A0
+		// (get) Token: 0x06006944 RID: 26948 RVA: 0x00224080 File Offset: 0x00222280
 		public static CosmeticAttachInfo Identity
 		{
 			get
@@ -22,7 +22,7 @@ namespace GorillaTag.CosmeticSystem
 			}
 		}
 
-		// Token: 0x06006945 RID: 26949 RVA: 0x002240DC File Offset: 0x002222DC
+		// Token: 0x06006945 RID: 26949 RVA: 0x002240BC File Offset: 0x002222BC
 		public CosmeticAttachInfo(ECosmeticSelectSide selectSide, GTHardCodedBones.EBone parentBone, XformOffset offset)
 		{
 			this.selectSide = selectSide;

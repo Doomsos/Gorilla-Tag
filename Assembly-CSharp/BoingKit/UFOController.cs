@@ -6,7 +6,7 @@ namespace BoingKit
 	// Token: 0x0200117B RID: 4475
 	public class UFOController : MonoBehaviour
 	{
-		// Token: 0x060070F2 RID: 28914 RVA: 0x0024F4B4 File Offset: 0x0024D6B4
+		// Token: 0x060070F2 RID: 28914 RVA: 0x0024F494 File Offset: 0x0024D694
 		private void Start()
 		{
 			this.m_linearVelocity = Vector3.zero;
@@ -26,13 +26,13 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x060070F3 RID: 28915 RVA: 0x0024F597 File Offset: 0x0024D797
+		// Token: 0x060070F3 RID: 28915 RVA: 0x0024F577 File Offset: 0x0024D777
 		private void OnEnable()
 		{
 			this.Start();
 		}
 
-		// Token: 0x060070F4 RID: 28916 RVA: 0x0024F5A0 File Offset: 0x0024D7A0
+		// Token: 0x060070F4 RID: 28916 RVA: 0x0024F580 File Offset: 0x0024D780
 		private void FixedUpdate()
 		{
 			float fixedDeltaTime = Time.fixedDeltaTime;

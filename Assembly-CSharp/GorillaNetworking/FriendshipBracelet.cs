@@ -7,13 +7,13 @@ namespace GorillaNetworking
 	// Token: 0x02000EDC RID: 3804
 	public class FriendshipBracelet : MonoBehaviour
 	{
-		// Token: 0x06005F18 RID: 24344 RVA: 0x001E9222 File Offset: 0x001E7422
+		// Token: 0x06005F18 RID: 24344 RVA: 0x001E9202 File Offset: 0x001E7402
 		protected void Awake()
 		{
 			this.ownerRig = base.GetComponentInParent<VRRig>();
 		}
 
-		// Token: 0x06005F19 RID: 24345 RVA: 0x001E9230 File Offset: 0x001E7430
+		// Token: 0x06005F19 RID: 24345 RVA: 0x001E9210 File Offset: 0x001E7410
 		private AudioSource GetAudioSource()
 		{
 			if (!this.isLeftHand)
@@ -23,13 +23,13 @@ namespace GorillaNetworking
 			return this.ownerRig.leftHandPlayer;
 		}
 
-		// Token: 0x06005F1A RID: 24346 RVA: 0x001E9251 File Offset: 0x001E7451
+		// Token: 0x06005F1A RID: 24346 RVA: 0x001E9231 File Offset: 0x001E7431
 		private void OnEnable()
 		{
 			this.PlayAppearEffects();
 		}
 
-		// Token: 0x06005F1B RID: 24347 RVA: 0x001E9259 File Offset: 0x001E7459
+		// Token: 0x06005F1B RID: 24347 RVA: 0x001E9239 File Offset: 0x001E7439
 		public void PlayAppearEffects()
 		{
 			this.GetAudioSource().GTPlayOneShot(this.braceletFormedSound, 1f);
@@ -39,7 +39,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005F1C RID: 24348 RVA: 0x001E928C File Offset: 0x001E748C
+		// Token: 0x06005F1C RID: 24348 RVA: 0x001E926C File Offset: 0x001E746C
 		private void OnDisable()
 		{
 			if (!this.ownerRig.gameObject.activeInHierarchy)
@@ -53,7 +53,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005F1D RID: 24349 RVA: 0x001E92DC File Offset: 0x001E74DC
+		// Token: 0x06005F1D RID: 24349 RVA: 0x001E92BC File Offset: 0x001E74BC
 		public void UpdateBeads(List<Color> colors, int selfIndex)
 		{
 			int num = colors.Count - 1;

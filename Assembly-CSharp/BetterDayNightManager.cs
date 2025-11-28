@@ -7,25 +7,25 @@ using UnityEngine;
 // Token: 0x020008FE RID: 2302
 public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITimeOfDaySystem
 {
-	// Token: 0x06003ADB RID: 15067 RVA: 0x001371F0 File Offset: 0x001353F0
+	// Token: 0x06003ADB RID: 15067 RVA: 0x001371D0 File Offset: 0x001353D0
 	public static void Register(PerSceneRenderData data)
 	{
 		BetterDayNightManager.allScenesRenderData.Add(data);
 	}
 
-	// Token: 0x06003ADC RID: 15068 RVA: 0x001371FD File Offset: 0x001353FD
+	// Token: 0x06003ADC RID: 15068 RVA: 0x001371DD File Offset: 0x001353DD
 	public static void Unregister(PerSceneRenderData data)
 	{
 		BetterDayNightManager.allScenesRenderData.Remove(data);
 	}
 
 	// Token: 0x17000573 RID: 1395
-	// (get) Token: 0x06003ADD RID: 15069 RVA: 0x0013720B File Offset: 0x0013540B
-	// (set) Token: 0x06003ADE RID: 15070 RVA: 0x00137213 File Offset: 0x00135413
+	// (get) Token: 0x06003ADD RID: 15069 RVA: 0x001371EB File Offset: 0x001353EB
+	// (set) Token: 0x06003ADE RID: 15070 RVA: 0x001371F3 File Offset: 0x001353F3
 	public string currentTimeOfDay { get; private set; }
 
 	// Token: 0x17000574 RID: 1396
-	// (get) Token: 0x06003ADF RID: 15071 RVA: 0x0013721C File Offset: 0x0013541C
+	// (get) Token: 0x06003ADF RID: 15071 RVA: 0x001371FC File Offset: 0x001353FC
 	public float NormalizedTimeOfDay
 	{
 		get
@@ -35,7 +35,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 	}
 
 	// Token: 0x17000575 RID: 1397
-	// (get) Token: 0x06003AE0 RID: 15072 RVA: 0x00137246 File Offset: 0x00135446
+	// (get) Token: 0x06003AE0 RID: 15072 RVA: 0x00137226 File Offset: 0x00135426
 	double ITimeOfDaySystem.currentTimeInSeconds
 	{
 		get
@@ -45,7 +45,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 	}
 
 	// Token: 0x17000576 RID: 1398
-	// (get) Token: 0x06003AE1 RID: 15073 RVA: 0x0013724E File Offset: 0x0013544E
+	// (get) Token: 0x06003AE1 RID: 15073 RVA: 0x0013722E File Offset: 0x0013542E
 	double ITimeOfDaySystem.totalTimeInSeconds
 	{
 		get
@@ -54,7 +54,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		}
 	}
 
-	// Token: 0x06003AE2 RID: 15074 RVA: 0x00137258 File Offset: 0x00135458
+	// Token: 0x06003AE2 RID: 15074 RVA: 0x00137238 File Offset: 0x00135438
 	public void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
@@ -93,7 +93,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 	{
 	}
 
-	// Token: 0x06003AE5 RID: 15077 RVA: 0x0013734C File Offset: 0x0013554C
+	// Token: 0x06003AE5 RID: 15077 RVA: 0x0013732C File Offset: 0x0013552C
 	private Vector4 MaterialColorCorrection(Vector4 color)
 	{
 		if (color.x < 0.5f)
@@ -115,7 +115,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		return color;
 	}
 
-	// Token: 0x06003AE6 RID: 15078 RVA: 0x001373D0 File Offset: 0x001355D0
+	// Token: 0x06003AE6 RID: 15078 RVA: 0x001373B0 File Offset: 0x001355B0
 	public void UpdateTimeOfDay()
 	{
 		if (Time.time < this.lastTimeChecked + this.currentTimestep)
@@ -212,7 +212,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		}
 	}
 
-	// Token: 0x06003AE7 RID: 15079 RVA: 0x001378C0 File Offset: 0x00135AC0
+	// Token: 0x06003AE7 RID: 15079 RVA: 0x001378A0 File Offset: 0x00135AA0
 	private void ChangeLerps(float newLerp)
 	{
 		Shader.SetGlobalFloat(this._GlobalDayNightLerpValue, newLerp);
@@ -229,7 +229,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		}
 	}
 
-	// Token: 0x06003AE8 RID: 15080 RVA: 0x001379A0 File Offset: 0x00135BA0
+	// Token: 0x06003AE8 RID: 15080 RVA: 0x00137980 File Offset: 0x00135B80
 	private void ChangeMaps(int fromIndex, int toIndex)
 	{
 		this.fromWeatherIndex = this.currentWeatherIndex;
@@ -267,7 +267,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		this.colorToDarker = this.standardUnlitColorWithPremadeColorDarker[toIndex];
 	}
 
-	// Token: 0x06003AE9 RID: 15081 RVA: 0x00137B28 File Offset: 0x00135D28
+	// Token: 0x06003AE9 RID: 15081 RVA: 0x00137B08 File Offset: 0x00135D08
 	public void SliceUpdate()
 	{
 		if (!this.shouldRepopulate)
@@ -291,7 +291,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		this.UpdateTimeOfDay();
 	}
 
-	// Token: 0x06003AEA RID: 15082 RVA: 0x00137BA4 File Offset: 0x00135DA4
+	// Token: 0x06003AEA RID: 15082 RVA: 0x00137B84 File Offset: 0x00135D84
 	private IEnumerator InitialUpdate()
 	{
 		yield return null;
@@ -299,19 +299,19 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		yield break;
 	}
 
-	// Token: 0x06003AEB RID: 15083 RVA: 0x00137BB3 File Offset: 0x00135DB3
+	// Token: 0x06003AEB RID: 15083 RVA: 0x00137B93 File Offset: 0x00135D93
 	public void RequestRepopulateLightmaps()
 	{
 		this.shouldRepopulate = true;
 	}
 
-	// Token: 0x06003AEC RID: 15084 RVA: 0x00137BBC File Offset: 0x00135DBC
+	// Token: 0x06003AEC RID: 15084 RVA: 0x00137B9C File Offset: 0x00135D9C
 	public void PopulateAllLightmaps()
 	{
 		this.PopulateAllLightmaps(this.currentTimeIndex, (this.currentTimeIndex + 1) % this.timeOfDayRange.Length);
 	}
 
-	// Token: 0x06003AED RID: 15085 RVA: 0x00137BDC File Offset: 0x00135DDC
+	// Token: 0x06003AED RID: 15085 RVA: 0x00137BBC File Offset: 0x00135DBC
 	public void PopulateAllLightmaps(int fromIndex, int toIndex)
 	{
 		string fromTimeOfDay;
@@ -340,7 +340,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		LightmapSettings.lightmaps = lightmaps;
 	}
 
-	// Token: 0x06003AEE RID: 15086 RVA: 0x00137C84 File Offset: 0x00135E84
+	// Token: 0x06003AEE RID: 15086 RVA: 0x00137C64 File Offset: 0x00135E64
 	public BetterDayNightManager.WeatherType CurrentWeather()
 	{
 		if (!this.overrideWeather)
@@ -350,7 +350,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		return this.overrideWeatherType;
 	}
 
-	// Token: 0x06003AEF RID: 15087 RVA: 0x00137CA2 File Offset: 0x00135EA2
+	// Token: 0x06003AEF RID: 15087 RVA: 0x00137C82 File Offset: 0x00135E82
 	public BetterDayNightManager.WeatherType NextWeather()
 	{
 		if (!this.overrideWeather)
@@ -360,7 +360,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		return this.overrideWeatherType;
 	}
 
-	// Token: 0x06003AF0 RID: 15088 RVA: 0x00137CCB File Offset: 0x00135ECB
+	// Token: 0x06003AF0 RID: 15088 RVA: 0x00137CAB File Offset: 0x00135EAB
 	public BetterDayNightManager.WeatherType LastWeather()
 	{
 		if (!this.overrideWeather)
@@ -370,7 +370,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		return this.overrideWeatherType;
 	}
 
-	// Token: 0x06003AF1 RID: 15089 RVA: 0x00137CF4 File Offset: 0x00135EF4
+	// Token: 0x06003AF1 RID: 15089 RVA: 0x00137CD4 File Offset: 0x00135ED4
 	private void GenerateWeatherEventTimes()
 	{
 		this.weatherCycle = new BetterDayNightManager.WeatherType[100 * this.dayNightLightmapNames.Length];
@@ -393,7 +393,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		}
 	}
 
-	// Token: 0x06003AF2 RID: 15090 RVA: 0x00137DCC File Offset: 0x00135FCC
+	// Token: 0x06003AF2 RID: 15090 RVA: 0x00137DAC File Offset: 0x00135FAC
 	public static int RegisterScheduledEvent(int hour, Action action)
 	{
 		int num = (int)(DateTime.Now.Ticks % 2147483647L);
@@ -410,25 +410,25 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		return num;
 	}
 
-	// Token: 0x06003AF3 RID: 15091 RVA: 0x00137E29 File Offset: 0x00136029
+	// Token: 0x06003AF3 RID: 15091 RVA: 0x00137E09 File Offset: 0x00136009
 	public static void UnregisterScheduledEvent(int id)
 	{
 		BetterDayNightManager.scheduledEvents.Remove(id);
 	}
 
-	// Token: 0x06003AF4 RID: 15092 RVA: 0x00137E37 File Offset: 0x00136037
+	// Token: 0x06003AF4 RID: 15092 RVA: 0x00137E17 File Offset: 0x00136017
 	public void SetTimeIndexOverrideFunction(Func<int, int> overrideFunction)
 	{
 		this.timeIndexOverrideFunc = overrideFunction;
 	}
 
-	// Token: 0x06003AF5 RID: 15093 RVA: 0x00137E40 File Offset: 0x00136040
+	// Token: 0x06003AF5 RID: 15093 RVA: 0x00137E20 File Offset: 0x00136020
 	public void UnsetTimeIndexOverrideFunction()
 	{
 		this.timeIndexOverrideFunc = null;
 	}
 
-	// Token: 0x06003AF6 RID: 15094 RVA: 0x00137E4C File Offset: 0x0013604C
+	// Token: 0x06003AF6 RID: 15094 RVA: 0x00137E2C File Offset: 0x0013602C
 	public void SetOverrideIndex(int index)
 	{
 		this.overrideIndex = index;
@@ -438,7 +438,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		this.ChangeMaps(this.currentTimeIndex, (this.currentTimeIndex + 1) % this.timeOfDayRange.Length);
 	}
 
-	// Token: 0x06003AF7 RID: 15095 RVA: 0x00137EA8 File Offset: 0x001360A8
+	// Token: 0x06003AF7 RID: 15095 RVA: 0x00137E88 File Offset: 0x00136088
 	public void AnimateLightFlash(int index, float fadeInDuration, float holdDuration, float fadeOutDuration)
 	{
 		if (this.animatingLightFlash != null)
@@ -448,7 +448,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		this.animatingLightFlash = base.StartCoroutine(this.AnimateLightFlashCo(index, fadeInDuration, holdDuration, fadeOutDuration));
 	}
 
-	// Token: 0x06003AF8 RID: 15096 RVA: 0x00137ED5 File Offset: 0x001360D5
+	// Token: 0x06003AF8 RID: 15096 RVA: 0x00137EB5 File Offset: 0x001360B5
 	private IEnumerator AnimateLightFlashCo(int index, float fadeInDuration, float holdDuration, float fadeOutDuration)
 	{
 		int startMap = (this.currentLerp < 0.5f) ? this.currentTimeIndex : ((this.currentTimeIndex + 1) % this.timeOfDayRange.Length);
@@ -479,7 +479,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		yield break;
 	}
 
-	// Token: 0x06003AF9 RID: 15097 RVA: 0x00137EFC File Offset: 0x001360FC
+	// Token: 0x06003AF9 RID: 15097 RVA: 0x00137EDC File Offset: 0x001360DC
 	public void SetTimeOfDay(int timeIndex)
 	{
 		double num = 0.0;
@@ -491,20 +491,20 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		this.currentSetting = TimeSettings.Static;
 	}
 
-	// Token: 0x06003AFA RID: 15098 RVA: 0x00137F42 File Offset: 0x00136142
+	// Token: 0x06003AFA RID: 15098 RVA: 0x00137F22 File Offset: 0x00136122
 	public void FastForward(float seconds)
 	{
 		this.baseSeconds += (double)seconds;
 	}
 
-	// Token: 0x06003AFB RID: 15099 RVA: 0x00137F53 File Offset: 0x00136153
+	// Token: 0x06003AFB RID: 15099 RVA: 0x00137F33 File Offset: 0x00136133
 	public void SetFixedWeather(BetterDayNightManager.WeatherType weather)
 	{
 		this.overrideWeather = true;
 		this.overrideWeatherType = weather;
 	}
 
-	// Token: 0x06003AFC RID: 15100 RVA: 0x00137F63 File Offset: 0x00136163
+	// Token: 0x06003AFC RID: 15100 RVA: 0x00137F43 File Offset: 0x00136143
 	public void ClearFixedWeather()
 	{
 		this.overrideWeather = false;

@@ -10,7 +10,7 @@ namespace GorillaTag
 	public class RigidbodyHighlighter : MonoBehaviour
 	{
 		// Token: 0x170009C5 RID: 2501
-		// (get) Token: 0x060067FB RID: 26619 RVA: 0x0021F198 File Offset: 0x0021D398
+		// (get) Token: 0x060067FB RID: 26619 RVA: 0x0021F178 File Offset: 0x0021D378
 		private string ButtonText
 		{
 			get
@@ -24,11 +24,11 @@ namespace GorillaTag
 		}
 
 		// Token: 0x170009C6 RID: 2502
-		// (get) Token: 0x060067FC RID: 26620 RVA: 0x0021F1AD File Offset: 0x0021D3AD
-		// (set) Token: 0x060067FD RID: 26621 RVA: 0x0021F1B5 File Offset: 0x0021D3B5
+		// (get) Token: 0x060067FC RID: 26620 RVA: 0x0021F18D File Offset: 0x0021D38D
+		// (set) Token: 0x060067FD RID: 26621 RVA: 0x0021F195 File Offset: 0x0021D395
 		public bool Active { get; set; }
 
-		// Token: 0x060067FE RID: 26622 RVA: 0x0021F1C0 File Offset: 0x0021D3C0
+		// Token: 0x060067FE RID: 26622 RVA: 0x0021F1A0 File Offset: 0x0021D3A0
 		private void Awake()
 		{
 			Object.Destroy(base.gameObject);
@@ -41,7 +41,7 @@ namespace GorillaTag
 			this._lineRenderer.endWidth = this._lineWidth;
 		}
 
-		// Token: 0x060067FF RID: 26623 RVA: 0x0021F228 File Offset: 0x0021D428
+		// Token: 0x060067FF RID: 26623 RVA: 0x0021F208 File Offset: 0x0021D408
 		private void Update()
 		{
 			if (!this.Active)
@@ -58,7 +58,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006800 RID: 26624 RVA: 0x0021F2C0 File Offset: 0x0021D4C0
+		// Token: 0x06006800 RID: 26624 RVA: 0x0021F2A0 File Offset: 0x0021D4A0
 		private static List<Rigidbody> GetAwakeRigidbodies()
 		{
 			List<Rigidbody> list = new List<Rigidbody>();
@@ -78,13 +78,13 @@ namespace GorillaTag
 			return list;
 		}
 
-		// Token: 0x06006801 RID: 26625 RVA: 0x0021F319 File Offset: 0x0021D519
+		// Token: 0x06006801 RID: 26625 RVA: 0x0021F2F9 File Offset: 0x0021D4F9
 		private void HighlightActiveRigidbodies()
 		{
 			this.Active = !this.Active;
 		}
 
-		// Token: 0x06006802 RID: 26626 RVA: 0x0021F32C File Offset: 0x0021D52C
+		// Token: 0x06006802 RID: 26626 RVA: 0x0021F30C File Offset: 0x0021D50C
 		private void GetRigidbodyNames()
 		{
 			List<Rigidbody> list = (this._rigidbodies.Count > 0) ? this._rigidbodies : RigidbodyHighlighter.GetAwakeRigidbodies();
@@ -94,7 +94,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006803 RID: 26627 RVA: 0x0021F394 File Offset: 0x0021D594
+		// Token: 0x06006803 RID: 26627 RVA: 0x0021F374 File Offset: 0x0021D574
 		private void OnDrawGizmos()
 		{
 			if (!this.Active)
@@ -108,7 +108,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x06006804 RID: 26628 RVA: 0x0021F408 File Offset: 0x0021D608
+		// Token: 0x06006804 RID: 26628 RVA: 0x0021F3E8 File Offset: 0x0021D5E8
 		private static void DrawBox(Transform tx, Color color, float duration)
 		{
 			Matrix4x4 matrix4x = default(Matrix4x4);
@@ -135,7 +135,7 @@ namespace GorillaTag
 			Debug.DrawLine(vector4, vector8, color, duration, false);
 		}
 
-		// Token: 0x06006805 RID: 26629 RVA: 0x0021F5A4 File Offset: 0x0021D7A4
+		// Token: 0x06006805 RID: 26629 RVA: 0x0021F584 File Offset: 0x0021D784
 		private void DrawTracers()
 		{
 			Vector3[] array = new Vector3[this._rigidbodies.Count * 2 + 1];

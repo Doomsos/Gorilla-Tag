@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000992 RID: 2450
 public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 {
-	// Token: 0x06003E50 RID: 15952 RVA: 0x0014C524 File Offset: 0x0014A724
+	// Token: 0x06003E50 RID: 15952 RVA: 0x0014C504 File Offset: 0x0014A704
 	private void LateUpdate()
 	{
 		if (CustomMapsTerminal.GetDriverID() == -2)
@@ -34,7 +34,7 @@ public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 	{
 	}
 
-	// Token: 0x06003E52 RID: 15954 RVA: 0x0014C580 File Offset: 0x0014A780
+	// Token: 0x06003E52 RID: 15954 RVA: 0x0014C560 File Offset: 0x0014A760
 	public override void Show()
 	{
 		base.Show();
@@ -47,7 +47,7 @@ public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 		this.terminalControlPromptText.text = this.displayedText;
 	}
 
-	// Token: 0x06003E53 RID: 15955 RVA: 0x0014C5E4 File Offset: 0x0014A7E4
+	// Token: 0x06003E53 RID: 15955 RVA: 0x0014C5C4 File Offset: 0x0014A7C4
 	public override void Hide()
 	{
 		this.errorText.gameObject.SetActive(false);
@@ -55,7 +55,7 @@ public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 		base.Hide();
 	}
 
-	// Token: 0x06003E54 RID: 15956 RVA: 0x0014C60E File Offset: 0x0014A80E
+	// Token: 0x06003E54 RID: 15956 RVA: 0x0014C5EE File Offset: 0x0014A7EE
 	public void Reset()
 	{
 		this.errorText.gameObject.SetActive(false);
@@ -63,13 +63,13 @@ public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 		this.displayedText = this.defaultText;
 	}
 
-	// Token: 0x06003E55 RID: 15957 RVA: 0x0014C63E File Offset: 0x0014A83E
+	// Token: 0x06003E55 RID: 15957 RVA: 0x0014C61E File Offset: 0x0014A81E
 	public void SetDetailsScreenForDriver()
 	{
 		this.displayedText = this.detailsScreenText;
 	}
 
-	// Token: 0x06003E56 RID: 15958 RVA: 0x0014C64C File Offset: 0x0014A84C
+	// Token: 0x06003E56 RID: 15958 RVA: 0x0014C62C File Offset: 0x0014A82C
 	public void SetDriverName()
 	{
 		bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
@@ -103,7 +103,7 @@ public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 		this.terminalControlPromptText.text = this.displayedText;
 	}
 
-	// Token: 0x06003E57 RID: 15959 RVA: 0x0014C727 File Offset: 0x0014A927
+	// Token: 0x06003E57 RID: 15959 RVA: 0x0014C707 File Offset: 0x0014A907
 	public void DisplayError(string errorMessage)
 	{
 		this.terminalControlPromptText.gameObject.SetActive(false);

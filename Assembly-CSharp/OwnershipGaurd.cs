@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000B99 RID: 2969
 internal class OwnershipGaurd : MonoBehaviour
 {
-	// Token: 0x0600495D RID: 18781 RVA: 0x00181437 File Offset: 0x0017F637
+	// Token: 0x0600495D RID: 18781 RVA: 0x00181417 File Offset: 0x0017F617
 	private void Start()
 	{
 		if (this.autoRegisterAll)
@@ -19,7 +19,7 @@ internal class OwnershipGaurd : MonoBehaviour
 		OwnershipGaurdHandler.RegisterViews(this.NetViews);
 	}
 
-	// Token: 0x0600495E RID: 18782 RVA: 0x00181461 File Offset: 0x0017F661
+	// Token: 0x0600495E RID: 18782 RVA: 0x00181441 File Offset: 0x0017F641
 	private void OnDestroy()
 	{
 		if (this.NetViews == null)

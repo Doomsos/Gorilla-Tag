@@ -6,7 +6,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E62 RID: 3682
 	public class BuilderScaleParticles : MonoBehaviour
 	{
-		// Token: 0x06005C04 RID: 23556 RVA: 0x001D8768 File Offset: 0x001D6968
+		// Token: 0x06005C04 RID: 23556 RVA: 0x001D8748 File Offset: 0x001D6948
 		private void OnEnable()
 		{
 			if (this.useLossyScale)
@@ -16,7 +16,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C05 RID: 23557 RVA: 0x001D8784 File Offset: 0x001D6984
+		// Token: 0x06005C05 RID: 23557 RVA: 0x001D8764 File Offset: 0x001D6964
 		private void LateUpdate()
 		{
 			if (this.setScaleNextFrame && Time.frameCount > this.enableFrame)
@@ -29,7 +29,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C06 RID: 23558 RVA: 0x001D87C0 File Offset: 0x001D69C0
+		// Token: 0x06005C06 RID: 23558 RVA: 0x001D87A0 File Offset: 0x001D69A0
 		private void OnDisable()
 		{
 			if (this.useLossyScale)
@@ -38,7 +38,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C07 RID: 23559 RVA: 0x001D87D0 File Offset: 0x001D69D0
+		// Token: 0x06005C07 RID: 23559 RVA: 0x001D87B0 File Offset: 0x001D69B0
 		public void SetScale(float inScale)
 		{
 			bool isPlaying = this.system.isPlaying;
@@ -145,7 +145,7 @@ namespace GorillaTagScripts.Builder
 			this.shouldRevert = true;
 		}
 
-		// Token: 0x06005C08 RID: 23560 RVA: 0x001D8B40 File Offset: 0x001D6D40
+		// Token: 0x06005C08 RID: 23560 RVA: 0x001D8B20 File Offset: 0x001D6D20
 		private void ScaleCurve(ref ParticleSystem.MinMaxCurve curve, float scale)
 		{
 			switch (curve.mode)
@@ -166,7 +166,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C09 RID: 23561 RVA: 0x001D8BA8 File Offset: 0x001D6DA8
+		// Token: 0x06005C09 RID: 23561 RVA: 0x001D8B88 File Offset: 0x001D6D88
 		public void RevertScale()
 		{
 			if (!this.shouldRevert)

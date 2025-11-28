@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000908 RID: 2312
 public class DayNightResetForBaking : MonoBehaviour
 {
-	// Token: 0x06003B19 RID: 15129 RVA: 0x001389F4 File Offset: 0x00136BF4
+	// Token: 0x06003B19 RID: 15129 RVA: 0x001389D4 File Offset: 0x00136BD4
 	public void SetMaterialsForBaking()
 	{
 		foreach (Material material in this.dayNightManager.dayNightSupportedMaterials)
@@ -31,7 +31,7 @@ public class DayNightResetForBaking : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003B1A RID: 15130 RVA: 0x00138A98 File Offset: 0x00136C98
+	// Token: 0x06003B1A RID: 15130 RVA: 0x00138A78 File Offset: 0x00136C78
 	public void SetMaterialsForGame()
 	{
 		foreach (Material material in this.dayNightManager.dayNightSupportedMaterials)

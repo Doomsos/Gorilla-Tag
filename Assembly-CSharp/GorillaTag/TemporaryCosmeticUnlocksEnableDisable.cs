@@ -8,7 +8,7 @@ namespace GorillaTag
 	// Token: 0x02000FF5 RID: 4085
 	public class TemporaryCosmeticUnlocksEnableDisable : MonoBehaviour
 	{
-		// Token: 0x0600672E RID: 26414 RVA: 0x00218EC0 File Offset: 0x002170C0
+		// Token: 0x0600672E RID: 26414 RVA: 0x00218EA0 File Offset: 0x002170A0
 		private void Awake()
 		{
 			if (this.m_wardrobe.IsNull() || this.m_cosmeticAreaTrigger.IsNull())
@@ -24,7 +24,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600672F RID: 26415 RVA: 0x00218F44 File Offset: 0x00217144
+		// Token: 0x0600672F RID: 26415 RVA: 0x00218F24 File Offset: 0x00217124
 		private void OnEnable()
 		{
 			bool tempUnlocksEnabled = PlayerCosmeticsSystem.TempUnlocksEnabled;
@@ -32,7 +32,7 @@ namespace GorillaTag
 			this.m_cosmeticAreaTrigger.SetActive(tempUnlocksEnabled);
 		}
 
-		// Token: 0x06006730 RID: 26416 RVA: 0x00218F70 File Offset: 0x00217170
+		// Token: 0x06006730 RID: 26416 RVA: 0x00218F50 File Offset: 0x00217150
 		private void CheckWardrobeRady()
 		{
 			if (CosmeticsController.instance.IsNotNull() && this.m_wardrobe.WardrobeButtonsInitialized())

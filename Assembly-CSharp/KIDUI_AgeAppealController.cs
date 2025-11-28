@@ -7,7 +7,7 @@ using UnityEngine;
 public class KIDUI_AgeAppealController : MonoBehaviour
 {
 	// Token: 0x1700066B RID: 1643
-	// (get) Token: 0x06004412 RID: 17426 RVA: 0x001687A0 File Offset: 0x001669A0
+	// (get) Token: 0x06004412 RID: 17426 RVA: 0x00168780 File Offset: 0x00166980
 	public static KIDUI_AgeAppealController Instance
 	{
 		get
@@ -16,14 +16,14 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004413 RID: 17427 RVA: 0x001687A7 File Offset: 0x001669A7
+	// Token: 0x06004413 RID: 17427 RVA: 0x00168787 File Offset: 0x00166987
 	private void Awake()
 	{
 		KIDUI_AgeAppealController._instance = this;
 		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Controller Initialised", Array.Empty<object>());
 	}
 
-	// Token: 0x06004414 RID: 17428 RVA: 0x001687C0 File Offset: 0x001669C0
+	// Token: 0x06004414 RID: 17428 RVA: 0x001687A0 File Offset: 0x001669A0
 	public void StartAgeAppealScreens(SessionStatus? sessionStatus)
 	{
 		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Showing k-ID Age Appeal Screens", Array.Empty<object>());
@@ -49,7 +49,7 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004415 RID: 17429 RVA: 0x00168881 File Offset: 0x00166A81
+	// Token: 0x06004415 RID: 17429 RVA: 0x00168861 File Offset: 0x00166A61
 	public void CloseKIDScreens()
 	{
 		PrivateUIRoom.RemoveUI(base.transform);
@@ -58,7 +58,7 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 		Object.DestroyImmediate(base.gameObject);
 	}
 
-	// Token: 0x06004416 RID: 17430 RVA: 0x001688B4 File Offset: 0x00166AB4
+	// Token: 0x06004416 RID: 17430 RVA: 0x00168894 File Offset: 0x00166A94
 	public void StartTooYoungToPlayScreen()
 	{
 		Debug.LogFormat("[KID::UI::AGEAPPEALCONTROLLER] Showing k-ID Too Young to Play Screen", Array.Empty<object>());
@@ -80,13 +80,13 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
-	// Token: 0x06004417 RID: 17431 RVA: 0x0016895E File Offset: 0x00166B5E
+	// Token: 0x06004417 RID: 17431 RVA: 0x0016893E File Offset: 0x00166B3E
 	public void OnQuitGamePressed()
 	{
 		Application.Quit();
 	}
 
-	// Token: 0x06004418 RID: 17432 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x06004418 RID: 17432 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;

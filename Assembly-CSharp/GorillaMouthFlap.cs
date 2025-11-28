@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020007A0 RID: 1952
 public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 {
-	// Token: 0x060032FD RID: 13053 RVA: 0x001135D8 File Offset: 0x001117D8
+	// Token: 0x060032FD RID: 13053 RVA: 0x001135B8 File Offset: 0x001117B8
 	private void Start()
 	{
 		this.speaker = base.GetComponent<GorillaSpeakerLoudness>();
@@ -17,13 +17,13 @@ public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x060032FE RID: 13054 RVA: 0x00113633 File Offset: 0x00111833
+	// Token: 0x060032FE RID: 13054 RVA: 0x00113613 File Offset: 0x00111813
 	public void EnableLeafBlower()
 	{
 		this.leafBlowerActiveUntilTimestamp = Time.time + 0.1f;
 	}
 
-	// Token: 0x060032FF RID: 13055 RVA: 0x00113646 File Offset: 0x00111846
+	// Token: 0x060032FF RID: 13055 RVA: 0x00113626 File Offset: 0x00111826
 	public void OnEnable()
 	{
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
@@ -37,7 +37,7 @@ public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
-	// Token: 0x06003301 RID: 13057 RVA: 0x00113668 File Offset: 0x00111868
+	// Token: 0x06003301 RID: 13057 RVA: 0x00113648 File Offset: 0x00111848
 	public void SliceUpdate()
 	{
 		this.deltaTime = Time.time - this.lastTimeUpdated;
@@ -65,7 +65,7 @@ public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 		this.UpdateMouthFlapFlipbook(mouthFlap);
 	}
 
-	// Token: 0x06003302 RID: 13058 RVA: 0x0011371C File Offset: 0x0011191C
+	// Token: 0x06003302 RID: 13058 RVA: 0x001136FC File Offset: 0x001118FC
 	private void CheckMouthflapChange(bool isMicEnabled, float currentLoudness)
 	{
 		if (isMicEnabled)
@@ -102,7 +102,7 @@ public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003303 RID: 13059 RVA: 0x001137A8 File Offset: 0x001119A8
+	// Token: 0x06003303 RID: 13059 RVA: 0x00113788 File Offset: 0x00111988
 	private void UpdateMouthFlapFlipbook(MouthFlapLevel mouthFlap)
 	{
 		Material material = this.targetFaceRenderer.material;
@@ -112,7 +112,7 @@ public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 		material.SetTextureOffset(this._MouthMap, mouthFlap.faces[num]);
 	}
 
-	// Token: 0x06003304 RID: 13060 RVA: 0x00113820 File Offset: 0x00111A20
+	// Token: 0x06003304 RID: 13060 RVA: 0x00113800 File Offset: 0x00111A00
 	public void SetMouthTextureReplacement(Texture2D replacementMouthAtlas)
 	{
 		Material material = this.targetFaceRenderer.material;
@@ -120,13 +120,13 @@ public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 		material.SetTexture(this._MouthMap, replacementMouthAtlas);
 	}
 
-	// Token: 0x06003305 RID: 13061 RVA: 0x00113852 File Offset: 0x00111A52
+	// Token: 0x06003305 RID: 13061 RVA: 0x00113832 File Offset: 0x00111A32
 	public void ClearMouthTextureReplacement()
 	{
 		this.targetFaceRenderer.material.SetTexture(this._MouthMap, this.defaultMouthAtlas);
 	}
 
-	// Token: 0x06003306 RID: 13062 RVA: 0x00113878 File Offset: 0x00111A78
+	// Token: 0x06003306 RID: 13062 RVA: 0x00113858 File Offset: 0x00111A58
 	public Material SetFaceMaterialReplacement(Material replacementFaceMaterial)
 	{
 		if (!this.hasDefaultFaceMaterial)
@@ -142,7 +142,7 @@ public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 		return this.targetFaceRenderer.material;
 	}
 
-	// Token: 0x06003307 RID: 13063 RVA: 0x001138F3 File Offset: 0x00111AF3
+	// Token: 0x06003307 RID: 13063 RVA: 0x001138D3 File Offset: 0x00111AD3
 	public void ClearFaceMaterialReplacement()
 	{
 		if (this.hasDefaultFaceMaterial)
@@ -151,7 +151,7 @@ public class GorillaMouthFlap : MonoBehaviour, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003308 RID: 13064 RVA: 0x0011390E File Offset: 0x00111B0E
+	// Token: 0x06003308 RID: 13064 RVA: 0x001138EE File Offset: 0x00111AEE
 	private void SetDefaultMouthAtlas(Material face)
 	{
 		if (!this.hasDefaultMouthAtlas)

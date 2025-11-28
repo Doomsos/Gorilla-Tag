@@ -5,17 +5,17 @@ using UnityEngine;
 public class GameLight : MonoBehaviour
 {
 	// Token: 0x170003E7 RID: 999
-	// (get) Token: 0x060027E7 RID: 10215 RVA: 0x000D46B8 File Offset: 0x000D28B8
-	// (set) Token: 0x060027E8 RID: 10216 RVA: 0x000D46C0 File Offset: 0x000D28C0
+	// (get) Token: 0x060027E7 RID: 10215 RVA: 0x000D4698 File Offset: 0x000D2898
+	// (set) Token: 0x060027E8 RID: 10216 RVA: 0x000D46A0 File Offset: 0x000D28A0
 	public float InitialIntensity { get; private set; }
 
-	// Token: 0x060027E9 RID: 10217 RVA: 0x000D46C9 File Offset: 0x000D28C9
+	// Token: 0x060027E9 RID: 10217 RVA: 0x000D46A9 File Offset: 0x000D28A9
 	public void Awake()
 	{
 		this.intensityMult = 1;
 	}
 
-	// Token: 0x060027EA RID: 10218 RVA: 0x000D46D2 File Offset: 0x000D28D2
+	// Token: 0x060027EA RID: 10218 RVA: 0x000D46B2 File Offset: 0x000D28B2
 	private void OnEnable()
 	{
 		if (this.initialized)
@@ -24,14 +24,14 @@ public class GameLight : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060027EB RID: 10219 RVA: 0x000D46F0 File Offset: 0x000D28F0
+	// Token: 0x060027EB RID: 10219 RVA: 0x000D46D0 File Offset: 0x000D28D0
 	private void Start()
 	{
 		this.lightId = GameLightingManager.instance.AddGameLight(this, false);
 		this.initialized = true;
 	}
 
-	// Token: 0x060027EC RID: 10220 RVA: 0x000D470D File Offset: 0x000D290D
+	// Token: 0x060027EC RID: 10220 RVA: 0x000D46ED File Offset: 0x000D28ED
 	private void OnDisable()
 	{
 		if (this.initialized)

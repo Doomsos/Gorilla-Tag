@@ -6,7 +6,7 @@ using UnityEngine.AI;
 [Serializable]
 public class GRAbilityInterpolatedMovement
 {
-	// Token: 0x060029FB RID: 10747 RVA: 0x000E2AD0 File Offset: 0x000E0CD0
+	// Token: 0x060029FB RID: 10747 RVA: 0x000E2AB0 File Offset: 0x000E0CB0
 	public void Setup(Transform root)
 	{
 		this.root = root;
@@ -14,7 +14,7 @@ public class GRAbilityInterpolatedMovement
 		this.walkableArea = NavMesh.GetAreaFromName("walkable");
 	}
 
-	// Token: 0x060029FC RID: 10748 RVA: 0x000E2AFA File Offset: 0x000E0CFA
+	// Token: 0x060029FC RID: 10748 RVA: 0x000E2ADA File Offset: 0x000E0CDA
 	public void InitFromVelocityAndDuration(Vector3 velocity, float duration)
 	{
 		this.velocity = velocity;
@@ -22,7 +22,7 @@ public class GRAbilityInterpolatedMovement
 		float magnitude = velocity.magnitude;
 	}
 
-	// Token: 0x060029FD RID: 10749 RVA: 0x000E2B14 File Offset: 0x000E0D14
+	// Token: 0x060029FD RID: 10749 RVA: 0x000E2AF4 File Offset: 0x000E0CF4
 	public void Start()
 	{
 		this.startPos = this.root.position;
@@ -40,13 +40,13 @@ public class GRAbilityInterpolatedMovement
 	{
 	}
 
-	// Token: 0x060029FF RID: 10751 RVA: 0x000E2B8E File Offset: 0x000E0D8E
+	// Token: 0x060029FF RID: 10751 RVA: 0x000E2B6E File Offset: 0x000E0D6E
 	public bool IsDone()
 	{
 		return Time.timeAsDouble >= this.endTime;
 	}
 
-	// Token: 0x06002A00 RID: 10752 RVA: 0x000E2BA0 File Offset: 0x000E0DA0
+	// Token: 0x06002A00 RID: 10752 RVA: 0x000E2B80 File Offset: 0x000E0D80
 	public void Update(float dt)
 	{
 		Vector3 position = this.root.position;

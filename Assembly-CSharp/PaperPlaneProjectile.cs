@@ -7,12 +7,12 @@ using UnityEngine.Events;
 public class PaperPlaneProjectile : MonoBehaviour
 {
 	// Token: 0x14000044 RID: 68
-	// (add) Token: 0x0600201B RID: 8219 RVA: 0x000AA5E0 File Offset: 0x000A87E0
-	// (remove) Token: 0x0600201C RID: 8220 RVA: 0x000AA618 File Offset: 0x000A8818
+	// (add) Token: 0x0600201B RID: 8219 RVA: 0x000AA5C0 File Offset: 0x000A87C0
+	// (remove) Token: 0x0600201C RID: 8220 RVA: 0x000AA5F8 File Offset: 0x000A87F8
 	public event PaperPlaneProjectile.PaperPlaneHit OnHit;
 
 	// Token: 0x17000368 RID: 872
-	// (get) Token: 0x0600201D RID: 8221 RVA: 0x000AA64D File Offset: 0x000A884D
+	// (get) Token: 0x0600201D RID: 8221 RVA: 0x000AA62D File Offset: 0x000A882D
 	public Transform transform
 	{
 		get
@@ -22,7 +22,7 @@ public class PaperPlaneProjectile : MonoBehaviour
 	}
 
 	// Token: 0x17000369 RID: 873
-	// (get) Token: 0x0600201E RID: 8222 RVA: 0x000AA655 File Offset: 0x000A8855
+	// (get) Token: 0x0600201E RID: 8222 RVA: 0x000AA635 File Offset: 0x000A8835
 	public VRRig MyRig
 	{
 		get
@@ -31,20 +31,20 @@ public class PaperPlaneProjectile : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600201F RID: 8223 RVA: 0x000AA65D File Offset: 0x000A885D
+	// Token: 0x0600201F RID: 8223 RVA: 0x000AA63D File Offset: 0x000A883D
 	private void Awake()
 	{
 		this._tCached = base.transform;
 		this.spawnWorldEffects = base.GetComponent<SpawnWorldEffects>();
 	}
 
-	// Token: 0x06002020 RID: 8224 RVA: 0x000AA677 File Offset: 0x000A8877
+	// Token: 0x06002020 RID: 8224 RVA: 0x000AA657 File Offset: 0x000A8857
 	private void Start()
 	{
 		this.ResetProjectile();
 	}
 
-	// Token: 0x06002021 RID: 8225 RVA: 0x000AA67F File Offset: 0x000A887F
+	// Token: 0x06002021 RID: 8225 RVA: 0x000AA65F File Offset: 0x000A885F
 	public void ResetProjectile()
 	{
 		this._timeElapsed = 0f;
@@ -52,7 +52,7 @@ public class PaperPlaneProjectile : MonoBehaviour
 		this.crashingObject.SetActive(false);
 	}
 
-	// Token: 0x06002022 RID: 8226 RVA: 0x000AA6A4 File Offset: 0x000A88A4
+	// Token: 0x06002022 RID: 8226 RVA: 0x000AA684 File Offset: 0x000A8884
 	internal void SetTransferrableState(TransferrableObject.SyncOptions syncType, int state)
 	{
 		if (!this.useTransferrableObjectState)
@@ -150,7 +150,7 @@ public class PaperPlaneProjectile : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002023 RID: 8227 RVA: 0x000AA78C File Offset: 0x000A898C
+	// Token: 0x06002023 RID: 8227 RVA: 0x000AA76C File Offset: 0x000A896C
 	public void Launch(Vector3 startPos, Quaternion startRot, Vector3 vel)
 	{
 		base.gameObject.SetActive(true);
@@ -170,7 +170,7 @@ public class PaperPlaneProjectile : MonoBehaviour
 		this.scaleFactor = 0.7f * (this.transform.lossyScale.x - 1f + 1.4285715f);
 	}
 
-	// Token: 0x06002024 RID: 8228 RVA: 0x000AA854 File Offset: 0x000A8A54
+	// Token: 0x06002024 RID: 8228 RVA: 0x000AA834 File Offset: 0x000A8A34
 	private void Update()
 	{
 		if (this._stopped)
@@ -218,13 +218,13 @@ public class PaperPlaneProjectile : MonoBehaviour
 		this.crashingObject.SetActive(true);
 	}
 
-	// Token: 0x06002025 RID: 8229 RVA: 0x000AAA46 File Offset: 0x000A8C46
+	// Token: 0x06002025 RID: 8229 RVA: 0x000AAA26 File Offset: 0x000A8C26
 	internal void SetVRRig(VRRig rig)
 	{
 		this.myRig = rig;
 	}
 
-	// Token: 0x06002026 RID: 8230 RVA: 0x000AAA4F File Offset: 0x000A8C4F
+	// Token: 0x06002026 RID: 8230 RVA: 0x000AAA2F File Offset: 0x000A8C2F
 	private void OnDisable()
 	{
 		if (this.useTransferrableObjectState)

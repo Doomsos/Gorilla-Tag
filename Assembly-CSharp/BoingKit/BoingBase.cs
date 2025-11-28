@@ -7,7 +7,7 @@ namespace BoingKit
 	public class BoingBase : MonoBehaviour
 	{
 		// Token: 0x17000A88 RID: 2696
-		// (get) Token: 0x060070F6 RID: 28918 RVA: 0x0024FBE2 File Offset: 0x0024DDE2
+		// (get) Token: 0x060070F6 RID: 28918 RVA: 0x0024FBC2 File Offset: 0x0024DDC2
 		public Version CurrentVersion
 		{
 			get
@@ -17,7 +17,7 @@ namespace BoingKit
 		}
 
 		// Token: 0x17000A89 RID: 2697
-		// (get) Token: 0x060070F7 RID: 28919 RVA: 0x0024FBEA File Offset: 0x0024DDEA
+		// (get) Token: 0x060070F7 RID: 28919 RVA: 0x0024FBCA File Offset: 0x0024DDCA
 		public Version PreviousVersion
 		{
 			get
@@ -27,7 +27,7 @@ namespace BoingKit
 		}
 
 		// Token: 0x17000A8A RID: 2698
-		// (get) Token: 0x060070F8 RID: 28920 RVA: 0x0024FBF2 File Offset: 0x0024DDF2
+		// (get) Token: 0x060070F8 RID: 28920 RVA: 0x0024FBD2 File Offset: 0x0024DDD2
 		public Version InitialVersion
 		{
 			get
@@ -36,7 +36,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x060070F9 RID: 28921 RVA: 0x0024FBFA File Offset: 0x0024DDFA
+		// Token: 0x060070F9 RID: 28921 RVA: 0x0024FBDA File Offset: 0x0024DDDA
 		protected virtual void OnUpgrade(Version oldVersion, Version newVersion)
 		{
 			this.m_previousVersion = this.m_currentVersion;

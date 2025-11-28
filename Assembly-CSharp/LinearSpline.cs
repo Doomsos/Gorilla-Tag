@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000C7D RID: 3197
 public class LinearSpline : MonoBehaviour
 {
-	// Token: 0x06004E22 RID: 20002 RVA: 0x00195144 File Offset: 0x00193344
+	// Token: 0x06004E22 RID: 20002 RVA: 0x00195124 File Offset: 0x00193324
 	private void RefreshControlPoints()
 	{
 		this.controlPoints.Clear();
@@ -44,13 +44,13 @@ public class LinearSpline : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004E23 RID: 20003 RVA: 0x0019537E File Offset: 0x0019357E
+	// Token: 0x06004E23 RID: 20003 RVA: 0x0019535E File Offset: 0x0019355E
 	private void Awake()
 	{
 		this.RefreshControlPoints();
 	}
 
-	// Token: 0x06004E24 RID: 20004 RVA: 0x00195388 File Offset: 0x00193588
+	// Token: 0x06004E24 RID: 20004 RVA: 0x00195368 File Offset: 0x00193568
 	public Vector3 Evaluate(float t)
 	{
 		if (this.controlPoints.Count < 1)
@@ -120,7 +120,7 @@ public class LinearSpline : MonoBehaviour
 		return Vector3.Lerp(this.controlPoints[num2], this.controlPoints[num5], num3);
 	}
 
-	// Token: 0x06004E25 RID: 20005 RVA: 0x001956D4 File Offset: 0x001938D4
+	// Token: 0x06004E25 RID: 20005 RVA: 0x001956B4 File Offset: 0x001938B4
 	public Vector3 GetForwardTangent(float t, float step = 0.01f)
 	{
 		t = Mathf.Clamp(t, 0f, 1f - step - Mathf.Epsilon);
@@ -128,7 +128,7 @@ public class LinearSpline : MonoBehaviour
 		return (this.Evaluate(t + step) - vector).normalized;
 	}
 
-	// Token: 0x06004E26 RID: 20006 RVA: 0x0019571C File Offset: 0x0019391C
+	// Token: 0x06004E26 RID: 20006 RVA: 0x001956FC File Offset: 0x001938FC
 	private void OnDrawGizmosSelected()
 	{
 		this.RefreshControlPoints();

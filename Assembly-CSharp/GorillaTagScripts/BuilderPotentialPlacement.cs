@@ -6,7 +6,7 @@ namespace GorillaTagScripts
 	// Token: 0x02000DBC RID: 3516
 	public struct BuilderPotentialPlacement
 	{
-		// Token: 0x0600568E RID: 22158 RVA: 0x001B3C50 File Offset: 0x001B1E50
+		// Token: 0x0600568E RID: 22158 RVA: 0x001B3C30 File Offset: 0x001B1E30
 		public void Reset()
 		{
 			this.attachPiece = null;

@@ -10,8 +10,8 @@ namespace Fusion.CodeGen
 	internal class UnityValueSurrogate@ElementReaderWriterVector3 : UnityValueSurrogate<Vector3, ElementReaderWriterVector3>
 	{
 		// Token: 0x17000AB9 RID: 2745
-		// (get) Token: 0x060072EC RID: 29420 RVA: 0x0025A8C5 File Offset: 0x00258AC5
-		// (set) Token: 0x060072ED RID: 29421 RVA: 0x0025A8CD File Offset: 0x00258ACD
+		// (get) Token: 0x060072EC RID: 29420 RVA: 0x0025A8A5 File Offset: 0x00258AA5
+		// (set) Token: 0x060072ED RID: 29421 RVA: 0x0025A8AD File Offset: 0x00258AAD
 		[WeaverGenerated]
 		public override Vector3 DataProperty
 		{
@@ -27,7 +27,7 @@ namespace Fusion.CodeGen
 			}
 		}
 
-		// Token: 0x060072EE RID: 29422 RVA: 0x0025A8D6 File Offset: 0x00258AD6
+		// Token: 0x060072EE RID: 29422 RVA: 0x0025A8B6 File Offset: 0x00258AB6
 		[WeaverGenerated]
 		public UnityValueSurrogate@ElementReaderWriterVector3()
 		{

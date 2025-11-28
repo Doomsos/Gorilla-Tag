@@ -8,7 +8,7 @@ using UnityEngine;
 public class NexusManager : MonoBehaviour, IBuildValidation
 {
 	// Token: 0x1700034C RID: 844
-	// (get) Token: 0x06001F0A RID: 7946 RVA: 0x000A500F File Offset: 0x000A320F
+	// (get) Token: 0x06001F0A RID: 7946 RVA: 0x000A4FEF File Offset: 0x000A31EF
 	public NexusManager.Environment CurrentEnvironment
 	{
 		get
@@ -17,7 +17,7 @@ public class NexusManager : MonoBehaviour, IBuildValidation
 		}
 	}
 
-	// Token: 0x06001F0B RID: 7947 RVA: 0x000A5017 File Offset: 0x000A3217
+	// Token: 0x06001F0B RID: 7947 RVA: 0x000A4FF7 File Offset: 0x000A31F7
 	private void Awake()
 	{
 		if (NexusManager.instance == null)
@@ -29,13 +29,13 @@ public class NexusManager : MonoBehaviour, IBuildValidation
 		Object.Destroy(this);
 	}
 
-	// Token: 0x06001F0C RID: 7948 RVA: 0x000A503A File Offset: 0x000A323A
+	// Token: 0x06001F0C RID: 7948 RVA: 0x000A501A File Offset: 0x000A321A
 	private void Start()
 	{
 		SDKInitializer.Init((this.environment == NexusManager.Environment.SANDBOX) ? "nexus_pk_ba155a8c229740489d214f024e25f25c" : "nexus_pk_4c18dcb1531846c7abad4cb00c5242bb", (this.environment == NexusManager.Environment.SANDBOX) ? "sandbox" : "production");
 	}
 
-	// Token: 0x06001F0D RID: 7949 RVA: 0x000A506C File Offset: 0x000A326C
+	// Token: 0x06001F0D RID: 7949 RVA: 0x000A504C File Offset: 0x000A324C
 	public Task<Member> VerifyCreatorCode(string terminalId, string code, NexusGroupId id)
 	{
 		NexusManager.<VerifyCreatorCode>d__15 <VerifyCreatorCode>d__;
@@ -48,7 +48,7 @@ public class NexusManager : MonoBehaviour, IBuildValidation
 		return <VerifyCreatorCode>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06001F0E RID: 7950 RVA: 0x000A50C0 File Offset: 0x000A32C0
+	// Token: 0x06001F0E RID: 7950 RVA: 0x000A50A0 File Offset: 0x000A32A0
 	public Task<bool> VerifyCreatorCodeJIT(string memberCode, string groupCode)
 	{
 		NexusManager.<VerifyCreatorCodeJIT>d__16 <VerifyCreatorCodeJIT>d__;
@@ -60,7 +60,7 @@ public class NexusManager : MonoBehaviour, IBuildValidation
 		return <VerifyCreatorCodeJIT>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06001F0F RID: 7951 RVA: 0x000A510B File Offset: 0x000A330B
+	// Token: 0x06001F0F RID: 7951 RVA: 0x000A50EB File Offset: 0x000A32EB
 	public bool BuildValidationCheck()
 	{
 		if (this.defaultNexusGroupId == null)
@@ -110,13 +110,13 @@ public class NexusManager : MonoBehaviour, IBuildValidation
 	public class MemberCode
 	{
 		// Token: 0x1700034D RID: 845
-		// (get) Token: 0x06001F11 RID: 7953 RVA: 0x000A5147 File Offset: 0x000A3347
-		// (set) Token: 0x06001F12 RID: 7954 RVA: 0x000A514F File Offset: 0x000A334F
+		// (get) Token: 0x06001F11 RID: 7953 RVA: 0x000A5127 File Offset: 0x000A3327
+		// (set) Token: 0x06001F12 RID: 7954 RVA: 0x000A512F File Offset: 0x000A332F
 		public string memberCode { get; set; }
 
 		// Token: 0x1700034E RID: 846
-		// (get) Token: 0x06001F13 RID: 7955 RVA: 0x000A5158 File Offset: 0x000A3358
-		// (set) Token: 0x06001F14 RID: 7956 RVA: 0x000A5160 File Offset: 0x000A3360
+		// (get) Token: 0x06001F13 RID: 7955 RVA: 0x000A5138 File Offset: 0x000A3338
+		// (set) Token: 0x06001F14 RID: 7956 RVA: 0x000A5140 File Offset: 0x000A3340
 		public NexusGroupId groupId { get; set; }
 	}
 
@@ -125,13 +125,13 @@ public class NexusManager : MonoBehaviour, IBuildValidation
 	public struct GetMembersRequest
 	{
 		// Token: 0x1700034F RID: 847
-		// (get) Token: 0x06001F16 RID: 7958 RVA: 0x000A5169 File Offset: 0x000A3369
-		// (set) Token: 0x06001F17 RID: 7959 RVA: 0x000A5171 File Offset: 0x000A3371
+		// (get) Token: 0x06001F16 RID: 7958 RVA: 0x000A5149 File Offset: 0x000A3349
+		// (set) Token: 0x06001F17 RID: 7959 RVA: 0x000A5151 File Offset: 0x000A3351
 		public int page { readonly get; set; }
 
 		// Token: 0x17000350 RID: 848
-		// (get) Token: 0x06001F18 RID: 7960 RVA: 0x000A517A File Offset: 0x000A337A
-		// (set) Token: 0x06001F19 RID: 7961 RVA: 0x000A5182 File Offset: 0x000A3382
+		// (get) Token: 0x06001F18 RID: 7960 RVA: 0x000A515A File Offset: 0x000A335A
+		// (set) Token: 0x06001F19 RID: 7961 RVA: 0x000A5162 File Offset: 0x000A3362
 		public int pageSize { readonly get; set; }
 	}
 }

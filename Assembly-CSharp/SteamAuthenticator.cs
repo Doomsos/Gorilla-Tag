@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000BA2 RID: 2978
 public class SteamAuthenticator : MonoBehaviour
 {
-	// Token: 0x06004982 RID: 18818 RVA: 0x001816B0 File Offset: 0x0017F8B0
+	// Token: 0x06004982 RID: 18818 RVA: 0x00181690 File Offset: 0x0017F890
 	public HAuthTicket GetAuthTicket(Action<string> successCallback, Action<EResult> failureCallback)
 	{
 		HAuthTicket ticketHandle = HAuthTicket.Invalid;
@@ -60,7 +60,7 @@ public class SteamAuthenticator : MonoBehaviour
 		return ticketHandle;
 	}
 
-	// Token: 0x06004983 RID: 18819 RVA: 0x00181764 File Offset: 0x0017F964
+	// Token: 0x06004983 RID: 18819 RVA: 0x00181744 File Offset: 0x0017F944
 	public HAuthTicket GetAuthTicketForWebApi(string authenticatorId, Action<string> successCallback, Action<EResult> failureCallback)
 	{
 		HAuthTicket ticketHandle = HAuthTicket.Invalid;

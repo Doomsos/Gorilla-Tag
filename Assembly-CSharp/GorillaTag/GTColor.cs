@@ -6,7 +6,7 @@ namespace GorillaTag
 	// Token: 0x02000FDA RID: 4058
 	public static class GTColor
 	{
-		// Token: 0x060066CE RID: 26318 RVA: 0x00217474 File Offset: 0x00215674
+		// Token: 0x060066CE RID: 26318 RVA: 0x00217454 File Offset: 0x00215654
 		public static Color RandomHSV(GTColor.HSVRanges ranges)
 		{
 			return Color.HSVToRGB(Random.Range(ranges.h.x, ranges.h.y), Random.Range(ranges.s.x, ranges.s.y), Random.Range(ranges.v.x, ranges.v.y));
@@ -16,7 +16,7 @@ namespace GorillaTag
 		[Serializable]
 		public struct HSVRanges
 		{
-			// Token: 0x060066CF RID: 26319 RVA: 0x002174D7 File Offset: 0x002156D7
+			// Token: 0x060066CF RID: 26319 RVA: 0x002174B7 File Offset: 0x002156B7
 			public HSVRanges(float hMin = 0f, float hMax = 1f, float sMin = 0f, float sMax = 1f, float vMin = 0f, float vMax = 1f)
 			{
 				this.h = new Vector2(hMin, hMax);

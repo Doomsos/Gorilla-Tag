@@ -10,7 +10,7 @@ using UnityEngine;
 [StructLayout(2)]
 public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, IEquatable<Hash128>
 {
-	// Token: 0x06004045 RID: 16453 RVA: 0x00158ED0 File Offset: 0x001570D0
+	// Token: 0x06004045 RID: 16453 RVA: 0x00158EB0 File Offset: 0x001570B0
 	public Id128(int a, int b, int c, int d)
 	{
 		this.guid = Guid.Empty;
@@ -22,7 +22,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		this.d = d;
 	}
 
-	// Token: 0x06004046 RID: 16454 RVA: 0x00158F24 File Offset: 0x00157124
+	// Token: 0x06004046 RID: 16454 RVA: 0x00158F04 File Offset: 0x00157104
 	public Id128(long x, long y)
 	{
 		this.a = (this.b = (this.c = (this.d = 0)));
@@ -32,7 +32,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		this.y = y;
 	}
 
-	// Token: 0x06004047 RID: 16455 RVA: 0x00158F78 File Offset: 0x00157178
+	// Token: 0x06004047 RID: 16455 RVA: 0x00158F58 File Offset: 0x00157158
 	public Id128(Hash128 hash)
 	{
 		this.x = (this.y = 0L);
@@ -41,7 +41,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		this.h128 = hash;
 	}
 
-	// Token: 0x06004048 RID: 16456 RVA: 0x00158FCC File Offset: 0x001571CC
+	// Token: 0x06004048 RID: 16456 RVA: 0x00158FAC File Offset: 0x001571AC
 	public Id128(Guid guid)
 	{
 		this.a = (this.b = (this.c = (this.d = 0)));
@@ -50,7 +50,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		this.guid = guid;
 	}
 
-	// Token: 0x06004049 RID: 16457 RVA: 0x00159020 File Offset: 0x00157220
+	// Token: 0x06004049 RID: 16457 RVA: 0x00159000 File Offset: 0x00157200
 	public Id128(string guid)
 	{
 		if (string.IsNullOrWhiteSpace(guid))
@@ -63,7 +63,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		this.guid = Guid.Parse(guid);
 	}
 
-	// Token: 0x0600404A RID: 16458 RVA: 0x0015908C File Offset: 0x0015728C
+	// Token: 0x0600404A RID: 16458 RVA: 0x0015906C File Offset: 0x0015726C
 	public Id128(byte[] bytes)
 	{
 		if (bytes == null)
@@ -80,7 +80,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		this.guid = new Guid(bytes);
 	}
 
-	// Token: 0x0600404B RID: 16459 RVA: 0x00159109 File Offset: 0x00157309
+	// Token: 0x0600404B RID: 16459 RVA: 0x001590E9 File Offset: 0x001572E9
 	[return: TupleElementNames(new string[]
 	{
 		"l1",
@@ -91,7 +91,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		return new ValueTuple<long, long>(this.x, this.y);
 	}
 
-	// Token: 0x0600404C RID: 16460 RVA: 0x0015911C File Offset: 0x0015731C
+	// Token: 0x0600404C RID: 16460 RVA: 0x001590FC File Offset: 0x001572FC
 	[return: TupleElementNames(new string[]
 	{
 		"i1",
@@ -104,31 +104,31 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		return new ValueTuple<int, int, int, int>(this.a, this.b, this.c, this.d);
 	}
 
-	// Token: 0x0600404D RID: 16461 RVA: 0x0015913B File Offset: 0x0015733B
+	// Token: 0x0600404D RID: 16461 RVA: 0x0015911B File Offset: 0x0015731B
 	public byte[] ToByteArray()
 	{
 		return this.guid.ToByteArray();
 	}
 
-	// Token: 0x0600404E RID: 16462 RVA: 0x00159148 File Offset: 0x00157348
+	// Token: 0x0600404E RID: 16462 RVA: 0x00159128 File Offset: 0x00157328
 	public bool Equals(Id128 id)
 	{
 		return this.x == id.x && this.y == id.y;
 	}
 
-	// Token: 0x0600404F RID: 16463 RVA: 0x00159168 File Offset: 0x00157368
+	// Token: 0x0600404F RID: 16463 RVA: 0x00159148 File Offset: 0x00157348
 	public bool Equals(Guid g)
 	{
 		return this.guid == g;
 	}
 
-	// Token: 0x06004050 RID: 16464 RVA: 0x00159176 File Offset: 0x00157376
+	// Token: 0x06004050 RID: 16464 RVA: 0x00159156 File Offset: 0x00157356
 	public bool Equals(Hash128 h)
 	{
 		return this.h128 == h;
 	}
 
-	// Token: 0x06004051 RID: 16465 RVA: 0x00159184 File Offset: 0x00157384
+	// Token: 0x06004051 RID: 16465 RVA: 0x00159164 File Offset: 0x00157364
 	public override bool Equals(object obj)
 	{
 		if (obj is Id128)
@@ -149,19 +149,19 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		return false;
 	}
 
-	// Token: 0x06004052 RID: 16466 RVA: 0x001591D7 File Offset: 0x001573D7
+	// Token: 0x06004052 RID: 16466 RVA: 0x001591B7 File Offset: 0x001573B7
 	public override string ToString()
 	{
 		return this.guid.ToString();
 	}
 
-	// Token: 0x06004053 RID: 16467 RVA: 0x001591EA File Offset: 0x001573EA
+	// Token: 0x06004053 RID: 16467 RVA: 0x001591CA File Offset: 0x001573CA
 	public override int GetHashCode()
 	{
 		return StaticHash.Compute(this.a, this.b, this.c, this.d);
 	}
 
-	// Token: 0x06004054 RID: 16468 RVA: 0x0015920C File Offset: 0x0015740C
+	// Token: 0x06004054 RID: 16468 RVA: 0x001591EC File Offset: 0x001573EC
 	public int CompareTo(Id128 id)
 	{
 		int num = this.x.CompareTo(id.x);
@@ -172,7 +172,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		return num;
 	}
 
-	// Token: 0x06004055 RID: 16469 RVA: 0x00159244 File Offset: 0x00157444
+	// Token: 0x06004055 RID: 16469 RVA: 0x00159224 File Offset: 0x00157424
 	public int CompareTo(object obj)
 	{
 		if (obj is Id128)
@@ -193,13 +193,13 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		throw new ArgumentException("Object must be of type Id128 or Guid");
 	}
 
-	// Token: 0x06004056 RID: 16470 RVA: 0x001592AA File Offset: 0x001574AA
+	// Token: 0x06004056 RID: 16470 RVA: 0x0015928A File Offset: 0x0015748A
 	public static Id128 NewId()
 	{
 		return new Id128(Guid.NewGuid());
 	}
 
-	// Token: 0x06004057 RID: 16471 RVA: 0x001592B8 File Offset: 0x001574B8
+	// Token: 0x06004057 RID: 16471 RVA: 0x00159298 File Offset: 0x00157498
 	public static Id128 ComputeMD5(string s)
 	{
 		if (string.IsNullOrEmpty(s))
@@ -214,7 +214,7 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		return result;
 	}
 
-	// Token: 0x06004058 RID: 16472 RVA: 0x00159314 File Offset: 0x00157514
+	// Token: 0x06004058 RID: 16472 RVA: 0x001592F4 File Offset: 0x001574F4
 	public static Id128 ComputeSHV2(string s)
 	{
 		if (string.IsNullOrEmpty(s))
@@ -224,115 +224,115 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		return Hash128.Compute(s);
 	}
 
-	// Token: 0x06004059 RID: 16473 RVA: 0x0015932F File Offset: 0x0015752F
+	// Token: 0x06004059 RID: 16473 RVA: 0x0015930F File Offset: 0x0015750F
 	public static bool operator ==(Id128 j, Id128 k)
 	{
 		return j.Equals(k);
 	}
 
-	// Token: 0x0600405A RID: 16474 RVA: 0x00159339 File Offset: 0x00157539
+	// Token: 0x0600405A RID: 16474 RVA: 0x00159319 File Offset: 0x00157519
 	public static bool operator !=(Id128 j, Id128 k)
 	{
 		return !j.Equals(k);
 	}
 
-	// Token: 0x0600405B RID: 16475 RVA: 0x00159346 File Offset: 0x00157546
+	// Token: 0x0600405B RID: 16475 RVA: 0x00159326 File Offset: 0x00157526
 	public static bool operator ==(Id128 j, Guid k)
 	{
 		return j.Equals(k);
 	}
 
-	// Token: 0x0600405C RID: 16476 RVA: 0x00159350 File Offset: 0x00157550
+	// Token: 0x0600405C RID: 16476 RVA: 0x00159330 File Offset: 0x00157530
 	public static bool operator !=(Id128 j, Guid k)
 	{
 		return !j.Equals(k);
 	}
 
-	// Token: 0x0600405D RID: 16477 RVA: 0x0015935D File Offset: 0x0015755D
+	// Token: 0x0600405D RID: 16477 RVA: 0x0015933D File Offset: 0x0015753D
 	public static bool operator ==(Guid j, Id128 k)
 	{
 		return j.Equals(k.guid);
 	}
 
-	// Token: 0x0600405E RID: 16478 RVA: 0x0015936C File Offset: 0x0015756C
+	// Token: 0x0600405E RID: 16478 RVA: 0x0015934C File Offset: 0x0015754C
 	public static bool operator !=(Guid j, Id128 k)
 	{
 		return !j.Equals(k.guid);
 	}
 
-	// Token: 0x0600405F RID: 16479 RVA: 0x0015937E File Offset: 0x0015757E
+	// Token: 0x0600405F RID: 16479 RVA: 0x0015935E File Offset: 0x0015755E
 	public static bool operator ==(Id128 j, Hash128 k)
 	{
 		return j.Equals(k);
 	}
 
-	// Token: 0x06004060 RID: 16480 RVA: 0x00159388 File Offset: 0x00157588
+	// Token: 0x06004060 RID: 16480 RVA: 0x00159368 File Offset: 0x00157568
 	public static bool operator !=(Id128 j, Hash128 k)
 	{
 		return !j.Equals(k);
 	}
 
-	// Token: 0x06004061 RID: 16481 RVA: 0x00159395 File Offset: 0x00157595
+	// Token: 0x06004061 RID: 16481 RVA: 0x00159375 File Offset: 0x00157575
 	public static bool operator ==(Hash128 j, Id128 k)
 	{
 		return j.Equals(k.h128);
 	}
 
-	// Token: 0x06004062 RID: 16482 RVA: 0x001593A4 File Offset: 0x001575A4
+	// Token: 0x06004062 RID: 16482 RVA: 0x00159384 File Offset: 0x00157584
 	public static bool operator !=(Hash128 j, Id128 k)
 	{
 		return !j.Equals(k.h128);
 	}
 
-	// Token: 0x06004063 RID: 16483 RVA: 0x001593B6 File Offset: 0x001575B6
+	// Token: 0x06004063 RID: 16483 RVA: 0x00159396 File Offset: 0x00157596
 	public static bool operator <(Id128 j, Id128 k)
 	{
 		return j.CompareTo(k) < 0;
 	}
 
-	// Token: 0x06004064 RID: 16484 RVA: 0x001593C3 File Offset: 0x001575C3
+	// Token: 0x06004064 RID: 16484 RVA: 0x001593A3 File Offset: 0x001575A3
 	public static bool operator >(Id128 j, Id128 k)
 	{
 		return j.CompareTo(k) > 0;
 	}
 
-	// Token: 0x06004065 RID: 16485 RVA: 0x001593D0 File Offset: 0x001575D0
+	// Token: 0x06004065 RID: 16485 RVA: 0x001593B0 File Offset: 0x001575B0
 	public static bool operator <=(Id128 j, Id128 k)
 	{
 		return j.CompareTo(k) <= 0;
 	}
 
-	// Token: 0x06004066 RID: 16486 RVA: 0x001593E0 File Offset: 0x001575E0
+	// Token: 0x06004066 RID: 16486 RVA: 0x001593C0 File Offset: 0x001575C0
 	public static bool operator >=(Id128 j, Id128 k)
 	{
 		return j.CompareTo(k) >= 0;
 	}
 
-	// Token: 0x06004067 RID: 16487 RVA: 0x001593F0 File Offset: 0x001575F0
+	// Token: 0x06004067 RID: 16487 RVA: 0x001593D0 File Offset: 0x001575D0
 	public static implicit operator Guid(Id128 id)
 	{
 		return id.guid;
 	}
 
-	// Token: 0x06004068 RID: 16488 RVA: 0x001593F8 File Offset: 0x001575F8
+	// Token: 0x06004068 RID: 16488 RVA: 0x001593D8 File Offset: 0x001575D8
 	public static implicit operator Id128(Guid guid)
 	{
 		return new Id128(guid);
 	}
 
-	// Token: 0x06004069 RID: 16489 RVA: 0x00159400 File Offset: 0x00157600
+	// Token: 0x06004069 RID: 16489 RVA: 0x001593E0 File Offset: 0x001575E0
 	public static implicit operator Id128(Hash128 h)
 	{
 		return new Id128(h);
 	}
 
-	// Token: 0x0600406A RID: 16490 RVA: 0x00159408 File Offset: 0x00157608
+	// Token: 0x0600406A RID: 16490 RVA: 0x001593E8 File Offset: 0x001575E8
 	public static implicit operator Hash128(Id128 id)
 	{
 		return id.h128;
 	}
 
-	// Token: 0x0600406B RID: 16491 RVA: 0x00159410 File Offset: 0x00157610
+	// Token: 0x0600406B RID: 16491 RVA: 0x001593F0 File Offset: 0x001575F0
 	public static explicit operator Id128(string s)
 	{
 		return Id128.ComputeMD5(s);

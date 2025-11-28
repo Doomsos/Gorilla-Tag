@@ -7,33 +7,33 @@ using UnityEngine.Events;
 // Token: 0x020004D4 RID: 1236
 public class BubbleGumEvents : MonoBehaviour
 {
-	// Token: 0x06001FDA RID: 8154 RVA: 0x000A993D File Offset: 0x000A7B3D
+	// Token: 0x06001FDA RID: 8154 RVA: 0x000A991D File Offset: 0x000A7B1D
 	private void OnEnable()
 	{
 		this._edible.onBiteWorld.AddListener(new UnityAction<VRRig, int>(this.OnBiteWorld));
 		this._edible.onBiteView.AddListener(new UnityAction<VRRig, int>(this.OnBiteView));
 	}
 
-	// Token: 0x06001FDB RID: 8155 RVA: 0x000A9977 File Offset: 0x000A7B77
+	// Token: 0x06001FDB RID: 8155 RVA: 0x000A9957 File Offset: 0x000A7B57
 	private void OnDisable()
 	{
 		this._edible.onBiteWorld.RemoveListener(new UnityAction<VRRig, int>(this.OnBiteWorld));
 		this._edible.onBiteView.RemoveListener(new UnityAction<VRRig, int>(this.OnBiteView));
 	}
 
-	// Token: 0x06001FDC RID: 8156 RVA: 0x000A99B1 File Offset: 0x000A7BB1
+	// Token: 0x06001FDC RID: 8156 RVA: 0x000A9991 File Offset: 0x000A7B91
 	public void OnBiteView(VRRig rig, int nextState)
 	{
 		this.OnBite(rig, nextState, true);
 	}
 
-	// Token: 0x06001FDD RID: 8157 RVA: 0x000A99BC File Offset: 0x000A7BBC
+	// Token: 0x06001FDD RID: 8157 RVA: 0x000A999C File Offset: 0x000A7B9C
 	public void OnBiteWorld(VRRig rig, int nextState)
 	{
 		this.OnBite(rig, nextState, false);
 	}
 
-	// Token: 0x06001FDE RID: 8158 RVA: 0x000A99C8 File Offset: 0x000A7BC8
+	// Token: 0x06001FDE RID: 8158 RVA: 0x000A99A8 File Offset: 0x000A7BA8
 	public void OnBite(VRRig rig, int nextState, bool isViewRig)
 	{
 		GorillaTagger instance = GorillaTagger.Instance;

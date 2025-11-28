@@ -10,7 +10,7 @@ namespace GorillaLocomotion.Swimming
 	public class WaterCurrent : MonoBehaviour
 	{
 		// Token: 0x17000976 RID: 2422
-		// (get) Token: 0x060063EF RID: 25583 RVA: 0x002088DD File Offset: 0x00206ADD
+		// (get) Token: 0x060063EF RID: 25583 RVA: 0x002088BD File Offset: 0x00206ABD
 		public float Speed
 		{
 			get
@@ -20,7 +20,7 @@ namespace GorillaLocomotion.Swimming
 		}
 
 		// Token: 0x17000977 RID: 2423
-		// (get) Token: 0x060063F0 RID: 25584 RVA: 0x002088E5 File Offset: 0x00206AE5
+		// (get) Token: 0x060063F0 RID: 25584 RVA: 0x002088C5 File Offset: 0x00206AC5
 		public float Accel
 		{
 			get
@@ -30,7 +30,7 @@ namespace GorillaLocomotion.Swimming
 		}
 
 		// Token: 0x17000978 RID: 2424
-		// (get) Token: 0x060063F1 RID: 25585 RVA: 0x002088ED File Offset: 0x00206AED
+		// (get) Token: 0x060063F1 RID: 25585 RVA: 0x002088CD File Offset: 0x00206ACD
 		public float InwardSpeed
 		{
 			get
@@ -40,7 +40,7 @@ namespace GorillaLocomotion.Swimming
 		}
 
 		// Token: 0x17000979 RID: 2425
-		// (get) Token: 0x060063F2 RID: 25586 RVA: 0x002088F5 File Offset: 0x00206AF5
+		// (get) Token: 0x060063F2 RID: 25586 RVA: 0x002088D5 File Offset: 0x00206AD5
 		public float InwardAccel
 		{
 			get
@@ -49,7 +49,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x060063F3 RID: 25587 RVA: 0x00208900 File Offset: 0x00206B00
+		// Token: 0x060063F3 RID: 25587 RVA: 0x002088E0 File Offset: 0x00206AE0
 		public bool GetCurrentAtPoint(Vector3 worldPoint, Vector3 startingVelocity, float dt, out Vector3 currentVelocity, out Vector3 velocityChange)
 		{
 			float num = (this.fullEffectDistance + this.fadeDistance) * (this.fullEffectDistance + this.fadeDistance);
@@ -109,7 +109,7 @@ namespace GorillaLocomotion.Swimming
 			return result;
 		}
 
-		// Token: 0x060063F4 RID: 25588 RVA: 0x00208BB4 File Offset: 0x00206DB4
+		// Token: 0x060063F4 RID: 25588 RVA: 0x00208B94 File Offset: 0x00206D94
 		private void Update()
 		{
 			if (this.debugDrawCurrentQueries)
@@ -119,7 +119,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x060063F5 RID: 25589 RVA: 0x00208C18 File Offset: 0x00206E18
+		// Token: 0x060063F5 RID: 25589 RVA: 0x00208BF8 File Offset: 0x00206DF8
 		private void OnDrawGizmosSelected()
 		{
 			int num = 16;
@@ -141,7 +141,7 @@ namespace GorillaLocomotion.Swimming
 			}
 		}
 
-		// Token: 0x060063F6 RID: 25590 RVA: 0x00208D00 File Offset: 0x00206F00
+		// Token: 0x060063F6 RID: 25590 RVA: 0x00208CE0 File Offset: 0x00206EE0
 		private void DrawGizmoCircle(Vector3 center, Quaternion rotation, float radius)
 		{
 			Vector3 vector = Vector3.right * radius;

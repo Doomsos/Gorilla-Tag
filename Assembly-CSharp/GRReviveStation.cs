@@ -7,30 +7,30 @@ using UnityEngine;
 public class GRReviveStation : MonoBehaviour
 {
 	// Token: 0x17000427 RID: 1063
-	// (get) Token: 0x06002D8F RID: 11663 RVA: 0x000F6520 File Offset: 0x000F4720
-	// (set) Token: 0x06002D90 RID: 11664 RVA: 0x000F6528 File Offset: 0x000F4728
+	// (get) Token: 0x06002D8F RID: 11663 RVA: 0x000F6500 File Offset: 0x000F4700
+	// (set) Token: 0x06002D90 RID: 11664 RVA: 0x000F6508 File Offset: 0x000F4708
 	public int Index { get; set; }
 
-	// Token: 0x06002D91 RID: 11665 RVA: 0x000F6531 File Offset: 0x000F4731
+	// Token: 0x06002D91 RID: 11665 RVA: 0x000F6511 File Offset: 0x000F4711
 	public void Init(GhostReactor reactor, int index)
 	{
 		this.reactor = reactor;
 		this.Index = index;
 	}
 
-	// Token: 0x06002D92 RID: 11666 RVA: 0x000F6541 File Offset: 0x000F4741
+	// Token: 0x06002D92 RID: 11666 RVA: 0x000F6521 File Offset: 0x000F4721
 	public void SetReviveCooldownSeconds(double seconds)
 	{
 		this.reviveCooldownSeconds = seconds;
 	}
 
-	// Token: 0x06002D93 RID: 11667 RVA: 0x000F654A File Offset: 0x000F474A
+	// Token: 0x06002D93 RID: 11667 RVA: 0x000F652A File Offset: 0x000F472A
 	public double GetReviveCooldownSeconds()
 	{
 		return this.reviveCooldownSeconds;
 	}
 
-	// Token: 0x06002D94 RID: 11668 RVA: 0x000F6554 File Offset: 0x000F4754
+	// Token: 0x06002D94 RID: 11668 RVA: 0x000F6534 File Offset: 0x000F4734
 	public double CalculateRemainingReviveCooldownSeconds(int ActorNumber)
 	{
 		if (this.reviveCooldownSeconds == 0.0)
@@ -44,7 +44,7 @@ public class GRReviveStation : MonoBehaviour
 		return 0.0;
 	}
 
-	// Token: 0x06002D95 RID: 11669 RVA: 0x000F65C0 File Offset: 0x000F47C0
+	// Token: 0x06002D95 RID: 11669 RVA: 0x000F65A0 File Offset: 0x000F47A0
 	public void RevivePlayer(GRPlayer player)
 	{
 		if (player != null)
@@ -69,7 +69,7 @@ public class GRReviveStation : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002D96 RID: 11670 RVA: 0x000F6670 File Offset: 0x000F4870
+	// Token: 0x06002D96 RID: 11670 RVA: 0x000F6650 File Offset: 0x000F4850
 	private void OnTriggerEnter(Collider collider)
 	{
 		Rigidbody attachedRigidbody = collider.attachedRigidbody;

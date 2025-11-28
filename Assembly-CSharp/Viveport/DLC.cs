@@ -8,14 +8,14 @@ namespace Viveport
 	// Token: 0x02000D2E RID: 3374
 	public class DLC
 	{
-		// Token: 0x0600521B RID: 21019 RVA: 0x001A4A40 File Offset: 0x001A2C40
+		// Token: 0x0600521B RID: 21019 RVA: 0x001A4A20 File Offset: 0x001A2C20
 		[MonoPInvokeCallback(typeof(StatusCallback))]
 		private static void IsDlcReadyIl2cppCallback(int errorCode)
 		{
 			DLC.isDlcReadyIl2cppCallback(errorCode);
 		}
 
-		// Token: 0x0600521C RID: 21020 RVA: 0x001A4A50 File Offset: 0x001A2C50
+		// Token: 0x0600521C RID: 21020 RVA: 0x001A4A30 File Offset: 0x001A2C30
 		public static int IsDlcReady(StatusCallback callback)
 		{
 			if (callback == null)
@@ -31,7 +31,7 @@ namespace Viveport
 			return DLC.IsReady(new StatusCallback(DLC.IsDlcReadyIl2cppCallback));
 		}
 
-		// Token: 0x0600521D RID: 21021 RVA: 0x001A4ABD File Offset: 0x001A2CBD
+		// Token: 0x0600521D RID: 21021 RVA: 0x001A4A9D File Offset: 0x001A2C9D
 		public static int GetCount()
 		{
 			if (IntPtr.Size == 8)
@@ -41,7 +41,7 @@ namespace Viveport
 			return DLC.GetCount();
 		}
 
-		// Token: 0x0600521E RID: 21022 RVA: 0x001A4AD4 File Offset: 0x001A2CD4
+		// Token: 0x0600521E RID: 21022 RVA: 0x001A4AB4 File Offset: 0x001A2CB4
 		public static bool GetIsAvailable(int index, out string appId, out bool isAvailable)
 		{
 			StringBuilder stringBuilder = new StringBuilder(37);
@@ -58,7 +58,7 @@ namespace Viveport
 			return result;
 		}
 
-		// Token: 0x0600521F RID: 21023 RVA: 0x001A4B10 File Offset: 0x001A2D10
+		// Token: 0x0600521F RID: 21023 RVA: 0x001A4AF0 File Offset: 0x001A2CF0
 		public static int IsSubscribed()
 		{
 			if (IntPtr.Size == 8)

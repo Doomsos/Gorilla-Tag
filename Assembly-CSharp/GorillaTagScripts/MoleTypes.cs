@@ -7,16 +7,16 @@ namespace GorillaTagScripts
 	public class MoleTypes : MonoBehaviour
 	{
 		// Token: 0x17000824 RID: 2084
-		// (get) Token: 0x06005594 RID: 21908 RVA: 0x001AEAB5 File Offset: 0x001ACCB5
-		// (set) Token: 0x06005595 RID: 21909 RVA: 0x001AEABD File Offset: 0x001ACCBD
+		// (get) Token: 0x06005594 RID: 21908 RVA: 0x001AEA95 File Offset: 0x001ACC95
+		// (set) Token: 0x06005595 RID: 21909 RVA: 0x001AEA9D File Offset: 0x001ACC9D
 		public bool IsLeftSideMoleType { get; set; }
 
 		// Token: 0x17000825 RID: 2085
-		// (get) Token: 0x06005596 RID: 21910 RVA: 0x001AEAC6 File Offset: 0x001ACCC6
-		// (set) Token: 0x06005597 RID: 21911 RVA: 0x001AEACE File Offset: 0x001ACCCE
+		// (get) Token: 0x06005596 RID: 21910 RVA: 0x001AEAA6 File Offset: 0x001ACCA6
+		// (set) Token: 0x06005597 RID: 21911 RVA: 0x001AEAAE File Offset: 0x001ACCAE
 		public Mole MoleContainerParent { get; set; }
 
-		// Token: 0x06005598 RID: 21912 RVA: 0x001AEAD7 File Offset: 0x001ACCD7
+		// Token: 0x06005598 RID: 21912 RVA: 0x001AEAB7 File Offset: 0x001ACCB7
 		private void Start()
 		{
 			this.MoleContainerParent = base.GetComponentInParent<Mole>();

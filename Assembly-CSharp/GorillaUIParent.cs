@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020007ED RID: 2029
 public class GorillaUIParent : MonoBehaviour
 {
-	// Token: 0x0600355D RID: 13661 RVA: 0x00121E4E File Offset: 0x0012004E
+	// Token: 0x0600355D RID: 13661 RVA: 0x00121E2E File Offset: 0x0012002E
 	private void Awake()
 	{
 		if (GorillaUIParent.instance == null)

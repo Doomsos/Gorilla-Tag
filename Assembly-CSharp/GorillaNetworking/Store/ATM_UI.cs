@@ -8,7 +8,7 @@ namespace GorillaNetworking.Store
 	// Token: 0x02000F34 RID: 3892
 	public class ATM_UI : MonoBehaviour
 	{
-		// Token: 0x06006174 RID: 24948 RVA: 0x001F614A File Offset: 0x001F434A
+		// Token: 0x06006174 RID: 24948 RVA: 0x001F612A File Offset: 0x001F432A
 		private void Start()
 		{
 			if (ATM_Manager.instance != null && !ATM_Manager.instance.atmUIs.Contains(this))
@@ -17,13 +17,13 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		// Token: 0x06006175 RID: 24949 RVA: 0x001F617C File Offset: 0x001F437C
+		// Token: 0x06006175 RID: 24949 RVA: 0x001F615C File Offset: 0x001F435C
 		public void SetCustomMapScene(Scene scene)
 		{
 			this.customMapScene = scene;
 		}
 
-		// Token: 0x06006176 RID: 24950 RVA: 0x001F6185 File Offset: 0x001F4385
+		// Token: 0x06006176 RID: 24950 RVA: 0x001F6165 File Offset: 0x001F4365
 		public bool IsFromCustomMapScene(Scene scene)
 		{
 			return this.customMapScene == scene;

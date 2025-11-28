@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x02000CB6 RID: 3254
 public class TeleportNode : GorillaTriggerBox
 {
-	// Token: 0x06004F74 RID: 20340 RVA: 0x001995DC File Offset: 0x001977DC
+	// Token: 0x06004F74 RID: 20340 RVA: 0x001995BC File Offset: 0x001977BC
 	public override void OnBoxTriggered()
 	{
 		if (Time.time - this.teleportTime < 0.1f)
@@ -40,7 +40,7 @@ public class TeleportNode : GorillaTriggerBox
 		this.teleportTime = Time.time;
 	}
 
-	// Token: 0x06004F75 RID: 20341 RVA: 0x001996B6 File Offset: 0x001978B6
+	// Token: 0x06004F75 RID: 20341 RVA: 0x00199696 File Offset: 0x00197896
 	private IEnumerator DelayedTeleport(GTPlayer p, Vector3 position, Quaternion rotation)
 	{
 		yield return null;

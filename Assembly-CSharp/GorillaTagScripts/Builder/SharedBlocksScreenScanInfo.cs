@@ -17,20 +17,20 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005D06 RID: 23814 RVA: 0x001DDBC4 File Offset: 0x001DBDC4
+		// Token: 0x06005D06 RID: 23814 RVA: 0x001DDBA4 File Offset: 0x001DBDA4
 		public override void OnSelectPressed()
 		{
 			this.terminal.OnLoadMapPressed();
 		}
 
-		// Token: 0x06005D07 RID: 23815 RVA: 0x001DDBD1 File Offset: 0x001DBDD1
+		// Token: 0x06005D07 RID: 23815 RVA: 0x001DDBB1 File Offset: 0x001DBDB1
 		public override void Show()
 		{
 			base.Show();
 			this.DrawScreen();
 		}
 
-		// Token: 0x06005D08 RID: 23816 RVA: 0x001DDBE0 File Offset: 0x001DBDE0
+		// Token: 0x06005D08 RID: 23816 RVA: 0x001DDBC0 File Offset: 0x001DBDC0
 		private void DrawScreen()
 		{
 			if (this.terminal.SelectedMap == null)

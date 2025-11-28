@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x0200079C RID: 1948
 public class GorillaLightmapData : MonoBehaviour
 {
-	// Token: 0x060032F6 RID: 13046 RVA: 0x0011348C File Offset: 0x0011168C
+	// Token: 0x060032F6 RID: 13046 RVA: 0x0011346C File Offset: 0x0011166C
 	public void Awake()
 	{
 		this.lights = new Color[this.lightTextures.Length][];

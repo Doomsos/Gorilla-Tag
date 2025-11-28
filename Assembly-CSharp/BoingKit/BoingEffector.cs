@@ -7,7 +7,7 @@ namespace BoingKit
 	public class BoingEffector : BoingBase
 	{
 		// Token: 0x17000A93 RID: 2707
-		// (get) Token: 0x0600712F RID: 28975 RVA: 0x00251911 File Offset: 0x0024FB11
+		// (get) Token: 0x0600712F RID: 28975 RVA: 0x002518F1 File Offset: 0x0024FAF1
 		public Vector3 LinearVelocity
 		{
 			get
@@ -17,7 +17,7 @@ namespace BoingKit
 		}
 
 		// Token: 0x17000A94 RID: 2708
-		// (get) Token: 0x06007130 RID: 28976 RVA: 0x00251919 File Offset: 0x0024FB19
+		// (get) Token: 0x06007130 RID: 28976 RVA: 0x002518F9 File Offset: 0x0024FAF9
 		public float LinearSpeed
 		{
 			get
@@ -26,7 +26,7 @@ namespace BoingKit
 			}
 		}
 
-		// Token: 0x06007131 RID: 28977 RVA: 0x00251926 File Offset: 0x0024FB26
+		// Token: 0x06007131 RID: 28977 RVA: 0x00251906 File Offset: 0x0024FB06
 		public void OnEnable()
 		{
 			this.m_currPosition = base.transform.position;
@@ -35,13 +35,13 @@ namespace BoingKit
 			BoingManager.Register(this);
 		}
 
-		// Token: 0x06007132 RID: 28978 RVA: 0x0025195B File Offset: 0x0024FB5B
+		// Token: 0x06007132 RID: 28978 RVA: 0x0025193B File Offset: 0x0024FB3B
 		public void OnDisable()
 		{
 			BoingManager.Unregister(this);
 		}
 
-		// Token: 0x06007133 RID: 28979 RVA: 0x00251964 File Offset: 0x0024FB64
+		// Token: 0x06007133 RID: 28979 RVA: 0x00251944 File Offset: 0x0024FB44
 		public void Update()
 		{
 			float deltaTime = Time.deltaTime;
@@ -54,7 +54,7 @@ namespace BoingKit
 			this.m_currPosition = base.transform.position;
 		}
 
-		// Token: 0x06007134 RID: 28980 RVA: 0x002519C0 File Offset: 0x0024FBC0
+		// Token: 0x06007134 RID: 28980 RVA: 0x002519A0 File Offset: 0x0024FBA0
 		public void OnDrawGizmosSelected()
 		{
 			if (!base.isActiveAndEnabled)
@@ -130,7 +130,7 @@ namespace BoingKit
 		// Token: 0x02001186 RID: 4486
 		public struct Params
 		{
-			// Token: 0x06007136 RID: 28982 RVA: 0x00251AB4 File Offset: 0x0024FCB4
+			// Token: 0x06007136 RID: 28982 RVA: 0x00251A94 File Offset: 0x0024FC94
 			public Params(BoingEffector effector)
 			{
 				this.Bits = default(Bits32);
@@ -151,13 +151,13 @@ namespace BoingKit
 				this.m_padding3 = 0;
 			}
 
-			// Token: 0x06007137 RID: 28983 RVA: 0x00251BCF File Offset: 0x0024FDCF
+			// Token: 0x06007137 RID: 28983 RVA: 0x00251BAF File Offset: 0x0024FDAF
 			public void Fill(BoingEffector effector)
 			{
 				this = new BoingEffector.Params(effector);
 			}
 
-			// Token: 0x06007138 RID: 28984 RVA: 0x00251BE0 File Offset: 0x0024FDE0
+			// Token: 0x06007138 RID: 28984 RVA: 0x00251BC0 File Offset: 0x0024FDC0
 			private void SuppressWarnings()
 			{
 				this.m_padding0 = 0f;

@@ -6,7 +6,7 @@ using UnityEngine.Events;
 public abstract class RandomComponent<T> : MonoBehaviour
 {
 	// Token: 0x170006ED RID: 1773
-	// (get) Token: 0x06004AD8 RID: 19160 RVA: 0x00187D31 File Offset: 0x00185F31
+	// (get) Token: 0x06004AD8 RID: 19160 RVA: 0x00187D11 File Offset: 0x00185F11
 	public T lastItem
 	{
 		get
@@ -16,7 +16,7 @@ public abstract class RandomComponent<T> : MonoBehaviour
 	}
 
 	// Token: 0x170006EE RID: 1774
-	// (get) Token: 0x06004AD9 RID: 19161 RVA: 0x00187D39 File Offset: 0x00185F39
+	// (get) Token: 0x06004AD9 RID: 19161 RVA: 0x00187D19 File Offset: 0x00185F19
 	public int lastItemIndex
 	{
 		get
@@ -25,7 +25,7 @@ public abstract class RandomComponent<T> : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004ADA RID: 19162 RVA: 0x00187D44 File Offset: 0x00185F44
+	// Token: 0x06004ADA RID: 19162 RVA: 0x00187D24 File Offset: 0x00185F24
 	public void ResetRandom(int? seedValue = null)
 	{
 		if (!this.staticSeed)
@@ -39,7 +39,7 @@ public abstract class RandomComponent<T> : MonoBehaviour
 		this._rnd = new SRand(this._seed);
 	}
 
-	// Token: 0x06004ADB RID: 19163 RVA: 0x00187DA4 File Offset: 0x00185FA4
+	// Token: 0x06004ADB RID: 19163 RVA: 0x00187D84 File Offset: 0x00185F84
 	public void Reset()
 	{
 		this.ResetRandom(default(int?));
@@ -47,7 +47,7 @@ public abstract class RandomComponent<T> : MonoBehaviour
 		this._lastItemIndex = -1;
 	}
 
-	// Token: 0x06004ADC RID: 19164 RVA: 0x00187DD3 File Offset: 0x00185FD3
+	// Token: 0x06004ADC RID: 19164 RVA: 0x00187DB3 File Offset: 0x00185FB3
 	private void Awake()
 	{
 		this.Reset();
@@ -58,13 +58,13 @@ public abstract class RandomComponent<T> : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06004ADE RID: 19166 RVA: 0x00187DDB File Offset: 0x00185FDB
+	// Token: 0x06004ADE RID: 19166 RVA: 0x00187DBB File Offset: 0x00185FBB
 	public virtual T GetItem(int index)
 	{
 		return this.items[index];
 	}
 
-	// Token: 0x06004ADF RID: 19167 RVA: 0x00187DEC File Offset: 0x00185FEC
+	// Token: 0x06004ADF RID: 19167 RVA: 0x00187DCC File Offset: 0x00185FCC
 	public virtual T NextItem()
 	{
 		this._lastItemIndex = (this.distinct ? this._rnd.NextIntWithExclusion(0, this.items.Length, this._lastItemIndex) : this._rnd.NextInt(0, this.items.Length));

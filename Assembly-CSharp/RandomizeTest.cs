@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020008D8 RID: 2264
 public class RandomizeTest : MonoBehaviour
 {
-	// Token: 0x06003A0F RID: 14863 RVA: 0x00133324 File Offset: 0x00131524
+	// Token: 0x06003A0F RID: 14863 RVA: 0x00133304 File Offset: 0x00131504
 	private void Start()
 	{
 		for (int i = 0; i < 10; i++)
@@ -31,7 +31,7 @@ public class RandomizeTest : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003A10 RID: 14864 RVA: 0x001333DC File Offset: 0x001315DC
+	// Token: 0x06003A10 RID: 14864 RVA: 0x001333BC File Offset: 0x001315BC
 	public void RandomizeList(ref List<int> listToRandomize)
 	{
 		this.randomIterator = 0;

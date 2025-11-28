@@ -4,7 +4,7 @@ using Modio;
 // Token: 0x02000965 RID: 2405
 public struct ModIORequestResult
 {
-	// Token: 0x06003D9F RID: 15775 RVA: 0x00146764 File Offset: 0x00144964
+	// Token: 0x06003D9F RID: 15775 RVA: 0x00146744 File Offset: 0x00144944
 	public static ModIORequestResult CreateFailureResult(string inMessage)
 	{
 		ModIORequestResult result;
@@ -13,7 +13,7 @@ public struct ModIORequestResult
 		return result;
 	}
 
-	// Token: 0x06003DA0 RID: 15776 RVA: 0x00146784 File Offset: 0x00144984
+	// Token: 0x06003DA0 RID: 15776 RVA: 0x00146764 File Offset: 0x00144964
 	public static ModIORequestResult CreateSuccessResult()
 	{
 		ModIORequestResult result;
@@ -22,7 +22,7 @@ public struct ModIORequestResult
 		return result;
 	}
 
-	// Token: 0x06003DA1 RID: 15777 RVA: 0x001467A8 File Offset: 0x001449A8
+	// Token: 0x06003DA1 RID: 15777 RVA: 0x00146788 File Offset: 0x00144988
 	public static ModIORequestResult CreateFromError(Error error)
 	{
 		ModIORequestResult result;

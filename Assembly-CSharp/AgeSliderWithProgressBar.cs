@@ -8,8 +8,8 @@ using UnityEngine.UI;
 public class AgeSliderWithProgressBar : MonoBehaviourTick
 {
 	// Token: 0x17000615 RID: 1557
-	// (get) Token: 0x0600418C RID: 16780 RVA: 0x0015C560 File Offset: 0x0015A760
-	// (set) Token: 0x0600418D RID: 16781 RVA: 0x0015C568 File Offset: 0x0015A768
+	// (get) Token: 0x0600418C RID: 16780 RVA: 0x0015C540 File Offset: 0x0015A740
+	// (set) Token: 0x0600418D RID: 16781 RVA: 0x0015C548 File Offset: 0x0015A748
 	public AgeSliderWithProgressBar.SliderHeldEvent onHoldComplete
 	{
 		get
@@ -23,7 +23,7 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 	}
 
 	// Token: 0x17000616 RID: 1558
-	// (get) Token: 0x0600418E RID: 16782 RVA: 0x0015C571 File Offset: 0x0015A771
+	// (get) Token: 0x0600418E RID: 16782 RVA: 0x0015C551 File Offset: 0x0015A751
 	public bool AdjustAge
 	{
 		get
@@ -33,8 +33,8 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 	}
 
 	// Token: 0x17000617 RID: 1559
-	// (get) Token: 0x0600418F RID: 16783 RVA: 0x0015C579 File Offset: 0x0015A779
-	// (set) Token: 0x06004190 RID: 16784 RVA: 0x0015C581 File Offset: 0x0015A781
+	// (get) Token: 0x0600418F RID: 16783 RVA: 0x0015C559 File Offset: 0x0015A759
+	// (set) Token: 0x06004190 RID: 16784 RVA: 0x0015C561 File Offset: 0x0015A761
 	public bool ControllerActive
 	{
 		get
@@ -56,8 +56,8 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 	}
 
 	// Token: 0x17000618 RID: 1560
-	// (get) Token: 0x06004191 RID: 16785 RVA: 0x0015C5BB File Offset: 0x0015A7BB
-	// (set) Token: 0x06004192 RID: 16786 RVA: 0x0015C5C3 File Offset: 0x0015A7C3
+	// (get) Token: 0x06004191 RID: 16785 RVA: 0x0015C59B File Offset: 0x0015A79B
+	// (set) Token: 0x06004192 RID: 16786 RVA: 0x0015C5A3 File Offset: 0x0015A7A3
 	public string LockMessage
 	{
 		get
@@ -71,7 +71,7 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 	}
 
 	// Token: 0x17000619 RID: 1561
-	// (get) Token: 0x06004193 RID: 16787 RVA: 0x0015C5CC File Offset: 0x0015A7CC
+	// (get) Token: 0x06004193 RID: 16787 RVA: 0x0015C5AC File Offset: 0x0015A7AC
 	public int CurrentAge
 	{
 		get
@@ -80,7 +80,7 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06004194 RID: 16788 RVA: 0x0015C5D4 File Offset: 0x0015A7D4
+	// Token: 0x06004194 RID: 16788 RVA: 0x0015C5B4 File Offset: 0x0015A7B4
 	private void Awake()
 	{
 		if (this._messageText)
@@ -89,13 +89,13 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06004195 RID: 16789 RVA: 0x0015C5F4 File Offset: 0x0015A7F4
+	// Token: 0x06004195 RID: 16789 RVA: 0x0015C5D4 File Offset: 0x0015A7D4
 	public void SetOriginalText(string text)
 	{
 		this._originalText = text;
 	}
 
-	// Token: 0x06004196 RID: 16790 RVA: 0x0015C600 File Offset: 0x0015A800
+	// Token: 0x06004196 RID: 16790 RVA: 0x0015C5E0 File Offset: 0x0015A7E0
 	private new void OnEnable()
 	{
 		base.OnEnable();
@@ -109,7 +109,7 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06004197 RID: 16791 RVA: 0x0015C688 File Offset: 0x0015A888
+	// Token: 0x06004197 RID: 16791 RVA: 0x0015C668 File Offset: 0x0015A868
 	public override void Tick()
 	{
 		if (!this._progressBarContainer)
@@ -155,7 +155,7 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06004198 RID: 16792 RVA: 0x0015C7CC File Offset: 0x0015A9CC
+	// Token: 0x06004198 RID: 16792 RVA: 0x0015C7AC File Offset: 0x0015A9AC
 	private void PostUpdate()
 	{
 		if (this.ControllerActive && this._ageValueTxt && this._ageSlidable && !this._incrementButtonsLockingSlider)
@@ -187,19 +187,19 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06004199 RID: 16793 RVA: 0x0015C8F0 File Offset: 0x0015AAF0
+	// Token: 0x06004199 RID: 16793 RVA: 0x0015C8D0 File Offset: 0x0015AAD0
 	public void EnableEditing()
 	{
 		this._ageSlidable = true;
 	}
 
-	// Token: 0x0600419A RID: 16794 RVA: 0x0015C8F9 File Offset: 0x0015AAF9
+	// Token: 0x0600419A RID: 16794 RVA: 0x0015C8D9 File Offset: 0x0015AAD9
 	public void DisableEditing()
 	{
 		this._ageSlidable = false;
 	}
 
-	// Token: 0x0600419B RID: 16795 RVA: 0x0015C904 File Offset: 0x0015AB04
+	// Token: 0x0600419B RID: 16795 RVA: 0x0015C8E4 File Offset: 0x0015AAE4
 	public string GetAgeString()
 	{
 		if (this._confirmButton)
@@ -221,14 +221,14 @@ public class AgeSliderWithProgressBar : MonoBehaviourTick
 		return this._currentAge.ToString();
 	}
 
-	// Token: 0x0600419C RID: 16796 RVA: 0x0015C980 File Offset: 0x0015AB80
+	// Token: 0x0600419C RID: 16796 RVA: 0x0015C960 File Offset: 0x0015AB60
 	public void ForceAddAge(int number)
 	{
 		this._incrementButtonsLockingSlider = true;
 		this._currentAge = Math.Min(this._currentAge + number, this._maxAge);
 	}
 
-	// Token: 0x0600419D RID: 16797 RVA: 0x0015C9A2 File Offset: 0x0015ABA2
+	// Token: 0x0600419D RID: 16797 RVA: 0x0015C982 File Offset: 0x0015AB82
 	public void ForceSubtractAge(int number)
 	{
 		this._incrementButtonsLockingSlider = true;

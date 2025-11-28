@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x020009EC RID: 2540
 public class ObjectToggle : MonoBehaviour
 {
-	// Token: 0x060040BE RID: 16574 RVA: 0x0015A402 File Offset: 0x00158602
+	// Token: 0x060040BE RID: 16574 RVA: 0x0015A3E2 File Offset: 0x001585E2
 	public void Toggle(bool initialState = true)
 	{
 		if (this._toggled == null)
@@ -30,7 +30,7 @@ public class ObjectToggle : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060040BF RID: 16575 RVA: 0x0015A43C File Offset: 0x0015863C
+	// Token: 0x060040BF RID: 16575 RVA: 0x0015A41C File Offset: 0x0015861C
 	public void Enable()
 	{
 		if (this.objectsToToggle == null)
@@ -55,7 +55,7 @@ public class ObjectToggle : MonoBehaviour
 		this._toggled = new bool?(true);
 	}
 
-	// Token: 0x060040C0 RID: 16576 RVA: 0x0015A4AC File Offset: 0x001586AC
+	// Token: 0x060040C0 RID: 16576 RVA: 0x0015A48C File Offset: 0x0015868C
 	public void Disable()
 	{
 		if (this.objectsToToggle == null)

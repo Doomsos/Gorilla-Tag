@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000832 RID: 2098
 public class SizeManagerManager : MonoBehaviour
 {
-	// Token: 0x0600372D RID: 14125 RVA: 0x001297D0 File Offset: 0x001279D0
+	// Token: 0x0600372D RID: 14125 RVA: 0x001297B0 File Offset: 0x001279B0
 	protected void Awake()
 	{
 		if (SizeManagerManager.hasInstance && SizeManagerManager.instance != this)
@@ -16,13 +16,13 @@ public class SizeManagerManager : MonoBehaviour
 		SizeManagerManager.SetInstance(this);
 	}
 
-	// Token: 0x0600372E RID: 14126 RVA: 0x001297F3 File Offset: 0x001279F3
+	// Token: 0x0600372E RID: 14126 RVA: 0x001297D3 File Offset: 0x001279D3
 	public static void CreateManager()
 	{
 		SizeManagerManager.SetInstance(new GameObject("SizeManagerManager").AddComponent<SizeManagerManager>());
 	}
 
-	// Token: 0x0600372F RID: 14127 RVA: 0x00129809 File Offset: 0x00127A09
+	// Token: 0x0600372F RID: 14127 RVA: 0x001297E9 File Offset: 0x001279E9
 	private static void SetInstance(SizeManagerManager manager)
 	{
 		SizeManagerManager.instance = manager;
@@ -33,7 +33,7 @@ public class SizeManagerManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003730 RID: 14128 RVA: 0x00129824 File Offset: 0x00127A24
+	// Token: 0x06003730 RID: 14128 RVA: 0x00129804 File Offset: 0x00127A04
 	public static void RegisterSM(SizeManager sM)
 	{
 		if (!SizeManagerManager.hasInstance)
@@ -46,7 +46,7 @@ public class SizeManagerManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003731 RID: 14129 RVA: 0x0012984A File Offset: 0x00127A4A
+	// Token: 0x06003731 RID: 14129 RVA: 0x0012982A File Offset: 0x00127A2A
 	public static void UnregisterSM(SizeManager sM)
 	{
 		if (!SizeManagerManager.hasInstance)
@@ -59,7 +59,7 @@ public class SizeManagerManager : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003732 RID: 14130 RVA: 0x00129874 File Offset: 0x00127A74
+	// Token: 0x06003732 RID: 14130 RVA: 0x00129854 File Offset: 0x00127A54
 	public void FixedUpdate()
 	{
 		for (int i = 0; i < SizeManagerManager.allSM.Count; i++)

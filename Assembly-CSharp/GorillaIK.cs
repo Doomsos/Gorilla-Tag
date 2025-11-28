@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000792 RID: 1938
 public class GorillaIK : MonoBehaviour
 {
-	// Token: 0x060032D8 RID: 13016 RVA: 0x00112640 File Offset: 0x00110840
+	// Token: 0x060032D8 RID: 13016 RVA: 0x00112620 File Offset: 0x00110820
 	private void Awake()
 	{
 		if (Application.isPlaying && !this.testInEditor)
@@ -19,19 +19,19 @@ public class GorillaIK : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060032D9 RID: 13017 RVA: 0x00112712 File Offset: 0x00110912
+	// Token: 0x060032D9 RID: 13017 RVA: 0x001126F2 File Offset: 0x001108F2
 	private void OnEnable()
 	{
 		GorillaIKMgr.Instance.RegisterIK(this);
 	}
 
-	// Token: 0x060032DA RID: 13018 RVA: 0x0011271F File Offset: 0x0011091F
+	// Token: 0x060032DA RID: 13018 RVA: 0x001126FF File Offset: 0x001108FF
 	private void OnDisable()
 	{
 		GorillaIKMgr.Instance.DeregisterIK(this);
 	}
 
-	// Token: 0x060032DB RID: 13019 RVA: 0x0011272C File Offset: 0x0011092C
+	// Token: 0x060032DB RID: 13019 RVA: 0x0011270C File Offset: 0x0011090C
 	public void OverrideTargetPos(bool isLeftHand, Vector3 targetWorldPos)
 	{
 		if (isLeftHand)
@@ -44,26 +44,26 @@ public class GorillaIK : MonoBehaviour
 		this.rightOverrideWorldPos = targetWorldPos;
 	}
 
-	// Token: 0x060032DC RID: 13020 RVA: 0x0011274E File Offset: 0x0011094E
+	// Token: 0x060032DC RID: 13020 RVA: 0x0011272E File Offset: 0x0011092E
 	public Vector3 GetShoulderLocalTargetPos_Left()
 	{
 		return this.leftUpperArm.parent.InverseTransformPoint(this.hasLeftOverride ? this.leftOverrideWorldPos : this.targetLeft.position);
 	}
 
-	// Token: 0x060032DD RID: 13021 RVA: 0x0011277B File Offset: 0x0011097B
+	// Token: 0x060032DD RID: 13021 RVA: 0x0011275B File Offset: 0x0011095B
 	public Vector3 GetShoulderLocalTargetPos_Right()
 	{
 		return this.rightUpperArm.parent.InverseTransformPoint(this.hasRightOverride ? this.rightOverrideWorldPos : this.targetRight.position);
 	}
 
-	// Token: 0x060032DE RID: 13022 RVA: 0x001127A8 File Offset: 0x001109A8
+	// Token: 0x060032DE RID: 13022 RVA: 0x00112788 File Offset: 0x00110988
 	public void ClearOverrides()
 	{
 		this.hasLeftOverride = false;
 		this.hasRightOverride = false;
 	}
 
-	// Token: 0x060032DF RID: 13023 RVA: 0x001127B8 File Offset: 0x001109B8
+	// Token: 0x060032DF RID: 13023 RVA: 0x00112798 File Offset: 0x00110998
 	private void ArmIK(ref Transform upperArm, ref Transform lowerArm, ref Transform hand, Quaternion initRotUpper, Quaternion initRotLower, Transform target)
 	{
 		upperArm.localRotation = initRotUpper;

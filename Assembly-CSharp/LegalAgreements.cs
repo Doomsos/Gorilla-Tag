@@ -12,11 +12,11 @@ using UnityEngine.UI;
 public class LegalAgreements : MonoBehaviour
 {
 	// Token: 0x17000681 RID: 1665
-	// (get) Token: 0x0600451D RID: 17693 RVA: 0x0016E2CA File Offset: 0x0016C4CA
-	// (set) Token: 0x0600451E RID: 17694 RVA: 0x0016E2D1 File Offset: 0x0016C4D1
+	// (get) Token: 0x0600451D RID: 17693 RVA: 0x0016E2AA File Offset: 0x0016C4AA
+	// (set) Token: 0x0600451E RID: 17694 RVA: 0x0016E2B1 File Offset: 0x0016C4B1
 	public static LegalAgreements instance { get; private set; }
 
-	// Token: 0x0600451F RID: 17695 RVA: 0x0016E2DC File Offset: 0x0016C4DC
+	// Token: 0x0600451F RID: 17695 RVA: 0x0016E2BC File Offset: 0x0016C4BC
 	protected virtual void Awake()
 	{
 		if (LegalAgreements.instance != null)
@@ -31,7 +31,7 @@ public class LegalAgreements : MonoBehaviour
 		base.enabled = false;
 	}
 
-	// Token: 0x06004520 RID: 17696 RVA: 0x0016E334 File Offset: 0x0016C534
+	// Token: 0x06004520 RID: 17696 RVA: 0x0016E314 File Offset: 0x0016C514
 	private void Update()
 	{
 		if (!this.legalAgreementsStarted)
@@ -74,7 +74,7 @@ public class LegalAgreements : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06004521 RID: 17697 RVA: 0x0016E4E8 File Offset: 0x0016C6E8
+	// Token: 0x06004521 RID: 17697 RVA: 0x0016E4C8 File Offset: 0x0016C6C8
 	public virtual Task StartLegalAgreements()
 	{
 		LegalAgreements.<StartLegalAgreements>d__24 <StartLegalAgreements>d__;
@@ -85,13 +85,13 @@ public class LegalAgreements : MonoBehaviour
 		return <StartLegalAgreements>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004522 RID: 17698 RVA: 0x0016E52B File Offset: 0x0016C72B
+	// Token: 0x06004522 RID: 17698 RVA: 0x0016E50B File Offset: 0x0016C70B
 	public void OnAccepted(int currentAge)
 	{
 		this._accepted = true;
 	}
 
-	// Token: 0x06004523 RID: 17699 RVA: 0x0016E534 File Offset: 0x0016C734
+	// Token: 0x06004523 RID: 17699 RVA: 0x0016E514 File Offset: 0x0016C714
 	protected Task WaitForAcknowledgement()
 	{
 		LegalAgreements.<WaitForAcknowledgement>d__27 <WaitForAcknowledgement>d__;
@@ -102,7 +102,7 @@ public class LegalAgreements : MonoBehaviour
 		return <WaitForAcknowledgement>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004524 RID: 17700 RVA: 0x0016E578 File Offset: 0x0016C778
+	// Token: 0x06004524 RID: 17700 RVA: 0x0016E558 File Offset: 0x0016C758
 	private Task<bool> UpdateText(LegalAgreementTextAsset asset, string version)
 	{
 		LegalAgreements.<UpdateText>d__28 <UpdateText>d__;
@@ -115,7 +115,7 @@ public class LegalAgreements : MonoBehaviour
 		return <UpdateText>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004525 RID: 17701 RVA: 0x0016E5CC File Offset: 0x0016C7CC
+	// Token: 0x06004525 RID: 17701 RVA: 0x0016E5AC File Offset: 0x0016C7AC
 	public Task<bool> UpdateTextFromPlayFabTitleData(string key, string version, TMP_Text target)
 	{
 		LegalAgreements.<UpdateTextFromPlayFabTitleData>d__33 <UpdateTextFromPlayFabTitleData>d__;
@@ -129,20 +129,20 @@ public class LegalAgreements : MonoBehaviour
 		return <UpdateTextFromPlayFabTitleData>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004526 RID: 17702 RVA: 0x0016E627 File Offset: 0x0016C827
+	// Token: 0x06004526 RID: 17702 RVA: 0x0016E607 File Offset: 0x0016C807
 	private void OnPlayFabError(PlayFabError error)
 	{
 		this.state = -1;
 	}
 
-	// Token: 0x06004527 RID: 17703 RVA: 0x0016E630 File Offset: 0x0016C830
+	// Token: 0x06004527 RID: 17703 RVA: 0x0016E610 File Offset: 0x0016C810
 	private void OnTitleDataReceived(string obj)
 	{
 		this.cachedText = obj;
 		this.state = 1;
 	}
 
-	// Token: 0x06004528 RID: 17704 RVA: 0x0016E640 File Offset: 0x0016C840
+	// Token: 0x06004528 RID: 17704 RVA: 0x0016E620 File Offset: 0x0016C820
 	private Task<string> GetTitleDataAsync(string key)
 	{
 		LegalAgreements.<GetTitleDataAsync>d__36 <GetTitleDataAsync>d__;
@@ -153,7 +153,7 @@ public class LegalAgreements : MonoBehaviour
 		return <GetTitleDataAsync>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x06004529 RID: 17705 RVA: 0x0016E684 File Offset: 0x0016C884
+	// Token: 0x06004529 RID: 17705 RVA: 0x0016E664 File Offset: 0x0016C864
 	private Task<Dictionary<string, string>> GetAcceptedAgreements(LegalAgreementTextAsset[] agreements)
 	{
 		LegalAgreements.<GetAcceptedAgreements>d__37 <GetAcceptedAgreements>d__;
@@ -164,7 +164,7 @@ public class LegalAgreements : MonoBehaviour
 		return <GetAcceptedAgreements>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600452A RID: 17706 RVA: 0x0016E6C8 File Offset: 0x0016C8C8
+	// Token: 0x0600452A RID: 17706 RVA: 0x0016E6A8 File Offset: 0x0016C8A8
 	private Task SubmitAcceptedAgreements(Dictionary<string, string> agreements)
 	{
 		LegalAgreements.<SubmitAcceptedAgreements>d__38 <SubmitAcceptedAgreements>d__;
@@ -175,7 +175,7 @@ public class LegalAgreements : MonoBehaviour
 		return <SubmitAcceptedAgreements>d__.<>t__builder.Task;
 	}
 
-	// Token: 0x0600452B RID: 17707 RVA: 0x0016470C File Offset: 0x0016290C
+	// Token: 0x0600452B RID: 17707 RVA: 0x001646EC File Offset: 0x001628EC
 	public void OnDisable()
 	{
 		KIDAudioManager instance = KIDAudioManager.Instance;

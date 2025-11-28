@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x020003FE RID: 1022
 public class PlayerPrefFlagButton : GorillaPressableButton
 {
-	// Token: 0x060018FB RID: 6395 RVA: 0x00085AE5 File Offset: 0x00083CE5
+	// Token: 0x060018FB RID: 6395 RVA: 0x00085AC5 File Offset: 0x00083CC5
 	protected override void OnEnable()
 	{
 		base.OnEnable();
@@ -12,7 +12,7 @@ public class PlayerPrefFlagButton : GorillaPressableButton
 		this.UpdateColor();
 	}
 
-	// Token: 0x060018FC RID: 6396 RVA: 0x00085B04 File Offset: 0x00083D04
+	// Token: 0x060018FC RID: 6396 RVA: 0x00085AE4 File Offset: 0x00083CE4
 	public override void ButtonActivation()
 	{
 		PlayerPrefFlagButton.ButtonMode buttonMode = this.mode;

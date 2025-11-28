@@ -6,7 +6,7 @@ using UnityEngine.Events;
 // Token: 0x0200043D RID: 1085
 public class RigEventVolume : MonoBehaviour
 {
-	// Token: 0x06001AB2 RID: 6834 RVA: 0x0008D04C File Offset: 0x0008B24C
+	// Token: 0x06001AB2 RID: 6834 RVA: 0x0008D02C File Offset: 0x0008B22C
 	private void OnTriggerEnter(Collider other)
 	{
 		VRRig rig;
@@ -17,7 +17,7 @@ public class RigEventVolume : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001AB3 RID: 6835 RVA: 0x0008D0AC File Offset: 0x0008B2AC
+	// Token: 0x06001AB3 RID: 6835 RVA: 0x0008D08C File Offset: 0x0008B28C
 	private void OnTriggerExit(Collider other)
 	{
 		VRRig rig;
@@ -28,7 +28,7 @@ public class RigEventVolume : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06001AB4 RID: 6836 RVA: 0x0008D10C File Offset: 0x0008B30C
+	// Token: 0x06001AB4 RID: 6836 RVA: 0x0008D0EC File Offset: 0x0008B2EC
 	private void countChanged(int oldValue, int newValue, VRRig rig)
 	{
 		if (newValue > oldValue)

@@ -5,7 +5,7 @@ using Photon.Pun;
 [Serializable]
 public struct PhotonSignalInfo
 {
-	// Token: 0x06004A31 RID: 18993 RVA: 0x00185763 File Offset: 0x00183963
+	// Token: 0x06004A31 RID: 18993 RVA: 0x00185743 File Offset: 0x00183943
 	public PhotonSignalInfo(NetPlayer sender, int timestamp)
 	{
 		this.sender = sender;
@@ -13,7 +13,7 @@ public struct PhotonSignalInfo
 	}
 
 	// Token: 0x170006E2 RID: 1762
-	// (get) Token: 0x06004A32 RID: 18994 RVA: 0x00185773 File Offset: 0x00183973
+	// (get) Token: 0x06004A32 RID: 18994 RVA: 0x00185753 File Offset: 0x00183953
 	public double sentServerTime
 	{
 		get
@@ -22,13 +22,13 @@ public struct PhotonSignalInfo
 		}
 	}
 
-	// Token: 0x06004A33 RID: 18995 RVA: 0x00185787 File Offset: 0x00183987
+	// Token: 0x06004A33 RID: 18995 RVA: 0x00185767 File Offset: 0x00183967
 	public override string ToString()
 	{
 		return string.Format("[{0}: Sender = '{1}' sentTime = {2}]", "PhotonSignalInfo", this.sender.ActorNumber, this.sentServerTime);
 	}
 
-	// Token: 0x06004A34 RID: 18996 RVA: 0x001857B3 File Offset: 0x001839B3
+	// Token: 0x06004A34 RID: 18996 RVA: 0x00185793 File Offset: 0x00183993
 	public static implicit operator PhotonMessageInfo(PhotonSignalInfo psi)
 	{
 		return new PhotonMessageInfo(psi.sender.GetPlayerRef(), psi.timestamp, null);

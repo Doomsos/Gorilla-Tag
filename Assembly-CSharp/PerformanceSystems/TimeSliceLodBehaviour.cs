@@ -8,7 +8,7 @@ namespace PerformanceSystems
 	public class TimeSliceLodBehaviour : ATimeSliceBehaviour, ILod
 	{
 		// Token: 0x1700080C RID: 2060
-		// (get) Token: 0x060054DC RID: 21724 RVA: 0x001ABC0E File Offset: 0x001A9E0E
+		// (get) Token: 0x060054DC RID: 21724 RVA: 0x001ABBEE File Offset: 0x001A9DEE
 		public Vector3 Position
 		{
 			get
@@ -18,7 +18,7 @@ namespace PerformanceSystems
 		}
 
 		// Token: 0x1700080D RID: 2061
-		// (get) Token: 0x060054DD RID: 21725 RVA: 0x001ABC1B File Offset: 0x001A9E1B
+		// (get) Token: 0x060054DD RID: 21725 RVA: 0x001ABBFB File Offset: 0x001A9DFB
 		public float[] LodRanges
 		{
 			get
@@ -28,7 +28,7 @@ namespace PerformanceSystems
 		}
 
 		// Token: 0x1700080E RID: 2062
-		// (get) Token: 0x060054DE RID: 21726 RVA: 0x001ABC23 File Offset: 0x001A9E23
+		// (get) Token: 0x060054DE RID: 21726 RVA: 0x001ABC03 File Offset: 0x001A9E03
 		public UnityEvent[] OnLodRangeEvents
 		{
 			get
@@ -38,7 +38,7 @@ namespace PerformanceSystems
 		}
 
 		// Token: 0x1700080F RID: 2063
-		// (get) Token: 0x060054DF RID: 21727 RVA: 0x001ABC2B File Offset: 0x001A9E2B
+		// (get) Token: 0x060054DF RID: 21727 RVA: 0x001ABC0B File Offset: 0x001A9E0B
 		public UnityEvent OnCulledEvent
 		{
 			get
@@ -48,7 +48,7 @@ namespace PerformanceSystems
 		}
 
 		// Token: 0x17000810 RID: 2064
-		// (get) Token: 0x060054E0 RID: 21728 RVA: 0x001ABC33 File Offset: 0x001A9E33
+		// (get) Token: 0x060054E0 RID: 21728 RVA: 0x001ABC13 File Offset: 0x001A9E13
 		public int CurrentLod
 		{
 			get
@@ -57,14 +57,14 @@ namespace PerformanceSystems
 			}
 		}
 
-		// Token: 0x060054E1 RID: 21729 RVA: 0x001ABC3B File Offset: 0x001A9E3B
+		// Token: 0x060054E1 RID: 21729 RVA: 0x001ABC1B File Offset: 0x001A9E1B
 		protected void Start()
 		{
 			this._updateIfDisabled = true;
 			this._transform = base.transform;
 		}
 
-		// Token: 0x060054E2 RID: 21730 RVA: 0x001ABC50 File Offset: 0x001A9E50
+		// Token: 0x060054E2 RID: 21730 RVA: 0x001ABC30 File Offset: 0x001A9E30
 		protected void SetLod(int newLod)
 		{
 			if (newLod == this._currentLod)
@@ -85,7 +85,7 @@ namespace PerformanceSystems
 			Debug.LogWarning(string.Format("No event for LOD [{0}]", newLod), this);
 		}
 
-		// Token: 0x060054E3 RID: 21731 RVA: 0x001ABCB4 File Offset: 0x001A9EB4
+		// Token: 0x060054E3 RID: 21731 RVA: 0x001ABC94 File Offset: 0x001A9E94
 		public void UpdateLod(Vector3 refPos)
 		{
 			Vector3 position = this._transform.position;
@@ -107,7 +107,7 @@ namespace PerformanceSystems
 		{
 		}
 
-		// Token: 0x060054E5 RID: 21733 RVA: 0x001ABD0B File Offset: 0x001A9F0B
+		// Token: 0x060054E5 RID: 21733 RVA: 0x001ABCEB File Offset: 0x001A9EEB
 		public override void SliceUpdateAlways(float deltaTime)
 		{
 			this.UpdateLod(this._timeSliceControllerAsset.ReferenceTransform.position);

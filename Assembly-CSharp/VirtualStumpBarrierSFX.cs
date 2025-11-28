@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 // Token: 0x020009B1 RID: 2481
 public class VirtualStumpBarrierSFX : MonoBehaviour
 {
-	// Token: 0x06003F59 RID: 16217 RVA: 0x00153E94 File Offset: 0x00152094
+	// Token: 0x06003F59 RID: 16217 RVA: 0x00153E74 File Offset: 0x00152074
 	public void OnTriggerEnter(Collider other)
 	{
 		if (other.gameObject == GorillaTagger.Instance.headCollider.gameObject)
@@ -24,7 +24,7 @@ public class VirtualStumpBarrierSFX : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003F5A RID: 16218 RVA: 0x00153F24 File Offset: 0x00152124
+	// Token: 0x06003F5A RID: 16218 RVA: 0x00153F04 File Offset: 0x00152104
 	public void OnTriggerStay(Collider other)
 	{
 		bool flag;
@@ -40,7 +40,7 @@ public class VirtualStumpBarrierSFX : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003F5B RID: 16219 RVA: 0x00153F90 File Offset: 0x00152190
+	// Token: 0x06003F5B RID: 16219 RVA: 0x00153F70 File Offset: 0x00152170
 	public void OnTriggerExit(Collider other)
 	{
 		bool flag;
@@ -55,7 +55,7 @@ public class VirtualStumpBarrierSFX : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003F5C RID: 16220 RVA: 0x00153FFC File Offset: 0x001521FC
+	// Token: 0x06003F5C RID: 16220 RVA: 0x00153FDC File Offset: 0x001521DC
 	public void PlaySFX()
 	{
 		if (this.barrierAudioSource.IsNull())

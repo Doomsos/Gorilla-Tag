@@ -21,7 +21,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		}
 	}
 
-	// Token: 0x0600448C RID: 17548 RVA: 0x0016AE14 File Offset: 0x00169014
+	// Token: 0x0600448C RID: 17548 RVA: 0x0016ADF4 File Offset: 0x00168FF4
 	protected void OnEnable()
 	{
 		if (ControllerBehaviour.Instance)
@@ -32,7 +32,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		SteamVR_Events.System(1201).Listen(new UnityAction<VREvent_t>(this.OnChar));
 	}
 
-	// Token: 0x0600448D RID: 17549 RVA: 0x0016AE7C File Offset: 0x0016907C
+	// Token: 0x0600448D RID: 17549 RVA: 0x0016AE5C File Offset: 0x0016905C
 	protected void OnDisable()
 	{
 		if (ControllerBehaviour.Instance)
@@ -43,7 +43,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		SteamVR_Events.System(1201).Remove(new UnityAction<VREvent_t>(this.OnChar));
 	}
 
-	// Token: 0x0600448E RID: 17550 RVA: 0x0016AEE4 File Offset: 0x001690E4
+	// Token: 0x0600448E RID: 17550 RVA: 0x0016AEC4 File Offset: 0x001690C4
 	private void Update()
 	{
 		if (!this.keyboardShowing)
@@ -56,7 +56,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		this._inputField.stringPosition = this._inputBuffer.Length;
 	}
 
-	// Token: 0x0600448F RID: 17551 RVA: 0x0016AF5C File Offset: 0x0016915C
+	// Token: 0x0600448F RID: 17551 RVA: 0x0016AF3C File Offset: 0x0016913C
 	private void PostUpdate()
 	{
 		if (!this._inputField.interactable || !this.inside)
@@ -89,7 +89,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		}
 	}
 
-	// Token: 0x06004490 RID: 17552 RVA: 0x0016B070 File Offset: 0x00169270
+	// Token: 0x06004490 RID: 17552 RVA: 0x0016B050 File Offset: 0x00169250
 	public void OnPointerEnter(PointerEventData eventData)
 	{
 		this.inside = true;
@@ -105,13 +105,13 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		xrrayInteractor.xrController.SendHapticImpulse(this._highlightedVibrationStrength, this._highlightedVibrationDuration);
 	}
 
-	// Token: 0x06004491 RID: 17553 RVA: 0x0016B0D7 File Offset: 0x001692D7
+	// Token: 0x06004491 RID: 17553 RVA: 0x0016B0B7 File Offset: 0x001692B7
 	public void OnPointerExit(PointerEventData eventData)
 	{
 		this.inside = false;
 	}
 
-	// Token: 0x06004492 RID: 17554 RVA: 0x0016B0E0 File Offset: 0x001692E0
+	// Token: 0x06004492 RID: 17554 RVA: 0x0016B0C0 File Offset: 0x001692C0
 	private void OnClickedInputField(string _ = "")
 	{
 		if (this.keyboardShowing)
@@ -130,7 +130,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		HandRayController.Instance.DisableHandRays();
 	}
 
-	// Token: 0x06004493 RID: 17555 RVA: 0x0016B180 File Offset: 0x00169380
+	// Token: 0x06004493 RID: 17555 RVA: 0x0016B160 File Offset: 0x00169360
 	private void OnChar(VREvent_t ev)
 	{
 		if (!this.keyboardShowing)
@@ -150,7 +150,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		this._inputBuffer += c.ToString();
 	}
 
-	// Token: 0x06004494 RID: 17556 RVA: 0x0016B1F4 File Offset: 0x001693F4
+	// Token: 0x06004494 RID: 17556 RVA: 0x0016B1D4 File Offset: 0x001693D4
 	private void OnKeyboardClosed(VREvent_t ev)
 	{
 		Debug.Log("[KID::INPUTFIELD_CONTROLLER] Trying to close Keyboard");
@@ -166,7 +166,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		this.keyboardShowing = false;
 	}
 
-	// Token: 0x06004495 RID: 17557 RVA: 0x0016B256 File Offset: 0x00169456
+	// Token: 0x06004495 RID: 17557 RVA: 0x0016B236 File Offset: 0x00169436
 	private bool IsIllegalChar(char c)
 	{
 		return c == '\t' || c == '\n';

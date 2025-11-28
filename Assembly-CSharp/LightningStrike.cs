@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class LightningStrike : MonoBehaviour
 {
-	// Token: 0x06004F99 RID: 20377 RVA: 0x00199C38 File Offset: 0x00197E38
+	// Token: 0x06004F99 RID: 20377 RVA: 0x00199C18 File Offset: 0x00197E18
 	private void Initialize()
 	{
 		this.ps = base.GetComponent<ParticleSystem>();
@@ -19,7 +19,7 @@ public class LightningStrike : MonoBehaviour
 		this.audioSource.playOnAwake = true;
 	}
 
-	// Token: 0x06004F9A RID: 20378 RVA: 0x00199CB4 File Offset: 0x00197EB4
+	// Token: 0x06004F9A RID: 20378 RVA: 0x00199C94 File Offset: 0x00197E94
 	public void Play(Vector3 p1, Vector3 p2, float beamWidthMultiplier, float audioVolume, float duration, Gradient colorOverLifetime)
 	{
 		if (this.ps == null)

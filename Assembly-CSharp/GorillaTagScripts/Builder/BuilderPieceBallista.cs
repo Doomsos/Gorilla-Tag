@@ -12,7 +12,7 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E4B RID: 3659
 	public class BuilderPieceBallista : MonoBehaviour, IBuilderPieceComponent, IBuilderPieceFunctional
 	{
-		// Token: 0x06005B3D RID: 23357 RVA: 0x001D3C34 File Offset: 0x001D1E34
+		// Token: 0x06005B3D RID: 23357 RVA: 0x001D3C14 File Offset: 0x001D1E14
 		private void Awake()
 		{
 			this.animator.SetFloat(this.pitchParamHash, this.pitch);
@@ -28,7 +28,7 @@ namespace GorillaTagScripts.Builder
 			this.hasLaunchParticles = (this.launchParticles != null);
 		}
 
-		// Token: 0x06005B3E RID: 23358 RVA: 0x001D3CFA File Offset: 0x001D1EFA
+		// Token: 0x06005B3E RID: 23358 RVA: 0x001D3CDA File Offset: 0x001D1EDA
 		private void OnDestroy()
 		{
 			if (this.handTrigger != null)
@@ -37,7 +37,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B3F RID: 23359 RVA: 0x001D3D26 File Offset: 0x001D1F26
+		// Token: 0x06005B3F RID: 23359 RVA: 0x001D3D06 File Offset: 0x001D1F06
 		private void OnHandTriggerPressed()
 		{
 			if (this.autoLaunch)
@@ -50,7 +50,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B40 RID: 23360 RVA: 0x001D3D5C File Offset: 0x001D1F5C
+		// Token: 0x06005B40 RID: 23360 RVA: 0x001D3D3C File Offset: 0x001D1F3C
 		private void UpdateStateMaster()
 		{
 			if (!NetworkSystem.Instance.InRoom || !NetworkSystem.Instance.IsMasterClient)
@@ -138,14 +138,14 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B41 RID: 23361 RVA: 0x001D416B File Offset: 0x001D236B
+		// Token: 0x06005B41 RID: 23361 RVA: 0x001D414B File Offset: 0x001D234B
 		private void ResetFlags()
 		{
 			this.playerLaunched = false;
 			this.loadCompleteTime = double.MaxValue;
 		}
 
-		// Token: 0x06005B42 RID: 23362 RVA: 0x001D4184 File Offset: 0x001D2384
+		// Token: 0x06005B42 RID: 23362 RVA: 0x001D4164 File Offset: 0x001D2364
 		private void UpdatePlayerPosition()
 		{
 			if (this.ballistaState != BuilderPieceBallista.BallistaState.PrepareForLaunchLocal && this.ballistaState != BuilderPieceBallista.BallistaState.LaunchingLocal)
@@ -198,13 +198,13 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B43 RID: 23363 RVA: 0x001D43BC File Offset: 0x001D25BC
+		// Token: 0x06005B43 RID: 23363 RVA: 0x001D439C File Offset: 0x001D259C
 		private Vector3 GetPlayerBodyCenterPosition(Transform headTransform, float playerScale)
 		{
 			return headTransform.position + Quaternion.Euler(0f, headTransform.rotation.eulerAngles.y, 0f) * new Vector3(0f, 0f, this.playerBodyOffsetFromHead.z * playerScale) + Vector3.down * (this.playerBodyOffsetFromHead.y * playerScale);
 		}
 
-		// Token: 0x06005B44 RID: 23364 RVA: 0x001D4434 File Offset: 0x001D2634
+		// Token: 0x06005B44 RID: 23364 RVA: 0x001D4414 File Offset: 0x001D2614
 		private void OnTriggerEnter(Collider other)
 		{
 			if (this.playerRigInTrigger != null)
@@ -236,7 +236,7 @@ namespace GorillaTagScripts.Builder
 			this.playerInTrigger = true;
 		}
 
-		// Token: 0x06005B45 RID: 23365 RVA: 0x001D44D4 File Offset: 0x001D26D4
+		// Token: 0x06005B45 RID: 23365 RVA: 0x001D44B4 File Offset: 0x001D26B4
 		private void OnTriggerExit(Collider other)
 		{
 			if (this.playerRigInTrigger == null || !this.playerInTrigger)
@@ -267,7 +267,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B46 RID: 23366 RVA: 0x001D456C File Offset: 0x001D276C
+		// Token: 0x06005B46 RID: 23366 RVA: 0x001D454C File Offset: 0x001D274C
 		public void OnPieceCreate(int pieceType, int pieceId)
 		{
 			if (!this.myPiece.GetTable().isTableMutable)
@@ -280,14 +280,14 @@ namespace GorillaTagScripts.Builder
 			this.playerLaunched = false;
 		}
 
-		// Token: 0x06005B47 RID: 23367 RVA: 0x001D45A3 File Offset: 0x001D27A3
+		// Token: 0x06005B47 RID: 23367 RVA: 0x001D4583 File Offset: 0x001D2783
 		public void OnPieceDestroy()
 		{
 			this.myPiece.functionalPieceState = 0;
 			this.ballistaState = BuilderPieceBallista.BallistaState.Idle;
 		}
 
-		// Token: 0x06005B48 RID: 23368 RVA: 0x001D45B8 File Offset: 0x001D27B8
+		// Token: 0x06005B48 RID: 23368 RVA: 0x001D4598 File Offset: 0x001D2798
 		public void OnPiecePlacementDeserialized()
 		{
 			this.launchDirection = this.launchEnd.position - this.launchStart.position;
@@ -295,7 +295,7 @@ namespace GorillaTagScripts.Builder
 			this.launchDirection /= this.launchRampDistance;
 		}
 
-		// Token: 0x06005B49 RID: 23369 RVA: 0x001D4610 File Offset: 0x001D2810
+		// Token: 0x06005B49 RID: 23369 RVA: 0x001D45F0 File Offset: 0x001D27F0
 		public void OnPieceActivate()
 		{
 			foreach (Collider collider in this.triggers)
@@ -310,7 +310,7 @@ namespace GorillaTagScripts.Builder
 			this.myPiece.GetTable().RegisterFunctionalPiece(this);
 		}
 
-		// Token: 0x06005B4A RID: 23370 RVA: 0x001D46E0 File Offset: 0x001D28E0
+		// Token: 0x06005B4A RID: 23370 RVA: 0x001D46C0 File Offset: 0x001D28C0
 		public void OnPieceDeactivate()
 		{
 			foreach (Collider collider in this.triggers)
@@ -330,7 +330,7 @@ namespace GorillaTagScripts.Builder
 			this.myPiece.GetTable().UnregisterFunctionalPiece(this);
 		}
 
-		// Token: 0x06005B4B RID: 23371 RVA: 0x001D4788 File Offset: 0x001D2988
+		// Token: 0x06005B4B RID: 23371 RVA: 0x001D4768 File Offset: 0x001D2968
 		public void OnStateRequest(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!NetworkSystem.Instance.IsMasterClient)
@@ -359,7 +359,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B4C RID: 23372 RVA: 0x001D4828 File Offset: 0x001D2A28
+		// Token: 0x06005B4C RID: 23372 RVA: 0x001D4808 File Offset: 0x001D2A08
 		public void OnStateChanged(byte newState, NetPlayer instigator, int timeStamp)
 		{
 			if (!this.IsStateValid(newState))
@@ -464,13 +464,13 @@ namespace GorillaTagScripts.Builder
 			this.ballistaState = ballistaState;
 		}
 
-		// Token: 0x06005B4D RID: 23373 RVA: 0x001D4B1C File Offset: 0x001D2D1C
+		// Token: 0x06005B4D RID: 23373 RVA: 0x001D4AFC File Offset: 0x001D2CFC
 		public bool IsStateValid(byte state)
 		{
 			return state < 8;
 		}
 
-		// Token: 0x06005B4E RID: 23374 RVA: 0x001D4B22 File Offset: 0x001D2D22
+		// Token: 0x06005B4E RID: 23374 RVA: 0x001D4B02 File Offset: 0x001D2D02
 		public void FunctionalPieceUpdate()
 		{
 			if (this.myPiece == null || this.myPiece.state != BuilderPiece.State.AttachedAndPlaced)
@@ -484,7 +484,7 @@ namespace GorillaTagScripts.Builder
 			this.UpdatePlayerPosition();
 		}
 
-		// Token: 0x06005B4F RID: 23375 RVA: 0x001D4B58 File Offset: 0x001D2D58
+		// Token: 0x06005B4F RID: 23375 RVA: 0x001D4B38 File Offset: 0x001D2D38
 		private void UpdatePredictionLine()
 		{
 			float num = 0.033333335f;
@@ -498,7 +498,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005B50 RID: 23376 RVA: 0x001D4BF2 File Offset: 0x001D2DF2
+		// Token: 0x06005B50 RID: 23376 RVA: 0x001D4BD2 File Offset: 0x001D2DD2
 		private IEnumerator DebugDrawTrajectory(float duration)
 		{
 			this.UpdatePredictionLine();

@@ -9,7 +9,7 @@ using UnityEngine;
 // Token: 0x0200093A RID: 2362
 public class CustomMapsGorillaZipline : GorillaZipline
 {
-	// Token: 0x06003C59 RID: 15449 RVA: 0x0013ECC8 File Offset: 0x0013CEC8
+	// Token: 0x06003C59 RID: 15449 RVA: 0x0013ECA8 File Offset: 0x0013CEA8
 	public bool GenerateZipline(BezierSpline splineRef)
 	{
 		this.spline = base.GetComponent<BezierSpline>();
@@ -55,7 +55,7 @@ public class CustomMapsGorillaZipline : GorillaZipline
 		return true;
 	}
 
-	// Token: 0x06003C5A RID: 15450 RVA: 0x0013EE4C File Offset: 0x0013D04C
+	// Token: 0x06003C5A RID: 15450 RVA: 0x0013EE2C File Offset: 0x0013D02C
 	private BezierControlPointMode[] ConvertControlPointModes(BezierControlPointMode[] refModes)
 	{
 		BezierControlPointMode[] array = new BezierControlPointMode[refModes.Length];
@@ -77,14 +77,14 @@ public class CustomMapsGorillaZipline : GorillaZipline
 		return array;
 	}
 
-	// Token: 0x06003C5B RID: 15451 RVA: 0x0013EE99 File Offset: 0x0013D099
+	// Token: 0x06003C5B RID: 15451 RVA: 0x0013EE79 File Offset: 0x0013D079
 	protected override void Start()
 	{
 		GorillaClimbable slideHelper = this.slideHelper;
 		slideHelper.onBeforeClimb = (Action<GorillaHandClimber, GorillaClimbableRef>)Delegate.Combine(slideHelper.onBeforeClimb, new Action<GorillaHandClimber, GorillaClimbableRef>(base.OnBeforeClimb));
 	}
 
-	// Token: 0x06003C5C RID: 15452 RVA: 0x0013EEC4 File Offset: 0x0013D0C4
+	// Token: 0x06003C5C RID: 15452 RVA: 0x0013EEA4 File Offset: 0x0013D0A4
 	public void Init(GTObjectPlaceholder ziplinePlaceholder)
 	{
 		if (ziplinePlaceholder.PlaceholderObject != 8)

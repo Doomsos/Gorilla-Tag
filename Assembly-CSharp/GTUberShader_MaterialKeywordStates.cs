@@ -4,7 +4,7 @@ using UnityEngine;
 // Token: 0x02000CE6 RID: 3302
 public struct GTUberShader_MaterialKeywordStates
 {
-	// Token: 0x06005056 RID: 20566 RVA: 0x0019CDB8 File Offset: 0x0019AFB8
+	// Token: 0x06005056 RID: 20566 RVA: 0x0019CD98 File Offset: 0x0019AF98
 	public GTUberShader_MaterialKeywordStates(Material mat)
 	{
 		this.material = mat;
@@ -84,7 +84,7 @@ public struct GTUberShader_MaterialKeywordStates
 		this.INSTANCING_ON = mat.IsKeywordEnabled("INSTANCING_ON");
 	}
 
-	// Token: 0x06005057 RID: 20567 RVA: 0x0019D2B8 File Offset: 0x0019B4B8
+	// Token: 0x06005057 RID: 20567 RVA: 0x0019D298 File Offset: 0x0019B498
 	public void Refresh()
 	{
 		Material material = this.material;

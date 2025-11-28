@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 // Token: 0x0200069A RID: 1690
 public class GRDistillery : MonoBehaviour
 {
-	// Token: 0x06002B2F RID: 11055 RVA: 0x000E7998 File Offset: 0x000E5B98
+	// Token: 0x06002B2F RID: 11055 RVA: 0x000E7978 File Offset: 0x000E5B78
 	public void Init(GhostReactor reactor)
 	{
 		this.reactor = reactor;
@@ -22,7 +22,7 @@ public class GRDistillery : MonoBehaviour
 		this.InitializeGauges();
 	}
 
-	// Token: 0x06002B30 RID: 11056 RVA: 0x000E79E8 File Offset: 0x000E5BE8
+	// Token: 0x06002B30 RID: 11056 RVA: 0x000E79C8 File Offset: 0x000E5BC8
 	private void SaveStartTime(DateTime time)
 	{
 		string text = time.ToString("O");
@@ -30,7 +30,7 @@ public class GRDistillery : MonoBehaviour
 		PlayerPrefs.Save();
 	}
 
-	// Token: 0x06002B31 RID: 11057 RVA: 0x000E7A14 File Offset: 0x000E5C14
+	// Token: 0x06002B31 RID: 11057 RVA: 0x000E79F4 File Offset: 0x000E5BF4
 	private void RestoreStartTime()
 	{
 		string @string = PlayerPrefs.GetString("_grDistilleryStartTime", string.Empty);
@@ -40,7 +40,7 @@ public class GRDistillery : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002B32 RID: 11058 RVA: 0x000E7A59 File Offset: 0x000E5C59
+	// Token: 0x06002B32 RID: 11058 RVA: 0x000E7A39 File Offset: 0x000E5C39
 	public void StartResearch()
 	{
 		if (this.cores > 0)
@@ -52,13 +52,13 @@ public class GRDistillery : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002B33 RID: 11059 RVA: 0x000E7A90 File Offset: 0x000E5C90
+	// Token: 0x06002B33 RID: 11059 RVA: 0x000E7A70 File Offset: 0x000E5C70
 	public double CalculateRemaining()
 	{
 		return (double)this.secondsToResearchACore - (GorillaComputer.instance.GetServerTime() - this.startTime).TotalSeconds;
 	}
 
-	// Token: 0x06002B34 RID: 11060 RVA: 0x000E7AC4 File Offset: 0x000E5CC4
+	// Token: 0x06002B34 RID: 11060 RVA: 0x000E7AA4 File Offset: 0x000E5CA4
 	private void FirstUpdate()
 	{
 		double num = this.CalculateRemaining();
@@ -96,7 +96,7 @@ public class GRDistillery : MonoBehaviour
 		this.UpdateGauges();
 	}
 
-	// Token: 0x06002B35 RID: 11061 RVA: 0x000E7BBC File Offset: 0x000E5DBC
+	// Token: 0x06002B35 RID: 11061 RVA: 0x000E7B9C File Offset: 0x000E5D9C
 	public void Update()
 	{
 		if (!this.firstUpdate)
@@ -117,7 +117,7 @@ public class GRDistillery : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002B36 RID: 11062 RVA: 0x000E7C18 File Offset: 0x000E5E18
+	// Token: 0x06002B36 RID: 11062 RVA: 0x000E7BF8 File Offset: 0x000E5DF8
 	private void UpdateDoorPosition()
 	{
 		if (this.cores >= 4)
@@ -128,7 +128,7 @@ public class GRDistillery : MonoBehaviour
 		this.depositDoor.transform.position = Vector3.MoveTowards(this.depositDoor.transform.position, this.depositOpenPosition.transform.position, this.depositDoorCloseSpeed * Time.deltaTime);
 	}
 
-	// Token: 0x06002B37 RID: 11063 RVA: 0x000E7CB4 File Offset: 0x000E5EB4
+	// Token: 0x06002B37 RID: 11063 RVA: 0x000E7C94 File Offset: 0x000E5E94
 	private void CompleteResearchingCore()
 	{
 		this.cores = Math.Max(this.cores - 1, 0);
@@ -148,7 +148,7 @@ public class GRDistillery : MonoBehaviour
 		this.UpdateGauges();
 	}
 
-	// Token: 0x06002B38 RID: 11064 RVA: 0x000E7D54 File Offset: 0x000E5F54
+	// Token: 0x06002B38 RID: 11064 RVA: 0x000E7D34 File Offset: 0x000E5F34
 	public void DepositCore()
 	{
 		if (this.cores < this.maxCores)
@@ -173,7 +173,7 @@ public class GRDistillery : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002B3A RID: 11066 RVA: 0x000E7DBC File Offset: 0x000E5FBC
+	// Token: 0x06002B3A RID: 11066 RVA: 0x000E7D9C File Offset: 0x000E5F9C
 	private void OnEnable()
 	{
 		if (this._applyMaterialgauge1)
@@ -195,7 +195,7 @@ public class GRDistillery : MonoBehaviour
 		this.InitializeGauges();
 	}
 
-	// Token: 0x06002B3B RID: 11067 RVA: 0x000E7E34 File Offset: 0x000E6034
+	// Token: 0x06002B3B RID: 11067 RVA: 0x000E7E14 File Offset: 0x000E6014
 	private void InitializeGauges()
 	{
 		for (int i = 0; i < this.gaugesFill.Length - 1; i++)
@@ -206,7 +206,7 @@ public class GRDistillery : MonoBehaviour
 		this.currentGaugeFillAmount = this.gaugeEmptyFillAmount;
 	}
 
-	// Token: 0x06002B3C RID: 11068 RVA: 0x000E7E94 File Offset: 0x000E6094
+	// Token: 0x06002B3C RID: 11068 RVA: 0x000E7E74 File Offset: 0x000E6074
 	private void UpdateGauges()
 	{
 		for (int i = 0; i < this.gaugesFill.Length; i++)

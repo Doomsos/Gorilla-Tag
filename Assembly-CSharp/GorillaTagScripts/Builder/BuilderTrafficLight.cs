@@ -7,13 +7,13 @@ namespace GorillaTagScripts.Builder
 	// Token: 0x02000E68 RID: 3688
 	public class BuilderTrafficLight : MonoBehaviour, IBuilderPieceComponent
 	{
-		// Token: 0x06005C3D RID: 23613 RVA: 0x001DA1A3 File Offset: 0x001D83A3
+		// Token: 0x06005C3D RID: 23613 RVA: 0x001DA183 File Offset: 0x001D8383
 		private void Start()
 		{
 			this.materialProps = new MaterialPropertyBlock();
 		}
 
-		// Token: 0x06005C3E RID: 23614 RVA: 0x001DA1B0 File Offset: 0x001D83B0
+		// Token: 0x06005C3E RID: 23614 RVA: 0x001DA190 File Offset: 0x001D8390
 		private void SetState(BuilderTrafficLight.LightState state)
 		{
 			this.lightState = state;
@@ -45,7 +45,7 @@ namespace GorillaTagScripts.Builder
 			this.greenLight.SetPropertyBlock(this.materialProps);
 		}
 
-		// Token: 0x06005C3F RID: 23615 RVA: 0x001DA290 File Offset: 0x001D8490
+		// Token: 0x06005C3F RID: 23615 RVA: 0x001DA270 File Offset: 0x001D8470
 		private void Update()
 		{
 			if (this.piece == null || this.piece.state == BuilderPiece.State.AttachedAndPlaced)
@@ -70,7 +70,7 @@ namespace GorillaTagScripts.Builder
 			}
 		}
 
-		// Token: 0x06005C40 RID: 23616 RVA: 0x001DA334 File Offset: 0x001D8534
+		// Token: 0x06005C40 RID: 23616 RVA: 0x001DA314 File Offset: 0x001D8514
 		public void OnPieceCreate(int pieceType, int pieceId)
 		{
 			this.SetState(BuilderTrafficLight.LightState.Off);
@@ -91,7 +91,7 @@ namespace GorillaTagScripts.Builder
 		{
 		}
 
-		// Token: 0x06005C44 RID: 23620 RVA: 0x001DA334 File Offset: 0x001D8534
+		// Token: 0x06005C44 RID: 23620 RVA: 0x001DA314 File Offset: 0x001D8514
 		public void OnPieceDeactivate()
 		{
 			this.SetState(BuilderTrafficLight.LightState.Off);

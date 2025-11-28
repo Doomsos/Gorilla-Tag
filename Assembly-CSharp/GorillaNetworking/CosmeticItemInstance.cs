@@ -9,7 +9,7 @@ namespace GorillaNetworking
 	// Token: 0x02000EBC RID: 3772
 	public class CosmeticItemInstance
 	{
-		// Token: 0x06005E06 RID: 24070 RVA: 0x001E1D44 File Offset: 0x001DFF44
+		// Token: 0x06005E06 RID: 24070 RVA: 0x001E1D24 File Offset: 0x001DFF24
 		private void EnableItem(GameObject obj, bool enable)
 		{
 			try
@@ -22,7 +22,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E07 RID: 24071 RVA: 0x001E1D80 File Offset: 0x001DFF80
+		// Token: 0x06005E07 RID: 24071 RVA: 0x001E1D60 File Offset: 0x001DFF60
 		private void ApplyClippingOffsets(bool itemEnabled)
 		{
 			if (this._bodyDockPositions == null)
@@ -70,7 +70,7 @@ namespace GorillaNetworking
 			}
 		}
 
-		// Token: 0x06005E08 RID: 24072 RVA: 0x001E1F94 File Offset: 0x001E0194
+		// Token: 0x06005E08 RID: 24072 RVA: 0x001E1F74 File Offset: 0x001E0174
 		public void DisableItem(CosmeticsController.CosmeticSlots cosmeticSlot)
 		{
 			bool flag = CosmeticsController.CosmeticSet.IsSlotLeftHanded(cosmeticSlot);
@@ -96,7 +96,7 @@ namespace GorillaNetworking
 			this.ApplyClippingOffsets(false);
 		}
 
-		// Token: 0x06005E09 RID: 24073 RVA: 0x001E2090 File Offset: 0x001E0290
+		// Token: 0x06005E09 RID: 24073 RVA: 0x001E2070 File Offset: 0x001E0270
 		public void EnableItem(CosmeticsController.CosmeticSlots cosmeticSlot, VRRig rig)
 		{
 			bool flag = CosmeticsController.CosmeticSet.IsSlotLeftHanded(cosmeticSlot);

@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	[RequireComponent(typeof(LoudSpeakerActivator))]
 	public class VoiceBroadcastCosmetic : MonoBehaviour, IGorillaSliceableSimple
 	{
-		// Token: 0x06006DCC RID: 28108 RVA: 0x00240DEE File Offset: 0x0023EFEE
+		// Token: 0x06006DCC RID: 28108 RVA: 0x00240DCE File Offset: 0x0023EFCE
 		private void Awake()
 		{
 			this.loudSpeaker = base.GetComponent<LoudSpeakerActivator>();
@@ -18,13 +18,13 @@ namespace GorillaTag.Cosmetics
 			this.gsl = base.GetComponentInParent<GorillaSpeakerLoudness>();
 		}
 
-		// Token: 0x06006DCD RID: 28109 RVA: 0x00240E25 File Offset: 0x0023F025
+		// Token: 0x06006DCD RID: 28109 RVA: 0x00240E05 File Offset: 0x0023F005
 		public void SetWearable(VoiceBroadcastCosmeticWearable wearable)
 		{
 			this.wearable = wearable;
 		}
 
-		// Token: 0x06006DCE RID: 28110 RVA: 0x00240E2E File Offset: 0x0023F02E
+		// Token: 0x06006DCE RID: 28110 RVA: 0x00240E0E File Offset: 0x0023F00E
 		private void StartBroadcast()
 		{
 			this.loudSpeaker.StartLocalBroadcast();
@@ -38,7 +38,7 @@ namespace GorillaTag.Cosmetics
 			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 		}
 
-		// Token: 0x06006DCF RID: 28111 RVA: 0x00240E69 File Offset: 0x0023F069
+		// Token: 0x06006DCF RID: 28111 RVA: 0x00240E49 File Offset: 0x0023F049
 		private void StopBroadcast()
 		{
 			this.loudSpeaker.StopLocalBroadcast();
@@ -51,14 +51,14 @@ namespace GorillaTag.Cosmetics
 			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 		}
 
-		// Token: 0x06006DD0 RID: 28112 RVA: 0x00240E99 File Offset: 0x0023F099
+		// Token: 0x06006DD0 RID: 28112 RVA: 0x00240E79 File Offset: 0x0023F079
 		public void OnEnable()
 		{
 			this.isListening = false;
 			this.speakingTime = 0f;
 		}
 
-		// Token: 0x06006DD1 RID: 28113 RVA: 0x00240EAD File Offset: 0x0023F0AD
+		// Token: 0x06006DD1 RID: 28113 RVA: 0x00240E8D File Offset: 0x0023F08D
 		public void OnDisable()
 		{
 			this.isListening = false;
@@ -66,7 +66,7 @@ namespace GorillaTag.Cosmetics
 			this.StopBroadcast();
 		}
 
-		// Token: 0x06006DD2 RID: 28114 RVA: 0x00240EC8 File Offset: 0x0023F0C8
+		// Token: 0x06006DD2 RID: 28114 RVA: 0x00240EA8 File Offset: 0x0023F0A8
 		public void SetListenState(bool listening)
 		{
 			if (this.isListening == listening || !base.enabled || !base.gameObject.activeInHierarchy)
@@ -83,7 +83,7 @@ namespace GorillaTag.Cosmetics
 			this.StopBroadcast();
 		}
 
-		// Token: 0x06006DD3 RID: 28115 RVA: 0x00240F18 File Offset: 0x0023F118
+		// Token: 0x06006DD3 RID: 28115 RVA: 0x00240EF8 File Offset: 0x0023F0F8
 		public void SliceUpdate()
 		{
 			float num = Time.time - this.lastSliceUpdateTime;
@@ -128,7 +128,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006DD4 RID: 28116 RVA: 0x00241025 File Offset: 0x0023F225
+		// Token: 0x06006DD4 RID: 28116 RVA: 0x00241005 File Offset: 0x0023F205
 		private void ResetToFirstFrame()
 		{
 			this.simpleAnimation.Rewind();

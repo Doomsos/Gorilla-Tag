@@ -5,13 +5,13 @@ using UnityEngine;
 // Token: 0x02000549 RID: 1353
 public class MonkeBall : MonoBehaviourTick
 {
-	// Token: 0x06002218 RID: 8728 RVA: 0x000B24B0 File Offset: 0x000B06B0
+	// Token: 0x06002218 RID: 8728 RVA: 0x000B2490 File Offset: 0x000B0690
 	private void Start()
 	{
 		this.Refresh();
 	}
 
-	// Token: 0x06002219 RID: 8729 RVA: 0x000B24B8 File Offset: 0x000B06B8
+	// Token: 0x06002219 RID: 8729 RVA: 0x000B2498 File Offset: 0x000B0698
 	public override void Tick()
 	{
 		this.UpdateVisualOffset();
@@ -103,7 +103,7 @@ public class MonkeBall : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x0600221A RID: 8730 RVA: 0x000B27C4 File Offset: 0x000B09C4
+	// Token: 0x0600221A RID: 8730 RVA: 0x000B27A4 File Offset: 0x000B09A4
 	public void OnCollisionEnter(Collision collision)
 	{
 		if (this.AlreadyDropped() || this._justGrabbed)
@@ -142,7 +142,7 @@ public class MonkeBall : MonoBehaviourTick
 		MonkeBallGame.Instance.RequestRestrictBallToTeam(this.gameBall.id, MonkeBallGame.Instance.GetOtherTeam(this.gameBall.lastHeldByTeamId));
 	}
 
-	// Token: 0x0600221B RID: 8731 RVA: 0x000B28EB File Offset: 0x000B0AEB
+	// Token: 0x0600221B RID: 8731 RVA: 0x000B28CB File Offset: 0x000B0ACB
 	public void TriggerDelayedResync()
 	{
 		this._resyncPosition = true;
@@ -154,19 +154,19 @@ public class MonkeBall : MonoBehaviourTick
 		this._resyncDelay = 1.5f;
 	}
 
-	// Token: 0x0600221C RID: 8732 RVA: 0x000B2912 File Offset: 0x000B0B12
+	// Token: 0x0600221C RID: 8732 RVA: 0x000B28F2 File Offset: 0x000B0AF2
 	public void SetRigidbodyDiscrete()
 	{
 		this._rigidBody.collisionDetectionMode = 0;
 	}
 
-	// Token: 0x0600221D RID: 8733 RVA: 0x000B2920 File Offset: 0x000B0B20
+	// Token: 0x0600221D RID: 8733 RVA: 0x000B2900 File Offset: 0x000B0B00
 	public void SetRigidbodyContinuous()
 	{
 		this._rigidBody.collisionDetectionMode = 3;
 	}
 
-	// Token: 0x0600221E RID: 8734 RVA: 0x000B292E File Offset: 0x000B0B2E
+	// Token: 0x0600221E RID: 8734 RVA: 0x000B290E File Offset: 0x000B0B0E
 	public static MonkeBall Get(GameBall ball)
 	{
 		if (ball == null)
@@ -176,13 +176,13 @@ public class MonkeBall : MonoBehaviourTick
 		return ball.GetComponent<MonkeBall>();
 	}
 
-	// Token: 0x0600221F RID: 8735 RVA: 0x000B2941 File Offset: 0x000B0B41
+	// Token: 0x0600221F RID: 8735 RVA: 0x000B2921 File Offset: 0x000B0B21
 	public bool AlreadyDropped()
 	{
 		return this.alreadyDropped;
 	}
 
-	// Token: 0x06002220 RID: 8736 RVA: 0x000B2949 File Offset: 0x000B0B49
+	// Token: 0x06002220 RID: 8736 RVA: 0x000B2929 File Offset: 0x000B0B29
 	public void OnGrabbed()
 	{
 		this.alreadyDropped = false;
@@ -191,7 +191,7 @@ public class MonkeBall : MonoBehaviourTick
 		this._resyncPosition = false;
 	}
 
-	// Token: 0x06002221 RID: 8737 RVA: 0x000B296B File Offset: 0x000B0B6B
+	// Token: 0x06002221 RID: 8737 RVA: 0x000B294B File Offset: 0x000B0B4B
 	public void OnSwitchHeldByTeam(int teamId)
 	{
 		if (PhotonNetwork.IsMasterClient)
@@ -200,7 +200,7 @@ public class MonkeBall : MonoBehaviourTick
 		}
 	}
 
-	// Token: 0x06002222 RID: 8738 RVA: 0x000B298A File Offset: 0x000B0B8A
+	// Token: 0x06002222 RID: 8738 RVA: 0x000B296A File Offset: 0x000B0B6A
 	public void ClearCannotGrabTeamId()
 	{
 		this.gameBall.onlyGrabTeamId = -1;
@@ -208,7 +208,7 @@ public class MonkeBall : MonoBehaviourTick
 		this.Refresh();
 	}
 
-	// Token: 0x06002223 RID: 8739 RVA: 0x000B29B0 File Offset: 0x000B0BB0
+	// Token: 0x06002223 RID: 8739 RVA: 0x000B2990 File Offset: 0x000B0B90
 	public bool RestrictBallToTeam(int teamId, float duration)
 	{
 		if (teamId == this.gameBall.onlyGrabTeamId && Time.timeAsDouble + (double)duration < this.restrictTeamGrabEndTime)
@@ -221,7 +221,7 @@ public class MonkeBall : MonoBehaviourTick
 		return true;
 	}
 
-	// Token: 0x06002224 RID: 8740 RVA: 0x000B29FE File Offset: 0x000B0BFE
+	// Token: 0x06002224 RID: 8740 RVA: 0x000B29DE File Offset: 0x000B0BDE
 	private void Refresh()
 	{
 		if (this.gameBall.onlyGrabTeamId == -1)
@@ -232,13 +232,13 @@ public class MonkeBall : MonoBehaviourTick
 		this.mainRenderer.material = this.teamMaterial[this.gameBall.onlyGrabTeamId];
 	}
 
-	// Token: 0x06002225 RID: 8741 RVA: 0x000B2A3D File Offset: 0x000B0C3D
+	// Token: 0x06002225 RID: 8741 RVA: 0x000B2A1D File Offset: 0x000B0C1D
 	private static bool IsGamePlayer(Collider collider)
 	{
 		return GameBallPlayer.GetGamePlayer(collider, false) != null;
 	}
 
-	// Token: 0x06002226 RID: 8742 RVA: 0x000B2A4C File Offset: 0x000B0C4C
+	// Token: 0x06002226 RID: 8742 RVA: 0x000B2A2C File Offset: 0x000B0C2C
 	public void SetVisualOffset(bool detach)
 	{
 		if (detach)
@@ -252,7 +252,7 @@ public class MonkeBall : MonoBehaviourTick
 		this.ReattachVisuals();
 	}
 
-	// Token: 0x06002227 RID: 8743 RVA: 0x000B2AA0 File Offset: 0x000B0CA0
+	// Token: 0x06002227 RID: 8743 RVA: 0x000B2A80 File Offset: 0x000B0C80
 	private void ReattachVisuals()
 	{
 		if (!this._visualOffset)
@@ -265,7 +265,7 @@ public class MonkeBall : MonoBehaviourTick
 		this._visualOffset = false;
 	}
 
-	// Token: 0x06002228 RID: 8744 RVA: 0x000B2B00 File Offset: 0x000B0D00
+	// Token: 0x06002228 RID: 8744 RVA: 0x000B2AE0 File Offset: 0x000B0CE0
 	private void UpdateVisualOffset()
 	{
 		if (this._visualOffset)

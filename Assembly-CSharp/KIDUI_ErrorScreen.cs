@@ -5,7 +5,7 @@ using UnityEngine;
 // Token: 0x02000AAE RID: 2734
 public class KIDUI_ErrorScreen : MonoBehaviour
 {
-	// Token: 0x06004486 RID: 17542 RVA: 0x0016ADAD File Offset: 0x00168FAD
+	// Token: 0x06004486 RID: 17542 RVA: 0x0016AD8D File Offset: 0x00168F8D
 	public void ShowErrorScreen(string title, string email, string errorMessage)
 	{
 		this._titleTxt.text = title;
@@ -14,20 +14,20 @@ public class KIDUI_ErrorScreen : MonoBehaviour
 		base.gameObject.SetActive(true);
 	}
 
-	// Token: 0x06004487 RID: 17543 RVA: 0x0016ADDF File Offset: 0x00168FDF
+	// Token: 0x06004487 RID: 17543 RVA: 0x0016ADBF File Offset: 0x00168FBF
 	public void OnClose()
 	{
 		base.gameObject.SetActive(false);
 		this._mainScreen.ShowMainScreen(EMainScreenStatus.None);
 	}
 
-	// Token: 0x06004488 RID: 17544 RVA: 0x0016895E File Offset: 0x00166B5E
+	// Token: 0x06004488 RID: 17544 RVA: 0x0016893E File Offset: 0x00166B3E
 	public void OnQuitGame()
 	{
 		Application.Quit();
 	}
 
-	// Token: 0x06004489 RID: 17545 RVA: 0x0016ADF9 File Offset: 0x00168FF9
+	// Token: 0x06004489 RID: 17545 RVA: 0x0016ADD9 File Offset: 0x00168FD9
 	public void OnBack()
 	{
 		base.gameObject.SetActive(false);

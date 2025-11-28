@@ -6,7 +6,7 @@ using UnityEngine;
 // Token: 0x020007D6 RID: 2006
 public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 {
-	// Token: 0x06003491 RID: 13457 RVA: 0x00119EB4 File Offset: 0x001180B4
+	// Token: 0x06003491 RID: 13457 RVA: 0x00119E94 File Offset: 0x00118094
 	private void Awake()
 	{
 		this.prevTime = -1;
@@ -34,7 +34,7 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003492 RID: 13458 RVA: 0x00119F68 File Offset: 0x00118168
+	// Token: 0x06003492 RID: 13458 RVA: 0x00119F48 File Offset: 0x00118148
 	private void OnEnable()
 	{
 		GorillaTagCompetitiveManager.onStateChanged += new Action<GorillaTagCompetitiveManager.GameState>(this.HandleOnGameStateChanged);
@@ -48,14 +48,14 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 		this.DisplayStandardTimer(false);
 	}
 
-	// Token: 0x06003493 RID: 13459 RVA: 0x00119FCA File Offset: 0x001181CA
+	// Token: 0x06003493 RID: 13459 RVA: 0x00119FAA File Offset: 0x001181AA
 	private void OnDisable()
 	{
 		GorillaTagCompetitiveManager.onStateChanged -= new Action<GorillaTagCompetitiveManager.GameState>(this.HandleOnGameStateChanged);
 		GorillaTagCompetitiveManager.onUpdateRemainingTime -= new Action<float>(this.HandleOnTimeChanged);
 	}
 
-	// Token: 0x06003494 RID: 13460 RVA: 0x00119FF0 File Offset: 0x001181F0
+	// Token: 0x06003494 RID: 13460 RVA: 0x00119FD0 File Offset: 0x001181D0
 	private void HandleOnGameStateChanged(GorillaTagCompetitiveManager.GameState newState)
 	{
 		this.SetNewBackground(newState);
@@ -77,7 +77,7 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003495 RID: 13461 RVA: 0x0011A044 File Offset: 0x00118244
+	// Token: 0x06003495 RID: 13461 RVA: 0x0011A024 File Offset: 0x00118224
 	private void DisplayStandardTimer(bool bShow)
 	{
 		if (bShow)
@@ -91,7 +91,7 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003496 RID: 13462 RVA: 0x0011A098 File Offset: 0x00118298
+	// Token: 0x06003496 RID: 13462 RVA: 0x0011A078 File Offset: 0x00118278
 	private void DoPostRoundShow()
 	{
 		GorillaTagCompetitiveManager gorillaTagCompetitiveManager = GorillaGameManager.instance as GorillaTagCompetitiveManager;
@@ -178,7 +178,7 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003497 RID: 13463 RVA: 0x0011A3C0 File Offset: 0x001185C0
+	// Token: 0x06003497 RID: 13463 RVA: 0x0011A3A0 File Offset: 0x001185A0
 	private void HandleOnTimeChanged(float time)
 	{
 		int num = Mathf.CeilToInt(time);
@@ -208,7 +208,7 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003498 RID: 13464 RVA: 0x0011A4A8 File Offset: 0x001186A8
+	// Token: 0x06003498 RID: 13464 RVA: 0x0011A488 File Offset: 0x00118688
 	private void SetNewBackground(GorillaTagCompetitiveManager.GameState newState)
 	{
 		if (this.currentBackground != null)
@@ -226,7 +226,7 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06003499 RID: 13465 RVA: 0x0011A509 File Offset: 0x00118709
+	// Token: 0x06003499 RID: 13465 RVA: 0x0011A4E9 File Offset: 0x001186E9
 	private GameObject SelectBackground(GorillaTagCompetitiveManager.GameState newState)
 	{
 		switch (newState)
@@ -244,7 +244,7 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600349A RID: 13466 RVA: 0x0011A542 File Offset: 0x00118742
+	// Token: 0x0600349A RID: 13466 RVA: 0x0011A522 File Offset: 0x00118722
 	private Color GetTextColor(GorillaTagCompetitiveManager.GameState newState)
 	{
 		switch (newState)

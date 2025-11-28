@@ -6,13 +6,13 @@ using UnityEngine.AI;
 [Serializable]
 public class GRSenseLineOfSight
 {
-	// Token: 0x06002DEA RID: 11754 RVA: 0x000F96C6 File Offset: 0x000F78C6
+	// Token: 0x06002DEA RID: 11754 RVA: 0x000F96A6 File Offset: 0x000F78A6
 	public bool HasLineOfSight(Vector3 headPos, Vector3 targetPos)
 	{
 		return GRSenseLineOfSight.HasLineOfSight(headPos, targetPos, this.sightDist, this.visibilityMask.value, this.rayCastMode);
 	}
 
-	// Token: 0x06002DEB RID: 11755 RVA: 0x000F96E8 File Offset: 0x000F78E8
+	// Token: 0x06002DEB RID: 11755 RVA: 0x000F96C8 File Offset: 0x000F78C8
 	public static bool HasLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist, int layerMask, GRSenseLineOfSight.RaycastMode rayCastMode = GRSenseLineOfSight.RaycastMode.Geometry)
 	{
 		switch (rayCastMode)
@@ -30,14 +30,14 @@ public class GRSenseLineOfSight
 		}
 	}
 
-	// Token: 0x06002DEC RID: 11756 RVA: 0x000F9750 File Offset: 0x000F7950
+	// Token: 0x06002DEC RID: 11756 RVA: 0x000F9730 File Offset: 0x000F7930
 	public static bool HasGeoLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist, int layerMask)
 	{
 		float num = Vector3.Distance(targetPos, headPos);
 		return num <= sightDist && Physics.RaycastNonAlloc(new Ray(headPos, targetPos - headPos), GRSenseLineOfSight.visibilityHits, Mathf.Min(num, sightDist), layerMask, 1) < 1;
 	}
 
-	// Token: 0x06002DED RID: 11757 RVA: 0x000F9790 File Offset: 0x000F7990
+	// Token: 0x06002DED RID: 11757 RVA: 0x000F9770 File Offset: 0x000F7970
 	public static bool HasNavmeshLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist)
 	{
 		NavMeshHit navMeshHit;

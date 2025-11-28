@@ -10,7 +10,7 @@ public class GameSnappable : MonoBehaviour
 	{
 	}
 
-	// Token: 0x06002875 RID: 10357 RVA: 0x000D7410 File Offset: 0x000D5610
+	// Token: 0x06002875 RID: 10357 RVA: 0x000D73F0 File Offset: 0x000D55F0
 	public void GetSnapOffset(SnapJointType jointType, out Vector3 positionOffset, out Quaternion rotationOffset)
 	{
 		foreach (GameSnappable.SnapJointOffset snapJointOffset in this.snapOffsets)
@@ -26,7 +26,7 @@ public class GameSnappable : MonoBehaviour
 		rotationOffset = Quaternion.identity;
 	}
 
-	// Token: 0x06002876 RID: 10358 RVA: 0x000D749C File Offset: 0x000D569C
+	// Token: 0x06002876 RID: 10358 RVA: 0x000D747C File Offset: 0x000D567C
 	public SuperInfectionSnapPoint BestSnapPoint()
 	{
 		int heldByHandIndex = this.gameEntity.heldByHandIndex;
@@ -88,7 +88,7 @@ public class GameSnappable : MonoBehaviour
 		return null;
 	}
 
-	// Token: 0x06002877 RID: 10359 RVA: 0x000D76B0 File Offset: 0x000D58B0
+	// Token: 0x06002877 RID: 10359 RVA: 0x000D7690 File Offset: 0x000D5890
 	public GameEntityId BestSnapPointDock()
 	{
 		int heldByHandIndex = this.gameEntity.heldByHandIndex;
@@ -124,7 +124,7 @@ public class GameSnappable : MonoBehaviour
 		return snapPoints[num2].GetSnappedEntity().id;
 	}
 
-	// Token: 0x06002878 RID: 10360 RVA: 0x000D7808 File Offset: 0x000D5A08
+	// Token: 0x06002878 RID: 10360 RVA: 0x000D77E8 File Offset: 0x000D59E8
 	public bool CanGrabWithHand(bool leftHand)
 	{
 		if (this.snappedToJoint == null)
@@ -135,14 +135,14 @@ public class GameSnappable : MonoBehaviour
 		return (leftHand && jointType != SnapJointType.HandL && jointType != SnapJointType.ForearmL) || (!leftHand && jointType != SnapJointType.HandR && jointType != SnapJointType.ForearmR);
 	}
 
-	// Token: 0x06002879 RID: 10361 RVA: 0x000D7856 File Offset: 0x000D5A56
+	// Token: 0x06002879 RID: 10361 RVA: 0x000D7836 File Offset: 0x000D5A36
 	public void OnSnap()
 	{
 		this.snapSound.Play(null);
 		this.snapHaptic.PlayIfSnappedLocal(this.gameEntity);
 	}
 
-	// Token: 0x0600287A RID: 10362 RVA: 0x000D7878 File Offset: 0x000D5A78
+	// Token: 0x0600287A RID: 10362 RVA: 0x000D7858 File Offset: 0x000D5A58
 	public bool IsSnappedToLeftArm()
 	{
 		if (this.snappedToJoint == null)
@@ -153,7 +153,7 @@ public class GameSnappable : MonoBehaviour
 		return jointType == SnapJointType.HandL || jointType == SnapJointType.ForearmL;
 	}
 
-	// Token: 0x0600287B RID: 10363 RVA: 0x000D78B0 File Offset: 0x000D5AB0
+	// Token: 0x0600287B RID: 10363 RVA: 0x000D7890 File Offset: 0x000D5A90
 	public bool IsSnappedToRightArm()
 	{
 		if (this.snappedToJoint == null)
@@ -164,7 +164,7 @@ public class GameSnappable : MonoBehaviour
 		return jointType == SnapJointType.HandR || jointType == SnapJointType.ForearmR;
 	}
 
-	// Token: 0x0600287C RID: 10364 RVA: 0x000D78E7 File Offset: 0x000D5AE7
+	// Token: 0x0600287C RID: 10364 RVA: 0x000D78C7 File Offset: 0x000D5AC7
 	public void OnUnsnap()
 	{
 		this.unsnapSound.Play(null);

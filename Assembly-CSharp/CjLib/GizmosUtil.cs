@@ -6,14 +6,14 @@ namespace CjLib
 	// Token: 0x02001169 RID: 4457
 	public class GizmosUtil
 	{
-		// Token: 0x0600705C RID: 28764 RVA: 0x00248A0F File Offset: 0x00246C0F
+		// Token: 0x0600705C RID: 28764 RVA: 0x002489EF File Offset: 0x00246BEF
 		public static void DrawLine(Vector3 v0, Vector3 v1, Color color)
 		{
 			Gizmos.color = color;
 			Gizmos.DrawLine(v0, v1);
 		}
 
-		// Token: 0x0600705D RID: 28765 RVA: 0x00248A20 File Offset: 0x00246C20
+		// Token: 0x0600705D RID: 28765 RVA: 0x00248A00 File Offset: 0x00246C00
 		public static void DrawLines(Vector3[] aVert, Color color)
 		{
 			Gizmos.color = color;
@@ -23,7 +23,7 @@ namespace CjLib
 			}
 		}
 
-		// Token: 0x0600705E RID: 28766 RVA: 0x00248A58 File Offset: 0x00246C58
+		// Token: 0x0600705E RID: 28766 RVA: 0x00248A38 File Offset: 0x00246C38
 		public static void DrawLineStrip(Vector3[] aVert, Color color)
 		{
 			Gizmos.color = color;
@@ -33,7 +33,7 @@ namespace CjLib
 			}
 		}
 
-		// Token: 0x0600705F RID: 28767 RVA: 0x00248A90 File Offset: 0x00246C90
+		// Token: 0x0600705F RID: 28767 RVA: 0x00248A70 File Offset: 0x00246C70
 		public static void DrawBox(Vector3 center, Quaternion rotation, Vector3 dimensions, Color color, GizmosUtil.Style style = GizmosUtil.Style.FlatShaded)
 		{
 			if (dimensions.x < MathUtil.Epsilon || dimensions.y < MathUtil.Epsilon || dimensions.z < MathUtil.Epsilon)
@@ -65,7 +65,7 @@ namespace CjLib
 			Gizmos.DrawMesh(mesh, center, rotation, dimensions);
 		}
 
-		// Token: 0x06007060 RID: 28768 RVA: 0x00248B0C File Offset: 0x00246D0C
+		// Token: 0x06007060 RID: 28768 RVA: 0x00248AEC File Offset: 0x00246CEC
 		public static void DrawCylinder(Vector3 center, Quaternion rotation, float height, float radius, int numSegments, Color color, GizmosUtil.Style style = GizmosUtil.Style.SmoothShaded)
 		{
 			if (height < MathUtil.Epsilon || radius < MathUtil.Epsilon)
@@ -98,7 +98,7 @@ namespace CjLib
 			Gizmos.DrawMesh(mesh, center, rotation, new Vector3(radius, height, radius));
 		}
 
-		// Token: 0x06007061 RID: 28769 RVA: 0x00248B94 File Offset: 0x00246D94
+		// Token: 0x06007061 RID: 28769 RVA: 0x00248B74 File Offset: 0x00246D74
 		public static void DrawCylinder(Vector3 point0, Vector3 point1, float radius, int numSegments, Color color, GizmosUtil.Style style = GizmosUtil.Style.SmoothShaded)
 		{
 			Vector3 vector = point1 - point0;
@@ -113,7 +113,7 @@ namespace CjLib
 			GizmosUtil.DrawCylinder(center, rotation, magnitude, radius, numSegments, color, style);
 		}
 
-		// Token: 0x06007062 RID: 28770 RVA: 0x00248C18 File Offset: 0x00246E18
+		// Token: 0x06007062 RID: 28770 RVA: 0x00248BF8 File Offset: 0x00246DF8
 		public static void DrawSphere(Vector3 center, Quaternion rotation, float radius, int latSegments, int longSegments, Color color, GizmosUtil.Style style = GizmosUtil.Style.SmoothShaded)
 		{
 			if (radius < MathUtil.Epsilon)
@@ -146,13 +146,13 @@ namespace CjLib
 			Gizmos.DrawMesh(mesh, center, rotation, new Vector3(radius, radius, radius));
 		}
 
-		// Token: 0x06007063 RID: 28771 RVA: 0x00248C9A File Offset: 0x00246E9A
+		// Token: 0x06007063 RID: 28771 RVA: 0x00248C7A File Offset: 0x00246E7A
 		public static void DrawSphere(Vector3 center, float radius, int latSegments, int longSegments, Color color, GizmosUtil.Style style = GizmosUtil.Style.SmoothShaded)
 		{
 			GizmosUtil.DrawSphere(center, Quaternion.identity, radius, latSegments, longSegments, color, style);
 		}
 
-		// Token: 0x06007064 RID: 28772 RVA: 0x00248CB0 File Offset: 0x00246EB0
+		// Token: 0x06007064 RID: 28772 RVA: 0x00248C90 File Offset: 0x00246E90
 		public static void DrawCapsule(Vector3 center, Quaternion rotation, float height, float radius, int latSegmentsPerCap, int longSegmentsPerCap, Color color, GizmosUtil.Style style = GizmosUtil.Style.SmoothShaded)
 		{
 			if (height < MathUtil.Epsilon || radius < MathUtil.Epsilon)
@@ -198,7 +198,7 @@ namespace CjLib
 			Gizmos.DrawMesh(mesh2, center, rotation, new Vector3(radius, height, radius));
 		}
 
-		// Token: 0x06007065 RID: 28773 RVA: 0x00248E04 File Offset: 0x00247004
+		// Token: 0x06007065 RID: 28773 RVA: 0x00248DE4 File Offset: 0x00246FE4
 		public static void DrawCapsule(Vector3 point0, Vector3 point1, float radius, int latSegmentsPerCap, int longSegmentsPerCap, Color color, GizmosUtil.Style style = GizmosUtil.Style.SmoothShaded)
 		{
 			Vector3 vector = point1 - point0;
@@ -213,7 +213,7 @@ namespace CjLib
 			GizmosUtil.DrawCapsule(center, rotation, magnitude, radius, latSegmentsPerCap, longSegmentsPerCap, color, style);
 		}
 
-		// Token: 0x06007066 RID: 28774 RVA: 0x00248E88 File Offset: 0x00247088
+		// Token: 0x06007066 RID: 28774 RVA: 0x00248E68 File Offset: 0x00247068
 		public static void DrawCone(Vector3 baseCenter, Quaternion rotation, float height, float radius, int numSegments, Color color, GizmosUtil.Style style = GizmosUtil.Style.FlatShaded)
 		{
 			if (height < MathUtil.Epsilon || radius < MathUtil.Epsilon)
@@ -246,7 +246,7 @@ namespace CjLib
 			Gizmos.DrawMesh(mesh, baseCenter, rotation, new Vector3(radius, height, radius));
 		}
 
-		// Token: 0x06007067 RID: 28775 RVA: 0x00248F10 File Offset: 0x00247110
+		// Token: 0x06007067 RID: 28775 RVA: 0x00248EF0 File Offset: 0x002470F0
 		public static void DrawCone(Vector3 baseCenter, Vector3 top, float radius, int numSegments, Color color, GizmosUtil.Style style = GizmosUtil.Style.FlatShaded)
 		{
 			Vector3 vector = top - baseCenter;
@@ -260,7 +260,7 @@ namespace CjLib
 			GizmosUtil.DrawCone(baseCenter, rotation, magnitude, radius, numSegments, color, style);
 		}
 
-		// Token: 0x06007068 RID: 28776 RVA: 0x00248F7C File Offset: 0x0024717C
+		// Token: 0x06007068 RID: 28776 RVA: 0x00248F5C File Offset: 0x0024715C
 		public static void DrawArrow(Vector3 from, Vector3 to, float coneRadius, float coneHeight, int numSegments, float stemThickness, Color color, GizmosUtil.Style style = GizmosUtil.Style.FlatShaded)
 		{
 			Vector3 vector = to - from;
@@ -288,7 +288,7 @@ namespace CjLib
 			}
 		}
 
-		// Token: 0x06007069 RID: 28777 RVA: 0x00249042 File Offset: 0x00247242
+		// Token: 0x06007069 RID: 28777 RVA: 0x00249022 File Offset: 0x00247222
 		public static void DrawArrow(Vector3 from, Vector3 to, float size, Color color, GizmosUtil.Style style = GizmosUtil.Style.FlatShaded)
 		{
 			GizmosUtil.DrawArrow(from, to, 0.5f * size, size, 8, 0f, color, style);

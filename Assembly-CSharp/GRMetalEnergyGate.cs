@@ -6,14 +6,14 @@ using UnityEngine;
 // Token: 0x020006D0 RID: 1744
 public class GRMetalEnergyGate : MonoBehaviour
 {
-	// Token: 0x06002CC1 RID: 11457 RVA: 0x000F28FF File Offset: 0x000F0AFF
+	// Token: 0x06002CC1 RID: 11457 RVA: 0x000F28DF File Offset: 0x000F0ADF
 	private void OnEnable()
 	{
 		this.tool.OnEnergyChange += this.OnEnergyChange;
 		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
 	}
 
-	// Token: 0x06002CC2 RID: 11458 RVA: 0x000F2930 File Offset: 0x000F0B30
+	// Token: 0x06002CC2 RID: 11458 RVA: 0x000F2910 File Offset: 0x000F0B10
 	private void OnDisable()
 	{
 		if (this.tool != null)
@@ -26,7 +26,7 @@ public class GRMetalEnergyGate : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002CC3 RID: 11459 RVA: 0x000F2988 File Offset: 0x000F0B88
+	// Token: 0x06002CC3 RID: 11459 RVA: 0x000F2968 File Offset: 0x000F0B68
 	private void OnEnergyChange(GRTool tool, int energyChange, GameEntityId chargingEntityId)
 	{
 		GameEntity gameEntity = this.gameEntity.manager.GetGameEntity(chargingEntityId);
@@ -53,7 +53,7 @@ public class GRMetalEnergyGate : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002CC4 RID: 11460 RVA: 0x000F2A20 File Offset: 0x000F0C20
+	// Token: 0x06002CC4 RID: 11460 RVA: 0x000F2A00 File Offset: 0x000F0C00
 	private void OnEntityStateChanged(long prevState, long nextState)
 	{
 		if (!this.gameEntity.IsAuthority())
@@ -62,7 +62,7 @@ public class GRMetalEnergyGate : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002CC5 RID: 11461 RVA: 0x000F2A38 File Offset: 0x000F0C38
+	// Token: 0x06002CC5 RID: 11461 RVA: 0x000F2A18 File Offset: 0x000F0C18
 	public void SetState(GRMetalEnergyGate.State newState)
 	{
 		if (this.state != newState)
@@ -103,19 +103,19 @@ public class GRMetalEnergyGate : MonoBehaviour
 		}
 	}
 
-	// Token: 0x06002CC6 RID: 11462 RVA: 0x000F2B60 File Offset: 0x000F0D60
+	// Token: 0x06002CC6 RID: 11462 RVA: 0x000F2B40 File Offset: 0x000F0D40
 	public void OpenGate()
 	{
 		this.SetState(GRMetalEnergyGate.State.Open);
 	}
 
-	// Token: 0x06002CC7 RID: 11463 RVA: 0x000F2B69 File Offset: 0x000F0D69
+	// Token: 0x06002CC7 RID: 11463 RVA: 0x000F2B49 File Offset: 0x000F0D49
 	public void CloseGate()
 	{
 		this.SetState(GRMetalEnergyGate.State.Closed);
 	}
 
-	// Token: 0x06002CC8 RID: 11464 RVA: 0x000F2B72 File Offset: 0x000F0D72
+	// Token: 0x06002CC8 RID: 11464 RVA: 0x000F2B52 File Offset: 0x000F0D52
 	private IEnumerator UpdateDoorAnimation()
 	{
 		while ((this.state == GRMetalEnergyGate.State.Open && this.openProgress < 1f) || (this.state == GRMetalEnergyGate.State.Closed && this.openProgress > 0f))

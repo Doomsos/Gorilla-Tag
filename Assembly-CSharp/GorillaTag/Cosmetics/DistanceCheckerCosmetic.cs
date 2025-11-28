@@ -11,16 +11,16 @@ namespace GorillaTag.Cosmetics
 	public class DistanceCheckerCosmetic : MonoBehaviour, ISpawnable
 	{
 		// Token: 0x17000A4A RID: 2634
-		// (get) Token: 0x06006C75 RID: 27765 RVA: 0x002393A4 File Offset: 0x002375A4
-		// (set) Token: 0x06006C76 RID: 27766 RVA: 0x002393AC File Offset: 0x002375AC
+		// (get) Token: 0x06006C75 RID: 27765 RVA: 0x00239384 File Offset: 0x00237584
+		// (set) Token: 0x06006C76 RID: 27766 RVA: 0x0023938C File Offset: 0x0023758C
 		public bool IsSpawned { get; set; }
 
 		// Token: 0x17000A4B RID: 2635
-		// (get) Token: 0x06006C77 RID: 27767 RVA: 0x002393B5 File Offset: 0x002375B5
-		// (set) Token: 0x06006C78 RID: 27768 RVA: 0x002393BD File Offset: 0x002375BD
+		// (get) Token: 0x06006C77 RID: 27767 RVA: 0x00239395 File Offset: 0x00237595
+		// (set) Token: 0x06006C78 RID: 27768 RVA: 0x0023939D File Offset: 0x0023759D
 		public ECosmeticSelectSide CosmeticSelectedSide { get; set; }
 
-		// Token: 0x06006C79 RID: 27769 RVA: 0x002393C6 File Offset: 0x002375C6
+		// Token: 0x06006C79 RID: 27769 RVA: 0x002393A6 File Offset: 0x002375A6
 		public void OnSpawn(VRRig rig)
 		{
 			this.myRig = rig;
@@ -31,7 +31,7 @@ namespace GorillaTag.Cosmetics
 		{
 		}
 
-		// Token: 0x06006C7B RID: 27771 RVA: 0x002393CF File Offset: 0x002375CF
+		// Token: 0x06006C7B RID: 27771 RVA: 0x002393AF File Offset: 0x002375AF
 		private void OnEnable()
 		{
 			this.currentState = DistanceCheckerCosmetic.State.None;
@@ -43,25 +43,25 @@ namespace GorillaTag.Cosmetics
 			this.ResetClosestPlayer();
 		}
 
-		// Token: 0x06006C7C RID: 27772 RVA: 0x00239409 File Offset: 0x00237609
+		// Token: 0x06006C7C RID: 27772 RVA: 0x002393E9 File Offset: 0x002375E9
 		private void Update()
 		{
 			this.UpdateDistance();
 		}
 
-		// Token: 0x06006C7D RID: 27773 RVA: 0x00239411 File Offset: 0x00237611
+		// Token: 0x06006C7D RID: 27773 RVA: 0x002393F1 File Offset: 0x002375F1
 		private bool IsBelowThreshold(Vector3 distance)
 		{
 			return distance.IsShorterThan(this.distanceThreshold);
 		}
 
-		// Token: 0x06006C7E RID: 27774 RVA: 0x00239424 File Offset: 0x00237624
+		// Token: 0x06006C7E RID: 27774 RVA: 0x00239404 File Offset: 0x00237604
 		private bool IsAboveThreshold(Vector3 distance)
 		{
 			return distance.IsLongerThan(this.distanceThreshold);
 		}
 
-		// Token: 0x06006C7F RID: 27775 RVA: 0x00239438 File Offset: 0x00237638
+		// Token: 0x06006C7F RID: 27775 RVA: 0x00239418 File Offset: 0x00237618
 		private void UpdateClosestPlayer(bool others = false)
 		{
 			if (!PhotonNetwork.InRoom)
@@ -95,14 +95,14 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C80 RID: 27776 RVA: 0x00239554 File Offset: 0x00237754
+		// Token: 0x06006C80 RID: 27776 RVA: 0x00239534 File Offset: 0x00237734
 		private void ResetClosestPlayer()
 		{
 			this.closestDistance = Vector3.positiveInfinity;
 			this.currentClosestPlayer = null;
 		}
 
-		// Token: 0x06006C81 RID: 27777 RVA: 0x00239568 File Offset: 0x00237768
+		// Token: 0x06006C81 RID: 27777 RVA: 0x00239548 File Offset: 0x00237748
 		private void UpdateDistance()
 		{
 			bool flag = true;
@@ -172,7 +172,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		// Token: 0x06006C82 RID: 27778 RVA: 0x00239710 File Offset: 0x00237910
+		// Token: 0x06006C82 RID: 27778 RVA: 0x002396F0 File Offset: 0x002378F0
 		private void UpdateState(DistanceCheckerCosmetic.State newState)
 		{
 			if (this.currentState == newState)

@@ -8,11 +8,11 @@ using UnityEngine;
 public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 {
 	// Token: 0x1700042D RID: 1069
-	// (get) Token: 0x06002DD4 RID: 11732 RVA: 0x000F9026 File Offset: 0x000F7226
-	// (set) Token: 0x06002DD5 RID: 11733 RVA: 0x000F902E File Offset: 0x000F722E
+	// (get) Token: 0x06002DD4 RID: 11732 RVA: 0x000F9006 File Offset: 0x000F7206
+	// (set) Token: 0x06002DD5 RID: 11733 RVA: 0x000F900E File Offset: 0x000F720E
 	public bool TickRunning { get; set; }
 
-	// Token: 0x06002DD6 RID: 11734 RVA: 0x000F9037 File Offset: 0x000F7237
+	// Token: 0x06002DD6 RID: 11734 RVA: 0x000F9017 File Offset: 0x000F7217
 	public void Start()
 	{
 		this.targetPage = 0;
@@ -30,7 +30,7 @@ public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 		TickSystem<object>.RemoveTickCallback(this);
 	}
 
-	// Token: 0x06002DD9 RID: 11737 RVA: 0x000F9040 File Offset: 0x000F7240
+	// Token: 0x06002DD9 RID: 11737 RVA: 0x000F9020 File Offset: 0x000F7220
 	public void ShowText(bool showText)
 	{
 		foreach (TMP_Text tmp_Text in this.shelfNames)
@@ -39,7 +39,7 @@ public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 		}
 	}
 
-	// Token: 0x06002DDA RID: 11738 RVA: 0x000F9094 File Offset: 0x000F7294
+	// Token: 0x06002DDA RID: 11738 RVA: 0x000F9074 File Offset: 0x000F7274
 	public void InitFromNameList(List<string> shelves)
 	{
 		this.shelfNames.Clear();
@@ -53,7 +53,7 @@ public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 		this.UpdateVisuals();
 	}
 
-	// Token: 0x06002DDB RID: 11739 RVA: 0x000F90FC File Offset: 0x000F72FC
+	// Token: 0x06002DDB RID: 11739 RVA: 0x000F90DC File Offset: 0x000F72DC
 	public void Tick()
 	{
 		if (!this.isBeingDrivenRemotely)
@@ -87,26 +87,26 @@ public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 		this.lastAngle = this.currentAngle;
 	}
 
-	// Token: 0x06002DDC RID: 11740 RVA: 0x000F923B File Offset: 0x000F743B
+	// Token: 0x06002DDC RID: 11740 RVA: 0x000F921B File Offset: 0x000F741B
 	public void SetRotationSpeed(float speed)
 	{
 		this.rotSpeedMult = Mathf.Sign(speed) * Mathf.Pow(Mathf.Abs(speed), 2f);
 	}
 
-	// Token: 0x06002DDD RID: 11741 RVA: 0x000F925A File Offset: 0x000F745A
+	// Token: 0x06002DDD RID: 11741 RVA: 0x000F923A File Offset: 0x000F743A
 	public void SetTargetShelf(int shelf)
 	{
 		this.currentAngle += (float)(shelf - this.targetPage) * this.deltaAngle;
 		this.targetPage = shelf;
 	}
 
-	// Token: 0x06002DDE RID: 11742 RVA: 0x000F9280 File Offset: 0x000F7480
+	// Token: 0x06002DDE RID: 11742 RVA: 0x000F9260 File Offset: 0x000F7460
 	public void SetTargetAngle(float angle)
 	{
 		this.currentAngle = angle;
 	}
 
-	// Token: 0x06002DDF RID: 11743 RVA: 0x000F928C File Offset: 0x000F748C
+	// Token: 0x06002DDF RID: 11743 RVA: 0x000F926C File Offset: 0x000F746C
 	public void UpdateVisuals()
 	{
 		this.rotationWheel.localRotation = Quaternion.Euler(-this.currentAngle + 7.5f, 0f, 0f);

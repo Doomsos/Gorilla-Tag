@@ -10,7 +10,7 @@ using UnityEngine.XR;
 // Token: 0x02000586 RID: 1414
 public class BuilderPieceInteractor : MonoBehaviour
 {
-	// Token: 0x060023C8 RID: 9160 RVA: 0x000BBF94 File Offset: 0x000BA194
+	// Token: 0x060023C8 RID: 9160 RVA: 0x000BBF74 File Offset: 0x000BA174
 	private void Awake()
 	{
 		if (BuilderPieceInteractor.instance == null)
@@ -84,7 +84,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023C9 RID: 9161 RVA: 0x000BC2CC File Offset: 0x000BA4CC
+	// Token: 0x060023C9 RID: 9161 RVA: 0x000BC2AC File Offset: 0x000BA4AC
 	public bool GetIsHolding(XRNode node)
 	{
 		if (this.heldPiece == null)
@@ -103,7 +103,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 	{
 	}
 
-	// Token: 0x060023CB RID: 9163 RVA: 0x000BC304 File Offset: 0x000BA504
+	// Token: 0x060023CB RID: 9163 RVA: 0x000BC2E4 File Offset: 0x000BA4E4
 	public void StartFindNearbyPieces()
 	{
 		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
@@ -132,7 +132,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		JobHandle.ScheduleBatchedJobs();
 	}
 
-	// Token: 0x060023CC RID: 9164 RVA: 0x000BC4D4 File Offset: 0x000BA6D4
+	// Token: 0x060023CC RID: 9164 RVA: 0x000BC4B4 File Offset: 0x000BA6B4
 	private void CalcLocalGridPlanes()
 	{
 		this.checkNearbyPiecesHandle.Complete();
@@ -179,7 +179,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023CD RID: 9165 RVA: 0x000BC65C File Offset: 0x000BA85C
+	// Token: 0x060023CD RID: 9165 RVA: 0x000BC63C File Offset: 0x000BA83C
 	private void OnDestroy()
 	{
 		if (BuilderPieceInteractor.instance == this)
@@ -224,14 +224,14 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023CE RID: 9166 RVA: 0x000BC780 File Offset: 0x000BA980
+	// Token: 0x060023CE RID: 9166 RVA: 0x000BC760 File Offset: 0x000BA960
 	public bool BlockSnowballCreation()
 	{
 		BuilderTable builderTable;
 		return !(GorillaTagger.Instance == null) && BuilderTable.TryGetBuilderTableForZone(GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone, out builderTable) && (builderTable.IsInBuilderZone() && builderTable.isTableMutable && GorillaTagger.Instance.offlineVRRig.scaleFactor >= 0.99f);
 	}
 
-	// Token: 0x060023CF RID: 9167 RVA: 0x000BC7E4 File Offset: 0x000BA9E4
+	// Token: 0x060023CF RID: 9167 RVA: 0x000BC7C4 File Offset: 0x000BA9C4
 	public void OnLateUpdate()
 	{
 		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
@@ -308,7 +308,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023D0 RID: 9168 RVA: 0x000BCAEC File Offset: 0x000BACEC
+	// Token: 0x060023D0 RID: 9168 RVA: 0x000BCACC File Offset: 0x000BACCC
 	private void SetHandState(int handIndex, BuilderPieceInteractor.HandState newState)
 	{
 		if (this.handState[handIndex] == BuilderPieceInteractor.HandState.Empty && this.potentialHeldPiece[handIndex] != null)
@@ -344,7 +344,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023D1 RID: 9169 RVA: 0x000BCC08 File Offset: 0x000BAE08
+	// Token: 0x060023D1 RID: 9169 RVA: 0x000BCBE8 File Offset: 0x000BADE8
 	public void OnCountChangedForRoot(BuilderPiece piece)
 	{
 		if (piece == null)
@@ -362,7 +362,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023D2 RID: 9170 RVA: 0x000BCCBC File Offset: 0x000BAEBC
+	// Token: 0x060023D2 RID: 9170 RVA: 0x000BCC9C File Offset: 0x000BAE9C
 	private void UpdateHandState(BuilderPieceInteractor.HandType handType, Transform handTransform, Vector3 palmForwardLocal, Transform handAttachPoint, bool isGrabbing, bool wasGrabPressed, IHoldableObject heldEquipment, bool grabDisabled)
 	{
 		int num = (int)((handType + 1) % (BuilderPieceInteractor.HandType)2);
@@ -753,7 +753,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023D3 RID: 9171 RVA: 0x000BDE94 File Offset: 0x000BC094
+	// Token: 0x060023D3 RID: 9171 RVA: 0x000BDE74 File Offset: 0x000BC074
 	private void ClearGlowBumps(int handIndex)
 	{
 		BuilderTable builderTable;
@@ -777,7 +777,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		list.Clear();
 	}
 
-	// Token: 0x060023D4 RID: 9172 RVA: 0x000BDF0C File Offset: 0x000BC10C
+	// Token: 0x060023D4 RID: 9172 RVA: 0x000BDEEC File Offset: 0x000BC0EC
 	private void AddGlowBumps(int handIndex, List<BuilderPotentialPlacement> allPotentialPlacements)
 	{
 		this.ClearGlowBumps(handIndex);
@@ -847,7 +847,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023D5 RID: 9173 RVA: 0x000BE1DC File Offset: 0x000BC3DC
+	// Token: 0x060023D5 RID: 9173 RVA: 0x000BE1BC File Offset: 0x000BC3BC
 	private void UpdateGlowBumps(int handIndex, float intensity)
 	{
 		List<BuilderBumpGlow> list = this.glowBumps[handIndex];
@@ -857,7 +857,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023D6 RID: 9174 RVA: 0x000BE214 File Offset: 0x000BC414
+	// Token: 0x060023D6 RID: 9174 RVA: 0x000BE1F4 File Offset: 0x000BC3F4
 	private void UpdatePullApartOffset(int handIndex, BuilderPiece potentialGrabPiece, Vector3 pullApartDiff)
 	{
 		BuilderPiece parentPiece = potentialGrabPiece.parentPiece;
@@ -893,13 +893,13 @@ public class BuilderPieceInteractor : MonoBehaviour
 		potentialGrabPiece.transform.localPosition = vector4 + vector3;
 	}
 
-	// Token: 0x060023D7 RID: 9175 RVA: 0x000BE336 File Offset: 0x000BC536
+	// Token: 0x060023D7 RID: 9175 RVA: 0x000BE316 File Offset: 0x000BC516
 	private void ClearUnSnapOffset(int handIndex, BuilderPiece potentialGrabPiece)
 	{
 		this.UpdatePullApartOffset(handIndex, potentialGrabPiece, Vector3.zero);
 	}
 
-	// Token: 0x060023D8 RID: 9176 RVA: 0x000BE348 File Offset: 0x000BC548
+	// Token: 0x060023D8 RID: 9176 RVA: 0x000BE328 File Offset: 0x000BC528
 	public void AddPieceToHeld(BuilderPiece piece, bool isLeft, Vector3 localPosition, Quaternion localRotation)
 	{
 		int num = isLeft ? 0 : 1;
@@ -911,7 +911,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023D9 RID: 9177 RVA: 0x000BE38C File Offset: 0x000BC58C
+	// Token: 0x060023D9 RID: 9177 RVA: 0x000BE36C File Offset: 0x000BC56C
 	public void RemovePieceFromHeld(BuilderPiece piece)
 	{
 		for (int i = 0; i < 2; i++)
@@ -923,7 +923,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023DA RID: 9178 RVA: 0x000BE3C4 File Offset: 0x000BC5C4
+	// Token: 0x060023DA RID: 9178 RVA: 0x000BE3A4 File Offset: 0x000BC5A4
 	private void AddPieceToHand(BuilderPiece piece, int handIndex, Vector3 localPosition, Quaternion localRotation)
 	{
 		this.heldPiece[handIndex] = piece;
@@ -935,7 +935,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		this.heldCurrentPos[handIndex] = localPosition;
 	}
 
-	// Token: 0x060023DB RID: 9179 RVA: 0x000BE42D File Offset: 0x000BC62D
+	// Token: 0x060023DB RID: 9179 RVA: 0x000BE40D File Offset: 0x000BC60D
 	private void RemovePieceFromHand(BuilderPiece piece, int handIndex)
 	{
 		this.heldPiece[handIndex] = null;
@@ -944,7 +944,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		this.ClearGlowBumps(handIndex);
 	}
 
-	// Token: 0x060023DC RID: 9180 RVA: 0x000BE45C File Offset: 0x000BC65C
+	// Token: 0x060023DC RID: 9180 RVA: 0x000BE43C File Offset: 0x000BC63C
 	public void RemovePiecesFromHands()
 	{
 		for (int i = 0; i < 2; i++)
@@ -956,7 +956,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023DD RID: 9181 RVA: 0x000BE4A4 File Offset: 0x000BC6A4
+	// Token: 0x060023DD RID: 9181 RVA: 0x000BE484 File Offset: 0x000BC684
 	private void CalcPieceLocalPosAndRot(Vector3 worldPosition, Quaternion worldRotation, Transform attachPoint, out Vector3 localPosition, out Quaternion localRotation)
 	{
 		Quaternion rotation = attachPoint.transform.rotation;
@@ -965,14 +965,14 @@ public class BuilderPieceInteractor : MonoBehaviour
 		localPosition = Quaternion.Inverse(rotation) * (worldPosition - position);
 	}
 
-	// Token: 0x060023DE RID: 9182 RVA: 0x000BE4F9 File Offset: 0x000BC6F9
+	// Token: 0x060023DE RID: 9182 RVA: 0x000BE4D9 File Offset: 0x000BC6D9
 	public void DisableCollisionsWithHands()
 	{
 		this.DisableCollisionsWithHand(true);
 		this.DisableCollisionsWithHand(false);
 	}
 
-	// Token: 0x060023DF RID: 9183 RVA: 0x000BE50C File Offset: 0x000BC70C
+	// Token: 0x060023DF RID: 9183 RVA: 0x000BE4EC File Offset: 0x000BC6EC
 	private void DisableCollisionsWithHand(bool leftHand)
 	{
 		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
@@ -996,14 +996,14 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 	}
 
-	// Token: 0x060023E0 RID: 9184 RVA: 0x000BE5E5 File Offset: 0x000BC7E5
+	// Token: 0x060023E0 RID: 9184 RVA: 0x000BE5C5 File Offset: 0x000BC7C5
 	public void UpdatePieceDisables()
 	{
 		this.UpdatePieceDisablesForHand(true);
 		this.UpdatePieceDisablesForHand(false);
 	}
 
-	// Token: 0x060023E1 RID: 9185 RVA: 0x000BE5F8 File Offset: 0x000BC7F8
+	// Token: 0x060023E1 RID: 9185 RVA: 0x000BE5D8 File Offset: 0x000BC7D8
 	public void UpdatePieceDisablesForHand(bool leftHand)
 	{
 		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;

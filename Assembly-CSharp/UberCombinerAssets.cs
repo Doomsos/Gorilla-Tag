@@ -5,7 +5,7 @@ using UnityEngine;
 public class UberCombinerAssets : ScriptableObject
 {
 	// Token: 0x17000775 RID: 1909
-	// (get) Token: 0x06005047 RID: 20551 RVA: 0x0019CB97 File Offset: 0x0019AD97
+	// (get) Token: 0x06005047 RID: 20551 RVA: 0x0019CB77 File Offset: 0x0019AD77
 	public static UberCombinerAssets Instance
 	{
 		get
@@ -15,7 +15,7 @@ public class UberCombinerAssets : ScriptableObject
 		}
 	}
 
-	// Token: 0x06005048 RID: 20552 RVA: 0x0019CBAA File Offset: 0x0019ADAA
+	// Token: 0x06005048 RID: 20552 RVA: 0x0019CB8A File Offset: 0x0019AD8A
 	private void OnEnable()
 	{
 		this.Setup();

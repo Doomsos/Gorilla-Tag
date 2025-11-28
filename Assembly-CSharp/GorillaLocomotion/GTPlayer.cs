@@ -19,7 +19,7 @@ namespace GorillaLocomotion
 	public class GTPlayer : MonoBehaviour
 	{
 		// Token: 0x1700094C RID: 2380
-		// (get) Token: 0x06006317 RID: 25367 RVA: 0x001FEAD3 File Offset: 0x001FCCD3
+		// (get) Token: 0x06006317 RID: 25367 RVA: 0x001FEAB3 File Offset: 0x001FCCB3
 		public static GTPlayer Instance
 		{
 			get
@@ -29,7 +29,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700094D RID: 2381
-		// (get) Token: 0x06006318 RID: 25368 RVA: 0x001FEADA File Offset: 0x001FCCDA
+		// (get) Token: 0x06006318 RID: 25368 RVA: 0x001FEABA File Offset: 0x001FCCBA
 		public GTPlayer.HandState LeftHand
 		{
 			get
@@ -39,7 +39,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700094E RID: 2382
-		// (get) Token: 0x06006319 RID: 25369 RVA: 0x001FEAE2 File Offset: 0x001FCCE2
+		// (get) Token: 0x06006319 RID: 25369 RVA: 0x001FEAC2 File Offset: 0x001FCCC2
 		public GTPlayer.HandState RightHand
 		{
 			get
@@ -48,79 +48,79 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600631A RID: 25370 RVA: 0x001FEAEA File Offset: 0x001FCCEA
+		// Token: 0x0600631A RID: 25370 RVA: 0x001FEACA File Offset: 0x001FCCCA
 		public int GetMaterialTouchIndex(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).materialTouchIndex;
 		}
 
-		// Token: 0x0600631B RID: 25371 RVA: 0x001FEB02 File Offset: 0x001FCD02
+		// Token: 0x0600631B RID: 25371 RVA: 0x001FEAE2 File Offset: 0x001FCCE2
 		public GorillaSurfaceOverride GetSurfaceOverride(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).surfaceOverride;
 		}
 
-		// Token: 0x0600631C RID: 25372 RVA: 0x001FEB1A File Offset: 0x001FCD1A
+		// Token: 0x0600631C RID: 25372 RVA: 0x001FEAFA File Offset: 0x001FCCFA
 		public RaycastHit GetTouchHitInfo(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).hitInfo;
 		}
 
-		// Token: 0x0600631D RID: 25373 RVA: 0x001FEB32 File Offset: 0x001FCD32
+		// Token: 0x0600631D RID: 25373 RVA: 0x001FEB12 File Offset: 0x001FCD12
 		public bool IsHandTouching(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).wasColliding;
 		}
 
-		// Token: 0x0600631E RID: 25374 RVA: 0x001FEB4A File Offset: 0x001FCD4A
+		// Token: 0x0600631E RID: 25374 RVA: 0x001FEB2A File Offset: 0x001FCD2A
 		public GorillaVelocityTracker GetHandVelocityTracker(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).velocityTracker;
 		}
 
-		// Token: 0x0600631F RID: 25375 RVA: 0x001FEB62 File Offset: 0x001FCD62
+		// Token: 0x0600631F RID: 25375 RVA: 0x001FEB42 File Offset: 0x001FCD42
 		public GorillaVelocityTracker GetInteractPointVelocityTracker(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).interactPointVelocityTracker;
 		}
 
-		// Token: 0x06006320 RID: 25376 RVA: 0x001FEB7A File Offset: 0x001FCD7A
+		// Token: 0x06006320 RID: 25376 RVA: 0x001FEB5A File Offset: 0x001FCD5A
 		public Transform GetControllerTransform(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).controllerTransform;
 		}
 
-		// Token: 0x06006321 RID: 25377 RVA: 0x001FEB92 File Offset: 0x001FCD92
+		// Token: 0x06006321 RID: 25377 RVA: 0x001FEB72 File Offset: 0x001FCD72
 		public Transform GetHandFollower(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).handFollower;
 		}
 
-		// Token: 0x06006322 RID: 25378 RVA: 0x001FEBAA File Offset: 0x001FCDAA
+		// Token: 0x06006322 RID: 25378 RVA: 0x001FEB8A File Offset: 0x001FCD8A
 		public Vector3 GetHandOffset(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).handOffset;
 		}
 
-		// Token: 0x06006323 RID: 25379 RVA: 0x001FEBC2 File Offset: 0x001FCDC2
+		// Token: 0x06006323 RID: 25379 RVA: 0x001FEBA2 File Offset: 0x001FCDA2
 		public Quaternion GetHandRotOffset(bool isLeftHand)
 		{
 			return (isLeftHand ? this.leftHand : this.rightHand).handRotOffset;
 		}
 
-		// Token: 0x06006324 RID: 25380 RVA: 0x001FEBDA File Offset: 0x001FCDDA
+		// Token: 0x06006324 RID: 25380 RVA: 0x001FEBBA File Offset: 0x001FCDBA
 		public Vector3 GetHandPosition(bool isLeftHand, StiltID stiltID = StiltID.None)
 		{
 			return ((stiltID != StiltID.None) ? this.stiltStates[(int)stiltID] : (isLeftHand ? this.leftHand : this.rightHand)).lastPosition;
 		}
 
-		// Token: 0x06006325 RID: 25381 RVA: 0x001FEC04 File Offset: 0x001FCE04
+		// Token: 0x06006325 RID: 25381 RVA: 0x001FEBE4 File Offset: 0x001FCDE4
 		public void GetHandTapData(bool isLeftHand, StiltID stiltID, out bool wasHandTouching, out bool wasSliding, out int handMatIndex, out GorillaSurfaceOverride surfaceOverride, out RaycastHit handHitInfo, out Vector3 handPosition, out GorillaVelocityTracker handVelocityTracker)
 		{
 			((stiltID != StiltID.None) ? this.stiltStates[(int)stiltID] : (isLeftHand ? this.leftHand : this.rightHand)).GetHandTapData(out wasHandTouching, out wasSliding, out handMatIndex, out surfaceOverride, out handHitInfo, out handPosition, out handVelocityTracker);
 		}
 
-		// Token: 0x06006326 RID: 25382 RVA: 0x001FEC49 File Offset: 0x001FCE49
+		// Token: 0x06006326 RID: 25382 RVA: 0x001FEC29 File Offset: 0x001FCE29
 		public void SetHandOffsets(bool isLeftHand, Vector3 handOffset, Quaternion handRotOffset)
 		{
 			if (isLeftHand)
@@ -134,7 +134,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700094F RID: 2383
-		// (get) Token: 0x06006327 RID: 25383 RVA: 0x001FEC7F File Offset: 0x001FCE7F
+		// (get) Token: 0x06006327 RID: 25383 RVA: 0x001FEC5F File Offset: 0x001FCE5F
 		public Vector3 InstantaneousVelocity
 		{
 			get
@@ -144,7 +144,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000950 RID: 2384
-		// (get) Token: 0x06006328 RID: 25384 RVA: 0x001FEC87 File Offset: 0x001FCE87
+		// (get) Token: 0x06006328 RID: 25384 RVA: 0x001FEC67 File Offset: 0x001FCE67
 		public Vector3 AveragedVelocity
 		{
 			get
@@ -154,7 +154,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000951 RID: 2385
-		// (get) Token: 0x06006329 RID: 25385 RVA: 0x001FEC8F File Offset: 0x001FCE8F
+		// (get) Token: 0x06006329 RID: 25385 RVA: 0x001FEC6F File Offset: 0x001FCE6F
 		public Transform CosmeticsHeadTarget
 		{
 			get
@@ -164,7 +164,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000952 RID: 2386
-		// (get) Token: 0x0600632A RID: 25386 RVA: 0x001FEC97 File Offset: 0x001FCE97
+		// (get) Token: 0x0600632A RID: 25386 RVA: 0x001FEC77 File Offset: 0x001FCE77
 		public float scale
 		{
 			get
@@ -174,7 +174,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000953 RID: 2387
-		// (get) Token: 0x0600632B RID: 25387 RVA: 0x001FECA6 File Offset: 0x001FCEA6
+		// (get) Token: 0x0600632B RID: 25387 RVA: 0x001FEC86 File Offset: 0x001FCE86
 		public float NativeScale
 		{
 			get
@@ -184,7 +184,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000954 RID: 2388
-		// (get) Token: 0x0600632C RID: 25388 RVA: 0x001FECAE File Offset: 0x001FCEAE
+		// (get) Token: 0x0600632C RID: 25388 RVA: 0x001FEC8E File Offset: 0x001FCE8E
 		public float ScaleMultiplier
 		{
 			get
@@ -193,13 +193,13 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600632D RID: 25389 RVA: 0x001FECB6 File Offset: 0x001FCEB6
+		// Token: 0x0600632D RID: 25389 RVA: 0x001FEC96 File Offset: 0x001FCE96
 		public void SetScaleMultiplier(float s)
 		{
 			this.scaleMultiplier = s;
 		}
 
-		// Token: 0x0600632E RID: 25390 RVA: 0x001FECC0 File Offset: 0x001FCEC0
+		// Token: 0x0600632E RID: 25390 RVA: 0x001FECA0 File Offset: 0x001FCEA0
 		public void SetNativeScale(NativeSizeChangerSettings s)
 		{
 			float num = this.nativeScale;
@@ -226,7 +226,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000955 RID: 2389
-		// (get) Token: 0x0600632F RID: 25391 RVA: 0x001FED4B File Offset: 0x001FCF4B
+		// (get) Token: 0x0600632F RID: 25391 RVA: 0x001FED2B File Offset: 0x001FCF2B
 		public bool IsDefaultScale
 		{
 			get
@@ -236,7 +236,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000956 RID: 2390
-		// (get) Token: 0x06006330 RID: 25392 RVA: 0x001FED65 File Offset: 0x001FCF65
+		// (get) Token: 0x06006330 RID: 25392 RVA: 0x001FED45 File Offset: 0x001FCF45
 		public bool turnedThisFrame
 		{
 			get
@@ -246,7 +246,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000957 RID: 2391
-		// (get) Token: 0x06006331 RID: 25393 RVA: 0x001FED77 File Offset: 0x001FCF77
+		// (get) Token: 0x06006331 RID: 25393 RVA: 0x001FED57 File Offset: 0x001FCF57
 		public List<GTPlayer.MaterialData> materialData
 		{
 			get
@@ -256,12 +256,12 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000958 RID: 2392
-		// (get) Token: 0x06006332 RID: 25394 RVA: 0x001FED84 File Offset: 0x001FCF84
-		// (set) Token: 0x06006333 RID: 25395 RVA: 0x001FED8C File Offset: 0x001FCF8C
+		// (get) Token: 0x06006332 RID: 25394 RVA: 0x001FED64 File Offset: 0x001FCF64
+		// (set) Token: 0x06006333 RID: 25395 RVA: 0x001FED6C File Offset: 0x001FCF6C
 		protected bool IsFrozen { get; set; }
 
 		// Token: 0x17000959 RID: 2393
-		// (get) Token: 0x06006334 RID: 25396 RVA: 0x001FED95 File Offset: 0x001FCF95
+		// (get) Token: 0x06006334 RID: 25396 RVA: 0x001FED75 File Offset: 0x001FCF75
 		public List<WaterVolume> HeadOverlappingWaterVolumes
 		{
 			get
@@ -271,7 +271,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700095A RID: 2394
-		// (get) Token: 0x06006335 RID: 25397 RVA: 0x001FED9D File Offset: 0x001FCF9D
+		// (get) Token: 0x06006335 RID: 25397 RVA: 0x001FED7D File Offset: 0x001FCF7D
 		public bool InWater
 		{
 			get
@@ -281,7 +281,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700095B RID: 2395
-		// (get) Token: 0x06006336 RID: 25398 RVA: 0x001FEDA5 File Offset: 0x001FCFA5
+		// (get) Token: 0x06006336 RID: 25398 RVA: 0x001FED85 File Offset: 0x001FCF85
 		public bool HeadInWater
 		{
 			get
@@ -291,7 +291,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700095C RID: 2396
-		// (get) Token: 0x06006337 RID: 25399 RVA: 0x001FEDAD File Offset: 0x001FCFAD
+		// (get) Token: 0x06006337 RID: 25399 RVA: 0x001FED8D File Offset: 0x001FCF8D
 		public WaterVolume CurrentWaterVolume
 		{
 			get
@@ -305,7 +305,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700095D RID: 2397
-		// (get) Token: 0x06006338 RID: 25400 RVA: 0x001FEDCB File Offset: 0x001FCFCB
+		// (get) Token: 0x06006338 RID: 25400 RVA: 0x001FEDAB File Offset: 0x001FCFAB
 		public WaterVolume.SurfaceQuery WaterSurfaceForHead
 		{
 			get
@@ -315,7 +315,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700095E RID: 2398
-		// (get) Token: 0x06006339 RID: 25401 RVA: 0x001FEDD3 File Offset: 0x001FCFD3
+		// (get) Token: 0x06006339 RID: 25401 RVA: 0x001FEDB3 File Offset: 0x001FCFB3
 		public WaterVolume LeftHandWaterVolume
 		{
 			get
@@ -325,7 +325,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700095F RID: 2399
-		// (get) Token: 0x0600633A RID: 25402 RVA: 0x001FEDDB File Offset: 0x001FCFDB
+		// (get) Token: 0x0600633A RID: 25402 RVA: 0x001FEDBB File Offset: 0x001FCFBB
 		public WaterVolume RightHandWaterVolume
 		{
 			get
@@ -335,7 +335,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000960 RID: 2400
-		// (get) Token: 0x0600633B RID: 25403 RVA: 0x001FEDE3 File Offset: 0x001FCFE3
+		// (get) Token: 0x0600633B RID: 25403 RVA: 0x001FEDC3 File Offset: 0x001FCFC3
 		public WaterVolume.SurfaceQuery LeftHandWaterSurface
 		{
 			get
@@ -345,7 +345,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000961 RID: 2401
-		// (get) Token: 0x0600633C RID: 25404 RVA: 0x001FEDEB File Offset: 0x001FCFEB
+		// (get) Token: 0x0600633C RID: 25404 RVA: 0x001FEDCB File Offset: 0x001FCFCB
 		public WaterVolume.SurfaceQuery RightHandWaterSurface
 		{
 			get
@@ -355,7 +355,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000962 RID: 2402
-		// (get) Token: 0x0600633D RID: 25405 RVA: 0x001FEDF3 File Offset: 0x001FCFF3
+		// (get) Token: 0x0600633D RID: 25405 RVA: 0x001FEDD3 File Offset: 0x001FCFD3
 		public Vector3 LastLeftHandPosition
 		{
 			get
@@ -365,7 +365,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000963 RID: 2403
-		// (get) Token: 0x0600633E RID: 25406 RVA: 0x001FEE00 File Offset: 0x001FD000
+		// (get) Token: 0x0600633E RID: 25406 RVA: 0x001FEDE0 File Offset: 0x001FCFE0
 		public Vector3 LastRightHandPosition
 		{
 			get
@@ -375,7 +375,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000964 RID: 2404
-		// (get) Token: 0x0600633F RID: 25407 RVA: 0x001FEE0D File Offset: 0x001FD00D
+		// (get) Token: 0x0600633F RID: 25407 RVA: 0x001FEDED File Offset: 0x001FCFED
 		public Vector3 RigidbodyVelocity
 		{
 			get
@@ -385,7 +385,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000965 RID: 2405
-		// (get) Token: 0x06006340 RID: 25408 RVA: 0x001FEE1A File Offset: 0x001FD01A
+		// (get) Token: 0x06006340 RID: 25408 RVA: 0x001FEDFA File Offset: 0x001FCFFA
 		public Vector3 HeadCenterPosition
 		{
 			get
@@ -395,7 +395,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000966 RID: 2406
-		// (get) Token: 0x06006341 RID: 25409 RVA: 0x001FEE5A File Offset: 0x001FD05A
+		// (get) Token: 0x06006341 RID: 25409 RVA: 0x001FEE3A File Offset: 0x001FD03A
 		public bool HandContactingSurface
 		{
 			get
@@ -405,7 +405,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000967 RID: 2407
-		// (get) Token: 0x06006342 RID: 25410 RVA: 0x001FEE76 File Offset: 0x001FD076
+		// (get) Token: 0x06006342 RID: 25410 RVA: 0x001FEE56 File Offset: 0x001FD056
 		public bool BodyOnGround
 		{
 			get
@@ -415,7 +415,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000968 RID: 2408
-		// (get) Token: 0x06006343 RID: 25411 RVA: 0x001FEE8E File Offset: 0x001FD08E
+		// (get) Token: 0x06006343 RID: 25411 RVA: 0x001FEE6E File Offset: 0x001FD06E
 		public bool IsGroundedHand
 		{
 			get
@@ -425,7 +425,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000969 RID: 2409
-		// (get) Token: 0x06006344 RID: 25412 RVA: 0x001FEEBA File Offset: 0x001FD0BA
+		// (get) Token: 0x06006344 RID: 25412 RVA: 0x001FEE9A File Offset: 0x001FD09A
 		public bool IsGroundedButt
 		{
 			get
@@ -435,12 +435,12 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700096A RID: 2410
-		// (get) Token: 0x06006345 RID: 25413 RVA: 0x001FEEC2 File Offset: 0x001FD0C2
-		// (set) Token: 0x06006346 RID: 25414 RVA: 0x001FEECA File Offset: 0x001FD0CA
+		// (get) Token: 0x06006345 RID: 25413 RVA: 0x001FEEA2 File Offset: 0x001FD0A2
+		// (set) Token: 0x06006346 RID: 25414 RVA: 0x001FEEAA File Offset: 0x001FD0AA
 		public int ThrusterActiveAtFrame { get; set; }
 
 		// Token: 0x1700096B RID: 2411
-		// (get) Token: 0x06006347 RID: 25415 RVA: 0x001FEED3 File Offset: 0x001FD0D3
+		// (get) Token: 0x06006347 RID: 25415 RVA: 0x001FEEB3 File Offset: 0x001FD0B3
 		public bool IsThrusterActive
 		{
 			get
@@ -450,7 +450,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700096C RID: 2412
-		// (set) Token: 0x06006348 RID: 25416 RVA: 0x001FEEE2 File Offset: 0x001FD0E2
+		// (set) Token: 0x06006348 RID: 25416 RVA: 0x001FEEC2 File Offset: 0x001FD0C2
 		public Quaternion PlayerRotationOverride
 		{
 			set
@@ -461,12 +461,12 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700096D RID: 2413
-		// (get) Token: 0x06006349 RID: 25417 RVA: 0x001FEEF6 File Offset: 0x001FD0F6
-		// (set) Token: 0x0600634A RID: 25418 RVA: 0x001FEEFE File Offset: 0x001FD0FE
+		// (get) Token: 0x06006349 RID: 25417 RVA: 0x001FEED6 File Offset: 0x001FD0D6
+		// (set) Token: 0x0600634A RID: 25418 RVA: 0x001FEEDE File Offset: 0x001FD0DE
 		public bool IsBodySliding { get; set; }
 
 		// Token: 0x1700096E RID: 2414
-		// (get) Token: 0x0600634B RID: 25419 RVA: 0x001FEF07 File Offset: 0x001FD107
+		// (get) Token: 0x0600634B RID: 25419 RVA: 0x001FEEE7 File Offset: 0x001FD0E7
 		public GorillaClimbable CurrentClimbable
 		{
 			get
@@ -476,7 +476,7 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x1700096F RID: 2415
-		// (get) Token: 0x0600634C RID: 25420 RVA: 0x001FEF0F File Offset: 0x001FD10F
+		// (get) Token: 0x0600634C RID: 25420 RVA: 0x001FEEEF File Offset: 0x001FD0EF
 		public GorillaHandClimber CurrentClimber
 		{
 			get
@@ -486,8 +486,8 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000970 RID: 2416
-		// (get) Token: 0x0600634D RID: 25421 RVA: 0x001FEF17 File Offset: 0x001FD117
-		// (set) Token: 0x0600634E RID: 25422 RVA: 0x001FEF1F File Offset: 0x001FD11F
+		// (get) Token: 0x0600634D RID: 25421 RVA: 0x001FEEF7 File Offset: 0x001FD0F7
+		// (set) Token: 0x0600634E RID: 25422 RVA: 0x001FEEFF File Offset: 0x001FD0FF
 		public float jumpMultiplier
 		{
 			get
@@ -501,16 +501,16 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000971 RID: 2417
-		// (get) Token: 0x0600634F RID: 25423 RVA: 0x001FEF28 File Offset: 0x001FD128
-		// (set) Token: 0x06006350 RID: 25424 RVA: 0x001FEF30 File Offset: 0x001FD130
+		// (get) Token: 0x0600634F RID: 25423 RVA: 0x001FEF08 File Offset: 0x001FD108
+		// (set) Token: 0x06006350 RID: 25424 RVA: 0x001FEF10 File Offset: 0x001FD110
 		public float LastTouchedGroundAtNetworkTime { get; private set; }
 
 		// Token: 0x17000972 RID: 2418
-		// (get) Token: 0x06006351 RID: 25425 RVA: 0x001FEF39 File Offset: 0x001FD139
-		// (set) Token: 0x06006352 RID: 25426 RVA: 0x001FEF41 File Offset: 0x001FD141
+		// (get) Token: 0x06006351 RID: 25425 RVA: 0x001FEF19 File Offset: 0x001FD119
+		// (set) Token: 0x06006352 RID: 25426 RVA: 0x001FEF21 File Offset: 0x001FD121
 		public float LastHandTouchedGroundAtNetworkTime { get; private set; }
 
-		// Token: 0x06006353 RID: 25427 RVA: 0x001FEF4C File Offset: 0x001FD14C
+		// Token: 0x06006353 RID: 25427 RVA: 0x001FEF2C File Offset: 0x001FD12C
 		public void EnableStilt(StiltID stiltID, bool isLeftHand, Vector3 currentTipWorldPos, float maxArmLength, bool canTag, bool canStun, float customBoostFactor = 0f, GorillaVelocityTracker velocityTracker = null)
 		{
 			this.stiltStates[(int)stiltID] = new GTPlayer.HandState
@@ -528,19 +528,19 @@ namespace GorillaLocomotion
 			this.UpdateStiltOffset(stiltID, currentTipWorldPos);
 		}
 
-		// Token: 0x06006354 RID: 25428 RVA: 0x001FF012 File Offset: 0x001FD212
+		// Token: 0x06006354 RID: 25428 RVA: 0x001FEFF2 File Offset: 0x001FD1F2
 		public void DisableStilt(StiltID stiltID)
 		{
 			this.stiltStates[(int)stiltID].isActive = false;
 		}
 
-		// Token: 0x06006355 RID: 25429 RVA: 0x001FF026 File Offset: 0x001FD226
+		// Token: 0x06006355 RID: 25429 RVA: 0x001FF006 File Offset: 0x001FD206
 		public void UpdateStiltOffset(StiltID stiltID, Vector3 currentTipWorldPos)
 		{
 			this.stiltStates[(int)stiltID].handOffset = this.stiltStates[(int)stiltID].controllerTransform.InverseTransformPoint(currentTipWorldPos);
 		}
 
-		// Token: 0x06006356 RID: 25430 RVA: 0x001FF050 File Offset: 0x001FD250
+		// Token: 0x06006356 RID: 25430 RVA: 0x001FF030 File Offset: 0x001FD230
 		private void Awake()
 		{
 			if (GTPlayer._instance != null && GTPlayer._instance != this)
@@ -580,7 +580,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006357 RID: 25431 RVA: 0x001FF1E4 File Offset: 0x001FD3E4
+		// Token: 0x06006357 RID: 25431 RVA: 0x001FF1C4 File Offset: 0x001FD3C4
 		protected void Start()
 		{
 			if (this.mainCamera == null)
@@ -594,7 +594,7 @@ namespace GorillaLocomotion
 			this.Turn(degrees);
 		}
 
-		// Token: 0x06006358 RID: 25432 RVA: 0x001FF281 File Offset: 0x001FD481
+		// Token: 0x06006358 RID: 25432 RVA: 0x001FF261 File Offset: 0x001FD461
 		protected void OnDestroy()
 		{
 			if (GTPlayer._instance == this)
@@ -608,7 +608,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006359 RID: 25433 RVA: 0x001FF2BC File Offset: 0x001FD4BC
+		// Token: 0x06006359 RID: 25433 RVA: 0x001FF29C File Offset: 0x001FD49C
 		public void InitializeValues()
 		{
 			Physics.SyncTransforms();
@@ -634,7 +634,7 @@ namespace GorillaLocomotion
 			this.ForceRigidBodySync();
 		}
 
-		// Token: 0x0600635A RID: 25434 RVA: 0x001FF428 File Offset: 0x001FD628
+		// Token: 0x0600635A RID: 25434 RVA: 0x001FF408 File Offset: 0x001FD608
 		public void SetHalloweenLevitation(float levitateStrength, float levitateDuration, float levitateBlendOutDuration, float levitateBonusStrength, float levitateBonusOffAtYSpeed, float levitateBonusFullAtYSpeed)
 		{
 			this.halloweenLevitationStrength = levitateStrength;
@@ -645,13 +645,13 @@ namespace GorillaLocomotion
 			this.halloweenLevitationBonusStrength = levitateBonusStrength;
 		}
 
-		// Token: 0x0600635B RID: 25435 RVA: 0x001FF459 File Offset: 0x001FD659
+		// Token: 0x0600635B RID: 25435 RVA: 0x001FF439 File Offset: 0x001FD639
 		public void TeleportToTrain(bool enable)
 		{
 			this.teleportToTrain = enable;
 		}
 
-		// Token: 0x0600635C RID: 25436 RVA: 0x001FF464 File Offset: 0x001FD664
+		// Token: 0x0600635C RID: 25436 RVA: 0x001FF444 File Offset: 0x001FD644
 		public void TeleportTo(Vector3 position, Quaternion rotation, bool keepVelocity = false, bool center = false)
 		{
 			if (center)
@@ -690,7 +690,7 @@ namespace GorillaLocomotion
 			this.ForceRigidBodySync();
 		}
 
-		// Token: 0x0600635D RID: 25437 RVA: 0x001FF620 File Offset: 0x001FD820
+		// Token: 0x0600635D RID: 25437 RVA: 0x001FF600 File Offset: 0x001FD800
 		public void TeleportTo(Transform destination, bool matchDestinationRotation = true, bool maintainVelocity = true)
 		{
 			Vector3 position = base.transform.position;
@@ -719,7 +719,7 @@ namespace GorillaLocomotion
 			this.ForceRigidBodySync();
 		}
 
-		// Token: 0x0600635E RID: 25438 RVA: 0x001FF704 File Offset: 0x001FD904
+		// Token: 0x0600635E RID: 25438 RVA: 0x001FF6E4 File Offset: 0x001FD8E4
 		public void AddForce(Vector3 force, ForceMode mode)
 		{
 			if (mode == 2)
@@ -735,7 +735,7 @@ namespace GorillaLocomotion
 			this.playerRigidBody.AddForce(force, mode);
 		}
 
-		// Token: 0x0600635F RID: 25439 RVA: 0x001FF764 File Offset: 0x001FD964
+		// Token: 0x0600635F RID: 25439 RVA: 0x001FF744 File Offset: 0x001FD944
 		public void SetPlayerVelocity(Vector3 newVelocity)
 		{
 			for (int i = 0; i < this.velocityHistory.Length; i++)
@@ -745,19 +745,19 @@ namespace GorillaLocomotion
 			this.playerRigidBody.AddForce(newVelocity - this.playerRigidBody.linearVelocity, 2);
 		}
 
-		// Token: 0x06006360 RID: 25440 RVA: 0x001FF7AE File Offset: 0x001FD9AE
+		// Token: 0x06006360 RID: 25440 RVA: 0x001FF78E File Offset: 0x001FD98E
 		public void SetGravityOverride(Object caller, Action<GTPlayer> gravityFunction)
 		{
 			this.gravityOverrides[caller] = gravityFunction;
 		}
 
-		// Token: 0x06006361 RID: 25441 RVA: 0x001FF7BD File Offset: 0x001FD9BD
+		// Token: 0x06006361 RID: 25441 RVA: 0x001FF79D File Offset: 0x001FD99D
 		public void UnsetGravityOverride(Object caller)
 		{
 			this.gravityOverrides.Remove(caller);
 		}
 
-		// Token: 0x06006362 RID: 25442 RVA: 0x001FF7CC File Offset: 0x001FD9CC
+		// Token: 0x06006362 RID: 25442 RVA: 0x001FF7AC File Offset: 0x001FD9AC
 		private void ApplyGravityOverrides()
 		{
 			foreach (KeyValuePair<Object, Action<GTPlayer>> keyValuePair in this.gravityOverrides)
@@ -766,7 +766,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006363 RID: 25443 RVA: 0x001FF828 File Offset: 0x001FDA28
+		// Token: 0x06006363 RID: 25443 RVA: 0x001FF808 File Offset: 0x001FDA08
 		public void ApplyKnockback(Vector3 direction, float speed, bool forceOffTheGround = false)
 		{
 			if (forceOffTheGround)
@@ -793,7 +793,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006364 RID: 25444 RVA: 0x001FF918 File Offset: 0x001FDB18
+		// Token: 0x06006364 RID: 25444 RVA: 0x001FF8F8 File Offset: 0x001FDAF8
 		public void ApplyClampedKnockback(Vector3 direction, float speed, float boostMultiplier, bool forceOffTheGround = false)
 		{
 			if (forceOffTheGround)
@@ -824,7 +824,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006365 RID: 25445 RVA: 0x001FFA1C File Offset: 0x001FDC1C
+		// Token: 0x06006365 RID: 25445 RVA: 0x001FF9FC File Offset: 0x001FDBFC
 		public void FixedUpdate()
 		{
 			this.AntiTeleportTechnology();
@@ -1080,23 +1080,23 @@ namespace GorillaLocomotion
 		}
 
 		// Token: 0x17000973 RID: 2419
-		// (get) Token: 0x06006366 RID: 25446 RVA: 0x002008E9 File Offset: 0x001FEAE9
-		// (set) Token: 0x06006367 RID: 25447 RVA: 0x002008F1 File Offset: 0x001FEAF1
+		// (get) Token: 0x06006366 RID: 25446 RVA: 0x002008C9 File Offset: 0x001FEAC9
+		// (set) Token: 0x06006367 RID: 25447 RVA: 0x002008D1 File Offset: 0x001FEAD1
 		public bool isHoverAllowed { get; private set; }
 
 		// Token: 0x17000974 RID: 2420
-		// (get) Token: 0x06006368 RID: 25448 RVA: 0x002008FA File Offset: 0x001FEAFA
-		// (set) Token: 0x06006369 RID: 25449 RVA: 0x00200902 File Offset: 0x001FEB02
+		// (get) Token: 0x06006368 RID: 25448 RVA: 0x002008DA File Offset: 0x001FEADA
+		// (set) Token: 0x06006369 RID: 25449 RVA: 0x002008E2 File Offset: 0x001FEAE2
 		public bool enableHoverMode { get; private set; }
 
-		// Token: 0x0600636A RID: 25450 RVA: 0x0020090B File Offset: 0x001FEB0B
+		// Token: 0x0600636A RID: 25450 RVA: 0x002008EB File Offset: 0x001FEAEB
 		public void SetHoverboardPosRot(Vector3 worldPos, Quaternion worldRot)
 		{
 			this.hoverboardPlayerLocalPos = this.headCollider.transform.InverseTransformPoint(worldPos);
 			this.hoverboardPlayerLocalRot = this.headCollider.transform.InverseTransformRotation(worldRot);
 		}
 
-		// Token: 0x0600636B RID: 25451 RVA: 0x0020093C File Offset: 0x001FEB3C
+		// Token: 0x0600636B RID: 25451 RVA: 0x0020091C File Offset: 0x001FEB1C
 		private void HoverboardLateUpdate()
 		{
 			Vector3 eulerAngles = this.headCollider.transform.eulerAngles;
@@ -1129,7 +1129,7 @@ namespace GorillaLocomotion
 			this.bodyCollider.enabled = (this.bodyCollider.transform.position - this.hoverboardVisual.transform.TransformPoint(Vector3.up * this.hoverBodyCollisionRadiusUpOffset)).IsLongerThan(this.hoverBodyHasCollisionsOutsideRadius);
 		}
 
-		// Token: 0x0600636C RID: 25452 RVA: 0x00200A84 File Offset: 0x001FEC84
+		// Token: 0x0600636C RID: 25452 RVA: 0x00200A64 File Offset: 0x001FEC64
 		private Vector3 HoverboardFixedUpdate(Vector3 velocity)
 		{
 			this.hoverboardVisual.transform.position = this.headCollider.transform.TransformPoint(this.hoverboardPlayerLocalPos);
@@ -1228,7 +1228,7 @@ namespace GorillaLocomotion
 			return velocity;
 		}
 
-		// Token: 0x0600636D RID: 25453 RVA: 0x00200FF4 File Offset: 0x001FF1F4
+		// Token: 0x0600636D RID: 25453 RVA: 0x00200FD4 File Offset: 0x001FF1D4
 		public void GrabPersonalHoverboard(bool isLeftHand, Vector3 pos, Quaternion rot, Color col)
 		{
 			if (this.hoverboardVisual.IsHeld)
@@ -1240,7 +1240,7 @@ namespace GorillaLocomotion
 			FreeHoverboardManager.instance.PreserveMaxHoverboardsConstraint(NetworkSystem.Instance.LocalPlayer.ActorNumber);
 		}
 
-		// Token: 0x0600636E RID: 25454 RVA: 0x00201050 File Offset: 0x001FF250
+		// Token: 0x0600636E RID: 25454 RVA: 0x00201030 File Offset: 0x001FF230
 		public void SetHoverAllowed(bool allowed, bool force = false)
 		{
 			if (allowed)
@@ -1261,7 +1261,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600636F RID: 25455 RVA: 0x002010C8 File Offset: 0x001FF2C8
+		// Token: 0x0600636F RID: 25455 RVA: 0x002010A8 File Offset: 0x001FF2A8
 		public void SetHoverActive(bool enable)
 		{
 			if (enable && !this.isHoverAllowed)
@@ -1282,7 +1282,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006370 RID: 25456 RVA: 0x00201138 File Offset: 0x001FF338
+		// Token: 0x06006370 RID: 25456 RVA: 0x00201118 File Offset: 0x001FF318
 		private void BodyCollider()
 		{
 			if (this.MaxSphereSizeForNoOverlap(this.bodyInitialRadius * this.scale, this.PositionWithOffset(this.headCollider.transform, this.bodyOffset), false, out this.bodyMaxRadius))
@@ -1316,13 +1316,13 @@ namespace GorillaLocomotion
 			this.bodyCollider.transform.eulerAngles = new Vector3(0f, this.headCollider.transform.eulerAngles.y, 0f);
 		}
 
-		// Token: 0x06006371 RID: 25457 RVA: 0x0020134C File Offset: 0x001FF54C
+		// Token: 0x06006371 RID: 25457 RVA: 0x0020132C File Offset: 0x001FF52C
 		private Vector3 PositionWithOffset(Transform transformToModify, Vector3 offsetVector)
 		{
 			return transformToModify.position + transformToModify.rotation * offsetVector * this.scale;
 		}
 
-		// Token: 0x06006372 RID: 25458 RVA: 0x00201370 File Offset: 0x001FF570
+		// Token: 0x06006372 RID: 25458 RVA: 0x00201350 File Offset: 0x001FF550
 		public void ScaleAwayFromPoint(float oldScale, float newScale, Vector3 scaleCenter)
 		{
 			if (oldScale < newScale)
@@ -1333,7 +1333,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006373 RID: 25459 RVA: 0x002013E8 File Offset: 0x001FF5E8
+		// Token: 0x06006373 RID: 25459 RVA: 0x002013C8 File Offset: 0x001FF5C8
 		private static Vector3 ScalePointAwayFromCenter(Vector3 point, float baseRadius, float oldScale, float newScale, Vector3 scaleCenter)
 		{
 			float magnitude = (point - scaleCenter).magnitude;
@@ -1341,7 +1341,7 @@ namespace GorillaLocomotion
 			return scaleCenter + (point - scaleCenter) * num / magnitude;
 		}
 
-		// Token: 0x06006374 RID: 25460 RVA: 0x00201430 File Offset: 0x001FF630
+		// Token: 0x06006374 RID: 25460 RVA: 0x00201410 File Offset: 0x001FF610
 		private void OnBeforeRenderInit()
 		{
 			if (Application.isPlaying && !this.hasCorrectedForTracking && this.mainCamera != null && this.mainCamera.transform.localPosition != Vector3.zero)
@@ -1353,7 +1353,7 @@ namespace GorillaLocomotion
 			Application.onBeforeRender -= new UnityAction(this.OnBeforeRenderInit);
 		}
 
-		// Token: 0x06006375 RID: 25461 RVA: 0x002014BC File Offset: 0x001FF6BC
+		// Token: 0x06006375 RID: 25461 RVA: 0x0020149C File Offset: 0x001FF69C
 		private void LateUpdate()
 		{
 			Vector3 vector = this.antiDriftLastPosition.GetValueOrDefault();
@@ -2059,7 +2059,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006376 RID: 25462 RVA: 0x0020342C File Offset: 0x0020162C
+		// Token: 0x06006376 RID: 25462 RVA: 0x0020340C File Offset: 0x0020160C
 		private float ApplyNativeScaleAdjustment(float adjustedMagnitude)
 		{
 			if (this.nativeScale > 0f && this.nativeScale != 1f)
@@ -2069,7 +2069,7 @@ namespace GorillaLocomotion
 			return adjustedMagnitude;
 		}
 
-		// Token: 0x06006377 RID: 25463 RVA: 0x00203460 File Offset: 0x00201660
+		// Token: 0x06006377 RID: 25463 RVA: 0x00203440 File Offset: 0x00201640
 		private float RotateWithSurface(Quaternion rotationDelta, Vector3 pivot)
 		{
 			Quaternion quaternion;
@@ -2092,7 +2092,7 @@ namespace GorillaLocomotion
 			return 0f;
 		}
 
-		// Token: 0x06006378 RID: 25464 RVA: 0x002034E4 File Offset: 0x002016E4
+		// Token: 0x06006378 RID: 25464 RVA: 0x002034C4 File Offset: 0x002016C4
 		private void stuckHandsCheckFixedUpdate()
 		{
 			Vector3 currentHandPosition = this.leftHand.GetCurrentHandPosition();
@@ -2101,7 +2101,7 @@ namespace GorillaLocomotion
 			this.stuckRight = (!this.controllerState.RightValid || (this.rightHand.isColliding && (currentHandPosition2 - this.rightHand.GetLastPosition()).magnitude > this.unStickDistance * this.scale && !Physics.Raycast(this.headCollider.transform.position, (currentHandPosition2 - this.headCollider.transform.position).normalized, (currentHandPosition2 - this.headCollider.transform.position).magnitude, this.locomotionEnabledLayers.value)));
 		}
 
-		// Token: 0x06006379 RID: 25465 RVA: 0x00203670 File Offset: 0x00201870
+		// Token: 0x06006379 RID: 25465 RVA: 0x00203650 File Offset: 0x00201850
 		private void stuckHandsCheckLateUpdate(ref Vector3 finalLeftHandPosition, ref Vector3 finalRightHandPosition)
 		{
 			if (this.stuckLeft)
@@ -2116,7 +2116,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600637A RID: 25466 RVA: 0x002036DC File Offset: 0x002018DC
+		// Token: 0x0600637A RID: 25466 RVA: 0x002036BC File Offset: 0x002018BC
 		private void handleClimbing(float deltaTime)
 		{
 			if (this.isClimbing && (this.inOverlay || this.climbHelper == null || this.currentClimbable == null || !this.currentClimbable.isActiveAndEnabled))
@@ -2148,7 +2148,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600637B RID: 25467 RVA: 0x0020389B File Offset: 0x00201A9B
+		// Token: 0x0600637B RID: 25467 RVA: 0x0020387B File Offset: 0x00201A7B
 		public void RequestTentacleMove(bool isLeftHand, Vector3 move)
 		{
 			if (isLeftHand)
@@ -2161,7 +2161,7 @@ namespace GorillaLocomotion
 			this.rightHandTentacleMove = move;
 		}
 
-		// Token: 0x0600637C RID: 25468 RVA: 0x002038C0 File Offset: 0x00201AC0
+		// Token: 0x0600637C RID: 25468 RVA: 0x002038A0 File Offset: 0x00201AA0
 		public void HandleTentacleMovement()
 		{
 			Vector3 vector;
@@ -2191,7 +2191,7 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		// Token: 0x0600637D RID: 25469 RVA: 0x00203960 File Offset: 0x00201B60
+		// Token: 0x0600637D RID: 25469 RVA: 0x00203940 File Offset: 0x00201B40
 		public HandLinkAuthorityStatus GetSelfHandLinkAuthority()
 		{
 			int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
@@ -2210,7 +2210,7 @@ namespace GorillaLocomotion
 			return new HandLinkAuthorityStatus(HandLinkAuthorityType.None, this.LastTouchedGroundAtNetworkTime, actorNumber);
 		}
 
-		// Token: 0x0600637E RID: 25470 RVA: 0x002039C8 File Offset: 0x00201BC8
+		// Token: 0x0600637E RID: 25470 RVA: 0x002039A8 File Offset: 0x00201BA8
 		private void HandleHandLink()
 		{
 			HandLink leftHandLink = VRRig.LocalRig.leftHandLink;
@@ -2351,7 +2351,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600637F RID: 25471 RVA: 0x00203C1C File Offset: 0x00201E1C
+		// Token: 0x0600637F RID: 25471 RVA: 0x00203BFC File Offset: 0x00201DFC
 		private void HandLink_PositionTriple(HandLink linkA, HandLink linkB)
 		{
 			Vector3 vector = linkA.transform.position - linkA.grabbedLink.transform.position;
@@ -2367,7 +2367,7 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		// Token: 0x06006380 RID: 25472 RVA: 0x00203CE0 File Offset: 0x00201EE0
+		// Token: 0x06006380 RID: 25472 RVA: 0x00203CC0 File Offset: 0x00201EC0
 		private void HandLink_PositionBoth(HandLink link)
 		{
 			Vector3 vector = (link.grabbedLink.transform.position - link.transform.position) * 0.5f;
@@ -2385,7 +2385,7 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		// Token: 0x06006381 RID: 25473 RVA: 0x00203D6C File Offset: 0x00201F6C
+		// Token: 0x06006381 RID: 25473 RVA: 0x00203D4C File Offset: 0x00201F4C
 		private void HandLink_PositionBoth_BothHands(HandLink link1, HandLink link2)
 		{
 			Vector3 vector = (link1.grabbedLink.transform.position - link1.transform.position) * 0.5f;
@@ -2405,7 +2405,7 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		// Token: 0x06006382 RID: 25474 RVA: 0x00203E34 File Offset: 0x00202034
+		// Token: 0x06006382 RID: 25474 RVA: 0x00203E14 File Offset: 0x00202014
 		private void HandLink_PositionChild_LocalPlayer(HandLink parentLink)
 		{
 			Vector3 vector = parentLink.grabbedLink.transform.position - parentLink.transform.position;
@@ -2413,7 +2413,7 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		// Token: 0x06006383 RID: 25475 RVA: 0x00203E90 File Offset: 0x00202090
+		// Token: 0x06006383 RID: 25475 RVA: 0x00203E70 File Offset: 0x00202070
 		private void HandLink_PositionChild_LocalPlayer(HandLink linkA, HandLink linkB)
 		{
 			Vector3 vector = linkA.grabbedLink.transform.position - linkA.transform.position;
@@ -2422,7 +2422,7 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		// Token: 0x06006384 RID: 25476 RVA: 0x00203F1C File Offset: 0x0020211C
+		// Token: 0x06006384 RID: 25476 RVA: 0x00203EFC File Offset: 0x002020FC
 		private void HandLink_PositionChild_RemotePlayer(HandLink childLink)
 		{
 			Vector3 movement = childLink.transform.position - childLink.grabbedLink.transform.position;
@@ -2435,7 +2435,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006385 RID: 25477 RVA: 0x00203F6C File Offset: 0x0020216C
+		// Token: 0x06006385 RID: 25477 RVA: 0x00203F4C File Offset: 0x0020214C
 		private void HandLink_PositionChild_RemotePlayer_BothHands(HandLink childLink1, HandLink childLink2)
 		{
 			Vector3 vector = childLink1.transform.position - childLink1.grabbedLink.transform.position;
@@ -2450,7 +2450,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006386 RID: 25478 RVA: 0x00203FF0 File Offset: 0x002021F0
+		// Token: 0x06006386 RID: 25478 RVA: 0x00203FD0 File Offset: 0x002021D0
 		private bool IterativeCollisionSphereCast(Vector3 startPosition, float sphereRadius, Vector3 movementVector, Vector3 boostVector, out Vector3 endPosition, bool singleHand, out float slipPercentage, out RaycastHit iterativeHitInfo, bool fullSlide)
 		{
 			slipPercentage = this.defaultSlideFactor;
@@ -2491,7 +2491,7 @@ namespace GorillaLocomotion
 			return false;
 		}
 
-		// Token: 0x06006387 RID: 25479 RVA: 0x002041AC File Offset: 0x002023AC
+		// Token: 0x06006387 RID: 25479 RVA: 0x0020418C File Offset: 0x0020238C
 		private bool CollisionsSphereCast(Vector3 startPosition, float sphereRadius, Vector3 movementVector, out Vector3 finalPosition, out RaycastHit collisionsHitInfo)
 		{
 			this.MaxSphereSizeForNoOverlap(sphereRadius, startPosition, false, out this.maxSphereSize1);
@@ -2567,7 +2567,7 @@ namespace GorillaLocomotion
 			return false;
 		}
 
-		// Token: 0x06006388 RID: 25480 RVA: 0x002045BC File Offset: 0x002027BC
+		// Token: 0x06006388 RID: 25480 RVA: 0x0020459C File Offset: 0x0020279C
 		public float GetSlidePercentage(RaycastHit raycastHit)
 		{
 			if (this.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
@@ -2666,7 +2666,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006389 RID: 25481 RVA: 0x00204954 File Offset: 0x00202B54
+		// Token: 0x06006389 RID: 25481 RVA: 0x00204934 File Offset: 0x00202B34
 		public bool IsTouchingMovingSurface(Vector3 rayOrigin, RaycastHit raycastHit, out int movingSurfaceId, out bool sideTouch, out bool isMonkeBlock)
 		{
 			movingSurfaceId = -1;
@@ -2708,7 +2708,7 @@ namespace GorillaLocomotion
 			return false;
 		}
 
-		// Token: 0x0600638A RID: 25482 RVA: 0x00204A10 File Offset: 0x00202C10
+		// Token: 0x0600638A RID: 25482 RVA: 0x002049F0 File Offset: 0x00202BF0
 		public void Turn(float degrees)
 		{
 			Vector3 position = this.headCollider.transform.position;
@@ -2733,7 +2733,7 @@ namespace GorillaLocomotion
 			this.averagedVelocity /= (float)this.velocityHistorySize;
 		}
 
-		// Token: 0x0600638B RID: 25483 RVA: 0x00204B44 File Offset: 0x00202D44
+		// Token: 0x0600638B RID: 25483 RVA: 0x00204B24 File Offset: 0x00202D24
 		public void BeginClimbing(GorillaClimbable climbable, GorillaHandClimber hand, GorillaClimbableRef climbableRef = null)
 		{
 			if (this.currentClimber != null)
@@ -2821,7 +2821,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600638C RID: 25484 RVA: 0x00204DB0 File Offset: 0x00202FB0
+		// Token: 0x0600638C RID: 25484 RVA: 0x00204D90 File Offset: 0x00202F90
 		private void VerifyClimbHelper()
 		{
 			if (this.climbHelper == null || this.climbHelper.gameObject == null)
@@ -2830,7 +2830,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600638D RID: 25485 RVA: 0x00204DE8 File Offset: 0x00202FE8
+		// Token: 0x0600638D RID: 25485 RVA: 0x00204DC8 File Offset: 0x00202FC8
 		public void EndClimbing(GorillaHandClimber hand, bool startingNewClimb, bool doDontReclimb = false)
 		{
 			if (hand != this.currentClimber)
@@ -2907,15 +2907,15 @@ namespace GorillaLocomotion
 			this.isClimbing = false;
 		}
 
-		// Token: 0x0600638E RID: 25486 RVA: 0x00205078 File Offset: 0x00203278
+		// Token: 0x0600638E RID: 25486 RVA: 0x00205058 File Offset: 0x00203258
 		public void ResetRigidbodyInterpolation()
 		{
 			this.playerRigidBody.interpolation = this.playerRigidbodyInterpolationDefault;
 		}
 
 		// Token: 0x17000975 RID: 2421
-		// (get) Token: 0x0600638F RID: 25487 RVA: 0x0020508B File Offset: 0x0020328B
-		// (set) Token: 0x06006390 RID: 25488 RVA: 0x00205098 File Offset: 0x00203298
+		// (get) Token: 0x0600638F RID: 25487 RVA: 0x0020506B File Offset: 0x0020326B
+		// (set) Token: 0x06006390 RID: 25488 RVA: 0x00205078 File Offset: 0x00203278
 		public RigidbodyInterpolation RigidbodyInterpolation
 		{
 			get
@@ -2928,31 +2928,31 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006391 RID: 25489 RVA: 0x002050A6 File Offset: 0x002032A6
+		// Token: 0x06006391 RID: 25489 RVA: 0x00205086 File Offset: 0x00203286
 		private void enablePlayerGravity(bool useGravity)
 		{
 			this.playerRigidBody.useGravity = useGravity;
 		}
 
-		// Token: 0x06006392 RID: 25490 RVA: 0x002050B4 File Offset: 0x002032B4
+		// Token: 0x06006392 RID: 25490 RVA: 0x00205094 File Offset: 0x00203294
 		public void SetVelocity(Vector3 velocity)
 		{
 			this.playerRigidBody.linearVelocity = velocity;
 		}
 
-		// Token: 0x06006393 RID: 25491 RVA: 0x002050C2 File Offset: 0x002032C2
+		// Token: 0x06006393 RID: 25491 RVA: 0x002050A2 File Offset: 0x002032A2
 		internal void RigidbodyMovePosition(Vector3 pos)
 		{
 			this.playerRigidBody.MovePosition(pos);
 		}
 
-		// Token: 0x06006394 RID: 25492 RVA: 0x002050D0 File Offset: 0x002032D0
+		// Token: 0x06006394 RID: 25492 RVA: 0x002050B0 File Offset: 0x002032B0
 		public void TempFreezeHand(bool isLeft, float freezeDuration)
 		{
 			(isLeft ? this.leftHand : this.rightHand).TempFreezeHand(freezeDuration);
 		}
 
-		// Token: 0x06006395 RID: 25493 RVA: 0x002050F8 File Offset: 0x002032F8
+		// Token: 0x06006395 RID: 25493 RVA: 0x002050D8 File Offset: 0x002032D8
 		private void StoreVelocities()
 		{
 			this.velocityIndex = (this.velocityIndex + 1) % this.velocityHistorySize;
@@ -2962,7 +2962,7 @@ namespace GorillaLocomotion
 			this.lastPosition = base.transform.position;
 		}
 
-		// Token: 0x06006396 RID: 25494 RVA: 0x00205188 File Offset: 0x00203388
+		// Token: 0x06006396 RID: 25494 RVA: 0x00205168 File Offset: 0x00203368
 		private void AntiTeleportTechnology()
 		{
 			if ((this.headCollider.transform.position - this.lastHeadPosition).magnitude >= this.teleportThresholdNoVel + this.playerRigidBody.linearVelocity.magnitude * this.calcDeltaTime)
@@ -2972,7 +2972,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x06006397 RID: 25495 RVA: 0x00205218 File Offset: 0x00203418
+		// Token: 0x06006397 RID: 25495 RVA: 0x002051F8 File Offset: 0x002033F8
 		private bool MaxSphereSizeForNoOverlap(float testRadius, Vector3 checkPosition, bool ignoreOneWay, out float overlapRadiusTest)
 		{
 			overlapRadiusTest = testRadius;
@@ -3008,7 +3008,7 @@ namespace GorillaLocomotion
 			return false;
 		}
 
-		// Token: 0x06006398 RID: 25496 RVA: 0x002052F8 File Offset: 0x002034F8
+		// Token: 0x06006398 RID: 25496 RVA: 0x002052D8 File Offset: 0x002034D8
 		private bool CrazyCheck2(float sphereSize, Vector3 startPosition)
 		{
 			for (int i = 0; i < this.crazyCheckVectors.Length; i++)
@@ -3021,7 +3021,7 @@ namespace GorillaLocomotion
 			return true;
 		}
 
-		// Token: 0x06006399 RID: 25497 RVA: 0x00205340 File Offset: 0x00203540
+		// Token: 0x06006399 RID: 25497 RVA: 0x00205320 File Offset: 0x00203520
 		private int NonAllocRaycast(Vector3 startPosition, Vector3 endPosition)
 		{
 			Vector3 vector = endPosition - startPosition;
@@ -3037,7 +3037,7 @@ namespace GorillaLocomotion
 			return num2;
 		}
 
-		// Token: 0x0600639A RID: 25498 RVA: 0x002053AC File Offset: 0x002035AC
+		// Token: 0x0600639A RID: 25498 RVA: 0x0020538C File Offset: 0x0020358C
 		private void ClearColliderBuffer(ref Collider[] colliders)
 		{
 			for (int i = 0; i < colliders.Length; i++)
@@ -3046,7 +3046,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600639B RID: 25499 RVA: 0x002053D0 File Offset: 0x002035D0
+		// Token: 0x0600639B RID: 25499 RVA: 0x002053B0 File Offset: 0x002035B0
 		private void ClearRaycasthitBuffer(ref RaycastHit[] raycastHits)
 		{
 			for (int i = 0; i < raycastHits.Length; i++)
@@ -3055,13 +3055,13 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x0600639C RID: 25500 RVA: 0x002053FA File Offset: 0x002035FA
+		// Token: 0x0600639C RID: 25500 RVA: 0x002053DA File Offset: 0x002035DA
 		private Vector3 MovingSurfaceMovement()
 		{
 			return this.refMovement + this.movingSurfaceOffset;
 		}
 
-		// Token: 0x0600639D RID: 25501 RVA: 0x00205410 File Offset: 0x00203610
+		// Token: 0x0600639D RID: 25501 RVA: 0x002053F0 File Offset: 0x002035F0
 		private static bool ComputeLocalHitPoint(RaycastHit hit, out Vector3 localHitPoint)
 		{
 			if (hit.collider == null || hit.point.sqrMagnitude < 0.001f)
@@ -3073,7 +3073,7 @@ namespace GorillaLocomotion
 			return true;
 		}
 
-		// Token: 0x0600639E RID: 25502 RVA: 0x0020546E File Offset: 0x0020366E
+		// Token: 0x0600639E RID: 25502 RVA: 0x0020544E File Offset: 0x0020364E
 		private static bool ComputeWorldHitPoint(RaycastHit hit, Vector3 localPoint, out Vector3 worldHitPoint)
 		{
 			if (hit.collider == null)
@@ -3085,7 +3085,7 @@ namespace GorillaLocomotion
 			return true;
 		}
 
-		// Token: 0x0600639F RID: 25503 RVA: 0x002054A8 File Offset: 0x002036A8
+		// Token: 0x0600639F RID: 25503 RVA: 0x00205488 File Offset: 0x00203688
 		private float ExtraVelMultiplier()
 		{
 			float num = 1f;
@@ -3100,7 +3100,7 @@ namespace GorillaLocomotion
 			return num;
 		}
 
-		// Token: 0x060063A0 RID: 25504 RVA: 0x00205510 File Offset: 0x00203710
+		// Token: 0x060063A0 RID: 25504 RVA: 0x002054F0 File Offset: 0x002036F0
 		private float ExtraVelMaxMultiplier()
 		{
 			float num = 1f;
@@ -3115,26 +3115,26 @@ namespace GorillaLocomotion
 			return num * this.scale;
 		}
 
-		// Token: 0x060063A1 RID: 25505 RVA: 0x00205581 File Offset: 0x00203781
+		// Token: 0x060063A1 RID: 25505 RVA: 0x00205561 File Offset: 0x00203761
 		public void SetMaximumSlipThisFrame()
 		{
 			this.leftHand.slipSetToMaxFrameIdx = Time.frameCount;
 			this.rightHand.slipSetToMaxFrameIdx = Time.frameCount;
 		}
 
-		// Token: 0x060063A2 RID: 25506 RVA: 0x002055A3 File Offset: 0x002037A3
+		// Token: 0x060063A2 RID: 25506 RVA: 0x00205583 File Offset: 0x00203783
 		public void SetLeftMaximumSlipThisFrame()
 		{
 			this.leftHand.slipSetToMaxFrameIdx = Time.frameCount;
 		}
 
-		// Token: 0x060063A3 RID: 25507 RVA: 0x002055B5 File Offset: 0x002037B5
+		// Token: 0x060063A3 RID: 25507 RVA: 0x00205595 File Offset: 0x00203795
 		public void SetRightMaximumSlipThisFrame()
 		{
 			this.rightHand.slipSetToMaxFrameIdx = Time.frameCount;
 		}
 
-		// Token: 0x060063A4 RID: 25508 RVA: 0x002055C7 File Offset: 0x002037C7
+		// Token: 0x060063A4 RID: 25508 RVA: 0x002055A7 File Offset: 0x002037A7
 		public void ChangeLayer(string layerName)
 		{
 			if (this.layerChanger != null)
@@ -3143,7 +3143,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x060063A5 RID: 25509 RVA: 0x002055EE File Offset: 0x002037EE
+		// Token: 0x060063A5 RID: 25509 RVA: 0x002055CE File Offset: 0x002037CE
 		public void RestoreLayer()
 		{
 			if (this.layerChanger != null)
@@ -3152,7 +3152,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x060063A6 RID: 25510 RVA: 0x0020560C File Offset: 0x0020380C
+		// Token: 0x060063A6 RID: 25510 RVA: 0x002055EC File Offset: 0x002037EC
 		public void OnEnterWaterVolume(Collider playerCollider, WaterVolume volume)
 		{
 			if (this.activeSizeChangerSettings != null && this.activeSizeChangerSettings.ExpireInWater)
@@ -3173,7 +3173,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x060063A7 RID: 25511 RVA: 0x00205686 File Offset: 0x00203886
+		// Token: 0x060063A7 RID: 25511 RVA: 0x00205666 File Offset: 0x00203866
 		public void OnExitWaterVolume(Collider playerCollider, WaterVolume volume)
 		{
 			if (playerCollider == this.headCollider)
@@ -3187,7 +3187,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x060063A8 RID: 25512 RVA: 0x002056C0 File Offset: 0x002038C0
+		// Token: 0x060063A8 RID: 25512 RVA: 0x002056A0 File Offset: 0x002038A0
 		private bool GetSwimmingVelocityForHand(Vector3 startingHandPosition, Vector3 endingHandPosition, Vector3 palmForwardDirection, float dt, ref WaterVolume contactingWaterVolume, ref WaterVolume.SurfaceQuery waterSurface, out Vector3 swimmingVelocityChange)
 		{
 			contactingWaterVolume = null;
@@ -3261,7 +3261,7 @@ namespace GorillaLocomotion
 			return false;
 		}
 
-		// Token: 0x060063A9 RID: 25513 RVA: 0x0020597C File Offset: 0x00203B7C
+		// Token: 0x060063A9 RID: 25513 RVA: 0x0020595C File Offset: 0x00203B5C
 		private bool CheckWaterSurfaceJump(Vector3 startingHandPosition, Vector3 endingHandPosition, Vector3 palmForwardDirection, Vector3 handAvgVelocity, PlayerSwimmingParameters parameters, WaterVolume contactingWaterVolume, WaterVolume.SurfaceQuery waterSurface, out Vector3 jumpVelocity)
 		{
 			if (contactingWaterVolume != null)
@@ -3282,7 +3282,7 @@ namespace GorillaLocomotion
 			return false;
 		}
 
-		// Token: 0x060063AA RID: 25514 RVA: 0x00205A75 File Offset: 0x00203C75
+		// Token: 0x060063AA RID: 25514 RVA: 0x00205A55 File Offset: 0x00203C55
 		private bool TryNormalize(Vector3 input, out Vector3 normalized, out float magnitude, float eps = 0.0001f)
 		{
 			magnitude = input.magnitude;
@@ -3295,7 +3295,7 @@ namespace GorillaLocomotion
 			return false;
 		}
 
-		// Token: 0x060063AB RID: 25515 RVA: 0x00205AA2 File Offset: 0x00203CA2
+		// Token: 0x060063AB RID: 25515 RVA: 0x00205A82 File Offset: 0x00203C82
 		private bool TryNormalizeDown(Vector3 input, out Vector3 normalized, out float magnitude, float eps = 0.0001f)
 		{
 			magnitude = input.magnitude;
@@ -3313,7 +3313,7 @@ namespace GorillaLocomotion
 			return false;
 		}
 
-		// Token: 0x060063AC RID: 25516 RVA: 0x00205AE4 File Offset: 0x00203CE4
+		// Token: 0x060063AC RID: 25516 RVA: 0x00205AC4 File Offset: 0x00203CC4
 		private float FreezeTagSlidePercentage()
 		{
 			if (this.materialData[this.currentMaterialIndex].overrideSlidePercent && this.materialData[this.currentMaterialIndex].slidePercent > this.freezeTagHandSlidePercent)
@@ -3323,7 +3323,7 @@ namespace GorillaLocomotion
 			return this.freezeTagHandSlidePercent;
 		}
 
-		// Token: 0x060063AD RID: 25517 RVA: 0x00205B44 File Offset: 0x00203D44
+		// Token: 0x060063AD RID: 25517 RVA: 0x00205B24 File Offset: 0x00203D24
 		private void OnCollisionStay(Collision collision)
 		{
 			this.bodyCollisionContactsCount = collision.GetContacts(this.bodyCollisionContacts);
@@ -3344,7 +3344,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x060063AE RID: 25518 RVA: 0x00205BCC File Offset: 0x00203DCC
+		// Token: 0x060063AE RID: 25518 RVA: 0x00205BAC File Offset: 0x00203DAC
 		public void DoLaunch(Vector3 velocity)
 		{
 			GTPlayer.<DoLaunch>d__442 <DoLaunch>d__;
@@ -3355,13 +3355,13 @@ namespace GorillaLocomotion
 			<DoLaunch>d__.<>t__builder.Start<GTPlayer.<DoLaunch>d__442>(ref <DoLaunch>d__);
 		}
 
-		// Token: 0x060063AF RID: 25519 RVA: 0x00205C0B File Offset: 0x00203E0B
+		// Token: 0x060063AF RID: 25519 RVA: 0x00205BEB File Offset: 0x00203DEB
 		private void OnEnable()
 		{
 			RoomSystem.JoinedRoomEvent += new Action(this.OnJoinedRoom);
 		}
 
-		// Token: 0x060063B0 RID: 25520 RVA: 0x00205C28 File Offset: 0x00203E28
+		// Token: 0x060063B0 RID: 25520 RVA: 0x00205C08 File Offset: 0x00203E08
 		private void OnJoinedRoom()
 		{
 			if (this.activeSizeChangerSettings != null && this.activeSizeChangerSettings.ExpireOnRoomJoin)
@@ -3370,19 +3370,19 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x060063B1 RID: 25521 RVA: 0x00205C46 File Offset: 0x00203E46
+		// Token: 0x060063B1 RID: 25521 RVA: 0x00205C26 File Offset: 0x00203E26
 		private void OnDisable()
 		{
 			RoomSystem.JoinedRoomEvent -= new Action(this.OnJoinedRoom);
 		}
 
-		// Token: 0x060063B2 RID: 25522 RVA: 0x00205C63 File Offset: 0x00203E63
+		// Token: 0x060063B2 RID: 25522 RVA: 0x00205C43 File Offset: 0x00203E43
 		public void ForceRigidBodySync()
 		{
 			this.forceRBSync = true;
 		}
 
-		// Token: 0x060063B3 RID: 25523 RVA: 0x00205C6C File Offset: 0x00203E6C
+		// Token: 0x060063B3 RID: 25523 RVA: 0x00205C4C File Offset: 0x00203E4C
 		internal void ClearHandHolds()
 		{
 			this.leftHand.isHolding = false;
@@ -3393,7 +3393,7 @@ namespace GorillaLocomotion
 			this.OnChangeActiveHandhold();
 		}
 
-		// Token: 0x060063B4 RID: 25524 RVA: 0x00205CAC File Offset: 0x00203EAC
+		// Token: 0x060063B4 RID: 25524 RVA: 0x00205C8C File Offset: 0x00203E8C
 		internal void AddHandHold(Transform objectHeld, Vector3 localPositionHeld, GorillaGrabber grabber, bool forLeftHand, bool rotatePlayerWhenHeld, out Vector3 grabbedVelocity)
 		{
 			if (!this.leftHand.isHolding && !this.rightHand.isHolding)
@@ -3426,7 +3426,7 @@ namespace GorillaLocomotion
 			this.OnChangeActiveHandhold();
 		}
 
-		// Token: 0x060063B5 RID: 25525 RVA: 0x00205DB0 File Offset: 0x00203FB0
+		// Token: 0x060063B5 RID: 25525 RVA: 0x00205D90 File Offset: 0x00203F90
 		internal void RemoveHandHold(GorillaGrabber grabber, bool forLeftHand)
 		{
 			this.activeHandHold.objectHeld == grabber;
@@ -3446,7 +3446,7 @@ namespace GorillaLocomotion
 			this.OnChangeActiveHandhold();
 		}
 
-		// Token: 0x060063B6 RID: 25526 RVA: 0x00205E20 File Offset: 0x00204020
+		// Token: 0x060063B6 RID: 25526 RVA: 0x00205E00 File Offset: 0x00204000
 		private void OnChangeActiveHandhold()
 		{
 			if (this.activeHandHold.objectHeld != null)
@@ -3484,7 +3484,7 @@ namespace GorillaLocomotion
 			VRRig.DetachLocalPlayerFromPhotonView();
 		}
 
-		// Token: 0x060063B7 RID: 25527 RVA: 0x00205F30 File Offset: 0x00204130
+		// Token: 0x060063B7 RID: 25527 RVA: 0x00205F10 File Offset: 0x00204110
 		private void FixedUpdate_HandHolds(float timeDelta)
 		{
 			if (this.activeHandHold.objectHeld == null)
@@ -3520,7 +3520,7 @@ namespace GorillaLocomotion
 			}
 		}
 
-		// Token: 0x060063BB RID: 25531 RVA: 0x002064D2 File Offset: 0x002046D2
+		// Token: 0x060063BB RID: 25531 RVA: 0x002064B2 File Offset: 0x002046B2
 		[CompilerGenerated]
 		internal static void <BeginClimbing>g__SnapAxis|406_0(ref float val, float maxDist)
 		{
@@ -4331,7 +4331,7 @@ namespace GorillaLocomotion
 		[Serializable]
 		public struct HandState
 		{
-			// Token: 0x060063BC RID: 25532 RVA: 0x002064E8 File Offset: 0x002046E8
+			// Token: 0x060063BC RID: 25532 RVA: 0x002064C8 File Offset: 0x002046C8
 			public void Init(GTPlayer gtPlayer, bool isLeftHand, float maxArmLength)
 			{
 				this.gtPlayer = gtPlayer;
@@ -4348,7 +4348,7 @@ namespace GorillaLocomotion
 				this.slipSetToMaxFrameIdx = -1;
 			}
 
-			// Token: 0x060063BD RID: 25533 RVA: 0x00206574 File Offset: 0x00204774
+			// Token: 0x060063BD RID: 25533 RVA: 0x00206554 File Offset: 0x00204754
 			public void OnTeleport()
 			{
 				this.wasColliding = false;
@@ -4361,19 +4361,19 @@ namespace GorillaLocomotion
 				this.lastRotation = this.handFollower.transform.rotation;
 			}
 
-			// Token: 0x060063BE RID: 25534 RVA: 0x002065F5 File Offset: 0x002047F5
+			// Token: 0x060063BE RID: 25534 RVA: 0x002065D5 File Offset: 0x002047D5
 			public Vector3 GetLastPosition()
 			{
 				return this.lastPosition + this.gtPlayer.MovingSurfaceMovement();
 			}
 
-			// Token: 0x060063BF RID: 25535 RVA: 0x0020660D File Offset: 0x0020480D
+			// Token: 0x060063BF RID: 25535 RVA: 0x002065ED File Offset: 0x002047ED
 			public bool SlipOverriddenToMax()
 			{
 				return this.slipSetToMaxFrameIdx == Time.frameCount;
 			}
 
-			// Token: 0x060063C0 RID: 25536 RVA: 0x0020661C File Offset: 0x0020481C
+			// Token: 0x060063C0 RID: 25536 RVA: 0x002065FC File Offset: 0x002047FC
 			public void FirstIteration(ref Vector3 totalMove, ref int divisor, float paddleBoostFactor)
 			{
 				if (this.hasCustomBoost)
@@ -4471,7 +4471,7 @@ namespace GorillaLocomotion
 				}
 			}
 
-			// Token: 0x060063C1 RID: 25537 RVA: 0x00206AA0 File Offset: 0x00204CA0
+			// Token: 0x060063C1 RID: 25537 RVA: 0x00206A80 File Offset: 0x00204C80
 			public void FinalizeHandPosition()
 			{
 				Vector3 vector = this.GetLastPosition();
@@ -4520,13 +4520,13 @@ namespace GorillaLocomotion
 				}
 			}
 
-			// Token: 0x060063C2 RID: 25538 RVA: 0x0020660D File Offset: 0x0020480D
+			// Token: 0x060063C2 RID: 25538 RVA: 0x002065ED File Offset: 0x002047ED
 			public bool IsSlipOverriddenToMax()
 			{
 				return this.slipSetToMaxFrameIdx == Time.frameCount;
 			}
 
-			// Token: 0x060063C3 RID: 25539 RVA: 0x00206C58 File Offset: 0x00204E58
+			// Token: 0x060063C3 RID: 25539 RVA: 0x00206C38 File Offset: 0x00204E38
 			public Vector3 GetCurrentHandPosition()
 			{
 				Vector3 position = this.gtPlayer.headCollider.transform.position;
@@ -4542,14 +4542,14 @@ namespace GorillaLocomotion
 				return position + (vector - position).normalized * this.maxArmLength * this.gtPlayer.scale;
 			}
 
-			// Token: 0x060063C4 RID: 25540 RVA: 0x00206D28 File Offset: 0x00204F28
+			// Token: 0x060063C4 RID: 25540 RVA: 0x00206D08 File Offset: 0x00204F08
 			public void PositionHandFollower()
 			{
 				this.handFollower.position = this.finalPositionThisFrame;
 				this.handFollower.rotation = this.lastRotation;
 			}
 
-			// Token: 0x060063C5 RID: 25541 RVA: 0x00206D4C File Offset: 0x00204F4C
+			// Token: 0x060063C5 RID: 25541 RVA: 0x00206D2C File Offset: 0x00204F2C
 			public void OnEndOfFrame()
 			{
 				this.wasColliding = this.isColliding;
@@ -4561,13 +4561,13 @@ namespace GorillaLocomotion
 				}
 			}
 
-			// Token: 0x060063C6 RID: 25542 RVA: 0x00206DA6 File Offset: 0x00204FA6
+			// Token: 0x060063C6 RID: 25542 RVA: 0x00206D86 File Offset: 0x00204F86
 			public void TempFreezeHand(float freezeDuration)
 			{
 				this.tempFreezeUntilTimestamp = Math.Max(this.tempFreezeUntilTimestamp, Time.time + freezeDuration);
 			}
 
-			// Token: 0x060063C7 RID: 25543 RVA: 0x00206DC0 File Offset: 0x00204FC0
+			// Token: 0x060063C7 RID: 25543 RVA: 0x00206DA0 File Offset: 0x00204FA0
 			public void GetHandTapData(out bool wasHandTouching, out bool wasSliding, out int handMatIndex, out GorillaSurfaceOverride surfaceOverride, out RaycastHit handHitInfo, out Vector3 handPosition, out GorillaVelocityTracker handVelocityTracker)
 			{
 				wasHandTouching = this.wasColliding;

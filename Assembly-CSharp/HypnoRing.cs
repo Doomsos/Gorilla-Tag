@@ -7,13 +7,13 @@ using UnityEngine;
 public class HypnoRing : MonoBehaviour, ISpawnable
 {
 	// Token: 0x17000364 RID: 868
-	// (get) Token: 0x0600200A RID: 8202 RVA: 0x000AA19D File Offset: 0x000A839D
-	// (set) Token: 0x0600200B RID: 8203 RVA: 0x000AA1A5 File Offset: 0x000A83A5
+	// (get) Token: 0x0600200A RID: 8202 RVA: 0x000AA17D File Offset: 0x000A837D
+	// (set) Token: 0x0600200B RID: 8203 RVA: 0x000AA185 File Offset: 0x000A8385
 	bool ISpawnable.IsSpawned { get; set; }
 
 	// Token: 0x17000365 RID: 869
-	// (get) Token: 0x0600200C RID: 8204 RVA: 0x000AA1AE File Offset: 0x000A83AE
-	// (set) Token: 0x0600200D RID: 8205 RVA: 0x000AA1B6 File Offset: 0x000A83B6
+	// (get) Token: 0x0600200C RID: 8204 RVA: 0x000AA18E File Offset: 0x000A838E
+	// (set) Token: 0x0600200D RID: 8205 RVA: 0x000AA196 File Offset: 0x000A8396
 	ECosmeticSelectSide ISpawnable.CosmeticSelectedSide { get; set; }
 
 	// Token: 0x0600200E RID: 8206 RVA: 0x00002789 File Offset: 0x00000989
@@ -21,13 +21,13 @@ public class HypnoRing : MonoBehaviour, ISpawnable
 	{
 	}
 
-	// Token: 0x0600200F RID: 8207 RVA: 0x000AA1BF File Offset: 0x000A83BF
+	// Token: 0x0600200F RID: 8207 RVA: 0x000AA19F File Offset: 0x000A839F
 	void ISpawnable.OnSpawn(VRRig rig)
 	{
 		this.myRig = rig;
 	}
 
-	// Token: 0x06002010 RID: 8208 RVA: 0x000AA1C8 File Offset: 0x000A83C8
+	// Token: 0x06002010 RID: 8208 RVA: 0x000AA1A8 File Offset: 0x000A83A8
 	private void Update()
 	{
 		if ((this.attachedToLeftHand ? this.myRig.leftIndex.calcT : this.myRig.rightIndex.calcT) > 0.5f)

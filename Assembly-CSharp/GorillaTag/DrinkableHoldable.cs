@@ -8,7 +8,7 @@ namespace GorillaTag
 	// Token: 0x02000FF3 RID: 4083
 	public class DrinkableHoldable : TransferrableObject
 	{
-		// Token: 0x06006723 RID: 26403 RVA: 0x00218A78 File Offset: 0x00216C78
+		// Token: 0x06006723 RID: 26403 RVA: 0x00218A58 File Offset: 0x00216C58
 		internal override void OnEnable()
 		{
 			base.OnEnable();
@@ -17,7 +17,7 @@ namespace GorillaTag
 			this.myByteArray = new byte[32];
 		}
 
-		// Token: 0x06006724 RID: 26404 RVA: 0x00218ACC File Offset: 0x00216CCC
+		// Token: 0x06006724 RID: 26404 RVA: 0x00218AAC File Offset: 0x00216CAC
 		protected override void LateUpdateLocal()
 		{
 			if (!this.containerLiquid.isActiveAndEnabled || !GorillaParent.hasInstance || !GorillaComputer.hasInstance)
@@ -71,7 +71,7 @@ namespace GorillaTag
 			base.LateUpdateLocal();
 		}
 
-		// Token: 0x06006725 RID: 26405 RVA: 0x00218CC8 File Offset: 0x00216EC8
+		// Token: 0x06006725 RID: 26405 RVA: 0x00218CA8 File Offset: 0x00216EA8
 		protected override void LateUpdateReplicated()
 		{
 			base.LateUpdateReplicated();
@@ -79,7 +79,7 @@ namespace GorillaTag
 			this.UnpackValuesNonstatic(itemState, out this.lastTimeSipSoundPlayed, out this.containerLiquid.fillAmount, out this.coolingDown);
 		}
 
-		// Token: 0x06006726 RID: 26406 RVA: 0x00218D01 File Offset: 0x00216F01
+		// Token: 0x06006726 RID: 26406 RVA: 0x00218CE1 File Offset: 0x00216EE1
 		protected override void LateUpdateShared()
 		{
 			base.LateUpdateShared();
@@ -90,7 +90,7 @@ namespace GorillaTag
 			this.wasCoolingDown = this.coolingDown;
 		}
 
-		// Token: 0x06006727 RID: 26407 RVA: 0x00218D30 File Offset: 0x00216F30
+		// Token: 0x06006727 RID: 26407 RVA: 0x00218D10 File Offset: 0x00216F10
 		private static int PackValues(float cooldownStartTime, float fillAmount, bool coolingDown)
 		{
 			byte[] array = new byte[32];
@@ -101,7 +101,7 @@ namespace GorillaTag
 			return BitConverter.ToInt32(array, 0);
 		}
 
-		// Token: 0x06006728 RID: 26408 RVA: 0x00218D84 File Offset: 0x00216F84
+		// Token: 0x06006728 RID: 26408 RVA: 0x00218D64 File Offset: 0x00216F64
 		private void UnpackValuesNonstatic(in int packed, out float cooldownStartTime, out float fillAmount, out bool coolingDown)
 		{
 			DrinkableHoldable.GetBytes(packed, ref this.myByteArray);
@@ -111,7 +111,7 @@ namespace GorillaTag
 			fillAmount = this.myByteArray.Read(ref num, 6) / 63f;
 		}
 
-		// Token: 0x06006729 RID: 26409 RVA: 0x00218DE8 File Offset: 0x00216FE8
+		// Token: 0x06006729 RID: 26409 RVA: 0x00218DC8 File Offset: 0x00216FC8
 		public static void GetBytes(int value, ref byte[] bytes)
 		{
 			for (int i = 0; i < bytes.Length; i++)
@@ -120,7 +120,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x0600672A RID: 26410 RVA: 0x00218E18 File Offset: 0x00217018
+		// Token: 0x0600672A RID: 26410 RVA: 0x00218DF8 File Offset: 0x00216FF8
 		private static void UnpackValuesStatic(in int packed, out float cooldownStartTime, out float fillAmount, out bool coolingDown)
 		{
 			byte[] bytes = BitConverter.GetBytes(packed);

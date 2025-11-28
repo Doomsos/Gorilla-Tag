@@ -6,27 +6,27 @@ using UnityEngine;
 public abstract class CosmeticCritter : MonoBehaviour
 {
 	// Token: 0x170003C1 RID: 961
-	// (get) Token: 0x06002549 RID: 9545 RVA: 0x000C80FB File Offset: 0x000C62FB
-	// (set) Token: 0x0600254A RID: 9546 RVA: 0x000C8103 File Offset: 0x000C6303
+	// (get) Token: 0x06002549 RID: 9545 RVA: 0x000C80DB File Offset: 0x000C62DB
+	// (set) Token: 0x0600254A RID: 9546 RVA: 0x000C80E3 File Offset: 0x000C62E3
 	public int Seed { get; protected set; }
 
 	// Token: 0x170003C2 RID: 962
-	// (get) Token: 0x0600254B RID: 9547 RVA: 0x000C810C File Offset: 0x000C630C
-	// (set) Token: 0x0600254C RID: 9548 RVA: 0x000C8114 File Offset: 0x000C6314
+	// (get) Token: 0x0600254B RID: 9547 RVA: 0x000C80EC File Offset: 0x000C62EC
+	// (set) Token: 0x0600254C RID: 9548 RVA: 0x000C80F4 File Offset: 0x000C62F4
 	public CosmeticCritterSpawner Spawner { get; protected set; }
 
 	// Token: 0x170003C3 RID: 963
-	// (get) Token: 0x0600254D RID: 9549 RVA: 0x000C811D File Offset: 0x000C631D
-	// (set) Token: 0x0600254E RID: 9550 RVA: 0x000C8125 File Offset: 0x000C6325
+	// (get) Token: 0x0600254D RID: 9549 RVA: 0x000C80FD File Offset: 0x000C62FD
+	// (set) Token: 0x0600254E RID: 9550 RVA: 0x000C8105 File Offset: 0x000C6305
 	public Type CachedType { get; private set; }
 
-	// Token: 0x0600254F RID: 9551 RVA: 0x000C812E File Offset: 0x000C632E
+	// Token: 0x0600254F RID: 9551 RVA: 0x000C810E File Offset: 0x000C630E
 	public int GetGlobalMaxCritters()
 	{
 		return this.globalMaxCritters;
 	}
 
-	// Token: 0x06002550 RID: 9552 RVA: 0x000C8136 File Offset: 0x000C6336
+	// Token: 0x06002550 RID: 9552 RVA: 0x000C8116 File Offset: 0x000C6316
 	public void SetSeedSpawnerTypeAndTime(int seed, CosmeticCritterSpawner spawner, Type type, double time)
 	{
 		this.Seed = seed;
@@ -53,7 +53,7 @@ public abstract class CosmeticCritter : MonoBehaviour
 	// Token: 0x06002554 RID: 9556
 	public abstract void Tick();
 
-	// Token: 0x06002555 RID: 9557 RVA: 0x000C8155 File Offset: 0x000C6355
+	// Token: 0x06002555 RID: 9557 RVA: 0x000C8135 File Offset: 0x000C6335
 	protected double GetAliveTime()
 	{
 		if (!PhotonNetwork.InRoom)
@@ -63,7 +63,7 @@ public abstract class CosmeticCritter : MonoBehaviour
 		return PhotonNetwork.Time - this.startTime;
 	}
 
-	// Token: 0x06002556 RID: 9558 RVA: 0x000C8177 File Offset: 0x000C6377
+	// Token: 0x06002556 RID: 9558 RVA: 0x000C8157 File Offset: 0x000C6357
 	public virtual bool Expired()
 	{
 		return this.GetAliveTime() > (double)this.lifetime || this.GetAliveTime() < 0.0;

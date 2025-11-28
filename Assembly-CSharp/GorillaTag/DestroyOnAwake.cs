@@ -6,7 +6,7 @@ namespace GorillaTag
 	// Token: 0x02000FD2 RID: 4050
 	public class DestroyOnAwake : MonoBehaviour
 	{
-		// Token: 0x060066AE RID: 26286 RVA: 0x00217088 File Offset: 0x00215288
+		// Token: 0x060066AE RID: 26286 RVA: 0x00217068 File Offset: 0x00215268
 		protected void Awake()
 		{
 			try
@@ -18,7 +18,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060066AF RID: 26287 RVA: 0x002170B8 File Offset: 0x002152B8
+		// Token: 0x060066AF RID: 26287 RVA: 0x00217098 File Offset: 0x00215298
 		protected void OnEnable()
 		{
 			try
@@ -30,7 +30,7 @@ namespace GorillaTag
 			}
 		}
 
-		// Token: 0x060066B0 RID: 26288 RVA: 0x002170E8 File Offset: 0x002152E8
+		// Token: 0x060066B0 RID: 26288 RVA: 0x002170C8 File Offset: 0x002152C8
 		protected void Update()
 		{
 			try

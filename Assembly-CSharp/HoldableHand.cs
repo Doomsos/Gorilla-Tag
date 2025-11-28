@@ -7,7 +7,7 @@ using UnityEngine;
 public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 {
 	// Token: 0x170004CE RID: 1230
-	// (get) Token: 0x06003611 RID: 13841 RVA: 0x001256A4 File Offset: 0x001238A4
+	// (get) Token: 0x06003611 RID: 13841 RVA: 0x00125684 File Offset: 0x00123884
 	public VRRig Rig
 	{
 		get
@@ -16,7 +16,7 @@ public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003612 RID: 13842 RVA: 0x001256AC File Offset: 0x001238AC
+	// Token: 0x06003612 RID: 13842 RVA: 0x0012568C File Offset: 0x0012388C
 	private void Start()
 	{
 		if (this.myPlayer.isOfflineVRRig)
@@ -41,13 +41,13 @@ public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.LateUpdate);
 	}
 
-	// Token: 0x06003615 RID: 13845 RVA: 0x001256E1 File Offset: 0x001238E1
+	// Token: 0x06003615 RID: 13845 RVA: 0x001256C1 File Offset: 0x001238C1
 	public void SliceUpdate()
 	{
 		this.interactionPoint.enabled = (GameMode.ActiveGameMode is GorillaGuardianManager);
 	}
 
-	// Token: 0x06003616 RID: 13846 RVA: 0x001256FC File Offset: 0x001238FC
+	// Token: 0x06003616 RID: 13846 RVA: 0x001256DC File Offset: 0x001238DC
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
 		GorillaGuardianManager gorillaGuardianManager = GameMode.ActiveGameMode as GorillaGuardianManager;
@@ -66,7 +66,7 @@ public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 		}
 	}
 
-	// Token: 0x06003617 RID: 13847 RVA: 0x001257D4 File Offset: 0x001239D4
+	// Token: 0x06003617 RID: 13847 RVA: 0x001257B4 File Offset: 0x001239B4
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
 	{
 		if (!base.OnRelease(zoneReleased, releasingHand))
@@ -99,13 +99,13 @@ public class HoldableHand : HoldableObject, IGorillaSliceableSimple
 	{
 	}
 
-	// Token: 0x06003619 RID: 13849 RVA: 0x001258B7 File Offset: 0x00123AB7
+	// Token: 0x06003619 RID: 13849 RVA: 0x00125897 File Offset: 0x00123A97
 	public override void DropItemCleanup()
 	{
 		this.myPlayer.ClearLocalGrabOverride();
 	}
 
-	// Token: 0x0600361A RID: 13850 RVA: 0x001258C4 File Offset: 0x00123AC4
+	// Token: 0x0600361A RID: 13850 RVA: 0x001258A4 File Offset: 0x00123AA4
 	private void ClearOtherGrabs(bool grabbedLeft)
 	{
 		IHoldableObject holdableObject = grabbedLeft ? EquipmentInteractor.instance.rightHandHeldEquipment : EquipmentInteractor.instance.leftHandHeldEquipment;
