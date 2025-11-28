@@ -1,0 +1,250 @@
+﻿using System;
+
+// Token: 0x02000304 RID: 772
+public static class UberShaderKeywords
+{
+	// Token: 0x0400180B RID: 6155
+	public const string STEREO_INSTANCING_ON = "STEREO_INSTANCING_ON";
+
+	// Token: 0x0400180C RID: 6156
+	public const string UNITY_SINGLE_PASS_STEREO = "UNITY_SINGLE_PASS_STEREO";
+
+	// Token: 0x0400180D RID: 6157
+	public const string STEREO_MULTIVIEW_ON = "STEREO_MULTIVIEW_ON";
+
+	// Token: 0x0400180E RID: 6158
+	public const string STEREO_CUBEMAP_RENDER_ON = "STEREO_CUBEMAP_RENDER_ON";
+
+	// Token: 0x0400180F RID: 6159
+	public const string _GLOBAL_ZONE_LIQUID_TYPE__WATER = "_GLOBAL_ZONE_LIQUID_TYPE__WATER";
+
+	// Token: 0x04001810 RID: 6160
+	public const string _GLOBAL_ZONE_LIQUID_TYPE__LAVA = "_GLOBAL_ZONE_LIQUID_TYPE__LAVA";
+
+	// Token: 0x04001811 RID: 6161
+	public const string _ZONE_LIQUID_SHAPE__CYLINDER = "_ZONE_LIQUID_SHAPE__CYLINDER";
+
+	// Token: 0x04001812 RID: 6162
+	public const string _USE_TEXTURE = "_USE_TEXTURE";
+
+	// Token: 0x04001813 RID: 6163
+	public const string USE_TEXTURE__AS_MASK = "USE_TEXTURE__AS_MASK";
+
+	// Token: 0x04001814 RID: 6164
+	public const string _USE_WEATHER_MAP = "_USE_WEATHER_MAP";
+
+	// Token: 0x04001815 RID: 6165
+	public const string _ALPHA_DETAIL_MAP = "_ALPHA_DETAIL_MAP";
+
+	// Token: 0x04001816 RID: 6166
+	public const string _WATER_EFFECT = "_WATER_EFFECT";
+
+	// Token: 0x04001817 RID: 6167
+	public const string _HEIGHT_BASED_WATER_EFFECT = "_HEIGHT_BASED_WATER_EFFECT";
+
+	// Token: 0x04001818 RID: 6168
+	public const string _ALPHATEST_ON = "_ALPHATEST_ON";
+
+	// Token: 0x04001819 RID: 6169
+	public const string _MAINTEX_ROTATE = "_MAINTEX_ROTATE";
+
+	// Token: 0x0400181A RID: 6170
+	public const string _UV_WAVE_WARP = "_UV_WAVE_WARP";
+
+	// Token: 0x0400181B RID: 6171
+	public const string _LIQUID_VOLUME = "_LIQUID_VOLUME";
+
+	// Token: 0x0400181C RID: 6172
+	public const string _LIQUID_CONTAINER = "_LIQUID_CONTAINER";
+
+	// Token: 0x0400181D RID: 6173
+	public const string _EMISSION = "_EMISSION";
+
+	// Token: 0x0400181E RID: 6174
+	public const string _EMISSION_USE_UV_WAVE_WARP = "_EMISSION_USE_UV_WAVE_WARP";
+
+	// Token: 0x0400181F RID: 6175
+	public const string _USE_DEFORM_MAP = "_USE_DEFORM_MAP";
+
+	// Token: 0x04001820 RID: 6176
+	public const string _USE_DAY_NIGHT_LIGHTMAP = "_USE_DAY_NIGHT_LIGHTMAP";
+
+	// Token: 0x04001821 RID: 6177
+	public const string _USE_TEX_ARRAY_ATLAS = "_USE_TEX_ARRAY_ATLAS";
+
+	// Token: 0x04001822 RID: 6178
+	public const string _CRYSTAL_EFFECT = "_CRYSTAL_EFFECT";
+
+	// Token: 0x04001823 RID: 6179
+	public const string _EYECOMP = "_EYECOMP";
+
+	// Token: 0x04001824 RID: 6180
+	public const string _MOUTHCOMP = "_MOUTHCOMP";
+
+	// Token: 0x04001825 RID: 6181
+	public const string _ALPHA_BLUE_LIVE_ON = "_ALPHA_BLUE_LIVE_ON";
+
+	// Token: 0x04001826 RID: 6182
+	public const string _GRID_EFFECT = "_GRID_EFFECT";
+
+	// Token: 0x04001827 RID: 6183
+	public const string _REFLECTIONS = "_REFLECTIONS";
+
+	// Token: 0x04001828 RID: 6184
+	public const string _REFLECTIONS_BOX_PROJECT = "_REFLECTIONS_BOX_PROJECT";
+
+	// Token: 0x04001829 RID: 6185
+	public const string _REFLECTIONS_USE_NORMAL_TEX = "_REFLECTIONS_USE_NORMAL_TEX";
+
+	// Token: 0x0400182A RID: 6186
+	public const string _VERTEX_ROTATE = "_VERTEX_ROTATE";
+
+	// Token: 0x0400182B RID: 6187
+	public const string _VERTEX_ANIM_FLAP = "_VERTEX_ANIM_FLAP";
+
+	// Token: 0x0400182C RID: 6188
+	public const string _VERTEX_ANIM_WAVE = "_VERTEX_ANIM_WAVE";
+
+	// Token: 0x0400182D RID: 6189
+	public const string _VERTEX_ANIM_WAVE_DEBUG = "_VERTEX_ANIM_WAVE_DEBUG";
+
+	// Token: 0x0400182E RID: 6190
+	public const string _VERTEX_LIGHTING = "_VERTEX_LIGHTING";
+
+	// Token: 0x0400182F RID: 6191
+	public const string _GRADIENT_MAP_ON = "_GRADIENT_MAP_ON";
+
+	// Token: 0x04001830 RID: 6192
+	public const string _PARALLAX = "_PARALLAX";
+
+	// Token: 0x04001831 RID: 6193
+	public const string _PARALLAX_AA = "_PARALLAX_AA";
+
+	// Token: 0x04001832 RID: 6194
+	public const string _PARALLAX_PLANAR = "_PARALLAX_PLANAR";
+
+	// Token: 0x04001833 RID: 6195
+	public const string _MASK_MAP_ON = "_MASK_MAP_ON";
+
+	// Token: 0x04001834 RID: 6196
+	public const string _FX_LAVA_LAMP = "_FX_LAVA_LAMP";
+
+	// Token: 0x04001835 RID: 6197
+	public const string _INNER_GLOW = "_INNER_GLOW";
+
+	// Token: 0x04001836 RID: 6198
+	public const string _STEALTH_EFFECT = "_STEALTH_EFFECT";
+
+	// Token: 0x04001837 RID: 6199
+	public const string _UV_SHIFT = "_UV_SHIFT";
+
+	// Token: 0x04001838 RID: 6200
+	public const string _TEXEL_SNAP_UVS = "_TEXEL_SNAP_UVS";
+
+	// Token: 0x04001839 RID: 6201
+	public const string _UNITY_EDIT_MODE = "_UNITY_EDIT_MODE";
+
+	// Token: 0x0400183A RID: 6202
+	public const string _GT_EDITOR_TIME = "_GT_EDITOR_TIME";
+
+	// Token: 0x0400183B RID: 6203
+	public const string _DEBUG_PAWN_DATA = "_DEBUG_PAWN_DATA";
+
+	// Token: 0x0400183C RID: 6204
+	public const string _COLOR_GRADE_PROTANOMALY = "_COLOR_GRADE_PROTANOMALY";
+
+	// Token: 0x0400183D RID: 6205
+	public const string _COLOR_GRADE_PROTANOPIA = "_COLOR_GRADE_PROTANOPIA";
+
+	// Token: 0x0400183E RID: 6206
+	public const string _COLOR_GRADE_DEUTERANOMALY = "_COLOR_GRADE_DEUTERANOMALY";
+
+	// Token: 0x0400183F RID: 6207
+	public const string _COLOR_GRADE_DEUTERANOPIA = "_COLOR_GRADE_DEUTERANOPIA";
+
+	// Token: 0x04001840 RID: 6208
+	public const string _COLOR_GRADE_TRITANOMALY = "_COLOR_GRADE_TRITANOMALY";
+
+	// Token: 0x04001841 RID: 6209
+	public const string _COLOR_GRADE_TRITANOPIA = "_COLOR_GRADE_TRITANOPIA";
+
+	// Token: 0x04001842 RID: 6210
+	public const string _COLOR_GRADE_ACHROMATOMALY = "_COLOR_GRADE_ACHROMATOMALY";
+
+	// Token: 0x04001843 RID: 6211
+	public const string _COLOR_GRADE_ACHROMATOPSIA = "_COLOR_GRADE_ACHROMATOPSIA";
+
+	// Token: 0x04001844 RID: 6212
+	public const string LIGHTMAP_ON = "LIGHTMAP_ON";
+
+	// Token: 0x04001845 RID: 6213
+	public const string DIRLIGHTMAP_COMBINED = "DIRLIGHTMAP_COMBINED";
+
+	// Token: 0x04001846 RID: 6214
+	public const string INSTANCING_ON = "INSTANCING_ON";
+
+	// Token: 0x04001847 RID: 6215
+	public static readonly string[] namesArray = new string[]
+	{
+		"STEREO_INSTANCING_ON",
+		"UNITY_SINGLE_PASS_STEREO",
+		"STEREO_MULTIVIEW_ON",
+		"STEREO_CUBEMAP_RENDER_ON",
+		"_GLOBAL_ZONE_LIQUID_TYPE__WATER",
+		"_GLOBAL_ZONE_LIQUID_TYPE__LAVA",
+		"_ZONE_LIQUID_SHAPE__CYLINDER",
+		"_USE_TEXTURE",
+		"USE_TEXTURE__AS_MASK",
+		"_USE_WEATHER_MAP",
+		"_ALPHA_DETAIL_MAP",
+		"_WATER_EFFECT",
+		"_HEIGHT_BASED_WATER_EFFECT",
+		"_ALPHATEST_ON",
+		"_MAINTEX_ROTATE",
+		"_UV_WAVE_WARP",
+		"_LIQUID_VOLUME",
+		"_LIQUID_CONTAINER",
+		"_EMISSION",
+		"_EMISSION_USE_UV_WAVE_WARP",
+		"_USE_DEFORM_MAP",
+		"_USE_DAY_NIGHT_LIGHTMAP",
+		"_USE_TEX_ARRAY_ATLAS",
+		"_CRYSTAL_EFFECT",
+		"_EYECOMP",
+		"_MOUTHCOMP",
+		"_ALPHA_BLUE_LIVE_ON",
+		"_GRID_EFFECT",
+		"_REFLECTIONS",
+		"_REFLECTIONS_BOX_PROJECT",
+		"_REFLECTIONS_USE_NORMAL_TEX",
+		"_VERTEX_ROTATE",
+		"_VERTEX_ANIM_FLAP",
+		"_VERTEX_ANIM_WAVE",
+		"_VERTEX_ANIM_WAVE_DEBUG",
+		"_VERTEX_LIGHTING",
+		"_GRADIENT_MAP_ON",
+		"_PARALLAX",
+		"_PARALLAX_AA",
+		"_PARALLAX_PLANAR",
+		"_MASK_MAP_ON",
+		"_FX_LAVA_LAMP",
+		"_INNER_GLOW",
+		"_STEALTH_EFFECT",
+		"_UV_SHIFT",
+		"_TEXEL_SNAP_UVS",
+		"_UNITY_EDIT_MODE",
+		"_GT_EDITOR_TIME",
+		"_DEBUG_PAWN_DATA",
+		"_COLOR_GRADE_PROTANOMALY",
+		"_COLOR_GRADE_PROTANOPIA",
+		"_COLOR_GRADE_DEUTERANOMALY",
+		"_COLOR_GRADE_DEUTERANOPIA",
+		"_COLOR_GRADE_TRITANOMALY",
+		"_COLOR_GRADE_TRITANOPIA",
+		"_COLOR_GRADE_ACHROMATOMALY",
+		"_COLOR_GRADE_ACHROMATOPSIA",
+		"LIGHTMAP_ON",
+		"DIRLIGHTMAP_COMBINED",
+		"INSTANCING_ON"
+	};
+}

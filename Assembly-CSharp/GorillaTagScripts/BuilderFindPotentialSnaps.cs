@@ -1,0 +1,241 @@
+﻿using System;
+using BoingKit;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using UnityEngine;
+
+namespace GorillaTagScripts
+{
+	// Token: 0x02000DCD RID: 3533
+	[BurstCompile]
+	public struct BuilderFindPotentialSnaps : IJobParallelFor
+	{
+		// Token: 0x06005790 RID: 22416 RVA: 0x001BE62C File Offset: 0x001BC82C
+		public void Execute(int index)
+		{
+			BuilderGridPlaneData builderGridPlaneData = this.gridPlanes[index];
+			for (int i = 0; i < this.checkGridPlanes.Length; i++)
+			{
+				BuilderGridPlaneData builderGridPlaneData2 = this.checkGridPlanes[i];
+				BuilderPotentialPlacementData builderPotentialPlacementData = default(BuilderPotentialPlacementData);
+				if (this.TryPlaceGridPlaneOnGridPlane(ref builderGridPlaneData, ref builderGridPlaneData2, ref builderPotentialPlacementData))
+				{
+					this.potentialPlacements.Enqueue(builderPotentialPlacementData);
+				}
+			}
+		}
+
+		// Token: 0x06005791 RID: 22417 RVA: 0x001BE68C File Offset: 0x001BC88C
+		public bool TryPlaceGridPlaneOnGridPlane(ref BuilderGridPlaneData gridPlane, ref BuilderGridPlaneData checkGridPlane, ref BuilderPotentialPlacementData potentialPlacement)
+		{
+			if (checkGridPlane.male == gridPlane.male)
+			{
+				return false;
+			}
+			if (checkGridPlane.pieceId == gridPlane.pieceId)
+			{
+				return false;
+			}
+			Vector3 vector = gridPlane.position;
+			Quaternion quaternion = gridPlane.rotation;
+			Vector3 vector2 = this.worldToLocalRot * (vector + this.worldToLocalPos);
+			Quaternion quaternion2 = this.worldToLocalRot * quaternion;
+			vector = this.localToWorldPos + this.localToWorldRot * vector2;
+			quaternion = this.localToWorldRot * quaternion2;
+			Vector3 position = checkGridPlane.position;
+			float sqrMagnitude = (position - vector).sqrMagnitude;
+			float num = checkGridPlane.boundingRadius + gridPlane.boundingRadius;
+			if (sqrMagnitude > num * num)
+			{
+				return false;
+			}
+			Quaternion rotation = checkGridPlane.rotation;
+			Quaternion quaternion3 = Quaternion.Inverse(rotation);
+			Quaternion quaternion4 = quaternion3 * quaternion;
+			float num2 = Vector3.Dot(Vector3.up, quaternion4 * Vector3.up);
+			if (num2 < this.currSnapParams.maxUpDotProduct)
+			{
+				return false;
+			}
+			Vector3 vector3 = quaternion3 * (vector - position);
+			float y = vector3.y;
+			if (Mathf.Abs(y) > 1f)
+			{
+				return false;
+			}
+			if ((gridPlane.male && y > this.currSnapParams.minOffsetY) || (!gridPlane.male && y < -this.currSnapParams.minOffsetY))
+			{
+				return false;
+			}
+			if (Mathf.Abs(y) > this.currSnapParams.maxOffsetY)
+			{
+				return false;
+			}
+			Quaternion identity = Quaternion.identity;
+			Vector3 vector4;
+			vector4..ctor(quaternion4.x, quaternion4.y, quaternion4.z);
+			if (vector4.sqrMagnitude > MathUtil.Epsilon)
+			{
+				Quaternion quaternion5;
+				QuaternionUtil.DecomposeSwingTwist(quaternion4, Vector3.up, out quaternion5, out identity);
+			}
+			float maxTwistDotProduct = this.currSnapParams.maxTwistDotProduct;
+			Vector3 vector5 = identity * Vector3.forward;
+			float num3 = Vector3.Dot(vector5, Vector3.forward);
+			float num4 = Vector3.Dot(vector5, Vector3.right);
+			bool flag = Mathf.Abs(num3) > maxTwistDotProduct;
+			bool flag2 = Mathf.Abs(num4) > maxTwistDotProduct;
+			if (!flag && !flag2)
+			{
+				return false;
+			}
+			float num5;
+			uint num6;
+			if (flag)
+			{
+				num5 = ((num3 > 0f) ? 0f : 180f);
+				num6 = ((num3 > 0f) ? 0U : 2U);
+			}
+			else
+			{
+				num5 = ((num4 > 0f) ? 90f : 270f);
+				num6 = ((num4 > 0f) ? 1U : 3U);
+			}
+			int num7 = flag2 ? gridPlane.width : gridPlane.length;
+			int num8 = flag2 ? gridPlane.length : gridPlane.width;
+			float num9 = (num8 % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			float num10 = (num7 % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			float num11 = (checkGridPlane.width % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			float num12 = (checkGridPlane.length % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			float num13 = num9 - num11;
+			float num14 = num10 - num12;
+			int num15 = Mathf.RoundToInt((vector3.x - num13) / this.gridSize);
+			int num16 = Mathf.RoundToInt((vector3.z - num14) / this.gridSize);
+			int num17 = num15 + Mathf.FloorToInt((float)num8 / 2f);
+			int num18 = num16 + Mathf.FloorToInt((float)num7 / 2f);
+			int num19 = num17 - (num8 - 1);
+			int num20 = num18 - (num7 - 1);
+			int num21 = Mathf.FloorToInt((float)checkGridPlane.width / 2f);
+			int num22 = Mathf.FloorToInt((float)checkGridPlane.length / 2f);
+			int num23 = num21 - (checkGridPlane.width - 1);
+			int num24 = num22 - (checkGridPlane.length - 1);
+			if (num19 > num21 || num17 < num23 || num20 > num22 || num18 < num24)
+			{
+				return false;
+			}
+			Quaternion quaternion6 = Quaternion.Euler(0f, num5, 0f);
+			Quaternion quaternion7 = rotation * quaternion6;
+			float num25 = (float)num15 * this.gridSize + num13;
+			float num26 = (float)num16 * this.gridSize + num14;
+			Vector3 vector6;
+			vector6..ctor(num25, 0f, num26);
+			Vector3 vector7 = position + rotation * vector6;
+			Quaternion quaternion8 = quaternion7 * Quaternion.Inverse(gridPlane.localRotation);
+			Vector3 localPosition = vector7 - quaternion8 * gridPlane.localPosition;
+			potentialPlacement.localPosition = localPosition;
+			potentialPlacement.localRotation = quaternion8;
+			float num27 = 0.025f;
+			float score = -Mathf.Abs(y) + num2 * num27;
+			potentialPlacement.score = score;
+			potentialPlacement.pieceId = gridPlane.pieceId;
+			potentialPlacement.attachIndex = gridPlane.attachIndex;
+			potentialPlacement.parentPieceId = checkGridPlane.pieceId;
+			potentialPlacement.parentAttachIndex = checkGridPlane.attachIndex;
+			potentialPlacement.attachDistance = Mathf.Abs(y);
+			potentialPlacement.attachPlaneNormal = Vector3.up;
+			if (!checkGridPlane.male)
+			{
+				potentialPlacement.attachPlaneNormal *= -1f;
+			}
+			potentialPlacement.parentAttachBounds.min.x = Mathf.Max(num23, num19);
+			potentialPlacement.parentAttachBounds.min.y = Mathf.Max(num24, num20);
+			potentialPlacement.parentAttachBounds.max.x = Mathf.Min(num21, num17);
+			potentialPlacement.parentAttachBounds.max.y = Mathf.Min(num22, num18);
+			potentialPlacement.twist = (byte)num6;
+			potentialPlacement.bumpOffsetX = (sbyte)num15;
+			potentialPlacement.bumpOffsetZ = (sbyte)num16;
+			Vector2Int v = Vector2Int.zero;
+			Vector2Int v2 = Vector2Int.zero;
+			v.x = potentialPlacement.parentAttachBounds.min.x - num15;
+			v2.x = potentialPlacement.parentAttachBounds.max.x - num15;
+			v.y = potentialPlacement.parentAttachBounds.min.y - num16;
+			v2.y = potentialPlacement.parentAttachBounds.max.y - num16;
+			int offsetX = (num8 % 2 == 0) ? 1 : 0;
+			int offsetY = (num7 % 2 == 0) ? 1 : 0;
+			if (flag && num3 <= 0f)
+			{
+				v = this.Rotate180(v, offsetX, offsetY);
+				v2 = this.Rotate180(v2, offsetX, offsetY);
+			}
+			else if (flag2 && num4 <= 0f)
+			{
+				v = this.Rotate270(v, offsetX, offsetY);
+				v2 = this.Rotate270(v2, offsetX, offsetY);
+			}
+			else if (flag2 && num4 >= 0f)
+			{
+				v = this.Rotate90(v, offsetX, offsetY);
+				v2 = this.Rotate90(v2, offsetX, offsetY);
+			}
+			potentialPlacement.attachBounds.min.x = Mathf.Min(v.x, v2.x);
+			potentialPlacement.attachBounds.min.y = Mathf.Min(v.y, v2.y);
+			potentialPlacement.attachBounds.max.x = Mathf.Max(v.x, v2.x);
+			potentialPlacement.attachBounds.max.y = Mathf.Max(v.y, v2.y);
+			return true;
+		}
+
+		// Token: 0x06005792 RID: 22418 RVA: 0x001BA3EE File Offset: 0x001B85EE
+		private Vector2Int Rotate90(Vector2Int v, int offsetX, int offsetY)
+		{
+			return new Vector2Int(v.y * -1 + offsetY, v.x);
+		}
+
+		// Token: 0x06005793 RID: 22419 RVA: 0x001BA407 File Offset: 0x001B8607
+		private Vector2Int Rotate270(Vector2Int v, int offsetX, int offsetY)
+		{
+			return new Vector2Int(v.y, v.x * -1 + offsetX);
+		}
+
+		// Token: 0x06005794 RID: 22420 RVA: 0x001BA420 File Offset: 0x001B8620
+		private Vector2Int Rotate180(Vector2Int v, int offsetX, int offsetY)
+		{
+			return new Vector2Int(v.x * -1 + offsetX, v.y * -1 + offsetY);
+		}
+
+		// Token: 0x040064E7 RID: 25831
+		[ReadOnly]
+		public float gridSize;
+
+		// Token: 0x040064E8 RID: 25832
+		[ReadOnly]
+		public BuilderTable.SnapParams currSnapParams;
+
+		// Token: 0x040064E9 RID: 25833
+		[ReadOnly]
+		public NativeList<BuilderGridPlaneData> gridPlanes;
+
+		// Token: 0x040064EA RID: 25834
+		[ReadOnly]
+		public NativeList<BuilderGridPlaneData> checkGridPlanes;
+
+		// Token: 0x040064EB RID: 25835
+		[ReadOnly]
+		public Vector3 worldToLocalPos;
+
+		// Token: 0x040064EC RID: 25836
+		[ReadOnly]
+		public Quaternion worldToLocalRot;
+
+		// Token: 0x040064ED RID: 25837
+		[ReadOnly]
+		public Vector3 localToWorldPos;
+
+		// Token: 0x040064EE RID: 25838
+		[ReadOnly]
+		public Quaternion localToWorldRot;
+
+		// Token: 0x040064EF RID: 25839
+		public NativeQueue<BuilderPotentialPlacementData>.ParallelWriter potentialPlacements;
+	}
+}

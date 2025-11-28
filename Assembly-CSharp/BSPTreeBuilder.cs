@@ -1,0 +1,738 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using UnityEngine;
+
+// Token: 0x02000CF9 RID: 3321
+public static class BSPTreeBuilder
+{
+	// Token: 0x060050B1 RID: 20657 RVA: 0x0019FF64 File Offset: 0x0019E164
+	public static SerializableBSPTree BuildTree(ZoneDef[] zones)
+	{
+		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
+		List<MatrixZonePair> list2 = new List<MatrixZonePair>();
+		new List<BoxCollider>();
+		for (int i = 0; i < zones.Length; i++)
+		{
+			ZoneDef zoneDef = zones[i];
+			List<BoxCollider> list3 = new List<BoxCollider>();
+			zoneDef.GetComponents<BoxCollider>(list3);
+			list3.AddRange(zoneDef.transform.GetComponentsInChildren<BoxCollider>());
+			foreach (BoxCollider boxCollider in list3)
+			{
+				int count = list2.Count;
+				int zoneIndex = Array.IndexOf<ZoneDef>(Enumerable.ToArray<ZoneDef>(zones), zoneDef);
+				list2.Add(new MatrixZonePair
+				{
+					matrix = BoxColliderUtils.GetWorldToNormalizedBoxMatrix(boxCollider),
+					zoneIndex = zoneIndex
+				});
+				list.Add(new BSPTreeBuilder.BoxMetadata(boxCollider, zoneDef, count, zones.Length - i));
+			}
+		}
+		if (list.Count == 0)
+		{
+			return null;
+		}
+		List<SerializableBSPNode> list4 = new List<SerializableBSPNode>();
+		List<MatrixBSPNode> list5 = new List<MatrixBSPNode>();
+		Dictionary<ValueTuple<int, int>, int> matrixNodeCache = new Dictionary<ValueTuple<int, int>, int>();
+		int num = 0;
+		list5.Add(new MatrixBSPNode
+		{
+			matrixIndex = -1,
+			outsideChildIndex = 0
+		});
+		BoundsInt bounds = BSPTreeBuilder.CalculateWorldBounds(list);
+		int num2 = BSPTreeBuilder.BuildTreeRecursive(Enumerable.ToArray<ZoneDef>(zones), list, bounds, 0, SerializableBSPNode.Axis.X, list4, list5, matrixNodeCache, ref num);
+		BSPTreeBuilder.CleanupUnreferencedMatrices(list5, list2);
+		List<SerializableBSPNode> list6 = new List<SerializableBSPNode>(list4);
+		int count2 = list6.Count;
+		for (int j = 0; j < list5.Count; j++)
+		{
+			MatrixBSPNode matrixBSPNode = list5[j];
+			if (matrixBSPNode.matrixIndex < 0)
+			{
+				SerializableBSPNode serializableBSPNode = new SerializableBSPNode
+				{
+					axis = SerializableBSPNode.Axis.Zone,
+					splitValue = 0f,
+					leftChildIndex = (short)matrixBSPNode.outsideChildIndex,
+					rightChildIndex = 0
+				};
+				SerializableBSPNode serializableBSPNode2 = serializableBSPNode;
+				list6.Add(serializableBSPNode2);
+			}
+			else
+			{
+				bool flag = matrixBSPNode.outsideChildIndex >= 0;
+				SerializableBSPNode serializableBSPNode = new SerializableBSPNode
+				{
+					axis = (flag ? SerializableBSPNode.Axis.MatrixFinal : SerializableBSPNode.Axis.MatrixChain),
+					splitValue = 0f,
+					leftChildIndex = (short)matrixBSPNode.matrixIndex,
+					rightChildIndex = (short)(flag ? matrixBSPNode.outsideChildIndex : (count2 - matrixBSPNode.outsideChildIndex))
+				};
+				SerializableBSPNode serializableBSPNode3 = serializableBSPNode;
+				list6.Add(serializableBSPNode3);
+			}
+		}
+		for (int k = 0; k < list6.Count; k++)
+		{
+			SerializableBSPNode serializableBSPNode4 = list6[k];
+			bool flag2 = false;
+			SerializableBSPNode.Axis axis = serializableBSPNode4.axis;
+			if (axis <= SerializableBSPNode.Axis.Z)
+			{
+				if (serializableBSPNode4.leftChildIndex < 0)
+				{
+					serializableBSPNode4.leftChildIndex = (short)(count2 - (int)serializableBSPNode4.leftChildIndex);
+					flag2 = true;
+				}
+				if (serializableBSPNode4.rightChildIndex < 0)
+				{
+					serializableBSPNode4.rightChildIndex = (short)(count2 - (int)serializableBSPNode4.rightChildIndex);
+					flag2 = true;
+				}
+			}
+			if (flag2)
+			{
+				list6[k] = serializableBSPNode4;
+			}
+		}
+		if (num2 < 0)
+		{
+			num2 = count2 - num2;
+		}
+		SerializableBSPTree serializableBSPTree = new SerializableBSPTree();
+		serializableBSPTree.nodes = list6.ToArray();
+		serializableBSPTree.matrices = list2.ToArray();
+		serializableBSPTree.zones = Enumerable.ToArray<ZoneDef>(zones);
+		serializableBSPTree.rootIndex = num2;
+		int num3 = serializableBSPTree.nodes.Length * 12;
+		int num4 = serializableBSPTree.matrices.Length * 68;
+		int num5 = num3 + num4;
+		Debug.Log(string.Format("Unified BSP Tree generated: {0} total nodes ({1} spatial + {2} matrix) ({3} bytes), {4} matrix-zone pairs ({5} bytes). Matrix nodes deduplicated: {6}. Total: {7} bytes", new object[]
+		{
+			serializableBSPTree.nodes.Length,
+			list4.Count,
+			list5.Count,
+			num3,
+			serializableBSPTree.matrices.Length,
+			num4,
+			num,
+			num5
+		}));
+		return serializableBSPTree;
+	}
+
+	// Token: 0x060050B2 RID: 20658 RVA: 0x001A0310 File Offset: 0x0019E510
+	private static int BuildTreeRecursive(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, int depth, SerializableBSPNode.Axis axis, List<SerializableBSPNode> nodeList, List<MatrixBSPNode> matrixNodeList, [TupleElementNames(new string[]
+	{
+		"matrixIndex",
+		"outsideIndex"
+	})] Dictionary<ValueTuple<int, int>, int> matrixNodeCache, ref int matrixNodeCacheHits)
+	{
+		Debug.Log(string.Format("Building node at depth {0} with {1} boxes, total nodes so far: {2}", depth, boxes.Count, nodeList.Count));
+		int count = nodeList.Count;
+		if (bounds.Contains(BSPTreeBuilder.testPoint))
+		{
+		}
+		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
+		int num = -1;
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata in boxes)
+		{
+			if (boxMetadata.bounds.GetIntersection(bounds) == bounds && BoxColliderUtils.DoesBoxContainRegion(boxMetadata.box, bounds))
+			{
+				list.Add(boxMetadata);
+				num = Mathf.Max(new int[]
+				{
+					boxMetadata.priority
+				});
+			}
+		}
+		if (list.Count > 1)
+		{
+			foreach (BSPTreeBuilder.BoxMetadata boxMetadata2 in list)
+			{
+				if (boxMetadata2.priority < num)
+				{
+					boxes.Remove(boxMetadata2);
+				}
+				else if (boxMetadata2.priority == num)
+				{
+					num++;
+				}
+			}
+		}
+		bool flag = true;
+		for (int i = 1; i < boxes.Count; i++)
+		{
+			BSPTreeBuilder.BoxMetadata boxMetadata3 = boxes[i];
+			if (boxMetadata3.zone != boxes[0].zone)
+			{
+				flag = false;
+				break;
+			}
+			if (boxMetadata3.bounds.GetIntersection(bounds) == bounds)
+			{
+				list.Add(boxMetadata3);
+			}
+		}
+		if (flag || boxes.Count == 1)
+		{
+			return BSPTreeBuilder.CreateMatrixNodeTree(zones, boxes, matrixNodeList, bounds, matrixNodeCache, ref matrixNodeCacheHits);
+		}
+		if (depth >= 15)
+		{
+			Debug.LogWarning(string.Format("Maximum depth {0} reached with {1} boxes, creating matrix node tree", 15, boxes.Count));
+			return BSPTreeBuilder.CreateMatrixNodeTree(zones, boxes, matrixNodeList, bounds, matrixNodeCache, ref matrixNodeCacheHits);
+		}
+		if (nodeList.Count >= 650)
+		{
+			Debug.LogWarning(string.Format("Maximum nodes {0} reached, creating matrix node tree", 650));
+			return BSPTreeBuilder.CreateMatrixNodeTree(zones, boxes, matrixNodeList, bounds, matrixNodeCache, ref matrixNodeCacheHits);
+		}
+		if (boxes.Count <= 10)
+		{
+			Debug.Log(string.Format("Creating matrix node tree with {0} boxes at depth {1}", boxes.Count, depth));
+			return BSPTreeBuilder.CreateMatrixNodeTree(zones, boxes, matrixNodeList, bounds, matrixNodeCache, ref matrixNodeCacheHits);
+		}
+		SerializableBSPNode serializableBSPNode = new SerializableBSPNode
+		{
+			axis = axis,
+			leftChildIndex = -1,
+			rightChildIndex = -1
+		};
+		nodeList.Add(serializableBSPNode);
+		int num2;
+		SerializableBSPNode.Axis axis2 = BSPTreeBuilder.FindBestAxis(boxes, bounds, axis, out num2);
+		serializableBSPNode.axis = axis2;
+		serializableBSPNode.splitValue = (float)num2 / 1000f;
+		Debug.Log(string.Format("Best axis: {0}, split value: {1}", axis2, num2));
+		BoundsInt boundsInt = bounds;
+		BoundsInt boundsInt2 = bounds;
+		switch (axis2)
+		{
+		case SerializableBSPNode.Axis.X:
+			boundsInt.SetMinMax(bounds.min, new Vector3Int(num2, bounds.max.y, bounds.max.z));
+			boundsInt2.SetMinMax(new Vector3Int(num2, bounds.min.y, bounds.min.z), bounds.max);
+			break;
+		case SerializableBSPNode.Axis.Y:
+			boundsInt.SetMinMax(bounds.min, new Vector3Int(bounds.max.x, num2, bounds.max.z));
+			boundsInt2.SetMinMax(new Vector3Int(bounds.min.x, num2, bounds.min.z), bounds.max);
+			break;
+		case SerializableBSPNode.Axis.Z:
+			boundsInt.SetMinMax(bounds.min, new Vector3Int(bounds.max.x, bounds.max.y, num2));
+			boundsInt2.SetMinMax(new Vector3Int(bounds.min.x, bounds.min.y, num2), bounds.max);
+			break;
+		}
+		List<BSPTreeBuilder.BoxMetadata> effectiveBoxes = BSPTreeBuilder.GetEffectiveBoxes(boxes, boundsInt);
+		IEnumerable<BSPTreeBuilder.BoxMetadata> effectiveBoxes2 = BSPTreeBuilder.GetEffectiveBoxes(boxes, boundsInt2);
+		List<BSPTreeBuilder.BoxMetadata> list2 = new List<BSPTreeBuilder.BoxMetadata>(effectiveBoxes);
+		List<BSPTreeBuilder.BoxMetadata> list3 = new List<BSPTreeBuilder.BoxMetadata>(effectiveBoxes2);
+		Debug.Log(string.Format("Split result: leftBoxes={0}, rightBoxes={1}", list2.Count, list3.Count));
+		if (list2.Count == 0 || list3.Count == 0)
+		{
+			Debug.Log(string.Format("No valid split found, creating matrix node tree with {0} boxes", boxes.Count));
+			return BSPTreeBuilder.CreateMatrixNodeTree(zones, boxes, matrixNodeList, bounds, matrixNodeCache, ref matrixNodeCacheHits);
+		}
+		SerializableBSPNode.Axis nextAxis = BSPTreeBuilder.GetNextAxis(axis);
+		serializableBSPNode.leftChildIndex = (short)BSPTreeBuilder.BuildTreeRecursive(zones, list2, boundsInt, depth + 1, nextAxis, nodeList, matrixNodeList, matrixNodeCache, ref matrixNodeCacheHits);
+		serializableBSPNode.rightChildIndex = (short)BSPTreeBuilder.BuildTreeRecursive(zones, list3, boundsInt2, depth + 1, nextAxis, nodeList, matrixNodeList, matrixNodeCache, ref matrixNodeCacheHits);
+		nodeList[count] = serializableBSPNode;
+		return count;
+	}
+
+	// Token: 0x060050B3 RID: 20659 RVA: 0x001A07E4 File Offset: 0x0019E9E4
+	private static SerializableBSPNode.Axis FindBestAxis(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis preferredAxis, out int bestSplitValue)
+	{
+		SerializableBSPNode.Axis[] array = new SerializableBSPNode.Axis[]
+		{
+			preferredAxis,
+			BSPTreeBuilder.GetNextAxis(preferredAxis),
+			BSPTreeBuilder.GetNextAxis(BSPTreeBuilder.GetNextAxis(preferredAxis))
+		};
+		SerializableBSPNode.Axis axis = preferredAxis;
+		int num = int.MaxValue;
+		bestSplitValue = BSPTreeBuilder.GetFallbackSplit(bounds, preferredAxis);
+		foreach (SerializableBSPNode.Axis axis2 in array)
+		{
+			int num3;
+			int num2 = BSPTreeBuilder.FindOptimalSplit(boxes, bounds, axis2, out num3);
+			Debug.Log(string.Format("Axis {0}: split={1:F3}, score={2}", axis2, num2, num3));
+			if (num3 < num)
+			{
+				num = num3;
+				axis = axis2;
+				bestSplitValue = num2;
+			}
+		}
+		Debug.Log(string.Format("Selected axis {0} with score {1}", axis, num));
+		return axis;
+	}
+
+	// Token: 0x060050B4 RID: 20660 RVA: 0x001A0894 File Offset: 0x0019EA94
+	private static int EvaluateBestSplit(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis axis, int splitValue)
+	{
+		BoundsInt boundsInt = bounds;
+		BoundsInt boundsInt2 = bounds;
+		switch (axis)
+		{
+		case SerializableBSPNode.Axis.X:
+			boundsInt.SetMinMax(bounds.min, new Vector3Int(splitValue, bounds.max.y, bounds.max.z));
+			boundsInt2.SetMinMax(new Vector3Int(splitValue, bounds.min.y, bounds.min.z), bounds.max);
+			break;
+		case SerializableBSPNode.Axis.Y:
+			boundsInt.SetMinMax(bounds.min, new Vector3Int(bounds.max.x, splitValue, bounds.max.z));
+			boundsInt2.SetMinMax(new Vector3Int(bounds.min.x, splitValue, bounds.min.z), bounds.max);
+			break;
+		case SerializableBSPNode.Axis.Z:
+			boundsInt.SetMinMax(bounds.min, new Vector3Int(bounds.max.x, bounds.max.y, splitValue));
+			boundsInt2.SetMinMax(new Vector3Int(bounds.min.x, bounds.min.y, splitValue), bounds.max);
+			break;
+		}
+		return BSPTreeBuilder.EvaluateSplit(boxes, splitValue, axis, bounds);
+	}
+
+	// Token: 0x060050B5 RID: 20661 RVA: 0x001A09D0 File Offset: 0x0019EBD0
+	private static int FindOptimalSplit(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis axis, out int bestScore)
+	{
+		List<int> list = new List<int>();
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata in boxes)
+		{
+			BoundsInt bounds2 = boxMetadata.bounds;
+			switch (axis)
+			{
+			case SerializableBSPNode.Axis.X:
+				list.Add(bounds2.min.x);
+				list.Add(bounds2.max.x);
+				break;
+			case SerializableBSPNode.Axis.Y:
+				list.Add(bounds2.min.y);
+				list.Add(bounds2.max.y);
+				break;
+			case SerializableBSPNode.Axis.Z:
+				list.Add(bounds2.min.z);
+				list.Add(bounds2.max.z);
+				break;
+			}
+		}
+		list = Enumerable.ToList<int>(Enumerable.OrderBy<int, int>(Enumerable.Distinct<int>(list), (int x) => x));
+		int num = BSPTreeBuilder.GetFallbackSplit(bounds, axis);
+		bestScore = int.MaxValue;
+		Debug.Log(string.Format("Evaluating {0} split candidates for {1} axis", list.Count, axis));
+		int axisValue = BSPTreeBuilder.GetAxisValue(bounds.min, axis);
+		int axisValue2 = BSPTreeBuilder.GetAxisValue(bounds.max, axis);
+		foreach (int num2 in list)
+		{
+			if (num2 > axisValue && num2 < axisValue2)
+			{
+				int num3 = BSPTreeBuilder.EvaluateSplit(boxes, num2, axis, bounds);
+				if (num3 < bestScore)
+				{
+					bestScore = num3;
+					num = num2;
+				}
+			}
+		}
+		Debug.Log(string.Format("Best split: {0} with score {1}", num, bestScore));
+		return num;
+	}
+
+	// Token: 0x060050B6 RID: 20662 RVA: 0x001A0BA0 File Offset: 0x0019EDA0
+	private static int GetFallbackSplit(BoundsInt bounds, SerializableBSPNode.Axis axis)
+	{
+		switch (axis)
+		{
+		case SerializableBSPNode.Axis.X:
+			return bounds.center.x;
+		case SerializableBSPNode.Axis.Y:
+			return bounds.center.y;
+		case SerializableBSPNode.Axis.Z:
+			return bounds.center.z;
+		default:
+			return 0;
+		}
+	}
+
+	// Token: 0x060050B7 RID: 20663 RVA: 0x001A0BF4 File Offset: 0x0019EDF4
+	private static int EvaluateSplit(List<BSPTreeBuilder.BoxMetadata> boxes, int splitValue, SerializableBSPNode.Axis axis, BoundsInt bounds)
+	{
+		BoundsInt region = bounds;
+		BoundsInt region2 = bounds;
+		switch (axis)
+		{
+		case SerializableBSPNode.Axis.X:
+			region.SetMinMax(bounds.min, new Vector3Int(splitValue - 1, bounds.max.y, bounds.max.z));
+			region2.SetMinMax(new Vector3Int(splitValue + 1, bounds.min.y, bounds.min.z), bounds.max);
+			break;
+		case SerializableBSPNode.Axis.Y:
+			region.SetMinMax(bounds.min, new Vector3Int(bounds.max.x, splitValue - 1, bounds.max.z));
+			region2.SetMinMax(new Vector3Int(bounds.min.x, splitValue + 1, bounds.min.z), bounds.max);
+			break;
+		case SerializableBSPNode.Axis.Z:
+			region.SetMinMax(bounds.min, new Vector3Int(bounds.max.x, bounds.max.y, splitValue - 1));
+			region2.SetMinMax(new Vector3Int(bounds.min.x, bounds.min.y, splitValue + 1), bounds.max);
+			break;
+		}
+		List<BSPTreeBuilder.BoxMetadata> effectiveBoxes = BSPTreeBuilder.GetEffectiveBoxes(boxes, region);
+		List<BSPTreeBuilder.BoxMetadata> effectiveBoxes2 = BSPTreeBuilder.GetEffectiveBoxes(boxes, region2);
+		int count = effectiveBoxes.Count;
+		int count2 = effectiveBoxes2.Count;
+		int count3 = boxes.Count;
+		int num = count3 - count;
+		int num2 = count3 - count2;
+		Debug.Log(string.Format("  Split evaluation: {0} total -> L:{1} (eliminated:{2}), R:{3} (eliminated:{4})", new object[]
+		{
+			count3,
+			count,
+			num,
+			count2,
+			num2
+		}));
+		if (count == 0 || count2 == 0)
+		{
+			return 1000;
+		}
+		return -((num + 1) * (num2 + 1));
+	}
+
+	// Token: 0x060050B8 RID: 20664 RVA: 0x001A0DC0 File Offset: 0x0019EFC0
+	private static List<BSPTreeBuilder.BoxMetadata> GetEffectiveBoxes(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt region)
+	{
+		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
+		List<BSPTreeBuilder.BoxMetadata> list2 = new List<BSPTreeBuilder.BoxMetadata>();
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata in boxes)
+		{
+			if (boxMetadata.bounds.Intersects(region))
+			{
+				list2.Add(boxMetadata);
+			}
+		}
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata2 in list2)
+		{
+			bool flag = false;
+			BoundsInt intersection = boxMetadata2.bounds.GetIntersection(region);
+			foreach (BSPTreeBuilder.BoxMetadata boxMetadata3 in list2)
+			{
+				if (boxMetadata3 != boxMetadata2 && boxMetadata3.priority > boxMetadata2.priority && boxMetadata3.bounds.GetIntersection(region).Contains(intersection) && BoxColliderUtils.DoesBoxContainBox(boxMetadata3.box, boxMetadata2.box))
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				list.Add(boxMetadata2);
+			}
+		}
+		return list;
+	}
+
+	// Token: 0x060050B9 RID: 20665 RVA: 0x001A0F14 File Offset: 0x0019F114
+	private static List<BSPTreeBuilder.BoxMetadata> GetEffectiveSpanningBoxes(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt leftBounds, BoundsInt rightBounds)
+	{
+		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
+		Dictionary<BSPTreeBuilder.BoxMetadata, BoundsInt> dictionary = new Dictionary<BSPTreeBuilder.BoxMetadata, BoundsInt>();
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata in boxes)
+		{
+			dictionary[boxMetadata] = boxMetadata.bounds;
+		}
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata2 in boxes)
+		{
+			BoundsInt boundsInt = dictionary[boxMetadata2];
+			if (boundsInt.Intersects(leftBounds) && boundsInt.Intersects(rightBounds))
+			{
+				list.Add(boxMetadata2);
+			}
+		}
+		return list;
+	}
+
+	// Token: 0x060050BA RID: 20666 RVA: 0x001A0FD4 File Offset: 0x0019F1D4
+	private static SerializableBSPNode.Axis GetNextAxis(SerializableBSPNode.Axis currentAxis)
+	{
+		switch (currentAxis)
+		{
+		case SerializableBSPNode.Axis.X:
+			return SerializableBSPNode.Axis.Y;
+		case SerializableBSPNode.Axis.Y:
+			return SerializableBSPNode.Axis.Z;
+		case SerializableBSPNode.Axis.Z:
+			return SerializableBSPNode.Axis.X;
+		default:
+			return SerializableBSPNode.Axis.X;
+		}
+	}
+
+	// Token: 0x060050BB RID: 20667 RVA: 0x001A0FF1 File Offset: 0x0019F1F1
+	private static int GetAxisValue(Vector3Int point, SerializableBSPNode.Axis axis)
+	{
+		switch (axis)
+		{
+		case SerializableBSPNode.Axis.X:
+			return point.x;
+		case SerializableBSPNode.Axis.Y:
+			return point.y;
+		case SerializableBSPNode.Axis.Z:
+			return point.z;
+		default:
+			return 0;
+		}
+	}
+
+	// Token: 0x060050BC RID: 20668 RVA: 0x001A1020 File Offset: 0x0019F220
+	private static BoundsInt CalculateWorldBounds(List<BSPTreeBuilder.BoxMetadata> boxes)
+	{
+		if (boxes.Count == 0)
+		{
+			return default(BoundsInt);
+		}
+		BoundsInt bounds = boxes[0].bounds;
+		for (int i = 1; i < boxes.Count; i++)
+		{
+			bounds.Encapsulate(boxes[i].bounds);
+		}
+		return bounds;
+	}
+
+	// Token: 0x060050BD RID: 20669 RVA: 0x001A1074 File Offset: 0x0019F274
+	private static float CalculateIntersectionVolume(BoundsInt box, BoundsInt region)
+	{
+		if (!box.Intersects(region))
+		{
+			return 0f;
+		}
+		return box.GetIntersection(region).VolumeFloat();
+	}
+
+	// Token: 0x060050BE RID: 20670 RVA: 0x001A10A4 File Offset: 0x0019F2A4
+	private static int CreateMatrixNodeTree(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, List<MatrixBSPNode> matrixNodeList, BoundsInt bounds, [TupleElementNames(new string[]
+	{
+		"matrixIndex",
+		"outsideIndex"
+	})] Dictionary<ValueTuple<int, int>, int> matrixNodeCache, ref int matrixNodeCacheHits)
+	{
+		if (boxes.Count == 0)
+		{
+			Debug.LogWarning("Cannot create matrix node tree with no boxes - returning zone 0");
+			return 0;
+		}
+		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
+		List<BSPTreeBuilder.BoxMetadata> list2 = new List<BSPTreeBuilder.BoxMetadata>();
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata in boxes)
+		{
+			if (boxMetadata.bounds.GetIntersection(bounds) == bounds && BoxColliderUtils.DoesBoxContainRegion(boxMetadata.box, bounds))
+			{
+				list.Add(boxMetadata);
+			}
+			else
+			{
+				list2.Add(boxMetadata);
+			}
+		}
+		if (list.Count <= 0)
+		{
+			List<BSPTreeBuilder.BoxMetadata> boxes2 = BSPTreeBuilder.SortBoxesByPriority(boxes);
+			return BSPTreeBuilder.CreateSequentialMatrixNodes(zones, boxes2, matrixNodeList, 0, zones, matrixNodeCache, ref matrixNodeCacheHits);
+		}
+		ZoneDef zone = list[0].zone;
+		int priority = list[0].priority;
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata2 in list)
+		{
+			if (boxMetadata2.priority > priority)
+			{
+				priority = boxMetadata2.priority;
+				zone = boxMetadata2.zone;
+			}
+		}
+		for (int i = list2.Count - 1; i >= 0; i--)
+		{
+			if (list2[i].priority < priority)
+			{
+				list2.RemoveAt(i);
+			}
+		}
+		if (list2.Count == 0)
+		{
+			MatrixBSPNode matrixNode = default(MatrixBSPNode);
+			matrixNode.matrixIndex = -1;
+			int outsideChildIndex = Array.IndexOf<ZoneDef>(zones, zone);
+			matrixNode.outsideChildIndex = outsideChildIndex;
+			return BSPTreeBuilder.AddMatrixNodeWithCache(matrixNode, matrixNodeList, matrixNodeCache, ref matrixNodeCacheHits);
+		}
+		List<BSPTreeBuilder.BoxMetadata> list3 = BSPTreeBuilder.SortBoxesByPriority(list2);
+		foreach (BSPTreeBuilder.BoxMetadata boxMetadata3 in list)
+		{
+			if (boxMetadata3.zone == zone)
+			{
+				list3.Add(boxMetadata3);
+				break;
+			}
+		}
+		return BSPTreeBuilder.CreateSequentialMatrixNodes(zones, list3, matrixNodeList, 0, zones, matrixNodeCache, ref matrixNodeCacheHits);
+	}
+
+	// Token: 0x060050BF RID: 20671 RVA: 0x001A12AC File Offset: 0x0019F4AC
+	private static int CreateSequentialMatrixNodes(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, List<MatrixBSPNode> matrixNodeList, int boxIndex, ZoneDef[] allZones, [TupleElementNames(new string[]
+	{
+		"matrixIndex",
+		"outsideIndex"
+	})] Dictionary<ValueTuple<int, int>, int> matrixNodeCache, ref int matrixNodeCacheHits)
+	{
+		if (boxIndex == 0 && boxes.Count > 1)
+		{
+			while (boxes.Count > 1 && boxes[boxes.Count - 1].zone == boxes[boxes.Count - 2].zone)
+			{
+				boxes.RemoveAt(boxes.Count - 1);
+			}
+		}
+		if (boxIndex >= boxes.Count)
+		{
+			return 0;
+		}
+		BSPTreeBuilder.BoxMetadata boxMetadata = boxes[boxIndex];
+		if (boxIndex == boxes.Count - 1)
+		{
+			MatrixBSPNode matrixNode = default(MatrixBSPNode);
+			matrixNode.matrixIndex = -1;
+			int outsideChildIndex = Array.IndexOf<ZoneDef>(allZones, boxMetadata.zone);
+			matrixNode.outsideChildIndex = outsideChildIndex;
+			return BSPTreeBuilder.AddMatrixNodeWithCache(matrixNode, matrixNodeList, matrixNodeCache, ref matrixNodeCacheHits);
+		}
+		MatrixBSPNode matrixNode2 = default(MatrixBSPNode);
+		matrixNode2.matrixIndex = boxMetadata.matrixIndex;
+		int outsideChildIndex2 = BSPTreeBuilder.CreateSequentialMatrixNodes(zones, boxes, matrixNodeList, boxIndex + 1, allZones, matrixNodeCache, ref matrixNodeCacheHits);
+		matrixNode2.outsideChildIndex = outsideChildIndex2;
+		return BSPTreeBuilder.AddMatrixNodeWithCache(matrixNode2, matrixNodeList, matrixNodeCache, ref matrixNodeCacheHits);
+	}
+
+	// Token: 0x060050C0 RID: 20672 RVA: 0x001A1398 File Offset: 0x0019F598
+	private static int AddMatrixNodeWithCache(MatrixBSPNode matrixNode, List<MatrixBSPNode> matrixNodeList, [TupleElementNames(new string[]
+	{
+		"matrixIndex",
+		"outsideIndex"
+	})] Dictionary<ValueTuple<int, int>, int> matrixNodeCache, ref int matrixNodeCacheHits)
+	{
+		ValueTuple<int, int> valueTuple = new ValueTuple<int, int>(matrixNode.matrixIndex, matrixNode.outsideChildIndex);
+		int num;
+		if (matrixNodeCache.TryGetValue(valueTuple, ref num))
+		{
+			matrixNodeCacheHits++;
+			return -num;
+		}
+		int count = matrixNodeList.Count;
+		matrixNodeList.Add(matrixNode);
+		matrixNodeCache[valueTuple] = count;
+		return -count;
+	}
+
+	// Token: 0x060050C1 RID: 20673 RVA: 0x001A13E4 File Offset: 0x0019F5E4
+	private static List<BSPTreeBuilder.BoxMetadata> SortBoxesByPriority(List<BSPTreeBuilder.BoxMetadata> boxes)
+	{
+		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>(boxes);
+		list.Sort((BSPTreeBuilder.BoxMetadata a, BSPTreeBuilder.BoxMetadata b) => b.priority.CompareTo(a.priority));
+		return list;
+	}
+
+	// Token: 0x060050C2 RID: 20674 RVA: 0x001A1414 File Offset: 0x0019F614
+	private static void CleanupUnreferencedMatrices(List<MatrixBSPNode> matrixNodeList, List<MatrixZonePair> matricesList)
+	{
+		HashSet<int> hashSet = new HashSet<int>();
+		foreach (MatrixBSPNode matrixBSPNode in matrixNodeList)
+		{
+			if (matrixBSPNode.matrixIndex >= 0)
+			{
+				hashSet.Add(matrixBSPNode.matrixIndex);
+			}
+		}
+		Dictionary<int, int> dictionary = new Dictionary<int, int>();
+		List<MatrixZonePair> list = new List<MatrixZonePair>();
+		for (int i = 0; i < matricesList.Count; i++)
+		{
+			if (hashSet.Contains(i))
+			{
+				dictionary[i] = list.Count;
+				list.Add(matricesList[i]);
+			}
+		}
+		for (int j = 0; j < matrixNodeList.Count; j++)
+		{
+			MatrixBSPNode matrixBSPNode2 = matrixNodeList[j];
+			int matrixIndex;
+			if (dictionary.TryGetValue(matrixBSPNode2.matrixIndex, ref matrixIndex))
+			{
+				matrixBSPNode2.matrixIndex = matrixIndex;
+				matrixNodeList[j] = matrixBSPNode2;
+			}
+		}
+		int count = matricesList.Count;
+		matricesList.Clear();
+		matricesList.AddRange(list);
+		int num = count - list.Count;
+		if (num > 0)
+		{
+			Debug.Log(string.Format("Cleaned up {0} unreferenced matrices. Matrices reduced from {1} to {2}", num, count, list.Count));
+		}
+	}
+
+	// Token: 0x04005FFA RID: 24570
+	private const int MAX_ZONES_PER_LEAF = 10;
+
+	// Token: 0x04005FFB RID: 24571
+	private const int MAX_DEPTH = 15;
+
+	// Token: 0x04005FFC RID: 24572
+	private const int MAX_NODES = 650;
+
+	// Token: 0x04005FFD RID: 24573
+	private static Vector3 testPoint = new Vector3(60f, 49f, -98f);
+
+	// Token: 0x02000CFA RID: 3322
+	public class BoxMetadata
+	{
+		// Token: 0x060050C4 RID: 20676 RVA: 0x001A156B File Offset: 0x0019F76B
+		public BoxMetadata(BoxCollider boxCollider, ZoneDef zoneData, int matrixIdx, int priority)
+		{
+			this.box = boxCollider;
+			this.zone = zoneData;
+			this.matrixIndex = matrixIdx;
+			this.bounds = BoundsInt.FromBounds(boxCollider.bounds);
+			this.priority = priority;
+		}
+
+		// Token: 0x060050C5 RID: 20677 RVA: 0x001A15A4 File Offset: 0x0019F7A4
+		public bool ContainsPoint(Vector3 worldPoint)
+		{
+			Vector3 vector = this.box.transform.InverseTransformPoint(worldPoint);
+			Vector3 size = this.box.size;
+			Vector3 center = this.box.center;
+			Vector3 vector2 = center - size * 0.5f;
+			Vector3 vector3 = center + size * 0.5f;
+			return vector.x >= vector2.x && vector.x <= vector3.x && vector.y >= vector2.y && vector.y <= vector3.y && vector.z >= vector2.z && vector.z <= vector3.z;
+		}
+
+		// Token: 0x060050C6 RID: 20678 RVA: 0x001A1656 File Offset: 0x0019F856
+		public BoundsInt GetWorldBounds()
+		{
+			return this.bounds;
+		}
+
+		// Token: 0x04005FFE RID: 24574
+		public BoxCollider box;
+
+		// Token: 0x04005FFF RID: 24575
+		public ZoneDef zone;
+
+		// Token: 0x04006000 RID: 24576
+		public int matrixIndex;
+
+		// Token: 0x04006001 RID: 24577
+		public int priority;
+
+		// Token: 0x04006002 RID: 24578
+		public readonly BoundsInt bounds;
+	}
+}
