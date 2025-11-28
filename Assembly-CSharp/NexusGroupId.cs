@@ -8,11 +8,7 @@ public class NexusGroupId : ScriptableObject
 	{
 		get
 		{
-			if (NexusManager.instance != null && NexusManager.instance.CurrentEnvironment == NexusManager.Environment.PRODUCTION)
-			{
-				return this.code;
-			}
-			return this.sandboxCode;
+			return this.code;
 		}
 	}
 
