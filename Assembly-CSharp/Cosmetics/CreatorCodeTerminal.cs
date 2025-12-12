@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using GorillaNetworking;
 using TMPro;
 using UnityEngine;
 
@@ -19,6 +21,14 @@ namespace Cosmetics
 			get
 			{
 				return this.termId;
+			}
+		}
+
+		GameObject ICreatorCodeProvider.GameObject
+		{
+			get
+			{
+				return base.gameObject;
 			}
 		}
 
@@ -46,6 +56,18 @@ namespace Cosmetics
 			{
 				this.OnCreatorCodesInitialized();
 			}
+			CosmeticsController.PushTerminalMessage = (Action<string, string>)Delegate.Combine(CosmeticsController.PushTerminalMessage, new Action<string, string>(this.OnTerminalMessage));
+		}
+
+		private void OnTerminalMessage(string termId, string msg)
+		{
+			CreatorCodeTerminal.<OnTerminalMessage>d__13 <OnTerminalMessage>d__;
+			<OnTerminalMessage>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
+			<OnTerminalMessage>d__.<>4__this = this;
+			<OnTerminalMessage>d__.termId = termId;
+			<OnTerminalMessage>d__.msg = msg;
+			<OnTerminalMessage>d__.<>1__state = -1;
+			<OnTerminalMessage>d__.<>t__builder.Start<CreatorCodeTerminal.<OnTerminalMessage>d__13>(ref <OnTerminalMessage>d__);
 		}
 
 		public void UnhookFromCreatorCodes()
@@ -53,6 +75,7 @@ namespace Cosmetics
 			CreatorCodes.InitializedEvent -= new Action(this.OnCreatorCodesInitialized);
 			CreatorCodes.OnCreatorCodeChangedEvent -= new Action<string>(this.OnCreatorCodeChanged);
 			CreatorCodes.OnCreatorCodeFailureEvent -= new Action<string>(this.OnCreatorCodeFailure);
+			CosmeticsController.PushTerminalMessage = (Action<string, string>)Delegate.Remove(CosmeticsController.PushTerminalMessage, new Action<string, string>(this.OnTerminalMessage));
 		}
 
 		private void OnCreatorCodesInitialized()

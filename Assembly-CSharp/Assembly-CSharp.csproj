@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6AAC2403-3370-46CB-87A6-A6CDBA4311A4}</ProjectGuid>
+    <ProjectGuid>{448FC4CD-4E19-499C-9009-487880FAA404}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -449,6 +449,7 @@
     <Compile Include="Cosmetics\CosmeticFlickReactor.cs" />
     <Compile Include="Cosmetics\CosmeticParticleSurfaceEffect.cs" />
     <Compile Include="Cosmetics\CosmeticsLocalHandReactor.cs" />
+    <Compile Include="Cosmetics\CountDrivenEvents.cs" />
     <Compile Include="Cosmetics\CreatorCodeTerminal.cs" />
     <Compile Include="Cosmetics\ICreatorCodeProvider.cs" />
     <Compile Include="CosmeticTiltReactor.cs" />
@@ -1199,6 +1200,7 @@
     <Compile Include="GorillaTagScripts\GhostReactor\GREnemyType.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\GREnemyTypeExtensions.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\GRGameObjectExtensions.cs" />
+    <Compile Include="GorillaTagScripts\GhostReactor\GRKiosk.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\SoakTasks\IGhostReactorSoakTask.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\SoakTasks\SoakTaskBreakable.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\SoakTasks\SoakTaskDepositCollectibles.cs" />
@@ -1394,6 +1396,7 @@
     <Compile Include="GorillaTag\GTColor.cs" />
     <Compile Include="GorillaTag\GTDirectAssetRef.cs" />
     <Compile Include="GorillaTag\GTLogErrorLimiter.cs" />
+    <Compile Include="GorillaTag\GTNetFuncAttribute.cs" />
     <Compile Include="GorillaTag\GTOnUnityEditorStartUpAttribute.cs" />
     <Compile Include="GorillaTag\GTStripGameObjectFromBuildAttribute.cs" />
     <Compile Include="GorillaTag\GTTime.cs" />
@@ -1507,8 +1510,12 @@
     <Compile Include="GorillaWalkingGrab.cs" />
     <Compile Include="GorillaWrappedSerializer.cs" />
     <Compile Include="GrabbingColorPicker.cs" />
+    <Compile Include="GRAbilityAgent.cs" />
     <Compile Include="GRAbilityAttackJump.cs" />
+    <Compile Include="GRAbilityAttackLaser.cs" />
     <Compile Include="GRAbilityAttackLatchOn.cs" />
+    <Compile Include="GRAbilityAttackSimple.cs" />
+    <Compile Include="GRAbilityAttackSimpleWander.cs" />
     <Compile Include="GRAbilityAttackSwipe.cs" />
     <Compile Include="GRAbilityBase.cs" />
     <Compile Include="GRAbilityChase.cs" />
@@ -1539,6 +1546,8 @@
     <Compile Include="GRBarrierOverloadable.cs" />
     <Compile Include="GRBarrierSpectral.cs" />
     <Compile Include="GRBay.cs" />
+    <Compile Include="GRBehaviors.cs" />
+    <Compile Include="GRBehaviorsBase.cs" />
     <Compile Include="GRBonusEntry.cs" />
     <Compile Include="GRBonusSystem.cs" />
     <Compile Include="GRBreakable.cs" />
@@ -1547,6 +1556,7 @@
     <Compile Include="GRCollectibleDispenser.cs" />
     <Compile Include="GRCollector.cs" />
     <Compile Include="GRCurrencyDepositor.cs" />
+    <Compile Include="GRDamageFlash.cs" />
     <Compile Include="GRDebugFtueResetButton.cs" />
     <Compile Include="GRDebugGodmodeButton.cs" />
     <Compile Include="GRDebugScoreButton.cs" />
@@ -1560,9 +1570,12 @@
     <Compile Include="GRElevatorButton.cs" />
     <Compile Include="GRElevatorManager.cs" />
     <Compile Include="GRElevatorType.cs" />
+    <Compile Include="GREmployeeLocker.cs" />
     <Compile Include="GREnemy.cs" />
+    <Compile Include="GREnemyBossMoon.cs" />
     <Compile Include="GREnemyChaser.cs" />
     <Compile Include="GREnemyCount.cs" />
+    <Compile Include="GREnemyMonkeye.cs" />
     <Compile Include="GREnemyPest.cs" />
     <Compile Include="GREnemyPhantom.cs" />
     <Compile Include="GREnemyRanged.cs" />
@@ -1581,6 +1594,8 @@
     <Compile Include="GRGuide.cs" />
     <Compile Include="GRHazardousMaterial.cs" />
     <Compile Include="GRHazardTower.cs" />
+    <Compile Include="GRHealthMeter.cs" />
+    <Compile Include="GRHealthMeterNode.cs" />
     <Compile Include="GRLevelAnchor.cs" />
     <Compile Include="GRMetalEnergyGate.cs" />
     <Compile Include="GRMeterEnergy.cs" />
@@ -2150,6 +2165,8 @@
     <Compile Include="ObjectHierarchyFlattenerManager.cs" />
     <Compile Include="ObjectPools.cs" />
     <Compile Include="ObjectToggle.cs" />
+    <Compile Include="ObservableBehavior.cs" />
+    <Compile Include="ObservableBehaviorRule.cs" />
     <Compile Include="OnEnterPlaySystem.cs" />
     <Compile Include="OnEnterPlay_Attribute.cs" />
     <Compile Include="OnEnterPlay_Clear.cs" />
@@ -2479,6 +2496,7 @@
     <Compile Include="SIHandScanner.cs" />
     <Compile Include="SIHandScannerTrigger.cs" />
     <Compile Include="SimpleSpeedTracker.cs" />
+    <Compile Include="SimpleStateMachine.cs" />
     <Compile Include="SimpleTeleporter.cs" />
     <Compile Include="SinglePool.cs" />
     <Compile Include="SIPlayer.cs" />
@@ -2827,6 +2845,8 @@
     <Compile Include="Viveport\Token.cs" />
     <Compile Include="Viveport\User.cs" />
     <Compile Include="Viveport\UserStats.cs" />
+    <Compile Include="VODPlayer.cs" />
+    <Compile Include="VODTarget.cs" />
     <Compile Include="VoiceLoudnessReactor.cs" />
     <Compile Include="VoiceLoudnessReactor2.cs" />
     <Compile Include="VoiceLoudnessReactorAnimatorTarget.cs" />

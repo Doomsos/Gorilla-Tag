@@ -79,10 +79,10 @@ namespace GorillaNetworking
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 				});
 				MothershipAuthenticator mothershipAuthenticator2 = PlayFabAuthenticator.instance.mothershipAuthenticator;
-				mothershipAuthenticator2.OnLoginFailure = (Action<string>)Delegate.Combine(mothershipAuthenticator2.OnLoginFailure, delegate(string errorMessage)
+				mothershipAuthenticator2.OnLoginFailure = (Action<string, string, string>)Delegate.Combine(mothershipAuthenticator2.OnLoginFailure, delegate(string errorMessage, string errorCode, string traceId)
 				{
 					this.loginFailed = true;
-					this.ShowMothershipAuthErrorMessage(errorMessage);
+					this.ShowMothershipAuthErrorMessage(errorMessage, errorCode, traceId);
 				});
 				PlayFabAuthenticator.instance.mothershipAuthenticator.BeginLoginFlow();
 			}
@@ -479,11 +479,25 @@ namespace GorillaNetworking
 			yield break;
 		}
 
-		private void ShowMothershipAuthErrorMessage(string errorMessage)
+		private void ShowMothershipAuthErrorMessage(string errorMessage, string errorCode, string traceId)
 		{
 			try
 			{
-				this.gorillaComputer.GeneralFailureMessage("UNABLE TO AUTHENTICATE WITH MOTHERSHIP.\nREASON: " + errorMessage);
+				StringBuilder stringBuilder = new StringBuilder("UNABLE TO AUTHENTICATE WITH MOTHERSHIP.\nREASON: " + errorMessage);
+				StringBuilder stringBuilder2 = stringBuilder;
+				if (!char.IsPunctuation(stringBuilder2.get_Chars(stringBuilder2.Length - 1)))
+				{
+					stringBuilder.Append('.');
+				}
+				if (!string.IsNullOrEmpty(errorCode))
+				{
+					stringBuilder.Append("\nERROR CODE: " + errorCode);
+				}
+				if (!string.IsNullOrEmpty(traceId))
+				{
+					stringBuilder.Append("\nTRACE ID: " + traceId);
+				}
+				this.gorillaComputer.GeneralFailureMessage(stringBuilder.ToString());
 			}
 			catch (Exception ex)
 			{
@@ -496,7 +510,13 @@ namespace GorillaNetworking
 			try
 			{
 				PlayFabAuthenticator.ErrorInfo errorInfo = JsonUtility.FromJson<PlayFabAuthenticator.ErrorInfo>(errorJson);
-				this.gorillaComputer.GeneralFailureMessage("UNABLE TO AUTHENTICATE WITH PLAYFAB.\nREASON: " + errorInfo.Message);
+				StringBuilder stringBuilder = new StringBuilder("UNABLE TO AUTHENTICATE WITH PLAYFAB.\nREASON: " + errorInfo.Message);
+				StringBuilder stringBuilder2 = stringBuilder;
+				if (!char.IsPunctuation(stringBuilder2.get_Chars(stringBuilder2.Length - 1)))
+				{
+					stringBuilder.Append('.');
+				}
+				this.gorillaComputer.GeneralFailureMessage(stringBuilder.ToString());
 			}
 			catch (Exception ex)
 			{

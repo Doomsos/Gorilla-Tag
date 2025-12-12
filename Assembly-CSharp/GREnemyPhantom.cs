@@ -361,7 +361,7 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 		switch (this.currBehavior)
 		{
 		case GREnemyPhantom.Behavior.Mine:
-			this.abilityMine.Update(dt);
+			this.abilityMine.UpdateAuthority(dt);
 			if (this.idleLocation != null)
 			{
 				GameAgent.UpdateFacingDir(base.transform, this.agent.navAgent, this.idleLocation.forward, 180f);
@@ -369,13 +369,13 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			}
 			break;
 		case GREnemyPhantom.Behavior.Idle:
-			this.abilityIdle.Update(dt);
+			this.abilityIdle.UpdateAuthority(dt);
 			return;
 		case GREnemyPhantom.Behavior.Alert:
 			this.UpdateAlert(dt);
 			return;
 		case GREnemyPhantom.Behavior.Return:
-			this.abilityReturn.Update(dt);
+			this.abilityReturn.UpdateAuthority(dt);
 			if (this.abilityReturn.IsDone())
 			{
 				this.SetBehavior(GREnemyPhantom.Behavior.Mine, false);
@@ -383,7 +383,7 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			}
 			break;
 		case GREnemyPhantom.Behavior.Rage:
-			this.abilityRage.Update(dt);
+			this.abilityRage.UpdateAuthority(dt);
 			if (this.abilityRage.IsDone())
 			{
 				this.SetBehavior(GREnemyPhantom.Behavior.Chase, false);
@@ -392,7 +392,7 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			break;
 		case GREnemyPhantom.Behavior.Chase:
 		{
-			this.abilityChase.Update(dt);
+			this.abilityChase.UpdateAuthority(dt);
 			if (this.abilityChase.IsDone())
 			{
 				this.SetBehavior(GREnemyPhantom.Behavior.Return, false);
@@ -411,7 +411,7 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			break;
 		}
 		case GREnemyPhantom.Behavior.Attack:
-			this.abilityAttack.Update(dt);
+			this.abilityAttack.UpdateAuthority(dt);
 			if (this.abilityAttack.IsDone())
 			{
 				this.SetBehavior(GREnemyPhantom.Behavior.Chase, false);
@@ -419,10 +419,10 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			}
 			break;
 		case GREnemyPhantom.Behavior.Investigate:
-			this.abilityInvestigate.Update(dt);
+			this.abilityInvestigate.UpdateAuthority(dt);
 			return;
 		case GREnemyPhantom.Behavior.Jump:
-			this.abilityJump.Update(dt);
+			this.abilityJump.UpdateAuthority(dt);
 			if (this.abilityJump.IsDone())
 			{
 				this.ChooseNewBehavior();
@@ -462,7 +462,7 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 	public void UpdateAlert(float dt)
 	{
 		this.abilityAlert.SetTargetPlayer(this.agent.targetPlayer);
-		this.abilityAlert.Update(dt);
+		this.abilityAlert.UpdateAuthority(dt);
 		double timeAsDouble = Time.timeAsDouble;
 		if (!this.senseNearby.IsAnyoneNearby())
 		{

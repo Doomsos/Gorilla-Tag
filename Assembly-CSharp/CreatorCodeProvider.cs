@@ -31,6 +31,14 @@ public class CreatorCodeProvider : MonoBehaviour, ICreatorCodeProvider, IBuildVa
 		};
 	}
 
+	GameObject ICreatorCodeProvider.GameObject
+	{
+		get
+		{
+			return base.gameObject;
+		}
+	}
+
 	[SerializeField]
 	private NexusCreatorCode nexusCreatorCode;
 }

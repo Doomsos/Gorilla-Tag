@@ -62,6 +62,10 @@ public class GRShiftStat
 
 	public void IncrementEnemyKills(GREnemyType type)
 	{
+		if (type == GREnemyType.None)
+		{
+			return;
+		}
 		if (!this.enemyKills.TryAdd(type, 1))
 		{
 			Dictionary<GREnemyType, int> dictionary = this.enemyKills;

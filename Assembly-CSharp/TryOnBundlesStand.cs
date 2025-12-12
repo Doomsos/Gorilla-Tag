@@ -40,6 +40,11 @@ public class TryOnBundlesStand : MonoBehaviour, IBuildValidation
 		}
 	}
 
+	private void OnEnable()
+	{
+		BundleManager.instance._tryOnBundlesStand = this;
+	}
+
 	private void Start()
 	{
 		PlayFabTitleDataCache.Instance.GetTitleData(this.ComputerDefaultTextTitleDataKey, new Action<string>(this.OnComputerDefaultTextTitleDataSuccess), new Action<PlayFabError>(this.OnComputerDefaultTextTitleDataFailure), false);

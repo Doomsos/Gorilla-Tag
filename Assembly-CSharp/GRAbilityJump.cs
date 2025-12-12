@@ -33,24 +33,22 @@ public class GRAbilityJump : GRAbilityBase
 		this.SetupJump(linkData.endPos, linkData.startPos, 1f, 1f);
 	}
 
-	public override void Start()
+	protected override void OnStart()
 	{
-		base.Start();
 		this.elapsedTime = 0f;
 		this.isActive = true;
 		this.PlayAnim(this.animationData.animName, 0.05f, this.animationData.speed);
-		this.agent.navAgent.isStopped = true;
+		this.agent.SetStopped(true);
 		this.agent.SetDisableNetworkSync(true);
 		this.agent.pauseEntityThink = true;
 		this.soundJump.Play(this.audioSource);
 	}
 
-	public override void Stop()
+	protected override void OnStop()
 	{
-		base.Stop();
 		this.agent.navAgent.Warp(this.endPos);
 		this.agent.navAgent.CompleteOffMeshLink();
-		this.agent.navAgent.isStopped = false;
+		this.agent.SetStopped(false);
 		this.isActive = false;
 		this.agent.SetDisableNetworkSync(false);
 		this.agent.pauseEntityThink = false;
@@ -66,7 +64,7 @@ public class GRAbilityJump : GRAbilityBase
 		return this.isActive;
 	}
 
-	protected override void UpdateShared(float dt)
+	protected override void OnUpdateShared(float dt)
 	{
 		if (GhostReactorManager.entityDebugEnabled)
 		{

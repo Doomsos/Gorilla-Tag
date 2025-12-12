@@ -375,6 +375,19 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		rig.myBodyDockPositions.RefreshTransferrableItems();
 	}
 
+	public static void SetRigTemporarySpace(bool enteringSpace, RigContainer rigRef, IReadOnlyList<string> cosmeticIds)
+	{
+		rigRef.Rig.inTempCosmSpace = enteringSpace;
+		if (enteringSpace)
+		{
+			CosmeticsController.CosmeticSet currentWornSet = CosmeticsController.instance.currentWornSet;
+			CosmeticsController.instance.tempUnlockedSet.CopyItemsIntoEmpty(currentWornSet);
+			PlayerCosmeticsSystem.UnlockTemporaryCosmeticsForPlayer(rigRef, cosmeticIds);
+			return;
+		}
+		PlayerCosmeticsSystem.LockTemporaryCosmeticsForPlayer(rigRef, cosmeticIds);
+	}
+
 	public static void UnlockTemporaryCosmeticsForPlayer(RigContainer rigRef)
 	{
 		PlayerCosmeticsSystem.UnlockTemporaryCosmeticsForPlayer(rigRef, PlayerCosmeticsSystem.TempUnlockCosmeticString);
@@ -390,7 +403,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		VRRig rig = rigRef.Rig;
 		foreach (string text in cosmeticIds)
 		{
-			if (!rig.concatStringOfCosmeticsAllowed.Contains(text) && rig.TemporaryCosmetics.Add(text) && rig.isOfflineVRRig)
+			if (rig.TemporaryCosmetics.Add(text) && rig.isOfflineVRRig && !rig.concatStringOfCosmeticsAllowed.Contains(text))
 			{
 				CosmeticsController.instance.AddTempUnlockToWardrobe(text);
 			}
@@ -476,6 +489,17 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 	{
 		int num;
 		return rigRef.TemporaryCosmetics.Contains(cosmeticId) || (PlayerCosmeticsSystem.k_tempUnlockedCosmetics.TryGetValue(cosmeticId, ref num) && num > 0);
+	}
+
+	public static bool LocalIsTemporaryCosmetic(string cosmeticId)
+	{
+		VRRig rig = VRRigCache.Instance.localRig.Rig;
+		return !rig.concatStringOfCosmeticsAllowed.Contains(cosmeticId) && PlayerCosmeticsSystem.IsTemporaryCosmeticAllowed(rig, cosmeticId);
+	}
+
+	public static bool LocalPlayerInTemporaryCosmeticSpace()
+	{
+		return VRRigCache.Instance.localRig.Rig.inTempCosmSpace;
 	}
 
 	public static void StaticReset()

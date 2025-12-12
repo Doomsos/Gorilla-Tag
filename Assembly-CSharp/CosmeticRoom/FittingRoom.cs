@@ -17,6 +17,22 @@ namespace CosmeticRoom
 			CosmeticsController.instance.AddFittingRoom(this);
 		}
 
+		private void OnEnable()
+		{
+			if (this.addOnEnable)
+			{
+				CosmeticsController.instance.AddFittingRoom(this);
+			}
+		}
+
+		private void OnDisable()
+		{
+			if (this.addOnEnable)
+			{
+				CosmeticsController.instance.RemoveFittingRoom(this);
+			}
+		}
+
 		public void UpdateFromCart(List<CosmeticsController.CosmeticItem> currentCart, CosmeticsController.CosmeticSet tryOnSet)
 		{
 			this.iterator = 0;
@@ -40,5 +56,7 @@ namespace CosmeticRoom
 		public GameObject consoleMesh;
 
 		private int iterator;
+
+		public bool addOnEnable;
 	}
 }

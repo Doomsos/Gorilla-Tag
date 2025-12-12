@@ -11,6 +11,22 @@ namespace CosmeticRoom
 {
 	public class ItemCheckout : MonoBehaviour
 	{
+		private void OnEnable()
+		{
+			if (this.addOnEnable)
+			{
+				CosmeticsController.instance.AddItemCheckout(this);
+			}
+		}
+
+		private void OnDisable()
+		{
+			if (this.addOnEnable)
+			{
+				CosmeticsController.instance.RemoveItemCheckout(this);
+			}
+		}
+
 		public void InitializeForCustomMap(CompositeTriggerEvents customMapTryOnArea, Scene customMapScene, bool useCustomCounterMesh = true)
 		{
 			GameObject gameObject = this.checkoutCounterMesh;
@@ -104,5 +120,7 @@ namespace CosmeticRoom
 		private Scene originalScene;
 
 		private int iterator;
+
+		public bool addOnEnable;
 	}
 }

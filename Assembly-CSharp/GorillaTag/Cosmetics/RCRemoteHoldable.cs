@@ -85,6 +85,8 @@ namespace GorillaTag.Cosmetics
 			if (this._events.IsNotNull())
 			{
 				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnStartConnectionEvent);
+				this._events.Dispose();
+				this._events = null;
 			}
 		}
 

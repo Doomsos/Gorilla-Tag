@@ -385,7 +385,7 @@ public class MonkeyeAI : MonoBehaviour, IGorillaSliceableSimple
 			}
 			else if (this.replState.state < MonkeyeAI_ReplState.EStates.DropPlayer)
 			{
-				this.lazerFx.EnableLazer(this.eyeBones, rig);
+				this.lazerFx.EnableLazer(this.eyeBones, rig, 10000f);
 			}
 			else
 			{

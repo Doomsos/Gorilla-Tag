@@ -9,6 +9,13 @@ namespace GorillaTagScripts.GhostReactor
 		Pest,
 		Phantom,
 		Ranged,
-		Summoner
+		Summoner,
+		Monkeye,
+		ArmoredPest,
+		ArmoredRanged,
+		ArmoredChaser,
+		ArmoredSummoner,
+		BigChaser,
+		BigPest
 	}
 }

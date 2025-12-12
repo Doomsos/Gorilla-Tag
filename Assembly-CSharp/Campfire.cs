@@ -38,7 +38,7 @@ public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 		{
 			return;
 		}
-		if ((this.isActive[BetterDayNightManager.instance.currentTimeIndex] && BetterDayNightManager.instance.CurrentWeather() != BetterDayNightManager.WeatherType.Raining) || this.overrideDayNight == 1)
+		if ((this.isActive[BetterDayNightManager.instance.currentTimeIndex] && (this.playDuringRain || BetterDayNightManager.instance.CurrentWeather() != BetterDayNightManager.WeatherType.Raining)) || this.overrideDayNight == 1)
 		{
 			if (!this.wasActive)
 			{
@@ -197,4 +197,6 @@ public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 	public bool wasActive;
 
 	private float lastTime;
+
+	public bool playDuringRain;
 }

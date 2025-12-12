@@ -15,6 +15,7 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 		base.GetComponentsInChildren<Collider>(this.colliders);
 		this.agent = base.GetComponent<GameAgent>();
 		this.entity = base.GetComponent<GameEntity>();
+		this.enemy = base.GetComponent<GREnemy>();
 		if (this.armor != null)
 		{
 			this.armor.SetHp(0);
@@ -342,13 +343,13 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 		switch (this.currBehavior)
 		{
 		case GREnemySummoner.Behavior.Idle:
-			this.abilityIdle.Update(dt);
+			this.abilityIdle.UpdateAuthority(dt);
 			return;
 		case GREnemySummoner.Behavior.Wander:
-			this.abilityWander.Update(dt);
+			this.abilityWander.UpdateAuthority(dt);
 			return;
 		case GREnemySummoner.Behavior.Stagger:
-			this.abilityStagger.Update(dt);
+			this.abilityStagger.UpdateAuthority(dt);
 			if (this.abilityStagger.IsDone())
 			{
 				this.SetBehavior(GREnemySummoner.Behavior.Wander, false);
@@ -356,22 +357,22 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 			}
 			break;
 		case GREnemySummoner.Behavior.Destroyed:
-			this.abilityDie.Update(dt);
+			this.abilityDie.UpdateAuthority(dt);
 			return;
 		case GREnemySummoner.Behavior.Summon:
-			this.abilitySummon.Update(dt);
+			this.abilitySummon.UpdateAuthority(dt);
 			return;
 		case GREnemySummoner.Behavior.KeepDistance:
-			this.abilityKeepDistance.Update(dt);
+			this.abilityKeepDistance.UpdateAuthority(dt);
 			return;
 		case GREnemySummoner.Behavior.MoveToTarget:
-			this.abilityMoveToTarget.Update(dt);
+			this.abilityMoveToTarget.UpdateAuthority(dt);
 			return;
 		case GREnemySummoner.Behavior.Investigate:
-			this.abilityInvestigate.Update(dt);
+			this.abilityInvestigate.UpdateAuthority(dt);
 			return;
 		case GREnemySummoner.Behavior.Jump:
-			this.abilityJump.Update(dt);
+			this.abilityJump.UpdateAuthority(dt);
 			if (this.abilityJump.IsDone())
 			{
 				this.ChooseNewBehavior();
@@ -379,7 +380,7 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 			}
 			break;
 		case GREnemySummoner.Behavior.Flashed:
-			this.abilityFlashed.Update(dt);
+			this.abilityFlashed.UpdateAuthority(dt);
 			if (this.abilityFlashed.IsDone())
 			{
 				this.ChooseNewBehavior();
@@ -672,6 +673,8 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 	private GameEntity entity;
 
 	private GameAgent agent;
+
+	private GREnemy enemy;
 
 	public GRArmorEnemy armor;
 

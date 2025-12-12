@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using GorillaExtensions;
 using GorillaTagScripts.VirtualStumpCustomMaps;
 using GT_CustomMapSupportRuntime;
@@ -27,18 +28,63 @@ namespace GorillaNetworking.Store
 		{
 			this.addToCartTextTMP.gameObject.SetActive(true);
 			this.slotPriceTextTMP.gameObject.SetActive(true);
+			this.AddStandToStoreController();
 		}
 
 		public void OnDisable()
 		{
 			this.addToCartTextTMP.gameObject.SetActive(false);
 			this.slotPriceTextTMP.gameObject.SetActive(false);
+			this.RemoveStandFromStoreController();
+		}
+
+		public void AddStandToStoreController()
+		{
+			if (!StoreController.instance.cosmeticsInitialized)
+			{
+				this.AsyncAddStandToStoreController();
+				return;
+			}
+			this._AddStandToStoreController();
+		}
+
+		public void AsyncAddStandToStoreController()
+		{
+			DynamicCosmeticStand.<AsyncAddStandToStoreController>d__29 <AsyncAddStandToStoreController>d__;
+			<AsyncAddStandToStoreController>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
+			<AsyncAddStandToStoreController>d__.<>4__this = this;
+			<AsyncAddStandToStoreController>d__.<>1__state = -1;
+			<AsyncAddStandToStoreController>d__.<>t__builder.Start<DynamicCosmeticStand.<AsyncAddStandToStoreController>d__29>(ref <AsyncAddStandToStoreController>d__);
+		}
+
+		public void _AddStandToStoreController()
+		{
+			StoreController.instance.AddStandToCosmeticStandsDictionary(this);
+			StoreController.instance.AddStandToPlayfabIDDictionary(this);
+			if (StoreController.instance.LoadFromTitleData)
+			{
+				StoreController.instance.InitializeStandFromTitleData(this);
+				return;
+			}
+			this.InitializeCosmetic();
+		}
+
+		public void RemoveStandFromStoreController()
+		{
+			if (StoreController.instance == null || !StoreController.instance.cosmeticsInitialized)
+			{
+				return;
+			}
+			StoreController.instance.RemoveStandFromDynamicCosmeticStandsDictionary(this);
+			StoreController.instance.RemoveStandFromPlayFabIDDictionary(this);
 		}
 
 		public virtual void SetForGame()
 		{
 			this.DisplayHeadModel.gameObject.SetActive(true);
 			this.SetStandType(this.DisplayHeadModel.bustType);
+			this.parentDisplay = base.GetComponentInParent<StoreDisplay>();
+			this.parentDepartment = base.GetComponentInParent<StoreDepartment>();
 		}
 
 		public string thisCosmeticName
@@ -446,6 +492,12 @@ namespace GorillaNetworking.Store
 		public GameObject TageEffectDisplayModel;
 
 		private Scene customMapScene;
+
+		[HideInInspector]
+		public StoreDisplay parentDisplay;
+
+		[HideInInspector]
+		public StoreDepartment parentDepartment;
 
 		private int searchIndex;
 	}

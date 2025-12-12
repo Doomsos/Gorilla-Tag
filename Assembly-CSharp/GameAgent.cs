@@ -74,6 +74,10 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 
 	public void OnUpdate()
 	{
+		if (this.navAgent == null)
+		{
+			return;
+		}
 		if (this.navAgent.isOnNavMesh)
 		{
 			this.lastPosOnNavMesh = this.navAgent.transform.position;
@@ -175,7 +179,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		dest = navMeshHit.position;
 		this.lastReceivedDest = dest;
 		this.hasNotifiedNavigationFailure = false;
-		if (this.navAgent.isOnNavMesh)
+		if (this.navAgent != null && this.navAgent.isOnNavMesh)
 		{
 			this.navAgent.destination = dest;
 		}
@@ -188,16 +192,38 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 
 	public void SetIsPathing(bool isPathing, bool ignoreRigiBody = false)
 	{
-		this.navAgent.enabled = isPathing;
+		if (this.navAgent != null)
+		{
+			this.navAgent.enabled = isPathing;
+		}
 		if (!ignoreRigiBody && this.rigidBody != null)
 		{
 			this.rigidBody.isKinematic = isPathing;
 		}
 	}
 
+	public void SetStopped(bool stopMovement)
+	{
+		if (this.navAgent != null)
+		{
+			this.navAgent.isStopped = stopMovement;
+		}
+	}
+
 	public void SetSpeed(float speed)
 	{
-		this.navAgent.speed = speed;
+		if (this.navAgent != null)
+		{
+			this.navAgent.speed = speed;
+		}
+	}
+
+	public void SetVelocity(Vector3 vel)
+	{
+		if (this.navAgent != null)
+		{
+			this.navAgent.velocity = vel;
+		}
 	}
 
 	public void ApplyNetworkUpdate(Vector3 position, Quaternion rotation)
@@ -206,7 +232,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		{
 			return;
 		}
-		if ((base.transform.position - position).sqrMagnitude > this.networkPositionCorrectionDist * this.networkPositionCorrectionDist)
+		if ((base.transform.position - position).sqrMagnitude > this.networkPositionCorrectionDist * this.networkPositionCorrectionDist && this.navAgent != null)
 		{
 			this.navAgent.Warp(position);
 			this.navAgent.destination = this.lastReceivedDest;
@@ -250,16 +276,16 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		}
 		else
 		{
-			Vector3 desiredVelocity = navAgent.desiredVelocity;
-			desiredVelocity.y = 0f;
-			float magnitude2 = desiredVelocity.magnitude;
+			Vector3 vector3 = (navAgent == null) ? Vector3.zero : navAgent.desiredVelocity;
+			vector3.y = 0f;
+			float magnitude2 = vector3.magnitude;
 			if (magnitude2 > 0f)
 			{
-				vector = desiredVelocity / magnitude2;
+				vector = vector3 / magnitude2;
 			}
 		}
 		Quaternion quaternion = Quaternion.LookRotation(vector);
-		if (navAgent.speed > 0f)
+		if (navAgent != null && navAgent.speed > 0f)
 		{
 			transform.rotation = Quaternion.Lerp(transform.rotation, quaternion, Mathf.Clamp(turnspeed * navAgent.speed / Quaternion.Angle(transform.rotation, quaternion) * Time.deltaTime, 0f, 1f));
 			return;
@@ -269,14 +295,14 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 
 	public static void UpdateFacingForward(Transform transform, NavMeshAgent navAgent, float turnspeed = 3600f)
 	{
-		Vector3 desiredVelocity = navAgent.desiredVelocity;
-		desiredVelocity.y = 0f;
-		float magnitude = desiredVelocity.magnitude;
+		Vector3 vector = (navAgent == null) ? Vector3.zero : navAgent.desiredVelocity;
+		vector.y = 0f;
+		float magnitude = vector.magnitude;
 		if (magnitude <= 0f)
 		{
 			return;
 		}
-		Vector3 facingDir = desiredVelocity / magnitude;
+		Vector3 facingDir = vector / magnitude;
 		GameAgent.UpdateFacingDir(transform, navAgent, facingDir, turnspeed);
 	}
 
@@ -290,8 +316,9 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 
 	public static void UpdateFacingDir(Transform transform, NavMeshAgent navAgent, Vector3 facingDir, float turnspeed = 3600f)
 	{
+		float num = (navAgent == null) ? 0f : navAgent.speed;
 		Quaternion quaternion = Quaternion.LookRotation(facingDir);
-		transform.rotation = Quaternion.Lerp(transform.rotation, quaternion, Mathf.Clamp(turnspeed * navAgent.speed / Quaternion.Angle(transform.rotation, quaternion) * Time.deltaTime, 0f, 1f));
+		transform.rotation = Quaternion.Lerp(transform.rotation, quaternion, Mathf.Clamp(turnspeed * num / Quaternion.Angle(transform.rotation, quaternion) * Time.deltaTime, 0f, 1f));
 	}
 
 	public GameEntity entity;

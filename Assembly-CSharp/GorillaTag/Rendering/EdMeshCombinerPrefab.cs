@@ -377,6 +377,12 @@ namespace GorillaTag.Rendering
 						component3.enabled = false;
 						combinedPrefabData.disabled.Add(component3);
 					}
+					SkinnedMeshRenderer component4 = transform.GetComponent<SkinnedMeshRenderer>();
+					if (component4 != null)
+					{
+						component4.enabled = false;
+						combinedPrefabData.disabled.Add(component4);
+					}
 				}
 			}
 		}

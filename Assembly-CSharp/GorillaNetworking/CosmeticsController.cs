@@ -449,7 +449,7 @@ namespace GorillaNetworking
 
 		public void RemoveItemCheckout(ItemCheckout checkoutToRemove)
 		{
-			this.itemCheckouts.Remove(checkoutToRemove);
+			this.itemCheckouts.RemoveIfContains(checkoutToRemove);
 		}
 
 		public void AddFittingRoom(FittingRoom newFittingRoom)
@@ -464,7 +464,7 @@ namespace GorillaNetworking
 
 		public void RemoveFittingRoom(FittingRoom fittingRoomToRemove)
 		{
-			this.fittingRooms.Remove(fittingRoomToRemove);
+			this.fittingRooms.RemoveIfContains(fittingRoomToRemove);
 		}
 
 		private void SaveItemPreference(CosmeticsController.CosmeticSlots slot, int slotIdx, CosmeticsController.CosmeticItem newItem)
@@ -1025,31 +1025,18 @@ namespace GorillaNetworking
 
 		public void PurchaseBundle(StoreBundle bundleToPurchase, ICreatorCodeProvider ccp)
 		{
-			CosmeticsController.<PurchaseBundle>d__183 <PurchaseBundle>d__;
+			CosmeticsController.<PurchaseBundle>d__185 <PurchaseBundle>d__;
 			<PurchaseBundle>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<PurchaseBundle>d__.<>4__this = this;
 			<PurchaseBundle>d__.bundleToPurchase = bundleToPurchase;
 			<PurchaseBundle>d__.ccp = ccp;
 			<PurchaseBundle>d__.<>1__state = -1;
-			<PurchaseBundle>d__.<>t__builder.Start<CosmeticsController.<PurchaseBundle>d__183>(ref <PurchaseBundle>d__);
+			<PurchaseBundle>d__.<>t__builder.Start<CosmeticsController.<PurchaseBundle>d__185>(ref <PurchaseBundle>d__);
 		}
 
 		private void OnCreatorCodeFailure()
 		{
 			this.buyingBundle = false;
-		}
-
-		private void OnCreatorCodeValid(NexusGroupId id, string creatorCode)
-		{
-			if (this.buyingBundle)
-			{
-				this.SetValidatedCreatorCode(new NexusManager.MemberCode
-				{
-					memberCode = creatorCode,
-					groupId = id
-				});
-				this.SteamPurchase();
-			}
 		}
 
 		public void PressEarlyAccessButton()
@@ -1574,7 +1561,7 @@ namespace GorillaNetworking
 		public void UpdateWornCosmetics(bool sync, bool playfx)
 		{
 			VRRig localRig = VRRig.LocalRig;
-			this.activeMergedSet.MergeInSets(this.currentWornSet, this.tempUnlockedSet, (string id) => PlayerCosmeticsSystem.IsTemporaryCosmeticAllowed(localRig, id));
+			this.activeMergedSet.MergeInSets(this.currentWornSet, this.tempUnlockedSet, (string id) => PlayerCosmeticsSystem.LocalPlayerInTemporaryCosmeticSpace() || PlayerCosmeticsSystem.IsTemporaryCosmeticAllowed(localRig, id));
 			GorillaTagger.Instance.offlineVRRig.LocalUpdateCosmeticsWithTryon(this.activeMergedSet, this.tryOnSet, playfx);
 			if (sync && GorillaTagger.Instance.myVRRig != null)
 			{
@@ -2214,8 +2201,7 @@ namespace GorillaNetworking
 			if (this.validatedCreatorCode != null)
 			{
 				dictionary2.Add("NexusCreatorId", this.validatedCreatorCode.memberCode);
-				dictionary2.Add("NexusGroupId", this.validatedCreatorCode.groupId.Code);
-				this.validatedCreatorCode = null;
+				dictionary2.Add("NexusGroupId", this.validatedCreatorCode.groupId);
 			}
 			return new ConfirmPurchaseRequest
 			{
@@ -2233,8 +2219,7 @@ namespace GorillaNetworking
 			if (this.validatedCreatorCode != null)
 			{
 				dictionary2.Add("NexusCreatorId", this.validatedCreatorCode.memberCode);
-				dictionary2.Add("NexusGroupId", this.validatedCreatorCode.groupId.Code);
-				this.validatedCreatorCode = null;
+				dictionary2.Add("NexusGroupId", this.validatedCreatorCode.groupId);
 			}
 			return new ConfirmPurchaseRequest
 			{
@@ -2247,6 +2232,10 @@ namespace GorillaNetworking
 		{
 			if (this.buyingBundle)
 			{
+				if (this.validatedCreatorCode != null && CosmeticsController.PushTerminalMessage != null)
+				{
+					CosmeticsController.PushTerminalMessage.Invoke(this.validatedCreatorCode.terminalId, "THIS PURCHASE SUPPORTED\n" + CreatorCodes.supportedMember.name + "!");
+				}
 				this.buyingBundle = false;
 				if (PhotonNetwork.InRoom)
 				{
@@ -2768,9 +2757,12 @@ namespace GorillaNetworking
 			return packed.Length == num + 1;
 		}
 
-		public void SetValidatedCreatorCode(NexusManager.MemberCode memberCode)
+		public void SetValidatedCreatorCode(string memberCode, string groupCode, string terminalId)
 		{
-			this.validatedCreatorCode = memberCode;
+			this.validatedCreatorCode = new CosmeticsController.ValidatedCreatorCode();
+			this.validatedCreatorCode.memberCode = memberCode;
+			this.validatedCreatorCode.groupId = groupCode;
+			this.validatedCreatorCode.terminalId = terminalId;
 		}
 
 		public static int SelectedOutfit
@@ -3102,6 +3094,8 @@ namespace GorillaNetworking
 		[OnEnterPlay_SetNull]
 		public static volatile CosmeticsController instance;
 
+		public static Action<string, string> PushTerminalMessage;
+
 		public Action V2_OnGetCosmeticsPlayFabCatalogData_PostSuccess;
 
 		public Action OnGetCurrency;
@@ -3277,7 +3271,7 @@ namespace GorillaNetworking
 
 		private bool checkoutCartButtonPressedWithLeft;
 
-		private NexusManager.MemberCode validatedCreatorCode;
+		private CosmeticsController.ValidatedCreatorCode validatedCreatorCode;
 
 		private Callback<MicroTxnAuthorizationResponse_t> _steamMicroTransactionAuthorizationResponse;
 
@@ -3443,6 +3437,17 @@ namespace GorillaNetworking
 				}
 			}
 
+			public void CopyItemsIntoEmpty(CosmeticsController.CosmeticSet other)
+			{
+				for (int i = 0; i < this.items.Length; i++)
+				{
+					if (this.items[i].isNullItem)
+					{
+						this.items[i] = other.items[i];
+					}
+				}
+			}
+
 			public void MergeSets(CosmeticsController.CosmeticSet tryOn, CosmeticsController.CosmeticSet current)
 			{
 				for (int i = 0; i < 16; i++)
@@ -3463,6 +3468,7 @@ namespace GorillaNetworking
 				int num = 16;
 				for (int i = 0; i < num; i++)
 				{
+					CosmeticsController.CosmeticItem[] array = tempOverrideSet.items;
 					bool flag = predicate.Invoke(tempOverrideSet.items[i].itemName);
 					this.items[i] = (flag ? tempOverrideSet.items[i] : playerPref.items[i]);
 				}
@@ -4007,6 +4013,15 @@ namespace GorillaNetworking
 			public string mothershipDeploymentId;
 
 			public Dictionary<string, string> customTags;
+		}
+
+		private class ValidatedCreatorCode
+		{
+			public string terminalId { get; set; }
+
+			public string memberCode { get; set; }
+
+			public string groupId { get; set; }
 		}
 
 		public enum EWearingCosmeticSet

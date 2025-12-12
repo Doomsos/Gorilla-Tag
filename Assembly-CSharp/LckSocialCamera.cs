@@ -25,6 +25,14 @@ public class LckSocialCamera : NetworkComponent, IGorillaSliceableSimple
 		}
 	}
 
+	public VRRig VrRig
+	{
+		get
+		{
+			return this._vrrig;
+		}
+	}
+
 	public LCKSocialCameraFollower SocialCameraFollower { get; private set; }
 
 	public override void OnSpawned()
@@ -267,7 +275,20 @@ public class LckSocialCamera : NetworkComponent, IGorillaSliceableSimple
 		{
 			return;
 		}
-		this.CameraVisuals.transform.localScale = Vector3.one * this._vrrig.scaleFactor;
+		if (this.m_cameraType != LckSocialCamera.CameraType.Tablet)
+		{
+			if (this.m_cameraType == LckSocialCamera.CameraType.Cococam)
+			{
+				this.SocialCameraFollower.transform.localScale = Vector3.one * this._vrrig.scaleFactor;
+			}
+			return;
+		}
+		if (this.IsOnNeck)
+		{
+			this.SocialCameraFollower.transform.localScale = Vector3.one * 0.3f;
+			return;
+		}
+		this.SocialCameraFollower.transform.localScale = Vector3.one * 0.3f * this._vrrig.scaleFactor;
 	}
 
 	public new void OnEnable()

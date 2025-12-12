@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ThermalSourceVolume : MonoBehaviour
@@ -19,4 +20,7 @@ public class ThermalSourceVolume : MonoBehaviour
 	public float innerRadius = 0.1f;
 
 	public float outerRadius = 1f;
+
+	[Tooltip("Exclude these thermal receivers from being impacted by this source")]
+	public List<ThermalReceiver> exclusionReceivers = new List<ThermalReceiver>();
 }

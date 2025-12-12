@@ -16,6 +16,18 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		BetterDayNightManager.allScenesRenderData.Remove(data);
 	}
 
+	public double[] timeOfDayRange
+	{
+		get
+		{
+			if (this.currentSeason == BetterDayNightManager.Season.Winter)
+			{
+				return this.winterTimeOfDayRange;
+			}
+			return this.summerTimeOfDayRange;
+		}
+	}
+
 	public string currentTimeOfDay { get; private set; }
 
 	public float NormalizedTimeOfDay
@@ -513,7 +525,11 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 
 	public float currentTimestep;
 
-	public double[] timeOfDayRange;
+	public BetterDayNightManager.Season currentSeason;
+
+	public double[] summerTimeOfDayRange;
+
+	public double[] winterTimeOfDayRange;
 
 	public double timeMultiplier;
 
@@ -627,6 +643,14 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 	private bool shouldRepopulate;
 
 	private Coroutine animatingLightFlash;
+
+	public enum Season
+	{
+		Winter,
+		Spring,
+		Summer,
+		Fall
+	}
 
 	public enum WeatherType
 	{

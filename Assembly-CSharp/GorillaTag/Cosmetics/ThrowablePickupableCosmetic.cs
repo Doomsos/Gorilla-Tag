@@ -111,13 +111,14 @@ namespace GorillaTag.Cosmetics
 			{
 				if (flag && this._events.Activate != null)
 				{
-					this._events.Activate.RaiseAll(new object[]
+					this._events.Activate.RaiseOthers(new object[]
 					{
 						true,
 						position,
 						averageVelocity,
 						scale
 					});
+					this.OnReleaseEventLocal(position, averageVelocity, scale);
 				}
 				else if (!flag && this._events.Deactivate != null)
 				{

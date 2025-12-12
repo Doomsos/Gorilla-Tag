@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using GorillaLocomotion;
-using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -67,15 +66,6 @@ public class SIPlayer : MonoBehaviour
 		this.lastQuestsAvailableToClaim = 999;
 		this.tpParticleSystem.Stop();
 		this.netInitialized = false;
-	}
-
-	public void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-	}
-
-	public bool ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
-	{
-		return true;
 	}
 
 	public static SIPlayer Get(int actorNumber)

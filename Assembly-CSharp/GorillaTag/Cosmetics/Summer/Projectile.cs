@@ -10,7 +10,7 @@ namespace GorillaTag.Cosmetics.Summer
 	{
 		protected void Awake()
 		{
-			this.rigidbody = base.GetComponentInChildren<Rigidbody>();
+			this.rigidbody = base.GetComponent<Rigidbody>();
 			this.impactEffectSpawned = false;
 			this.forceComponent = base.GetComponent<ConstantForce>();
 		}
@@ -26,6 +26,9 @@ namespace GorillaTag.Cosmetics.Summer
 			transform.localScale = Vector3.one * ownerRig.scaleFactor;
 			if (this.rigidbody != null)
 			{
+				this.rigidbody.isKinematic = false;
+				this.rigidbody.position = startPosition;
+				this.rigidbody.rotation = startRotation;
 				this.rigidbody.linearVelocity = velocity;
 			}
 			if (this.audioSource && this.launchAudio)

@@ -10,8 +10,14 @@ namespace GorillaNetworking.Store
 	{
 		public void Start()
 		{
-			this.skinnedMeshRenderer.gameObject.SetActive(false);
-			this.staticGorillaMesh.gameObject.SetActive(true);
+			if (this.skinnedMeshRenderer)
+			{
+				this.skinnedMeshRenderer.gameObject.SetActive(false);
+			}
+			if (this.staticGorillaMesh)
+			{
+				this.staticGorillaMesh.gameObject.SetActive(true);
+			}
 		}
 
 		private string GetPrefabPathFromCurrentPrefabStage()

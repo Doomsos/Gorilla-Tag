@@ -10,14 +10,13 @@ public class GRAbilityGrabbed : GRAbilityBase
 		this.idleAbility.Setup(agent, anim, audioSource, root, head, lineOfSight);
 	}
 
-	public override void Start()
+	protected override void OnStart()
 	{
-		base.Start();
 		this.agent.SetIsPathing(false, true);
 		this.idleAbility.Start();
 	}
 
-	public override void Stop()
+	protected override void OnStop()
 	{
 		this.idleAbility.Stop();
 		this.agent.SetIsPathing(true, true);
@@ -28,9 +27,14 @@ public class GRAbilityGrabbed : GRAbilityBase
 		return this.idleAbility.IsDone();
 	}
 
-	public override void Update(float dt)
+	protected override void OnUpdateAuthority(float dt)
 	{
-		this.idleAbility.Update(dt);
+		this.idleAbility.UpdateAuthority(dt);
+	}
+
+	protected override void OnUpdateRemote(float dt)
+	{
+		this.idleAbility.UpdateRemote(dt);
 	}
 
 	public GRAbilityIdle idleAbility;

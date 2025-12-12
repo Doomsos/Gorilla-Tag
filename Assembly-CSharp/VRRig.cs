@@ -1774,7 +1774,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		TagEffectPack tagEffectPack = null;
 		quaternion quaternion = base.transform.rotation;
 		TagEffectsLibrary.EffectType effectType = (VRRig.LocalRig == this) ? TagEffectsLibrary.EffectType.FIRST_PERSON : TagEffectsLibrary.EffectType.THIRD_PERSON;
-		if (GorillaGameManager.instance != null && this.OwningNetPlayer == null)
+		if (GorillaGameManager.instance != null && this.OwningNetPlayer != null)
 		{
 			GorillaGameManager.instance.lastTaggedActorNr.TryGetValue(this.OwningNetPlayer.ActorNumber, ref this.taggedById);
 		}
@@ -2918,6 +2918,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			this.initialized = false;
 			this.initializedCosmetics = false;
 			this.inTryOnRoom = false;
+			this.inTempCosmSpace = false;
 			this.timeSpawned = 0f;
 			this.setMatIndex = 0;
 			this.currentCosmeticTries = 0;
@@ -3474,7 +3475,6 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		}
 		this.rawCosmeticString = (cosmetics ?? "");
 		this.concatStringOfCosmeticsAllowed = this.rawCosmeticString;
-		this.concatStringOfCosmeticsAllowed += "LHAJJ.LHAJK.LHAJL.";
 		this.InitializedCosmetics = true;
 		this.currentCosmeticTries = 0;
 		this.CheckForEarlyAccess();
@@ -3969,6 +3969,8 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	};
 
 	public bool inTryOnRoom;
+
+	public bool inTempCosmSpace;
 
 	public bool muted;
 

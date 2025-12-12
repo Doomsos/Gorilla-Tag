@@ -138,6 +138,11 @@ namespace GorillaNetworking
 			return this.networkZone + GorillaComputer.instance.currentQueue + this.GetDesiredGameType();
 		}
 
+		public virtual bool SameZoneAsOverride()
+		{
+			return NetworkSystem.Instance.groupJoinOverrideGameMode.StartsWith(this.networkZone);
+		}
+
 		public virtual byte GetRoomSize()
 		{
 			return RoomSystem.GetRoomSizeForCreate(this.networkZone);
@@ -185,12 +190,17 @@ namespace GorillaNetworking
 				{
 					if (NetworkSystem.Instance.GameModeString == this.GetFullDesiredGameModeString())
 					{
-						Debug.Log("JoinTrigger: Ignoring party join/leave because " + this.networkZone + " is already the game mode");
+						GTDev.Log<string>("JoinTrigger: Ignoring party join/leave because " + this.networkZone + " is already the game mode", null);
 						return;
 					}
 					if (NetworkSystem.Instance.SessionIsPrivate)
 					{
-						Debug.Log("JoinTrigger: Ignoring party join/leave because we're in a private room");
+						GTDev.Log<string>("JoinTrigger: Ignoring party join/leave because we're in a private room", null);
+						return;
+					}
+					if (this.SameZoneAsOverride())
+					{
+						GTDev.Log<string>("JoinTrigger: Ignoring party join/leave because we joined as a group, and this trigger matches the zone for the override, so there's no reason to attempt to leave", null);
 						return;
 					}
 				}

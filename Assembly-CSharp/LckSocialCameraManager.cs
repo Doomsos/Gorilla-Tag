@@ -110,7 +110,14 @@ public class LckSocialCameraManager : MonoBehaviour
 			Transform transform = this._lckCamera.transform;
 			this._socialCameraCococamInstance.transform.position = transform.position;
 			this._socialCameraCococamInstance.transform.rotation = transform.rotation;
-			this._socialCameraTabletInstance.transform.position = base.transform.position;
+			if (this._socialCameraTabletInstance.IsOnNeck)
+			{
+				this._socialCameraTabletInstance.transform.position = base.transform.position;
+			}
+			else
+			{
+				this._socialCameraTabletInstance.transform.position = base.transform.position + this._tabletPositionOffset * this._socialCameraTabletInstance.VrRig.scaleFactor;
+			}
 			this._socialCameraTabletInstance.transform.rotation = base.transform.rotation;
 			Camera main = Camera.main;
 			if (main != null)
@@ -278,6 +285,8 @@ public class LckSocialCameraManager : MonoBehaviour
 	private static LckSocialCameraManager _instance;
 
 	public static Action<LckSocialCameraManager> OnManagerSpawned;
+
+	private Vector3 _tabletPositionOffset = new Vector3(0f, 0.11f, -0.08f);
 
 	private bool _recording;
 

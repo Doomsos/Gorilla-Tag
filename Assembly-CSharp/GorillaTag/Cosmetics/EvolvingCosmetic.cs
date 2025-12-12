@@ -213,6 +213,98 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
+		private void SetStage(int targetIndex)
+		{
+			if (this.stages == null || this.stages.Length == 0)
+			{
+				return;
+			}
+			if (this.enableLooping)
+			{
+				if (targetIndex < 0)
+				{
+					targetIndex = this.stages.Length - 1;
+				}
+				else if (targetIndex >= this.stages.Length)
+				{
+					targetIndex = 0;
+				}
+			}
+			else
+			{
+				targetIndex = Mathf.Clamp(targetIndex, 0, this.stages.Length - 1);
+			}
+			this.activeStageIndex = targetIndex;
+			this.activeStage = this.stages[targetIndex];
+			float num = 0f;
+			for (int i = 0; i < targetIndex; i++)
+			{
+				num += this.stages[i].Duration;
+			}
+			this.totalTimeOfPreviousStages = num;
+			this.totalElapsedTime = num + Mathf.Epsilon;
+			this.nextEventIndex = 0;
+			this.nextEvent = this.activeStage.GetEventOrNull(0);
+			if (this.activeStage.HasDuration)
+			{
+				TickSystem<object>.AddTickCallback(this);
+			}
+			else
+			{
+				TickSystem<object>.RemoveTickCallback(this);
+			}
+			int num2 = 0;
+			for (EvolvingCosmetic.EvolutionStage.EventAtTime eventOrNull = this.activeStage.GetEventOrNull(num2); eventOrNull != null; eventOrNull = this.activeStage.GetEventOrNull(num2))
+			{
+				UnityEvent onTimeReached = eventOrNull.onTimeReached;
+				if (onTimeReached != null)
+				{
+					onTimeReached.Invoke();
+				}
+				num2++;
+			}
+			this.HandleStages();
+		}
+
+		private void RestartStageInternal()
+		{
+			this.SetStage(this.activeStageIndex);
+		}
+
+		public void IncrementStage()
+		{
+			this.SetStage(this.activeStageIndex + 1);
+		}
+
+		public void DecrementStage()
+		{
+			this.SetStage(this.activeStageIndex - 1);
+		}
+
+		public void JumpToFirstStage()
+		{
+			this.SetStage(0);
+		}
+
+		public void JumpToLastStage()
+		{
+			if (this.stages == null || this.stages.Length == 0)
+			{
+				return;
+			}
+			this.SetStage(this.stages.Length - 1);
+		}
+
+		public void RestartCurrentStage()
+		{
+			this.RestartStageInternal();
+		}
+
+		public void JumpToStageIndex(int index)
+		{
+			this.SetStage(index);
+		}
+
 		[SerializeField]
 		private bool enableLooping;
 

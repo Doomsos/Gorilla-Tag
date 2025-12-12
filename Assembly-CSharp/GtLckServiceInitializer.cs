@@ -1,5 +1,7 @@
 ﻿using System;
 using Liv.Lck;
+using Liv.Lck.Core.Cosmetics;
+using Liv.Lck.Cosmetics;
 using Liv.Lck.DependencyInjection;
 using UnityEngine;
 
@@ -18,6 +20,8 @@ public class GtLckServiceInitializer : MonoBehaviour
 		LckServiceInitializer.ConfigureServices(instance, this._qualityConfig, delegate(LckDiContainer container)
 		{
 			container.AddSingleton<ILckCosmeticsFeatureFlagManager, LckCosmeticsFeatureFlagManagerPlayFab>();
+			container.AddSingleton<ILckCosmeticsCoordinator, LckCoreCosmeticsCoordinator>();
+			container.AddSingleton<ILckCosmeticsManager, LckCosmeticsManager>();
 		});
 	}
 

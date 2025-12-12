@@ -14,11 +14,10 @@ public class GRAbilityAttackLatchOn : GRAbilityBase
 		}
 	}
 
-	public override void Start()
+	protected override void OnStart()
 	{
-		base.Start();
 		this.PlayAnim(this.animName, 0.1f, this.animSpeed);
-		this.agent.navAgent.speed = this.tellMoveSpeed;
+		this.agent.SetSpeed(this.tellMoveSpeed);
 		this.startTime = Time.timeAsDouble;
 		if (this.damageTrigger != null)
 		{
@@ -26,7 +25,7 @@ public class GRAbilityAttackLatchOn : GRAbilityBase
 		}
 	}
 
-	public override void Stop()
+	protected override void OnStop()
 	{
 		this.agent.transform.SetParent(null);
 		this.agent.SetIsPathing(true, true);
@@ -41,13 +40,13 @@ public class GRAbilityAttackLatchOn : GRAbilityBase
 		return Time.timeAsDouble - this.startTime >= (double)this.duration;
 	}
 
-	public override void Update(float dt)
+	protected override void OnUpdateAuthority(float dt)
 	{
 		this.UpdateNavSpeed();
 		GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
 	}
 
-	public override void UpdateRemote(float dt)
+	protected override void OnUpdateRemote(float dt)
 	{
 		this.UpdateNavSpeed();
 	}
@@ -56,8 +55,8 @@ public class GRAbilityAttackLatchOn : GRAbilityBase
 	{
 		if (Time.timeAsDouble - this.startTime > (double)this.tellDuration)
 		{
-			this.agent.navAgent.velocity = this.agent.navAgent.velocity.normalized * this.attackMoveSpeed;
-			this.agent.navAgent.speed = this.attackMoveSpeed;
+			this.agent.SetSpeed(this.attackMoveSpeed);
+			this.agent.SetVelocity(this.agent.navAgent.velocity.normalized * this.attackMoveSpeed);
 			if (this.damageTrigger != null)
 			{
 				this.damageTrigger.SetActive(true);

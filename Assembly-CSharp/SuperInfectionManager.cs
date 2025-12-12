@@ -73,24 +73,6 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 			this.zoneSuperInfection.siDeposits[j].WriteDataPUN(stream, info);
 		}
 		this.zoneSuperInfection.questBoard.WriteDataPUN(stream, info);
-		SuperInfectionManager.tempRigs.Clear();
-		VRRigCache.Instance.GetActiveRigs(SuperInfectionManager.tempRigs);
-		SuperInfectionManager.tempRigs2.Clear();
-		for (int k = 0; k < SuperInfectionManager.tempRigs.Count; k++)
-		{
-			if (SuperInfectionManager.tempRigs[k].OwningNetPlayer != null)
-			{
-				SuperInfectionManager.tempRigs2.Add(SuperInfectionManager.tempRigs[k]);
-			}
-		}
-		int count = SuperInfectionManager.tempRigs2.Count;
-		stream.SendNext(count);
-		for (int l = 0; l < count; l++)
-		{
-			SIPlayer siplayer = SIPlayer.Get(SuperInfectionManager.tempRigs2[l].OwningNetPlayer.ActorNumber);
-			stream.SendNext(siplayer.ActorNr);
-			siplayer.WriteDataPUN(stream, info);
-		}
 	}
 
 	public void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
@@ -112,23 +94,6 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 			this.zoneSuperInfection.siDeposits[j].ReadDataPUN(stream, info);
 		}
 		this.zoneSuperInfection.questBoard.ReadDataPUN(stream, info);
-		int num = (int)stream.ReceiveNext();
-		if (num < 0 || num > 10)
-		{
-			return;
-		}
-		for (int k = 0; k < num; k++)
-		{
-			SIPlayer siplayer = SIPlayer.Get((int)stream.ReceiveNext());
-			if (siplayer == null)
-			{
-				return;
-			}
-			if (!siplayer.ReadDataPUN(stream, info))
-			{
-				return;
-			}
-		}
 	}
 
 	void IGameEntityZoneComponent.SerializeZoneData(BinaryWriter writer)

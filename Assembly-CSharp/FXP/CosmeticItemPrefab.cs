@@ -259,7 +259,7 @@ namespace FXP
 
 		public void SetStoreUpdateEvent(StoreUpdateEvent storeUpdateEvent, bool playFX)
 		{
-			if (!this.isValid)
+			if (!this.isValid || !this.AffectedByStoreUpdateEvents)
 			{
 				return;
 			}
@@ -487,6 +487,8 @@ namespace FXP
 		public string PedestalID = "";
 
 		public HeadModel HeadModel;
+
+		public bool AffectedByStoreUpdateEvents = true;
 
 		[SerializeField]
 		private Guid? itemGUID;

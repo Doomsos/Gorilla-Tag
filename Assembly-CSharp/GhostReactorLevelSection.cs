@@ -38,7 +38,7 @@ public class GhostReactorLevelSection : MonoBehaviour
 
 	private void Awake()
 	{
-		this.spawnPointGroupLookup = new GhostReactorLevelSection.SpawnPointGroup[10];
+		this.spawnPointGroupLookup = new GhostReactorLevelSection.SpawnPointGroup[11];
 		for (int i = 0; i < this.spawnPointGroups.Count; i++)
 		{
 			this.spawnPointGroups[i].SpawnPointIndexes = new List<int>();

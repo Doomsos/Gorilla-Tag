@@ -626,6 +626,9 @@ public abstract class NetworkSystem : MonoBehaviour
 
 	protected static StringBuilder reusableSB = new StringBuilder();
 
+	[NonSerialized]
+	public string groupJoinOverrideGameMode = "";
+
 	public delegate void RPC(byte[] data);
 
 	public delegate void StringRPC(string message);

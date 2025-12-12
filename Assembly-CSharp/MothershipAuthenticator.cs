@@ -59,7 +59,7 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 			onLoginSuccess.Invoke();
 		}, delegate(MothershipError MothershipError, int errorCode)
 		{
-			Debug.Log(string.Format("Failed to log in, error {0} trace ID: {1} status: {2} Mothership error code: {3}", new object[]
+			Debug.LogError(string.Format("Failed to log in, error {0} trace ID: {1} status: {2} Mothership error code: {3}", new object[]
 			{
 				MothershipError.Message,
 				MothershipError.TraceId,
@@ -71,12 +71,12 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 			{
 				onLoginAttemptFailure.Invoke(1);
 			}
-			Action<string> onLoginFailure = this.OnLoginFailure;
+			Action<string, string, string> onLoginFailure = this.OnLoginFailure;
 			if (onLoginFailure == null)
 			{
 				return;
 			}
-			onLoginFailure.Invoke(MothershipError.Message);
+			onLoginFailure.Invoke(MothershipError.Message, MothershipError.MothershipErrorCode, MothershipError.TraceId);
 		});
 	}
 
@@ -113,7 +113,7 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 					action2 = (<>9__5 = delegate(MothershipError MothershipError, int errorCode)
 					{
 						ticketHandle.Dispose();
-						Debug.Log(string.Format("Couldn't log into Mothership with Steam error {0} trace ID: {1} status: {2} Mothership error code: {3}", new object[]
+						Debug.LogError(string.Format("Couldn't log into Mothership with Steam error {0} trace ID: {1} status: {2} Mothership error code: {3}", new object[]
 						{
 							MothershipError.Message,
 							MothershipError.TraceId,
@@ -125,33 +125,34 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 						{
 							onLoginAttemptFailure.Invoke(1);
 						}
-						Action<string> onLoginFailure = this.OnLoginFailure;
+						Action<string, string, string> onLoginFailure = this.OnLoginFailure;
 						if (onLoginFailure == null)
 						{
 							return;
 						}
-						onLoginFailure.Invoke(MothershipError.Message);
+						onLoginFailure.Invoke(MothershipError.Message, MothershipError.MothershipErrorCode, MothershipError.TraceId);
 					});
 				}
 				MothershipClientApiUnity.CompleteLoginWithSteam(nonce, ticket, action, action2);
 			}, delegate(EResult error)
 			{
-				Debug.Log(string.Format("Couldn't get an auth ticket for logging into Mothership with Steam {0}", error));
+				string text = string.Format("Couldn't get an auth ticket for logging into Mothership with Steam: {0}", error);
+				Debug.LogError(text);
 				Action<int> onLoginAttemptFailure = this.OnLoginAttemptFailure;
 				if (onLoginAttemptFailure != null)
 				{
 					onLoginAttemptFailure.Invoke(1);
 				}
-				Action<string> onLoginFailure = this.OnLoginFailure;
+				Action<string, string, string> onLoginFailure = this.OnLoginFailure;
 				if (onLoginFailure == null)
 				{
 					return;
 				}
-				onLoginFailure.Invoke(error.ToString());
+				onLoginFailure.Invoke(text, "", "");
 			});
 		}, delegate(MothershipError MothershipError, int errorCode)
 		{
-			Debug.Log(string.Format("Couldn't start Mothership auth for Steam error {0} trace ID: {1} status: {2} Mothership error code: {3}", new object[]
+			Debug.LogError(string.Format("Couldn't start Mothership auth for Steam error {0} trace ID: {1} status: {2} Mothership error code: {3}", new object[]
 			{
 				MothershipError.Message,
 				MothershipError.TraceId,
@@ -163,12 +164,12 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 			{
 				onLoginAttemptFailure.Invoke(1);
 			}
-			Action<string> onLoginFailure = this.OnLoginFailure;
+			Action<string, string, string> onLoginFailure = this.OnLoginFailure;
 			if (onLoginFailure == null)
 			{
 				return;
 			}
-			onLoginFailure.Invoke(MothershipError.Message);
+			onLoginFailure.Invoke(MothershipError.Message, MothershipError.MothershipErrorCode, MothershipError.TraceId);
 		});
 	}
 
@@ -206,7 +207,7 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 
 	public Action OnLoginSuccess;
 
-	public Action<string> OnLoginFailure;
+	public Action<string, string, string> OnLoginFailure;
 
 	public Action<int> OnLoginAttemptFailure;
 }

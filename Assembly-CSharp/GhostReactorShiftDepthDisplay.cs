@@ -60,7 +60,7 @@ public class GhostReactorShiftDepthDisplay
 			{
 				if (grenemyCount.Count > 0)
 				{
-					int num4 = Math.Min(this.shiftManager.shiftStats.EnemyKills[grenemyCount.EnemyType], grenemyCount.Count);
+					int num4 = this.shiftManager.shiftStats.EnemyKills.ContainsKey(grenemyCount.EnemyType) ? Math.Min(this.shiftManager.shiftStats.EnemyKills[grenemyCount.EnemyType], grenemyCount.Count) : 0;
 					StringBuilder stringBuilder3 = new StringBuilder();
 					stringBuilder3.Append(string.Format("Kill {0} {1}s ", grenemyCount.Count, grenemyCount.EnemyType));
 					stringBuilder3.Append(string.Format("({0}/{1})", num4, grenemyCount.Count));

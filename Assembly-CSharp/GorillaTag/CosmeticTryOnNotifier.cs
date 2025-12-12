@@ -30,7 +30,7 @@ namespace GorillaTag
 			{
 				return;
 			}
-			PlayerCosmeticsSystem.UnlockTemporaryCosmeticsForPlayer(playerRig, this.unlockList.Strings);
+			PlayerCosmeticsSystem.SetRigTemporarySpace(true, playerRig, this.unlockList.Strings);
 		}
 
 		private void PlayerLeftTryOnSpace(RigContainer playerRig)
@@ -45,7 +45,7 @@ namespace GorillaTag
 			{
 				return;
 			}
-			PlayerCosmeticsSystem.LockTemporaryCosmeticsForPlayer(playerRig, this.unlockList.Strings);
+			PlayerCosmeticsSystem.SetRigTemporarySpace(false, playerRig, this.unlockList.Strings);
 		}
 
 		private VRRigCollection m_vrrigCollection;

@@ -615,11 +615,6 @@ namespace GorillaLocomotion
 				this.playerRigidBody.AddForce(force * this.playerRigidBody.mass, 1);
 				return;
 			}
-			if (mode == 5)
-			{
-				this.playerRigidBody.AddForce(force * this.playerRigidBody.mass, 0);
-				return;
-			}
 			this.playerRigidBody.AddForce(force, mode);
 		}
 
@@ -720,24 +715,24 @@ namespace GorillaLocomotion
 			{
 				if (!this.isClimbing)
 				{
-					this.playerRigidBody.AddForce(Physics.gravity * this.scale * this.playerRigidBody.mass, 0);
+					this.playerRigidBody.AddForce(Physics.gravity * this.scale, 5);
 				}
 				if (this.halloweenLevitationBonusStrength > 0f || this.halloweenLevitationStrength > 0f)
 				{
 					float num = Time.time - this.lastTouchedGroundTimestamp;
 					if (num < this.halloweenLevitationTotalDuration)
 					{
-						this.playerRigidBody.AddForce(Vector3.up * this.halloweenLevitationStrength * Mathf.InverseLerp(this.halloweenLevitationFullStrengthDuration, this.halloweenLevitationTotalDuration, num) * this.playerRigidBody.mass, 0);
+						this.playerRigidBody.AddForce(Vector3.up * (this.halloweenLevitationStrength * Mathf.InverseLerp(this.halloweenLevitationFullStrengthDuration, this.halloweenLevitationTotalDuration, num)), 5);
 					}
 					float y = this.playerRigidBody.linearVelocity.y;
 					if (y <= this.halloweenLevitateBonusFullAtYSpeed)
 					{
-						this.playerRigidBody.AddForce(Vector3.up * this.halloweenLevitationBonusStrength * this.playerRigidBody.mass, 0);
+						this.playerRigidBody.AddForce(Vector3.up * this.halloweenLevitationBonusStrength, 5);
 					}
 					else if (y <= this.halloweenLevitateBonusOffAtYSpeed)
 					{
-						Mathf.InverseLerp(this.halloweenLevitateBonusOffAtYSpeed, this.halloweenLevitateBonusFullAtYSpeed, this.playerRigidBody.linearVelocity.y);
-						this.playerRigidBody.AddForce(Vector3.up * this.halloweenLevitationBonusStrength * Mathf.InverseLerp(this.halloweenLevitateBonusOffAtYSpeed, this.halloweenLevitateBonusFullAtYSpeed, this.playerRigidBody.linearVelocity.y) * this.playerRigidBody.mass, 0);
+						float num2 = Mathf.InverseLerp(this.halloweenLevitateBonusOffAtYSpeed, this.halloweenLevitateBonusFullAtYSpeed, this.playerRigidBody.linearVelocity.y);
+						this.playerRigidBody.AddForce(Vector3.up * (this.halloweenLevitationBonusStrength * num2), 5);
 					}
 				}
 			}
@@ -758,7 +753,7 @@ namespace GorillaLocomotion
 			if (this.bodyOverlappingWaterVolumes.Count > 0)
 			{
 				WaterVolume waterVolume = null;
-				float num2 = float.MinValue;
+				float num3 = float.MinValue;
 				Vector3 vector2 = this.headCollider.transform.position + Vector3.down * this.swimmingParams.floatingWaterLevelBelowHead * this.scale;
 				this.activeWaterCurrents.Clear();
 				for (int i = 0; i < this.bodyOverlappingWaterVolumes.Count; i++)
@@ -766,15 +761,15 @@ namespace GorillaLocomotion
 					WaterVolume.SurfaceQuery surfaceQuery;
 					if (this.bodyOverlappingWaterVolumes[i].GetSurfaceQueryForPoint(vector2, out surfaceQuery, false))
 					{
-						float num3 = Vector3.Dot(surfaceQuery.surfacePoint - vector2, surfaceQuery.surfaceNormal);
-						if (num3 > num2)
+						float num4 = Vector3.Dot(surfaceQuery.surfacePoint - vector2, surfaceQuery.surfaceNormal);
+						if (num4 > num3)
 						{
-							num2 = num3;
+							num3 = num4;
 							waterVolume = this.bodyOverlappingWaterVolumes[i];
 							this.waterSurfaceForHead = surfaceQuery;
 						}
 						WaterCurrent waterCurrent = this.bodyOverlappingWaterVolumes[i].Current;
-						if (waterCurrent != null && num3 > 0f && !this.activeWaterCurrents.Contains(waterCurrent))
+						if (waterCurrent != null && num4 > 0f && !this.activeWaterCurrents.Contains(waterCurrent))
 						{
 							this.activeWaterCurrents.Add(waterCurrent);
 						}
@@ -802,150 +797,149 @@ namespace GorillaLocomotion
 						GTPlayer.LiquidProperties liquidProperties = this.liquidPropertiesList[(int)waterVolume.LiquidType];
 						if (waterVolume != null)
 						{
-							float num7;
+							float num8;
 							if (this.swimmingParams.extendBouyancyFromSpeed)
 							{
-								float num4 = Mathf.Clamp(Vector3.Dot(linearVelocity / this.scale, this.waterSurfaceForHead.surfaceNormal), this.swimmingParams.speedToBouyancyExtensionMinMax.x, this.swimmingParams.speedToBouyancyExtensionMinMax.y);
-								float num5 = this.swimmingParams.speedToBouyancyExtension.Evaluate(num4);
-								this.buoyancyExtension = Mathf.Max(this.buoyancyExtension, num5);
-								float num6 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist + this.buoyancyExtension, num2 / this.scale + this.buoyancyExtension);
+								float num5 = Mathf.Clamp(Vector3.Dot(linearVelocity / this.scale, this.waterSurfaceForHead.surfaceNormal), this.swimmingParams.speedToBouyancyExtensionMinMax.x, this.swimmingParams.speedToBouyancyExtensionMinMax.y);
+								float num6 = this.swimmingParams.speedToBouyancyExtension.Evaluate(num5);
+								this.buoyancyExtension = Mathf.Max(this.buoyancyExtension, num6);
+								float num7 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist + this.buoyancyExtension, num3 / this.scale + this.buoyancyExtension);
 								this.buoyancyExtension = Spring.DamperDecayExact(this.buoyancyExtension, this.swimmingParams.buoyancyExtensionDecayHalflife, fixedDeltaTime, 1E-05f);
-								num7 = num6;
+								num8 = num7;
 							}
 							else
 							{
-								num7 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist, num2 / this.scale);
+								num8 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist, num3 / this.scale);
 							}
-							Vector3 vector3 = Physics.gravity * this.scale;
-							Vector3 vector4 = liquidProperties.buoyancy * -vector3 * num7;
+							Vector3 vector3 = -(Physics.gravity * this.scale) * (liquidProperties.buoyancy * num8);
 							if (this.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
 							{
-								vector4 *= this.frozenBodyBuoyancyFactor;
+								vector3 *= this.frozenBodyBuoyancyFactor;
 							}
-							this.playerRigidBody.AddForce(vector4 * this.playerRigidBody.mass, 0);
+							this.playerRigidBody.AddForce(vector3, 5);
 						}
+						Vector3 vector4 = Vector3.zero;
 						Vector3 vector5 = Vector3.zero;
-						Vector3 vector6 = Vector3.zero;
 						for (int j = 0; j < this.activeWaterCurrents.Count; j++)
 						{
 							WaterCurrent waterCurrent2 = this.activeWaterCurrents[j];
-							Vector3 startingVelocity = linearVelocity + vector5;
+							Vector3 startingVelocity = linearVelocity + vector4;
+							Vector3 vector6;
 							Vector3 vector7;
-							Vector3 vector8;
-							if (waterCurrent2.GetCurrentAtPoint(this.bodyCollider.transform.position, startingVelocity, fixedDeltaTime, out vector7, out vector8))
+							if (waterCurrent2.GetCurrentAtPoint(this.bodyCollider.transform.position, startingVelocity, fixedDeltaTime, out vector6, out vector7))
 							{
-								vector6 += vector7;
-								vector5 += vector8;
+								vector5 += vector6;
+								vector4 += vector7;
 							}
 						}
 						if (magnitude > Mathf.Epsilon)
 						{
-							float num8 = 0.01f;
-							Vector3 vector9 = linearVelocity / magnitude;
+							float num9 = 0.01f;
+							Vector3 vector8 = linearVelocity / magnitude;
 							Vector3 right = this.leftHand.handFollower.right;
 							Vector3 dir = -this.rightHand.handFollower.right;
 							Vector3 forward = this.leftHand.handFollower.forward;
 							Vector3 forward2 = this.rightHand.handFollower.forward;
-							Vector3 vector10 = vector9;
-							float num9 = 0f;
+							Vector3 vector9 = vector8;
 							float num10 = 0f;
 							float num11 = 0f;
+							float num12 = 0f;
 							if (this.swimmingParams.applyDiveSteering && !this.disableMovement && isDefaultScale)
 							{
-								float num12 = Vector3.Dot(linearVelocity - vector6, vector9);
-								float num13 = Mathf.Clamp(num12, this.swimmingParams.swimSpeedToRedirectAmountMinMax.x, this.swimmingParams.swimSpeedToRedirectAmountMinMax.y);
-								float num14 = this.swimmingParams.swimSpeedToRedirectAmount.Evaluate(num13);
-								num13 = Mathf.Clamp(num12, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.x, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.y);
-								float num15 = this.swimmingParams.swimSpeedToMaxRedirectAngle.Evaluate(num13);
-								float num16 = Mathf.Acos(Vector3.Dot(vector9, forward)) / 3.1415927f * -2f + 1f;
-								float num17 = Mathf.Acos(Vector3.Dot(vector9, forward2)) / 3.1415927f * -2f + 1f;
-								float num18 = Mathf.Clamp(num16, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
+								float num13 = Vector3.Dot(linearVelocity - vector5, vector8);
+								float num14 = Mathf.Clamp(num13, this.swimmingParams.swimSpeedToRedirectAmountMinMax.x, this.swimmingParams.swimSpeedToRedirectAmountMinMax.y);
+								float num15 = this.swimmingParams.swimSpeedToRedirectAmount.Evaluate(num14);
+								num14 = Mathf.Clamp(num13, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.x, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.y);
+								float num16 = this.swimmingParams.swimSpeedToMaxRedirectAngle.Evaluate(num14);
+								float num17 = Mathf.Acos(Vector3.Dot(vector8, forward)) / 3.1415927f * -2f + 1f;
+								float num18 = Mathf.Acos(Vector3.Dot(vector8, forward2)) / 3.1415927f * -2f + 1f;
 								float num19 = Mathf.Clamp(num17, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
-								float num20 = (!float.IsNaN(num18)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num18) : 0f;
+								float num20 = Mathf.Clamp(num18, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
 								float num21 = (!float.IsNaN(num19)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num19) : 0f;
-								Vector3 vector11 = Vector3.ProjectOnPlane(vector9, right);
-								Vector3 vector12 = Vector3.ProjectOnPlane(vector9, right);
-								float num22 = Mathf.Min(vector11.magnitude, 1f);
-								float num23 = Mathf.Min(vector12.magnitude, 1f);
+								float num22 = (!float.IsNaN(num20)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num20) : 0f;
+								Vector3 vector10 = Vector3.ProjectOnPlane(vector8, right);
+								Vector3 vector11 = Vector3.ProjectOnPlane(vector8, right);
+								float num23 = Mathf.Min(vector10.magnitude, 1f);
+								float num24 = Mathf.Min(vector11.magnitude, 1f);
 								float magnitude2 = this.leftHand.velocityTracker.GetAverageVelocity(false, this.swimmingParams.diveVelocityAveragingWindow, false).magnitude;
 								float magnitude3 = this.rightHand.velocityTracker.GetAverageVelocity(false, this.swimmingParams.diveVelocityAveragingWindow, false).magnitude;
-								float num24 = Mathf.Clamp(magnitude2, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
-								float num25 = Mathf.Clamp(magnitude3, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
-								float num26 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(num24);
+								float num25 = Mathf.Clamp(magnitude2, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
+								float num26 = Mathf.Clamp(magnitude3, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
 								float num27 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(num25);
+								float num28 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(num26);
 								float averageSpeedChangeMagnitudeInDirection = this.leftHand.velocityTracker.GetAverageSpeedChangeMagnitudeInDirection(right, false, this.swimmingParams.diveVelocityAveragingWindow);
 								float averageSpeedChangeMagnitudeInDirection2 = this.rightHand.velocityTracker.GetAverageSpeedChangeMagnitudeInDirection(dir, false, this.swimmingParams.diveVelocityAveragingWindow);
-								float num28 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
-								float num29 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection2, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
-								float num30 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(num28);
+								float num29 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
+								float num30 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection2, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
 								float num31 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(num29);
-								num9 = Mathf.Min(num20, Mathf.Min(num26, num30));
-								float num32 = (Vector3.Dot(vector9, forward) > 0f) ? (Mathf.Min(num9, num14) * num22) : 0f;
+								float num32 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(num30);
 								num10 = Mathf.Min(num21, Mathf.Min(num27, num31));
-								float num33 = (Vector3.Dot(vector9, forward2) > 0f) ? (Mathf.Min(num10, num14) * num23) : 0f;
+								float num33 = (Vector3.Dot(vector8, forward) > 0f) ? (Mathf.Min(num10, num15) * num23) : 0f;
+								num11 = Mathf.Min(num22, Mathf.Min(num28, num32));
+								float num34 = (Vector3.Dot(vector8, forward2) > 0f) ? (Mathf.Min(num11, num15) * num24) : 0f;
 								if (this.swimmingParams.reduceDiveSteeringBelowVelocityPlane)
 								{
-									Vector3 vector13;
-									if (Vector3.Dot(this.headCollider.transform.up, vector9) > 0.95f)
+									Vector3 vector12;
+									if (Vector3.Dot(this.headCollider.transform.up, vector8) > 0.95f)
 									{
-										vector13 = -this.headCollider.transform.forward;
+										vector12 = -this.headCollider.transform.forward;
 									}
 									else
 									{
-										vector13 = Vector3.Cross(Vector3.Cross(vector9, this.headCollider.transform.up), vector9).normalized;
+										vector12 = Vector3.Cross(Vector3.Cross(vector8, this.headCollider.transform.up), vector8).normalized;
 									}
 									Vector3 position = this.headCollider.transform.position;
-									Vector3 vector14 = position - this.leftHand.handFollower.position;
-									Vector3 vector15 = position - this.rightHand.handFollower.position;
+									Vector3 vector13 = position - this.leftHand.handFollower.position;
+									Vector3 vector14 = position - this.rightHand.handFollower.position;
 									float reduceDiveSteeringBelowPlaneFadeStartDist = this.swimmingParams.reduceDiveSteeringBelowPlaneFadeStartDist;
 									float reduceDiveSteeringBelowPlaneFadeEndDist = this.swimmingParams.reduceDiveSteeringBelowPlaneFadeEndDist;
-									float num34 = Vector3.Dot(vector14, Vector3.up);
-									float num35 = Vector3.Dot(vector15, Vector3.up);
-									float num36 = Vector3.Dot(vector14, vector13);
-									float num37 = Vector3.Dot(vector15, vector13);
-									float num38 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(num34), Mathf.Abs(num36)));
+									float num35 = Vector3.Dot(vector13, Vector3.up);
+									float num36 = Vector3.Dot(vector14, Vector3.up);
+									float num37 = Vector3.Dot(vector13, vector12);
+									float num38 = Vector3.Dot(vector14, vector12);
 									float num39 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(num35), Mathf.Abs(num37)));
-									num32 *= num38;
+									float num40 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(num36), Mathf.Abs(num38)));
 									num33 *= num39;
+									num34 *= num40;
 								}
-								float num40 = num33 + num32;
-								Vector3 vector16 = Vector3.zero;
-								if (this.swimmingParams.applyDiveSteering && num40 > num8)
+								float num41 = num34 + num33;
+								Vector3 vector15 = Vector3.zero;
+								if (this.swimmingParams.applyDiveSteering && num41 > num9)
 								{
-									vector16 = ((num32 * vector11 + num33 * vector12) / num40).normalized;
-									vector16 = Vector3.Lerp(vector9, vector16, num40);
-									vector10 = Vector3.RotateTowards(vector9, vector16, 0.017453292f * num15 * fixedDeltaTime, 0f);
+									vector15 = ((num33 * vector10 + num34 * vector11) / num41).normalized;
+									vector15 = Vector3.Lerp(vector8, vector15, num41);
+									vector9 = Vector3.RotateTowards(vector8, vector15, 0.017453292f * num16 * fixedDeltaTime, 0f);
 								}
 								else
 								{
-									vector10 = vector9;
+									vector9 = vector8;
 								}
-								num11 = Mathf.Clamp01((num9 + num10) * 0.5f);
+								num12 = Mathf.Clamp01((num10 + num11) * 0.5f);
 							}
-							float num41 = Mathf.Clamp(Vector3.Dot(vector, vector9), 0f, magnitude);
-							float num42 = magnitude - num41;
-							if (this.swimmingParams.applyDiveSwimVelocityConversion && !this.disableMovement && num11 > num8 && num41 < this.swimmingParams.diveMaxSwimVelocityConversion)
+							float num42 = Mathf.Clamp(Vector3.Dot(vector, vector8), 0f, magnitude);
+							float num43 = magnitude - num42;
+							if (this.swimmingParams.applyDiveSwimVelocityConversion && !this.disableMovement && num12 > num9 && num42 < this.swimmingParams.diveMaxSwimVelocityConversion)
 							{
-								float num43 = Mathf.Min(this.swimmingParams.diveSwimVelocityConversionRate * fixedDeltaTime, num42) * num11;
-								num41 += num43;
-								num42 -= num43;
+								float num44 = Mathf.Min(this.swimmingParams.diveSwimVelocityConversionRate * fixedDeltaTime, num43) * num12;
+								num42 += num44;
+								num43 -= num44;
 							}
 							float halflife = this.swimmingParams.swimUnderWaterDampingHalfLife * liquidProperties.dampingFactor;
 							float halflife2 = this.swimmingParams.baseUnderWaterDampingHalfLife * liquidProperties.dampingFactor;
-							float num44 = Spring.DamperDecayExact(num41 / this.scale, halflife, fixedDeltaTime, 1E-05f) * this.scale;
-							float num45 = Spring.DamperDecayExact(num42 / this.scale, halflife2, fixedDeltaTime, 1E-05f) * this.scale;
+							float num45 = Spring.DamperDecayExact(num42 / this.scale, halflife, fixedDeltaTime, 1E-05f) * this.scale;
+							float num46 = Spring.DamperDecayExact(num43 / this.scale, halflife2, fixedDeltaTime, 1E-05f) * this.scale;
 							if (this.swimmingParams.applyDiveDampingMultiplier && !this.disableMovement)
 							{
-								float num46 = Mathf.Lerp(1f, this.swimmingParams.diveDampingMultiplier, num11);
-								num44 = Mathf.Lerp(num41, num44, num46);
-								num45 = Mathf.Lerp(num42, num45, num46);
-								float num47 = Mathf.Clamp((1f - num9) * (num41 + num42), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num8, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num8);
-								float num48 = Mathf.Clamp((1f - num10) * (num41 + num42), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num8, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num8);
-								this.leftHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(num47);
-								this.rightHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(num48);
+								float num47 = Mathf.Lerp(1f, this.swimmingParams.diveDampingMultiplier, num12);
+								num45 = Mathf.Lerp(num42, num45, num47);
+								num46 = Mathf.Lerp(num43, num46, num47);
+								float num48 = Mathf.Clamp((1f - num10) * (num42 + num43), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num9, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num9);
+								float num49 = Mathf.Clamp((1f - num11) * (num42 + num43), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num9, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num9);
+								this.leftHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(num48);
+								this.rightHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(num49);
 							}
-							this.swimmingVelocity = num44 * vector10 + vector5 * this.scale;
-							this.playerRigidBody.linearVelocity = this.swimmingVelocity + num45 * vector10;
+							this.swimmingVelocity = num45 * vector9 + vector4 * this.scale;
+							this.playerRigidBody.linearVelocity = this.swimmingVelocity + num46 * vector9;
 						}
 					}
 				}
@@ -1918,6 +1912,8 @@ namespace GorillaLocomotion
 			}
 			if (this.didAJump || this.anyHandIsColliding || this.anyHandIsSliding || this.anyHandIsSticking || this.IsGroundedHand || this.forceRBSync)
 			{
+				this.playerRigidBody.position = base.transform.position;
+				this.playerRigidBody.rotation = base.transform.rotation;
 				this.forceRBSync = false;
 			}
 		}

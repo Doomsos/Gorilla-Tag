@@ -11,21 +11,20 @@ public class GRAbilityWatch : GRAbilityBase
 		this.target = null;
 	}
 
-	public override void Start()
+	protected override void OnStart()
 	{
-		base.Start();
 		this.PlayAnim(this.animName, 0.1f, this.animSpeed);
 		this.endTime = -1.0;
 		if (this.duration > 0f)
 		{
 			this.endTime = Time.timeAsDouble + (double)this.duration;
 		}
-		this.agent.navAgent.isStopped = true;
+		this.agent.SetStopped(true);
 	}
 
-	public override void Stop()
+	protected override void OnStop()
 	{
-		this.agent.navAgent.isStopped = false;
+		this.agent.SetStopped(false);
 	}
 
 	public override bool IsDone()
@@ -33,7 +32,7 @@ public class GRAbilityWatch : GRAbilityBase
 		return this.endTime > 0.0 && Time.timeAsDouble >= this.endTime;
 	}
 
-	protected override void UpdateShared(float dt)
+	protected override void OnUpdateShared(float dt)
 	{
 		GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
 	}

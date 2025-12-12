@@ -126,15 +126,20 @@ namespace GorillaNetworking
 				{
 					this.deferredJoin = false;
 					this.partyJoinDeferredUntilTimestamp = 0f;
-					if (this.currentJoinTrigger == this.privateTrigger)
+					if (!(this.currentJoinTrigger == this.privateTrigger))
 					{
-						this.AttemptToJoinSpecificRoom(this.customRoomID, FriendshipGroupDetection.Instance.IsInParty ? JoinType.JoinWithParty : JoinType.Solo);
+						this.AttemptToJoinPublicRoom(this.currentJoinTrigger, this.currentJoinType, null);
 						return;
 					}
-					this.AttemptToJoinPublicRoom(this.currentJoinTrigger, this.currentJoinType, null);
+					if (this.customRoomID == this.roomToJoin || this.customRoomID == this.autoJoinRoom || this.customRoomID == this.LastRoomToJoin)
+					{
+						this.AttemptToAutoJoinSpecificRoom(this.customRoomID, FriendshipGroupDetection.Instance.IsInParty ? JoinType.JoinWithParty : JoinType.Solo);
+						return;
+					}
+					this.AttemptToJoinSpecificRoom(this.customRoomID, FriendshipGroupDetection.Instance.IsInParty ? JoinType.JoinWithParty : JoinType.Solo);
 					return;
 				}
-				else if (NetworkSystem.Instance.netState != NetSystemState.PingRecon && NetworkSystem.Instance.netState != NetSystemState.Initialization)
+				else if (NetworkSystem.Instance.netState != NetSystemState.PingRecon && NetworkSystem.Instance.netState != NetSystemState.Initialization && NetworkSystem.Instance.netState != NetSystemState.Disconnecting)
 				{
 					this.deferredJoin = false;
 					this.partyJoinDeferredUntilTimestamp = 0f;
@@ -160,14 +165,14 @@ namespace GorillaNetworking
 
 		private void AttemptToJoinPublicRoomAsync(GorillaNetworkJoinTrigger triggeredTrigger, JoinType roomJoinType, List<ValueTuple<string, string>> additionalCustomProperties)
 		{
-			PhotonNetworkController.<AttemptToJoinPublicRoomAsync>d__68 <AttemptToJoinPublicRoomAsync>d__;
+			PhotonNetworkController.<AttemptToJoinPublicRoomAsync>d__69 <AttemptToJoinPublicRoomAsync>d__;
 			<AttemptToJoinPublicRoomAsync>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<AttemptToJoinPublicRoomAsync>d__.<>4__this = this;
 			<AttemptToJoinPublicRoomAsync>d__.triggeredTrigger = triggeredTrigger;
 			<AttemptToJoinPublicRoomAsync>d__.roomJoinType = roomJoinType;
 			<AttemptToJoinPublicRoomAsync>d__.additionalCustomProperties = additionalCustomProperties;
 			<AttemptToJoinPublicRoomAsync>d__.<>1__state = -1;
-			<AttemptToJoinPublicRoomAsync>d__.<>t__builder.Start<PhotonNetworkController.<AttemptToJoinPublicRoomAsync>d__68>(ref <AttemptToJoinPublicRoomAsync>d__);
+			<AttemptToJoinPublicRoomAsync>d__.<>t__builder.Start<PhotonNetworkController.<AttemptToJoinPublicRoomAsync>d__69>(ref <AttemptToJoinPublicRoomAsync>d__);
 		}
 
 		public void AttemptToJoinRankedPublicRoom(GorillaNetworkJoinTrigger triggeredTrigger, JoinType roomJoinType = JoinType.Solo)
@@ -179,7 +184,7 @@ namespace GorillaNetworking
 
 		private void AttemptToJoinRankedPublicRoomAsync(GorillaNetworkJoinTrigger triggeredTrigger, string mmrTier, string platform, JoinType roomJoinType)
 		{
-			PhotonNetworkController.<AttemptToJoinRankedPublicRoomAsync>d__70 <AttemptToJoinRankedPublicRoomAsync>d__;
+			PhotonNetworkController.<AttemptToJoinRankedPublicRoomAsync>d__71 <AttemptToJoinRankedPublicRoomAsync>d__;
 			<AttemptToJoinRankedPublicRoomAsync>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<AttemptToJoinRankedPublicRoomAsync>d__.<>4__this = this;
 			<AttemptToJoinRankedPublicRoomAsync>d__.triggeredTrigger = triggeredTrigger;
@@ -187,16 +192,40 @@ namespace GorillaNetworking
 			<AttemptToJoinRankedPublicRoomAsync>d__.platform = platform;
 			<AttemptToJoinRankedPublicRoomAsync>d__.roomJoinType = roomJoinType;
 			<AttemptToJoinRankedPublicRoomAsync>d__.<>1__state = -1;
-			<AttemptToJoinRankedPublicRoomAsync>d__.<>t__builder.Start<PhotonNetworkController.<AttemptToJoinRankedPublicRoomAsync>d__70>(ref <AttemptToJoinRankedPublicRoomAsync>d__);
+			<AttemptToJoinRankedPublicRoomAsync>d__.<>t__builder.Start<PhotonNetworkController.<AttemptToJoinRankedPublicRoomAsync>d__71>(ref <AttemptToJoinRankedPublicRoomAsync>d__);
 		}
 
 		private Task SendPartyFollowCommands()
 		{
-			PhotonNetworkController.<SendPartyFollowCommands>d__71 <SendPartyFollowCommands>d__;
+			PhotonNetworkController.<SendPartyFollowCommands>d__72 <SendPartyFollowCommands>d__;
 			<SendPartyFollowCommands>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
 			<SendPartyFollowCommands>d__.<>1__state = -1;
-			<SendPartyFollowCommands>d__.<>t__builder.Start<PhotonNetworkController.<SendPartyFollowCommands>d__71>(ref <SendPartyFollowCommands>d__);
+			<SendPartyFollowCommands>d__.<>t__builder.Start<PhotonNetworkController.<SendPartyFollowCommands>d__72>(ref <SendPartyFollowCommands>d__);
 			return <SendPartyFollowCommands>d__.<>t__builder.Task;
+		}
+
+		private void AttemptToAutoJoinRoomCallback(NetJoinResult obj)
+		{
+			this.LastRoomToJoin = this.roomToJoin;
+			switch (obj)
+			{
+			case NetJoinResult.Success:
+				return;
+			case NetJoinResult.FallbackCreated:
+				return;
+			case NetJoinResult.Failed_Full:
+				return;
+			case NetJoinResult.AlreadyInRoom:
+				return;
+			default:
+				return;
+			}
+		}
+
+		public void AttemptToAutoJoinSpecificRoom(string roomID, JoinType roomJoinType)
+		{
+			this.roomToJoin = roomID;
+			this.AttemptToJoinSpecificRoomAsync(roomID, roomJoinType, new Action<NetJoinResult>(this.AttemptToAutoJoinRoomCallback));
 		}
 
 		public void AttemptToJoinSpecificRoom(string roomID, JoinType roomJoinType)
@@ -211,14 +240,14 @@ namespace GorillaNetworking
 
 		public Task AttemptToJoinSpecificRoomAsync(string roomID, JoinType roomJoinType, Action<NetJoinResult> callback)
 		{
-			PhotonNetworkController.<AttemptToJoinSpecificRoomAsync>d__74 <AttemptToJoinSpecificRoomAsync>d__;
+			PhotonNetworkController.<AttemptToJoinSpecificRoomAsync>d__79 <AttemptToJoinSpecificRoomAsync>d__;
 			<AttemptToJoinSpecificRoomAsync>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
 			<AttemptToJoinSpecificRoomAsync>d__.<>4__this = this;
 			<AttemptToJoinSpecificRoomAsync>d__.roomID = roomID;
 			<AttemptToJoinSpecificRoomAsync>d__.roomJoinType = roomJoinType;
 			<AttemptToJoinSpecificRoomAsync>d__.callback = callback;
 			<AttemptToJoinSpecificRoomAsync>d__.<>1__state = -1;
-			<AttemptToJoinSpecificRoomAsync>d__.<>t__builder.Start<PhotonNetworkController.<AttemptToJoinSpecificRoomAsync>d__74>(ref <AttemptToJoinSpecificRoomAsync>d__);
+			<AttemptToJoinSpecificRoomAsync>d__.<>t__builder.Start<PhotonNetworkController.<AttemptToJoinSpecificRoomAsync>d__79>(ref <AttemptToJoinSpecificRoomAsync>d__);
 			return <AttemptToJoinSpecificRoomAsync>d__.<>t__builder.Task;
 		}
 
@@ -549,6 +578,8 @@ namespace GorillaNetworking
 
 		public string autoJoinRoom;
 
+		public int autoJoinRoomCap = 8;
+
 		public string autoJoinGameMode;
 
 		private bool deferredJoin;
@@ -560,6 +591,10 @@ namespace GorillaNetworking
 		[NetworkPrefab]
 		[SerializeField]
 		private NetworkObject testPlayerPrefab;
+
+		private string roomToJoin = "";
+
+		private string LastRoomToJoin = "";
 
 		private List<GorillaNetworkJoinTrigger> allJoinTriggers = new List<GorillaNetworkJoinTrigger>();
 	}

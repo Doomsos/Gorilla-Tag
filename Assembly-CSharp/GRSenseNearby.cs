@@ -12,6 +12,19 @@ public class GRSenseNearby
 		this.headTransform = headTransform;
 	}
 
+	public void OnHitByPlayer(int hitByActorId)
+	{
+		GRPlayer grplayer = GRPlayer.Get(hitByActorId);
+		if (grplayer != null)
+		{
+			VRRig rig = grplayer.gamePlayer.rig;
+			if (!this.rigsNearby.Contains(rig))
+			{
+				this.rigsNearby.Add(rig);
+			}
+		}
+	}
+
 	public void UpdateNearby(List<VRRig> allRigs, GRSenseLineOfSight senseLineOfSight)
 	{
 		Vector3 position = this.headTransform.position;
@@ -24,6 +37,24 @@ public class GRSenseNearby
 	public bool IsAnyoneNearby()
 	{
 		return !GhostReactorManager.AggroDisabled && this.rigsNearby != null && this.rigsNearby.Count > 0;
+	}
+
+	public bool IsAnyoneNearby(float range)
+	{
+		if (!this.IsAnyoneNearby())
+		{
+			return false;
+		}
+		Vector3 position = this.headTransform.position;
+		float num = range * range;
+		for (int i = 0; i < this.rigsNearby.Count; i++)
+		{
+			if (!(this.rigsNearby[i] == null) && (GRSenseNearby.GetRigTestLocation(this.rigsNearby[i]) - position).sqrMagnitude <= num)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static Vector3 GetRigTestLocation(VRRig rig)
@@ -43,20 +74,25 @@ public class GRSenseNearby
 			{
 				Vector3 vector = GRSenseNearby.GetRigTestLocation(vrrig) - position;
 				float sqrMagnitude = vector.sqrMagnitude;
-				if (sqrMagnitude <= num)
+				float num3 = this.hearingRange * this.hearingRange;
+				if (sqrMagnitude >= num3)
 				{
+					if (sqrMagnitude >= num)
+					{
+						goto IL_C4;
+					}
 					if (sqrMagnitude > 0f)
 					{
-						float num3 = Mathf.Sqrt(sqrMagnitude);
-						if (Vector3.Dot(vector / num3, forward) < num2)
+						float num4 = Mathf.Sqrt(sqrMagnitude);
+						if (Vector3.Dot(vector / num4, forward) < num2)
 						{
-							goto IL_AB;
+							goto IL_C4;
 						}
 					}
-					this.rigsNearby.Add(vrrig);
 				}
+				this.rigsNearby.Add(vrrig);
 			}
-			IL_AB:;
+			IL_C4:;
 		}
 	}
 
@@ -118,6 +154,8 @@ public class GRSenseNearby
 	}
 
 	public float range;
+
+	public float hearingRange;
 
 	public float exitRange;
 

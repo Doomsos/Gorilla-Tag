@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using GorillaExtensions;
 using GorillaLocomotion;
 using GorillaTag.Shared.Scripts;
@@ -27,6 +28,7 @@ namespace GorillaTag.Cosmetics
 			{
 				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnThrowEvent);
 			}
+			this.forceBackToDock = false;
 		}
 
 		protected override void Awake()
@@ -39,6 +41,7 @@ namespace GorillaTag.Cosmetics
 			}
 			this.currentProjectileHash = this.projectileHash;
 			this.playersEffect = base.GetComponentInChildren<CosmeticEffectsOnPlayers>();
+			this.respawnWait = new WaitForSeconds(this.respawnCooldown);
 		}
 
 		public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
@@ -98,6 +101,18 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
+		public void ForceBackToDock()
+		{
+			this.forceBackToDock = true;
+		}
+
+		private IEnumerator ReEnableAfterDelay(GameObject obj)
+		{
+			yield return this.respawnWait;
+			obj.SetActive(true);
+			yield break;
+		}
+
 		private void OnThrowEvent(int sender, int target, object[] args, PhotonMessageInfoWrapped info)
 		{
 			if (sender != target)
@@ -154,6 +169,12 @@ namespace GorillaTag.Cosmetics
 		private void OnThrowLocal(Vector3 startPos, Quaternion rotation, Vector3 velocity, VRRig ownerRig)
 		{
 			this.disableWhenThrown.SetActive(false);
+			if (this.forceBackToDock)
+			{
+				this.forceBackToDock = false;
+				base.StartCoroutine(this.ReEnableAfterDelay(this.disableWhenThrown));
+				return;
+			}
 			IProjectile component = ObjectPools.instance.Instantiate(this.currentProjectileHash, true).GetComponent<IProjectile>();
 			FirecrackerProjectile firecrackerProjectile = component as FirecrackerProjectile;
 			if (firecrackerProjectile != null)
@@ -213,21 +234,23 @@ namespace GorillaTag.Cosmetics
 					base.ResetStateBools();
 				}
 			}
-			this.disableWhenThrown.SetActive(true);
 			FirecrackerProjectile firecrackerProjectile = projectile as FirecrackerProjectile;
 			if (firecrackerProjectile != null)
 			{
 				firecrackerProjectile.OnDetonationStart.RemoveListener(new UnityAction<FirecrackerProjectile, Vector3>(this.HitStart));
 				firecrackerProjectile.OnDetonationComplete.RemoveListener(new UnityAction<FirecrackerProjectile>(this.HitComplete));
 				ObjectPools.instance.Destroy(firecrackerProjectile.gameObject);
-				return;
 			}
-			FartBagThrowable fartBagThrowable = projectile as FartBagThrowable;
-			if (fartBagThrowable != null)
+			else
 			{
-				fartBagThrowable.OnDeflated -= new Action<IProjectile>(this.HitComplete);
-				ObjectPools.instance.Destroy(fartBagThrowable.gameObject);
+				FartBagThrowable fartBagThrowable = projectile as FartBagThrowable;
+				if (fartBagThrowable != null)
+				{
+					fartBagThrowable.OnDeflated -= new Action<IProjectile>(this.HitComplete);
+					ObjectPools.instance.Destroy(fartBagThrowable.gameObject);
+				}
 			}
+			base.StartCoroutine(this.ReEnableAfterDelay(this.disableWhenThrown));
 		}
 
 		[Tooltip("Projectile prefab from the global object pool that gets spawned when this object is thrown")]
@@ -245,6 +268,9 @@ namespace GorillaTag.Cosmetics
 
 		private CallLimiter firecrackerCallLimiter = new CallLimiter(10, 3f, 0.5f);
 
+		[SerializeField]
+		private float respawnCooldown = 1f;
+
 		private CosmeticEffectsOnPlayers playersEffect;
 
 		private int projectileHash;
@@ -252,6 +278,10 @@ namespace GorillaTag.Cosmetics
 		private int alternativeProjectileHash;
 
 		private int currentProjectileHash;
+
+		private bool forceBackToDock;
+
+		private WaitForSeconds respawnWait;
 
 		private RubberDuckEvents _events;
 	}

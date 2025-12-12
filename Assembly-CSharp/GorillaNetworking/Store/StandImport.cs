@@ -64,5 +64,7 @@ namespace GorillaNetworking.Store
 		}
 
 		public List<StandTypeData> standData = new List<StandTypeData>();
+
+		public Dictionary<string, StandTypeData> standKeyToDataDict = new Dictionary<string, StandTypeData>();
 	}
 }

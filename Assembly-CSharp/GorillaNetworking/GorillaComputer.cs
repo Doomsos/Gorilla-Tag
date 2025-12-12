@@ -153,7 +153,7 @@ namespace GorillaNetworking
 				this.buildCode,
 				", BUILD DATE: ",
 				this.buildDate,
-				" ====\r\n\r\n      ___   ___\r\n     /   ---   \\\r\n    C|  @   @  |D\r\n      \\  . .  /\r\n       |     |\r\n       | _._ |\r\n       \\_____/\r\n\r\n\r\n"
+				" ====\r\n\r\n               _______\r\n              /       \\\r\n             /  _____  \\\r\n            / / _   _ \\ \\\r\n           [ | (O) (O) | ]\r\n            | \\  . .  / |\r\n     _______|  | _._ |  |_______\r\n    /        \\  \\___/  /        \\\r\n\r\n\r\n"
 			}));
 			this._activeOrderList = this.OrderList;
 			this.defaultUpdateCooldown = this.updateCooldown;
@@ -528,7 +528,7 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			string text = PlayerPrefs.GetString("currentGameModePostSI", GameModeType.SuperInfect.ToString());
+			string text = PlayerPrefs.GetString("currentGameModePostSI", GameModeType.Infection.ToString());
 			GameModeType gameModeType;
 			try
 			{
@@ -1075,11 +1075,11 @@ namespace GorillaNetworking
 
 		private void DisconnectAfterDelay(float seconds)
 		{
-			GorillaComputer.<DisconnectAfterDelay>d__360 <DisconnectAfterDelay>d__;
+			GorillaComputer.<DisconnectAfterDelay>d__361 <DisconnectAfterDelay>d__;
 			<DisconnectAfterDelay>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<DisconnectAfterDelay>d__.seconds = seconds;
 			<DisconnectAfterDelay>d__.<>1__state = -1;
-			<DisconnectAfterDelay>d__.<>t__builder.Start<GorillaComputer.<DisconnectAfterDelay>d__360>(ref <DisconnectAfterDelay>d__);
+			<DisconnectAfterDelay>d__.<>t__builder.Start<GorillaComputer.<DisconnectAfterDelay>d__361>(ref <DisconnectAfterDelay>d__);
 		}
 
 		private void ProcessTurnState(GorillaKeyboardBindings buttonPressed)
@@ -1669,7 +1669,7 @@ namespace GorillaNetworking
 
 		private void LoadingScreen()
 		{
-			GorillaComputer.<>c__DisplayClass386_0 CS$<>8__locals1 = new GorillaComputer.<>c__DisplayClass386_0();
+			GorillaComputer.<>c__DisplayClass387_0 CS$<>8__locals1 = new GorillaComputer.<>c__DisplayClass387_0();
 			CS$<>8__locals1.<>4__this = this;
 			CS$<>8__locals1.tmp = "LOADING";
 			string text;
@@ -3372,11 +3372,11 @@ namespace GorillaNetworking
 
 		private void UpdateSession()
 		{
-			GorillaComputer.<UpdateSession>d__468 <UpdateSession>d__;
+			GorillaComputer.<UpdateSession>d__469 <UpdateSession>d__;
 			<UpdateSession>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<UpdateSession>d__.<>4__this = this;
 			<UpdateSession>d__.<>1__state = -1;
-			<UpdateSession>d__.<>t__builder.Start<GorillaComputer.<UpdateSession>d__468>(ref <UpdateSession>d__);
+			<UpdateSession>d__.<>t__builder.Start<GorillaComputer.<UpdateSession>d__469>(ref <UpdateSession>d__);
 		}
 
 		private void OnSessionUpdate_GorillaComputer()
@@ -3980,6 +3980,8 @@ namespace GorillaNetworking
 		private const string VISUALS_SCREEN_INTRO_KEY = "VISUALS_SCREEN_INTRO";
 
 		private const string VISUALS_SCREEN_OPTIONS_KEY = "VISUALS_SCREEN_OPTIONS";
+
+		private const string VISUALS_SCREEN_PERF_KEY = "VISUALS_SCREEN_PERF";
 
 		private const string VISUALS_SCREEN_CURRENT_KEY = "VISUALS_SCREEN_CURRENT";
 

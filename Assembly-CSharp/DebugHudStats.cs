@@ -7,6 +7,9 @@ using GorillaTag;
 using TMPro;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.XR;
 
 public class DebugHudStats : MonoBehaviour
 {
@@ -94,8 +97,6 @@ public class DebugHudStats : MonoBehaviour
 			{
 				Application.logMessageReceived += new Application.LogCallback(this.LogMessageReceived);
 			}
-			this.logMessages.Clear();
-			this.logVerbosity = ((this.currentState == DebugHudStats.State.ShowError) ? 1 : 0);
 			this.text.gameObject.SetActive(this.currentState > DebugHudStats.State.Inactive);
 			if (RigidbodyHighlighter.Instance != null)
 			{
@@ -113,7 +114,7 @@ public class DebugHudStats : MonoBehaviour
 			return;
 		}
 		int num = Mathf.RoundToInt(1f / Time.smoothDeltaTime);
-		if (num < 89)
+		if (num < DebugHudStats.FPS_THRESHOLD)
 		{
 			this.lowFps++;
 		}
@@ -132,10 +133,13 @@ public class DebugHudStats : MonoBehaviour
 			this.builder.Append(GorillaComputer.instance.buildCode);
 			this.builder.Append("</color>");
 			num = Mathf.Min(num, 90);
-			this.builder.Append((num < 89) ? " - <color=\"red\">" : " - <color=\"white\">");
+			this.builder.Append((num < DebugHudStats.FPS_THRESHOLD) ? " - <color=\"red\">" : " - <color=\"white\">");
 			this.builder.Append(num);
 			this.builder.AppendLine(" fps</color>");
-			this.builder.AppendLine(string.Format("draw calls: {0} tris: {1}", this.drawCallsRecorder.LastValue, this.trisRecorder.LastValue));
+			float eyeTextureResolutionScale = XRSettings.eyeTextureResolutionScale;
+			float renderViewportScale = XRSettings.renderViewportScale;
+			float renderScale = (GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset).renderScale;
+			this.builder.AppendLine(string.Format("draw calls: {0} tris: {1} ", this.drawCallsRecorder.LastValue, this.trisRecorder.LastValue) + string.Format("rs: {0}/{1}/{2} ", eyeTextureResolutionScale, renderViewportScale, renderScale));
 			if (GorillaComputer.instance != null)
 			{
 				this.builder.AppendLine(GorillaComputer.instance.GetServerTime().ToString());
@@ -204,15 +208,20 @@ public class DebugHudStats : MonoBehaviour
 				this.builder.AppendLine(string.Format("v: {0:F1} m/s\t\todo: {1:F2}m\tswam: {2:F2}m", magnitude, this.distanceMoved, this.distanceSwam));
 				this.builder.AppendLine(string.Format("ground: {0:F1} m/s\thead: {1:F2}", this.groundVelocity.magnitude, headCenterPosition));
 			}
-			else if (this.currentState == DebugHudStats.State.ShowLog || this.currentState == DebugHudStats.State.ShowError)
+			else if (this.currentState == DebugHudStats.State.ShowLog)
 			{
 				this.builder.AppendLine();
-				for (int i = this.logMessages.Count - 1; i >= 0; i--)
+				for (int i = this.logMessage.Count - 1; i >= 0; i--)
 				{
-					if (this.logFilter.Length == 0 || this.logMessages[i].Contains(this.logFilter))
-					{
-						this.builder.AppendLine(this.logMessages[i]);
-					}
+					this.builder.AppendLine(this.logMessage[i]);
+				}
+			}
+			else if (this.currentState == DebugHudStats.State.ShowError)
+			{
+				this.builder.AppendLine();
+				for (int j = this.logError.Count - 1; j >= 0; j--)
+				{
+					this.builder.AppendLine(this.logError[j]);
 				}
 			}
 			this.text.text = this.builder.ToString();
@@ -260,23 +269,27 @@ public class DebugHudStats : MonoBehaviour
 
 	private void LogMessageReceived(string condition, string stackTrace, LogType type)
 	{
-		if (this.logVerbosity == 1 && type != 4 && type != 1 && type != null)
-		{
-			return;
-		}
 		string text = string.Format("{0:F2}> {1}{2}</color>", Time.realtimeSinceStartup, this.getColorStringFromLogType(type), condition);
 		if (this.pLog != condition)
 		{
-			this.logMessages.Add(text);
+			this.logMessage.Add(text);
 		}
 		else
 		{
-			this.logMessages[this.logMessages.Count - 1] = text;
+			this.logMessage[this.logMessage.Count - 1] = text;
 		}
 		this.pLog = condition;
-		if (this.logMessages.Count > 10)
+		if (this.logMessage.Count > 10)
 		{
-			this.logMessages.RemoveAt(0);
+			this.logMessage.RemoveAt(0);
+		}
+		if (type == null || type == 1 || type == 4)
+		{
+			this.logError.Add(text + "\n" + stackTrace);
+			if (this.logError.Count > 10)
+			{
+				this.logError.RemoveAt(0);
+			}
 		}
 	}
 
@@ -306,7 +319,7 @@ public class DebugHudStats : MonoBehaviour
 		}
 	}
 
-	private const int FPS_THRESHOLD = 89;
+	public static int FPS_THRESHOLD = 89;
 
 	private static DebugHudStats _instance;
 
@@ -343,7 +356,9 @@ public class DebugHudStats : MonoBehaviour
 
 	private float distanceSwam;
 
-	private List<string> logMessages = new List<string>();
+	private List<string> logMessage = new List<string>();
+
+	private List<string> logError = new List<string>();
 
 	private bool buttonDown;
 
@@ -355,12 +370,7 @@ public class DebugHudStats : MonoBehaviour
 
 	private GroupJoinZoneAB lastGroupJoinZone;
 
-	[SerializeField]
-	private string logFilter;
-
 	private DebugHudStats.State currentState = DebugHudStats.State.Active;
-
-	private int logVerbosity;
 
 	private ProfilerRecorder drawCallsRecorder;
 

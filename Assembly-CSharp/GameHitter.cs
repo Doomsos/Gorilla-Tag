@@ -199,7 +199,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 			if (parentEnemy.IsHitValid(hitData))
 			{
 				parentEnemy.RequestHit(hitData);
-				this.hitCooldownEnd = timeAsDouble + 0.10000000149011612;
+				this.hitCooldownEnd = timeAsDouble + 0.25;
 			}
 		}
 	}

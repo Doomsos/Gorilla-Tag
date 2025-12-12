@@ -306,14 +306,14 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		switch (this.currBehavior)
 		{
 		case GREnemyPest.Behavior.Idle:
-			this.abilityIdle.Update(dt);
+			this.abilityIdle.UpdateAuthority(dt);
 			return;
 		case GREnemyPest.Behavior.Wander:
-			this.abilityWander.Update(dt);
+			this.abilityWander.UpdateAuthority(dt);
 			return;
 		case GREnemyPest.Behavior.Chase:
 		{
-			this.abilityChase.Update(dt);
+			this.abilityChase.UpdateAuthority(dt);
 			if (this.abilityChase.IsDone())
 			{
 				this.SetBehavior(GREnemyPest.Behavior.Wander, false);
@@ -332,7 +332,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 			break;
 		}
 		case GREnemyPest.Behavior.Attack:
-			this.abilityAttack.Update(dt);
+			this.abilityAttack.UpdateAuthority(dt);
 			if (this.abilityAttack.IsDone())
 			{
 				this.SetBehavior(GREnemyPest.Behavior.Chase, false);
@@ -340,7 +340,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 			}
 			break;
 		case GREnemyPest.Behavior.Stagger:
-			this.abilityStagger.Update(dt);
+			this.abilityStagger.UpdateAuthority(dt);
 			if (this.abilityStagger.IsDone())
 			{
 				this.SetBehavior(GREnemyPest.Behavior.Wander, false);
@@ -357,13 +357,13 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 			}
 			break;
 		case GREnemyPest.Behavior.Destroyed:
-			this.abilityDie.Update(dt);
+			this.abilityDie.UpdateAuthority(dt);
 			return;
 		case GREnemyPest.Behavior.Investigate:
-			this.abilityInvestigate.Update(dt);
+			this.abilityInvestigate.UpdateAuthority(dt);
 			return;
 		case GREnemyPest.Behavior.Jump:
-			this.abilityJump.Update(dt);
+			this.abilityJump.UpdateAuthority(dt);
 			if (this.abilityJump.IsDone())
 			{
 				this.ChooseNewBehavior();
@@ -371,7 +371,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 			}
 			break;
 		case GREnemyPest.Behavior.Flashed:
-			this.abilityFlashed.Update(dt);
+			this.abilityFlashed.UpdateAuthority(dt);
 			if (this.abilityFlashed.IsDone())
 			{
 				this.ChooseNewBehavior();
@@ -662,6 +662,8 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 	public GameEntity entity;
 
 	public GameAgent agent;
+
+	public GREnemy enemy;
 
 	public GRArmorEnemy armor;
 

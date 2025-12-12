@@ -271,10 +271,19 @@ public class GRPlayer : MonoBehaviourTick
 		}
 	}
 
-	public void OnPlayerHit(Vector3 hitPosition, GhostReactorManager manager, GameEntityId hitByEntityId)
+	public void OnPlayerHit(Vector3 hitPosition, Vector3 hitImpulse, GhostReactorManager manager, GameEntityId hitByEntityId)
 	{
 		GameEntity gameEntity = manager.gameEntityManager.GetGameEntity(hitByEntityId);
 		int num = 1;
+		if (this.gamePlayer.IsLocal())
+		{
+			GTPlayer instance = GTPlayer.Instance;
+			float magnitude = hitImpulse.magnitude;
+			if (magnitude > 0f)
+			{
+				instance.ApplyKnockback(hitImpulse / magnitude, magnitude, true);
+			}
+		}
 		if (this.State == GRPlayer.GRPlayerState.Alive)
 		{
 			if (this.shieldHp > 0)
@@ -1069,6 +1078,93 @@ public class GRPlayer : MonoBehaviourTick
 		}
 	}
 
+	private void RequestSetMothershipUserData(string keyName, string value)
+	{
+		if (this.saveEquipmentInProgress)
+		{
+			Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: request already in progress");
+			return;
+		}
+		this.saveEquipmentInProgress = true;
+		try
+		{
+			if (!MothershipClientApiUnity.SetUserDataValue(keyName, value, new Action<SetUserDataResponse>(this.OnSetMothershipUserDataSuccess), new Action<MothershipError, int>(this.OnSetMothershipUserDataFail), ""))
+			{
+				Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: SetUserDataValue Fail");
+				this.OnSetMothershipDataComplete(false);
+			}
+		}
+		catch (Exception ex)
+		{
+			Debug.LogError("SharedBlocksManager RequestSetMothershipUserData: exception " + ex.Message);
+			this.OnSetMothershipDataComplete(false);
+		}
+	}
+
+	private void OnSetMothershipUserDataSuccess(SetUserDataResponse response)
+	{
+		GTDev.Log<string>("GRPlayer OnSetMothershipUserDataSuccess", null);
+		this.OnSetMothershipDataComplete(true);
+		response.Dispose();
+	}
+
+	private void OnSetMothershipUserDataFail(MothershipError error, int status)
+	{
+		string text = (error == null) ? status.ToString() : error.Message;
+		GTDev.LogError<string>("GRPlayer OnSetMothershipUserDataFail: " + text, null);
+		this.OnSetMothershipDataComplete(false);
+		if (error != null)
+		{
+			error.Dispose();
+		}
+	}
+
+	private void OnSetMothershipDataComplete(bool success)
+	{
+		this.saveEquipmentInProgress = false;
+	}
+
+	public void RequestFetchMothershipUserData(string key)
+	{
+		if (!this.hasPulledEquipment)
+		{
+			try
+			{
+				if (!MothershipClientApiUnity.GetUserDataValue(key, new Action<MothershipUserData>(this.OnGetMothershipFetchUserDataSuccess), new Action<MothershipError, int>(this.OnGetMothershipFetchUserDataFail), ""))
+				{
+					Debug.LogError("GRPlayer RequestFetchMothershipUserData failed ");
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.LogError("GRPlayer RequestFetchMothershipUserData exception " + ex.Message);
+			}
+		}
+	}
+
+	private void OnGetMothershipFetchUserDataSuccess(MothershipUserData response)
+	{
+		GTDev.Log<string>("GRPlayer OnGetMothershipFetchUserDataSuccess", null);
+		bool flag = response != null && response.value != null && response.value.Length > 0;
+		if (response != null)
+		{
+		}
+		if (response != null)
+		{
+			response.Dispose();
+		}
+	}
+
+	private void OnGetMothershipFetchUserDataFail(MothershipError error, int status)
+	{
+		string text = (error == null) ? status.ToString() : error.Message;
+		GTDev.LogError<string>("GRPlayer OnGetMothershipFetchUserDataFail: " + text, null);
+		if (error != null)
+		{
+			error.Dispose();
+		}
+	}
+
 	public bool IsDropPodUnlocked()
 	{
 		return this.dropPodLevel > 0;
@@ -1389,6 +1485,10 @@ public class GRPlayer : MonoBehaviourTick
 	private float freezeDuration;
 
 	private Vector3 lastPlayerPosition = Vector3.zero;
+
+	private bool saveEquipmentInProgress;
+
+	private bool hasPulledEquipment;
 
 	public int dropPodLevel;
 

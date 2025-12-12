@@ -281,11 +281,12 @@ public class CosmeticWardrobe : MonoBehaviour
 		for (int i = 0; i < this.cosmeticCollectionDisplays.Length; i++)
 		{
 			CosmeticsController.CosmeticItem cosmetic = CosmeticsController.instance.GetCosmetic(CosmeticWardrobe.selectedCategory, CosmeticWardrobe.startingDisplayIndex + i);
-			this.cosmeticCollectionDisplays[i].currentCosmeticItem = cosmetic;
-			this.cosmeticCollectionDisplays[i].displayHead.SetCosmeticActive(cosmetic.displayName, false);
-			this.cosmeticCollectionDisplays[i].selectButton.enabled = !cosmetic.isNullItem;
-			this.cosmeticCollectionDisplays[i].selectButton.isOn = (!cosmetic.isNullItem && CosmeticsController.instance.IsCosmeticEquipped(cosmetic, this.m_useTemporarySet));
-			this.cosmeticCollectionDisplays[i].selectButton.UpdateColor();
+			CosmeticWardrobe.CosmeticWardrobeSelection cosmeticWardrobeSelection = this.cosmeticCollectionDisplays[i];
+			cosmeticWardrobeSelection.currentCosmeticItem = cosmetic;
+			cosmeticWardrobeSelection.displayHead.SetCosmeticActive(cosmetic.displayName, false);
+			cosmeticWardrobeSelection.selectButton.enabled = !cosmetic.isNullItem;
+			cosmeticWardrobeSelection.selectButton.isOn = (!cosmetic.isNullItem && CosmeticsController.instance.IsCosmeticEquipped(cosmetic, this.m_useTemporarySet));
+			cosmeticWardrobeSelection.selectButton.UpdateColor();
 		}
 		int categorySize = CosmeticsController.instance.GetCategorySize(CosmeticWardrobe.selectedCategory);
 		this.nextSelection.enabled = (categorySize > this.cosmeticCollectionDisplays.Length);

@@ -17,15 +17,14 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		}
 	}
 
-	public override void Start()
+	protected override void OnStart()
 	{
-		base.Start();
 		if (this.target != null)
 		{
 			Vector3 vector = this.agent.transform.position - this.target.position;
 			if (this.maxDistanceFromTarget > 0f && vector.magnitude > this.maxDistanceFromTarget)
 			{
-				this.navMeshAgent.isStopped = true;
+				this.agent.SetStopped(true);
 				this.PlayAnim(this.idleAnimName, 0.5f, 1f);
 				this.idleSound.Play(null);
 			}
@@ -41,16 +40,22 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		this.agent.SetIsPathing(true, true);
 		Vector3 targetPos = this.PickBackupDestination();
 		this.moveAbility.SetTargetPos(targetPos);
-		this.defaultUpdateRotation = this.navMeshAgent.updateRotation;
-		this.navMeshAgent.updateRotation = false;
+		if (this.navMeshAgent != null)
+		{
+			this.defaultUpdateRotation = this.navMeshAgent.updateRotation;
+			this.navMeshAgent.updateRotation = false;
+		}
 	}
 
-	public override void Stop()
+	protected override void OnStop()
 	{
 		this.moveAbility.Stop();
 		this.idleSound.Stop();
-		this.navMeshAgent.updateRotation = this.defaultUpdateRotation;
-		this.navMeshAgent.isStopped = false;
+		if (this.navMeshAgent != null)
+		{
+			this.navMeshAgent.updateRotation = this.defaultUpdateRotation;
+		}
+		this.agent.SetStopped(false);
 	}
 
 	public override bool IsDone()
@@ -72,14 +77,14 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		}
 	}
 
-	public override void Think(float dt)
+	protected override void OnThink(float dt)
 	{
 		Vector3 vector = this.agent.transform.position - this.target.position;
 		if (this.moveAbility.IsDone())
 		{
 			if (this.maxDistanceFromTarget < 0f || vector.magnitude < this.maxDistanceFromTarget)
 			{
-				if (this.navMeshAgent.isOnNavMesh && this.navMeshAgent.isStopped)
+				if (this.navMeshAgent != null && this.navMeshAgent.isOnNavMesh && this.navMeshAgent.isStopped)
 				{
 					this.idleSound.Stop();
 					this.moveAbility.Start();
@@ -93,7 +98,7 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		{
 			this.moveAbility.SetTargetPos(this.root.position);
 			this.moveAbility.Stop();
-			this.navMeshAgent.isStopped = true;
+			this.agent.SetStopped(true);
 			this.PlayAnim(this.idleAnimName, 0.5f, 1f);
 			this.idleSound.Play(null);
 		}
@@ -151,13 +156,22 @@ public class GRAbilityKeepDistance : GRAbilityBase
 		return position;
 	}
 
-	protected override void UpdateShared(float dt)
+	protected override void OnUpdateShared(float dt)
 	{
-		this.moveAbility.Update(dt);
 		if (GhostReactorManager.entityDebugEnabled)
 		{
 			DebugUtil.DrawLine(this.root.position, this.moveAbility.GetTargetPos(), Color.magenta, true);
 		}
+	}
+
+	protected override void OnUpdateAuthority(float dt)
+	{
+		this.moveAbility.UpdateAuthority(dt);
+	}
+
+	protected override void OnUpdateRemote(float dt)
+	{
+		this.moveAbility.UpdateRemote(dt);
 	}
 
 	private NavMeshAgent navMeshAgent;

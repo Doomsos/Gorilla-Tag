@@ -19,6 +19,7 @@ public class GhostReactorSpawnConfig : ScriptableObject
 		Tool,
 		ChaosSeed,
 		HazardTower,
+		MiniBoss,
 		SpawnPointTypeCount
 	}
 

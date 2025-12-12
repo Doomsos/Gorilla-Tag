@@ -33,9 +33,8 @@ public class GRAbilityPatrol : GRAbilityBase
 		this.patrolGroanSoundRandom = new Random((uint)this.entity.GetNetId());
 	}
 
-	public override void Start()
+	protected override void OnStart()
 	{
-		base.Start();
 		this.moveAbility.Start();
 		this.agent.SetIsPathing(true, true);
 		if (this.patrolPath != null)
@@ -49,7 +48,7 @@ public class GRAbilityPatrol : GRAbilityBase
 		this.CalculateNextPatrolGroan();
 	}
 
-	public override void Stop()
+	protected override void OnStop()
 	{
 		this.moveAbility.Stop();
 	}
@@ -87,9 +86,9 @@ public class GRAbilityPatrol : GRAbilityBase
 		this.CalculateNextPatrolGroan();
 	}
 
-	public override void Update(float dt)
+	protected override void OnUpdateAuthority(float dt)
 	{
-		this.moveAbility.Update(dt);
+		this.moveAbility.UpdateAuthority(dt);
 		if (GhostReactorManager.entityDebugEnabled)
 		{
 			DebugUtil.DrawLine(this.root.position, this.moveAbility.GetTargetPos(), Color.green, true);
@@ -105,11 +104,11 @@ public class GRAbilityPatrol : GRAbilityBase
 		}
 	}
 
-	public override void UpdateRemote(float dt)
+	protected override void OnUpdateRemote(float dt)
 	{
 		this.moveAbility.SetTarget(null);
 		this.moveAbility.SetTargetPos(this.agent.navAgent.destination);
-		this.moveAbility.Update(dt);
+		this.moveAbility.UpdateRemote(dt);
 		if (GhostReactorManager.entityDebugEnabled)
 		{
 			DebugUtil.DrawLine(this.root.position, this.moveAbility.GetTargetPos(), Color.green, true);

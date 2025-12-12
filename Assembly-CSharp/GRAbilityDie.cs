@@ -21,14 +21,14 @@ public class GRAbilityDie : GRAbilityBase
 		this.staggerMovement.Setup(root);
 	}
 
-	public override void Start()
+	protected override void OnStart()
 	{
-		base.Start();
+		this.totalDeathDelay = this.delayDeath;
 		if (this.animData.Count > 0)
 		{
 			int num = Random.Range(0, this.animData.Count);
-			this.delayDeath = this.animData[num].duration;
-			this.staggerMovement.InitFromVelocityAndDuration(this.staggerMovement.velocity, this.delayDeath);
+			this.totalDeathDelay += this.animData[num].duration;
+			this.staggerMovement.InitFromVelocityAndDuration(this.staggerMovement.velocity, this.totalDeathDelay);
 			this.PlayAnim(this.animData[num].animName, 0.1f, this.animData[num].speed);
 		}
 		this.agent.SetIsPathing(false, true);
@@ -42,9 +42,13 @@ public class GRAbilityDie : GRAbilityBase
 		this.soundOnHide.soundSelectMode = AbilitySound.SoundSelectMode.Random;
 		this.soundDeath.Play(null);
 		GRAbilityDie.Disable(this.disableCollidersWhenDead, true);
+		if (this.fxDeath != null)
+		{
+			this.fxDeath.SetActive(false);
+		}
 	}
 
-	public override void Stop()
+	protected override void OnStop()
 	{
 		this.staggerMovement.Stop();
 		this.agent.SetIsPathing(true, true);
@@ -62,7 +66,7 @@ public class GRAbilityDie : GRAbilityBase
 			vector.y = 0f;
 			vel = vector * magnitude;
 		}
-		this.staggerMovement.InitFromVelocityAndDuration(vel, this.delayDeath);
+		this.staggerMovement.InitFromVelocityAndDuration(vel, this.totalDeathDelay);
 	}
 
 	public void SetInstigatingPlayerIndex(int actorNumber)
@@ -89,12 +93,22 @@ public class GRAbilityDie : GRAbilityBase
 			{
 				transform = this.agent.transform;
 			}
-			Vector3 position = transform.position;
+			Vector3 vector = transform.position;
 			if (transform == null)
 			{
-				position.y += 0.33f;
+				vector.y += 0.33f;
 			}
-			entity.manager.RequestCreateItem(gameEntity.gameObject.name.GetStaticHash(), position, transform.rotation, 0L);
+			RaycastHit raycastHit;
+			if (this.spawnOnGround && Physics.Raycast(new Ray(vector + Vector3.up * 0.5f, -Vector3.up), ref raycastHit, 5f, this.groundLayerMask.value, 1))
+			{
+				vector = raycastHit.point;
+			}
+			entity.manager.RequestCreateItem(gameEntity.gameObject.name.GetStaticHash(), vector, transform.rotation, 0L);
+		}
+		GREnemy component = entity.GetComponent<GREnemy>();
+		if (component != null && component.damageFlash != null)
+		{
+			component.damageFlash.Play();
 		}
 	}
 
@@ -106,12 +120,7 @@ public class GRAbilityDie : GRAbilityBase
 		{
 			grplayer.IncrementSynchronizedSessionStat(GRPlayer.SynchronizedSessionStat.Kills, 1f);
 		}
-		GREnemyType? enemyType = entity.GetEnemyType();
-		if (enemyType != null)
-		{
-			GREnemyType valueOrDefault = enemyType.GetValueOrDefault();
-			GhostReactor.instance.shiftManager.shiftStats.IncrementEnemyKills(valueOrDefault);
-		}
+		GhostReactor.instance.shiftManager.shiftStats.IncrementEnemyKills(entity.GetEnemyType());
 		if (entity.IsAuthority())
 		{
 			entity.manager.RequestDestroyItem(entity.id);
@@ -123,7 +132,7 @@ public class GRAbilityDie : GRAbilityBase
 		return false;
 	}
 
-	protected override void UpdateShared(float dt)
+	protected override void OnUpdateShared(float dt)
 	{
 		if (this.startTime >= 0.0)
 		{
@@ -132,13 +141,13 @@ public class GRAbilityDie : GRAbilityBase
 				this.staggerMovement.Update(dt);
 			}
 			double num = Time.timeAsDouble - this.startTime;
-			if (!this.isDead && num > (double)this.delayDeath)
+			if (!this.isDead && num > (double)this.totalDeathDelay)
 			{
 				this.isDead = true;
 				this.Die();
 				return;
 			}
-			if (this.isDead && num > (double)(this.delayDeath + this.destroyDelay))
+			if (this.isDead && num > (double)(this.totalDeathDelay + this.destroyDelay))
 			{
 				GhostReactorManager.Get(this.entity).OnAbilityDie(this.entity);
 				this.DestroySelf();
@@ -199,6 +208,10 @@ public class GRAbilityDie : GRAbilityBase
 
 	public GRBreakableItemSpawnConfig lootTable;
 
+	public bool spawnOnGround;
+
+	public LayerMask groundLayerMask;
+
 	public Transform lootSpawnMarker;
 
 	public List<AnimationData> animData;
@@ -206,6 +219,8 @@ public class GRAbilityDie : GRAbilityBase
 	private int instigatingActorNumber;
 
 	private bool isDead;
+
+	private float totalDeathDelay;
 
 	public GRAbilityInterpolatedMovement staggerMovement;
 }

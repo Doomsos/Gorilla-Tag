@@ -87,6 +87,7 @@ internal class MockWarningServer : WarningsServer
 			return inOptInCohort;
 		case 3:
 		case 4:
+		case 5:
 			return true;
 		}
 	}

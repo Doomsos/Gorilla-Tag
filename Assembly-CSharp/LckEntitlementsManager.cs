@@ -49,11 +49,11 @@ public class LckEntitlementsManager : MonoBehaviour
 
 	private Task InitializeFeatureAsync()
 	{
-		LckEntitlementsManager.<InitializeFeatureAsync>d__25 <InitializeFeatureAsync>d__;
+		LckEntitlementsManager.<InitializeFeatureAsync>d__27 <InitializeFeatureAsync>d__;
 		<InitializeFeatureAsync>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
 		<InitializeFeatureAsync>d__.<>4__this = this;
 		<InitializeFeatureAsync>d__.<>1__state = -1;
-		<InitializeFeatureAsync>d__.<>t__builder.Start<LckEntitlementsManager.<InitializeFeatureAsync>d__25>(ref <InitializeFeatureAsync>d__);
+		<InitializeFeatureAsync>d__.<>t__builder.Start<LckEntitlementsManager.<InitializeFeatureAsync>d__27>(ref <InitializeFeatureAsync>d__);
 		return <InitializeFeatureAsync>d__.<>t__builder.Task;
 	}
 
@@ -105,6 +105,7 @@ public class LckEntitlementsManager : MonoBehaviour
 			playerProcessRecord = new LckEntitlementsManager.PlayerProcessRecord();
 			this._processedPlayers[userId] = playerProcessRecord;
 		}
+		playerProcessRecord.LastSeenTimestamp = Time.time;
 		if (Time.time < playerProcessRecord.TimeoutUntilTimestamp)
 		{
 			Debug.LogWarning("LCK: Player " + userId + " is on a timeout. Entitlements Manager will ignore spawn event.");
@@ -130,21 +131,24 @@ public class LckEntitlementsManager : MonoBehaviour
 		for (;;)
 		{
 			yield return new WaitForSeconds(15f);
-			HashSet<string> remotePlayersToGetEntitlementsFor = this._remotePlayersToGetEntitlementsFor;
-			List<string> list;
-			lock (remotePlayersToGetEntitlementsFor)
+			if (!this._isProcessingBatch)
 			{
-				if (this._remotePlayersToGetEntitlementsFor.Count == 0)
+				HashSet<string> remotePlayersToGetEntitlementsFor = this._remotePlayersToGetEntitlementsFor;
+				List<string> list;
+				lock (remotePlayersToGetEntitlementsFor)
 				{
-					continue;
+					if (this._remotePlayersToGetEntitlementsFor.Count == 0)
+					{
+						continue;
+					}
+					list = Enumerable.ToList<string>(this._remotePlayersToGetEntitlementsFor);
+					this._remotePlayersToGetEntitlementsFor.Clear();
 				}
-				list = Enumerable.ToList<string>(this._remotePlayersToGetEntitlementsFor);
-				this._remotePlayersToGetEntitlementsFor.Clear();
-			}
-			if (list.Count > 0)
-			{
-				Debug.Log(string.Format("LCK: Processing a batch of {0} remote player(s).", list.Count));
-				base.StartCoroutine(this.GetCosmeticsForPlayersCoroutine(list, "ProcessBatchedRemotePlayersCoroutine"));
+				if (list.Count > 0)
+				{
+					this._isProcessingBatch = true;
+					this.GetCosmeticsForPlayersAsync(list, "ProcessBatchedRemotePlayers");
+				}
 			}
 		}
 		yield break;
@@ -169,7 +173,7 @@ public class LckEntitlementsManager : MonoBehaviour
 		int num;
 		for (int attempt = 1; attempt <= 2; attempt = num + 1)
 		{
-			LckEntitlementsManager.<>c__DisplayClass31_0 CS$<>8__locals1 = new LckEntitlementsManager.<>c__DisplayClass31_0();
+			LckEntitlementsManager.<>c__DisplayClass33_0 CS$<>8__locals1 = new LckEntitlementsManager.<>c__DisplayClass33_0();
 			CS$<>8__locals1.announcementAsync = this._lckCosmeticsCoordinator.AnnouncePlayerPresenceForSessionAsync(localPlayerId, sessionId);
 			yield return new WaitUntil(() => CS$<>8__locals1.announcementAsync.IsCompleted);
 			if (!CS$<>8__locals1.announcementAsync.IsFaulted && CS$<>8__locals1.announcementAsync.Result.IsOk)
@@ -186,68 +190,41 @@ public class LckEntitlementsManager : MonoBehaviour
 		yield break;
 	}
 
-	private IEnumerator GetCosmeticsForPlayersCoroutine(IEnumerable<string> playerUserIds, string methodNameForLogging)
+	private Task GetCosmeticsForPlayersAsync(List<string> userIdList, string methodNameForLogging)
 	{
-		List<string> userIdList = ((playerUserIds != null) ? Enumerable.ToList<string>(playerUserIds) : null) ?? new List<string>();
-		if (userIdList.Count == 0)
-		{
-			yield break;
-		}
-		if (PhotonNetwork.CurrentRoom == null)
-		{
-			Debug.LogError("LCK: Called " + methodNameForLogging + " but no room was found.");
-			yield break;
-		}
-		string sessionId = "DefaultSessionId";
-		Debug.Log(string.Concat(new string[]
-		{
-			"LCK: Calling ",
-			methodNameForLogging,
-			" for session: ",
-			sessionId,
-			" for players: ",
-			string.Join(", ", userIdList),
-			"."
-		}));
-		int num;
-		for (int attempt = 1; attempt <= 2; attempt = num + 1)
-		{
-			LckEntitlementsManager.<>c__DisplayClass32_0 CS$<>8__locals1 = new LckEntitlementsManager.<>c__DisplayClass32_0();
-			CS$<>8__locals1.getUserCosmeticsTask = this._lckCosmeticsCoordinator.GetUserCosmeticsForSessionAsync(userIdList, sessionId);
-			yield return new WaitUntil(() => CS$<>8__locals1.getUserCosmeticsTask.IsCompleted);
-			if (!CS$<>8__locals1.getUserCosmeticsTask.IsFaulted && CS$<>8__locals1.getUserCosmeticsTask.Result.IsOk)
-			{
-				Debug.Log("LCK: Successfully called " + methodNameForLogging + " endpoint.");
-				yield break;
-			}
-			string text = CS$<>8__locals1.getUserCosmeticsTask.IsFaulted ? CS$<>8__locals1.getUserCosmeticsTask.Exception.ToString() : CS$<>8__locals1.getUserCosmeticsTask.Result.Message.ToString();
-			Debug.LogError(string.Format("LCK: Error in {0} (Attempt {1}/{2}): {3}", new object[]
-			{
-				methodNameForLogging,
-				attempt,
-				2,
-				text
-			}));
-			CS$<>8__locals1 = null;
-			num = attempt;
-		}
-		Debug.LogError("LCK: All attempts to call " + methodNameForLogging + " failed.");
-		yield break;
+		LckEntitlementsManager.<GetCosmeticsForPlayersAsync>d__34 <GetCosmeticsForPlayersAsync>d__;
+		<GetCosmeticsForPlayersAsync>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
+		<GetCosmeticsForPlayersAsync>d__.<>4__this = this;
+		<GetCosmeticsForPlayersAsync>d__.userIdList = userIdList;
+		<GetCosmeticsForPlayersAsync>d__.methodNameForLogging = methodNameForLogging;
+		<GetCosmeticsForPlayersAsync>d__.<>1__state = -1;
+		<GetCosmeticsForPlayersAsync>d__.<>t__builder.Start<LckEntitlementsManager.<GetCosmeticsForPlayersAsync>d__34>(ref <GetCosmeticsForPlayersAsync>d__);
+		return <GetCosmeticsForPlayersAsync>d__.<>t__builder.Task;
 	}
 
 	private IEnumerator CleanupProcessedPlayersCoroutine()
 	{
+		List<string> playersToRemove = new List<string>();
 		for (;;)
 		{
 			yield return new WaitForSeconds(60f);
-			List<string> list = Enumerable.ToList<string>(Enumerable.Select<KeyValuePair<string, LckEntitlementsManager.PlayerProcessRecord>, string>(Enumerable.Where<KeyValuePair<string, LckEntitlementsManager.PlayerProcessRecord>>(this._processedPlayers, (KeyValuePair<string, LckEntitlementsManager.PlayerProcessRecord> pair) => pair.Value.TimeoutUntilTimestamp > 0f && Time.time > pair.Value.TimeoutUntilTimestamp), (KeyValuePair<string, LckEntitlementsManager.PlayerProcessRecord> pair) => pair.Key));
-			if (Enumerable.Any<string>(list))
+			playersToRemove.Clear();
+			float time = Time.time;
+			foreach (KeyValuePair<string, LckEntitlementsManager.PlayerProcessRecord> keyValuePair in this._processedPlayers)
 			{
-				using (List<string>.Enumerator enumerator = list.GetEnumerator())
+				if (time > keyValuePair.Value.LastSeenTimestamp + 300f)
 				{
-					while (enumerator.MoveNext())
+					playersToRemove.Add(keyValuePair.Key);
+				}
+			}
+			if (playersToRemove.Count > 0)
+			{
+				Debug.Log(string.Format("LCK: Cleaning up {0} stale player records.", playersToRemove.Count));
+				using (List<string>.Enumerator enumerator2 = playersToRemove.GetEnumerator())
+				{
+					while (enumerator2.MoveNext())
 					{
-						string text = enumerator.Current;
+						string text = enumerator2.Current;
 						this._processedPlayers.Remove(text);
 					}
 					continue;
@@ -271,6 +248,8 @@ public class LckEntitlementsManager : MonoBehaviour
 
 	private const float BATCH_GET_ENTITLEMENTS_INTERVAL_SECONDS = 15f;
 
+	private const float STALE_PLAYER_TIMEOUT_MINUTES = 5f;
+
 	private const string DEFAULT_SESSION_ID = "DefaultSessionId";
 
 	private LckEntitlementsManager.FeatureState _currentState;
@@ -283,11 +262,15 @@ public class LckEntitlementsManager : MonoBehaviour
 
 	private Coroutine _cleanupProcessedPlayersCoroutine;
 
+	private bool _isProcessingBatch;
+
 	private class PlayerProcessRecord
 	{
 		public int AttemptCount;
 
 		public float TimeoutUntilTimestamp;
+
+		public float LastSeenTimestamp;
 	}
 
 	private enum FeatureState

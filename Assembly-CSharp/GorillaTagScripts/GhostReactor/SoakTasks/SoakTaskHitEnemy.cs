@@ -104,7 +104,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 
 		private static bool IsEnemy(GameEntity entity)
 		{
-			return entity.GetComponent<GREnemyChaser>() != null || entity.GetComponent<GREnemyPest>() != null || entity.GetComponent<GREnemyRanged>() != null || entity.GetComponent<GREnemySummoner>() != null;
+			return entity.GetComponent<GREnemyChaser>() != null || entity.GetComponent<GREnemyPest>() != null || entity.GetComponent<GREnemyRanged>() != null || entity.GetComponent<GREnemySummoner>() != null || entity.GetComponent<GREnemyMonkeye>() != null;
 		}
 
 		private static bool IsLivingEnemy(GameEntity entity)
@@ -121,7 +121,11 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 						if (component3 == null || component3.hp <= 0)
 						{
 							GREnemySummoner component4 = entity.GetComponent<GREnemySummoner>();
-							return component4 != null && component4.hp > 0;
+							if (component4 == null || component4.hp <= 0)
+							{
+								GREnemyMonkeye component5 = entity.GetComponent<GREnemyMonkeye>();
+								return component5 != null && component5.hp > 0;
+							}
 						}
 					}
 				}

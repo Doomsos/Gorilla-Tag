@@ -45,11 +45,13 @@ public class BuilderScanKiosk : MonoBehaviourTick
 
 	private new void OnEnable()
 	{
+		base.OnEnable();
 		LocalisationManager.RegisterOnLanguageChanged(new Action(this.UpdateUI));
 	}
 
 	private new void OnDisable()
 	{
+		base.OnDisable();
 		LocalisationManager.UnregisterOnLanguageChanged(new Action(this.UpdateUI));
 	}
 
