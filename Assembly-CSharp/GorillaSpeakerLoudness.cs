@@ -92,16 +92,21 @@ public class GorillaSpeakerLoudness : MonoBehaviour, IGorillaSliceableSimple, ID
 		VRRig rig = this.rigContainer.Rig;
 		if (rig.isOfflineVRRig)
 		{
-			this.permission = (this.permission || MicPermissionsManager.HasMicPermission());
-			if (this.permission && !this.micConnected && Microphone.devices != null)
-			{
-				this.micConnected = (Microphone.devices.Length != 0);
-			}
-			this.isMicEnabled = (this.permission && this.micConnected);
+			this.isMicEnabled = this.CheckMicConnection();
 			rig.IsMicEnabled = this.isMicEnabled;
 			return;
 		}
 		this.isMicEnabled = rig.IsMicEnabled;
+	}
+
+	private bool CheckMicConnection()
+	{
+		this.permission = (this.permission || MicPermissionsManager.HasMicPermission());
+		if (this.permission && !this.micConnected && Microphone.devices != null)
+		{
+			this.micConnected = (Microphone.devices.Length != 0);
+		}
+		return this.permission && this.micConnected;
 	}
 
 	private void UpdateLoudness()
@@ -160,11 +165,15 @@ public class GorillaSpeakerLoudness : MonoBehaviour, IGorillaSliceableSimple, ID
 			if (this.voiceToLoudness == null)
 			{
 				this.voiceToLoudness = this.recorder.GetComponent<VoiceToLoudness>();
+				if (this.voiceToLoudness == null)
+				{
+					this.recorder.AddComponent<VoiceToLoudness>();
+				}
 			}
 			this.isSpeaking = true;
 			if (this.voiceToLoudness != null)
 			{
-				this.loudness = this.voiceToLoudness.loudness;
+				this.loudness = this.voiceToLoudness.Loudness;
 				return;
 			}
 			this.loudness = 0f;

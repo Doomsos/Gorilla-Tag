@@ -2055,7 +2055,6 @@ namespace GorillaNetworking
 			if (this.speakerLoudness != null)
 			{
 				float num = Mathf.Sqrt(this.speakerLoudness.LoudnessNormalized);
-				Debug.Log("Loudness: " + num.ToString());
 				if (num <= 0.01f)
 				{
 					this.micInputTestTimer += this.deltaTime;

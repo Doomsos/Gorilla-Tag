@@ -63,6 +63,30 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 		return true;
 	}
 
+	protected override void UnityOnEnable()
+	{
+		VODPlayer.OnCrash = (Action)Delegate.Combine(VODPlayer.OnCrash, new Action(this.VODPlayer_OnCrash));
+		if (VODPlayer.state == VODPlayer.State.CRASHED)
+		{
+			base.gameObject.SetActive(false);
+		}
+	}
+
+	protected override void UnityOnDisable()
+	{
+		VODPlayer.OnCrash = (Action)Delegate.Remove(VODPlayer.OnCrash, new Action(this.VODPlayer_OnCrash));
+	}
+
+	private void OnDestroy()
+	{
+		VODPlayer.OnCrash = (Action)Delegate.Remove(VODPlayer.OnCrash, new Action(this.VODPlayer_OnCrash));
+	}
+
+	private void VODPlayer_OnCrash()
+	{
+		base.gameObject.SetActive(false);
+	}
+
 	[SerializeField]
 	private Renderer targetRenderer;
 

@@ -1000,7 +1000,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 								Array.Resize<float>(ref this.voiceSampleBuffer, num);
 							}
 							float[] array = this.voiceSampleBuffer;
-							if (micWrapper != null && micWrapper.Mic != null && micWrapper.Mic.samples >= num && micWrapper.Mic.GetData(array, micWrapper.Mic.samples - num))
+							if (micWrapper.Mic != null && micWrapper.Mic.samples >= num && micWrapper.Mic.GetData(array, micWrapper.Mic.samples - num))
 							{
 								float num2 = 0f;
 								for (int j = 0; j < num; j++)

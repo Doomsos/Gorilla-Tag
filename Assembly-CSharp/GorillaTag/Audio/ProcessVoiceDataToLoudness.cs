@@ -18,7 +18,7 @@ namespace GorillaTag.Audio
 			{
 				num += Mathf.Abs(buf[i]);
 			}
-			this._voiceToLoudness.loudness = num / (float)buf.Length;
+			this._voiceToLoudness.Loudness = num / (float)buf.Length;
 			return buf;
 		}
 

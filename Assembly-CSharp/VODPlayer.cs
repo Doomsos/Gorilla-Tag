@@ -11,20 +11,19 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 {
 	public void OnEnable()
 	{
-		VODPlayer.<OnEnable>d__19 <OnEnable>d__;
+		VODPlayer.<OnEnable>d__20 <OnEnable>d__;
 		<OnEnable>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 		<OnEnable>d__.<>4__this = this;
 		<OnEnable>d__.<>1__state = -1;
-		<OnEnable>d__.<>t__builder.Start<VODPlayer.<OnEnable>d__19>(ref <OnEnable>d__);
+		<OnEnable>d__.<>t__builder.Start<VODPlayer.<OnEnable>d__20>(ref <OnEnable>d__);
 	}
 
 	private void waitOnServerTime()
 	{
-		VODPlayer.<waitOnServerTime>d__20 <waitOnServerTime>d__;
+		VODPlayer.<waitOnServerTime>d__21 <waitOnServerTime>d__;
 		<waitOnServerTime>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<waitOnServerTime>d__.<>4__this = this;
 		<waitOnServerTime>d__.<>1__state = -1;
-		<waitOnServerTime>d__.<>t__builder.Start<VODPlayer.<waitOnServerTime>d__20>(ref <waitOnServerTime>d__);
+		<waitOnServerTime>d__.<>t__builder.Start<VODPlayer.<waitOnServerTime>d__21>(ref <waitOnServerTime>d__);
 	}
 
 	private void VODTarget_AlertEnabled(VODTarget o)
@@ -32,8 +31,8 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		if (!this.targets.Contains(o))
 		{
 			this.targets.Add(o);
-			o.gameObject.SetActive(this.state != VODPlayer.State.CRASHED);
-			if (this.state == VODPlayer.State.RUNNING && this.player.isPlaying)
+			o.gameObject.SetActive(VODPlayer.state != VODPlayer.State.CRASHED);
+			if (VODPlayer.state == VODPlayer.State.RUNNING && this.player.isPlaying)
 			{
 				o.Renderer.material = this.playBackMaterial;
 				return;
@@ -85,7 +84,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	void IGorillaSliceableSimple.SliceUpdate()
 	{
-		switch (this.state)
+		switch (VODPlayer.state)
 		{
 		case VODPlayer.State.INITIALIZING:
 		case VODPlayer.State.CRASHED:
@@ -95,7 +94,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 			{
 				this.nextStream = this.NextStream();
 				this.PlayPreviouStream();
-				this.state = VODPlayer.State.RUNNING;
+				VODPlayer.state = VODPlayer.State.RUNNING;
 			}
 			return;
 		case VODPlayer.State.RUNNING:
@@ -106,7 +105,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 				{
 					this.player.Stop();
 				}
-				this.state = VODPlayer.State.IDLE;
+				VODPlayer.state = VODPlayer.State.IDLE;
 				return;
 			}
 			if (this.player.isPlaying)
@@ -341,14 +340,14 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	private void StartPlayback(string url, int priority, double time = 0.0)
 	{
-		VODPlayer.<StartPlayback>d__32 <StartPlayback>d__;
+		VODPlayer.<StartPlayback>d__33 <StartPlayback>d__;
 		<StartPlayback>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 		<StartPlayback>d__.<>4__this = this;
 		<StartPlayback>d__.url = url;
 		<StartPlayback>d__.priority = priority;
 		<StartPlayback>d__.time = time;
 		<StartPlayback>d__.<>1__state = -1;
-		<StartPlayback>d__.<>t__builder.Start<VODPlayer.<StartPlayback>d__32>(ref <StartPlayback>d__);
+		<StartPlayback>d__.<>t__builder.Start<VODPlayer.<StartPlayback>d__33>(ref <StartPlayback>d__);
 	}
 
 	private void onTD(string s)
@@ -377,7 +376,11 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	private void Crash(string msg)
 	{
-		this.state = VODPlayer.State.CRASHED;
+		VODPlayer.state = VODPlayer.State.CRASHED;
+		if (VODPlayer.OnCrash != null)
+		{
+			VODPlayer.OnCrash.Invoke();
+		}
 		for (int i = 0; i < this.targets.Count; i++)
 		{
 			this.targets[i].gameObject.SetActive(false);
@@ -388,6 +391,10 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	{
 		this.Crash(error.ErrorMessage);
 	}
+
+	public static Action OnCrash;
+
+	public static VODPlayer.State state;
 
 	private VideoPlayer player;
 
@@ -417,13 +424,11 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	private int lastCheck;
 
-	private VODPlayer.State state;
-
 	private bool playerBusy;
 
 	private int currentStreamPrio;
 
-	private enum State
+	public enum State
 	{
 		INITIALIZING,
 		IDLE,

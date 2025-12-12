@@ -15,10 +15,15 @@ namespace GorillaTag.Audio
 
 		protected void PhotonVoiceCreated(PhotonVoiceCreatedParams photonVoiceCreatedParams)
 		{
-			VoiceInfo info = photonVoiceCreatedParams.Voice.Info;
-			LocalVoiceAudioFloat localVoiceAudioFloat = photonVoiceCreatedParams.Voice as LocalVoiceAudioFloat;
+			this.CreateProcessVoiceData(photonVoiceCreatedParams.Voice);
+		}
+
+		private void CreateProcessVoiceData(LocalVoice voice)
+		{
+			LocalVoiceAudioFloat localVoiceAudioFloat = voice as LocalVoiceAudioFloat;
 			if (localVoiceAudioFloat != null)
 			{
+				this._photonVoiceCreated = true;
 				localVoiceAudioFloat.AddPostProcessor(new IProcessor<float>[]
 				{
 					new ProcessVoiceDataToLoudness(this)
@@ -26,9 +31,25 @@ namespace GorillaTag.Audio
 			}
 		}
 
+		private void Update()
+		{
+			if (this._photonVoiceCreated)
+			{
+				return;
+			}
+			if (this._recorder != null && this._recorder.Voice != null)
+			{
+				this.CreateProcessVoiceData(this._recorder.Voice);
+			}
+		}
+
 		[NonSerialized]
-		public float loudness;
+		public float Loudness;
 
 		private Recorder _recorder;
+
+		private bool _photonVoiceCreated;
+
+		private float _checkVoice;
 	}
 }

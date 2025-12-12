@@ -484,8 +484,8 @@ public class NetworkSystemPUN : NetworkSystem
 			this.localRecorder.Bitrate = this.VoiceSettings.Bitrate;
 			this.localRecorder.VoiceDetectionDelayMs = this.VoiceSettings.Delay;
 			this.localRecorder.DebugEchoMode = this.VoiceSettings.DebugEcho;
-			this.punVoice.PrimaryRecorder = this.localRecorder;
 			this.VoiceNetworkObject.AddComponent<VoiceToLoudness>();
+			this.punVoice.PrimaryRecorder = this.localRecorder;
 		}
 		catch (Exception ex)
 		{
