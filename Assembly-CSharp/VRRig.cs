@@ -2372,7 +2372,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	private void CheckForEarlyAccess()
 	{
-		if (this.concatStringOfCosmeticsAllowed.Contains("Early Access Supporter Pack"))
+		if (this.concatStringOfCosmeticsAllowed.Contains(CosmeticsController.instance.EarlyAccessSupporterPackCosmeticSO.info.playFabID))
 		{
 			this.concatStringOfCosmeticsAllowed += "LBAAE.LFAAM.LFAAN.LHAAA.LHAAK.LHAAL.LHAAM.LHAAN.LHAAO.LHAAP.LHABA.LHABB.";
 		}

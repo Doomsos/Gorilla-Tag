@@ -483,6 +483,8 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		this.overrideWeather = false;
 	}
 
+	public const int TIME_OF_DAY_COUNT = 10;
+
 	[OnEnterPlay_SetNull]
 	public static volatile BetterDayNightManager instance;
 

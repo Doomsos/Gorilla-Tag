@@ -283,6 +283,10 @@ namespace GorillaNetworking.Store
 
 		public void PressCosmeticStandButton()
 		{
+			if (!StoreController.instance.StandsByPlayfabID.ContainsKey(this.thisCosmeticName) || CosmeticsController.instance.GetCosmeticSOFromDisplayName(this.thisCosmeticName) == null)
+			{
+				return;
+			}
 			this.searchIndex = CosmeticsController.instance.currentCart.IndexOf(this.thisCosmeticItem);
 			if (this.searchIndex != -1)
 			{

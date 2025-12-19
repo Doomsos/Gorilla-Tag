@@ -349,6 +349,8 @@ public class SIGadgetDashYoyo : SIGadget
 	private void _LaunchYoYoShared(Vector3 velocity, Vector3 angVelocity, Vector3 targetPosition, Quaternion targetRotation)
 	{
 		this.m_yoyoTargetRB.transform.parent = null;
+		float x = base.transform.lossyScale.x;
+		this.m_yoyoTargetRB.transform.localScale = new Vector3(x, x, x);
 		this.m_yoyoTargetRB.transform.position = targetPosition;
 		this.m_yoyoTargetRB.transform.rotation = targetRotation;
 		this.m_yoyoTargetRB.gameObject.SetActive(true);
@@ -389,6 +391,7 @@ public class SIGadgetDashYoyo : SIGadget
 		this.m_yoyoTarget.SetParent(this.m_yoyoDefaultPosXform, false);
 		this.m_yoyoTarget.transform.localPosition = Vector3.zero;
 		this.m_yoyoTarget.transform.localRotation = Quaternion.identity;
+		this.m_yoyoTargetRB.transform.localScale = Vector3.one;
 		this.m_yoyoTargetRB.transform.SetParent(this.m_yoyoDefaultPosXform, false);
 		this.m_yoyoTargetRB.transform.localPosition = Vector3.zero;
 		this.m_yoyoTargetRB.transform.localRotation = Quaternion.identity;

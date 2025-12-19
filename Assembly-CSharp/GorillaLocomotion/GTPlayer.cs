@@ -2597,15 +2597,15 @@ namespace GorillaLocomotion
 			Vector3 localPosition = this.climbHelper.localPosition;
 			if (climbable.snapX)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|406_0(ref localPosition.x, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|407_0(ref localPosition.x, climbable.maxDistanceSnap);
 			}
 			if (climbable.snapY)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|406_0(ref localPosition.y, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|407_0(ref localPosition.y, climbable.maxDistanceSnap);
 			}
 			if (climbable.snapZ)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|406_0(ref localPosition.z, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|407_0(ref localPosition.z, climbable.maxDistanceSnap);
 			}
 			this.climbHelperTargetPos = localPosition;
 			climbable.isBeingClimbed = true;
@@ -3148,12 +3148,12 @@ namespace GorillaLocomotion
 
 		public void DoLaunch(Vector3 velocity)
 		{
-			GTPlayer.<DoLaunch>d__442 <DoLaunch>d__;
+			GTPlayer.<DoLaunch>d__443 <DoLaunch>d__;
 			<DoLaunch>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<DoLaunch>d__.<>4__this = this;
 			<DoLaunch>d__.velocity = velocity;
 			<DoLaunch>d__.<>1__state = -1;
-			<DoLaunch>d__.<>t__builder.Start<GTPlayer.<DoLaunch>d__442>(ref <DoLaunch>d__);
+			<DoLaunch>d__.<>t__builder.Start<GTPlayer.<DoLaunch>d__443>(ref <DoLaunch>d__);
 		}
 
 		private void OnEnable()
@@ -3313,7 +3313,7 @@ namespace GorillaLocomotion
 		}
 
 		[CompilerGenerated]
-		internal static void <BeginClimbing>g__SnapAxis|406_0(ref float val, float maxDist)
+		internal static void <BeginClimbing>g__SnapAxis|407_0(ref float val, float maxDist)
 		{
 			if (val > maxDist)
 			{
@@ -3326,9 +3326,11 @@ namespace GorillaLocomotion
 			}
 		}
 
+		public static LayerMask LocomotionEnabledLayers = 201327105;
+
 		private static GTPlayer _instance;
 
-		public static bool hasInstance;
+		public static bool hasInstance = false;
 
 		public Camera mainCamera;
 

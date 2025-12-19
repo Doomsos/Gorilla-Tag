@@ -61,7 +61,7 @@ namespace GorillaTag
 				this.Log("__NULL__", context, caller, sourceFilePath, line);
 				return;
 			}
-			this.Log(obj.ToString(), null, "Log", "E:\\DevAlternate\\GT\\Assets\\GorillaTag\\Shared\\Scripts\\MonkeFX\\GTLogErrorLimiter.cs", 137);
+			this.Log(obj.ToString(), null, "Log", "C:\\Users\\root\\GT\\Assets\\GorillaTag\\Shared\\Scripts\\MonkeFX\\GTLogErrorLimiter.cs", 137);
 		}
 
 		public void AddOccurrence(string s)

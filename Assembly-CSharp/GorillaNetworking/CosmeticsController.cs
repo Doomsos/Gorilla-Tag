@@ -225,6 +225,14 @@ namespace GorillaNetworking
 			}
 		}
 
+		public CosmeticSO EarlyAccessSupporterPackCosmeticSO
+		{
+			get
+			{
+				return this.m_earlyAccessSupporterPackCosmeticSO;
+			}
+		}
+
 		public void Awake()
 		{
 			if (CosmeticsController.instance == null)
@@ -1025,13 +1033,13 @@ namespace GorillaNetworking
 
 		public void PurchaseBundle(StoreBundle bundleToPurchase, ICreatorCodeProvider ccp)
 		{
-			CosmeticsController.<PurchaseBundle>d__185 <PurchaseBundle>d__;
+			CosmeticsController.<PurchaseBundle>d__187 <PurchaseBundle>d__;
 			<PurchaseBundle>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<PurchaseBundle>d__.<>4__this = this;
 			<PurchaseBundle>d__.bundleToPurchase = bundleToPurchase;
 			<PurchaseBundle>d__.ccp = ccp;
 			<PurchaseBundle>d__.<>1__state = -1;
-			<PurchaseBundle>d__.<>t__builder.Start<CosmeticsController.<PurchaseBundle>d__185>(ref <PurchaseBundle>d__);
+			<PurchaseBundle>d__.<>t__builder.Start<CosmeticsController.<PurchaseBundle>d__187>(ref <PurchaseBundle>d__);
 		}
 
 		private void OnCreatorCodeFailure()
@@ -1649,15 +1657,22 @@ namespace GorillaNetworking
 			{
 				return set.IsActive(item.displayName);
 			}
-			if (item.bundledItems.Length == 1)
+			if (item.itemCategory == CosmeticsController.CosmeticCategory.Set && item.bundledItems != null)
 			{
-				return this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[0]));
+				if (item.bundledItems.Length == 1)
+				{
+					return this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[0]));
+				}
+				if (item.bundledItems.Length == 2)
+				{
+					return this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[0])) || this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[1]));
+				}
+				if (item.bundledItems.Length >= 3)
+				{
+					return this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[0])) || this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[1])) || this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[2]));
+				}
 			}
-			if (item.bundledItems.Length == 2)
-			{
-				return this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[0])) || this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[1]));
-			}
-			return item.bundledItems.Length >= 3 && (this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[0])) || this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[1])) || this.AnyMatch(set, this.GetItemFromDict(item.bundledItems[2])));
+			return false;
 		}
 
 		public void Initialize()
