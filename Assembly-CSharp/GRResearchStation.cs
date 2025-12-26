@@ -12,7 +12,7 @@ public class GRResearchStation : MonoBehaviour
 	public void Init(GRToolProgressionManager tree, GhostReactor ghostReactor)
 	{
 		this.toolProgressionManager = tree;
-		this.toolProgressionManager.OnProgressionUpdated += new Action(this.ResearchTreeUpdated);
+		this.toolProgressionManager.OnProgressionUpdated += this.ResearchTreeUpdated;
 		this.reactor = ghostReactor;
 		this.totalTools = 0;
 		this.selectedToolIndex = 0;

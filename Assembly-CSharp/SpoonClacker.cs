@@ -29,8 +29,8 @@ public class SpoonClacker : MonoBehaviour
 			return;
 		}
 		float num = MathUtils.Linear(this.hingeJoint.angle, this.hingeMin, this.hingeMax, 0f, 1f);
-		float num2 = (this.invertOut ? (1f - num) : num) * 100f;
-		this.skinnedMesh.SetBlendShapeWeight(this.targetBlendShape, num2);
+		float value = (this.invertOut ? (1f - num) : num) * 100f;
+		this.skinnedMesh.SetBlendShapeWeight(this.targetBlendShape, value);
 		if (!this._lockMin && num <= this.minThreshold)
 		{
 			this.OnHitMin.Invoke();

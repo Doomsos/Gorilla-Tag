@@ -46,7 +46,7 @@ namespace BuildSafe
 			{
 				return Reflection<T>.gEventsCache;
 			}
-			return Reflection<T>.gEventsCache = Enumerable.ToArray<EventInfo>(RuntimeReflectionExtensions.GetRuntimeEvents(Reflection<T>.Type));
+			return Reflection<T>.gEventsCache = Reflection<T>.Type.GetRuntimeEvents().ToArray<EventInfo>();
 		}
 
 		private static PropertyInfo[] PreFetchProperties()
@@ -55,7 +55,7 @@ namespace BuildSafe
 			{
 				return Reflection<T>.gPropertiesCache;
 			}
-			return Reflection<T>.gPropertiesCache = Enumerable.ToArray<PropertyInfo>(RuntimeReflectionExtensions.GetRuntimeProperties(Reflection<T>.Type));
+			return Reflection<T>.gPropertiesCache = Reflection<T>.Type.GetRuntimeProperties().ToArray<PropertyInfo>();
 		}
 
 		private static MethodInfo[] PreFetchMethods()
@@ -64,7 +64,7 @@ namespace BuildSafe
 			{
 				return Reflection<T>.gMethodsCache;
 			}
-			return Reflection<T>.gMethodsCache = Enumerable.ToArray<MethodInfo>(RuntimeReflectionExtensions.GetRuntimeMethods(Reflection<T>.Type));
+			return Reflection<T>.gMethodsCache = Reflection<T>.Type.GetRuntimeMethods().ToArray<MethodInfo>();
 		}
 
 		private static FieldInfo[] PreFetchFields()
@@ -73,7 +73,7 @@ namespace BuildSafe
 			{
 				return Reflection<T>.gFieldsCache;
 			}
-			return Reflection<T>.gFieldsCache = Enumerable.ToArray<FieldInfo>(RuntimeReflectionExtensions.GetRuntimeFields(Reflection<T>.Type));
+			return Reflection<T>.gFieldsCache = Reflection<T>.Type.GetRuntimeFields().ToArray<FieldInfo>();
 		}
 
 		private static Type gCachedType;

@@ -18,8 +18,8 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		base.transform.eulerAngles = new Vector3(0f, Random.value * 360f, 0f);
 		this.raycastHits = new RaycastHit[20];
 		this.wasSomethingInTheWay = false;
-		this._spawnAnimationDuration = Enumerable.Last<Keyframe>(this.spawnInHeighMovement.keys).time;
-		this._despawnAnimationDuration = Enumerable.Last<Keyframe>(this.despawnInHeighMovement.keys).time;
+		this._spawnAnimationDuration = this.spawnInHeighMovement.keys.Last<Keyframe>().time;
+		this._despawnAnimationDuration = this.despawnInHeighMovement.keys.Last<Keyframe>().time;
 	}
 
 	private void InitializeTemplateValues()
@@ -81,8 +81,8 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 
 	private bool CanSeeActor(Vector3 actorPosition)
 	{
-		Vector3 vector = actorPosition - base.transform.position;
-		return vector.sqrMagnitude < this.autoSeeFoodDistance || (vector.sqrMagnitude < this.sensoryRange && Vector3.Angle(base.transform.forward, vector) < this.visionConeAngle);
+		Vector3 to = actorPosition - base.transform.position;
+		return to.sqrMagnitude < this.autoSeeFoodDistance || (to.sqrMagnitude < this.sensoryRange && Vector3.Angle(base.transform.forward, to) < this.visionConeAngle);
 	}
 
 	private bool IsGrabPossible(CrittersGrabber actor)
@@ -258,7 +258,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		}
 		if (this.OnDataChange != null)
 		{
-			this.OnDataChange.Invoke();
+			this.OnDataChange();
 		}
 	}
 
@@ -315,7 +315,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 			this.despawnStartTime = (double)(PhotonNetwork.InRoom ? ((float)PhotonNetwork.Time) : Time.time);
 		}
 		this.StartOngoingStateFX(newState);
-		GameObject valueOrDefault = CollectionExtensions.GetValueOrDefault<CrittersPawn.CreatureState, GameObject>(this.StartStateFX, this.currentState);
+		GameObject valueOrDefault = this.StartStateFX.GetValueOrDefault(this.currentState);
 		if (valueOrDefault.IsNotNull())
 		{
 			GameObject pooled = CrittersPool.GetPooled(valueOrDefault);
@@ -326,7 +326,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		}
 		this.currentAnimTime = 0f;
 		CrittersAnim crittersAnim;
-		if (this.stateAnim.TryGetValue(this.currentState, ref crittersAnim))
+		if (this.stateAnim.TryGetValue(this.currentState, out crittersAnim))
 		{
 			this.currentAnim = crittersAnim;
 		}
@@ -338,7 +338,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		}
 		if (this.OnDataChange != null)
 		{
-			this.OnDataChange.Invoke();
+			this.OnDataChange();
 		}
 	}
 
@@ -353,7 +353,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 
 	private void StartOngoingStateFX(CrittersPawn.CreatureState state)
 	{
-		GameObject valueOrDefault = CollectionExtensions.GetValueOrDefault<CrittersPawn.CreatureState, GameObject>(this.OngoingStateFX, state);
+		GameObject valueOrDefault = this.OngoingStateFX.GetValueOrDefault(state);
 		if (valueOrDefault.IsNotNull())
 		{
 			this.currentOngoingStateFX = CrittersPool.GetPooled(valueOrDefault);
@@ -410,14 +410,14 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 			this.currentAnimTime += Time.deltaTime * this.currentAnim.playSpeed;
 			this.currentAnimTime %= 1f;
 			float num = this.currentAnim.squashAmount.Evaluate(this.currentAnimTime);
-			float num2 = this.currentAnim.forwardOffset.Evaluate(this.currentAnimTime);
-			float num3 = this.currentAnim.horizontalOffset.Evaluate(this.currentAnimTime);
-			float num4 = this.currentAnim.verticalOffset.Evaluate(this.currentAnimTime);
-			this.animTarget.localPosition = new Vector3(num3, num4, num2);
-			float num5 = 1f - num;
-			num5 *= 0.5f;
-			num5 += 1f;
-			this.animTarget.localScale = new Vector3(num5, num, num5);
+			float z = this.currentAnim.forwardOffset.Evaluate(this.currentAnimTime);
+			float x = this.currentAnim.horizontalOffset.Evaluate(this.currentAnimTime);
+			float y = this.currentAnim.verticalOffset.Evaluate(this.currentAnimTime);
+			this.animTarget.localPosition = new Vector3(x, y, z);
+			float num2 = 1f - num;
+			num2 *= 0.5f;
+			num2 += 1f;
+			this.animTarget.localScale = new Vector3(num2, num, num2);
 		}
 	}
 
@@ -726,11 +726,11 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 			CrittersActor crittersActor = CrittersManager.instance.awareOfActors[this][i];
 			float multiplier;
 			float multiplier2;
-			if (this.afraidOfTypes != null && this.afraidOfTypes.TryGetValue(crittersActor.crittersActorType, ref multiplier))
+			if (this.afraidOfTypes != null && this.afraidOfTypes.TryGetValue(crittersActor.crittersActorType, out multiplier))
 			{
 				crittersActor.CalculateFear(this, multiplier);
 			}
-			else if (this.attractedToTypes != null && this.attractedToTypes.TryGetValue(crittersActor.crittersActorType, ref multiplier2))
+			else if (this.attractedToTypes != null && this.attractedToTypes.TryGetValue(crittersActor.crittersActorType, out multiplier2))
 			{
 				crittersActor.CalculateAttraction(this, multiplier2);
 			}
@@ -1143,7 +1143,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 			}
 			else
 			{
-				if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor))
+				if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
 				{
 					this.cageTarget = (CrittersCage)crittersActor;
 					if (this.cageTarget != null)
@@ -1156,7 +1156,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		}
 		else
 		{
-			if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor))
+			if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
 			{
 				this.grabbedTarget = (CrittersGrabber)crittersActor;
 			}
@@ -1207,7 +1207,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 			}
 			else
 			{
-				if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor))
+				if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
 				{
 					this.cageTarget = (CrittersCage)crittersActor;
 					if (this.cageTarget != null)
@@ -1220,7 +1220,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		}
 		else
 		{
-			if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor))
+			if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
 			{
 				this.grabbedTarget = (CrittersGrabber)crittersActor;
 			}

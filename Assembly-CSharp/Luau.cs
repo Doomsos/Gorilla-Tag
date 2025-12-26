@@ -17,29 +17,29 @@ public class Luau
 	public unsafe static extern void luaL_openlibs(lua_State* L);
 
 	[DllImport("luau")]
-	public unsafe static extern sbyte* luau_compile([MarshalAs(20)] string source, [NativeInteger] UIntPtr size, lua_CompileOptions* options, [NativeInteger] UIntPtr* outsize);
+	public unsafe static extern sbyte* luau_compile([MarshalAs(UnmanagedType.LPStr)] string source, [NativeInteger] UIntPtr size, lua_CompileOptions* options, [NativeInteger] UIntPtr* outsize);
 
 	[DllImport("luau")]
-	public unsafe static extern int luau_load(lua_State* L, [MarshalAs(20)] string chunkname, sbyte* data, [NativeInteger] UIntPtr size, int env);
+	public unsafe static extern int luau_load(lua_State* L, [MarshalAs(UnmanagedType.LPStr)] string chunkname, sbyte* data, [NativeInteger] UIntPtr size, int env);
 
 	[DllImport("luau")]
 	public unsafe static extern void lua_pushvalue(lua_State* L, int idx);
 
 	[DllImport("luau")]
-	public unsafe static extern void lua_pushcclosurek(lua_State* L, lua_CFunction fn, [MarshalAs(20)] string debugname, int nup, lua_Continuation cont);
+	public unsafe static extern void lua_pushcclosurek(lua_State* L, lua_CFunction fn, [MarshalAs(UnmanagedType.LPStr)] string debugname, int nup, lua_Continuation cont);
 
 	[DllImport("luau")]
-	public unsafe static extern void lua_pushcclosurek(lua_State* L, FunctionPointer<lua_CFunction> fn, [MarshalAs(20)] string debugname, int nup, lua_Continuation cont);
+	public unsafe static extern void lua_pushcclosurek(lua_State* L, FunctionPointer<lua_CFunction> fn, [MarshalAs(UnmanagedType.LPStr)] string debugname, int nup, lua_Continuation cont);
 
 	[DllImport("luau")]
 	public unsafe static extern void lua_pushcclosurek(lua_State* L, FunctionPointer<lua_CFunction> fn, byte* debugname, int nup, int* cont);
 
-	public unsafe static void lua_pushcfunction(lua_State* L, FunctionPointer<lua_CFunction> fn, [MarshalAs(20)] string debugname)
+	public unsafe static void lua_pushcfunction(lua_State* L, FunctionPointer<lua_CFunction> fn, [MarshalAs(UnmanagedType.LPStr)] string debugname)
 	{
 		Luau.lua_pushcclosurek(L, fn, debugname, 0, null);
 	}
 
-	public unsafe static void lua_pushcfunction(lua_State* L, lua_CFunction fn, [MarshalAs(20)] string debugname)
+	public unsafe static void lua_pushcfunction(lua_State* L, lua_CFunction fn, [MarshalAs(UnmanagedType.LPStr)] string debugname)
 	{
 		Luau.lua_pushcclosurek(L, fn, debugname, 0, null);
 	}
@@ -57,7 +57,7 @@ public class Luau
 	public unsafe static extern int lua_resume(lua_State* L, lua_State* from, int nargs);
 
 	[DllImport("luau")]
-	public unsafe static extern void lua_setfield(lua_State* L, int index, [MarshalAs(20)] string k);
+	public unsafe static extern void lua_setfield(lua_State* L, int index, [MarshalAs(UnmanagedType.LPStr)] string k);
 
 	[DllImport("luau")]
 	public unsafe static extern void lua_setfield(lua_State* L, int index, byte* k);
@@ -91,7 +91,7 @@ public class Luau
 	public unsafe static extern int lua_type(lua_State* L, int index);
 
 	[DllImport("luau")]
-	public unsafe static extern int lua_pushstring(lua_State* L, [MarshalAs(20)] string s);
+	public unsafe static extern int lua_pushstring(lua_State* L, [MarshalAs(UnmanagedType.LPStr)] string s);
 
 	[DllImport("luau")]
 	public unsafe static extern int lua_pushstring(lua_State* L, byte* s);
@@ -100,7 +100,7 @@ public class Luau
 	public unsafe static extern int lua_error(lua_State* L);
 
 	[DllImport("luau")]
-	public unsafe static extern void luaL_errorL(lua_State* L, [MarshalAs(20)] string fmt, [MarshalAs(20)] params string[] a);
+	public unsafe static extern void luaL_errorL(lua_State* L, [MarshalAs(UnmanagedType.LPStr)] string fmt, [MarshalAs(UnmanagedType.LPStr)] params string[] a);
 
 	[DllImport("luau")]
 	public unsafe static extern void luaL_errorL(lua_State* L, sbyte* fmt);
@@ -144,10 +144,10 @@ public class Luau
 	public unsafe static extern int lua_setmetatable(lua_State* L, int objindex);
 
 	[DllImport("luau")]
-	public unsafe static extern int luaL_newmetatable(lua_State* L, [MarshalAs(20)] string tname);
+	public unsafe static extern int luaL_newmetatable(lua_State* L, [MarshalAs(UnmanagedType.LPStr)] string tname);
 
 	[DllImport("luau")]
-	public unsafe static extern int lua_getfield(lua_State* L, int idx, [MarshalAs(20)] string k);
+	public unsafe static extern int lua_getfield(lua_State* L, int idx, [MarshalAs(UnmanagedType.LPStr)] string k);
 
 	[DllImport("luau")]
 	public unsafe static extern int lua_getfield(lua_State* L, int idx, byte* k);
@@ -156,7 +156,7 @@ public class Luau
 	public unsafe static extern int luaL_getmetafield(lua_State* L, int idx, byte* k);
 
 	[DllImport("luau")]
-	public unsafe static extern int luaL_getmetafield(lua_State* L, int idx, [MarshalAs(20)] string k);
+	public unsafe static extern int luaL_getmetafield(lua_State* L, int idx, [MarshalAs(UnmanagedType.LPStr)] string k);
 
 	public unsafe static void luaL_getmetatable(lua_State* L, string n)
 	{
@@ -212,7 +212,7 @@ public class Luau
 	public unsafe static extern int lua_status(lua_State* L);
 
 	[DllImport("luau")]
-	public unsafe static extern void* luaL_checkudata(lua_State* L, int arg, [MarshalAs(20)] string tname);
+	public unsafe static extern void* luaL_checkudata(lua_State* L, int arg, [MarshalAs(UnmanagedType.LPStr)] string tname);
 
 	[DllImport("luau")]
 	public unsafe static extern void* luaL_checkudata(lua_State* L, int arg, byte* tname);
@@ -441,8 +441,8 @@ public class Luau
 			int num2 = Luau.lua_type(L, i);
 			if (num2 == 5 || num2 == 3)
 			{
-				sbyte* ptr = Luau.lua_tostring(L, i);
-				text += Marshal.PtrToStringAnsi((IntPtr)((void*)ptr));
+				sbyte* value = Luau.lua_tostring(L, i);
+				text += Marshal.PtrToStringAnsi((IntPtr)((void*)value));
 			}
 			else
 			{
@@ -511,7 +511,7 @@ public class Luau
 		public static string get(Type t)
 		{
 			string result;
-			if (Luau.lua_TypeID.names.TryGetValue(t, ref result))
+			if (Luau.lua_TypeID.names.TryGetValue(t, out result))
 			{
 				return result;
 			}
@@ -532,7 +532,7 @@ public class Luau
 		{
 			Dictionary<int, FieldInfo> dictionary;
 			FieldInfo result;
-			if (Luau.lua_ClassFields<T>.classDictionarys.TryGetValue(typeof(T).GetHashCode(), ref dictionary) && dictionary.TryGetValue(name.GetHashCode(), ref result))
+			if (Luau.lua_ClassFields<T>.classDictionarys.TryGetValue(typeof(T).GetHashCode(), out dictionary) && dictionary.TryGetValue(name.GetHashCode(), out result))
 			{
 				return result;
 			}
@@ -542,7 +542,7 @@ public class Luau
 		public static void Add(string name, FieldInfo field)
 		{
 			Dictionary<int, FieldInfo> dictionary;
-			if (Luau.lua_ClassFields<T>.classDictionarys.TryGetValue(typeof(T).GetHashCode(), ref dictionary))
+			if (Luau.lua_ClassFields<T>.classDictionarys.TryGetValue(typeof(T).GetHashCode(), out dictionary))
 			{
 				dictionary.TryAdd(name.GetHashCode(), field);
 				return;
@@ -561,7 +561,7 @@ public class Luau
 		{
 			Dictionary<string, lua_CFunction> dictionary;
 			lua_CFunction result;
-			if (Luau.lua_ClassProperties<T>.classProperties.TryGetValue(typeof(T), ref dictionary) && dictionary.TryGetValue(name, ref result))
+			if (Luau.lua_ClassProperties<T>.classProperties.TryGetValue(typeof(T), out dictionary) && dictionary.TryGetValue(name, out result))
 			{
 				return result;
 			}
@@ -571,7 +571,7 @@ public class Luau
 		public static void Add(string name, lua_CFunction field)
 		{
 			Dictionary<string, lua_CFunction> dictionary;
-			if (Luau.lua_ClassProperties<T>.classProperties.TryGetValue(typeof(T), ref dictionary))
+			if (Luau.lua_ClassProperties<T>.classProperties.TryGetValue(typeof(T), out dictionary))
 			{
 				dictionary.TryAdd(name, field);
 				return;
@@ -590,7 +590,7 @@ public class Luau
 		{
 			Dictionary<string, lua_CFunction> dictionary;
 			lua_CFunction result;
-			if (Luau.lua_ClassFunctions<T>.classProperties.TryGetValue(typeof(T), ref dictionary) && dictionary.TryGetValue(name, ref result))
+			if (Luau.lua_ClassFunctions<T>.classProperties.TryGetValue(typeof(T), out dictionary) && dictionary.TryGetValue(name, out result))
 			{
 				return result;
 			}
@@ -600,7 +600,7 @@ public class Luau
 		public static void Add(string name, lua_CFunction field)
 		{
 			Dictionary<string, lua_CFunction> dictionary;
-			if (Luau.lua_ClassFunctions<T>.classProperties.TryGetValue(typeof(T), ref dictionary))
+			if (Luau.lua_ClassFunctions<T>.classProperties.TryGetValue(typeof(T), out dictionary))
 			{
 				dictionary.TryAdd(name, field);
 				return;

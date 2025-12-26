@@ -48,8 +48,8 @@ namespace BoingKit
 			}
 			if (num < -0.99999f)
 			{
-				Vector3 vector = VectorUtil.FindOrthogonal(a);
-				return Quaternion.AngleAxis(180f * t, vector) * a;
+				Vector3 axis = VectorUtil.FindOrthogonal(a);
+				return Quaternion.AngleAxis(180f * t, axis) * a;
 			}
 			float num2 = MathUtil.AcosSafe(num);
 			return (Mathf.Sin((1f - t) * num2) * a + Mathf.Sin(t * num2) * b) / Mathf.Sin(num2);
@@ -57,84 +57,84 @@ namespace BoingKit
 
 		public static Vector3 GetClosestPointOnSegment(Vector3 p, Vector3 segA, Vector3 segB)
 		{
-			Vector3 vector = segB - segA;
-			if (vector.sqrMagnitude < MathUtil.Epsilon)
+			Vector3 a = segB - segA;
+			if (a.sqrMagnitude < MathUtil.Epsilon)
 			{
 				return 0.5f * (segA + segB);
 			}
-			float num = Mathf.Clamp01(Vector3.Dot(p - segA, vector.normalized) / vector.magnitude);
-			return segA + num * vector;
+			float d = Mathf.Clamp01(Vector3.Dot(p - segA, a.normalized) / a.magnitude);
+			return segA + d * a;
 		}
 
 		public static Vector3 TriLerp(ref Vector3 v000, ref Vector3 v001, ref Vector3 v010, ref Vector3 v011, ref Vector3 v100, ref Vector3 v101, ref Vector3 v110, ref Vector3 v111, float tx, float ty, float tz)
 		{
-			Vector3 vector = Vector3.Lerp(v000, v001, tx);
-			Vector3 vector2 = Vector3.Lerp(v010, v011, tx);
-			Vector3 vector3 = Vector3.Lerp(v100, v101, tx);
-			Vector3 vector4 = Vector3.Lerp(v110, v111, tx);
-			Vector3 vector5 = Vector3.Lerp(vector, vector2, ty);
-			Vector3 vector6 = Vector3.Lerp(vector3, vector4, ty);
-			return Vector3.Lerp(vector5, vector6, tz);
+			Vector3 a = Vector3.Lerp(v000, v001, tx);
+			Vector3 b = Vector3.Lerp(v010, v011, tx);
+			Vector3 a2 = Vector3.Lerp(v100, v101, tx);
+			Vector3 b2 = Vector3.Lerp(v110, v111, tx);
+			Vector3 a3 = Vector3.Lerp(a, b, ty);
+			Vector3 b3 = Vector3.Lerp(a2, b2, ty);
+			return Vector3.Lerp(a3, b3, tz);
 		}
 
 		public static Vector3 TriLerp(ref Vector3 v000, ref Vector3 v001, ref Vector3 v010, ref Vector3 v011, ref Vector3 v100, ref Vector3 v101, ref Vector3 v110, ref Vector3 v111, bool lerpX, bool lerpY, bool lerpZ, float tx, float ty, float tz)
 		{
 			Vector3 vector = lerpX ? Vector3.Lerp(v000, v001, tx) : v000;
-			Vector3 vector2 = lerpX ? Vector3.Lerp(v010, v011, tx) : v010;
-			Vector3 vector3 = lerpX ? Vector3.Lerp(v100, v101, tx) : v100;
-			Vector3 vector4 = lerpX ? Vector3.Lerp(v110, v111, tx) : v110;
-			Vector3 vector5 = lerpY ? Vector3.Lerp(vector, vector2, ty) : vector;
-			Vector3 vector6 = lerpY ? Vector3.Lerp(vector3, vector4, ty) : vector3;
+			Vector3 b = lerpX ? Vector3.Lerp(v010, v011, tx) : v010;
+			Vector3 vector2 = lerpX ? Vector3.Lerp(v100, v101, tx) : v100;
+			Vector3 b2 = lerpX ? Vector3.Lerp(v110, v111, tx) : v110;
+			Vector3 vector3 = lerpY ? Vector3.Lerp(vector, b, ty) : vector;
+			Vector3 b3 = lerpY ? Vector3.Lerp(vector2, b2, ty) : vector2;
 			if (!lerpZ)
 			{
-				return vector5;
+				return vector3;
 			}
-			return Vector3.Lerp(vector5, vector6, tz);
+			return Vector3.Lerp(vector3, b3, tz);
 		}
 
 		public static Vector3 TriLerp(ref Vector3 min, ref Vector3 max, bool lerpX, bool lerpY, bool lerpZ, float tx, float ty, float tz)
 		{
 			Vector3 vector = lerpX ? Vector3.Lerp(new Vector3(min.x, min.y, min.z), new Vector3(max.x, min.y, min.z), tx) : new Vector3(min.x, min.y, min.z);
-			Vector3 vector2 = lerpX ? Vector3.Lerp(new Vector3(min.x, max.y, min.z), new Vector3(max.x, max.y, min.z), tx) : new Vector3(min.x, max.y, min.z);
-			Vector3 vector3 = lerpX ? Vector3.Lerp(new Vector3(min.x, min.y, max.z), new Vector3(max.x, min.y, max.z), tx) : new Vector3(min.x, min.y, max.z);
-			Vector3 vector4 = lerpX ? Vector3.Lerp(new Vector3(min.x, max.y, max.z), new Vector3(max.x, max.y, max.z), tx) : new Vector3(min.x, max.y, max.z);
-			Vector3 vector5 = lerpY ? Vector3.Lerp(vector, vector2, ty) : vector;
-			Vector3 vector6 = lerpY ? Vector3.Lerp(vector3, vector4, ty) : vector3;
+			Vector3 b = lerpX ? Vector3.Lerp(new Vector3(min.x, max.y, min.z), new Vector3(max.x, max.y, min.z), tx) : new Vector3(min.x, max.y, min.z);
+			Vector3 vector2 = lerpX ? Vector3.Lerp(new Vector3(min.x, min.y, max.z), new Vector3(max.x, min.y, max.z), tx) : new Vector3(min.x, min.y, max.z);
+			Vector3 b2 = lerpX ? Vector3.Lerp(new Vector3(min.x, max.y, max.z), new Vector3(max.x, max.y, max.z), tx) : new Vector3(min.x, max.y, max.z);
+			Vector3 vector3 = lerpY ? Vector3.Lerp(vector, b, ty) : vector;
+			Vector3 b3 = lerpY ? Vector3.Lerp(vector2, b2, ty) : vector2;
 			if (!lerpZ)
 			{
-				return vector5;
+				return vector3;
 			}
-			return Vector3.Lerp(vector5, vector6, tz);
+			return Vector3.Lerp(vector3, b3, tz);
 		}
 
 		public static Vector4 TriLerp(ref Vector4 v000, ref Vector4 v001, ref Vector4 v010, ref Vector4 v011, ref Vector4 v100, ref Vector4 v101, ref Vector4 v110, ref Vector4 v111, bool lerpX, bool lerpY, bool lerpZ, float tx, float ty, float tz)
 		{
 			Vector4 vector = lerpX ? Vector4.Lerp(v000, v001, tx) : v000;
-			Vector4 vector2 = lerpX ? Vector4.Lerp(v010, v011, tx) : v010;
-			Vector4 vector3 = lerpX ? Vector4.Lerp(v100, v101, tx) : v100;
-			Vector4 vector4 = lerpX ? Vector4.Lerp(v110, v111, tx) : v110;
-			Vector4 vector5 = lerpY ? Vector4.Lerp(vector, vector2, ty) : vector;
-			Vector4 vector6 = lerpY ? Vector4.Lerp(vector3, vector4, ty) : vector3;
+			Vector4 b = lerpX ? Vector4.Lerp(v010, v011, tx) : v010;
+			Vector4 vector2 = lerpX ? Vector4.Lerp(v100, v101, tx) : v100;
+			Vector4 b2 = lerpX ? Vector4.Lerp(v110, v111, tx) : v110;
+			Vector4 vector3 = lerpY ? Vector4.Lerp(vector, b, ty) : vector;
+			Vector4 b3 = lerpY ? Vector4.Lerp(vector2, b2, ty) : vector2;
 			if (!lerpZ)
 			{
-				return vector5;
+				return vector3;
 			}
-			return Vector4.Lerp(vector5, vector6, tz);
+			return Vector4.Lerp(vector3, b3, tz);
 		}
 
 		public static Vector4 TriLerp(ref Vector4 min, ref Vector4 max, bool lerpX, bool lerpY, bool lerpZ, float tx, float ty, float tz)
 		{
 			Vector4 vector = lerpX ? Vector4.Lerp(new Vector4(min.x, min.y, min.z), new Vector4(max.x, min.y, min.z), tx) : new Vector4(min.x, min.y, min.z);
-			Vector4 vector2 = lerpX ? Vector4.Lerp(new Vector4(min.x, max.y, min.z), new Vector4(max.x, max.y, min.z), tx) : new Vector4(min.x, max.y, min.z);
-			Vector4 vector3 = lerpX ? Vector4.Lerp(new Vector4(min.x, min.y, max.z), new Vector4(max.x, min.y, max.z), tx) : new Vector4(min.x, min.y, max.z);
-			Vector4 vector4 = lerpX ? Vector4.Lerp(new Vector4(min.x, max.y, max.z), new Vector4(max.x, max.y, max.z), tx) : new Vector4(min.x, max.y, max.z);
-			Vector4 vector5 = lerpY ? Vector4.Lerp(vector, vector2, ty) : vector;
-			Vector4 vector6 = lerpY ? Vector4.Lerp(vector3, vector4, ty) : vector3;
+			Vector4 b = lerpX ? Vector4.Lerp(new Vector4(min.x, max.y, min.z), new Vector4(max.x, max.y, min.z), tx) : new Vector4(min.x, max.y, min.z);
+			Vector4 vector2 = lerpX ? Vector4.Lerp(new Vector4(min.x, min.y, max.z), new Vector4(max.x, min.y, max.z), tx) : new Vector4(min.x, min.y, max.z);
+			Vector4 b2 = lerpX ? Vector4.Lerp(new Vector4(min.x, max.y, max.z), new Vector4(max.x, max.y, max.z), tx) : new Vector4(min.x, max.y, max.z);
+			Vector4 vector3 = lerpY ? Vector4.Lerp(vector, b, ty) : vector;
+			Vector4 b3 = lerpY ? Vector4.Lerp(vector2, b2, ty) : vector2;
 			if (!lerpZ)
 			{
-				return vector5;
+				return vector3;
 			}
-			return Vector4.Lerp(vector5, vector6, tz);
+			return Vector4.Lerp(vector3, b3, tz);
 		}
 
 		public static Vector3 ClampLength(Vector3 v, float minLen, float maxLen)
@@ -190,12 +190,12 @@ namespace BoingKit
 			{
 				return vector;
 			}
-			Vector3 vector2 = vector / Mathf.Sqrt(sqrMagnitude);
-			Vector3 vector3 = reference / Mathf.Sqrt(sqrMagnitude2);
-			Vector3 vector4 = Vector3.Cross(vector3, vector2);
-			float num = Vector3.Dot(vector3, vector2);
-			Vector3 axis = (vector4.sqrMagnitude > MathUtil.Epsilon) ? vector4.normalized : VectorUtil.FindOrthogonal(vector3);
-			if (Mathf.Acos(Mathf.Clamp01(num)) <= maxBendAngle)
+			Vector3 rhs = vector / Mathf.Sqrt(sqrMagnitude);
+			Vector3 vector2 = reference / Mathf.Sqrt(sqrMagnitude2);
+			Vector3 vector3 = Vector3.Cross(vector2, rhs);
+			float value = Vector3.Dot(vector2, rhs);
+			Vector3 axis = (vector3.sqrMagnitude > MathUtil.Epsilon) ? vector3.normalized : VectorUtil.FindOrthogonal(vector2);
+			if (Mathf.Acos(Mathf.Clamp01(value)) <= maxBendAngle)
 			{
 				return vector;
 			}

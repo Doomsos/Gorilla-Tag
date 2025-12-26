@@ -63,7 +63,7 @@ namespace GorillaTagScripts.Builder
 
 		public override void Show()
 		{
-			SharedBlocksManager.OnRecentMapIdsUpdated += new Action(this.DrawScreen);
+			SharedBlocksManager.OnRecentMapIdsUpdated += this.DrawScreen;
 			this.currentMapCode = string.Empty;
 			this.DrawScreen();
 			base.Show();
@@ -87,7 +87,7 @@ namespace GorillaTagScripts.Builder
 			}
 			this.statusText.text = "";
 			this.statusText.gameObject.SetActive(false);
-			SharedBlocksManager.OnRecentMapIdsUpdated -= new Action(this.DrawScreen);
+			SharedBlocksManager.OnRecentMapIdsUpdated -= this.DrawScreen;
 			base.Hide();
 		}
 
@@ -151,13 +151,13 @@ namespace GorillaTagScripts.Builder
 		private void DrawScreen()
 		{
 			this.UpdateInput();
-			string text;
-			if (!LocalisationManager.TryGetKeyForCurrentLocale("SHARE_BLOCKS_TERMINAL_SEARCH_VOTES", out text, "RECENT VOTES"))
+			string str;
+			if (!LocalisationManager.TryGetKeyForCurrentLocale("SHARE_BLOCKS_TERMINAL_SEARCH_VOTES", out str, "RECENT VOTES"))
 			{
 				Debug.LogError("[LOCALIZATION::BUILDER_SCAN_KIOSK] Failed to get key for SHARE MY BLOCKS SEARCH TERMINAL localization [SHARE_BLOCKS_TERMINAL_SEARCH_VOTES]");
 			}
 			this.sb.Clear();
-			this.sb.Append(text + "\n");
+			this.sb.Append(str + "\n");
 			foreach (string mapID in SharedBlocksManager.GetRecentUpVotes())
 			{
 				if (SharedBlocksManager.IsMapIDValid(mapID))
@@ -167,12 +167,12 @@ namespace GorillaTagScripts.Builder
 				}
 			}
 			this.recentList.text = this.sb.ToString();
-			if (!LocalisationManager.TryGetKeyForCurrentLocale("SHARE_BLOCKS_TERMINAL_SEARCH_MAPS_LABEL", out text, "MY MAPS"))
+			if (!LocalisationManager.TryGetKeyForCurrentLocale("SHARE_BLOCKS_TERMINAL_SEARCH_MAPS_LABEL", out str, "MY MAPS"))
 			{
 				Debug.LogError("[LOCALIZATION::BUILDER_SCAN_KIOSK] Failed to get key for SHARE MY BLOCKS SEARCH TERMINAL localization [SHARE_BLOCKS_TERMINAL_SEARCH_MAPS_LABEL]");
 			}
 			this.sb.Clear();
-			this.sb.Append(text + "\n");
+			this.sb.Append(str + "\n");
 			foreach (string mapID2 in SharedBlocksManager.GetLocalMapIDs())
 			{
 				if (SharedBlocksManager.IsMapIDValid(mapID2))

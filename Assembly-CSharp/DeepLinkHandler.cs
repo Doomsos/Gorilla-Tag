@@ -32,7 +32,7 @@ public class DeepLinkHandler : MonoBehaviour
 			return;
 		}
 		DeepLinkHandler.instance.RefreshLaunchDetails();
-		if (DeepLinkHandler.instance.cachedLaunchDetails != null && DeepLinkHandler.instance.cachedLaunchDetails.LaunchType == 4)
+		if (DeepLinkHandler.instance.cachedLaunchDetails != null && DeepLinkHandler.instance.cachedLaunchDetails.LaunchType == LaunchType.Deeplink)
 		{
 			DeepLinkHandler.instance.HandleDeepLink();
 			return;
@@ -42,7 +42,7 @@ public class DeepLinkHandler : MonoBehaviour
 
 	private void RefreshLaunchDetails()
 	{
-		if (Application.platform != 11)
+		if (UnityEngine.Application.platform != RuntimePlatform.Android)
 		{
 			GTDev.Log<string>("[DeepLinkHandler::RefreshLaunchDetails] Not on Android Platform!", null);
 			return;
@@ -63,7 +63,7 @@ public class DeepLinkHandler : MonoBehaviour
 	{
 		UnityWebRequest request = UnityWebRequest.Post(url, data, contentType);
 		yield return request.SendWebRequest();
-		callback.Invoke(request);
+		callback(request);
 		yield break;
 	}
 
@@ -112,13 +112,13 @@ public class DeepLinkHandler : MonoBehaviour
 
 	private void OnWitchbloodCollabResponse(UnityWebRequest completedRequest)
 	{
-		if (completedRequest.result != 1)
+		if (completedRequest.result != UnityWebRequest.Result.Success)
 		{
 			GTDev.LogError<string>("[DeepLinkHandler::OnWitchbloodCollabResponse] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text, null);
 			Object.Destroy(this);
 			return;
 		}
-		if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", 5))
+		if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
 		{
 			GTDev.Log<string>("[DeepLinkHandler::OnWitchbloodCollabResponse] Item has already been redeemed!", null);
 			Object.Destroy(this);
@@ -130,13 +130,13 @@ public class DeepLinkHandler : MonoBehaviour
 
 	private void OnRaccoonLagoonCollabResponse(UnityWebRequest completedRequest)
 	{
-		if (completedRequest.result != 1)
+		if (completedRequest.result != UnityWebRequest.Result.Success)
 		{
 			GTDev.LogError<string>("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text, null);
 			Object.Destroy(this);
 			return;
 		}
-		if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", 5))
+		if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
 		{
 			GTDev.Log<string>("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Item has already been redeemed!", null);
 			Object.Destroy(this);

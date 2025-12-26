@@ -4,6 +4,7 @@ using GorillaLocomotion;
 using Liv.Lck.Cosmetics;
 using Liv.Lck.GorillaTag;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 public class LckWallCameraSpawner : MonoBehaviour
 {
@@ -19,8 +20,8 @@ public class LckWallCameraSpawner : MonoBehaviour
 			Debug.LogError("Unable to find Player!");
 			return null;
 		}
-		LckWallCameraSpawner.AddGTag(Camera.main.gameObject, 1);
-		LckWallCameraSpawner.AddGTag(instance.gameObject, 0);
+		LckWallCameraSpawner.AddGTag(Camera.main.gameObject, GtTagType.HMD);
+		LckWallCameraSpawner.AddGTag(instance.gameObject, GtTagType.Player);
 		Transform transform = instance.bodyCollider.transform;
 		GameObject gameObject = Object.Instantiate<GameObject>(this._lckBodySpawnerPrefab, transform.parent);
 		Transform transform2 = gameObject.transform;
@@ -32,8 +33,8 @@ public class LckWallCameraSpawner : MonoBehaviour
 		GorillaTagger instance2 = GorillaTagger.Instance;
 		if (instance2 != null)
 		{
-			LckWallCameraSpawner.AddGTag(instance2.leftHandTriggerCollider, 2);
-			LckWallCameraSpawner.AddGTag(instance2.rightHandTriggerCollider, 3);
+			LckWallCameraSpawner.AddGTag(instance2.leftHandTriggerCollider, GtTagType.LeftHand);
+			LckWallCameraSpawner.AddGTag(instance2.rightHandTriggerCollider, GtTagType.RightHand);
 		}
 		else
 		{
@@ -92,8 +93,8 @@ public class LckWallCameraSpawner : MonoBehaviour
 			LckGameObjectSwapCosmetic swapEmobi = this._swapEmobi;
 			swapEmobi.OnCosmeticSpawned = (Action<GameObject>)Delegate.Combine(swapEmobi.OnCosmeticSpawned, new Action<GameObject>(this._dummyTablet.OnEmobiCosmeticSpawned));
 		}
-		this._cameraHandleGrabbable.onGrabbed += new Action(this.OnGrabbed);
-		this._cameraHandleGrabbable.onReleased += new Action(this.OnReleased);
+		this._cameraHandleGrabbable.onGrabbed += this.OnGrabbed;
+		this._cameraHandleGrabbable.onReleased += this.OnReleased;
 		this.wallSpawnerState = LckWallCameraSpawner.WallSpawnerState.CameraOnHook;
 	}
 
@@ -150,8 +151,8 @@ public class LckWallCameraSpawner : MonoBehaviour
 			LckGameObjectSwapCosmetic swapEmobi = this._swapEmobi;
 			swapEmobi.OnCosmeticSpawned = (Action<GameObject>)Delegate.Remove(swapEmobi.OnCosmeticSpawned, new Action<GameObject>(this._dummyTablet.OnEmobiCosmeticSpawned));
 		}
-		this._cameraHandleGrabbable.onGrabbed -= new Action(this.OnGrabbed);
-		this._cameraHandleGrabbable.onReleased -= new Action(this.OnReleased);
+		this._cameraHandleGrabbable.onGrabbed -= this.OnGrabbed;
+		this._cameraHandleGrabbable.onReleased -= this.OnReleased;
 	}
 
 	private bool cameraVisible
@@ -212,9 +213,9 @@ public class LckWallCameraSpawner : MonoBehaviour
 	private bool ShouldSpawnCamera(Transform gorillaGrabberTransform)
 	{
 		Matrix4x4 worldToLocalMatrix = base.transform.worldToLocalMatrix;
-		Vector3 vector = worldToLocalMatrix.MultiplyPoint(this._cameraModelOriginTransform.position);
-		Vector3 vector2 = worldToLocalMatrix.MultiplyPoint(gorillaGrabberTransform.position);
-		return Vector3.SqrMagnitude(vector - vector2) >= this._activateDistance * this._activateDistance;
+		Vector3 a = worldToLocalMatrix.MultiplyPoint(this._cameraModelOriginTransform.position);
+		Vector3 b = worldToLocalMatrix.MultiplyPoint(gorillaGrabberTransform.position);
+		return Vector3.SqrMagnitude(a - b) >= this._activateDistance * this._activateDistance;
 	}
 
 	private void OnGrabbed()
@@ -243,8 +244,8 @@ public class LckWallCameraSpawner : MonoBehaviour
 		LckWallCameraSpawner._prewarmCamera.farClipPlane = main.farClipPlane;
 		LckWallCameraSpawner._prewarmCamera.cullingMask = main.cullingMask;
 		LckWallCameraSpawner._prewarmCamera.tag = "Untagged";
-		LckWallCameraSpawner._prewarmCamera.stereoTargetEye = 0;
-		LckWallCameraSpawner._prewarmCamera.targetTexture = new RenderTexture(32, 32, 8, 94);
+		LckWallCameraSpawner._prewarmCamera.stereoTargetEye = StereoTargetEyeMask.None;
+		LckWallCameraSpawner._prewarmCamera.targetTexture = new RenderTexture(32, 32, GraphicsFormat.R8G8B8A8_UNorm, GraphicsFormat.D32_SFloat_S8_UInt);
 		LckWallCameraSpawner._prewarmCamera.transform.SetPositionAndRotation(main.transform.position, main.transform.rotation);
 		base.StartCoroutine(this.DestroyPrewarmCameraDelayed());
 	}

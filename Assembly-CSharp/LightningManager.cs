@@ -26,10 +26,9 @@ public class LightningManager : MonoBehaviour
 	private void GetHourStart(out long seed, out float timestampRealtime)
 	{
 		DateTime serverTime = GorillaComputer.instance.GetServerTime();
-		DateTime dateTime;
-		dateTime..ctor(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour, 0, 0);
-		timestampRealtime = Time.realtimeSinceStartup - (float)(serverTime - dateTime).TotalSeconds;
-		seed = dateTime.Ticks;
+		DateTime d = new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour, 0, 0);
+		timestampRealtime = Time.realtimeSinceStartup - (float)(serverTime - d).TotalSeconds;
+		seed = d.Ticks;
 	}
 
 	private void InitializeRng()

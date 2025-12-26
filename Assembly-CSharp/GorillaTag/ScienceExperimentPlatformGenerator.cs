@@ -79,16 +79,16 @@ namespace GorillaTag
 			for (int i = 0; i < this.activeBubbles.Count; i++)
 			{
 				ScienceExperimentPlatformGenerator.BubbleData bubbleData = this.activeBubbles[i];
-				float num2 = Mathf.Clamp01((float)(currentTime - bubbleData.spawnTime) / bubbleData.lifetime);
-				float num3 = bubbleData.spawnSize * this.rockSizeVsLifetime.Evaluate(num2) * this.scaleFactor;
+				float time = Mathf.Clamp01((float)(currentTime - bubbleData.spawnTime) / bubbleData.lifetime);
+				float d = bubbleData.spawnSize * this.rockSizeVsLifetime.Evaluate(time) * this.scaleFactor;
 				bubbleData.position.y = y;
-				bubbleData.bubble.body.gameObject.transform.localScale = Vector3.one * num3;
+				bubbleData.bubble.body.gameObject.transform.localScale = Vector3.one * d;
 				bubbleData.bubble.body.MovePosition(bubbleData.position);
-				float num4 = (float)((double)bubbleData.lifetime + bubbleData.spawnTime - currentTime);
-				if (num4 < this.bubblePopAnticipationTime)
+				float num2 = (float)((double)bubbleData.lifetime + bubbleData.spawnTime - currentTime);
+				if (num2 < this.bubblePopAnticipationTime)
 				{
-					float num5 = Mathf.Clamp01(1f - num4 / this.bubblePopAnticipationTime);
-					bubbleData.bubble.bubbleMesh.transform.localScale = Vector3.one * (1f + num5 * num);
+					float num3 = Mathf.Clamp01(1f - num2 / this.bubblePopAnticipationTime);
+					bubbleData.bubble.bubbleMesh.transform.localScale = Vector3.one * (1f + num3 * num);
 				}
 				this.activeBubbles[i] = bubbleData;
 			}
@@ -128,14 +128,14 @@ namespace GorillaTag
 							float num8 = Mathf.InverseLerp(this.trailEdgeAvoidanceSpawnsMinMax.x * this.trailDistanceBetweenSpawns * this.scaleFactor, this.trailEdgeAvoidanceSpawnsMinMax.y * this.trailDistanceBetweenSpawns * this.scaleFactor, num7);
 							if (num6 > 0f)
 							{
-								float num9 = num6 - 90f * num8;
-								num5 = Mathf.Min(num5, num9);
+								float b = num6 - 90f * num8;
+								num5 = Mathf.Min(num5, b);
 								num4 = Mathf.Min(num4, num5 - this.trailMaxTurnAngle);
 							}
 							else
 							{
-								float num10 = num6 + 90f * num8;
-								num4 = Mathf.Max(num4, num10);
+								float b2 = num6 + 90f * num8;
+								num4 = Mathf.Max(num4, b2);
 								num5 = Mathf.Max(num5, num4 + this.trailMaxTurnAngle);
 							}
 						}
@@ -145,19 +145,18 @@ namespace GorillaTag
 						{
 							vector2 = vector2.normalized * this.surfaceRadiusSpawnRange.y;
 						}
-						Vector2 vector3;
-						vector3..ctor(vector2.x, vector2.z);
-						float num11 = this.trailBubbleSize;
-						float num12 = this.trailBubbleLifetimeVsProgress.Evaluate(this.scienceExperimentManager.RiseProgressLinear) * this.trailBubbleLifetimeMultiplier;
+						Vector2 vector3 = new Vector2(vector2.x, vector2.z);
+						float num9 = this.trailBubbleSize;
+						float num10 = this.trailBubbleLifetimeVsProgress.Evaluate(this.scienceExperimentManager.RiseProgressLinear) * this.trailBubbleLifetimeMultiplier;
 						this.trailHeads.RemoveAt(k);
-						base.photonView.RPC("SpawnSodaBubbleRPC", 1, new object[]
+						base.photonView.RPC("SpawnSodaBubbleRPC", RpcTarget.Others, new object[]
 						{
 							vector3,
-							num11,
-							num12,
+							num9,
+							num10,
 							currentTime
 						});
-						this.SpawnSodaBubbleLocal(vector3, num11, num12, currentTime, true, vector);
+						this.SpawnSodaBubbleLocal(vector3, num9, num10, currentTime, true, vector);
 					}
 				}
 			}
@@ -171,10 +170,10 @@ namespace GorillaTag
 				float num2 = this.rockMaxSizeMultiplierVsLavaProgress.Evaluate(lavaProgress);
 				float num3 = Random.Range(this.lifetimeRange.x, this.lifetimeRange.y) * num;
 				float num4 = Random.Range(this.sizeRange.x, this.sizeRange.y * num2);
-				float num5 = this.spawnRadiusMultiplierVsLavaProgress.Evaluate(lavaProgress);
-				Vector2 vector = Random.insideUnitCircle.normalized * Random.Range(this.surfaceRadiusSpawnRange.x, this.surfaceRadiusSpawnRange.y) * num5;
+				float d = this.spawnRadiusMultiplierVsLavaProgress.Evaluate(lavaProgress);
+				Vector2 vector = Random.insideUnitCircle.normalized * Random.Range(this.surfaceRadiusSpawnRange.x, this.surfaceRadiusSpawnRange.y) * d;
 				vector = this.GetSpawnPositionWithClearance(vector, num4 * this.scaleFactor, this.surfaceRadiusSpawnRange.y, this.liquidSurfacePlane.transform.position);
-				base.photonView.RPC("SpawnSodaBubbleRPC", 1, new object[]
+				base.photonView.RPC("SpawnSodaBubbleRPC", RpcTarget.Others, new object[]
 				{
 					vector,
 					num4,
@@ -194,7 +193,7 @@ namespace GorillaTag
 				Vector2 vector = Random.insideUnitCircle.normalized * Random.Range(this.surfaceRadiusSpawnRange.x, this.surfaceRadiusSpawnRange.y);
 				vector = this.GetSpawnPositionWithClearance(vector, num2 * this.scaleFactor, this.surfaceRadiusSpawnRange.y, this.liquidSurfacePlane.transform.position);
 				Vector3 direction = Quaternion.AngleAxis(Random.Range(0f, 360f), Vector3.up) * Vector3.forward;
-				base.photonView.RPC("SpawnSodaBubbleRPC", 1, new object[]
+				base.photonView.RPC("SpawnSodaBubbleRPC", RpcTarget.Others, new object[]
 				{
 					vector,
 					num2,
@@ -239,12 +238,12 @@ namespace GorillaTag
 				{
 					return;
 				}
-				float num = Mathf.Clamp01(this.scienceExperimentManager.RiseProgressLinear);
+				float time = Mathf.Clamp01(this.scienceExperimentManager.RiseProgressLinear);
 				ref surfacePosLocal.ClampThisMagnitudeSafe(this.surfaceRadiusSpawnRange.y);
-				spawnSize = Mathf.Clamp(spawnSize, this.sizeRange.x, this.sizeRange.y * this.rockMaxSizeMultiplierVsLavaProgress.Evaluate(num));
-				lifetime = Mathf.Clamp(lifetime, this.lifetimeRange.x, this.lifetimeRange.y * this.rockLifetimeMultiplierVsLavaProgress.Evaluate(num));
-				double num2 = PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.unscaledTimeAsDouble;
-				spawnTime = ((Mathf.Abs((float)(spawnTime - num2)) < 10f) ? spawnTime : num2);
+				spawnSize = Mathf.Clamp(spawnSize, this.sizeRange.x, this.sizeRange.y * this.rockMaxSizeMultiplierVsLavaProgress.Evaluate(time));
+				lifetime = Mathf.Clamp(lifetime, this.lifetimeRange.x, this.lifetimeRange.y * this.rockLifetimeMultiplierVsLavaProgress.Evaluate(time));
+				double num = PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.unscaledTimeAsDouble;
+				spawnTime = ((Mathf.Abs((float)(spawnTime - num)) < 10f) ? spawnTime : num);
 				this.SpawnSodaBubbleLocal(surfacePosLocal, spawnSize, lifetime, spawnTime, false, default(Vector3));
 			}
 		}
@@ -255,17 +254,16 @@ namespace GorillaTag
 			for (int i = 0; i < this.activeBubbles.Count; i++)
 			{
 				Vector3 vector2 = this.activeBubbles[i].position - lavaSurfaceOrigin;
-				Vector2 vector3;
-				vector3..ctor(vector2.x, vector2.z);
-				Vector2 vector4 = vector - vector3;
+				Vector2 b = new Vector2(vector2.x, vector2.z);
+				Vector2 a = vector - b;
 				float num = (inputSize + this.activeBubbles[i].spawnSize * this.scaleFactor) * 0.5f;
-				if (vector4.sqrMagnitude < num * num)
+				if (a.sqrMagnitude < num * num)
 				{
-					float magnitude = vector4.magnitude;
+					float magnitude = a.magnitude;
 					if (magnitude > 0.001f)
 					{
-						Vector2 vector5 = vector4 / magnitude;
-						vector += vector5 * (num - magnitude);
+						Vector2 a2 = a / magnitude;
+						vector += a2 * (num - magnitude);
 						if (vector.sqrMagnitude > maxDistance * maxDistance)
 						{
 							vector = vector.normalized * maxDistance;

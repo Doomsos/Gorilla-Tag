@@ -12,8 +12,8 @@ namespace GorillaTagScripts.Builder
 		{
 			foreach (BuilderSmallMonkeTrigger builderSmallMonkeTrigger in this.doorHoldTriggers)
 			{
-				builderSmallMonkeTrigger.onTriggerFirstEntered += new Action(this.OnHoldTriggerEntered);
-				builderSmallMonkeTrigger.onTriggerLastExited += new Action(this.OnHoldTriggerExited);
+				builderSmallMonkeTrigger.onTriggerFirstEntered += this.OnHoldTriggerEntered;
+				builderSmallMonkeTrigger.onTriggerLastExited += this.OnHoldTriggerExited;
 			}
 			this.frontTrigger.TriggeredEvent.AddListener(new UnityAction(this.OnFrontTriggerEntered));
 			this.backTrigger.TriggeredEvent.AddListener(new UnityAction(this.OnBackTriggerEntered));
@@ -23,8 +23,8 @@ namespace GorillaTagScripts.Builder
 		{
 			foreach (BuilderSmallMonkeTrigger builderSmallMonkeTrigger in this.doorHoldTriggers)
 			{
-				builderSmallMonkeTrigger.onTriggerFirstEntered -= new Action(this.OnHoldTriggerEntered);
-				builderSmallMonkeTrigger.onTriggerLastExited -= new Action(this.OnHoldTriggerExited);
+				builderSmallMonkeTrigger.onTriggerFirstEntered -= this.OnHoldTriggerEntered;
+				builderSmallMonkeTrigger.onTriggerLastExited -= this.OnHoldTriggerExited;
 			}
 			this.frontTrigger.TriggeredEvent.RemoveListener(new UnityAction(this.OnFrontTriggerEntered));
 			this.backTrigger.TriggeredEvent.RemoveListener(new UnityAction(this.OnBackTriggerEntered));

@@ -26,7 +26,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 			this.targetTable.OnSaveDirtyChanged.AddListener(new UnityAction<bool>(this.OnSaveDirtyChanged));
 			this.targetTable.OnSaveSuccess.AddListener(new UnityAction(this.OnSaveSuccess));
 			this.targetTable.OnSaveFailure.AddListener(new UnityAction<string>(this.OnSaveFail));
-			SharedBlocksManager.OnSaveTimeUpdated += new Action(this.OnSaveTimeUpdated);
+			SharedBlocksManager.OnSaveTimeUpdated += this.OnSaveTimeUpdated;
 		}
 		if (this.noneButton != null)
 		{
@@ -34,7 +34,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		}
 		foreach (GorillaPressableButton gorillaPressableButton in this.scanButtons)
 		{
-			gorillaPressableButton.onPressed += new Action<GorillaPressableButton, bool>(this.OnScanButtonPressed);
+			gorillaPressableButton.onPressed += this.OnScanButtonPressed;
 		}
 		this.scanTriangle = this.scanAnimation.GetComponent<MeshRenderer>();
 		this.scanTriangle.enabled = false;
@@ -61,7 +61,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		{
 			this.saveButton.onPressButton.RemoveListener(new UnityAction(this.OnSavePressed));
 		}
-		SharedBlocksManager.OnSaveTimeUpdated -= new Action(this.OnSaveTimeUpdated);
+		SharedBlocksManager.OnSaveTimeUpdated -= this.OnSaveTimeUpdated;
 		if (this.targetTable != null)
 		{
 			this.targetTable.OnSaveDirtyChanged.RemoveListener(new UnityAction<bool>(this.OnSaveDirtyChanged));
@@ -75,7 +75,7 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		{
 			if (!(gorillaPressableButton == null))
 			{
-				gorillaPressableButton.onPressed -= new Action<GorillaPressableButton, bool>(this.OnScanButtonPressed);
+				gorillaPressableButton.onPressed -= this.OnScanButtonPressed;
 			}
 		}
 	}
@@ -295,12 +295,12 @@ public class BuilderScanKiosk : MonoBehaviourTick
 			return "";
 		}
 		StringBuilder stringBuilder = new StringBuilder();
-		string text = "";
+		string value = "";
 		int currentSaveSlot = this.targetTable.CurrentSaveSlot;
 		if (!BuilderScanKiosk.IsSaveSlotValid(currentSaveSlot))
 		{
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_NO_SAVE_SLOT", out text, "<b><color=red>NONE</color></b>");
-			stringBuilder.Append(text);
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_NO_SAVE_SLOT", out value, "<b><color=red>NONE</color></b>");
+			stringBuilder.Append(value);
 		}
 		else if (currentSaveSlot == BuilderScanKiosk.DEV_SAVE_SLOT)
 		{
@@ -309,29 +309,29 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		else
 		{
 			stringBuilder.Append("<b><color=red>");
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out text, "SCAN ");
-			stringBuilder.Append(text);
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out value, "SCAN ");
+			stringBuilder.Append(value);
 			stringBuilder.Append(currentSaveSlot + 1);
 			stringBuilder.Append("</color></b>");
 			SharedBlocksManager.LocalPublishInfo publishInfoForSlot = SharedBlocksManager.GetPublishInfoForSlot(currentSaveSlot);
-			DateTime dateTime = DateTime.FromBinary(publishInfoForSlot.publishTime);
-			if (dateTime > DateTime.MinValue)
+			DateTime t = DateTime.FromBinary(publishInfoForSlot.publishTime);
+			if (t > DateTime.MinValue)
 			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_UPDATE_LABEL", out text, "UPDATED ");
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_UPDATE_LABEL", out value, "UPDATED ");
 				stringBuilder.Append(": ");
-				stringBuilder.Append(text);
-				stringBuilder.Append(dateTime.ToString());
+				stringBuilder.Append(value);
+				stringBuilder.Append(t.ToString());
 				stringBuilder.Append("\n");
 			}
 			if (SharedBlocksManager.IsMapIDValid(publishInfoForSlot.mapID))
 			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_MAP_ID_LABEL", out text, "MAP ID: ");
-				stringBuilder.Append(text);
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_MAP_ID_LABEL", out value, "MAP ID: ");
+				stringBuilder.Append(value);
 				stringBuilder.Append(publishInfoForSlot.mapID.Substring(0, 4));
 				stringBuilder.Append("-");
 				stringBuilder.Append(publishInfoForSlot.mapID.Substring(4));
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_CODE_INSTRUCTIONS", out text, "\nUSE THIS CODE IN THE SHARE MY BLOCKS ROOM");
-				stringBuilder.Append(text);
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_CODE_INSTRUCTIONS", out value, "\nUSE THIS CODE IN THE SHARE MY BLOCKS ROOM");
+				stringBuilder.Append(value);
 			}
 		}
 		stringBuilder.Append("\n");
@@ -340,54 +340,54 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		case BuilderScanKiosk.ScannerState.IDLE:
 			if (this.saveError)
 			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_ERROR", out text, "ERROR WHILE SCANNING: ");
-				stringBuilder.Append(text);
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_ERROR", out value, "ERROR WHILE SCANNING: ");
+				stringBuilder.Append(value);
 				stringBuilder.Append(this.errorMsg);
 			}
 			else if (this.coolingDown)
 			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_COOLDOWN", out text, "COOLING DOWN...");
-				stringBuilder.Append(text);
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_COOLDOWN", out value, "COOLING DOWN...");
+				stringBuilder.Append(value);
 			}
 			else if (!this.isDirty)
 			{
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_NO_CHANGES", out text, "NO UNSAVED CHANGES");
-				stringBuilder.Append(text);
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_NO_CHANGES", out value, "NO UNSAVED CHANGES");
+				stringBuilder.Append(value);
 			}
 			break;
 		case BuilderScanKiosk.ScannerState.CONFIRMATION:
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_WARNING_REPLACE", out text, "YOU ARE ABOUT TO REPLACE ");
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_WARNING_REPLACE", out value, "YOU ARE ABOUT TO REPLACE ");
 			if (currentSaveSlot == BuilderScanKiosk.DEV_SAVE_SLOT)
 			{
-				stringBuilder.Append(text);
+				stringBuilder.Append(value);
 				stringBuilder.Append("<b><color=red>DEV SCAN</color></b>");
 			}
 			else
 			{
-				stringBuilder.Append(text);
+				stringBuilder.Append(value);
 				stringBuilder.Append("<b><color=red>");
-				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out text, "SCAN ");
-				stringBuilder.Append(text);
+				LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out value, "SCAN ");
+				stringBuilder.Append(value);
 				stringBuilder.Append(currentSaveSlot + 1);
 				stringBuilder.Append("</color></b>");
 			}
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_WARNING_CONFIRMATION", out text, " ARE YOU SURE YOU WANT TO SCAN?");
-			stringBuilder.Append(text);
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_WARNING_CONFIRMATION", out value, " ARE YOU SURE YOU WANT TO SCAN?");
+			stringBuilder.Append(value);
 			break;
 		case BuilderScanKiosk.ScannerState.SAVING:
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_SAVING", out text, "SCANNING BUILD...");
-			stringBuilder.Append(text);
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SAVE_SAVING", out value, "SCANNING BUILD...");
+			stringBuilder.Append(value);
 			break;
 		default:
 			throw new ArgumentOutOfRangeException();
 		}
 		stringBuilder.Append("\n\n\n");
-		LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_LOAD_INSTRUCTIONS", out text, "CREATE A <b><color=red>NEW</color></b> PRIVATE ROOM TO LOAD ");
-		stringBuilder.Append(text);
+		LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_LOAD_INSTRUCTIONS", out value, "CREATE A <b><color=red>NEW</color></b> PRIVATE ROOM TO LOAD ");
+		stringBuilder.Append(value);
 		if (!BuilderScanKiosk.IsSaveSlotValid(currentSaveSlot))
 		{
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_EMPTY_TABLE", out text, "<b><color=red>AN EMPTY TABLE</color></b>");
-			stringBuilder.Append(text);
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_EMPTY_TABLE", out value, "<b><color=red>AN EMPTY TABLE</color></b>");
+			stringBuilder.Append(value);
 		}
 		else if (currentSaveSlot == BuilderScanKiosk.DEV_SAVE_SLOT)
 		{
@@ -395,9 +395,9 @@ public class BuilderScanKiosk : MonoBehaviourTick
 		}
 		else
 		{
-			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out text, "SCAN ");
+			LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_SAVE_KIOSK_SCAN_LABEL", out value, "SCAN ");
 			stringBuilder.Append("<b><color=red>");
-			stringBuilder.Append(text);
+			stringBuilder.Append(value);
 			stringBuilder.Append(currentSaveSlot + 1);
 			stringBuilder.Append("</color></b>");
 		}

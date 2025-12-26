@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 using UnityEngine;
 
-[StructLayout(3)]
+[StructLayout(LayoutKind.Auto)]
 public struct MaterialFingerprint
 {
 	public MaterialFingerprint(UberShaderMatUsedProps used)
@@ -231,10 +232,28 @@ public struct MaterialFingerprint
 		return string.Empty;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static GTShaderTransparencyMode GetMatTransparencyMode(Material mat)
 	{
 		return (GTShaderTransparencyMode)mat.GetInteger(ShaderProps._TransparencyMode);
+	}
+
+	public override string ToString()
+	{
+		string text = "";
+		BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+		foreach (FieldInfo fieldInfo in typeof(MaterialFingerprint).GetFields(bindingAttr))
+		{
+			text = string.Concat(new string[]
+			{
+				text,
+				"|",
+				fieldInfo.ToString(),
+				":",
+				fieldInfo.GetValue(this).ToString()
+			});
+		}
+		return text;
 	}
 
 	public GTShaderTransparencyMode _TransparencyMode;

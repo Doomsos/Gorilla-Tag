@@ -57,16 +57,16 @@ public class CustomMapsTerminal : MonoBehaviour
 		this.modDetailsScreen.Hide();
 		ModIOManager.OnModIOLoggedIn.AddListener(new UnityAction(this.OnModIOLoggedIn));
 		ModIOManager.OnModIOLoggedOut.AddListener(new UnityAction(this.OnModIOLoggedOut));
-		NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnJoinedRoom);
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnReturnedToSinglePlayer);
+		NetworkSystem.Instance.OnMultiplayerStarted += this.OnJoinedRoom;
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnReturnedToSinglePlayer;
 	}
 
 	private void OnDestroy()
 	{
 		ModIOManager.OnModIOLoggedIn.RemoveListener(new UnityAction(this.OnModIOLoggedIn));
 		ModIOManager.OnModIOLoggedOut.RemoveListener(new UnityAction(this.OnModIOLoggedOut));
-		NetworkSystem.Instance.OnMultiplayerStarted -= new Action(this.OnJoinedRoom);
-		NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnReturnedToSinglePlayer);
+		NetworkSystem.Instance.OnMultiplayerStarted -= this.OnJoinedRoom;
+		NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnReturnedToSinglePlayer;
 	}
 
 	public static void ShowDetailsScreen(Mod mod)

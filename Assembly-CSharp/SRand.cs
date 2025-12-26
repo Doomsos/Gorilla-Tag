@@ -181,13 +181,13 @@ public struct SRand
 
 	public Color32 NextColor32()
 	{
+		byte r = this.NextByte();
+		byte g = this.NextByte();
 		byte b = this.NextByte();
-		byte b2 = this.NextByte();
-		byte b3 = this.NextByte();
-		return new Color32(b, b2, b3, byte.MaxValue);
+		return new Color32(r, g, b, byte.MaxValue);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public Vector3 NextPointInsideSphere(float radius)
 	{
 		float num = this.NextFloat() * 2f - 1f;
@@ -198,7 +198,7 @@ public struct SRand
 		return new Vector3(num * num5 * num4 * radius, num2 * num5 * num4 * radius, num3 * num5 * num4 * radius);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public Vector3 NextPointOnSphere(float radius)
 	{
 		float num = this.NextFloat() * 2f - 1f;
@@ -208,7 +208,7 @@ public struct SRand
 		return new Vector3(num * num4 * radius, num2 * num4 * radius, num3 * num4 * radius);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public Vector3 NextPointInsideBox(Vector3 extents)
 	{
 		float num = this.NextFloat() - 0.5f;
@@ -219,10 +219,10 @@ public struct SRand
 
 	public Color NextColor()
 	{
-		float num = this.NextFloat();
-		float num2 = this.NextFloat();
-		float num3 = this.NextFloat();
-		return new Color(num, num2, num3, 1f);
+		float r = this.NextFloat();
+		float g = this.NextFloat();
+		float b = this.NextFloat();
+		return new Color(r, g, b, 1f);
 	}
 
 	public void Shuffle<T>(T[] array)
@@ -246,12 +246,12 @@ public struct SRand
 		while (i > 1)
 		{
 			int num = this.NextInt(i--);
-			int num2 = i;
-			int num3 = num;
-			T t = list[num];
-			T t2 = list[i];
-			list[num2] = t;
-			list[num3] = t2;
+			int index = i;
+			int index2 = num;
+			T value = list[num];
+			T value2 = list[i];
+			list[index] = value;
+			list[index2] = value2;
 		}
 	}
 
@@ -304,13 +304,13 @@ public struct SRand
 		this._state = this._seed;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private uint NextState()
 	{
 		return this._state = this.Mix(this._state + 184402071U);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private uint Mix(uint x)
 	{
 		x = (x >> 17 ^ x) * 3982152891U;

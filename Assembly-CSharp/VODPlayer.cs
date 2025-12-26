@@ -11,19 +11,19 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 {
 	public void OnEnable()
 	{
-		VODPlayer.<OnEnable>d__20 <OnEnable>d__;
+		VODPlayer.<OnEnable>d__18 <OnEnable>d__;
 		<OnEnable>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 		<OnEnable>d__.<>4__this = this;
 		<OnEnable>d__.<>1__state = -1;
-		<OnEnable>d__.<>t__builder.Start<VODPlayer.<OnEnable>d__20>(ref <OnEnable>d__);
+		<OnEnable>d__.<>t__builder.Start<VODPlayer.<OnEnable>d__18>(ref <OnEnable>d__);
 	}
 
 	private void waitOnServerTime()
 	{
-		VODPlayer.<waitOnServerTime>d__21 <waitOnServerTime>d__;
+		VODPlayer.<waitOnServerTime>d__19 <waitOnServerTime>d__;
 		<waitOnServerTime>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 		<waitOnServerTime>d__.<>1__state = -1;
-		<waitOnServerTime>d__.<>t__builder.Start<VODPlayer.<waitOnServerTime>d__21>(ref <waitOnServerTime>d__);
+		<waitOnServerTime>d__.<>t__builder.Start<VODPlayer.<waitOnServerTime>d__19>(ref <waitOnServerTime>d__);
 	}
 
 	private void VODTarget_AlertEnabled(VODTarget o)
@@ -59,7 +59,6 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		if (!this.playerBusy)
 		{
 			this.player.Stop();
-			this.currentStreamPrio = 0;
 			for (int i = 0; i < this.targets.Count; i++)
 			{
 				this.targets[i].Renderer.material = ((this.targets[i].StandbyOverride == null) ? this.standbyMaterial : this.targets[i].StandbyOverride);
@@ -71,7 +70,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	public void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		this.player.loopPointReached -= new VideoPlayer.EventHandler(this.Player_loopPointReached);
+		this.player.loopPointReached -= this.Player_loopPointReached;
 		VODTarget.AlertEnabled = (Action<VODTarget>)Delegate.Remove(VODTarget.AlertEnabled, new Action<VODTarget>(this.VODTarget_AlertEnabled));
 		VODTarget.AlertDisabled = (Action<VODTarget>)Delegate.Remove(VODTarget.AlertDisabled, new Action<VODTarget>(this.VODTarget_AlertDisabled));
 	}
@@ -113,19 +112,19 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 				this.PositionAudio();
 			}
 			DateTime serverTime = GorillaComputer.instance.GetServerTime();
-			int dayOfWeek = serverTime.DayOfWeek;
+			DayOfWeek dayOfWeek = serverTime.DayOfWeek;
 			int hour = serverTime.Hour;
 			int minute = serverTime.Minute;
 			if (this.nextStream != null && !this.playerBusy && !this.player.isPlaying && this.nextStream.Title != string.Empty)
 			{
 				TimeSpan timeSpan = this.nextStream.StartTime - serverTime;
-				if (timeSpan.TotalSeconds > 0.0 && timeSpan.TotalSeconds <= 3600.0)
+				if (timeSpan.TotalMinutes > 0.0 && timeSpan.TotalMinutes <= 60.0)
 				{
 					for (int i = 0; i < this.targets.Count; i++)
 					{
 						if (this.targets[i].UpNextText != null)
 						{
-							this.targets[i].UpNextText.text = string.Format("next: {0} - {1:00}:{2:00}", this.nextStream.Title, timeSpan.TotalSeconds / 60.0, timeSpan.TotalSeconds % 60.0);
+							this.targets[i].UpNextText.text = string.Format("next: {0} - {1:00}:{2:00}", this.nextStream.Title, timeSpan.Minutes, timeSpan.Seconds);
 						}
 					}
 				}
@@ -135,27 +134,11 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 				return;
 			}
 			this.lastCheck = minute;
-			for (int j = 0; j < this.schedule.weekly.Length; j++)
+			for (int j = 0; j < this.schedule.hourly.Length; j++)
 			{
-				if (1440 * (this.schedule.weekly[j].day - dayOfWeek) + 60 * (this.schedule.weekly[j].hour - hour) + (this.schedule.weekly[j].minute - minute) == 0)
+				if (this.schedule.hourly[j].minute - minute == 0 && this.schedule.hourly[j].IsDateInRange(serverTime))
 				{
-					this.StartPlayback(this.schedule.weekly[j].stream.url, 3, 0.0);
-					break;
-				}
-			}
-			for (int k = 0; k < this.schedule.daily.Length; k++)
-			{
-				if (60 * (this.schedule.daily[k].hour - hour) + (this.schedule.daily[k].minute - minute) == 0)
-				{
-					this.StartPlayback(this.schedule.daily[k].stream.url, 2, 0.0);
-					break;
-				}
-			}
-			for (int l = 0; l < this.schedule.hourly.Length; l++)
-			{
-				if (this.schedule.hourly[l].minute - minute == 0)
-				{
-					this.StartPlayback(this.schedule.hourly[l].stream.url, 1, 0.0);
+					this.StartPlayback(this.schedule.hourly[j].stream.url, 1.0);
 					return;
 				}
 			}
@@ -170,36 +153,20 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	{
 		DateTime serverTime = GorillaComputer.instance.GetServerTime();
 		List<VODPlayer.VODNextStream> list = new List<VODPlayer.VODNextStream>();
-		for (int i = 0; i < this.schedule.weekly.Length; i++)
+		for (int i = 0; i < this.schedule.hourly.Length; i++)
 		{
 			if (i == 0)
 			{
-				list.Add(new VODPlayer.VODNextStream(3, this.schedule.weekly[i].stream.name, new DateTime(serverTime.Year, serverTime.Month, 7 + serverTime.Day + (this.schedule.weekly[i].day - serverTime.DayOfWeek), this.schedule.weekly[i].hour, this.schedule.weekly[i].minute, 0)));
+				list.Add(new VODPlayer.VODNextStream(2, this.schedule.hourly[i].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour + 1, this.schedule.hourly[i].minute, 0)));
 			}
-			list.Add(new VODPlayer.VODNextStream(3, this.schedule.weekly[i].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day + (this.schedule.weekly[i].day - serverTime.DayOfWeek), this.schedule.weekly[i].hour, this.schedule.weekly[i].minute, 0)));
-		}
-		for (int j = 0; j < this.schedule.daily.Length; j++)
-		{
-			if (j == 0)
-			{
-				list.Add(new VODPlayer.VODNextStream(2, this.schedule.daily[j].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day + 1, this.schedule.daily[j].hour, this.schedule.daily[j].minute, 0)));
-			}
-			list.Add(new VODPlayer.VODNextStream(2, this.schedule.daily[j].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, this.schedule.daily[j].hour, this.schedule.daily[j].minute, 0)));
-		}
-		for (int k = 0; k < this.schedule.hourly.Length; k++)
-		{
-			if (k == 0)
-			{
-				list.Add(new VODPlayer.VODNextStream(2, this.schedule.hourly[k].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour + 1, this.schedule.hourly[k].minute, 0)));
-			}
-			list.Add(new VODPlayer.VODNextStream(2, this.schedule.hourly[k].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour, this.schedule.hourly[k].minute, 0)));
+			list.Add(new VODPlayer.VODNextStream(2, this.schedule.hourly[i].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour, this.schedule.hourly[i].minute, 0)));
 		}
 		list.Sort();
-		for (int l = 0; l < list.Count; l++)
+		for (int j = 0; j < list.Count; j++)
 		{
-			if (list[l].StartTime > serverTime)
+			if (list[j].StartTime > serverTime)
 			{
-				return list[l];
+				return list[j];
 			}
 		}
 		return null;
@@ -229,7 +196,6 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		this.audioSource.transform.localPosition = Vector3.zero;
 		this.audioSource.volume = vodtarget.AudioSettings.volume;
 		this.audioSource.dopplerLevel = vodtarget.AudioSettings.dopplerLevel;
-		this.audioSource.spread = vodtarget.AudioSettings.spread;
 		this.audioSource.rolloffMode = vodtarget.AudioSettings.rolloffMode;
 		this.audioSource.minDistance = vodtarget.AudioSettings.minDistance;
 		this.audioSource.maxDistance = vodtarget.AudioSettings.maxDistance;
@@ -238,116 +204,33 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	private void PlayPreviouStream()
 	{
 		DateTime serverTime = GorillaComputer.instance.GetServerTime();
-		int dayOfWeek = serverTime.DayOfWeek;
 		int hour = serverTime.Hour;
 		int minute = serverTime.Minute;
-		DateTime dateTime;
-		dateTime..ctor(serverTime.Year, serverTime.Month, serverTime.Day, hour, minute, 0);
+		DateTime dateTime = new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, hour, minute, 0);
 		int num = -1;
-		int num2 = -1;
-		int num3 = -1;
-		for (int i = 0; i < this.schedule.weekly.Length; i++)
+		for (int i = 0; i < this.schedule.hourly.Length; i++)
 		{
-			if (this.schedule.weekly[i].day <= dayOfWeek && this.schedule.weekly[i].hour <= hour && this.schedule.weekly[i].minute <= minute)
+			if (this.schedule.hourly[i].minute <= minute && this.schedule.hourly[i].IsDateInRange(serverTime))
 			{
 				num = i;
 			}
 		}
-		for (int j = 0; j < this.schedule.daily.Length; j++)
-		{
-			if (this.schedule.daily[j].hour <= hour && this.schedule.daily[j].minute <= minute)
-			{
-				num2 = j;
-			}
-		}
-		for (int k = 0; k < this.schedule.hourly.Length; k++)
-		{
-			if (this.schedule.hourly[k].minute <= minute)
-			{
-				num3 = k;
-			}
-		}
-		int num4 = int.MaxValue;
-		int num5 = int.MaxValue;
-		int num6 = int.MaxValue;
 		if (num >= 0)
 		{
-			int num7 = 1440 * (dayOfWeek - this.schedule.weekly[num].day) + 60 * (hour - this.schedule.weekly[num].hour) + (minute - this.schedule.weekly[num].minute);
-			if (num7 < num4)
-			{
-				num4 = num7;
-			}
-		}
-		else if (this.schedule.weekly.Length != 0)
-		{
-			num = this.schedule.weekly.Length;
-			int num8 = 10080 - (1440 * (dayOfWeek - this.schedule.weekly[num].day) + 60 * (hour - this.schedule.weekly[num].hour) + (minute - this.schedule.weekly[num].minute));
-			if (num8 < num4)
-			{
-				num4 = num8;
-			}
-		}
-		if (num2 >= 0)
-		{
-			int num9 = 60 * (hour - this.schedule.daily[num2].hour) + (minute - this.schedule.daily[num2].minute);
-			if (num9 < num5)
-			{
-				num5 = num9;
-			}
-		}
-		else if (this.schedule.daily.Length != 0)
-		{
-			num2 = this.schedule.daily.Length - 1;
-			int num10 = 1440 - (60 * (hour - this.schedule.daily[num2].hour) + (minute - this.schedule.daily[num2].minute));
-			if (num10 < num5)
-			{
-				num5 = num10;
-			}
-		}
-		if (num3 >= 0)
-		{
-			int num11 = minute - this.schedule.hourly[num3].minute;
-			if (num11 < num6)
-			{
-				num6 = num11;
-			}
-		}
-		else if (this.schedule.daily.Length != 0)
-		{
-			num3 = this.schedule.hourly.Length - 1;
-			int num12 = 60 - (minute - this.schedule.hourly[num3].minute);
-			if (num12 < num6)
-			{
-				num6 = num12;
-			}
-		}
-		if (num3 >= 0 && num6 < num5 && num6 < num4)
-		{
-			this.StartPlayback(this.schedule.hourly[num3].stream.url, 1, serverTime.Subtract(dateTime.AddMinutes((double)(-(double)num6))).TotalSeconds);
-			return;
-		}
-		if (num2 >= 0 && num5 < num4)
-		{
-			this.StartPlayback(this.schedule.hourly[num2].stream.url, 2, serverTime.Subtract(dateTime.AddMinutes((double)(-(double)num5))).TotalSeconds);
-			return;
-		}
-		if (num >= 0)
-		{
-			this.StartPlayback(this.schedule.hourly[num].stream.url, 3, serverTime.Subtract(dateTime.AddMinutes((double)(-(double)num4))).TotalSeconds);
-			return;
+			int num2 = minute - this.schedule.hourly[num].minute;
+			this.StartPlayback(this.schedule.hourly[num].stream.url, serverTime.Subtract(dateTime.AddMinutes((double)(-(double)num2))).TotalSeconds);
 		}
 	}
 
-	private void StartPlayback(string url, int priority, double time = 0.0)
+	private void StartPlayback(string url, double time = 0.0)
 	{
-		VODPlayer.<StartPlayback>d__33 <StartPlayback>d__;
+		VODPlayer.<StartPlayback>d__30 <StartPlayback>d__;
 		<StartPlayback>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 		<StartPlayback>d__.<>4__this = this;
 		<StartPlayback>d__.url = url;
-		<StartPlayback>d__.priority = priority;
 		<StartPlayback>d__.time = time;
 		<StartPlayback>d__.<>1__state = -1;
-		<StartPlayback>d__.<>t__builder.Start<VODPlayer.<StartPlayback>d__33>(ref <StartPlayback>d__);
+		<StartPlayback>d__.<>t__builder.Start<VODPlayer.<StartPlayback>d__30>(ref <StartPlayback>d__);
 	}
 
 	private void onTD(string s)
@@ -366,7 +249,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 			this.Crash("Malformed schedule data");
 			return;
 		}
-		if (this.schedule.weekly.Length + this.schedule.daily.Length + this.schedule.hourly.Length == 0)
+		if (this.schedule.hourly.Length == 0)
 		{
 			this.Crash("Nothing scheduled in title data");
 			return;
@@ -379,7 +262,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		VODPlayer.state = VODPlayer.State.CRASHED;
 		if (VODPlayer.OnCrash != null)
 		{
-			VODPlayer.OnCrash.Invoke();
+			VODPlayer.OnCrash();
 		}
 		for (int i = 0; i < this.targets.Count; i++)
 		{
@@ -426,8 +309,6 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	private bool playerBusy;
 
-	private int currentStreamPrio;
-
 	public enum State
 	{
 		INITIALIZING,
@@ -461,10 +342,6 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	[Serializable]
 	public struct VODStreamSchedule
 	{
-		public VODPlayer.VODWeeklyStream[] weekly;
-
-		public VODPlayer.VODDailyStream[] daily;
-
 		public VODPlayer.VODHourlyStream[] hourly;
 	}
 
@@ -477,43 +354,6 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	}
 
 	[Serializable]
-	public struct VODWeeklyStream : IComparable<VODPlayer.VODWeeklyStream>
-	{
-		public int CompareTo(VODPlayer.VODWeeklyStream other)
-		{
-			return this.day + this.hour + this.minute - (other.day + other.hour + other.minute);
-		}
-
-		public VODPlayer.VODStream stream;
-
-		[Range(0f, 6f)]
-		public int day;
-
-		[Range(0f, 23f)]
-		public int hour;
-
-		[Range(0f, 59f)]
-		public int minute;
-	}
-
-	[Serializable]
-	public struct VODDailyStream : IComparable<VODPlayer.VODDailyStream>
-	{
-		public int CompareTo(VODPlayer.VODDailyStream other)
-		{
-			return this.hour + this.minute - (other.hour + other.minute);
-		}
-
-		public VODPlayer.VODStream stream;
-
-		[Range(0f, 23f)]
-		public int hour;
-
-		[Range(0f, 59f)]
-		public int minute;
-	}
-
-	[Serializable]
 	public struct VODHourlyStream : IComparable<VODPlayer.VODHourlyStream>
 	{
 		public int CompareTo(VODPlayer.VODHourlyStream other)
@@ -521,9 +361,45 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 			return this.minute - other.minute;
 		}
 
+		public void ValidateDate()
+		{
+			try
+			{
+				this.startDT = DateTime.Parse(this.startDateTime);
+			}
+			catch
+			{
+				this.startDT = DateTime.Parse("1/1/0001");
+			}
+			try
+			{
+				this.endDT = DateTime.Parse(this.endDateTime);
+			}
+			catch
+			{
+				this.endDT = DateTime.Parse("1/1/3001");
+			}
+			this.startDateTime = this.startDT.ToString();
+			this.endDateTime = this.endDT.ToString();
+		}
+
+		internal bool IsDateInRange(DateTime serverTime)
+		{
+			this.ValidateDate();
+			return serverTime >= this.startDT && serverTime <= this.endDT;
+		}
+
 		public VODPlayer.VODStream stream;
 
 		[Range(0f, 59f)]
 		public int minute;
+
+		public string startDateTime;
+
+		private DateTime startDT;
+
+		public string endDateTime;
+
+		private DateTime endDT;
 	}
 }

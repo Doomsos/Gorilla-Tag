@@ -51,7 +51,7 @@ public class MenagerieCritter : MonoBehaviour, IHoldableObject, IEyeScannable
 		this.visuals.SetAppearance(this._critterData.appearance);
 		this._animRoot = this.visuals.bodyRoot;
 		this._bodyScale = this._animRoot.localScale;
-		this.PlayAnimation(this.heldAnimation, Random.value);
+		this.PlayAnimation(this.heldAnimation, UnityEngine.Random.value);
 	}
 
 	private void PlayAnimation(CrittersAnim anim, float time = 0f)
@@ -73,14 +73,14 @@ public class MenagerieCritter : MonoBehaviour, IHoldableObject, IEyeScannable
 			this._currentAnimTime += Time.deltaTime * this._currentAnim.playSpeed;
 			this._currentAnimTime %= 1f;
 			float num = this._currentAnim.squashAmount.Evaluate(this._currentAnimTime);
-			float num2 = this._currentAnim.forwardOffset.Evaluate(this._currentAnimTime);
-			float num3 = this._currentAnim.horizontalOffset.Evaluate(this._currentAnimTime);
-			float num4 = this._currentAnim.verticalOffset.Evaluate(this._currentAnimTime);
-			this._animRoot.localPosition = Vector3.Scale(this._bodyScale, new Vector3(num3, num4, num2));
-			float num5 = 1f - num;
-			num5 *= 0.5f;
-			num5 += 1f;
-			this._animRoot.localScale = Vector3.Scale(this._bodyScale, new Vector3(num5, num, num5));
+			float z = this._currentAnim.forwardOffset.Evaluate(this._currentAnimTime);
+			float x = this._currentAnim.horizontalOffset.Evaluate(this._currentAnimTime);
+			float y = this._currentAnim.verticalOffset.Evaluate(this._currentAnimTime);
+			this._animRoot.localPosition = Vector3.Scale(this._bodyScale, new Vector3(x, y, z));
+			float num2 = 1f - num;
+			num2 *= 0.5f;
+			num2 += 1f;
+			this._animRoot.localScale = Vector3.Scale(this._bodyScale, new Vector3(num2, num, num2));
 		}
 	}
 
@@ -117,7 +117,7 @@ public class MenagerieCritter : MonoBehaviour, IHoldableObject, IEyeScannable
 		{
 			return;
 		}
-		onDataChange.Invoke();
+		onDataChange();
 	}
 
 	public bool OnRelease(DropZone zoneReleased, GameObject releasingHand)
@@ -144,12 +144,12 @@ public class MenagerieCritter : MonoBehaviour, IHoldableObject, IEyeScannable
 		Action<MenagerieCritter> onReleased = this.OnReleased;
 		if (onReleased != null)
 		{
-			onReleased.Invoke(this);
+			onReleased(this);
 		}
 		Action onDataChange = this.OnDataChange;
 		if (onDataChange != null)
 		{
-			onDataChange.Invoke();
+			onDataChange();
 		}
 		this.ResetToTransform();
 		return true;

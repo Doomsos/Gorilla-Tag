@@ -80,7 +80,7 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 		}
 		if (NetworkSystem.Instance != null)
 		{
-			NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.RemovePlayerGadgetsOnLeave);
+			NetworkSystem.Instance.OnPlayerLeft += this.RemovePlayerGadgetsOnLeave;
 		}
 		for (int i = 0; i < this.siTerminals.Length; i++)
 		{
@@ -106,7 +106,7 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 		this.DisableStations();
 		if (NetworkSystem.Instance != null)
 		{
-			NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(this.RemovePlayerGadgetsOnLeave);
+			NetworkSystem.Instance.OnPlayerLeft -= this.RemovePlayerGadgetsOnLeave;
 		}
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
@@ -253,8 +253,8 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 				return;
 			}
 			float spawnPitchVariance = siresourceRegion.resourcePrefab.spawnPitchVariance;
-			Quaternion quaternion = Quaternion.Euler(Random.Range(-spawnPitchVariance, spawnPitchVariance), (float)Random.Range(0, 360), Random.Range(-spawnPitchVariance, spawnPitchVariance));
-			Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * quaternion;
+			Quaternion rhs = Quaternion.Euler(Random.Range(-spawnPitchVariance, spawnPitchVariance), (float)Random.Range(0, 360), Random.Range(-spawnPitchVariance, spawnPitchVariance));
+			Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * rhs;
 			GameEntity gameEntity = this.siManager.gameEntityManager.GetGameEntity(this.siManager.gameEntityManager.RequestCreateItem(siresourceRegion.resourcePrefab.gameObject.name.GetStaticHash(), spawnPointWithNormal.Item2, rotation, 0L));
 			if (gameEntity)
 			{

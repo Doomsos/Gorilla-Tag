@@ -36,8 +36,8 @@ public class GRShiftStat
 		int num = reader.ReadInt32();
 		for (int i = 0; i < num; i++)
 		{
-			GREnemyType grenemyType = (GREnemyType)reader.ReadInt32();
-			this.enemyKills[grenemyType] = reader.ReadInt32();
+			GREnemyType key = (GREnemyType)reader.ReadInt32();
+			this.enemyKills[key] = reader.ReadInt32();
 		}
 	}
 

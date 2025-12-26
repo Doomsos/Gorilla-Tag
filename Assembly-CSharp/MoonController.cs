@@ -99,7 +99,7 @@ public class MoonController : MonoBehaviour
 		for (int i = 0; i < instance.activeZones.Count; i++)
 		{
 			MoonController.Scenes scenes2;
-			if (this.zoneToSceneMapping.TryGetValue(instance.activeZones[i], ref scenes2) && scenes2 > scenes)
+			if (this.zoneToSceneMapping.TryGetValue(instance.activeZones[i], out scenes2) && scenes2 > scenes)
 			{
 				scenes = scenes2;
 			}
@@ -195,7 +195,7 @@ public class MoonController : MonoBehaviour
 		MoonController.Placement placement = sceneData.overridePlacement ? sceneData.PlacementOverride : this.defaultPlacement;
 		float num = Mathf.Lerp(placement.heightRange.x, placement.heightRange.y, this.distance);
 		float num2 = Mathf.Lerp(placement.radiusRange.x, placement.radiusRange.y, this.distance);
-		float num3 = Mathf.Lerp(placement.scaleRange.x, placement.scaleRange.y, this.distance);
+		float d = Mathf.Lerp(placement.scaleRange.x, placement.scaleRange.y, this.distance);
 		float restAngle = placement.restAngle;
 		Vector3 position = referencePoint.position;
 		position.y += num;
@@ -203,7 +203,7 @@ public class MoonController : MonoBehaviour
 		position.z += num2 * Mathf.Sin(restAngle * 0.017453292f);
 		base.transform.position = position;
 		base.transform.rotation = Quaternion.LookRotation(referencePoint.position - base.transform.position);
-		base.transform.localScale = Vector3.one * num3;
+		base.transform.localScale = Vector3.one * d;
 	}
 
 	public void UpdatePlacementOrbit()
@@ -217,11 +217,11 @@ public class MoonController : MonoBehaviour
 		position.y += y;
 		position.x += y2 * Mathf.Cos(placement.restAngle * 0.017453292f);
 		position.z += y2 * Mathf.Sin(placement.restAngle * 0.017453292f);
-		float num = Mathf.Sqrt(y * y + y2 * y2);
-		float num2 = Mathf.Atan2(y, y2);
-		Quaternion quaternion = Quaternion.AngleAxis(57.29578f * num2, Vector3.Cross(position - referencePoint.position, Vector3.up));
-		float num3 = placement.restAngle * 0.017453292f + this.orbitAngle;
-		Vector3 vector = referencePoint.position + quaternion * new Vector3(Mathf.Cos(num3), 0f, Mathf.Sin(num3)) * num;
+		float d = Mathf.Sqrt(y * y + y2 * y2);
+		float num = Mathf.Atan2(y, y2);
+		Quaternion rotation = Quaternion.AngleAxis(57.29578f * num, Vector3.Cross(position - referencePoint.position, Vector3.up));
+		float f = placement.restAngle * 0.017453292f + this.orbitAngle;
+		Vector3 vector = referencePoint.position + rotation * new Vector3(Mathf.Cos(f), 0f, Mathf.Sin(f)) * d;
 		if (this.distance < 1f)
 		{
 			Vector3 position2 = referencePoint.position;
@@ -242,25 +242,25 @@ public class MoonController : MonoBehaviour
 		base.transform.localScale = Vector3.one * Mathf.Lerp(placement.scaleRange.x, placement.scaleRange.y, this.distance);
 		if (this.debugDrawOrbit)
 		{
-			int num4 = 32;
+			int num2 = 32;
 			float timeOfDay = this.TimeOfDay;
-			float num5 = 0.086666666f;
-			float num6 = 0.24666667f;
-			float num7 = 0.6333333f;
-			float num8 = 0.76f;
-			bool flag = timeOfDay > num5 && timeOfDay < num6;
-			bool flag2 = timeOfDay > num7 && timeOfDay < num8;
-			bool flag3 = timeOfDay <= num5 || timeOfDay >= num8;
-			if (timeOfDay >= num6)
+			float num3 = 0.086666666f;
+			float num4 = 0.24666667f;
+			float num5 = 0.6333333f;
+			float num6 = 0.76f;
+			bool flag = timeOfDay > num3 && timeOfDay < num4;
+			bool flag2 = timeOfDay > num5 && timeOfDay < num6;
+			bool flag3 = timeOfDay <= num3 || timeOfDay >= num6;
+			if (timeOfDay >= num4)
 			{
-				bool flag4 = timeOfDay <= num7;
+				bool flag4 = timeOfDay <= num5;
 			}
 			Color color = flag2 ? Color.red : (flag3 ? Color.green : (flag ? Color.yellow : Color.blue));
-			Vector3 v = referencePoint.position + quaternion * new Vector3(Mathf.Cos(0f), 0f, Mathf.Sin(0f)) * num;
-			for (int i = 1; i <= num4; i++)
+			Vector3 v = referencePoint.position + rotation * new Vector3(Mathf.Cos(0f), 0f, Mathf.Sin(0f)) * d;
+			for (int i = 1; i <= num2; i++)
 			{
-				float num9 = (float)i / (float)num4;
-				Vector3 vector2 = referencePoint.position + quaternion * new Vector3(Mathf.Cos(6.2831855f * num9), 0f, Mathf.Sin(6.2831855f * num9)) * num;
+				float num7 = (float)i / (float)num2;
+				Vector3 vector2 = referencePoint.position + rotation * new Vector3(Mathf.Cos(6.2831855f * num7), 0f, Mathf.Sin(6.2831855f * num7)) * d;
 				DebugUtil.DrawLine(v, vector2, color, false);
 				v = vector2;
 			}
@@ -287,17 +287,17 @@ public class MoonController : MonoBehaviour
 			DateTime serverTime = GorillaComputer.instance.GetServerTime();
 			if (this.debugOverrideCrackDayInOctober)
 			{
-				serverTime..ctor(2024, 10, Mathf.Clamp(this.crackDayInOctoberOverride, 1, 31));
+				serverTime = new DateTime(2024, 10, Mathf.Clamp(this.crackDayInOctoberOverride, 1, 31));
 			}
-			float num = Mathf.InverseLerp((float)this.crackStartDayOfYear, (float)this.crackEndDayOfYear, (float)serverTime.DayOfYear);
+			float value = Mathf.InverseLerp((float)this.crackStartDayOfYear, (float)this.crackEndDayOfYear, (float)serverTime.DayOfYear);
 			if (this.debugOverrideCrackProgress)
 			{
-				num = this.crackProgress;
+				value = this.crackProgress;
 			}
-			float num2 = 1f - Mathf.Clamp01(num);
-			if (this.crackRenderer != null && Mathf.Abs(num2 - this.currentlySetCrackProgress) > Mathf.Epsilon)
+			float num = 1f - Mathf.Clamp01(value);
+			if (this.crackRenderer != null && Mathf.Abs(num - this.currentlySetCrackProgress) > Mathf.Epsilon)
 			{
-				this.currentlySetCrackProgress = num2;
+				this.currentlySetCrackProgress = num;
 				this.crackMaterialPropertyBlock.SetFloat(ShaderProps._Progress, this.currentlySetCrackProgress);
 				this.crackRenderer.SetPropertyBlock(this.crackMaterialPropertyBlock);
 			}

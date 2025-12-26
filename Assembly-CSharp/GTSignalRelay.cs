@@ -49,7 +49,7 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 		}
 		GTSignalRelay.gActiveListeners.Add(listener);
 		List<GTSignalListener> list;
-		if (!GTSignalRelay.gSignalIdToListeners.TryGetValue(num, ref list))
+		if (!GTSignalRelay.gSignalIdToListeners.TryGetValue(num, out list))
 		{
 			list = new List<GTSignalListener>(64);
 			GTSignalRelay.gSignalIdToListeners.Add(num, list);
@@ -66,13 +66,13 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 		GTSignalRelay.gListenerSet.Remove(listener);
 		GTSignalRelay.gActiveListeners.Remove(listener);
 		List<GTSignalListener> list;
-		if (GTSignalRelay.gSignalIdToListeners.TryGetValue(listener.signal, ref list))
+		if (GTSignalRelay.gSignalIdToListeners.TryGetValue(listener.signal, out list))
 		{
 			list.Remove(listener);
 		}
 	}
 
-	[RuntimeInitializeOnLoadMethod(1)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void InitializeOnLoad()
 	{
 		Object.DontDestroyOnLoad(new GameObject("GTSignalRelay").AddComponent<GTSignalRelay>());
@@ -85,9 +85,9 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 			return;
 		}
 		object[] array = (object[])eventData.CustomData;
-		int num = (int)array[0];
+		int key = (int)array[0];
 		List<GTSignalListener> list;
-		if (!GTSignalRelay.gSignalIdToListeners.TryGetValue(num, ref list))
+		if (!GTSignalRelay.gSignalIdToListeners.TryGetValue(key, out list))
 		{
 			return;
 		}

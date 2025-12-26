@@ -89,7 +89,7 @@ public class EquipmentInteractor : MonoBehaviour
 
 	public bool GetIsHolding(XRNode node)
 	{
-		if (node == 4)
+		if (node == XRNode.LeftHand)
 		{
 			return this.leftHandHeldEquipment != null;
 		}
@@ -98,7 +98,7 @@ public class EquipmentInteractor : MonoBehaviour
 
 	public bool IsGrabDisabled(XRNode node)
 	{
-		if (node == 4)
+		if (node == XRNode.LeftHand)
 		{
 			return this.disableLeftGrab;
 		}
@@ -228,15 +228,15 @@ public class EquipmentInteractor : MonoBehaviour
 			}
 		}
 		this.iteratingInteractionPoints = false;
-		foreach (InteractionPoint interactionPoint2 in this.interactionPointsToRemove)
+		foreach (InteractionPoint item in this.interactionPointsToRemove)
 		{
 			if (this.overlapInteractionPointsLeft != null)
 			{
-				this.overlapInteractionPointsLeft.Remove(interactionPoint2);
+				this.overlapInteractionPointsLeft.Remove(item);
 			}
 			if (this.overlapInteractionPointsRight != null)
 			{
-				this.overlapInteractionPointsRight.Remove(interactionPoint2);
+				this.overlapInteractionPointsRight.Remove(item);
 			}
 		}
 		this.interactionPointsToRemove.Clear();
@@ -274,13 +274,13 @@ public class EquipmentInteractor : MonoBehaviour
 	{
 		if (isLeftHand)
 		{
-			this.grabValue = ControllerInputPoller.GripFloat(4);
-			this.tempValue = ControllerInputPoller.TriggerFloat(4);
+			this.grabValue = ControllerInputPoller.GripFloat(XRNode.LeftHand);
+			this.tempValue = ControllerInputPoller.TriggerFloat(XRNode.LeftHand);
 		}
 		else
 		{
-			this.grabValue = ControllerInputPoller.GripFloat(5);
-			this.tempValue = ControllerInputPoller.TriggerFloat(5);
+			this.grabValue = ControllerInputPoller.GripFloat(XRNode.RightHand);
+			this.tempValue = ControllerInputPoller.TriggerFloat(XRNode.RightHand);
 		}
 		this.grabValue = Mathf.Max(this.grabValue, this.tempValue);
 	}

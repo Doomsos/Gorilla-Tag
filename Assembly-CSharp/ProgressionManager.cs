@@ -71,19 +71,19 @@ public class ProgressionManager : MonoBehaviour
 	public UserHydratedProgressionTreeResponse GetTree(string treeName)
 	{
 		UserHydratedProgressionTreeResponse result;
-		this._trees.TryGetValue(treeName, ref result);
+		this._trees.TryGetValue(treeName, out result);
 		return result;
 	}
 
 	public bool GetInventoryItem(string inventoryKey, out ProgressionManager.MothershipItemSummary item)
 	{
-		return this._inventory.TryGetValue((inventoryKey != null) ? inventoryKey.Trim() : null, ref item);
+		return this._inventory.TryGetValue((inventoryKey != null) ? inventoryKey.Trim() : null, out item);
 	}
 
 	public int GetNodeCost(string treeName, string nodeId, string currencyKey)
 	{
 		UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse;
-		if (!this._trees.TryGetValue(treeName, ref userHydratedProgressionTreeResponse) || userHydratedProgressionTreeResponse == null || string.IsNullOrEmpty(nodeId) || string.IsNullOrEmpty(currencyKey))
+		if (!this._trees.TryGetValue(treeName, out userHydratedProgressionTreeResponse) || userHydratedProgressionTreeResponse == null || string.IsNullOrEmpty(nodeId) || string.IsNullOrEmpty(currencyKey))
 		{
 			return 0;
 		}
@@ -97,7 +97,7 @@ public class ProgressionManager : MonoBehaviour
 					{
 						KeyValuePair<string, MothershipHydratedInventoryChange> keyValuePair = enumerator2.Current;
 						string key = keyValuePair.Key;
-						if (string.Equals((key != null) ? key.Trim() : null, currencyKey.Trim(), 4))
+						if (string.Equals((key != null) ? key.Trim() : null, currencyKey.Trim(), StringComparison.Ordinal))
 						{
 							return keyValuePair.Value.Delta;
 						}
@@ -242,7 +242,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoPurchaseShiftCreditCapIncrease(new ProgressionManager.PurchaseShiftCreditCapIncreaseRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -260,7 +259,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoPurchaseShiftCredit(new ProgressionManager.PurchaseShiftCreditRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -273,7 +271,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoGetShiftCredit(new ProgressionManager.GetShiftCreditRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -291,7 +288,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoGetJuicerStatus(new ProgressionManager.GetJuicerStatusRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -309,7 +305,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoDepositCore(new ProgressionManager.DepositCoreRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -328,7 +323,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoPurchaseOverdrive(new ProgressionManager.PurchaseOverdriveRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -346,7 +340,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoSubtractShiftCredit(new ProgressionManager.SubtractShiftCreditRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -365,7 +358,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoAdvanceDockWristUpgradeLevel(new ProgressionManager.AdvanceDockWristUpgradeRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -379,7 +371,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoGetDockWristUpgradeStatus(new ProgressionManager.DockWristUpgradeStatusRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token
@@ -391,7 +382,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoPurchaseDrillUpgrade(new ProgressionManager.PurchaseDrillUpgradeRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -404,7 +394,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoRecycleTool(new ProgressionManager.RecycleToolRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -418,7 +407,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoStartOfShift(new ProgressionManager.StartOfShiftRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -439,7 +427,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoEndOfShiftReward(new ProgressionManager.EndOfShiftRewardRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -453,7 +440,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoGetGhostReactorStats(new ProgressionManager.GhostReactorStatsRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token
@@ -465,7 +451,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoGetGhostReactorInventory(new ProgressionManager.GhostReactorInventoryRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token
@@ -482,7 +467,6 @@ public class ProgressionManager : MonoBehaviour
 		base.StartCoroutine(this.DoSetGhostReactorInventory(new ProgressionManager.SetGhostReactorInventoryRequest
 		{
 			MothershipId = MothershipClientContext.MothershipId,
-			MothershipTitleId = MothershipClientApiUnity.TitleId,
 			MothershipEnvId = MothershipClientApiUnity.EnvironmentId,
 			MothershipDeploymentId = MothershipClientApiUnity.DeploymentId,
 			MothershipToken = MothershipClientContext.Token,
@@ -505,7 +489,7 @@ public class ProgressionManager : MonoBehaviour
 			int num2 = dictionary[requestType];
 			dictionary[requestType] = num2 + 1;
 			yield return new WaitForSeconds(num);
-			actionToTake.Invoke(data);
+			actionToTake(data);
 		}
 		else
 		{
@@ -513,7 +497,7 @@ public class ProgressionManager : MonoBehaviour
 			this.retryCounters[requestType] = 0;
 			if (failureActionToTake != null)
 			{
-				failureActionToTake.Invoke();
+				failureActionToTake();
 			}
 		}
 		yield break;
@@ -523,7 +507,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		bool result = false;
 		Debug.LogError(string.Format("PM: HandleWebRequestFailures Error: {0} -- raw response: ", request.responseCode) + request.downloadHandler.text);
-		if (request.result != 3)
+		if (request.result != UnityWebRequest.Result.ProtocolError)
 		{
 			result = true;
 		}
@@ -559,7 +543,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GetProgressionRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetProgression);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			int num = int.Parse(request.downloadHandler.text);
 			this._tracks[data.TrackId] = num;
@@ -568,7 +552,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string, int> onTrackRead = this.OnTrackRead;
 			if (onTrackRead != null)
 			{
-				onTrackRead.Invoke(data.TrackId, num);
+				onTrackRead(data.TrackId, num);
 			}
 			yield break;
 		}
@@ -587,7 +571,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SetProgressionRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.SetProgression);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			ProgressionManager.GetProgressionResponse getProgressionResponse = JsonConvert.DeserializeObject<ProgressionManager.GetProgressionResponse>(request.downloadHandler.text);
 			this._tracks[data.TrackId] = getProgressionResponse.Progress;
@@ -595,7 +579,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string, int> onTrackSet = this.OnTrackSet;
 			if (onTrackSet != null)
 			{
-				onTrackSet.Invoke(data.TrackId, getProgressionResponse.Progress);
+				onTrackSet(data.TrackId, getProgressionResponse.Progress);
 			}
 			yield break;
 		}
@@ -618,7 +602,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.UnlockNodeRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.UnlockProgressionTreeNode);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			this.retryCounters[ProgressionManager.RequestType.UnlockProgressionTreeNode] = 0;
 			this.RefreshProgressionTree();
@@ -626,7 +610,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string, string> onNodeUnlocked = this.OnNodeUnlocked;
 			if (onNodeUnlocked != null)
 			{
-				onNodeUnlocked.Invoke(data.TreeId, data.NodeId);
+				onNodeUnlocked(data.TreeId, data.NodeId);
 			}
 			yield break;
 		}
@@ -655,7 +639,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onSuccess = OnSuccess;
 			if (onSuccess != null)
 			{
-				onSuccess.Invoke(incrementSIResourceResponse.ResourceType);
+				onSuccess(incrementSIResourceResponse.ResourceType);
 			}
 			yield break;
 		}
@@ -664,7 +648,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onFailure = OnFailure;
 			if (onFailure != null)
 			{
-				onFailure.Invoke(request.error);
+				onFailure(request.error);
 			}
 			yield break;
 		}
@@ -678,7 +662,7 @@ public class ProgressionManager : MonoBehaviour
 			{
 				return;
 			}
-			onFailure2.Invoke(request.error);
+			onFailure2(request.error);
 		});
 		yield break;
 	}
@@ -693,7 +677,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<ProgressionManager.UserQuestsStatusResponse> onSuccess = OnSuccess;
 			if (onSuccess != null)
 			{
-				onSuccess.Invoke(getSIQuestsStatusResponse.Result);
+				onSuccess(getSIQuestsStatusResponse.Result);
 			}
 			yield break;
 		}
@@ -702,7 +686,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onFailure = OnFailure;
 			if (onFailure != null)
 			{
-				onFailure.Invoke(request.error);
+				onFailure(request.error);
 			}
 			yield break;
 		}
@@ -716,7 +700,7 @@ public class ProgressionManager : MonoBehaviour
 			{
 				return;
 			}
-			onFailure2.Invoke(request.error);
+			onFailure2(request.error);
 		});
 		yield break;
 	}
@@ -731,7 +715,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<ProgressionManager.UserQuestsStatusResponse> onSuccess = OnSuccess;
 			if (onSuccess != null)
 			{
-				onSuccess.Invoke(getSIQuestsStatusResponse.Result);
+				onSuccess(getSIQuestsStatusResponse.Result);
 			}
 			yield break;
 		}
@@ -740,7 +724,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onFailure = OnFailure;
 			if (onFailure != null)
 			{
-				onFailure.Invoke(request.error);
+				onFailure(request.error);
 			}
 			yield break;
 		}
@@ -754,7 +738,7 @@ public class ProgressionManager : MonoBehaviour
 			{
 				return;
 			}
-			onFailure2.Invoke(request.error);
+			onFailure2(request.error);
 		});
 		yield break;
 	}
@@ -769,7 +753,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<ProgressionManager.UserQuestsStatusResponse> onSuccess = OnSuccess;
 			if (onSuccess != null)
 			{
-				onSuccess.Invoke(getSIQuestsStatusResponse.Result);
+				onSuccess(getSIQuestsStatusResponse.Result);
 			}
 			yield break;
 		}
@@ -778,7 +762,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onFailure = OnFailure;
 			if (onFailure != null)
 			{
-				onFailure.Invoke(request.error);
+				onFailure(request.error);
 			}
 			yield break;
 		}
@@ -792,7 +776,7 @@ public class ProgressionManager : MonoBehaviour
 			{
 				return;
 			}
-			onFailure2.Invoke(request.error);
+			onFailure2(request.error);
 		});
 		yield break;
 	}
@@ -807,7 +791,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<List<RotatingQuest>> onSuccess = OnSuccess;
 			if (onSuccess != null)
 			{
-				onSuccess.Invoke(getActiveSIQuestsResponse.Result.Quests);
+				onSuccess(getActiveSIQuestsResponse.Result.Quests);
 			}
 			yield break;
 		}
@@ -816,7 +800,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onFailure = OnFailure;
 			if (onFailure != null)
 			{
-				onFailure.Invoke(request.error);
+				onFailure(request.error);
 			}
 			yield break;
 		}
@@ -830,7 +814,7 @@ public class ProgressionManager : MonoBehaviour
 			{
 				return;
 			}
-			onFailure2.Invoke(request.error);
+			onFailure2(request.error);
 		});
 		yield break;
 	}
@@ -845,7 +829,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<ProgressionManager.UserQuestsStatusResponse> onSuccess = OnSuccess;
 			if (onSuccess != null)
 			{
-				onSuccess.Invoke(getSIQuestsStatusResponse.Result);
+				onSuccess(getSIQuestsStatusResponse.Result);
 			}
 			yield break;
 		}
@@ -854,7 +838,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onFailure = OnFailure;
 			if (onFailure != null)
 			{
-				onFailure.Invoke(request.error);
+				onFailure(request.error);
 			}
 			yield break;
 		}
@@ -868,7 +852,7 @@ public class ProgressionManager : MonoBehaviour
 			{
 				return;
 			}
-			onFailure2.Invoke(request.error);
+			onFailure2(request.error);
 		});
 		yield break;
 	}
@@ -882,7 +866,7 @@ public class ProgressionManager : MonoBehaviour
 			Action onSuccess = OnSuccess;
 			if (onSuccess != null)
 			{
-				onSuccess.Invoke();
+				onSuccess();
 			}
 			yield break;
 		}
@@ -891,7 +875,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onFailure = OnFailure;
 			if (onFailure != null)
 			{
-				onFailure.Invoke(request.error);
+				onFailure(request.error);
 			}
 			yield break;
 		}
@@ -905,7 +889,7 @@ public class ProgressionManager : MonoBehaviour
 			{
 				return;
 			}
-			onFailure2.Invoke(request.error);
+			onFailure2(request.error);
 		});
 		yield break;
 	}
@@ -920,7 +904,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<ProgressionManager.UserInventory> onSuccess = OnSuccess;
 			if (onSuccess != null)
 			{
-				onSuccess.Invoke(userInventoryResponse.Result);
+				onSuccess(userInventoryResponse.Result);
 			}
 			yield break;
 		}
@@ -929,7 +913,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<string> onFailure = OnFailure;
 			if (onFailure != null)
 			{
-				onFailure.Invoke(request.error);
+				onFailure(request.error);
 			}
 			yield break;
 		}
@@ -943,7 +927,7 @@ public class ProgressionManager : MonoBehaviour
 			{
 				return;
 			}
-			onFailure2.Invoke(request.error);
+			onFailure2(request.error);
 		});
 		yield break;
 	}
@@ -952,7 +936,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseShiftCreditCapIncreaseRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.PurchaseShiftCreditCapIncrease);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			ProgressionManager.PurchaseShiftCreditCapIncreaseResponse purchaseShiftCreditCapIncreaseResponse = JsonConvert.DeserializeObject<ProgressionManager.PurchaseShiftCreditCapIncreaseResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.PurchaseShiftCreditCapIncrease] = 0;
@@ -960,12 +944,12 @@ public class ProgressionManager : MonoBehaviour
 			Action<string, int, int> onGetShiftCreditCapData = this.OnGetShiftCreditCapData;
 			if (onGetShiftCreditCapData != null)
 			{
-				onGetShiftCreditCapData.Invoke(purchaseShiftCreditCapIncreaseResponse.TargetMothershipId, purchaseShiftCreditCapIncreaseResponse.CurrentShiftCreditCapIncreases, purchaseShiftCreditCapIncreaseResponse.CurrentShiftCreditCapIncreasesMax);
+				onGetShiftCreditCapData(purchaseShiftCreditCapIncreaseResponse.TargetMothershipId, purchaseShiftCreditCapIncreaseResponse.CurrentShiftCreditCapIncreases, purchaseShiftCreditCapIncreaseResponse.CurrentShiftCreditCapIncreasesMax);
 			}
 			Action<bool> onPurchaseShiftCreditCapIncrease = this.OnPurchaseShiftCreditCapIncrease;
 			if (onPurchaseShiftCreditCapIncrease != null)
 			{
-				onPurchaseShiftCreditCapIncrease.Invoke(true);
+				onPurchaseShiftCreditCapIncrease(true);
 			}
 			yield break;
 		}
@@ -974,7 +958,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<bool> onPurchaseShiftCreditCapIncrease2 = this.OnPurchaseShiftCreditCapIncrease;
 			if (onPurchaseShiftCreditCapIncrease2 != null)
 			{
-				onPurchaseShiftCreditCapIncrease2.Invoke(false);
+				onPurchaseShiftCreditCapIncrease2(false);
 			}
 			yield break;
 		}
@@ -993,7 +977,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseShiftCreditRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.PurchaseShiftCredit);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			ProgressionManager.PurchaseShiftCreditResponse purchaseShiftCreditResponse = JsonConvert.DeserializeObject<ProgressionManager.PurchaseShiftCreditResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.PurchaseShiftCredit] = 0;
@@ -1001,12 +985,12 @@ public class ProgressionManager : MonoBehaviour
 			Action<string, int> onGetShiftCredit = this.OnGetShiftCredit;
 			if (onGetShiftCredit != null)
 			{
-				onGetShiftCredit.Invoke(purchaseShiftCreditResponse.TargetMothershipId, purchaseShiftCreditResponse.CurrentShiftCredits);
+				onGetShiftCredit(purchaseShiftCreditResponse.TargetMothershipId, purchaseShiftCreditResponse.CurrentShiftCredits);
 			}
 			Action<bool> onPurchaseShiftCredit = this.OnPurchaseShiftCredit;
 			if (onPurchaseShiftCredit != null)
 			{
-				onPurchaseShiftCredit.Invoke(true);
+				onPurchaseShiftCredit(true);
 			}
 			GRPlayer local = GRPlayer.GetLocal();
 			if (local != null)
@@ -1020,7 +1004,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<bool> onPurchaseShiftCredit2 = this.OnPurchaseShiftCredit;
 			if (onPurchaseShiftCredit2 != null)
 			{
-				onPurchaseShiftCredit2.Invoke(false);
+				onPurchaseShiftCredit2(false);
 			}
 			yield break;
 		}
@@ -1039,19 +1023,19 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GetShiftCreditRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetShiftCredit);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			ProgressionManager.ShiftCreditResponse shiftCreditResponse = JsonConvert.DeserializeObject<ProgressionManager.ShiftCreditResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.GetShiftCredit] = 0;
 			Action<string, int> onGetShiftCredit = this.OnGetShiftCredit;
 			if (onGetShiftCredit != null)
 			{
-				onGetShiftCredit.Invoke(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCredits);
+				onGetShiftCredit(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCredits);
 			}
 			Action<string, int, int> onGetShiftCreditCapData = this.OnGetShiftCreditCapData;
 			if (onGetShiftCreditCapData != null)
 			{
-				onGetShiftCreditCapData.Invoke(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCreditCapIncreases, shiftCreditResponse.CurrentShiftCreditCapIncreasesMax);
+				onGetShiftCreditCapData(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCreditCapIncreases, shiftCreditResponse.CurrentShiftCreditCapIncreasesMax);
 			}
 			yield break;
 		}
@@ -1070,14 +1054,14 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GetJuicerStatusRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetJuicerStatus);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			this.retryCounters[ProgressionManager.RequestType.GetJuicerStatus] = 0;
-			ProgressionManager.JuicerStatusResponse juicerStatusResponse = JsonConvert.DeserializeObject<ProgressionManager.JuicerStatusResponse>(request.downloadHandler.text);
+			ProgressionManager.JuicerStatusResponse obj = JsonConvert.DeserializeObject<ProgressionManager.JuicerStatusResponse>(request.downloadHandler.text);
 			Action<ProgressionManager.JuicerStatusResponse> onJucierStatusUpdated = this.OnJucierStatusUpdated;
 			if (onJucierStatusUpdated != null)
 			{
-				onJucierStatusUpdated.Invoke(juicerStatusResponse);
+				onJucierStatusUpdated(obj);
 			}
 			yield break;
 		}
@@ -1096,7 +1080,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.DepositCoreRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.DepositCore);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			this.retryCounters[ProgressionManager.RequestType.DepositCore] = 0;
 			if (data.CoreBeingDeposited == ProgressionManager.CoreType.ChaosSeed)
@@ -1104,7 +1088,7 @@ public class ProgressionManager : MonoBehaviour
 				Action<bool> onChaosDepositSuccess = this.OnChaosDepositSuccess;
 				if (onChaosDepositSuccess != null)
 				{
-					onChaosDepositSuccess.Invoke(true);
+					onChaosDepositSuccess(true);
 				}
 				this.GetJuicerStatus();
 			}
@@ -1114,7 +1098,7 @@ public class ProgressionManager : MonoBehaviour
 				Action<string, int> onGetShiftCredit = this.OnGetShiftCredit;
 				if (onGetShiftCredit != null)
 				{
-					onGetShiftCredit.Invoke(data.MothershipId, depositCoreResponse.CurrentShiftCredits);
+					onGetShiftCredit(data.MothershipId, depositCoreResponse.CurrentShiftCredits);
 				}
 			}
 			yield break;
@@ -1126,7 +1110,7 @@ public class ProgressionManager : MonoBehaviour
 				Action<bool> onChaosDepositSuccess2 = this.OnChaosDepositSuccess;
 				if (onChaosDepositSuccess2 != null)
 				{
-					onChaosDepositSuccess2.Invoke(false);
+					onChaosDepositSuccess2(false);
 				}
 				this.GetJuicerStatus();
 			}
@@ -1147,7 +1131,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseOverdriveRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.PurchaseOverdrive);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			this.retryCounters[ProgressionManager.RequestType.PurchaseOverdrive] = 0;
 			this.GetJuicerStatus();
@@ -1155,7 +1139,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<bool> onPurchaseOverdrive = this.OnPurchaseOverdrive;
 			if (onPurchaseOverdrive != null)
 			{
-				onPurchaseOverdrive.Invoke(true);
+				onPurchaseOverdrive(true);
 			}
 			yield break;
 		}
@@ -1164,7 +1148,7 @@ public class ProgressionManager : MonoBehaviour
 			Action<bool> onPurchaseOverdrive2 = this.OnPurchaseOverdrive;
 			if (onPurchaseOverdrive2 != null)
 			{
-				onPurchaseOverdrive2.Invoke(false);
+				onPurchaseOverdrive2(false);
 			}
 			yield break;
 		}
@@ -1183,19 +1167,19 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SubtractShiftCreditRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.SubtractShiftCredit);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			ProgressionManager.ShiftCreditResponse shiftCreditResponse = JsonConvert.DeserializeObject<ProgressionManager.ShiftCreditResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.SubtractShiftCredit] = 0;
 			Action<string, int> onGetShiftCredit = this.OnGetShiftCredit;
 			if (onGetShiftCredit != null)
 			{
-				onGetShiftCredit.Invoke(data.MothershipId, shiftCreditResponse.CurrentShiftCredits);
+				onGetShiftCredit(data.MothershipId, shiftCreditResponse.CurrentShiftCredits);
 			}
 			Action<string, int, int> onGetShiftCreditCapData = this.OnGetShiftCreditCapData;
 			if (onGetShiftCreditCapData != null)
 			{
-				onGetShiftCreditCapData.Invoke(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCreditCapIncreases, shiftCreditResponse.CurrentShiftCreditCapIncreasesMax);
+				onGetShiftCreditCapData(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCreditCapIncreases, shiftCreditResponse.CurrentShiftCreditCapIncreasesMax);
 			}
 			yield break;
 		}
@@ -1214,14 +1198,14 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.AdvanceDockWristUpgradeRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.AdvanceDockWristUpgrade);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			ProgressionManager.DockWristStatusResponse dockWristStatusResponse = JsonConvert.DeserializeObject<ProgressionManager.DockWristStatusResponse>(request.downloadHandler.text);
+			ProgressionManager.DockWristStatusResponse obj = JsonConvert.DeserializeObject<ProgressionManager.DockWristStatusResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.AdvanceDockWristUpgrade] = 0;
 			Action<ProgressionManager.DockWristStatusResponse> onDockWristStatusUpdated = this.OnDockWristStatusUpdated;
 			if (onDockWristStatusUpdated != null)
 			{
-				onDockWristStatusUpdated.Invoke(dockWristStatusResponse);
+				onDockWristStatusUpdated(obj);
 			}
 			yield break;
 		}
@@ -1240,14 +1224,14 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.DockWristUpgradeStatusRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetDockWristUpgradeStatus);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			ProgressionManager.DockWristStatusResponse dockWristStatusResponse = JsonConvert.DeserializeObject<ProgressionManager.DockWristStatusResponse>(request.downloadHandler.text);
+			ProgressionManager.DockWristStatusResponse obj = JsonConvert.DeserializeObject<ProgressionManager.DockWristStatusResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.GetDockWristUpgradeStatus] = 0;
 			Action<ProgressionManager.DockWristStatusResponse> onDockWristStatusUpdated = this.OnDockWristStatusUpdated;
 			if (onDockWristStatusUpdated != null)
 			{
-				onDockWristStatusUpdated.Invoke(dockWristStatusResponse);
+				onDockWristStatusUpdated(obj);
 			}
 			yield break;
 		}
@@ -1266,14 +1250,14 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.PurchaseDrillUpgradeRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.PurchaseDrillUpgrade);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			this.retryCounters[ProgressionManager.RequestType.PurchaseDrillUpgrade] = 0;
 			this.RefreshUserInventory();
 			Action<string, string> onNodeUnlocked = this.OnNodeUnlocked;
 			if (onNodeUnlocked != null)
 			{
-				onNodeUnlocked.Invoke("", "");
+				onNodeUnlocked("", "");
 			}
 			if (data.Upgrade == ProgressionManager.DrillUpgradeLevel.Base)
 			{
@@ -1300,19 +1284,19 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.RecycleToolRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.RecycleTool);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			ProgressionManager.ShiftCreditResponse shiftCreditResponse = JsonConvert.DeserializeObject<ProgressionManager.ShiftCreditResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.RecycleTool] = 0;
 			Action<string, int> onGetShiftCredit = this.OnGetShiftCredit;
 			if (onGetShiftCredit != null)
 			{
-				onGetShiftCredit.Invoke(data.MothershipId, shiftCreditResponse.CurrentShiftCredits);
+				onGetShiftCredit(data.MothershipId, shiftCreditResponse.CurrentShiftCredits);
 			}
 			Action<string, int, int> onGetShiftCreditCapData = this.OnGetShiftCreditCapData;
 			if (onGetShiftCreditCapData != null)
 			{
-				onGetShiftCreditCapData.Invoke(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCreditCapIncreases, shiftCreditResponse.CurrentShiftCreditCapIncreasesMax);
+				onGetShiftCreditCapData(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCreditCapIncreases, shiftCreditResponse.CurrentShiftCreditCapIncreasesMax);
 			}
 			yield break;
 		}
@@ -1331,7 +1315,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.StartOfShiftRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.StartOfShift);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			this.retryCounters[ProgressionManager.RequestType.StartOfShift] = 0;
 			yield break;
@@ -1351,19 +1335,19 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.EndOfShiftRewardRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.EndOfShiftReward);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			ProgressionManager.ShiftCreditResponse shiftCreditResponse = JsonConvert.DeserializeObject<ProgressionManager.ShiftCreditResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.EndOfShiftReward] = 0;
 			Action<string, int> onGetShiftCredit = this.OnGetShiftCredit;
 			if (onGetShiftCredit != null)
 			{
-				onGetShiftCredit.Invoke(data.MothershipId, shiftCreditResponse.CurrentShiftCredits);
+				onGetShiftCredit(data.MothershipId, shiftCreditResponse.CurrentShiftCredits);
 			}
 			Action<string, int, int> onGetShiftCreditCapData = this.OnGetShiftCreditCapData;
 			if (onGetShiftCreditCapData != null)
 			{
-				onGetShiftCreditCapData.Invoke(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCreditCapIncreases, shiftCreditResponse.CurrentShiftCreditCapIncreasesMax);
+				onGetShiftCreditCapData(shiftCreditResponse.TargetMothershipId, shiftCreditResponse.CurrentShiftCreditCapIncreases, shiftCreditResponse.CurrentShiftCreditCapIncreasesMax);
 			}
 			yield break;
 		}
@@ -1386,14 +1370,14 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GhostReactorStatsRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetGhostReactorStats);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			ProgressionManager.GhostReactorStatsResponse ghostReactorStatsResponse = JsonConvert.DeserializeObject<ProgressionManager.GhostReactorStatsResponse>(request.downloadHandler.text);
+			ProgressionManager.GhostReactorStatsResponse obj = JsonConvert.DeserializeObject<ProgressionManager.GhostReactorStatsResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.GetGhostReactorStats] = 0;
 			Action<ProgressionManager.GhostReactorStatsResponse> onGhostReactorStatsUpdated = this.OnGhostReactorStatsUpdated;
 			if (onGhostReactorStatsUpdated != null)
 			{
-				onGhostReactorStatsUpdated.Invoke(ghostReactorStatsResponse);
+				onGhostReactorStatsUpdated(obj);
 			}
 			yield break;
 		}
@@ -1412,14 +1396,14 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.GhostReactorInventoryRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.GetGhostReactorInventory);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			ProgressionManager.GhostReactorInventoryResponse ghostReactorInventoryResponse = JsonConvert.DeserializeObject<ProgressionManager.GhostReactorInventoryResponse>(request.downloadHandler.text);
+			ProgressionManager.GhostReactorInventoryResponse obj = JsonConvert.DeserializeObject<ProgressionManager.GhostReactorInventoryResponse>(request.downloadHandler.text);
 			this.retryCounters[ProgressionManager.RequestType.GetGhostReactorInventory] = 0;
 			Action<ProgressionManager.GhostReactorInventoryResponse> onGhostReactorInventoryUpdated = this.OnGhostReactorInventoryUpdated;
 			if (onGhostReactorInventoryUpdated != null)
 			{
-				onGhostReactorInventoryUpdated.Invoke(ghostReactorInventoryResponse);
+				onGhostReactorInventoryUpdated(obj);
 			}
 			yield break;
 		}
@@ -1438,7 +1422,7 @@ public class ProgressionManager : MonoBehaviour
 	{
 		UnityWebRequest request = this.FormatWebRequest<ProgressionManager.SetGhostReactorInventoryRequest>(PlayFabAuthenticatorSettings.ProgressionApiBaseUrl, data, ProgressionManager.RequestType.SetGhostReactorInventory);
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
 			this.retryCounters[ProgressionManager.RequestType.SetGhostReactorInventory] = 0;
 			yield break;
@@ -1461,96 +1445,96 @@ public class ProgressionManager : MonoBehaviour
 
 	private UnityWebRequest FormatWebRequest<T>(string url, T pendingRequest, ProgressionManager.RequestType type)
 	{
-		string text = "";
+		string str = "";
 		byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(pendingRequest));
 		switch (type)
 		{
 		case ProgressionManager.RequestType.GetProgression:
-			text = "/api/GetProgression";
+			str = "/api/GetProgression";
 			break;
 		case ProgressionManager.RequestType.SetProgression:
-			text = "/api/SetProgression";
+			str = "/api/SetProgression";
 			break;
 		case ProgressionManager.RequestType.UnlockProgressionTreeNode:
-			text = "/api/UnlockProgressionTreeNode";
+			str = "/api/UnlockProgressionTreeNode";
 			break;
 		case ProgressionManager.RequestType.IncrementSIResource:
-			text = "/api/IncrementSIResource";
+			str = "/api/IncrementSIResource";
 			break;
 		case ProgressionManager.RequestType.CompleteSIQuest:
-			text = "/api/SetSIQuestComplete";
+			str = "/api/SetSIQuestComplete";
 			break;
 		case ProgressionManager.RequestType.CompleteSIBonus:
-			text = "/api/SetSIBonusComplete";
+			str = "/api/SetSIBonusComplete";
 			break;
 		case ProgressionManager.RequestType.CollectSIIdol:
-			text = "/api/SetSIIdolCollect";
+			str = "/api/SetSIIdolCollect";
 			break;
 		case ProgressionManager.RequestType.GetActiveSIQuests:
-			text = "/api/GetActiveSIQuests";
+			str = "/api/GetActiveSIQuests";
 			break;
 		case ProgressionManager.RequestType.GetSIQuestsStatus:
-			text = "/api/GetSIQuestsStatus";
+			str = "/api/GetSIQuestsStatus";
 			break;
 		case ProgressionManager.RequestType.ResetSIQuestsStatus:
-			text = "/api/ResetSIQuestsStatus";
+			str = "/api/ResetSIQuestsStatus";
 			break;
 		case ProgressionManager.RequestType.PurchaseTechPoints:
-			text = "/api/PurchaseTechPoints";
+			str = "/api/PurchaseTechPoints";
 			break;
 		case ProgressionManager.RequestType.PurchaseResources:
-			text = "/api/PurchaseResources";
+			str = "/api/PurchaseResources";
 			break;
 		case ProgressionManager.RequestType.PurchaseShiftCreditCapIncrease:
-			text = "/api/PurchaseShiftCreditCapIncrease";
+			str = "/api/PurchaseShiftCreditCapIncrease";
 			break;
 		case ProgressionManager.RequestType.PurchaseShiftCredit:
-			text = "/api/PurchaseShiftCredit";
+			str = "/api/PurchaseShiftCredit";
 			break;
 		case ProgressionManager.RequestType.GetJuicerStatus:
-			text = "/api/GetJuicerStatus";
+			str = "/api/GetJuicerStatus";
 			break;
 		case ProgressionManager.RequestType.DepositCore:
-			text = "/api/DepositGRCore";
+			str = "/api/DepositGRCore";
 			break;
 		case ProgressionManager.RequestType.PurchaseOverdrive:
-			text = "/api/PurchaseOverdrive";
+			str = "/api/PurchaseOverdrive";
 			break;
 		case ProgressionManager.RequestType.GetShiftCredit:
-			text = "/api/GetShiftCredit";
+			str = "/api/GetShiftCredit";
 			break;
 		case ProgressionManager.RequestType.SubtractShiftCredit:
-			text = "/api/SubtractShiftCredit";
+			str = "/api/SubtractShiftCredit";
 			break;
 		case ProgressionManager.RequestType.AdvanceDockWristUpgrade:
-			text = "/api/AdvanceDockWristUpgrade";
+			str = "/api/AdvanceDockWristUpgrade";
 			break;
 		case ProgressionManager.RequestType.GetDockWristUpgradeStatus:
-			text = "/api/GetDockWristUpgradeStatus";
+			str = "/api/GetDockWristUpgradeStatus";
 			break;
 		case ProgressionManager.RequestType.PurchaseDrillUpgrade:
-			text = "/api/PurchaseDrillUpgrade";
+			str = "/api/PurchaseDrillUpgrade";
 			break;
 		case ProgressionManager.RequestType.RecycleTool:
-			text = "/api/RecycleTool";
+			str = "/api/RecycleTool";
 			break;
 		case ProgressionManager.RequestType.StartOfShift:
-			text = "/api/StartOfShift";
+			str = "/api/StartOfShift";
 			break;
 		case ProgressionManager.RequestType.EndOfShiftReward:
-			text = "/api/EndOfShiftReward";
+			str = "/api/EndOfShiftReward";
 			break;
 		case ProgressionManager.RequestType.GetGhostReactorStats:
-			text = "/api/GetGhostReactorStats";
+			str = "/api/GetGhostReactorStats";
 			break;
 		case ProgressionManager.RequestType.GetGhostReactorInventory:
-			text = "/api/GetGhostReactorInventory";
+			str = "/api/GetGhostReactorInventory";
 			break;
 		case ProgressionManager.RequestType.SetGhostReactorInventory:
-			text = "/api/SetGhostReactorInventory";
+			str = "/api/SetGhostReactorInventory";
 			break;
 		}
-		UnityWebRequest unityWebRequest = new UnityWebRequest(url + text, "POST");
+		UnityWebRequest unityWebRequest = new UnityWebRequest(url + str, "POST");
 		unityWebRequest.uploadHandler = new UploadHandlerRaw(bytes);
 		unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
 		unityWebRequest.SetRequestHeader("Content-Type", "application/json");
@@ -1577,7 +1561,7 @@ public class ProgressionManager : MonoBehaviour
 		{
 			return;
 		}
-		onTreeUpdated.Invoke();
+		onTreeUpdated();
 	}
 
 	private void OnGetInventory(MothershipGetInventoryResponse response)
@@ -1595,8 +1579,8 @@ public class ProgressionManager : MonoBehaviour
 				foreach (MothershipInventoryItemSummary mothershipInventoryItemSummary in keyValuePair.Value.entitlements)
 				{
 					string name = mothershipInventoryItemSummary.name;
-					string text = (name != null) ? name.Trim() : null;
-					this._inventory[text] = new ProgressionManager.MothershipItemSummary
+					string key = (name != null) ? name.Trim() : null;
+					this._inventory[key] = new ProgressionManager.MothershipItemSummary
 					{
 						EntitlementId = mothershipInventoryItemSummary.entitlement_id,
 						InGameId = mothershipInventoryItemSummary.in_game_id,
@@ -1611,7 +1595,7 @@ public class ProgressionManager : MonoBehaviour
 		{
 			return;
 		}
-		onInventoryUpdated.Invoke();
+		onInventoryUpdated();
 	}
 
 	public int GetShinyRocksTotal()
@@ -1871,8 +1855,6 @@ public class ProgressionManager : MonoBehaviour
 		public string MothershipToken;
 
 		public string MothershipEnvId;
-
-		public string MothershipTitleId;
 
 		public string MothershipDeploymentId;
 	}

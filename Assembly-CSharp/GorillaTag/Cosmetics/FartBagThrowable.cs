@@ -56,7 +56,7 @@ namespace GorillaTag.Cosmetics
 			}
 			if (this._events != null)
 			{
-				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.DeflateEvent);
+				this._events.Activate += this.DeflateEvent;
 			}
 		}
 
@@ -172,7 +172,7 @@ namespace GorillaTag.Cosmetics
 			Action<IProjectile> onDeflated = this.OnDeflated;
 			if (onDeflated != null)
 			{
-				onDeflated.Invoke(this);
+				onDeflated(this);
 			}
 			this.deflated = false;
 		}
@@ -181,7 +181,7 @@ namespace GorillaTag.Cosmetics
 		{
 			if (this._events != null)
 			{
-				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.DeflateEvent);
+				this._events.Activate -= this.DeflateEvent;
 				this._events.Dispose();
 				this._events = null;
 			}

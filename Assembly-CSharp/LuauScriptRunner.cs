@@ -11,10 +11,10 @@ public class LuauScriptRunner
 	{
 		if (status != 0)
 		{
-			sbyte* ptr = Luau.lua_tostring(L, -1);
-			LuauHud.Instance.LuauLog(new string(ptr));
-			sbyte* ptr2 = (sbyte*)Luau.lua_debugtrace(L);
-			LuauHud.Instance.LuauLog(new string(ptr2));
+			sbyte* value = Luau.lua_tostring(L, -1);
+			LuauHud.Instance.LuauLog(new string(value));
+			sbyte* value2 = (sbyte*)Luau.lua_debugtrace(L);
+			LuauHud.Instance.LuauLog(new string(value2));
 			LuauHud.Instance.LuauLog("Error code: " + status.ToString());
 			Luau.lua_close(L);
 			return true;

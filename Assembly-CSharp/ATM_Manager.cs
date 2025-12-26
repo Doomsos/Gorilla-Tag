@@ -58,9 +58,9 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 
 	public void HookupToCreatorCodes()
 	{
-		CreatorCodes.InitializedEvent += new Action(this.CreatorCodesInitialized);
-		CreatorCodes.OnCreatorCodeChangedEvent += new Action<string>(this.OnCreatorCodeChanged);
-		CreatorCodes.OnCreatorCodeFailureEvent += new Action<string>(this.OnOnCreatorCodeFailureEvent);
+		CreatorCodes.InitializedEvent += this.CreatorCodesInitialized;
+		CreatorCodes.OnCreatorCodeChangedEvent += this.OnCreatorCodeChanged;
+		CreatorCodes.OnCreatorCodeFailureEvent += this.OnOnCreatorCodeFailureEvent;
 		if (CreatorCodes.Intialized)
 		{
 			this.CreatorCodesInitialized();

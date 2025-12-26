@@ -32,8 +32,8 @@ public class TeleportNode : GorillaTriggerBox
 		}
 		Physics.SyncTransforms();
 		Vector3 position = transform2.TransformPoint(transform.InverseTransformPoint(instance.transform.position));
-		Quaternion quaternion = Quaternion.Inverse(transform.rotation) * instance.transform.rotation;
-		Quaternion rotation = transform2.rotation * quaternion;
+		Quaternion rhs = Quaternion.Inverse(transform.rotation) * instance.transform.rotation;
+		Quaternion rotation = transform2.rotation * rhs;
 		base.StartCoroutine(this.DelayedTeleport(instance, position, rotation));
 		this.teleportTime = Time.time;
 	}

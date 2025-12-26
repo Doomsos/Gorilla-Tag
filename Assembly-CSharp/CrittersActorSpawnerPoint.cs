@@ -37,7 +37,7 @@ public class CrittersActorSpawnerPoint : CrittersActor
 		Action<CrittersActor> onSpawnChanged = this.OnSpawnChanged;
 		if (onSpawnChanged != null)
 		{
-			onSpawnChanged.Invoke(this.spawnedActor);
+			onSpawnChanged(this.spawnedActor);
 		}
 		this.updatedSinceLastFrame = true;
 	}
@@ -56,7 +56,7 @@ public class CrittersActorSpawnerPoint : CrittersActor
 		else
 		{
 			CrittersActor crittersActor;
-			if (!CrittersManager.instance.actorById.TryGetValue(newSpawnedActorID, ref crittersActor))
+			if (!CrittersManager.instance.actorById.TryGetValue(newSpawnedActorID, out crittersActor))
 			{
 				return;
 			}
@@ -68,7 +68,7 @@ public class CrittersActorSpawnerPoint : CrittersActor
 		{
 			return;
 		}
-		onSpawnChanged.Invoke(this.spawnedActor);
+		onSpawnChanged(this.spawnedActor);
 	}
 
 	public override void SendDataByCrittersActorType(PhotonStream stream)

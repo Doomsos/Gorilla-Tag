@@ -28,8 +28,7 @@ internal class RoomSystem : MonoBehaviour
 		byte b2 = Convert.ToByte(projectileData[6]);
 		byte b3 = Convert.ToByte(projectileData[7]);
 		byte b4 = Convert.ToByte(projectileData[8]);
-		Color32 color;
-		color..ctor(b, b2, b3, b4);
+		Color32 c = new Color32(b, b2, b3, b4);
 		Vector3 position = (Vector3)projectileData[0];
 		Vector3 velocity = (Vector3)projectileData[1];
 		float num = 10000f;
@@ -48,7 +47,7 @@ internal class RoomSystem : MonoBehaviour
 					RoomSystem.launchProjectile.position = position;
 					RoomSystem.launchProjectile.velocity = velocity;
 					RoomSystem.launchProjectile.overridecolour = overridecolour;
-					RoomSystem.launchProjectile.colour = color;
+					RoomSystem.launchProjectile.colour = c;
 					RoomSystem.launchProjectile.projectileIndex = projectileIndex;
 					RoomSystem.launchProjectile.projectileSource = projectileSource;
 					RoomSystem.launchProjectile.messageInfo = info;
@@ -156,11 +155,11 @@ internal class RoomSystem : MonoBehaviour
 			}
 		}
 		RoomSystem.sceneViews = list.ToArray();
-		NetworkSystem.Instance.OnRaiseEvent += new Action<byte, object, int>(RoomSystem.OnEvent);
-		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeftRoom);
-		NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(this.OnPlayerEnteredRoom);
-		NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnJoinedRoom);
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnLeftRoom);
+		NetworkSystem.Instance.OnRaiseEvent += RoomSystem.OnEvent;
+		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnPlayerJoined += this.OnPlayerEnteredRoom;
+		NetworkSystem.Instance.OnMultiplayerStarted += this.OnJoinedRoom;
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnLeftRoom;
 	}
 
 	private void OnApplicationPause(bool paused)
@@ -179,9 +178,9 @@ internal class RoomSystem : MonoBehaviour
 	private void OnJoinedRoom()
 	{
 		RoomSystem.joinedRoom = true;
-		foreach (NetPlayer netPlayer in NetworkSystem.Instance.AllNetPlayers)
+		foreach (NetPlayer item in NetworkSystem.Instance.AllNetPlayers)
 		{
-			RoomSystem.netPlayersInRoom.Add(netPlayer);
+			RoomSystem.netPlayersInRoom.Add(item);
 		}
 		PlayerCosmeticsSystem.UpdatePlayerCosmetics(RoomSystem.netPlayersInRoom);
 		RoomSystem.roomGameMode = NetworkSystem.Instance.GameModeString;
@@ -356,7 +355,7 @@ internal class RoomSystem : MonoBehaviour
 
 	static RoomSystem()
 	{
-		RoomSystem.disconnectTimer.Elapsed += new ElapsedEventHandler(RoomSystem.TimerDC);
+		RoomSystem.disconnectTimer.Elapsed += RoomSystem.TimerDC;
 		RoomSystem.disconnectTimer.AutoReset = false;
 		RoomSystem.StaticLoad();
 	}
@@ -499,18 +498,18 @@ internal class RoomSystem : MonoBehaviour
 		{
 			object[] array = (object[])data;
 			int tick = Convert.ToInt32(array[0]);
-			byte b = Convert.ToByte(array[1]);
-			object[] array2 = null;
+			byte key = Convert.ToByte(array[1]);
+			object[] arg = null;
 			if (array.Length > 2)
 			{
 				object obj = array[2];
-				array2 = ((obj == null) ? null : ((object[])obj));
+				arg = ((obj == null) ? null : ((object[])obj));
 			}
-			PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(netPlayer.ActorNumber, tick);
+			PhotonMessageInfoWrapped arg2 = new PhotonMessageInfoWrapped(netPlayer.ActorNumber, tick);
 			Action<object[], PhotonMessageInfoWrapped> action;
-			if (RoomSystem.netEventCallbacks.TryGetValue(b, ref action))
+			if (RoomSystem.netEventCallbacks.TryGetValue(key, out action))
 			{
-				action.Invoke(array2, photonMessageInfoWrapped);
+				action(arg, arg2);
 			}
 		}
 		catch
@@ -701,14 +700,14 @@ internal class RoomSystem : MonoBehaviour
 		{
 			return;
 		}
-		NetPlayer netPlayer = (NetPlayer)data[0];
+		NetPlayer arg = (NetPlayer)data[0];
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.senderID);
 		Action<NetPlayer, NetPlayer> action = RoomSystem.playerTouchedCallback;
 		if (action == null)
 		{
 			return;
 		}
-		action.Invoke(netPlayer, player);
+		action(arg, player);
 	}
 
 	internal static void SendReportTouch(NetPlayer touchedNetPlayer)
@@ -726,7 +725,7 @@ internal class RoomSystem : MonoBehaviour
 		{
 			return;
 		}
-		action.Invoke(touchedNetPlayer, NetworkSystem.Instance.LocalPlayer);
+		action(touchedNetPlayer, NetworkSystem.Instance.LocalPlayer);
 	}
 
 	internal static void LaunchPlayer(NetPlayer player, Vector3 velocity)
@@ -796,7 +795,7 @@ internal class RoomSystem : MonoBehaviour
 						{
 							CosmeticEffectsOnPlayers.CosmeticEffect cosmeticEffect;
 							CosmeticEffectsOnPlayers.CosmeticEffect cosmeticEffect2;
-							if (GorillaTagger.Instance.offlineVRRig.TemporaryCosmeticEffects.TryGetValue(CosmeticEffectsOnPlayers.EFFECTTYPE.TagWithKnockback, ref cosmeticEffect))
+							if (GorillaTagger.Instance.offlineVRRig.TemporaryCosmeticEffects.TryGetValue(CosmeticEffectsOnPlayers.EFFECTTYPE.TagWithKnockback, out cosmeticEffect))
 							{
 								if (!cosmeticEffect.IsGameModeAllowed())
 								{
@@ -809,7 +808,7 @@ internal class RoomSystem : MonoBehaviour
 								}
 								GTPlayer.Instance.ApplyKnockback(vector.normalized, num4, cosmeticEffect.forceOffTheGround);
 							}
-							else if (GorillaTagger.Instance.offlineVRRig.TemporaryCosmeticEffects.TryGetValue(CosmeticEffectsOnPlayers.EFFECTTYPE.InstantKnockback, ref cosmeticEffect2))
+							else if (GorillaTagger.Instance.offlineVRRig.TemporaryCosmeticEffects.TryGetValue(CosmeticEffectsOnPlayers.EFFECTTYPE.InstantKnockback, out cosmeticEffect2))
 							{
 								if (!cosmeticEffect2.IsGameModeAllowed())
 								{
@@ -917,13 +916,13 @@ internal class RoomSystem : MonoBehaviour
 		{
 			return;
 		}
-		RoomSystem.StatusEffects statusEffects = (RoomSystem.StatusEffects)Convert.ToInt32(data[0]);
+		RoomSystem.StatusEffects obj = (RoomSystem.StatusEffects)Convert.ToInt32(data[0]);
 		Action<RoomSystem.StatusEffects> action = RoomSystem.statusEffectCallback;
 		if (action == null)
 		{
 			return;
 		}
-		action.Invoke(statusEffects);
+		action(obj);
 	}
 
 	internal static void SendStatusEffectAll(RoomSystem.StatusEffects status)
@@ -931,7 +930,7 @@ internal class RoomSystem : MonoBehaviour
 		Action<RoomSystem.StatusEffects> action = RoomSystem.statusEffectCallback;
 		if (action != null)
 		{
-			action.Invoke(status);
+			action(status);
 		}
 		if (!RoomSystem.joinedRoom)
 		{
@@ -958,7 +957,7 @@ internal class RoomSystem : MonoBehaviour
 		{
 			return;
 		}
-		action.Invoke(status);
+		action(status);
 	}
 
 	internal static void PlaySoundEffect(int soundIndex, float soundVolume, bool stopCurrentAudio)
@@ -1002,7 +1001,7 @@ internal class RoomSystem : MonoBehaviour
 		{
 			return;
 		}
-		NetPlayer netPlayer;
+		NetPlayer arg;
 		if (data.Length > 3)
 		{
 			if (!RoomSystem.callbackInstance.roomSettings.SoundEffectOtherLimiter.CheckCallServerTime(info.SentServerTime))
@@ -1010,7 +1009,7 @@ internal class RoomSystem : MonoBehaviour
 				return;
 			}
 			int playerID = Convert.ToInt32(data[3]);
-			netPlayer = NetworkSystem.Instance.GetPlayer(playerID);
+			arg = NetworkSystem.Instance.GetPlayer(playerID);
 		}
 		else
 		{
@@ -1018,9 +1017,9 @@ internal class RoomSystem : MonoBehaviour
 			{
 				return;
 			}
-			netPlayer = NetworkSystem.Instance.LocalPlayer;
+			arg = NetworkSystem.Instance.LocalPlayer;
 		}
-		RoomSystem.soundEffectCallback.Invoke(soundEffect, netPlayer);
+		RoomSystem.soundEffectCallback(soundEffect, arg);
 	}
 
 	internal static void SendSoundEffectAll(int soundIndex, float soundVolume, bool stopCurrentAudio = false)
@@ -1033,7 +1032,7 @@ internal class RoomSystem : MonoBehaviour
 		Action<RoomSystem.SoundEffect, NetPlayer> action = RoomSystem.soundEffectCallback;
 		if (action != null)
 		{
-			action.Invoke(sound, NetworkSystem.Instance.LocalPlayer);
+			action(sound, NetworkSystem.Instance.LocalPlayer);
 		}
 		if (!RoomSystem.joinedRoom)
 		{
@@ -1061,7 +1060,7 @@ internal class RoomSystem : MonoBehaviour
 			{
 				return;
 			}
-			action.Invoke(sound, player);
+			action(sound, player);
 			return;
 		}
 		else
@@ -1090,7 +1089,7 @@ internal class RoomSystem : MonoBehaviour
 		Action<RoomSystem.SoundEffect, NetPlayer> action = RoomSystem.soundEffectCallback;
 		if (action != null)
 		{
-			action.Invoke(sound, target);
+			action(sound, target);
 		}
 		if (!RoomSystem.joinedRoom)
 		{
@@ -1113,7 +1112,7 @@ internal class RoomSystem : MonoBehaviour
 		}
 		RoomSystem.PlayerEffectConfig playerEffectConfig;
 		RigContainer rigContainer;
-		if (RoomSystem.playerEffectDictionary.TryGetValue(effect, ref playerEffectConfig) && VRRigCache.Instance.TryGetVrrig(target, out rigContainer) && rigContainer != null && rigContainer.Rig != null && playerEffectConfig.tagEffectPack != null)
+		if (RoomSystem.playerEffectDictionary.TryGetValue(effect, out playerEffectConfig) && VRRigCache.Instance.TryGetVrrig(target, out rigContainer) && rigContainer != null && rigContainer.Rig != null && playerEffectConfig.tagEffectPack != null)
 		{
 			TagEffectsLibrary.PlayEffect(rigContainer.Rig.transform, false, rigContainer.Rig.scaleFactor, target.IsLocal ? TagEffectsLibrary.EffectType.FIRST_PERSON : TagEffectsLibrary.EffectType.THIRD_PERSON, playerEffectConfig.tagEffectPack, playerEffectConfig.tagEffectPack, rigContainer.Rig.transform.rotation);
 		}
@@ -1267,7 +1266,7 @@ internal class RoomSystem : MonoBehaviour
 			GameObject gameObject = ObjectPools.instance.Instantiate(obj, this.position, true);
 			gameObject.transform.localScale = Vector3.one * this.targetRig.scaleFactor;
 			GorillaColorizableBase gorillaColorizableBase;
-			if (gameObject.TryGetComponent<GorillaColorizableBase>(ref gorillaColorizableBase))
+			if (gameObject.TryGetComponent<GorillaColorizableBase>(out gorillaColorizableBase))
 			{
 				gorillaColorizableBase.SetColor(this.colour);
 			}
@@ -1326,7 +1325,7 @@ internal class RoomSystem : MonoBehaviour
 				default:
 					return;
 				}
-				if (!this.tempThrowableGO.IsNull() && this.tempThrowableGO.TryGetComponent<SnowballThrowable>(ref this.tempThrowableRef) && !(this.tempThrowableRef is GrowingSnowballThrowable))
+				if (!this.tempThrowableGO.IsNull() && this.tempThrowableGO.TryGetComponent<SnowballThrowable>(out this.tempThrowableRef) && !(this.tempThrowableRef is GrowingSnowballThrowable))
 				{
 					this.velocity = this.targetRig.ClampVelocityRelativeToPlayerSafe(this.velocity, 50f, 100f);
 					int projectileHash = this.tempThrowableRef.ProjectileHash;

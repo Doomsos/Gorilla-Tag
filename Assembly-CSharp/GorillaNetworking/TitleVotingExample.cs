@@ -83,10 +83,10 @@ namespace GorillaNetworking
 			request.downloadHandler = new DownloadHandlerBuffer();
 			request.SetRequestHeader("Content-Type", "application/json");
 			yield return request.SendWebRequest();
-			if (request.result == 1)
+			if (request.result == UnityWebRequest.Result.Success)
 			{
-				List<TitleVotingExample.FetchPollsResponse> list = JsonConvert.DeserializeObject<List<TitleVotingExample.FetchPollsResponse>>(request.downloadHandler.text);
-				callback.Invoke(list);
+				List<TitleVotingExample.FetchPollsResponse> obj = JsonConvert.DeserializeObject<List<TitleVotingExample.FetchPollsResponse>>(request.downloadHandler.text);
+				callback(obj);
 			}
 			else
 			{
@@ -97,7 +97,7 @@ namespace GorillaNetworking
 					retry = true;
 					Debug.LogError(string.Format("HTTP {0} error: {1}", request.responseCode, request.error));
 				}
-				else if (request.result == 2)
+				else if (request.result == UnityWebRequest.Result.ConnectionError)
 				{
 					retry = true;
 				}
@@ -116,7 +116,7 @@ namespace GorillaNetworking
 				{
 					Debug.LogError("Maximum FetchPolls retries attempted. Please check your network connection.");
 					this.fetchPollsRetryCount = 0;
-					callback.Invoke(null);
+					callback(null);
 				}
 			}
 			yield break;
@@ -131,10 +131,10 @@ namespace GorillaNetworking
 			request.downloadHandler = new DownloadHandlerBuffer();
 			request.SetRequestHeader("Content-Type", "application/json");
 			yield return request.SendWebRequest();
-			if (request.result == 1)
+			if (request.result == UnityWebRequest.Result.Success)
 			{
-				TitleVotingExample.VoteResponse voteResponse = JsonConvert.DeserializeObject<TitleVotingExample.VoteResponse>(request.downloadHandler.text);
-				callback.Invoke(voteResponse);
+				TitleVotingExample.VoteResponse obj = JsonConvert.DeserializeObject<TitleVotingExample.VoteResponse>(request.downloadHandler.text);
+				callback(obj);
 			}
 			else
 			{
@@ -149,7 +149,7 @@ namespace GorillaNetworking
 				{
 					Debug.LogWarning("User already voted on this poll!");
 				}
-				else if (request.result == 2)
+				else if (request.result == UnityWebRequest.Result.ConnectionError)
 				{
 					retry = true;
 				}
@@ -168,7 +168,7 @@ namespace GorillaNetworking
 				{
 					Debug.LogError("Maximum Vote retries attempted. Please check your network connection.");
 					this.voteRetryCount = 0;
-					callback.Invoke(null);
+					callback(null);
 				}
 			}
 			yield break;

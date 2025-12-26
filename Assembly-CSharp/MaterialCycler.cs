@@ -16,7 +16,7 @@ public class MaterialCycler : MonoBehaviour
 	{
 		if (this.materialCyclerNetworked != null)
 		{
-			this.materialCyclerNetworked.OnSynchronize += new Action<int, int3>(this.MaterialCyclerNetworked_OnSynchronize);
+			this.materialCyclerNetworked.OnSynchronize += this.MaterialCyclerNetworked_OnSynchronize;
 		}
 	}
 
@@ -24,7 +24,7 @@ public class MaterialCycler : MonoBehaviour
 	{
 		if (this.materialCyclerNetworked != null)
 		{
-			this.materialCyclerNetworked.OnSynchronize -= new Action<int, int3>(this.MaterialCyclerNetworked_OnSynchronize);
+			this.materialCyclerNetworked.OnSynchronize -= this.MaterialCyclerNetworked_OnSynchronize;
 		}
 	}
 

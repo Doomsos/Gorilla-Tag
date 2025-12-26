@@ -28,7 +28,7 @@ public class ElfLauncherElf : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		this.rb.AddForce(base.transform.lossyScale.x * Physics.gravity * this.rb.mass, 0);
+		this.rb.AddForce(base.transform.lossyScale.x * Physics.gravity * this.rb.mass, ForceMode.Force);
 	}
 
 	[SerializeField]

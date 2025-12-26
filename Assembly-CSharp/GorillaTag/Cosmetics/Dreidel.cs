@@ -82,10 +82,10 @@ namespace GorillaTag.Cosmetics
 			{
 				float num2 = (GTPlayer.Instance != null) ? GTPlayer.Instance.scale : 1f;
 				Vector3 down = Vector3.down;
-				Vector3 vector = base.transform.parent.position - down * 2f * this.surfaceCheckDistance * num2;
-				float num3 = (3f * this.surfaceCheckDistance + -this.bottomPointOffset.y) * num2;
+				Vector3 origin = base.transform.parent.position - down * 2f * this.surfaceCheckDistance * num2;
+				float maxDistance = (3f * this.surfaceCheckDistance + -this.bottomPointOffset.y) * num2;
 				RaycastHit raycastHit;
-				if (Physics.Raycast(vector, down, ref raycastHit, num3, this.surfaceLayers.value, 1) && Vector3.Dot(raycastHit.normal, Vector3.up) > this.surfaceUprightThreshold && Vector3.Dot(raycastHit.normal, this.spinTransform.up) > this.surfaceDreidelAngleThreshold)
+				if (Physics.Raycast(origin, down, out raycastHit, maxDistance, this.surfaceLayers.value, QueryTriggerInteraction.Ignore) && Vector3.Dot(raycastHit.normal, Vector3.up) > this.surfaceUprightThreshold && Vector3.Dot(raycastHit.normal, this.spinTransform.up) > this.surfaceDreidelAngleThreshold)
 				{
 					this.canStartSpin = true;
 					this.surfacePlanePoint = raycastHit.point;
@@ -104,14 +104,14 @@ namespace GorillaTag.Cosmetics
 			}
 			case Dreidel.State.Spinning:
 			{
-				float num4 = Mathf.Clamp01((float)(num - this.stateStartTime) / this.spinTime);
-				this.spinSpeed = Mathf.Lerp(this.spinSpeedStart, this.spinSpeedEnd, num4);
-				float num5 = this.spinCounterClockwise ? -1f : 1f;
-				this.spinAngle += num5 * this.spinSpeed * 360f * deltaTime;
-				float num6 = this.tiltWobble;
-				float num7 = Mathf.Sin(this.spinWobbleFrequency * 2f * 3.1415927f * (float)(num - this.stateStartTime));
-				float num8 = 0.5f * num7 + 0.5f;
-				this.tiltWobble = Mathf.Lerp(this.spinWobbleAmplitudeEndMin * num4, this.spinWobbleAmplitude * num4, num8);
+				float num3 = Mathf.Clamp01((float)(num - this.stateStartTime) / this.spinTime);
+				this.spinSpeed = Mathf.Lerp(this.spinSpeedStart, this.spinSpeedEnd, num3);
+				float num4 = this.spinCounterClockwise ? -1f : 1f;
+				this.spinAngle += num4 * this.spinSpeed * 360f * deltaTime;
+				float num5 = this.tiltWobble;
+				float num6 = Mathf.Sin(this.spinWobbleFrequency * 2f * 3.1415927f * (float)(num - this.stateStartTime));
+				float t = 0.5f * num6 + 0.5f;
+				this.tiltWobble = Mathf.Lerp(this.spinWobbleAmplitudeEndMin * num3, this.spinWobbleAmplitude * num3, t);
 				if (this.landingTiltTarget.y == 0f)
 				{
 					if (this.landingVariation == Dreidel.Variation.Tumble || this.landingVariation == Dreidel.Variation.Smooth)
@@ -131,21 +131,21 @@ namespace GorillaTag.Cosmetics
 				{
 					this.tiltLeftRight = Mathf.Sign(this.landingTiltLeadingTarget.y) * this.tiltWobble;
 				}
-				float num9 = Mathf.Lerp(this.pathStartTurnRate, this.pathEndTurnRate, num4) + num7 * this.pathTurnRateSinOffset;
+				float num7 = Mathf.Lerp(this.pathStartTurnRate, this.pathEndTurnRate, num3) + num6 * this.pathTurnRateSinOffset;
 				if (this.spinCounterClockwise)
 				{
-					this.pathDir = Vector3.ProjectOnPlane(Quaternion.AngleAxis(-num9 * deltaTime, Vector3.up) * this.pathDir, Vector3.up);
+					this.pathDir = Vector3.ProjectOnPlane(Quaternion.AngleAxis(-num7 * deltaTime, Vector3.up) * this.pathDir, Vector3.up);
 					this.pathDir.Normalize();
 				}
 				else
 				{
-					this.pathDir = Vector3.ProjectOnPlane(Quaternion.AngleAxis(-num9 * deltaTime, Vector3.up) * this.pathDir, Vector3.up);
+					this.pathDir = Vector3.ProjectOnPlane(Quaternion.AngleAxis(-num7 * deltaTime, Vector3.up) * this.pathDir, Vector3.up);
 					this.pathDir.Normalize();
 				}
 				this.pathOffset += this.pathDir * this.pathMoveSpeed * deltaTime;
 				this.AlignToSurfacePlane();
 				this.UpdateSpinTransform();
-				if (num4 - Mathf.Epsilon >= 1f && this.tiltWobble > 0.9f * this.spinWobbleAmplitude && num6 < this.tiltWobble)
+				if (num3 - Mathf.Epsilon >= 1f && this.tiltWobble > 0.9f * this.spinWobbleAmplitude && num5 < this.tiltWobble)
 				{
 					this.StartFall();
 					return;
@@ -154,13 +154,13 @@ namespace GorillaTag.Cosmetics
 			}
 			case Dreidel.State.Falling:
 			{
-				float num10 = this.fallTimeTumble;
+				float num8 = this.fallTimeTumble;
 				Dreidel.Variation variation = this.landingVariation;
 				if (variation <= Dreidel.Variation.Smooth || variation - Dreidel.Variation.Bounce > 2)
 				{
 					this.spinSpeed = Mathf.MoveTowards(this.spinSpeed, 0f, this.spinSpeedStopRate * deltaTime);
-					float num11 = this.spinCounterClockwise ? -1f : 1f;
-					this.spinAngle += num11 * this.spinSpeed * 360f * deltaTime;
+					float num9 = this.spinCounterClockwise ? -1f : 1f;
+					this.spinAngle += num9 * this.spinSpeed * 360f * deltaTime;
 					float angularFrequency = (this.landingVariation == Dreidel.Variation.Smooth) ? this.smoothFallFrequency : this.tumbleFallFrontBackFrequency;
 					float dampingRatio = (this.landingVariation == Dreidel.Variation.Smooth) ? this.smoothFallDampingRatio : this.tumbleFallFrontBackDampingRatio;
 					float angularFrequency2 = (this.landingVariation == Dreidel.Variation.Smooth) ? this.smoothFallFrequency : this.tumbleFallFrequency;
@@ -172,12 +172,12 @@ namespace GorillaTag.Cosmetics
 				{
 					bool flag = this.landingVariation != Dreidel.Variation.Bounce;
 					bool flag2 = this.landingVariation == Dreidel.Variation.FalseSlowTurn;
-					float num12 = flag ? this.slowTurnSwitchTime : this.bounceFallSwitchTime;
+					float num10 = flag ? this.slowTurnSwitchTime : this.bounceFallSwitchTime;
 					if (flag)
 					{
-						num10 = this.fallTimeSlowTurn;
+						num8 = this.fallTimeSlowTurn;
 					}
-					if (num - this.stateStartTime < (double)num12)
+					if (num - this.stateStartTime < (double)num10)
 					{
 						this.tiltFrontBack = this.tiltFrontBackSpring.TrackDampingRatio(this.landingTiltLeadingTarget.x, this.tumbleFallFrontBackFrequency, this.tumbleFallFrontBackDampingRatio, deltaTime);
 						this.tiltLeftRight = this.tiltLeftRightSpring.TrackDampingRatio(this.landingTiltLeadingTarget.y, this.tumbleFallFrequency, this.tumbleFallDampingRatio, deltaTime);
@@ -207,13 +207,13 @@ namespace GorillaTag.Cosmetics
 						}
 					}
 					this.spinSpeed = Mathf.MoveTowards(this.spinSpeed, 0f, this.spinSpeedStopRate * deltaTime);
-					float num13 = this.spinCounterClockwise ? -1f : 1f;
-					this.spinAngle += num13 * this.spinSpeed * 360f * deltaTime;
+					float num11 = this.spinCounterClockwise ? -1f : 1f;
+					this.spinAngle += num11 * this.spinSpeed * 360f * deltaTime;
 				}
 				this.AlignToSurfacePlane();
 				this.UpdateSpinTransform();
-				float num14 = (float)(num - this.stateStartTime);
-				if (num14 > num10)
+				float num12 = (float)(num - this.stateStartTime);
+				if (num12 > num8)
 				{
 					if (!this.hasLanded)
 					{
@@ -225,7 +225,7 @@ namespace GorillaTag.Cosmetics
 							this.audioSource.GTPlayOneShot(this.gimelConfettiSound, 1f);
 						}
 					}
-					if (num14 > num10 + this.respawnTimeAfterLanding)
+					if (num12 > num8 + this.respawnTimeAfterLanding)
 					{
 						this.StartIdle();
 					}
@@ -374,13 +374,13 @@ namespace GorillaTag.Cosmetics
 
 		private void AlignToSurfacePlane()
 		{
-			Vector3 vector = Vector3.forward;
+			Vector3 forward = Vector3.forward;
 			if (Vector3.Dot(Vector3.up, this.surfacePlaneNormal) < 0.9999f)
 			{
-				Vector3 vector2 = Vector3.Cross(this.surfacePlaneNormal, Vector3.up);
-				vector = Quaternion.AngleAxis(90f, vector2) * this.surfacePlaneNormal;
+				Vector3 axis = Vector3.Cross(this.surfacePlaneNormal, Vector3.up);
+				forward = Quaternion.AngleAxis(90f, axis) * this.surfacePlaneNormal;
 			}
-			Quaternion rotation = Quaternion.LookRotation(vector, this.surfacePlaneNormal);
+			Quaternion rotation = Quaternion.LookRotation(forward, this.surfacePlaneNormal);
 			base.transform.position = this.surfacePlanePoint;
 			base.transform.rotation = rotation;
 		}
@@ -389,14 +389,14 @@ namespace GorillaTag.Cosmetics
 		{
 			Vector3 position = this.spinTransform.position;
 			Vector3 groundContactPoint = this.GetGroundContactPoint();
-			Vector3 vector = this.groundPointSpring.TrackDampingRatio(groundContactPoint, this.groundTrackingFrequency, this.groundTrackingDampingRatio, Time.deltaTime);
-			Vector3 vector2 = this.spinTransform.TransformPoint(vector);
-			Quaternion quaternion = Quaternion.AngleAxis(90f * this.tiltLeftRight, Vector3.forward) * Quaternion.AngleAxis(90f * this.tiltFrontBack, Vector3.right);
+			Vector3 position2 = this.groundPointSpring.TrackDampingRatio(groundContactPoint, this.groundTrackingFrequency, this.groundTrackingDampingRatio, Time.deltaTime);
+			Vector3 b = this.spinTransform.TransformPoint(position2);
+			Quaternion rhs = Quaternion.AngleAxis(90f * this.tiltLeftRight, Vector3.forward) * Quaternion.AngleAxis(90f * this.tiltFrontBack, Vector3.right);
 			this.spinAxis = base.transform.InverseTransformDirection(base.transform.up);
-			Quaternion quaternion2 = Quaternion.AngleAxis(this.spinAngle, this.spinAxis);
-			this.spinTransform.localRotation = quaternion2 * quaternion;
-			Vector3 vector3 = base.transform.InverseTransformVector(Vector3.Dot(position - vector2, base.transform.up) * base.transform.up);
-			this.spinTransform.localPosition = vector3 + this.pathOffset;
+			Quaternion lhs = Quaternion.AngleAxis(this.spinAngle, this.spinAxis);
+			this.spinTransform.localRotation = lhs * rhs;
+			Vector3 a = base.transform.InverseTransformVector(Vector3.Dot(position - b, base.transform.up) * base.transform.up);
+			this.spinTransform.localPosition = a + this.pathOffset;
 			this.spinTransform.TransformPoint(this.bottomPointOffset);
 		}
 

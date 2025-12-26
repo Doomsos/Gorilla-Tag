@@ -63,7 +63,7 @@ namespace GorillaTagScripts
 					{
 						int pieceType = pieceInfo.piecePrefab.name.GetStaticHash();
 						int count;
-						if (!this.piecePoolLookup.TryGetValue(pieceType, ref count))
+						if (!this.piecePoolLookup.TryGetValue(pieceType, out count))
 						{
 							count = this.piecePools.Count;
 							this.piecePools.Add(new List<BuilderPiece>(128));
@@ -94,7 +94,7 @@ namespace GorillaTagScripts
 		private void AddToPool(int pieceType, int count)
 		{
 			int count2;
-			if (!this.piecePoolLookup.TryGetValue(pieceType, ref count2))
+			if (!this.piecePoolLookup.TryGetValue(pieceType, out count2))
 			{
 				count2 = this.piecePools.Count;
 				this.piecePools.Add(new List<BuilderPiece>(count * 8));
@@ -123,7 +123,7 @@ namespace GorillaTagScripts
 		public BuilderPiece CreatePiece(int pieceType, bool assertNotEmpty)
 		{
 			int count;
-			if (!this.piecePoolLookup.TryGetValue(pieceType, ref count))
+			if (!this.piecePoolLookup.TryGetValue(pieceType, out count))
 			{
 				if (assertNotEmpty)
 				{
@@ -159,8 +159,8 @@ namespace GorillaTagScripts
 				Debug.LogError("Why is a null piece being destroyed");
 				return;
 			}
-			int num;
-			if (!this.piecePoolLookup.TryGetValue(piece.pieceType, ref num))
+			int index;
+			if (!this.piecePoolLookup.TryGetValue(piece.pieceType, out index))
 			{
 				Debug.LogErrorFormat("No Pool Found for {0} Cannot return to pool", new object[]
 				{
@@ -168,7 +168,7 @@ namespace GorillaTagScripts
 				});
 				return;
 			}
-			List<BuilderPiece> list = this.piecePools[num];
+			List<BuilderPiece> list = this.piecePools[index];
 			if (list.Count == 128)
 			{
 				piece.OnReturnToPool();
@@ -265,9 +265,9 @@ namespace GorillaTagScripts
 				}
 			}
 			this.piecePoolLookup.Clear();
-			foreach (BuilderBumpGlow builderBumpGlow in this.bumpGlowPool)
+			foreach (BuilderBumpGlow obj in this.bumpGlowPool)
 			{
-				Object.Destroy(builderBumpGlow);
+				Object.Destroy(obj);
 			}
 			this.bumpGlowPool.Clear();
 		}

@@ -25,8 +25,8 @@ public class GRToolProgressionTree
 		this.manager = toolManager;
 		if (ProgressionManager.Instance != null)
 		{
-			ProgressionManager.Instance.OnTreeUpdated += new Action(this.OnProgressionTreeUpdate);
-			ProgressionManager.Instance.OnInventoryUpdated += new Action(this.OnInventoryUpdated);
+			ProgressionManager.Instance.OnTreeUpdated += this.OnProgressionTreeUpdate;
+			ProgressionManager.Instance.OnInventoryUpdated += this.OnInventoryUpdated;
 		}
 		this.RefreshProgressionTree();
 		this.RefreshUserInventory();
@@ -40,9 +40,9 @@ public class GRToolProgressionTree
 	public List<GRTool.GRToolType> GetSupportedTools()
 	{
 		List<GRTool.GRToolType> list = new List<GRTool.GRToolType>();
-		foreach (GRTool.GRToolType grtoolType in this.toolTree.Keys)
+		foreach (GRTool.GRToolType item in this.toolTree.Keys)
 		{
-			list.Add(grtoolType);
+			list.Add(item);
 		}
 		return list;
 	}
@@ -317,25 +317,25 @@ public class GRToolProgressionTree
 		foreach (KeyValuePair<string, GRToolProgressionTree.GRToolProgressionRawNode> keyValuePair in this.nodeTree)
 		{
 			GRToolProgressionTree.GRToolProgressionRawNode value = keyValuePair.Value;
-			foreach (string text in value.requiredByIds)
+			foreach (string key in value.requiredByIds)
 			{
-				if (this.nodeTree.ContainsKey(text))
+				if (this.nodeTree.ContainsKey(key))
 				{
-					this.nodeTree[text].progressionNode.children.Add(value.progressionNode);
-					value.progressionNode.parents.Add(this.nodeTree[text].progressionNode);
+					this.nodeTree[key].progressionNode.children.Add(value.progressionNode);
+					value.progressionNode.parents.Add(this.nodeTree[key].progressionNode);
 				}
 			}
 			value.progressionNode.requiredEmployeeLevel = this.GetEmployeeLevel(value.requiredEntitlements);
-			string text2 = value.progressionNode.name.Trim();
-			if (this.toolMapping.ContainsKey(text2))
+			string key2 = value.progressionNode.name.Trim();
+			if (this.toolMapping.ContainsKey(key2))
 			{
-				GRTool.GRToolType grtoolType = this.toolMapping[text2];
+				GRTool.GRToolType key3 = this.toolMapping[key2];
 				value.progressionNode.rootNode = true;
 				if (!value.progressionNode.unlocked && this.autoUnlockNodeId == string.Empty && value.progressionNode.researchCost == 0 && value.progressionNode.requiredEmployeeLevel == GRToolProgressionTree.EmployeeLevelRequirement.None)
 				{
 					this.autoUnlockNodeId = value.progressionNode.id;
 				}
-				this.toolTree[grtoolType] = value.progressionNode;
+				this.toolTree[key3] = value.progressionNode;
 			}
 			this.partTree[value.progressionNode.type] = value.progressionNode;
 		}
@@ -353,16 +353,16 @@ public class GRToolProgressionTree
 	{
 		foreach (string text in rawRequiredEntitlements)
 		{
-			string text2 = text.Trim();
-			if (text2 == "Intern")
+			string a = text.Trim();
+			if (a == "Intern")
 			{
 				return GRToolProgressionTree.EmployeeLevelRequirement.Intern;
 			}
-			if (text2 == "PartTime")
+			if (a == "PartTime")
 			{
 				return GRToolProgressionTree.EmployeeLevelRequirement.PartTime;
 			}
-			if (text2 == "FullTime")
+			if (a == "FullTime")
 			{
 				return GRToolProgressionTree.EmployeeLevelRequirement.FullTime;
 			}
@@ -398,11 +398,11 @@ public class GRToolProgressionTree
 		{
 			grtoolProgressionRawNode.requiredEntitlements.Add(mothershipEntitlementCatalogItem.name);
 		}
-		foreach (SWIGTYPE_p_std__variantT_MothershipApiShared__NodeReference_MothershipApiShared__ComplexPrerequisiteNodes_t swigtype_p_std__variantT_MothershipApiShared__NodeReference_MothershipApiShared__ComplexPrerequisiteNodes_t in treeNode.prerequisite_nodes.nodes)
+		foreach (SWIGTYPE_p_std__variantT_MothershipApiShared__NodeReference_MothershipApiShared__ComplexPrerequisiteNodes_t variant in treeNode.prerequisite_nodes.nodes)
 		{
-			ComplexPrerequisiteNodes complexPrerequisiteNodes = new ComplexPrerequisiteNodes();
+			ComplexPrerequisiteNodes value = new ComplexPrerequisiteNodes();
 			NodeReference nodeReference = new NodeReference();
-			if (!MothershipApi.TryGetComplexPrerequisiteNodeFromVariant(swigtype_p_std__variantT_MothershipApiShared__NodeReference_MothershipApiShared__ComplexPrerequisiteNodes_t, complexPrerequisiteNodes) && MothershipApi.TryGetNodeReferenceFromVariant(swigtype_p_std__variantT_MothershipApiShared__NodeReference_MothershipApiShared__ComplexPrerequisiteNodes_t, nodeReference))
+			if (!MothershipApi.TryGetComplexPrerequisiteNodeFromVariant(variant, value) && MothershipApi.TryGetNodeReferenceFromVariant(variant, nodeReference))
 			{
 				grtoolProgressionRawNode.requiredByIds.Add(nodeReference.node_id);
 			}

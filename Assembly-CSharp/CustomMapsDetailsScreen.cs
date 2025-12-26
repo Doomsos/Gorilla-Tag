@@ -62,8 +62,8 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 	private void OnModUpdated()
 	{
 		ModRating currentUserRating = this.currentMapMod.CurrentUserRating;
-		this.rateUpButton.SetButtonActive(currentUserRating == 1);
-		this.rateDownButton.SetButtonActive(currentUserRating == -1);
+		this.rateUpButton.SetButtonActive(currentUserRating == ModRating.Positive);
+		this.rateDownButton.SetButtonActive(currentUserRating == ModRating.Negative);
 	}
 
 	private void OnModIOLoggedIn()
@@ -100,8 +100,8 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 	{
 		if (base.isActiveAndEnabled && this.hasModProfile && this.GetModId() == mod.Id)
 		{
-			this.UpdateStatus(jobPhase == 3 || jobPhase == 4);
-			if (jobPhase == 4)
+			this.UpdateStatus(jobPhase == ModInstallationManagement.OperationPhase.Cancelled || jobPhase == ModInstallationManagement.OperationPhase.Failed);
+			if (jobPhase == ModInstallationManagement.OperationPhase.Failed)
 			{
 				this.modDescriptionText.gameObject.SetActive(false);
 				this.loadingMapLabelText.text = this.mapLoadingErrorString;
@@ -118,11 +118,11 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 		{
 			return;
 		}
-		string text;
-		if (this.GetModId().IsValid() && ModInstallationManagement.CurrentOperationOnMod != null && ModInstallationManagement.CurrentOperationOnMod.Id == this.GetModId() && ModInstallationManagement.CurrentOperationOnMod.File.State != 5 && CustomMapsDetailsScreen.modStatusStrings.TryGetValue(ModInstallationManagement.CurrentOperationOnMod.File.State, ref text))
+		string str;
+		if (this.GetModId().IsValid() && ModInstallationManagement.CurrentOperationOnMod != null && ModInstallationManagement.CurrentOperationOnMod.Id == this.GetModId() && ModInstallationManagement.CurrentOperationOnMod.File.State != ModFileState.Installed && CustomMapsDetailsScreen.modStatusStrings.TryGetValue(ModInstallationManagement.CurrentOperationOnMod.File.State, out str))
 		{
-			float num = this.currentMapMod.File.FileStateProgress * 100f;
-			this.modStatusText.text = text + string.Format(" {0}%", Mathf.RoundToInt(num));
+			float f = this.currentMapMod.File.FileStateProgress * 100f;
+			this.modStatusText.text = str + string.Format(" {0}%", Mathf.RoundToInt(f));
 		}
 	}
 
@@ -144,7 +144,7 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 			this.pendingModId = 0L;
 			this.currentMapMod = mod;
 			this.hasModProfile = true;
-			this.currentMapMod.OnModUpdated += new Action(this.OnModUpdated);
+			this.currentMapMod.OnModUpdated += this.OnModUpdated;
 			this.isFavorite = ModIOManager.IsModFavorited(mod.Id);
 			this.favoriteToggleButton.SetButtonActive(this.isFavorite);
 			this.UpdateMapDetails(true);
@@ -202,7 +202,7 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 				}
 				CustomMapsTerminal.ReturnFromDetailsScreen();
 				this.hasModProfile = false;
-				this.currentMapMod.OnModUpdated -= new Action(this.OnModUpdated);
+				this.currentMapMod.OnModUpdated -= this.OnModUpdated;
 				this.currentMapMod = null;
 				return;
 			}
@@ -254,7 +254,7 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 			}
 			if (buttonPressed == CustomMapKeyboardBinding.enter && !CustomMapManager.IsLoading() && !CustomMapManager.IsUnloading() && !CustomMapLoader.IsMapLoaded() && this.currentMapMod != null && !this.IsCurrentModHidden())
 			{
-				if (this.currentMapMod.File.State == 5)
+				if (this.currentMapMod.File.State == ModFileState.Installed)
 				{
 					string text2;
 					if (!this.CanChangeMapState(true, out text2))
@@ -271,7 +271,7 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 				else
 				{
 					ModFileState state = this.currentMapMod.File.State;
-					if (state == 1 || state == null)
+					if (state == ModFileState.Queued || state == ModFileState.None)
 					{
 						ModIOManager.DownloadMod(this.GetModId(), delegate(bool modDownloadStarted)
 						{
@@ -322,7 +322,7 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 					if (file != null)
 					{
 						ModFileState state = file.State;
-						if (state == 1 || state == 5)
+						if (state == ModFileState.Queued || state == ModFileState.Installed)
 						{
 							flag2 = true;
 							goto IL_3EC;
@@ -339,11 +339,11 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 			}
 			if (buttonPressed == CustomMapKeyboardBinding.rateUp)
 			{
-				this.currentMapMod.RateMod((this.currentMapMod.CurrentUserRating == 1) ? 0 : 1);
+				this.currentMapMod.RateMod((this.currentMapMod.CurrentUserRating == ModRating.Positive) ? ModRating.None : ModRating.Positive);
 			}
 			if (buttonPressed == CustomMapKeyboardBinding.rateDown)
 			{
-				this.currentMapMod.RateMod((this.currentMapMod.CurrentUserRating == -1) ? 0 : -1);
+				this.currentMapMod.RateMod((this.currentMapMod.CurrentUserRating == ModRating.Negative) ? ModRating.None : ModRating.Negative);
 			}
 			return;
 		}
@@ -359,7 +359,7 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 		{
 			long id = this.GetModId()._id;
 			this.hasModProfile = false;
-			this.currentMapMod.OnModUpdated -= new Action(this.OnModUpdated);
+			this.currentMapMod.OnModUpdated -= this.OnModUpdated;
 			this.currentMapMod = null;
 			this.ResetToDefaultView();
 			this.RetrieveModFromModIO(id, true, null);
@@ -397,8 +397,7 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 		this.loadingText.gameObject.SetActive(true);
 		if (CustomMapLoader.IsMapLoaded() || CustomMapManager.IsLoading() || CustomMapManager.IsUnloading())
 		{
-			ModId modId;
-			modId..ctor(CustomMapLoader.IsMapLoaded() ? CustomMapLoader.LoadedMapModId : (CustomMapManager.IsLoading() ? CustomMapManager.LoadingMapId : CustomMapManager.UnloadingMapId));
+			ModId modId = new ModId(CustomMapLoader.IsMapLoaded() ? CustomMapLoader.LoadedMapModId : (CustomMapManager.IsLoading() ? CustomMapManager.LoadingMapId : CustomMapManager.UnloadingMapId));
 			if (this.hasModProfile && this.GetModId() == modId)
 			{
 				this.UpdateMapDetails(true);
@@ -467,8 +466,7 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 			}
 			if (CustomMapLoader.IsMapLoaded())
 			{
-				ModId modId;
-				modId..ctor(CustomMapLoader.LoadedMapModId);
+				ModId modId = new ModId(CustomMapLoader.LoadedMapModId);
 				if (this.GetModId() == modId)
 				{
 					this.OnMapLoadComplete_UIUpdate();
@@ -725,21 +723,6 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 		return this.hasModProfile && (this.currentMapMod.Creator == null || (!ModIOManager.IsLoggedIn() && this.currentMapMod.IsHidden()));
 	}
 
-	// Note: this type is marked as 'beforefieldinit'.
-	static CustomMapsDetailsScreen()
-	{
-		Dictionary<ModFileState, string> dictionary = new Dictionary<ModFileState, string>();
-		dictionary.Add(5, "READY");
-		dictionary.Add(1, "QUEUED");
-		dictionary.Add(2, "DOWNLOADING");
-		dictionary.Add(4, "INSTALLING");
-		dictionary.Add(7, "UNINSTALLING");
-		dictionary.Add(6, "UPDATING");
-		dictionary.Add(8, "ERROR");
-		dictionary.Add(0, "AVAILABLE");
-		CustomMapsDetailsScreen.modStatusStrings = dictionary;
-	}
-
 	[SerializeField]
 	private SpriteRenderer mapScreenshotImage;
 
@@ -839,7 +822,41 @@ public class CustomMapsDetailsScreen : CustomMapsTerminalScreen
 	[SerializeField]
 	private VirtualStumpSerializer networkObject;
 
-	public static Dictionary<ModFileState, string> modStatusStrings;
+	public static Dictionary<ModFileState, string> modStatusStrings = new Dictionary<ModFileState, string>
+	{
+		{
+			ModFileState.Installed,
+			"READY"
+		},
+		{
+			ModFileState.Queued,
+			"QUEUED"
+		},
+		{
+			ModFileState.Downloading,
+			"DOWNLOADING"
+		},
+		{
+			ModFileState.Installing,
+			"INSTALLING"
+		},
+		{
+			ModFileState.Uninstalling,
+			"UNINSTALLING"
+		},
+		{
+			ModFileState.Updating,
+			"UPDATING"
+		},
+		{
+			ModFileState.FileOperationFailed,
+			"ERROR"
+		},
+		{
+			ModFileState.None,
+			"AVAILABLE"
+		}
+	};
 
 	[SerializeField]
 	private string mapNotDownloadedString = "NOT DOWNLOADED";

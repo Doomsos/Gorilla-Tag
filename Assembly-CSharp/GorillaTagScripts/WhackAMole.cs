@@ -339,11 +339,11 @@ namespace GorillaTagScripts
 			{
 				return true;
 			}
-			float num = passedTime / this.currentLevel.levelDuration;
-			CS$<>8__locals1.minMoleCount = Mathf.Lerp(this.currentLevel.minimumMoleCount.x, this.currentLevel.minimumMoleCount.y, num);
-			CS$<>8__locals1.maxMoleCount = Mathf.Lerp(this.currentLevel.maximumMoleCount.x, this.currentLevel.maximumMoleCount.y, num);
+			float t = passedTime / this.currentLevel.levelDuration;
+			CS$<>8__locals1.minMoleCount = Mathf.Lerp(this.currentLevel.minimumMoleCount.x, this.currentLevel.minimumMoleCount.y, t);
+			CS$<>8__locals1.maxMoleCount = Mathf.Lerp(this.currentLevel.maximumMoleCount.x, this.currentLevel.maximumMoleCount.y, t);
 			this.curentTime = Time.time;
-			CS$<>8__locals1.hazardMoleChance = Mathf.Lerp(this.currentLevel.hazardMoleChance.x, this.currentLevel.hazardMoleChance.y, num);
+			CS$<>8__locals1.hazardMoleChance = Mathf.Lerp(this.currentLevel.hazardMoleChance.x, this.currentLevel.hazardMoleChance.y, t);
 			if (this.isMultiplayer)
 			{
 				this.<PickMoles>g__PickMolesFrom|85_0(this.rightMolesList, ref CS$<>8__locals1);
@@ -483,7 +483,7 @@ namespace GorillaTagScripts
 			WhackAMole.GameState gameState = this.currentState;
 			if (gameState == WhackAMole.GameState.TimesUp || gameState == WhackAMole.GameState.Off)
 			{
-				base.GetView.RPC("WhackAMoleButtonPressed", 0, Array.Empty<object>());
+				base.GetView.RPC("WhackAMoleButtonPressed", RpcTarget.All, Array.Empty<object>());
 			}
 		}
 
@@ -499,7 +499,7 @@ namespace GorillaTagScripts
 			if (!this.InvokeRpc)
 			{
 				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != 4)
+				if (base.Runner.Stage != SimulationStages.Resimulate)
 				{
 					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 					if ((localAuthorityMask & 7) == 0)
@@ -521,12 +521,12 @@ namespace GorillaTagScripts
 								byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 								*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 1);
 								int num2 = 8;
-								ptr.Offset = num2 * 8;
+								ptr->Offset = num2 * 8;
 								base.Runner.SendRpc(ptr);
 							}
 							if ((localAuthorityMask & 7) != 0)
 							{
-								info = RpcInfo.FromLocal(base.Runner, 0, 0);
+								info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 								goto IL_12;
 							}
 						}
@@ -690,7 +690,7 @@ namespace GorillaTagScripts
 		[CompilerGenerated]
 		private void <PickMoles>g__PickMolesFrom|85_0(List<Mole> moles, ref WhackAMole.<>c__DisplayClass85_0 A_2)
 		{
-			int num = Mathf.RoundToInt(Random.Range(A_2.minMoleCount, A_2.maxMoleCount));
+			int a = Mathf.RoundToInt(Random.Range(A_2.minMoleCount, A_2.maxMoleCount));
 			this.potentialMoles.Clear();
 			foreach (Mole mole in moles)
 			{
@@ -699,17 +699,17 @@ namespace GorillaTagScripts
 					this.potentialMoles.Add(mole);
 				}
 			}
-			int num2 = Mathf.Min(num, this.potentialMoles.Count);
-			int num3 = Mathf.CeilToInt((float)num2 * A_2.hazardMoleChance);
-			int num4 = 0;
-			for (int i = 0; i < num2; i++)
+			int num = Mathf.Min(a, this.potentialMoles.Count);
+			int num2 = Mathf.CeilToInt((float)num * A_2.hazardMoleChance);
+			int num3 = 0;
+			for (int i = 0; i < num; i++)
 			{
-				int num5 = Random.Range(0, this.potentialMoles.Count);
-				if (this.PickSingleMole(this.molesList.IndexOf(this.potentialMoles[num5]), (num4 < num3) ? A_2.hazardMoleChance : 0f))
+				int index = Random.Range(0, this.potentialMoles.Count);
+				if (this.PickSingleMole(this.molesList.IndexOf(this.potentialMoles[index]), (num3 < num2) ? A_2.hazardMoleChance : 0f))
 				{
-					num4++;
+					num3++;
 				}
-				this.potentialMoles.RemoveAt(num5);
+				this.potentialMoles.RemoveAt(index);
 			}
 		}
 
@@ -733,7 +733,7 @@ namespace GorillaTagScripts
 		protected unsafe static void RPC_WhackAMoleButtonPressed@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
+			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
 			behaviour.InvokeRpc = true;
 			((WhackAMole)behaviour).RPC_WhackAMoleButtonPressed(info);
 		}
@@ -894,7 +894,7 @@ namespace GorillaTagScripts
 		[WeaverGenerated]
 		[SerializeField]
 		[DefaultForProperty("Data", 0, 210)]
-		[DrawIf("IsEditorWritable", true, 0, 0)]
+		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 		private WhackAMole.WhackAMoleData _Data;
 
 		public enum GameState
@@ -916,7 +916,7 @@ namespace GorillaTagScripts
 		}
 
 		[NetworkStructWeaved(210)]
-		[StructLayout(2, Size = 840)]
+		[StructLayout(LayoutKind.Explicit, Size = 840)]
 		public struct WhackAMoleData : INetworkStruct
 		{
 			public WhackAMole.GameState CurrentState { readonly get; set; }

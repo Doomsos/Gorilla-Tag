@@ -38,18 +38,18 @@ public class CosmeticWardrobe : MonoBehaviour
 		}
 		if (GorillaTagger.Instance && GorillaTagger.Instance.offlineVRRig)
 		{
-			GorillaTagger.Instance.offlineVRRig.OnColorChanged += new Action<Color>(this.HandleLocalColorChanged);
+			GorillaTagger.Instance.offlineVRRig.OnColorChanged += this.HandleLocalColorChanged;
 			this.HandleLocalColorChanged(GorillaTagger.Instance.offlineVRRig.playerColor);
 		}
-		this.nextSelection.onPressed += new Action<GorillaPressableButton, bool>(this.HandlePressedNextSelection);
-		this.prevSelection.onPressed += new Action<GorillaPressableButton, bool>(this.HandlePressedPrevSelection);
+		this.nextSelection.onPressed += this.HandlePressedNextSelection;
+		this.prevSelection.onPressed += this.HandlePressedPrevSelection;
 		for (int k = 0; k < this.cosmeticCollectionDisplays.Length; k++)
 		{
-			this.cosmeticCollectionDisplays[k].selectButton.onPressed += new Action<GorillaPressableButton, bool>(this.HandlePressedSelectCosmeticButton);
+			this.cosmeticCollectionDisplays[k].selectButton.onPressed += this.HandlePressedSelectCosmeticButton;
 		}
 		for (int l = 0; l < this.cosmeticCategoryButtons.Length; l++)
 		{
-			this.cosmeticCategoryButtons[l].button.onPressed += new Action<GorillaPressableButton, bool>(this.HandleChangeCategory);
+			this.cosmeticCategoryButtons[l].button.onPressed += this.HandleChangeCategory;
 			this.cosmeticCategoryButtons[l].slot1RemovedItem = CosmeticsController.instance.nullItem;
 			this.cosmeticCategoryButtons[l].slot2RemovedItem = CosmeticsController.instance.nullItem;
 		}
@@ -59,8 +59,8 @@ public class CosmeticWardrobe : MonoBehaviour
 		instance2.OnOutfitsUpdated = (Action)Delegate.Combine(instance2.OnOutfitsUpdated, new Action(this.UpdateOutfitButtons));
 		CosmeticWardrobe.OnWardrobeUpdateCategories = (Action)Delegate.Combine(CosmeticWardrobe.OnWardrobeUpdateCategories, new Action(this.UpdateCategoryButtons));
 		CosmeticWardrobe.OnWardrobeUpdateDisplays = (Action)Delegate.Combine(CosmeticWardrobe.OnWardrobeUpdateDisplays, new Action(this.UpdateCosmeticDisplays));
-		this.previousOutfit.onPressed += new Action<GorillaPressableButton, bool>(this.HandlePressedPrevOutfitButton);
-		this.nextOutfit.onPressed += new Action<GorillaPressableButton, bool>(this.HandlePressedNextOutfitButton);
+		this.previousOutfit.onPressed += this.HandlePressedPrevOutfitButton;
+		this.nextOutfit.onPressed += this.HandlePressedNextOutfitButton;
 		this.HandleCosmeticsUpdated();
 	}
 
@@ -68,17 +68,17 @@ public class CosmeticWardrobe : MonoBehaviour
 	{
 		if (GorillaTagger.Instance && GorillaTagger.Instance.offlineVRRig)
 		{
-			GorillaTagger.Instance.offlineVRRig.OnColorChanged -= new Action<Color>(this.HandleLocalColorChanged);
+			GorillaTagger.Instance.offlineVRRig.OnColorChanged -= this.HandleLocalColorChanged;
 		}
-		this.nextSelection.onPressed -= new Action<GorillaPressableButton, bool>(this.HandlePressedNextSelection);
-		this.prevSelection.onPressed -= new Action<GorillaPressableButton, bool>(this.HandlePressedPrevSelection);
+		this.nextSelection.onPressed -= this.HandlePressedNextSelection;
+		this.prevSelection.onPressed -= this.HandlePressedPrevSelection;
 		for (int i = 0; i < this.cosmeticCollectionDisplays.Length; i++)
 		{
-			this.cosmeticCollectionDisplays[i].selectButton.onPressed -= new Action<GorillaPressableButton, bool>(this.HandlePressedSelectCosmeticButton);
+			this.cosmeticCollectionDisplays[i].selectButton.onPressed -= this.HandlePressedSelectCosmeticButton;
 		}
 		for (int j = 0; j < this.cosmeticCategoryButtons.Length; j++)
 		{
-			this.cosmeticCategoryButtons[j].button.onPressed -= new Action<GorillaPressableButton, bool>(this.HandleChangeCategory);
+			this.cosmeticCategoryButtons[j].button.onPressed -= this.HandleChangeCategory;
 		}
 		CosmeticsController instance = CosmeticsController.instance;
 		instance.OnCosmeticsUpdated = (Action)Delegate.Remove(instance.OnCosmeticsUpdated, new Action(this.HandleCosmeticsUpdated));
@@ -86,8 +86,8 @@ public class CosmeticWardrobe : MonoBehaviour
 		instance2.OnOutfitsUpdated = (Action)Delegate.Remove(instance2.OnOutfitsUpdated, new Action(this.UpdateOutfitButtons));
 		CosmeticWardrobe.OnWardrobeUpdateCategories = (Action)Delegate.Remove(CosmeticWardrobe.OnWardrobeUpdateCategories, new Action(this.UpdateCategoryButtons));
 		CosmeticWardrobe.OnWardrobeUpdateDisplays = (Action)Delegate.Remove(CosmeticWardrobe.OnWardrobeUpdateDisplays, new Action(this.UpdateCosmeticDisplays));
-		this.previousOutfit.onPressed -= new Action<GorillaPressableButton, bool>(this.HandlePressedPrevOutfitButton);
-		this.nextOutfit.onPressed -= new Action<GorillaPressableButton, bool>(this.HandlePressedNextOutfitButton);
+		this.previousOutfit.onPressed -= this.HandlePressedPrevOutfitButton;
+		this.nextOutfit.onPressed -= this.HandlePressedNextOutfitButton;
 	}
 
 	private void HandlePressedNextSelection(GorillaPressableButton button, bool isLeft)
@@ -102,7 +102,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		{
 			return;
 		}
-		onWardrobeUpdateDisplays.Invoke();
+		onWardrobeUpdateDisplays();
 	}
 
 	private void HandlePressedPrevSelection(GorillaPressableButton button, bool isLeft)
@@ -128,7 +128,7 @@ public class CosmeticWardrobe : MonoBehaviour
 		{
 			return;
 		}
-		onWardrobeUpdateDisplays.Invoke();
+		onWardrobeUpdateDisplays();
 	}
 
 	private void HandlePressedSelectCosmeticButton(GorillaPressableButton button, bool isLeft)
@@ -189,14 +189,14 @@ public class CosmeticWardrobe : MonoBehaviour
 						Action onWardrobeUpdateDisplays = CosmeticWardrobe.OnWardrobeUpdateDisplays;
 						if (onWardrobeUpdateDisplays != null)
 						{
-							onWardrobeUpdateDisplays.Invoke();
+							onWardrobeUpdateDisplays();
 						}
 						Action onWardrobeUpdateCategories = CosmeticWardrobe.OnWardrobeUpdateCategories;
 						if (onWardrobeUpdateCategories == null)
 						{
 							return;
 						}
-						onWardrobeUpdateCategories.Invoke();
+						onWardrobeUpdateCategories();
 						return;
 					}
 					else if (!cosmeticWardrobeCategory.slot1RemovedItem.isNullItem || !cosmeticWardrobeCategory.slot2RemovedItem.isNullItem)
@@ -214,14 +214,14 @@ public class CosmeticWardrobe : MonoBehaviour
 						Action onWardrobeUpdateDisplays2 = CosmeticWardrobe.OnWardrobeUpdateDisplays;
 						if (onWardrobeUpdateDisplays2 != null)
 						{
-							onWardrobeUpdateDisplays2.Invoke();
+							onWardrobeUpdateDisplays2();
 						}
 						Action onWardrobeUpdateCategories2 = CosmeticWardrobe.OnWardrobeUpdateCategories;
 						if (onWardrobeUpdateCategories2 == null)
 						{
 							return;
 						}
-						onWardrobeUpdateCategories2.Invoke();
+						onWardrobeUpdateCategories2();
 						return;
 					}
 				}
@@ -233,14 +233,14 @@ public class CosmeticWardrobe : MonoBehaviour
 					Action onWardrobeUpdateDisplays3 = CosmeticWardrobe.OnWardrobeUpdateDisplays;
 					if (onWardrobeUpdateDisplays3 != null)
 					{
-						onWardrobeUpdateDisplays3.Invoke();
+						onWardrobeUpdateDisplays3();
 					}
 					Action onWardrobeUpdateCategories3 = CosmeticWardrobe.OnWardrobeUpdateCategories;
 					if (onWardrobeUpdateCategories3 == null)
 					{
 						return;
 					}
-					onWardrobeUpdateCategories3.Invoke();
+					onWardrobeUpdateCategories3();
 				}
 				return;
 			}

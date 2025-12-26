@@ -13,8 +13,8 @@ public class VerletLine : MonoBehaviour
 		this._positions = new Vector3[this.segmentNumber];
 		for (int i = 0; i < this.segmentNumber; i++)
 		{
-			float num = (float)i / (float)(this.segmentNumber - 1);
-			Vector3 vector = Vector3.Lerp(this.lineStart.position, this.lineEnd.position, num);
+			float t = (float)i / (float)(this.segmentNumber - 1);
+			Vector3 vector = Vector3.Lerp(this.lineStart.position, this.lineEnd.position, t);
 			this._nodes[i] = new VerletLine.LineNode
 			{
 				position = vector,
@@ -147,8 +147,8 @@ public class VerletLine : MonoBehaviour
 			{
 				if ((this.endRigidbody.transform.position - this.lineStart.position).IsLongerThan(this.totalLineLength))
 				{
-					Vector3 vector = this.lineStart.position + (this.endRigidbody.transform.position - this.lineStart.position).normalized * this.totalLineLength;
-					this.endRigidbody.linearVelocity += (vector - this.endRigidbody.transform.position) / Time.fixedDeltaTime;
+					Vector3 a = this.lineStart.position + (this.endRigidbody.transform.position - this.lineStart.position).normalized * this.totalLineLength;
+					this.endRigidbody.linearVelocity += (a - this.endRigidbody.transform.position) / Time.fixedDeltaTime;
 					if (this.endRigidbody.linearVelocity.IsLongerThan(this.endMaxSpeed))
 					{
 						this.endRigidbody.linearVelocity = this.endRigidbody.linearVelocity.normalized * this.endMaxSpeed;
@@ -158,7 +158,7 @@ public class VerletLine : MonoBehaviour
 			else
 			{
 				VerletLine.LineNode[] nodes = this._nodes;
-				Vector3 vector2 = (nodes[nodes.Length - 1].position - this.lineEnd.position) * (this.tension * this.tensionScale);
+				Vector3 force = (nodes[nodes.Length - 1].position - this.lineEnd.position) * (this.tension * this.tensionScale);
 				Quaternion rotation = this.endRigidbody.rotation;
 				VerletLine.LineNode[] nodes2 = this._nodes;
 				Vector3 position = nodes2[nodes2.Length - 1].position;
@@ -166,7 +166,7 @@ public class VerletLine : MonoBehaviour
 				Quaternion.LookRotation(position - nodes3[nodes3.Length - 2].position);
 				if (!this.endRigidbody.isKinematic)
 				{
-					this.endRigidbody.AddForceAtPosition(vector2, this.endRigidbody.transform.TransformPoint(this.endLineAnchorLocalPosition));
+					this.endRigidbody.AddForceAtPosition(force, this.endRigidbody.transform.TransformPoint(this.endLineAnchorLocalPosition));
 				}
 			}
 		}
@@ -188,11 +188,11 @@ public class VerletLine : MonoBehaviour
 
 	private static void LimitDistance(ref VerletLine.LineNode p1, ref VerletLine.LineNode p2, float restLength)
 	{
-		Vector3 vector = p2.position - p1.position;
-		float num = vector.magnitude + 1E-05f;
+		Vector3 a = p2.position - p1.position;
+		float num = a.magnitude + 1E-05f;
 		float num2 = (num - restLength) / num;
-		p1.position += vector * (num2 * 0.5f);
-		p2.position -= vector * (num2 * 0.5f);
+		p1.position += a * (num2 * 0.5f);
+		p2.position -= a * (num2 * 0.5f);
 	}
 
 	public Transform lineStart;

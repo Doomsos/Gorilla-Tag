@@ -17,17 +17,17 @@ public class PoseStiffnessComparison : MonoBehaviour
 	{
 		BoingBones[] components = this.BonesA.GetComponents<BoingBones>();
 		BoingBones[] components2 = this.BonesB.GetComponents<BoingBones>();
-		Transform[] array = new Transform[]
+		Transform[] source = new Transform[]
 		{
 			this.BonesA.transform,
 			this.BonesB.transform
 		};
-		float[] array2 = new float[]
+		float[] source2 = new float[]
 		{
 			this.m_yA,
 			this.m_yB
 		};
-		IEnumerable<BoingBones> enumerable = Enumerable.Concat<BoingBones>(components, components2);
+		IEnumerable<BoingBones> enumerable = components.Concat(components2);
 		float fixedDeltaTime = Time.fixedDeltaTime;
 		float num = 0.5f * this.Run;
 		this.m_timer += fixedDeltaTime;
@@ -36,8 +36,8 @@ public class PoseStiffnessComparison : MonoBehaviour
 			this.m_timer = Mathf.Repeat(this.m_timer, this.Period + this.Rest);
 			for (int i = 0; i < 2; i++)
 			{
-				Transform transform = Enumerable.ElementAt<Transform>(array, i);
-				float y = Enumerable.ElementAt<float>(array2, i);
+				Transform transform = source.ElementAt(i);
+				float y = source2.ElementAt(i);
 				Vector3 position = transform.position;
 				position.y = y;
 				position.z = -num;
@@ -52,8 +52,8 @@ public class PoseStiffnessComparison : MonoBehaviour
 		float num3 = 1f - Mathf.Pow(1f - num2, 1.5f);
 		for (int j = 0; j < 2; j++)
 		{
-			Transform transform2 = Enumerable.ElementAt<Transform>(array, j);
-			float num4 = Enumerable.ElementAt<float>(array2, j);
+			Transform transform2 = source.ElementAt(j);
+			float num4 = source2.ElementAt(j);
 			Vector3 position2 = transform2.position;
 			position2.y = num4 + 2f * Mathf.Sin(12.566371f * num3);
 			position2.z = Mathf.Lerp(-num, num, num3);

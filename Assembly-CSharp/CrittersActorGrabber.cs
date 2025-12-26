@@ -32,7 +32,7 @@ public class CrittersActorGrabber : MonoBehaviour
 			this.NewJointMethod();
 		}
 		CrittersRigActorSetup crittersRigActorSetup;
-		if ((this.grabber == null || !this.grabber.gameObject.activeSelf || this.grabber.rigPlayerId != PhotonNetwork.LocalPlayer.ActorNumber) && CrittersManager.instance.rigSetupByRig.TryGetValue(GorillaTagger.Instance.offlineVRRig, ref crittersRigActorSetup))
+		if ((this.grabber == null || !this.grabber.gameObject.activeSelf || this.grabber.rigPlayerId != PhotonNetwork.LocalPlayer.ActorNumber) && CrittersManager.instance.rigSetupByRig.TryGetValue(GorillaTagger.Instance.offlineVRRig, out crittersRigActorSetup))
 		{
 			int num;
 			if (this.isLeft)
@@ -139,7 +139,7 @@ public class CrittersActorGrabber : MonoBehaviour
 			{
 				CrittersActor component = attachedRigidbody.GetComponent<CrittersActor>();
 				CrittersActor crittersActor;
-				if (!(component == null) && (!(component is CrittersBag) || !CrittersManager.instance.actorById.TryGetValue(component.parentActorId, ref crittersActor) || !(crittersActor is CrittersAttachPoint) || (crittersActor as CrittersAttachPoint).rigPlayerId != PhotonNetwork.LocalPlayer.ActorNumber || (crittersActor as CrittersAttachPoint).anchorLocation != CrittersAttachPoint.AnchoredLocationTypes.Arm || (crittersActor as CrittersAttachPoint).isLeft != this.isLeft) && component.usesRB && component.CanBeGrabbed(this.grabber))
+				if (!(component == null) && (!(component is CrittersBag) || !CrittersManager.instance.actorById.TryGetValue(component.parentActorId, out crittersActor) || !(crittersActor is CrittersAttachPoint) || (crittersActor as CrittersAttachPoint).rigPlayerId != PhotonNetwork.LocalPlayer.ActorNumber || (crittersActor as CrittersAttachPoint).anchorLocation != CrittersAttachPoint.AnchoredLocationTypes.Arm || (crittersActor as CrittersAttachPoint).isLeft != this.isLeft) && component.usesRB && component.CanBeGrabbed(this.grabber))
 				{
 					float sqrMagnitude = (this.colliders[i].attachedRigidbody.position - base.transform.position).sqrMagnitude;
 					if (sqrMagnitude < num2)
@@ -220,8 +220,8 @@ public class CrittersActorGrabber : MonoBehaviour
 		{
 			CrittersActor crittersActor = this.grabber.grabbedActors[i];
 			float magnitude = this.estimator.linearVelocity.magnitude;
-			float num = magnitude + Mathf.Max(0f, magnitude - CrittersManager.instance.fastThrowThreshold) * CrittersManager.instance.fastThrowMultiplier;
-			crittersActor.Released(true, crittersActor.transform.rotation, crittersActor.transform.position, this.estimator.linearVelocity.normalized * num, this.estimator.angularVelocity);
+			float d = magnitude + Mathf.Max(0f, magnitude - CrittersManager.instance.fastThrowThreshold) * CrittersManager.instance.fastThrowMultiplier;
+			crittersActor.Released(true, crittersActor.transform.rotation, crittersActor.transform.position, this.estimator.linearVelocity.normalized * d, this.estimator.angularVelocity);
 			if (i < this.grabber.grabbedActors.Count)
 			{
 				this.grabber.grabbedActors.RemoveAt(i);
@@ -341,7 +341,7 @@ public class CrittersActorGrabber : MonoBehaviour
 			}
 		}
 		CrittersActor crittersActor;
-		return !(heldStorableActor == null) && potentialBagActor is CrittersBag && (!CrittersManager.instance.actorById.TryGetValue(potentialBagActor.parentActorId, ref crittersActor) || !(crittersActor is CrittersAttachPoint) || (crittersActor as CrittersAttachPoint).rigPlayerId != PhotonNetwork.LocalPlayer.ActorNumber || (crittersActor as CrittersAttachPoint).anchorLocation != CrittersAttachPoint.AnchoredLocationTypes.Arm || (crittersActor as CrittersAttachPoint).isLeft != this.isLeft);
+		return !(heldStorableActor == null) && potentialBagActor is CrittersBag && (!CrittersManager.instance.actorById.TryGetValue(potentialBagActor.parentActorId, out crittersActor) || !(crittersActor is CrittersAttachPoint) || (crittersActor as CrittersAttachPoint).rigPlayerId != PhotonNetwork.LocalPlayer.ActorNumber || (crittersActor as CrittersAttachPoint).anchorLocation != CrittersAttachPoint.AnchoredLocationTypes.Arm || (crittersActor as CrittersAttachPoint).isLeft != this.isLeft);
 	}
 
 	private void AddGrabberPhysicsTrigger(CrittersActor actor)
@@ -376,8 +376,8 @@ public class CrittersActorGrabber : MonoBehaviour
 			CapsuleCollider capsuleCollider = CrittersGrabberSharedData.actorGrabbers[i].triggerCollider;
 			if (!(capsuleCollider == null))
 			{
-				Vector3 vector = capsuleCollider.transform.up * MathF.Max(0f, capsuleCollider.height / 2f - capsuleCollider.radius);
-				int num = Physics.OverlapCapsuleNonAlloc(capsuleCollider.transform.position + vector, capsuleCollider.transform.position - vector, capsuleCollider.radius, this.colliders, CrittersManager.instance.containerLayer, 2);
+				Vector3 b = capsuleCollider.transform.up * MathF.Max(0f, capsuleCollider.height / 2f - capsuleCollider.radius);
+				int num = Physics.OverlapCapsuleNonAlloc(capsuleCollider.transform.position + b, capsuleCollider.transform.position - b, capsuleCollider.radius, this.colliders, CrittersManager.instance.containerLayer, QueryTriggerInteraction.Collide);
 				if (num != 0)
 				{
 					for (int j = 0; j < num; j++)

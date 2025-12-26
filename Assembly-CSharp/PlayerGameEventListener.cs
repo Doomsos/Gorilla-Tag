@@ -21,40 +21,40 @@ public class PlayerGameEventListener : MonoBehaviour
 		case PlayerGameEvents.EventType.NONE:
 			return;
 		case PlayerGameEvents.EventType.GameModeObjective:
-			PlayerGameEvents.OnGameModeObjectiveTrigger += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnGameModeObjectiveTrigger += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.GameModeCompleteRound:
-			PlayerGameEvents.OnGameModeCompleteRound += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnGameModeCompleteRound += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.GrabbedObject:
-			PlayerGameEvents.OnGrabbedObject += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnGrabbedObject += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.DroppedObject:
-			PlayerGameEvents.OnDroppedObject += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnDroppedObject += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.EatObject:
-			PlayerGameEvents.OnEatObject += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnEatObject += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.TapObject:
-			PlayerGameEvents.OnTapObject += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnTapObject += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.LaunchedProjectile:
-			PlayerGameEvents.OnLaunchedProjectile += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnLaunchedProjectile += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.PlayerMoved:
-			PlayerGameEvents.OnPlayerMoved += new Action<float, float>(this.OnGameMoveEventTriggered);
+			PlayerGameEvents.OnPlayerMoved += this.OnGameMoveEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.PlayerSwam:
-			PlayerGameEvents.OnPlayerSwam += new Action<float, float>(this.OnGameMoveEventTriggered);
+			PlayerGameEvents.OnPlayerSwam += this.OnGameMoveEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.TriggerHandEfffect:
-			PlayerGameEvents.OnTriggerHandEffect += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnTriggerHandEffect += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.EnterLocation:
-			PlayerGameEvents.OnEnterLocation += new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnEnterLocation += this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.MiscEvent:
-			PlayerGameEvents.OnMiscEvent += new Action<string, int>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnMiscEvent += this.OnGameEventTriggered;
 			return;
 		default:
 			throw new ArgumentOutOfRangeException();
@@ -68,40 +68,40 @@ public class PlayerGameEventListener : MonoBehaviour
 		case PlayerGameEvents.EventType.NONE:
 			return;
 		case PlayerGameEvents.EventType.GameModeObjective:
-			PlayerGameEvents.OnGameModeObjectiveTrigger -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnGameModeObjectiveTrigger -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.GameModeCompleteRound:
-			PlayerGameEvents.OnGameModeCompleteRound -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnGameModeCompleteRound -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.GrabbedObject:
-			PlayerGameEvents.OnGrabbedObject -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnGrabbedObject -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.DroppedObject:
-			PlayerGameEvents.OnDroppedObject -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnDroppedObject -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.EatObject:
-			PlayerGameEvents.OnEatObject -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnEatObject -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.TapObject:
-			PlayerGameEvents.OnTapObject -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnTapObject -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.LaunchedProjectile:
-			PlayerGameEvents.OnLaunchedProjectile -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnLaunchedProjectile -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.PlayerMoved:
-			PlayerGameEvents.OnPlayerMoved -= new Action<float, float>(this.OnGameMoveEventTriggered);
+			PlayerGameEvents.OnPlayerMoved -= this.OnGameMoveEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.PlayerSwam:
-			PlayerGameEvents.OnPlayerSwam -= new Action<float, float>(this.OnGameMoveEventTriggered);
+			PlayerGameEvents.OnPlayerSwam -= this.OnGameMoveEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.TriggerHandEfffect:
-			PlayerGameEvents.OnTriggerHandEffect -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnTriggerHandEffect -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.EnterLocation:
-			PlayerGameEvents.OnEnterLocation -= new Action<string>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnEnterLocation -= this.OnGameEventTriggered;
 			return;
 		case PlayerGameEvents.EventType.MiscEvent:
-			PlayerGameEvents.OnMiscEvent -= new Action<string, int>(this.OnGameEventTriggered);
+			PlayerGameEvents.OnMiscEvent -= this.OnGameEventTriggered;
 			return;
 		default:
 			throw new ArgumentOutOfRangeException();

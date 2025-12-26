@@ -49,9 +49,9 @@ public static class AprilFools
 		float num = 0.00013888889f;
 		float num2 = Mathf.Clamp01(t - num);
 		float num3 = Mathf.Clamp01(t + num);
-		float num4 = 3f * num2 * num2 - 2f * num2 * num2 * num2;
-		float num5 = 3f * num3 * num3 - 2f * num3 * num3 * num3;
-		return AprilFools.Slerp(a, b, Mathf.Lerp(num4, num5, (t - num2) / (num3 - num2)));
+		float a2 = 3f * num2 * num2 - 2f * num2 * num2 * num2;
+		float b2 = 3f * num3 * num3 - 2f * num3 * num3 * num3;
+		return AprilFools.Slerp(a, b, Mathf.Lerp(a2, b2, (t - num2) / (num3 - num2)));
 	}
 
 	public static float GenerateSmoothTarget(string username, string roomName, string areaName)

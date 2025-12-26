@@ -33,7 +33,7 @@ public class SteamManager : MonoBehaviour
 		Debug.LogWarning(pchDebugText);
 	}
 
-	[RuntimeInitializeOnLoadMethod(4)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 	private static void InitOnPlayMode()
 	{
 		SteamManager.s_EverInitialized = false;
@@ -72,9 +72,9 @@ public class SteamManager : MonoBehaviour
 		}
 		catch (DllNotFoundException ex)
 		{
-			string text = "[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n";
+			string str = "[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n";
 			DllNotFoundException ex2 = ex;
-			Debug.LogError(text + ((ex2 != null) ? ex2.ToString() : null), this);
+			Debug.LogError(str + ((ex2 != null) ? ex2.ToString() : null), this);
 			Application.Quit();
 			return;
 		}

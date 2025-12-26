@@ -70,35 +70,35 @@ namespace GorillaTag.Cosmetics
 			{
 				return;
 			}
-			Vector3 vector = (this.spawnerRigidbody != null) ? this.spawnerRigidbody.linearVelocity : Vector3.zero;
-			Vector3 vector2 = Time.fixedDeltaTime * 2f * vector;
-			Vector3 vector3 = vector2.normalized;
-			if (vector3 == Vector3.zero)
+			Vector3 a = (this.spawnerRigidbody != null) ? this.spawnerRigidbody.linearVelocity : Vector3.zero;
+			Vector3 b = Time.fixedDeltaTime * 2f * a;
+			Vector3 vector = b.normalized;
+			if (vector == Vector3.zero)
 			{
-				vector3 = base.transform.forward;
-				vector2 = vector3 * 0.01f;
+				vector = base.transform.forward;
+				b = vector * 0.01f;
 			}
-			Vector3 vector4 = base.transform.position - vector2;
-			Vector3 vector5;
+			Vector3 vector2 = base.transform.position - b;
+			Vector3 a2;
 			if (this.alignToHitNormal)
 			{
-				float magnitude = vector2.magnitude;
+				float magnitude = b.magnitude;
 				RaycastHit raycastHit;
-				if (other.Raycast(new Ray(vector4, vector3), ref raycastHit, 2f * magnitude))
+				if (other.Raycast(new Ray(vector2, vector), out raycastHit, 2f * magnitude))
 				{
-					vector5 = raycastHit.point;
+					a2 = raycastHit.point;
 				}
 				else
 				{
-					vector5 = other.ClosestPoint(vector4);
+					a2 = other.ClosestPoint(vector2);
 				}
 			}
 			else
 			{
-				vector5 = other.ClosestPoint(vector4);
+				a2 = other.ClosestPoint(vector2);
 			}
-			Vector3 vector6 = this.GetSpawnPosition(this.spawnLocation, componentInParent).TransformPoint(this.positionOffset);
-			if ((vector5 - vector6).magnitude <= this.stickRadius * componentInParent.scaleFactor)
+			Vector3 vector3 = this.GetSpawnPosition(this.spawnLocation, componentInParent).TransformPoint(this.positionOffset);
+			if ((a2 - vector3).magnitude <= this.stickRadius * componentInParent.scaleFactor)
 			{
 				if (NetworkSystem.Instance.LocalPlayer == componentInParent.creator)
 				{
@@ -114,7 +114,7 @@ namespace GorillaTag.Cosmetics
 						return;
 					}
 					Transform parent = this.MakeOrGetStickyContainer(componentInParent.transform);
-					this.StickTo(parent, vector6, this.localEulerAngles);
+					this.StickTo(parent, vector3, this.localEulerAngles);
 				}
 				UnityEvent onStickShared = this.OnStickShared;
 				if (onStickShared == null)

@@ -107,10 +107,10 @@ public class MovingPlatform : BasePlatform
 
 	private Vector3 UpdateArc()
 	{
-		float num = Mathf.Lerp(this.rotateStartAmt, this.rotateStartAmt + this.rotateAmt, this.smoothedPercent);
+		float angle = Mathf.Lerp(this.rotateStartAmt, this.rotateStartAmt + this.rotateAmt, this.smoothedPercent);
 		Quaternion quaternion = this.initLocalRotation;
-		Vector3 vector = Quaternion.AngleAxis(num, Vector3.forward) * this.initOffset;
-		return this.pivot.transform.position + vector;
+		Vector3 b = Quaternion.AngleAxis(angle, Vector3.forward) * this.initOffset;
+		return this.pivot.transform.position + b;
 	}
 
 	private Quaternion UpdateRotation()

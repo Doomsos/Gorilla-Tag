@@ -46,7 +46,7 @@ public class FusionRegionCrawler : MonoBehaviour, INetworkRunnerCallbacks, IPubl
 			startGameArgs.CustomPhotonAppSettings = new FusionAppSettings();
 			startGameArgs.CustomPhotonAppSettings.FixedRegion = fixedRegion;
 			this.waitingForSessionListUpdate = true;
-			this.regionRunner.JoinSessionLobby(1, startGameArgs.CustomPhotonAppSettings.FixedRegion, null, null, new bool?(false), default(CancellationToken), true);
+			this.regionRunner.JoinSessionLobby(SessionLobby.ClientServer, startGameArgs.CustomPhotonAppSettings.FixedRegion, null, null, new bool?(false), default(CancellationToken), true);
 			while (this.waitingForSessionListUpdate)
 			{
 				yield return new WaitForEndOfFrame();

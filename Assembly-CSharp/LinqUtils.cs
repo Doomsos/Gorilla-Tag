@@ -17,7 +17,7 @@ public static class LinqUtils
 		{
 			if (tsource != null)
 			{
-				IEnumerable<TResult> enumerable = selector.Invoke(tsource);
+				IEnumerable<TResult> enumerable = selector(tsource);
 				foreach (TResult tresult in enumerable)
 				{
 					if (tresult != null)
@@ -38,8 +38,8 @@ public static class LinqUtils
 		HashSet<TResult> set = new HashSet<TResult>();
 		foreach (TSource tsource in source)
 		{
-			TResult tresult = selector.Invoke(tsource);
-			if (set.Add(tresult))
+			TResult item = selector(tsource);
+			if (set.Add(item))
 			{
 				yield return tsource;
 			}
@@ -51,9 +51,9 @@ public static class LinqUtils
 
 	public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
 	{
-		foreach (T t in source)
+		foreach (T obj in source)
 		{
-			action.Invoke(t);
+			action(obj);
 		}
 		return source;
 	}
@@ -72,7 +72,7 @@ public static class LinqUtils
 	{
 		for (int i = 0; i < list.Count; i++)
 		{
-			list[i] = action.Invoke(list[i]);
+			list[i] = action(list[i]);
 		}
 		return list;
 	}

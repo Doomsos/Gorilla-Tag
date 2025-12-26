@@ -116,7 +116,7 @@ namespace GorillaLocomotion.Gameplay
 				}
 				else if (this.remotePlayers.Count > 0)
 				{
-					num = Enumerable.First<KeyValuePair<int, int>>(this.remotePlayers).Value;
+					num = this.remotePlayers.First<KeyValuePair<int, int>>().Value;
 				}
 				if (num >= 0 && VectorizedCustomRopeSimulation.instance.GetNodeVelocity(this, num).magnitude > 2f && !this.ropeCreakSFX.isPlaying && Mathf.RoundToInt(Time.time) % 5 == 0)
 				{
@@ -132,7 +132,7 @@ namespace GorillaLocomotion.Gameplay
 				}
 				Transform bone = this.GetBone(this.lastNodeCheckIndex);
 				Vector3 nodeVelocity = VectorizedCustomRopeSimulation.instance.GetNodeVelocity(this, this.lastNodeCheckIndex);
-				if (Physics.SphereCastNonAlloc(bone.position, 0.2f * this.scaleFactor, nodeVelocity.normalized, this.nodeHits, 0.4f * this.scaleFactor, this.wallLayerMask, 1) > 0)
+				if (Physics.SphereCastNonAlloc(bone.position, 0.2f * this.scaleFactor, nodeVelocity.normalized, this.nodeHits, 0.4f * this.scaleFactor, this.wallLayerMask, QueryTriggerInteraction.Ignore) > 0)
 				{
 					this.SetVelocity(this.lastNodeCheckIndex, Vector3.zero, false, default(PhotonMessageInfoWrapped));
 				}
@@ -190,7 +190,7 @@ namespace GorillaLocomotion.Gameplay
 		{
 			if (index >= this.nodes.Length)
 			{
-				return Enumerable.Last<Transform>(this.nodes);
+				return this.nodes.Last<Transform>();
 			}
 			return this.nodes[index];
 		}
@@ -217,7 +217,7 @@ namespace GorillaLocomotion.Gameplay
 			{
 				GorillaTagger.Instance.offlineVRRig.grabbedRopeIndex = this.ropeId;
 				GorillaTagger.Instance.offlineVRRig.grabbedRopeBoneIndex = boneIndex;
-				GorillaTagger.Instance.offlineVRRig.grabbedRopeIsLeft = (xrNode == 4);
+				GorillaTagger.Instance.offlineVRRig.grabbedRopeIsLeft = (xrNode == XRNode.LeftHand);
 				GorillaTagger.Instance.offlineVRRig.grabbedRopeOffset = offset;
 				GorillaTagger.Instance.offlineVRRig.grabbedRopeIsPhotonView = false;
 			}

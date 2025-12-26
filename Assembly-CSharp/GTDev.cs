@@ -6,7 +6,7 @@ using UnityEngine;
 
 public static class GTDev
 {
-	[RuntimeInitializeOnLoadMethod(3)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
 	private static void InitializeOnLoad()
 	{
 		GTDev.FetchDevID();

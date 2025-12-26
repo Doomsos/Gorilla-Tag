@@ -52,7 +52,7 @@ namespace GorillaTagScripts
 				this.particleSystem = this.friendshipBubble.GetComponent<ParticleSystem>();
 				this.audioSource = this.friendshipBubble.GetComponent<AudioSource>();
 			}
-			NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(this.OnPlayerJoinedRoom);
+			NetworkSystem.Instance.OnPlayerJoined += this.OnPlayerJoinedRoom;
 		}
 
 		private new void OnEnable()
@@ -250,17 +250,17 @@ namespace GorillaTagScripts
 						}
 					}
 					int num2 = 0;
-					foreach (int num3 in this.playersInProvisionalGroup)
+					foreach (int key in this.playersInProvisionalGroup)
 					{
-						int[] array;
-						if (this.partyMergeIDs.TryGetValue(num3, ref array))
+						int[] collection;
+						if (this.partyMergeIDs.TryGetValue(key, out collection))
 						{
-							list5.AddRange(array);
+							list5.AddRange(collection);
 							num2++;
 						}
 					}
 					list5.Sort();
-					int[] memberIDs = Enumerable.ToArray<int>(Enumerable.Distinct<int>(list5));
+					int[] memberIDs = list5.Distinct<int>().ToArray<int>();
 					this.myBraceletColor = GTColor.RandomHSV(this.braceletRandomColorHSVRanges);
 					this.SendPartyFormedRPC(FriendshipGroupDetection.PackColor(this.myBraceletColor), memberIDs, false);
 					this.groupCreateAfterTimestamp = Time.time + this.cooldownAfterCreatingGroup;
@@ -279,7 +279,7 @@ namespace GorillaTagScripts
 				this.playersInProvisionalGroup.Clear();
 				bool willJoinLeftHanded;
 				VRMap makingFist = VRRig.LocalRig.GetMakingFist(this.debug, out willJoinLeftHanded);
-				if (makingFist == null || !NetworkSystem.Instance.InRoom || VRRig.LocalRig.leftHandLink.IsLinkActive() || VRRig.LocalRig.rightHandLink.IsLinkActive() || GorillaParent.instance.vrrigs.Count == 0 || Time.time < this.suppressPartyCreationUntilTimestamp || (GameMode.ActiveGameMode != null && !GameMode.ActiveGameMode.CanJoinFrienship(NetworkSystem.Instance.LocalPlayer)))
+				if (makingFist == null || !NetworkSystem.Instance.InRoom || VRRig.LocalRig.leftHandLink.IsLinkActive() || VRRig.LocalRig.rightHandLink.IsLinkActive() || GorillaParent.instance.vrrigs.Count == 0 || Time.time < this.suppressPartyCreationUntilTimestamp || (GorillaGameModes.GameMode.ActiveGameMode != null && !GorillaGameModes.GameMode.ActiveGameMode.CanJoinFrienship(NetworkSystem.Instance.LocalPlayer)))
 				{
 					midpoint = Vector3.zero;
 				}
@@ -295,9 +295,9 @@ namespace GorillaTagScripts
 					{
 						bool isLeftHand;
 						VRMap makingFist2 = vrrig.GetMakingFist(this.debug, out isLeftHand);
-						if (makingFist2 != null && !vrrig.leftHandLink.IsLinkActive() && !vrrig.rightHandLink.IsLinkActive() && (!(GameMode.ActiveGameMode != null) || GameMode.ActiveGameMode.CanJoinFrienship(vrrig.OwningNetPlayer)))
+						if (makingFist2 != null && !vrrig.leftHandLink.IsLinkActive() && !vrrig.rightHandLink.IsLinkActive() && (!(GorillaGameModes.GameMode.ActiveGameMode != null) || GorillaGameModes.GameMode.ActiveGameMode.CanJoinFrienship(vrrig.OwningNetPlayer)))
 						{
-							FriendshipGroupDetection.PlayerFist playerFist = new FriendshipGroupDetection.PlayerFist
+							FriendshipGroupDetection.PlayerFist item = new FriendshipGroupDetection.PlayerFist
 							{
 								actorNumber = vrrig.creator.ActorNumber,
 								position = makingFist2.rigTarget.position,
@@ -307,7 +307,7 @@ namespace GorillaTagScripts
 							{
 								num = this.playersMakingFists.Count;
 							}
-							this.playersMakingFists.Add(playerFist);
+							this.playersMakingFists.Add(item);
 						}
 					}
 					if (this.playersMakingFists.Count <= 1 || num == -1)
@@ -320,25 +320,25 @@ namespace GorillaTagScripts
 						this.playersInProvisionalGroup.Add(actorNumber);
 						midpoint = makingFist.rigTarget.position;
 						int num2 = 1 << num;
-						FriendshipGroupDetection.PlayerFist playerFist2;
-						while (this.playersToPropagateFrom.TryDequeue(ref playerFist2))
+						FriendshipGroupDetection.PlayerFist playerFist;
+						while (this.playersToPropagateFrom.TryDequeue(out playerFist))
 						{
 							for (int i = 0; i < this.playersMakingFists.Count; i++)
 							{
 								if ((num2 & 1 << i) == 0)
 								{
-									FriendshipGroupDetection.PlayerFist playerFist3 = this.playersMakingFists[i];
-									if ((playerFist2.position - playerFist3.position).IsShorterThan(this.detectionRadius))
+									FriendshipGroupDetection.PlayerFist playerFist2 = this.playersMakingFists[i];
+									if ((playerFist.position - playerFist2.position).IsShorterThan(this.detectionRadius))
 									{
-										int num3 = ~this.playersInProvisionalGroup.BinarySearch(playerFist3.actorNumber);
+										int index = ~this.playersInProvisionalGroup.BinarySearch(playerFist2.actorNumber);
 										num2 |= 1 << i;
-										this.playersInProvisionalGroup.Insert(num3, playerFist3.actorNumber);
-										if (playerFist3.isLeftHand)
+										this.playersInProvisionalGroup.Insert(index, playerFist2.actorNumber);
+										if (playerFist2.isLeftHand)
 										{
-											this.provisionalGroupUsingLeftHands.Add(playerFist3.actorNumber);
+											this.provisionalGroupUsingLeftHands.Add(playerFist2.actorNumber);
 										}
-										this.playersToPropagateFrom.Enqueue(playerFist3);
-										midpoint += playerFist3.position;
+										this.playersToPropagateFrom.Enqueue(playerFist2);
+										midpoint += playerFist2.position;
 									}
 								}
 							}
@@ -384,7 +384,7 @@ namespace GorillaTagScripts
 				this.partyZone = groupJoinZoneAB;
 				foreach (Action<GroupJoinZoneAB> action in this.groupZoneCallbacks)
 				{
-					action.Invoke(this.partyZone);
+					action(this.partyZone);
 				}
 			}
 		}
@@ -413,7 +413,7 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					int num = 8;
 					if (SimulationMessage.CanAllocateUserPayload(num))
@@ -424,11 +424,11 @@ namespace GorillaTagScripts
 							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 							*(RpcHeader*)ptr2 = RpcHeader.Create(NetworkBehaviourUtils.GetRpcStaticIndexOrThrow("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyNoPartyToMerge(Fusion.NetworkRunner,Fusion.RpcInfo)"));
 							int num2 = 8;
-							ptr.Offset = num2 * 8;
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
-						info = RpcInfo.FromLocal(runner, 0, 0);
+						info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 						goto IL_10;
 					}
 					NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyNoPartyToMerge(Fusion.NetworkRunner,Fusion.RpcInfo)", num);
@@ -467,18 +467,18 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(playerRef);
-					if (rpcTargetStatus == 0)
+					if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 					{
 						NetworkBehaviourUtils.NotifyRpcTargetUnreachable(playerRef, "System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyPartyMerging(Fusion.NetworkRunner,Fusion.PlayerRef,System.Int32[],Fusion.RpcInfo)");
 					}
 					else
 					{
-						if (rpcTargetStatus == 1)
+						if (rpcTargetStatus == RpcTargetStatus.Self)
 						{
-							info = RpcInfo.FromLocal(runner, 0, 0);
+							info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_10;
 						}
 						int num = 8;
@@ -496,9 +496,9 @@ namespace GorillaTagScripts
 							*(int*)(ptr2 + num2) = memberIDs.Length;
 							num2 += 4;
 							num2 = (Native.CopyFromArray<int>((void*)(ptr2 + num2), memberIDs) + 3 & -4) + num2;
-							ptr.Offset = num2 * 8;
-							ptr.SetTarget(playerRef);
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetTarget(playerRef);
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
 					}
@@ -553,18 +553,18 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(targetPlayer);
-					if (rpcTargetStatus == 0)
+					if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 					{
 						NetworkBehaviourUtils.NotifyRpcTargetUnreachable(targetPlayer, "System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_PartyMemberIsAboutToGroupJoin(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)");
 					}
 					else
 					{
-						if (rpcTargetStatus == 1)
+						if (rpcTargetStatus == RpcTargetStatus.Self)
 						{
-							info = RpcInfo.FromLocal(runner, 0, 0);
+							info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_10;
 						}
 						int num = 8;
@@ -578,9 +578,9 @@ namespace GorillaTagScripts
 							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 							*(RpcHeader*)ptr2 = RpcHeader.Create(NetworkBehaviourUtils.GetRpcStaticIndexOrThrow("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_PartyMemberIsAboutToGroupJoin(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)"));
 							int num2 = 8;
-							ptr.Offset = num2 * 8;
-							ptr.SetTarget(targetPlayer);
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetTarget(targetPlayer);
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
 					}
@@ -636,18 +636,18 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(targetPlayer);
-					if (rpcTargetStatus == 0)
+					if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 					{
 						NetworkBehaviourUtils.NotifyRpcTargetUnreachable(targetPlayer, "System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_PartyFormedSuccessfully(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,System.Int16,System.Int32[],System.Boolean,Fusion.RpcInfo)");
 					}
 					else
 					{
-						if (rpcTargetStatus == 1)
+						if (rpcTargetStatus == RpcTargetStatus.Self)
 						{
-							info = RpcInfo.FromLocal(runner, 0, 0);
+							info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_10;
 						}
 						int num = 8;
@@ -673,9 +673,9 @@ namespace GorillaTagScripts
 							num2 = (Native.CopyFromArray<int>((void*)(ptr2 + num2), memberIDs) + 3 & -4) + num2;
 							ReadWriteUtilsForWeaver.WriteBoolean((int*)(ptr2 + num2), forceDebug);
 							num2 += 4;
-							ptr.Offset = num2 * 8;
-							ptr.SetTarget(targetPlayer);
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetTarget(targetPlayer);
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
 					}
@@ -696,7 +696,7 @@ namespace GorillaTagScripts
 
 		private void PartyFormedSuccesfullyWrapped(string partyGameMode, short braceletColor, int[] memberIDs, bool forceDebug, PhotonMessageInfoWrapped info)
 		{
-			if (memberIDs == null || memberIDs.Length > 10 || !Enumerable.Contains<int>(memberIDs, info.Sender.ActorNumber) || this.playersInProvisionalGroup.IndexOf(info.Sender.ActorNumber) != 0 || Mathf.Abs(this.groupCreateAfterTimestamp - Time.time) > this.m_maxGroupJoinTimeDifference || !GameMode.IsValidGameMode(partyGameMode))
+			if (memberIDs == null || memberIDs.Length > 10 || !memberIDs.Contains(info.Sender.ActorNumber) || this.playersInProvisionalGroup.IndexOf(info.Sender.ActorNumber) != 0 || Mathf.Abs(this.groupCreateAfterTimestamp - Time.time) > this.m_maxGroupJoinTimeDifference || !GorillaGameModes.GameMode.IsValidGameMode(partyGameMode))
 			{
 				return;
 			}
@@ -740,18 +740,18 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(rpcTarget);
-					if (rpcTargetStatus == 0)
+					if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 					{
 						NetworkBehaviourUtils.NotifyRpcTargetUnreachable(rpcTarget, "System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_AddPartyMembers(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,System.Int16,System.Int32[],Fusion.RpcInfo)");
 					}
 					else
 					{
-						if (rpcTargetStatus == 1)
+						if (rpcTargetStatus == RpcTargetStatus.Self)
 						{
-							info = RpcInfo.FromLocal(runner, 0, 0);
+							info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_10;
 						}
 						int num = 8;
@@ -774,9 +774,9 @@ namespace GorillaTagScripts
 							*(int*)(ptr2 + num2) = memberIDs.Length;
 							num2 += 4;
 							num2 = (Native.CopyFromArray<int>((void*)(ptr2 + num2), memberIDs) + 3 & -4) + num2;
-							ptr.Offset = num2 * 8;
-							ptr.SetTarget(rpcTarget);
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetTarget(rpcTarget);
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
 					}
@@ -790,7 +790,7 @@ namespace GorillaTagScripts
 		private void AddPartyMembersWrapped(string partyGameMode, short braceletColor, int[] memberIDs, PhotonMessageInfoWrapped infoWrapped)
 		{
 			GorillaNot.IncrementRPCCall(infoWrapped, "AddPartyMembersWrapped");
-			if (memberIDs.Length > 10 || !this.IsInParty || !this.myPartyMembersHash.Contains(NetworkSystem.Instance.GetUserID(infoWrapped.senderID)) || !GameMode.IsValidGameMode(partyGameMode))
+			if (memberIDs.Length > 10 || !this.IsInParty || !this.myPartyMembersHash.Contains(NetworkSystem.Instance.GetUserID(infoWrapped.senderID)) || !GorillaGameModes.GameMode.IsValidGameMode(partyGameMode))
 			{
 				return;
 			}
@@ -807,12 +807,12 @@ namespace GorillaTagScripts
 			{
 				FriendshipGroupDetection.userIdLookup.Add(vrrig.creator.ActorNumber, vrrig.creator.UserId);
 			}
-			foreach (int num in memberIDs)
+			foreach (int key in memberIDs)
 			{
-				string text;
-				if (FriendshipGroupDetection.userIdLookup.TryGetValue(num, ref text))
+				string item;
+				if (FriendshipGroupDetection.userIdLookup.TryGetValue(key, out item))
 				{
-					this.myPartyMemberIDs.Add(text);
+					this.myPartyMemberIDs.Add(item);
 				}
 			}
 			this.myBraceletColor = FriendshipGroupDetection.UnpackColor(braceletColor);
@@ -888,18 +888,18 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(player);
-					if (rpcTargetStatus == 0)
+					if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 					{
 						NetworkBehaviourUtils.NotifyRpcTargetUnreachable(player, "System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_PlayerLeftParty(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)");
 					}
 					else
 					{
-						if (rpcTargetStatus == 1)
+						if (rpcTargetStatus == RpcTargetStatus.Self)
 						{
-							info = RpcInfo.FromLocal(runner, 0, 0);
+							info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_10;
 						}
 						int num = 8;
@@ -913,9 +913,9 @@ namespace GorillaTagScripts
 							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 							*(RpcHeader*)ptr2 = RpcHeader.Create(NetworkBehaviourUtils.GetRpcStaticIndexOrThrow("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_PlayerLeftParty(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)"));
 							int num2 = 8;
-							ptr.Offset = num2 * 8;
-							ptr.SetTarget(player);
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetTarget(player);
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
 					}
@@ -994,18 +994,18 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(rpcTarget);
-					if (rpcTargetStatus == 0)
+					if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 					{
 						NetworkBehaviourUtils.NotifyRpcTargetUnreachable(rpcTarget, "System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_VerifyPartyMember(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)");
 					}
 					else
 					{
-						if (rpcTargetStatus == 1)
+						if (rpcTargetStatus == RpcTargetStatus.Self)
 						{
-							info = RpcInfo.FromLocal(runner, 0, 0);
+							info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_10;
 						}
 						int num = 8;
@@ -1019,9 +1019,9 @@ namespace GorillaTagScripts
 							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 							*(RpcHeader*)ptr2 = RpcHeader.Create(NetworkBehaviourUtils.GetRpcStaticIndexOrThrow("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_VerifyPartyMember(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.RpcInfo)"));
 							int num2 = 8;
-							ptr.Offset = num2 * 8;
-							ptr.SetTarget(rpcTarget);
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetTarget(rpcTarget);
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
 					}
@@ -1080,18 +1080,18 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(targetPlayer);
-					if (rpcTargetStatus == 0)
+					if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 					{
 						NetworkBehaviourUtils.NotifyRpcTargetUnreachable(targetPlayer, "System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_RequestPartyGameMode(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,Fusion.RpcInfo)");
 					}
 					else
 					{
-						if (rpcTargetStatus == 1)
+						if (rpcTargetStatus == RpcTargetStatus.Self)
 						{
-							info = RpcInfo.FromLocal(runner, 0, 0);
+							info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_10;
 						}
 						int num = 8;
@@ -1107,9 +1107,9 @@ namespace GorillaTagScripts
 							*(RpcHeader*)ptr2 = RpcHeader.Create(NetworkBehaviourUtils.GetRpcStaticIndexOrThrow("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_RequestPartyGameMode(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,Fusion.RpcInfo)"));
 							int num2 = 8;
 							num2 = (ReadWriteUtilsForWeaver.WriteStringUtf8NoHash((void*)(ptr2 + num2), gameMode) + 3 & -4) + num2;
-							ptr.Offset = num2 * 8;
-							ptr.SetTarget(targetPlayer);
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetTarget(targetPlayer);
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
 					}
@@ -1129,7 +1129,7 @@ namespace GorillaTagScripts
 		private void RequestPartyGameModeWrapped(string gameMode, PhotonMessageInfoWrapped info)
 		{
 			GorillaNot.IncrementRPCCall(info, "RequestPartyGameModeWrapped");
-			if (!this.IsInParty || !this.IsInMyGroup(info.Sender.UserId) || !GameMode.IsValidGameMode(gameMode))
+			if (!this.IsInParty || !this.IsInMyGroup(info.Sender.UserId) || !GorillaGameModes.GameMode.IsValidGameMode(gameMode))
 			{
 				return;
 			}
@@ -1158,18 +1158,18 @@ namespace GorillaTagScripts
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != 4)
+				if (runner.Stage != SimulationStages.Resimulate)
 				{
 					RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(targetPlayer);
-					if (rpcTargetStatus == 0)
+					if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 					{
 						NetworkBehaviourUtils.NotifyRpcTargetUnreachable(targetPlayer, "System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyPartyGameModeChanged(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,Fusion.RpcInfo)");
 					}
 					else
 					{
-						if (rpcTargetStatus == 1)
+						if (rpcTargetStatus == RpcTargetStatus.Self)
 						{
-							info = RpcInfo.FromLocal(runner, 0, 0);
+							info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_10;
 						}
 						int num = 8;
@@ -1185,9 +1185,9 @@ namespace GorillaTagScripts
 							*(RpcHeader*)ptr2 = RpcHeader.Create(NetworkBehaviourUtils.GetRpcStaticIndexOrThrow("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyPartyGameModeChanged(Fusion.NetworkRunner,Fusion.PlayerRef,System.String,Fusion.RpcInfo)"));
 							int num2 = 8;
 							num2 = (ReadWriteUtilsForWeaver.WriteStringUtf8NoHash((void*)(ptr2 + num2), gameMode) + 3 & -4) + num2;
-							ptr.Offset = num2 * 8;
-							ptr.SetTarget(targetPlayer);
-							ptr.SetStatic();
+							ptr->Offset = num2 * 8;
+							ptr->SetTarget(targetPlayer);
+							ptr->SetStatic();
 							runner.SendRpc(ptr);
 						}
 					}
@@ -1207,7 +1207,7 @@ namespace GorillaTagScripts
 		private void NotifyPartyGameModeChangedWrapped(string gameMode, PhotonMessageInfoWrapped info)
 		{
 			GorillaNot.IncrementRPCCall(info, "NotifyPartyGameModeChangedWrapped");
-			if (!this.IsInParty || !this.IsInMyGroup(info.Sender.UserId) || !GameMode.IsValidGameMode(gameMode))
+			if (!this.IsInParty || !this.IsInMyGroup(info.Sender.UserId) || !GorillaGameModes.GameMode.IsValidGameMode(gameMode))
 			{
 				return;
 			}
@@ -1219,9 +1219,9 @@ namespace GorillaTagScripts
 			this.myPartyMembersHash.Clear();
 			if (this.myPartyMemberIDs != null)
 			{
-				foreach (string text in this.myPartyMemberIDs)
+				foreach (string item in this.myPartyMemberIDs)
 				{
-					this.myPartyMembersHash.Add(text);
+					this.myPartyMembersHash.Add(item);
 				}
 			}
 			this.myBeadColors.Clear();
@@ -1241,15 +1241,15 @@ namespace GorillaTagScripts
 				{
 					while (enumerator.MoveNext())
 					{
-						string text2 = enumerator.Current;
-						Color color;
-						if (FriendshipGroupDetection.tempColorLookup.TryGetValue(text2, ref color))
+						string text = enumerator.Current;
+						Color item2;
+						if (FriendshipGroupDetection.tempColorLookup.TryGetValue(text, out item2))
 						{
-							if (text2 == PhotonNetwork.LocalPlayer.UserId)
+							if (text == PhotonNetwork.LocalPlayer.UserId)
 							{
 								this.MyBraceletSelfIndex = this.myBeadColors.Count;
 							}
-							this.myBeadColors.Add(color);
+							this.myBeadColors.Add(item2);
 						}
 					}
 					goto IL_168;
@@ -1283,11 +1283,12 @@ namespace GorillaTagScripts
 
 		public static Color UnpackColor(short data)
 		{
-			Color result = default(Color);
-			result.r = (float)(data % 10) / 9f;
-			result.g = (float)(data / 10 % 10) / 9f;
-			result.b = (float)(data / 100 % 10) / 9f;
-			return result;
+			return new Color
+			{
+				r = (float)(data % 10) / 9f,
+				g = (float)(data / 10 % 10) / 9f,
+				b = (float)(data / 100 % 10) / 9f
+			};
 		}
 
 		[NetworkRpcStaticWeavedInvoker("System.Void GorillaTagScripts.FriendshipGroupDetection::RPC_NotifyNoPartyToMerge(Fusion.NetworkRunner,Fusion.RpcInfo)")]
@@ -1296,7 +1297,7 @@ namespace GorillaTagScripts
 		protected unsafe static void RPC_NotifyNoPartyToMerge@Invoker(NetworkRunner runner, SimulationMessage* message)
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_NotifyNoPartyToMerge(runner, info);
 		}
@@ -1308,11 +1309,11 @@ namespace GorillaTagScripts
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
 			int num = 8;
-			PlayerRef target = message.Target;
+			PlayerRef target = message->Target;
 			int[] array = new int[*(int*)(ptr + num)];
 			num += 4;
 			num = (Native.CopyToArray<int>(array, (void*)(ptr + num)) + 3 & -4) + num;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_NotifyPartyMerging(runner, target, array, info);
 		}
@@ -1323,8 +1324,8 @@ namespace GorillaTagScripts
 		protected unsafe static void RPC_PartyMemberIsAboutToGroupJoin@Invoker(NetworkRunner runner, SimulationMessage* message)
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			PlayerRef target = message.Target;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			PlayerRef target = message->Target;
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_PartyMemberIsAboutToGroupJoin(runner, target, info);
 		}
@@ -1336,9 +1337,9 @@ namespace GorillaTagScripts
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
 			int num = 8;
-			PlayerRef target = message.Target;
+			PlayerRef target = message->Target;
 			string partyGameMode;
-			num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), ref partyGameMode) + 3 & -4) + num;
+			num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), out partyGameMode) + 3 & -4) + num;
 			short num2 = *(short*)(ptr + num);
 			num += (2 + 3 & -4);
 			short braceletColor = num2;
@@ -1348,7 +1349,7 @@ namespace GorillaTagScripts
 			bool flag = ReadWriteUtilsForWeaver.ReadBoolean((int*)(ptr + num));
 			num += 4;
 			bool forceDebug = flag;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_PartyFormedSuccessfully(runner, target, partyGameMode, braceletColor, array, forceDebug, info);
 		}
@@ -1360,16 +1361,16 @@ namespace GorillaTagScripts
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
 			int num = 8;
-			PlayerRef target = message.Target;
+			PlayerRef target = message->Target;
 			string partyGameMode;
-			num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), ref partyGameMode) + 3 & -4) + num;
+			num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), out partyGameMode) + 3 & -4) + num;
 			short num2 = *(short*)(ptr + num);
 			num += (2 + 3 & -4);
 			short braceletColor = num2;
 			int[] array = new int[*(int*)(ptr + num)];
 			num += 4;
 			num = (Native.CopyToArray<int>(array, (void*)(ptr + num)) + 3 & -4) + num;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_AddPartyMembers(runner, target, partyGameMode, braceletColor, array, info);
 		}
@@ -1380,8 +1381,8 @@ namespace GorillaTagScripts
 		protected unsafe static void RPC_PlayerLeftParty@Invoker(NetworkRunner runner, SimulationMessage* message)
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			PlayerRef target = message.Target;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			PlayerRef target = message->Target;
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_PlayerLeftParty(runner, target, info);
 		}
@@ -1392,8 +1393,8 @@ namespace GorillaTagScripts
 		protected unsafe static void RPC_VerifyPartyMember@Invoker(NetworkRunner runner, SimulationMessage* message)
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			PlayerRef target = message.Target;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			PlayerRef target = message->Target;
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_VerifyPartyMember(runner, target, info);
 		}
@@ -1405,10 +1406,10 @@ namespace GorillaTagScripts
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
 			int num = 8;
-			PlayerRef target = message.Target;
+			PlayerRef target = message->Target;
 			string gameMode;
-			num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), ref gameMode) + 3 & -4) + num;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), out gameMode) + 3 & -4) + num;
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_RequestPartyGameMode(runner, target, gameMode, info);
 		}
@@ -1420,10 +1421,10 @@ namespace GorillaTagScripts
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
 			int num = 8;
-			PlayerRef target = message.Target;
+			PlayerRef target = message->Target;
 			string gameMode;
-			num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), ref gameMode) + 3 & -4) + num;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+			num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), out gameMode) + 3 & -4) + num;
+			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			FriendshipGroupDetection.RPC_NotifyPartyGameModeChanged(runner, target, gameMode, info);
 		}

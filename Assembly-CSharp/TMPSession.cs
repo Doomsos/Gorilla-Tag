@@ -62,7 +62,7 @@ public class TMPSession
 		for (;;)
 		{
 			int num2 = num;
-			int? num3 = (optedInPermissions != null) ? new int?(optedInPermissions.Length) : default(int?);
+			int? num3 = (optedInPermissions != null) ? new int?(optedInPermissions.Length) : null;
 			if (!(num2 < num3.GetValueOrDefault() & num3 != null))
 			{
 				break;
@@ -91,7 +91,7 @@ public class TMPSession
 
 	public List<Permission> GetAllPermissions()
 	{
-		return Enumerable.ToList<Permission>(this.Permissions.Values);
+		return this.Permissions.Values.ToList<Permission>();
 	}
 
 	public bool HasPermissionForFeature(EKIDFeatures feature)
@@ -132,7 +132,8 @@ public class TMPSession
 			Debug.LogWarning("[KID::SESSION] OptedInPermissions is null or empty. Returning empty array.");
 			return Array.Empty<string>();
 		}
-		return Enumerable.ToArray<string>(Enumerable.Select<EKIDFeatures, string>(this.OptedInPermissions, (EKIDFeatures f) => f.ToStandardisedString()));
+		return (from f in this.OptedInPermissions
+		select f.ToStandardisedString()).ToArray<string>();
 	}
 
 	public void UpdatePermission(EKIDFeatures feature, Permission newData)

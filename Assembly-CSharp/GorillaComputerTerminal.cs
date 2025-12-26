@@ -37,8 +37,8 @@ public class GorillaComputerTerminal : MonoBehaviour, IBuildValidation
 		GameEvents.FunctionSelectTextChangedEvent.AddListener(new UnityAction<string>(this.OnFunctionTextChanged));
 		GameEvents.ScreenTextMaterialsEvent.AddListener(new UnityAction<Material[]>(this.OnMaterialsChanged));
 		GameEvents.LanguageEvent.AddListener(new UnityAction(this.OnLanguageChanged));
-		this.myScreenText.text = GorillaComputer.instance.screenText.Text;
-		this.myFunctionText.text = GorillaComputer.instance.functionSelectText.Text;
+		this.myScreenText.text = GorillaComputer.instance.screenText.currentText;
+		this.myFunctionText.text = GorillaComputer.instance.functionSelectText.currentText;
 		if (GorillaComputer.instance.screenText.currentMaterials != null)
 		{
 			this.monitorMesh.materials = GorillaComputer.instance.screenText.currentMaterials;

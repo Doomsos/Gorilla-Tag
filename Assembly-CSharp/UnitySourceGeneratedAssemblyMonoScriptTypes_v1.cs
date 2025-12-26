@@ -4,11 +4,11 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 [CompilerGenerated]
-[EditorBrowsable(1)]
+[EditorBrowsable(EditorBrowsableState.Never)]
 [GeneratedCode("Unity.MonoScriptGenerator.MonoScriptInfoGenerator", null)]
 internal class UnitySourceGeneratedAssemblyMonoScriptTypes_v1
 {
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static UnitySourceGeneratedAssemblyMonoScriptTypes_v1.MonoScriptData Get()
 	{
 		UnitySourceGeneratedAssemblyMonoScriptTypes_v1.MonoScriptData result = default(UnitySourceGeneratedAssemblyMonoScriptTypes_v1.MonoScriptData);
@@ -10013,7 +10013,7 @@ internal class UnitySourceGeneratedAssemblyMonoScriptTypes_v1
 			92,
 			83,
 			99,
-			"Not showing all elements because this array is too big (150413 elements)"
+			"Not showing all elements because this array is too big (150550 elements)"
 		};
 		result.TypesData = new byte[]
 		{
@@ -20016,10 +20016,10 @@ internal class UnitySourceGeneratedAssemblyMonoScriptTypes_v1
 			124,
 			67,
 			108,
-			"Not showing all elements because this array is too big (97376 elements)"
+			"Not showing all elements because this array is too big (97402 elements)"
 		};
-		result.TotalFiles = 2223;
-		result.TotalTypes = 3154;
+		result.TotalFiles = 2225;
+		result.TotalTypes = 3155;
 		result.IsEditorOnly = false;
 		return result;
 	}

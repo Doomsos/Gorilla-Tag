@@ -284,10 +284,10 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 	private void ChooseNewBehavior()
 	{
 		float num = 0f;
-		VRRig vrrig = this.senseNearby.PickClosest(out num);
-		if (!GhostReactorManager.AggroDisabled && vrrig != null)
+		VRRig x = this.senseNearby.PickClosest(out num);
+		if (!GhostReactorManager.AggroDisabled && x != null)
 		{
-			this.investigateLocation = default(Vector3?);
+			this.investigateLocation = null;
 			float num2 = (this.currBehavior == GREnemySummoner.Behavior.KeepDistance) ? (this.keepDistanceThreshold + 1f) : this.keepDistanceThreshold;
 			if (num < num2 * num2)
 			{
@@ -429,11 +429,11 @@ public class GREnemySummoner : MonoBehaviour, IGameEntityComponent, IGameEntityS
 
 	public void OnGameEntitySerialize(BinaryWriter writer)
 	{
-		byte b = (byte)this.currBehavior;
-		byte b2 = (byte)this.currBodyState;
-		writer.Write(b);
+		byte value = (byte)this.currBehavior;
+		byte value2 = (byte)this.currBodyState;
+		writer.Write(value);
 		writer.Write(this.hp);
-		writer.Write(b2);
+		writer.Write(value2);
 	}
 
 	public void OnGameEntityDeserialize(BinaryReader reader)

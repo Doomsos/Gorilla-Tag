@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GorillaLocomotion;
+using Photon.Pun;
 using UnityEngine;
 
 public class SecondLookSkeleton : MonoBehaviour
@@ -360,7 +361,7 @@ public class SecondLookSkeleton : MonoBehaviour
 	private bool CanSeePlayerWithResults(out RaycastHit closest)
 	{
 		Vector3 vector = this.playerTransform.position - this.lookSource.position;
-		int num = Physics.RaycastNonAlloc(this.lookSource.position, vector.normalized, this.rHits, this.maxSeeDistance, this.mask, 1);
+		int num = Physics.RaycastNonAlloc(this.lookSource.position, vector.normalized, this.rHits, this.maxSeeDistance, this.mask, QueryTriggerInteraction.Ignore);
 		closest = this.rHits[0];
 		if (num == 0)
 		{
@@ -383,7 +384,7 @@ public class SecondLookSkeleton : MonoBehaviour
 			this.ChangeState(SecondLookSkeleton.GhostState.Activated);
 			return;
 		}
-		this.synchValues.SendRPC("RemoteActivateGhost", 2, Array.Empty<object>());
+		this.synchValues.SendRPC("RemoteActivateGhost", RpcTarget.MasterClient, Array.Empty<object>());
 	}
 
 	private void StartChasing()
@@ -411,7 +412,7 @@ public class SecondLookSkeleton : MonoBehaviour
 		}
 		if (NetworkSystem.Instance.InRoom)
 		{
-			this.synchValues.SendRPC("RemotePlayerSeen", 1, Array.Empty<object>());
+			this.synchValues.SendRPC("RemotePlayerSeen", RpcTarget.Others, Array.Empty<object>());
 		}
 		this.playersSeen.Add(NetworkSystem.Instance.LocalPlayer);
 		return true;
@@ -437,9 +438,9 @@ public class SecondLookSkeleton : MonoBehaviour
 	{
 		if (this.IsMine() && this.currentState == SecondLookSkeleton.GhostState.Chasing)
 		{
-			RigContainer rigContainer;
-			VRRigCache.Instance.TryGetVrrig(player, out rigContainer);
-			if (rigContainer != null && this.playersSeen.Contains(player))
+			RigContainer x;
+			VRRigCache.Instance.TryGetVrrig(player, out x);
+			if (x != null && this.playersSeen.Contains(player))
 			{
 				this.ChangeState(SecondLookSkeleton.GhostState.CaughtPlayer);
 			}
@@ -611,7 +612,7 @@ public class SecondLookSkeleton : MonoBehaviour
 			}
 			this.localCaught = true;
 		}
-		this.synchValues.SendRPC("RemotePlayerCaught", 2, Array.Empty<object>());
+		this.synchValues.SendRPC("RemotePlayerCaught", RpcTarget.MasterClient, Array.Empty<object>());
 	}
 
 	private void FloatPlayer()
@@ -653,7 +654,7 @@ public class SecondLookSkeleton : MonoBehaviour
 
 	private void SetHeightOffset()
 	{
-		int num = Physics.RaycastNonAlloc(this.spookyGhost.transform.position + Vector3.up * this.bodyHeightOffset, Vector3.down, this.rHits, this.maxSeeDistance, this.mask, 1);
+		int num = Physics.RaycastNonAlloc(this.spookyGhost.transform.position + Vector3.up * this.bodyHeightOffset, Vector3.down, this.rHits, this.maxSeeDistance, this.mask, QueryTriggerInteraction.Ignore);
 		if (num == 0)
 		{
 			this.heightOffset.localPosition = Vector3.zero;

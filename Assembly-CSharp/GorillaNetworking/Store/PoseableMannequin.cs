@@ -109,40 +109,40 @@ namespace GorillaNetworking.Store
 
 		public void SetCurvesForBone(SkinnedMeshRenderer paramSkinnedMeshRenderer, AnimationClip clip, Transform bone)
 		{
-			Keyframe[] array = new Keyframe[]
+			Keyframe[] keys = new Keyframe[]
 			{
 				new Keyframe(0f, bone.parent.localRotation.x)
 			};
-			Keyframe[] array2 = new Keyframe[]
+			Keyframe[] keys2 = new Keyframe[]
 			{
 				new Keyframe(0f, bone.parent.localRotation.y)
 			};
-			Keyframe[] array3 = new Keyframe[]
+			Keyframe[] keys3 = new Keyframe[]
 			{
 				new Keyframe(0f, bone.parent.localRotation.z)
 			};
-			Keyframe[] array4 = new Keyframe[]
+			Keyframe[] keys4 = new Keyframe[]
 			{
 				new Keyframe(0f, bone.parent.localRotation.w)
 			};
-			AnimationCurve animationCurve = new AnimationCurve(array);
-			AnimationCurve animationCurve2 = new AnimationCurve(array2);
-			AnimationCurve animationCurve3 = new AnimationCurve(array3);
-			AnimationCurve animationCurve4 = new AnimationCurve(array4);
-			string text = "";
-			string text2 = bone.name.Replace("_new", "");
+			AnimationCurve curve = new AnimationCurve(keys);
+			AnimationCurve curve2 = new AnimationCurve(keys2);
+			AnimationCurve curve3 = new AnimationCurve(keys3);
+			AnimationCurve curve4 = new AnimationCurve(keys4);
+			string relativePath = "";
+			string b = bone.name.Replace("_new", "");
 			foreach (Transform transform in this.skinnedMeshRenderer.bones)
 			{
-				if (transform.name == text2)
+				if (transform.name == b)
 				{
-					text = transform.GetPath(this.skinnedMeshRenderer.transform.parent).TrimStart('/');
+					relativePath = transform.GetPath(this.skinnedMeshRenderer.transform.parent).TrimStart('/');
 					break;
 				}
 			}
-			clip.SetCurve(text, typeof(Transform), "m_LocalRotation.x", animationCurve);
-			clip.SetCurve(text, typeof(Transform), "m_LocalRotation.y", animationCurve2);
-			clip.SetCurve(text, typeof(Transform), "m_LocalRotation.z", animationCurve3);
-			clip.SetCurve(text, typeof(Transform), "m_LocalRotation.w", animationCurve4);
+			clip.SetCurve(relativePath, typeof(Transform), "m_LocalRotation.x", curve);
+			clip.SetCurve(relativePath, typeof(Transform), "m_LocalRotation.y", curve2);
+			clip.SetCurve(relativePath, typeof(Transform), "m_LocalRotation.z", curve3);
+			clip.SetCurve(relativePath, typeof(Transform), "m_LocalRotation.w", curve4);
 		}
 
 		public void UpdatePrefabWithAnimationClip(string AnimationFileName)

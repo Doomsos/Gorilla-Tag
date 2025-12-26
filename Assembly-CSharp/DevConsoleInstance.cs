@@ -9,20 +9,6 @@ public class DevConsoleInstance : MonoBehaviour
 		base.gameObject.SetActive(false);
 	}
 
-	public DevConsoleInstance()
-	{
-		HashSet<LogType> hashSet = new HashSet<LogType>();
-		hashSet.Add(0);
-		hashSet.Add(4);
-		hashSet.Add(3);
-		hashSet.Add(2);
-		hashSet.Add(1);
-		this.selectedLogTypes = hashSet;
-		this.textScale = 0.5;
-		this.isEnabled = true;
-		base..ctor();
-	}
-
 	public GorillaDevButton[] buttons;
 
 	public GameObject[] disableWhileActive;
@@ -45,7 +31,14 @@ public class DevConsoleInstance : MonoBehaviour
 
 	public List<DevConsole.DisplayedLogLine> logLines = new List<DevConsole.DisplayedLogLine>();
 
-	public HashSet<LogType> selectedLogTypes;
+	public HashSet<LogType> selectedLogTypes = new HashSet<LogType>
+	{
+		LogType.Error,
+		LogType.Exception,
+		LogType.Log,
+		LogType.Warning,
+		LogType.Assert
+	};
 
 	[SerializeField]
 	private GorillaDevButton[] logTypeButtons;
@@ -61,9 +54,9 @@ public class DevConsoleInstance : MonoBehaviour
 
 	public float lineStartTextWidth;
 
-	public double textScale;
+	public double textScale = 0.5;
 
-	public bool isEnabled;
+	public bool isEnabled = true;
 
 	[SerializeField]
 	private GameObject ConsoleLineExample;

@@ -124,8 +124,8 @@ namespace Photon.Pun
 						}
 						else
 						{
-							float num = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
-							this.m_NetworkPosition += this.m_Direction * num;
+							float d = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
+							this.m_NetworkPosition += this.m_Direction * d;
 							if (this.m_UseLocal)
 							{
 								this.m_Distance = Vector3.Distance(transform.localPosition, this.m_NetworkPosition);

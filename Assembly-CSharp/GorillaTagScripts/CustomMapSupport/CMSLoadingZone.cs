@@ -77,8 +77,8 @@ namespace GorillaTagScripts.CustomMapSupport
 
 		private string GetSceneNameFromFilePath(string filePath)
 		{
-			string[] array = filePath.Split("/", 0);
-			return array[array.Length - 1].Split(".", 0)[0];
+			string[] array = filePath.Split("/", StringSplitOptions.None);
+			return array[array.Length - 1].Split(".", StringSplitOptions.None)[0];
 		}
 
 		private int[] scenesToLoad;

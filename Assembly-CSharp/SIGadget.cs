@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.XR;
 
 [RequireComponent(typeof(GameEntity))]
 public abstract class SIGadget : MonoBehaviour, IGameEntityComponent, IPrefabRequirements, IGameActivatable, IGameStateProvider
@@ -62,7 +63,7 @@ public abstract class SIGadget : MonoBehaviour, IGameEntityComponent, IPrefabReq
 		{
 			return default(Vector2);
 		}
-		return ControllerInputPoller.Primary2DAxis((this.gameEntity.heldByHandIndex == 0 || this.gameEntity.snappedJoint == SnapJointType.HandL) ? 4 : 5);
+		return ControllerInputPoller.Primary2DAxis((this.gameEntity.heldByHandIndex == 0 || this.gameEntity.snappedJoint == SnapJointType.HandL) ? XRNode.LeftHand : XRNode.RightHand);
 	}
 
 	protected bool ShouldProcessInput()
@@ -131,7 +132,7 @@ public abstract class SIGadget : MonoBehaviour, IGameEntityComponent, IPrefabReq
 		{
 			return;
 		}
-		onPostRefreshVisuals.Invoke(withUpgrades);
+		onPostRefreshVisuals(withUpgrades);
 	}
 
 	protected virtual void OnEnable()

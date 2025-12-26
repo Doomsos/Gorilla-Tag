@@ -37,7 +37,7 @@ public static class AbilityHelperFunctions
 	{
 		GameNoiseEvent gameNoiseEvent;
 		NavMeshHit navMeshHit;
-		if (GRNoiseEventManager.instance.GetMostRecentNoiseEventInRadius(listenerLocation, hearingRadius, out gameNoiseEvent) && NavMesh.SamplePosition(gameNoiseEvent.position, ref navMeshHit, 1f, AbilityHelperFunctions.GetNavMeshWalkableArea()))
+		if (GRNoiseEventManager.instance.GetMostRecentNoiseEventInRadius(listenerLocation, hearingRadius, out gameNoiseEvent) && NavMesh.SamplePosition(gameNoiseEvent.position, out navMeshHit, 1f, AbilityHelperFunctions.GetNavMeshWalkableArea()))
 		{
 			return new Vector3?(navMeshHit.position);
 		}
@@ -45,7 +45,7 @@ public static class AbilityHelperFunctions
 		{
 			return currentInvestigationLocation;
 		}
-		return default(Vector3?);
+		return null;
 	}
 
 	private static int navMeshWalkableArea = -1;

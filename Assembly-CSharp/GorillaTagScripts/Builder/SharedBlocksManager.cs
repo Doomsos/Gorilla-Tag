@@ -152,19 +152,19 @@ namespace GorillaTagScripts.Builder
 
 		private static void SetPublishTimeForSlot(int slotID, DateTime time)
 		{
-			SharedBlocksManager.LocalPublishInfo localPublishInfo;
-			if (SharedBlocksManager.localPublishData.TryGetValue(slotID, ref localPublishInfo))
+			SharedBlocksManager.LocalPublishInfo value;
+			if (SharedBlocksManager.localPublishData.TryGetValue(slotID, out value))
 			{
-				localPublishInfo.publishTime = time.ToBinary();
-				SharedBlocksManager.localPublishData[slotID] = localPublishInfo;
+				value.publishTime = time.ToBinary();
+				SharedBlocksManager.localPublishData[slotID] = value;
 				return;
 			}
-			SharedBlocksManager.LocalPublishInfo localPublishInfo2 = new SharedBlocksManager.LocalPublishInfo
+			SharedBlocksManager.LocalPublishInfo value2 = new SharedBlocksManager.LocalPublishInfo
 			{
 				mapID = null,
 				publishTime = time.ToBinary()
 			};
-			SharedBlocksManager.localPublishData.Add(slotID, localPublishInfo2);
+			SharedBlocksManager.localPublishData.Add(slotID, value2);
 		}
 
 		private static void SetMapIDAndPublishTimeForSlot(int slotID, string mapID, DateTime time)
@@ -180,7 +180,7 @@ namespace GorillaTagScripts.Builder
 		public static SharedBlocksManager.LocalPublishInfo GetPublishInfoForSlot(int slot)
 		{
 			SharedBlocksManager.LocalPublishInfo result;
-			if (SharedBlocksManager.localPublishData.TryGetValue(slot, ref result))
+			if (SharedBlocksManager.localPublishData.TryGetValue(slot, out result))
 			{
 				return result;
 			}
@@ -240,7 +240,7 @@ namespace GorillaTagScripts.Builder
 				Action onSaveTimeUpdated = SharedBlocksManager.OnSaveTimeUpdated;
 				if (onSaveTimeUpdated != null)
 				{
-					onSaveTimeUpdated.Invoke();
+					onSaveTimeUpdated();
 				}
 			}
 			else
@@ -253,7 +253,7 @@ namespace GorillaTagScripts.Builder
 			{
 				return;
 			}
-			onRecentMapIdsUpdated.Invoke();
+			onRecentMapIdsUpdated();
 		}
 
 		private void SaveRecentVotesToPlayerPrefs()
@@ -275,7 +275,7 @@ namespace GorillaTagScripts.Builder
 				GTDev.LogWarning<string>("SharedBlocksManager RequestVote Client Not Logged into Mothership", null);
 				if (callback != null)
 				{
-					callback.Invoke(false, 1.ToString());
+					callback(false, 1.ToString());
 				}
 				return;
 			}
@@ -304,7 +304,7 @@ namespace GorillaTagScripts.Builder
 			request.downloadHandler = new DownloadHandlerBuffer();
 			request.SetRequestHeader("Content-Type", "application/json");
 			yield return request.SendWebRequest();
-			if (request.result == 1)
+			if (request.result == UnityWebRequest.Result.Success)
 			{
 				string mapId = data.mapId;
 				if (data.vote == -1)
@@ -315,7 +315,7 @@ namespace GorillaTagScripts.Builder
 						Action onRecentMapIdsUpdated = SharedBlocksManager.OnRecentMapIdsUpdated;
 						if (onRecentMapIdsUpdated != null)
 						{
-							onRecentMapIdsUpdated.Invoke();
+							onRecentMapIdsUpdated();
 						}
 					}
 				}
@@ -330,19 +330,19 @@ namespace GorillaTagScripts.Builder
 					Action onRecentMapIdsUpdated2 = SharedBlocksManager.OnRecentMapIdsUpdated;
 					if (onRecentMapIdsUpdated2 != null)
 					{
-						onRecentMapIdsUpdated2.Invoke();
+						onRecentMapIdsUpdated2();
 					}
 				}
 				this.voteInProgress = false;
 				if (callback != null)
 				{
-					callback.Invoke(true, "");
+					callback(true, "");
 				}
 			}
 			else
 			{
 				GTDev.LogError<string>(string.Format("PostVote Error: {0} -- raw response: ", request.responseCode) + request.downloadHandler.text, null);
-				if (request.result != 3)
+				if (request.result != UnityWebRequest.Result.ProtocolError)
 				{
 					retry = true;
 				}
@@ -374,7 +374,7 @@ namespace GorillaTagScripts.Builder
 						this.voteInProgress = false;
 						if (callback != null)
 						{
-							callback.Invoke(false, "REQUEST ERROR");
+							callback(false, "REQUEST ERROR");
 						}
 					}
 				}
@@ -383,9 +383,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.voteRetryCount < this.maxRetriesOnFail)
 				{
-					float num = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.voteRetryCount + 1)));
+					float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.voteRetryCount + 1)));
 					this.voteRetryCount++;
-					yield return new WaitForSeconds(num);
+					yield return new WaitForSeconds(seconds);
 					this.voteInProgress = false;
 					this.RequestVote(data.mapId, data.vote == 1, callback);
 				}
@@ -395,7 +395,7 @@ namespace GorillaTagScripts.Builder
 					this.voteInProgress = false;
 					if (callback != null)
 					{
-						callback.Invoke(false, "CONNECTION ERROR");
+						callback(false, "CONNECTION ERROR");
 					}
 				}
 			}
@@ -435,7 +435,7 @@ namespace GorillaTagScripts.Builder
 				if (num >= 0)
 				{
 					SharedBlocksManager.LocalPublishInfo localPublishInfo;
-					if (SharedBlocksManager.localPublishData.TryGetValue(num, ref localPublishInfo))
+					if (SharedBlocksManager.localPublishData.TryGetValue(num, out localPublishInfo))
 					{
 						SharedBlocksManager.localMapIds.Remove(localPublishInfo.mapID);
 					}
@@ -448,7 +448,7 @@ namespace GorillaTagScripts.Builder
 					Action onRecentMapIdsUpdated = SharedBlocksManager.OnRecentMapIdsUpdated;
 					if (onRecentMapIdsUpdated != null)
 					{
-						onRecentMapIdsUpdated.Invoke();
+						onRecentMapIdsUpdated();
 					}
 				}
 				SharedBlocksManager.SharedBlocksMap map = new SharedBlocksManager.SharedBlocksMap
@@ -462,7 +462,7 @@ namespace GorillaTagScripts.Builder
 				Action<int> onSavePrivateScanSuccess = this.OnSavePrivateScanSuccess;
 				if (onSavePrivateScanSuccess != null)
 				{
-					onSavePrivateScanSuccess.Invoke(this.currentSaveScanIndex);
+					onSavePrivateScanSuccess(this.currentSaveScanIndex);
 				}
 			}
 			else
@@ -470,7 +470,7 @@ namespace GorillaTagScripts.Builder
 				Action<int, string> onSavePrivateScanFailed = this.OnSavePrivateScanFailed;
 				if (onSavePrivateScanFailed != null)
 				{
-					onSavePrivateScanFailed.Invoke(this.currentSaveScanIndex, "ERROR PUBLISHING: " + response.ToString());
+					onSavePrivateScanFailed(this.currentSaveScanIndex, "ERROR PUBLISHING: " + response.ToString());
 				}
 			}
 			this.currentSaveScanIndex = -1;
@@ -486,7 +486,7 @@ namespace GorillaTagScripts.Builder
 			request.downloadHandler = new DownloadHandlerBuffer();
 			request.SetRequestHeader("Content-Type", "application/json");
 			yield return request.SendWebRequest();
-			if (request.result == 1)
+			if (request.result == UnityWebRequest.Result.Success)
 			{
 				GTDev.Log<string>("PostPublishMapRequest Success: raw response: " + request.downloadHandler.text, null);
 				try
@@ -509,7 +509,7 @@ namespace GorillaTagScripts.Builder
 					goto IL_21D;
 				}
 			}
-			if (request.result != 3)
+			if (request.result != UnityWebRequest.Result.ProtocolError)
 			{
 				retry = true;
 			}
@@ -546,9 +546,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.postPublishMapRetryCount < this.maxRetriesOnFail)
 				{
-					float num = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.postPublishMapRetryCount + 1)));
+					float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.postPublishMapRetryCount + 1)));
 					this.postPublishMapRetryCount++;
-					yield return new WaitForSeconds(num);
+					yield return new WaitForSeconds(seconds);
 					this.publishRequestInProgress = false;
 					this.RequestPublishMap(data.userdataMetadataKey);
 				}
@@ -608,12 +608,12 @@ namespace GorillaTagScripts.Builder
 			request.downloadHandler = new DownloadHandlerBuffer();
 			request.SetRequestHeader("Content-Type", "application/json");
 			yield return request.SendWebRequest();
-			if (request.result == 1)
+			if (request.result == UnityWebRequest.Result.Success)
 			{
 				string text = request.downloadHandler.text;
 				this.GetMapDataFromIDComplete(data.mapId, text, callback);
 			}
-			else if (request.result != 3)
+			else if (request.result != UnityWebRequest.Result.ProtocolError)
 			{
 				retry = true;
 			}
@@ -649,9 +649,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.getMapDataFromIDRetryCount < this.maxRetriesOnFail)
 				{
-					float num = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.getMapDataFromIDRetryCount + 1)));
+					float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.getMapDataFromIDRetryCount + 1)));
 					this.getMapDataFromIDRetryCount++;
-					yield return new WaitForSeconds(num);
+					yield return new WaitForSeconds(seconds);
 					this.getMapDataFromIDInProgress = false;
 					this.RequestMapDataFromID(data.mapId, callback);
 				}
@@ -726,14 +726,14 @@ namespace GorillaTagScripts.Builder
 			request.downloadHandler = new DownloadHandlerBuffer();
 			request.SetRequestHeader("Content-Type", "application/json");
 			yield return request.SendWebRequest();
-			if (request.result == 1)
+			if (request.result == UnityWebRequest.Result.Success)
 			{
 				try
 				{
-					List<SharedBlocksManager.SharedBlocksMapMetaData> list = JsonConvert.DeserializeObject<List<SharedBlocksManager.SharedBlocksMapMetaData>>(request.downloadHandler.text);
+					List<SharedBlocksManager.SharedBlocksMapMetaData> obj = JsonConvert.DeserializeObject<List<SharedBlocksManager.SharedBlocksMapMetaData>>(request.downloadHandler.text);
 					if (callback != null)
 					{
-						callback.Invoke(list);
+						callback(obj);
 					}
 					goto IL_187;
 				}
@@ -741,12 +741,12 @@ namespace GorillaTagScripts.Builder
 				{
 					if (callback != null)
 					{
-						callback.Invoke(null);
+						callback(null);
 					}
 					goto IL_187;
 				}
 			}
-			if (request.result != 3)
+			if (request.result != UnityWebRequest.Result.ProtocolError)
 			{
 				retry = true;
 			}
@@ -775,7 +775,7 @@ namespace GorillaTagScripts.Builder
 				}
 				else if (callback != null)
 				{
-					callback.Invoke(null);
+					callback(null);
 				}
 			}
 			IL_187:
@@ -783,9 +783,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.getTopMapsRetryCount < this.maxRetriesOnFail)
 				{
-					float num = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.getTopMapsRetryCount + 1)));
+					float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.getTopMapsRetryCount + 1)));
 					this.getTopMapsRetryCount++;
-					yield return new WaitForSeconds(num);
+					yield return new WaitForSeconds(seconds);
 					this.getTopMapsInProgress = false;
 					this.RequestGetTopMaps(data.page, data.pageSize, data.sort);
 				}
@@ -794,7 +794,7 @@ namespace GorillaTagScripts.Builder
 					this.getTopMapsRetryCount = 0;
 					if (callback != null)
 					{
-						callback.Invoke(null);
+						callback(null);
 					}
 				}
 			}
@@ -822,7 +822,7 @@ namespace GorillaTagScripts.Builder
 						{
 							GTDev.LogWarning<string>("SharedBlocksManager GetTopMaps bad update or create time" + ex.Message, null);
 						}
-						SharedBlocksManager.SharedBlocksMap sharedBlocksMap = new SharedBlocksManager.SharedBlocksMap
+						SharedBlocksManager.SharedBlocksMap item = new SharedBlocksManager.SharedBlocksMap
 						{
 							MapID = sharedBlocksMapMetaData.mapId,
 							CreatorID = null,
@@ -831,7 +831,7 @@ namespace GorillaTagScripts.Builder
 							UpdateTime = updateTime,
 							MapData = null
 						};
-						this.latestPopularMaps.Add(sharedBlocksMap);
+						this.latestPopularMaps.Add(item);
 					}
 				}
 				this.hasCachedTopMaps = true;
@@ -840,7 +840,7 @@ namespace GorillaTagScripts.Builder
 				{
 					return;
 				}
-				onGetPopularMapsComplete.Invoke(true);
+				onGetPopularMapsComplete(true);
 				return;
 			}
 			else
@@ -850,7 +850,7 @@ namespace GorillaTagScripts.Builder
 				{
 					return;
 				}
-				onGetPopularMapsComplete2.Invoke(false);
+				onGetPopularMapsComplete2(false);
 				return;
 			}
 		}
@@ -887,14 +887,14 @@ namespace GorillaTagScripts.Builder
 			request.downloadHandler = new DownloadHandlerBuffer();
 			request.SetRequestHeader("Content-Type", "application/json");
 			yield return request.SendWebRequest();
-			if (request.result == 1)
+			if (request.result == UnityWebRequest.Result.Success)
 			{
 				if (callback != null)
 				{
-					callback.Invoke(true);
+					callback(true);
 				}
 			}
-			else if (request.result != 3)
+			else if (request.result != UnityWebRequest.Result.ProtocolError)
 			{
 				retry = true;
 			}
@@ -923,16 +923,16 @@ namespace GorillaTagScripts.Builder
 				}
 				else if (callback != null)
 				{
-					callback.Invoke(false);
+					callback(false);
 				}
 			}
 			if (retry)
 			{
 				if (this.updateMapActiveRetryCount < this.maxRetriesOnFail)
 				{
-					float num = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.updateMapActiveRetryCount + 1)));
+					float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.updateMapActiveRetryCount + 1)));
 					this.updateMapActiveRetryCount++;
-					yield return new WaitForSeconds(num);
+					yield return new WaitForSeconds(seconds);
 					this.updateMapActiveInProgress = false;
 					this.RequestUpdateMapActive(data.userdataMetadataKey, data.setActive);
 				}
@@ -941,7 +941,7 @@ namespace GorillaTagScripts.Builder
 					this.updateMapActiveRetryCount = 0;
 					if (callback != null)
 					{
-						callback.Invoke(false);
+						callback(false);
 					}
 				}
 			}
@@ -971,24 +971,26 @@ namespace GorillaTagScripts.Builder
 				{
 					return;
 				}
-				onGetTableConfiguration.Invoke(this.tableConfigResponse);
+				onGetTableConfiguration(this.tableConfigResponse);
 			}
 		}
 
 		private void FetchConfigurationFromTitleData()
 		{
-			GetTitleDataRequest getTitleDataRequest = new GetTitleDataRequest();
-			List<string> list = new List<string>();
-			list.Add(this.serializationConfig.tableConfigurationKey);
-			getTitleDataRequest.Keys = list;
-			PlayFabClientAPI.GetTitleData(getTitleDataRequest, new Action<GetTitleDataResult>(this.OnGetConfigurationSuccess), new Action<PlayFabError>(this.OnGetConfigurationFail), null, null);
+			PlayFabClientAPI.GetTitleData(new GetTitleDataRequest
+			{
+				Keys = new List<string>
+				{
+					this.serializationConfig.tableConfigurationKey
+				}
+			}, new Action<GetTitleDataResult>(this.OnGetConfigurationSuccess), new Action<PlayFabError>(this.OnGetConfigurationFail), null, null);
 		}
 
 		private void OnGetConfigurationSuccess(GetTitleDataResult result)
 		{
 			GTDev.Log<string>("SharedBlocksManager OnGetConfigurationSuccess", null);
 			string text;
-			if (result.Data.TryGetValue(this.serializationConfig.tableConfigurationKey, ref text))
+			if (result.Data.TryGetValue(this.serializationConfig.tableConfigurationKey, out text))
 			{
 				this.tableConfigResponse = text;
 				this.fetchedTableConfig = true;
@@ -997,14 +999,14 @@ namespace GorillaTagScripts.Builder
 				{
 					return;
 				}
-				onGetTableConfiguration.Invoke(this.tableConfigResponse);
+				onGetTableConfiguration(this.tableConfigResponse);
 			}
 		}
 
 		private void OnGetConfigurationFail(PlayFabError error)
 		{
 			GTDev.LogWarning<string>("SharedBlocksManager OnGetConfigurationFail " + error.Error.ToString(), null);
-			if (error.Error == 2 && this.fetchTableConfigRetryCount < this.maxRetriesOnFail)
+			if (error.Error == PlayFabErrorCode.ConnectionError && this.fetchTableConfigRetryCount < this.maxRetriesOnFail)
 			{
 				float waitTime = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchTableConfigRetryCount + 1)));
 				this.fetchTableConfigRetryCount++;
@@ -1018,7 +1020,7 @@ namespace GorillaTagScripts.Builder
 			{
 				return;
 			}
-			onGetTableConfiguration.Invoke(this.tableConfigResponse);
+			onGetTableConfiguration(this.tableConfigResponse);
 		}
 
 		private IEnumerator RetryAfterWaitTime(float waitTime, Action function)
@@ -1026,7 +1028,7 @@ namespace GorillaTagScripts.Builder
 			yield return new WaitForSeconds(waitTime);
 			if (function != null)
 			{
-				function.Invoke();
+				function();
 			}
 			yield break;
 		}
@@ -1038,11 +1040,13 @@ namespace GorillaTagScripts.Builder
 				if (!this.fetchTitleDataBuildInProgress)
 				{
 					this.fetchTitleDataBuildInProgress = true;
-					GetTitleDataRequest getTitleDataRequest = new GetTitleDataRequest();
-					List<string> list = new List<string>();
-					list.Add(this.serializationConfig.titleDataKey);
-					getTitleDataRequest.Keys = list;
-					base.StartCoroutine(this.SendTitleDataRequest(getTitleDataRequest, new Action<GetTitleDataResult>(this.OnGetTitleDataBuildSuccess), new Action<PlayFabError>(this.OnGetTitleDataBuildFail)));
+					base.StartCoroutine(this.SendTitleDataRequest(new GetTitleDataRequest
+					{
+						Keys = new List<string>
+						{
+							this.serializationConfig.titleDataKey
+						}
+					}, new Action<GetTitleDataResult>(this.OnGetTitleDataBuildSuccess), new Action<PlayFabError>(this.OnGetTitleDataBuildFail)));
 				}
 				return;
 			}
@@ -1051,7 +1055,7 @@ namespace GorillaTagScripts.Builder
 			{
 				return;
 			}
-			onGetTitleDataBuildComplete.Invoke(this.titleDataBuildCache);
+			onGetTitleDataBuildComplete(this.titleDataBuildCache);
 		}
 
 		private IEnumerator SendTitleDataRequest(GetTitleDataRequest request, Action<GetTitleDataResult> successCallback, Action<PlayFabError> failCallback)
@@ -1069,7 +1073,7 @@ namespace GorillaTagScripts.Builder
 			this.fetchTitleDataBuildInProgress = false;
 			GTDev.Log<string>("SharedBlocksManager OnGetTitleDataBuildSuccess", null);
 			string s;
-			if (result.Data.TryGetValue(this.serializationConfig.titleDataKey, ref s) && !s.IsNullOrEmpty())
+			if (result.Data.TryGetValue(this.serializationConfig.titleDataKey, out s) && !s.IsNullOrEmpty())
 			{
 				this.titleDataBuildCache = s;
 				this.fetchTitleDataBuildComplete = true;
@@ -1078,7 +1082,7 @@ namespace GorillaTagScripts.Builder
 				{
 					return;
 				}
-				onGetTitleDataBuildComplete.Invoke(this.titleDataBuildCache);
+				onGetTitleDataBuildComplete(this.titleDataBuildCache);
 				return;
 			}
 			else
@@ -1090,7 +1094,7 @@ namespace GorillaTagScripts.Builder
 				{
 					return;
 				}
-				onGetTitleDataBuildComplete2.Invoke(this.titleDataBuildCache);
+				onGetTitleDataBuildComplete2(this.titleDataBuildCache);
 				return;
 			}
 		}
@@ -1099,7 +1103,7 @@ namespace GorillaTagScripts.Builder
 		{
 			this.fetchTitleDataBuildInProgress = false;
 			GTDev.LogWarning<string>("SharedBlocksManager FetchTitleDataBuildFail " + error.Error.ToString(), null);
-			if (error.Error == 2 && this.fetchTitleDataRetryCount < this.maxRetriesOnFail)
+			if (error.Error == PlayFabErrorCode.ConnectionError && this.fetchTitleDataRetryCount < this.maxRetriesOnFail)
 			{
 				float waitTime = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchTitleDataRetryCount + 1)));
 				this.fetchTitleDataRetryCount++;
@@ -1113,7 +1117,7 @@ namespace GorillaTagScripts.Builder
 			{
 				return;
 			}
-			onGetTitleDataBuildComplete.Invoke(this.titleDataBuildCache);
+			onGetTitleDataBuildComplete(this.titleDataBuildCache);
 		}
 
 		private string GetPlayfabKeyForSlot(int slot)
@@ -1130,20 +1134,20 @@ namespace GorillaTagScripts.Builder
 		{
 			if (!this.hasQueriedSaveTime)
 			{
-				GetUserDataRequest getUserDataRequest = new GetUserDataRequest
+				PlayFab.ClientModels.GetUserDataRequest request = new PlayFab.ClientModels.GetUserDataRequest
 				{
 					PlayFabId = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
 					Keys = SharedBlocksManager.saveDateKeys
 				};
 				try
 				{
-					PlayFabClientAPI.GetUserData(getUserDataRequest, new Action<GetUserDataResult>(this.OnGetLastSaveTimeSuccess), new Action<PlayFabError>(this.OnGetLastSaveTimeFailure), null, null);
+					PlayFabClientAPI.GetUserData(request, new Action<GetUserDataResult>(this.OnGetLastSaveTimeSuccess), new Action<PlayFabError>(this.OnGetLastSaveTimeFailure), null, null);
 				}
 				catch (PlayFabException ex)
 				{
 					this.OnGetLastSaveTimeFailure(new PlayFabError
 					{
-						Error = 1,
+						Error = PlayFabErrorCode.Unknown,
 						ErrorMessage = ex.Message
 					});
 				}
@@ -1155,7 +1159,7 @@ namespace GorillaTagScripts.Builder
 			{
 				return;
 			}
-			onSaveTimeUpdated.Invoke();
+			onSaveTimeUpdated();
 		}
 
 		private void OnGetLastSaveTimeSuccess(GetUserDataResult result)
@@ -1164,7 +1168,7 @@ namespace GorillaTagScripts.Builder
 			for (int i = 0; i < BuilderScanKiosk.NUM_SAVE_SLOTS; i++)
 			{
 				UserDataRecord userDataRecord;
-				if (result.Data.TryGetValue(this.GetPlayfabSlotTimeKey(i), ref userDataRecord))
+				if (result.Data.TryGetValue(this.GetPlayfabSlotTimeKey(i), out userDataRecord))
 				{
 					flag = true;
 					DateTime lastUpdated = userDataRecord.LastUpdated;
@@ -1180,13 +1184,13 @@ namespace GorillaTagScripts.Builder
 			{
 				return;
 			}
-			onSaveTimeUpdated.Invoke();
+			onSaveTimeUpdated();
 		}
 
 		private void OnGetLastSaveTimeFailure(PlayFabError error)
 		{
-			string text = ((error != null) ? error.ErrorMessage : null) ?? "Null";
-			GTDev.LogError<string>("SharedBlocksManager GetLastSaveTimeFailure " + text, null);
+			string str = ((error != null) ? error.ErrorMessage : null) ?? "Null";
+			GTDev.LogError<string>("SharedBlocksManager GetLastSaveTimeFailure " + str, null);
 		}
 
 		private void FetchBuildFromPlayfab()
@@ -1196,22 +1200,24 @@ namespace GorillaTagScripts.Builder
 				Action<int, bool> onFetchPrivateScanComplete = this.OnFetchPrivateScanComplete;
 				if (onFetchPrivateScanComplete != null)
 				{
-					onFetchPrivateScanComplete.Invoke(this.currentGetScanIndex, true);
+					onFetchPrivateScanComplete(this.currentGetScanIndex, true);
 				}
 				this.currentGetScanIndex = -1;
 				this.getScanInProgress = false;
 				return;
 			}
-			GetUserDataRequest getUserDataRequest = new GetUserDataRequest();
-			getUserDataRequest.PlayFabId = PlayFabAuthenticator.instance.GetPlayFabPlayerId();
-			List<string> list = new List<string>();
-			list.Add(this.GetPlayfabKeyForSlot(this.currentGetScanIndex));
-			getUserDataRequest.Keys = list;
-			GetUserDataRequest request = getUserDataRequest;
+			PlayFab.ClientModels.GetUserDataRequest request = new PlayFab.ClientModels.GetUserDataRequest
+			{
+				PlayFabId = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
+				Keys = new List<string>
+				{
+					this.GetPlayfabKeyForSlot(this.currentGetScanIndex)
+				}
+			};
 			base.StartCoroutine(this.SendPlayfabUserDataRequest(request, new Action<GetUserDataResult>(this.OnFetchBuildFromPlayfabSuccess), new Action<PlayFabError>(this.OnFetchBuildFromPlayfabFail)));
 		}
 
-		private IEnumerator SendPlayfabUserDataRequest(GetUserDataRequest request, Action<GetUserDataResult> resultCallback, Action<PlayFabError> errorCallback)
+		private IEnumerator SendPlayfabUserDataRequest(PlayFab.ClientModels.GetUserDataRequest request, Action<GetUserDataResult> resultCallback, Action<PlayFabError> errorCallback)
 		{
 			while (!PlayFabSettings.staticPlayer.IsClientLoggedIn())
 			{
@@ -1226,9 +1232,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (errorCallback != null)
 				{
-					errorCallback.Invoke(new PlayFabError
+					errorCallback(new PlayFabError
 					{
-						Error = 1,
+						Error = PlayFabErrorCode.Unknown,
 						ErrorMessage = ex.Message
 					});
 				}
@@ -1242,7 +1248,7 @@ namespace GorillaTagScripts.Builder
 			this.getScanInProgress = false;
 			GTDev.Log<string>("SharedBlocksManager OnFetchBuildsFromPlayfabSuccess", null);
 			UserDataRecord userDataRecord;
-			if (result != null && result.Data != null && result.Data.TryGetValue(this.GetPlayfabKeyForSlot(this.currentGetScanIndex), ref userDataRecord))
+			if (result != null && result.Data != null && result.Data.TryGetValue(this.GetPlayfabKeyForSlot(this.currentGetScanIndex), out userDataRecord))
 			{
 				this.privateScanDataCache[this.currentGetScanIndex] = userDataRecord.Value;
 				this.hasPulledPrivateScanPlayfab[this.currentGetScanIndex] = true;
@@ -1259,7 +1265,7 @@ namespace GorillaTagScripts.Builder
 			Action<int, bool> onFetchPrivateScanComplete = this.OnFetchPrivateScanComplete;
 			if (onFetchPrivateScanComplete != null)
 			{
-				onFetchPrivateScanComplete.Invoke(this.currentGetScanIndex, true);
+				onFetchPrivateScanComplete(this.currentGetScanIndex, true);
 			}
 			this.currentGetScanIndex = -1;
 		}
@@ -1267,7 +1273,7 @@ namespace GorillaTagScripts.Builder
 		private void OnFetchBuildFromPlayfabFail(PlayFabError error)
 		{
 			GTDev.LogWarning<string>("SharedBlocksManager OnFetchBuildsFromPlayfabFail " + (((error != null) ? error.ErrorMessage : null) ?? "Null"), null);
-			if (error != null && error.Error == 2 && this.fetchPlayfabBuildsRetryCount < this.maxRetriesOnFail)
+			if (error != null && error.Error == PlayFabErrorCode.ConnectionError && this.fetchPlayfabBuildsRetryCount < this.maxRetriesOnFail)
 			{
 				float waitTime = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchPlayfabBuildsRetryCount + 1)));
 				this.fetchPlayfabBuildsRetryCount++;
@@ -1280,7 +1286,7 @@ namespace GorillaTagScripts.Builder
 			Action<int, bool> onFetchPrivateScanComplete = this.OnFetchPrivateScanComplete;
 			if (onFetchPrivateScanComplete != null)
 			{
-				onFetchPrivateScanComplete.Invoke(this.currentGetScanIndex, false);
+				onFetchPrivateScanComplete(this.currentGetScanIndex, false);
 			}
 			this.currentGetScanIndex = -1;
 		}
@@ -1320,13 +1326,13 @@ namespace GorillaTagScripts.Builder
 				Action<int, string> onSavePrivateScanFailed = this.OnSavePrivateScanFailed;
 				if (onSavePrivateScanFailed != null)
 				{
-					onSavePrivateScanFailed.Invoke(scanIndex, "ERROR SAVING: BUSY");
+					onSavePrivateScanFailed(scanIndex, "ERROR SAVING: BUSY");
 				}
 				this.currentSaveScanIndex = -1;
 				this.currentSaveScanData = string.Empty;
 				return;
 			}
-			this.OnFetchPrivateScanComplete += new Action<int, bool>(this.PushMothershipPrivateScan);
+			this.OnFetchPrivateScanComplete += this.PushMothershipPrivateScan;
 			this.RequestFetchPrivateScan(scanIndex);
 		}
 
@@ -1334,7 +1340,7 @@ namespace GorillaTagScripts.Builder
 		{
 			if (scan == this.currentSaveScanIndex)
 			{
-				this.OnFetchPrivateScanComplete -= new Action<int, bool>(this.PushMothershipPrivateScan);
+				this.OnFetchPrivateScanComplete -= this.PushMothershipPrivateScan;
 				this.privateScanDataCache[this.currentSaveScanIndex] = this.currentSaveScanData;
 				this.RequestSetMothershipUserData(this.serializationConfig.scanSlotMothershipKeys[this.currentSaveScanIndex], this.currentSaveScanData);
 			}
@@ -1372,8 +1378,8 @@ namespace GorillaTagScripts.Builder
 
 		private void OnSetMothershipUserDataFail(MothershipError error, int status)
 		{
-			string text = (error == null) ? status.ToString() : error.Message;
-			GTDev.LogError<string>("SharedBlocksManager OnSetMothershipUserDataFail: " + text, null);
+			string str = (error == null) ? status.ToString() : error.Message;
+			GTDev.LogError<string>("SharedBlocksManager OnSetMothershipUserDataFail: " + str, null);
 			this.OnSetMothershipDataComplete(false);
 			if (error != null)
 			{
@@ -1398,7 +1404,7 @@ namespace GorillaTagScripts.Builder
 			Action<int, string> onSavePrivateScanFailed = this.OnSavePrivateScanFailed;
 			if (onSavePrivateScanFailed != null)
 			{
-				onSavePrivateScanFailed.Invoke(this.currentSaveScanIndex, "ERROR SAVING");
+				onSavePrivateScanFailed(this.currentSaveScanIndex, "ERROR SAVING");
 			}
 			this.currentSaveScanIndex = -1;
 			this.currentSaveScanData = string.Empty;
@@ -1424,13 +1430,13 @@ namespace GorillaTagScripts.Builder
 			}
 			if (this.hasPulledPrivateScanMothership[slot])
 			{
-				bool flag = this.privateScanDataCache[slot].Length > 0;
+				bool arg = this.privateScanDataCache[slot].Length > 0;
 				Action<int, bool> onFetchPrivateScanComplete = this.OnFetchPrivateScanComplete;
 				if (onFetchPrivateScanComplete == null)
 				{
 					return;
 				}
-				onFetchPrivateScanComplete.Invoke(slot, flag);
+				onFetchPrivateScanComplete(slot, arg);
 				return;
 			}
 			else
@@ -1445,7 +1451,7 @@ namespace GorillaTagScripts.Builder
 						{
 							return;
 						}
-						onFetchPrivateScanComplete2.Invoke(slot, false);
+						onFetchPrivateScanComplete2(slot, false);
 					}
 					return;
 				}
@@ -1461,7 +1467,7 @@ namespace GorillaTagScripts.Builder
 						Action<int, bool> onFetchPrivateScanComplete3 = this.OnFetchPrivateScanComplete;
 						if (onFetchPrivateScanComplete3 != null)
 						{
-							onFetchPrivateScanComplete3.Invoke(slot, false);
+							onFetchPrivateScanComplete3(slot, false);
 						}
 					}
 				}
@@ -1473,7 +1479,7 @@ namespace GorillaTagScripts.Builder
 					Action<int, bool> onFetchPrivateScanComplete4 = this.OnFetchPrivateScanComplete;
 					if (onFetchPrivateScanComplete4 != null)
 					{
-						onFetchPrivateScanComplete4.Invoke(slot, false);
+						onFetchPrivateScanComplete4(slot, false);
 					}
 				}
 				return;
@@ -1484,7 +1490,7 @@ namespace GorillaTagScripts.Builder
 		{
 			GTDev.Log<string>("SharedBlocksManager OnGetMothershipPrivateScanSuccess", null);
 			bool flag = response != null && response.value != null && response.value.Length > 0;
-			int num = this.currentGetScanIndex;
+			int arg = this.currentGetScanIndex;
 			if (response != null)
 			{
 				this.privateScanDataCache[this.currentGetScanIndex] = response.value;
@@ -1508,7 +1514,7 @@ namespace GorillaTagScripts.Builder
 					Action<int, bool> onFetchPrivateScanComplete = this.OnFetchPrivateScanComplete;
 					if (onFetchPrivateScanComplete != null)
 					{
-						onFetchPrivateScanComplete.Invoke(num, true);
+						onFetchPrivateScanComplete(arg, true);
 					}
 				}
 				else
@@ -1523,7 +1529,7 @@ namespace GorillaTagScripts.Builder
 				Action<int, bool> onFetchPrivateScanComplete2 = this.OnFetchPrivateScanComplete;
 				if (onFetchPrivateScanComplete2 != null)
 				{
-					onFetchPrivateScanComplete2.Invoke(num, false);
+					onFetchPrivateScanComplete2(arg, false);
 				}
 			}
 			if (response != null)
@@ -1534,9 +1540,9 @@ namespace GorillaTagScripts.Builder
 
 		private void OnGetMothershipPrivateScanFail(MothershipError error, int status)
 		{
-			string text = (error == null) ? status.ToString() : error.Message;
-			GTDev.LogError<string>("SharedBlocksManager OnGetMothershipPrivateScanFail: " + text, null);
-			int num = this.currentGetScanIndex;
+			string str = (error == null) ? status.ToString() : error.Message;
+			GTDev.LogError<string>("SharedBlocksManager OnGetMothershipPrivateScanFail: " + str, null);
+			int arg = this.currentGetScanIndex;
 			if (BuilderScanKiosk.IsSaveSlotValid(this.currentGetScanIndex))
 			{
 				this.privateScanDataCache[this.currentGetScanIndex] = string.Empty;
@@ -1547,7 +1553,7 @@ namespace GorillaTagScripts.Builder
 			Action<int, bool> onFetchPrivateScanComplete = this.OnFetchPrivateScanComplete;
 			if (onFetchPrivateScanComplete != null)
 			{
-				onFetchPrivateScanComplete.Invoke(num, false);
+				onFetchPrivateScanComplete(arg, false);
 			}
 			if (error != null)
 			{

@@ -53,12 +53,12 @@ public class DebugHudStats : MonoBehaviour
 	private void LateUpdate()
 	{
 		base.transform.LookAt(Camera.main.transform.position, Vector3.up);
-		bool flag = ControllerInputPoller.SecondaryButtonPress(4);
+		bool flag = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
 		if (this.buttonDown && !flag)
 		{
-			Application.logMessageReceived -= new Application.LogCallback(this.LogMessageReceived);
-			PlayerGameEvents.OnPlayerMoved -= new Action<float, float>(this.OnPlayerMoved);
-			PlayerGameEvents.OnPlayerSwam -= new Action<float, float>(this.OnPlayerSwam);
+			Application.logMessageReceived -= this.LogMessageReceived;
+			PlayerGameEvents.OnPlayerMoved -= this.OnPlayerMoved;
+			PlayerGameEvents.OnPlayerSwam -= this.OnPlayerSwam;
 			switch (this.currentState)
 			{
 			case DebugHudStats.State.Inactive:
@@ -80,22 +80,22 @@ public class DebugHudStats : MonoBehaviour
 				this.currentState = DebugHudStats.State.Inactive;
 				break;
 			}
-			Application.logMessageReceived -= new Application.LogCallback(this.LogMessageReceived);
-			PlayerGameEvents.OnPlayerMoved -= new Action<float, float>(this.OnPlayerMoved);
-			PlayerGameEvents.OnPlayerSwam -= new Action<float, float>(this.OnPlayerSwam);
+			Application.logMessageReceived -= this.LogMessageReceived;
+			PlayerGameEvents.OnPlayerMoved -= this.OnPlayerMoved;
+			PlayerGameEvents.OnPlayerSwam -= this.OnPlayerSwam;
 			DebugHudStats.State state = this.currentState;
 			if (state - DebugHudStats.State.ShowLog > 1)
 			{
 				if (state == DebugHudStats.State.ShowStats)
 				{
 					this.distanceMoved = (this.distanceSwam = 0f);
-					PlayerGameEvents.OnPlayerMoved += new Action<float, float>(this.OnPlayerMoved);
-					PlayerGameEvents.OnPlayerSwam += new Action<float, float>(this.OnPlayerSwam);
+					PlayerGameEvents.OnPlayerMoved += this.OnPlayerMoved;
+					PlayerGameEvents.OnPlayerSwam += this.OnPlayerSwam;
 				}
 			}
 			else
 			{
-				Application.logMessageReceived += new Application.LogCallback(this.LogMessageReceived);
+				Application.logMessageReceived += this.LogMessageReceived;
 			}
 			this.text.gameObject.SetActive(this.currentState > DebugHudStats.State.Inactive);
 			if (RigidbodyHighlighter.Instance != null)
@@ -264,7 +264,7 @@ public class DebugHudStats : MonoBehaviour
 
 	private void OnDisable()
 	{
-		Application.logMessageReceived -= new Application.LogCallback(this.LogMessageReceived);
+		Application.logMessageReceived -= this.LogMessageReceived;
 	}
 
 	private void LogMessageReceived(string condition, string stackTrace, LogType type)
@@ -283,7 +283,7 @@ public class DebugHudStats : MonoBehaviour
 		{
 			this.logMessage.RemoveAt(0);
 		}
-		if (type == null || type == 1 || type == 4)
+		if (type == LogType.Error || type == LogType.Assert || type == LogType.Exception)
 		{
 			this.logError.Add(text + "\n" + stackTrace);
 			if (this.logError.Count > 10)
@@ -297,11 +297,11 @@ public class DebugHudStats : MonoBehaviour
 	{
 		switch (type)
 		{
-		case 0:
-		case 1:
-		case 4:
+		case LogType.Error:
+		case LogType.Assert:
+		case LogType.Exception:
 			return "<color=\"red\">";
-		case 2:
+		case LogType.Warning:
 			return "<color=\"yellow\">";
 		}
 		return "<color=\"white\">";

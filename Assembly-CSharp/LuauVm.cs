@@ -41,7 +41,7 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 			return;
 		}
 		float num = 0f;
-		LuauVm.callTimers.TryGetValue(eventData.Sender, ref num);
+		LuauVm.callTimers.TryGetValue(eventData.Sender, out num);
 		if (num < Time.time - 1f)
 		{
 			num = Time.time - 1f;
@@ -109,7 +109,7 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 			while (i < args.Length)
 			{
 				object obj = args[i];
-				if (StructWrapperUtility.IsType<double>(obj))
+				if (obj.IsType<double>())
 				{
 					if (double.IsFinite((double)obj))
 					{
@@ -119,19 +119,19 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 				}
 				else
 				{
-					if (StructWrapperUtility.IsType<bool>(obj))
+					if (obj.IsType<bool>())
 					{
 						Luau.lua_pushboolean(L, (int)obj);
 						goto IL_399;
 					}
-					if (StructWrapperUtility.IsType<Vector3>(obj))
+					if (obj.IsType<Vector3>())
 					{
 						Vector3 vector = (Vector3)obj;
 						vector.ClampMagnitudeSafe(10000000f);
 						*Luau.lua_class_push<Vector3>(L, "Vec3") = vector;
 						goto IL_399;
 					}
-					if (StructWrapperUtility.IsType<Quaternion>(obj))
+					if (obj.IsType<Quaternion>())
 					{
 						Quaternion quaternion = (Quaternion)obj;
 						if (float.IsFinite(quaternion.x) && float.IsFinite(quaternion.y) && float.IsFinite(quaternion.z) && float.IsFinite(quaternion.w))
@@ -140,11 +140,11 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 							goto IL_399;
 						}
 					}
-					else if (StructWrapperUtility.IsType<Player>(obj))
+					else if (obj.IsType<Player>())
 					{
 						int actorNumber = ((Player)obj).ActorNumber;
 						IntPtr ptr;
-						if (Bindings.LuauPlayerList.TryGetValue(actorNumber, ref ptr))
+						if (Bindings.LuauPlayerList.TryGetValue(actorNumber, out ptr))
 						{
 							Luau.lua_class_push(L, "Player", ptr);
 							goto IL_399;
@@ -168,11 +168,11 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 						Bindings.LuauPlayerList[netPlayer2.ActorNumber] = (IntPtr)((void*)ptr2);
 						goto IL_399;
 					}
-					else if (StructWrapperUtility.IsType<Bindings.LuauAIAgent>(obj))
+					else if (obj.IsType<Bindings.LuauAIAgent>())
 					{
 						int entityID = ((Bindings.LuauAIAgent)obj).EntityID;
 						IntPtr ptr3;
-						if (Bindings.LuauAIAgentList.TryGetValue(entityID, ref ptr3))
+						if (Bindings.LuauAIAgentList.TryGetValue(entityID, out ptr3))
 						{
 							Luau.lua_class_push(L, "AIAgent", ptr3);
 							goto IL_399;
@@ -230,7 +230,7 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 			{
 				int actorNumber2 = netPlayer.ActorNumber;
 				IntPtr ptr5;
-				if (Bindings.LuauPlayerList.TryGetValue(actorNumber2, ref ptr5))
+				if (Bindings.LuauPlayerList.TryGetValue(actorNumber2, out ptr5))
 				{
 					Luau.lua_class_push(L, "Player", ptr5);
 				}
@@ -294,11 +294,11 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 		}
 		while (LuauVm.touchEventsQueue.Count > 0)
 		{
-			GameObject gameObject = LuauVm.touchEventsQueue.Dequeue();
+			GameObject key = LuauVm.touchEventsQueue.Dequeue();
 			foreach (LuauScriptRunner luauScriptRunner3 in LuauScriptRunner.ScriptRunners)
 			{
 				int rid;
-				if (luauScriptRunner3.ShouldTick && Bindings.LuauTriggerCallbacks.TryGetValue(gameObject, ref rid))
+				if (luauScriptRunner3.ShouldTick && Bindings.LuauTriggerCallbacks.TryGetValue(key, out rid))
 				{
 					Luau.lua_getref(luauScriptRunner3.L, rid);
 					if (Luau.lua_type(luauScriptRunner3.L, -1) == 7)
@@ -331,9 +331,9 @@ public class LuauVm : MonoBehaviourPunCallbacks, IOnEventCallback
 				BurstClassInfo.ClassList.InfoFields.Data.Dispose();
 			}
 		}
-		catch (ObjectDisposedException ex)
+		catch (ObjectDisposedException message)
 		{
-			Debug.Log(ex);
+			Debug.Log(message);
 		}
 		finally
 		{

@@ -1,6 +1,7 @@
 ﻿using System;
 using GorillaLocomotion;
 using GorillaNetworking;
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -40,7 +41,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		CosmeticsController.OnPlayerColorSet = (Action<float, float, float>)Delegate.Combine(CosmeticsController.OnPlayerColorSet, new Action<float, float, float>(this.LoadPlayerColor));
 		if (GorillaTagger.Instance && GorillaTagger.Instance.offlineVRRig)
 		{
-			GorillaTagger.Instance.offlineVRRig.OnColorChanged += new Action<Color>(this.HandleLocalColorChanged);
+			GorillaTagger.Instance.offlineVRRig.OnColorChanged += this.HandleLocalColorChanged;
 		}
 	}
 
@@ -54,7 +55,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		CosmeticsController.OnPlayerColorSet = (Action<float, float, float>)Delegate.Remove(CosmeticsController.OnPlayerColorSet, new Action<float, float, float>(this.LoadPlayerColor));
 		if (GorillaTagger.Instance && GorillaTagger.Instance.offlineVRRig)
 		{
-			GorillaTagger.Instance.offlineVRRig.OnColorChanged -= new Action<Color>(this.HandleLocalColorChanged);
+			GorillaTagger.Instance.offlineVRRig.OnColorChanged -= this.HandleLocalColorChanged;
 		}
 	}
 
@@ -108,7 +109,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		PlayerPrefs.Save();
 		if (NetworkSystem.Instance.InRoom)
 		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 			{
 				(float)this.Segment1 / 9f,
 				(float)this.Segment2 / 9f,
@@ -141,8 +142,7 @@ public class GrabbingColorPicker : MonoBehaviour, IGorillaSliceableSimple
 		this.textR.text = this.Segment1.ToString();
 		this.textG.text = this.Segment2.ToString();
 		this.textB.text = this.Segment3.ToString();
-		Color color;
-		color..ctor((float)this.Segment1 / 9f, (float)this.Segment2 / 9f, (float)this.Segment3 / 9f);
+		Color color = new Color((float)this.Segment1 / 9f, (float)this.Segment2 / 9f, (float)this.Segment3 / 9f);
 		Renderer[] componentsInChildren = this.ColorSwatch.GetComponentsInChildren<Renderer>();
 		for (int i = 0; i < componentsInChildren.Length; i++)
 		{

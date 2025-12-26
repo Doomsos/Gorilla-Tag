@@ -49,8 +49,8 @@ public class GameBallManager : NetworkComponent
 	{
 		int count = this.gameBallData.Count;
 		this.gameBalls.Add(gameBall);
-		GameBallData gameBallData = default(GameBallData);
-		this.gameBallData.Add(gameBallData);
+		GameBallData item = default(GameBallData);
+		this.gameBallData.Add(item);
 		gameBall.id = new GameBallId(count);
 		return gameBall.id;
 	}
@@ -95,7 +95,7 @@ public class GameBallManager : NetworkComponent
 	{
 		this.GrabBall(ballId, isLeftHand, localPosition, localRotation, NetPlayer.Get(PhotonNetwork.LocalPlayer));
 		long num = BitPackUtils.PackHandPosRotForNetwork(localPosition, localRotation);
-		this.photonView.RPC("RequestGrabBallRPC", 2, new object[]
+		this.photonView.RPC("RequestGrabBallRPC", RpcTarget.MasterClient, new object[]
 		{
 			ballId.index,
 			isLeftHand,
@@ -161,7 +161,7 @@ public class GameBallManager : NetworkComponent
 		}
 		if (flag)
 		{
-			this.photonView.RPC("GrabBallRPC", 0, new object[]
+			this.photonView.RPC("GrabBallRPC", RpcTarget.All, new object[]
 			{
 				gameBallIndex,
 				isLeftHand,
@@ -275,7 +275,7 @@ public class GameBallManager : NetworkComponent
 		Vector3 position = gameBall.transform.position;
 		Quaternion rotation = gameBall.transform.rotation;
 		this.ThrowBall(ballId, isLeftHand, position, rotation, velocity, angVelocity, NetPlayer.Get(PhotonNetwork.LocalPlayer));
-		this.photonView.RPC("RequestThrowBallRPC", 2, new object[]
+		this.photonView.RPC("RequestThrowBallRPC", RpcTarget.MasterClient, new object[]
 		{
 			ballId.index,
 			isLeftHand,
@@ -326,7 +326,7 @@ public class GameBallManager : NetworkComponent
 		}
 		if (flag)
 		{
-			this.photonView.RPC("ThrowBallRPC", 0, new object[]
+			this.photonView.RPC("ThrowBallRPC", RpcTarget.All, new object[]
 			{
 				gameBallIndex,
 				isLeftHand,
@@ -457,7 +457,7 @@ public class GameBallManager : NetworkComponent
 		Vector3 position = gameBall.transform.position;
 		Quaternion rotation = gameBall.transform.rotation;
 		this.LaunchBall(ballId, position, rotation, velocity);
-		this.photonView.RPC("RequestLaunchBallRPC", 2, new object[]
+		this.photonView.RPC("RequestLaunchBallRPC", RpcTarget.MasterClient, new object[]
 		{
 			ballId.index,
 			position,
@@ -492,7 +492,7 @@ public class GameBallManager : NetworkComponent
 		}
 		if (flag)
 		{
-			this.photonView.RPC("LaunchBallRPC", 0, new object[]
+			this.photonView.RPC("LaunchBallRPC", RpcTarget.All, new object[]
 			{
 				gameBallIndex,
 				position,
@@ -567,7 +567,7 @@ public class GameBallManager : NetworkComponent
 		{
 			return;
 		}
-		this.photonView.RPC("TeleportBallRPC", 0, new object[]
+		this.photonView.RPC("TeleportBallRPC", RpcTarget.All, new object[]
 		{
 			id.index,
 			position,
@@ -653,7 +653,7 @@ public class GameBallManager : NetworkComponent
 		{
 			return;
 		}
-		this.photonView.RPC("RequestSetBallPositionRPC", 2, new object[]
+		this.photonView.RPC("RequestSetBallPositionRPC", RpcTarget.MasterClient, new object[]
 		{
 			ballId.index
 		});

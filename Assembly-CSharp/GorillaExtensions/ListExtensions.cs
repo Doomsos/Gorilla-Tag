@@ -16,17 +16,17 @@ namespace GorillaExtensions
 				i--;
 				int num = Random.Range(0, i);
 				List<TVal> list3 = list2;
-				int num2 = i;
+				int index = i;
 				List<TVal> list4 = list2;
-				int num3 = num;
-				TVal tval = list2[num];
-				TVal tval2 = list2[i];
-				list3[num2] = tval;
-				list4[num3] = tval2;
+				int index2 = num;
+				TVal value = list2[num];
+				TVal value2 = list2[i];
+				list3[index] = value;
+				list4[index2] = value2;
 			}
-			foreach (TVal tval3 in list2)
+			foreach (TVal item in list2)
 			{
-				result.Add(tval3);
+				result.Add(item);
 			}
 			return result;
 		}

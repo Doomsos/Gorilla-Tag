@@ -12,7 +12,7 @@ public class UberCombiner : MonoBehaviour
 {
 	private void CollectRenderers()
 	{
-		MeshRenderer[] array = Enumerable.ToArray<MeshRenderer>(UberCombiner.FilterRenderers(Enumerable.ToArray<MeshRenderer>(Enumerable.SelectMany<GameObject, MeshRenderer>(this.meshSources, (GameObject g) => g.GetComponentsInChildren<MeshRenderer>(this.includeInactive)))).DistinctBy((MeshRenderer mr) => mr.GetInstanceID()));
+		MeshRenderer[] array = UberCombiner.FilterRenderers(this.meshSources.SelectMany((GameObject g) => g.GetComponentsInChildren<MeshRenderer>(this.includeInactive)).ToArray<MeshRenderer>()).DistinctBy((MeshRenderer mr) => mr.GetInstanceID()).ToArray<MeshRenderer>();
 		this.renderersToCombine = array;
 		string.Format("Found {0} renderers to combine.", array.Length).Echo<string>();
 	}
@@ -120,12 +120,17 @@ public class UberCombiner : MonoBehaviour
 				}
 			}
 		}
-		this.invalidObjects = Enumerable.ToList<GameObject>(list.DistinctBy((GameObject g) => g.GetHashCode()));
+		this.invalidObjects = list.DistinctBy((GameObject g) => g.GetHashCode()).ToList<GameObject>();
 	}
 
 	private void SendToCombiner()
 	{
-		List<GameObject> targetMeshes = Enumerable.ToList<GameObject>(Enumerable.Where<GameObject>(Enumerable.Where<GameObject>(Enumerable.Where<GameObject>(Enumerable.Select<MeshRenderer, GameObject>(this.renderersToCombine, (MeshRenderer r) => r.gameObject), (GameObject g) => !(g == null)), (GameObject g) => !Enumerable.Contains<GameObject>(this.objectsToIgnore, g)), (GameObject g) => !this.invalidObjects.Contains(g)).DistinctBy((GameObject g) => g.GetInstanceID()));
+		List<GameObject> targetMeshes = (from r in this.renderersToCombine
+		select r.gameObject into g
+		where !(g == null)
+		where !this.objectsToIgnore.Contains(g)
+		where !this.invalidObjects.Contains(g)
+		select g).DistinctBy((GameObject g) => g.GetInstanceID()).ToList<GameObject>();
 		this._combiner.targetMeshes = targetMeshes;
 	}
 
@@ -180,8 +185,8 @@ public class UberCombiner : MonoBehaviour
 			Mesh sharedMesh2 = gtmeshData.ExtractSubmesh(i, false);
 			meshFilter.sharedMesh = sharedMesh2;
 			meshRenderer.sharedMaterial = sharedMaterials[i];
-			meshRenderer.lightProbeUsage = 0;
-			meshRenderer.motionVectorGenerationMode = 2;
+			meshRenderer.lightProbeUsage = LightProbeUsage.Off;
+			meshRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
 			uberCombinerPerMaterialMeshes.objects[i] = gameObject2;
 			uberCombinerPerMaterialMeshes.filters[i] = meshFilter;
 			uberCombinerPerMaterialMeshes.renderers[i] = meshRenderer;

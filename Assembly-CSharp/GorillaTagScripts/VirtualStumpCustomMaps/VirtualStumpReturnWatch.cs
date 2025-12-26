@@ -159,9 +159,9 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 				{
 					yield break;
 				}
-				float num = this.GetCurrentHoldDuration() - (Time.time - this.startPressingButtonTime);
-				int num2 = 1 + Mathf.FloorToInt(num);
-				this.countdownText.text = num2.ToString();
+				float f = this.GetCurrentHoldDuration() - (Time.time - this.startPressingButtonTime);
+				int num = 1 + Mathf.FloorToInt(f);
+				this.countdownText.text = num.ToString();
 				yield return null;
 			}
 			yield break;

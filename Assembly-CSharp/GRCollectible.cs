@@ -36,7 +36,7 @@ public class GRCollectible : MonoBehaviour, IGameEntityComponent
 		{
 			return;
 		}
-		onCollected.Invoke();
+		onCollected();
 	}
 
 	public GameEntity entity;

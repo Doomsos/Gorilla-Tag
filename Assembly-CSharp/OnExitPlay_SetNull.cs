@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 
-[AttributeUsage(256)]
+[AttributeUsage(AttributeTargets.Field)]
 public class OnExitPlay_SetNull : OnExitPlay_Attribute
 {
 	public override void OnEnterPlay(FieldInfo field)

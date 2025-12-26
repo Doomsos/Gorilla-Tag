@@ -156,19 +156,24 @@ public class KIDAgeGate : MonoBehaviour
 
 	public void OnWhyAgeGateButtonPressed()
 	{
-		TelemetryData telemetryData = default(TelemetryData);
-		telemetryData.EventName = "kid_screen_shown";
-		telemetryData.CustomTags = new string[]
+		TelemetryData telemetryData = new TelemetryData
 		{
-			"kid_age_gate",
-			KIDTelemetry.GameVersionCustomTag,
-			KIDTelemetry.GameEnvironment
+			EventName = "kid_screen_shown",
+			CustomTags = new string[]
+			{
+				"kid_age_gate",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string>
+			{
+				{
+					"screen",
+					"why_age_gate"
+				}
+			}
 		};
-		Dictionary<string, string> dictionary = new Dictionary<string, string>();
-		dictionary.Add("screen", "why_age_gate");
-		telemetryData.BodyData = dictionary;
-		TelemetryData telemetryData2 = telemetryData;
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
 		this._uiParent.SetActive(false);
 		PrivateUIRoom.AddUI(this._whyAgeGateScreen.transform);
 		this._whyAgeGateScreen.SetActive(true);
@@ -184,19 +189,24 @@ public class KIDAgeGate : MonoBehaviour
 	public void OnLearnMoreAboutKIDPressed()
 	{
 		this._metrics_LearnMorePressed = true;
-		TelemetryData telemetryData = default(TelemetryData);
-		telemetryData.EventName = "kid_screen_shown";
-		telemetryData.CustomTags = new string[]
+		TelemetryData telemetryData = new TelemetryData
 		{
-			"kid_age_gate",
-			KIDTelemetry.GameVersionCustomTag,
-			KIDTelemetry.GameEnvironment
+			EventName = "kid_screen_shown",
+			CustomTags = new string[]
+			{
+				"kid_age_gate",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
+			},
+			BodyData = new Dictionary<string, string>
+			{
+				{
+					"screen",
+					"learn_more_url"
+				}
+			}
 		};
-		Dictionary<string, string> dictionary = new Dictionary<string, string>();
-		dictionary.Add("screen", "learn_more_url");
-		telemetryData.BodyData = dictionary;
-		TelemetryData telemetryData2 = telemetryData;
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
 		Application.OpenURL("https://whyagegate.com/");
 	}
 

@@ -113,8 +113,8 @@ public class StopwatchFace : MonoBehaviour
 
 	private void UpdateHand()
 	{
-		float num = (float)(this._millisElapsed % 60000) / 60000f * 360f;
-		this._hand.localEulerAngles = new Vector3(0f, 0f, num);
+		float z = (float)(this._millisElapsed % 60000) / 60000f * 360f;
+		this._hand.localEulerAngles = new Vector3(0f, 0f, z);
 	}
 
 	public void WatchToggle()

@@ -3,6 +3,7 @@ using GorillaTag.CosmeticSystem;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR;
 
 namespace GorillaTag.Cosmetics
 {
@@ -40,7 +41,7 @@ namespace GorillaTag.Cosmetics
 			this.hasNetworkSync = (sync != null);
 			base.enabled = true;
 			base.gameObject.SetActive(true);
-			this.useLeftDock = (remote.XRNode == 4);
+			this.useLeftDock = (remote.XRNode == XRNode.LeftHand);
 			if (this.HasLocalAuthority && this.localState != RCVehicle.State.Mobilized)
 			{
 				this.AuthorityBeginDocked();
@@ -139,10 +140,10 @@ namespace GorillaTag.Cosmetics
 				GTDev.LogError<string>("RCVehicle: Could not find VRRig in parents. If you are trying to make this a world item rather than a cosmetic then you'll have to refactor how it teleports back to the arms.", this, null);
 				return;
 			}
-			string text;
-			if (!GTHardCodedBones.TryGetBoneXforms(rig, out this._vrRigBones, out text))
+			string str;
+			if (!GTHardCodedBones.TryGetBoneXforms(rig, out this._vrRigBones, out str))
 			{
-				Debug.LogError("RCVehicle: " + text, this);
+				Debug.LogError("RCVehicle: " + str, this);
 				return;
 			}
 			if (this.leftDockParent == null && !GTHardCodedBones.TryGetBoneXform(this._vrRigBones, this.dockLeftOffset.bone, out this.leftDockParent))
@@ -299,8 +300,8 @@ namespace GorillaTag.Cosmetics
 		{
 			if (this.HasLocalAuthority && this.localState == RCVehicle.State.Mobilized)
 			{
-				float num = isProjectile ? this.projectileVelocityTransfer : this.hitVelocityTransfer;
-				this.rb.AddForce(Vector3.ClampMagnitude(hitVelocity * num, this.hitMaxHitSpeed) * this.rb.mass, 1);
+				float d = isProjectile ? this.projectileVelocityTransfer : this.hitVelocityTransfer;
+				this.rb.AddForce(Vector3.ClampMagnitude(hitVelocity * d, this.hitMaxHitSpeed) * this.rb.mass, ForceMode.Impulse);
 				if (isProjectile || (this.crashOnHit && hitVelocity.sqrMagnitude > this.crashOnHitSpeedThreshold * this.crashOnHitSpeedThreshold))
 				{
 					this.AuthorityBeginCrash();
@@ -329,8 +330,8 @@ namespace GorillaTag.Cosmetics
 			Vector3 gravity = Physics.gravity;
 			Vector3 vector = -gravity * gravityCompensation;
 			Vector3 vector2 = gravity + vector;
-			Vector3 vector3 = vector2 * scaleFactor - vector2;
-			rb.AddForce((vector + vector3) * rb.mass, 0);
+			Vector3 b = vector2 * scaleFactor - vector2;
+			rb.AddForce((vector + b) * rb.mass, ForceMode.Force);
 		}
 
 		[SerializeField]

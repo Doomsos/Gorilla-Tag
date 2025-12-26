@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 
-[AttributeUsage(256)]
+[AttributeUsage(AttributeTargets.Field)]
 public class OnExitPlay_Set : OnExitPlay_Attribute
 {
 	public OnExitPlay_Set(object value)

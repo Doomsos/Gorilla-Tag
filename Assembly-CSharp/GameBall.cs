@@ -47,8 +47,8 @@ public class GameBall : MonoBehaviour
 				this.collider.isTrigger = false;
 			}
 		}
-		Vector3 vector = -Physics.gravity * (1f - this.gravityMult);
-		this.rigidBody.AddForce(vector * this.rigidBody.mass, 0);
+		Vector3 a = -Physics.gravity * (1f - this.gravityMult);
+		this.rigidBody.AddForce(a * this.rigidBody.mass, ForceMode.Force);
 		this._catchSoundDecay -= Time.deltaTime;
 	}
 

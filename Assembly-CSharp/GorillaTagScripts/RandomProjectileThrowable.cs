@@ -70,7 +70,7 @@ namespace GorillaTagScripts
 			UnityAction<bool> onDestroyRandomProjectile = this.OnDestroyRandomProjectile;
 			if (onDestroyRandomProjectile != null)
 			{
-				onDestroyRandomProjectile.Invoke(false);
+				onDestroyRandomProjectile(false);
 			}
 			yield break;
 		}

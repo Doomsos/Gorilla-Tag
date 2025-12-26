@@ -28,7 +28,7 @@ public class CrankableToyCarHoldable : TransferrableObject
 		if (netPlayer != null && this._events != null)
 		{
 			this._events.Init(netPlayer);
-			this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnDeployRPC);
+			this._events.Activate += this.OnDeployRPC;
 		}
 		else
 		{
@@ -80,10 +80,10 @@ public class CrankableToyCarHoldable : TransferrableObject
 			}
 			else
 			{
-				float num = Mathf.Lerp(this.minClickPitch, this.maxClickPitch, Mathf.InverseLerp(0f, this.maxCrankStrength, this.currentCrankStrength));
+				float value = Mathf.Lerp(this.minClickPitch, this.maxClickPitch, Mathf.InverseLerp(0f, this.maxCrankStrength, this.currentCrankStrength));
 				SoundBankPlayer soundBankPlayer = this.clickSound;
-				float? pitchOverride = new float?(num);
-				soundBankPlayer.Play(default(float?), pitchOverride);
+				float? pitchOverride = new float?(value);
+				soundBankPlayer.Play(null, pitchOverride);
 				VRRig ownerRig2 = this.ownerRig;
 				if (ownerRig2 != null && ownerRig2.isLocal)
 				{

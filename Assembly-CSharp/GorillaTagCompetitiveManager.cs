@@ -105,7 +105,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 			Action<float> action = GorillaTagCompetitiveManager.onUpdateRemainingTime;
 			if (action != null)
 			{
-				action.Invoke(this.stateRemainingTime);
+				action(this.stateRemainingTime);
 			}
 		}
 		base.Tick();
@@ -160,7 +160,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 					PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable, null, null);
 				});
 			}
-			else if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", ref obj))
+			else if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out obj))
 			{
 				GorillaTagCompetitiveServerApi.Instance.RequestValidateMatchJoin((string)obj, delegate(bool valid)
 				{
@@ -175,7 +175,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 		Action<NetPlayer> action = GorillaTagCompetitiveManager.onPlayerJoined;
 		if (action != null)
 		{
-			action.Invoke(newPlayer);
+			action(newPlayer);
 		}
 		RigContainer rigContainer;
 		if (VRRigCache.Instance.TryGetVrrig(newPlayer, out rigContainer))
@@ -190,7 +190,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 		Action<NetPlayer> action = GorillaTagCompetitiveManager.onPlayerLeft;
 		if (action != null)
 		{
-			action.Invoke(otherPlayer);
+			action(otherPlayer);
 		}
 		RigContainer rigContainer;
 		if (VRRigCache.Instance.TryGetVrrig(otherPlayer, out rigContainer))
@@ -282,7 +282,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 			{
 				return;
 			}
-			action.Invoke(taggedPlayer, taggingPlayer);
+			action(taggedPlayer, taggingPlayer);
 		}
 	}
 
@@ -310,19 +310,19 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 			Action<GorillaTagCompetitiveManager.GameState> action = GorillaTagCompetitiveManager.onStateChanged;
 			if (action != null)
 			{
-				action.Invoke(this.gameState);
+				action(this.gameState);
 			}
 			Action<float> action2 = GorillaTagCompetitiveManager.onUpdateRemainingTime;
 			if (action2 != null)
 			{
-				action2.Invoke(this.stateRemainingTime);
+				action2(this.stateRemainingTime);
 			}
 			if (this.gameState == GorillaTagCompetitiveManager.GameState.Playing)
 			{
 				Action action3 = GorillaTagCompetitiveManager.onRoundStart;
 				if (action3 != null)
 				{
-					action3.Invoke();
+					action3();
 				}
 			}
 			else if (gameState == GorillaTagCompetitiveManager.GameState.Playing)
@@ -330,7 +330,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 				Action action4 = GorillaTagCompetitiveManager.onRoundEnd;
 				if (action4 != null)
 				{
-					action4.Invoke();
+					action4();
 				}
 			}
 			GTDev.Log<string>(string.Format("!! Competitive SetState: {0} at: {1}", this.gameState, Time.time), null);
@@ -427,8 +427,8 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 		}
 		if (this.isCurrentlyTag && this.currentIt == null)
 		{
-			int num = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-			this.ChangeCurrentIt(GameMode.ParticipatingPlayers[num], false);
+			int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
 		}
 	}
 
@@ -497,7 +497,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 	private void PingRoom()
 	{
 		object obj;
-		if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", ref obj))
+		if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out obj))
 		{
 			GorillaTagCompetitiveServerApi.Instance.RequestPingRoom((string)obj, delegate
 			{
@@ -521,9 +521,9 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 	private bool IsEveryoneTagged()
 	{
 		bool result = true;
-		foreach (NetPlayer netPlayer in GameMode.ParticipatingPlayers)
+		foreach (NetPlayer item in GameMode.ParticipatingPlayers)
 		{
-			if (!this.currentInfected.Contains(netPlayer))
+			if (!this.currentInfected.Contains(item))
 			{
 				result = false;
 				break;
@@ -536,8 +536,8 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 	{
 		if (this.currentInfected.Count == 0)
 		{
-			int num = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-			this.AddInfectedPlayer(GameMode.ParticipatingPlayers[num], true);
+			int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index], true);
 		}
 	}
 

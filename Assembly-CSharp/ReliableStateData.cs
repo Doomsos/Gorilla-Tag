@@ -6,7 +6,7 @@ using UnityEngine;
 
 [NetworkStructWeaved(21)]
 [Serializable]
-[StructLayout(2, Size = 84)]
+[StructLayout(LayoutKind.Explicit, Size = 84)]
 public struct ReliableStateData : INetworkStruct
 {
 	public long Header { readonly get; set; }

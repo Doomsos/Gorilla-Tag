@@ -18,7 +18,7 @@ public class GorillaTagCompetitiveRankCosmetic : MonoBehaviour, ISpawnable
 			return;
 		}
 		this.myRig = rig;
-		this.myRig.OnRankedSubtierChanged += new Action<int, int>(this.OnRankedScoreChanged);
+		this.myRig.OnRankedSubtierChanged += this.OnRankedScoreChanged;
 		this.OnRankedScoreChanged(this.myRig.GetCurrentRankedSubTier(false), this.myRig.GetCurrentRankedSubTier(true));
 	}
 
@@ -42,7 +42,7 @@ public class GorillaTagCompetitiveRankCosmetic : MonoBehaviour, ISpawnable
 	{
 		if (this.forWardrobe && this.myRig)
 		{
-			this.myRig.OnRankedSubtierChanged -= new Action<int, int>(this.OnRankedScoreChanged);
+			this.myRig.OnRankedSubtierChanged -= this.OnRankedScoreChanged;
 			this.myRig = null;
 		}
 	}
@@ -63,7 +63,7 @@ public class GorillaTagCompetitiveRankCosmetic : MonoBehaviour, ISpawnable
 		this.myRig = ((instance != null) ? instance.offlineVRRig : null);
 		if (this.myRig)
 		{
-			this.myRig.OnRankedSubtierChanged += new Action<int, int>(this.OnRankedScoreChanged);
+			this.myRig.OnRankedSubtierChanged += this.OnRankedScoreChanged;
 			this.OnRankedScoreChanged(this.myRig.GetCurrentRankedSubTier(false), this.myRig.GetCurrentRankedSubTier(true));
 			return true;
 		}

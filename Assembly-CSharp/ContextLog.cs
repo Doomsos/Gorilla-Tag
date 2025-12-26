@@ -13,8 +13,8 @@ public static class ContextLog
 	public static void LogCall<T0, T1>(this T0 ctx, T1 arg1, [CallerMemberName] string call = null)
 	{
 		string prefix = ContextLog.GetPrefix<T0>(ref ctx);
-		string text = ZString.Concat<string, string, string>("{.", call, "()} ");
-		Debug.Log(ZString.Concat<string, string, T1>(prefix, text, arg1));
+		string arg2 = ZString.Concat<string, string, string>("{.", call, "()} ");
+		Debug.Log(ZString.Concat<string, string, T1>(prefix, arg2, arg1));
 	}
 
 	private static string GetPrefix<T>(ref T ctx)
@@ -24,23 +24,23 @@ public static class ContextLog
 			return string.Empty;
 		}
 		Type type = ctx as Type;
-		string text;
+		string arg;
 		if (type != null)
 		{
-			text = type.Name;
+			arg = type.Name;
 		}
 		else
 		{
-			string text2 = ctx as string;
-			if (text2 != null)
+			string text = ctx as string;
+			if (text != null)
 			{
-				text = text2;
+				arg = text;
 			}
 			else
 			{
-				text = ctx.GetType().Name;
+				arg = ctx.GetType().Name;
 			}
 		}
-		return ZString.Concat<string, string, string>("[", text, "] ");
+		return ZString.Concat<string, string, string>("[", arg, "] ");
 	}
 }

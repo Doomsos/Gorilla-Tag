@@ -8,11 +8,7 @@ public sealed class CasualGameMode : GorillaGameManager
 {
 	public override int MyMatIndex(NetPlayer player)
 	{
-		if (this.GetMyMaterial == null)
-		{
-			return 0;
-		}
-		return this.GetMyMaterial(player);
+		return 0;
 	}
 
 	public override void OnSerializeRead(object newData)
@@ -56,8 +52,4 @@ public sealed class CasualGameMode : GorillaGameManager
 		}
 		return result;
 	}
-
-	public CasualGameMode.MyMatDelegate GetMyMaterial;
-
-	public delegate int MyMatDelegate(NetPlayer player);
 }

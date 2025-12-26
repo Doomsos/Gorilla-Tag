@@ -90,7 +90,7 @@ public class SIGadgetGrenadeKnockBack : SIGadgetGrenade
 		{
 			return;
 		}
-		grenadeFinished.Invoke();
+		grenadeFinished();
 	}
 
 	[SerializeField]

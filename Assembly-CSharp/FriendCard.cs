@@ -51,7 +51,7 @@ public class FriendCard : MonoBehaviour
 	{
 		if (this._button)
 		{
-			this._button.onPressed -= new Action<GorillaPressableButton, bool>(this.OnButtonPressed);
+			this._button.onPressed -= this.OnButtonPressed;
 		}
 	}
 
@@ -126,7 +126,7 @@ public class FriendCard : MonoBehaviour
 				bool? isPublic = friend.Presence.IsPublic;
 				bool flag = true;
 				bool flag2 = isPublic.GetValueOrDefault() == flag & isPublic != null;
-				bool flag3 = friend.Presence.RoomId.get_Chars(0) == '@';
+				bool flag3 = friend.Presence.RoomId[0] == '@';
 				bool flag4 = friend.Presence.RoomId.Equals(NetworkSystem.Instance.RoomName);
 				bool flag5 = false;
 				if (!flag4 && flag2 && !friend.Presence.Zone.IsNullOrEmpty())
@@ -275,9 +275,9 @@ public class FriendCard : MonoBehaviour
 	{
 		this._button = friendCardButton;
 		this._button.SetFillBar(this.removeProgressBar);
-		this._button.onPressBegin += new Action(this.OnButtonPressBegin);
-		this._button.onPressAbort += new Action(this.OnButtonPressAbort);
-		this._button.onPressed += new Action<GorillaPressableButton, bool>(this.OnButtonPressed);
+		this._button.onPressBegin += this.OnButtonPressBegin;
+		this._button.onPressAbort += this.OnButtonPressAbort;
+		this._button.onPressed += this.OnButtonPressed;
 		this._buttonDefaultMaterials = normalMaterials;
 		this._buttonActiveMaterials = activeMaterials;
 		this._buttonAlertMaterials = alertMaterials;

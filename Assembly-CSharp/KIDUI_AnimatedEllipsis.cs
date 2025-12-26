@@ -53,11 +53,11 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 				{
 					num = this._ellipsisStartingValues.Count + num;
 				}
-				float num2 = this._ellipsisStartingValues[num];
-				this._ellipsisObjects[i].Item1.transform.localScale = Vector3.one * num2;
+				float d = this._ellipsisStartingValues[num];
+				this._ellipsisObjects[i].Item1.transform.localScale = Vector3.one * d;
 			}
-			int num3 = currIndex;
-			currIndex = num3 + 1;
+			int num2 = currIndex;
+			currIndex = num2 + 1;
 			if (currIndex >= this._ellipsisObjects.Length)
 			{
 				currIndex = 0;
@@ -106,9 +106,9 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 
 	public float LerpLoop(float start, float end, float time, float offsetTime, float duration)
 	{
-		float num = (offsetTime - time) % duration / duration;
-		float num2 = this._ellipsisAnimationCurve.Evaluate(num);
-		return Mathf.Lerp(start, end, num2);
+		float time2 = (offsetTime - time) % duration / duration;
+		float t = this._ellipsisAnimationCurve.Evaluate(time2);
+		return Mathf.Lerp(start, end, t);
 	}
 
 	[Header("Ellipsis Spawning")]

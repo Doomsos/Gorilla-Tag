@@ -14,12 +14,12 @@ public class CoconutMystic : MonoBehaviour
 
 	private void OnEnable()
 	{
-		PhotonNetwork.NetworkingClient.EventReceived += new Action<EventData>(this.OnPhotonEvent);
+		PhotonNetwork.NetworkingClient.EventReceived += this.OnPhotonEvent;
 	}
 
 	private void OnDisable()
 	{
-		PhotonNetwork.NetworkingClient.EventReceived -= new Action<EventData>(this.OnPhotonEvent);
+		PhotonNetwork.NetworkingClient.EventReceived -= this.OnPhotonEvent;
 	}
 
 	private void OnPhotonEvent(EventData evData)
@@ -63,12 +63,12 @@ public class CoconutMystic : MonoBehaviour
 		this.label.text = this.answers.NextItem().GetLocalizedString();
 		this.soundPlayer.Play();
 		this.breakEffect.Play();
-		object obj = new object[]
+		object eventContent = new object[]
 		{
 			CoconutMystic.kUpdateLabelEvent,
 			this.answers.lastItemIndex
 		};
-		PhotonNetwork.RaiseEvent(176, obj, RaiseEventOptions.Default, SendOptions.SendReliable);
+		PhotonNetwork.RaiseEvent(176, eventContent, RaiseEventOptions.Default, SendOptions.SendReliable);
 	}
 
 	public VRRig rig;

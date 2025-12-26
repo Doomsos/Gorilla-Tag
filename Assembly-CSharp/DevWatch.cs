@@ -23,10 +23,10 @@ public class DevWatch : MonoBehaviour
 		{
 			foreach (RaycastHit raycastHit in array)
 			{
-				NetworkObject networkObject;
-				if (raycastHit.collider.gameObject.TryGetComponent<NetworkObject>(ref networkObject))
+				NetworkObject item;
+				if (raycastHit.collider.gameObject.TryGetComponent<NetworkObject>(out item))
 				{
-					this.FoundNetworkObjects.Add(networkObject);
+					this.FoundNetworkObjects.Add(item);
 				}
 			}
 		}

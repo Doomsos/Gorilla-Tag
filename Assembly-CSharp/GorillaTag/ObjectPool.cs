@@ -54,7 +54,7 @@ namespace GorillaTag
 			this.pool.Push(instance);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public virtual T CreateInstance()
 		{
 			return Activator.CreateInstance<T>();

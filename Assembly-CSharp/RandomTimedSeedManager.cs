@@ -126,7 +126,7 @@ public class RandomTimedSeedManager : NetworkComponent, ITickSystemTick
 			this.cachedSeed = this.seed;
 			foreach (Action action in this.callbacksOnSeedChanged)
 			{
-				action.Invoke();
+				action();
 			}
 		}
 	}
@@ -159,11 +159,11 @@ public class RandomTimedSeedManager : NetworkComponent, ITickSystemTick
 
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 2)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private RandomTimedSeedManager.RandomTimedSeedManagerData _Data;
 
 	[NetworkStructWeaved(2)]
-	[StructLayout(2, Size = 8)]
+	[StructLayout(LayoutKind.Explicit, Size = 8)]
 	private struct RandomTimedSeedManagerData : INetworkStruct
 	{
 		[Networked]

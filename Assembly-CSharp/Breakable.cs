@@ -48,7 +48,7 @@ public class Breakable : MonoBehaviour
 		}
 		this._rigidbody.isKinematic = false;
 		this._rigidbody.useGravity = false;
-		this._rigidbody.constraints = 126;
+		this._rigidbody.constraints = RigidbodyConstraints.FreezeAll;
 		this.UpdatePhysMasks();
 		if (this.rendererRoot == null)
 		{

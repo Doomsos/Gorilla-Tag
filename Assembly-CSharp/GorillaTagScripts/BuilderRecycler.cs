@@ -134,8 +134,7 @@ namespace GorillaTagScripts
 		private Vector2 GetUVShiftOffset()
 		{
 			float y = Shader.GetGlobalVector(ShaderProps._Time).y;
-			Vector4 vector;
-			vector..ctor(500f, 0f, 0f, 0f);
+			Vector4 vector = new Vector4(500f, 0f, 0f, 0f);
 			Vector4 vector2 = vector / this.recycleEffectDuration;
 			return new Vector2(-1f * (Mathf.Floor(y * vector2.x) * 1f / vector.x % 1f) * vector.x - vector.x + 165f, 0f);
 		}
@@ -149,10 +148,10 @@ namespace GorillaTagScripts
 				{
 					flag = true;
 					this.outputPipes[i].GetPropertyBlock(this.props, 1);
-					Vector4 vector = new Vector4(500f, 0f, 0f, 0f) / this.recycleEffectDuration;
+					Vector4 value = new Vector4(500f, 0f, 0f, 0f) / this.recycleEffectDuration;
 					Vector2 uvshiftOffset = this.GetUVShiftOffset();
 					this.props.SetColor(ShaderProps._BaseColor, this.builderResourceColors.colors[i].color);
-					this.props.SetVector(ShaderProps._UvShiftRate, vector);
+					this.props.SetVector(ShaderProps._UvShiftRate, value);
 					this.props.SetVector(ShaderProps._UvShiftOffset, uvshiftOffset);
 					this.outputPipes[i].SetPropertyBlock(this.props, 1);
 					this.totalRecycledCost[i] = Mathf.Max(this.totalRecycledCost[i] - 1, 0);

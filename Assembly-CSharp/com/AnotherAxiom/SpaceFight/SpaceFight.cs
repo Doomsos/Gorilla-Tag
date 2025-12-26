@@ -63,7 +63,7 @@ namespace com.AnotherAxiom.SpaceFight
 
 		private void move(Transform p, float speed)
 		{
-			p.Translate(p.up * Time.deltaTime * speed, 0);
+			p.Translate(p.up * Time.deltaTime * speed, Space.World);
 		}
 
 		private void turn(Transform p, bool cw)

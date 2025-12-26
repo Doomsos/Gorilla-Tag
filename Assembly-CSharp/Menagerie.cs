@@ -12,10 +12,10 @@ public class Menagerie : MonoBehaviour
 {
 	private void Start()
 	{
-		CrittersCageDeposit[] array = Object.FindObjectsByType<CrittersCageDeposit>(1, 0);
+		CrittersCageDeposit[] array = Object.FindObjectsByType<CrittersCageDeposit>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 		for (int i = 0; i < array.Length; i++)
 		{
-			array[i].OnDepositCritter += new Action<Menagerie.CritterData, int>(this.OnDepositCritter);
+			array[i].OnDepositCritter += this.OnDepositCritter;
 		}
 		CrittersManager.CheckInitialize();
 		this._totalPages = this.critterIndex.critterTypes.Count / this.collection.Length + ((this.critterIndex.critterTypes.Count % this.collection.Length == 0) ? 0 : 1);
@@ -30,7 +30,7 @@ public class Menagerie : MonoBehaviour
 
 	private void CritterDepositedInDonationBox(MenagerieCritter critter)
 	{
-		if (Enumerable.Contains<MenagerieSlot>(this.newCritterPen, critter.Slot))
+		if (this.newCritterPen.Contains(critter.Slot))
 		{
 			critter.currentState = MenagerieCritter.MenagerieCritterState.Donating;
 			this.DonateCritter(critter.CritterData);
@@ -43,7 +43,7 @@ public class Menagerie : MonoBehaviour
 
 	private void CritterDepositedInFavoriteBox(MenagerieCritter critter)
 	{
-		if (Enumerable.Contains<MenagerieSlot>(this.collection, critter.Slot))
+		if (this.collection.Contains(critter.Slot))
 		{
 			this._savedCritters.favoriteCritter = critter.CritterData.critterType;
 			this.Save();
@@ -54,7 +54,7 @@ public class Menagerie : MonoBehaviour
 
 	private void CritterDepositedInCollectionBox(MenagerieCritter critter)
 	{
-		if (Enumerable.Contains<MenagerieSlot>(this.newCritterPen, critter.Slot))
+		if (this.newCritterPen.Contains(critter.Slot))
 		{
 			this.AddCritterToCollection(critter.CritterData);
 			this._savedCritters.newCritters.Remove(critter.CritterData);
@@ -75,9 +75,9 @@ public class Menagerie : MonoBehaviour
 				this.Save();
 			}
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
-			Debug.LogException(ex);
+			Debug.LogException(exception);
 		}
 	}
 
@@ -102,7 +102,7 @@ public class Menagerie : MonoBehaviour
 	private void AddCritterToCollection(Menagerie.CritterData critterData)
 	{
 		Menagerie.CritterData critterData2;
-		if (this._savedCritters.collectedCritters.TryGetValue(critterData.critterType, ref critterData2))
+		if (this._savedCritters.collectedCritters.TryGetValue(critterData.critterType, out critterData2))
 		{
 			this.DonateCritter(critterData2);
 		}
@@ -174,7 +174,7 @@ public class Menagerie : MonoBehaviour
 			int num2 = num + i;
 			MenagerieSlot menagerieSlot = this.collection[i];
 			Menagerie.CritterData critterData;
-			if (this._savedCritters.collectedCritters.TryGetValue(num2, ref critterData))
+			if (this._savedCritters.collectedCritters.TryGetValue(num2, out critterData))
 			{
 				this.SpawnCritterInSlot(menagerieSlot, critterData);
 			}
@@ -190,7 +190,7 @@ public class Menagerie : MonoBehaviour
 	private void UpdateFavoriteCritter()
 	{
 		Menagerie.CritterData critterData;
-		if (this._savedCritters.collectedCritters.TryGetValue(this._savedCritters.favoriteCritter, ref critterData))
+		if (this._savedCritters.collectedCritters.TryGetValue(this._savedCritters.favoriteCritter, out critterData))
 		{
 			this.SpawnCritterInSlot(this.favoriteCritterSlot, critterData);
 			return;
@@ -352,8 +352,8 @@ public class Menagerie : MonoBehaviour
 	private void Save()
 	{
 		Debug.Log(string.Format("Saving {0} critters", this._critters.Count));
-		string text = this.SaveCrittersToJson();
-		PlayerPrefs.SetString("_SavedCritters", text);
+		string value = this.SaveCrittersToJson();
+		PlayerPrefs.SetString("_SavedCritters", value);
 	}
 
 	private void LoadCrittersFromJson(string jsonString)
@@ -365,10 +365,10 @@ public class Menagerie : MonoBehaviour
 			{
 				this._savedCritters = JsonConvert.DeserializeObject<Menagerie.CritterSaveData>(jsonString);
 			}
-			catch (Exception ex)
+			catch (Exception exception)
 			{
 				Debug.LogError("Unable to deserialize critters from json: " + jsonString);
-				Debug.LogException(ex);
+				Debug.LogException(exception);
 			}
 		}
 		this.ValidateSaveData();
@@ -377,7 +377,7 @@ public class Menagerie : MonoBehaviour
 	private string SaveCrittersToJson()
 	{
 		this.ValidateSaveData();
-		string text = JsonConvert.SerializeObject(this._savedCritters, 1);
+		string text = JsonConvert.SerializeObject(this._savedCritters, Formatting.Indented);
 		Debug.Log("Critters save to JSON: " + text);
 		return text;
 	}

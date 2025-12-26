@@ -69,9 +69,9 @@ namespace GorillaTagScripts.Builder
 				return;
 			}
 			AudioRolloffMode rolloffMode = this.audioSource.rolloffMode;
-			if (rolloffMode > 1)
+			if (rolloffMode > AudioRolloffMode.Linear)
 			{
-				if (rolloffMode == 2)
+				if (rolloffMode == AudioRolloffMode.Custom)
 				{
 					this.maxDist = this.audioSource.maxDistance;
 					this.audioSource.maxDistance *= this.scale;
@@ -98,9 +98,9 @@ namespace GorillaTagScripts.Builder
 				return;
 			}
 			AudioRolloffMode rolloffMode = this.audioSource.rolloffMode;
-			if (rolloffMode > 1)
+			if (rolloffMode > AudioRolloffMode.Linear)
 			{
-				if (rolloffMode == 2)
+				if (rolloffMode == AudioRolloffMode.Custom)
 				{
 					this.audioSource.maxDistance = this.maxDist;
 				}

@@ -1,5 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-[UnmanagedFunctionPointer(2)]
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 public unsafe delegate int lua_CFunction(lua_State* L);

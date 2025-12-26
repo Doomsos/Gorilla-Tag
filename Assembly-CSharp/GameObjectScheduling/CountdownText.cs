@@ -233,46 +233,46 @@ namespace GameObjectScheduling
 		})]
 		public static ValueTuple<string, int, int, bool> GetTimeDisplay(TimeSpan ts, string format, int maxDaysToDisplay, string elapsedString, string overMaxString)
 		{
-			string text = overMaxString;
-			int num = 0;
-			int num2 = ts.Days;
-			bool flag = false;
+			string item = overMaxString;
+			int item2 = 0;
+			int item3 = ts.Days;
+			bool item4 = false;
 			if (ts.TotalSeconds < 0.0)
 			{
-				return new ValueTuple<string, int, int, bool>(elapsedString, num, num2, flag);
+				return new ValueTuple<string, int, int, bool>(elapsedString, item2, item3, item4);
 			}
 			if (ts.TotalDays < (double)maxDaysToDisplay)
 			{
 				if (ts.Days > 0)
 				{
-					num = 3;
-					num2 = ts.Days;
-					flag = true;
-					text = string.Format(format, ts.Days, CountdownText.getTimeChunkString(CountdownText.TimeChunk.DAY, ts.Days));
+					item2 = 3;
+					item3 = ts.Days;
+					item4 = true;
+					item = string.Format(format, ts.Days, CountdownText.getTimeChunkString(CountdownText.TimeChunk.DAY, ts.Days));
 				}
 				else if (ts.Hours > 0)
 				{
-					num = 2;
-					num2 = ts.Hours;
-					flag = true;
-					text = string.Format(format, ts.Hours, CountdownText.getTimeChunkString(CountdownText.TimeChunk.HOUR, ts.Hours));
+					item2 = 2;
+					item3 = ts.Hours;
+					item4 = true;
+					item = string.Format(format, ts.Hours, CountdownText.getTimeChunkString(CountdownText.TimeChunk.HOUR, ts.Hours));
 				}
 				else if (ts.Minutes > 0)
 				{
-					num = 1;
-					num2 = ts.Minutes;
-					flag = true;
-					text = string.Format(format, ts.Minutes, CountdownText.getTimeChunkString(CountdownText.TimeChunk.MINUTE, ts.Minutes));
+					item2 = 1;
+					item3 = ts.Minutes;
+					item4 = true;
+					item = string.Format(format, ts.Minutes, CountdownText.getTimeChunkString(CountdownText.TimeChunk.MINUTE, ts.Minutes));
 				}
 				else if (ts.Seconds > 0)
 				{
-					num = 0;
-					num2 = ts.Seconds;
-					flag = true;
-					text = string.Format(format, ts.Seconds, CountdownText.getTimeChunkString(CountdownText.TimeChunk.SECOND, ts.Seconds));
+					item2 = 0;
+					item3 = ts.Seconds;
+					item4 = true;
+					item = string.Format(format, ts.Seconds, CountdownText.getTimeChunkString(CountdownText.TimeChunk.SECOND, ts.Seconds));
 				}
 			}
-			return new ValueTuple<string, int, int, bool>(text, num, num2, flag);
+			return new ValueTuple<string, int, int, bool>(item, item2, item3, item4);
 		}
 
 		private static string getTimeChunkString(CountdownText.TimeChunk chunk, int n)

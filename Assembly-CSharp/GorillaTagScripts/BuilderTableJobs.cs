@@ -13,11 +13,11 @@ namespace GorillaTagScripts
 			}
 			int length = testPieceList.Length;
 			BuilderPieceData builderPieceData = new BuilderPieceData(testPiece);
-			testPieceList.Add(ref builderPieceData);
+			testPieceList.Add(builderPieceData);
 			for (int i = 0; i < testPiece.gridPlanes.Count; i++)
 			{
 				BuilderGridPlaneData builderGridPlaneData = new BuilderGridPlaneData(testPiece.gridPlanes[i], length);
-				testGridPlaneList.Add(ref builderGridPlaneData);
+				testGridPlaneList.Add(builderGridPlaneData);
 			}
 			BuilderPiece builderPiece = testPiece.firstChildPiece;
 			while (builderPiece != null)
@@ -36,7 +36,7 @@ namespace GorillaTagScripts
 			for (int i = 0; i < testPiece.gridPlanes.Count; i++)
 			{
 				BuilderGridPlaneData builderGridPlaneData = new BuilderGridPlaneData(testPiece.gridPlanes[i], -1);
-				testGridPlaneList.Add(ref builderGridPlaneData);
+				testGridPlaneList.Add(builderGridPlaneData);
 			}
 			BuilderPiece builderPiece = testPiece.firstChildPiece;
 			while (builderPiece != null)

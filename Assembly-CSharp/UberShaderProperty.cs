@@ -10,16 +10,16 @@ public class UberShaderProperty
 	{
 		switch (this.type)
 		{
-		case 0:
+		case ShaderPropertyType.Color:
 			return UberShaderProperty.ValueAs<Color, T>(target.GetColor(this.nameID));
-		case 1:
+		case ShaderPropertyType.Vector:
 			return UberShaderProperty.ValueAs<Vector4, T>(target.GetVector(this.nameID));
-		case 2:
-		case 3:
+		case ShaderPropertyType.Float:
+		case ShaderPropertyType.Range:
 			return UberShaderProperty.ValueAs<float, T>(target.GetFloat(this.nameID));
-		case 4:
+		case ShaderPropertyType.Texture:
 			return UberShaderProperty.ValueAs<Texture, T>(target.GetTexture(this.nameID));
-		case 5:
+		case ShaderPropertyType.Int:
 			return UberShaderProperty.ValueAs<int, T>(target.GetInt(this.nameID));
 		default:
 			return default(T);
@@ -30,20 +30,20 @@ public class UberShaderProperty
 	{
 		switch (this.type)
 		{
-		case 0:
+		case ShaderPropertyType.Color:
 			target.SetColor(this.nameID, UberShaderProperty.ValueAs<T, Color>(value));
 			break;
-		case 1:
+		case ShaderPropertyType.Vector:
 			target.SetVector(this.nameID, UberShaderProperty.ValueAs<T, Vector4>(value));
 			break;
-		case 2:
-		case 3:
+		case ShaderPropertyType.Float:
+		case ShaderPropertyType.Range:
 			target.SetFloat(this.nameID, UberShaderProperty.ValueAs<T, float>(value));
 			break;
-		case 4:
+		case ShaderPropertyType.Texture:
 			target.SetTexture(this.nameID, UberShaderProperty.ValueAs<T, Texture>(value));
 			break;
-		case 5:
+		case ShaderPropertyType.Int:
 			target.SetInt(this.nameID, UberShaderProperty.ValueAs<T, int>(value));
 			break;
 		}
@@ -53,9 +53,9 @@ public class UberShaderProperty
 		}
 		bool flag = false;
 		ShaderPropertyType shaderPropertyType = this.type;
-		if (shaderPropertyType != 2)
+		if (shaderPropertyType != ShaderPropertyType.Float)
 		{
-			if (shaderPropertyType == 5)
+			if (shaderPropertyType == ShaderPropertyType.Int)
 			{
 				flag = (UberShaderProperty.ValueAs<T, int>(value) >= 1);
 			}
@@ -75,9 +75,9 @@ public class UberShaderProperty
 	public void Enable(Material target)
 	{
 		ShaderPropertyType shaderPropertyType = this.type;
-		if (shaderPropertyType != 2)
+		if (shaderPropertyType != ShaderPropertyType.Float)
 		{
-			if (shaderPropertyType == 5)
+			if (shaderPropertyType == ShaderPropertyType.Int)
 			{
 				target.SetInt(this.nameID, 1);
 			}
@@ -95,9 +95,9 @@ public class UberShaderProperty
 	public void Disable(Material target)
 	{
 		ShaderPropertyType shaderPropertyType = this.type;
-		if (shaderPropertyType != 2)
+		if (shaderPropertyType != ShaderPropertyType.Float)
 		{
-			if (shaderPropertyType == 5)
+			if (shaderPropertyType == ShaderPropertyType.Int)
 			{
 				target.SetInt(this.nameID, 0);
 			}
@@ -123,7 +123,7 @@ public class UberShaderProperty
 		return true;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private unsafe static TOut ValueAs<TIn, TOut>(TIn value)
 	{
 		return *Unsafe.As<TIn, TOut>(ref value);

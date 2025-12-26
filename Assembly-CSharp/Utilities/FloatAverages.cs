@@ -10,25 +10,25 @@ namespace Utilities
 			this.Reset();
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override float PlusEquals(float value, float sample)
 		{
 			return value + sample;
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override float MinusEquals(float value, float sample)
 		{
 			return value - sample;
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override float Divide(float value, int sampleCount)
 		{
 			return value / (float)sampleCount;
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override float Multiply(float value, int sampleCount)
 		{
 			return value * (float)sampleCount;

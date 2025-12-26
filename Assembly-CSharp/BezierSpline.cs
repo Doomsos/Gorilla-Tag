@@ -22,13 +22,13 @@ public class BezierSpline : MonoBehaviour
 		float num = 1f / (float)subdivisions;
 		this._timesTable = new float[subdivisions];
 		this._lengthsTable = new float[subdivisions];
-		Vector3 vector = this.GetPoint(0f);
+		Vector3 b = this.GetPoint(0f);
 		for (int i = 1; i <= subdivisions; i++)
 		{
 			float num2 = num * (float)i;
 			Vector3 point = this.GetPoint(num2);
-			this._totalArcLength += Vector3.Distance(point, vector);
-			vector = point;
+			this._totalArcLength += Vector3.Distance(point, b);
+			b = point;
 			this._timesTable[i - 1] = num2;
 			this._lengthsTable[i - 1] = this._totalArcLength;
 		}
@@ -129,36 +129,36 @@ public class BezierSpline : MonoBehaviour
 	{
 		if (index % 3 == 0)
 		{
-			Vector3 vector = point - this.points[index];
+			Vector3 b = point - this.points[index];
 			if (this.loop)
 			{
 				if (index == 0)
 				{
-					this.points[1] += vector;
-					this.points[this.points.Length - 2] += vector;
+					this.points[1] += b;
+					this.points[this.points.Length - 2] += b;
 					this.points[this.points.Length - 1] = point;
 				}
 				else if (index == this.points.Length - 1)
 				{
 					this.points[0] = point;
-					this.points[1] += vector;
-					this.points[index - 1] += vector;
+					this.points[1] += b;
+					this.points[index - 1] += b;
 				}
 				else
 				{
-					this.points[index - 1] += vector;
-					this.points[index + 1] += vector;
+					this.points[index - 1] += b;
+					this.points[index + 1] += b;
 				}
 			}
 			else
 			{
 				if (index > 0)
 				{
-					this.points[index - 1] += vector;
+					this.points[index - 1] += b;
 				}
 				if (index + 1 < this.points.Length)
 				{
-					this.points[index + 1] += vector;
+					this.points[index + 1] += b;
 				}
 			}
 		}
@@ -226,13 +226,13 @@ public class BezierSpline : MonoBehaviour
 				num4 = this.points.Length - 2;
 			}
 		}
-		Vector3 vector = this.points[num2];
-		Vector3 vector2 = vector - this.points[num3];
+		Vector3 a = this.points[num2];
+		Vector3 b = a - this.points[num3];
 		if (bezierControlPointMode == BezierControlPointMode.Aligned)
 		{
-			vector2 = vector2.normalized * Vector3.Distance(vector, this.points[num4]);
+			b = b.normalized * Vector3.Distance(a, this.points[num4]);
 		}
-		this.points[num4] = vector + vector2;
+		this.points[num4] = a + b;
 	}
 
 	public int CurveCount
@@ -357,7 +357,7 @@ public class BezierSpline : MonoBehaviour
 		{
 			return;
 		}
-		List<Vector3> list = Enumerable.ToList<Vector3>(this.points);
+		List<Vector3> list = this.points.ToList<Vector3>();
 		int num = 4;
 		while (num < this.points.Length && index - 3 > num)
 		{
@@ -368,9 +368,9 @@ public class BezierSpline : MonoBehaviour
 			list.RemoveAt(num);
 		}
 		this.points = list.ToArray();
-		int num2 = (num - 4) / 3;
-		List<BezierControlPointMode> list2 = Enumerable.ToList<BezierControlPointMode>(this.modes);
-		list2.RemoveAt(num2);
+		int index2 = (num - 4) / 3;
+		List<BezierControlPointMode> list2 = this.modes.ToList<BezierControlPointMode>();
+		list2.RemoveAt(index2);
 		this.modes = list2.ToArray();
 	}
 

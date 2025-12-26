@@ -20,7 +20,7 @@ namespace GorillaLocomotion.Gameplay
 				position.y -= this.nodeDistance;
 			}
 			this.nodes[this.nodes.Count - 1].GetComponentInChildren<Renderer>().enabled = false;
-			this.burstNodes = new NativeArray<BurstRopeNode>(this.nodes.Count, 4, 1);
+			this.burstNodes = new NativeArray<BurstRopeNode>(this.nodes.Count, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 		}
 
 		private void OnDestroy()
@@ -30,21 +30,21 @@ namespace GorillaLocomotion.Gameplay
 
 		private void Update()
 		{
-			IJobExtensions.Run<SolveRopeJob>(new SolveRopeJob
+			new SolveRopeJob
 			{
 				fixedDeltaTime = Time.deltaTime,
 				gravity = this.gravity,
 				nodes = this.burstNodes,
 				nodeDistance = this.nodeDistance,
 				rootPos = base.transform.position
-			});
+			}.Run<SolveRopeJob>();
 			for (int i = 0; i < this.burstNodes.Length; i++)
 			{
 				this.nodes[i].position = this.burstNodes[i].curPos;
 				if (i > 0)
 				{
-					Vector3 vector = this.burstNodes[i - 1].curPos - this.burstNodes[i].curPos;
-					this.nodes[i].up = -vector;
+					Vector3 a = this.burstNodes[i - 1].curPos - this.burstNodes[i].curPos;
+					this.nodes[i].up = -a;
 				}
 			}
 		}

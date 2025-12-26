@@ -35,7 +35,7 @@ public abstract class RandomComponent<T> : MonoBehaviour
 
 	public void Reset()
 	{
-		this.ResetRandom(default(int?));
+		this.ResetRandom(null);
 		this._lastItem = default(T);
 		this._lastItemIndex = -1;
 	}

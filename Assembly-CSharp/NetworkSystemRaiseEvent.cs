@@ -15,7 +15,7 @@ public static class NetworkSystemRaiseEvent
 		PhotonNetwork.RaiseEvent(code, data, new RaiseEventOptions
 		{
 			TargetActors = options.TargetActors,
-			Receivers = (byte)options.Reciever,
+			Receivers = (ReceiverGroup)options.Reciever,
 			Flags = options.Flags
 		}, reliable ? SendOptions.SendReliable : SendOptions.SendUnreliable);
 	}

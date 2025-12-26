@@ -85,9 +85,8 @@ public class FlockingManager : NetworkComponent
 		int num = Random.Range(0, fishArea.colliders.Length);
 		BoxCollider boxCollider = fishArea.colliders[num];
 		Vector3 vector = boxCollider.size / 2f;
-		Vector3 vector2;
-		vector2..ctor(Random.Range(-vector.x, vector.x), Random.Range(-vector.y, vector.y), Random.Range(-vector.z, vector.z));
-		return boxCollider.transform.TransformPoint(vector2);
+		Vector3 position = new Vector3(Random.Range(-vector.x, vector.x), Random.Range(-vector.y, vector.y), Random.Range(-vector.z, vector.z));
+		return boxCollider.transform.TransformPoint(position);
 	}
 
 	public bool IsInside(Vector3 point, FlockingManager.FishArea fish)
@@ -123,20 +122,17 @@ public class FlockingManager : NetworkComponent
 			{
 				return point;
 			}
-			Vector3 vector3;
-			vector3..ctor(center.x - num2, center.y - num3, center.z - num4);
-			Vector3 vector4;
-			vector4..ctor(center.x + num2, center.y + num3, center.z + num4);
-			Vector3 vector5;
-			vector5..ctor(Mathf.Clamp(vector.x, vector3.x, vector4.x), Mathf.Clamp(vector.y, vector3.y, vector4.y), Mathf.Clamp(vector.z, vector3.z, vector4.z));
+			Vector3 vector3 = new Vector3(center.x - num2, center.y - num3, center.z - num4);
+			Vector3 vector4 = new Vector3(center.x + num2, center.y + num3, center.z + num4);
+			Vector3 vector5 = new Vector3(Mathf.Clamp(vector.x, vector3.x, vector4.x), Mathf.Clamp(vector.y, vector3.y, vector4.y), Mathf.Clamp(vector.z, vector3.z, vector4.z));
 			float num5 = Vector3.Distance(vector, vector5);
 			if (num5 < num)
 			{
 				num = num5;
 				if (num5 > 1f)
 				{
-					Vector3 vector6 = Vector3.Normalize(vector - vector5);
-					result = boxCollider.transform.TransformPoint(vector5 + vector6 * 1f);
+					Vector3 a = Vector3.Normalize(vector - vector5);
+					result = boxCollider.transform.TransformPoint(vector5 + a * 1f);
 				}
 				else
 				{
@@ -150,7 +146,7 @@ public class FlockingManager : NetworkComponent
 	private void ProjectileHitReceiver(SlingshotProjectile projectile, Collider collider1)
 	{
 		bool isRealFood = projectile.CompareTag(this.foodProjectileTag);
-		FlockingManager.FishFood fishFood = new FlockingManager.FishFood
+		FlockingManager.FishFood arg = new FlockingManager.FishFood
 		{
 			collider = (collider1 as BoxCollider),
 			isRealFood = isRealFood,
@@ -161,7 +157,7 @@ public class FlockingManager : NetworkComponent
 		{
 			return;
 		}
-		unityAction.Invoke(fishFood);
+		unityAction(arg);
 	}
 
 	private void ProjectileHitExit(SlingshotProjectile projectile, Collider collider2)
@@ -171,7 +167,7 @@ public class FlockingManager : NetworkComponent
 		{
 			return;
 		}
-		unityAction.Invoke(collider2 as BoxCollider);
+		unityAction(collider2 as BoxCollider);
 	}
 
 	[Networked]
@@ -264,7 +260,7 @@ public class FlockingManager : NetworkComponent
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("Data", 0, 337)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private FlockingData _Data;
 
 	public class FishArea

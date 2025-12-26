@@ -9,13 +9,13 @@ using UnityEngine;
 
 public static class StringUtils
 {
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsNullOrEmpty(this string s)
 	{
 		return string.IsNullOrEmpty(s);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsNullOrWhiteSpace(this string s)
 	{
 		return string.IsNullOrWhiteSpace(s);
@@ -30,9 +30,8 @@ public static class StringUtils
 		string result;
 		using (Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder())
 		{
-			for (int i = 0; i < s.Length; i++)
+			foreach (char c in s)
 			{
-				char c = s.get_Chars(i);
 				if (char.IsLetterOrDigit(c))
 				{
 					utf16ValueStringBuilder.Append(c);
@@ -69,7 +68,7 @@ public static class StringUtils
 		return string.Join<string>(separator, source);
 	}
 
-	public static string RemoveAll(this string s, string value, StringComparison mode = 5)
+	public static string RemoveAll(this string s, string value, StringComparison mode = StringComparison.OrdinalIgnoreCase)
 	{
 		if (string.IsNullOrEmpty(s))
 		{
@@ -78,7 +77,7 @@ public static class StringUtils
 		return s.Replace(value, string.Empty, mode);
 	}
 
-	public static string RemoveAll(this string s, char value, StringComparison mode = 5)
+	public static string RemoveAll(this string s, char value, StringComparison mode = StringComparison.OrdinalIgnoreCase)
 	{
 		return s.RemoveAll(value.ToString(), mode);
 	}
@@ -109,7 +108,8 @@ public static class StringUtils
 		{
 			return null;
 		}
-		return "?" + string.Join("&", Enumerable.Select<KeyValuePair<string, string>, string>(d, (KeyValuePair<string, string> x) => x.Key + "=" + x.Value));
+		return "?" + string.Join("&", from x in d
+		select x.Key + "=" + x.Value);
 	}
 
 	public static string Combine(string separator, params string[] values)
@@ -144,18 +144,18 @@ public static class StringUtils
 			{
 				string[] array2 = array;
 				int num = i;
-				string text = char.ToUpper(array[i].get_Chars(0)).ToString();
-				string text2;
+				string str = char.ToUpper(array[i][0]).ToString();
+				string str2;
 				if (array[i].Length <= 1)
 				{
-					text2 = "";
+					str2 = "";
 				}
 				else
 				{
-					string text3 = array[i];
-					text2 = text3.Substring(1, text3.Length - 1).ToLower();
+					string text = array[i];
+					str2 = text.Substring(1, text.Length - 1).ToLower();
 				}
-				array2[num] = text + text2;
+				array2[num] = str + str2;
 			}
 		}
 		return string.Join("", array);
@@ -172,9 +172,8 @@ public static class StringUtils
 		using (Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder())
 		{
 			bool flag = true;
-			for (int i = 0; i < input.Length; i++)
+			foreach (char c in input)
 			{
-				char c = input.get_Chars(i);
 				if (char.IsUpper(c) && !flag)
 				{
 					utf16ValueStringBuilder.Append(' ');
@@ -187,7 +186,7 @@ public static class StringUtils
 		return result;
 	}
 
-	public static string RemoveStart(this string s, string value, StringComparison comparison = 1)
+	public static string RemoveStart(this string s, string value, StringComparison comparison = StringComparison.CurrentCultureIgnoreCase)
 	{
 		if (string.IsNullOrEmpty(s) || !s.StartsWith(value, comparison))
 		{
@@ -196,7 +195,7 @@ public static class StringUtils
 		return s.Substring(value.Length);
 	}
 
-	public static string RemoveEnd(this string s, string value, StringComparison comparison = 1)
+	public static string RemoveEnd(this string s, string value, StringComparison comparison = StringComparison.CurrentCultureIgnoreCase)
 	{
 		if (string.IsNullOrEmpty(s) || !s.EndsWith(value, comparison))
 		{
@@ -205,7 +204,7 @@ public static class StringUtils
 		return s.Substring(0, s.Length - value.Length);
 	}
 
-	public static string RemoveBothEnds(this string s, string value, StringComparison comparison = 1)
+	public static string RemoveBothEnds(this string s, string value, StringComparison comparison = StringComparison.CurrentCultureIgnoreCase)
 	{
 		return s.RemoveEnd(value, comparison).RemoveStart(value, comparison);
 	}
@@ -217,7 +216,7 @@ public static class StringUtils
 			Debug.LogError("[STRING::UTILS] Trying to add Space, but string is null or empty");
 			return s;
 		}
-		if (s.get_Chars(s.Length - 1) == ' ')
+		if (s[s.Length - 1] == ' ')
 		{
 			return s;
 		}

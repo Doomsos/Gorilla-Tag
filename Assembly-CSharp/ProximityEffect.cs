@@ -21,9 +21,10 @@ public class ProximityEffect : MonoBehaviour, ITickSystemTick
 	{
 		if (this.receivers == null)
 		{
-			List<IProximityEffectReceiver> list = new List<IProximityEffectReceiver>();
-			list.Add(receiver);
-			this.receivers = list;
+			this.receivers = new List<IProximityEffectReceiver>
+			{
+				receiver
+			};
 			return;
 		}
 		if (!this.receivers.Contains(receiver))
@@ -119,35 +120,35 @@ public class ProximityEffect : MonoBehaviour, ITickSystemTick
 
 	private void CalculateProximityScores(bool drawGizmos, out float distance, out float alignment, out float parallel, out Vector3 midpoint)
 	{
-		float num = (this.rig != null) ? this.rig.scaleFactor : 1f;
+		float d = (this.rig != null) ? this.rig.scaleFactor : 1f;
 		Vector3 position = this.leftTransform.position;
 		Vector3 position2 = this.rightTransform.position;
 		Vector3 forward = this.leftTransform.forward;
 		Vector3 forward2 = this.rightTransform.forward;
-		Vector3 vector = (position2 - position) / num;
-		float magnitude = vector.magnitude;
-		Vector3 vector2 = vector / magnitude;
+		Vector3 a = (position2 - position) / d;
+		float magnitude = a.magnitude;
+		Vector3 vector = a / magnitude;
 		distance = this.scoreCurves.distanceModifierCurve.Evaluate(magnitude);
 		alignment = this.scoreCurves.alignmentModifierCurve.Evaluate(-Vector3.Dot(forward, forward2));
-		parallel = this.scoreCurves.parallelModifierCurve.Evaluate((Vector3.Dot(forward, vector2) + Vector3.Dot(forward2, -vector2)) / 2f);
-		midpoint = position + 0.5f * vector;
+		parallel = this.scoreCurves.parallelModifierCurve.Evaluate((Vector3.Dot(forward, vector) + Vector3.Dot(forward2, -vector)) / 2f);
+		midpoint = position + 0.5f * a;
 	}
 
 	private void MoveTransform(Transform target, float score, Vector3 midpoint)
 	{
 		Vector3 vector;
-		Quaternion quaternion;
-		target.GetPositionAndRotation(ref vector, ref quaternion);
+		Quaternion a;
+		target.GetPositionAndRotation(out vector, out a);
 		Vector3 vector2 = Vector3.Lerp(vector, midpoint, ProximityEffect.<MoveTransform>g__ExpT|40_0(this.positionCTLerpSpeed));
 		if (this.rotateCT)
 		{
 			Vector3 vector3 = (vector2 - vector) / Time.deltaTime;
 			if (vector3 != Vector3.zero)
 			{
-				Quaternion quaternion2 = Quaternion.LookRotation(vector3);
-				Quaternion quaternion3 = Quaternion.LookRotation(vector2 - this.rig.syncPos);
-				Quaternion quaternion4 = Quaternion.Slerp(quaternion, Quaternion.Slerp(quaternion3, quaternion2, vector3.magnitude), ProximityEffect.<MoveTransform>g__ExpT|40_0(this.rotationCTLerpSpeed));
-				target.SetPositionAndRotation(vector2, quaternion4);
+				Quaternion b = Quaternion.LookRotation(vector3);
+				Quaternion a2 = Quaternion.LookRotation(vector2 - this.rig.syncPos);
+				Quaternion rotation = Quaternion.Slerp(a, Quaternion.Slerp(a2, b, vector3.magnitude), ProximityEffect.<MoveTransform>g__ExpT|40_0(this.rotationCTLerpSpeed));
+				target.SetPositionAndRotation(vector2, rotation);
 			}
 		}
 		else

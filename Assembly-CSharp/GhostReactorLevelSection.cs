@@ -181,14 +181,14 @@ public class GhostReactorLevelSection : MonoBehaviour
 										enemyEntityCreateData.patrolIndex = patrolIndex;
 										createData = enemyEntityCreateData.Pack();
 									}
-									GameEntityCreateData gameEntityCreateData = new GameEntityCreateData
+									GameEntityCreateData item = new GameEntityCreateData
 									{
 										entityTypeId = staticHash,
 										position = nextSpawnPoint.transform.position,
 										rotation = nextSpawnPoint.transform.rotation,
 										createData = createData
 									};
-									GhostReactorLevelSection.tempCreateEntitiesList.Add(gameEntityCreateData);
+									GhostReactorLevelSection.tempCreateEntitiesList.Add(item);
 									if (GhostReactorLevelSection.tempCreateEntitiesList.Count > 25)
 									{
 										gameEntityManager.RequestCreateItems(GhostReactorLevelSection.tempCreateEntitiesList);
@@ -214,14 +214,14 @@ public class GhostReactorLevelSection : MonoBehaviour
 				}
 				else
 				{
-					GameEntityCreateData gameEntityCreateData2 = new GameEntityCreateData
+					GameEntityCreateData item2 = new GameEntityCreateData
 					{
 						entityTypeId = staticHash2,
 						position = this.prePlacedGameEntities[l].transform.position,
 						rotation = this.prePlacedGameEntities[l].transform.rotation,
 						createData = 0L
 					};
-					GhostReactorLevelSection.tempCreateEntitiesList.Add(gameEntityCreateData2);
+					GhostReactorLevelSection.tempCreateEntitiesList.Add(item2);
 					if (GhostReactorLevelSection.tempCreateEntitiesList.Count > 25)
 					{
 						gameEntityManager.RequestCreateItems(GhostReactorLevelSection.tempCreateEntitiesList);

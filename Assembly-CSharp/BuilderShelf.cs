@@ -107,17 +107,17 @@ public class BuilderShelf : MonoBehaviour
 		{
 			this.center = base.transform;
 		}
-		Vector3 vector = Vector3.zero;
-		Vector3 vector2 = Vector3.zero;
+		Vector3 b = Vector3.zero;
+		Vector3 euler = Vector3.zero;
 		BuilderPiece component = spawn.buildPiecePrefab.GetComponent<BuilderPiece>();
 		if (component != null)
 		{
-			vector = component.desiredShelfOffset;
-			vector2 = component.desiredShelfRotationOffset;
+			b = component.desiredShelfOffset;
+			euler = component.desiredShelfRotationOffset;
 		}
-		spawnRotation = this.center.rotation * Quaternion.Euler(vector2);
-		float num = (float)slot * this.separation - (float)(this.count - 1) * this.separation / 2f;
-		spawnPosition = this.center.position + this.center.rotation * (spawn.localAxis * num + vector);
+		spawnRotation = this.center.rotation * Quaternion.Euler(euler);
+		float d = (float)slot * this.separation - (float)(this.count - 1) * this.separation / 2f;
+		spawnPosition = this.center.position + this.center.rotation * (spawn.localAxis * d + b);
 	}
 
 	private int count;

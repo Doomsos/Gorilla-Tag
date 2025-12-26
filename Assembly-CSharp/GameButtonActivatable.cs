@@ -64,7 +64,7 @@ public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 				}
 			}
 		}
-		XRNode xrNode = GamePlayer.IsLeftHand(num) ? 4 : 5;
+		XRNode xrNode = GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand;
 		return this.CheckInput(xrNode, sensitivity);
 	}
 
@@ -126,7 +126,7 @@ public class GameButtonActivatable : MonoBehaviour, IGameActivatable
 				return 0f;
 			}
 		}
-		XRNode xrNode = GamePlayer.IsLeftHand(num) ? 4 : 5;
+		XRNode xrNode = GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand;
 		return this.GetFloatInput(xrNode, sensitivity);
 	}
 

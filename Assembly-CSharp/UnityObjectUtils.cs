@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class UnityObjectUtils
 {
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static T AsNull<T>(this T obj) where T : Object
 	{
 		if (obj == null)
@@ -18,7 +18,7 @@ public static class UnityObjectUtils
 		return default(T);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void SafeDestroy(this Object obj)
 	{
 		Object.Destroy(obj);

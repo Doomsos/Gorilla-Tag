@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 [Serializable]
-[StructLayout(2)]
+[StructLayout(LayoutKind.Explicit)]
 public class GTContactPoint
 {
 	[NonSerialized]

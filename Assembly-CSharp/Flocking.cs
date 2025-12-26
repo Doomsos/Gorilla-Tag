@@ -110,8 +110,8 @@ public class Flocking : MonoBehaviour
 	private void Turn(Vector3 towardPoint)
 	{
 		this.isTurning = true;
-		Quaternion quaternion = Quaternion.LookRotation(towardPoint - base.transform.position);
-		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, quaternion, this.rotationSpeed * Time.deltaTime);
+		Quaternion to = Quaternion.LookRotation(towardPoint - base.transform.position);
+		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, this.rotationSpeed * Time.deltaTime);
 	}
 
 	private void SwitchState(Flocking.FishState state)
@@ -121,8 +121,8 @@ public class Flocking : MonoBehaviour
 
 	private void Flock(Vector3 nextGoal)
 	{
+		Vector3 a = Vector3.zero;
 		Vector3 vector = Vector3.zero;
-		Vector3 vector2 = Vector3.zero;
 		float num = 1f;
 		int num2 = 0;
 		foreach (Flocking flocking in this.FishArea.fishList)
@@ -132,11 +132,11 @@ public class Flocking : MonoBehaviour
 				float num3 = Vector3.Distance(flocking.transform.position, base.transform.position);
 				if (num3 <= this.maxNeighbourDistance)
 				{
-					vector += flocking.transform.position;
+					a += flocking.transform.position;
 					num2++;
 					if (num3 < this.flockingAvoidanceDistance)
 					{
-						vector2 += base.transform.position - flocking.transform.position;
+						vector += base.transform.position - flocking.transform.position;
 					}
 					num += flocking.speed;
 				}
@@ -145,14 +145,14 @@ public class Flocking : MonoBehaviour
 		if (num2 > 0)
 		{
 			this.fishState = Flocking.FishState.flock;
-			vector = vector / (float)num2 + (nextGoal - base.transform.position);
+			a = a / (float)num2 + (nextGoal - base.transform.position);
 			this.speed = num / (float)num2;
 			this.speed = Mathf.Clamp(this.speed, this.minSpeed, this.maxSpeed);
-			Vector3 vector3 = vector + vector2 - base.transform.position;
-			if (vector3 != Vector3.zero)
+			Vector3 vector2 = a + vector - base.transform.position;
+			if (vector2 != Vector3.zero)
 			{
-				Quaternion quaternion = Quaternion.LookRotation(vector3);
-				base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, quaternion, this.rotationSpeed * Time.deltaTime);
+				Quaternion to = Quaternion.LookRotation(vector2);
+				base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, this.rotationSpeed * Time.deltaTime);
 			}
 		}
 	}
@@ -160,9 +160,9 @@ public class Flocking : MonoBehaviour
 	private void HandleOnFoodDetected(FlockingManager.FishFood fishFood)
 	{
 		bool flag = false;
-		foreach (BoxCollider boxCollider in this.FishArea.colliders)
+		foreach (BoxCollider y in this.FishArea.colliders)
 		{
-			if (fishFood.collider == boxCollider)
+			if (fishFood.collider == y)
 			{
 				flag = true;
 			}
@@ -180,9 +180,9 @@ public class Flocking : MonoBehaviour
 	private void HandleOnFoodDestroyed(BoxCollider collider)
 	{
 		bool flag = false;
-		foreach (BoxCollider boxCollider in this.FishArea.colliders)
+		foreach (BoxCollider y in this.FishArea.colliders)
 		{
-			if (collider == boxCollider)
+			if (collider == y)
 			{
 				flag = true;
 			}
@@ -199,8 +199,8 @@ public class Flocking : MonoBehaviour
 	private void FollowFood()
 	{
 		this.followingFood = true;
-		Quaternion quaternion = Quaternion.LookRotation(this.projectileGameObject.transform.position - base.transform.position);
-		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, quaternion, this.rotationSpeed * Time.deltaTime);
+		Quaternion to = Quaternion.LookRotation(this.projectileGameObject.transform.position - base.transform.position);
+		base.transform.rotation = Quaternion.RotateTowards(base.transform.rotation, to, this.rotationSpeed * Time.deltaTime);
 		base.transform.position = Vector3.MoveTowards(base.transform.position, this.projectileGameObject.transform.position, this.speed * this.followFoodSpeedMult * Time.deltaTime);
 	}
 

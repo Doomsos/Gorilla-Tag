@@ -93,7 +93,7 @@ public class PlayFabTitleDataTextDisplay : MonoBehaviour, IBuildValidation
 		{
 			this._cachedText = titleDataResult;
 			string text = titleDataResult.Replace("\\r", "\r").Replace("\\n", "\n");
-			if (text.get_Chars(0) == '"' && text.get_Chars(text.Length - 1) == '"')
+			if (text[0] == '"' && text[text.Length - 1] == '"')
 			{
 				text = text.Substring(1, text.Length - 2);
 			}

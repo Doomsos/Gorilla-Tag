@@ -45,20 +45,20 @@ public class HitTargetScoreDisplay : MonoBehaviour
 		bool digitsChange = true;
 		while (timeElapsedSinceHit < this.rotateTimeTotal)
 		{
-			this.singlesCard.Rotate((float)this.rotateSpeed * Time.deltaTime, 0f, 0f, 1);
+			this.singlesCard.Rotate((float)this.rotateSpeed * Time.deltaTime, 0f, 0f, Space.Self);
 			Vector3 localEulerAngles = this.singlesCard.localEulerAngles;
 			localEulerAngles.x = Mathf.Clamp(localEulerAngles.x, 0f, 180f);
 			this.singlesCard.localEulerAngles = localEulerAngles;
 			if (tensChange)
 			{
-				this.tensCard.Rotate((float)this.rotateSpeed * Time.deltaTime, 0f, 0f, 1);
+				this.tensCard.Rotate((float)this.rotateSpeed * Time.deltaTime, 0f, 0f, Space.Self);
 				Vector3 localEulerAngles2 = this.tensCard.localEulerAngles;
 				localEulerAngles2.x = Mathf.Clamp(localEulerAngles2.x, 0f, 180f);
 				this.tensCard.localEulerAngles = localEulerAngles2;
 			}
 			if (hundredsChange)
 			{
-				this.hundredsCard.Rotate((float)this.rotateSpeed * Time.deltaTime, 0f, 0f, 1);
+				this.hundredsCard.Rotate((float)this.rotateSpeed * Time.deltaTime, 0f, 0f, Space.Self);
 				Vector3 localEulerAngles3 = this.hundredsCard.localEulerAngles;
 				localEulerAngles3.x = Mathf.Clamp(localEulerAngles3.x, 0f, 180f);
 				this.hundredsCard.localEulerAngles = localEulerAngles3;

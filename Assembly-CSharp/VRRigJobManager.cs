@@ -20,7 +20,7 @@ public class VRRigJobManager : MonoBehaviour
 	private void Awake()
 	{
 		VRRigJobManager._instance = this;
-		this.cachedInput = new NativeArray<VRRigJobManager.VRRigTransformInput>(9, 4, 1);
+		this.cachedInput = new NativeArray<VRRigJobManager.VRRigTransformInput>(9, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 		this.tAA = new TransformAccessArray(9, 2);
 		this.job = default(VRRigJobManager.VRRigTransformJob);
 	}
@@ -79,7 +79,7 @@ public class VRRigJobManager : MonoBehaviour
 		}
 		this.CopyInput();
 		this.job.input = this.cachedInput;
-		this.jobHandle = IJobParallelForTransformExtensions.Schedule<VRRigJobManager.VRRigTransformJob>(this.job, this.tAA, default(JobHandle));
+		this.jobHandle = this.job.Schedule(this.tAA, default(JobHandle));
 	}
 
 	[OnEnterPlay_SetNull]

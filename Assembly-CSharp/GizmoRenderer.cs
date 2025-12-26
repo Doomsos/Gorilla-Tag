@@ -25,7 +25,7 @@ public class GizmoRenderer : MonoBehaviour
 		{
 			return;
 		}
-		CommandBuilder commandBuilder = *Draw.ingame;
+		CommandBuilder arg = *Draw.ingame;
 		Transform transform = base.transform;
 		for (int i = 0; i < num; i++)
 		{
@@ -33,11 +33,11 @@ public class GizmoRenderer : MonoBehaviour
 			if (gizmoInfo.render)
 			{
 				Transform transform2 = gizmoInfo.target ? gizmoInfo.target : transform;
-				using (commandBuilder.InLocalSpace(transform2))
+				using (arg.InLocalSpace(transform2))
 				{
-					using (commandBuilder.WithLineWidth(gizmoInfo.lineWidth, false))
+					using (arg.WithLineWidth(gizmoInfo.lineWidth, false))
 					{
-						GizmoRenderer.gRenderFuncs[(int)gizmoInfo.type].Invoke(commandBuilder, gizmoInfo);
+						GizmoRenderer.gRenderFuncs[(int)gizmoInfo.type](arg, gizmoInfo);
 					}
 				}
 			}
@@ -76,8 +76,8 @@ public class GizmoRenderer : MonoBehaviour
 
 	private static void RenderSphereSolid(CommandBuilder draw, GizmoRenderer.GizmoInfo gizmo)
 	{
-		Matrix4x4 matrix4x = Matrix4x4.TRS(gizmo.center, quaternion.identity, new float3(gizmo.radius));
-		using (draw.WithMatrix(matrix4x))
+		Matrix4x4 matrix = Matrix4x4.TRS(gizmo.center, quaternion.identity, new float3(gizmo.radius));
+		using (draw.WithMatrix(matrix))
 		{
 			draw.SolidMesh(GizmoRenderer.gSphereMesh, gizmo.color);
 		}
@@ -93,7 +93,7 @@ public class GizmoRenderer : MonoBehaviour
 		draw.Label2D(gizmo.center, gizmo.text, gizmo.textSize * gizmo.textPPU, GizmoRenderer.gLabelAligns[(int)gizmo.textAlign], gizmo.color);
 	}
 
-	[RuntimeInitializeOnLoadMethod(1)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void InitializeOnLoad()
 	{
 		GizmoRenderer.gSphereMesh = Resources.GetBuiltinResource<Mesh>("New-Sphere.fbx");

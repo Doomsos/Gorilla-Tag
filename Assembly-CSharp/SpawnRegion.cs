@@ -82,7 +82,7 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : Object wh
 	public static void AddItemToRegion(TItem item, int regionId)
 	{
 		TRegion tregion;
-		if (SpawnRegion<TItem, TRegion>._regionLookup.TryGetValue(regionId, ref tregion))
+		if (SpawnRegion<TItem, TRegion>._regionLookup.TryGetValue(regionId, out tregion))
 		{
 			tregion.AddItem(item);
 		}
@@ -90,9 +90,9 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : Object wh
 
 	public static void RemoveItemFromRegion(TItem item)
 	{
-		int num;
+		int key;
 		TRegion tregion;
-		if (SpawnRegion<TItem, TRegion>._itemRegionLookup.TryGetValue(item, ref num) && SpawnRegion<TItem, TRegion>._regionLookup.TryGetValue(num, ref tregion))
+		if (SpawnRegion<TItem, TRegion>._itemRegionLookup.TryGetValue(item, out key) && SpawnRegion<TItem, TRegion>._regionLookup.TryGetValue(key, out tregion))
 		{
 			tregion.RemoveItem(item);
 		}
@@ -127,8 +127,8 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : Object wh
 			}
 		}
 		float num = this._scale / 2f;
-		Vector3 vector = base.transform.TransformPoint(new Vector3(Random.Range(-num, num), num, Random.Range(-num, num)));
-		return new ValueTuple<bool, Vector3, Vector3>(false, vector, Vector3.up);
+		Vector3 item = base.transform.TransformPoint(new Vector3(Random.Range(-num, num), num, Random.Range(-num, num)));
+		return new ValueTuple<bool, Vector3, Vector3>(false, item, Vector3.up);
 	}
 
 	private bool TryGetSpawnPoint(out RaycastHit spawnPoint)
@@ -160,7 +160,7 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : Object wh
 	private bool TryGetSpawnPoint(Vector3 origin, Vector3 direction, float distance, out RaycastHit spawnPoint)
 	{
 		RaycastHit raycastHit;
-		if (Physics.Raycast(origin, direction, ref raycastHit, distance, -1, 1))
+		if (Physics.Raycast(origin, direction, out raycastHit, distance, -1, QueryTriggerInteraction.Ignore))
 		{
 			Debug.DrawLine(origin, raycastHit.point, Color.green, 5f);
 			spawnPoint = raycastHit;
@@ -179,8 +179,8 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : Object wh
 		int num2;
 		for (;;)
 		{
-			num = Physics.RaycastNonAlloc(point, vector, this._hitTestBuffer, vector.magnitude, -1, 1);
-			num2 = Physics.RaycastNonAlloc(position, -vector, this._hitTestBuffer, vector.magnitude, -1, 1);
+			num = Physics.RaycastNonAlloc(point, vector, this._hitTestBuffer, vector.magnitude, -1, QueryTriggerInteraction.Ignore);
+			num2 = Physics.RaycastNonAlloc(position, -vector, this._hitTestBuffer, vector.magnitude, -1, QueryTriggerInteraction.Ignore);
 			if (num < this._hitTestBuffer.Length && num2 < this._hitTestBuffer.Length)
 			{
 				break;

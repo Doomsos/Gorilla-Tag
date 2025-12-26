@@ -119,7 +119,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 		{
 			return;
 		}
-		int[] array = Enumerable.ToArray<int>(dict.Keys);
+		int[] array = dict.Keys.ToArray<int>();
 		for (int i = 0; i < array.Length; i++)
 		{
 			if (!Utils.PlayerInRoom(array[i]))
@@ -188,7 +188,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 				{
 					this.Transition(GorillaPaintbrawlManager.PaintbrawlState.GameEnd);
 					PlayerGameEvents.GameModeCompleteRound();
-					GameMode.BroadcastRoundComplete();
+					GorillaGameModes.GameMode.BroadcastRoundComplete();
 				}
 				if ((float)RoomSystem.PlayersInRoom.Count < this.playerMin)
 				{
@@ -208,12 +208,12 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 		this.rcount = 0;
 		foreach (NetPlayer netPlayer in RoomSystem.PlayersInRoom)
 		{
-			if (this.playerLives.TryGetValue(netPlayer.ActorNumber, ref this.lives))
+			if (this.playerLives.TryGetValue(netPlayer.ActorNumber, out this.lives))
 			{
 				if (this.lives > 0)
 				{
 					num++;
-					if (this.teamBattle && this.playerStatusDict.TryGetValue(netPlayer.ActorNumber, ref this.tempStatus))
+					if (this.teamBattle && this.playerStatusDict.TryGetValue(netPlayer.ActorNumber, out this.tempStatus))
 					{
 						if (this.HasFlag(this.tempStatus, GorillaPaintbrawlManager.PaintbrawlStatus.RedTeam))
 						{
@@ -288,7 +288,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 
 	public bool SlingshotHit(NetPlayer myPlayer, Player otherPlayer)
 	{
-		return this.playerLives.TryGetValue(otherPlayer.ActorNumber, ref this.lives) && this.lives > 0;
+		return this.playerLives.TryGetValue(otherPlayer.ActorNumber, out this.lives) && this.lives > 0;
 	}
 
 	public void ReportSlingshotHit(NetPlayer taggedPlayer, Vector3 hitLocation, int projectileCount, PhotonMessageInfoWrapped info)
@@ -308,7 +308,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 		}
 		if (this.GetPlayerLives(taggedPlayer) > 0 && this.GetPlayerLives(player) > 0 && !this.PlayerInHitCooldown(taggedPlayer))
 		{
-			if (!this.playerHitTimes.TryGetValue(taggedPlayer.ActorNumber, ref this.outHitTime))
+			if (!this.playerHitTimes.TryGetValue(taggedPlayer.ActorNumber, out this.outHitTime))
 			{
 				this.playerHitTimes.Add(taggedPlayer.ActorNumber, Time.time);
 			}
@@ -328,7 +328,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 			this.tempStatus = this.GetPlayerStatus(taggedPlayer);
 			if (this.HasFlag(this.tempStatus, GorillaPaintbrawlManager.PaintbrawlStatus.Normal) && !this.PlayerInHitCooldown(taggedPlayer) && !this.PlayerInStunCooldown(taggedPlayer))
 			{
-				if (!this.playerStunTimes.TryGetValue(taggedPlayer.ActorNumber, ref this.outHitTime))
+				if (!this.playerStunTimes.TryGetValue(taggedPlayer.ActorNumber, out this.outHitTime))
 				{
 					this.playerStunTimes.Add(taggedPlayer.ActorNumber, Time.time);
 				}
@@ -362,7 +362,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 
 	public override bool CanAffectPlayer(NetPlayer player, bool thisFrame)
 	{
-		return this.playerLives.TryGetValue(player.ActorNumber, ref this.lives) && this.lives > 0;
+		return this.playerLives.TryGetValue(player.ActorNumber, out this.lives) && this.lives > 0;
 	}
 
 	public override void OnPlayerEnteredRoom(NetPlayer newPlayer)
@@ -526,7 +526,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 
 	public override float[] LocalPlayerSpeed()
 	{
-		if (this.playerStatusDict.TryGetValue(NetworkSystem.Instance.LocalPlayerID, ref this.tempStatus))
+		if (this.playerStatusDict.TryGetValue(NetworkSystem.Instance.LocalPlayerID, out this.tempStatus))
 		{
 			if (this.HasFlag(this.tempStatus, GorillaPaintbrawlManager.PaintbrawlStatus.Normal))
 			{
@@ -591,7 +591,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 		{
 			return 0;
 		}
-		if (this.playerLives.TryGetValue(player.ActorNumber, ref this.outLives))
+		if (this.playerLives.TryGetValue(player.ActorNumber, out this.outLives))
 		{
 			return this.outLives;
 		}
@@ -601,18 +601,18 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 	public bool PlayerInHitCooldown(NetPlayer player)
 	{
 		float num;
-		return this.playerHitTimes.TryGetValue(player.ActorNumber, ref num) && num + this.hitCooldown > Time.time;
+		return this.playerHitTimes.TryGetValue(player.ActorNumber, out num) && num + this.hitCooldown > Time.time;
 	}
 
 	public bool PlayerInStunCooldown(NetPlayer player)
 	{
 		float num;
-		return this.playerStunTimes.TryGetValue(player.ActorNumber, ref num) && num + this.hitCooldown + this.stunGracePeriod > Time.time;
+		return this.playerStunTimes.TryGetValue(player.ActorNumber, out num) && num + this.hitCooldown + this.stunGracePeriod > Time.time;
 	}
 
 	public GorillaPaintbrawlManager.PaintbrawlStatus GetPlayerStatus(NetPlayer player)
 	{
-		if (this.playerStatusDict.TryGetValue(player.ActorNumber, ref this.tempStatus))
+		if (this.playerStatusDict.TryGetValue(player.ActorNumber, out this.tempStatus))
 		{
 			return this.tempStatus;
 		}
@@ -709,7 +709,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 			this.playerLivesArray[i] = 0;
 			this.playerActorNumberArray[i] = -1;
 		}
-		this.keyValuePairs = Enumerable.ToArray<KeyValuePair<int, int>>(this.playerLives);
+		this.keyValuePairs = this.playerLives.ToArray<KeyValuePair<int, int>>();
 		int num = 0;
 		while (num < this.playerLivesArray.Length && num < this.keyValuePairs.Length)
 		{
@@ -726,7 +726,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 		{
 			if (this.playerActorNumberArray[i] != -1 && Utils.PlayerInRoom(this.playerActorNumberArray[i]))
 			{
-				if (this.playerLives.TryGetValue(this.playerActorNumberArray[i], ref this.outLives))
+				if (this.playerLives.TryGetValue(this.playerActorNumberArray[i], out this.outLives))
 				{
 					this.playerLives[this.playerActorNumberArray[i]] = this.playerLivesArray[i];
 				}
@@ -774,13 +774,15 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 			array[i] = i;
 		}
 		Random rand = new Random();
-		int[] array2 = Enumerable.ToArray<int>(Enumerable.OrderBy<int, int>(array, (int x) => rand.Next()));
+		int[] array2 = (from x in array
+		orderby rand.Next()
+		select x).ToArray<int>();
 		GorillaPaintbrawlManager.PaintbrawlStatus paintbrawlStatus = (rand.Next(0, 2) == 0) ? GorillaPaintbrawlManager.PaintbrawlStatus.RedTeam : GorillaPaintbrawlManager.PaintbrawlStatus.BlueTeam;
 		GorillaPaintbrawlManager.PaintbrawlStatus paintbrawlStatus2 = (paintbrawlStatus == GorillaPaintbrawlManager.PaintbrawlStatus.RedTeam) ? GorillaPaintbrawlManager.PaintbrawlStatus.BlueTeam : GorillaPaintbrawlManager.PaintbrawlStatus.RedTeam;
 		for (int j = 0; j < RoomSystem.PlayersInRoom.Count; j++)
 		{
-			GorillaPaintbrawlManager.PaintbrawlStatus paintbrawlStatus3 = (array2[j] % 2 == 0) ? paintbrawlStatus2 : paintbrawlStatus;
-			this.playerStatusDict[RoomSystem.PlayersInRoom[j].ActorNumber] = paintbrawlStatus3;
+			GorillaPaintbrawlManager.PaintbrawlStatus value = (array2[j] % 2 == 0) ? paintbrawlStatus2 : paintbrawlStatus;
+			this.playerStatusDict[RoomSystem.PlayersInRoom[j].ActorNumber] = value;
 		}
 	}
 
@@ -808,7 +810,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 
 	private void InitializePlayerStatus()
 	{
-		this.keyValuePairsStatus = Enumerable.ToArray<KeyValuePair<int, GorillaPaintbrawlManager.PaintbrawlStatus>>(this.playerStatusDict);
+		this.keyValuePairsStatus = this.playerStatusDict.ToArray<KeyValuePair<int, GorillaPaintbrawlManager.PaintbrawlStatus>>();
 		foreach (KeyValuePair<int, GorillaPaintbrawlManager.PaintbrawlStatus> keyValuePair in this.keyValuePairsStatus)
 		{
 			this.playerStatusDict[keyValuePair.Key] = GorillaPaintbrawlManager.PaintbrawlStatus.Normal;
@@ -817,19 +819,19 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 
 	private void UpdatePlayerStatus()
 	{
-		this.keyValuePairsStatus = Enumerable.ToArray<KeyValuePair<int, GorillaPaintbrawlManager.PaintbrawlStatus>>(this.playerStatusDict);
+		this.keyValuePairsStatus = this.playerStatusDict.ToArray<KeyValuePair<int, GorillaPaintbrawlManager.PaintbrawlStatus>>();
 		foreach (KeyValuePair<int, GorillaPaintbrawlManager.PaintbrawlStatus> keyValuePair in this.keyValuePairsStatus)
 		{
 			GorillaPaintbrawlManager.PaintbrawlStatus playerTeam = this.GetPlayerTeam(keyValuePair.Value);
-			if (this.playerLives.TryGetValue(keyValuePair.Key, ref this.outLives) && this.outLives == 0)
+			if (this.playerLives.TryGetValue(keyValuePair.Key, out this.outLives) && this.outLives == 0)
 			{
 				this.playerStatusDict[keyValuePair.Key] = (playerTeam | GorillaPaintbrawlManager.PaintbrawlStatus.Eliminated);
 			}
-			else if (this.playerHitTimes.TryGetValue(keyValuePair.Key, ref this.outHitTime) && this.outHitTime + this.hitCooldown > Time.time)
+			else if (this.playerHitTimes.TryGetValue(keyValuePair.Key, out this.outHitTime) && this.outHitTime + this.hitCooldown > Time.time)
 			{
 				this.playerStatusDict[keyValuePair.Key] = (playerTeam | GorillaPaintbrawlManager.PaintbrawlStatus.Hit);
 			}
-			else if (this.playerStunTimes.TryGetValue(keyValuePair.Key, ref this.outHitTime))
+			else if (this.playerStunTimes.TryGetValue(keyValuePair.Key, out this.outHitTime))
 			{
 				if (this.outHitTime + this.hitCooldown > Time.time)
 				{

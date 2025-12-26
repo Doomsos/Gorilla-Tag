@@ -232,7 +232,7 @@ namespace GorillaTag.Shared.Scripts
 			gameObject.transform.up = normal;
 			gameObject.transform.position = base.transform.position;
 			SoundBankPlayer soundBankPlayer;
-			if (gameObject.TryGetComponent<SoundBankPlayer>(ref soundBankPlayer) && soundBankPlayer.soundBank)
+			if (gameObject.TryGetComponent<SoundBankPlayer>(out soundBankPlayer) && soundBankPlayer.soundBank)
 			{
 				soundBankPlayer.Play();
 			}

@@ -178,7 +178,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			unityAction.Invoke(this);
+			unityAction(this);
 		}
 
 		private bool ShouldPlayFX()

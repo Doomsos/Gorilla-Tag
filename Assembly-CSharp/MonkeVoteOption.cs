@@ -67,7 +67,7 @@ public class MonkeVoteOption : MonoBehaviour
 		{
 			return;
 		}
-		onVote.Invoke(this, other);
+		onVote(this, other);
 	}
 
 	private bool IsValidVotingRock(Collider other)
@@ -104,7 +104,7 @@ public class MonkeVoteOption : MonoBehaviour
 		{
 			return;
 		}
-		onVote.Invoke(this, other);
+		onVote(this, other);
 	}
 
 	public void SetDynamicMeshesVisible(bool visible)

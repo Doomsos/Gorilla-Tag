@@ -18,7 +18,7 @@ public class ArcadeMachine : NetworkComponent
 		base.Start();
 		if (this.arcadeGame != null && this.arcadeGame.Scale.x > 0f && this.arcadeGame.Scale.y > 0f)
 		{
-			this.arcadeGameInstance = Object.Instantiate<ArcadeGame>(this.arcadeGame, this.screen.transform);
+			this.arcadeGameInstance = UnityEngine.Object.Instantiate<ArcadeGame>(this.arcadeGame, this.screen.transform);
 			this.arcadeGameInstance.transform.localScale = new Vector3(1f / this.arcadeGameInstance.Scale.x, 1f / this.arcadeGameInstance.Scale.y, 1f);
 			this.screen.forceRenderingOff = true;
 			this.arcadeGameInstance.SetMachine(this);
@@ -35,7 +35,7 @@ public class ArcadeMachine : NetworkComponent
 			this.audioSource.GTPlay();
 			if (this.networkSynchronized && base.IsMine)
 			{
-				base.GetView.RPC("ArcadeGameInstance_OnPlaySound_RPC", 1, new object[]
+				base.GetView.RPC("ArcadeGameInstance_OnPlaySound_RPC", RpcTarget.Others, new object[]
 				{
 					soundId
 				});
@@ -179,6 +179,6 @@ public class ArcadeMachine : NetworkComponent
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("Data", 0, 128)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private byte[] _Data;
 }

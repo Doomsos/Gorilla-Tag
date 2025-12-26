@@ -77,11 +77,11 @@ public class SIGadgetGrenadeStun : SIGadgetGrenade
 			VRRig componentInParent = array[i].GetComponentInParent<VRRig>();
 			if (componentInParent != null)
 			{
-				Vector3 vector = componentInParent.transform.position - base.transform.position;
-				float magnitude = vector.magnitude;
+				Vector3 a = componentInParent.transform.position - base.transform.position;
+				float magnitude = a.magnitude;
 				float num = 1f - magnitude / this.explosionRadius;
-				float num2 = this.knockbackStrength * num;
-				RoomSystem.LaunchPlayer(componentInParent.OwningNetPlayer, num2 * vector / magnitude);
+				float d = this.knockbackStrength * num;
+				RoomSystem.LaunchPlayer(componentInParent.OwningNetPlayer, d * a / magnitude);
 				RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.TaggedTime, componentInParent.OwningNetPlayer);
 			}
 		}

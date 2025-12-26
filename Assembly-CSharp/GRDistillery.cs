@@ -22,8 +22,8 @@ public class GRDistillery : MonoBehaviour
 
 	private void SaveStartTime(DateTime time)
 	{
-		string text = time.ToString("O");
-		PlayerPrefs.SetString("_grDistilleryStartTime", text);
+		string value = time.ToString("O");
+		PlayerPrefs.SetString("_grDistilleryStartTime", value);
 		PlayerPrefs.Save();
 	}
 
@@ -32,7 +32,7 @@ public class GRDistillery : MonoBehaviour
 		string @string = PlayerPrefs.GetString("_grDistilleryStartTime", string.Empty);
 		if (@string != string.Empty)
 		{
-			this.startTime = DateTime.ParseExact(@string, "O", CultureInfo.InvariantCulture, 128);
+			this.startTime = DateTime.ParseExact(@string, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 		}
 	}
 

@@ -5,7 +5,7 @@ using Fusion.CodeGen;
 using UnityEngine;
 
 [NetworkStructWeaved(31)]
-[StructLayout(2, Size = 124)]
+[StructLayout(LayoutKind.Explicit, Size = 124)]
 public struct PaintbrawlData : INetworkStruct
 {
 	[Networked]

@@ -95,7 +95,7 @@ public class SITechTreePage
 	private GraphNode<SITechTreeNode> <BuildGraph>g__PopulateGraph|22_0(SITechTreeNode node, ref SITechTreePage.<>c__DisplayClass22_0 A_2)
 	{
 		GraphNode<SITechTreeNode> graphNode;
-		if (!A_2.nodeLookup.TryGetValue(node.upgradeType, ref graphNode))
+		if (!A_2.nodeLookup.TryGetValue(node.upgradeType, out graphNode))
 		{
 			graphNode = new GraphNode<SITechTreeNode>(node);
 			A_2.nodeLookup.Add(node.upgradeType, graphNode);
@@ -126,7 +126,8 @@ public class SITechTreePage
 	[CompilerGenerated]
 	internal static string[] <PrintGraph>g__GetChildText|23_0(GraphNode<SITechTreeNode> root)
 	{
-		return Enumerable.ToArray<string>(Enumerable.Select<GraphNode<SITechTreeNode>, string>(root.TraversePreOrder(), (GraphNode<SITechTreeNode> n) => SITechTreePage.<PrintGraph>g__NodeText|23_1(n)));
+		return (from n in root.TraversePreOrder()
+		select SITechTreePage.<PrintGraph>g__NodeText|23_1(n)).ToArray<string>();
 	}
 
 	[CompilerGenerated]
@@ -145,7 +146,8 @@ public class SITechTreePage
 	[CompilerGenerated]
 	internal static string <PrintGraph>g__NodeListText|23_2(List<GraphNode<SITechTreeNode>> nodes)
 	{
-		return string.Join("|", Enumerable.Select<GraphNode<SITechTreeNode>, string>(nodes, (GraphNode<SITechTreeNode> n) => n.Value.nickName));
+		return string.Join("|", from n in nodes
+		select n.Value.nickName);
 	}
 
 	[SerializeField]

@@ -23,11 +23,11 @@ namespace PerformanceSystems
 
 		private void AddPendingObjects()
 		{
-			foreach (ITimeSlice timeSlice in this._timeSliceBehavioursToAdd)
+			foreach (ITimeSlice item in this._timeSliceBehavioursToAdd)
 			{
-				if (!this._currentTimeSliceBehaviours.Contains(timeSlice))
+				if (!this._currentTimeSliceBehaviours.Contains(item))
 				{
-					this._currentTimeSliceBehaviours.Add(timeSlice);
+					this._currentTimeSliceBehaviours.Add(item);
 				}
 			}
 			this._timeSliceBehavioursToAdd.Clear();

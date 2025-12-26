@@ -71,7 +71,7 @@ public class TransferableObjectSpawner : MonoBehaviour
 	private bool SpawnOnGround()
 	{
 		RaycastHit raycastHit;
-		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * this.spawnRadius, Vector3.down), ref raycastHit, 3f, this.groundRaycastMask))
+		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * this.spawnRadius, Vector3.down), out raycastHit, 3f, this.groundRaycastMask))
 		{
 			this.spawnPosition = raycastHit.point;
 			this.spawnRotation = Quaternion.FromToRotation(Vector3.up, raycastHit.normal);

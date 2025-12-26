@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -64,7 +65,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 			Action<GorillaHeldItemPressableButton, TransferrableObject, bool> action = this.onPressed;
 			if (action != null)
 			{
-				action.Invoke(this, componentInParent, componentInParent.InLeftHand());
+				action(this, componentInParent, componentInParent.InLeftHand());
 			}
 			this.ButtonActivation(componentInParent);
 			this.ButtonActivationWithHand(componentInParent, componentInParent.InLeftHand());
@@ -81,7 +82,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 			Action<GorillaHeldItemPressableButton, TransferrableObject, bool> action2 = this.onPressed;
 			if (action2 != null)
 			{
-				action2.Invoke(this, componentInParent, componentInParent.InLeftHand());
+				action2(this, componentInParent, componentInParent.InLeftHand());
 			}
 			this.ButtonActivation(componentInParent);
 			this.ButtonActivationWithHand(componentInParent, componentInParent.InLeftHand());
@@ -100,7 +101,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 				Action<GorillaHeldItemPressableButton, TransferrableObject, bool> action3 = this.onPressed;
 				if (action3 != null)
 				{
-					action3.Invoke(this, componentInParent, componentInParent.InLeftHand());
+					action3(this, componentInParent, componentInParent.InLeftHand());
 				}
 				this.ButtonActivation(componentInParent);
 				this.ButtonActivationWithHand(componentInParent, componentInParent.InLeftHand());
@@ -115,7 +116,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 				Action<GorillaHeldItemPressableButton, TransferrableObject, bool> action4 = this.onReleased;
 				if (action4 != null)
 				{
-					action4.Invoke(this, componentInParent, componentInParent.InLeftHand());
+					action4(this, componentInParent, componentInParent.InLeftHand());
 				}
 			}
 			break;
@@ -124,7 +125,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 		GorillaTagger.Instance.StartVibration(componentInParent.InLeftHand(), GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
 		if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
 		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", 1, new object[]
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
 			{
 				67,
 				componentInParent.InLeftHand(),
@@ -167,7 +168,7 @@ public class GorillaHeldItemPressableButton : MonoBehaviour, IDelayedExecListene
 		{
 			return;
 		}
-		action.Invoke(this, null, false);
+		action(this, null, false);
 	}
 
 	public void OnDelayedAction(int contextIndex)

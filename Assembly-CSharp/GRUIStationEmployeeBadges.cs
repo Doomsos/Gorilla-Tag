@@ -23,8 +23,8 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 			this.badgeDispensers[i].actorNr = -1;
 		}
 		this.dispenserForActorNr = new Dictionary<int, int>();
-		VRRigCache.OnRigActivated += new Action<RigContainer>(this.UpdateRigs);
-		VRRigCache.OnRigDeactivated += new Action<RigContainer>(this.UpdateRigs);
+		VRRigCache.OnRigActivated += this.UpdateRigs;
+		VRRigCache.OnRigDeactivated += this.UpdateRigs;
 		RoomSystem.JoinedRoomEvent += new Action(this.UpdateRigs);
 		this.UpdateRigs();
 	}
@@ -32,8 +32,8 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 	public void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		VRRigCache.OnRigActivated -= new Action<RigContainer>(this.UpdateRigs);
-		VRRigCache.OnRigDeactivated -= new Action<RigContainer>(this.UpdateRigs);
+		VRRigCache.OnRigActivated -= this.UpdateRigs;
+		VRRigCache.OnRigDeactivated -= this.UpdateRigs;
 		RoomSystem.JoinedRoomEvent -= new Action(this.UpdateRigs);
 	}
 
@@ -58,7 +58,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		{
 			NetPlayer netPlayer = GRUIStationEmployeeBadges.tempRigs[i].isOfflineVRRig ? NetworkSystem.Instance.LocalPlayer : GRUIStationEmployeeBadges.tempRigs[i].OwningNetPlayer;
 			int num;
-			if (netPlayer != null && netPlayer.ActorNumber != -1 && !this.dispenserForActorNr.TryGetValue(netPlayer.ActorNumber, ref num))
+			if (netPlayer != null && netPlayer.ActorNumber != -1 && !this.dispenserForActorNr.TryGetValue(netPlayer.ActorNumber, out num))
 			{
 				for (int j = 0; j < this.badgeDispensers.Count; j++)
 				{
@@ -73,7 +73,7 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 		for (int k = this.registeredBadges.Count - 1; k >= 0; k--)
 		{
 			int num2;
-			if (NetworkSystem.Instance.GetNetPlayerByID(this.registeredBadges[k].actorNr) == null || !this.dispenserForActorNr.TryGetValue(this.registeredBadges[k].actorNr, ref num2) || num2 != this.registeredBadges[k].dispenserIndex)
+			if (NetworkSystem.Instance.GetNetPlayerByID(this.registeredBadges[k].actorNr) == null || !this.dispenserForActorNr.TryGetValue(this.registeredBadges[k].actorNr, out num2) || num2 != this.registeredBadges[k].dispenserIndex)
 			{
 				this.reactor.grManager.gameEntityManager.RequestDestroyItem(this.registeredBadges[k].GetComponent<GameEntity>().id);
 			}
@@ -134,12 +134,12 @@ public class GRUIStationEmployeeBadges : MonoBehaviour, IGorillaSliceableSimple
 
 	public GRUIEmployeeBadgeDispenser GetDispenserForPlayer(int actorNumber)
 	{
-		int num;
-		if (!this.dispenserForActorNr.TryGetValue(actorNumber, ref num))
+		int index;
+		if (!this.dispenserForActorNr.TryGetValue(actorNumber, out index))
 		{
 			return null;
 		}
-		return this.badgeDispensers[num];
+		return this.badgeDispensers[index];
 	}
 
 	[SerializeField]

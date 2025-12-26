@@ -12,7 +12,7 @@ namespace GorillaTag.Reactions
 
 		internal static bool hasInstance { get; private set; }
 
-		[RuntimeInitializeOnLoadMethod(0)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		private static void Initialize()
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -28,7 +28,7 @@ namespace GorillaTag.Reactions
 			TickSystem<object>.AddPostTickCallback(FireManager.instance);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Register(FireInstance f)
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -69,7 +69,7 @@ namespace GorillaTag.Reactions
 			}
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Unregister(FireInstance reactable)
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -80,14 +80,14 @@ namespace GorillaTag.Reactions
 			FireManager._kGObjInstId_to_fire.Remove(instanceID);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static Vector3Int GetSpatialGridPos(Vector3 pos)
 		{
 			Vector3 vector = pos / 0.2f;
 			return new Vector3Int((int)vector.x, (int)vector.y, (int)vector.z);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void ResetFireValues(FireInstance f)
 		{
 			f._timeSinceExtinguished = Mathf.Min(f._timeSinceExtinguished, f._stayExtinguishedDuration);
@@ -97,13 +97,13 @@ namespace GorillaTag.Reactions
 			f._thermalVolume.celsius = f._defaultTemperature;
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void SpawnFire(SinglePool pool, Vector3 pos, Vector3 normal, float scale)
 		{
-			int num;
-			if (FireManager._fireSpatialGrid.TryGetValue(FireManager.GetSpatialGridPos(pos), ref num))
+			int key;
+			if (FireManager._fireSpatialGrid.TryGetValue(FireManager.GetSpatialGridPos(pos), out key))
 			{
-				FireManager.ResetFireValues(FireManager._kGObjInstId_to_fire[num]);
+				FireManager.ResetFireValues(FireManager._kGObjInstId_to_fire[key]);
 				return;
 			}
 			GameObject gameObject = pool.Instantiate(false);
@@ -113,7 +113,7 @@ namespace GorillaTag.Reactions
 			gameObject.SetActive(true);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void OnEnable(FireInstance f)
 		{
 			if (ApplicationQuittingState.IsQuitting || ObjectPools.instance == null || !ObjectPools.instance.initialized)
@@ -137,7 +137,7 @@ namespace GorillaTag.Reactions
 			f._loopingAudioSource.enabled = false;
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void OnDisable(FireInstance f)
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -149,7 +149,7 @@ namespace GorillaTag.Reactions
 			FireManager._activeAudioSources = Mathf.Min(FireManager._activeAudioSources - (f._loopingAudioSource.enabled ? 1 : 0), 0);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void OnTriggerEnter(FireInstance f, Collider other)
 		{
 			if (f._isDespawning || ApplicationQuittingState.IsQuitting)
@@ -162,7 +162,7 @@ namespace GorillaTag.Reactions
 			}
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Extinguish(GameObject gObj, float extinguishAmount)
 		{
 			if (ApplicationQuittingState.IsQuitting)
@@ -170,7 +170,7 @@ namespace GorillaTag.Reactions
 				return;
 			}
 			FireInstance fireInstance;
-			if (!FireManager._kGObjInstId_to_fire.TryGetValue(gObj.GetInstanceID(), ref fireInstance))
+			if (!FireManager._kGObjInstId_to_fire.TryGetValue(gObj.GetInstanceID(), out fireInstance))
 			{
 				return;
 			}

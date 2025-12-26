@@ -45,13 +45,15 @@ public class SIResourceCollection : MonoBehaviour, ITouchScreenStation
 	private void CollectButtonColliders()
 	{
 		SIResourceCollection.<>c__DisplayClass45_0 CS$<>8__locals1;
-		CS$<>8__locals1.buttons = Enumerable.ToList<SITouchscreenButton>(base.GetComponentsInChildren<SITouchscreenButton>(true));
-		SIResourceCollection.<CollectButtonColliders>g__RemoveButtonsInside|45_2(Enumerable.ToArray<GameObject>(Enumerable.Select<DestroyIfNotBeta, GameObject>(base.GetComponentsInChildren<DestroyIfNotBeta>(), (DestroyIfNotBeta d) => d.gameObject)), ref CS$<>8__locals1);
+		CS$<>8__locals1.buttons = base.GetComponentsInChildren<SITouchscreenButton>(true).ToList<SITouchscreenButton>();
+		SIResourceCollection.<CollectButtonColliders>g__RemoveButtonsInside|45_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
+		select d.gameObject).ToArray<GameObject>(), ref CS$<>8__locals1);
 		SIResourceCollection.<CollectButtonColliders>g__RemoveButtonsInside|45_2(new GameObject[]
 		{
 			this.helpScreen
 		}, ref CS$<>8__locals1);
-		this._nonPopupButtonColliders = Enumerable.ToList<Collider>(Enumerable.Select<SITouchscreenButton, Collider>(CS$<>8__locals1.buttons, (SITouchscreenButton b) => b.GetComponent<Collider>()));
+		this._nonPopupButtonColliders = (from b in CS$<>8__locals1.buttons
+		select b.GetComponent<Collider>()).ToList<Collider>();
 	}
 
 	private void SetNonPopupButtonsEnabled(bool enable)
@@ -463,9 +465,9 @@ public class SIResourceCollection : MonoBehaviour, ITouchScreenStation
 	{
 		for (int i = 0; i < roots.Length; i++)
 		{
-			foreach (SITouchscreenButton sitouchscreenButton in roots[i].GetComponentsInChildren<SITouchscreenButton>(true))
+			foreach (SITouchscreenButton item in roots[i].GetComponentsInChildren<SITouchscreenButton>(true))
 			{
-				A_1.buttons.Remove(sitouchscreenButton);
+				A_1.buttons.Remove(item);
 			}
 		}
 	}

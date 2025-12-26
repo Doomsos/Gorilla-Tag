@@ -18,7 +18,7 @@ public class ParticleSystemEventShortcut : MonoBehaviour
 	public void StopAndClear()
 	{
 		this.InitIfNeeded();
-		this.ps.Stop(true, 0);
+		this.ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 	}
 
 	public void ClearAndPlay()
@@ -31,7 +31,7 @@ public class ParticleSystemEventShortcut : MonoBehaviour
 	public void PlayFromMesh(MeshRenderer mesh)
 	{
 		this.InitIfNeeded();
-		this.shape.shapeType = 13;
+		this.shape.shapeType = ParticleSystemShapeType.MeshRenderer;
 		this.shape.meshRenderer = mesh;
 		this.ps.Play();
 	}
@@ -39,7 +39,7 @@ public class ParticleSystemEventShortcut : MonoBehaviour
 	public void PlayFromSkin(SkinnedMeshRenderer skin)
 	{
 		this.InitIfNeeded();
-		this.shape.shapeType = 14;
+		this.shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
 		this.shape.skinnedMeshRenderer = skin;
 		this.ps.Play();
 	}

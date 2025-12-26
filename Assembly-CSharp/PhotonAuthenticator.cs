@@ -16,7 +16,7 @@ public class PhotonAuthenticator : MonoBehaviour
 	public void SetCustomAuthenticationParameters(Dictionary<string, object> customAuthData)
 	{
 		AuthenticationValues authenticationValues = new AuthenticationValues();
-		authenticationValues.AuthType = 0;
+		authenticationValues.AuthType = CustomAuthenticationType.Custom;
 		authenticationValues.SetAuthPostData(customAuthData);
 		NetworkSystem.Instance.SetAuthenticationValues(authenticationValues);
 		Debug.Log("Set Photon auth data. AppVersion is: " + NetworkSystemConfig.AppVersion);

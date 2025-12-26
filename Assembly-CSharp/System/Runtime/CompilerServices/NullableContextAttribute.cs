@@ -5,7 +5,7 @@ namespace System.Runtime.CompilerServices
 {
 	[CompilerGenerated]
 	[Embedded]
-	[AttributeUsage(5196, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
 	internal sealed class NullableContextAttribute : Attribute
 	{
 		public NullableContextAttribute(byte A_1)

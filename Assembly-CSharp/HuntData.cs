@@ -5,7 +5,7 @@ using Fusion.CodeGen;
 using UnityEngine;
 
 [NetworkStructWeaved(23)]
-[StructLayout(2, Size = 92)]
+[StructLayout(LayoutKind.Explicit, Size = 92)]
 public struct HuntData : INetworkStruct
 {
 	[Networked]

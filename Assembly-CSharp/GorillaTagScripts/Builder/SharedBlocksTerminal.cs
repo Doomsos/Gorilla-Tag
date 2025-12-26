@@ -70,14 +70,14 @@ namespace GorillaTagScripts.Builder
 				SharedBlocksTerminal.sb.Append(mapID.Substring(0, num));
 				SharedBlocksTerminal.sb.Append("-");
 				SharedBlocksTerminal.sb.Append(mapID.Substring(num));
-				int num2 = 9 - SharedBlocksTerminal.sb.Length;
-				SharedBlocksTerminal.sb.Append('_', num2);
+				int repeatCount = 9 - SharedBlocksTerminal.sb.Length;
+				SharedBlocksTerminal.sb.Append('_', repeatCount);
 			}
 			else
 			{
 				SharedBlocksTerminal.sb.Append(mapID.Substring(0));
-				int num3 = num - SharedBlocksTerminal.sb.Length;
-				SharedBlocksTerminal.sb.Append('_', num3);
+				int repeatCount2 = num - SharedBlocksTerminal.sb.Length;
+				SharedBlocksTerminal.sb.Append('_', repeatCount2);
 				SharedBlocksTerminal.sb.Append("-____");
 			}
 			return SharedBlocksTerminal.sb.ToString();
@@ -103,8 +103,8 @@ namespace GorillaTagScripts.Builder
 			this.linkedTable.OnMapLoaded.AddListener(new UnityAction<string>(this.OnSharedBlocksMapLoaded));
 			this.linkedTable.OnMapLoadFailed.AddListener(new UnityAction<string>(this.OnSharedBlocksMapLoadFailed));
 			this.linkedTable.OnMapCleared.AddListener(new UnityAction(this.OnSharedBlocksMapLoadStart));
-			NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnJoinedRoom);
-			NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnReturnedToSinglePlayer);
+			NetworkSystem.Instance.OnMultiplayerStarted += this.OnJoinedRoom;
+			NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnReturnedToSinglePlayer;
 			this.hasInitialized = true;
 		}
 
@@ -146,8 +146,8 @@ namespace GorillaTagScripts.Builder
 			}
 			if (NetworkSystem.Instance != null)
 			{
-				NetworkSystem.Instance.OnMultiplayerStarted -= new Action(this.OnJoinedRoom);
-				NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnReturnedToSinglePlayer);
+				NetworkSystem.Instance.OnMultiplayerStarted -= this.OnJoinedRoom;
+				NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnReturnedToSinglePlayer;
 			}
 			if (this.linkedTable != null)
 			{
@@ -345,12 +345,12 @@ namespace GorillaTagScripts.Builder
 		public string GetLobbyText()
 		{
 			string defaultResult = "PLAYERS IN ROOM {0}\nPLAYERS IN LOBBY {1}";
-			string text;
-			if (!LocalisationManager.TryGetKeyForCurrentLocale("SHARE_BLOCKS_TERMINAL_SEARCH_LOBBY_TEXT_FORMAT", out text, defaultResult))
+			string format;
+			if (!LocalisationManager.TryGetKeyForCurrentLocale("SHARE_BLOCKS_TERMINAL_SEARCH_LOBBY_TEXT_FORMAT", out format, defaultResult))
 			{
 				Debug.LogError("[LOCALIZATION::BUILDER_SCAN_KIOSK] Failed to get key for MONKE BLOCKS SCAN KIOSK localization [SHARE_BLOCKS_TERMINAL_SEARCH_LOBBY_TEXT_FORMAT]");
 			}
-			return string.Format(text, this.playersInRoom, this.playersInLobby);
+			return string.Format(format, this.playersInRoom, this.playersInLobby);
 		}
 
 		public void RefreshLobbyCount()
@@ -600,7 +600,7 @@ namespace GorillaTagScripts.Builder
 				if (netPlayerByID != null && VRRigCache.Instance.TryGetVrrig(netPlayerByID, out rigContainer))
 				{
 					this.driverRig = rigContainer.Rig;
-					this.driverRig.OnPlayerNameVisibleChanged += new Action(this.OnDriverNameChanged);
+					this.driverRig.OnPlayerNameVisibleChanged += this.OnDriverNameChanged;
 				}
 				this.isTerminalLocked = true;
 				this.UpdateTerminalButton();
@@ -625,7 +625,7 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.driverRig != null)
 				{
-					this.driverRig.OnPlayerNameVisibleChanged -= new Action(this.OnDriverNameChanged);
+					this.driverRig.OnPlayerNameVisibleChanged -= this.OnDriverNameChanged;
 					this.driverRig = null;
 				}
 				this.localState.driverID = -2;

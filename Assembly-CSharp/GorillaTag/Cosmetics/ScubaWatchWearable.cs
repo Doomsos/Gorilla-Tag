@@ -29,9 +29,9 @@ namespace GorillaTag.Cosmetics
 			{
 				this.currentDepth = 0f;
 			}
-			float num = (this.currentDepth - this.depthRange.x) / (this.depthRange.y - this.depthRange.x);
-			float num2 = Mathf.Lerp(this.dialRotationRange.x, this.dialRotationRange.y, num);
-			this.dialNeedle.localRotation = this.initialDialRotation * Quaternion.AngleAxis(num2, this.dialRotationAxis);
+			float t = (this.currentDepth - this.depthRange.x) / (this.depthRange.y - this.depthRange.x);
+			float angle = Mathf.Lerp(this.dialRotationRange.x, this.dialRotationRange.y, t);
+			this.dialNeedle.localRotation = this.initialDialRotation * Quaternion.AngleAxis(angle, this.dialRotationAxis);
 		}
 
 		public bool onLeftHand;

@@ -161,7 +161,7 @@ public class GRDebugUpgradeKiosk : MonoBehaviour
 		GameAgent component = this.grManager.gameEntityManager.GetGameEntity(gameEntityId).gameObject.GetComponent<GameAgent>();
 		if (component != null)
 		{
-			if (entityName.Contains("enemy", 5))
+			if (entityName.Contains("enemy", StringComparison.OrdinalIgnoreCase))
 			{
 				GhostReactorManager.entityDebugEnabled = true;
 			}

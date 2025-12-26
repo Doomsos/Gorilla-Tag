@@ -6,7 +6,7 @@ using UnityEngine.UI;
 [ExecuteInEditMode]
 public class LckRawImageFillCanvas : UIBehaviour
 {
-	private void OnEnable()
+	private new void OnEnable()
 	{
 		this.UpdateSizeDelta();
 	}
@@ -24,15 +24,12 @@ public class LckRawImageFillCanvas : UIBehaviour
 		}
 		RectTransform rectTransform = this._rawImage.rectTransform;
 		Vector2 sizeDelta = ((RectTransform)rectTransform.parent).sizeDelta;
-		Vector2 vector;
-		vector..ctor((float)this._rawImage.texture.width, (float)this._rawImage.texture.height);
+		Vector2 vector = new Vector2((float)this._rawImage.texture.width, (float)this._rawImage.texture.height);
 		float num = sizeDelta.x / sizeDelta.y;
 		float num2 = vector.x / vector.y;
 		float num3 = num / num2;
-		Vector2 vector2;
-		vector2..ctor(sizeDelta.x, sizeDelta.x / num2);
-		Vector2 vector3;
-		vector3..ctor(sizeDelta.y * num2, sizeDelta.y);
+		Vector2 vector2 = new Vector2(sizeDelta.x, sizeDelta.x / num2);
+		Vector2 vector3 = new Vector2(sizeDelta.y * num2, sizeDelta.y);
 		switch (this._scaleType)
 		{
 		case LckRawImageFillCanvas.ScaleType.Fill:

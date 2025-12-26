@@ -173,60 +173,60 @@ namespace GorillaTagScripts
 			}
 			float num = Mathf.Max(0f, this.ToSeconds(this.randTimeMin));
 			float num2 = Mathf.Max(num, this.ToSeconds(this.randTimeMax));
-			float num3;
+			float b;
 			if (this.intervalSource == GorillaIntervalTimer.IntervalSource.NetworkedRandom && this.networkProvider != null)
 			{
 				switch (this.distribution)
 				{
 				default:
-					num3 = this.networkProvider.NextFloat(num, num2);
+					b = this.networkProvider.NextFloat(num, num2);
 					break;
 				case GorillaIntervalTimer.RandomDistribution.Normal:
 				{
-					double num4 = Math.Max(double.Epsilon, 1.0 - this.networkProvider.NextDouble(0.0, 1.0));
-					double num5 = Math.Max(double.Epsilon, 1.0 - (double)this.networkProvider.NextFloat01());
-					double num6 = Math.Sqrt(-2.0 * Math.Log(num4)) * Math.Sin(6.283185307179586 * num5);
-					float num7 = 0.5f * (num + num2);
-					float num8 = (num2 - num) / 6f;
-					num3 = Mathf.Clamp(num7 + (float)(num6 * (double)num8), num, num2);
+					double d = Math.Max(double.Epsilon, 1.0 - this.networkProvider.NextDouble(0.0, 1.0));
+					double num3 = Math.Max(double.Epsilon, 1.0 - (double)this.networkProvider.NextFloat01());
+					double num4 = Math.Sqrt(-2.0 * Math.Log(d)) * Math.Sin(6.283185307179586 * num3);
+					float num5 = 0.5f * (num + num2);
+					float num6 = (num2 - num) / 6f;
+					b = Mathf.Clamp(num5 + (float)(num4 * (double)num6), num, num2);
 					break;
 				}
 				case GorillaIntervalTimer.RandomDistribution.Exponential:
 				{
-					double num9 = Math.Max(double.Epsilon, 1.0 - this.networkProvider.NextDouble(0.0, 1.0));
-					double num10 = 0.5 * (double)(num + num2);
-					double num11 = (num10 > 0.0) ? (1.0 / num10) : 1.0;
-					num3 = Mathf.Clamp((float)(-(float)Math.Log(num9) / num11), num, num2);
+					double d2 = Math.Max(double.Epsilon, 1.0 - this.networkProvider.NextDouble(0.0, 1.0));
+					double num7 = 0.5 * (double)(num + num2);
+					double num8 = (num7 > 0.0) ? (1.0 / num7) : 1.0;
+					b = Mathf.Clamp((float)(-(float)Math.Log(d2) / num8), num, num2);
 					break;
 				}
 				}
-				this.currentIntervalSeconds = Mathf.Max(0.001f, num3);
+				this.currentIntervalSeconds = Mathf.Max(0.001f, b);
 				return;
 			}
 			switch (this.distribution)
 			{
 			default:
-				num3 = Random.Range(num, num2);
+				b = Random.Range(num, num2);
 				break;
 			case GorillaIntervalTimer.RandomDistribution.Normal:
 			{
-				float num12 = Mathf.Max(float.Epsilon, 1f - Random.value);
-				float num13 = 1f - Random.value;
-				float num14 = Mathf.Sqrt(-2f * Mathf.Log(num12)) * Mathf.Sin(6.2831855f * num13);
-				float num15 = 0.5f * (num + num2);
-				float num16 = (num2 - num) / 6f;
-				num3 = Mathf.Clamp(num15 + num14 * num16, num, num2);
+				float f = Mathf.Max(float.Epsilon, 1f - Random.value);
+				float num9 = 1f - Random.value;
+				float num10 = Mathf.Sqrt(-2f * Mathf.Log(f)) * Mathf.Sin(6.2831855f * num9);
+				float num11 = 0.5f * (num + num2);
+				float num12 = (num2 - num) / 6f;
+				b = Mathf.Clamp(num11 + num10 * num12, num, num2);
 				break;
 			}
 			case GorillaIntervalTimer.RandomDistribution.Exponential:
 			{
-				float num17 = 0.5f * (num + num2);
-				float num18 = (num17 > 0f) ? (1f / num17) : 1f;
-				num3 = Mathf.Clamp(-Mathf.Log(Mathf.Max(float.Epsilon, 1f - Random.value)) / num18, num, num2);
+				float num13 = 0.5f * (num + num2);
+				float num14 = (num13 > 0f) ? (1f / num13) : 1f;
+				b = Mathf.Clamp(-Mathf.Log(Mathf.Max(float.Epsilon, 1f - Random.value)) / num14, num, num2);
 				break;
 			}
 			}
-			this.currentIntervalSeconds = Mathf.Max(0.001f, num3);
+			this.currentIntervalSeconds = Mathf.Max(0.001f, b);
 		}
 
 		private float ToSeconds(float value)

@@ -84,9 +84,9 @@ public static class SIResourceHelper
 	public static List<SIResource.ResourceCost> GetTotalResourceCost(this IList<SIResource.ResourceCost> baseCost, IList<SIResource.ResourceCost> additiveCosts)
 	{
 		List<SIResource.ResourceCost> list = new List<SIResource.ResourceCost>(baseCost);
-		foreach (SIResource.ResourceCost resourceCost in additiveCosts)
+		foreach (SIResource.ResourceCost item in additiveCosts)
 		{
-			list.Add(resourceCost);
+			list.Add(item);
 		}
 		return list;
 	}
@@ -94,9 +94,9 @@ public static class SIResourceHelper
 	public static List<SIResource.ResourceCost> GetMax(this IList<SIResource.ResourceCost> baseCost, IList<SIResource.ResourceCost> additiveCosts)
 	{
 		List<SIResource.ResourceCost> list = new List<SIResource.ResourceCost>(baseCost);
-		foreach (SIResource.ResourceCost resourceCost in additiveCosts)
+		foreach (SIResource.ResourceCost item in additiveCosts)
 		{
-			list.Add(resourceCost);
+			list.Add(item);
 		}
 		list.Sort();
 		return list;

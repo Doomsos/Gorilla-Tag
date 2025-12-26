@@ -41,6 +41,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		{
 			GorillaSlicerSimpleManager.CreateManager();
 		}
+		GorillaSlicerSimpleManager.instance.lastRunTicks.TryAdd(gSS, 0L);
 		switch (step)
 		{
 		case GorillaSlicerSimpleManager.UpdateStep.FixedUpdate:
@@ -103,6 +104,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 
 	public void FixedUpdate()
 	{
+		this.startingIndex = this.updateIndex;
 		if (this.updateIndex < 0 || this.updateIndex >= this.fixedUpdateSlice.Count + this.updateSlice.Count + this.lateUpdateSlice.Count)
 		{
 			this.updateIndex = 0;
@@ -111,6 +113,12 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		while (this.ticksThisFrame + this.sW.ElapsedTicks < this.ticksPerFrame && this.updateIndex < this.fixedUpdateSlice.Count)
 		{
 			IGorillaSliceableSimple gorillaSliceableSimple = this.fixedUpdateSlice[this.updateIndex];
+			if (this.startingIndex != this.updateIndex && this.ticksThisFrame + this.sW.ElapsedTicks + this.lastRunTicks[gorillaSliceableSimple] >= this.ticksPerFrame)
+			{
+				this.ticksThisFrame = this.ticksPerFrame;
+				break;
+			}
+			long elapsedTicks = this.sW.ElapsedTicks;
 			if (0 <= this.updateIndex && this.updateIndex < this.fixedUpdateSlice.Count)
 			{
 				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
@@ -119,6 +127,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 					gorillaSliceableSimple.SliceUpdate();
 				}
 			}
+			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
 			this.updateIndex++;
 		}
 		this.ticksThisFrame += this.sW.ElapsedTicks;
@@ -134,6 +143,12 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		while (this.ticksThisFrame + this.sW.ElapsedTicks < this.ticksPerFrame && count <= this.updateIndex && this.updateIndex < num)
 		{
 			IGorillaSliceableSimple gorillaSliceableSimple = this.updateSlice[this.updateIndex - count];
+			if (this.startingIndex != this.updateIndex && this.ticksThisFrame + this.sW.ElapsedTicks + this.lastRunTicks[gorillaSliceableSimple] >= this.ticksPerFrame)
+			{
+				this.ticksThisFrame = this.ticksPerFrame;
+				break;
+			}
+			long elapsedTicks = this.sW.ElapsedTicks;
 			if (0 <= this.updateIndex - count && this.updateIndex - count < this.updateSlice.Count)
 			{
 				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
@@ -142,6 +157,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 					gorillaSliceableSimple.SliceUpdate();
 				}
 			}
+			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
 			this.updateIndex++;
 		}
 		this.ticksThisFrame += this.sW.ElapsedTicks;
@@ -159,6 +175,12 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		while (this.ticksThisFrame + this.sW.ElapsedTicks < this.ticksPerFrame && num <= this.updateIndex && this.updateIndex < num2)
 		{
 			IGorillaSliceableSimple gorillaSliceableSimple = this.lateUpdateSlice[this.updateIndex - num];
+			if (this.startingIndex != this.updateIndex && this.ticksThisFrame + this.sW.ElapsedTicks + this.lastRunTicks[gorillaSliceableSimple] >= this.ticksPerFrame)
+			{
+				this.ticksThisFrame = this.ticksPerFrame;
+				break;
+			}
+			long elapsedTicks = this.sW.ElapsedTicks;
 			if (0 <= this.updateIndex - num && this.updateIndex - num < this.lateUpdateSlice.Count)
 			{
 				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
@@ -167,6 +189,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 					gorillaSliceableSimple.SliceUpdate();
 				}
 			}
+			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
 			this.updateIndex++;
 		}
 		this.sW.Stop();
@@ -193,7 +216,11 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 
 	public int updateIndex = -1;
 
+	public int startingIndex = -1;
+
 	public Stopwatch sW;
+
+	public Dictionary<IGorillaSliceableSimple, long> lastRunTicks = new Dictionary<IGorillaSliceableSimple, long>();
 
 	public enum UpdateStep
 	{

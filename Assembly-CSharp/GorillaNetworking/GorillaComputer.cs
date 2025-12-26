@@ -19,6 +19,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
+using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
 namespace GorillaNetworking
@@ -89,7 +90,7 @@ namespace GorillaNetworking
 			get
 			{
 				GorillaComputer.ComputerState result;
-				this.stateStack.TryPeek(ref result);
+				this.stateStack.TryPeek(out result);
 				return result;
 			}
 		}
@@ -233,6 +234,7 @@ namespace GorillaNetworking
 		private void Initialise()
 		{
 			GameEvents.OnGorrillaKeyboardButtonPressedEvent.AddListener(new UnityAction<GorillaKeyboardBindings>(this.PressButton));
+			RoomSystem.JoinedRoomEvent += new Action(GorillaComputer.OnFirstJoinedRoom_IncrementSessionCount);
 			RoomSystem.JoinedRoomEvent += new Action(this.UpdateScreen);
 			RoomSystem.LeftRoomEvent += new Action(this.UpdateScreen);
 			RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(this.PlayerCountChangedCallback);
@@ -247,11 +249,11 @@ namespace GorillaNetworking
 			this.InitialiseStrings();
 			this.InitialiseAllRoomStates();
 			this.UpdateScreen();
-			byte[] array = new byte[]
+			byte[] bytes = new byte[]
 			{
 				Convert.ToByte(64)
 			};
-			this.virtualStumpRoomPrepend = Encoding.ASCII.GetString(array);
+			this.virtualStumpRoomPrepend = Encoding.ASCII.GetString(bytes);
 			this.initialized = true;
 		}
 
@@ -320,7 +322,7 @@ namespace GorillaNetworking
 			Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Custom_Nametags);
 			switch (permissionDataByFeature.ManagedBy)
 			{
-			case 1:
+			case Permission.ManagedByEnum.PLAYER:
 				if (@int == -1)
 				{
 					this.NametagsEnabled = permissionDataByFeature.Enabled;
@@ -330,10 +332,10 @@ namespace GorillaNetworking
 					this.NametagsEnabled = (@int > 0);
 				}
 				break;
-			case 2:
+			case Permission.ManagedByEnum.GUARDIAN:
 				this.NametagsEnabled = (permissionDataByFeature.Enabled && @int > 0);
 				break;
-			case 3:
+			case Permission.ManagedByEnum.PROHIBITED:
 				this.NametagsEnabled = false;
 				break;
 			}
@@ -341,9 +343,9 @@ namespace GorillaNetworking
 			NetworkSystem.Instance.SetMyNickName(this.savedName);
 			this.currentName = this.savedName;
 			VRRigCache.Instance.localRig.Rig.UpdateName();
-			this.exactOneWeek = this.exactOneWeekFile.text.Split('\n', 0);
-			this.anywhereOneWeek = this.anywhereOneWeekFile.text.Split('\n', 0);
-			this.anywhereTwoWeek = this.anywhereTwoWeekFile.text.Split('\n', 0);
+			this.exactOneWeek = this.exactOneWeekFile.text.Split('\n', StringSplitOptions.None);
+			this.anywhereOneWeek = this.anywhereOneWeekFile.text.Split('\n', StringSplitOptions.None);
+			this.anywhereTwoWeek = this.anywhereTwoWeekFile.text.Split('\n', StringSplitOptions.None);
 			for (int i = 0; i < this.exactOneWeek.Length; i++)
 			{
 				this.exactOneWeek[i] = this.exactOneWeek[i].ToLower().TrimEnd(new char[]
@@ -483,35 +485,35 @@ namespace GorillaNetworking
 		{
 			Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Voice_Chat);
 			string text = PlayerPrefs.GetString("voiceChatOn", "");
-			string text2 = "FALSE";
+			string defaultValue = "FALSE";
 			switch (permissionDataByFeature.ManagedBy)
 			{
-			case 1:
+			case Permission.ManagedByEnum.PLAYER:
 				if (string.IsNullOrEmpty(text))
 				{
-					text2 = (permissionDataByFeature.Enabled ? "TRUE" : "FALSE");
+					defaultValue = (permissionDataByFeature.Enabled ? "TRUE" : "FALSE");
 				}
 				else
 				{
-					text2 = text;
+					defaultValue = text;
 				}
 				break;
-			case 2:
+			case Permission.ManagedByEnum.GUARDIAN:
 				if (permissionDataByFeature.Enabled)
 				{
 					text = (string.IsNullOrEmpty(text) ? "FALSE" : text);
-					text2 = text;
+					defaultValue = text;
 				}
 				else
 				{
-					text2 = "FALSE";
+					defaultValue = "FALSE";
 				}
 				break;
-			case 3:
-				text2 = "FALSE";
+			case Permission.ManagedByEnum.PROHIBITED:
+				defaultValue = "FALSE";
 				break;
 			}
-			this.voiceChatOn = PlayerPrefs.GetString("voiceChatOn", text2);
+			this.voiceChatOn = PlayerPrefs.GetString("voiceChatOn", defaultValue);
 		}
 
 		public void InitializeGameMode(string gameMode)
@@ -528,7 +530,18 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			string text = PlayerPrefs.GetString("currentGameModePostSI", GameModeType.Infection.ToString());
+			GorillaComputer.sessionCount = PlayerPrefs.GetInt("sessionCount", -1);
+			string text = PlayerPrefs.GetString("currentGameModePostSI");
+			if (GorillaComputer.sessionCount == -1)
+			{
+				GorillaComputer.sessionCount = ((text.Length == 0) ? 0 : 100);
+				PlayerPrefs.SetInt("sessionCount", GorillaComputer.sessionCount);
+				PlayerPrefs.Save();
+			}
+			if (GorillaComputer.sessionCount < 4)
+			{
+				text = GameModeType.Infection.ToString();
+			}
 			GameModeType gameModeType;
 			try
 			{
@@ -578,7 +591,7 @@ namespace GorillaNetworking
 
 		private bool CheckInternetConnection()
 		{
-			return Application.internetReachability > 0;
+			return Application.internetReachability > NetworkReachability.NotReachable;
 		}
 
 		public void OnConnectedToMasterStuff()
@@ -620,21 +633,21 @@ namespace GorillaNetworking
 				return;
 			}
 			object obj;
-			if (jsonObject.TryGetValue("SynchTime", ref obj))
+			if (jsonObject.TryGetValue("SynchTime", out obj))
 			{
 				Debug.Log("message value is: " + (string)obj);
 			}
-			if (jsonObject.TryGetValue("Fail", ref obj) && (bool)obj)
+			if (jsonObject.TryGetValue("Fail", out obj) && (bool)obj)
 			{
 				this.GeneralFailureMessage(this.versionMismatch);
 				return;
 			}
-			if (jsonObject.TryGetValue("ResultCode", ref obj) && (ulong)obj != 0UL)
+			if (jsonObject.TryGetValue("ResultCode", out obj) && (ulong)obj != 0UL)
 			{
 				this.GeneralFailureMessage(this.versionMismatch);
 				return;
 			}
-			if (jsonObject.TryGetValue("QueueStats", ref obj) && ((JsonObject)obj).TryGetValue("TopTroops", ref obj))
+			if (jsonObject.TryGetValue("QueueStats", out obj) && ((JsonObject)obj).TryGetValue("TopTroops", out obj))
 			{
 				this.topTroops.Clear();
 				foreach (object obj2 in ((JsonArray)obj))
@@ -642,7 +655,7 @@ namespace GorillaNetworking
 					this.topTroops.Add(obj2.ToString());
 				}
 			}
-			if (jsonObject.TryGetValue("BannedUsers", ref obj))
+			if (jsonObject.TryGetValue("BannedUsers", out obj))
 			{
 				this.usersBanned = int.Parse((string)obj);
 			}
@@ -659,7 +672,7 @@ namespace GorillaNetworking
 			GorillaServer.Instance.ReturnMyOculusHash(delegate(ExecuteFunctionResult result)
 			{
 				object obj;
-				if (((JsonObject)result.FunctionResult).TryGetValue("oculusHash", ref obj))
+				if (((JsonObject)result.FunctionResult).TryGetValue("oculusHash", out obj))
 				{
 					StreamWriter streamWriter = new StreamWriter(path);
 					streamWriter.Write(PlayFabAuthenticator.instance.GetPlayFabPlayerId() + "." + (string)obj);
@@ -667,12 +680,12 @@ namespace GorillaNetworking
 				}
 			}, delegate(PlayFabError error)
 			{
-				if (error.Error == 1074)
+				if (error.Error == PlayFabErrorCode.NotAuthenticated)
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					return;
 				}
-				if (error.Error == 1002)
+				if (error.Error == PlayFabErrorCode.AccountBanned)
 				{
 					GorillaGameManager.ForceStopGame_DisconnectAndDestroy();
 				}
@@ -759,7 +772,10 @@ namespace GorillaNetworking
 		public void OnModeSelectButtonPress(string gameMode, bool leftHand)
 		{
 			this.lastPressedGameMode = gameMode;
-			PlayerPrefs.SetString("currentGameModePostSI", gameMode);
+			if (GorillaComputer.sessionCount >= 4)
+			{
+				PlayerPrefs.SetString("currentGameModePostSI", gameMode);
+			}
 			if (leftHand != this.leftHanded)
 			{
 				PlayerPrefs.SetInt("leftHanded", leftHand ? 1 : 0);
@@ -789,14 +805,14 @@ namespace GorillaNetworking
 		private GorillaNetworkJoinTrigger GetSelectedMapJoinTrigger()
 		{
 			GorillaNetworkJoinTrigger result;
-			this.primaryTriggersByZone.TryGetValue(this.allowedMapsToJoin[Mathf.Min(this.allowedMapsToJoin.Length - 1, this.groupMapJoinIndex)], ref result);
+			this.primaryTriggersByZone.TryGetValue(this.allowedMapsToJoin[Mathf.Min(this.allowedMapsToJoin.Length - 1, this.groupMapJoinIndex)], out result);
 			return result;
 		}
 
 		public GorillaNetworkJoinTrigger GetJoinTriggerForZone(string zone)
 		{
 			GorillaNetworkJoinTrigger result;
-			this.primaryTriggersByZone.TryGetValue(zone, ref result);
+			this.primaryTriggersByZone.TryGetValue(zone, out result);
 			return result;
 		}
 
@@ -828,9 +844,9 @@ namespace GorillaNetworking
 				if (NetworkSystem.Instance.InRoom && NetworkSystem.Instance.SessionIsPrivate)
 				{
 					PhotonNetworkController.Instance.FriendIDList = new List<string>(chosenFriendJoinCollider.playerIDsCurrentlyTouching);
-					foreach (string text in this.networkController.FriendIDList)
+					foreach (string str in this.networkController.FriendIDList)
 					{
-						Debug.Log("Friend ID:" + text);
+						Debug.Log("Friend ID:" + str);
 					}
 					PhotonNetworkController.Instance.shuffler = Random.Range(0, 99).ToString().PadLeft(2, '0') + Random.Range(0, 99999999).ToString().PadLeft(8, '0');
 					PhotonNetworkController.Instance.keyStr = Random.Range(0, 99999999).ToString().PadLeft(8, '0');
@@ -959,7 +975,7 @@ namespace GorillaNetworking
 					PlayerPrefs.Save();
 					if (NetworkSystem.Instance.InRoom)
 					{
-						GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+						GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 						{
 							this.redValue,
 							this.greenValue,
@@ -998,18 +1014,18 @@ namespace GorillaNetworking
 				default:
 					if (this.NametagsEnabled && this.currentName.Length < 12 && (buttonPressed < GorillaKeyboardBindings.up || buttonPressed > GorillaKeyboardBindings.option3))
 					{
-						string text = this.currentName;
-						string text2;
+						string str = this.currentName;
+						string str2;
 						if (buttonPressed >= GorillaKeyboardBindings.up)
 						{
-							text2 = buttonPressed.ToString();
+							str2 = buttonPressed.ToString();
 						}
 						else
 						{
 							int num = (int)buttonPressed;
-							text2 = num.ToString();
+							str2 = num.ToString();
 						}
-						this.currentName = text + text2;
+						this.currentName = str + str2;
 					}
 					break;
 				}
@@ -1056,18 +1072,18 @@ namespace GorillaNetworking
 			default:
 				if (flag && this.roomToJoin.Length < 10)
 				{
-					string text = this.roomToJoin;
-					string text2;
+					string str = this.roomToJoin;
+					string str2;
 					if (buttonPressed >= GorillaKeyboardBindings.up)
 					{
-						text2 = buttonPressed.ToString();
+						str2 = buttonPressed.ToString();
 					}
 					else
 					{
 						int num = (int)buttonPressed;
-						text2 = num.ToString();
+						str2 = num.ToString();
 					}
-					this.roomToJoin = text + text2;
+					this.roomToJoin = str + str2;
 				}
 				break;
 			}
@@ -1075,11 +1091,11 @@ namespace GorillaNetworking
 
 		private void DisconnectAfterDelay(float seconds)
 		{
-			GorillaComputer.<DisconnectAfterDelay>d__361 <DisconnectAfterDelay>d__;
+			GorillaComputer.<DisconnectAfterDelay>d__368 <DisconnectAfterDelay>d__;
 			<DisconnectAfterDelay>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<DisconnectAfterDelay>d__.seconds = seconds;
 			<DisconnectAfterDelay>d__.<>1__state = -1;
-			<DisconnectAfterDelay>d__.<>t__builder.Start<GorillaComputer.<DisconnectAfterDelay>d__361>(ref <DisconnectAfterDelay>d__);
+			<DisconnectAfterDelay>d__.<>t__builder.Start<GorillaComputer.<DisconnectAfterDelay>d__368>(ref <DisconnectAfterDelay>d__);
 		}
 
 		private void ProcessTurnState(GorillaKeyboardBindings buttonPressed)
@@ -1205,7 +1221,7 @@ namespace GorillaNetworking
 				{
 					Debug.Log("Troop pop received");
 					object obj;
-					if (((JsonObject)result.FunctionResult).TryGetValue("PlayerCount", ref obj))
+					if (((JsonObject)result.FunctionResult).TryGetValue("PlayerCount", out obj))
 					{
 						this.currentTroopPopulation = int.Parse(obj.ToString());
 						if (this.currentComputerState == GorillaComputer.ComputerState.Queue)
@@ -1366,18 +1382,18 @@ namespace GorillaNetworking
 				default:
 					if (!flag2 && this.troopToJoin.Length < 12)
 					{
-						string text = this.troopToJoin;
-						string text2;
+						string str = this.troopToJoin;
+						string str2;
 						if (buttonPressed >= GorillaKeyboardBindings.up)
 						{
-							text2 = buttonPressed.ToString();
+							str2 = buttonPressed.ToString();
 						}
 						else
 						{
 							int num = (int)buttonPressed;
-							text2 = num.ToString();
+							str2 = num.ToString();
 						}
-						this.troopToJoin = text + text2;
+						this.troopToJoin = str + str2;
 						return;
 					}
 					break;
@@ -1556,18 +1572,18 @@ namespace GorillaNetworking
 				}
 				else if (this.redemptionCode.Length < 8 && (buttonPressed < GorillaKeyboardBindings.up || buttonPressed > GorillaKeyboardBindings.option3))
 				{
-					string text = this.redemptionCode;
-					string text2;
+					string str = this.redemptionCode;
+					string str2;
 					if (buttonPressed >= GorillaKeyboardBindings.up)
 					{
-						text2 = buttonPressed.ToString();
+						str2 = buttonPressed.ToString();
 					}
 					else
 					{
 						int num = (int)buttonPressed;
-						text2 = num.ToString();
+						str2 = num.ToString();
 					}
-					this.redemptionCode = text + text2;
+					this.redemptionCode = str + str2;
 				}
 			}
 			else if (this.redemptionCode.Length > 0)
@@ -1669,12 +1685,11 @@ namespace GorillaNetworking
 
 		private void LoadingScreen()
 		{
-			GorillaComputer.<>c__DisplayClass387_0 CS$<>8__locals1 = new GorillaComputer.<>c__DisplayClass387_0();
+			GorillaComputer.<>c__DisplayClass394_0 CS$<>8__locals1 = new GorillaComputer.<>c__DisplayClass394_0();
 			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.tmp = "LOADING";
-			string text;
-			LocalisationManager.TryGetKeyForCurrentLocale("LOADING_SCREEN", out text, CS$<>8__locals1.tmp);
-			this.screenText.Text = text;
+			string defaultResult = "LOADING";
+			LocalisationManager.TryGetKeyForCurrentLocale("LOADING_SCREEN", out CS$<>8__locals1.result, defaultResult);
+			this.screenText.Set(CS$<>8__locals1.result);
 			this.LoadingRoutine = base.StartCoroutine(CS$<>8__locals1.<LoadingScreen>g__LoadingScreenLocal|0());
 		}
 
@@ -1683,26 +1698,23 @@ namespace GorillaNetworking
 			string defaultResult = "<color=red>WARNING: PLEASE CHOOSE A BETTER NAME\n\nENTERING ANOTHER BAD NAME WILL RESULT IN A BAN</color>";
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("WARNING_SCREEN", out text, defaultResult);
-			this.screenText.Text = text;
+			this.screenText.Set(text);
 			if (this.warningConfirmationInputString.ToLower() == "yes")
 			{
 				defaultResult = "\n\nPRESS ANY KEY TO CONTINUE";
 				LocalisationManager.TryGetKeyForCurrentLocale("WARNING_SCREEN_CONFIRMATION", out text, defaultResult);
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text;
+				this.screenText.Append(text);
 				return;
 			}
 			defaultResult = "\n\nTYPE 'YES' TO CONFIRM:";
 			LocalisationManager.TryGetKeyForCurrentLocale("WARNING_SCREEN_TYPE_YES", out text, defaultResult);
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += text.TrailingSpace();
-			GorillaText gorillaText3 = this.screenText;
-			gorillaText3.Text += this.warningConfirmationInputString;
+			this.screenText.Append(text.TrailingSpace());
+			this.screenText.Append(this.warningConfirmationInputString);
 		}
 
 		private void SupportScreen()
 		{
-			this.screenText.Text = "";
+			this.screenText.Set("");
 			if (this.displaySupport)
 			{
 				string text = PlayFabAuthenticator.instance.platform.ToString().ToUpper();
@@ -1758,58 +1770,44 @@ namespace GorillaNetworking
 				text = text3;
 				string defaultResult = "SUPPORT";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INTRO", out text3, defaultResult);
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text3;
+				this.screenText.Append(text3);
 				defaultResult = "\n\nPLAYERID";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_PLAYERID", out text3, defaultResult);
-				GorillaText gorillaText2 = this.screenText;
-				gorillaText2.Text = gorillaText2.Text + text3 + "   ";
-				GorillaText gorillaText3 = this.screenText;
-				gorillaText3.Text += PlayFabAuthenticator.instance.GetPlayFabPlayerId();
+				this.screenText.Append(text3 + "   ");
+				this.screenText.Append(PlayFabAuthenticator.instance.GetPlayFabPlayerId());
 				defaultResult = "\nVERSION";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_VERSION", out text3, defaultResult);
-				GorillaText gorillaText4 = this.screenText;
-				gorillaText4.Text = gorillaText4.Text + text3 + "    ";
-				GorillaText gorillaText5 = this.screenText;
-				gorillaText5.Text += this.version.ToUpper();
+				this.screenText.Append(text3 + "    ");
+				this.screenText.Append(this.version.ToUpper());
 				defaultResult = "\nPLATFORM";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_PLATFORM", out text3, defaultResult);
-				GorillaText gorillaText6 = this.screenText;
-				gorillaText6.Text = gorillaText6.Text + text3 + "   ";
-				GorillaText gorillaText7 = this.screenText;
-				gorillaText7.Text += text;
+				this.screenText.Append(text3 + "   ");
+				this.screenText.Append(text);
 				defaultResult = "\nBUILD DATE";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_BUILD_DATE", out text3, defaultResult);
-				GorillaText gorillaText8 = this.screenText;
-				gorillaText8.Text = gorillaText8.Text + text3 + " ";
-				GorillaText gorillaText9 = this.screenText;
-				gorillaText9.Text += this.buildDate;
+				this.screenText.Append(text3 + " ");
+				this.screenText.Append(this.buildDate);
 				if (KIDManager.KidEnabled)
 				{
 					defaultResult = "\nk-ID ACCOUNT TYPE:";
 					LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_KID_ACCOUNT_TYPE", out text3, defaultResult);
-					GorillaText gorillaText10 = this.screenText;
-					gorillaText10.Text += text3.TrailingSpace();
-					GorillaText gorillaText11 = this.screenText;
-					gorillaText11.Text += KIDManager.GetActiveAccountStatusNiceString().ToUpper();
+					this.screenText.Append(text3.TrailingSpace());
+					this.screenText.Append(KIDManager.GetActiveAccountStatusNiceString().ToUpper());
 					return;
 				}
 			}
 			else
 			{
 				string defaultResult2 = "SUPPORT";
-				string text4;
-				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INTRO", out text4, defaultResult2);
-				GorillaText gorillaText12 = this.screenText;
-				gorillaText12.Text += text4;
+				string str;
+				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INTRO", out str, defaultResult2);
+				this.screenText.Append(str);
 				defaultResult2 = "\n\nPRESS ENTER TO DISPLAY SUPPORT AND ACCOUNT INFORMATION";
-				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INITIAL", out text4, defaultResult2);
-				GorillaText gorillaText13 = this.screenText;
-				gorillaText13.Text += text4;
+				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INITIAL", out str, defaultResult2);
+				this.screenText.Append(str);
 				defaultResult2 = "\n\n\n\n<color=red>DO NOT SHARE ACCOUNT INFORMATION WITH ANYONE OTHER THAN ANOTHER AXIOM</color>";
-				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INITIAL_WARNING", out text4, defaultResult2);
-				GorillaText gorillaText14 = this.screenText;
-				gorillaText14.Text += text4;
+				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INITIAL_WARNING", out str, defaultResult2);
+				this.screenText.Append(str);
 			}
 		}
 
@@ -1819,12 +1817,12 @@ namespace GorillaNetworking
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("TIME_SCREEN", out text, defaultResult);
 			text = text.Replace("{currentSetting}", BetterDayNightManager.instance.currentSetting.ToString().ToUpper()).Replace("{currentTimeOfDay}", BetterDayNightManager.instance.currentTimeOfDay.ToUpper());
-			this.screenText.Text = text;
+			this.screenText.Set(text);
 		}
 
 		private void CreditsScreen()
 		{
-			this.screenText.Text = this.creditsView.GetScreenText();
+			this.screenText.Set(this.creditsView.GetScreenText());
 		}
 
 		private void VisualsScreen()
@@ -1832,25 +1830,20 @@ namespace GorillaNetworking
 			string defaultResult = "UPDATE ITEMS SETTINGS.";
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("VISUALS_SCREEN_INTRO", out text, defaultResult);
-			this.screenText.Text = text.TrailingSpace();
+			this.screenText.Set(text.TrailingSpace());
 			defaultResult = "PRESS OPTION 1 TO ENABLE ITEM PARTICLES. PRESS OPTION 2 TO DISABLE ITEM PARTICLES. PRESS 1-10 TO CHANGE INSTRUMENT VOLUME FOR OTHER PLAYERS.";
 			LocalisationManager.TryGetKeyForCurrentLocale("VISUALS_SCREEN_OPTIONS", out text, defaultResult);
-			GorillaText gorillaText = this.screenText;
-			gorillaText.Text += text;
+			this.screenText.Append(text);
 			defaultResult = "\n\nITEM PARTICLES ON:";
 			LocalisationManager.TryGetKeyForCurrentLocale("VISUALS_SCREEN_CURRENT", out text, defaultResult);
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += text.TrailingSpace();
+			this.screenText.Append(text.TrailingSpace());
 			string text2 = this.disableParticles ? "FALSE" : "TRUE";
 			LocalisationManager.TryGetKeyForCurrentLocale(text2, out text, text2);
-			GorillaText gorillaText3 = this.screenText;
-			gorillaText3.Text += text;
+			this.screenText.Append(text);
 			defaultResult = "\nINSTRUMENT VOLUME:";
 			LocalisationManager.TryGetKeyForCurrentLocale("VISUALS_SCREEN_VOLUME", out text, defaultResult);
-			GorillaText gorillaText4 = this.screenText;
-			gorillaText4.Text += text.TrailingSpace();
-			GorillaText gorillaText5 = this.screenText;
-			gorillaText5.Text += Mathf.CeilToInt(this.instrumentVolume * 50f).ToString();
+			this.screenText.Append(text.TrailingSpace());
+			this.screenText.Append(Mathf.CeilToInt(this.instrumentVolume * 50f).ToString());
 		}
 
 		private void VoiceScreen()
@@ -1861,23 +1854,20 @@ namespace GorillaNetworking
 				string defaultResult = "CHOOSE WHICH TYPE OF VOICE YOU WANT TO HEAR AND SPEAK.";
 				string text;
 				LocalisationManager.TryGetKeyForCurrentLocale("VOICE_CHAT_SCREEN_INTRO", out text, defaultResult);
-				this.screenText.Text = text;
+				this.screenText.Set(text);
 				defaultResult = "\nPRESS OPTION 1 = HUMAN VOICES.\nPRESS OPTION 2 = MONKE VOICES.";
 				LocalisationManager.TryGetKeyForCurrentLocale("VOICE_CHAT_SCREEN_OPTIONS", out text, defaultResult);
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text;
+				this.screenText.Append(text);
 				defaultResult = "\n\nVOICE TYPE:";
 				LocalisationManager.TryGetKeyForCurrentLocale("VOICE_CHAT_SCREEN_CURRENT", out text, defaultResult);
-				GorillaText gorillaText2 = this.screenText;
-				gorillaText2.Text += text.TrailingSpace();
+				this.screenText.Append(text.TrailingSpace());
 				string key = (this.voiceChatOn == "TRUE") ? "VOICE_OPTION_HUMAN" : ((this.voiceChatOn == "FALSE") ? "VOICE_OPTION_MONKE" : "VOICE_OPTION_OFF");
 				defaultResult = ((this.voiceChatOn == "TRUE") ? "HUMAN" : ((this.voiceChatOn == "FALSE") ? "MONKE" : "OFF"));
 				LocalisationManager.TryGetKeyForCurrentLocale(key, out text, defaultResult);
-				GorillaText gorillaText3 = this.screenText;
-				gorillaText3.Text += text;
+				this.screenText.Append(text);
 				return;
 			}
-			if (permissionDataByFeature.ManagedBy == 3)
+			if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PROHIBITED)
 			{
 				this.VoiceScreen_KIdProhibited();
 				return;
@@ -1890,22 +1880,20 @@ namespace GorillaNetworking
 			string defaultResult = "AUTOMOD AUTOMATICALLY MUTES PLAYERS WHEN THEY JOIN YOUR ROOM IF A LOT OF OTHER PLAYERS HAVE MUTED THEM";
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("AUTOMOD_SCREEN_INTRO", out text, defaultResult);
-			this.screenText.Text = text;
+			this.screenText.Set(text);
 			defaultResult = "\nPRESS OPTION 1 FOR AGGRESSIVE MUTING\nPRESS OPTION 2 FOR MODERATE MUTING\nPRESS OPTION 3 TO TURN AUTOMOD OFF";
 			LocalisationManager.TryGetKeyForCurrentLocale("AUTOMOD_SCREEN_OPTIONS", out text, defaultResult);
-			GorillaText gorillaText = this.screenText;
-			gorillaText.Text += text;
+			this.screenText.Append(text);
 			defaultResult = "\n\nCURRENT AUTOMOD LEVEL: ";
 			LocalisationManager.TryGetKeyForCurrentLocale("AUTOMOD_SCREEN_CURRENT", out text, defaultResult);
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += text.TrailingSpace();
+			this.screenText.Append(text.TrailingSpace());
 			string key = "AUTOMOD_OFF";
-			string text2 = this.autoMuteType;
-			if (!(text2 == "OFF"))
+			string a = this.autoMuteType;
+			if (!(a == "OFF"))
 			{
-				if (!(text2 == "MODERATE"))
+				if (!(a == "MODERATE"))
 				{
-					if (text2 == "AGGRESSIVE")
+					if (a == "AGGRESSIVE")
 					{
 						key = "AUTOMOD_AGGRESSIVE";
 					}
@@ -1920,8 +1908,7 @@ namespace GorillaNetworking
 				key = "AUTOMOD_OFF";
 			}
 			LocalisationManager.TryGetKeyForCurrentLocale(key, out text, this.autoMuteType);
-			GorillaText gorillaText3 = this.screenText;
-			gorillaText3.Text += text;
+			this.screenText.Append(text);
 		}
 
 		private void GroupScreen()
@@ -1932,82 +1919,79 @@ namespace GorillaNetworking
 				return;
 			}
 			string text = "";
-			string text2 = (this.allowedMapsToJoin.Length > 1) ? this.groupMapJoin : this.allowedMapsToJoin[0].ToUpper();
-			string text3 = "";
+			string str = (this.allowedMapsToJoin.Length > 1) ? this.groupMapJoin : this.allowedMapsToJoin[0].ToUpper();
+			string str2 = "";
 			string defaultResult;
 			if (this.allowedMapsToJoin.Length > 1)
 			{
 				defaultResult = "\n\nUSE NUMBER KEYS TO SELECT DESTINATION\n1: FOREST, 2: CAVE, 3: CANYON, 4: CITY, 5: CLOUDS.";
 				LocalisationManager.TryGetKeyForCurrentLocale("GROUP_SCREEN_DESTINATIONS", out text, defaultResult);
-				text3 = text;
+				str2 = text;
 			}
 			defaultResult = "\n\nACTIVE ZONE WILL BE:";
 			LocalisationManager.TryGetKeyForCurrentLocale("GROUP_SCREEN_ACTIVE_ZONES", out text, defaultResult);
-			string text4 = text.TrailingSpace();
-			text4 = text4 + text2 + text3;
+			string text2 = text.TrailingSpace();
+			text2 = text2 + str + str2;
 			if (FriendshipGroupDetection.Instance.IsInParty)
 			{
 				GorillaNetworkJoinTrigger selectedMapJoinTrigger = this.GetSelectedMapJoinTrigger();
-				string text5 = "";
+				string str3 = "";
 				if (selectedMapJoinTrigger.CanPartyJoin())
 				{
 					defaultResult = "\n\n<color=red>CANNOT JOIN BECAUSE YOUR GROUP IS NOT HERE</color>";
 					LocalisationManager.TryGetKeyForCurrentLocale("GROUP_SCREEN_CANNOT_JOIN", out text, defaultResult);
-					text5 = text;
+					str3 = text;
 				}
 				defaultResult = "PRESS ENTER TO JOIN A PUBLIC GAME WITH YOUR FRIENDSHIP GROUP.";
 				LocalisationManager.TryGetKeyForCurrentLocale("GROUP_SCREEN_ENTER_PARTY", out text, defaultResult);
-				this.screenText.Text = text;
-				text4 += text5;
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text4;
+				this.screenText.Set(text);
+				text2 += str3;
+				this.screenText.Append(text2);
 				return;
 			}
 			defaultResult = "PRESS ENTER TO JOIN A PUBLIC GAME AND BRING EVERYONE IN THIS ROOM WITH YOU.";
 			LocalisationManager.TryGetKeyForCurrentLocale("GROUP_SCREEN_ENTER_NOPARTY", out text, defaultResult);
-			this.screenText.Text = text;
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += text4;
+			this.screenText.Set(text);
+			this.screenText.Append(text2);
 		}
 
 		private void MicScreen()
 		{
-			if (KIDManager.GetPermissionDataByFeature(EKIDFeatures.Voice_Chat).ManagedBy == 3)
+			if (KIDManager.GetPermissionDataByFeature(EKIDFeatures.Voice_Chat).ManagedBy == Permission.ManagedByEnum.PROHIBITED)
 			{
 				this.MicScreen_KIdProhibited();
 				return;
 			}
 			bool flag = false;
-			string text = "";
+			string str = "";
 			if (Microphone.devices.Length == 0)
 			{
 				flag = true;
-				text = "NO MICROPHONE DETECTED";
+				str = "NO MICROPHONE DETECTED";
 			}
 			if (flag)
 			{
-				string text2;
-				LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_MIC_DISABLED", out text2, "MIC DISABLED: ");
-				this.screenText.Text = text2 + text;
+				string str2;
+				LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_MIC_DISABLED", out str2, "MIC DISABLED: ");
+				this.screenText.Set(str2 + str);
 				return;
 			}
 			string defaultResult = "PRESS OPTION 1 = ALL CHAT.\nPRESS OPTION 2 = PUSH TO TALK.\nPRESS OPTION 3 = PUSH TO MUTE.";
-			string text3;
-			LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_OPTIONS", out text3, defaultResult);
-			this.screenText.Text = text3;
+			string text;
+			LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_OPTIONS", out text, defaultResult);
+			this.screenText.Set(text);
 			defaultResult = "\n\nCURRENT MIC SETTING:";
-			LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_CURRENT", out text3, defaultResult);
-			GorillaText gorillaText = this.screenText;
-			gorillaText.Text += text3.TrailingSpace();
+			LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_CURRENT", out text, defaultResult);
+			this.screenText.Append(text.TrailingSpace());
 			string key = "";
-			string text4 = this.pttType;
-			if (!(text4 == "PUSH TO MUTE"))
+			string a = this.pttType;
+			if (!(a == "PUSH TO MUTE"))
 			{
-				if (!(text4 == "PUSH TO TALK"))
+				if (!(a == "PUSH TO TALK"))
 				{
-					if (!(text4 == "OPEN MIC"))
+					if (!(a == "OPEN MIC"))
 					{
-						if (text4 == "ALL CHAT")
+						if (a == "ALL CHAT")
 						{
 							key = "OPEN_MIC";
 						}
@@ -2026,27 +2010,23 @@ namespace GorillaNetworking
 			{
 				key = "PUSH_TO_MUTE_MIC";
 			}
-			LocalisationManager.TryGetKeyForCurrentLocale(key, out text3, this.pttType);
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += text3;
+			LocalisationManager.TryGetKeyForCurrentLocale(key, out text, this.pttType);
+			this.screenText.Append(text);
 			if (this.pttType == "PUSH TO MUTE")
 			{
 				defaultResult = "- MIC IS OPEN.\n- HOLD ANY FACE BUTTON TO MUTE.\n\n";
-				LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_PUSH_TO_MUTE_TOOLTIP", out text3, defaultResult);
-				GorillaText gorillaText3 = this.screenText;
-				gorillaText3.Text += text3;
+				LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_PUSH_TO_MUTE_TOOLTIP", out text, defaultResult);
+				this.screenText.Append(text);
 			}
 			else if (this.pttType == "PUSH TO TALK")
 			{
 				defaultResult = "- MIC IS MUTED.\n- HOLD ANY FACE BUTTON TO TALK.\n\n";
-				LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_PUSH_TO_TALK_TOOLTIP", out text3, defaultResult);
-				GorillaText gorillaText4 = this.screenText;
-				gorillaText4.Text += text3;
+				LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_PUSH_TO_TALK_TOOLTIP", out text, defaultResult);
+				this.screenText.Append(text);
 			}
 			else
 			{
-				GorillaText gorillaText5 = this.screenText;
-				gorillaText5.Text += "\n\n\n";
+				this.screenText.Append("\n\n\n");
 			}
 			if (this.speakerLoudness == null)
 			{
@@ -2065,44 +2045,39 @@ namespace GorillaNetworking
 				}
 				if (this.pttType != "OPEN MIC")
 				{
-					bool flag2 = ControllerInputPoller.PrimaryButtonPress(5);
-					bool flag3 = ControllerInputPoller.SecondaryButtonPress(5);
-					bool flag4 = ControllerInputPoller.PrimaryButtonPress(4);
-					bool flag5 = ControllerInputPoller.SecondaryButtonPress(4);
+					bool flag2 = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
+					bool flag3 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
+					bool flag4 = ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand);
+					bool flag5 = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
 					bool flag6 = flag2 || flag3 || flag4 || flag5;
 					if (flag6 && this.pttType == "PUSH TO MUTE")
 					{
 						defaultResult = "INPUT TEST: ";
-						LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_INPUT_TEST_LABEL", out text3, defaultResult);
-						GorillaText gorillaText6 = this.screenText;
-						gorillaText6.Text += text3;
+						LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_INPUT_TEST_LABEL", out text, defaultResult);
+						this.screenText.Append(text);
 						return;
 					}
 					if (!flag6 && this.pttType == "PUSH TO TALK")
 					{
 						defaultResult = "INPUT TEST: ";
-						LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_INPUT_TEST_LABEL", out text3, defaultResult);
-						GorillaText gorillaText7 = this.screenText;
-						gorillaText7.Text += text3;
+						LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_INPUT_TEST_LABEL", out text, defaultResult);
+						this.screenText.Append(text);
 						return;
 					}
 				}
 				if (this.micInputTestTimer >= this.micInputTestTimerThreshold)
 				{
 					defaultResult = "NO MIC INPUT DETECTED. CHECK MIC SETTINGS IN THE OPERATING SYSTEM.";
-					LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_INPUT_TEST_NO_MIC", out text3, defaultResult);
-					GorillaText gorillaText8 = this.screenText;
-					gorillaText8.Text += text3;
+					LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_INPUT_TEST_NO_MIC", out text, defaultResult);
+					this.screenText.Append(text);
 					return;
 				}
 				defaultResult = "INPUT TEST: ";
-				LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_INPUT_TEST_LABEL", out text3, defaultResult);
-				GorillaText gorillaText9 = this.screenText;
-				gorillaText9.Text += text3;
+				LocalisationManager.TryGetKeyForCurrentLocale("MIC_SCREEN_INPUT_TEST_LABEL", out text, defaultResult);
+				this.screenText.Append(text);
 				for (int i = 0; i < Mathf.FloorToInt(num * 50f); i++)
 				{
-					GorillaText gorillaText10 = this.screenText;
-					gorillaText10.Text += "|";
+					this.screenText.Append("|");
 				}
 			}
 		}
@@ -2117,54 +2092,48 @@ namespace GorillaNetworking
 			string defaultResult = "THIS OPTION AFFECTS WHO YOU PLAY WITH. DEFAULT IS FOR ANYONE TO PLAY NORMALLY. MINIGAMES IS FOR PEOPLE LOOKING TO PLAY WITH THEIR OWN MADE UP RULES.";
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("QUEUE_SCREEN", out text, defaultResult);
-			this.screenText.Text = text.TrailingSpace();
+			this.screenText.Set(text.TrailingSpace());
 			if (this.allowedInCompetitive)
 			{
 				defaultResult = "COMPETITIVE IS FOR PLAYERS WHO WANT TO PLAY THE GAME AND TRY AS HARD AS THEY CAN.";
 				LocalisationManager.TryGetKeyForCurrentLocale("COMPETITIVE_DESC", out text, defaultResult);
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text.TrailingSpace();
+				this.screenText.Append(text.TrailingSpace());
 				defaultResult = "PRESS OPTION 1 FOR DEFAULT, OPTION 2 FOR MINIGAMES, OR OPTION 3 FOR COMPETITIVE.";
 				LocalisationManager.TryGetKeyForCurrentLocale("QUEUE_SCREEN_ALL_QUEUES", out text, defaultResult);
-				GorillaText gorillaText2 = this.screenText;
-				gorillaText2.Text += text;
+				this.screenText.Append(text);
 			}
 			else
 			{
 				defaultResult = "BEAT THE OBSTACLE COURSE IN CITY TO ALLOW COMPETITIVE PLAY.";
 				LocalisationManager.TryGetKeyForCurrentLocale("BEAT_OBSTACLE_COURSE", out text, defaultResult);
-				GorillaText gorillaText3 = this.screenText;
-				gorillaText3.Text += text.TrailingSpace();
+				this.screenText.Append(text.TrailingSpace());
 				defaultResult = "PRESS OPTION 1 FOR DEFAULT, OR OPTION 2 FOR MINIGAMES.";
 				LocalisationManager.TryGetKeyForCurrentLocale("QUEUE_SCREEN_DEFAULT_QUEUES", out text, defaultResult);
-				GorillaText gorillaText4 = this.screenText;
-				gorillaText4.Text += text;
+				this.screenText.Append(text);
 			}
 			defaultResult = "\n\nCURRENT QUEUE:";
 			LocalisationManager.TryGetKeyForCurrentLocale("CURRENT_QUEUE", out text, defaultResult);
-			GorillaText gorillaText5 = this.screenText;
-			gorillaText5.Text += text.TrailingSpace();
-			string text2 = this.currentQueue;
+			this.screenText.Append(text.TrailingSpace());
+			string a = this.currentQueue;
 			string key;
-			if (!(text2 == "DEFAULT"))
+			if (!(a == "DEFAULT"))
 			{
-				if (text2 == "COMPETITIVE")
+				if (a == "COMPETITIVE")
 				{
 					key = "COMPETITIVE_QUEUE";
-					goto IL_16E;
+					goto IL_137;
 				}
-				if (text2 == "MINIGAMES")
+				if (a == "MINIGAMES")
 				{
 					key = "MINIGAMES_QUEUE";
-					goto IL_16E;
+					goto IL_137;
 				}
 			}
 			key = "DEFAULT_QUEUE";
-			IL_16E:
+			IL_137:
 			defaultResult = this.currentQueue;
 			LocalisationManager.TryGetKeyForCurrentLocale(key, out text, defaultResult);
-			GorillaText gorillaText6 = this.screenText;
-			gorillaText6.Text += text;
+			this.screenText.Append(text);
 		}
 
 		private void TroopScreen()
@@ -2178,30 +2147,27 @@ namespace GorillaNetworking
 			Permission permissionDataByFeature2 = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Multiplayer);
 			bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Groups) && KIDManager.HasPermissionToUseFeature(EKIDFeatures.Multiplayer);
 			bool flag2 = this.IsValidTroopName(this.troopName);
-			this.screenText.Text = string.Empty;
+			this.screenText.Set(string.Empty);
 			string text = "";
 			string defaultResult;
 			if (flag)
 			{
 				defaultResult = "PLAY WITH A PERSISTENT GROUP ACROSS MULTIPLE ROOMS.";
 				LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_INTRO", out text, defaultResult);
-				this.screenText.Text = text;
+				this.screenText.Set(text);
 				if (!flag2)
 				{
 					defaultResult = " PRESS ENTER TO JOIN OR CREATE A TROOP.";
 					LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_INSTRUCTIONS", out text, defaultResult);
-					GorillaText gorillaText = this.screenText;
-					gorillaText.Text += text;
+					this.screenText.Append(text);
 				}
 			}
 			defaultResult = "\n\nCURRENT TROOP: ";
 			LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_CURRENT_TROOP", out text, defaultResult);
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += text.TrailingSpace();
+			this.screenText.Append(text.TrailingSpace());
 			if (flag2)
 			{
-				GorillaText gorillaText3 = this.screenText;
-				gorillaText3.Text += this.troopName;
+				this.screenText.Append(this.troopName ?? "");
 				if (flag)
 				{
 					bool flag3 = this.currentTroopPopulation > -1;
@@ -2209,75 +2175,65 @@ namespace GorillaNetworking
 					{
 						defaultResult = "\n  -IN TROOP QUEUE-";
 						LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_IN_QUEUE", out text, defaultResult);
-						GorillaText gorillaText4 = this.screenText;
-						gorillaText4.Text += text;
+						this.screenText.Append(text);
 						if (flag3)
 						{
 							defaultResult = "\n\nPLAYERS IN TROOP: ";
 							LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_PLAYERS_IN_TROOP", out text, defaultResult);
-							GorillaText gorillaText5 = this.screenText;
-							gorillaText5.Text += text.TrailingSpace();
-							GorillaText gorillaText6 = this.screenText;
-							gorillaText6.Text += Mathf.Max(1, this.currentTroopPopulation).ToString();
+							this.screenText.Append(text.TrailingSpace());
+							this.screenText.Append(Mathf.Max(1, this.currentTroopPopulation).ToString());
 						}
 						defaultResult = "\n\nPRESS OPTION 2 FOR DEFAULT QUEUE.";
 						LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_DEFAULT_QUEUE", out text, defaultResult);
-						GorillaText gorillaText7 = this.screenText;
-						gorillaText7.Text += text;
+						this.screenText.Append(text);
 					}
 					else
 					{
 						defaultResult = "\n  -IN {currentQueue} QUEUE-";
 						LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_CURRENT_QUEUE", out text, defaultResult);
-						string text2 = this.currentQueue;
+						string a = this.currentQueue;
 						string key;
-						if (!(text2 == "DEFAULT"))
+						if (!(a == "DEFAULT"))
 						{
-							if (text2 == "MINIGAMES")
+							if (a == "MINIGAMES")
 							{
 								key = "MINIGAMES_QUEUE";
-								goto IL_24D;
+								goto IL_209;
 							}
-							if (text2 == "COMPETITIVE")
+							if (a == "COMPETITIVE")
 							{
 								key = "COMPETITIVE_QUEUE";
-								goto IL_24D;
+								goto IL_209;
 							}
 						}
 						key = "DEFAULT_QUEUE";
-						IL_24D:
+						IL_209:
 						defaultResult = this.currentQueue;
-						string text3;
-						LocalisationManager.TryGetKeyForCurrentLocale(key, out text3, defaultResult);
-						text = text.Replace("{currentQueue}", text3);
-						GorillaText gorillaText8 = this.screenText;
-						gorillaText8.Text += text;
+						string newValue;
+						LocalisationManager.TryGetKeyForCurrentLocale(key, out newValue, defaultResult);
+						text = text.Replace("{currentQueue}", newValue);
+						this.screenText.Append(text);
 						if (flag3)
 						{
 							defaultResult = "\n\nPLAYERS IN TROOP: ";
 							LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_PLAYERS_IN_TROOP", out text, defaultResult);
-							GorillaText gorillaText9 = this.screenText;
-							gorillaText9.Text += text.TrailingSpace();
-							GorillaText gorillaText10 = this.screenText;
-							gorillaText10.Text += Mathf.Max(1, this.currentTroopPopulation).ToString();
+							this.screenText.Append(text.TrailingSpace());
+							this.screenText.Append(Mathf.Max(1, this.currentTroopPopulation).ToString());
 						}
 						defaultResult = "\n\nPRESS OPTION 1 FOR TROOP QUEUE.";
 						LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_TROOP_QUEUE", out text, defaultResult);
-						GorillaText gorillaText11 = this.screenText;
-						gorillaText11.Text += text;
+						this.screenText.Append(text);
 					}
 					defaultResult = "\nPRESS OPTION 3 TO LEAVE YOUR TROOP.";
 					LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_LEAVE", out text, defaultResult);
-					GorillaText gorillaText12 = this.screenText;
-					gorillaText12.Text += text;
+					this.screenText.Append(text);
 				}
 			}
 			else
 			{
 				defaultResult = "-NOT IN TROOP-";
 				LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_NOT_IN_TROOP", out text, defaultResult);
-				GorillaText gorillaText13 = this.screenText;
-				gorillaText13.Text += text;
+				this.screenText.Append(text);
 			}
 			if (flag)
 			{
@@ -2285,16 +2241,14 @@ namespace GorillaNetworking
 				{
 					defaultResult = "\n\nTROOP TO JOIN: ";
 					LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_JOIN_TROOP", out text, defaultResult);
-					GorillaText gorillaText14 = this.screenText;
-					gorillaText14.Text += text.TrailingSpace();
-					GorillaText gorillaText15 = this.screenText;
-					gorillaText15.Text += this.troopToJoin;
+					this.screenText.Append(text.TrailingSpace());
+					this.screenText.Append(this.troopToJoin);
 					return;
 				}
 			}
 			else
 			{
-				if (permissionDataByFeature.ManagedBy == 3 || permissionDataByFeature2.ManagedBy == 3)
+				if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PROHIBITED || permissionDataByFeature2.ManagedBy == Permission.ManagedByEnum.PROHIBITED)
 				{
 					this.TroopScreen_KIdProhibited();
 					return;
@@ -2346,7 +2300,7 @@ namespace GorillaNetworking
 			LocalisationManager.TryGetKeyForCurrentLocale("TURN_SCREEN_TURN_SPEED", out text2, defaultResult);
 			text += text2;
 			text += GorillaSnapTurn.CachedSnapTurnRef.turnFactor.ToString();
-			this.screenText.Text = text;
+			this.screenText.Set(text);
 		}
 
 		private void NameScreen()
@@ -2357,34 +2311,28 @@ namespace GorillaNetworking
 				string defaultResult = "PRESS ENTER TO CHANGE YOUR NAME TO THE ENTERED NEW NAME.\n\n";
 				string text;
 				LocalisationManager.TryGetKeyForCurrentLocale("NAME_SCREEN", out text, defaultResult);
-				this.screenText.Text = text;
+				this.screenText.Set(text);
 				defaultResult = "CURRENT NAME: ";
 				LocalisationManager.TryGetKeyForCurrentLocale("CURRENT_NAME", out text, defaultResult);
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text.TrailingSpace();
-				GorillaText gorillaText2 = this.screenText;
-				gorillaText2.Text += this.savedName;
+				this.screenText.Append(text.TrailingSpace());
+				this.screenText.Append(this.savedName);
 				if (this.NametagsEnabled)
 				{
 					defaultResult = "NEW NAME: ";
 					LocalisationManager.TryGetKeyForCurrentLocale("NEW_NAME", out text, defaultResult);
-					GorillaText gorillaText3 = this.screenText;
-					gorillaText3.Text += text.TrailingSpace();
-					GorillaText gorillaText4 = this.screenText;
-					gorillaText4.Text += this.currentName;
+					this.screenText.Append(text.TrailingSpace());
+					this.screenText.Append(this.currentName);
 				}
 				defaultResult = "PRESS OPTION 1 TO TOGGLE NAMETAGS.\nCURRENTLY NAMETAGS ARE: ";
 				LocalisationManager.TryGetKeyForCurrentLocale("NAME_SCREEN_TOGGLE_NAMETAGS", out text, defaultResult);
 				string key = this.NametagsEnabled ? "ON_KEY" : "OFF_KEY";
-				GorillaText gorillaText5 = this.screenText;
-				gorillaText5.Text += text.TrailingSpace();
+				this.screenText.Append(text.TrailingSpace());
 				defaultResult = (this.NametagsEnabled ? "ON" : "OFF");
 				LocalisationManager.TryGetKeyForCurrentLocale(key, out text, defaultResult);
-				GorillaText gorillaText6 = this.screenText;
-				gorillaText6.Text += text;
+				this.screenText.Append(text);
 				return;
 			}
-			if (permissionDataByFeature.ManagedBy == 3)
+			if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PROHIBITED)
 			{
 				this.NameScreen_KIdProhibited();
 				return;
@@ -2395,7 +2343,7 @@ namespace GorillaNetworking
 		private void StartupScreen()
 		{
 			string text = string.Empty;
-			if (KIDManager.GetActiveAccountStatus() == 1)
+			if (KIDManager.GetActiveAccountStatus() == AgeStatusType.DIGITALMINOR)
 			{
 				text = "YOU ARE PLAYING ON A MANAGED ACCOUNT. SOME SETTINGS MAY BE DISABLED WITHOUT PARENT OR GUARDIAN APPROVAL\n\n";
 				string text2;
@@ -2407,48 +2355,33 @@ namespace GorillaNetworking
 			string empty = string.Empty;
 			string text3;
 			LocalisationManager.TryGetKeyForCurrentLocale("STARTUP_INTRO", out text3, "GORILLA OS\n\n");
-			this.screenText.Text = text3;
-			GorillaText gorillaText = this.screenText;
-			gorillaText.Text += text;
+			this.screenText.Set(text3);
+			this.screenText.Append(text);
 			LocalisationManager.TryGetKeyForCurrentLocale("STARTUP_PLAYERS_ONLINE", out text3, "{playersOnline} PLAYERS ONLINE\n\n");
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += text3.Replace("{playersOnline}", HowManyMonke.ThisMany.ToString());
+			this.screenText.Append(text3.Replace("{playersOnline}", HowManyMonke.ThisMany.ToString()));
 			LocalisationManager.TryGetKeyForCurrentLocale("STARTUP_USERS_BANNED", out text3, "{usersBanned} USERS BANNED YESTERDAY\n\n");
-			GorillaText gorillaText3 = this.screenText;
-			gorillaText3.Text += text3.Replace("{usersBanned}", this.usersBanned.ToString());
+			this.screenText.Append(text3.Replace("{usersBanned}", this.usersBanned.ToString()));
 			LocalisationManager.TryGetKeyForCurrentLocale("STARTUP_PRESS_KEY", out text3, "PRESS ANY KEY TO BEGIN");
-			GorillaText gorillaText4 = this.screenText;
-			gorillaText4.Text += text3;
+			this.screenText.Append(text3);
 		}
 
 		private void ColourScreen()
 		{
-			this.screenText.Text = "USE THE OPTIONS BUTTONS TO SELECT THE COLOR TO UPDATE, THEN PRESS 0-9 TO SET A NEW VALUE.";
-			string text;
-			LocalisationManager.TryGetKeyForCurrentLocale("COLOR_SELECT_INTRO", out text, this.screenText.Text);
-			GorillaText gorillaText = this.screenText;
-			gorillaText.Text += text;
-			LocalisationManager.TryGetKeyForCurrentLocale("COLOR_RED", out text, this.screenText.Text);
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += "\n\n";
-			GorillaText gorillaText3 = this.screenText;
-			gorillaText3.Text += text;
-			GorillaText gorillaText4 = this.screenText;
-			gorillaText4.Text = gorillaText4.Text + Mathf.FloorToInt(this.redValue * 9f).ToString() + ((this.colorCursorLine == 0) ? "<--" : "");
-			LocalisationManager.TryGetKeyForCurrentLocale("COLOR_GREEN", out text, this.screenText.Text);
-			GorillaText gorillaText5 = this.screenText;
-			gorillaText5.Text += "\n\n";
-			GorillaText gorillaText6 = this.screenText;
-			gorillaText6.Text += text;
-			GorillaText gorillaText7 = this.screenText;
-			gorillaText7.Text = gorillaText7.Text + Mathf.FloorToInt(this.greenValue * 9f).ToString() + ((this.colorCursorLine == 1) ? "<--" : "");
-			LocalisationManager.TryGetKeyForCurrentLocale("COLOR_BLUE", out text, this.screenText.Text);
-			GorillaText gorillaText8 = this.screenText;
-			gorillaText8.Text += "\n\n";
-			GorillaText gorillaText9 = this.screenText;
-			gorillaText9.Text += text;
-			GorillaText gorillaText10 = this.screenText;
-			gorillaText10.Text = gorillaText10.Text + Mathf.FloorToInt(this.blueValue * 9f).ToString() + ((this.colorCursorLine == 2) ? "<--" : "");
+			string str;
+			LocalisationManager.TryGetKeyForCurrentLocale("COLOR_SELECT_INTRO", out str, "USE THE OPTIONS BUTTONS TO SELECT THE COLOR TO UPDATE, THEN PRESS 0-9 TO SET A NEW VALUE.");
+			this.screenText.Set(str);
+			LocalisationManager.TryGetKeyForCurrentLocale("COLOR_RED", out str, "RED");
+			this.screenText.Append("\n\n");
+			this.screenText.Append(str);
+			this.screenText.Append(Mathf.FloorToInt(this.redValue * 9f).ToString() + ((this.colorCursorLine == 0) ? "<--" : ""));
+			LocalisationManager.TryGetKeyForCurrentLocale("COLOR_GREEN", out str, "GREEN");
+			this.screenText.Append("\n\n");
+			this.screenText.Append(str);
+			this.screenText.Append(Mathf.FloorToInt(this.greenValue * 9f).ToString() + ((this.colorCursorLine == 1) ? "<--" : ""));
+			LocalisationManager.TryGetKeyForCurrentLocale("COLOR_BLUE", out str, "BLUE");
+			this.screenText.Append("\n\n");
+			this.screenText.Append(str);
+			this.screenText.Append(Mathf.FloorToInt(this.blueValue * 9f).ToString() + ((this.colorCursorLine == 2) ? "<--" : ""));
 		}
 
 		private void RoomScreen()
@@ -2462,103 +2395,87 @@ namespace GorillaNetworking
 			Permission permissionDataByFeature2 = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Multiplayer);
 			bool item = KIDManager.CheckFeatureOptIn(EKIDFeatures.Multiplayer, null).Item2;
 			bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Groups) && KIDManager.HasPermissionToUseFeature(EKIDFeatures.Multiplayer) && item;
-			this.screenText.Text = "";
+			this.screenText.Set("");
 			string text = "";
 			string defaultResult;
 			if (flag)
 			{
 				defaultResult = "PRESS ENTER TO JOIN OR CREATE A CUSTOM ROOM WITH THE ENTERED CODE.";
 				LocalisationManager.TryGetKeyForCurrentLocale("ROOM_INTRO", out text, defaultResult);
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text.TrailingSpace();
+				this.screenText.Append(text.TrailingSpace());
 			}
 			defaultResult = "PRESS OPTION 1 TO DISCONNECT FROM THE CURRENT ROOM.";
 			LocalisationManager.TryGetKeyForCurrentLocale("ROOM_OPTION", out text, defaultResult);
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += text.TrailingSpace();
+			this.screenText.Append(text.TrailingSpace());
 			if (FriendshipGroupDetection.Instance.IsInParty)
 			{
 				if (FriendshipGroupDetection.Instance.IsPartyWithinCollider(this.friendJoinCollider))
 				{
 					defaultResult = "YOUR GROUP WILL TRAVEL WITH YOU.";
 					LocalisationManager.TryGetKeyForCurrentLocale("ROOM_GROUP_TRAVEL", out text, defaultResult);
-					GorillaText gorillaText3 = this.screenText;
-					gorillaText3.Text += text.TrailingSpace();
+					this.screenText.Append(text.TrailingSpace());
 				}
 				else
 				{
 					defaultResult = "<color=red>YOU WILL LEAVE YOUR PARTY UNLESS YOU GATHER THEM HERE FIRST!</color> ";
 					LocalisationManager.TryGetKeyForCurrentLocale("ROOM_PARTY_WARNING", out text, defaultResult);
-					GorillaText gorillaText4 = this.screenText;
-					gorillaText4.Text += text;
+					this.screenText.Append(text);
 				}
 			}
 			defaultResult = "\n\nCURRENT ROOM:";
 			LocalisationManager.TryGetKeyForCurrentLocale("ROOM_TEXT_CURRENT_ROOM", out text, defaultResult);
-			GorillaText gorillaText5 = this.screenText;
-			gorillaText5.Text += text.TrailingSpace();
+			this.screenText.Append(text.TrailingSpace());
 			if (NetworkSystem.Instance.InRoom)
 			{
-				GorillaText gorillaText6 = this.screenText;
-				gorillaText6.Text += NetworkSystem.Instance.RoomName.TrailingSpace();
+				this.screenText.Append(NetworkSystem.Instance.RoomName.TrailingSpace());
 				if (NetworkSystem.Instance.SessionIsPrivate)
 				{
 					GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
 					string text2 = (activeGameMode != null) ? activeGameMode.GameModeNameRoomLabel() : null;
 					if (!string.IsNullOrEmpty(text2))
 					{
-						GorillaText gorillaText7 = this.screenText;
-						gorillaText7.Text += text2;
+						this.screenText.Append(text2 ?? "");
 					}
 				}
 				defaultResult = "\n\nPLAYERS IN ROOM:";
 				LocalisationManager.TryGetKeyForCurrentLocale("PLAYERS_IN_ROOM", out text, defaultResult);
-				GorillaText gorillaText8 = this.screenText;
-				gorillaText8.Text += text.TrailingSpace();
-				GorillaText gorillaText9 = this.screenText;
-				gorillaText9.Text += NetworkSystem.Instance.RoomPlayerCount.ToString();
+				this.screenText.Append(text.TrailingSpace());
+				this.screenText.Append(NetworkSystem.Instance.RoomPlayerCount.ToString());
 			}
 			else
 			{
 				defaultResult = "-NOT IN ROOM-";
 				LocalisationManager.TryGetKeyForCurrentLocale("NOT_IN_ROOM", out text, defaultResult);
-				GorillaText gorillaText10 = this.screenText;
-				gorillaText10.Text += text;
+				this.screenText.Append(text);
 				defaultResult = "\n\nPLAYERS ONLINE:";
 				LocalisationManager.TryGetKeyForCurrentLocale("PLAYERS_ONLINE", out text, defaultResult);
-				GorillaText gorillaText11 = this.screenText;
-				gorillaText11.Text += text.TrailingSpace();
-				GorillaText gorillaText12 = this.screenText;
-				gorillaText12.Text += HowManyMonke.ThisMany.ToString();
+				this.screenText.Append(text.TrailingSpace());
+				this.screenText.Append(HowManyMonke.ThisMany.ToString());
 			}
 			if (flag)
 			{
 				defaultResult = "\n\nROOM TO JOIN:";
 				LocalisationManager.TryGetKeyForCurrentLocale("ROOM_TO_JOIN", out text, defaultResult);
-				GorillaText gorillaText13 = this.screenText;
-				gorillaText13.Text += text.TrailingSpace();
-				GorillaText gorillaText14 = this.screenText;
-				gorillaText14.Text += this.roomToJoin;
+				this.screenText.Append(text.TrailingSpace());
+				this.screenText.Append(this.roomToJoin);
 				if (this.roomFull)
 				{
 					defaultResult = "\n\nROOM FULL. JOIN ROOM FAILED.";
 					LocalisationManager.TryGetKeyForCurrentLocale("ROOM_FULL", out text, defaultResult);
-					GorillaText gorillaText15 = this.screenText;
-					gorillaText15.Text += text;
+					this.screenText.Append(text);
 					return;
 				}
 				if (this.roomNotAllowed)
 				{
 					defaultResult = "\n\nCANNOT JOIN ROOM TYPE FROM HERE.";
 					LocalisationManager.TryGetKeyForCurrentLocale("ROOM_JOIN_NOT_ALLOWED", out text, defaultResult);
-					GorillaText gorillaText16 = this.screenText;
-					gorillaText16.Text += text;
+					this.screenText.Append(text);
 					return;
 				}
 			}
 			else
 			{
-				if (permissionDataByFeature.ManagedBy == 3 || permissionDataByFeature2.ManagedBy == 3)
+				if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PROHIBITED || permissionDataByFeature2.ManagedBy == Permission.ManagedByEnum.PROHIBITED)
 				{
 					this.RoomScreen_KIdProhibited();
 					return;
@@ -2572,49 +2489,35 @@ namespace GorillaNetworking
 			string defaultResult = "TYPE REDEMPTION CODE AND PRESS ENTER";
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_INTRO", out text, defaultResult);
-			this.screenText.Text = text;
+			this.screenText.Set(text);
 			defaultResult = "\n\nCODE: " + this.redemptionCode;
 			LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_CODE_LABEL", out text, defaultResult);
-			GorillaText gorillaText = this.screenText;
-			gorillaText.Text += text.TrailingSpace();
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text += this.redemptionCode;
+			this.screenText.Append(text.TrailingSpace());
+			this.screenText.Append(this.redemptionCode);
 			switch (this.RedemptionStatus)
 			{
 			case GorillaComputer.RedemptionResult.Empty:
 				break;
 			case GorillaComputer.RedemptionResult.Invalid:
-			{
 				defaultResult = "\n\nINVALID CODE";
 				LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_CODE_INVALID", out text, defaultResult);
-				GorillaText gorillaText3 = this.screenText;
-				gorillaText3.Text += text;
+				this.screenText.Append(text);
 				return;
-			}
 			case GorillaComputer.RedemptionResult.Checking:
-			{
 				defaultResult = "\n\nVALIDATING...";
 				LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_CODE_VALIDATING", out text, defaultResult);
-				GorillaText gorillaText4 = this.screenText;
-				gorillaText4.Text += text;
+				this.screenText.Append(text);
 				return;
-			}
 			case GorillaComputer.RedemptionResult.AlreadyUsed:
-			{
 				defaultResult = "\n\nCODE ALREADY CLAIMED";
 				LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_CODE_ALREADY_USED", out text, defaultResult);
-				GorillaText gorillaText5 = this.screenText;
-				gorillaText5.Text += text;
+				this.screenText.Append(text);
 				return;
-			}
 			case GorillaComputer.RedemptionResult.Success:
-			{
 				defaultResult = "\n\nSUCCESSFULLY CLAIMED!";
 				LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_CODE_SUCCESS", out text, defaultResult);
-				GorillaText gorillaText6 = this.screenText;
-				gorillaText6.Text += text;
+				this.screenText.Append(text);
 				break;
-			}
 			default:
 				return;
 			}
@@ -2623,9 +2526,9 @@ namespace GorillaNetworking
 		private void LimitedOnlineFunctionalityScreen()
 		{
 			string defaultResult = "NOT AVAILABLE IN RANKED PLAY";
-			string text;
-			LocalisationManager.TryGetKeyForCurrentLocale("LIMITED_ONLINE_FUNC", out text, defaultResult);
-			this.screenText.Text = text;
+			string str;
+			LocalisationManager.TryGetKeyForCurrentLocale("LIMITED_ONLINE_FUNC", out str, defaultResult);
+			this.screenText.Set(str);
 		}
 
 		private void UpdateGameModeText()
@@ -2648,7 +2551,7 @@ namespace GorillaNetworking
 
 		private void UpdateFunctionScreen()
 		{
-			this.functionSelectText.Text = this.GetOrderListForScreen(this.currentState);
+			this.functionSelectText.Set(this.GetOrderListForScreen(this.currentState));
 		}
 
 		private void CheckAutoBanListForRoomName(string nameToCheck)
@@ -2705,7 +2608,7 @@ namespace GorillaNetworking
 		private void OnRoomNameChecked(ExecuteFunctionResult result)
 		{
 			object obj;
-			if (((JsonObject)result.FunctionResult).TryGetValue("result", ref obj))
+			if (((JsonObject)result.FunctionResult).TryGetValue("result", out obj))
 			{
 				switch (int.Parse(obj.ToString()))
 				{
@@ -2741,7 +2644,7 @@ namespace GorillaNetworking
 		private void OnPlayerNameChecked(ExecuteFunctionResult result)
 		{
 			object obj;
-			if (((JsonObject)result.FunctionResult).TryGetValue("result", ref obj))
+			if (((JsonObject)result.FunctionResult).TryGetValue("result", out obj))
 			{
 				switch (int.Parse(obj.ToString()))
 				{
@@ -2769,7 +2672,7 @@ namespace GorillaNetworking
 			PlayerPrefs.Save();
 			if (NetworkSystem.Instance.InRoom)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 				{
 					this.redValue,
 					this.greenValue,
@@ -2785,7 +2688,7 @@ namespace GorillaNetworking
 		private void OnTroopNameChecked(ExecuteFunctionResult result)
 		{
 			object obj;
-			if (((JsonObject)result.FunctionResult).TryGetValue("result", ref obj))
+			if (((JsonObject)result.FunctionResult).TryGetValue("result", out obj))
 			{
 				switch (int.Parse(obj.ToString()))
 				{
@@ -2821,16 +2724,16 @@ namespace GorillaNetworking
 		{
 			nameToCheck = nameToCheck.ToLower();
 			nameToCheck = new string(Array.FindAll<char>(nameToCheck.ToCharArray(), (char c) => char.IsLetterOrDigit(c)));
-			foreach (string text in this.anywhereTwoWeek)
+			foreach (string value in this.anywhereTwoWeek)
 			{
-				if (nameToCheck.IndexOf(text) >= 0)
+				if (nameToCheck.IndexOf(value) >= 0)
 				{
 					return false;
 				}
 			}
-			foreach (string text2 in this.anywhereOneWeek)
+			foreach (string value2 in this.anywhereOneWeek)
 			{
-				if (nameToCheck.IndexOf(text2) >= 0 && !nameToCheck.Contains("fagol"))
+				if (nameToCheck.IndexOf(value2) >= 0 && !nameToCheck.Contains("fagol"))
 				{
 					return false;
 				}
@@ -2879,11 +2782,11 @@ namespace GorillaNetworking
 
 		private static void OnErrorShared(PlayFabError error)
 		{
-			if (error.Error == 1074)
+			if (error.Error == PlayFabErrorCode.NotAuthenticated)
 			{
 				PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 			}
-			else if (error.Error == 1002)
+			else if (error.Error == PlayFabErrorCode.AccountBanned)
 			{
 				GorillaGameManager.ForceStopGame_DisconnectAndDestroy();
 			}
@@ -3014,7 +2917,7 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			onServerTimeUpdated.Invoke();
+			onServerTimeUpdated();
 		}
 
 		private void OnGetTimeFailure(PlayFabError error)
@@ -3024,14 +2927,14 @@ namespace GorillaNetworking
 			Action onServerTimeUpdated = this.OnServerTimeUpdated;
 			if (onServerTimeUpdated != null)
 			{
-				onServerTimeUpdated.Invoke();
+				onServerTimeUpdated();
 			}
-			if (error.Error == 1074)
+			if (error.Error == PlayFabErrorCode.NotAuthenticated)
 			{
 				PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 				return;
 			}
-			if (error.Error == 1002)
+			if (error.Error == PlayFabErrorCode.AccountBanned)
 			{
 				GorillaGameManager.ForceStopGame_DisconnectAndDestroy();
 			}
@@ -3040,6 +2943,14 @@ namespace GorillaNetworking
 		private void PlayerCountChangedCallback(NetPlayer player)
 		{
 			this.UpdateScreen();
+		}
+
+		private static void OnFirstJoinedRoom_IncrementSessionCount()
+		{
+			RoomSystem.JoinedRoomEvent -= new Action(GorillaComputer.OnFirstJoinedRoom_IncrementSessionCount);
+			GorillaComputer.sessionCount++;
+			PlayerPrefs.SetInt("sessionCount", GorillaComputer.sessionCount);
+			PlayerPrefs.Save();
 		}
 
 		public void SetNameBySafety(bool isSafety)
@@ -3057,7 +2968,7 @@ namespace GorillaNetworking
 			PlayerPrefs.Save();
 			if (NetworkSystem.Instance.InRoom)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 				{
 					this.redValue,
 					this.greenValue,
@@ -3130,8 +3041,8 @@ namespace GorillaNetworking
 				for (int m = 0; m < num2; m++)
 				{
 					List<string> functionNames = this.FunctionNames;
-					int num3 = l;
-					functionNames[num3] += " ";
+					int index = l;
+					functionNames[index] += " ";
 				}
 			}
 			this.UpdateScreen();
@@ -3139,7 +3050,7 @@ namespace GorillaNetworking
 
 		public void KID_SetVoiceChatSettingOnStart(bool voiceChatEnabled, Permission.ManagedByEnum managedBy, bool hasOptedInPreviously)
 		{
-			if (managedBy == 3)
+			if (managedBy == Permission.ManagedByEnum.PROHIBITED)
 			{
 				return;
 			}
@@ -3176,7 +3087,7 @@ namespace GorillaNetworking
 				GorillaComputer.ComputerState.AutoMute,
 				GorillaComputer.ComputerState.Mic
 			}, false);
-			string text = PlayerPrefs.GetString("voiceChatOn", "");
+			string value = PlayerPrefs.GetString("voiceChatOn", "");
 			if (KIDManager.KidEnabledAndReady)
 			{
 				Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Voice_Chat);
@@ -3185,7 +3096,7 @@ namespace GorillaNetworking
 					ValueTuple<bool, bool> valueTuple = KIDManager.CheckFeatureOptIn(EKIDFeatures.Voice_Chat, permissionDataByFeature);
 					if (valueTuple.Item1 && !valueTuple.Item2)
 					{
-						text = "FALSE";
+						value = "FALSE";
 					}
 				}
 				else
@@ -3195,26 +3106,26 @@ namespace GorillaNetworking
 			}
 			switch (managedBy)
 			{
-			case 1:
-				if (string.IsNullOrEmpty(text))
+			case Permission.ManagedByEnum.PLAYER:
+				if (string.IsNullOrEmpty(value))
 				{
 					this.voiceChatOn = (voiceChatEnabled ? "TRUE" : "FALSE");
 				}
 				else
 				{
-					this.voiceChatOn = text;
+					this.voiceChatOn = value;
 				}
 				break;
-			case 2:
+			case Permission.ManagedByEnum.GUARDIAN:
 				if (KIDManager.GetPermissionDataByFeature(EKIDFeatures.Voice_Chat).Enabled)
 				{
-					if (string.IsNullOrEmpty(text))
+					if (string.IsNullOrEmpty(value))
 					{
 						this.voiceChatOn = "TRUE";
 					}
 					else
 					{
-						this.voiceChatOn = text;
+						this.voiceChatOn = value;
 					}
 				}
 				else
@@ -3222,7 +3133,7 @@ namespace GorillaNetworking
 					this.voiceChatOn = "FALSE";
 				}
 				break;
-			case 3:
+			case Permission.ManagedByEnum.PROHIBITED:
 				this.voiceChatOn = "FALSE";
 				break;
 			}
@@ -3232,11 +3143,11 @@ namespace GorillaNetworking
 
 		public void SetNametagSetting(bool setting, Permission.ManagedByEnum managedBy, bool hasOptedInPreviously)
 		{
-			if (managedBy == 3)
+			if (managedBy == Permission.ManagedByEnum.PROHIBITED)
 			{
 				return;
 			}
-			if (managedBy == 2)
+			if (managedBy == Permission.ManagedByEnum.GUARDIAN)
 			{
 				int @int = PlayerPrefs.GetInt(this.NameTagPlayerPref, 1);
 				setting = (setting && @int == 1);
@@ -3267,7 +3178,7 @@ namespace GorillaNetworking
 			NetworkSystem.Instance.SetMyNickName(this.NametagsEnabled ? this.savedName : NetworkSystem.Instance.GetMyDefaultName());
 			if (NetworkSystem.Instance.InRoom)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 				{
 					this.redValue,
 					this.greenValue,
@@ -3277,18 +3188,18 @@ namespace GorillaNetworking
 			Action<bool> action = GorillaComputer.onNametagSettingChangedAction;
 			if (action != null)
 			{
-				action.Invoke(this.NametagsEnabled);
+				action(this.NametagsEnabled);
 			}
 			if (!saveSetting)
 			{
 				return;
 			}
-			int num = this.NametagsEnabled ? 1 : 0;
-			PlayerPrefs.SetInt(this.NameTagPlayerPref, num);
+			int value = this.NametagsEnabled ? 1 : 0;
+			PlayerPrefs.SetInt(this.NameTagPlayerPref, value);
 			PlayerPrefs.Save();
 		}
 
-		void IMatchmakingCallbacks.OnFriendListUpdate(List<FriendInfo> friendList)
+		void IMatchmakingCallbacks.OnFriendListUpdate(List<Photon.Realtime.FriendInfo> friendList)
 		{
 		}
 
@@ -3327,7 +3238,7 @@ namespace GorillaNetworking
 		public void SetInVirtualStump(bool inVirtualStump)
 		{
 			this.playerInVirtualStump = inVirtualStump;
-			this.roomToJoin = (this.playerInVirtualStump ? (this.virtualStumpRoomPrepend + this.roomToJoin) : this.roomToJoin.RemoveAll(this.virtualStumpRoomPrepend, 5));
+			this.roomToJoin = (this.playerInVirtualStump ? (this.virtualStumpRoomPrepend + this.roomToJoin) : this.roomToJoin.RemoveAll(this.virtualStumpRoomPrepend, StringComparison.OrdinalIgnoreCase));
 		}
 
 		public bool IsPlayerInVirtualStump()
@@ -3371,11 +3282,11 @@ namespace GorillaNetworking
 
 		private void UpdateSession()
 		{
-			GorillaComputer.<UpdateSession>d__469 <UpdateSession>d__;
+			GorillaComputer.<UpdateSession>d__477 <UpdateSession>d__;
 			<UpdateSession>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<UpdateSession>d__.<>4__this = this;
 			<UpdateSession>d__.<>1__state = -1;
-			<UpdateSession>d__.<>t__builder.Start<GorillaComputer.<UpdateSession>d__469>(ref <UpdateSession>d__);
+			<UpdateSession>d__.<>t__builder.Start<GorillaComputer.<UpdateSession>d__477>(ref <UpdateSession>d__);
 		}
 
 		private void OnSessionUpdate_GorillaComputer()
@@ -3398,32 +3309,27 @@ namespace GorillaNetworking
 			string defaultResult = "PARENT/GUARDIAN PERMISSION REQUIRED TO ";
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("KID_PERMISSION_NEEDED", out text, defaultResult);
-			GorillaText gorillaText = this.screenText;
-			gorillaText.Text += text;
-			GorillaText gorillaText2 = this.screenText;
-			gorillaText2.Text = gorillaText2.Text + featureDescription + "!";
+			this.screenText.Append(text);
+			this.screenText.Append(featureDescription + "!");
 			if (this._waitingForUpdatedSession)
 			{
 				defaultResult = "\n\nWAITING FOR PARENT/GUARDIAN CONSENT!";
 				LocalisationManager.TryGetKeyForCurrentLocale("KID_WAITING_PERMISSION", out text, defaultResult);
-				GorillaText gorillaText3 = this.screenText;
-				gorillaText3.Text += text;
+				this.screenText.Append(text);
 				return true;
 			}
 			if (Time.time >= this._nextUpdateAttemptTime)
 			{
 				defaultResult = "\n\nPRESS OPTION 2 TO REFRESH PERMISSIONS!";
 				LocalisationManager.TryGetKeyForCurrentLocale("KID_REFRESH_PERMISSIONS", out text, defaultResult);
-				GorillaText gorillaText4 = this.screenText;
-				gorillaText4.Text += text;
+				this.screenText.Append(text);
 			}
 			else
 			{
 				defaultResult = "CHECK AGAIN IN {time} SECONDS!";
 				LocalisationManager.TryGetKeyForCurrentLocale("KID_CHECK_AGAIN_COOLDOWN", out text, defaultResult);
 				text = text.Replace("{time}", ((int)(this._nextUpdateAttemptTime - Time.time)).ToString());
-				GorillaText gorillaText5 = this.screenText;
-				gorillaText5.Text += text;
+				this.screenText.Append(text);
 			}
 			return false;
 		}
@@ -3434,8 +3340,7 @@ namespace GorillaNetworking
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("KID_PROHIBITED_MESSAGE", out text, "SET CUSTOM NICKNAMES");
 			text = text.Replace("{verb}", verb);
-			GorillaText gorillaText = this.screenText;
-			gorillaText.Text += text;
+			this.screenText.Append(text);
 		}
 
 		private void RoomScreen_Permission()
@@ -3443,12 +3348,12 @@ namespace GorillaNetworking
 			if (!KIDManager.KidEnabled)
 			{
 				string defaultResult = "YOU CANNOT USE THE PRIVATE ROOM FEATURE RIGHT NOW";
-				string text;
-				LocalisationManager.TryGetKeyForCurrentLocale("ROOM_SCREEN_DISABLED", out text, defaultResult);
-				this.screenText.Text = text;
+				string str;
+				LocalisationManager.TryGetKeyForCurrentLocale("ROOM_SCREEN_DISABLED", out str, defaultResult);
+				this.screenText.Set(str);
 				return;
 			}
-			this.screenText.Text = "";
+			this.screenText.Set("");
 			string defaultResult2 = "CREATE OR JOIN PRIVATE ROOMS";
 			string featureDescription;
 			LocalisationManager.TryGetKeyForCurrentLocale("ROOM_SCREEN_KID_PROHIBITED_VERB", out featureDescription, defaultResult2);
@@ -3468,13 +3373,12 @@ namespace GorillaNetworking
 			string defaultResult = "VOICE TYPE: \"MONKE\"\n\n";
 			string text;
 			LocalisationManager.TryGetKeyForCurrentLocale("VOICE_SCREEN_KID_CURRENT_VOICE", out text, defaultResult);
-			this.screenText.Text = text;
+			this.screenText.Set(text);
 			if (!KIDManager.KidEnabled)
 			{
 				defaultResult = "YOU CANNOT USE THE HUMAN VOICE TYPE FEATURE RIGHT NOW";
 				LocalisationManager.TryGetKeyForCurrentLocale("VOICE_SCREEN_DISABLED", out text, defaultResult);
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text;
+				this.screenText.Append(text);
 				return;
 			}
 			defaultResult = "ENABLE HUMAN VOICE CHAT";
@@ -3492,7 +3396,7 @@ namespace GorillaNetworking
 
 		private void MicScreen_Permission()
 		{
-			this.screenText.Text = "";
+			this.screenText.Set("");
 			string defaultResult = "ENABLE HUMAN VOICE CHAT";
 			string featureDescription;
 			LocalisationManager.TryGetKeyForCurrentLocale("VOICE_SCREEN_GUARDIAN_FEATURE_DESC", out featureDescription, defaultResult);
@@ -3509,13 +3413,12 @@ namespace GorillaNetworking
 			if (!KIDManager.KidEnabled)
 			{
 				string defaultResult = "YOU CANNOT USE THE CUSTOM NICKNAME FEATURE RIGHT NOW";
-				string text;
-				LocalisationManager.TryGetKeyForCurrentLocale("NAME_SCREEN_DISABLED", out text, defaultResult);
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text;
+				string str;
+				LocalisationManager.TryGetKeyForCurrentLocale("NAME_SCREEN_DISABLED", out str, defaultResult);
+				this.screenText.Append(str);
 				return;
 			}
-			this.screenText.Text = "";
+			this.screenText.Set("");
 			string featureDescription;
 			LocalisationManager.TryGetKeyForCurrentLocale("NAME_SCREEN_KID_PROHIBITED_VERB", out featureDescription, "SET CUSTOM NICKNAMES");
 			this.GuardianConsentMessage("OPTION 3", featureDescription);
@@ -3530,7 +3433,7 @@ namespace GorillaNetworking
 
 		private void OnKIDSessionUpdated_CustomNicknames(bool showCustomNames, Permission.ManagedByEnum managedBy)
 		{
-			bool flag = (showCustomNames || managedBy == 1) && managedBy != 3;
+			bool flag = (showCustomNames || managedBy == Permission.ManagedByEnum.PLAYER) && managedBy != Permission.ManagedByEnum.PROHIBITED;
 			this.SetComputerSettingsBySafety(!flag, new GorillaComputer.ComputerState[]
 			{
 				GorillaComputer.ComputerState.Name
@@ -3539,7 +3442,7 @@ namespace GorillaNetworking
 			bool flag2 = @int > 0;
 			switch (managedBy)
 			{
-			case 1:
+			case Permission.ManagedByEnum.PLAYER:
 				if (showCustomNames)
 				{
 					this.NametagsEnabled = (@int == -1 || flag2);
@@ -3549,10 +3452,10 @@ namespace GorillaNetworking
 					this.NametagsEnabled = (@int != -1 && flag2);
 				}
 				break;
-			case 2:
+			case Permission.ManagedByEnum.GUARDIAN:
 				this.NametagsEnabled = (showCustomNames && (flag2 || @int == -1));
 				break;
-			case 3:
+			case Permission.ManagedByEnum.PROHIBITED:
 				this.NametagsEnabled = false;
 				break;
 			}
@@ -3565,18 +3468,17 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			action.Invoke(this.NametagsEnabled);
+			action(this.NametagsEnabled);
 		}
 
 		private void TroopScreen_Permission()
 		{
-			this.screenText.Text = "";
+			this.screenText.Set("");
 			if (!KIDManager.KidEnabled)
 			{
-				string text;
-				LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_DISABLED", out text, "YOU CANNOT USE THE TROOPS FEATURE RIGHT NOW");
-				GorillaText gorillaText = this.screenText;
-				gorillaText.Text += text;
+				string str;
+				LocalisationManager.TryGetKeyForCurrentLocale("TROOP_SCREEN_DISABLED", out str, "YOU CANNOT USE THE TROOPS FEATURE RIGHT NOW");
+				this.screenText.Append(str);
 				return;
 			}
 			string featureDescription;
@@ -3616,19 +3518,19 @@ namespace GorillaNetworking
 		private void KIdScreen_DisplayPermissions()
 		{
 			AgeStatusType activeAccountStatus = KIDManager.GetActiveAccountStatus();
-			string text = (!KIDManager.InitialisationSuccessful) ? "NOT READY" : activeAccountStatus.ToString();
+			string str = (!KIDManager.InitialisationSuccessful) ? "NOT READY" : activeAccountStatus.ToString();
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("k-ID Account Status:\t" + text);
-			if (activeAccountStatus == null)
+			stringBuilder.AppendLine("k-ID Account Status:\t" + str);
+			if (activeAccountStatus == (AgeStatusType)0)
 			{
 				stringBuilder.AppendLine("\nPress 'OPTION 1' to get permissions!");
-				this.screenText.Text = stringBuilder.ToString();
+				this.screenText.Set(stringBuilder.ToString());
 				return;
 			}
 			if (this._waitingForUpdatedSession)
 			{
 				stringBuilder.AppendLine("\nWAITING FOR PARENT/GUARDIAN CONSENT!");
-				this.screenText.Text = stringBuilder.ToString();
+				this.screenText.Set(stringBuilder.ToString());
 				return;
 			}
 			stringBuilder.AppendLine("\nPermissions:");
@@ -3637,15 +3539,15 @@ namespace GorillaNetworking
 			int num = 1;
 			for (int i = 0; i < count; i++)
 			{
-				if (Enumerable.Contains<string>(this._interestedPermissionNames, allPermissionsData[i].Name))
+				if (this._interestedPermissionNames.Contains(allPermissionsData[i].Name))
 				{
-					string text2 = allPermissionsData[i].Enabled ? "<color=#85ffa5>" : "<color=\"RED\">";
+					string text = allPermissionsData[i].Enabled ? "<color=#85ffa5>" : "<color=\"RED\">";
 					stringBuilder.AppendLine(string.Concat(new string[]
 					{
 						"[",
 						num.ToString(),
 						"] ",
-						text2,
+						text,
 						allPermissionsData[i].Name,
 						"</color>"
 					}));
@@ -3653,7 +3555,7 @@ namespace GorillaNetworking
 				}
 			}
 			stringBuilder.AppendLine("\nTO REFRESH PERMISSIONS PRESS OPTION 1!");
-			this.screenText.Text = stringBuilder.ToString();
+			this.screenText.Set(stringBuilder.ToString());
 		}
 
 		private string GetLocalisedLanguageScreen()
@@ -3672,8 +3574,8 @@ namespace GorillaNetworking
 			{
 				num2++;
 				string text = LocalisationManager.LocaleToFriendlyString(keyValuePair.Value, false).ToUpper();
-				string text2 = string.Format("{0}) {1}", keyValuePair.Key, text);
-				stringBuilder.Append(text2);
+				string value = string.Format("{0}) {1}", keyValuePair.Key, text);
+				stringBuilder.Append(value);
 				int remainingChars = this.GetRemainingChars(text, maxLength);
 				stringBuilder.Append(' ', remainingChars);
 				if (num2 >= num)
@@ -3723,7 +3625,7 @@ namespace GorillaNetworking
 
 		private void LanguageScreen()
 		{
-			this.screenText.Text = this.GetLocalisedLanguageScreen();
+			this.screenText.Set(this.GetLocalisedLanguageScreen());
 		}
 
 		private void ProcessLanguageState(GorillaKeyboardBindings buttonPressed)
@@ -3773,55 +3675,10 @@ namespace GorillaNetworking
 				for (int j = 0; j < num; j++)
 				{
 					List<string> functionNames = this.FunctionNames;
-					int num2 = i;
-					functionNames[num2] += " ";
+					int index = i;
+					functionNames[index] += " ";
 				}
 			}
-		}
-
-		public GorillaComputer()
-		{
-			List<GorillaComputer.StateOrderItem> list = new List<GorillaComputer.StateOrderItem>();
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Room));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Name));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Language, "Lang"));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Turn));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Mic));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Queue));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Troop));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Group));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Voice));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.AutoMute, "Automod"));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Visuals, "Items"));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Credits));
-			list.Add(new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Support));
-			this.OrderList = list;
-			this.Pointer = "<-";
-			this.FunctionNames = new List<string>();
-			this.micInputTestTimerThreshold = 10f;
-			this.primaryTriggersByZone = new Dictionary<string, GorillaNetworkJoinTrigger>();
-			this._filteredStates = new List<GorillaComputer.ComputerState>();
-			this._activeOrderList = new List<GorillaComputer.StateOrderItem>();
-			this.stateStack = new Stack<GorillaComputer.ComputerState>();
-			this.warningConfirmationInputString = string.Empty;
-			this.redemptionCode = "";
-			this.virtualStumpRoomPrepend = "";
-			this.waitOneSecond = new WaitForSeconds(1f);
-			this.topTroops = new List<string>();
-			this.currentTroopPopulation = -1;
-			this.checkIfDisconnectedSeconds = 10f;
-			this.checkIfConnectedSeconds = 1f;
-			this.troopPopulationCheckCooldown = 3f;
-			this._updateAttemptCooldown = 15f;
-			this._currentScreentState = GorillaComputer.EKidScreenState.Show_OTP;
-			this._interestedPermissionNames = new string[]
-			{
-				"custom-username",
-				"voice-chat",
-				"join-groups"
-			};
-			this._languagesDisplaySB = new StringBuilder();
-			base..ctor();
 		}
 
 		private const string VERSION_MISMATCH_KEY = "VERSION_MISMATCH";
@@ -4182,7 +4039,7 @@ namespace GorillaNetworking
 		public static volatile GorillaComputer instance;
 
 		[OnEnterPlay_Set(false)]
-		public static bool hasInstance;
+		public static bool hasInstance = false;
 
 		[OnEnterPlay_SetNull]
 		private static Action<bool> onNametagSettingChangedAction;
@@ -4258,13 +4115,28 @@ namespace GorillaNetworking
 
 		public bool initialized;
 
-		public List<GorillaComputer.StateOrderItem> OrderList;
+		public List<GorillaComputer.StateOrderItem> OrderList = new List<GorillaComputer.StateOrderItem>
+		{
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Room),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Name),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Language, "Lang"),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Turn),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Mic),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Queue),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Troop),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Group),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Voice),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.AutoMute, "Automod"),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Visuals, "Items"),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Credits),
+			new GorillaComputer.StateOrderItem(GorillaComputer.ComputerState.Support)
+		};
 
-		public string Pointer;
+		public string Pointer = "<-";
 
 		public int highestCharacterCount;
 
-		public List<string> FunctionNames;
+		public List<string> FunctionNames = new List<string>();
 
 		public int FunctionsCount;
 
@@ -4282,7 +4154,7 @@ namespace GorillaNetworking
 
 		private float micInputTestTimer;
 
-		public float micInputTestTimerThreshold;
+		public float micInputTestTimerThreshold = 10f;
 
 		[Header("Automute vars")]
 		public string autoMuteType;
@@ -4309,7 +4181,7 @@ namespace GorillaNetworking
 		private bool rememberTroopQueueState;
 
 		[Header("Join Triggers")]
-		public Dictionary<string, GorillaNetworkJoinTrigger> primaryTriggersByZone;
+		public Dictionary<string, GorillaNetworkJoinTrigger> primaryTriggersByZone = new Dictionary<string, GorillaNetworkJoinTrigger>();
 
 		public string voiceChatOn;
 
@@ -4344,11 +4216,11 @@ namespace GorillaNetworking
 
 		public TextAsset anywhereTwoWeekFile;
 
-		private List<GorillaComputer.ComputerState> _filteredStates;
+		private List<GorillaComputer.ComputerState> _filteredStates = new List<GorillaComputer.ComputerState>();
 
-		private List<GorillaComputer.StateOrderItem> _activeOrderList;
+		private List<GorillaComputer.StateOrderItem> _activeOrderList = new List<GorillaComputer.StateOrderItem>();
 
-		private Stack<GorillaComputer.ComputerState> stateStack;
+		private Stack<GorillaComputer.ComputerState> stateStack = new Stack<GorillaComputer.ComputerState>();
 
 		private GorillaComputer.ComputerState currentComputerState;
 
@@ -4372,7 +4244,7 @@ namespace GorillaNetworking
 
 		private int colorCursorLine;
 
-		private string warningConfirmationInputString;
+		private string warningConfirmationInputString = string.Empty;
 
 		private bool displaySupport;
 
@@ -4384,31 +4256,45 @@ namespace GorillaNetworking
 
 		private GorillaComputer.RedemptionResult redemptionResult;
 
-		private string redemptionCode;
+		private string redemptionCode = "";
 
 		private bool playerInVirtualStump;
 
-		private string virtualStumpRoomPrepend;
+		private string virtualStumpRoomPrepend = "";
 
-		private WaitForSeconds waitOneSecond;
+		private WaitForSeconds waitOneSecond = new WaitForSeconds(1f);
 
 		private Coroutine LoadingRoutine;
 
-		private List<string> topTroops;
+		private List<string> topTroops = new List<string>();
 
 		private bool hasRequestedInitialTroopPopulation;
 
-		private int currentTroopPopulation;
+		private int currentTroopPopulation = -1;
 
 		private float lastCheckedWifi;
 
-		private float checkIfDisconnectedSeconds;
+		private float checkIfDisconnectedSeconds = 10f;
 
-		private float checkIfConnectedSeconds;
+		private float checkIfConnectedSeconds = 1f;
 
 		private bool didInitializeGameMode;
 
-		private float troopPopulationCheckCooldown;
+		private static int sessionCount = -1;
+
+		private const bool k_debug_shouldResetSessionCount = false;
+
+		private const bool k_debug_shouldResetGameMode = false;
+
+		private const string k_sessionCountKey = "sessionCount";
+
+		private const GameModeType k_defaultGameMode = GameModeType.SuperInfect;
+
+		private const GameModeType k_noobGameMode = GameModeType.Infection;
+
+		private const int k_noobSessionCountThreshold = 4;
+
+		private float troopPopulationCheckCooldown = 3f;
 
 		private float nextPopulationCheckTime;
 
@@ -4420,15 +4306,20 @@ namespace GorillaNetworking
 
 		private const string FAMILY_PORTAL_URL = "k-id.com/code";
 
-		private float _updateAttemptCooldown;
+		private float _updateAttemptCooldown = 15f;
 
 		private float _nextUpdateAttemptTime;
 
 		private bool _waitingForUpdatedSession;
 
-		private GorillaComputer.EKidScreenState _currentScreentState;
+		private GorillaComputer.EKidScreenState _currentScreentState = GorillaComputer.EKidScreenState.Show_OTP;
 
-		private string[] _interestedPermissionNames;
+		private string[] _interestedPermissionNames = new string[]
+		{
+			"custom-username",
+			"voice-chat",
+			"join-groups"
+		};
 
 		private const string LANG_SCREEN_TITLE_KEY = "LANG_SCREEN_TITLE";
 
@@ -4436,7 +4327,7 @@ namespace GorillaNetworking
 
 		private const string LANG_SCREEN_CURRENT_LANGUAGE_KEY = "LANG_SCREEN_CURRENT_LANGUAGE";
 
-		private StringBuilder _languagesDisplaySB;
+		private StringBuilder _languagesDisplaySB = new StringBuilder();
 
 		private Locale _previousLocalisationSetting;
 

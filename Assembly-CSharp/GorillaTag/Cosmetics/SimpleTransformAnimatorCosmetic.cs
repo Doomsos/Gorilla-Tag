@@ -81,18 +81,18 @@ namespace GorillaTag.Cosmetics
 
 		private void UpdateTransform()
 		{
-			Vector3 vector = this.targetTransform.position;
-			Quaternion quaternion = this.targetTransform.rotation;
-			float num = this.InterpolationCurve.Evaluate(this.posBlendCurrent);
+			Vector3 position = this.targetTransform.position;
+			Quaternion rotation = this.targetTransform.rotation;
+			float t = this.InterpolationCurve.Evaluate(this.posBlendCurrent);
 			if (this.animatedProperties == SimpleTransformAnimatorCosmetic.animatedPropertyChoices.Position || this.animatedProperties == SimpleTransformAnimatorCosmetic.animatedPropertyChoices.PositionAndRotation)
 			{
-				vector = Vector3.Lerp(this.poseA.position, this.poseB.position, num);
+				position = Vector3.Lerp(this.poseA.position, this.poseB.position, t);
 			}
 			if (this.animatedProperties == SimpleTransformAnimatorCosmetic.animatedPropertyChoices.Rotation || this.animatedProperties == SimpleTransformAnimatorCosmetic.animatedPropertyChoices.PositionAndRotation)
 			{
-				quaternion = Quaternion.Slerp(this.poseA.rotation, this.poseB.rotation, num);
+				rotation = Quaternion.Slerp(this.poseA.rotation, this.poseB.rotation, t);
 			}
-			this.targetTransform.SetPositionAndRotation(vector, quaternion);
+			this.targetTransform.SetPositionAndRotation(position, rotation);
 		}
 
 		public void Toggle()

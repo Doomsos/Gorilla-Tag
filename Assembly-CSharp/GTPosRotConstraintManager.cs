@@ -30,9 +30,9 @@ public class GTPosRotConstraintManager : MonoBehaviour
 	{
 		Transform source = constraint.source;
 		Transform follower = constraint.follower;
-		Vector3 vector = source.position + source.TransformVector(constraint.positionOffset);
-		Quaternion quaternion = source.rotation * constraint.rotationOffset;
-		follower.SetPositionAndRotation(vector, quaternion);
+		Vector3 position = source.position + source.TransformVector(constraint.positionOffset);
+		Quaternion rotation = source.rotation * constraint.rotationOffset;
+		follower.SetPositionAndRotation(position, rotation);
 	}
 
 	protected void LateUpdate()
@@ -107,12 +107,12 @@ public class GTPosRotConstraintManager : MonoBehaviour
 				return;
 			}
 		}
-		GTPosRotConstraintManager.Range range = new GTPosRotConstraintManager.Range
+		GTPosRotConstraintManager.Range value = new GTPosRotConstraintManager.Range
 		{
 			start = GTPosRotConstraintManager.constraints.Count,
 			end = GTPosRotConstraintManager.constraints.Count + component.constraints.Length - 1
 		};
-		GTPosRotConstraintManager.componentRanges.Add(instanceID, range);
+		GTPosRotConstraintManager.componentRanges.Add(instanceID, value);
 		GTPosRotConstraintManager.constraints.AddRange(component.constraints);
 		if (GTPosRotConstraintManager.instance.constraintsToDisable.Contains(component))
 		{
@@ -144,18 +144,18 @@ public class GTPosRotConstraintManager : MonoBehaviour
 	{
 		int instanceID = component.GetInstanceID();
 		GTPosRotConstraintManager.Range range;
-		if (!GTPosRotConstraintManager.hasInstance || !GTPosRotConstraintManager.componentRanges.TryGetValue(instanceID, ref range))
+		if (!GTPosRotConstraintManager.hasInstance || !GTPosRotConstraintManager.componentRanges.TryGetValue(instanceID, out range))
 		{
 			return;
 		}
 		GTPosRotConstraintManager.constraints.RemoveRange(range.start, 1 + range.end - range.start);
 		GTPosRotConstraintManager.componentRanges.Remove(instanceID);
-		foreach (int num in Enumerable.ToArray<int>(GTPosRotConstraintManager.componentRanges.Keys))
+		foreach (int key in GTPosRotConstraintManager.componentRanges.Keys.ToArray<int>())
 		{
-			GTPosRotConstraintManager.Range range2 = GTPosRotConstraintManager.componentRanges[num];
+			GTPosRotConstraintManager.Range range2 = GTPosRotConstraintManager.componentRanges[key];
 			if (range2.start > range.end)
 			{
-				GTPosRotConstraintManager.componentRanges[num] = new GTPosRotConstraintManager.Range
+				GTPosRotConstraintManager.componentRanges[key] = new GTPosRotConstraintManager.Range
 				{
 					start = range2.start - range.end + range.start - 1,
 					end = range2.end - range.end + range.start - 1

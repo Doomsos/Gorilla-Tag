@@ -503,8 +503,8 @@ public class BodyDockPositions : MonoBehaviour
 				TransferrableObject.PositionState positionState = this.MapDropPositionToState(dropPositions2);
 				if (this.TransferrableItemActive(num))
 				{
-					BodyDockPositions.DropPositions dropPositions3 = this.TransferrableItemPosition(num);
-					dockingResult.positionsDisabled.Add(dropPositions3);
+					BodyDockPositions.DropPositions item = this.TransferrableItemPosition(num);
+					dockingResult.positionsDisabled.Add(item);
 					this.MoveTransferableItem(num, dropPositions2, positionState);
 				}
 				else

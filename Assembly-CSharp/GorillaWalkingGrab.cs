@@ -31,9 +31,9 @@ public class GorillaWalkingGrab : MonoBehaviour
 	{
 		if (!this.MakeJump())
 		{
-			Vector3 vector = Vector3.ProjectOnPlane(this.positionHistory[(this.historyIndex != 0) ? (this.historyIndex - 1) : (this.historySteps - 1)] - this.handToStickTo.transform.position, collision.GetContact(0).normal);
-			Vector3 vector2 = this.thisRigidbody.transform.position - this.handToStickTo.transform.position;
-			this.playspaceRigidbody.MovePosition(this.playspaceRigidbody.transform.position + vector - vector2);
+			Vector3 b = Vector3.ProjectOnPlane(this.positionHistory[(this.historyIndex != 0) ? (this.historyIndex - 1) : (this.historySteps - 1)] - this.handToStickTo.transform.position, collision.GetContact(0).normal);
+			Vector3 b2 = this.thisRigidbody.transform.position - this.handToStickTo.transform.position;
+			this.playspaceRigidbody.MovePosition(this.playspaceRigidbody.transform.position + b - b2);
 		}
 	}
 

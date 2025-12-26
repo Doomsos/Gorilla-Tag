@@ -165,9 +165,9 @@ public class RCShip : RCHoverboard
 		base.SharedUpdate(dt);
 		if (this.cannonTransform != null)
 		{
-			float num = this.cannonToLeft ? this.leftYaw : this.rightYaw;
+			float target = this.cannonToLeft ? this.leftYaw : this.rightYaw;
 			Vector3 localEulerAngles = this.cannonTransform.localEulerAngles;
-			localEulerAngles.z = Mathf.MoveTowardsAngle(localEulerAngles.z, num, this.cannonYawSpeed * dt);
+			localEulerAngles.z = Mathf.MoveTowardsAngle(localEulerAngles.z, target, this.cannonYawSpeed * dt);
 			this.cannonTransform.localEulerAngles = localEulerAngles;
 		}
 		if (this.cannonToLeft != this.lastCannonToLeft)

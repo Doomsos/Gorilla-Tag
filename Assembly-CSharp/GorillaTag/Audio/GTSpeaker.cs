@@ -57,7 +57,7 @@ namespace GorillaTag.Audio
 			};
 			foreach (AudioSource source in this._externalAudioSources)
 			{
-				this._externalAudioOutputs.Add(this.GetAudioOutFactoryFromSource(source, pdc).Invoke());
+				this._externalAudioOutputs.Add(this.GetAudioOutFactoryFromSource(source, pdc)());
 			}
 		}
 

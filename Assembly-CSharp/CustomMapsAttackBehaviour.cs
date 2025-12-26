@@ -191,7 +191,7 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 		}
 		switch (this.attackType)
 		{
-		case 0:
+		case AttackType.Tag:
 			if (GameMode.ActiveGameMode.GameType() != GameModeType.Custom)
 			{
 				GameMode.ReportHit();
@@ -199,10 +199,10 @@ public class CustomMapsAttackBehaviour : CustomMapsBehaviourBase
 			}
 			CustomGameMode.TaggedByAI(this.controller.entity, grplayer.MyRig.OwningNetPlayer.ActorNumber);
 			return;
-		case 1:
+		case AttackType.UseGT:
 			CustomMapsGameManager.instance.OnPlayerHit(this.controller.entity.id, grplayer, this.controller.transform.position);
 			return;
-		case 2:
+		case AttackType.UseLuau:
 			CustomGameMode.OnPlayerHit(this.controller.entity, grplayer.MyRig.OwningNetPlayer.ActorNumber, this.damageAmount);
 			return;
 		default:

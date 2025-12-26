@@ -101,8 +101,7 @@ public class TestManipulatableCube : ManipulatableObject
 
 	public void SetCubeToSpecificPosition(float x, float y, float z)
 	{
-		Vector3 vector;
-		vector..ctor(0f, 0f, 0f);
+		Vector3 vector = new Vector3(0f, 0f, 0f);
 		vector.x = Mathf.Clamp(x, this.minXOffset, this.maxXOffset);
 		vector.y = Mathf.Clamp(y, this.minYOffset, this.maxYOffset);
 		vector.z = Mathf.Clamp(z, this.minZOffset, this.maxZOffset);

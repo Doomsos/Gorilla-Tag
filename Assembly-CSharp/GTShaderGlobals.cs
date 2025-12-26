@@ -38,7 +38,7 @@ public class GTShaderGlobals : MonoBehaviour, IGorillaSliceableSimple
 		this.SliceUpdate();
 	}
 
-	[RuntimeInitializeOnLoadMethod(1)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void Initialize()
 	{
 		GTShaderGlobals.InitBlueNoiseTex();

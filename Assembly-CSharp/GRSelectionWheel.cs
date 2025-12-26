@@ -102,14 +102,13 @@ public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 		for (int i = 0; i < this.shelfNames.Count; i++)
 		{
 			float num3 = ((float)i - num2) * this.deltaAngle + this.pointerOffsetAngle;
-			float num4 = num3 * 3.1415927f / 180f;
-			float num5 = Mathf.Cos(num4);
-			float num6 = Mathf.Sin(num4);
+			float f = num3 * 3.1415927f / 180f;
+			float num4 = Mathf.Cos(f);
+			float num5 = Mathf.Sin(f);
 			Quaternion localRotation = Quaternion.Euler(90f - num3, 180f, 0f);
-			Vector3 vector;
-			vector..ctor(this.textHorizOffset, num5 * this.wheelTextRadius, num6 * this.wheelTextRadius);
+			Vector3 position = new Vector3(this.textHorizOffset, num4 * this.wheelTextRadius, num5 * this.wheelTextRadius);
 			this.shelfNames[i].transform.rotation = base.transform.TransformRotation(localRotation);
-			this.shelfNames[i].transform.position = base.transform.TransformPoint(vector);
+			this.shelfNames[i].transform.position = base.transform.TransformPoint(position);
 			this.shelfNames[i].color = ((Math.Abs(num2 - (float)i) < 0.5f) ? Color.green : Color.white);
 		}
 	}

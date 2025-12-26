@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
-public class SIResource : MonoBehaviour
+public class SIResource : MonoBehaviour, IGorillaSliceableSimple
 {
 	private void Awake()
 	{
@@ -22,7 +22,7 @@ public class SIResource : MonoBehaviour
 		this.myGameEntity.onEntityDestroyed += this.HandleOnDestroyed;
 	}
 
-	public void Update()
+	public void SliceUpdate()
 	{
 		if (this.isSleeping || !this.shouldSleep)
 		{
@@ -57,6 +57,7 @@ public class SIResource : MonoBehaviour
 		gameEntity4.OnUnsnapped = (Action)Delegate.Combine(gameEntity4.OnUnsnapped, new Action(this.ReleaseInitialization));
 		this.timeReleased = Time.time;
 		this._rb.isKinematic = true;
+		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
 	private void OnDisable()
@@ -70,6 +71,7 @@ public class SIResource : MonoBehaviour
 		GameEntity gameEntity4 = this.myGameEntity;
 		gameEntity4.OnUnsnapped = (Action)Delegate.Remove(gameEntity4.OnUnsnapped, new Action(this.ReleaseInitialization));
 		SpawnRegion<GameEntity, SIResourceRegion>.RemoveItemFromRegion(this.myGameEntity);
+		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
 	public void GrabInitialization()

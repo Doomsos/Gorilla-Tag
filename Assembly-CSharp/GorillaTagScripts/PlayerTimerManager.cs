@@ -70,13 +70,13 @@ namespace GorillaTagScripts
 		public bool IsLocalTimerStarted()
 		{
 			PlayerTimerManager.PlayerTimerData playerTimerData;
-			return this.playerTimerData.TryGetValue(NetworkSystem.Instance.LocalPlayer.ActorNumber, ref playerTimerData) && playerTimerData.isStarted;
+			return this.playerTimerData.TryGetValue(NetworkSystem.Instance.LocalPlayer.ActorNumber, out playerTimerData) && playerTimerData.isStarted;
 		}
 
 		public float GetTimeForPlayer(int actorNumber)
 		{
 			PlayerTimerManager.PlayerTimerData playerTimerData;
-			if (!this.playerTimerData.TryGetValue(actorNumber, ref playerTimerData))
+			if (!this.playerTimerData.TryGetValue(actorNumber, out playerTimerData))
 			{
 				return 0f;
 			}
@@ -90,7 +90,7 @@ namespace GorillaTagScripts
 		public float GetLastDurationForPlayer(int actorNumber)
 		{
 			PlayerTimerManager.PlayerTimerData playerTimerData;
-			if (this.playerTimerData.TryGetValue(actorNumber, ref playerTimerData))
+			if (this.playerTimerData.TryGetValue(actorNumber, out playerTimerData))
 			{
 				return Mathf.Clamp(playerTimerData.lastTimerDuration / 1000f, 0f, 3599.99f);
 			}
@@ -154,7 +154,7 @@ namespace GorillaTagScripts
 			this.playerTimerData.Clear();
 			try
 			{
-				List<Player> list = Enumerable.ToList<Player>(PhotonNetwork.PlayerList);
+				List<Player> list = PhotonNetwork.PlayerList.ToList<Player>();
 				if (bytes.Length < 4)
 				{
 					this.playerTimerData.Clear();
@@ -181,25 +181,25 @@ namespace GorillaTagScripts
 					uint lastTimerDuration = binaryReader.ReadUInt32();
 					if (list.FindIndex((Player x) => x.ActorNumber == actorNum) >= 0)
 					{
-						PlayerTimerManager.PlayerTimerData playerTimerData = new PlayerTimerManager.PlayerTimerData
+						PlayerTimerManager.PlayerTimerData value = new PlayerTimerManager.PlayerTimerData
 						{
 							startTimeStamp = startTimeStamp,
 							endTimeStamp = endTimeStamp,
 							isStarted = isStarted,
 							lastTimerDuration = lastTimerDuration
 						};
-						this.playerTimerData.TryAdd(actorNum, playerTimerData);
+						this.playerTimerData.TryAdd(actorNum, value);
 					}
 				}
 			}
-			catch (Exception ex)
+			catch (Exception value2)
 			{
-				Console.WriteLine(ex);
+				Console.WriteLine(value2);
 				this.playerTimerData.Clear();
 			}
 			if (Time.time - this.requestSendTime < 5f && this.IsLocalTimerStarted() != this.localPlayerRequestedStart)
 			{
-				this.timerPV.RPC("RequestTimerToggleRPC", 2, new object[]
+				this.timerPV.RPC("RequestTimerToggleRPC", RpcTarget.MasterClient, new object[]
 				{
 					this.localPlayerRequestedStart
 				});
@@ -209,7 +209,7 @@ namespace GorillaTagScripts
 		private void ClearOldPlayerData()
 		{
 			List<int> list = new List<int>(this.playerTimerData.Count);
-			List<Player> list2 = Enumerable.ToList<Player>(PhotonNetwork.PlayerList);
+			List<Player> list2 = PhotonNetwork.PlayerList.ToList<Player>();
 			using (Dictionary<int, PlayerTimerManager.PlayerTimerData>.KeyCollection.Enumerator enumerator = this.playerTimerData.Keys.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
@@ -221,9 +221,9 @@ namespace GorillaTagScripts
 					}
 				}
 			}
-			foreach (int num in list)
+			foreach (int key in list)
 			{
-				this.playerTimerData.Remove(num);
+				this.playerTimerData.Remove(key);
 			}
 		}
 
@@ -231,7 +231,7 @@ namespace GorillaTagScripts
 		{
 			this.requestSendTime = Time.time;
 			this.localPlayerRequestedStart = startTimer;
-			this.timerPV.RPC("RequestTimerToggleRPC", 2, new object[]
+			this.timerPV.RPC("RequestTimerToggleRPC", RpcTarget.MasterClient, new object[]
 			{
 				startTimer
 			});
@@ -246,7 +246,7 @@ namespace GorillaTagScripts
 			}
 			GorillaNot.IncrementRPCCall(info, "RequestTimerToggleRPC");
 			CallLimiter callLimiter;
-			if (this.timerToggleLimiters.TryGetValue(info.Sender.ActorNumber, ref callLimiter))
+			if (this.timerToggleLimiters.TryGetValue(info.Sender.ActorNumber, out callLimiter))
 			{
 				if (!callLimiter.CheckCallTime(Time.time))
 				{
@@ -264,7 +264,7 @@ namespace GorillaTagScripts
 				return;
 			}
 			PlayerTimerManager.PlayerTimerData playerTimerData;
-			bool flag = this.playerTimerData.TryGetValue(info.Sender.ActorNumber, ref playerTimerData);
+			bool flag = this.playerTimerData.TryGetValue(info.Sender.ActorNumber, out playerTimerData);
 			if (!startTimer && !flag)
 			{
 				return;
@@ -278,7 +278,7 @@ namespace GorillaTagScripts
 			{
 				num = PhotonNetwork.ServerTimestamp - PhotonNetwork.NetworkingClient.LoadBalancingPeer.DisconnectTimeout;
 			}
-			this.timerPV.RPC("TimerToggledMasterRPC", 0, new object[]
+			this.timerPV.RPC("TimerToggledMasterRPC", RpcTarget.All, new object[]
 			{
 				startTimer,
 				num,
@@ -322,7 +322,7 @@ namespace GorillaTagScripts
 		private void OnToggleTimerForPlayer(bool startTimer, Player player, int toggleTime)
 		{
 			PlayerTimerManager.PlayerTimerData playerTimerData;
-			if (this.playerTimerData.TryGetValue(player.ActorNumber, ref playerTimerData))
+			if (this.playerTimerData.TryGetValue(player.ActorNumber, out playerTimerData))
 			{
 				if (startTimer && !playerTimerData.isStarted)
 				{
@@ -357,14 +357,14 @@ namespace GorillaTagScripts
 			}
 			else
 			{
-				PlayerTimerManager.PlayerTimerData playerTimerData2 = new PlayerTimerManager.PlayerTimerData
+				PlayerTimerManager.PlayerTimerData value = new PlayerTimerManager.PlayerTimerData
 				{
 					startTimeStamp = (startTimer ? toggleTime : 0),
 					endTimeStamp = (startTimer ? 0 : toggleTime),
 					isStarted = startTimer,
 					lastTimerDuration = 0U
 				};
-				this.playerTimerData.TryAdd(player.ActorNumber, playerTimerData2);
+				this.playerTimerData.TryAdd(player.ActorNumber, value);
 				UnityEvent<int> onTimerStartedForPlayer2 = this.OnTimerStartedForPlayer;
 				if (onTimerStartedForPlayer2 != null)
 				{
@@ -393,7 +393,7 @@ namespace GorillaTagScripts
 			if (newMasterClient.IsLocal)
 			{
 				int num = this.SerializeTimerState();
-				this.timerPV.RPC("InitTimersMasterRPC", 1, new object[]
+				this.timerPV.RPC("InitTimersMasterRPC", RpcTarget.Others, new object[]
 				{
 					num,
 					this.serializedTimerData
@@ -424,7 +424,7 @@ namespace GorillaTagScripts
 			base.OnPlayerLeftRoom(otherPlayer);
 			this.playerTimerData.Remove(otherPlayer.ActorNumber);
 			CallLimiter limiter;
-			if (this.timerToggleLimiters.TryGetValue(otherPlayer.ActorNumber, ref limiter))
+			if (this.timerToggleLimiters.TryGetValue(otherPlayer.ActorNumber, out limiter))
 			{
 				this.ReturnCallLimiterToPool(limiter);
 				this.timerToggleLimiters.Remove(otherPlayer.ActorNumber);

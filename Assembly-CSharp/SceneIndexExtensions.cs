@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public static class SceneIndexExtensions
@@ -30,7 +29,7 @@ public static class SceneIndexExtensions
 			{
 				SceneIndexExtensions.onSceneLoadCallbacks[i] = new List<Action>();
 			}
-			SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(SceneIndexExtensions.OnSceneLoad);
+			SceneManager.sceneLoaded += SceneIndexExtensions.OnSceneLoad;
 		}
 		SceneIndexExtensions.onSceneLoadCallbacks[(int)scene].Add(callback);
 	}
@@ -46,7 +45,7 @@ public static class SceneIndexExtensions
 		{
 			foreach (Action action in SceneIndexExtensions.onSceneLoadCallbacks[scene.buildIndex])
 			{
-				action.Invoke();
+				action();
 			}
 		}
 	}
@@ -60,7 +59,7 @@ public static class SceneIndexExtensions
 			{
 				SceneIndexExtensions.onSceneUnloadCallbacks[i] = new List<Action>();
 			}
-			SceneManager.sceneUnloaded += new UnityAction<Scene>(SceneIndexExtensions.OnSceneUnload);
+			SceneManager.sceneUnloaded += SceneIndexExtensions.OnSceneUnload;
 		}
 		SceneIndexExtensions.onSceneUnloadCallbacks[(int)scene].Add(callback);
 	}
@@ -76,7 +75,7 @@ public static class SceneIndexExtensions
 		{
 			foreach (Action action in SceneIndexExtensions.onSceneUnloadCallbacks[scene.buildIndex])
 			{
-				action.Invoke();
+				action();
 			}
 		}
 	}
@@ -87,12 +86,12 @@ public static class SceneIndexExtensions
 		if (SceneIndexExtensions.onSceneLoadCallbacks != null)
 		{
 			SceneIndexExtensions.onSceneLoadCallbacks = null;
-			SceneManager.sceneLoaded -= new UnityAction<Scene, LoadSceneMode>(SceneIndexExtensions.OnSceneLoad);
+			SceneManager.sceneLoaded -= SceneIndexExtensions.OnSceneLoad;
 		}
 		if (SceneIndexExtensions.onSceneUnloadCallbacks != null)
 		{
 			SceneIndexExtensions.onSceneUnloadCallbacks = null;
-			SceneManager.sceneUnloaded -= new UnityAction<Scene>(SceneIndexExtensions.OnSceneUnload);
+			SceneManager.sceneUnloaded -= SceneIndexExtensions.OnSceneUnload;
 		}
 	}
 

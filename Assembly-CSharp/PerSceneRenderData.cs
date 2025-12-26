@@ -9,7 +9,7 @@ public class PerSceneRenderData : MonoBehaviour
 	{
 		int sceneIndex = this.sceneIndex;
 		new List<Renderer>();
-		foreach (Renderer renderer in Object.FindObjectsByType<Renderer>(0))
+		foreach (Renderer renderer in Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
 		{
 			if (renderer.gameObject.scene.buildIndex == sceneIndex)
 			{
@@ -63,9 +63,9 @@ public class PerSceneRenderData : MonoBehaviour
 				this.mRendererIndex++;
 			}
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
-			Debug.LogException(ex);
+			Debug.LogException(exception);
 		}
 	}
 
@@ -97,10 +97,10 @@ public class PerSceneRenderData : MonoBehaviour
 			return this.singleLightmap;
 		}
 		Texture2D result;
-		if (!this.lightmapsCache.TryGetValue(timeOfDay, ref result))
+		if (!this.lightmapsCache.TryGetValue(timeOfDay, out result))
 		{
 			ResourceRequest request;
-			if (this.resourceRequests.TryGetValue(timeOfDay, ref request))
+			if (this.resourceRequests.TryGetValue(timeOfDay, out request))
 			{
 				return null;
 			}
@@ -155,10 +155,10 @@ public class PerSceneRenderData : MonoBehaviour
 
 	public void ReleaseLightmap(string oldTimeOfDay)
 	{
-		Texture2D texture2D;
-		if (this.lightmapsCache.Remove(oldTimeOfDay, ref texture2D))
+		Texture2D assetToUnload;
+		if (this.lightmapsCache.Remove(oldTimeOfDay, out assetToUnload))
 		{
-			Resources.UnloadAsset(texture2D);
+			Resources.UnloadAsset(assetToUnload);
 		}
 	}
 
@@ -166,15 +166,15 @@ public class PerSceneRenderData : MonoBehaviour
 	{
 		if (this.singleLightmap != null)
 		{
-			callback.Invoke(this.singleLightmap);
+			callback(this.singleLightmap);
 		}
-		Texture2D texture2D;
-		if (this.lightmapsCache.TryGetValue(momentName, ref texture2D))
+		Texture2D obj;
+		if (this.lightmapsCache.TryGetValue(momentName, out obj))
 		{
-			callback.Invoke(texture2D);
+			callback(obj);
 		}
 		List<Action<Texture2D>> callbacks;
-		if (!this._momentName_to_callbacks.TryGetValue(momentName, ref callbacks))
+		if (!this._momentName_to_callbacks.TryGetValue(momentName, out callbacks))
 		{
 			callbacks = new List<Action<Texture2D>>(8);
 			this._momentName_to_callbacks[momentName] = callbacks;
@@ -184,7 +184,7 @@ public class PerSceneRenderData : MonoBehaviour
 			callbacks.Add(callback);
 		}
 		ResourceRequest request;
-		if (this.resourceRequests.TryGetValue(momentName, ref request))
+		if (this.resourceRequests.TryGetValue(momentName, out request))
 		{
 			return;
 		}
@@ -196,14 +196,14 @@ public class PerSceneRenderData : MonoBehaviour
 			{
 				return;
 			}
-			Texture2D texture2D2 = (Texture2D)request.asset;
-			this.lightmapsCache.Add(momentName, texture2D2);
+			Texture2D texture2D = (Texture2D)request.asset;
+			this.lightmapsCache.Add(momentName, texture2D);
 			this.resourceRequests.Remove(momentName);
 			foreach (Action<Texture2D> action in callbacks)
 			{
 				if (action != null)
 				{
-					action.Invoke(texture2D2);
+					action(texture2D);
 				}
 			}
 			callbacks.Clear();
@@ -258,7 +258,7 @@ public class PerSceneRenderData : MonoBehaviour
 	public static void g_StartAllScenesPopulateLightmaps(string fromLightmapName, string toLightmapName)
 	{
 		PerSceneRenderData._g_allScenesPopulateLightmaps_renderDatasHashSet.Clear();
-		PerSceneRenderData[] array = Object.FindObjectsByType<PerSceneRenderData>(0);
+		PerSceneRenderData[] array = Object.FindObjectsByType<PerSceneRenderData>(FindObjectsSortMode.None);
 		PerSceneRenderData._g_allScenesPopulateLightmaps_renderDatasHashSet.UnionWith(array);
 		foreach (PerSceneRenderData perSceneRenderData in array)
 		{
@@ -279,7 +279,7 @@ public class PerSceneRenderData : MonoBehaviour
 			{
 				return;
 			}
-			action.Invoke();
+			action();
 		}
 	}
 
@@ -342,7 +342,7 @@ public class PerSceneRenderData : MonoBehaviour
 			{
 				return;
 			}
-			onPopulateToAndFromLightmapsCompleted.Invoke(this);
+			onPopulateToAndFromLightmapsCompleted(this);
 		}
 	}
 

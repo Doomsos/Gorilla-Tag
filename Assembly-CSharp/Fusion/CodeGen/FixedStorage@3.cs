@@ -7,7 +7,7 @@ namespace Fusion.CodeGen
 	[WeaverGenerated]
 	[NetworkStructWeaved(3)]
 	[Serializable]
-	[StructLayout(2)]
+	[StructLayout(LayoutKind.Explicit)]
 	internal struct FixedStorage@3 : INetworkStruct
 	{
 		[FixedBuffer(typeof(int), 3)]
@@ -28,7 +28,7 @@ namespace Fusion.CodeGen
 		[CompilerGenerated]
 		[UnsafeValueType]
 		[WeaverGenerated]
-		[StructLayout(0, Size = 12)]
+		[StructLayout(LayoutKind.Sequential, Size = 12)]
 		public struct <Data>e__FixedBuffer
 		{
 			[WeaverGenerated]

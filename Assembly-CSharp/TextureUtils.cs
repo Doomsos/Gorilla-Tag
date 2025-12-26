@@ -49,7 +49,7 @@ public static class TextureUtils
 			}
 			RenderTexture resizeRT = RenderTexture.GetTemporary(width, height, 0);
 			Graphics.Blit(source, resizeRT);
-			NativeArray<byte> narray = new NativeArray<byte>(width * height * 4, 4, 0);
+			NativeArray<byte> narray = new NativeArray<byte>(width * height * 4, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
 			AsyncGPUReadbackRequest asyncGPUReadbackRequest = AsyncGPUReadback.RequestIntoNativeArray<byte>(ref narray, resizeRT, 0, delegate(AsyncGPUReadbackRequest request)
 			{
 				if (!request.hasError)
@@ -58,7 +58,7 @@ public static class TextureUtils
 					switch (fileFormat)
 					{
 					case SaveTextureFileFormat.EXR:
-						nativeArray = ImageConversion.EncodeNativeArrayToEXR<byte>(narray, resizeRT.graphicsFormat, (uint)width, (uint)height, 0U, 0);
+						nativeArray = ImageConversion.EncodeNativeArrayToEXR<byte>(narray, resizeRT.graphicsFormat, (uint)width, (uint)height, 0U, Texture2D.EXRFlags.None);
 						goto IL_C8;
 					case SaveTextureFileFormat.JPG:
 						nativeArray = ImageConversion.EncodeNativeArrayToJPG<byte>(narray, resizeRT.graphicsFormat, (uint)width, (uint)height, 0U, jpgQuality);
@@ -78,7 +78,7 @@ public static class TextureUtils
 				{
 					return;
 				}
-				done3.Invoke(!request.hasError);
+				done3(!request.hasError);
 			});
 			if (!asynchronous)
 			{
@@ -91,7 +91,7 @@ public static class TextureUtils
 		{
 			return;
 		}
-		done2.Invoke(false);
+		done2(false);
 	}
 
 	public static Texture2D CreateCopy(Texture2D tex)
@@ -100,7 +100,7 @@ public static class TextureUtils
 		{
 			throw new ArgumentNullException("tex");
 		}
-		RenderTexture temporary = RenderTexture.GetTemporary(tex.width, tex.height, 0, 7, 1);
+		RenderTexture temporary = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
 		Graphics.Blit(tex, temporary);
 		RenderTexture active = RenderTexture.active;
 		RenderTexture.active = temporary;

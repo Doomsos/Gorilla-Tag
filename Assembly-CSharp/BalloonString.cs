@@ -14,9 +14,9 @@ public class BalloonString : MonoBehaviour, IGorillaSliceableSimple
 			int num = this.vertices.Count - 2;
 			for (int i = 0; i < num; i++)
 			{
-				float num2 = (float)((i + 1) / (this.vertices.Count - 1));
-				Vector3 vector = Vector3.Lerp(this.startPositionXf.position, this.endPositionXf.position, num2);
-				this.vertices.Add(vector);
+				float t = (float)((i + 1) / (this.vertices.Count - 1));
+				Vector3 item = Vector3.Lerp(this.startPositionXf.position, this.endPositionXf.position, t);
+				this.vertices.Add(item);
 			}
 			this.vertices.Add(this.endPositionXf.position);
 		}

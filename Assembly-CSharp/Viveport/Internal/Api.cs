@@ -10,34 +10,34 @@ namespace Viveport.Internal
 			Api.LoadLibraryManually("viveport_api");
 		}
 
-		[DllImport("viveport_api", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_GetLicense")]
+		[DllImport("viveport_api", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_GetLicense")]
 		internal static extern void GetLicense(GetLicenseCallback callback, string appId, string appKey);
 
-		[DllImport("viveport_api64", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_GetLicense")]
+		[DllImport("viveport_api64", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_GetLicense")]
 		internal static extern void GetLicense_64(GetLicenseCallback callback, string appId, string appKey);
 
-		[DllImport("viveport_api", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_Init")]
+		[DllImport("viveport_api", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_Init")]
 		internal static extern int Init(StatusCallback initCallback, string appId);
 
-		[DllImport("viveport_api64", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_Init")]
+		[DllImport("viveport_api64", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_Init")]
 		internal static extern int Init_64(StatusCallback initCallback, string appId);
 
-		[DllImport("viveport_api", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_Shutdown")]
+		[DllImport("viveport_api", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_Shutdown")]
 		internal static extern int Shutdown(StatusCallback initCallback);
 
-		[DllImport("viveport_api64", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_Shutdown")]
+		[DllImport("viveport_api64", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_Shutdown")]
 		internal static extern int Shutdown_64(StatusCallback initCallback);
 
-		[DllImport("viveport_api", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_Version")]
+		[DllImport("viveport_api", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_Version")]
 		internal static extern IntPtr Version();
 
-		[DllImport("viveport_api64", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_Version")]
+		[DllImport("viveport_api64", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_Version")]
 		internal static extern IntPtr Version_64();
 
-		[DllImport("viveport_api", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_QueryRuntimeMode")]
+		[DllImport("viveport_api", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_QueryRuntimeMode")]
 		internal static extern void QueryRuntimeMode(QueryRuntimeModeCallback queryRunTimeCallback);
 
-		[DllImport("viveport_api64", CallingConvention = 2, CharSet = 2, EntryPoint = "IViveportAPI_QueryRuntimeMode")]
+		[DllImport("viveport_api64", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "IViveportAPI_QueryRuntimeMode")]
 		internal static extern void QueryRuntimeMode_64(QueryRuntimeModeCallback queryRunTimeCallback);
 
 		[DllImport("kernel32.dll")]

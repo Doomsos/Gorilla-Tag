@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public static class UberShader
 {
@@ -109,7 +110,7 @@ public static class UberShader
 				name = uberShader.GetPropertyName(i),
 				attributes = uberShader.GetPropertyAttributes(i)
 			};
-			if (uberShaderProperty.type == 3)
+			if (uberShaderProperty.type == ShaderPropertyType.Range)
 			{
 				uberShaderProperty.rangeLimits = uberShader.GetPropertyRangeLimits(uberShaderProperty.index);
 			}
@@ -124,7 +125,7 @@ public static class UberShader
 						uberShaderProperty.isKeywordToggle = flag;
 						if (flag)
 						{
-							string keyword = text.Split('(', 1)[1].RemoveEnd(")", 2);
+							string keyword = text.Split('(', StringSplitOptions.RemoveEmptyEntries)[1].RemoveEnd(")", StringComparison.InvariantCulture);
 							uberShaderProperty.keyword = keyword;
 						}
 					}

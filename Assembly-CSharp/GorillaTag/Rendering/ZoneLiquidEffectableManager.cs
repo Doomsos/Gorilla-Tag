@@ -31,11 +31,11 @@ namespace GorillaTag.Rendering
 
 		protected void LateUpdate()
 		{
-			int num = UnityLayer.Water.ToLayerMask();
+			int layerMask = UnityLayer.Water.ToLayerMask();
 			foreach (ZoneLiquidEffectable zoneLiquidEffectable in this.zoneLiquidEffectables)
 			{
 				Transform transform = zoneLiquidEffectable.transform;
-				zoneLiquidEffectable.inLiquidVolume = Physics.CheckSphere(transform.position, zoneLiquidEffectable.radius * transform.lossyScale.x, num);
+				zoneLiquidEffectable.inLiquidVolume = Physics.CheckSphere(transform.position, zoneLiquidEffectable.radius * transform.lossyScale.x, layerMask);
 				if (zoneLiquidEffectable.inLiquidVolume != zoneLiquidEffectable.wasInLiquidVolume)
 				{
 					for (int i = 0; i < zoneLiquidEffectable.childRenderers.Length; i++)

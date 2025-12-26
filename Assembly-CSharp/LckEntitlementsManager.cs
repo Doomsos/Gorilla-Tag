@@ -100,7 +100,7 @@ public class LckEntitlementsManager : MonoBehaviour
 	private bool ShouldProcessPlayer(string userId)
 	{
 		LckEntitlementsManager.PlayerProcessRecord playerProcessRecord;
-		if (!this._processedPlayers.TryGetValue(userId, ref playerProcessRecord))
+		if (!this._processedPlayers.TryGetValue(userId, out playerProcessRecord))
 		{
 			playerProcessRecord = new LckEntitlementsManager.PlayerProcessRecord();
 			this._processedPlayers[userId] = playerProcessRecord;
@@ -141,7 +141,7 @@ public class LckEntitlementsManager : MonoBehaviour
 					{
 						continue;
 					}
-					list = Enumerable.ToList<string>(this._remotePlayersToGetEntitlementsFor);
+					list = this._remotePlayersToGetEntitlementsFor.ToList<string>();
 					this._remotePlayersToGetEntitlementsFor.Clear();
 				}
 				if (list.Count > 0)
@@ -181,8 +181,8 @@ public class LckEntitlementsManager : MonoBehaviour
 				Debug.Log("LCK: Successfully set session entitlement.");
 				yield break;
 			}
-			string text = CS$<>8__locals1.announcementAsync.IsFaulted ? CS$<>8__locals1.announcementAsync.Exception.ToString() : CS$<>8__locals1.announcementAsync.Result.Message.ToString();
-			Debug.LogError(string.Format("LCK: Error setting session entitlement (Attempt {0}/{1}): {2}", attempt, 2, text));
+			string arg = CS$<>8__locals1.announcementAsync.IsFaulted ? CS$<>8__locals1.announcementAsync.Exception.ToString() : CS$<>8__locals1.announcementAsync.Result.Message.ToString();
+			Debug.LogError(string.Format("LCK: Error setting session entitlement (Attempt {0}/{1}): {2}", attempt, 2, arg));
 			CS$<>8__locals1 = null;
 			num = attempt;
 		}
@@ -224,8 +224,8 @@ public class LckEntitlementsManager : MonoBehaviour
 				{
 					while (enumerator2.MoveNext())
 					{
-						string text = enumerator2.Current;
-						this._processedPlayers.Remove(text);
+						string key = enumerator2.Current;
+						this._processedPlayers.Remove(key);
 					}
 					continue;
 				}

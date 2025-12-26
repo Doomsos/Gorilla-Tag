@@ -70,7 +70,7 @@ public class KiteDynamics : MonoBehaviour, ITetheredObjectBehavior
 		{
 			Vector3 vector = (this.grabPt.position - this.grabPtPosition) * 100f;
 			vector = Matrix4x4.Rotate(this.ctrlRotation).MultiplyVector(vector);
-			this.rb.AddForce(vector, 0);
+			this.rb.AddForce(vector, ForceMode.Force);
 			Vector3 linearVelocity = this.rb.linearVelocity;
 			float magnitude = linearVelocity.magnitude;
 			this.rb.linearVelocity = linearVelocity.normalized * Mathf.Min(magnitude, this.maximumVelocity * this.balloonScale);

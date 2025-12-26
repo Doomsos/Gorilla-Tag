@@ -3,6 +3,7 @@ using GorillaLocomotion.Gameplay;
 using Liv.Lck.GorillaTag;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR;
 
 public class LckDirectGrabbable : MonoBehaviour, IGorillaGrabable
 {
@@ -55,7 +56,7 @@ public class LckDirectGrabbable : MonoBehaviour, IGorillaGrabable
 		}
 		bool flag;
 		bool flag2;
-		if (this._precise && this.IsSlingshotHeldInHand(out flag, out flag2) && ((grabber.XrNode == 4 && flag) || (grabber.XrNode == 5 && flag2)))
+		if (this._precise && this.IsSlingshotHeldInHand(out flag, out flag2) && ((grabber.XrNode == XRNode.LeftHand && flag) || (grabber.XrNode == XRNode.RightHand && flag2)))
 		{
 			this._grabber = null;
 			grabbedTransform = grabber.transform;
@@ -71,7 +72,7 @@ public class LckDirectGrabbable : MonoBehaviour, IGorillaGrabable
 		Action action = this.onGrabbed;
 		if (action != null)
 		{
-			action.Invoke();
+			action();
 		}
 		UnityEvent onTabletGrabbed = this.OnTabletGrabbed;
 		if (onTabletGrabbed == null)
@@ -89,7 +90,7 @@ public class LckDirectGrabbable : MonoBehaviour, IGorillaGrabable
 		Action action = this.onReleased;
 		if (action != null)
 		{
-			action.Invoke();
+			action();
 		}
 		UnityEvent onTabletReleased = this.OnTabletReleased;
 		if (onTabletReleased == null)

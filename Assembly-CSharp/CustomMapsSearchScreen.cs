@@ -59,9 +59,9 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		}
 		if (pressedButton < CustomMapKeyboardBinding.up)
 		{
-			string text = this.searchPhrase;
+			string str = this.searchPhrase;
 			int num = (int)pressedButton;
-			this.searchPhrase = text + num.ToString();
+			this.searchPhrase = str + num.ToString();
 			this.RefreshSearchText();
 			return;
 		}
@@ -144,8 +144,8 @@ public class CustomMapsSearchScreen : CustomMapsTerminalScreen
 		this.filteredSearchedMods.Clear();
 		foreach (Mod mod in this.searchedMods)
 		{
-			ModId modId;
-			if (ModIOManager.TryGetNewMapsModId(out modId) && mod.Id == modId)
+			ModId right;
+			if (ModIOManager.TryGetNewMapsModId(out right) && mod.Id == right)
 			{
 				this.totalSearchMods = Mathf.Max(0, this.totalSearchMods - 1);
 			}

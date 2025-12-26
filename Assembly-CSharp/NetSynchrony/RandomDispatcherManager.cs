@@ -30,8 +30,7 @@ namespace NetSynchrony
 
 		private void AdjustedServerTime()
 		{
-			DateTime dateTime;
-			dateTime..ctor(2020, 1, 1);
+			DateTime dateTime = new DateTime(2020, 1, 1);
 			long num = GorillaComputer.instance.GetServerTime().Ticks - dateTime.Ticks;
 			this.serverTime = (double)((float)num / 10000000f);
 		}

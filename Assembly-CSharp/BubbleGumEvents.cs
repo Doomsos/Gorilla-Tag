@@ -40,9 +40,9 @@ public class BubbleGumEvents : MonoBehaviour
 		{
 			gameObject = rig.gameObject;
 		}
-		if (!BubbleGumEvents.gTargetCache.TryGetValue(gameObject, ref this._bubble))
+		if (!BubbleGumEvents.gTargetCache.TryGetValue(gameObject, out this._bubble))
 		{
-			this._bubble = Enumerable.FirstOrDefault<GumBubble>(gameObject.GetComponentsInChildren<GumBubble>(true), (GumBubble g) => g.transform.parent.name == "$gum");
+			this._bubble = gameObject.GetComponentsInChildren<GumBubble>(true).FirstOrDefault((GumBubble g) => g.transform.parent.name == "$gum");
 			if (isViewRig)
 			{
 				this._bubble.audioSource = instance.offlineVRRig.tagSound;

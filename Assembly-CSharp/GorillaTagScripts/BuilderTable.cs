@@ -133,12 +133,12 @@ namespace GorillaTagScripts
 				this.checkGridPlaneData.Clear();
 				this.allPotentialPlacements.Clear();
 				BuilderTable.tempPieceSet.Clear();
-				QueryParameters queryParameters = default(QueryParameters);
-				queryParameters.layerMask = this.allPiecesMask;
-				QueryParameters queryParameters2 = queryParameters;
-				OverlapSphereCommand overlapSphereCommand;
-				overlapSphereCommand..ctor(position, 1f, queryParameters2);
-				this.nearbyPiecesCommands[0] = overlapSphereCommand;
+				QueryParameters queryParameters = new QueryParameters
+				{
+					layerMask = this.allPiecesMask
+				};
+				OverlapSphereCommand value = new OverlapSphereCommand(position, 1f, queryParameters);
+				this.nearbyPiecesCommands[0] = value;
 				OverlapSphereCommand.ScheduleBatch(this.nearbyPiecesCommands, this.nearbyPiecesResults, 1, 1024, default(JobHandle)).Complete();
 				int num = 0;
 				while (num < 1024 && this.nearbyPiecesResults[num].instanceID != 0)
@@ -153,7 +153,7 @@ namespace GorillaTagScripts
 							for (int i = 0; i < builderPieceFromCollider.gridPlanes.Count; i++)
 							{
 								BuilderGridPlaneData builderGridPlaneData = new BuilderGridPlaneData(builderPieceFromCollider.gridPlanes[i], -1);
-								this.checkGridPlaneData.Add(ref builderGridPlaneData);
+								this.checkGridPlaneData.Add(builderGridPlaneData);
 							}
 						}
 					}
@@ -366,8 +366,8 @@ namespace GorillaTagScripts
 					return false;
 				}
 				object obj = (rootA.parentPiece != null) ? rootA.parentPiece : rootA;
-				BuilderPiece builderPiece = (rootB.parentPiece != null) ? rootB.parentPiece : rootB;
-				return obj.Equals(builderPiece);
+				BuilderPiece obj2 = (rootB.parentPiece != null) ? rootB.parentPiece : rootB;
+				return obj.Equals(obj2);
 			}
 			default:
 				return false;
@@ -451,10 +451,10 @@ namespace GorillaTagScripts
 				this.droppedPieces = new List<BuilderPiece>(BuilderTable.DROPPED_PIECE_LIMIT + 50);
 				this.droppedPieceData = new List<BuilderTable.DroppedPieceData>(BuilderTable.DROPPED_PIECE_LIMIT + 50);
 				this.SetupMonkeBlocksRoom();
-				this.gridPlaneData = new NativeList<BuilderGridPlaneData>(1024, 4);
-				this.checkGridPlaneData = new NativeList<BuilderGridPlaneData>(1024, 4);
-				this.nearbyPiecesResults = new NativeArray<ColliderHit>(1024, 4, 1);
-				this.nearbyPiecesCommands = new NativeArray<OverlapSphereCommand>(1, 4, 1);
+				this.gridPlaneData = new NativeList<BuilderGridPlaneData>(1024, Allocator.Persistent);
+				this.checkGridPlaneData = new NativeList<BuilderGridPlaneData>(1024, Allocator.Persistent);
+				this.nearbyPiecesResults = new NativeArray<ColliderHit>(1024, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+				this.nearbyPiecesCommands = new NativeArray<OverlapSphereCommand>(1, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 				this.allPotentialPlacements = new List<BuilderPotentialPlacement>(1024);
 			}
 			else
@@ -487,7 +487,7 @@ namespace GorillaTagScripts
 				table = null;
 				return false;
 			}
-			return BuilderTable.zoneToInstance.TryGetValue(zone, ref table);
+			return BuilderTable.zoneToInstance.TryGetValue(zone, out table);
 		}
 
 		private void SetupMonkeBlocksRoom()
@@ -664,10 +664,10 @@ namespace GorillaTagScripts
 					builderPiece.OnCreate();
 					builderPiece.SetState(BuilderPiece.State.OnShelf, true);
 					this.baseGridPlanes.AddRange(builderPiece.gridPlanes);
-					BuilderPiecePrivatePlot builderPiecePrivatePlot;
-					if (builderPiece.IsPrivatePlot() && builderPiece.TryGetPlotComponent(out builderPiecePrivatePlot))
+					BuilderPiecePrivatePlot item;
+					if (builderPiece.IsPrivatePlot() && builderPiece.TryGetPlotComponent(out item))
 					{
-						this.allPrivatePlots.Add(builderPiecePrivatePlot);
+						this.allPrivatePlots.Add(item);
 					}
 					this.AddPieceData(builderPiece);
 				}
@@ -707,13 +707,13 @@ namespace GorillaTagScripts
 				foreach (BoxCollider boxCollider in components)
 				{
 					boxCollider.enabled = true;
-					BuilderTable.BoxCheckParams boxCheckParams = new BuilderTable.BoxCheckParams
+					BuilderTable.BoxCheckParams item2 = new BuilderTable.BoxCheckParams
 					{
 						center = boxCollider.transform.TransformPoint(boxCollider.center),
 						halfExtents = Vector3.Scale(boxCollider.transform.lossyScale, boxCollider.size) / 2f,
 						rotation = boxCollider.transform.rotation
 					};
-					this.noBlocksAreas.Add(boxCheckParams);
+					this.noBlocksAreas.Add(item2);
 					boxCollider.enabled = false;
 				}
 				this.noBlocksArea.SetActive(false);
@@ -747,15 +747,15 @@ namespace GorillaTagScripts
 					this.fixedUpdateFunctionalComponents.Add(builderPieceFunctional);
 				}
 			}
-			foreach (IBuilderPieceFunctional builderPieceFunctional2 in this.funcComponentsToUnregisterFixed)
+			foreach (IBuilderPieceFunctional item in this.funcComponentsToUnregisterFixed)
 			{
-				this.fixedUpdateFunctionalComponents.Remove(builderPieceFunctional2);
+				this.fixedUpdateFunctionalComponents.Remove(item);
 			}
 			this.funcComponentsToRegisterFixed.Clear();
 			this.funcComponentsToUnregisterFixed.Clear();
-			foreach (IBuilderPieceFunctional builderPieceFunctional3 in this.fixedUpdateFunctionalComponents)
+			foreach (IBuilderPieceFunctional builderPieceFunctional2 in this.fixedUpdateFunctionalComponents)
 			{
-				builderPieceFunctional3.FunctionalPieceFixedUpdate();
+				builderPieceFunctional2.FunctionalPieceFixedUpdate();
 			}
 		}
 
@@ -1026,11 +1026,11 @@ namespace GorillaTagScripts
 				this.OnAvailableResourcesChange();
 				if (!this.isTableMutable)
 				{
-					string text = (this.sharedBlocksMap == null) ? "" : this.sharedBlocksMap.MapID;
+					string arg = (this.sharedBlocksMap == null) ? "" : this.sharedBlocksMap.MapID;
 					UnityEvent<string> onMapLoaded = this.OnMapLoaded;
 					if (onMapLoaded != null)
 					{
-						onMapLoaded.Invoke(text);
+						onMapLoaded.Invoke(arg);
 					}
 					this.SetPendingMap(null);
 					return;
@@ -1286,17 +1286,17 @@ namespace GorillaTagScripts
 						this.activeFunctionalComponents.Add(builderPieceFunctional);
 					}
 				}
-				foreach (IBuilderPieceFunctional builderPieceFunctional2 in this.funcComponentsToUnregister)
+				foreach (IBuilderPieceFunctional item in this.funcComponentsToUnregister)
 				{
-					this.activeFunctionalComponents.Remove(builderPieceFunctional2);
+					this.activeFunctionalComponents.Remove(item);
 				}
 				this.funcComponentsToRegister.Clear();
 				this.funcComponentsToUnregister.Clear();
-				foreach (IBuilderPieceFunctional builderPieceFunctional3 in this.activeFunctionalComponents)
+				foreach (IBuilderPieceFunctional builderPieceFunctional2 in this.activeFunctionalComponents)
 				{
-					if (builderPieceFunctional3 != null)
+					if (builderPieceFunctional2 != null)
 					{
-						builderPieceFunctional3.FunctionalPieceUpdate();
+						builderPieceFunctional2.FunctionalPieceUpdate();
 					}
 				}
 				if (this.isTableMutable)
@@ -1978,15 +1978,15 @@ namespace GorillaTagScripts
 				Vector3 vector;
 				Quaternion quaternion;
 				Vector3 vector2;
-				Quaternion quaternion2;
-				piece2.BumpTwistToPositionRotation(twist, bumpOffsetX, bumpOffsetZ, attachIndex, piece3.gridPlanes[parentAttachIndex], out vector, out quaternion, out vector2, out quaternion2);
-				Vector3 vector3 = piece2.transform.InverseTransformPoint(piece.transform.position);
-				Vector3 worldPosition = vector2 + quaternion2 * vector3;
+				Quaternion rotation;
+				piece2.BumpTwistToPositionRotation(twist, bumpOffsetX, bumpOffsetZ, attachIndex, piece3.gridPlanes[parentAttachIndex], out vector, out quaternion, out vector2, out rotation);
+				Vector3 point = piece2.transform.InverseTransformPoint(piece.transform.position);
+				Vector3 worldPosition = vector2 + rotation * point;
 				if (!this.IsPlayerHandNearAction(placedByPlayer, worldPosition, piece.heldInLeftHand, false, 2.5f))
 				{
 					return false;
 				}
-				if (!this.ValidatePieceWorldTransform(vector2, quaternion2))
+				if (!this.ValidatePieceWorldTransform(vector2, rotation))
 				{
 					return false;
 				}
@@ -2225,12 +2225,12 @@ namespace GorillaTagScripts
 					piece.armShelf = null;
 				}
 				int num;
-				if (piece.heldInLeftHand && this.playerToArmShelfLeft.TryGetValue(piece.heldByPlayerActorNumber, ref num) && num == piece.pieceId)
+				if (piece.heldInLeftHand && this.playerToArmShelfLeft.TryGetValue(piece.heldByPlayerActorNumber, out num) && num == piece.pieceId)
 				{
 					this.playerToArmShelfLeft.Remove(piece.heldByPlayerActorNumber);
 				}
 				int num2;
-				if (!piece.heldInLeftHand && this.playerToArmShelfRight.TryGetValue(piece.heldByPlayerActorNumber, ref num2) && num2 == piece.pieceId)
+				if (!piece.heldInLeftHand && this.playerToArmShelfRight.TryGetValue(piece.heldByPlayerActorNumber, out num2) && num2 == piece.pieceId)
 				{
 					this.playerToArmShelfRight.Remove(piece.heldByPlayerActorNumber);
 				}
@@ -2317,19 +2317,19 @@ namespace GorillaTagScripts
 			sbyte zOffset;
 			BuilderTable.UnpackPiecePlacement(placement, out b, out xOffset, out zOffset);
 			Vector3 zero = Vector3.zero;
-			Quaternion quaternion;
+			Quaternion localRotation;
 			if (piece2 != null && parentAttachIndex >= 0 && parentAttachIndex < piece2.gridPlanes.Count)
 			{
 				Vector3 vector;
-				Quaternion quaternion2;
-				piece.BumpTwistToPositionRotation(b, xOffset, zOffset, attachIndex, piece2.gridPlanes[parentAttachIndex], out zero, out quaternion, out vector, out quaternion2);
+				Quaternion quaternion;
+				piece.BumpTwistToPositionRotation(b, xOffset, zOffset, attachIndex, piece2.gridPlanes[parentAttachIndex], out zero, out localRotation, out vector, out quaternion);
 			}
 			else
 			{
-				quaternion = Quaternion.Euler(0f, (float)b * 90f, 0f);
+				localRotation = Quaternion.Euler(0f, (float)b * 90f, 0f);
 			}
 			piece.SetParentPiece(attachIndex, piece2, parentAttachIndex);
-			piece.transform.SetLocalPositionAndRotation(zero, quaternion);
+			piece.transform.SetLocalPositionAndRotation(zero, localRotation);
 		}
 
 		private void AttachPieceToActorInternal(int pieceId, int actorNumber, bool isLeftHand)
@@ -2360,7 +2360,7 @@ namespace GorillaTagScripts
 					rig.builderArmShelfLeft.piece = piece;
 					piece.armShelf = rig.builderArmShelfLeft;
 					int num;
-					if (this.playerToArmShelfLeft.TryGetValue(actorNumber, ref num) && num != pieceId)
+					if (this.playerToArmShelfLeft.TryGetValue(actorNumber, out num) && num != pieceId)
 					{
 						BuilderPiece piece2 = this.GetPiece(num);
 						if (piece2 != null && piece2.isArmShelf)
@@ -2376,7 +2376,7 @@ namespace GorillaTagScripts
 					rig.builderArmShelfRight.piece = piece;
 					piece.armShelf = rig.builderArmShelfRight;
 					int num2;
-					if (this.playerToArmShelfRight.TryGetValue(actorNumber, ref num2) && num2 != pieceId)
+					if (this.playerToArmShelfRight.TryGetValue(actorNumber, out num2) && num2 != pieceId)
 					{
 						BuilderPiece piece3 = this.GetPiece(num2);
 						if (piece3 != null && piece3.isArmShelf)
@@ -2934,10 +2934,10 @@ namespace GorillaTagScripts
 			int num = this.droppedPieces.IndexOf(piece);
 			if (num >= 0)
 			{
-				BuilderTable.DroppedPieceData droppedPieceData = this.droppedPieceData[num];
-				droppedPieceData.droppedState = BuilderTable.DroppedPieceState.Frozen;
-				droppedPieceData.speedThreshCrossedTime = 0f;
-				this.droppedPieceData[num] = droppedPieceData;
+				BuilderTable.DroppedPieceData value = this.droppedPieceData[num];
+				value.droppedState = BuilderTable.DroppedPieceState.Frozen;
+				value.speedThreshCrossedTime = 0f;
+				this.droppedPieceData[num] = value;
 				if (piece.rigidBody != null)
 				{
 					piece.SetKinematic(true, false);
@@ -3110,13 +3110,13 @@ namespace GorillaTagScripts
 			int num = (player != null) ? player.ActorNumber : cmd.pieceId;
 			this.FreePlotInternal(-1, num);
 			int pieceId;
-			if (this.playerToArmShelfLeft.TryGetValue(num, ref pieceId))
+			if (this.playerToArmShelfLeft.TryGetValue(num, out pieceId))
 			{
 				this.RecyclePieceInternal(pieceId, true, false, -1);
 			}
 			this.playerToArmShelfLeft.Remove(num);
 			int pieceId2;
-			if (this.playerToArmShelfRight.TryGetValue(num, ref pieceId2))
+			if (this.playerToArmShelfRight.TryGetValue(num, out pieceId2))
 			{
 				this.RecyclePieceInternal(pieceId2, true, false, -1);
 			}
@@ -3147,7 +3147,7 @@ namespace GorillaTagScripts
 
 		private void FreePlotInternal(int plotPieceId, int requestingPlayer)
 		{
-			if (plotPieceId == -1 && !this.plotOwners.TryGetValue(requestingPlayer, ref plotPieceId))
+			if (plotPieceId == -1 && !this.plotOwners.TryGetValue(requestingPlayer, out plotPieceId))
 			{
 				return;
 			}
@@ -3246,7 +3246,7 @@ namespace GorillaTagScripts
 				return;
 			}
 			int pieceId;
-			if (this.playerToArmShelfLeft.TryGetValue(player.ActorNumber, ref pieceId))
+			if (this.playerToArmShelfLeft.TryGetValue(player.ActorNumber, out pieceId))
 			{
 				BuilderPiece piece = this.GetPiece(pieceId);
 				this.playerToArmShelfLeft.Remove(player.ActorNumber);
@@ -3265,7 +3265,7 @@ namespace GorillaTagScripts
 				}
 			}
 			int pieceId2;
-			if (this.playerToArmShelfRight.TryGetValue(player.ActorNumber, ref pieceId2))
+			if (this.playerToArmShelfRight.TryGetValue(player.ActorNumber, out pieceId2))
 			{
 				BuilderPiece piece2 = this.GetPiece(pieceId2);
 				this.playerToArmShelfRight.Remove(player.ActorNumber);
@@ -3524,7 +3524,7 @@ namespace GorillaTagScripts
 				piece.rigidBody.position = position;
 				piece.rigidBody.rotation = rotation;
 				piece.rigidBody.linearVelocity = linearVelocity;
-				piece.rigidBody.AddForce(Vector3.up * (BuilderTable.DROP_ZONE_REPEL / 2f) * piece.rigidBody.mass, 1);
+				piece.rigidBody.AddForce(Vector3.up * (BuilderTable.DROP_ZONE_REPEL / 2f) * piece.rigidBody.mass, ForceMode.Impulse);
 				piece.rigidBody.angularVelocity = Vector3.zero;
 			}
 		}
@@ -3532,7 +3532,7 @@ namespace GorillaTagScripts
 		public BuilderPiece GetPiece(int pieceId)
 		{
 			int num;
-			if (this.pieceIDToIndexCache.TryGetValue(pieceId, ref num))
+			if (this.pieceIDToIndexCache.TryGetValue(pieceId, out num))
 			{
 				if (num >= 0 && num < this.pieces.Count)
 				{
@@ -3703,49 +3703,49 @@ namespace GorillaTagScripts
 				return false;
 			}
 			Quaternion quaternion3;
-			Quaternion quaternion4;
-			BoingKit.QuaternionUtil.DecomposeSwingTwist(quaternion2, Vector3.up, out quaternion3, out quaternion4);
+			Quaternion rotation2;
+			BoingKit.QuaternionUtil.DecomposeSwingTwist(quaternion2, Vector3.up, out quaternion3, out rotation2);
 			float maxTwistDotProduct = this.currSnapParams.maxTwistDotProduct;
-			Vector3 vector2 = quaternion4 * Vector3.forward;
-			float num3 = Vector3.Dot(vector2, Vector3.forward);
-			float num4 = Vector3.Dot(vector2, Vector3.right);
+			Vector3 lhs = rotation2 * Vector3.forward;
+			float num3 = Vector3.Dot(lhs, Vector3.forward);
+			float num4 = Vector3.Dot(lhs, Vector3.right);
 			bool flag = Mathf.Abs(num3) > maxTwistDotProduct;
 			bool flag2 = Mathf.Abs(num4) > maxTwistDotProduct;
 			if (!flag && !flag2)
 			{
 				return false;
 			}
-			float num5;
-			uint num6;
+			float y2;
+			uint num5;
 			if (flag)
 			{
-				num5 = ((num3 > 0f) ? 0f : 180f);
-				num6 = ((num3 > 0f) ? 0U : 2U);
+				y2 = ((num3 > 0f) ? 0f : 180f);
+				num5 = ((num3 > 0f) ? 0U : 2U);
 			}
 			else
 			{
-				num5 = ((num4 > 0f) ? 90f : 270f);
-				num6 = ((num4 > 0f) ? 1U : 3U);
+				y2 = ((num4 > 0f) ? 90f : 270f);
+				num5 = ((num4 > 0f) ? 1U : 3U);
 			}
-			int num7 = flag2 ? gridPlane.width : gridPlane.length;
-			int num8 = flag2 ? gridPlane.length : gridPlane.width;
-			float num9 = (num8 % 2 == 0) ? (this.gridSize / 2f) : 0f;
-			float num10 = (num7 % 2 == 0) ? (this.gridSize / 2f) : 0f;
-			float num11 = (checkGridPlane.width % 2 == 0) ? (this.gridSize / 2f) : 0f;
-			float num12 = (checkGridPlane.length % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			int num6 = flag2 ? gridPlane.width : gridPlane.length;
+			int num7 = flag2 ? gridPlane.length : gridPlane.width;
+			float num8 = (num7 % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			float num9 = (num6 % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			float num10 = (checkGridPlane.width % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			float num11 = (checkGridPlane.length % 2 == 0) ? (this.gridSize / 2f) : 0f;
+			float num12 = num8 - num10;
 			float num13 = num9 - num11;
-			float num14 = num10 - num12;
-			int num15 = Mathf.RoundToInt((vector.x - num13) / this.gridSize);
-			int num16 = Mathf.RoundToInt((vector.z - num14) / this.gridSize);
-			int num17 = num15 + Mathf.FloorToInt((float)num8 / 2f);
-			int num18 = num16 + Mathf.FloorToInt((float)num7 / 2f);
-			int num19 = num17 - (num8 - 1);
-			int num20 = num18 - (num7 - 1);
-			int num21 = Mathf.FloorToInt((float)checkGridPlane.width / 2f);
-			int num22 = Mathf.FloorToInt((float)checkGridPlane.length / 2f);
-			int num23 = num21 - (checkGridPlane.width - 1);
-			int num24 = num22 - (checkGridPlane.length - 1);
-			if (num19 > num21 || num17 < num23 || num20 > num22 || num18 < num24)
+			int num14 = Mathf.RoundToInt((vector.x - num12) / this.gridSize);
+			int num15 = Mathf.RoundToInt((vector.z - num13) / this.gridSize);
+			int num16 = num14 + Mathf.FloorToInt((float)num7 / 2f);
+			int num17 = num15 + Mathf.FloorToInt((float)num6 / 2f);
+			int num18 = num16 - (num7 - 1);
+			int num19 = num17 - (num6 - 1);
+			int num20 = Mathf.FloorToInt((float)checkGridPlane.width / 2f);
+			int num21 = Mathf.FloorToInt((float)checkGridPlane.length / 2f);
+			int num22 = num20 - (checkGridPlane.width - 1);
+			int num23 = num21 - (checkGridPlane.length - 1);
+			if (num18 > num20 || num16 < num22 || num19 > num21 || num17 < num23)
 			{
 				return false;
 			}
@@ -3770,19 +3770,18 @@ namespace GorillaTagScripts
 					return false;
 				}
 			}
-			Quaternion quaternion5 = Quaternion.Euler(0f, num5, 0f);
-			Quaternion quaternion6 = rotation * quaternion5;
-			float num25 = (float)num15 * this.gridSize + num13;
-			float num26 = (float)num16 * this.gridSize + num14;
-			Vector3 vector3;
-			vector3..ctor(num25, 0f, num26);
-			Vector3 vector4 = position + rotation * vector3;
+			Quaternion rhs = Quaternion.Euler(0f, y2, 0f);
+			Quaternion lhs2 = rotation * rhs;
+			float x = (float)num14 * this.gridSize + num12;
+			float z = (float)num15 * this.gridSize + num13;
+			Vector3 point = new Vector3(x, 0f, z);
+			Vector3 a = position + rotation * point;
 			Transform center2 = gridPlane.center;
-			Quaternion quaternion7 = quaternion6 * Quaternion.Inverse(center2.localRotation);
-			Vector3 vector5 = piece.transform.InverseTransformPoint(center2.position);
-			Vector3 localPosition = vector4 - quaternion7 * vector5;
+			Quaternion quaternion4 = lhs2 * Quaternion.Inverse(center2.localRotation);
+			Vector3 point2 = piece.transform.InverseTransformPoint(center2.position);
+			Vector3 localPosition = a - quaternion4 * point2;
 			potentialPlacement.localPosition = localPosition;
-			potentialPlacement.localRotation = quaternion7;
+			potentialPlacement.localRotation = quaternion4;
 			potentialPlacement.score = num2;
 			success = true;
 			potentialPlacement.parentPiece = piece2;
@@ -3799,21 +3798,21 @@ namespace GorillaTagScripts
 				potentialPlacement.localPosition = builderAttachGridPlane.transform.InverseTransformPoint(potentialPlacement.localPosition);
 				potentialPlacement.localRotation = Quaternion.Inverse(builderAttachGridPlane.transform.rotation) * potentialPlacement.localRotation;
 			}
-			potentialPlacement.parentAttachBounds.min.x = Mathf.Max(num23, num19);
-			potentialPlacement.parentAttachBounds.min.y = Mathf.Max(num24, num20);
-			potentialPlacement.parentAttachBounds.max.x = Mathf.Min(num21, num17);
-			potentialPlacement.parentAttachBounds.max.y = Mathf.Min(num22, num18);
+			potentialPlacement.parentAttachBounds.min.x = Mathf.Max(num22, num18);
+			potentialPlacement.parentAttachBounds.min.y = Mathf.Max(num23, num19);
+			potentialPlacement.parentAttachBounds.max.x = Mathf.Min(num20, num16);
+			potentialPlacement.parentAttachBounds.max.y = Mathf.Min(num21, num17);
 			Vector2Int v = Vector2Int.zero;
 			Vector2Int v2 = Vector2Int.zero;
-			v.x = potentialPlacement.parentAttachBounds.min.x - num15;
-			v2.x = potentialPlacement.parentAttachBounds.max.x - num15;
-			v.y = potentialPlacement.parentAttachBounds.min.y - num16;
-			v2.y = potentialPlacement.parentAttachBounds.max.y - num16;
-			potentialPlacement.twist = (byte)num6;
-			potentialPlacement.bumpOffsetX = (sbyte)num15;
-			potentialPlacement.bumpOffsetZ = (sbyte)num16;
-			int offsetX = (num8 % 2 == 0) ? 1 : 0;
-			int offsetY = (num7 % 2 == 0) ? 1 : 0;
+			v.x = potentialPlacement.parentAttachBounds.min.x - num14;
+			v2.x = potentialPlacement.parentAttachBounds.max.x - num14;
+			v.y = potentialPlacement.parentAttachBounds.min.y - num15;
+			v2.y = potentialPlacement.parentAttachBounds.max.y - num15;
+			potentialPlacement.twist = (byte)num5;
+			potentialPlacement.bumpOffsetX = (sbyte)num14;
+			potentialPlacement.bumpOffsetZ = (sbyte)num15;
+			int offsetX = (num7 % 2 == 0) ? 1 : 0;
+			int offsetY = (num6 % 2 == 0) ? 1 : 0;
 			if (flag && num3 < 0f)
 			{
 				v = this.Rotate180(v, offsetX, offsetY);
@@ -3916,8 +3915,8 @@ namespace GorillaTagScripts
 				return false;
 			}
 			this.currSnapParams = this.pushAndEaseParams;
-			NativeQueue<BuilderPotentialPlacementData> nativeQueue = new NativeQueue<BuilderPotentialPlacementData>(3);
-			IJobParallelForExtensions.Schedule<BuilderFindPotentialSnaps>(new BuilderFindPotentialSnaps
+			NativeQueue<BuilderPotentialPlacementData> nativeQueue = new NativeQueue<BuilderPotentialPlacementData>(Allocator.TempJob);
+			new BuilderFindPotentialSnaps
 			{
 				gridSize = this.gridSize,
 				currSnapParams = this.currSnapParams,
@@ -3928,7 +3927,7 @@ namespace GorillaTagScripts
 				localToWorldPos = Vector3.zero,
 				localToWorldRot = Quaternion.identity,
 				potentialPlacements = nativeQueue.AsParallelWriter()
-			}, gridPlaneData.Length, 32, default(JobHandle)).Complete();
+			}.Schedule(gridPlaneData.Length, 32, default(JobHandle)).Complete();
 			BuilderPotentialPlacementData builderPotentialPlacementData = default(BuilderPotentialPlacementData);
 			bool flag = false;
 			while (!nativeQueue.IsEmpty())
@@ -3953,7 +3952,7 @@ namespace GorillaTagScripts
 				BuilderAttachGridPlane builderAttachGridPlane = potentialPlacement.parentPiece.gridPlanes[potentialPlacement.parentAttachIndex];
 				Quaternion localToWorldRot = builderAttachGridPlane.transform.rotation * potentialPlacement.localRotation;
 				Vector3 localToWorldPos = builderAttachGridPlane.transform.TransformPoint(potentialPlacement.localPosition);
-				IJobParallelForExtensions.Schedule<BuilderFindPotentialSnaps>(new BuilderFindPotentialSnaps
+				new BuilderFindPotentialSnaps
 				{
 					gridSize = this.gridSize,
 					currSnapParams = this.currSnapParams,
@@ -3964,7 +3963,7 @@ namespace GorillaTagScripts
 					localToWorldPos = localToWorldPos,
 					localToWorldRot = localToWorldRot,
 					potentialPlacements = nativeQueue.AsParallelWriter()
-				}, gridPlaneData.Length, 32, default(JobHandle)).Complete();
+				}.Schedule(gridPlaneData.Length, 32, default(JobHandle)).Complete();
 				while (!nativeQueue.IsEmpty())
 				{
 					BuilderPotentialPlacementData builderPotentialPlacementData3 = nativeQueue.Dequeue();
@@ -3986,14 +3985,14 @@ namespace GorillaTagScripts
 			}
 			bool result = false;
 			this.currSnapParams = this.overlapParams;
-			NativeQueue<BuilderPotentialPlacementData> nativeQueue = new NativeQueue<BuilderPotentialPlacementData>(3);
+			NativeQueue<BuilderPotentialPlacementData> nativeQueue = new NativeQueue<BuilderPotentialPlacementData>(Allocator.TempJob);
 			nativeQueue.Clear();
 			Vector3 worldToLocalPos = -potentialPlacement.attachPiece.transform.position;
 			Quaternion worldToLocalRot = Quaternion.Inverse(potentialPlacement.attachPiece.transform.rotation);
 			BuilderAttachGridPlane builderAttachGridPlane = potentialPlacement.parentPiece.gridPlanes[potentialPlacement.parentAttachIndex];
 			Quaternion localToWorldRot = builderAttachGridPlane.transform.rotation * potentialPlacement.localRotation;
 			Vector3 localToWorldPos = builderAttachGridPlane.transform.TransformPoint(potentialPlacement.localPosition);
-			IJobParallelForExtensions.Schedule<BuilderFindPotentialSnaps>(new BuilderFindPotentialSnaps
+			new BuilderFindPotentialSnaps
 			{
 				gridSize = this.gridSize,
 				currSnapParams = this.currSnapParams,
@@ -4004,7 +4003,7 @@ namespace GorillaTagScripts
 				localToWorldPos = localToWorldPos,
 				localToWorldRot = localToWorldRot,
 				potentialPlacements = nativeQueue.AsParallelWriter()
-			}, gridPlaneData.Length, 32, default(JobHandle)).Complete();
+			}.Schedule(gridPlaneData.Length, 32, default(JobHandle)).Complete();
 			while (!nativeQueue.IsEmpty())
 			{
 				BuilderPotentialPlacementData builderPotentialPlacementData = nativeQueue.Dequeue();
@@ -4128,8 +4127,8 @@ namespace GorillaTagScripts
 			int i = 0;
 			while (i < list.Count)
 			{
-				int num2 = (i + num) % list.Count;
-				BuilderAttachGridPlane builderAttachGridPlane2 = list[num2];
+				int index = (i + num) % list.Count;
+				BuilderAttachGridPlane builderAttachGridPlane2 = list[index];
 				if (builderAttachGridPlane2.male != builderAttachGridPlane.male && !(builderAttachGridPlane2.piece == builderAttachGridPlane.piece) && !this.ShareSameRoot(builderAttachGridPlane, builderAttachGridPlane2))
 				{
 					Vector3 zero = Vector3.zero;
@@ -4138,15 +4137,14 @@ namespace GorillaTagScripts
 					int attachIndex = builderAttachGridPlane2.attachIndex;
 					Transform center = builderAttachGridPlane.center;
 					Quaternion quaternion = builderAttachGridPlane2.transform.rotation * Quaternion.Inverse(center.localRotation);
-					Vector3 vector = piece.transform.InverseTransformPoint(center.position);
-					Vector3 vector2 = builderAttachGridPlane2.transform.position - quaternion * vector;
+					Vector3 point = piece.transform.InverseTransformPoint(center.position);
+					Vector3 a = builderAttachGridPlane2.transform.position - quaternion * point;
 					if (piece2 != null)
 					{
 						BuilderAttachGridPlane builderAttachGridPlane3 = piece2.gridPlanes[attachIndex];
 						Vector3 lossyScale = builderAttachGridPlane3.transform.lossyScale;
-						Vector3 vector3;
-						vector3..ctor(1f / lossyScale.x, 1f / lossyScale.y, 1f / lossyScale.z);
-						Quaternion.Inverse(builderAttachGridPlane3.transform.rotation) * Vector3.Scale(vector2 - builderAttachGridPlane3.transform.position, vector3);
+						Vector3 b = new Vector3(1f / lossyScale.x, 1f / lossyScale.y, 1f / lossyScale.z);
+						Quaternion.Inverse(builderAttachGridPlane3.transform.rotation) * Vector3.Scale(a - builderAttachGridPlane3.transform.position, b);
 						Quaternion.Inverse(builderAttachGridPlane3.transform.rotation) * quaternion;
 						return;
 					}
@@ -4356,12 +4354,12 @@ namespace GorillaTagScripts
 			attachGridIndex = (int)num;
 			num = (packed >> 5 & 31L);
 			otherAttachGridIndex = (int)num;
-			int num2 = (int)(packed >> 10 & 2047L) - 1024;
-			int num3 = (int)(packed >> 21 & 2047L) - 1024;
-			min = new Vector2Int(num2, num3);
-			int num4 = (int)(packed >> 32 & 2047L) - 1024;
-			int num5 = (int)(packed >> 43 & 2047L) - 1024;
-			max = new Vector2Int(num4, num5);
+			int x = (int)(packed >> 10 & 2047L) - 1024;
+			int y = (int)(packed >> 21 & 2047L) - 1024;
+			min = new Vector2Int(x, y);
+			int x2 = (int)(packed >> 32 & 2047L) - 1024;
+			int y2 = (int)(packed >> 43 & 2047L) - 1024;
+			max = new Vector2Int(x2, y2);
 		}
 
 		private void OnTitleDataUpdate(string key)
@@ -4442,13 +4440,13 @@ namespace GorillaTagScripts
 
 		private void RequestTableConfiguration()
 		{
-			SharedBlocksManager.instance.OnGetTableConfiguration += new Action<string>(this.OnGetTableConfiguration);
+			SharedBlocksManager.instance.OnGetTableConfiguration += this.OnGetTableConfiguration;
 			SharedBlocksManager.instance.RequestTableConfiguration();
 		}
 
 		private void OnGetTableConfiguration(string configString)
 		{
-			SharedBlocksManager.instance.OnGetTableConfiguration -= new Action<string>(this.OnGetTableConfiguration);
+			SharedBlocksManager.instance.OnGetTableConfiguration -= this.OnGetTableConfiguration;
 			if (!configString.IsNullOrEmpty())
 			{
 				this.ParseTableConfiguration(configString);
@@ -4538,8 +4536,8 @@ namespace GorillaTagScripts
 			}
 			builderTableConfiguration.DroppedPieceLimit = BuilderTable.DROPPED_PIECE_LIMIT;
 			builderTableConfiguration.updateCountdownDate = "1/10/2025 16:00:00";
-			string text = JsonUtility.ToJson(builderTableConfiguration);
-			Debug.Log("Configuration Dump \n" + text);
+			string str = JsonUtility.ToJson(builderTableConfiguration);
+			Debug.Log("Configuration Dump \n" + str);
 		}
 
 		private string GetSaveDataTimeKey(int slot)
@@ -4598,13 +4596,13 @@ namespace GorillaTagScripts
 				this.TryBuildingFromTitleData();
 				return;
 			}
-			SharedBlocksManager.instance.OnFetchPrivateScanComplete += new Action<int, bool>(this.OnFetchPrivateScanComplete);
+			SharedBlocksManager.instance.OnFetchPrivateScanComplete += this.OnFetchPrivateScanComplete;
 			SharedBlocksManager.instance.RequestFetchPrivateScan(this.currentSaveSlot);
 		}
 
 		private void OnFetchPrivateScanComplete(int slot, bool success)
 		{
-			SharedBlocksManager.instance.OnFetchPrivateScanComplete -= new Action<int, bool>(this.OnFetchPrivateScanComplete);
+			SharedBlocksManager.instance.OnFetchPrivateScanComplete -= this.OnFetchPrivateScanComplete;
 			if (this.tableState != BuilderTable.TableState.WaitForInitialBuildMaster)
 			{
 				return;
@@ -4673,7 +4671,7 @@ namespace GorillaTagScripts
 				this.ChooseMapFromList();
 				return;
 			}
-			SharedBlocksManager.instance.OnGetPopularMapsComplete += new Action<bool>(this.FoundStartingMapList);
+			SharedBlocksManager.instance.OnGetPopularMapsComplete += this.FoundStartingMapList;
 			if (!SharedBlocksManager.instance.RequestGetTopMaps(this.startingMapConfig.pageNumber, this.startingMapConfig.pageSize, this.startingMapConfig.sortMethod.ToString()))
 			{
 				this.FoundStartingMapList(false);
@@ -4682,7 +4680,7 @@ namespace GorillaTagScripts
 
 		private void FoundStartingMapList(bool success)
 		{
-			SharedBlocksManager.instance.OnGetPopularMapsComplete -= new Action<bool>(this.FoundStartingMapList);
+			SharedBlocksManager.instance.OnGetPopularMapsComplete -= this.FoundStartingMapList;
 			if (success && SharedBlocksManager.instance.LatestPopularMaps.Count > 0)
 			{
 				this.startingMapList.Clear();
@@ -4697,8 +4695,8 @@ namespace GorillaTagScripts
 
 		private void ChooseMapFromList()
 		{
-			int num = Random.Range(0, this.startingMapList.Count);
-			this.startingMap = this.startingMapList[num];
+			int index = Random.Range(0, this.startingMapList.Count);
+			this.startingMap = this.startingMapList[index];
 			if (this.startingMap == null || !SharedBlocksManager.IsMapIDValid(this.startingMap.MapID))
 			{
 				this.FoundDefaultSharedBlocksMap(false, null);
@@ -4775,13 +4773,13 @@ namespace GorillaTagScripts
 
 		private void TryBuildingFromTitleData()
 		{
-			SharedBlocksManager.instance.OnGetTitleDataBuildComplete += new Action<string>(this.OnGetTitleDataBuildComplete);
+			SharedBlocksManager.instance.OnGetTitleDataBuildComplete += this.OnGetTitleDataBuildComplete;
 			SharedBlocksManager.instance.FetchTitleDataBuild();
 		}
 
 		private void OnGetTitleDataBuildComplete(string titleDataBuild)
 		{
-			SharedBlocksManager.instance.OnGetTitleDataBuildComplete -= new Action<string>(this.OnGetTitleDataBuildComplete);
+			SharedBlocksManager.instance.OnGetTitleDataBuildComplete -= this.OnGetTitleDataBuildComplete;
 			if (this.tableState != BuilderTable.TableState.WaitForInitialBuildMaster)
 			{
 				return;
@@ -4844,8 +4842,8 @@ namespace GorillaTagScripts
 						this.tableData.numEdits++;
 						string text = this.WriteTableToJson();
 						text = Convert.ToBase64String(GZipStream.CompressString(text));
-						SharedBlocksManager.instance.OnSavePrivateScanSuccess += new Action<int>(this.OnSaveScanSuccess);
-						SharedBlocksManager.instance.OnSavePrivateScanFailed += new Action<int, string>(this.OnSaveScanFailure);
+						SharedBlocksManager.instance.OnSavePrivateScanSuccess += this.OnSaveScanSuccess;
+						SharedBlocksManager.instance.OnSavePrivateScanFailed += this.OnSaveScanFailure;
 						SharedBlocksManager.instance.RequestSavePrivateScan(this.currentSaveSlot, text);
 						return;
 					}
@@ -4864,8 +4862,8 @@ namespace GorillaTagScripts
 
 		private void OnSaveScanSuccess(int scan)
 		{
-			SharedBlocksManager.instance.OnSavePrivateScanSuccess -= new Action<int>(this.OnSaveScanSuccess);
-			SharedBlocksManager.instance.OnSavePrivateScanFailed -= new Action<int, string>(this.OnSaveScanFailure);
+			SharedBlocksManager.instance.OnSavePrivateScanSuccess -= this.OnSaveScanSuccess;
+			SharedBlocksManager.instance.OnSavePrivateScanFailed -= this.OnSaveScanFailure;
 			this.saveInProgress = false;
 			UnityEvent onSaveSuccess = this.OnSaveSuccess;
 			if (onSaveSuccess == null)
@@ -4877,8 +4875,8 @@ namespace GorillaTagScripts
 
 		private void OnSaveScanFailure(int scan, string message)
 		{
-			SharedBlocksManager.instance.OnSavePrivateScanSuccess -= new Action<int>(this.OnSaveScanSuccess);
-			SharedBlocksManager.instance.OnSavePrivateScanFailed -= new Action<int, string>(this.OnSaveScanFailure);
+			SharedBlocksManager.instance.OnSavePrivateScanSuccess -= this.OnSaveScanSuccess;
+			SharedBlocksManager.instance.OnSavePrivateScanFailed -= this.OnSaveScanFailure;
 			this.saveInProgress = false;
 			this.SetIsDirty(true);
 			UnityEvent<string> onSaveFailure = this.OnSaveFailure;
@@ -4905,8 +4903,8 @@ namespace GorillaTagScripts
 					this.tableData.placement.Add(this.pieces[i].GetPiecePlacement());
 					this.tableData.materialType.Add(this.pieces[i].overrideSavedPiece ? this.pieces[i].savedMaterialType : this.pieces[i].materialType);
 					BuilderMovingSnapPiece component = this.pieces[i].GetComponent<BuilderMovingSnapPiece>();
-					int num = (component == null) ? 0 : component.GetTimeOffset();
-					this.tableData.timeOffset.Add(num);
+					int item = (component == null) ? 0 : component.GetTimeOffset();
+					this.tableData.timeOffset.Add(item);
 					for (int j = 0; j < this.pieces[i].gridPlanes.Count; j++)
 					{
 						if (!(this.pieces[i].gridPlanes[j] == null))
@@ -4915,14 +4913,14 @@ namespace GorillaTagScripts
 							{
 								if (snapOverlap.otherPlane.piece.state == BuilderPiece.State.AttachedAndPlaced || snapOverlap.otherPlane.piece.isBuiltIntoTable)
 								{
-									BuilderTable.SnapOverlapKey snapOverlapKey = BuilderTable.BuildOverlapKey(this.pieces[i].pieceId, snapOverlap.otherPlane.piece.pieceId, j, snapOverlap.otherPlane.attachIndex);
-									if (!BuilderTable.tempDuplicateOverlaps.Contains(snapOverlapKey))
+									BuilderTable.SnapOverlapKey item2 = BuilderTable.BuildOverlapKey(this.pieces[i].pieceId, snapOverlap.otherPlane.piece.pieceId, j, snapOverlap.otherPlane.attachIndex);
+									if (!BuilderTable.tempDuplicateOverlaps.Contains(item2))
 									{
-										BuilderTable.tempDuplicateOverlaps.Add(snapOverlapKey);
-										long num2 = this.PackSnapInfo(j, snapOverlap.otherPlane.attachIndex, snapOverlap.bounds.min, snapOverlap.bounds.max);
+										BuilderTable.tempDuplicateOverlaps.Add(item2);
+										long item3 = this.PackSnapInfo(j, snapOverlap.otherPlane.attachIndex, snapOverlap.bounds.min, snapOverlap.bounds.max);
 										this.tableData.overlapingPieces.Add(this.pieces[i].pieceId);
 										this.tableData.overlappedPieces.Add(snapOverlap.otherPlane.piece.pieceId);
-										this.tableData.overlapInfo.Add(num2);
+										this.tableData.overlapInfo.Add(item3);
 									}
 								}
 							}
@@ -4942,14 +4940,14 @@ namespace GorillaTagScripts
 							{
 								if (snapOverlap2.otherPlane.piece.state == BuilderPiece.State.AttachedAndPlaced || snapOverlap2.otherPlane.piece.isBuiltIntoTable)
 								{
-									BuilderTable.SnapOverlapKey snapOverlapKey2 = BuilderTable.BuildOverlapKey(builderPiece.pieceId, snapOverlap2.otherPlane.piece.pieceId, k, snapOverlap2.otherPlane.attachIndex);
-									if (!BuilderTable.tempDuplicateOverlaps.Contains(snapOverlapKey2))
+									BuilderTable.SnapOverlapKey item4 = BuilderTable.BuildOverlapKey(builderPiece.pieceId, snapOverlap2.otherPlane.piece.pieceId, k, snapOverlap2.otherPlane.attachIndex);
+									if (!BuilderTable.tempDuplicateOverlaps.Contains(item4))
 									{
-										BuilderTable.tempDuplicateOverlaps.Add(snapOverlapKey2);
-										long num3 = this.PackSnapInfo(k, snapOverlap2.otherPlane.attachIndex, snapOverlap2.bounds.min, snapOverlap2.bounds.max);
+										BuilderTable.tempDuplicateOverlaps.Add(item4);
+										long item5 = this.PackSnapInfo(k, snapOverlap2.otherPlane.attachIndex, snapOverlap2.bounds.min, snapOverlap2.bounds.max);
 										this.tableData.overlapingPieces.Add(builderPiece.pieceId);
 										this.tableData.overlappedPieces.Add(snapOverlap2.otherPlane.piece.pieceId);
-										this.tableData.overlapInfo.Add(num3);
+										this.tableData.overlapInfo.Add(item5);
 									}
 								}
 							}
@@ -5119,10 +5117,10 @@ namespace GorillaTagScripts
 			{
 				int parentAttachIndex = (this.tableData.parentAttachIndex == null || this.tableData.parentAttachIndex.Count <= k) ? -1 : this.tableData.parentAttachIndex[k];
 				int attachIndex = (this.tableData.attachIndex == null || this.tableData.attachIndex.Count <= k) ? -1 : this.tableData.attachIndex[k];
-				int valueOrDefault = CollectionExtensions.GetValueOrDefault<int, int>(dictionary, this.tableData.pieceId[k], -1);
+				int valueOrDefault = dictionary.GetValueOrDefault(this.tableData.pieceId[k], -1);
 				int parentId = -1;
 				int num8;
-				if (dictionary.TryGetValue(this.tableData.parentId[k], ref num8))
+				if (dictionary.TryGetValue(this.tableData.parentId[k], out num8))
 				{
 					parentId = num8;
 				}
@@ -5148,7 +5146,7 @@ namespace GorillaTagScripts
 				{
 					int num10 = -1;
 					int num11;
-					if (dictionary.TryGetValue(this.tableData.overlapingPieces[num9], ref num11))
+					if (dictionary.TryGetValue(this.tableData.overlapingPieces[num9], out num11))
 					{
 						num10 = num11;
 					}
@@ -5158,7 +5156,7 @@ namespace GorillaTagScripts
 					}
 					int num12 = -1;
 					int num13;
-					if (dictionary.TryGetValue(this.tableData.overlappedPieces[num9], ref num13))
+					if (dictionary.TryGetValue(this.tableData.overlappedPieces[num9], out num13))
 					{
 						num12 = num13;
 					}
@@ -5182,10 +5180,10 @@ namespace GorillaTagScripts
 								this.UnpackSnapInfo(packed, out num14, out num15, out min, out max);
 								if (num14 >= 0 && num14 < piece.gridPlanes.Count && num15 >= 0 && num15 < piece2.gridPlanes.Count)
 								{
-									BuilderTable.SnapOverlapKey snapOverlapKey = BuilderTable.BuildOverlapKey(num10, num12, num14, num15);
-									if (!BuilderTable.tempDuplicateOverlaps.Contains(snapOverlapKey))
+									BuilderTable.SnapOverlapKey item = BuilderTable.BuildOverlapKey(num10, num12, num14, num15);
+									if (!BuilderTable.tempDuplicateOverlaps.Contains(item))
 									{
-										BuilderTable.tempDuplicateOverlaps.Add(snapOverlapKey);
+										BuilderTable.tempDuplicateOverlaps.Add(item);
 										piece.gridPlanes[num14].AddSnapOverlap(this.builderPool.CreateSnapOverlap(piece2.gridPlanes[num15], new SnapBounds(min, max)));
 									}
 								}
@@ -5231,8 +5229,8 @@ namespace GorillaTagScripts
 			}
 			BuilderTable.childPieces.Clear();
 			BuilderTable.rootPieces.Clear();
-			ListExtensions.EnsureCapacity<BuilderPiece>(BuilderTable.childPieces, this.pieces.Count);
-			ListExtensions.EnsureCapacity<BuilderPiece>(BuilderTable.rootPieces, this.pieces.Count);
+			BuilderTable.childPieces.EnsureCapacity(this.pieces.Count);
+			BuilderTable.rootPieces.EnsureCapacity(this.pieces.Count);
 			foreach (BuilderPiece builderPiece in this.pieces)
 			{
 				if (builderPiece.parentPiece == null)
@@ -5261,10 +5259,10 @@ namespace GorillaTagScripts
 				}
 				binaryWriter.Write(builderPiece2.heldInLeftHand ? 1 : 0);
 				binaryWriter.Write(builderPiece2.materialType);
-				long num = BitPackUtils.PackWorldPosForNetwork(builderPiece2.transform.localPosition);
-				int num2 = BitPackUtils.PackQuaternionForNetwork(builderPiece2.transform.localRotation);
-				binaryWriter.Write(num);
-				binaryWriter.Write(num2);
+				long value = BitPackUtils.PackWorldPosForNetwork(builderPiece2.transform.localPosition);
+				int value2 = BitPackUtils.PackQuaternionForNetwork(builderPiece2.transform.localRotation);
+				binaryWriter.Write(value);
+				binaryWriter.Write(value2);
 				if (builderPiece2.state == BuilderPiece.State.AttachedAndPlaced)
 				{
 					binaryWriter.Write(builderPiece2.functionalPieceState);
@@ -5281,8 +5279,8 @@ namespace GorillaTagScripts
 				BuilderPiece builderPiece3 = BuilderTable.childPieces[j];
 				binaryWriter.Write(builderPiece3.pieceType);
 				binaryWriter.Write(builderPiece3.pieceId);
-				int num3 = (builderPiece3.parentPiece == null) ? -1 : builderPiece3.parentPiece.pieceId;
-				binaryWriter.Write(num3);
+				int value3 = (builderPiece3.parentPiece == null) ? -1 : builderPiece3.parentPiece.pieceId;
+				binaryWriter.Write(value3);
 				binaryWriter.Write(builderPiece3.attachIndex);
 				binaryWriter.Write(builderPiece3.parentAttachIndex);
 				binaryWriter.Write((byte)builderPiece3.state);
@@ -5333,7 +5331,7 @@ namespace GorillaTagScripts
 			{
 				for (int l = 0; l < BuilderTable.mapIDBuffer.Length; l++)
 				{
-					BuilderTable.mapIDBuffer[l] = this.sharedBlocksMap.MapID.get_Chars(l);
+					BuilderTable.mapIDBuffer[l] = this.sharedBlocksMap.MapID[l];
 				}
 			}
 			binaryWriter.Write(BuilderTable.mapIDBuffer);
@@ -5353,14 +5351,14 @@ namespace GorillaTagScripts
 						{
 							for (SnapOverlap snapOverlap = builderPiece4.gridPlanes[m].firstOverlap; snapOverlap != null; snapOverlap = snapOverlap.nextOverlap)
 							{
-								BuilderTable.SnapOverlapKey snapOverlapKey = BuilderTable.BuildOverlapKey(builderPiece4.pieceId, snapOverlap.otherPlane.piece.pieceId, m, snapOverlap.otherPlane.attachIndex);
-								if (!BuilderTable.tempDuplicateOverlaps.Contains(snapOverlapKey))
+								BuilderTable.SnapOverlapKey item = BuilderTable.BuildOverlapKey(builderPiece4.pieceId, snapOverlap.otherPlane.piece.pieceId, m, snapOverlap.otherPlane.attachIndex);
+								if (!BuilderTable.tempDuplicateOverlaps.Contains(item))
 								{
-									BuilderTable.tempDuplicateOverlaps.Add(snapOverlapKey);
-									long num4 = this.PackSnapInfo(m, snapOverlap.otherPlane.attachIndex, snapOverlap.bounds.min, snapOverlap.bounds.max);
+									BuilderTable.tempDuplicateOverlaps.Add(item);
+									long item2 = this.PackSnapInfo(m, snapOverlap.otherPlane.attachIndex, snapOverlap.bounds.min, snapOverlap.bounds.max);
 									BuilderTable.overlapPieces.Add(builderPiece4.pieceId);
 									BuilderTable.overlapOtherPieces.Add(snapOverlap.otherPlane.piece.pieceId);
-									BuilderTable.overlapPacked.Add(num4);
+									BuilderTable.overlapPacked.Add(item2);
 								}
 							}
 						}
@@ -5377,14 +5375,14 @@ namespace GorillaTagScripts
 						{
 							for (SnapOverlap snapOverlap2 = builderPiece5.gridPlanes[n].firstOverlap; snapOverlap2 != null; snapOverlap2 = snapOverlap2.nextOverlap)
 							{
-								BuilderTable.SnapOverlapKey snapOverlapKey2 = BuilderTable.BuildOverlapKey(builderPiece5.pieceId, snapOverlap2.otherPlane.piece.pieceId, n, snapOverlap2.otherPlane.attachIndex);
-								if (!BuilderTable.tempDuplicateOverlaps.Contains(snapOverlapKey2))
+								BuilderTable.SnapOverlapKey item3 = BuilderTable.BuildOverlapKey(builderPiece5.pieceId, snapOverlap2.otherPlane.piece.pieceId, n, snapOverlap2.otherPlane.attachIndex);
+								if (!BuilderTable.tempDuplicateOverlaps.Contains(item3))
 								{
-									BuilderTable.tempDuplicateOverlaps.Add(snapOverlapKey2);
-									long num5 = this.PackSnapInfo(n, snapOverlap2.otherPlane.attachIndex, snapOverlap2.bounds.min, snapOverlap2.bounds.max);
+									BuilderTable.tempDuplicateOverlaps.Add(item3);
+									long item4 = this.PackSnapInfo(n, snapOverlap2.otherPlane.attachIndex, snapOverlap2.bounds.min, snapOverlap2.bounds.max);
 									BuilderTable.overlapPieces.Add(builderPiece5.pieceId);
 									BuilderTable.overlapOtherPieces.Add(snapOverlap2.otherPlane.piece.pieceId);
-									BuilderTable.overlapPacked.Add(num5);
+									BuilderTable.overlapPacked.Add(item4);
 								}
 							}
 						}
@@ -5393,11 +5391,11 @@ namespace GorillaTagScripts
 			}
 			BuilderTable.tempDuplicateOverlaps.Clear();
 			binaryWriter.Write(BuilderTable.overlapPieces.Count);
-			for (int num6 = 0; num6 < BuilderTable.overlapPieces.Count; num6++)
+			for (int num = 0; num < BuilderTable.overlapPieces.Count; num++)
 			{
-				binaryWriter.Write(BuilderTable.overlapPieces[num6]);
-				binaryWriter.Write(BuilderTable.overlapOtherPieces[num6]);
-				binaryWriter.Write(BuilderTable.overlapPacked[num6]);
+				binaryWriter.Write(BuilderTable.overlapPieces[num]);
+				binaryWriter.Write(BuilderTable.overlapOtherPieces[num]);
+				binaryWriter.Write(BuilderTable.overlapPacked[num]);
 			}
 			return (int)memoryStream.Position;
 		}
@@ -5443,7 +5441,7 @@ namespace GorillaTagScripts
 				int num4 = binaryReader.ReadInt32();
 				BuilderPiece.State state = (BuilderPiece.State)binaryReader.ReadByte();
 				int num5 = binaryReader.ReadInt32();
-				bool flag3 = binaryReader.ReadByte() > 0;
+				bool item = binaryReader.ReadByte() > 0;
 				int materialType = binaryReader.ReadInt32();
 				long data = binaryReader.ReadInt64();
 				int data2 = binaryReader.ReadInt32();
@@ -5469,7 +5467,7 @@ namespace GorillaTagScripts
 					BuilderPiece builderPiece = this.CreatePieceInternal(newPieceType, num4, vector, quaternion, state, materialType, activateTimeStamp, this);
 					BuilderTable.tempPeiceIds.Add(num4);
 					BuilderTable.tempParentActorNumbers.Add(num5);
-					BuilderTable.tempInLeftHand.Add(flag3);
+					BuilderTable.tempInLeftHand.Add(item);
 					builderPiece.SetFunctionalPieceState(fState, NetPlayer.Get(PhotonNetwork.MasterClient), PhotonNetwork.ServerTimestamp);
 					if (num8 >= 0 && this.isTableMutable)
 					{
@@ -5506,55 +5504,55 @@ namespace GorillaTagScripts
 			{
 				int newPieceType2 = binaryReader.ReadInt32();
 				int num10 = binaryReader.ReadInt32();
-				int num11 = binaryReader.ReadInt32();
-				int num12 = binaryReader.ReadInt32();
-				int num13 = binaryReader.ReadInt32();
+				int item2 = binaryReader.ReadInt32();
+				int item3 = binaryReader.ReadInt32();
+				int item4 = binaryReader.ReadInt32();
 				BuilderPiece.State state2 = (BuilderPiece.State)binaryReader.ReadByte();
-				int num14 = binaryReader.ReadInt32();
-				bool flag4 = binaryReader.ReadByte() > 0;
+				int num11 = binaryReader.ReadInt32();
+				bool item5 = binaryReader.ReadByte() > 0;
 				int materialType2 = binaryReader.ReadInt32();
-				int num15 = binaryReader.ReadInt32();
+				int item6 = binaryReader.ReadInt32();
 				byte fState2 = (state2 == BuilderPiece.State.AttachedAndPlaced) ? binaryReader.ReadByte() : 0;
 				int activateTimeStamp2 = (state2 == BuilderPiece.State.AttachedAndPlaced) ? binaryReader.ReadInt32() : 0;
-				int num16 = (state2 == BuilderPiece.State.OnConveyor) ? binaryReader.ReadInt32() : 0;
+				int num12 = (state2 == BuilderPiece.State.OnConveyor) ? binaryReader.ReadInt32() : 0;
 				if (!this.ValidateCreatePieceParams(newPieceType2, num10, state2, materialType2))
 				{
 					this.SetTableState(BuilderTable.TableState.BadData);
 					return;
 				}
-				int num17 = -1;
+				int num13 = -1;
 				if (state2 == BuilderPiece.State.OnConveyor || state2 == BuilderPiece.State.OnShelf || state2 == BuilderPiece.State.Displayed)
 				{
-					num17 = num14;
-					num14 = -1;
+					num13 = num11;
+					num11 = -1;
 				}
 				if (this.ValidateDeserializedChildPieceState(num10, state2))
 				{
 					BuilderPiece builderPiece2 = this.CreatePieceInternal(newPieceType2, num10, this.roomCenter.position, Quaternion.identity, state2, materialType2, activateTimeStamp2, this);
 					builderPiece2.SetFunctionalPieceState(fState2, NetPlayer.Get(PhotonNetwork.MasterClient), PhotonNetwork.ServerTimestamp);
 					BuilderTable.tempPeiceIds.Add(num10);
-					BuilderTable.tempParentPeiceIds.Add(num11);
-					BuilderTable.tempAttachIndexes.Add(num12);
-					BuilderTable.tempParentAttachIndexes.Add(num13);
-					BuilderTable.tempParentActorNumbers.Add(num14);
-					BuilderTable.tempInLeftHand.Add(flag4);
-					BuilderTable.tempPiecePlacement.Add(num15);
-					if (num17 >= 0 && this.isTableMutable)
+					BuilderTable.tempParentPeiceIds.Add(item2);
+					BuilderTable.tempAttachIndexes.Add(item3);
+					BuilderTable.tempParentAttachIndexes.Add(item4);
+					BuilderTable.tempParentActorNumbers.Add(num11);
+					BuilderTable.tempInLeftHand.Add(item5);
+					BuilderTable.tempPiecePlacement.Add(item6);
+					if (num13 >= 0 && this.isTableMutable)
 					{
-						builderPiece2.shelfOwner = num17;
+						builderPiece2.shelfOwner = num13;
 						if (state2 == BuilderPiece.State.OnConveyor)
 						{
-							BuilderConveyor builderConveyor2 = this.conveyors[num17];
+							BuilderConveyor builderConveyor2 = this.conveyors[num13];
 							float timeOffset2 = 0f;
-							if (PhotonNetwork.ServerTimestamp > num16)
+							if (PhotonNetwork.ServerTimestamp > num12)
 							{
-								timeOffset2 = (PhotonNetwork.ServerTimestamp - num16) / 1000f;
+								timeOffset2 = (PhotonNetwork.ServerTimestamp - num12) / 1000f;
 							}
 							builderConveyor2.OnShelfPieceCreated(builderPiece2, timeOffset2);
 						}
 						else if (state2 == BuilderPiece.State.OnShelf || state2 == BuilderPiece.State.Displayed)
 						{
-							this.dispenserShelves[num17].OnShelfPieceCreated(builderPiece2, false);
+							this.dispenserShelves[num13].OnShelfPieceCreated(builderPiece2, false);
 						}
 					}
 				}
@@ -5570,11 +5568,11 @@ namespace GorillaTagScripts
 					this.AttachPieceInternal(BuilderTable.tempPeiceIds[n], BuilderTable.tempAttachIndexes[n], BuilderTable.tempParentPeiceIds[n], BuilderTable.tempParentAttachIndexes[n], BuilderTable.tempPiecePlacement[n]);
 				}
 			}
-			for (int num18 = 0; num18 < BuilderTable.tempPeiceIds.Count; num18++)
+			for (int num14 = 0; num14 < BuilderTable.tempPeiceIds.Count; num14++)
 			{
-				if (BuilderTable.tempParentActorNumbers[num18] >= 0)
+				if (BuilderTable.tempParentActorNumbers[num14] >= 0)
 				{
-					this.AttachPieceToActorInternal(BuilderTable.tempPeiceIds[num18], BuilderTable.tempParentActorNumbers[num18], BuilderTable.tempInLeftHand[num18]);
+					this.AttachPieceToActorInternal(BuilderTable.tempPeiceIds[num14], BuilderTable.tempParentActorNumbers[num14], BuilderTable.tempInLeftHand[num14]);
 				}
 			}
 			foreach (BuilderPiece builderPiece3 in this.pieces)
@@ -5588,16 +5586,16 @@ namespace GorillaTagScripts
 			{
 				this.plotOwners.Clear();
 				this.doesLocalPlayerOwnPlot = false;
-				int num19 = binaryReader.ReadInt32();
-				for (int num20 = 0; num20 < num19; num20++)
+				int num15 = binaryReader.ReadInt32();
+				for (int num16 = 0; num16 < num15; num16++)
 				{
-					int num21 = binaryReader.ReadInt32();
-					int num22 = binaryReader.ReadInt32();
+					int num17 = binaryReader.ReadInt32();
+					int num18 = binaryReader.ReadInt32();
 					BuilderPiecePrivatePlot builderPiecePrivatePlot;
-					if (this.plotOwners.TryAdd(num21, num22) && this.GetPiece(num22).TryGetPlotComponent(out builderPiecePrivatePlot))
+					if (this.plotOwners.TryAdd(num17, num18) && this.GetPiece(num18).TryGetPlotComponent(out builderPiecePrivatePlot))
 					{
-						builderPiecePrivatePlot.ClaimPlotForPlayerNumber(num21);
-						if (num21 == PhotonNetwork.LocalPlayer.ActorNumber)
+						builderPiecePrivatePlot.ClaimPlotForPlayerNumber(num17);
+						if (num17 == PhotonNetwork.LocalPlayer.ActorNumber)
 						{
 							this.doesLocalPlayerOwnPlot = true;
 						}
@@ -5623,30 +5621,30 @@ namespace GorillaTagScripts
 				}
 			}
 			BuilderTable.tempDuplicateOverlaps.Clear();
-			int num23 = binaryReader.ReadInt32();
-			for (int num24 = 0; num24 < num23; num24++)
+			int num19 = binaryReader.ReadInt32();
+			for (int num20 = 0; num20 < num19; num20++)
 			{
 				int pieceId = binaryReader.ReadInt32();
-				int num25 = binaryReader.ReadInt32();
+				int num21 = binaryReader.ReadInt32();
 				long packed = binaryReader.ReadInt64();
 				BuilderPiece piece = this.GetPiece(pieceId);
 				if (!(piece == null))
 				{
-					BuilderPiece piece2 = this.GetPiece(num25);
+					BuilderPiece piece2 = this.GetPiece(num21);
 					if (!(piece2 == null))
 					{
-						int num26;
-						int num27;
+						int num22;
+						int num23;
 						Vector2Int min;
 						Vector2Int max;
-						this.UnpackSnapInfo(packed, out num26, out num27, out min, out max);
-						if (num26 >= 0 && num26 < piece.gridPlanes.Count && num27 >= 0 && num27 < piece2.gridPlanes.Count)
+						this.UnpackSnapInfo(packed, out num22, out num23, out min, out max);
+						if (num22 >= 0 && num22 < piece.gridPlanes.Count && num23 >= 0 && num23 < piece2.gridPlanes.Count)
 						{
-							BuilderTable.SnapOverlapKey snapOverlapKey = BuilderTable.BuildOverlapKey(pieceId, num25, num26, num27);
-							if (!BuilderTable.tempDuplicateOverlaps.Contains(snapOverlapKey))
+							BuilderTable.SnapOverlapKey item7 = BuilderTable.BuildOverlapKey(pieceId, num21, num22, num23);
+							if (!BuilderTable.tempDuplicateOverlaps.Contains(item7))
 							{
-								BuilderTable.tempDuplicateOverlaps.Add(snapOverlapKey);
-								piece.gridPlanes[num26].AddSnapOverlap(this.builderPool.CreateSnapOverlap(piece2.gridPlanes[num27], new SnapBounds(min, max)));
+								BuilderTable.tempDuplicateOverlaps.Add(item7);
+								piece.gridPlanes[num22].AddSnapOverlap(this.builderPool.CreateSnapOverlap(piece2.gridPlanes[num23], new SnapBounds(min, max)));
 							}
 						}
 					}

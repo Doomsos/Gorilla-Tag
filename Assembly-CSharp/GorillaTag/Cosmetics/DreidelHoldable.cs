@@ -27,7 +27,7 @@ namespace GorillaTag.Cosmetics
 			if (this._events != null)
 			{
 				this._events.Activate.reliable = true;
-				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnDreidelSpin);
+				this._events.Activate += this.OnDreidelSpin;
 			}
 		}
 
@@ -36,7 +36,7 @@ namespace GorillaTag.Cosmetics
 			base.OnDisable();
 			if (this._events != null)
 			{
-				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnDreidelSpin);
+				this._events.Activate -= this.OnDreidelSpin;
 				this._events.Dispose();
 				this._events = null;
 			}
@@ -137,34 +137,34 @@ namespace GorillaTag.Cosmetics
 		public void DebugSpinDreidel()
 		{
 			Transform transform = GTPlayer.Instance.headCollider.transform;
-			Vector3 vector = transform.position + transform.forward * 0.5f;
-			float num = 2f;
+			Vector3 origin = transform.position + transform.forward * 0.5f;
+			float maxDistance = 2f;
 			RaycastHit raycastHit;
-			if (Physics.Raycast(vector, Vector3.down, ref raycastHit, num, GTPlayer.Instance.locomotionEnabledLayers.value, 1))
+			if (Physics.Raycast(origin, Vector3.down, out raycastHit, maxDistance, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
 			{
 				Vector3 point = raycastHit.point;
 				Vector3 normal = raycastHit.normal;
-				float num2 = Random.Range(7f, 10f);
+				float num = Random.Range(7f, 10f);
 				Dreidel.Side side = (Dreidel.Side)Random.Range(0, 4);
 				Dreidel.Variation variation = (Dreidel.Variation)Random.Range(0, 5);
 				bool flag = this.currentState == TransferrableObject.PositionState.InLeftHand;
-				double num3 = PhotonNetwork.InRoom ? PhotonNetwork.Time : -1.0;
+				double num2 = PhotonNetwork.InRoom ? PhotonNetwork.Time : -1.0;
 				if (PhotonNetwork.InRoom && this._events != null && this._events.Activate != null)
 				{
 					object[] args = new object[]
 					{
 						point,
 						normal,
-						num2,
+						num,
 						flag,
 						(int)side,
 						(int)variation,
-						num3
+						num2
 					};
 					this._events.Activate.RaiseAll(args);
 					return;
 				}
-				this.StartSpinLocal(point, normal, num2, flag, side, variation, num3);
+				this.StartSpinLocal(point, normal, num, flag, side, variation, num2);
 			}
 		}
 

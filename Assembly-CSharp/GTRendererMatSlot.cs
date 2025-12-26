@@ -17,7 +17,7 @@ public struct GTRendererMatSlot
 		}
 		List<Material> list;
 		bool isValid;
-		using (ListPool<Material>.Get(ref list))
+		using (ListPool<Material>.Get(out list))
 		{
 			this.renderer.GetSharedMaterials(list);
 			this.isValid = (this.slot > 0 && this.slot < list.Count && list[this.slot] != null);

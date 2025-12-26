@@ -266,7 +266,7 @@ namespace emotitron.Compression.HalfFloat
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
 		{
-			return this.ToType(type, provider);
+			return ((IConvertible)this).ToType(type, provider);
 		}
 
 		ushort IConvertible.ToUInt16(IFormatProvider provider)

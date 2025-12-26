@@ -10,10 +10,10 @@ public class PlayerPrefFlags
 
 	internal static void Touch(PlayerPrefFlags.Flag flag)
 	{
-		bool flag2 = (PlayerPrefs.GetInt("PlayerPrefFlags0", 1) & (int)flag) == (int)flag;
+		bool arg = (PlayerPrefs.GetInt("PlayerPrefFlags0", 1) & (int)flag) == (int)flag;
 		if (PlayerPrefFlags.OnFlagChange != null)
 		{
-			PlayerPrefFlags.OnFlagChange.Invoke(flag, flag2);
+			PlayerPrefFlags.OnFlagChange(flag, arg);
 		}
 	}
 
@@ -22,7 +22,7 @@ public class PlayerPrefFlags
 		int @int = PlayerPrefs.GetInt("PlayerPrefFlags0", 1);
 		if (value == ((@int & (int)flag) == (int)flag) && PlayerPrefFlags.OnFlagChange != null)
 		{
-			PlayerPrefFlags.OnFlagChange.Invoke(flag, value);
+			PlayerPrefFlags.OnFlagChange(flag, value);
 		}
 	}
 
@@ -40,7 +40,7 @@ public class PlayerPrefFlags
 		PlayerPrefs.SetInt("PlayerPrefFlags0", num);
 		if (PlayerPrefFlags.OnFlagChange != null)
 		{
-			PlayerPrefFlags.OnFlagChange.Invoke(flag, value);
+			PlayerPrefFlags.OnFlagChange(flag, value);
 		}
 	}
 
@@ -59,7 +59,7 @@ public class PlayerPrefFlags
 		PlayerPrefs.SetInt("PlayerPrefFlags0", num);
 		if (PlayerPrefFlags.OnFlagChange != null)
 		{
-			PlayerPrefFlags.OnFlagChange.Invoke(flag, flag2);
+			PlayerPrefFlags.OnFlagChange(flag, flag2);
 		}
 		return flag2;
 	}

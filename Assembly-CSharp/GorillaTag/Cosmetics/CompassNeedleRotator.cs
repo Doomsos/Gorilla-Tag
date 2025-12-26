@@ -17,8 +17,8 @@ namespace GorillaTag.Cosmetics
 			Vector3 forward = transform.forward;
 			forward.y = 0f;
 			forward.Normalize();
-			float num = Mathf.SmoothDamp(Vector3.SignedAngle(forward, Vector3.forward, Vector3.up), 0f, ref this.currentVelocity, 0.005f);
-			transform.Rotate(transform.up, num, 0);
+			float angle = Mathf.SmoothDamp(Vector3.SignedAngle(forward, Vector3.forward, Vector3.up), 0f, ref this.currentVelocity, 0.005f);
+			transform.Rotate(transform.up, angle, Space.World);
 		}
 
 		private const float smoothTime = 0.005f;

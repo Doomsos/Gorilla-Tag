@@ -41,7 +41,7 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 	{
 		if (VODTarget.AlertDisabled != null)
 		{
-			VODTarget.AlertDisabled.Invoke(this);
+			VODTarget.AlertDisabled(this);
 		}
 	}
 
@@ -49,7 +49,7 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 	{
 		if (VODTarget.AlertEnabled != null)
 		{
-			VODTarget.AlertEnabled.Invoke(this);
+			VODTarget.AlertEnabled(this);
 		}
 	}
 
@@ -85,6 +85,10 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 	private void VODPlayer_OnCrash()
 	{
 		base.gameObject.SetActive(false);
+	}
+
+	protected override void ObservableSliceUpdate()
+	{
 	}
 
 	[SerializeField]

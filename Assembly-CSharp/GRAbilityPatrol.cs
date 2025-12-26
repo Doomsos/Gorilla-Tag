@@ -29,8 +29,8 @@ public class GRAbilityPatrol : GRAbilityBase
 
 	private void InitializeRandoms()
 	{
-		this.patrolGroanSoundDelayRandom = new Random((uint)this.entity.GetNetId());
-		this.patrolGroanSoundRandom = new Random((uint)this.entity.GetNetId());
+		this.patrolGroanSoundDelayRandom = new Unity.Mathematics.Random((uint)this.entity.GetNetId());
+		this.patrolGroanSoundRandom = new Unity.Mathematics.Random((uint)this.entity.GetNetId());
 	}
 
 	protected override void OnStart()
@@ -139,9 +139,9 @@ public class GRAbilityPatrol : GRAbilityBase
 
 	private double nextPatrolGroanTime;
 
-	private Random patrolGroanSoundDelayRandom;
+	private Unity.Mathematics.Random patrolGroanSoundDelayRandom;
 
-	private Random patrolGroanSoundRandom;
+	private Unity.Mathematics.Random patrolGroanSoundRandom;
 
 	[ReadOnly]
 	public int nextPatrolNode;

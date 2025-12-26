@@ -13,7 +13,7 @@ public class GRToolUpgradeStation : MonoBehaviour
 		this._reactor = reactor;
 		this.defaultCostText = this.CostText.text;
 		this.toolProgressionManager = tree;
-		this.toolProgressionManager.OnProgressionUpdated += new Action(this.ResearchTreeUpdated);
+		this.toolProgressionManager.OnProgressionUpdated += this.ResearchTreeUpdated;
 		this.ResetScreen();
 	}
 
@@ -171,7 +171,7 @@ public class GRToolUpgradeStation : MonoBehaviour
 			Action onReleased = gameEntity.OnReleased;
 			if (onReleased != null)
 			{
-				onReleased.Invoke();
+				onReleased();
 			}
 			this.PositionInsertedTool(gameEntity);
 			this.SelectUpgrade(0);

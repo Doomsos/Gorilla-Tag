@@ -127,10 +127,10 @@ public class FriendBackendController : MonoBehaviour
 		request.SetRequestHeader("Content-Type", "application/json");
 		yield return request.SendWebRequest();
 		bool flag = false;
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			FriendBackendController.GetFriendsResponse getFriendsResponse = JsonConvert.DeserializeObject<FriendBackendController.GetFriendsResponse>(request.downloadHandler.text);
-			callback.Invoke(getFriendsResponse);
+			FriendBackendController.GetFriendsResponse obj = JsonConvert.DeserializeObject<FriendBackendController.GetFriendsResponse>(request.downloadHandler.text);
+			callback(obj);
 		}
 		else
 		{
@@ -139,7 +139,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				flag = true;
 			}
-			else if (request.result == 2)
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
 			{
 				flag = true;
 			}
@@ -157,7 +157,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				GTDev.LogError<string>("Maximum GetFriends retries attempted. Please check your network connection.", null);
 				this.getFriendsRetryCount = 0;
-				callback.Invoke(null);
+				callback(null);
 			}
 		}
 		else
@@ -179,9 +179,9 @@ public class FriendBackendController : MonoBehaviour
 				if (this.lastGetFriendsResponse.Result.Friends != null)
 				{
 					this.lastFriendsList.Clear();
-					foreach (FriendBackendController.Friend friend in this.lastGetFriendsResponse.Result.Friends)
+					foreach (FriendBackendController.Friend item in this.lastGetFriendsResponse.Result.Friends)
 					{
-						this.lastFriendsList.Add(friend);
+						this.lastFriendsList.Add(item);
 					}
 				}
 			}
@@ -190,7 +190,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				return;
 			}
-			onGetFriendsComplete.Invoke(true);
+			onGetFriendsComplete(true);
 			return;
 		}
 		else
@@ -200,7 +200,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				return;
 			}
-			onGetFriendsComplete2.Invoke(false);
+			onGetFriendsComplete2(false);
 			return;
 		}
 	}
@@ -243,10 +243,10 @@ public class FriendBackendController : MonoBehaviour
 		request.SetRequestHeader("Content-Type", "application/json");
 		yield return request.SendWebRequest();
 		bool flag = false;
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			FriendBackendController.SetPrivacyStateResponse setPrivacyStateResponse = JsonConvert.DeserializeObject<FriendBackendController.SetPrivacyStateResponse>(request.downloadHandler.text);
-			callback.Invoke(setPrivacyStateResponse);
+			FriendBackendController.SetPrivacyStateResponse obj = JsonConvert.DeserializeObject<FriendBackendController.SetPrivacyStateResponse>(request.downloadHandler.text);
+			callback(obj);
 		}
 		else
 		{
@@ -255,7 +255,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				flag = true;
 			}
-			else if (request.result == 2)
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
 			{
 				flag = true;
 			}
@@ -273,7 +273,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				GTDev.LogError<string>("Maximum SetPrivacyState retries attempted. Please check your network connection.", null);
 				this.setPrivacyStateRetryCount = 0;
-				callback.Invoke(null);
+				callback(null);
 			}
 		}
 		else
@@ -292,7 +292,7 @@ public class FriendBackendController : MonoBehaviour
 			Action<bool> onSetPrivacyStateComplete = this.OnSetPrivacyStateComplete;
 			if (onSetPrivacyStateComplete != null)
 			{
-				onSetPrivacyStateComplete.Invoke(true);
+				onSetPrivacyStateComplete(true);
 			}
 		}
 		else
@@ -300,7 +300,7 @@ public class FriendBackendController : MonoBehaviour
 			Action<bool> onSetPrivacyStateComplete2 = this.OnSetPrivacyStateComplete;
 			if (onSetPrivacyStateComplete2 != null)
 			{
-				onSetPrivacyStateComplete2.Invoke(false);
+				onSetPrivacyStateComplete2(false);
 			}
 		}
 		if (this.setPrivacyStateQueue.Count > 0)
@@ -332,9 +332,9 @@ public class FriendBackendController : MonoBehaviour
 		request.SetRequestHeader("Content-Type", "application/json");
 		yield return request.SendWebRequest();
 		bool flag = false;
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			callback.Invoke(true);
+			callback(true);
 		}
 		else
 		{
@@ -347,7 +347,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				flag = true;
 			}
-			else if (request.result == 2)
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
 			{
 				flag = true;
 			}
@@ -365,7 +365,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				GTDev.LogError<string>("Maximum AddFriend retries attempted. Please check your network connection.", null);
 				this.addFriendRetryCount = 0;
-				callback.Invoke(false);
+				callback(false);
 			}
 		}
 		else
@@ -382,7 +382,7 @@ public class FriendBackendController : MonoBehaviour
 			Action<NetPlayer, bool> onAddFriendComplete = this.OnAddFriendComplete;
 			if (onAddFriendComplete != null)
 			{
-				onAddFriendComplete.Invoke(this.addFriendTargetPlayer, true);
+				onAddFriendComplete(this.addFriendTargetPlayer, true);
 			}
 		}
 		else
@@ -390,7 +390,7 @@ public class FriendBackendController : MonoBehaviour
 			Action<NetPlayer, bool> onAddFriendComplete2 = this.OnAddFriendComplete;
 			if (onAddFriendComplete2 != null)
 			{
-				onAddFriendComplete2.Invoke(this.addFriendTargetPlayer, false);
+				onAddFriendComplete2(this.addFriendTargetPlayer, false);
 			}
 		}
 		this.addFriendInProgress = false;
@@ -424,9 +424,9 @@ public class FriendBackendController : MonoBehaviour
 		request.SetRequestHeader("Content-Type", "application/json");
 		yield return request.SendWebRequest();
 		bool flag = false;
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			callback.Invoke(true);
+			callback(true);
 		}
 		else
 		{
@@ -435,7 +435,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				flag = true;
 			}
-			else if (request.result == 2)
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
 			{
 				flag = true;
 			}
@@ -453,7 +453,7 @@ public class FriendBackendController : MonoBehaviour
 			{
 				GTDev.LogError<string>("Maximum AddFriend retries attempted. Please check your network connection.", null);
 				this.removeFriendRetryCount = 0;
-				callback.Invoke(false);
+				callback(false);
 			}
 		}
 		else
@@ -470,7 +470,7 @@ public class FriendBackendController : MonoBehaviour
 			Action<FriendBackendController.Friend, bool> onRemoveFriendComplete = this.OnRemoveFriendComplete;
 			if (onRemoveFriendComplete != null)
 			{
-				onRemoveFriendComplete.Invoke(this.removeFriendTarget, true);
+				onRemoveFriendComplete(this.removeFriendTarget, true);
 			}
 		}
 		else
@@ -478,7 +478,7 @@ public class FriendBackendController : MonoBehaviour
 			Action<FriendBackendController.Friend, bool> onRemoveFriendComplete2 = this.OnRemoveFriendComplete;
 			if (onRemoveFriendComplete2 != null)
 			{
-				onRemoveFriendComplete2.Invoke(this.removeFriendTarget, false);
+				onRemoveFriendComplete2(this.removeFriendTarget, false);
 			}
 		}
 		this.removeFriendInProgress = false;
@@ -511,8 +511,8 @@ public class FriendBackendController : MonoBehaviour
 
 	private void TestAddFriend()
 	{
-		this.OnAddFriendComplete -= new Action<NetPlayer, bool>(this.TestAddFriendCompleteCallback);
-		this.OnAddFriendComplete += new Action<NetPlayer, bool>(this.TestAddFriendCompleteCallback);
+		this.OnAddFriendComplete -= this.TestAddFriendCompleteCallback;
+		this.OnAddFriendComplete += this.TestAddFriendCompleteCallback;
 		NetPlayer target = null;
 		if (this.netPlayerIndexToAddFriend >= 0 && this.netPlayerIndexToAddFriend < NetworkSystem.Instance.AllNetPlayers.Length)
 		{
@@ -533,8 +533,8 @@ public class FriendBackendController : MonoBehaviour
 
 	private void TestRemoveFriend()
 	{
-		this.OnRemoveFriendComplete -= new Action<FriendBackendController.Friend, bool>(this.TestRemoveFriendCompleteCallback);
-		this.OnRemoveFriendComplete += new Action<FriendBackendController.Friend, bool>(this.TestRemoveFriendCompleteCallback);
+		this.OnRemoveFriendComplete -= this.TestRemoveFriendCompleteCallback;
+		this.OnRemoveFriendComplete += this.TestRemoveFriendCompleteCallback;
 		FriendBackendController.Friend target = null;
 		if (this.friendListIndexToRemoveFriend >= 0 && this.friendListIndexToRemoveFriend < this.FriendsList.Count)
 		{
@@ -555,8 +555,8 @@ public class FriendBackendController : MonoBehaviour
 
 	private void TestGetFriends()
 	{
-		this.OnGetFriendsComplete -= new Action<bool>(this.TestGetFriendsCompleteCallback);
-		this.OnGetFriendsComplete += new Action<bool>(this.TestGetFriendsCompleteCallback);
+		this.OnGetFriendsComplete -= this.TestGetFriendsCompleteCallback;
+		this.OnGetFriendsComplete += this.TestGetFriendsCompleteCallback;
 		this.GetFriends();
 	}
 
@@ -604,8 +604,8 @@ public class FriendBackendController : MonoBehaviour
 
 	private void TestSetPrivacyState()
 	{
-		this.OnSetPrivacyStateComplete -= new Action<bool>(this.TestSetPrivacyStateCompleteCallback);
-		this.OnSetPrivacyStateComplete += new Action<bool>(this.TestSetPrivacyStateCompleteCallback);
+		this.OnSetPrivacyStateComplete -= this.TestSetPrivacyStateCompleteCallback;
+		this.OnSetPrivacyStateComplete += this.TestSetPrivacyStateCompleteCallback;
 		this.SetPrivacyState(this.privacyStateToSet);
 	}
 

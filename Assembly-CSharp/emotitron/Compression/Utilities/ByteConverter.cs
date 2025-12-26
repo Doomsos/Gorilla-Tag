@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace emotitron.Compression.Utilities
 {
-	[StructLayout(2)]
+	[StructLayout(LayoutKind.Explicit)]
 	public struct ByteConverter
 	{
 		public byte this[int index]

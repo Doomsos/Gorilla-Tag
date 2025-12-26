@@ -78,14 +78,14 @@ namespace GorillaTag.Rendering.Shaders
 		public static string GetShaderPropertiesStringFromMaterial(Material mat, bool excludeMainTexData)
 		{
 			string text = "";
-			string[] propertyNames = mat.GetPropertyNames(1);
+			string[] propertyNames = mat.GetPropertyNames(MaterialPropertyType.Int);
 			int[] array = new int[propertyNames.Length];
 			for (int i = 0; i < propertyNames.Length; i++)
 			{
 				array[i] = mat.GetInteger(propertyNames[i]);
 				text += array[i].ToString();
 			}
-			propertyNames = mat.GetPropertyNames(0);
+			propertyNames = mat.GetPropertyNames(MaterialPropertyType.Float);
 			float[] array2 = new float[propertyNames.Length];
 			for (int j = 0; j < propertyNames.Length; j++)
 			{
@@ -95,14 +95,14 @@ namespace GorillaTag.Rendering.Shaders
 					text += array2[j].ToString();
 				}
 			}
-			propertyNames = mat.GetPropertyNames(3);
+			propertyNames = mat.GetPropertyNames(MaterialPropertyType.Matrix);
 			Matrix4x4[] array3 = new Matrix4x4[propertyNames.Length];
 			for (int k = 0; k < propertyNames.Length; k++)
 			{
 				array3[k] = mat.GetMatrix(propertyNames[k]);
 				text += array3[k].ToString();
 			}
-			propertyNames = mat.GetPropertyNames(2);
+			propertyNames = mat.GetPropertyNames(MaterialPropertyType.Vector);
 			Vector4[] array4 = new Vector4[propertyNames.Length];
 			for (int l = 0; l < propertyNames.Length; l++)
 			{
@@ -112,7 +112,7 @@ namespace GorillaTag.Rendering.Shaders
 					text += array4[l].ToString();
 				}
 			}
-			propertyNames = mat.GetPropertyNames(4);
+			propertyNames = mat.GetPropertyNames(MaterialPropertyType.Texture);
 			Texture[] array5 = new Texture[propertyNames.Length];
 			for (int m = 0; m < propertyNames.Length; m++)
 			{
@@ -130,7 +130,7 @@ namespace GorillaTag.Rendering.Shaders
 
 		public static ShaderConfigData.ShaderConfig GetConfigDataFromMaterial(Material mat, bool includeMainTexData)
 		{
-			string[] propertyNames = mat.GetPropertyNames(1);
+			string[] propertyNames = mat.GetPropertyNames(MaterialPropertyType.Int);
 			string[] array = propertyNames;
 			int[] array2 = new int[array.Length];
 			bool flag = mat.IsKeywordEnabled("_WATER_EFFECT");
@@ -153,7 +153,7 @@ namespace GorillaTag.Rendering.Shaders
 					array2[i] = 0;
 				}
 			}
-			propertyNames = mat.GetPropertyNames(0);
+			propertyNames = mat.GetPropertyNames(MaterialPropertyType.Float);
 			string[] array3 = propertyNames;
 			float[] array4 = new float[array3.Length];
 			for (int j = 0; j < propertyNames.Length; j++)
@@ -167,14 +167,14 @@ namespace GorillaTag.Rendering.Shaders
 					array4[j] = 0f;
 				}
 			}
-			propertyNames = mat.GetPropertyNames(3);
+			propertyNames = mat.GetPropertyNames(MaterialPropertyType.Matrix);
 			string[] array5 = propertyNames;
 			Matrix4x4[] array6 = new Matrix4x4[array5.Length];
 			for (int k = 0; k < propertyNames.Length; k++)
 			{
 				array6[k] = mat.GetMatrix(propertyNames[k]);
 			}
-			propertyNames = mat.GetPropertyNames(2);
+			propertyNames = mat.GetPropertyNames(MaterialPropertyType.Vector);
 			string[] array7 = propertyNames;
 			Vector4[] array8 = new Vector4[array7.Length];
 			for (int l = 0; l < propertyNames.Length; l++)
@@ -188,7 +188,7 @@ namespace GorillaTag.Rendering.Shaders
 					array8[l] = Vector4.zero;
 				}
 			}
-			propertyNames = mat.GetPropertyNames(4);
+			propertyNames = mat.GetPropertyNames(MaterialPropertyType.Texture);
 			string[] array9 = propertyNames;
 			Texture[] array10 = new Texture[array9.Length];
 			for (int m = 0; m < propertyNames.Length; m++)

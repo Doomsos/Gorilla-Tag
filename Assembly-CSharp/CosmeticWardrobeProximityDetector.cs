@@ -24,7 +24,7 @@ public class CosmeticWardrobeProximityDetector : MonoBehaviour
 
 	public static bool IsUserNearWardrobe(string userID)
 	{
-		int num = LayerMask.GetMask(new string[]
+		int layerMask = LayerMask.GetMask(new string[]
 		{
 			"Gorilla Tag Collider"
 		}) | LayerMask.GetMask(new string[]
@@ -33,11 +33,11 @@ public class CosmeticWardrobeProximityDetector : MonoBehaviour
 		});
 		foreach (SphereCollider sphereCollider in CosmeticWardrobeProximityDetector.wardrobeNearbyDetection)
 		{
-			int num2 = Physics.OverlapSphereNonAlloc(sphereCollider.transform.position, sphereCollider.radius, CosmeticWardrobeProximityDetector.overlapColliders, num);
-			num2 = Mathf.Min(num2, CosmeticWardrobeProximityDetector.overlapColliders.Length);
-			if (num2 > 0)
+			int num = Physics.OverlapSphereNonAlloc(sphereCollider.transform.position, sphereCollider.radius, CosmeticWardrobeProximityDetector.overlapColliders, layerMask);
+			num = Mathf.Min(num, CosmeticWardrobeProximityDetector.overlapColliders.Length);
+			if (num > 0)
 			{
-				for (int i = 0; i < num2; i++)
+				for (int i = 0; i < num; i++)
 				{
 					Collider collider = CosmeticWardrobeProximityDetector.overlapColliders[i];
 					if (!(collider == null))

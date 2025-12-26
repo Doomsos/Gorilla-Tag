@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GorillaTagScripts;
 using Photon.Pun;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Splines;
@@ -43,7 +44,7 @@ public class BuilderConveyor : MonoBehaviour
 		this.initialized = true;
 		this.splineLength = this.spline.Splines[0].GetLength();
 		this.maxItemsOnSpline = Mathf.RoundToInt(this.splineLength / (this.conveyorMoveSpeed * this.spawnDelay)) + 5;
-		this.nativeSpline = new NativeSpline(this.spline.Splines[0], this.spline.transform.localToWorldMatrix, 4);
+		this.nativeSpline = new NativeSpline(this.spline.Splines[0], this.spline.transform.localToWorldMatrix, Allocator.Persistent);
 	}
 
 	public int GetMaxItemsOnConveyor()
@@ -134,9 +135,9 @@ public class BuilderConveyor : MonoBehaviour
 
 	private Vector3 EvaluateSpline(float t)
 	{
-		float num;
-		this._evaluateCurve = this.nativeSpline.GetCurve(SplineUtility.SplineToCurveT<NativeSpline>(this.nativeSpline, t, ref num));
-		return CurveUtility.EvaluatePosition(this._evaluateCurve, num);
+		float t2;
+		this._evaluateCurve = this.nativeSpline.GetCurve(this.nativeSpline.SplineToCurveT(t, out t2));
+		return CurveUtility.EvaluatePosition(this._evaluateCurve, t2);
 	}
 
 	public void UpdateShelfSliced()
@@ -199,10 +200,10 @@ public class BuilderConveyor : MonoBehaviour
 		int count = this.piecesOnConveyor.Count;
 		this.piecesOnConveyor.Add(piece);
 		float num2 = Mathf.Clamp(num, 0f, 1f);
-		Vector3 vector = this.EvaluateSpline(num2);
-		Quaternion quaternion = this.spawnTransform.rotation * Quaternion.Euler(piece.desiredShelfRotationOffset);
-		Vector3 vector2 = vector + this.spawnTransform.rotation * piece.desiredShelfOffset;
-		piece.transform.SetPositionAndRotation(vector2, quaternion);
+		Vector3 a = this.EvaluateSpline(num2);
+		Quaternion rotation = this.spawnTransform.rotation * Quaternion.Euler(piece.desiredShelfRotationOffset);
+		Vector3 position = a + this.spawnTransform.rotation * piece.desiredShelfOffset;
+		piece.transform.SetPositionAndRotation(position, rotation);
 		if (num <= 1f)
 		{
 			this.table.conveyorManager.AddPieceToJob(piece, num2, this.shelfID);
@@ -381,7 +382,7 @@ public class BuilderConveyor : MonoBehaviour
 
 	private int maxItemsOnSpline;
 
-	private BezierCurve _evaluateCurve;
+	private UnityEngine.Splines.BezierCurve _evaluateCurve;
 
 	public NativeSpline nativeSpline;
 

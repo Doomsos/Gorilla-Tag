@@ -2,7 +2,7 @@
 using System.Diagnostics;
 
 [Conditional("UNITY_EDITOR")]
-[AttributeUsage(32767)]
+[AttributeUsage(AttributeTargets.All)]
 public class InlineAttribute : Attribute
 {
 	public InlineAttribute(bool keepLabel = false, bool asGroup = false)

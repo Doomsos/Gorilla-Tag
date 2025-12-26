@@ -33,7 +33,7 @@ namespace GorillaTagScripts
 		{
 			if (this.spinTheTop && this.topOrnament)
 			{
-				this.topOrnament.transform.Rotate(0f, this.spinSpeed * Time.deltaTime, 0f, 0);
+				this.topOrnament.transform.Rotate(0f, this.spinSpeed * Time.deltaTime, 0f, Space.World);
 			}
 		}
 
@@ -183,7 +183,7 @@ namespace GorillaTagScripts
 
 		[WeaverGenerated]
 		[DefaultForProperty("Data", 0, 1)]
-		[DrawIf("IsEditorWritable", true, 0, 0)]
+		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 		private NetworkBool _Data;
 	}
 }

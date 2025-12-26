@@ -26,11 +26,11 @@ namespace GorillaTag.GuidedRefs
 				GuidedRefHub.rootInstance = null;
 			}
 			List<int> list;
-			if (GuidedRefHub.globalLookupRefInstIDsByHub.TryGetValue(this, ref list))
+			if (GuidedRefHub.globalLookupRefInstIDsByHub.TryGetValue(this, out list))
 			{
-				foreach (int num in list)
+				foreach (int key in list)
 				{
-					GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId[num].Remove(this);
+					GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId[key].Remove(this);
 				}
 				GuidedRefHub.globalLookupRefInstIDsByHub.Remove(this);
 			}
@@ -95,7 +95,7 @@ namespace GorillaTag.GuidedRefs
 				int instanceID = targetMono.GetInstanceID();
 				GuidedRefHub.GetHubsThatHaveRegisteredInstId(instanceID).Add(this);
 				List<int> list;
-				if (!GuidedRefHub.globalLookupRefInstIDsByHub.TryGetValue(this, ref list))
+				if (!GuidedRefHub.globalLookupRefInstIDsByHub.TryGetValue(this, out list))
 				{
 					Debug.LogError(string.Concat(new string[]
 					{
@@ -118,8 +118,8 @@ namespace GorillaTag.GuidedRefs
 		{
 			if (targetMono == null)
 			{
-				string text = (debugCaller == null) ? "UNSUPPLIED_CALLER_NAME" : debugCaller.name;
-				Debug.LogError("GuidedRefHub: Cannot register null target from \"" + text + "\".", debugCaller);
+				string str = (debugCaller == null) ? "UNSUPPLIED_CALLER_NAME" : debugCaller.name;
+				Debug.LogError("GuidedRefHub: Cannot register null target from \"" + str + "\".", debugCaller);
 				return;
 			}
 			if (targetMono.GRefTargetInfo.targetId == null)
@@ -160,7 +160,7 @@ namespace GorillaTag.GuidedRefs
 			}
 			int instanceID = targetMono.GetInstanceID();
 			List<GuidedRefHub> list;
-			if (!GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId.TryGetValue(instanceID, ref list))
+			if (!GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId.TryGetValue(instanceID, out list))
 			{
 				return;
 			}
@@ -169,7 +169,7 @@ namespace GorillaTag.GuidedRefs
 				while (enumerator.MoveNext())
 				{
 					RelayInfo relayInfo;
-					if (enumerator.Current.lookupRelayInfoByTargetId.TryGetValue(targetMono.GRefTargetInfo.targetId, ref relayInfo))
+					if (enumerator.Current.lookupRelayInfoByTargetId.TryGetValue(targetMono.GRefTargetInfo.targetId, out relayInfo))
 					{
 						foreach (RegisteredReceiverFieldInfo registeredReceiverFieldInfo in relayInfo.registeredFields)
 						{
@@ -190,7 +190,7 @@ namespace GorillaTag.GuidedRefs
 			foreach (GuidedRefHub guidedRefHub in list)
 			{
 				RelayInfo relayInfo2;
-				if (guidedRefHub.lookupRelayInfoByTargetId.TryGetValue(targetMono.GRefTargetInfo.targetId, ref relayInfo2))
+				if (guidedRefHub.lookupRelayInfoByTargetId.TryGetValue(targetMono.GRefTargetInfo.targetId, out relayInfo2))
 				{
 					relayInfo2.targetMono = null;
 				}
@@ -302,7 +302,7 @@ namespace GorillaTag.GuidedRefs
 			}
 			int instanceID = receiverMono.GetInstanceID();
 			List<GuidedRefHub> list;
-			if (!GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId.TryGetValue(instanceID, ref list))
+			if (!GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId.TryGetValue(instanceID, out list))
 			{
 				Debug.LogError("Tried to unregister a receiver before it was registered.");
 				return;
@@ -314,12 +314,12 @@ namespace GorillaTag.GuidedRefs
 				foreach (RelayInfo relayInfo in guidedRefHub.lookupRelayInfoByTargetId.Values)
 				{
 					List<RegisteredReceiverFieldInfo> registeredFields = relayInfo.registeredFields;
-					Predicate<RegisteredReceiverFieldInfo> predicate;
-					if ((predicate = <>9__0) == null)
+					Predicate<RegisteredReceiverFieldInfo> match;
+					if ((match = <>9__0) == null)
 					{
-						predicate = (<>9__0 = ((RegisteredReceiverFieldInfo fieldInfo) => fieldInfo.receiverMono == iReceiverMono));
+						match = (<>9__0 = ((RegisteredReceiverFieldInfo fieldInfo) => fieldInfo.receiverMono == iReceiverMono));
 					}
-					registeredFields.RemoveAll(predicate);
+					registeredFields.RemoveAll(match);
 				}
 				GuidedRefHub.globalLookupRefInstIDsByHub[guidedRefHub].Remove(instanceID);
 			}
@@ -335,7 +335,7 @@ namespace GorillaTag.GuidedRefs
 				return null;
 			}
 			RelayInfo relayInfo;
-			if (!this.lookupRelayInfoByTargetId.TryGetValue(targetId, ref relayInfo))
+			if (!this.lookupRelayInfoByTargetId.TryGetValue(targetId, out relayInfo))
 			{
 				relayInfo = new RelayInfo
 				{
@@ -352,7 +352,7 @@ namespace GorillaTag.GuidedRefs
 		public static List<GuidedRefHub> GetHubsThatHaveRegisteredInstId(int instanceId)
 		{
 			List<GuidedRefHub> list;
-			if (!GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId.TryGetValue(instanceId, ref list))
+			if (!GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId.TryGetValue(instanceId, out list))
 			{
 				list = new List<GuidedRefHub>(1);
 				GuidedRefHub.globalLookupHubsThatHaveRegisteredInstId[instanceId] = list;
@@ -374,8 +374,8 @@ namespace GorillaTag.GuidedRefs
 			if (relayInfo.registeredFields == null)
 			{
 				GuidedRefTargetIdSO guidedRefTargetIdSO = GuidedRefHub.static_relayInfo_to_targetId[relayInfo];
-				string text = (guidedRefTargetIdSO != null) ? guidedRefTargetIdSO.name : "NULL";
-				Debug.LogError("GuidedRefHub.ResolveReferences: (this should never happen) \"" + text + "\"relayInfo.registeredFields is null.");
+				string str = (guidedRefTargetIdSO != null) ? guidedRefTargetIdSO.name : "NULL";
+				Debug.LogError("GuidedRefHub.ResolveReferences: (this should never happen) \"" + str + "\"relayInfo.registeredFields is null.");
 				return;
 			}
 			if (relayInfo.targetMono == null)

@@ -32,7 +32,7 @@ namespace com.AnotherAxiom.MonkeArcade.Joust
 				while (i < Physics2D.RaycastNonAlloc(base.transform.position, this.velocity.normalized, this.raycastHitResults, this.velocity.magnitude))
 				{
 					JoustTerrain joustTerrain;
-					if (this.raycastHitResults[i].collider.TryGetComponent<JoustTerrain>(ref joustTerrain))
+					if (this.raycastHitResults[i].collider.TryGetComponent<JoustTerrain>(out joustTerrain))
 					{
 						this.velocity.y = 0f;
 						if (joustTerrain.transform.localPosition.y < base.transform.localPosition.y)

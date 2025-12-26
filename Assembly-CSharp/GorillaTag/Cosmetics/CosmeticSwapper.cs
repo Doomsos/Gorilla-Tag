@@ -122,20 +122,20 @@ namespace GorillaTag.Cosmetics
 		{
 			if (this.controller == null)
 			{
-				return default(CosmeticSwapper.CosmeticState?);
+				return null;
 			}
 			CosmeticsController.CosmeticItem cosmeticItem = this.FindItem(nameOrId);
 			if (cosmeticItem.isNullItem)
 			{
 				Debug.LogWarning("Cosmetic not found: " + nameOrId);
-				return default(CosmeticSwapper.CosmeticState?);
+				return null;
 			}
 			bool isLeftHand;
 			CosmeticsController.CosmeticSlots cosmeticSlot = this.GetCosmeticSlot(cosmeticItem, out isLeftHand);
 			if (cosmeticSlot == CosmeticsController.CosmeticSlots.Count)
 			{
 				Debug.LogWarning("Could not determine slot for: " + cosmeticItem.displayName);
-				return default(CosmeticSwapper.CosmeticState?);
+				return null;
 			}
 			CosmeticsController.CosmeticItem replacedItem = this.controller.currentWornSet.items[(int)cosmeticSlot];
 			this.controller.ApplyCosmeticItemToSet(this.controller.tempUnlockedSet, cosmeticItem, isLeftHand, false);
@@ -171,12 +171,12 @@ namespace GorillaTag.Cosmetics
 		private CosmeticsController.CosmeticItem FindItem(string nameOrId)
 		{
 			CosmeticsController.CosmeticItem result;
-			if (this.controller.allCosmeticsDict.TryGetValue(nameOrId, ref result))
+			if (this.controller.allCosmeticsDict.TryGetValue(nameOrId, out result))
 			{
 				return result;
 			}
 			string itemID;
-			if (this.controller.allCosmeticsItemIDsfromDisplayNamesDict.TryGetValue(nameOrId, ref itemID))
+			if (this.controller.allCosmeticsItemIDsfromDisplayNamesDict.TryGetValue(nameOrId, out itemID))
 			{
 				return this.controller.GetItemFromDict(itemID);
 			}

@@ -9,6 +9,7 @@ using GorillaTagScripts;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using UnityEngine.XR;
 
 [RequireComponent(typeof(Rigidbody))]
 [NetworkBehaviourWeaved(11)]
@@ -264,8 +265,8 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 			this.cachedRig = null;
 			this.subtlePlayerPitch = 0f;
 			this.subtlePlayerRoll = 0f;
-			this.leftHoldPositionLocal = default(Vector3?);
-			this.rightHoldPositionLocal = default(Vector3?);
+			this.leftHoldPositionLocal = null;
+			this.rightHoldPositionLocal = null;
 			this.ridersMaterialOverideIndex = 0;
 			if (base.IsMine || !NetworkSystem.Instance.InRoom)
 			{
@@ -297,7 +298,7 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		GTPlayer instance = GTPlayer.Instance;
 		if (this.holdingTwoGliders)
 		{
-			instance.AddForce(Physics.gravity, 5);
+			instance.AddForce(Physics.gravity, ForceMode.Acceleration);
 			return;
 		}
 		if (this.leftHold.active || this.rightHold.active)
@@ -308,45 +309,45 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 			float magnitude = this.currentVelocity.magnitude;
 			this.accelerationAverage.AddSample((this.currentVelocity - this.previousVelocity) / Time.fixedDeltaTime, Time.fixedTime);
 			float rollAngle180Wrapping = this.GetRollAngle180Wrapping();
-			float num = this.liftIncreaseVsRoll.Evaluate(Mathf.Clamp01(Mathf.Abs(rollAngle180Wrapping / 180f))) * this.liftIncreaseVsRollMaxAngle;
-			Vector3 vector = Vector3.RotateTowards(this.currentVelocity, Quaternion.AngleAxis(num, -base.transform.right) * base.transform.forward * magnitude, this.pitchVelocityFollowRateAngle * 0.017453292f * fixedDeltaTime, this.pitchVelocityFollowRateMagnitude * fixedDeltaTime);
-			Vector3 vector2 = vector - this.currentVelocity;
-			float num2 = this.NormalizeAngle180(Vector3.SignedAngle(Vector3.ProjectOnPlane(this.currentVelocity, base.transform.right), base.transform.forward, base.transform.right));
-			if (num2 > 90f)
+			float angle = this.liftIncreaseVsRoll.Evaluate(Mathf.Clamp01(Mathf.Abs(rollAngle180Wrapping / 180f))) * this.liftIncreaseVsRollMaxAngle;
+			Vector3 vector = Vector3.RotateTowards(this.currentVelocity, Quaternion.AngleAxis(angle, -base.transform.right) * base.transform.forward * magnitude, this.pitchVelocityFollowRateAngle * 0.017453292f * fixedDeltaTime, this.pitchVelocityFollowRateMagnitude * fixedDeltaTime);
+			Vector3 a = vector - this.currentVelocity;
+			float num = this.NormalizeAngle180(Vector3.SignedAngle(Vector3.ProjectOnPlane(this.currentVelocity, base.transform.right), base.transform.forward, base.transform.right));
+			if (num > 90f)
 			{
-				num2 = Mathf.Lerp(0f, 90f, Mathf.InverseLerp(180f, 90f, num2));
+				num = Mathf.Lerp(0f, 90f, Mathf.InverseLerp(180f, 90f, num));
 			}
-			else if (num2 < -90f)
+			else if (num < -90f)
 			{
-				num2 = Mathf.Lerp(0f, -90f, Mathf.InverseLerp(-180f, -90f, num2));
+				num = Mathf.Lerp(0f, -90f, Mathf.InverseLerp(-180f, -90f, num));
 			}
-			float num3 = Mathf.Lerp(-1f, 1f, Mathf.InverseLerp(-90f, 90f, num2));
+			float time = Mathf.Lerp(-1f, 1f, Mathf.InverseLerp(-90f, 90f, num));
 			Mathf.Lerp(-1f, 1f, Mathf.InverseLerp(-90f, 90f, this.pitch));
-			float num4 = this.liftVsAttack.Evaluate(num3);
-			instance.AddForce(vector2 * num4, 2);
-			float num5 = this.dragVsAttack.Evaluate(num3);
-			float num6 = (this.syncedState.riderId != -1 && this.syncedState.materialIndex == 1) ? (this.dragVsSpeedMaxSpeed + this.infectedSpeedIncrease) : this.dragVsSpeedMaxSpeed;
-			float num7 = this.dragVsSpeed.Evaluate(Mathf.Clamp01(magnitude / num6));
-			float num8 = Mathf.Clamp01(num5 * this.attackDragFactor + num7 * this.dragVsSpeedDragFactor);
-			instance.AddForce(-this.currentVelocity * num8, 5);
+			float d = this.liftVsAttack.Evaluate(time);
+			instance.AddForce(a * d, ForceMode.VelocityChange);
+			float num2 = this.dragVsAttack.Evaluate(time);
+			float num3 = (this.syncedState.riderId != -1 && this.syncedState.materialIndex == 1) ? (this.dragVsSpeedMaxSpeed + this.infectedSpeedIncrease) : this.dragVsSpeedMaxSpeed;
+			float num4 = this.dragVsSpeed.Evaluate(Mathf.Clamp01(magnitude / num3));
+			float d2 = Mathf.Clamp01(num2 * this.attackDragFactor + num4 * this.dragVsSpeedDragFactor);
+			instance.AddForce(-this.currentVelocity * d2, ForceMode.Acceleration);
 			if (this.pitch > 0f && this.currentVelocity.y > 0f && (this.currentVelocity - this.previousVelocity).y > 0f)
 			{
-				float num9 = Mathf.InverseLerp(0f, this.pullUpLiftActivationVelocity, this.currentVelocity.y);
-				float num10 = Mathf.InverseLerp(0f, this.pullUpLiftActivationAcceleration, (this.currentVelocity - this.previousVelocity).y / fixedDeltaTime);
-				float num11 = Mathf.Min(num9, num10);
-				instance.AddForce(-Physics.gravity * this.pullUpLiftBonus * num11, 5);
+				float a2 = Mathf.InverseLerp(0f, this.pullUpLiftActivationVelocity, this.currentVelocity.y);
+				float b = Mathf.InverseLerp(0f, this.pullUpLiftActivationAcceleration, (this.currentVelocity - this.previousVelocity).y / fixedDeltaTime);
+				float d3 = Mathf.Min(a2, b);
+				instance.AddForce(-Physics.gravity * this.pullUpLiftBonus * d3, ForceMode.Acceleration);
 			}
 			if (Vector3.Dot(vector, Physics.gravity) > 0f)
 			{
-				instance.AddForce(-Physics.gravity * this.gravityCompensation, 5);
+				instance.AddForce(-Physics.gravity * this.gravityCompensation, ForceMode.Acceleration);
 				return;
 			}
 		}
 		else
 		{
-			Vector3 vector3 = this.WindResistanceForceOffset(base.transform.up, Vector3.down);
-			Vector3 vector4 = base.transform.position - vector3 * this.gravityUprightTorqueMultiplier;
-			this.rb.AddForceAtPosition(-this.fallingGravityReduction * Physics.gravity * this.rb.mass, vector4, 0);
+			Vector3 a3 = this.WindResistanceForceOffset(base.transform.up, Vector3.down);
+			Vector3 position = base.transform.position - a3 * this.gravityUprightTorqueMultiplier;
+			this.rb.AddForceAtPosition(-this.fallingGravityReduction * Physics.gravity * this.rb.mass, position, ForceMode.Force);
 		}
 	}
 
@@ -390,18 +391,18 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		{
 			this.rightHold.holdLocalPos = Vector3.Lerp(Vector3.zero, this.rightHold.holdLocalPos, Mathf.Exp(-5f * dt));
 		}
-		Vector3 vector = Vector3.zero;
+		Vector3 a = Vector3.zero;
 		if (this.leftHold.active && this.rightHold.active)
 		{
-			vector = (this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos) + this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos)) * 0.5f;
+			a = (this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos) + this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos)) * 0.5f;
 		}
 		else if (this.leftHold.active)
 		{
-			vector = this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos);
+			a = this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos);
 		}
 		else if (this.rightHold.active)
 		{
-			vector = this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos);
+			a = this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos);
 		}
 		this.UpdateGliderPosition();
 		float magnitude = this.currentVelocity.magnitude;
@@ -453,18 +454,18 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		float amplitude = Mathf.Max(num2 * this.hapticAccelOutputMax * num, num3 * this.hapticSpeedOutputMax);
 		if (this.rightHold.active)
 		{
-			GorillaTagger.Instance.DoVibration(5, amplitude, dt);
+			GorillaTagger.Instance.DoVibration(XRNode.RightHand, amplitude, dt);
 		}
 		if (this.leftHold.active)
 		{
-			GorillaTagger.Instance.DoVibration(4, amplitude, dt);
+			GorillaTagger.Instance.DoVibration(XRNode.LeftHand, amplitude, dt);
 		}
-		Vector3 vector2 = this.handle.transform.position + this.handle.transform.rotation * new Vector3(0f, 0f, 1f);
+		Vector3 origin = this.handle.transform.position + this.handle.transform.rotation * new Vector3(0f, 0f, 1f);
 		if (Time.frameCount % 2 == 0)
 		{
-			Vector3 vector3 = this.handle.transform.rotation * new Vector3(-0.707f, 0f, 0.707f);
+			Vector3 direction = this.handle.transform.rotation * new Vector3(-0.707f, 0f, 0.707f);
 			RaycastHit raycastHit;
-			if (this.leftWhooshStartTime < Time.time - this.whooshSoundRetriggerThreshold && magnitude > this.whooshSpeedThresholdInput.x && Physics.Raycast(new Ray(vector2, vector3), ref raycastHit, this.whooshCheckDistance, GTPlayer.Instance.locomotionEnabledLayers.value, 1))
+			if (this.leftWhooshStartTime < Time.time - this.whooshSoundRetriggerThreshold && magnitude > this.whooshSpeedThresholdInput.x && Physics.Raycast(new Ray(origin, direction), out raycastHit, this.whooshCheckDistance, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
 			{
 				this.leftWhooshStartTime = Time.time;
 				this.leftWhooshHitPoint = raycastHit.point;
@@ -475,9 +476,9 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		}
 		else
 		{
-			Vector3 vector4 = this.handle.transform.rotation * new Vector3(0.707f, 0f, 0.707f);
+			Vector3 direction2 = this.handle.transform.rotation * new Vector3(0.707f, 0f, 0.707f);
 			RaycastHit raycastHit2;
-			if (this.rightWhooshStartTime < Time.time - this.whooshSoundRetriggerThreshold && magnitude > this.whooshSpeedThresholdInput.x && Physics.Raycast(new Ray(vector2, vector4), ref raycastHit2, this.whooshCheckDistance, GTPlayer.Instance.locomotionEnabledLayers.value, 1))
+			if (this.rightWhooshStartTime < Time.time - this.whooshSoundRetriggerThreshold && magnitude > this.whooshSpeedThresholdInput.x && Physics.Raycast(new Ray(origin, direction2), out raycastHit2, this.whooshCheckDistance, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
 			{
 				this.rightWhooshStartTime = Time.time;
 				this.rightWhooshHitPoint = raycastHit2.point;
@@ -514,58 +515,58 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		}
 		Vector3 normalized = Vector3.ProjectOnPlane(base.transform.right, Vector3.up).normalized;
 		Vector3 normalized2 = Vector3.ProjectOnPlane(base.transform.forward, Vector3.up).normalized;
-		float num4 = -Vector3.Dot(vector - this.handle.transform.position, normalized2);
-		Vector3 vector5 = this.handle.transform.position - normalized2 * (this.riderPosRange.y * 0.5f + this.riderPosRangeOffset + num4);
-		float num5 = Vector3.Dot(headCenterPosition - vector5, normalized);
-		float num6 = Vector3.Dot(headCenterPosition - vector5, normalized2);
+		float num4 = -Vector3.Dot(a - this.handle.transform.position, normalized2);
+		Vector3 b = this.handle.transform.position - normalized2 * (this.riderPosRange.y * 0.5f + this.riderPosRangeOffset + num4);
+		float num5 = Vector3.Dot(headCenterPosition - b, normalized);
+		float num6 = Vector3.Dot(headCenterPosition - b, normalized2);
 		num5 /= this.riderPosRange.x * 0.5f;
 		num6 /= this.riderPosRange.y * 0.5f;
 		this.riderPosition.x = Mathf.Sign(num5) * Mathf.Lerp(0f, 1f, Mathf.InverseLerp(this.riderPosRangeNormalizedDeadzone.x, 1f, Mathf.Abs(num5)));
 		this.riderPosition.y = Mathf.Sign(num6) * Mathf.Lerp(0f, 1f, Mathf.InverseLerp(this.riderPosRangeNormalizedDeadzone.y, 1f, Mathf.Abs(num6)));
-		Vector3 vector6;
-		Vector3 vector7;
+		Vector3 vector;
+		Vector3 vector2;
 		if (this.leftHold.active && this.rightHold.active)
 		{
-			vector6 = this.leftHold.transform.position;
-			this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector6));
-			vector7 = this.rightHold.transform.position;
-			this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector7));
+			vector = this.leftHold.transform.position;
+			this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector));
+			vector2 = this.rightHold.transform.position;
+			this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector2));
 		}
 		else if (this.leftHold.active)
 		{
-			vector6 = this.leftHold.transform.position;
-			this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector6));
-			Vector3 vector8 = vector6 + this.leftHold.transform.forward * this.oneHandSimulatedHoldOffset.x;
+			vector = this.leftHold.transform.position;
+			this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector));
+			Vector3 vector3 = vector + this.leftHold.transform.forward * this.oneHandSimulatedHoldOffset.x;
 			if (this.rightHoldPositionLocal != null)
 			{
-				this.rightHoldPositionLocal = new Vector3?(Vector3.Lerp(GTPlayer.Instance.transform.InverseTransformPoint(vector8), this.rightHoldPositionLocal.Value, Mathf.Exp(-5f * dt)));
-				vector7 = GTPlayer.Instance.transform.TransformPoint(this.rightHoldPositionLocal.Value);
+				this.rightHoldPositionLocal = new Vector3?(Vector3.Lerp(GTPlayer.Instance.transform.InverseTransformPoint(vector3), this.rightHoldPositionLocal.Value, Mathf.Exp(-5f * dt)));
+				vector2 = GTPlayer.Instance.transform.TransformPoint(this.rightHoldPositionLocal.Value);
 			}
 			else
 			{
-				vector7 = vector8;
-				this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector7));
+				vector2 = vector3;
+				this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector2));
 			}
 		}
 		else
 		{
-			vector7 = this.rightHold.transform.position;
-			this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector7));
-			Vector3 vector9 = vector7 + this.rightHold.transform.forward * this.oneHandSimulatedHoldOffset.x;
+			vector2 = this.rightHold.transform.position;
+			this.rightHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector2));
+			Vector3 vector4 = vector2 + this.rightHold.transform.forward * this.oneHandSimulatedHoldOffset.x;
 			if (this.leftHoldPositionLocal != null)
 			{
-				this.leftHoldPositionLocal = new Vector3?(Vector3.Lerp(GTPlayer.Instance.transform.InverseTransformPoint(vector9), this.leftHoldPositionLocal.Value, Mathf.Exp(-5f * dt)));
-				vector6 = GTPlayer.Instance.transform.TransformPoint(this.leftHoldPositionLocal.Value);
+				this.leftHoldPositionLocal = new Vector3?(Vector3.Lerp(GTPlayer.Instance.transform.InverseTransformPoint(vector4), this.leftHoldPositionLocal.Value, Mathf.Exp(-5f * dt)));
+				vector = GTPlayer.Instance.transform.TransformPoint(this.leftHoldPositionLocal.Value);
 			}
 			else
 			{
-				vector6 = vector9;
-				this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector6));
+				vector = vector4;
+				this.leftHoldPositionLocal = new Vector3?(GTPlayer.Instance.transform.InverseTransformPoint(vector));
 			}
 		}
-		Vector3 vector10;
-		Vector3 vector11;
-		this.GetHandsOrientationVectors(vector6, vector7, GTPlayer.Instance.headCollider.transform, false, out vector10, out vector11);
+		Vector3 forward;
+		Vector3 vector5;
+		this.GetHandsOrientationVectors(vector, vector2, GTPlayer.Instance.headCollider.transform, false, out forward, out vector5);
 		float num7 = this.riderPosition.y * this.riderPosDirectPitchMax;
 		if (!this.leftHold.active || !this.rightHold.active)
 		{
@@ -573,48 +574,48 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		}
 		Spring.CriticalSpringDamperExact(ref this.pitch, ref this.pitchVel, num7, 0f, this.pitchHalfLife, dt);
 		this.pitch = Mathf.Clamp(this.pitch, this.pitchMinMax.x, this.pitchMinMax.y);
-		Quaternion quaternion = Quaternion.AngleAxis(this.pitch, Vector3.right);
+		Quaternion rhs = Quaternion.AngleAxis(this.pitch, Vector3.right);
 		this.twoHandRotationOffsetAngle = Mathf.Lerp(0f, this.twoHandRotationOffsetAngle, Mathf.Exp(-8f * dt));
-		Vector3 vector12 = this.twoHandGliderInversionOnYawInsteadOfRoll ? vector11 : Vector3.up;
-		Quaternion quaternion2 = Quaternion.AngleAxis(this.twoHandRotationOffsetAngle, this.twoHandRotationOffsetAxis) * Quaternion.LookRotation(vector10, vector12) * Quaternion.AngleAxis(-90f, Vector3.up);
+		Vector3 upwards = this.twoHandGliderInversionOnYawInsteadOfRoll ? vector5 : Vector3.up;
+		Quaternion lhs = Quaternion.AngleAxis(this.twoHandRotationOffsetAngle, this.twoHandRotationOffsetAxis) * Quaternion.LookRotation(forward, upwards) * Quaternion.AngleAxis(-90f, Vector3.up);
 		float num8 = (this.leftHold.active && this.rightHold.active) ? this.twoHandRotationRateExp : this.oneHandRotationRateExp;
-		base.transform.rotation = Quaternion.Slerp(quaternion2 * quaternion, base.transform.rotation, Mathf.Exp(-num8 * dt));
+		base.transform.rotation = Quaternion.Slerp(lhs * rhs, base.transform.rotation, Mathf.Exp(-num8 * dt));
 		if (this.subtlePlayerPitchActive || this.subtlePlayerRollActive)
 		{
-			float num9 = Mathf.InverseLerp(this.subtlePlayerRotationSpeedRampMinMax.x, this.subtlePlayerRotationSpeedRampMinMax.y, this.currentVelocity.magnitude);
-			Quaternion quaternion3 = Quaternion.identity;
+			float a2 = Mathf.InverseLerp(this.subtlePlayerRotationSpeedRampMinMax.x, this.subtlePlayerRotationSpeedRampMinMax.y, this.currentVelocity.magnitude);
+			Quaternion rhs2 = Quaternion.identity;
 			if (this.subtlePlayerRollActive)
 			{
-				float num10 = this.GetRollAngle180Wrapping();
-				if (num10 > 90f)
+				float num9 = this.GetRollAngle180Wrapping();
+				if (num9 > 90f)
 				{
-					num10 = Mathf.Lerp(0f, 90f, Mathf.InverseLerp(180f, 90f, num10));
+					num9 = Mathf.Lerp(0f, 90f, Mathf.InverseLerp(180f, 90f, num9));
 				}
-				else if (num10 < -90f)
+				else if (num9 < -90f)
 				{
-					num10 = Mathf.Lerp(0f, -90f, Mathf.InverseLerp(-180f, -90f, num10));
+					num9 = Mathf.Lerp(0f, -90f, Mathf.InverseLerp(-180f, -90f, num9));
 				}
 				Vector3 normalized3 = new Vector3(this.currentVelocity.x, 0f, this.currentVelocity.z).normalized;
-				Vector3 vector13 = new Vector3(average.x, 0f, average.z);
-				float num11 = Vector3.Dot(vector13 - Vector3.Dot(vector13, normalized3) * normalized3, Vector3.Cross(normalized3, Vector3.up));
-				this.turnAccelerationSmoothed = Mathf.Lerp(num11, this.turnAccelerationSmoothed, Mathf.Exp(-this.accelSmoothingFollowRateExp * dt));
-				float num12 = 0f;
-				if (num11 * num10 > 0f)
+				Vector3 vector6 = new Vector3(average.x, 0f, average.z);
+				float num10 = Vector3.Dot(vector6 - Vector3.Dot(vector6, normalized3) * normalized3, Vector3.Cross(normalized3, Vector3.up));
+				this.turnAccelerationSmoothed = Mathf.Lerp(num10, this.turnAccelerationSmoothed, Mathf.Exp(-this.accelSmoothingFollowRateExp * dt));
+				float b2 = 0f;
+				if (num10 * num9 > 0f)
 				{
-					num12 = Mathf.InverseLerp(this.subtlePlayerRollAccelMinMax.x, this.subtlePlayerRollAccelMinMax.y, Mathf.Abs(this.turnAccelerationSmoothed));
+					b2 = Mathf.InverseLerp(this.subtlePlayerRollAccelMinMax.x, this.subtlePlayerRollAccelMinMax.y, Mathf.Abs(this.turnAccelerationSmoothed));
 				}
-				float num13 = num10 * this.subtlePlayerRollFactor * Mathf.Min(num9, num12);
-				this.subtlePlayerRoll = Mathf.Lerp(num13, this.subtlePlayerRoll, Mathf.Exp(-this.subtlePlayerRollRateExp * dt));
-				quaternion3 = Quaternion.AngleAxis(this.subtlePlayerRoll, base.transform.forward);
+				float a3 = num9 * this.subtlePlayerRollFactor * Mathf.Min(a2, b2);
+				this.subtlePlayerRoll = Mathf.Lerp(a3, this.subtlePlayerRoll, Mathf.Exp(-this.subtlePlayerRollRateExp * dt));
+				rhs2 = Quaternion.AngleAxis(this.subtlePlayerRoll, base.transform.forward);
 			}
-			Quaternion quaternion4 = Quaternion.identity;
+			Quaternion lhs2 = Quaternion.identity;
 			if (this.subtlePlayerPitchActive)
 			{
-				float num14 = this.pitch * this.subtlePlayerPitchFactor * Mathf.Min(num9, 1f);
-				this.subtlePlayerPitch = Mathf.Lerp(num14, this.subtlePlayerPitch, Mathf.Exp(-this.subtlePlayerPitchRateExp * dt));
-				quaternion4 = Quaternion.AngleAxis(this.subtlePlayerPitch, -base.transform.right);
+				float a4 = this.pitch * this.subtlePlayerPitchFactor * Mathf.Min(a2, 1f);
+				this.subtlePlayerPitch = Mathf.Lerp(a4, this.subtlePlayerPitch, Mathf.Exp(-this.subtlePlayerPitchRateExp * dt));
+				lhs2 = Quaternion.AngleAxis(this.subtlePlayerPitch, -base.transform.right);
 			}
-			GTPlayer.Instance.PlayerRotationOverride = quaternion4 * quaternion3;
+			GTPlayer.Instance.PlayerRotationOverride = lhs2 * rhs2;
 		}
 		this.UpdateGliderPosition();
 		if (this.syncedState.riderId != NetworkSystem.Instance.LocalPlayer.ActorNumber)
@@ -765,11 +766,11 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		Vector3 vector = startingPoint;
 		if (component != null)
 		{
-			Vector3 vector2 = (component.direction == 0) ? Vector3.right : ((component.direction == 1) ? Vector3.up : Vector3.forward);
-			Vector3 vector3 = component.transform.rotation * vector2;
-			Vector3 vector4 = component.transform.position + component.transform.rotation * component.center;
-			float num = Mathf.Clamp(Vector3.Dot(vector - vector4, vector3), -component.height * 0.5f, component.height * 0.5f);
-			vector = vector4 + vector3 * num;
+			Vector3 point = (component.direction == 0) ? Vector3.right : ((component.direction == 1) ? Vector3.up : Vector3.forward);
+			Vector3 vector2 = component.transform.rotation * point;
+			Vector3 vector3 = component.transform.position + component.transform.rotation * component.center;
+			float d = Mathf.Clamp(Vector3.Dot(vector - vector3, vector2), -component.height * 0.5f, component.height * 0.5f);
+			vector = vector3 + vector2 * d;
 		}
 		return vector;
 	}
@@ -778,9 +779,9 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 	{
 		if (this.leftHold.active && this.rightHold.active)
 		{
-			Vector3 vector = this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos) + base.transform.TransformVector(this.leftHold.handleLocalPos);
-			Vector3 vector2 = this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos) + base.transform.TransformVector(this.rightHold.handleLocalPos);
-			base.transform.position = (vector + vector2) * 0.5f;
+			Vector3 a = this.leftHold.transform.TransformPoint(this.leftHold.holdLocalPos) + base.transform.TransformVector(this.leftHold.handleLocalPos);
+			Vector3 b = this.rightHold.transform.TransformPoint(this.rightHold.holdLocalPos) + base.transform.TransformVector(this.rightHold.handleLocalPos);
+			base.transform.position = (a + b) * 0.5f;
 			return;
 		}
 		if (this.leftHold.active)
@@ -797,8 +798,8 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 	private Vector3 GetHandsVector(Vector3 leftHandPos, Vector3 rightHandPos, Vector3 headPos, bool flipBasedOnFacingDir)
 	{
 		Vector3 vector = rightHandPos - leftHandPos;
-		Vector3 vector2 = (rightHandPos + leftHandPos) * 0.5f - headPos;
-		Vector3 normalized = Vector3.Cross(Vector3.up, vector2).normalized;
+		Vector3 rhs = (rightHandPos + leftHandPos) * 0.5f - headPos;
+		Vector3 normalized = Vector3.Cross(Vector3.up, rhs).normalized;
 		if (flipBasedOnFacingDir && Vector3.Dot(vector, normalized) < 0f)
 		{
 			vector = -vector;
@@ -812,33 +813,33 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		float magnitude = handsVector.magnitude;
 		handsVector /= Mathf.Max(magnitude, 0.001f);
 		Vector3 position = head.position;
-		float num = 1f;
-		Vector3 vector = (Vector3.Dot(head.right, handsVector) < 0f) ? handsVector : (-handsVector);
-		Vector3 normalized = Vector3.ProjectOnPlane(-head.forward, vector).normalized;
-		Vector3 vector2 = normalized * num + position;
-		Vector3 vector3 = (leftHandPos + rightHandPos) * 0.5f;
-		Vector3 vector4 = Vector3.ProjectOnPlane(vector3 - head.position, Vector3.up);
-		float magnitude2 = vector4.magnitude;
-		vector4 /= Mathf.Max(magnitude2, 0.001f);
+		float d = 1f;
+		Vector3 planeNormal = (Vector3.Dot(head.right, handsVector) < 0f) ? handsVector : (-handsVector);
+		Vector3 normalized = Vector3.ProjectOnPlane(-head.forward, planeNormal).normalized;
+		Vector3 a = normalized * d + position;
+		Vector3 a2 = (leftHandPos + rightHandPos) * 0.5f;
+		Vector3 a3 = Vector3.ProjectOnPlane(a2 - head.position, Vector3.up);
+		float magnitude2 = a3.magnitude;
+		a3 /= Mathf.Max(magnitude2, 0.001f);
 		Vector3 normalized2 = Vector3.ProjectOnPlane(-base.transform.forward, Vector3.up).normalized;
-		Vector3 vector5 = -vector4 * num + position;
-		float num2 = Vector3.Dot(normalized2, -vector4);
-		float num3 = Vector3.Dot(normalized2, normalized);
+		Vector3 a4 = -a3 * d + position;
+		float num = Vector3.Dot(normalized2, -a3);
+		float num2 = Vector3.Dot(normalized2, normalized);
 		if (Vector3.Dot(base.transform.up, Vector3.up) < 0f)
 		{
+			num = Mathf.Abs(num);
 			num2 = Mathf.Abs(num2);
-			num3 = Mathf.Abs(num3);
 		}
+		num = Mathf.Max(num, 0f);
 		num2 = Mathf.Max(num2, 0f);
-		num3 = Mathf.Max(num3, 0f);
-		Vector3 vector6 = (vector5 * num2 + vector2 * num3) / Mathf.Max(num2 + num3, 0.001f);
-		Vector3 vector7 = vector3 - vector6;
-		Vector3 normalized3 = Vector3.Cross(Vector3.up, vector7).normalized;
+		Vector3 b = (a4 * num + a * num2) / Mathf.Max(num + num2, 0.001f);
+		Vector3 vector = a2 - b;
+		Vector3 normalized3 = Vector3.Cross(Vector3.up, vector).normalized;
 		if (flipBasedOnFacingDir && Vector3.Dot(handsVector, normalized3) < 0f)
 		{
 			handsVector = -handsVector;
 		}
-		handsUpVector = Vector3.Cross(Vector3.ProjectOnPlane(vector7, Vector3.up), handsVector).normalized;
+		handsUpVector = Vector3.Cross(Vector3.ProjectOnPlane(vector, Vector3.up), handsVector).normalized;
 	}
 
 	private Material GetMaterialFromIndex(byte materialIndex)
@@ -915,14 +916,14 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 		if (this.leftHold.active || this.rightHold.active)
 		{
 			Vector3 accelFromVelocity = component.GetAccelFromVelocity(GTPlayer.Instance.RigidbodyVelocity);
-			GTPlayer.Instance.AddForce(accelFromVelocity, 5);
+			GTPlayer.Instance.AddForce(accelFromVelocity, ForceMode.Acceleration);
 			this.windVolumeForceAppliedFrame = Time.frameCount;
 			return;
 		}
 		Vector3 accelFromVelocity2 = component.GetAccelFromVelocity(this.rb.linearVelocity);
-		Vector3 vector = this.WindResistanceForceOffset(base.transform.up, component.WindDirection);
-		Vector3 vector2 = base.transform.position + vector * this.windUprightTorqueMultiplier;
-		this.rb.AddForceAtPosition(accelFromVelocity2 * this.rb.mass, vector2, 0);
+		Vector3 a = this.WindResistanceForceOffset(base.transform.up, component.WindDirection);
+		Vector3 position = base.transform.position + a * this.windUprightTorqueMultiplier;
+		this.rb.AddForceAtPosition(accelFromVelocity2 * this.rb.mass, position, ForceMode.Force);
 		this.windVolumeForceAppliedFrame = Time.frameCount;
 	}
 
@@ -1415,7 +1416,7 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 11)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private GliderHoldable.SyncedState _Data;
 
 	private enum GliderState
@@ -1457,7 +1458,7 @@ public class GliderHoldable : NetworkHoldableObject, IRequestableOwnershipGuardC
 	}
 
 	[NetworkStructWeaved(11)]
-	[StructLayout(2, Size = 44)]
+	[StructLayout(LayoutKind.Explicit, Size = 44)]
 	internal struct SyncedState : INetworkStruct
 	{
 		public void Init(Vector3 defaultPosition, Quaternion defaultRotation)

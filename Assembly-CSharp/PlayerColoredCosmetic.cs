@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GorillaExtensions;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -36,7 +37,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 		this.InitIfNeeded();
 		if (this.rig != null)
 		{
-			this.rig.OnColorChanged += new Action<Color>(this.UpdateColor);
+			this.rig.OnColorChanged += this.UpdateColor;
 			this.UpdateColor(this.rig.playerColor);
 		}
 	}
@@ -45,7 +46,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 	{
 		if (this.rig != null)
 		{
-			this.rig.OnColorChanged -= new Action<Color>(this.UpdateColor);
+			this.rig.OnColorChanged -= this.UpdateColor;
 		}
 	}
 
@@ -62,6 +63,10 @@ public class PlayerColoredCosmetic : MonoBehaviour
 			this.particleMains[j].startColor = color2;
 		}
 	}
+
+	private const string preLog = "[GT/PlayerColoredCosmetic]  ";
+
+	private const string preErr = "ERROR!!!  ";
 
 	private bool didInit;
 
@@ -88,11 +93,23 @@ public class PlayerColoredCosmetic : MonoBehaviour
 		public void Init()
 		{
 			this.hashId = Shader.PropertyToID(this.shaderColorProperty);
+			if (this.meshRenderer == null)
+			{
+				Debug.LogError("ERROR!!!  ColoringRule.Init: Default meshRenderer cannot be null! Path=" + this.meshRenderer.transform.GetPathQ());
+			}
 			List<Material> list;
-			using (CollectionPool<List<Material>, Material>.Get(ref list))
+			using (CollectionPool<List<Material>, Material>.Get(out list))
 			{
 				this.meshRenderer.GetSharedMaterials(list);
+				if (this.materialIndex < 0 || this.materialIndex >= list.Count)
+				{
+					Debug.LogError("ERROR!!!  " + string.Format("ColoringRule.Init: Material index {0} is out of range! Path=", this.materialIndex) + this.meshRenderer.transform.GetPathQ(), this.meshRenderer);
+				}
 				this.defaultMaterial = list[this.materialIndex];
+				if (this.defaultMaterial == null)
+				{
+					Debug.LogError("ERROR!!!  ColoringRule.Init: Default material cannot be null! Path=" + this.meshRenderer.transform.GetPathQ(), this.meshRenderer);
+				}
 				this.instancedMaterial = new Material(list[this.materialIndex]);
 				list[this.materialIndex] = this.instancedMaterial;
 				this.meshRenderer.SetSharedMaterials(list);

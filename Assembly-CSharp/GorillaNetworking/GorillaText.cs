@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,30 +16,26 @@ namespace GorillaNetworking
 			Debug.Log("Original text = " + this.originalText);
 			this.updateTextCallback = callback;
 			this.updateMaterialCallback = materialCallback;
+			GorillaTextManager.RegisterText(this);
 		}
 
-		public string Text
+		public void InvokeIfUpdated()
 		{
-			get
+			if (!this.modified)
 			{
-				return this.originalText;
+				return;
 			}
-			set
+			this.modified = false;
+			string b = this.stringBuilder.ToString();
+			if (this.currentText != b)
 			{
-				if (this.originalText == value)
+				this.currentText = b;
+				UnityEvent<string> unityEvent = this.updateTextCallback;
+				if (unityEvent == null)
 				{
 					return;
 				}
-				this.originalText = value;
-				if (!this.failedState)
-				{
-					UnityEvent<string> unityEvent = this.updateTextCallback;
-					if (unityEvent == null)
-					{
-						return;
-					}
-					unityEvent.Invoke(value);
-				}
+				unityEvent.Invoke(this.currentText);
 			}
 		}
 
@@ -51,6 +48,8 @@ namespace GorillaNetworking
 			{
 				unityEvent.Invoke(failText);
 			}
+			this.originalText = this.currentText;
+			this.currentText = failText;
 			this.currentMaterials = (Material[])this.originalMaterials.Clone();
 			this.currentMaterials[0] = this.failureMaterial;
 			UnityEvent<Material[]> unityEvent2 = this.updateMaterialCallback;
@@ -70,6 +69,7 @@ namespace GorillaNetworking
 				unityEvent.Invoke(this.originalText);
 			}
 			this.failureText = "";
+			this.currentText = this.originalText;
 			this.currentMaterials = this.originalMaterials;
 			UnityEvent<Material[]> unityEvent2 = this.updateMaterialCallback;
 			if (unityEvent2 == null)
@@ -79,9 +79,28 @@ namespace GorillaNetworking
 			unityEvent2.Invoke(this.currentMaterials);
 		}
 
+		public void Append(string str)
+		{
+			this.modified = true;
+			this.stringBuilder.Append(str);
+		}
+
+		public void Set(string str)
+		{
+			this.modified = true;
+			this.stringBuilder.Clear();
+			this.stringBuilder.Append(str);
+		}
+
 		private string failureText;
 
+		public string currentText;
+
 		private string originalText = string.Empty;
+
+		private StringBuilder stringBuilder = new StringBuilder();
+
+		private bool modified;
 
 		private bool failedState;
 

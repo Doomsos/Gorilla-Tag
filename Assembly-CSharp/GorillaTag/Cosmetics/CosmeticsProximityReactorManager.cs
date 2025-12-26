@@ -63,7 +63,7 @@ namespace GorillaTag.Cosmetics
 				if (!string.IsNullOrEmpty(text))
 				{
 					List<CosmeticsProximityReactor> list;
-					if (!this.byType.TryGetValue(text, ref list))
+					if (!this.byType.TryGetValue(text, out list))
 					{
 						list = new List<CosmeticsProximityReactor>();
 						this.byType[text] = list;
@@ -111,9 +111,9 @@ namespace GorillaTag.Cosmetics
 				{
 					for (int i = 0; i < this.typeKeysCache.Count; i++)
 					{
-						string text = this.typeKeysCache[i];
+						string key = this.typeKeysCache[i];
 						List<CosmeticsProximityReactor> list;
-						if (this.byType.TryGetValue(text, ref list) && list != null && list.Count > 0)
+						if (this.byType.TryGetValue(key, out list) && list != null && list.Count > 0)
 						{
 							this.ProcessOneGroup(list);
 						}
@@ -169,9 +169,9 @@ namespace GorillaTag.Cosmetics
 			}
 			for (int l = 0; l < this.typeKeysCache.Count; l++)
 			{
-				string text2 = this.typeKeysCache[l];
+				string key2 = this.typeKeysCache[l];
 				List<CosmeticsProximityReactor> list2;
-				if (this.byType.TryGetValue(text2, ref list2) && list2 != null && list2.Count > 0)
+				if (this.byType.TryGetValue(key2, out list2) && list2 != null && list2.Count > 0)
 				{
 					this.BreakTheBoundForGroup(list2);
 				}
@@ -234,7 +234,7 @@ namespace GorillaTag.Cosmetics
 			{
 				CosmeticsProximityReactor cosmeticsProximityReactor = group[i];
 				int num;
-				if (!(cosmeticsProximityReactor == null) && cosmeticsProximityReactor.HasAnyCosmeticMatch() && (!this.matchedFrame.TryGetValue(cosmeticsProximityReactor, ref num) || num != Time.frameCount))
+				if (!(cosmeticsProximityReactor == null) && cosmeticsProximityReactor.HasAnyCosmeticMatch() && (!this.matchedFrame.TryGetValue(cosmeticsProximityReactor, out num) || num != Time.frameCount))
 				{
 					CosmeticsProximityReactor cosmeticsProximityReactor2;
 					Vector3 contact;
@@ -260,7 +260,7 @@ namespace GorillaTag.Cosmetics
 			{
 				string text = types[i];
 				List<CosmeticsProximityReactor> list;
-				if (!string.IsNullOrEmpty(text) && this.byType.TryGetValue(text, ref list) && list != null)
+				if (!string.IsNullOrEmpty(text) && this.byType.TryGetValue(text, out list) && list != null)
 				{
 					for (int j = 0; j < list.Count; j++)
 					{
@@ -291,15 +291,15 @@ namespace GorillaTag.Cosmetics
 
 		private static bool ShouldSkipSameIdPair(CosmeticsProximityReactor a, CosmeticsProximityReactor b)
 		{
-			return (a.ignoreSameCosmeticInstances || b.ignoreSameCosmeticInstances) && !string.IsNullOrEmpty(a.PlayFabID) && !string.IsNullOrEmpty(b.PlayFabID) && string.Equals(a.PlayFabID, b.PlayFabID, 4);
+			return (a.ignoreSameCosmeticInstances || b.ignoreSameCosmeticInstances) && !string.IsNullOrEmpty(a.PlayFabID) && !string.IsNullOrEmpty(b.PlayFabID) && string.Equals(a.PlayFabID, b.PlayFabID, StringComparison.Ordinal);
 		}
 
 		private static bool AreCollidersWithinThreshold(CosmeticsProximityReactor a, CosmeticsProximityReactor b, float threshold, out Vector3 contactPoint)
 		{
 			Vector3 vector = (b.collider == null) ? b.transform.position : b.collider.ClosestPoint(a.transform.position);
-			Vector3 vector2 = (a.collider == null) ? a.transform.position : a.collider.ClosestPoint(vector);
-			contactPoint = (vector2 + vector) * 0.5f;
-			return Vector3.Distance(vector2, vector) <= threshold;
+			Vector3 a2 = (a.collider == null) ? a.transform.position : a.collider.ClosestPoint(vector);
+			contactPoint = (a2 + vector) * 0.5f;
+			return Vector3.Distance(a2, vector) <= threshold;
 		}
 
 		private bool AnyGroupHasTwo()

@@ -18,27 +18,27 @@ namespace GorillaTagScripts.Builder
 			{
 				this.materialProps = new MaterialPropertyBlock();
 			}
-			Color color = this.yellowOff;
-			Color color2 = this.redOff;
-			Color color3 = this.greenOff;
+			Color value = this.yellowOff;
+			Color value2 = this.redOff;
+			Color value3 = this.greenOff;
 			switch (state)
 			{
 			case BuilderTrafficLight.LightState.Red:
-				color2 = this.redOn;
+				value2 = this.redOn;
 				break;
 			case BuilderTrafficLight.LightState.Yellow:
-				color = this.yellowOn;
+				value = this.yellowOn;
 				break;
 			case BuilderTrafficLight.LightState.Green:
-				color3 = this.greenOn;
+				value3 = this.greenOn;
 				break;
 			}
 			this.redLight.GetPropertyBlock(this.materialProps);
-			this.materialProps.SetColor(ShaderProps._BaseColor, color2);
+			this.materialProps.SetColor(ShaderProps._BaseColor, value2);
 			this.redLight.SetPropertyBlock(this.materialProps);
-			this.materialProps.SetColor(ShaderProps._BaseColor, color);
+			this.materialProps.SetColor(ShaderProps._BaseColor, value);
 			this.yellowLight.SetPropertyBlock(this.materialProps);
-			this.materialProps.SetColor(ShaderProps._BaseColor, color3);
+			this.materialProps.SetColor(ShaderProps._BaseColor, value3);
 			this.greenLight.SetPropertyBlock(this.materialProps);
 		}
 

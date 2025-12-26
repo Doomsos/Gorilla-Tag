@@ -100,7 +100,7 @@ namespace GorillaTag.Cosmetics
 				return;
 			}
 			this.ps.main.startSize = size;
-			this.targetSize = default(float?);
+			this.targetSize = null;
 		}
 
 		public void IncreaseStartSize(float delta)
@@ -112,7 +112,7 @@ namespace GorillaTag.Cosmetics
 			ParticleSystem.MainModule main = this.ps.main;
 			float constant = main.startSize.constant;
 			main.startSize = constant + delta;
-			this.targetSize = default(float?);
+			this.targetSize = null;
 		}
 
 		public void LerpStartSize(float size)
@@ -135,7 +135,7 @@ namespace GorillaTag.Cosmetics
 				return;
 			}
 			this.ps.main.startColor = color;
-			this.targetColor = default(Color?);
+			this.targetColor = null;
 		}
 
 		public void LerpStartColor(Color color)
@@ -178,7 +178,7 @@ namespace GorillaTag.Cosmetics
 				if (Mathf.Abs(num - this.targetSize.Value) < 0.01f)
 				{
 					main.startSize = this.targetSize.Value;
-					this.targetSize = default(float?);
+					this.targetSize = null;
 				}
 			}
 			if (this.targetColor != null)
@@ -188,7 +188,7 @@ namespace GorillaTag.Cosmetics
 				if (this.IsColorApproximatelyEqual(color, this.targetColor.Value, 0.0001f))
 				{
 					main.startColor = this.targetColor.Value;
-					this.targetColor = default(Color?);
+					this.targetColor = null;
 				}
 			}
 		}
@@ -200,8 +200,8 @@ namespace GorillaTag.Cosmetics
 			{
 				return;
 			}
-			this.targetSize = default(float?);
-			this.targetColor = default(Color?);
+			this.targetSize = null;
+			this.targetColor = null;
 			ParticleSystem.MainModule main = this.ps.main;
 			main.startSize = this.originalStartSize;
 			main.startColor = this.originalStartColor;

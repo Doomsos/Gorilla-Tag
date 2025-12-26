@@ -64,12 +64,12 @@ namespace Photon.Pun
 					}
 					if (this.m_SynchronizeVelocity || this.m_SynchronizeAngularVelocity)
 					{
-						float num = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
+						float d = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
 						if (this.m_SynchronizeVelocity)
 						{
 							Vector3 linearVelocity = (Vector3)stream.ReceiveNext();
-							float num2 = 10000f;
-							if (!linearVelocity.IsValid(num2))
+							float num = 10000f;
+							if (!linearVelocity.IsValid(num))
 							{
 								linearVelocity = Vector3.zero;
 							}
@@ -77,19 +77,19 @@ namespace Photon.Pun
 							{
 								this.m_Body.linearVelocity = linearVelocity;
 							}
-							this.m_NetworkPosition += this.m_Body.linearVelocity * num;
+							this.m_NetworkPosition += this.m_Body.linearVelocity * d;
 							this.m_Distance = Vector3.Distance(this.m_Body.position, this.m_NetworkPosition);
 						}
 						if (this.m_SynchronizeAngularVelocity)
 						{
 							Vector3 angularVelocity = (Vector3)stream.ReceiveNext();
-							float num2 = 10000f;
-							if (!angularVelocity.IsValid(num2))
+							float num = 10000f;
+							if (!angularVelocity.IsValid(num))
 							{
 								angularVelocity = Vector3.zero;
 							}
 							this.m_Body.angularVelocity = angularVelocity;
-							this.m_NetworkRotation = Quaternion.Euler(this.m_Body.angularVelocity * num) * this.m_NetworkRotation;
+							this.m_NetworkRotation = Quaternion.Euler(this.m_Body.angularVelocity * d) * this.m_NetworkRotation;
 							this.m_Angle = Quaternion.Angle(this.m_Body.rotation, this.m_NetworkRotation);
 						}
 					}

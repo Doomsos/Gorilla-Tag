@@ -43,8 +43,8 @@ public class SlotTransformOverride
 
 	public void AddSubGrabPoint(TransferrableObjectGripPosition togp)
 	{
-		SubGrabPoint subGrabPoint = togp.CreateSubGrabPoint(this);
-		this.multiPoints.Add(subGrabPoint);
+		SubGrabPoint item = togp.CreateSubGrabPoint(this);
+		this.multiPoints.Add(item);
 	}
 
 	[Obsolete("(2024-08-20 MattO) Cosmetics use xformOffsets now which fills in the appropriate data for this component. If you are doing something weird then `overrideTransformMatrix` must be used instead. This will probably be removed after 2024-09-15.")]

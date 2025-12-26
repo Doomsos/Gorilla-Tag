@@ -46,8 +46,8 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 		grabbedTransform = base.transform;
 		Vector3 position = g.transform.position;
 		localGrabbedPosition = base.transform.InverseTransformPoint(position);
-		Vector3 vector;
-		g.Player.AddHandHold(base.transform, localGrabbedPosition, g, g.IsLeftHand, this.rotatePlayerWhenHeld, out vector);
+		Vector3 arg;
+		g.Player.AddHandHold(base.transform, localGrabbedPosition, g, g.IsLeftHand, this.rotatePlayerWhenHeld, out arg);
 		this.currentGrabbers.AddIfNew(g);
 		if (this.handSnapMethod != HandHold.HandSnapMethod.None && HandHold.HandPositionRequestOverride != null)
 		{
@@ -56,7 +56,7 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 		UnityEvent<Vector3> onGrab = this.OnGrab;
 		if (onGrab != null)
 		{
-			onGrab.Invoke(vector);
+			onGrab.Invoke(arg);
 		}
 		UnityEvent<HandHold> onGrabHandHold = this.OnGrabHandHold;
 		if (onGrabHandHold != null)
@@ -132,7 +132,7 @@ public class HandHold : MonoBehaviour, IGorillaGrabable
 
 	public void CopyProperties(HandHoldSettings handHoldSettings)
 	{
-		this.handSnapMethod = handHoldSettings.handSnapMethod;
+		this.handSnapMethod = (HandHold.HandSnapMethod)handHoldSettings.handSnapMethod;
 		this.rotatePlayerWhenHeld = handHoldSettings.rotatePlayerWhenHeld;
 		this.forceMomentary = !handHoldSettings.allowPreGrab;
 	}

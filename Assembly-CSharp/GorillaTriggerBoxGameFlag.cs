@@ -7,7 +7,7 @@ public class GorillaTriggerBoxGameFlag : GorillaTriggerBox
 	public override void OnBoxTriggered()
 	{
 		base.OnBoxTriggered();
-		PhotonView.Get(Object.FindAnyObjectByType<GorillaGameManager>()).RPC(this.functionName, 2, null);
+		PhotonView.Get(Object.FindAnyObjectByType<GorillaGameManager>()).RPC(this.functionName, RpcTarget.MasterClient, null);
 	}
 
 	public string functionName;

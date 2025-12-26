@@ -33,36 +33,36 @@ public class VRRigCollection : MonoBehaviour
 	{
 		Rigidbody attachedRigidbody = other.attachedRigidbody;
 		RigContainer rigContainer;
-		if (attachedRigidbody == null || !attachedRigidbody.TryGetComponent<RigContainer>(ref rigContainer) || other != rigContainer.HeadCollider || this.containedRigs.Contains(rigContainer))
+		if (attachedRigidbody == null || !attachedRigidbody.TryGetComponent<RigContainer>(out rigContainer) || other != rigContainer.HeadCollider || this.containedRigs.Contains(rigContainer))
 		{
 			return;
 		}
-		rigContainer.RigEvents.disableEvent += new Action<RigContainer>(this.RigDisabled);
+		rigContainer.RigEvents.disableEvent += this.RigDisabled;
 		this.containedRigs.Add(rigContainer);
 		Action<RigContainer> action = this.playerEnteredCollection;
 		if (action == null)
 		{
 			return;
 		}
-		action.Invoke(rigContainer);
+		action(rigContainer);
 	}
 
 	private void OnRigTriggerExit(Collider other)
 	{
 		Rigidbody attachedRigidbody = other.attachedRigidbody;
 		RigContainer rigContainer;
-		if (attachedRigidbody == null || !attachedRigidbody.TryGetComponent<RigContainer>(ref rigContainer) || other != rigContainer.HeadCollider || !this.containedRigs.Contains(rigContainer))
+		if (attachedRigidbody == null || !attachedRigidbody.TryGetComponent<RigContainer>(out rigContainer) || other != rigContainer.HeadCollider || !this.containedRigs.Contains(rigContainer))
 		{
 			return;
 		}
-		rigContainer.RigEvents.disableEvent -= new Action<RigContainer>(this.RigDisabled);
+		rigContainer.RigEvents.disableEvent -= this.RigDisabled;
 		this.containedRigs.Remove(rigContainer);
 		Action<RigContainer> action = this.playerLeftCollection;
 		if (action == null)
 		{
 			return;
 		}
-		action.Invoke(rigContainer);
+		action(rigContainer);
 	}
 
 	private void RigDisabled(RigContainer rig)

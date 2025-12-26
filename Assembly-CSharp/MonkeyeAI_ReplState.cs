@@ -114,7 +114,7 @@ public class MonkeyeAI_ReplState : NetworkComponent
 
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 42)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private MonkeyeAI_ReplState.MonkeyeAI_RepStateData _Data;
 
 	public enum EStates
@@ -131,7 +131,7 @@ public class MonkeyeAI_ReplState : NetworkComponent
 	}
 
 	[NetworkStructWeaved(42)]
-	[StructLayout(2, Size = 168)]
+	[StructLayout(LayoutKind.Explicit, Size = 168)]
 	public struct MonkeyeAI_RepStateData : INetworkStruct
 	{
 		[Networked]

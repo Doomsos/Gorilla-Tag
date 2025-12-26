@@ -38,19 +38,19 @@ namespace GorillaExtensions
 			return list;
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTAddPath(this Utf16ValueStringBuilder stringBuilderToAddTo, GameObject gameObject)
 		{
 			gameObject.transform.GetPathQ(ref stringBuilderToAddTo);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTAddPath(this Utf16ValueStringBuilder stringBuilderToAddTo, Transform transform)
 		{
 			transform.GetPathQ(ref stringBuilderToAddTo);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Q(this Utf16ValueStringBuilder sb, string value)
 		{
 			sb.Append('"');
@@ -58,14 +58,14 @@ namespace GorillaExtensions
 			sb.Append('"');
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b)
 		{
 			sb.Append(a);
 			sb.Append(b);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b, string c)
 		{
 			sb.Append(a);
@@ -73,7 +73,7 @@ namespace GorillaExtensions
 			sb.Append(c);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b, string c, string d)
 		{
 			sb.Append(a);
@@ -82,7 +82,7 @@ namespace GorillaExtensions
 			sb.Append(d);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b, string c, string d, string e)
 		{
 			sb.Append(a);
@@ -92,7 +92,7 @@ namespace GorillaExtensions
 			sb.Append(e);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b, string c, string d, string e, string f)
 		{
 			sb.Append(a);
@@ -103,7 +103,7 @@ namespace GorillaExtensions
 			sb.Append(f);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b, string c, string d, string e, string f, string g)
 		{
 			sb.Append(a);
@@ -115,7 +115,7 @@ namespace GorillaExtensions
 			sb.Append(g);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b, string c, string d, string e, string f, string g, string h)
 		{
 			sb.Append(a);
@@ -128,7 +128,7 @@ namespace GorillaExtensions
 			sb.Append(h);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b, string c, string d, string e, string f, string g, string h, string i)
 		{
 			sb.Append(a);
@@ -142,7 +142,7 @@ namespace GorillaExtensions
 			sb.Append(i);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GTMany(this Utf16ValueStringBuilder sb, string a, string b, string c, string d, string e, string f, string g, string h, string i, string j)
 		{
 			sb.Append(a);

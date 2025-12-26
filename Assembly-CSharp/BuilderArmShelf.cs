@@ -29,14 +29,14 @@ public class BuilderArmShelf : MonoBehaviour
 				return;
 			}
 			BuilderTable table = this.piece.GetTable();
-			Vector3 vector = table.roomCenter.position - this.piece.transform.position;
-			vector.Normalize();
-			Vector3 vector2 = Quaternion.Euler(0f, 180f, 0f) * vector;
-			velocity = BuilderTable.DROP_ZONE_REPEL * vector2;
+			Vector3 point = table.roomCenter.position - this.piece.transform.position;
+			point.Normalize();
+			Vector3 a = Quaternion.Euler(0f, 180f, 0f) * point;
+			velocity = BuilderTable.DROP_ZONE_REPEL * a;
 			BuilderPiece builderPiece = this.piece.firstChildPiece;
 			while (builderPiece != null)
 			{
-				table.RequestDropPiece(builderPiece, builderPiece.transform.position + vector2 * 0.1f, builderPiece.transform.rotation, velocity, Vector3.zero);
+				table.RequestDropPiece(builderPiece, builderPiece.transform.position + a * 0.1f, builderPiece.transform.rotation, velocity, Vector3.zero);
 				builderPiece = builderPiece.nextSiblingPiece;
 			}
 		}

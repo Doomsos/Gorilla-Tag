@@ -17,7 +17,7 @@ public class GRRecycler : MonoBehaviourTick
 			this.timeRemaining -= Time.deltaTime;
 			if (this.timeRemaining <= 0f)
 			{
-				this.anim.PlayQueued("Recycler_Open", 0);
+				this.anim.PlayQueued("Recycler_Open", QueueMode.CompleteOthers);
 				this.closed = false;
 				if (this.closeEffects != null && this.openEffects != null)
 				{

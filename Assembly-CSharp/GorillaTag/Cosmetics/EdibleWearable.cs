@@ -1,5 +1,6 @@
 ﻿using System;
 using GorillaExtensions;
+using Photon.Pun;
 using UnityEngine;
 
 namespace GorillaTag.Cosmetics
@@ -59,7 +60,7 @@ namespace GorillaTag.Cosmetics
 					this.edibleState = 0;
 					this.previousEdibleState = 0;
 					this.OnEdibleHoldableStateChange();
-					GorillaGameManager.instance.FindPlayerVRRig(NetworkSystem.Instance.LocalPlayer).netView.SendRPC("EnableNonCosmeticHandItemRPC", 0, new object[]
+					GorillaGameManager.instance.FindPlayerVRRig(NetworkSystem.Instance.LocalPlayer).netView.SendRPC("EnableNonCosmeticHandItemRPC", RpcTarget.All, new object[]
 					{
 						false,
 						this.isLeftHand
@@ -68,14 +69,14 @@ namespace GorillaTag.Cosmetics
 			}
 			else if (Time.time > this.lastEatTime + this.biteCooldown)
 			{
-				Vector3 vector = base.transform.TransformPoint(this.edibleBiteOffset);
+				Vector3 b = base.transform.TransformPoint(this.edibleBiteOffset);
 				bool flag = false;
 				float num = this.biteDistance * this.biteDistance;
 				if (!GorillaParent.hasInstance)
 				{
 					return;
 				}
-				if ((GorillaTagger.Instance.offlineVRRig.head.rigTarget.transform.TransformPoint(this.gorillaHeadMouthOffset) - vector).sqrMagnitude < num)
+				if ((GorillaTagger.Instance.offlineVRRig.head.rigTarget.transform.TransformPoint(this.gorillaHeadMouthOffset) - b).sqrMagnitude < num)
 				{
 					flag = true;
 				}
@@ -91,7 +92,7 @@ namespace GorillaTag.Cosmetics
 						{
 							break;
 						}
-						if ((vrrig.head.rigTarget.transform.TransformPoint(this.gorillaHeadMouthOffset) - vector).sqrMagnitude < num)
+						if ((vrrig.head.rigTarget.transform.TransformPoint(this.gorillaHeadMouthOffset) - b).sqrMagnitude < num)
 						{
 							flag = true;
 						}

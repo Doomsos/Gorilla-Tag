@@ -53,7 +53,7 @@ namespace GorillaTag
 
 		public abstract void OnTimedEvent();
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		void ITickSystemPre.PreTick()
 		{
 			base.CheckCooldown();

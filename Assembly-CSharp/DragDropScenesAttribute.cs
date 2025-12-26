@@ -1,6 +1,6 @@
 ﻿using System;
 
-[AttributeUsage(384, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
 public class DragDropScenesAttribute : Attribute
 {
 }

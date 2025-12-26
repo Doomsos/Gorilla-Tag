@@ -78,7 +78,7 @@ namespace Viveport.Arcade
 				return new SessionCallback(this.IsReadyHandler);
 			}
 
-			protected override void IsReadyHandler(int code, [MarshalAs(20)] string message)
+			protected override void IsReadyHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[Session IsReadyHandler] message=" + message + ",code=" + code.ToString());
 				JsonData jsonData = null;
@@ -88,40 +88,40 @@ namespace Viveport.Arcade
 				}
 				catch (Exception ex)
 				{
-					string text = "[Session IsReadyHandler] exception=";
+					string str = "[Session IsReadyHandler] exception=";
 					Exception ex2 = ex;
-					Logger.Log(text + ((ex2 != null) ? ex2.ToString() : null));
+					Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 				}
 				int num = -1;
+				string text = "";
 				string text2 = "";
-				string text3 = "";
 				if (code == 0 && jsonData != null)
 				{
 					try
 					{
 						num = (int)jsonData["statusCode"];
-						text2 = (string)jsonData["message"];
+						text = (string)jsonData["message"];
 					}
 					catch (Exception ex3)
 					{
-						string text4 = "[IsReadyHandler] statusCode, message ex=";
+						string str2 = "[IsReadyHandler] statusCode, message ex=";
 						Exception ex4 = ex3;
-						Logger.Log(text4 + ((ex4 != null) ? ex4.ToString() : null));
+						Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 					}
-					Logger.Log("[IsReadyHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
+					Logger.Log("[IsReadyHandler] statusCode =" + num.ToString() + ",errMessage=" + text);
 					if (num == 0)
 					{
 						try
 						{
-							text3 = (string)jsonData["appID"];
+							text2 = (string)jsonData["appID"];
 						}
 						catch (Exception ex5)
 						{
-							string text5 = "[IsReadyHandler] appID ex=";
+							string str3 = "[IsReadyHandler] appID ex=";
 							Exception ex6 = ex5;
-							Logger.Log(text5 + ((ex6 != null) ? ex6.ToString() : null));
+							Logger.Log(str3 + ((ex6 != null) ? ex6.ToString() : null));
 						}
-						Logger.Log("[IsReadyHandler] appID=" + text3);
+						Logger.Log("[IsReadyHandler] appID=" + text2);
 					}
 				}
 				if (Session.SessionHandler.listener != null)
@@ -130,10 +130,10 @@ namespace Viveport.Arcade
 					{
 						if (num == 0)
 						{
-							Session.SessionHandler.listener.OnSuccess(text3);
+							Session.SessionHandler.listener.OnSuccess(text2);
 							return;
 						}
-						Session.SessionHandler.listener.OnFailure(num, text2);
+						Session.SessionHandler.listener.OnFailure(num, text);
 						return;
 					}
 					else
@@ -148,7 +148,7 @@ namespace Viveport.Arcade
 				return new SessionCallback(this.StartHandler);
 			}
 
-			protected override void StartHandler(int code, [MarshalAs(20)] string message)
+			protected override void StartHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[Session StartHandler] message=" + message + ",code=" + code.ToString());
 				JsonData jsonData = null;
@@ -158,42 +158,42 @@ namespace Viveport.Arcade
 				}
 				catch (Exception ex)
 				{
-					string text = "[Session StartHandler] exception=";
+					string str = "[Session StartHandler] exception=";
 					Exception ex2 = ex;
-					Logger.Log(text + ((ex2 != null) ? ex2.ToString() : null));
+					Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 				}
 				int num = -1;
+				string text = "";
 				string text2 = "";
 				string text3 = "";
-				string text4 = "";
 				if (code == 0 && jsonData != null)
 				{
 					try
 					{
 						num = (int)jsonData["statusCode"];
-						text2 = (string)jsonData["message"];
+						text = (string)jsonData["message"];
 					}
 					catch (Exception ex3)
 					{
-						string text5 = "[StartHandler] statusCode, message ex=";
+						string str2 = "[StartHandler] statusCode, message ex=";
 						Exception ex4 = ex3;
-						Logger.Log(text5 + ((ex4 != null) ? ex4.ToString() : null));
+						Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 					}
-					Logger.Log("[StartHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
+					Logger.Log("[StartHandler] statusCode =" + num.ToString() + ",errMessage=" + text);
 					if (num == 0)
 					{
 						try
 						{
-							text3 = (string)jsonData["appID"];
-							text4 = (string)jsonData["Guid"];
+							text2 = (string)jsonData["appID"];
+							text3 = (string)jsonData["Guid"];
 						}
 						catch (Exception ex5)
 						{
-							string text6 = "[StartHandler] appID, Guid ex=";
+							string str3 = "[StartHandler] appID, Guid ex=";
 							Exception ex6 = ex5;
-							Logger.Log(text6 + ((ex6 != null) ? ex6.ToString() : null));
+							Logger.Log(str3 + ((ex6 != null) ? ex6.ToString() : null));
 						}
-						Logger.Log("[StartHandler] appID=" + text3 + ",Guid=" + text4);
+						Logger.Log("[StartHandler] appID=" + text2 + ",Guid=" + text3);
 					}
 				}
 				if (Session.SessionHandler.listener != null)
@@ -202,10 +202,10 @@ namespace Viveport.Arcade
 					{
 						if (num == 0)
 						{
-							Session.SessionHandler.listener.OnStartSuccess(text3, text4);
+							Session.SessionHandler.listener.OnStartSuccess(text2, text3);
 							return;
 						}
-						Session.SessionHandler.listener.OnFailure(num, text2);
+						Session.SessionHandler.listener.OnFailure(num, text);
 						return;
 					}
 					else
@@ -220,7 +220,7 @@ namespace Viveport.Arcade
 				return new SessionCallback(this.StopHandler);
 			}
 
-			protected override void StopHandler(int code, [MarshalAs(20)] string message)
+			protected override void StopHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[Session StopHandler] message=" + message + ",code=" + code.ToString());
 				JsonData jsonData = null;
@@ -230,42 +230,42 @@ namespace Viveport.Arcade
 				}
 				catch (Exception ex)
 				{
-					string text = "[Session StopHandler] exception=";
+					string str = "[Session StopHandler] exception=";
 					Exception ex2 = ex;
-					Logger.Log(text + ((ex2 != null) ? ex2.ToString() : null));
+					Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 				}
 				int num = -1;
+				string text = "";
 				string text2 = "";
 				string text3 = "";
-				string text4 = "";
 				if (code == 0 && jsonData != null)
 				{
 					try
 					{
 						num = (int)jsonData["statusCode"];
-						text2 = (string)jsonData["message"];
+						text = (string)jsonData["message"];
 					}
 					catch (Exception ex3)
 					{
-						string text5 = "[StopHandler] statusCode, message ex=";
+						string str2 = "[StopHandler] statusCode, message ex=";
 						Exception ex4 = ex3;
-						Logger.Log(text5 + ((ex4 != null) ? ex4.ToString() : null));
+						Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 					}
-					Logger.Log("[StopHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
+					Logger.Log("[StopHandler] statusCode =" + num.ToString() + ",errMessage=" + text);
 					if (num == 0)
 					{
 						try
 						{
-							text3 = (string)jsonData["appID"];
-							text4 = (string)jsonData["Guid"];
+							text2 = (string)jsonData["appID"];
+							text3 = (string)jsonData["Guid"];
 						}
 						catch (Exception ex5)
 						{
-							string text6 = "[StopHandler] appID, Guid ex=";
+							string str3 = "[StopHandler] appID, Guid ex=";
 							Exception ex6 = ex5;
-							Logger.Log(text6 + ((ex6 != null) ? ex6.ToString() : null));
+							Logger.Log(str3 + ((ex6 != null) ? ex6.ToString() : null));
 						}
-						Logger.Log("[StopHandler] appID=" + text3 + ",Guid=" + text4);
+						Logger.Log("[StopHandler] appID=" + text2 + ",Guid=" + text3);
 					}
 				}
 				if (Session.SessionHandler.listener != null)
@@ -274,10 +274,10 @@ namespace Viveport.Arcade
 					{
 						if (num == 0)
 						{
-							Session.SessionHandler.listener.OnStopSuccess(text3, text4);
+							Session.SessionHandler.listener.OnStopSuccess(text2, text3);
 							return;
 						}
-						Session.SessionHandler.listener.OnFailure(num, text2);
+						Session.SessionHandler.listener.OnFailure(num, text);
 						return;
 					}
 					else
@@ -292,11 +292,11 @@ namespace Viveport.Arcade
 
 		private abstract class BaseHandler
 		{
-			protected abstract void IsReadyHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void IsReadyHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void StartHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void StartHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void StopHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void StopHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 		}
 
 		public class SessionListener

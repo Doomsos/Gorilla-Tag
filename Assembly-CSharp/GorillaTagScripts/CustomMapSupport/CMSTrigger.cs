@@ -26,29 +26,29 @@ namespace GorillaTagScripts.CustomMapSupport
 			this.triggeredBy = settings.triggeredBy;
 			float num = Math.Max(settings.validationDistance, 2f);
 			this.validationDistanceSquared = num * num;
-			if (this.triggeredBy == null)
+			if (this.triggeredBy == TriggerSource.None)
 			{
 				if (settings.triggeredByHead && !settings.triggeredByBody)
 				{
-					this.triggeredBy = 2;
+					this.triggeredBy = TriggerSource.Head;
 				}
 				else if (settings.triggeredByBody && !settings.triggeredByHead)
 				{
-					this.triggeredBy = 3;
+					this.triggeredBy = TriggerSource.Body;
 				}
 				else if (settings.triggeredByHands && !settings.triggeredByHead && !settings.triggeredByBody)
 				{
-					this.triggeredBy = 1;
+					this.triggeredBy = TriggerSource.Hands;
 				}
 				else
 				{
-					this.triggeredBy = 4;
+					this.triggeredBy = TriggerSource.HeadOrBody;
 				}
 			}
 			TriggerSource triggerSource = this.triggeredBy;
-			if (triggerSource != 1)
+			if (triggerSource != TriggerSource.Hands)
 			{
-				if (triggerSource - 2 <= 2)
+				if (triggerSource - TriggerSource.Head <= 2)
 				{
 					base.gameObject.layer = UnityLayer.GorillaTrigger.ToLayerIndex();
 				}
@@ -113,17 +113,17 @@ namespace GorillaTagScripts.CustomMapSupport
 		private bool ValidateCollider(Collider other)
 		{
 			GameObject gameObject = other.gameObject;
-			bool flag = gameObject == GorillaTagger.Instance.headCollider.gameObject && (this.triggeredBy == 2 || this.triggeredBy == 4);
+			bool flag = gameObject == GorillaTagger.Instance.headCollider.gameObject && (this.triggeredBy == TriggerSource.Head || this.triggeredBy == TriggerSource.HeadOrBody);
 			bool flag2;
 			if (GorillaTagger.Instance.bodyCollider.enabled)
 			{
-				flag2 = (gameObject == GorillaTagger.Instance.bodyCollider.gameObject && (this.triggeredBy == 3 || this.triggeredBy == 4));
+				flag2 = (gameObject == GorillaTagger.Instance.bodyCollider.gameObject && (this.triggeredBy == TriggerSource.Body || this.triggeredBy == TriggerSource.HeadOrBody));
 			}
 			else
 			{
-				flag2 = (gameObject == VRRig.LocalRig.gameObject && (this.triggeredBy == 3 || this.triggeredBy == 4));
+				flag2 = (gameObject == VRRig.LocalRig.gameObject && (this.triggeredBy == TriggerSource.Body || this.triggeredBy == TriggerSource.HeadOrBody));
 			}
-			bool flag3 = (gameObject == GorillaTagger.Instance.leftHandTriggerCollider.gameObject || gameObject == GorillaTagger.Instance.rightHandTriggerCollider.gameObject) && this.triggeredBy == 1;
+			bool flag3 = (gameObject == GorillaTagger.Instance.leftHandTriggerCollider.gameObject || gameObject == GorillaTagger.Instance.rightHandTriggerCollider.gameObject) && this.triggeredBy == TriggerSource.Hands;
 			return flag || flag2 || flag3;
 		}
 
@@ -244,7 +244,7 @@ namespace GorillaTagScripts.CustomMapSupport
 
 		public float validationDistanceSquared;
 
-		public TriggerSource triggeredBy = 4;
+		public TriggerSource triggeredBy = TriggerSource.HeadOrBody;
 
 		public double onEnableTriggerDelay;
 

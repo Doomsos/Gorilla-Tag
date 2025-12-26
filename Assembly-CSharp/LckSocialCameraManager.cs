@@ -50,7 +50,7 @@ public class LckSocialCameraManager : MonoBehaviour
 		{
 			return;
 		}
-		onManagerSpawned.Invoke(this);
+		onManagerSpawned(this);
 	}
 
 	private void OnEnable()
@@ -58,13 +58,13 @@ public class LckSocialCameraManager : MonoBehaviour
 		LckResult<LckService> service = LckService.GetService();
 		if (service.Result != null)
 		{
-			service.Result.OnRecordingStarted += new Action<LckResult>(this.OnRecordingStarted);
-			service.Result.OnStreamingStarted += new Action<LckResult>(this.OnRecordingStarted);
-			service.Result.OnRecordingStopped += new Action<LckResult>(this.OnRecordingStopped);
-			service.Result.OnStreamingStopped += new Action<LckResult>(this.OnRecordingStopped);
+			service.Result.OnRecordingStarted += this.OnRecordingStarted;
+			service.Result.OnStreamingStarted += this.OnRecordingStarted;
+			service.Result.OnRecordingStopped += this.OnRecordingStopped;
+			service.Result.OnStreamingStopped += this.OnRecordingStopped;
 		}
 		LckBodyCameraSpawner.OnCameraStateChange += this.OnBodyCameraStateChanged;
-		this._gtLckController.OnCameraModeChanged += new GTLckController.CameraModeDelegate(this.OnCameraModeChanged);
+		this._gtLckController.OnCameraModeChanged += this.OnCameraModeChanged;
 	}
 
 	private void OnBodyCameraStateChanged(LckBodyCameraSpawner.CameraState state)
@@ -93,7 +93,7 @@ public class LckSocialCameraManager : MonoBehaviour
 		case LckBodyCameraSpawner.CameraState.CameraSpawned:
 			this._socialCameraTabletInstance.visible = true;
 			this._socialCameraTabletInstance.IsOnNeck = false;
-			if (this._lckActiveCameraMode == 2)
+			if (this._lckActiveCameraMode == CameraMode.ThirdPerson)
 			{
 				this._socialCameraCococamInstance.visible = true;
 			}
@@ -129,9 +129,9 @@ public class LckSocialCameraManager : MonoBehaviour
 		if (this.CoconutCamera.gameObject.activeSelf)
 		{
 			CameraMode lckActiveCameraMode = this._lckActiveCameraMode;
-			if (lckActiveCameraMode != null)
+			if (lckActiveCameraMode != CameraMode.Selfie)
 			{
-				if (lckActiveCameraMode - 2 <= 1)
+				if (lckActiveCameraMode - CameraMode.ThirdPerson <= 1)
 				{
 					this.CoconutCamera.SetVisualsActive(this.cameraActive);
 				}
@@ -153,13 +153,13 @@ public class LckSocialCameraManager : MonoBehaviour
 		LckResult<LckService> service = LckService.GetService();
 		if (service.Result != null)
 		{
-			service.Result.OnRecordingStarted -= new Action<LckResult>(this.OnRecordingStarted);
-			service.Result.OnRecordingStopped -= new Action<LckResult>(this.OnRecordingStopped);
-			service.Result.OnStreamingStopped -= new Action<LckResult>(this.OnRecordingStopped);
-			service.Result.OnStreamingStopped -= new Action<LckResult>(this.OnRecordingStopped);
+			service.Result.OnRecordingStarted -= this.OnRecordingStarted;
+			service.Result.OnRecordingStopped -= this.OnRecordingStopped;
+			service.Result.OnStreamingStopped -= this.OnRecordingStopped;
+			service.Result.OnStreamingStopped -= this.OnRecordingStopped;
 		}
 		LckBodyCameraSpawner.OnCameraStateChange -= this.OnBodyCameraStateChanged;
-		this._gtLckController.OnCameraModeChanged -= new GTLckController.CameraModeDelegate(this.OnCameraModeChanged);
+		this._gtLckController.OnCameraModeChanged -= this.OnCameraModeChanged;
 	}
 
 	public bool cameraActive
@@ -226,28 +226,28 @@ public class LckSocialCameraManager : MonoBehaviour
 		}
 		switch (this._lckActiveCameraMode)
 		{
-		case 0:
+		case CameraMode.Selfie:
 			if (this._socialCameraCococamInstance.visible)
 			{
 				this._socialCameraCococamInstance.visible = false;
 				return;
 			}
 			break;
-		case 1:
+		case CameraMode.FirstPerson:
 			if (this._socialCameraCococamInstance.visible)
 			{
 				this._socialCameraCococamInstance.visible = false;
 				return;
 			}
 			break;
-		case 2:
+		case CameraMode.ThirdPerson:
 			if (!this._socialCameraCococamInstance.visible)
 			{
 				this._socialCameraCococamInstance.visible = true;
 				return;
 			}
 			break;
-		case 3:
+		case CameraMode.Drone:
 			this._socialCameraCococamInstance.visible = (!this._forceHidden && this.cameraActive);
 			this._socialCameraTabletInstance.visible = this.cameraActive;
 			return;

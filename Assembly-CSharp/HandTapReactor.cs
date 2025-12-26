@@ -93,12 +93,12 @@ public class HandTapReactor : MonoBehaviour
 		}
 		if (this.myRig != null)
 		{
-			this.myRig.LeftHandEffect.handTapDown += new Action<HandEffectContext>(this.LeftDown);
-			this.myRig.LeftHandEffect.handTapUp += new Action<HandEffectContext>(this.LeftUp);
+			this.myRig.LeftHandEffect.handTapDown += this.LeftDown;
+			this.myRig.LeftHandEffect.handTapUp += this.LeftUp;
 			IHandEffectsTrigger handEffectsTrigger = this.leftHandTrigger;
 			handEffectsTrigger.OnTrigger = (Action<IHandEffectsTrigger.Mode>)Delegate.Combine(handEffectsTrigger.OnTrigger, new Action<IHandEffectsTrigger.Mode>(this.LeftGesture));
-			this.myRig.RightHandEffect.handTapDown += new Action<HandEffectContext>(this.RightDown);
-			this.myRig.RightHandEffect.handTapUp += new Action<HandEffectContext>(this.RightUp);
+			this.myRig.RightHandEffect.handTapDown += this.RightDown;
+			this.myRig.RightHandEffect.handTapUp += this.RightUp;
 			IHandEffectsTrigger handEffectsTrigger2 = this.rightHandTrigger;
 			handEffectsTrigger2.OnTrigger = (Action<IHandEffectsTrigger.Mode>)Delegate.Combine(handEffectsTrigger2.OnTrigger, new Action<IHandEffectsTrigger.Mode>(this.RightGesture));
 		}
@@ -108,12 +108,12 @@ public class HandTapReactor : MonoBehaviour
 	{
 		if (this.myRig != null)
 		{
-			this.myRig.LeftHandEffect.handTapDown -= new Action<HandEffectContext>(this.LeftDown);
-			this.myRig.LeftHandEffect.handTapUp -= new Action<HandEffectContext>(this.LeftUp);
+			this.myRig.LeftHandEffect.handTapDown -= this.LeftDown;
+			this.myRig.LeftHandEffect.handTapUp -= this.LeftUp;
 			IHandEffectsTrigger handEffectsTrigger = this.leftHandTrigger;
 			handEffectsTrigger.OnTrigger = (Action<IHandEffectsTrigger.Mode>)Delegate.Remove(handEffectsTrigger.OnTrigger, new Action<IHandEffectsTrigger.Mode>(this.LeftGesture));
-			this.myRig.RightHandEffect.handTapDown -= new Action<HandEffectContext>(this.RightDown);
-			this.myRig.RightHandEffect.handTapUp -= new Action<HandEffectContext>(this.RightUp);
+			this.myRig.RightHandEffect.handTapDown -= this.RightDown;
+			this.myRig.RightHandEffect.handTapUp -= this.RightUp;
 			IHandEffectsTrigger handEffectsTrigger2 = this.rightHandTrigger;
 			handEffectsTrigger2.OnTrigger = (Action<IHandEffectsTrigger.Mode>)Delegate.Remove(handEffectsTrigger2.OnTrigger, new Action<IHandEffectsTrigger.Mode>(this.RightGesture));
 		}

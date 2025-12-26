@@ -27,13 +27,13 @@ namespace GorillaLocomotion.Gameplay
 		private void RegenerateData()
 		{
 			this.Dispose();
-			foreach (GorillaRopeSwing gorillaRopeSwing in VectorizedCustomRopeSimulation.registerQueue)
+			foreach (GorillaRopeSwing item in VectorizedCustomRopeSimulation.registerQueue)
 			{
-				this.ropes.Add(gorillaRopeSwing);
+				this.ropes.Add(item);
 			}
-			foreach (GorillaRopeSwing gorillaRopeSwing2 in VectorizedCustomRopeSimulation.deregisterQueue)
+			foreach (GorillaRopeSwing item2 in VectorizedCustomRopeSimulation.deregisterQueue)
 			{
-				this.ropes.Remove(gorillaRopeSwing2);
+				this.ropes.Remove(item2);
 			}
 			VectorizedCustomRopeSimulation.registerQueue.Clear();
 			VectorizedCustomRopeSimulation.deregisterQueue.Clear();
@@ -45,15 +45,15 @@ namespace GorillaLocomotion.Gameplay
 			int num2 = num * 32 / 4;
 			this.burstData = new VectorizedBurstRopeData
 			{
-				posX = new NativeArray<float4>(num2, 4, 1),
-				posY = new NativeArray<float4>(num2, 4, 1),
-				posZ = new NativeArray<float4>(num2, 4, 1),
-				validNodes = new NativeArray<int4>(num2, 4, 1),
-				lastPosX = new NativeArray<float4>(num2, 4, 1),
-				lastPosY = new NativeArray<float4>(num2, 4, 1),
-				lastPosZ = new NativeArray<float4>(num2, 4, 1),
-				ropeRoots = new NativeArray<float3>(num, 4, 1),
-				nodeMass = new NativeArray<float4>(num2, 4, 1)
+				posX = new NativeArray<float4>(num2, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+				posY = new NativeArray<float4>(num2, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+				posZ = new NativeArray<float4>(num2, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+				validNodes = new NativeArray<int4>(num2, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+				lastPosX = new NativeArray<float4>(num2, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+				lastPosY = new NativeArray<float4>(num2, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+				lastPosZ = new NativeArray<float4>(num2, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+				ropeRoots = new NativeArray<float3>(num, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+				nodeMass = new NativeArray<float4>(num2, Allocator.Persistent, NativeArrayOptions.ClearMemory)
 			};
 			for (int i = 0; i < this.ropes.Count; i += 4)
 			{
@@ -68,10 +68,10 @@ namespace GorillaLocomotion.Gameplay
 			int num4 = 0;
 			for (int j = 0; j < num2; j++)
 			{
-				float4 @float = this.burstData.posX[j];
-				float4 float2 = this.burstData.posY[j];
-				float4 float3 = this.burstData.posZ[j];
-				int4 @int = this.burstData.validNodes[j];
+				float4 value = this.burstData.posX[j];
+				float4 value2 = this.burstData.posY[j];
+				float4 value3 = this.burstData.posZ[j];
+				int4 value4 = this.burstData.validNodes[j];
 				for (int k = 0; k < 4; k++)
 				{
 					int num5 = num4 * 4 + k;
@@ -79,30 +79,30 @@ namespace GorillaLocomotion.Gameplay
 					if (this.ropes.Count > num5 && this.ropes[num5].nodes.Length > num6)
 					{
 						Vector3 localPosition = this.ropes[num5].nodes[num6].localPosition;
-						@float[k] = localPosition.x;
-						float2[k] = localPosition.y;
-						float3[k] = localPosition.z;
-						@int[k] = 1;
+						value[k] = localPosition.x;
+						value2[k] = localPosition.y;
+						value3[k] = localPosition.z;
+						value4[k] = 1;
 					}
 					else
 					{
-						@float[k] = 0f;
-						float2[k] = 0f;
-						float3[k] = 0f;
-						@int[k] = 0;
+						value[k] = 0f;
+						value2[k] = 0f;
+						value3[k] = 0f;
+						value4[k] = 0;
 					}
 				}
 				if (j > 0 && (j + 1) % 32 == 0)
 				{
 					num4++;
 				}
-				this.burstData.posX[j] = @float;
-				this.burstData.posY[j] = float2;
-				this.burstData.posZ[j] = float3;
-				this.burstData.lastPosX[j] = @float;
-				this.burstData.lastPosY[j] = float2;
-				this.burstData.lastPosZ[j] = float3;
-				this.burstData.validNodes[j] = @int;
+				this.burstData.posX[j] = value;
+				this.burstData.posY[j] = value2;
+				this.burstData.posZ[j] = value3;
+				this.burstData.lastPosX[j] = value;
+				this.burstData.lastPosY[j] = value2;
+				this.burstData.lastPosZ[j] = value3;
+				this.burstData.validNodes[j] = value4;
 				this.burstData.nodeMass[j] = math.float4(1f, 1f, 1f, 1f);
 			}
 			for (int l = 0; l < this.ropes.Count; l++)
@@ -144,30 +144,30 @@ namespace GorillaLocomotion.Gameplay
 			{
 				if (onlySetIndex < 0 || i == onlySetIndex)
 				{
-					int num = ropeTarget.ropeDataStartIndex + i;
+					int index = ropeTarget.ropeDataStartIndex + i;
 					if (setCurPos)
 					{
-						float4 @float = this.burstData.posX[num];
-						float4 float2 = this.burstData.posY[num];
-						float4 float3 = this.burstData.posZ[num];
-						@float[ropeDataIndexOffset] = positions[i].x;
-						float2[ropeDataIndexOffset] = positions[i].y;
-						float3[ropeDataIndexOffset] = positions[i].z;
-						this.burstData.posX[num] = @float;
-						this.burstData.posY[num] = float2;
-						this.burstData.posZ[num] = float3;
+						float4 value = this.burstData.posX[index];
+						float4 value2 = this.burstData.posY[index];
+						float4 value3 = this.burstData.posZ[index];
+						value[ropeDataIndexOffset] = positions[i].x;
+						value2[ropeDataIndexOffset] = positions[i].y;
+						value3[ropeDataIndexOffset] = positions[i].z;
+						this.burstData.posX[index] = value;
+						this.burstData.posY[index] = value2;
+						this.burstData.posZ[index] = value3;
 					}
 					if (setLastPos)
 					{
-						float4 float4 = this.burstData.lastPosX[num];
-						float4 float5 = this.burstData.lastPosY[num];
-						float4 float6 = this.burstData.lastPosZ[num];
-						float4[ropeDataIndexOffset] = positions[i].x;
-						float5[ropeDataIndexOffset] = positions[i].y;
-						float6[ropeDataIndexOffset] = positions[i].z;
-						this.burstData.lastPosX[num] = float4;
-						this.burstData.lastPosY[num] = float5;
-						this.burstData.lastPosZ[num] = float6;
+						float4 value4 = this.burstData.lastPosX[index];
+						float4 value5 = this.burstData.lastPosY[index];
+						float4 value6 = this.burstData.lastPosZ[index];
+						value4[ropeDataIndexOffset] = positions[i].x;
+						value5[ropeDataIndexOffset] = positions[i].y;
+						value6[ropeDataIndexOffset] = positions[i].z;
+						this.burstData.lastPosX[index] = value4;
+						this.burstData.lastPosY[index] = value5;
+						this.burstData.lastPosZ[index] = value6;
 					}
 				}
 			}
@@ -176,7 +176,7 @@ namespace GorillaLocomotion.Gameplay
 		public void SetVelocity(GorillaRopeSwing ropeTarget, Vector3 velocity, bool wholeRope, int boneIndex = 1)
 		{
 			List<Vector3> list = new List<Vector3>();
-			float num = math.min(velocity.magnitude, 15f);
+			float maxLength = math.min(velocity.magnitude, 15f);
 			int ropeDataStartIndex = ropeTarget.ropeDataStartIndex;
 			int ropeDataIndexOffset = ropeTarget.ropeDataIndexOffset;
 			if (ropeTarget.SupportsMovingAtRuntime)
@@ -185,12 +185,11 @@ namespace GorillaLocomotion.Gameplay
 			}
 			for (int i = 0; i < ropeTarget.nodes.Length; i++)
 			{
-				Vector3 vector;
-				vector..ctor(this.burstData.lastPosX[ropeDataStartIndex + i][ropeDataIndexOffset], this.burstData.lastPosY[ropeDataStartIndex + i][ropeDataIndexOffset], this.burstData.lastPosZ[ropeDataStartIndex + i][ropeDataIndexOffset]);
+				Vector3 vector = new Vector3(this.burstData.lastPosX[ropeDataStartIndex + i][ropeDataIndexOffset], this.burstData.lastPosY[ropeDataStartIndex + i][ropeDataIndexOffset], this.burstData.lastPosZ[ropeDataStartIndex + i][ropeDataIndexOffset]);
 				if ((wholeRope || boneIndex == i) && boneIndex > 0)
 				{
 					Vector3 vector2 = velocity / (float)boneIndex * (float)i;
-					vector2 = Vector3.ClampMagnitude(vector2, num);
+					vector2 = Vector3.ClampMagnitude(vector2, maxLength);
 					list.Add(vector += vector2 * this.lastDelta);
 				}
 				else
@@ -208,17 +207,16 @@ namespace GorillaLocomotion.Gameplay
 
 		public Vector3 GetNodeVelocity(GorillaRopeSwing ropeTarget, int nodeIndex)
 		{
-			int num = ropeTarget.ropeDataStartIndex + nodeIndex;
+			int index = ropeTarget.ropeDataStartIndex + nodeIndex;
 			int ropeDataIndexOffset = ropeTarget.ropeDataIndexOffset;
-			Vector3 vector = new Vector3(this.burstData.posX[num][ropeDataIndexOffset], this.burstData.posY[num][ropeDataIndexOffset], this.burstData.posZ[num][ropeDataIndexOffset]);
-			Vector3 vector2;
-			vector2..ctor(this.burstData.lastPosX[num][ropeDataIndexOffset], this.burstData.lastPosY[num][ropeDataIndexOffset], this.burstData.lastPosZ[num][ropeDataIndexOffset]);
-			Vector3 vector3 = (vector - vector2) / this.lastDelta;
+			Vector3 a = new Vector3(this.burstData.posX[index][ropeDataIndexOffset], this.burstData.posY[index][ropeDataIndexOffset], this.burstData.posZ[index][ropeDataIndexOffset]);
+			Vector3 b = new Vector3(this.burstData.lastPosX[index][ropeDataIndexOffset], this.burstData.lastPosY[index][ropeDataIndexOffset], this.burstData.lastPosZ[index][ropeDataIndexOffset]);
+			Vector3 vector = (a - b) / this.lastDelta;
 			if (ropeTarget.SupportsMovingAtRuntime)
 			{
-				vector3 = ropeTarget.transform.rotation * vector3;
+				vector = ropeTarget.transform.rotation * vector;
 			}
-			return vector3;
+			return vector;
 		}
 
 		public void SetMassForPlayers(GorillaRopeSwing ropeTarget, bool hasPlayers, int furthestBoneIndex = 0)
@@ -230,17 +228,17 @@ namespace GorillaLocomotion.Gameplay
 			int ropeDataIndexOffset = ropeTarget.ropeDataIndexOffset;
 			for (int i = 0; i < 32; i++)
 			{
-				int num = ropeTarget.ropeDataStartIndex + i;
-				float4 @float = this.burstData.nodeMass[num];
+				int index = ropeTarget.ropeDataStartIndex + i;
+				float4 value = this.burstData.nodeMass[index];
 				if (hasPlayers && i == furthestBoneIndex + 1)
 				{
-					@float[ropeDataIndexOffset] = 0.1f;
+					value[ropeDataIndexOffset] = 0.1f;
 				}
 				else
 				{
-					@float[ropeDataIndexOffset] = 1f;
+					value[ropeDataIndexOffset] = 1f;
 				}
-				this.burstData.nodeMass[num] = @float;
+				this.burstData.nodeMass[index] = value;
 			}
 		}
 
@@ -255,7 +253,7 @@ namespace GorillaLocomotion.Gameplay
 				return;
 			}
 			float deltaTime = math.min(Time.deltaTime, 0.05f);
-			VectorizedSolveRopeJob vectorizedSolveRopeJob = new VectorizedSolveRopeJob
+			VectorizedSolveRopeJob jobData = new VectorizedSolveRopeJob
 			{
 				applyConstraintIterations = this.applyConstraintIterations,
 				finalPassIterations = this.finalPassIterations,
@@ -266,7 +264,7 @@ namespace GorillaLocomotion.Gameplay
 				nodeDistance = this.nodeDistance,
 				ropeCount = this.ropes.Count
 			};
-			IJobExtensions.Schedule<VectorizedSolveRopeJob>(vectorizedSolveRopeJob, default(JobHandle)).Complete();
+			jobData.Schedule(default(JobHandle)).Complete();
 			for (int i = 0; i < this.ropes.Count; i++)
 			{
 				GorillaRopeSwing gorillaRopeSwing = this.ropes[i];
@@ -275,8 +273,8 @@ namespace GorillaLocomotion.Gameplay
 					int ropeDataIndexOffset = gorillaRopeSwing.ropeDataIndexOffset;
 					for (int j = 0; j < gorillaRopeSwing.nodes.Length; j++)
 					{
-						int num = gorillaRopeSwing.ropeDataStartIndex + j;
-						gorillaRopeSwing.nodes[j].localPosition = new Vector3(vectorizedSolveRopeJob.data.posX[num][ropeDataIndexOffset], vectorizedSolveRopeJob.data.posY[num][ropeDataIndexOffset], vectorizedSolveRopeJob.data.posZ[num][ropeDataIndexOffset]);
+						int index = gorillaRopeSwing.ropeDataStartIndex + j;
+						gorillaRopeSwing.nodes[j].localPosition = new Vector3(jobData.data.posX[index][ropeDataIndexOffset], jobData.data.posY[index][ropeDataIndexOffset], jobData.data.posZ[index][ropeDataIndexOffset]);
 					}
 					if (gorillaRopeSwing.SupportsMovingAtRuntime)
 					{

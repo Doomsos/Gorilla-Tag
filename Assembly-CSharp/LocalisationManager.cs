@@ -101,14 +101,14 @@ public class LocalisationManager : MonoBehaviour
 		LocalisationManager._onLanguageChanged = null;
 	}
 
-	[RuntimeInitializeOnLoadMethod(3)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
 	private static void InitialiseLocTables()
 	{
 		CultureInfo.CurrentCulture = new CultureInfo("en");
 		LocalisationManager.CacheLocTables();
 	}
 
-	[RuntimeInitializeOnLoadMethod(1)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void InitialiseLanguage()
 	{
 		LocalisationManager._hasInitialised = false;
@@ -158,9 +158,9 @@ public class LocalisationManager : MonoBehaviour
 	{
 		int num = 1;
 		LocalisationManager._localeDisplayBinding.Clear();
-		foreach (Locale locale in LocalizationSettings.AvailableLocales.Locales)
+		foreach (Locale value in LocalizationSettings.AvailableLocales.Locales)
 		{
-			LocalisationManager._localeDisplayBinding.Add(num, locale);
+			LocalisationManager._localeDisplayBinding.Add(num, value);
 			num++;
 		}
 	}
@@ -189,14 +189,14 @@ public class LocalisationManager : MonoBehaviour
 
 	private static bool SysLangToLoc(SystemLanguage sysLanguage, out Locale language)
 	{
-		if (sysLanguage <= 14)
+		if (sysLanguage <= SystemLanguage.French)
 		{
-			if (sysLanguage == 10)
+			if (sysLanguage == SystemLanguage.English)
 			{
 				language = LocalizationSettings.Instance.GetAvailableLocales().GetLocale("en");
 				return language != null;
 			}
-			if (sysLanguage == 14)
+			if (sysLanguage == SystemLanguage.French)
 			{
 				language = LocalizationSettings.Instance.GetAvailableLocales().GetLocale("fr");
 				return language != null;
@@ -204,12 +204,12 @@ public class LocalisationManager : MonoBehaviour
 		}
 		else
 		{
-			if (sysLanguage == 15)
+			if (sysLanguage == SystemLanguage.German)
 			{
 				language = LocalizationSettings.Instance.GetAvailableLocales().GetLocale("de");
 				return language != null;
 			}
-			if (sysLanguage == 34)
+			if (sysLanguage == SystemLanguage.Spanish)
 			{
 				language = LocalizationSettings.Instance.GetAvailableLocales().GetLocale("es");
 				return language != null;
@@ -240,19 +240,27 @@ public class LocalisationManager : MonoBehaviour
 		{
 			yield break;
 		}
-		TelemetryData telemetryData = default(TelemetryData);
-		telemetryData.EventName = "language_changed";
-		telemetryData.CustomTags = new string[]
+		TelemetryData telemetryData = new TelemetryData
 		{
-			LocalizationTelemetry.GameVersionCustomTag
+			EventName = "language_changed",
+			CustomTags = new string[]
+			{
+				LocalizationTelemetry.GameVersionCustomTag
+			},
+			BodyData = new Dictionary<string, string>
+			{
+				{
+					"starting_language",
+					LocalisationManager.CurrentLanguage.Identifier.Code
+				},
+				{
+					"new_language",
+					newLocale.Identifier.Code
+				}
+			}
 		};
-		Dictionary<string, string> dictionary = new Dictionary<string, string>();
-		dictionary.Add("starting_language", LocalisationManager.CurrentLanguage.Identifier.Code);
-		dictionary.Add("new_language", newLocale.Identifier.Code);
-		telemetryData.BodyData = dictionary;
-		TelemetryData telemetryData2 = telemetryData;
 		MothershipClientApiUnity.SetLanguage(newLocale.Identifier.Code);
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
 		LocalizationSettings.SelectedLocale = newLocale;
 		UnityEvent languageEvent = GameEvents.LanguageEvent;
 		if (languageEvent != null)
@@ -262,7 +270,7 @@ public class LocalisationManager : MonoBehaviour
 		Action onLanguageChanged = LocalisationManager._onLanguageChanged;
 		if (onLanguageChanged != null)
 		{
-			onLanguageChanged.Invoke();
+			onLanguageChanged();
 		}
 		if (!saveLanguage)
 		{
@@ -323,7 +331,7 @@ public class LocalisationManager : MonoBehaviour
 		{
 			LocalisationManager.Instance.ReconstructBindings();
 		}
-		return LocalisationManager._localeDisplayBinding.TryGetValue(binding, ref loc);
+		return LocalisationManager._localeDisplayBinding.TryGetValue(binding, out loc);
 	}
 
 	public static Dictionary<int, Locale> GetAllBindings()
@@ -343,7 +351,7 @@ public class LocalisationManager : MonoBehaviour
 			return false;
 		}
 		StringTable stringTable;
-		if (!LocalisationManager._localeTablePairs.TryGetValue(LocalisationManager.CurrentLanguage.Identifier.Code, ref stringTable))
+		if (!LocalisationManager._localeTablePairs.TryGetValue(LocalisationManager.CurrentLanguage.Identifier.Code, out stringTable))
 		{
 			return false;
 		}
@@ -369,7 +377,7 @@ public class LocalisationManager : MonoBehaviour
 			return false;
 		}
 		StringTable stringTable;
-		if (!LocalisationManager._localeTablePairs.TryGetValue("en", ref stringTable))
+		if (!LocalisationManager._localeTablePairs.TryGetValue("en", out stringTable))
 		{
 			return false;
 		}

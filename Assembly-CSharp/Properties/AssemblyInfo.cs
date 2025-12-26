@@ -8,4 +8,4 @@ using Fusion;
 
 [assembly: AssemblyVersion("0.0.0.0")]
 [assembly: NetworkAssemblyWeaved]
-[assembly: SecurityPermission(8, SkipVerification = true)]
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]

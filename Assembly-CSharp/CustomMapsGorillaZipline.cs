@@ -8,9 +8,9 @@ using UnityEngine;
 
 public class CustomMapsGorillaZipline : GorillaZipline
 {
-	public bool GenerateZipline(BezierSpline splineRef)
+	public bool GenerateZipline(CustomMapSupport.BezierSpline splineRef)
 	{
-		this.spline = base.GetComponent<BezierSpline>();
+		this.spline = base.GetComponent<global::BezierSpline>();
 		if (this.spline.IsNull())
 		{
 			return false;
@@ -53,21 +53,21 @@ public class CustomMapsGorillaZipline : GorillaZipline
 		return true;
 	}
 
-	private BezierControlPointMode[] ConvertControlPointModes(BezierControlPointMode[] refModes)
+	private global::BezierControlPointMode[] ConvertControlPointModes(CustomMapSupport.BezierControlPointMode[] refModes)
 	{
-		BezierControlPointMode[] array = new BezierControlPointMode[refModes.Length];
+		global::BezierControlPointMode[] array = new global::BezierControlPointMode[refModes.Length];
 		for (int i = 0; i < refModes.Length; i++)
 		{
 			switch (refModes[i])
 			{
-			case 0:
-				array[i] = BezierControlPointMode.Free;
+			case CustomMapSupport.BezierControlPointMode.Free:
+				array[i] = global::BezierControlPointMode.Free;
 				break;
-			case 1:
-				array[i] = BezierControlPointMode.Aligned;
+			case CustomMapSupport.BezierControlPointMode.Aligned:
+				array[i] = global::BezierControlPointMode.Aligned;
 				break;
-			case 2:
-				array[i] = BezierControlPointMode.Mirrored;
+			case CustomMapSupport.BezierControlPointMode.Mirrored:
+				array[i] = global::BezierControlPointMode.Mirrored;
 				break;
 			}
 		}
@@ -82,15 +82,15 @@ public class CustomMapsGorillaZipline : GorillaZipline
 
 	public void Init(GTObjectPlaceholder ziplinePlaceholder)
 	{
-		if (ziplinePlaceholder.PlaceholderObject != 8)
+		if (ziplinePlaceholder.PlaceholderObject != GTObject.ZipLine)
 		{
 			return;
 		}
 		this.segmentDistance = ziplinePlaceholder.ziplineSegmentGenerationOffset;
-		this.spline = base.gameObject.GetComponent<BezierSpline>();
+		this.spline = base.gameObject.GetComponent<global::BezierSpline>();
 		if (this.spline == null)
 		{
-			this.spline = base.gameObject.AddComponent<BezierSpline>();
+			this.spline = base.gameObject.AddComponent<global::BezierSpline>();
 		}
 		this.spline.BuildSplineFromPoints(ziplinePlaceholder.spline.GetControlPoints(), this.ConvertControlPointModes(ziplinePlaceholder.spline.GetControlPointModes()), ziplinePlaceholder.spline.Loop);
 		for (int i = 0; i < ziplinePlaceholder.ziplineSegments.Count; i++)

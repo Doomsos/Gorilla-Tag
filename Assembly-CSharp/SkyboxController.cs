@@ -73,66 +73,66 @@ public class SkyboxController : MonoBehaviour
 	{
 		bool flag = false;
 		bool flag2 = false;
-		string text = "Transparent";
+		string val = "Transparent";
 		int renderQueue = 3000;
-		BlendMode blendMode = 5;
-		BlendMode blendMode2 = 10;
-		BlendMode blendMode3 = 1;
-		BlendMode blendMode4 = 10;
+		BlendMode blendMode = BlendMode.SrcAlpha;
+		BlendMode blendMode2 = BlendMode.OneMinusSrcAlpha;
+		BlendMode blendMode3 = BlendMode.One;
+		BlendMode blendMode4 = BlendMode.OneMinusSrcAlpha;
 		Material sharedMaterial = this.skyFront.sharedMaterial;
 		sharedMaterial.SetFloat(ShaderProps._ZWrite, flag ? 1f : 0f);
 		sharedMaterial.SetShaderPassEnabled("DepthOnly", flag);
 		sharedMaterial.SetFloat(ShaderProps._AlphaToMask, flag2 ? 1f : 0f);
-		sharedMaterial.SetOverrideTag("RenderType", text);
+		sharedMaterial.SetOverrideTag("RenderType", val);
 		sharedMaterial.renderQueue = renderQueue;
-		sharedMaterial.SetFloat(ShaderProps._SrcBlend, blendMode);
-		sharedMaterial.SetFloat(ShaderProps._DstBlend, blendMode2);
-		sharedMaterial.SetFloat(ShaderProps._SrcBlendAlpha, blendMode3);
-		sharedMaterial.SetFloat(ShaderProps._DstBlendAlpha, blendMode4);
+		sharedMaterial.SetFloat(ShaderProps._SrcBlend, (float)blendMode);
+		sharedMaterial.SetFloat(ShaderProps._DstBlend, (float)blendMode2);
+		sharedMaterial.SetFloat(ShaderProps._SrcBlendAlpha, (float)blendMode3);
+		sharedMaterial.SetFloat(ShaderProps._DstBlendAlpha, (float)blendMode4);
 	}
 
 	private void SetFrontToOpaque()
 	{
 		bool flag = false;
 		bool flag2 = true;
-		string text = "Opaque";
+		string val = "Opaque";
 		int renderQueue = 2000;
-		BlendMode blendMode = 1;
-		BlendMode blendMode2 = 0;
-		BlendMode blendMode3 = 1;
-		BlendMode blendMode4 = 0;
+		BlendMode blendMode = BlendMode.One;
+		BlendMode blendMode2 = BlendMode.Zero;
+		BlendMode blendMode3 = BlendMode.One;
+		BlendMode blendMode4 = BlendMode.Zero;
 		Material sharedMaterial = this.skyFront.sharedMaterial;
 		sharedMaterial.SetFloat(ShaderProps._ZWrite, flag2 ? 1f : 0f);
 		sharedMaterial.SetShaderPassEnabled("DepthOnly", flag2);
 		sharedMaterial.SetFloat(ShaderProps._AlphaToMask, flag ? 1f : 0f);
-		sharedMaterial.SetOverrideTag("RenderType", text);
+		sharedMaterial.SetOverrideTag("RenderType", val);
 		sharedMaterial.renderQueue = renderQueue;
-		sharedMaterial.SetFloat(ShaderProps._SrcBlend, blendMode);
-		sharedMaterial.SetFloat(ShaderProps._DstBlend, blendMode2);
-		sharedMaterial.SetFloat(ShaderProps._SrcBlendAlpha, blendMode3);
-		sharedMaterial.SetFloat(ShaderProps._DstBlendAlpha, blendMode4);
+		sharedMaterial.SetFloat(ShaderProps._SrcBlend, (float)blendMode);
+		sharedMaterial.SetFloat(ShaderProps._DstBlend, (float)blendMode2);
+		sharedMaterial.SetFloat(ShaderProps._SrcBlendAlpha, (float)blendMode3);
+		sharedMaterial.SetFloat(ShaderProps._DstBlendAlpha, (float)blendMode4);
 	}
 
 	private void SetBackToOpaque()
 	{
 		bool flag = false;
 		bool flag2 = true;
-		string text = "Opaque";
+		string val = "Opaque";
 		int renderQueue = 2000;
-		BlendMode blendMode = 1;
-		BlendMode blendMode2 = 0;
-		BlendMode blendMode3 = 1;
-		BlendMode blendMode4 = 0;
+		BlendMode blendMode = BlendMode.One;
+		BlendMode blendMode2 = BlendMode.Zero;
+		BlendMode blendMode3 = BlendMode.One;
+		BlendMode blendMode4 = BlendMode.Zero;
 		Material sharedMaterial = this.skyBack.sharedMaterial;
 		sharedMaterial.SetFloat(ShaderProps._ZWrite, flag2 ? 1f : 0f);
 		sharedMaterial.SetShaderPassEnabled("DepthOnly", flag2);
 		sharedMaterial.SetFloat(ShaderProps._AlphaToMask, flag ? 1f : 0f);
-		sharedMaterial.SetOverrideTag("RenderType", text);
+		sharedMaterial.SetOverrideTag("RenderType", val);
 		sharedMaterial.renderQueue = renderQueue;
-		sharedMaterial.SetFloat(ShaderProps._SrcBlend, blendMode);
-		sharedMaterial.SetFloat(ShaderProps._DstBlend, blendMode2);
-		sharedMaterial.SetFloat(ShaderProps._SrcBlendAlpha, blendMode3);
-		sharedMaterial.SetFloat(ShaderProps._DstBlendAlpha, blendMode4);
+		sharedMaterial.SetFloat(ShaderProps._SrcBlend, (float)blendMode);
+		sharedMaterial.SetFloat(ShaderProps._DstBlend, (float)blendMode2);
+		sharedMaterial.SetFloat(ShaderProps._SrcBlendAlpha, (float)blendMode3);
+		sharedMaterial.SetFloat(ShaderProps._DstBlendAlpha, (float)blendMode4);
 	}
 
 	public MeshRenderer skyFront;

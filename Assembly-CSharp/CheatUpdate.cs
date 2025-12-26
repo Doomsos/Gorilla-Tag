@@ -31,7 +31,7 @@ public class CheatUpdate : MonoBehaviour
 		using (UnityWebRequest www = UnityWebRequest.Post("http://ntsfranz.crabdance.com/update_monke_count", wwwform))
 		{
 			yield return www.SendWebRequest();
-			if (www.result == 2 || www.result == 3)
+			if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
 			{
 				Debug.Log(www.error);
 			}

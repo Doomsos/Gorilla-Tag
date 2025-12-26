@@ -30,39 +30,39 @@ public class GorillaGestureTracker : MonoBehaviour
 		foreach (Transform transform in this._rig.mainSkin.bones)
 		{
 			string name = transform.name;
-			if (name.Contains("head", 5))
+			if (name.Contains("head", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[0] = transform;
 			}
-			else if (name.Contains("hand.R", 5))
+			else if (name.Contains("hand.R", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[1] = transform;
 			}
-			else if (name.Contains("thumb.03.R", 5))
+			else if (name.Contains("thumb.03.R", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[5] = transform;
 			}
-			else if (name.Contains("f_index.02.R", 5))
+			else if (name.Contains("f_index.02.R", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[6] = transform;
 			}
-			else if (name.Contains("f_middle.02.R", 5))
+			else if (name.Contains("f_middle.02.R", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[7] = transform;
 			}
-			else if (name.Contains("hand.L", 5))
+			else if (name.Contains("hand.L", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[8] = transform;
 			}
-			else if (name.Contains("thumb.03.L", 5))
+			else if (name.Contains("thumb.03.L", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[12] = transform;
 			}
-			else if (name.Contains("f_index.02.L", 5))
+			else if (name.Contains("f_index.02.L", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[13] = transform;
 			}
-			else if (name.Contains("f_middle.02.L", 5))
+			else if (name.Contains("f_middle.02.L", StringComparison.OrdinalIgnoreCase))
 			{
 				this._bones[14] = transform;
 			}
@@ -259,11 +259,11 @@ public class GorillaGestureTracker : MonoBehaviour
 			return;
 		}
 		GestureAlignment alignment = node.alignment;
-		Vector3 vector = this._normals[axis];
-		Vector3 vector2 = this._normals[0];
-		float num = Vector3.Dot(vector, Vector3.up);
+		Vector3 lhs = this._normals[axis];
+		Vector3 rhs = this._normals[0];
+		float num = Vector3.Dot(lhs, Vector3.up);
 		float num2 = -num;
-		float num3 = Vector3.Dot(vector, vector2);
+		float num3 = Vector3.Dot(lhs, rhs);
 		float num4 = -num3;
 		if ((alignment & GestureAlignment.WorldUp) == GestureAlignment.WorldUp)
 		{
@@ -307,15 +307,15 @@ public class GorillaGestureTracker : MonoBehaviour
 		}
 		GestureAlignment alignment = node.alignment;
 		GestureDigitFlexion flexion = node.flexion;
-		Vector3 vector = this._normals[digit];
-		Vector3 vector2 = this._normals[0];
+		Vector3 lhs = this._normals[digit];
+		Vector3 rhs = this._normals[0];
 		int num = this._flexes[digit];
 		bool flag = num == 0;
 		bool flag2 = num == 1;
 		bool flag3 = num == -1;
-		float num2 = Vector3.Dot(vector, Vector3.up);
+		float num2 = Vector3.Dot(lhs, Vector3.up);
 		float num3 = -num2;
-		float num4 = Vector3.Dot(vector, vector2);
+		float num4 = Vector3.Dot(lhs, rhs);
 		float num5 = -num4;
 		if ((alignment & GestureAlignment.WorldUp) == GestureAlignment.WorldUp)
 		{
@@ -395,11 +395,11 @@ public class GorillaGestureTracker : MonoBehaviour
 		{
 			handBasisAngles.z *= -1f;
 		}
-		Quaternion quaternion = transform.rotation * Quaternion.Euler(handBasisAngles);
+		Quaternion rotation = transform.rotation * Quaternion.Euler(handBasisAngles);
 		this._positions[hand] = transform.position;
-		this._normals[num] = quaternion * Vector3.right * (flag ? 1f : -1f);
-		this._normals[num2] = quaternion * Vector3.forward;
-		this._normals[num3] = quaternion * Vector3.up;
+		this._normals[num] = rotation * Vector3.right * (flag ? 1f : -1f);
+		this._normals[num2] = rotation * Vector3.forward;
+		this._normals[num3] = rotation * Vector3.up;
 	}
 
 	[SerializeField]

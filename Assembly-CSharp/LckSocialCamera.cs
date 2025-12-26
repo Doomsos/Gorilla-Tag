@@ -198,7 +198,7 @@ public class LckSocialCamera : NetworkComponent, IGorillaSliceableSimple
 	protected override void Awake()
 	{
 		base.Awake();
-		if (this.CameraVisuals != null && !this.CameraVisuals.TryGetComponent<IGtCameraVisuals>(ref this.m_CameraVisuals))
+		if (this.CameraVisuals != null && !this.CameraVisuals.TryGetComponent<IGtCameraVisuals>(out this.m_CameraVisuals))
 		{
 			Debug.LogError("LCK: LckSocialCamera failed to find IGtCameraVisuals component on CameraVisuals");
 		}
@@ -377,7 +377,7 @@ public class LckSocialCamera : NetworkComponent, IGorillaSliceableSimple
 
 	[WeaverGenerated]
 	[DefaultForProperty("_networkedData", 0, 1)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private LckSocialCamera.CameraData __networkedData;
 
 	private enum CameraState
@@ -395,7 +395,7 @@ public class LckSocialCamera : NetworkComponent, IGorillaSliceableSimple
 	}
 
 	[NetworkStructWeaved(1)]
-	[StructLayout(2, Size = 4)]
+	[StructLayout(LayoutKind.Explicit, Size = 4)]
 	private struct CameraData : INetworkStruct
 	{
 		public CameraData(LckSocialCamera.CameraState state)

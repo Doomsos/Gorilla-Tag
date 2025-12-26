@@ -15,7 +15,7 @@ public class BoundsCalcs : MonoBehaviour
 		}
 		else if (this.optionalTargets != null && this.optionalTargets.Length != 0)
 		{
-			array = Enumerable.ToArray<MeshFilter>(Enumerable.Concat<MeshFilter>(base.GetComponentsInChildren<MeshFilter>(), this.optionalTargets));
+			array = base.GetComponentsInChildren<MeshFilter>().Concat(this.optionalTargets).ToArray<MeshFilter>();
 		}
 		else
 		{
@@ -39,8 +39,8 @@ public class BoundsCalcs : MonoBehaviour
 			{
 				vertices[j] = localToWorldMatrix.MultiplyPoint3x4(vertices[j]);
 			}
-			BoundsInfo boundsInfo = BoundsInfo.ComputeBounds(vertices);
-			this.elements.Add(boundsInfo);
+			BoundsInfo item = BoundsInfo.ComputeBounds(vertices);
+			this.elements.Add(item);
 			list2.AddRange(vertices);
 		}
 		this.composite = BoundsInfo.ComputeBounds(list2.ToArray());

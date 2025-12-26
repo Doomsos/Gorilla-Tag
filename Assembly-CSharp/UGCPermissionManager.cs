@@ -73,7 +73,7 @@ internal class UGCPermissionManager : MonoBehaviour
 				{
 					return;
 				}
-				action.Invoke();
+				action();
 				return;
 			}
 			else
@@ -84,7 +84,7 @@ internal class UGCPermissionManager : MonoBehaviour
 				{
 					return;
 				}
-				action2.Invoke();
+				action2();
 			}
 		}
 	}
@@ -126,7 +126,7 @@ internal class UGCPermissionManager : MonoBehaviour
 			{
 				return;
 			}
-			action.Invoke(!safety);
+			action(!safety);
 		}
 
 		public void CheckPermissions()
@@ -150,7 +150,7 @@ internal class UGCPermissionManager : MonoBehaviour
 			{
 				return;
 			}
-			action.Invoke(enabled);
+			action(enabled);
 		}
 
 		public void Initialize()
@@ -182,15 +182,15 @@ internal class UGCPermissionManager : MonoBehaviour
 				isEnabled,
 				managedBy
 			});
-			if (managedBy == 3)
+			if (managedBy == Permission.ManagedByEnum.PROHIBITED)
 			{
 				Debug.Log("[UGCPermissionManager][KID] KID UGC prohibited.");
 				this.SetUGCEnabled(false);
 				return;
 			}
-			if (managedBy != 1)
+			if (managedBy != Permission.ManagedByEnum.PLAYER)
 			{
-				if (managedBy == 2)
+				if (managedBy == Permission.ManagedByEnum.GUARDIAN)
 				{
 					Debug.LogFormat("[UGCPermissionManager][KID] KID UGC managed by guardian. (opted in: [{0}], enabled: [{1}])", new object[]
 					{

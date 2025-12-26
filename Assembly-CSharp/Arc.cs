@@ -17,7 +17,7 @@ public struct Arc
 
 	public static Arc From(Vector3 start, Vector3 end)
 	{
-		Vector3 vector = Arc.DeriveArcControlPoint(start, end, default(Vector3?), default(float?));
+		Vector3 vector = Arc.DeriveArcControlPoint(start, end, null, null);
 		return new Arc
 		{
 			start = start,
@@ -30,11 +30,11 @@ public struct Arc
 	{
 		Vector3[] array = new Vector3[count];
 		float num = 1f / (float)count;
-		Vector3 vector = c.GetValueOrDefault();
+		Vector3 value = c.GetValueOrDefault();
 		if (c == null)
 		{
-			vector = Arc.DeriveArcControlPoint(a, b, default(Vector3?), default(float?));
-			c = new Vector3?(vector);
+			value = Arc.DeriveArcControlPoint(a, b, null, null);
+			c = new Vector3?(value);
 		}
 		for (int i = 0; i < count; i++)
 		{
@@ -58,28 +58,28 @@ public struct Arc
 
 	public static Vector3 BezierLerp(Vector3 a, Vector3 b, Vector3 c, float t)
 	{
-		Vector3 vector = Vector3.Lerp(a, c, t);
-		Vector3 vector2 = Vector3.Lerp(c, b, t);
-		return Vector3.Lerp(vector, vector2, t);
+		Vector3 a2 = Vector3.Lerp(a, c, t);
+		Vector3 b2 = Vector3.Lerp(c, b, t);
+		return Vector3.Lerp(a2, b2, t);
 	}
 
 	public static Vector3 DeriveArcControlPoint(Vector3 a, Vector3 b, Vector3? dir = null, float? height = null)
 	{
-		Vector3 vector = (b - a) * 0.5f;
-		Vector3 normalized = vector.normalized;
-		float num = height.GetValueOrDefault();
+		Vector3 b2 = (b - a) * 0.5f;
+		Vector3 normalized = b2.normalized;
+		float value = height.GetValueOrDefault();
 		if (height == null)
 		{
-			num = vector.magnitude;
-			height = new float?(num);
+			value = b2.magnitude;
+			height = new float?(value);
 		}
 		if (dir == null)
 		{
-			Vector3 vector2 = Vector3.Cross(normalized, Vector3.up);
-			dir = new Vector3?(Vector3.Cross(normalized, vector2));
+			Vector3 rhs = Vector3.Cross(normalized, Vector3.up);
+			dir = new Vector3?(Vector3.Cross(normalized, rhs));
 		}
-		Vector3 vector3 = dir.Value * -height.Value;
-		return a + vector + vector3;
+		Vector3 b3 = dir.Value * -height.Value;
+		return a + b2 + b3;
 	}
 
 	public Vector3 start;

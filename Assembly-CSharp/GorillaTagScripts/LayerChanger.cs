@@ -45,7 +45,7 @@ namespace GorillaTagScripts
 		{
 			if (!this.includeChildren)
 			{
-				if (!LayerMaskExtensions.Contains(this.restrictedLayers, parent.gameObject.layer))
+				if (!this.restrictedLayers.Contains(parent.gameObject.layer))
 				{
 					parent.gameObject.layer = newLayer;
 				}
@@ -54,7 +54,7 @@ namespace GorillaTagScripts
 			foreach (object obj in parent)
 			{
 				Transform transform = (Transform)obj;
-				if (!LayerMaskExtensions.Contains(this.restrictedLayers, transform.gameObject.layer))
+				if (!this.restrictedLayers.Contains(transform.gameObject.layer))
 				{
 					transform.gameObject.layer = newLayer;
 					this.ChangeLayers(transform, newLayer);

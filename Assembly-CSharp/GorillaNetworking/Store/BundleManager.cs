@@ -73,7 +73,7 @@ namespace GorillaNetworking.Store
 			this.storeBundlesBySKU.Clear();
 			this._storeBundles.Clear();
 			this._bundleScriptableObjects.Clear();
-			BundleStand[] array = Object.FindObjectsByType<BundleStand>(0);
+			BundleStand[] array = Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				Object.DestroyImmediate(array[i].gameObject);
@@ -134,7 +134,7 @@ namespace GorillaNetworking.Store
 			this.tryOnBundleButton3 = this.nullBundleData;
 			this.tryOnBundleButton4 = this.nullBundleData;
 			this.tryOnBundleButton5 = this.nullBundleData;
-			BundleStand[] array = Object.FindObjectsByType<BundleStand>(0);
+			BundleStand[] array = Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				Object.DestroyImmediate(array[i].gameObject);
@@ -186,13 +186,13 @@ namespace GorillaNetworking.Store
 					this._spawnedBundleStands.RemoveAt(i);
 				}
 			}
-			BundleStand[] array = Object.FindObjectsByType<BundleStand>(0);
+			BundleStand[] array = Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
 			for (int j = 0; j < array.Length; j++)
 			{
 				BundleStand bundle = array[j];
-				if (Enumerable.Any<SpawnedBundle>(this._spawnedBundleStands, (SpawnedBundle x) => x.spawnLocationPath == bundle.transform.parent.gameObject.GetPath(3)))
+				if (this._spawnedBundleStands.Any((SpawnedBundle x) => x.spawnLocationPath == bundle.transform.parent.gameObject.GetPath(3)))
 				{
-					SpawnedBundle spawnedBundle = Enumerable.First<SpawnedBundle>(this._spawnedBundleStands, (SpawnedBundle x) => x.spawnLocationPath == bundle.transform.parent.gameObject.GetPath(3));
+					SpawnedBundle spawnedBundle = this._spawnedBundleStands.First((SpawnedBundle x) => x.spawnLocationPath == bundle.transform.parent.gameObject.GetPath(3));
 					if (spawnedBundle != null && spawnedBundle.bundleStand != bundle)
 					{
 						Object.DestroyImmediate(spawnedBundle.bundleStand.gameObject);
@@ -226,7 +226,7 @@ namespace GorillaNetworking.Store
 		public void NotifyBundleOfErrorByPlayFabID(string ItemId)
 		{
 			StoreBundle storeBundle;
-			if (this.storeBundlesById.TryGetValue(ItemId, ref storeBundle))
+			if (this.storeBundlesById.TryGetValue(ItemId, out storeBundle))
 			{
 				foreach (BundleStand bundleStand in storeBundle.bundleStands)
 				{
@@ -238,7 +238,7 @@ namespace GorillaNetworking.Store
 		public void NotifyBundleOfErrorBySKU(string ItemSKU)
 		{
 			StoreBundle storeBundle;
-			if (this.storeBundlesBySKU.TryGetValue(ItemSKU, ref storeBundle))
+			if (this.storeBundlesBySKU.TryGetValue(ItemSKU, out storeBundle))
 			{
 				foreach (BundleStand bundleStand in storeBundle.bundleStands)
 				{
@@ -289,13 +289,23 @@ namespace GorillaNetworking.Store
 		{
 			if (this._tryOnBundlesStand.IsNotNull())
 			{
-				this._tryOnBundlesStand.PressTryOnBundleButton(pressedTryOnBundleButton, isLeftHand);
+				TryOnBundlesStand tryOnBundlesStand = this._tryOnBundlesStand;
+				if (tryOnBundlesStand == null)
+				{
+					return;
+				}
+				tryOnBundlesStand.PressTryOnBundleButton(pressedTryOnBundleButton, isLeftHand);
 			}
 		}
 
 		public void PressPurchaseTryOnBundleButton()
 		{
-			this._tryOnBundlesStand.PurchaseButtonPressed();
+			TryOnBundlesStand tryOnBundlesStand = this._tryOnBundlesStand;
+			if (tryOnBundlesStand == null)
+			{
+				return;
+			}
+			tryOnBundlesStand.PurchaseButtonPressed();
 		}
 
 		public void UpdateBundlePrice(string productSku, string productFormattedPrice)
@@ -312,7 +322,7 @@ namespace GorillaNetworking.Store
 			{
 				string text;
 				StoreBundle storeBundle;
-				keyValuePair.Deconstruct(ref text, ref storeBundle);
+				keyValuePair.Deconstruct(out text, out storeBundle);
 				StoreBundle storeBundle2 = storeBundle;
 				if (!storeBundle2.HasPrice)
 				{
@@ -366,14 +376,15 @@ namespace GorillaNetworking.Store
 		{
 			private static IEnumerable GetEndCapSpawnPoints()
 			{
-				return Enumerable.Select<EndCapSpawnPoint, ValueDropdownItem>(Object.FindObjectsByType<EndCapSpawnPoint>(0), (EndCapSpawnPoint x) => new ValueDropdownItem(string.Concat(new string[]
+				return from x in Object.FindObjectsByType<EndCapSpawnPoint>(FindObjectsSortMode.None)
+				select new ValueDropdownItem(string.Concat(new string[]
 				{
 					x.transform.parent.parent.name,
 					"/",
 					x.transform.parent.name,
 					"/",
 					x.name
-				}), x));
+				}), x);
 			}
 
 			public EndCapSpawnPoint spawnLocation;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR;
 
 public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 {
@@ -39,13 +40,13 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		this.reactor = reactor;
 		this.grManager = reactor.grManager;
 		this.toolProgressionManager = progression;
-		this.toolProgressionManager.OnProgressionUpdated += new Action(this.ProgressionUpdated);
+		this.toolProgressionManager.OnProgressionUpdated += this.ProgressionUpdated;
 		this.nextVisibleShelfIndex = -1;
 		this.prefabMagnetHeightOffset = this.ropeTop.position.y;
 		this.frontBackShelfMovement = new GRSpringMovement(0.5f, 0.7f);
 		this.raiseLowerShelfMovement = new GRSpringMovement(1f, 0.7f);
 		this.magnetMovement = new GRSpringMovement(1f, 0.7f);
-		ProgressionManager.Instance.OnGetShiftCredit += new Action<string, int>(this.OnShiftCreditChanged);
+		ProgressionManager.Instance.OnGetShiftCredit += this.OnShiftCreditChanged;
 		this.needsUIRefresh = true;
 		this.InitPageSelectionWheel();
 		this.ChangeShelfMovementState(GRToolUpgradePurchaseStationFull.ShelfMovementState.Idle);
@@ -582,18 +583,18 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 			this.playerInfo.text = "AVAILABLE";
 			return;
 		}
-		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
-		GRPlayer grplayer2 = GRPlayer.Get(this.currentActivePlayerActorNumber);
-		if (grplayer2 == null)
+		GRPlayer y = GRPlayer.Get(VRRig.LocalRig);
+		GRPlayer grplayer = GRPlayer.Get(this.currentActivePlayerActorNumber);
+		if (grplayer == null)
 		{
 			this.currentActivePlayerActorNumber = -1;
 			this.playerInfo.text = "AVAILABLE";
 			return;
 		}
 		string text2;
-		if (grplayer2 == grplayer)
+		if (grplayer == y)
 		{
-			int shiftCredits = grplayer2.ShiftCredits;
+			int shiftCredits = grplayer.ShiftCredits;
 			int numberOfResearchPoints = this.toolProgressionManager.GetNumberOfResearchPoints();
 			NetPlayer player = NetworkSystem.Instance.GetPlayer(this.currentActivePlayerActorNumber);
 			string text = (player != null) ? player.SanitizedNickName : "RANDO MONKE";
@@ -630,18 +631,18 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 
 	public bool CheckActivePlayer()
 	{
-		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
+		GRPlayer y = GRPlayer.Get(VRRig.LocalRig);
 		if (this.currentActivePlayerActorNumber == -1)
 		{
 			this.RequestActivePlayerToken();
 			return false;
 		}
-		GRPlayer grplayer2 = GRPlayer.Get(this.currentActivePlayerActorNumber);
-		if (grplayer2 == null)
+		GRPlayer x = GRPlayer.Get(this.currentActivePlayerActorNumber);
+		if (x == null)
 		{
 			this.currentActivePlayerActorNumber = -1;
 		}
-		return !(grplayer2 != grplayer);
+		return !(x != y);
 	}
 
 	public void SelectOption1()
@@ -827,8 +828,8 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		GameDockable component3 = entity.GetComponent<GameDockable>();
 		Transform dock = (component2 != null) ? component2.magnetAttachTransform : ((component3 != null) ? component3.dockablePoint : entity.transform);
 		GRToolUpgradePurchaseStationFull.AttachEntityToMagnet_DockGoesToLocation(this.magnet, entity.transform, dock, new Vector3(0f, -0.03f, 0f));
-		float num = 0f;
-		float num2 = 0f;
+		float angle = 0f;
+		float angle2 = 0f;
 		bool flag = false;
 		for (int i = 0; i < this.gameShelves.Count; i++)
 		{
@@ -837,8 +838,8 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 				GRToolUpgradePurchaseStationShelf.GRPurchaseSlot grpurchaseSlot = this.gameShelves[i].gRPurchaseSlots[j];
 				if (grpurchaseSlot != null && !(grpurchaseSlot.ToolEntityPrefab == null) && grpurchaseSlot.ToolEntityPrefab.name != null && grpurchaseSlot.ToolEntityPrefab.name.GetStaticHash() == entity.typeId)
 				{
-					num = grpurchaseSlot.RopeYaw;
-					num2 = grpurchaseSlot.RopePitch;
+					angle = grpurchaseSlot.RopeYaw;
+					angle2 = grpurchaseSlot.RopePitch;
 					flag = true;
 					break;
 				}
@@ -849,8 +850,8 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 			}
 		}
 		Quaternion quaternion = Quaternion.Euler(0f, 0f, 180f);
-		quaternion = Quaternion.AngleAxis(num, Vector3.up) * quaternion;
-		quaternion = Quaternion.AngleAxis(num2, Vector3.forward) * quaternion;
+		quaternion = Quaternion.AngleAxis(angle, Vector3.up) * quaternion;
+		quaternion = Quaternion.AngleAxis(angle2, Vector3.forward) * quaternion;
 		this.magnet.localRotation = quaternion;
 		this.magnet.localPosition = quaternion * new Vector3(0f, 0.055f, 0f);
 		this.currentMagnetEntity = entity;
@@ -859,25 +860,25 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 
 	public void UpdateSelectionLever()
 	{
-		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
-		GRPlayer grplayer2 = GRPlayer.Get(this.currentActivePlayerActorNumber);
-		bool flag = ControllerInputPoller.GripFloat(4) > 0.7f;
-		bool flag2 = ControllerInputPoller.GripFloat(5) > 0.7f;
+		GRPlayer x = GRPlayer.Get(VRRig.LocalRig);
+		GRPlayer y = GRPlayer.Get(this.currentActivePlayerActorNumber);
+		bool flag = ControllerInputPoller.GripFloat(XRNode.LeftHand) > 0.7f;
+		bool flag2 = ControllerInputPoller.GripFloat(XRNode.RightHand) > 0.7f;
 		VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
 		Transform handTransform = GamePlayer.GetHandTransform(offlineVRRig, 0);
 		Transform handTransform2 = GamePlayer.GetHandTransform(offlineVRRig, 1);
 		Vector3 position = this.pageSelectionHandle.transform.position;
-		Vector3 vector = handTransform.position - position;
-		Vector3 vector2 = handTransform2.position - position;
+		Vector3 lhs = handTransform.position - position;
+		Vector3 lhs2 = handTransform2.position - position;
 		float num = this.pageSelectionLever.transform.localRotation.eulerAngles.x;
 		float num2 = 0.2f;
 		float num3 = this.bIsGrippingLeft ? 0.15f : 0.1f;
 		float num4 = this.bIsGrippingRight ? 0.15f : 0.1f;
-		if (vector.sqrMagnitude > num3 * num3)
+		if (lhs.sqrMagnitude > num3 * num3)
 		{
 			flag = false;
 		}
-		if (vector2.sqrMagnitude > num4 * num4)
+		if (lhs2.sqrMagnitude > num4 * num4)
 		{
 			flag2 = false;
 		}
@@ -888,7 +889,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		else if (this.bGripLeftLastFrame && flag)
 		{
 			Vector3 forward = this.pageSelectionHandle.transform.forward;
-			float num5 = Vector3.Dot(vector, forward);
+			float num5 = Vector3.Dot(lhs, forward);
 			num += num5 / num2 * 180f / 3.1415925f;
 		}
 		else
@@ -902,19 +903,19 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		else if (this.bGripRightLastFrame && flag2)
 		{
 			Vector3 forward2 = this.pageSelectionHandle.transform.forward;
-			float num6 = Vector3.Dot(vector2, forward2);
+			float num6 = Vector3.Dot(lhs2, forward2);
 			num += num6 / num2 * 180f / 3.1415925f;
 		}
 		else
 		{
 			this.bIsGrippingRight = false;
 		}
-		if (!this.bIsGrippingLeft && !this.bIsGrippingRight && grplayer == grplayer2)
+		if (!this.bIsGrippingLeft && !this.bIsGrippingRight && x == y)
 		{
 			num = 30f + (num - 30f) * Mathf.Exp(-20f * Time.deltaTime);
 		}
 		num = Mathf.Clamp(num, 0f, 60f);
-		if ((grplayer == grplayer2 || this.currentActivePlayerActorNumber == -1) && this.lastHandleAngle != num)
+		if ((x == y || this.currentActivePlayerActorNumber == -1) && this.lastHandleAngle != num)
 		{
 			this.pageSelectionLever.transform.localRotation = Quaternion.Euler(num, 0f, 0f);
 			this.lastHandleAngle = num;
@@ -926,7 +927,7 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 		}
 		this.bGripLeftLastFrame = flag;
 		this.bGripRightLastFrame = flag2;
-		if (grplayer == grplayer2)
+		if (x == y)
 		{
 			this.pageSelectionWheel.isBeingDrivenRemotely = false;
 			this.pageSelectionWheel.SetRotationSpeed(rotationSpeed);
@@ -962,11 +963,11 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 			return;
 		}
 		Matrix4x4 m = entity.worldToLocalMatrix * dock.localToWorldMatrix;
-		Vector3 vector = GRToolUpgradePurchaseStationFull.ExtractLossyScale(m);
+		Vector3 s = GRToolUpgradePurchaseStationFull.ExtractLossyScale(m);
 		Vector3 localPosition;
 		Quaternion localRotation;
 		Vector3 localScale;
-		GRToolUpgradePurchaseStationFull.DecomposeTRS(Matrix4x4.TRS(magnetDockOffset, Quaternion.identity, vector) * m.inverse, out localPosition, out localRotation, out localScale);
+		GRToolUpgradePurchaseStationFull.DecomposeTRS(Matrix4x4.TRS(magnetDockOffset, Quaternion.identity, s) * m.inverse, out localPosition, out localRotation, out localScale);
 		entity.SetParent(magnet, false);
 		entity.localPosition = localPosition;
 		entity.localRotation = localRotation;
@@ -1201,14 +1202,14 @@ public class GRToolUpgradePurchaseStationFull : MonoBehaviour, ITickSystemTick
 	private static void DecomposeTRS(Matrix4x4 m, out Vector3 pos, out Quaternion rot, out Vector3 scale)
 	{
 		pos = m.GetColumn(3);
-		Vector3 vector = m.GetColumn(0);
-		Vector3 vector2 = m.GetColumn(1);
-		Vector3 vector3 = m.GetColumn(2);
-		scale = new Vector3(vector.magnitude, vector2.magnitude, vector3.magnitude);
-		vector / scale.x;
-		Vector3 vector4 = vector2 / scale.y;
-		Vector3 vector5 = vector3 / scale.z;
-		rot = Quaternion.LookRotation(vector5, vector4);
+		Vector3 a = m.GetColumn(0);
+		Vector3 a2 = m.GetColumn(1);
+		Vector3 a3 = m.GetColumn(2);
+		scale = new Vector3(a.magnitude, a2.magnitude, a3.magnitude);
+		a / scale.x;
+		Vector3 upwards = a2 / scale.y;
+		Vector3 forward = a3 / scale.z;
+		rot = Quaternion.LookRotation(forward, upwards);
 	}
 
 	private GhostReactor reactor;

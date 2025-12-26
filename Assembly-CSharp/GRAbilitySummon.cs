@@ -101,10 +101,10 @@ public class GRAbilitySummon : GRAbilityBase
 		int i = 0;
 		while (i < 5)
 		{
-			Vector3 vector = Quaternion.Euler(0f, num, 0f) * this.root.forward;
-			Vector3 vector2 = position + vector * this.desiredSpawnDistance;
+			Vector3 a = Quaternion.Euler(0f, num, 0f) * this.root.forward;
+			Vector3 vector = position + a * this.desiredSpawnDistance;
 			NavMeshHit navMeshHit;
-			if (NavMesh.Raycast(position, vector2, ref navMeshHit, this.walkableArea))
+			if (NavMesh.Raycast(position, vector, out navMeshHit, this.walkableArea))
 			{
 				if (navMeshHit.distance < this.minSpawnDistance)
 				{
@@ -116,11 +116,11 @@ public class GRAbilitySummon : GRAbilityBase
 					i++;
 					continue;
 				}
-				vector2 = navMeshHit.position + Vector3.up * this.spawnHeight;
+				vector = navMeshHit.position + Vector3.up * this.spawnHeight;
 			}
-			return new Vector3?(vector2);
+			return new Vector3?(vector);
 		}
-		return default(Vector3?);
+		return null;
 	}
 
 	private bool DoSpawn()

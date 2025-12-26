@@ -430,7 +430,7 @@ public static class PhotonUtils
 			throw new Exception("Size cannot be less than 0.");
 		}
 		object[] array;
-		if (!PhotonUtils.gLengthToArgsArray.TryGetValue(size, ref array))
+		if (!PhotonUtils.gLengthToArgsArray.TryGetValue(size, out array))
 		{
 			array = new object[size];
 			PhotonUtils.gLengthToArgsArray.Add(size, array);
@@ -521,7 +521,7 @@ public static class PhotonUtils
 
 	public static class CustomTypes
 	{
-		[RuntimeInitializeOnLoadMethod(1)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void InitOnLoad()
 		{
 			PhotonPeer.RegisterType(typeof(Color32), 67, new SerializeMethod(PhotonUtils.CustomTypes.SerializeColor32), new DeserializeMethod(PhotonUtils.CustomTypes.DeserializeColor32));
@@ -539,7 +539,7 @@ public static class PhotonUtils
 
 		private static T CastToStruct<T>(byte[] bytes) where T : struct
 		{
-			GCHandle gchandle = GCHandle.Alloc(bytes, 3);
+			GCHandle gchandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
 			T result = Marshal.PtrToStructure<T>(gchandle.AddrOfPinnedObject());
 			gchandle.Free();
 			return result;
@@ -548,9 +548,9 @@ public static class PhotonUtils
 		private static byte[] CastToBytes<T>(T data) where T : struct
 		{
 			byte[] array = new byte[Marshal.SizeOf<T>()];
-			GCHandle gchandle = GCHandle.Alloc(array, 3);
-			IntPtr intPtr = gchandle.AddrOfPinnedObject();
-			Marshal.StructureToPtr<T>(data, intPtr, true);
+			GCHandle gchandle = GCHandle.Alloc(array, GCHandleType.Pinned);
+			IntPtr ptr = gchandle.AddrOfPinnedObject();
+			Marshal.StructureToPtr<T>(data, ptr, true);
 			gchandle.Free();
 			return array;
 		}

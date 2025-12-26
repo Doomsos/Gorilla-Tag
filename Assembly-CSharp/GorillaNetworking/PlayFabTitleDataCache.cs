@@ -28,18 +28,18 @@ namespace GorillaNetworking
 		{
 			Dictionary<string, string> dictionary;
 			string data;
-			if (!ignoreCache && !this.isFirstLoad && this.localizedTitleData.TryGetValue(LocalisationManager.CurrentLanguage.Identifier.Code, ref dictionary) && dictionary.TryGetValue(name, ref data))
+			if (!ignoreCache && !this.isFirstLoad && this.localizedTitleData.TryGetValue(LocalisationManager.CurrentLanguage.Identifier.Code, out dictionary) && dictionary.TryGetValue(name, out data))
 			{
 				callback.SafeInvoke(data);
 				return;
 			}
-			PlayFabTitleDataCache.DataRequest dataRequest = new PlayFabTitleDataCache.DataRequest
+			PlayFabTitleDataCache.DataRequest item = new PlayFabTitleDataCache.DataRequest
 			{
 				Name = name,
 				Callback = callback,
 				ErrorCallback = errorCallback
 			};
-			this.requests.Add(dataRequest);
+			this.requests.Add(item);
 			this.TryUpdateData();
 		}
 
@@ -87,9 +87,9 @@ namespace GorillaNetworking
 					result = (JsonMapper.ToObject<CacheImport>(File.ReadAllText(PlayFabTitleDataCache.FilePath)) ?? new CacheImport());
 				}
 			}
-			catch (Exception ex)
+			catch (Exception arg)
 			{
-				Debug.LogError(string.Format("[PlayFabTitleDataCache::LoadDataFromFile] Error reading PlayFab title data from file: {0}", ex));
+				Debug.LogError(string.Format("[PlayFabTitleDataCache::LoadDataFromFile] Error reading PlayFab title data from file: {0}", arg));
 				result = null;
 			}
 			return result;
@@ -99,16 +99,16 @@ namespace GorillaNetworking
 		{
 			try
 			{
-				string text = JsonMapper.ToJson(new CacheImport
+				string contents = JsonMapper.ToJson(new CacheImport
 				{
 					DeploymentId = MothershipClientApiUnity.DeploymentId,
 					TitleData = titleData
 				});
-				File.WriteAllText(filepath, text);
+				File.WriteAllText(filepath, contents);
 			}
-			catch (Exception ex)
+			catch (Exception arg)
 			{
-				Debug.LogError(string.Format("[PlayFabTitleDataCache::SaveDataToFile] Error writing PlayFab title data to file: {0}", ex));
+				Debug.LogError(string.Format("[PlayFabTitleDataCache::SaveDataToFile] Error writing PlayFab title data to file: {0}", arg));
 			}
 		}
 
@@ -125,13 +125,13 @@ namespace GorillaNetworking
 				CacheImport oldCache = this.LoadDataFromFile();
 				string currentLocale = LocalisationManager.CurrentLanguage.Identifier.Code;
 				Dictionary<string, string> titleData;
-				if (!this.localizedTitleData.TryGetValue(currentLocale, ref titleData))
+				if (!this.localizedTitleData.TryGetValue(currentLocale, out titleData))
 				{
 					this.localizedTitleData[currentLocale] = new Dictionary<string, string>();
 					titleData = this.localizedTitleData[currentLocale];
 				}
 				Dictionary<string, string> oldLocalizedCache;
-				if (oldCache == null || oldCache.TitleData == null || !oldCache.TitleData.TryGetValue(currentLocale, ref oldLocalizedCache))
+				if (oldCache == null || oldCache.TitleData == null || !oldCache.TitleData.TryGetValue(currentLocale, out oldLocalizedCache))
 				{
 					oldLocalizedCache = new Dictionary<string, string>();
 				}
@@ -157,31 +157,31 @@ namespace GorillaNetworking
 				}));
 				if (!MothershipClientApiUnity.ListMothershipTitleData(MothershipClientApiUnity.TitleId, MothershipClientApiUnity.EnvironmentId, MothershipClientApiUnity.DeploymentId, stringVector, delegate(ListClientMothershipTitleDataResponse response)
 				{
-					string text6 = "[PlayFabTitleDataCache::UpdateDataCo] Mothership API success callback - Response: {0}, Results: {1}";
-					object obj = response != null;
+					string format = "[PlayFabTitleDataCache::UpdateDataCo] Mothership API success callback - Response: {0}, Results: {1}";
+					object arg = response != null;
 					int? num;
 					if (response == null)
 					{
-						num = default(int?);
+						num = null;
 					}
 					else
 					{
 						TitleDataShortVector results = response.Results;
-						num = ((results != null) ? new int?(results.Count) : default(int?));
+						num = ((results != null) ? new int?(results.Count) : null);
 					}
 					int? num2 = num;
-					Debug.Log(string.Format(text6, obj, num2.GetValueOrDefault()));
+					Debug.Log(string.Format(format, arg, num2.GetValueOrDefault()));
 					if (response != null && response.Results != null)
 					{
 						CS$<>8__locals1.newTitleData = new Dictionary<string, string>();
 						for (int j = 0; j < response.Results.Count; j++)
 						{
 							MothershipTitleDataShort mothershipTitleDataShort = response.Results[j];
-							string text7 = "[PlayFabTitleDataCache::UpdateDataCo] Processing title data item {0}: key='{1}', data length={2}";
-							object obj2 = j;
+							string format2 = "[PlayFabTitleDataCache::UpdateDataCo] Processing title data item {0}: key='{1}', data length={2}";
+							object arg2 = j;
 							object key = mothershipTitleDataShort.key;
 							string data = mothershipTitleDataShort.data;
-							Debug.Log(string.Format(text7, obj2, key, (data != null) ? data.Length : 0));
+							Debug.Log(string.Format(format2, arg2, key, (data != null) ? data.Length : 0));
 							if (!string.IsNullOrEmpty(mothershipTitleDataShort.key))
 							{
 								CS$<>8__locals1.newTitleData[mothershipTitleDataShort.key] = mothershipTitleDataShort.data;
@@ -226,7 +226,7 @@ namespace GorillaNetworking
 					{
 						string text;
 						string text2;
-						keyValuePair.Deconstruct(ref text, ref text2);
+						keyValuePair.Deconstruct(out text, out text2);
 						string text3 = text;
 						string text4 = text2;
 						Debug.Log("[PlayFabTitleDataCache::UpdateDataCo] Updating title data key: " + text3);
@@ -239,14 +239,14 @@ namespace GorillaNetworking
 								Action<string> callback = dataRequest2.Callback;
 								if (callback != null)
 								{
-									callback.Invoke(text4);
+									callback(text4);
 								}
 								this.requests.RemoveAt(i);
 								break;
 							}
 						}
-						string text5;
-						if (oldLocalizedCache.TryGetValue(text3, ref text5) && text5 != text4)
+						string a;
+						if (oldLocalizedCache.TryGetValue(text3, out a) && a != text4)
 						{
 							PlayFabTitleDataCache.DataUpdate onTitleDataUpdate = this.OnTitleDataUpdate;
 							if (onTitleDataUpdate != null)

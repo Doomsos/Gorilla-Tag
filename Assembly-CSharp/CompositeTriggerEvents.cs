@@ -134,14 +134,14 @@ public class CompositeTriggerEvents : MonoBehaviour
 	public void TriggerEnterReceiver(TriggerEventNotifier notifier, Collider other)
 	{
 		int num;
-		if (this.overlapMask.TryGetValue(other, ref num))
+		if (this.overlapMask.TryGetValue(other, out num))
 		{
 			num = this.SetMaskIndexTrue(num, notifier.maskIndex);
 			this.overlapMask[other] = num;
 			return;
 		}
-		int num2 = this.SetMaskIndexTrue(0, notifier.maskIndex);
-		this.overlapMask.Add(other, num2);
+		int value = this.SetMaskIndexTrue(0, notifier.maskIndex);
+		this.overlapMask.Add(other, value);
 		CompositeTriggerEvents.TriggerEvent compositeTriggerEnter = this.CompositeTriggerEnter;
 		if (compositeTriggerEnter == null)
 		{
@@ -153,7 +153,7 @@ public class CompositeTriggerEvents : MonoBehaviour
 	public void TriggerExitReceiver(TriggerEventNotifier notifier, Collider other)
 	{
 		int num;
-		if (this.overlapMask.TryGetValue(other, ref num))
+		if (this.overlapMask.TryGetValue(other, out num))
 		{
 			num = this.SetMaskIndexFalse(num, notifier.maskIndex);
 			if (num == 0)
@@ -177,7 +177,7 @@ public class CompositeTriggerEvents : MonoBehaviour
 	public void ResetColliderMask(Collider other)
 	{
 		int num;
-		if (this.overlapMask.TryGetValue(other, ref num))
+		if (this.overlapMask.TryGetValue(other, out num))
 		{
 			if (num != 0)
 			{

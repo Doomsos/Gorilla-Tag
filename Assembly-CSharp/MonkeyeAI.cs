@@ -68,10 +68,9 @@ public class MonkeyeAI : MonoBehaviour, IGorillaSliceableSimple
 
 	private float Distance2D(Vector3 a, Vector3 b)
 	{
-		Vector2 vector = new Vector2(a.x, a.z);
-		Vector2 vector2;
-		vector2..ctor(b.x, b.z);
-		return Vector2.Distance(vector, vector2);
+		Vector2 a2 = new Vector2(a.x, a.z);
+		Vector2 b2 = new Vector2(b.x, b.z);
+		return Vector2.Distance(a2, b2);
 	}
 
 	private Transform PickRandomPatrolPoint()
@@ -209,8 +208,8 @@ public class MonkeyeAI : MonoBehaviour, IGorillaSliceableSimple
 		normalized.y = 0f;
 		if (this.animController.GetCurrentAnimatorStateInfo(0).IsName("Move"))
 		{
-			Vector3 vector = normalized * this.speed;
-			base.transform.position += vector * this.deltaTime;
+			Vector3 a = normalized * this.speed;
+			base.transform.position += a * this.deltaTime;
 		}
 		Mathf.Clamp01(Vector3.Dot(base.transform.forward, normalized) / 1.5707964f);
 		if (Mathf.Sign(Vector3.Cross(base.transform.forward, normalized).y) > 0f)
@@ -222,8 +221,8 @@ public class MonkeyeAI : MonoBehaviour, IGorillaSliceableSimple
 			this.animController.SetLayerWeight(this.layerLeft, 0f);
 		}
 		this.animController.SetLayerWeight(this.layerForward, 0f);
-		Vector3 vector2 = Vector3.RotateTowards(base.transform.forward, normalized, this.rotationSpeed * this.deltaTime, 0f);
-		base.transform.rotation = Quaternion.LookRotation(vector2);
+		Vector3 forward = Vector3.RotateTowards(base.transform.forward, normalized, this.rotationSpeed * this.deltaTime, 0f);
+		base.transform.rotation = Quaternion.LookRotation(forward);
 	}
 
 	private bool PlayerNear(VRRig rig, float dist, out float playerDist)
@@ -768,9 +767,9 @@ public class MonkeyeAI : MonoBehaviour, IGorillaSliceableSimple
 				}
 			}
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
-			Debug.LogException(ex, this);
+			Debug.LogException(exception, this);
 		}
 	}
 

@@ -45,14 +45,14 @@ public class GhostReactorLevelSectionConnector : MonoBehaviour
 				}
 				else
 				{
-					GameEntityCreateData gameEntityCreateData = new GameEntityCreateData
+					GameEntityCreateData item = new GameEntityCreateData
 					{
 						entityTypeId = staticHash,
 						position = this.prePlacedGameEntities[i].transform.position,
 						rotation = this.prePlacedGameEntities[i].transform.rotation,
 						createData = 0L
 					};
-					GhostReactorLevelSection.tempCreateEntitiesList.Add(gameEntityCreateData);
+					GhostReactorLevelSection.tempCreateEntitiesList.Add(item);
 				}
 			}
 			grManager.gameEntityManager.RequestCreateItems(GhostReactorLevelSection.tempCreateEntitiesList);

@@ -318,7 +318,7 @@ public class BuilderPiecePrivatePlot : MonoBehaviour
 			return true;
 		}
 		int pieceId;
-		if (this.piece.GetTable().plotOwners.TryGetValue(actorNumber, ref pieceId))
+		if (this.piece.GetTable().plotOwners.TryGetValue(actorNumber, out pieceId))
 		{
 			BuilderPiece builderPiece = this.piece.GetTable().GetPiece(pieceId);
 			BuilderPiecePrivatePlot builderPiecePrivatePlot;

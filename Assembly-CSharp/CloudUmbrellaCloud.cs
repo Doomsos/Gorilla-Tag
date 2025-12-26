@@ -11,11 +11,11 @@ public class CloudUmbrellaCloud : MonoBehaviour
 
 	protected void LateUpdate()
 	{
-		float num = Vector3.Dot(this.umbrellaXform.up, Vector3.up);
-		float num2 = Mathf.Clamp01(this.scaleCurve.Evaluate(num));
-		this.rendererOn = ((num2 > 0.09f && num2 < 0.1f) ? this.rendererOn : (num2 > 0.1f));
+		float time = Vector3.Dot(this.umbrellaXform.up, Vector3.up);
+		float num = Mathf.Clamp01(this.scaleCurve.Evaluate(time));
+		this.rendererOn = ((num > 0.09f && num < 0.1f) ? this.rendererOn : (num > 0.1f));
 		this.cloudRenderer.enabled = this.rendererOn;
-		this.cloudScaleXform.localScale = new Vector3(num2, num2, num2);
+		this.cloudScaleXform.localScale = new Vector3(num, num, num);
 		this.cloudRotateXform.up = Vector3.up;
 	}
 

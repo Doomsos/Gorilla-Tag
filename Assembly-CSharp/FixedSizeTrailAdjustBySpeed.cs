@@ -55,12 +55,12 @@ public class FixedSizeTrailAdjustBySpeed : MonoBehaviour
 		int num = colorKeys.Length;
 		for (int i = 0; i < num; i++)
 		{
-			float num2 = (float)i / (float)(num - 1);
-			Color color = this.minColors.Evaluate(num2);
-			Color color2 = this.maxColors.Evaluate(num2);
-			Color color3 = Color.Lerp(color, color2, t);
-			colorKeys[i].color = color3;
-			colorKeys[i].time = num2;
+			float time = (float)i / (float)(num - 1);
+			Color a = this.minColors.Evaluate(time);
+			Color b = this.maxColors.Evaluate(time);
+			Color color = Color.Lerp(a, b, t);
+			colorKeys[i].color = color;
+			colorKeys[i].time = time;
 		}
 		this._mixGradient.colorKeys = colorKeys;
 		if (this.trail)
@@ -110,9 +110,9 @@ public class FixedSizeTrailAdjustBySpeed : MonoBehaviour
 		if (this.adjustPhysics)
 		{
 			Transform transform = base.transform;
-			Vector3 vector = transform.forward * this.gravityOffset.z + transform.right * this.gravityOffset.x + transform.up * this.gravityOffset.y;
-			Vector3 vector2 = (this._initGravity + vector) * (1f - num);
-			this.trail.gravity = Vector3.Lerp(Vector3.zero, vector2, 0.5f);
+			Vector3 b = transform.forward * this.gravityOffset.z + transform.right * this.gravityOffset.x + transform.up * this.gravityOffset.y;
+			Vector3 b2 = (this._initGravity + b) * (1f - num);
+			this.trail.gravity = Vector3.Lerp(Vector3.zero, b2, 0.5f);
 		}
 	}
 

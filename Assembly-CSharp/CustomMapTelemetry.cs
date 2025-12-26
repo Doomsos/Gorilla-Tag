@@ -77,10 +77,10 @@ public class CustomMapTelemetry : MonoBehaviour
 			return;
 		}
 		CustomMapTelemetry.metricsCaptureStarted = true;
-		NetworkSystem.Instance.OnPlayerJoined -= new Action<NetPlayer>(CustomMapTelemetry.OnPlayerJoinedRoom);
-		NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(CustomMapTelemetry.OnPlayerJoinedRoom);
-		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(CustomMapTelemetry.OnPlayerLeftRoom);
-		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(CustomMapTelemetry.OnPlayerLeftRoom);
+		NetworkSystem.Instance.OnPlayerJoined -= CustomMapTelemetry.OnPlayerJoinedRoom;
+		NetworkSystem.Instance.OnPlayerJoined += CustomMapTelemetry.OnPlayerJoinedRoom;
+		NetworkSystem.Instance.OnPlayerLeft -= CustomMapTelemetry.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnPlayerLeft += CustomMapTelemetry.OnPlayerLeftRoom;
 		CustomMapTelemetry.runningPlayerCount = NetworkSystem.Instance.RoomPlayerCount;
 		CustomMapTelemetry.minPlayersInMap = CustomMapTelemetry.runningPlayerCount;
 		CustomMapTelemetry.maxPlayersInMap = CustomMapTelemetry.runningPlayerCount;
@@ -93,8 +93,8 @@ public class CustomMapTelemetry : MonoBehaviour
 			return;
 		}
 		CustomMapTelemetry.metricsCaptureStarted = false;
-		NetworkSystem.Instance.OnPlayerJoined -= new Action<NetPlayer>(CustomMapTelemetry.OnPlayerJoinedRoom);
-		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(CustomMapTelemetry.OnPlayerLeftRoom);
+		NetworkSystem.Instance.OnPlayerJoined -= CustomMapTelemetry.OnPlayerJoinedRoom;
+		NetworkSystem.Instance.OnPlayerLeft -= CustomMapTelemetry.OnPlayerLeftRoom;
 		CustomMapTelemetry.inPrivateRoom = (NetworkSystem.Instance.InRoom && NetworkSystem.Instance.SessionIsPrivate);
 		int num = Mathf.RoundToInt(Time.unscaledTime - CustomMapTelemetry.mapEnterTime);
 		if (num < 30)
@@ -120,7 +120,7 @@ public class CustomMapTelemetry : MonoBehaviour
 		{
 			CustomMapTelemetry.EndPerfCapture();
 		}
-		CustomMapTelemetry.drawCallsRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count", 1, 24);
+		CustomMapTelemetry.drawCallsRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count", 1, ProfilerRecorderOptions.Default);
 		CustomMapTelemetry.LowestFPS = int.MaxValue;
 		CustomMapTelemetry.HighestFPS = int.MinValue;
 		CustomMapTelemetry.totalFPS = 0;

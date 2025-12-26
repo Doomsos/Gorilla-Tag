@@ -102,8 +102,8 @@ namespace GorillaLocomotion.Climbing
 					{
 						continue;
 					}
-					Vector3 vector = gorillaClimbable.colliderCache.ClosestPoint(position);
-					num2 = Vector3.Distance(position, vector);
+					Vector3 b = gorillaClimbable.colliderCache.ClosestPoint(position);
+					num2 = Vector3.Distance(position, b);
 				}
 				else
 				{
@@ -120,31 +120,31 @@ namespace GorillaLocomotion.Climbing
 
 		private void OnTriggerEnter(Collider other)
 		{
-			GorillaClimbable gorillaClimbable;
-			if (other.TryGetComponent<GorillaClimbable>(ref gorillaClimbable))
+			GorillaClimbable item;
+			if (other.TryGetComponent<GorillaClimbable>(out item))
 			{
-				this.potentialClimbables.Add(gorillaClimbable);
+				this.potentialClimbables.Add(item);
 				return;
 			}
-			GorillaClimbableRef gorillaClimbableRef;
-			if (other.TryGetComponent<GorillaClimbableRef>(ref gorillaClimbableRef))
+			GorillaClimbableRef item2;
+			if (other.TryGetComponent<GorillaClimbableRef>(out item2))
 			{
-				this.potentialClimbables.Add(gorillaClimbableRef);
+				this.potentialClimbables.Add(item2);
 			}
 		}
 
 		private void OnTriggerExit(Collider other)
 		{
-			GorillaClimbable gorillaClimbable;
-			if (other.TryGetComponent<GorillaClimbable>(ref gorillaClimbable))
+			GorillaClimbable item;
+			if (other.TryGetComponent<GorillaClimbable>(out item))
 			{
-				this.potentialClimbables.Remove(gorillaClimbable);
+				this.potentialClimbables.Remove(item);
 				return;
 			}
-			GorillaClimbableRef gorillaClimbableRef;
-			if (other.TryGetComponent<GorillaClimbableRef>(ref gorillaClimbableRef))
+			GorillaClimbableRef item2;
+			if (other.TryGetComponent<GorillaClimbableRef>(out item2))
 			{
-				this.potentialClimbables.Remove(gorillaClimbableRef);
+				this.potentialClimbables.Remove(item2);
 			}
 		}
 
@@ -162,7 +162,7 @@ namespace GorillaLocomotion.Climbing
 		private List<GorillaClimbable> potentialClimbables = new List<GorillaClimbable>();
 
 		[Header("Non-hand input should have the component disabled")]
-		public XRNode xrNode = 4;
+		public XRNode xrNode = XRNode.LeftHand;
 
 		[NonSerialized]
 		public bool isClimbing;

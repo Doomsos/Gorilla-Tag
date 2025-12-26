@@ -34,6 +34,10 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 		}
 		this.observable = flag;
 		this.firstFrame = false;
+		if (flag)
+		{
+			this.ObservableSliceUpdate();
+		}
 	}
 
 	protected virtual void UnityOnEnable()
@@ -47,6 +51,8 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	protected abstract void OnLostObservable();
 
 	protected abstract void OnBecameObservable();
+
+	protected abstract void ObservableSliceUpdate();
 
 	private bool firstFrame = true;
 

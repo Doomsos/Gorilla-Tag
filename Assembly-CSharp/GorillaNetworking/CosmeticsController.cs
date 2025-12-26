@@ -81,15 +81,15 @@ namespace GorillaNetworking
 				{
 					Debug.LogError("`newSysAllCosmeticsAsyncOp` (should never happen) became invalid some how.");
 				}
-				if (newSysAllCosmeticsAsyncOp.Status == 1)
+				if (newSysAllCosmeticsAsyncOp.Status == AsyncOperationStatus.Succeeded)
 				{
 					goto Block_4;
 				}
 				Debug.LogError(string.Format("Failed to load \"{0}\". ", this.v2_allCosmeticsInfoAssetRef.RuntimeKey) + "Error: " + newSysAllCosmeticsAsyncOp.OperationException.Message);
-				float num = retryWaitTimes[Mathf.Min(retryCount, retryWaitTimes.Length - 1)];
-				yield return new WaitForSecondsRealtime(num);
-				int num2 = retryCount;
-				retryCount = num2 + 1;
+				float time = retryWaitTimes[Mathf.Min(retryCount, retryWaitTimes.Length - 1)];
+				yield return new WaitForSecondsRealtime(time);
+				int num = retryCount;
+				retryCount = num + 1;
 				newSysAllCosmeticsAsyncOp = default(AsyncOperationHandle<AllCosmeticsArraySO>);
 			}
 			yield break;
@@ -111,7 +111,7 @@ namespace GorillaNetworking
 				CosmeticInfoV2 cosmeticInfoV = this.v2_allCosmetics[j];
 				string playFabID = cosmeticInfoV.playFabID;
 				this._allCosmeticsDictV2[playFabID] = cosmeticInfoV;
-				CosmeticsController.CosmeticItem cosmeticItem = new CosmeticsController.CosmeticItem
+				CosmeticsController.CosmeticItem item = new CosmeticsController.CosmeticItem
 				{
 					itemName = playFabID,
 					itemCategory = cosmeticInfoV.category,
@@ -122,7 +122,7 @@ namespace GorillaNetworking
 					bothHandsHoldable = cosmeticInfoV.usesBothHandSlots,
 					isNullItem = false
 				};
-				this._allCosmetics.Add(cosmeticItem);
+				this._allCosmetics.Add(item);
 			}
 			this.v2_allCosmeticsInfoAssetRef_isLoaded = true;
 			Action v2_allCosmeticsInfoAssetRef_OnPostLoad = this.V2_allCosmeticsInfoAssetRef_OnPostLoad;
@@ -130,12 +130,12 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			v2_allCosmeticsInfoAssetRef_OnPostLoad.Invoke();
+			v2_allCosmeticsInfoAssetRef_OnPostLoad();
 		}
 
 		public bool TryGetCosmeticInfoV2(string playFabId, out CosmeticInfoV2 cosmeticInfo)
 		{
-			return this._allCosmeticsDictV2.TryGetValue(playFabId, ref cosmeticInfo);
+			return this._allCosmeticsDictV2.TryGetValue(playFabId, out cosmeticInfo);
 		}
 
 		private void V2_ConformCosmeticItemV1DisplayName(ref CosmeticsController.CosmeticItem cosmetic)
@@ -642,7 +642,11 @@ namespace GorillaNetworking
 
 		public void PressFittingRoomButton(FittingRoomButton pressedFittingRoomButton, bool isLeftHand)
 		{
-			BundleManager.instance._tryOnBundlesStand.ClearSelectedBundle();
+			TryOnBundlesStand tryOnBundlesStand = BundleManager.instance._tryOnBundlesStand;
+			if (tryOnBundlesStand != null)
+			{
+				tryOnBundlesStand.ClearSelectedBundle();
+			}
 			this.ApplyCosmeticItemToSet(this.tryOnSet, pressedFittingRoomButton.currentCosmeticItem, isLeftHand, false);
 			this.UpdateShoppingCart();
 			this.UpdateWornCosmetics(true);
@@ -654,9 +658,9 @@ namespace GorillaNetworking
 			CosmeticsController.CosmeticItem cosmeticItem = this.allCosmeticsDict[itemName];
 			if (cosmeticItem.bundledItems.Length != 0)
 			{
-				foreach (string text in cosmeticItem.bundledItems)
+				foreach (string key in cosmeticItem.bundledItems)
 				{
-					if (this.AnyMatch(set, this.allCosmeticsDict[text]))
+					if (this.AnyMatch(set, this.allCosmeticsDict[key]))
 					{
 						if (ewearingCosmeticSet == CosmeticsController.EWearingCosmeticSet.NotASet)
 						{
@@ -740,7 +744,7 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			onCosmeticsUpdated.Invoke();
+			onCosmeticsUpdated();
 		}
 
 		private void PressWardrobeItemButton(CosmeticsController.CosmeticItem item, bool isLeftHand)
@@ -928,7 +932,7 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			onCosmeticsUpdated.Invoke();
+			onCosmeticsUpdated();
 		}
 
 		public void ClearCheckout(bool sendEvent)
@@ -1118,10 +1122,10 @@ namespace GorillaNetworking
 				CosmeticsController.CosmeticItem itemFromDict = this.GetItemFromDict(this.itemToBuy.itemName);
 				if (itemFromDict.bundledItems != null)
 				{
-					foreach (string text in itemFromDict.bundledItems)
+					foreach (string str in itemFromDict.bundledItems)
 					{
 						VRRig offlineVRRig2 = GorillaTagger.Instance.offlineVRRig;
-						offlineVRRig2.concatStringOfCosmeticsAllowed += text;
+						offlineVRRig2.concatStringOfCosmeticsAllowed += str;
 					}
 				}
 				this.tryOnSet.ClearSet(this.nullItem);
@@ -1135,7 +1139,7 @@ namespace GorillaNetworking
 				{
 					return;
 				}
-				onCosmeticsUpdated.Invoke();
+				onCosmeticsUpdated();
 				break;
 			}
 			case CosmeticsController.PurchaseItemStages.Failure:
@@ -1322,20 +1326,20 @@ namespace GorillaNetworking
 				if (this.UseNewCosmeticsPath())
 				{
 					this.playerIDList.Add("Inventory");
-					PlayFabClientAPI.GetSharedGroupData(new GetSharedGroupDataRequest
+					PlayFabClientAPI.GetSharedGroupData(new PlayFab.ClientModels.GetSharedGroupDataRequest
 					{
 						Keys = this.playerIDList,
 						SharedGroupId = NetworkSystem.Instance.LocalPlayer.UserId + "Inventory"
 					}, delegate(GetSharedGroupDataResult result)
 					{
 						this.attempts++;
-						foreach (KeyValuePair<string, SharedGroupDataRecord> keyValuePair in result.Data)
+						foreach (KeyValuePair<string, PlayFab.ClientModels.SharedGroupDataRecord> keyValuePair in result.Data)
 						{
 							if (keyValuePair.Value.Value.Contains(itemToBuyID))
 							{
 								PhotonNetwork.RaiseEvent(199, null, new RaiseEventOptions
 								{
-									Receivers = 0
+									Receivers = ReceiverGroup.Others
 								}, SendOptions.SendReliable);
 								this.foundCosmetic = true;
 							}
@@ -1354,14 +1358,14 @@ namespace GorillaNetworking
 				else
 				{
 					this.playerIDList.Add(PhotonNetwork.LocalPlayer.ActorNumber.ToString());
-					PlayFabClientAPI.GetSharedGroupData(new GetSharedGroupDataRequest
+					PlayFabClientAPI.GetSharedGroupData(new PlayFab.ClientModels.GetSharedGroupDataRequest
 					{
 						Keys = this.playerIDList,
 						SharedGroupId = NetworkSystem.Instance.RoomName + Regex.Replace(NetworkSystem.Instance.CurrentRegion, "[^a-zA-Z0-9]", "").ToUpper()
 					}, delegate(GetSharedGroupDataResult result)
 					{
 						this.attempts++;
-						foreach (KeyValuePair<string, SharedGroupDataRecord> keyValuePair in result.Data)
+						foreach (KeyValuePair<string, PlayFab.ClientModels.SharedGroupDataRecord> keyValuePair in result.Data)
 						{
 							if (keyValuePair.Value.Value.Contains(itemToBuyID))
 							{
@@ -1380,11 +1384,11 @@ namespace GorillaNetworking
 					}, delegate(PlayFabError error)
 					{
 						this.attempts++;
-						if (error.Error == 1074)
+						if (error.Error == PlayFabErrorCode.NotAuthenticated)
 						{
 							PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 						}
-						else if (error.Error == 1002)
+						else if (error.Error == PlayFabErrorCode.AccountBanned)
 						{
 							GorillaGameManager.ForceStopGame_DisconnectAndDestroy();
 						}
@@ -1575,12 +1579,12 @@ namespace GorillaNetworking
 			{
 				if (this.isHidingCosmeticsFromRemotePlayers)
 				{
-					GorillaTagger.Instance.myVRRig.SendRPC("RPC_HideAllCosmetics", 0, Array.Empty<object>());
+					GorillaTagger.Instance.myVRRig.SendRPC("RPC_HideAllCosmetics", RpcTarget.All, Array.Empty<object>());
 					return;
 				}
 				int[] array = this.activeMergedSet.ToPackedIDArray();
 				int[] array2 = this.tryOnSet.ToPackedIDArray();
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", 1, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_UpdateCosmeticsWithTryonPacked", RpcTarget.Others, new object[]
 				{
 					array,
 					array2,
@@ -1591,7 +1595,7 @@ namespace GorillaNetworking
 
 		public CosmeticsController.CosmeticItem GetItemFromDict(string itemID)
 		{
-			if (!this.allCosmeticsDict.TryGetValue(itemID, ref this.cosmeticItemVar))
+			if (!this.allCosmeticsDict.TryGetValue(itemID, out this.cosmeticItemVar))
 			{
 				return this.nullItem;
 			}
@@ -1600,7 +1604,7 @@ namespace GorillaNetworking
 
 		public string GetItemNameFromDisplayName(string displayName)
 		{
-			if (!this.allCosmeticsItemIDsfromDisplayNamesDict.TryGetValue(displayName, ref this.returnString))
+			if (!this.allCosmeticsItemIDsfromDisplayNamesDict.TryGetValue(displayName, out this.returnString))
 			{
 				return "null";
 			}
@@ -1692,9 +1696,9 @@ namespace GorillaNetworking
 
 		public void GetLastDailyLogin()
 		{
-			PlayFabClientAPI.GetUserReadOnlyData(new GetUserDataRequest(), delegate(GetUserDataResult result)
+			PlayFabClientAPI.GetUserReadOnlyData(new PlayFab.ClientModels.GetUserDataRequest(), delegate(GetUserDataResult result)
 			{
-				if (result.Data.TryGetValue("DailyLogin", ref this.userDataRecord))
+				if (result.Data.TryGetValue("DailyLogin", out this.userDataRecord))
 				{
 					this.lastDailyLogin = this.userDataRecord.Value;
 					return;
@@ -1706,18 +1710,18 @@ namespace GorillaNetworking
 				Debug.Log("Got error getting read-only user data:");
 				Debug.Log(error.GenerateErrorReport());
 				this.lastDailyLogin = "FAILED";
-				if (error.Error == 1074)
+				if (error.Error == PlayFabErrorCode.NotAuthenticated)
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					return;
 				}
-				if (error.Error == 1002)
+				if (error.Error == PlayFabErrorCode.AccountBanned)
 				{
 					Application.Quit();
 					NetworkSystem.Instance.ReturnToSinglePlayer();
 					Object.DestroyImmediate(PhotonNetworkController.Instance);
 					Object.DestroyImmediate(GTPlayer.Instance);
-					GameObject[] array = Object.FindObjectsByType<GameObject>(0);
+					GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 					for (int i = 0; i < array.Length; i++)
 					{
 						Object.Destroy(array[i]);
@@ -1778,18 +1782,18 @@ namespace GorillaNetworking
 				this.GetLastDailyLogin();
 			}, delegate(PlayFabError error)
 			{
-				if (error.Error == 1074)
+				if (error.Error == PlayFabErrorCode.NotAuthenticated)
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					return;
 				}
-				if (error.Error == 1002)
+				if (error.Error == PlayFabErrorCode.AccountBanned)
 				{
 					Application.Quit();
 					NetworkSystem.Instance.ReturnToSinglePlayer();
 					Object.DestroyImmediate(PhotonNetworkController.Instance);
 					Object.DestroyImmediate(GTPlayer.Instance);
-					GameObject[] array = Object.FindObjectsByType<GameObject>(0);
+					GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 					for (int i = 0; i < array.Length; i++)
 					{
 						Object.Destroy(array[i]);
@@ -1844,7 +1848,7 @@ namespace GorillaNetworking
 										this.tempStringArray = catalogItem.Bundle.BundledItems.ToArray();
 									}
 									uint cost;
-									if (catalogItem.VirtualCurrencyPrices.TryGetValue(this.currencyName, ref cost))
+									if (catalogItem.VirtualCurrencyPrices.TryGetValue(this.currencyName, out cost))
 									{
 										this.hasPrice = true;
 									}
@@ -1914,8 +1918,8 @@ namespace GorillaNetworking
 					{
 						string text2;
 						StoreBundle bundleData2;
-						keyValuePair.Deconstruct(ref text2, ref bundleData2);
-						string text3 = text2;
+						keyValuePair.Deconstruct(out text2, out bundleData2);
+						string key = text2;
 						StoreBundle bundleData = bundleData2;
 						int num = this._allCosmetics.FindIndex((CosmeticsController.CosmeticItem x) => bundleData.playfabBundleID == x.itemName);
 						if (num > 0 && this._allCosmetics[num].bundledItems != null)
@@ -1941,13 +1945,13 @@ namespace GorillaNetworking
 							if (num > 0)
 							{
 								uint bundlePrice;
-								if (this.catalogItems[num].VirtualCurrencyPrices.TryGetValue("RM", ref bundlePrice))
+								if (this.catalogItems[num].VirtualCurrencyPrices.TryGetValue("RM", out bundlePrice))
 								{
-									BundleManager.instance.storeBundlesById[text3].TryUpdatePrice(bundlePrice);
+									BundleManager.instance.storeBundlesById[key].TryUpdatePrice(bundlePrice);
 								}
 								else
 								{
-									BundleManager.instance.storeBundlesById[text3].TryUpdatePrice(null);
+									BundleManager.instance.storeBundlesById[key].TryUpdatePrice(null);
 								}
 							}
 						}
@@ -1973,10 +1977,10 @@ namespace GorillaNetworking
 								{
 									foreach (CosmeticSO cosmeticSO in this.m_earlyAccessSupporterPackCosmeticSO.info.setCosmetics)
 									{
-										CosmeticsController.CosmeticItem cosmeticItem2;
-										if (this.allCosmeticsDict.TryGetValue(cosmeticSO.info.playFabID, ref cosmeticItem2))
+										CosmeticsController.CosmeticItem item2;
+										if (this.allCosmeticsDict.TryGetValue(cosmeticSO.info.playFabID, out item2))
 										{
-											this.unlockedCosmetics.Add(cosmeticItem2);
+											this.unlockedCosmetics.Add(item2);
 										}
 									}
 								}
@@ -1993,69 +1997,69 @@ namespace GorillaNetworking
 							}
 						}
 					}
-					foreach (CosmeticsController.CosmeticItem cosmeticItem3 in this.unlockedCosmetics)
+					foreach (CosmeticsController.CosmeticItem cosmeticItem2 in this.unlockedCosmetics)
 					{
-						if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Hat && !this.unlockedHats.Contains(cosmeticItem3))
+						if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Hat && !this.unlockedHats.Contains(cosmeticItem2))
 						{
-							this.unlockedHats.Add(cosmeticItem3);
+							this.unlockedHats.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Face && !this.unlockedFaces.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Face && !this.unlockedFaces.Contains(cosmeticItem2))
 						{
-							this.unlockedFaces.Add(cosmeticItem3);
+							this.unlockedFaces.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Badge && !this.unlockedBadges.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Badge && !this.unlockedBadges.Contains(cosmeticItem2))
 						{
-							this.unlockedBadges.Add(cosmeticItem3);
+							this.unlockedBadges.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Paw)
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Paw)
 						{
-							if (!cosmeticItem3.isThrowable && !this.unlockedPaws.Contains(cosmeticItem3))
+							if (!cosmeticItem2.isThrowable && !this.unlockedPaws.Contains(cosmeticItem2))
 							{
-								this.unlockedPaws.Add(cosmeticItem3);
+								this.unlockedPaws.Add(cosmeticItem2);
 							}
-							else if (cosmeticItem3.isThrowable && !this.unlockedThrowables.Contains(cosmeticItem3))
+							else if (cosmeticItem2.isThrowable && !this.unlockedThrowables.Contains(cosmeticItem2))
 							{
-								this.unlockedThrowables.Add(cosmeticItem3);
+								this.unlockedThrowables.Add(cosmeticItem2);
 							}
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Fur && !this.unlockedFurs.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Fur && !this.unlockedFurs.Contains(cosmeticItem2))
 						{
-							this.unlockedFurs.Add(cosmeticItem3);
+							this.unlockedFurs.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Shirt && !this.unlockedShirts.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Shirt && !this.unlockedShirts.Contains(cosmeticItem2))
 						{
-							this.unlockedShirts.Add(cosmeticItem3);
+							this.unlockedShirts.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Arms && !this.unlockedArms.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Arms && !this.unlockedArms.Contains(cosmeticItem2))
 						{
-							this.unlockedArms.Add(cosmeticItem3);
+							this.unlockedArms.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Back && !this.unlockedBacks.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Back && !this.unlockedBacks.Contains(cosmeticItem2))
 						{
-							this.unlockedBacks.Add(cosmeticItem3);
+							this.unlockedBacks.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Chest && !this.unlockedChests.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Chest && !this.unlockedChests.Contains(cosmeticItem2))
 						{
-							this.unlockedChests.Add(cosmeticItem3);
+							this.unlockedChests.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.Pants && !this.unlockedPants.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.Pants && !this.unlockedPants.Contains(cosmeticItem2))
 						{
-							this.unlockedPants.Add(cosmeticItem3);
+							this.unlockedPants.Add(cosmeticItem2);
 						}
-						else if (cosmeticItem3.itemCategory == CosmeticsController.CosmeticCategory.TagEffect && !this.unlockedTagFX.Contains(cosmeticItem3))
+						else if (cosmeticItem2.itemCategory == CosmeticsController.CosmeticCategory.TagEffect && !this.unlockedTagFX.Contains(cosmeticItem2))
 						{
-							this.unlockedTagFX.Add(cosmeticItem3);
+							this.unlockedTagFX.Add(cosmeticItem2);
 						}
-						this.concatStringCosmeticsAllowed += cosmeticItem3.itemName;
+						this.concatStringCosmeticsAllowed += cosmeticItem2.itemName;
 					}
 					BuilderSetManager.instance.OnGotInventoryItems(result, result2);
 					this.currencyBalance = result.VirtualCurrency[this.currencyName];
 					int num2;
-					this.playedInBeta = (result.VirtualCurrency.TryGetValue("TC", ref num2) && num2 > 0);
+					this.playedInBeta = (result.VirtualCurrency.TryGetValue("TC", out num2) && num2 > 0);
 					Action onGetCurrency = this.OnGetCurrency;
 					if (onGetCurrency != null)
 					{
-						onGetCurrency.Invoke();
+						onGetCurrency();
 					}
 					BundleManager.instance.CheckIfBundlesOwned();
 					StoreUpdater.instance.Initialize();
@@ -2076,13 +2080,13 @@ namespace GorillaNetworking
 					Action onCosmeticsUpdated = this.OnCosmeticsUpdated;
 					if (onCosmeticsUpdated != null)
 					{
-						onCosmeticsUpdated.Invoke();
+						onCosmeticsUpdated();
 					}
 					this.v2_isCosmeticPlayFabCatalogDataLoaded = true;
 					Action v2_OnGetCosmeticsPlayFabCatalogData_PostSuccess = this.V2_OnGetCosmeticsPlayFabCatalogData_PostSuccess;
 					if (v2_OnGetCosmeticsPlayFabCatalogData_PostSuccess != null)
 					{
-						v2_OnGetCosmeticsPlayFabCatalogData_PostSuccess.Invoke();
+						v2_OnGetCosmeticsPlayFabCatalogData_PostSuccess();
 					}
 					if (!CosmeticsV2Spawner_Dirty.startedAllPartsInstantiated && !CosmeticsV2Spawner_Dirty.allPartsInstantiated)
 					{
@@ -2090,17 +2094,17 @@ namespace GorillaNetworking
 					}
 				}, delegate(PlayFabError error)
 				{
-					if (error.Error == 1074)
+					if (error.Error == PlayFabErrorCode.NotAuthenticated)
 					{
 						PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					}
-					else if (error.Error == 1002)
+					else if (error.Error == PlayFabErrorCode.AccountBanned)
 					{
 						Application.Quit();
 						NetworkSystem.Instance.ReturnToSinglePlayer();
 						Object.DestroyImmediate(PhotonNetworkController.Instance);
 						Object.DestroyImmediate(GTPlayer.Instance);
-						GameObject[] array = Object.FindObjectsByType<GameObject>(0);
+						GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 						for (int i = 0; i < array.Length; i++)
 						{
 							Object.Destroy(array[i]);
@@ -2114,17 +2118,17 @@ namespace GorillaNetworking
 				}, null, null);
 			}, delegate(PlayFabError error)
 			{
-				if (error.Error == 1074)
+				if (error.Error == PlayFabErrorCode.NotAuthenticated)
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 				}
-				else if (error.Error == 1002)
+				else if (error.Error == PlayFabErrorCode.AccountBanned)
 				{
 					Application.Quit();
 					NetworkSystem.Instance.ReturnToSinglePlayer();
 					Object.DestroyImmediate(PhotonNetworkController.Instance);
 					Object.DestroyImmediate(GTPlayer.Instance);
-					GameObject[] array = Object.FindObjectsByType<GameObject>(0);
+					GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 					for (int i = 0; i < array.Length; i++)
 					{
 						Object.Destroy(array[i]);
@@ -2151,17 +2155,19 @@ namespace GorillaNetworking
 
 		private StartPurchaseRequest GetStartPurchaseRequest()
 		{
-			StartPurchaseRequest startPurchaseRequest = new StartPurchaseRequest();
-			startPurchaseRequest.CatalogVersion = this.catalog;
-			List<ItemPurchaseRequest> list = new List<ItemPurchaseRequest>();
-			list.Add(new ItemPurchaseRequest
+			return new StartPurchaseRequest
 			{
-				ItemId = this.itemToPurchase,
-				Quantity = 1U,
-				Annotation = "Purchased via in-game store"
-			});
-			startPurchaseRequest.Items = list;
-			return startPurchaseRequest;
+				CatalogVersion = this.catalog,
+				Items = new List<ItemPurchaseRequest>
+				{
+					new ItemPurchaseRequest
+					{
+						ItemId = this.itemToPurchase,
+						Quantity = 1U,
+						Annotation = "Purchased via in-game store"
+					}
+				}
+			};
 		}
 
 		private void ProcessStartPurchaseResponse(StartPurchaseResult result)
@@ -2209,37 +2215,51 @@ namespace GorillaNetworking
 
 		private ConfirmPurchaseRequest GetConfirmBundlePurchaseRequest()
 		{
-			Dictionary<string, string> dictionary = new Dictionary<string, string>();
-			dictionary.Add("PlayerName", GorillaComputer.instance.savedName);
-			dictionary.Add("Location", GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone.ToString());
-			Dictionary<string, string> dictionary2 = dictionary;
+			Dictionary<string, string> dictionary = new Dictionary<string, string>
+			{
+				{
+					"PlayerName",
+					GorillaComputer.instance.savedName
+				},
+				{
+					"Location",
+					GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone.ToString()
+				}
+			};
 			if (this.validatedCreatorCode != null)
 			{
-				dictionary2.Add("NexusCreatorId", this.validatedCreatorCode.memberCode);
-				dictionary2.Add("NexusGroupId", this.validatedCreatorCode.groupId);
+				dictionary.Add("NexusCreatorId", this.validatedCreatorCode.memberCode);
+				dictionary.Add("NexusGroupId", this.validatedCreatorCode.groupId);
 			}
 			return new ConfirmPurchaseRequest
 			{
 				OrderId = this.currentPurchaseID,
-				CustomTags = dictionary2
+				CustomTags = dictionary
 			};
 		}
 
 		private ConfirmPurchaseRequest GetConfirmATMPurchaseRequest()
 		{
-			Dictionary<string, string> dictionary = new Dictionary<string, string>();
-			dictionary.Add("PlayerName", GorillaComputer.instance.savedName);
-			dictionary.Add("Location", GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone.ToString());
-			Dictionary<string, string> dictionary2 = dictionary;
+			Dictionary<string, string> dictionary = new Dictionary<string, string>
+			{
+				{
+					"PlayerName",
+					GorillaComputer.instance.savedName
+				},
+				{
+					"Location",
+					GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone.ToString()
+				}
+			};
 			if (this.validatedCreatorCode != null)
 			{
-				dictionary2.Add("NexusCreatorId", this.validatedCreatorCode.memberCode);
-				dictionary2.Add("NexusGroupId", this.validatedCreatorCode.groupId);
+				dictionary.Add("NexusCreatorId", this.validatedCreatorCode.memberCode);
+				dictionary.Add("NexusGroupId", this.validatedCreatorCode.groupId);
 			}
 			return new ConfirmPurchaseRequest
 			{
 				OrderId = this.currentPurchaseID,
-				CustomTags = dictionary2
+				CustomTags = dictionary
 			};
 		}
 
@@ -2249,7 +2269,7 @@ namespace GorillaNetworking
 			{
 				if (this.validatedCreatorCode != null && CosmeticsController.PushTerminalMessage != null)
 				{
-					CosmeticsController.PushTerminalMessage.Invoke(this.validatedCreatorCode.terminalId, "THIS PURCHASE SUPPORTED\n" + CreatorCodes.supportedMember.name + "!");
+					CosmeticsController.PushTerminalMessage(this.validatedCreatorCode.terminalId, "THIS PURCHASE SUPPORTED\n" + CreatorCodes.supportedMember.name + "!");
 				}
 				this.buyingBundle = false;
 				if (PhotonNetwork.InRoom)
@@ -2279,16 +2299,16 @@ namespace GorillaNetworking
 		private void ProcessSteamPurchaseError(PlayFabError error)
 		{
 			PlayFabErrorCode error2 = error.Error;
-			if (error2 <= 1064)
+			if (error2 <= PlayFabErrorCode.PurchaseInitializationFailure)
 			{
-				if (error2 <= 1015)
+				if (error2 <= PlayFabErrorCode.FailedByPaymentProvider)
 				{
-					if (error2 == 1002)
+					if (error2 == PlayFabErrorCode.AccountBanned)
 					{
 						PhotonNetwork.Disconnect();
 						Object.DestroyImmediate(PhotonNetworkController.Instance);
 						Object.DestroyImmediate(GTPlayer.Instance);
-						GameObject[] array = Object.FindObjectsByType<GameObject>(0);
+						GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 						for (int i = 0; i < array.Length; i++)
 						{
 							Object.Destroy(array[i]);
@@ -2296,7 +2316,7 @@ namespace GorillaNetworking
 						Application.Quit();
 						goto IL_1A2;
 					}
-					if (error2 != 1015)
+					if (error2 != PlayFabErrorCode.FailedByPaymentProvider)
 					{
 						goto IL_192;
 					}
@@ -2305,52 +2325,52 @@ namespace GorillaNetworking
 				}
 				else
 				{
-					if (error2 == 1059)
+					if (error2 == PlayFabErrorCode.InsufficientFunds)
 					{
 						Debug.Log(string.Format("Attempting to do purchase through steam, steam has returned insufficient funds: {0}", error));
 						goto IL_1A2;
 					}
-					if (error2 == 1063)
+					if (error2 == PlayFabErrorCode.InvalidPaymentProvider)
 					{
 						Debug.Log(string.Format("Attempted to connect to steam as payment provider, but received error: {0}", error));
 						goto IL_1A2;
 					}
-					if (error2 != 1064)
+					if (error2 != PlayFabErrorCode.PurchaseInitializationFailure)
 					{
 						goto IL_192;
 					}
 				}
 			}
-			else if (error2 <= 1081)
+			else if (error2 <= PlayFabErrorCode.InvalidPurchaseTransactionStatus)
 			{
-				if (error2 == 1074)
+				if (error2 == PlayFabErrorCode.NotAuthenticated)
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					goto IL_1A2;
 				}
-				if (error2 == 1080)
+				if (error2 == PlayFabErrorCode.PurchaseDoesNotExist)
 				{
 					Debug.Log(string.Format("Attempting to confirm purchase for order {0} but received error: {1}", this.currentPurchaseID, error));
 					goto IL_1A2;
 				}
-				if (error2 != 1081)
+				if (error2 != PlayFabErrorCode.InvalidPurchaseTransactionStatus)
 				{
 					goto IL_192;
 				}
 			}
 			else
 			{
-				if (error2 == 1110)
+				if (error2 == PlayFabErrorCode.InternalServerError)
 				{
 					Debug.Log(string.Format("PlayFab threw an internal server error: {0}", error));
 					goto IL_1A2;
 				}
-				if (error2 == 1221)
+				if (error2 == PlayFabErrorCode.StoreNotFound)
 				{
 					Debug.Log(string.Format("Attempted to load {0} from {1} but received an error: {2}", this.itemToPurchase, this.catalog, error));
 					goto IL_1A2;
 				}
-				if (error2 != 1489)
+				if (error2 != PlayFabErrorCode.DuplicatePurchaseTransactionId)
 				{
 					goto IL_192;
 				}
@@ -2403,21 +2423,21 @@ namespace GorillaNetworking
 				{
 					return;
 				}
-				onGetCurrency.Invoke();
+				onGetCurrency();
 			}, delegate(PlayFabError error)
 			{
-				if (error.Error == 1074)
+				if (error.Error == PlayFabErrorCode.NotAuthenticated)
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					return;
 				}
-				if (error.Error == 1002)
+				if (error.Error == PlayFabErrorCode.AccountBanned)
 				{
 					Application.Quit();
 					NetworkSystem.Instance.ReturnToSinglePlayer();
 					Object.DestroyImmediate(PhotonNetworkController.Instance);
 					Object.DestroyImmediate(GTPlayer.Instance);
-					GameObject[] array = Object.FindObjectsByType<GameObject>(0);
+					GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 					for (int i = 0; i < array.Length; i++)
 					{
 						Object.Destroy(array[i]);
@@ -2465,16 +2485,16 @@ namespace GorillaNetworking
 
 		private void UpdateMyCosmeticsForRoom(bool shouldSetSharedGroupData)
 		{
-			byte b = 9;
+			byte eventCode = 9;
 			if (shouldSetSharedGroupData)
 			{
-				b = 10;
+				eventCode = 10;
 			}
 			RaiseEventOptions raiseEventOptions = new RaiseEventOptions();
 			WebFlags flags = new WebFlags(3);
 			raiseEventOptions.Flags = flags;
-			object[] array = new object[0];
-			PhotonNetwork.RaiseEvent(b, array, raiseEventOptions, SendOptions.SendReliable);
+			object[] eventContent = new object[0];
+			PhotonNetwork.RaiseEvent(eventCode, eventContent, raiseEventOptions, SendOptions.SendReliable);
 		}
 
 		private void AlreadyOwnAllBundleButtons()
@@ -2517,14 +2537,14 @@ namespace GorillaNetworking
 				base.StartCoroutine(this.WaitForNextCosmeticsAttempt());
 				return;
 			}
-			PlayFabClientAPI.GetSharedGroupData(new GetSharedGroupDataRequest
+			PlayFabClientAPI.GetSharedGroupData(new PlayFab.ClientModels.GetSharedGroupDataRequest
 			{
 				Keys = this.inventoryStringList,
 				SharedGroupId = PhotonNetwork.LocalPlayer.UserId + "Inventory"
 			}, delegate(GetSharedGroupDataResult result)
 			{
 				bool flag = true;
-				foreach (KeyValuePair<string, SharedGroupDataRecord> keyValuePair in result.Data)
+				foreach (KeyValuePair<string, PlayFab.ClientModels.SharedGroupDataRecord> keyValuePair in result.Data)
 				{
 					if (keyValuePair.Key != "Inventory")
 					{
@@ -2554,18 +2574,18 @@ namespace GorillaNetworking
 
 		public void ReauthOrBan(PlayFabError error)
 		{
-			if (error.Error == 1074)
+			if (error.Error == PlayFabErrorCode.NotAuthenticated)
 			{
 				PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 				return;
 			}
-			if (error.Error == 1002)
+			if (error.Error == PlayFabErrorCode.AccountBanned)
 			{
 				Application.Quit();
 				PhotonNetwork.Disconnect();
 				Object.DestroyImmediate(PhotonNetworkController.Instance);
 				Object.DestroyImmediate(GTPlayer.Instance);
-				GameObject[] array = Object.FindObjectsByType<GameObject>(0);
+				GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 				for (int i = 0; i < array.Length; i++)
 				{
 					Object.Destroy(array[i]);
@@ -2601,7 +2621,7 @@ namespace GorillaNetworking
 				{
 					return;
 				}
-				onCosmeticsUpdated.Invoke();
+				onCosmeticsUpdated();
 			}
 		}
 
@@ -2666,7 +2686,7 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			onCosmeticsUpdated.Invoke();
+			onCosmeticsUpdated();
 		}
 
 		public void RemoveTempUnlockFromWardrobe(string cosmeticID)
@@ -2730,7 +2750,7 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			onCosmeticsUpdated.Invoke();
+			onCosmeticsUpdated();
 		}
 
 		public bool BuildValidationCheck()
@@ -2843,7 +2863,7 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			onCosmeticsUpdated.Invoke();
+			onCosmeticsUpdated();
 		}
 
 		private void ApplyNewItem(CosmeticsController.CosmeticSet outfit, int i)
@@ -2875,7 +2895,7 @@ namespace GorillaNetworking
 				{
 					return;
 				}
-				onOutfitsUpdated.Invoke();
+				onOutfitsUpdated();
 			}
 		}
 
@@ -2885,8 +2905,8 @@ namespace GorillaNetworking
 			{
 				try
 				{
-					byte[] array = Convert.FromBase64String(response.value);
-					this.outfitStringMothership = Encoding.UTF8.GetString(array);
+					byte[] bytes = Convert.FromBase64String(response.value);
+					this.outfitStringMothership = Encoding.UTF8.GetString(bytes);
 					this.StringToOutfits(this.outfitStringMothership);
 					goto IL_6E;
 				}
@@ -2942,7 +2962,7 @@ namespace GorillaNetworking
 			{
 				return;
 			}
-			onOutfitsUpdated.Invoke();
+			onOutfitsUpdated();
 		}
 
 		private void UpdateMonkeColor(Vector3 col, bool saveToPrefs)
@@ -2954,11 +2974,11 @@ namespace GorillaNetworking
 			GorillaComputer.instance.UpdateColor(num, num2, num3);
 			if (CosmeticsController.OnPlayerColorSet != null)
 			{
-				CosmeticsController.OnPlayerColorSet.Invoke(num, num2, num3);
+				CosmeticsController.OnPlayerColorSet(num, num2, num3);
 			}
 			if (NetworkSystem.Instance.InRoom)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 				{
 					num,
 					num2,
@@ -3001,7 +3021,7 @@ namespace GorillaNetworking
 			Action onOutfitsUpdated = this.OnOutfitsUpdated;
 			if (onOutfitsUpdated != null)
 			{
-				onOutfitsUpdated.Invoke();
+				onOutfitsUpdated();
 			}
 			response.Dispose();
 		}
@@ -3027,8 +3047,8 @@ namespace GorillaNetworking
 				for (int j = 0; j < cosmeticSet.items.Length; j++)
 				{
 					CosmeticsController.CosmeticItem cosmeticItem = cosmeticSet.items[j];
-					string text = (cosmeticItem.isNullItem || string.IsNullOrEmpty(cosmeticItem.displayName)) ? "null" : cosmeticItem.displayName;
-					CosmeticsController.outfitDataTemp.itemIDs.Add(text);
+					string item = (cosmeticItem.isNullItem || string.IsNullOrEmpty(cosmeticItem.displayName)) ? "null" : cosmeticItem.displayName;
+					CosmeticsController.outfitDataTemp.itemIDs.Add(item);
 				}
 				if (VRRig.LocalRig != null)
 				{
@@ -3062,7 +3082,7 @@ namespace GorillaNetworking
 			}
 			try
 			{
-				string[] array = response.Split(this.outfitSystemConfig.outfitSeparator, 0);
+				string[] array = response.Split(this.outfitSystemConfig.outfitSeparator, StringSplitOptions.None);
 				for (int i = 0; i < this.outfitSystemConfig.maxOutfits; i++)
 				{
 					this.savedOutfits[i] = new CosmeticsController.CosmeticSet();
@@ -3484,7 +3504,7 @@ namespace GorillaNetworking
 				for (int i = 0; i < num; i++)
 				{
 					CosmeticsController.CosmeticItem[] array = tempOverrideSet.items;
-					bool flag = predicate.Invoke(tempOverrideSet.items[i].itemName);
+					bool flag = predicate(tempOverrideSet.items[i].itemName);
 					this.items[i] = (flag ? tempOverrideSet.items[i] : playerPref.items[i]);
 				}
 			}
@@ -3759,12 +3779,12 @@ namespace GorillaNetworking
 				}
 				catch (Exception)
 				{
-					char c = ',';
+					char separator = ',';
 					if (controller.outfitSystemConfig != null)
 					{
-						c = controller.outfitSystemConfig.itemSeparator;
+						separator = controller.outfitSystemConfig.itemSeparator;
 					}
-					string[] array = setString.Split(c, num, 0);
+					string[] array = setString.Split(separator, num, StringSplitOptions.None);
 					if (array == null || array.Length > num)
 					{
 						this.ClearSet(controller.nullItem);
@@ -3849,7 +3869,7 @@ namespace GorillaNetworking
 					if ((num & 1 << j) != 0)
 					{
 						string itemName = this.items[j].itemName;
-						array[num4] = (int)(itemName.get_Chars(0) - 'A' + '\u001a' * (itemName.get_Chars(1) - 'A' + '\u001a' * (itemName.get_Chars(2) - 'A' + '\u001a' * (itemName.get_Chars(3) - 'A' + '\u001a' * (itemName.get_Chars(4) - 'A')))));
+						array[num4] = (int)(itemName[0] - 'A' + '\u001a' * (itemName[1] - 'A' + '\u001a' * (itemName[2] - 'A' + '\u001a' * (itemName[3] - 'A' + '\u001a' * (itemName[4] - 'A')))));
 						num4++;
 					}
 				}

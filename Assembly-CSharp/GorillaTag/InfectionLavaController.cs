@@ -380,15 +380,15 @@ namespace GorillaTag
 			}
 			case InfectionLavaController.RisingLavaState.Rising:
 			{
-				float num2 = (float)(currentTime - syncData.stateStartTime) / this.riseTime;
-				this.lavaProgressLinear = Mathf.Clamp01(num2);
+				float value = (float)(currentTime - syncData.stateStartTime) / this.riseTime;
+				this.lavaProgressLinear = Mathf.Clamp01(value);
 				this.lavaProgressSmooth = this.lavaProgressAnimationCurve.Evaluate(this.lavaProgressLinear);
-				float num3 = (float)(currentTime - syncData.stateStartTime);
+				float num2 = (float)(currentTime - syncData.stateStartTime);
 				foreach (VolcanoEffects volcanoEffects3 in this.volcanoEffects)
 				{
 					if (volcanoEffects3 != null)
 					{
-						volcanoEffects3.UpdateRisingState(num3, this.riseTime - num3, this.lavaProgressLinear);
+						volcanoEffects3.UpdateRisingState(num2, this.riseTime - num2, this.lavaProgressLinear);
 					}
 				}
 				return;
@@ -397,28 +397,28 @@ namespace GorillaTag
 			{
 				this.lavaProgressLinear = 1f;
 				this.lavaProgressSmooth = 1f;
-				float num4 = (float)(currentTime - syncData.stateStartTime);
-				float progress2 = Mathf.Clamp01(this.fullTime / num4);
+				float num3 = (float)(currentTime - syncData.stateStartTime);
+				float progress2 = Mathf.Clamp01(this.fullTime / num3);
 				foreach (VolcanoEffects volcanoEffects4 in this.volcanoEffects)
 				{
 					if (volcanoEffects4 != null)
 					{
-						volcanoEffects4.UpdateFullState(num4, this.fullTime - num4, progress2);
+						volcanoEffects4.UpdateFullState(num3, this.fullTime - num3, progress2);
 					}
 				}
 				return;
 			}
 			case InfectionLavaController.RisingLavaState.Draining:
 			{
-				float num5 = (float)(currentTime - syncData.stateStartTime);
-				float num6 = Mathf.Clamp01(num5 / this.drainTime);
-				this.lavaProgressLinear = 1f - num6;
+				float num4 = (float)(currentTime - syncData.stateStartTime);
+				float num5 = Mathf.Clamp01(num4 / this.drainTime);
+				this.lavaProgressLinear = 1f - num5;
 				this.lavaProgressSmooth = this.lavaProgressAnimationCurve.Evaluate(this.lavaProgressLinear);
 				foreach (VolcanoEffects volcanoEffects5 in this.volcanoEffects)
 				{
 					if (volcanoEffects5 != null)
 					{
-						volcanoEffects5.UpdateDrainingState(num5, this.riseTime - num5, num6);
+						volcanoEffects5.UpdateDrainingState(num4, this.riseTime - num4, num5);
 					}
 				}
 				return;

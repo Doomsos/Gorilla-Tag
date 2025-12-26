@@ -178,18 +178,18 @@ public class WorldShareableItem : NetworkComponent, IRequestableOwnershipGuardCa
 		}
 		if (this.guard.isTrulyMine)
 		{
-			Vector3 vector;
-			Quaternion quaternion;
-			this.target.targetObject.GetPositionAndRotation(ref vector, ref quaternion);
-			base.transform.SetPositionAndRotation(vector, quaternion);
+			Vector3 position;
+			Quaternion rotation;
+			this.target.targetObject.GetPositionAndRotation(out position, out rotation);
+			base.transform.SetPositionAndRotation(position, rotation);
 			return;
 		}
 		if (!base.IsMine && this.EnableRemoteSync)
 		{
-			Vector3 vector2;
-			Quaternion quaternion2;
-			base.transform.GetPositionAndRotation(ref vector2, ref quaternion2);
-			this.target.targetObject.SetPositionAndRotation(vector2, quaternion2);
+			Vector3 position2;
+			Quaternion rotation2;
+			base.transform.GetPositionAndRotation(out position2, out rotation2);
+			this.target.targetObject.SetPositionAndRotation(position2, rotation2);
 		}
 	}
 
@@ -223,7 +223,7 @@ public class WorldShareableItem : NetworkComponent, IRequestableOwnershipGuardCa
 			return;
 		}
 		WorldShareableItem.CachedData cachedData;
-		if (this.cachedDatas.TryGetValue(toPlayer, ref cachedData))
+		if (this.cachedDatas.TryGetValue(toPlayer, out cachedData))
 		{
 			this.transferableObjectState = cachedData.cachedTransferableObjectState;
 			this.transferableObjectItemState = cachedData.cachedTransferableObjectItemState;
@@ -275,7 +275,7 @@ public class WorldShareableItem : NetworkComponent, IRequestableOwnershipGuardCa
 		{
 			return;
 		}
-		this.rpcCallBack.Invoke();
+		this.rpcCallBack();
 	}
 
 	public bool OnMasterClientAssistedTakeoverRequest(NetPlayer fromPlayer, NetPlayer toPlayer)

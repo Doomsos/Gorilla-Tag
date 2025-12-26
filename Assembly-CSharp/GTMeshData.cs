@@ -40,7 +40,7 @@ public class GTMeshData
 			indices[i] -= firstVertex;
 		}
 		Mesh mesh = new Mesh();
-		mesh.indexFormat = ((vertexCount > 65535) ? 1 : 0);
+		mesh.indexFormat = ((vertexCount > 65535) ? IndexFormat.UInt32 : IndexFormat.UInt16);
 		mesh.SetVertices(this.vertices, firstVertex, vertexCount);
 		mesh.SetIndices(indices, topology, 0);
 		mesh.SetNormals(this.normals, firstVertex, vertexCount);

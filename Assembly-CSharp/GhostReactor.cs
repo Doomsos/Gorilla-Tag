@@ -5,6 +5,7 @@ using Fusion;
 using GorillaTag.Rendering;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class GhostReactor : MonoBehaviourTick, IBuildValidation
 {
@@ -101,12 +102,12 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		{
 			GameLightingManager.instance.ZoneEnableCustomDynamicLighting(true);
 		}
-		VRRigCache.OnRigActivated += new Action<RigContainer>(this.OnVRRigsChanged);
-		VRRigCache.OnRigDeactivated += new Action<RigContainer>(this.OnVRRigsChanged);
-		VRRigCache.OnRigNameChanged += new Action<RigContainer>(this.OnVRRigsChanged);
+		VRRigCache.OnRigActivated += this.OnVRRigsChanged;
+		VRRigCache.OnRigDeactivated += this.OnVRRigsChanged;
+		VRRigCache.OnRigNameChanged += this.OnVRRigsChanged;
 		if (NetworkSystem.Instance != null)
 		{
-			NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnLocalPlayerConnectedToRoom);
+			NetworkSystem.Instance.OnMultiplayerStarted += this.OnLocalPlayerConnectedToRoom;
 		}
 		for (int i = 0; i < this.toolPurchasingStations.Count; i++)
 		{
@@ -139,7 +140,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		if (this.toolProgression != null)
 		{
 			this.toolProgression.Init(this);
-			this.toolProgression.OnProgressionUpdated += new Action(this.OnProgressionUpdated);
+			this.toolProgression.OnProgressionUpdated += this.OnProgressionUpdated;
 		}
 		if (this.shiftManager != null)
 		{
@@ -182,7 +183,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		base.GetComponentsInChildren<GRReviveStation>(this.reviveStations);
 		if (searchScene)
 		{
-			this.reviveStations.AddRange(Object.FindObjectsByType<GRReviveStation>(1, 0));
+			this.reviveStations.AddRange(Object.FindObjectsByType<GRReviveStation>(FindObjectsInactive.Include, FindObjectsSortMode.None));
 		}
 		for (int i = 0; i < this.reviveStations.Count; i++)
 		{
@@ -198,16 +199,16 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 			return;
 		}
 		GameLightingManager.instance.ZoneEnableCustomDynamicLighting(false);
-		VRRigCache.OnRigActivated -= new Action<RigContainer>(this.OnVRRigsChanged);
-		VRRigCache.OnRigDeactivated -= new Action<RigContainer>(this.OnVRRigsChanged);
-		VRRigCache.OnRigNameChanged -= new Action<RigContainer>(this.OnVRRigsChanged);
+		VRRigCache.OnRigActivated -= this.OnVRRigsChanged;
+		VRRigCache.OnRigDeactivated -= this.OnVRRigsChanged;
+		VRRigCache.OnRigNameChanged -= this.OnVRRigsChanged;
 		if (this.toolProgression != null)
 		{
-			this.toolProgression.OnProgressionUpdated -= new Action(this.OnProgressionUpdated);
+			this.toolProgression.OnProgressionUpdated -= this.OnProgressionUpdated;
 		}
 		if (NetworkSystem.Instance != null)
 		{
-			NetworkSystem.Instance.OnMultiplayerStarted -= new Action(this.OnLocalPlayerConnectedToRoom);
+			NetworkSystem.Instance.OnMultiplayerStarted -= this.OnLocalPlayerConnectedToRoom;
 		}
 	}
 
@@ -458,7 +459,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.zone);
 		if (managerForZone != null && managerForZone.ghostReactorManager != null)
 		{
-			managerForZone.ghostReactorManager.photonView.RPC("BroadcastScoreboardPage", 1, new object[]
+			managerForZone.ghostReactorManager.photonView.RPC("BroadcastScoreboardPage", RpcTarget.Others, new object[]
 			{
 				scoreboardPage
 			});
@@ -472,15 +473,19 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		if (this.depthLevel >= 0 && this.zone == GTZone.ghostReactorDrill && PhotonNetwork.InRoom && !NetworkSystem.Instance.SessionIsPrivate && this.grManager.IsAuthority())
 		{
 			int joinDepthSectionFromLevel = GhostReactor.GetJoinDepthSectionFromLevel(this.depthLevel);
-			Hashtable hashtable = new Hashtable();
-			hashtable.Add("ghostReactorDepth", joinDepthSectionFromLevel.ToString());
-			Hashtable hashtable2 = hashtable;
+			Hashtable hashtable = new Hashtable
+			{
+				{
+					"ghostReactorDepth",
+					joinDepthSectionFromLevel.ToString()
+				}
+			};
 			Debug.LogFormat("GR Room Param Set {0} {1}", new object[]
 			{
 				"ghostReactorDepth",
-				hashtable2["ghostReactorDepth"]
+				hashtable["ghostReactorDepth"]
 			});
-			PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable2, null, null);
+			PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable, null, null);
 		}
 		this.depthConfigIndex = newDepthConfigIndex;
 	}
@@ -621,13 +626,12 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 			{
 				Matrix4x4 matrix4x = this.handPrintLocations[i];
 				Matrix4x4 matrix4x2 = this.handPrintLocations[i + this.handPrintCombineTestDelta];
-				Vector3 vector;
-				vector..ctor(matrix4x.m03 - matrix4x2.m03, matrix4x.m13 - matrix4x2.m13, matrix4x.m23 - matrix4x2.m23);
+				Vector3 vector = new Vector3(matrix4x.m03 - matrix4x2.m03, matrix4x.m13 - matrix4x2.m13, matrix4x.m23 - matrix4x2.m23);
 				if (vector.sqrMagnitude < this.handPrintScale * this.handPrintScale)
 				{
 					List<float> list = this.handPrintData;
-					int num2 = i;
-					list[num2] -= deltaTime * (float)this.handPrintData.Count * 50f;
+					int index = i;
+					list[index] -= deltaTime * (float)this.handPrintData.Count * 50f;
 					goto IL_13E;
 				}
 				goto IL_13E;
@@ -661,21 +665,21 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 			this.handPrintMaterial.SetFloat("_FadeDuration", this.handPrintFadeTime);
 			this.handPrintMaterial.enableInstancing = true;
 		}
-		int num3 = Mathf.Min(Math.Min(1000, 1023), this.handPrintLocations.Count);
-		if (num3 > 0)
+		int num2 = Mathf.Min(Math.Min(1000, 1023), this.handPrintLocations.Count);
+		if (num2 > 0)
 		{
 			this.handPrintMPB.Clear();
-			this.handPrintMPB.SetFloatArray("_HandPrintData", this.handPrintData.GetRange(0, num3));
+			this.handPrintMPB.SetFloatArray("_HandPrintData", this.handPrintData.GetRange(0, num2));
 			this.handPrintMPB.SetFloat("_FadeDuration", this.handPrintFadeTime);
-			RenderParams renderParams;
-			renderParams..ctor(this.handPrintMaterial);
-			renderParams.shadowCastingMode = 0;
-			renderParams.receiveShadows = false;
-			renderParams.layer = base.gameObject.layer;
-			renderParams.matProps = this.handPrintMPB;
-			renderParams.worldBounds = new Bounds(Vector3.zero, Vector3.one * 2000f);
-			RenderParams renderParams2 = renderParams;
-			Graphics.RenderMeshInstanced<Matrix4x4>(ref renderParams2, this.handPrintMesh, 0, this.handPrintLocations.GetRange(0, num3), -1, 0);
+			RenderParams renderParams = new RenderParams(this.handPrintMaterial)
+			{
+				shadowCastingMode = ShadowCastingMode.Off,
+				receiveShadows = false,
+				layer = base.gameObject.layer,
+				matProps = this.handPrintMPB,
+				worldBounds = new Bounds(Vector3.zero, Vector3.one * 2000f)
+			};
+			Graphics.RenderMeshInstanced<Matrix4x4>(renderParams, this.handPrintMesh, 0, this.handPrintLocations.GetRange(0, num2), -1, 0);
 		}
 		GRPlayer grplayer = GRPlayer.Get(VRRig.LocalRig);
 		if (grplayer != null)
@@ -706,7 +710,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 				GameEntityManager managerForZone = GameEntityManager.GetManagerForZone(this.zone);
 				if (managerForZone != null && managerForZone.ghostReactorManager != null)
 				{
-					managerForZone.ghostReactorManager.photonView.RPC("BroadcastHandprint", 0, new object[]
+					managerForZone.ghostReactorManager.photonView.RPC("BroadcastHandprint", RpcTarget.All, new object[]
 					{
 						pos,
 						orient
@@ -727,9 +731,9 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 
 	public void AddHandprint(Vector3 pos, Quaternion orient)
 	{
-		Matrix4x4 matrix4x = default(Matrix4x4);
-		matrix4x.SetTRS(pos, orient * Quaternion.Euler(90f, 0f, 180f), Vector3.one * this.handPrintScale);
-		this.handPrintLocations.Add(matrix4x);
+		Matrix4x4 item = default(Matrix4x4);
+		item.SetTRS(pos, orient * Quaternion.Euler(90f, 0f, 180f), Vector3.one * this.handPrintScale);
+		this.handPrintLocations.Add(item);
 		this.handPrintData.Add(this.handPrintFadeTime);
 	}
 

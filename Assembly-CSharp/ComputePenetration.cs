@@ -27,7 +27,7 @@ public class ComputePenetration : MonoBehaviour
 		Transform transform2 = this.colliderB.transform;
 		if (this.lastUpdate.HasElapsed(0.5f, true))
 		{
-			this.overlapped = Physics.ComputePenetration(this.colliderA, transform.position, transform.rotation, this.colliderB, transform2.position, transform2.rotation, ref this.direction, ref this.distance);
+			this.overlapped = Physics.ComputePenetration(this.colliderA, transform.position, transform.rotation, this.colliderB, transform2.position, transform2.rotation, out this.direction, out this.distance);
 		}
 		Color color = this.overlapped ? Color.red : Color.green;
 		this.DrawCollider(this.colliderA, color);
@@ -35,8 +35,8 @@ public class ComputePenetration : MonoBehaviour
 		if (this.overlapped)
 		{
 			Vector3 position = this.colliderB.transform.position;
-			Vector3 vector = position + this.direction * this.distance;
-			Gizmos.DrawLine(position, vector);
+			Vector3 to = position + this.direction * this.distance;
+			Gizmos.DrawLine(position, to);
 		}
 	}
 

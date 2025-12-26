@@ -69,12 +69,12 @@ public class SIBlasterDirectHitProjectile : MonoBehaviour, SIGadgetProjectileTyp
 			return;
 		}
 		this.projectile.DespawnProjectile();
-		SIPlayer siplayer = SIPlayer.Get(actorNumber);
-		if (siplayer == null)
+		SIPlayer x = SIPlayer.Get(actorNumber);
+		if (x == null)
 		{
 			return;
 		}
-		if (siplayer != SIPlayer.LocalPlayer)
+		if (x != SIPlayer.LocalPlayer)
 		{
 			SIGadgetBlasterProjectile.SpawnExplosion(this.projectile.hitEffect, vector, this.projectile.transform.rotation);
 			return;

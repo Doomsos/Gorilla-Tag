@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 [Serializable]
-[StructLayout(2)]
+[StructLayout(LayoutKind.Explicit)]
 public struct GlobalObjectRef
 {
 	public static GlobalObjectRef ObjectToRefSlow(Object target)

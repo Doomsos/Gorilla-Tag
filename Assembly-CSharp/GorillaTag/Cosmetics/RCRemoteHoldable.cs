@@ -29,7 +29,7 @@ namespace GorillaTag.Cosmetics
 
 		public bool TurnOverrideActive()
 		{
-			return base.gameObject.activeSelf && this.currentlyHeld && this.xrNode == 5;
+			return base.gameObject.activeSelf && this.currentlyHeld && this.xrNode == XRNode.RightHand;
 		}
 
 		protected override void Awake()
@@ -52,7 +52,7 @@ namespace GorillaTag.Cosmetics
 				base.gameObject.SetActive(false);
 				return;
 			}
-			if (this._events.IsNotNull() || base.gameObject.TryGetComponent<RubberDuckEvents>(ref this._events))
+			if (this._events.IsNotNull() || base.gameObject.TryGetComponent<RubberDuckEvents>(out this._events))
 			{
 				this._events = base.gameObject.GetOrAddComponent<RubberDuckEvents>();
 				NetPlayer netPlayer = (base.myOnlineRig != null) ? base.myOnlineRig.creator : ((base.myRig != null) ? ((base.myRig.creator != null) ? base.myRig.creator : NetworkSystem.Instance.LocalPlayer) : null);
@@ -64,7 +64,7 @@ namespace GorillaTag.Cosmetics
 				{
 					Debug.LogError("Failed to get a reference to the Photon Player needed to hook up the cosmetic event");
 				}
-				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnStartConnectionEvent);
+				this._events.Activate += this.OnStartConnectionEvent;
 			}
 			this.WakeUpRemoteVehicle();
 		}
@@ -84,7 +84,7 @@ namespace GorillaTag.Cosmetics
 			}
 			if (this._events.IsNotNull())
 			{
-				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnStartConnectionEvent);
+				this._events.Activate -= this.OnStartConnectionEvent;
 				this._events.Dispose();
 				this._events = null;
 			}
@@ -110,16 +110,16 @@ namespace GorillaTag.Cosmetics
 			}
 			if (this.networkSync == null && PhotonNetwork.InRoom)
 			{
-				object[] array = new object[]
+				object[] data = new object[]
 				{
 					this.myIndex
 				};
-				GameObject gameObject = PhotonNetwork.Instantiate(this.networkSyncPrefabName, Vector3.zero, Quaternion.identity, 0, array);
+				GameObject gameObject = PhotonNetwork.Instantiate(this.networkSyncPrefabName, Vector3.zero, Quaternion.identity, 0, data);
 				this.networkSync = ((gameObject != null) ? gameObject.GetComponent<RCCosmeticNetworkSync>() : null);
 			}
 			this.currentlyHeld = true;
 			bool flag = grabbingHand == EquipmentInteractor.instance.rightHand;
-			this.xrNode = (flag ? 5 : 4);
+			this.xrNode = (flag ? XRNode.RightHand : XRNode.LeftHand);
 			GorillaSnapTurn component = GorillaTagger.Instance.GetComponent<GorillaSnapTurn>();
 			if (flag)
 			{

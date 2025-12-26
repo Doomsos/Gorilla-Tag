@@ -64,8 +64,8 @@ public class GorillaHandNode : MonoBehaviour
 			this.vrThumb = (this._isLeftHand ? this.rig.leftThumb : this.rig.rightThumb);
 			this.vrMiddle = (this._isLeftHand ? this.rig.leftMiddle : this.rig.rightMiddle);
 		}
-		this._isLeftHand = base.name.Contains("left", 5);
-		this._isRightHand = base.name.Contains("right", 5);
+		this._isLeftHand = base.name.Contains("left", StringComparison.OrdinalIgnoreCase);
+		this._isRightHand = base.name.Contains("right", StringComparison.OrdinalIgnoreCase);
 		int num = 0;
 		num |= 1024;
 		num |= 2097152;
@@ -76,7 +76,7 @@ public class GorillaHandNode : MonoBehaviour
 		this.rigidbody.excludeLayers = ~num;
 		this.rigidbody.isKinematic = true;
 		this.rigidbody.useGravity = false;
-		this.rigidbody.constraints = 126;
+		this.rigidbody.constraints = RigidbodyConstraints.FreezeAll;
 		this.collider.isTrigger = true;
 		this.collider.includeLayers = num;
 		this.collider.excludeLayers = ~num;

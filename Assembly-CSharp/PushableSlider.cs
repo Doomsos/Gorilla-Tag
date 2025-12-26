@@ -30,22 +30,22 @@ public class PushableSlider : MonoBehaviour
 		{
 			return;
 		}
-		Vector3 vector = this._localSpace.MultiplyPoint3x4(other.transform.position);
-		Vector3 vector2 = base.transform.localPosition - this._startingPos - vector;
-		float num = Mathf.Abs(vector2.x);
+		Vector3 b = this._localSpace.MultiplyPoint3x4(other.transform.position);
+		Vector3 vector = base.transform.localPosition - this._startingPos - b;
+		float num = Mathf.Abs(vector.x);
 		if (num < this.farPushDist)
 		{
 			Vector3 currentVelocity = componentInParent.currentVelocity;
-			if (Mathf.Sign(vector2.x) != Mathf.Sign((this._localSpace.rotation * currentVelocity).x))
+			if (Mathf.Sign(vector.x) != Mathf.Sign((this._localSpace.rotation * currentVelocity).x))
 			{
 				return;
 			}
-			vector2.x = Mathf.Sign(vector2.x) * (this.farPushDist - num);
-			vector2.y = 0f;
-			vector2.z = 0f;
-			Vector3 vector3 = base.transform.localPosition - this._startingPos + vector2;
-			vector3.x = Mathf.Clamp(vector3.x, this.minXOffset, this.maxXOffset);
-			base.transform.localPosition = this.GetXOffsetVector(vector3.x + this._startingPos.x);
+			vector.x = Mathf.Sign(vector.x) * (this.farPushDist - num);
+			vector.y = 0f;
+			vector.z = 0f;
+			Vector3 vector2 = base.transform.localPosition - this._startingPos + vector;
+			vector2.x = Mathf.Clamp(vector2.x, this.minXOffset, this.maxXOffset);
+			base.transform.localPosition = this.GetXOffsetVector(vector2.x + this._startingPos.x);
 			GorillaTagger.Instance.StartVibration(componentInParent.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
 		}
 	}

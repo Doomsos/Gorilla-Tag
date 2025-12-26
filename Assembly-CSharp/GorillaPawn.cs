@@ -20,7 +20,7 @@ public class GorillaPawn : MonoBehaviour
 		}
 	}
 
-	public Transform transform
+	public new Transform transform
 	{
 		get
 		{
@@ -84,7 +84,7 @@ public class GorillaPawn : MonoBehaviour
 		foreach (Transform transform in this._rig.mainSkin.bones)
 		{
 			string name = transform.name;
-			if (flag3 && name.StartsWith("head", 5))
+			if (flag3 && name.StartsWith("head", StringComparison.OrdinalIgnoreCase))
 			{
 				this._head = transform;
 				this._headXform = new XformNode();
@@ -92,7 +92,7 @@ public class GorillaPawn : MonoBehaviour
 				this._headXform.radius = 0.12f;
 				this._headXform.parent = transform;
 			}
-			else if (flag && name.StartsWith("hand.L", 5))
+			else if (flag && name.StartsWith("hand.L", StringComparison.OrdinalIgnoreCase))
 			{
 				this._handLeft = transform;
 				this._handLeftXform = new XformNode();
@@ -100,7 +100,7 @@ public class GorillaPawn : MonoBehaviour
 				this._handLeftXform.radius = 0.044f;
 				this._handLeftXform.parent = transform;
 			}
-			else if (flag2 && name.StartsWith("hand.R", 5))
+			else if (flag2 && name.StartsWith("hand.R", StringComparison.OrdinalIgnoreCase))
 			{
 				this._handRight = transform;
 				this._handRightXform = new XformNode();

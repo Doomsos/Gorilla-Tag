@@ -151,12 +151,12 @@ public class MonkeBall : MonoBehaviourTick
 
 	public void SetRigidbodyDiscrete()
 	{
-		this._rigidBody.collisionDetectionMode = 0;
+		this._rigidBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
 	}
 
 	public void SetRigidbodyContinuous()
 	{
-		this._rigidBody.collisionDetectionMode = 3;
+		this._rigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 	}
 
 	public static MonkeBall Get(GameBall ball)

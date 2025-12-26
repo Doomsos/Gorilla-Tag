@@ -14,7 +14,7 @@ public class GTDelayedExec : ITickSystemTick
 		GTDelayedExec._listeners = new GTDelayedExec.Listener[1024];
 	}
 
-	[RuntimeInitializeOnLoadMethod(2)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 	private static void InitializeAfterAssemblies()
 	{
 		GTDelayedExec.listenerCount = 0;
@@ -55,9 +55,9 @@ public class GTDelayedExec : ITickSystemTick
 				{
 					GTDelayedExec._listeners[i].listener.OnDelayedAction(GTDelayedExec._listeners[i].contextId);
 				}
-				catch (Exception ex)
+				catch (Exception exception)
 				{
-					Debug.LogException(ex);
+					Debug.LogException(exception);
 				}
 				GTDelayedExec.listenerCount--;
 				GTDelayedExec._listenerDelays[i] = GTDelayedExec._listenerDelays[GTDelayedExec.listenerCount];

@@ -12,6 +12,7 @@ using Modio;
 using Modio.API;
 using Modio.Authentication;
 using Modio.Customizations;
+using Modio.Errors;
 using Modio.FileIO;
 using Modio.Mods;
 using Modio.Users;
@@ -31,8 +32,8 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			ModIOManager.hasInstance = true;
 			UGCPermissionManager.SubscribeToUGCEnabled(new Action(ModIOManager.OnUGCEnabled));
 			UGCPermissionManager.SubscribeToUGCDisabled(new Action(ModIOManager.OnUGCDisabled));
-			ModioServices.Bind<IModioAuthService>().FromInstance(ModIOManager.accountLinkingAuthService, 41, null);
-			ModioServices.Bind<IModioAuthService>().FromInstance(ModIOManager.steamAuthService, 40, null);
+			ModioServices.Bind<IModioAuthService>().FromInstance(ModIOManager.accountLinkingAuthService, (ModioServicePriority)41, null);
+			ModioServices.Bind<IModioAuthService>().FromInstance(ModIOManager.steamAuthService, ModioServicePriority.DeveloperOverride, null);
 			long gameId = ModioServices.Resolve<ModioSettings>().GameId;
 			ModIOManager.ModIODirectory = Path.Combine(ModioServices.Resolve<IModioRootPathProvider>().Path, "mod.io", gameId.ToString()) + Path.DirectorySeparatorChar.ToString();
 			return;
@@ -45,7 +46,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 
 	private void Start()
 	{
-		NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnJoinedRoom);
+		NetworkSystem.Instance.OnMultiplayerStarted += this.OnJoinedRoom;
 	}
 
 	private void OnDestroy()
@@ -57,7 +58,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			UGCPermissionManager.UnsubscribeFromUGCEnabled(new Action(ModIOManager.OnUGCEnabled));
 			UGCPermissionManager.UnsubscribeFromUGCDisabled(new Action(ModIOManager.OnUGCDisabled));
 		}
-		NetworkSystem.Instance.OnMultiplayerStarted -= new Action(this.OnJoinedRoom);
+		NetworkSystem.Instance.OnMultiplayerStarted -= this.OnJoinedRoom;
 	}
 
 	private void Update()
@@ -123,7 +124,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			Action<ModIORequestResultAnd<bool>> action = ModIOManager.modIOTermsAcknowledgedCallback;
 			if (action != null)
 			{
-				action.Invoke(ModIORequestResultAnd<bool>.CreateSuccessResult(true));
+				action(ModIORequestResultAnd<bool>.CreateSuccessResult(true));
 			}
 		}
 		else
@@ -131,7 +132,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			Action<ModIORequestResultAnd<bool>> action2 = ModIOManager.modIOTermsAcknowledgedCallback;
 			if (action2 != null)
 			{
-				action2.Invoke(ModIORequestResultAnd<bool>.CreateFailureResult("MOD.IO TERMS OF USE HAVE NOT BEEN ACCEPTED. YOU MUST ACCEPT THE MOD.IO TERMS OF USE TO LOGIN WITH YOUR PLATFORM CREDENTIALS OR YOU CAN LOGIN WITH AN EXISTING MOD.IO ACCOUNT BY PRESSING THE 'LINK MOD.IO ACCOUNT' BUTTON AND FOLLOWING THE INSTRUCTIONS."));
+				action2(ModIORequestResultAnd<bool>.CreateFailureResult("MOD.IO TERMS OF USE HAVE NOT BEEN ACCEPTED. YOU MUST ACCEPT THE MOD.IO TERMS OF USE TO LOGIN WITH YOUR PLATFORM CREDENTIALS OR YOU CAN LOGIN WITH AN EXISTING MOD.IO ACCOUNT BY PRESSING THE 'LINK MOD.IO ACCOUNT' BUTTON AND FOLLOWING THE INSTRUCTIONS."));
 			}
 		}
 		ModIOManager.modIOTermsAcknowledgedCallback = null;
@@ -141,7 +142,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 	{
 		if (!ModIOManager.modManagementEnabled)
 		{
-			ModInstallationManagement.ManagementEvents += new ModInstallationManagement.InstallationManagementEventDelegate(ModIOManager.HandleModManagementEvent);
+			ModInstallationManagement.ManagementEvents += ModIOManager.HandleModManagementEvent;
 			ModInstallationManagement.Activate();
 			ModIOManager.modManagementEnabled = true;
 			ModioLog verbose = ModioLog.Verbose;
@@ -162,7 +163,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			{
 				verbose.Log("[ModIOManager::EnableModManagement] Mod Management disabled!");
 			}
-			ModInstallationManagement.ManagementEvents -= new ModInstallationManagement.InstallationManagementEventDelegate(ModIOManager.HandleModManagementEvent);
+			ModInstallationManagement.ManagementEvents -= ModIOManager.HandleModManagementEvent;
 			ModInstallationManagement.Deactivate(false);
 			ModIOManager.modManagementEnabled = false;
 		}
@@ -177,22 +178,22 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 		try
 		{
-			if ((jobType == 1 || jobType == null) && jobPhase == 2 && modfile.State == 5)
+			if ((jobType == ModInstallationManagement.OperationType.Install || jobType == ModInstallationManagement.OperationType.Download) && jobPhase == ModInstallationManagement.OperationPhase.Completed && modfile.State == ModFileState.Installed)
 			{
 				ModIOManager.outdatedModCMSVersions.Remove(mod.Id);
 				ModIOManager.IsModOutdated(mod);
 			}
-			if (jobPhase == 1 && (jobType == null || jobType == 2 || jobType == 3))
+			if (jobPhase == ModInstallationManagement.OperationPhase.Started && (jobType == ModInstallationManagement.OperationType.Download || jobType == ModInstallationManagement.OperationType.Update || jobType == ModInstallationManagement.OperationType.Uninstall))
 			{
 				ModIOManager.outdatedModCMSVersions.Remove(mod.Id);
 			}
 		}
-		catch (Exception ex)
+		catch (Exception arg)
 		{
 			ModioLog error = ModioLog.Error;
 			if (error != null)
 			{
-				error.Log(string.Format("[ModIOManager::HandleModManagementEvent] Exception: {0}", ex));
+				error.Log(string.Format("[ModIOManager::HandleModManagementEvent] Exception: {0}", arg));
 			}
 		}
 		UnityEvent<Mod, Modfile, ModInstallationManagement.OperationType, ModInstallationManagement.OperationPhase> onModManagementEvent = ModIOManager.OnModManagementEvent;
@@ -229,19 +230,19 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 
 	public static ValueTuple<bool, int> IsModOutdated(Mod mod)
 	{
-		int num;
-		if (ModIOManager.outdatedModCMSVersions.TryGetValue(mod.Id, ref num))
+		int item;
+		if (ModIOManager.outdatedModCMSVersions.TryGetValue(mod.Id, out item))
 		{
-			return new ValueTuple<bool, int>(true, num);
+			return new ValueTuple<bool, int>(true, item);
 		}
 		if (mod.File != null)
 		{
-			if (mod.File.State == 5)
+			if (mod.File.State == ModFileState.Installed)
 			{
 				ValueTuple<bool, int> valueTuple = ModIOManager.IsInstalledModOutdated(mod);
-				bool item = valueTuple.Item1;
-				int item2 = valueTuple.Item2;
-				return new ValueTuple<bool, int>(item, item2);
+				bool item2 = valueTuple.Item1;
+				int item3 = valueTuple.Item2;
+				return new ValueTuple<bool, int>(item2, item3);
 			}
 			ModioLog error = ModioLog.Error;
 			if (error != null)
@@ -285,8 +286,8 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 				{
 					array[num++] = keyValuePair.Key;
 				}
-				string text = JsonConvert.SerializeObject(array);
-				File.WriteAllText(Path.Join(directoryInfo.FullName, "favoriteMods.json"), text);
+				string contents = JsonConvert.SerializeObject(array);
+				File.WriteAllText(Path.Join(directoryInfo.FullName, "favoriteMods.json"), contents);
 			}
 		}
 		catch (Exception)
@@ -324,7 +325,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 	{
 		if (!ModIOManager.favoriteMods.ContainsKey(modId))
 		{
-			return new Error(-2147483648L, "MOD NOT FAVORITED");
+			return new Error(ErrorCode.UNKNOWN, "MOD NOT FAVORITED");
 		}
 		ModIOManager.favoriteMods.Remove(modId);
 		ModIOManager.SaveFavoriteMods();
@@ -358,19 +359,19 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 
 	private static ValueTuple<bool, int> IsInstalledModOutdated(Mod mod)
 	{
-		int num = -1;
+		int item = -1;
 		if (!ModIOManager.hasInstance)
 		{
-			return new ValueTuple<bool, int>(false, num);
+			return new ValueTuple<bool, int>(false, item);
 		}
-		if (mod.File == null || mod.File.State != 5)
+		if (mod.File == null || mod.File.State != ModFileState.Installed)
 		{
 			ModioLog message = ModioLog.Message;
 			if (message != null)
 			{
 				message.Log("[ModIOManager::IsInstalledModOutdated] Mod " + mod.Id.ToString() + " is not currently installed.");
 			}
-			return new ValueTuple<bool, int>(false, num);
+			return new ValueTuple<bool, int>(false, item);
 		}
 		try
 		{
@@ -406,23 +407,23 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 				}
 			}
 			MapPackageInfo packageInfo = CustomMapLoader.GetPackageInfo(files[0].FullName);
-			if (packageInfo.customMapSupportVersion != Constants.customMapSupportVersion)
+			if (packageInfo.customMapSupportVersion != GT_CustomMapSupportRuntime.Constants.customMapSupportVersion)
 			{
 				ModIOManager.outdatedModCMSVersions.Add(mod.Id, packageInfo.customMapSupportVersion);
 				return new ValueTuple<bool, int>(true, packageInfo.customMapSupportVersion);
 			}
 		}
-		catch (Exception ex)
+		catch (Exception arg)
 		{
 			ModioLog error2 = ModioLog.Error;
 			if (error2 != null)
 			{
-				error2.Log(string.Format("[ModIOManager::IsInstalledModOutdated] Exception while reading package.json: {0}", ex));
+				error2.Log(string.Format("[ModIOManager::IsInstalledModOutdated] Exception while reading package.json: {0}", arg));
 			}
 			ModInstallationManagement.RefreshMod(mod);
-			return new ValueTuple<bool, int>(false, num);
+			return new ValueTuple<bool, int>(false, item);
 		}
-		return new ValueTuple<bool, int>(false, num);
+		return new ValueTuple<bool, int>(false, item);
 	}
 
 	public static Task RefreshUserProfile(Action<bool> callback = null, bool force = false)
@@ -620,12 +621,12 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 					}
 				}
 			}
-			catch (Exception ex)
+			catch (Exception arg)
 			{
 				ModioLog verbose3 = ModioLog.Verbose;
 				if (verbose3 != null)
 				{
-					verbose3.Log(string.Format("[ModIOManager::IsAuthenticated] error {0}", ex));
+					verbose3.Log(string.Format("[ModIOManager::IsAuthenticated] error {0}", arg));
 				}
 			}
 		}
@@ -746,7 +747,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			}
 			if (callback != null)
 			{
-				callback.Invoke(false, "AN ENCRYPTED APP TICKET REQUEST IS ALREADY IN PROGRESS");
+				callback(false, "AN ENCRYPTED APP TICKET REQUEST IS ALREADY IN PROGRESS");
 			}
 			return;
 		}
@@ -760,8 +761,8 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		{
 			verbose.Log("[ModIOManager::RequestEncryptedAppTicket] Requesting Steam Encrypted App Ticket...");
 		}
-		SteamAPICall_t steamAPICall_t = SteamUser.RequestEncryptedAppTicket(null, 0);
-		ModIOManager.requestEncryptedAppTicketResponse.Set(steamAPICall_t, null);
+		SteamAPICall_t hAPICall = SteamUser.RequestEncryptedAppTicket(null, 0);
+		ModIOManager.requestEncryptedAppTicketResponse.Set(hAPICall, null);
 	}
 
 	private void OnRequestEncryptedAppTicketFinished(EncryptedAppTicketResponse_t response, bool bIOFailure)
@@ -776,17 +777,17 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			Action<bool, string> action = this.requestEncryptedAppTicketCallback;
 			if (action != null)
 			{
-				action.Invoke(false, "FAILED TO RETRIEVE 'EncryptedAppTicket' DUE TO A STEAM API IO FAILURE.");
+				action(false, "FAILED TO RETRIEVE 'EncryptedAppTicket' DUE TO A STEAM API IO FAILURE.");
 			}
 			this.requestEncryptedAppTicketCallback = null;
 			return;
 		}
 		EResult eResult = response.m_eResult;
-		if (eResult <= 3)
+		if (eResult <= EResult.k_EResultNoConnection)
 		{
-			if (eResult != 1)
+			if (eResult != EResult.k_EResultOK)
 			{
-				if (eResult == 3)
+				if (eResult == EResult.k_EResultNoConnection)
 				{
 					ModioLog error2 = ModioLog.Error;
 					if (error2 != null)
@@ -796,7 +797,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 					Action<bool, string> action2 = this.requestEncryptedAppTicketCallback;
 					if (action2 != null)
 					{
-						action2.Invoke(false, "NOT CONNECTED TO STEAM.");
+						action2(false, "NOT CONNECTED TO STEAM.");
 					}
 					this.requestEncryptedAppTicketCallback = null;
 					return;
@@ -804,7 +805,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			}
 			else
 			{
-				if (!SteamUser.GetEncryptedAppTicket(ModIOManager.ticketBlob, ModIOManager.ticketBlob.Length, ref ModIOManager.ticketSize))
+				if (!SteamUser.GetEncryptedAppTicket(ModIOManager.ticketBlob, ModIOManager.ticketBlob.Length, out ModIOManager.ticketSize))
 				{
 					ModioLog error3 = ModioLog.Error;
 					if (error3 != null)
@@ -814,7 +815,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 					Action<bool, string> action3 = this.requestEncryptedAppTicketCallback;
 					if (action3 != null)
 					{
-						action3.Invoke(false, "FAILED TO RETRIEVE 'EncryptedAppTicket'.");
+						action3(false, "FAILED TO RETRIEVE 'EncryptedAppTicket'.");
 					}
 					this.requestEncryptedAppTicketCallback = null;
 					return;
@@ -829,7 +830,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 				Action<bool, string> action4 = this.requestEncryptedAppTicketCallback;
 				if (action4 != null)
 				{
-					action4.Invoke(true, text);
+					action4(true, text);
 				}
 				this.requestEncryptedAppTicketCallback = null;
 				return;
@@ -837,7 +838,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 		else
 		{
-			if (eResult == 25)
+			if (eResult == EResult.k_EResultLimitExceeded)
 			{
 				ModioLog error4 = ModioLog.Error;
 				if (error4 != null)
@@ -847,12 +848,12 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 				Action<bool, string> action5 = this.requestEncryptedAppTicketCallback;
 				if (action5 != null)
 				{
-					action5.Invoke(false, "RATE LIMIT EXCEEDED, CAN ONLY REQUEST ONE 'EncryptedAppTicket' PER MINUTE.");
+					action5(false, "RATE LIMIT EXCEEDED, CAN ONLY REQUEST ONE 'EncryptedAppTicket' PER MINUTE.");
 				}
 				this.requestEncryptedAppTicketCallback = null;
 				return;
 			}
-			if (eResult == 29)
+			if (eResult == EResult.k_EResultDuplicateRequest)
 			{
 				ModioLog error5 = ModioLog.Error;
 				if (error5 != null)
@@ -862,7 +863,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 				Action<bool, string> action6 = this.requestEncryptedAppTicketCallback;
 				if (action6 != null)
 				{
-					action6.Invoke(false, "THERE IS ALREADY AN 'EncryptedAppTicket' REQUEST IN PROGRESS.");
+					action6(false, "THERE IS ALREADY AN 'EncryptedAppTicket' REQUEST IN PROGRESS.");
 				}
 				this.requestEncryptedAppTicketCallback = null;
 				return;
@@ -876,7 +877,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		Action<bool, string> action7 = this.requestEncryptedAppTicketCallback;
 		if (action7 != null)
 		{
-			action7.Invoke(false, string.Format("{0}", response.m_eResult));
+			action7(false, string.Format("{0}", response.m_eResult));
 		}
 		this.requestEncryptedAppTicketCallback = null;
 	}
@@ -1044,25 +1045,25 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 	public static IEnumerator AssociateMothershipAndModIOAccounts(AssociateMotherhsipAndModIOAccountsRequest data, Action<AssociateMotherhsipAndModIOAccountsResponse> callback)
 	{
 		UnityWebRequest request = new UnityWebRequest(PlayFabAuthenticatorSettings.AuthApiBaseUrl + "/api/AssociatePlayFabAndModIO", "POST");
-		string text = JsonUtility.ToJson(data);
-		byte[] bytes = Encoding.UTF8.GetBytes(text);
+		string s = JsonUtility.ToJson(data);
+		byte[] bytes = Encoding.UTF8.GetBytes(s);
 		bool retry = false;
 		request.uploadHandler = new UploadHandlerRaw(bytes);
 		request.downloadHandler = new DownloadHandlerBuffer();
 		request.SetRequestHeader("Content-Type", "application/json");
 		request.timeout = 15;
 		yield return request.SendWebRequest();
-		if (request.result != 2 && request.result != 3)
+		if (request.result != UnityWebRequest.Result.ConnectionError && request.result != UnityWebRequest.Result.ProtocolError)
 		{
-			AssociateMotherhsipAndModIOAccountsResponse associateMotherhsipAndModIOAccountsResponse = JsonUtility.FromJson<AssociateMotherhsipAndModIOAccountsResponse>(request.downloadHandler.text);
-			callback.Invoke(associateMotherhsipAndModIOAccountsResponse);
+			AssociateMotherhsipAndModIOAccountsResponse obj = JsonUtility.FromJson<AssociateMotherhsipAndModIOAccountsResponse>(request.downloadHandler.text);
+			callback(obj);
 		}
-		else if (request.result == 3 && request.responseCode != 400L)
+		else if (request.result == UnityWebRequest.Result.ProtocolError && request.responseCode != 400L)
 		{
 			retry = true;
 			Debug.LogError(string.Format("HTTP {0} error: {1} message:{2}", request.responseCode, request.error, request.downloadHandler.text));
 		}
-		else if (request.result == 2)
+		else if (request.result == UnityWebRequest.Result.ConnectionError)
 		{
 			retry = true;
 			Debug.LogError("NETWORK ERROR: " + request.error + "\nMessage: " + request.downloadHandler.text);
@@ -1085,7 +1086,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 			else
 			{
 				Debug.LogError("Maximum retries attempted. Please check your network connection.");
-				callback.Invoke(null);
+				callback(null);
 			}
 		}
 		yield break;

@@ -189,15 +189,6 @@ public class KIDUI_Controller : MonoBehaviour
 		instance.PlaySoundWithDelay(KIDAudioManager.KIDSoundType.PageTransition);
 	}
 
-	public KIDUI_Controller()
-	{
-		List<EKIDFeatures> list = new List<EKIDFeatures>();
-		list.Add(EKIDFeatures.Multiplayer);
-		list.Add(EKIDFeatures.Mods);
-		this._inaccessibleSettings = list;
-		base..ctor();
-	}
-
 	private const string CLOSE_BLACK_SCREEN_ETAG_PLAYER_PREF_PREFIX = "closeBlackScreen-";
 
 	private const string FIRST_TIME_POST_CHANGE_PLAYER_PREF = "hasShownFirstTimePostChange-";
@@ -214,7 +205,11 @@ public class KIDUI_Controller : MonoBehaviour
 	private List<string> _PermissionsWithToggles = new List<string>();
 
 	[SerializeField]
-	private List<EKIDFeatures> _inaccessibleSettings;
+	private List<EKIDFeatures> _inaccessibleSettings = new List<EKIDFeatures>
+	{
+		EKIDFeatures.Multiplayer,
+		EKIDFeatures.Mods
+	};
 
 	private KIDUI_Controller.Metrics_ShowReason _showReason;
 

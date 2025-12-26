@@ -89,7 +89,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		{
 			Vector3 vector;
 			float num;
-			if (this.testColliderA.bounds.Intersects(this.nonOverlapZones[i].bounds) && Physics.ComputePenetration(this.testColliderA, this.testColliderA.transform.position, this.testColliderA.transform.rotation, this.nonOverlapZones[i], this.nonOverlapZones[i].transform.position, this.nonOverlapZones[i].transform.rotation, ref vector, ref num))
+			if (this.testColliderA.bounds.Intersects(this.nonOverlapZones[i].bounds) && Physics.ComputePenetration(this.testColliderA, this.testColliderA.transform.position, this.testColliderA.transform.rotation, this.nonOverlapZones[i], this.nonOverlapZones[i].transform.position, this.nonOverlapZones[i].transform.rotation, out vector, out num))
 			{
 				this.testColliderA.gameObject.SetActive(false);
 				this.testColliderB.gameObject.SetActive(false);
@@ -118,7 +118,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 								this.testColliderB.center = sectionInstance.BoundingCollider.center;
 								Vector3 vector2;
 								float num2;
-								if (this.testColliderA.bounds.Intersects(this.testColliderB.bounds) && Physics.ComputePenetration(this.testColliderA, this.testColliderA.transform.position, this.testColliderA.transform.rotation, this.testColliderB, this.testColliderB.transform.position, this.testColliderB.transform.rotation, ref vector2, ref num2))
+								if (this.testColliderA.bounds.Intersects(this.testColliderB.bounds) && Physics.ComputePenetration(this.testColliderA, this.testColliderA.transform.position, this.testColliderA.transform.rotation, this.testColliderB, this.testColliderB.transform.position, this.testColliderB.transform.rotation, out vector2, out num2))
 								{
 									this.testColliderA.gameObject.SetActive(false);
 									this.testColliderB.gameObject.SetActive(false);
@@ -137,7 +137,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 						this.testColliderB.center = sectionInstance2.BoundingCollider.center;
 						Vector3 vector3;
 						float num3;
-						if (this.testColliderA.bounds.Intersects(this.testColliderB.bounds) && Physics.ComputePenetration(this.testColliderA, this.testColliderA.transform.position, this.testColliderA.transform.rotation, this.testColliderB, this.testColliderB.transform.position, this.testColliderB.transform.rotation, ref vector3, ref num3))
+						if (this.testColliderA.bounds.Intersects(this.testColliderB.bounds) && Physics.ComputePenetration(this.testColliderA, this.testColliderA.transform.position, this.testColliderA.transform.rotation, this.testColliderB, this.testColliderB.transform.position, this.testColliderB.transform.rotation, out vector3, out num3))
 						{
 							this.testColliderA.gameObject.SetActive(false);
 							this.testColliderB.gameObject.SetActive(false);
@@ -209,23 +209,23 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 					{
 						int num5 = this.hubOrder[num % this.hubOrder.Count];
 						num++;
-						int num6 = this.connectorOrder[num2 % this.connectorOrder.Count];
+						int index = this.connectorOrder[num2 % this.connectorOrder.Count];
 						num2++;
-						int num7 = (j == 0) ? -1 : (k % this.nodeTree[j].Count);
-						GhostReactorLevelGenerator.Node node2 = (num7 != -1) ? this.nodeTree[j][num7] : node;
+						int num6 = (j == 0) ? -1 : (k % this.nodeTree[j].Count);
+						GhostReactorLevelGenerator.Node node2 = (num6 != -1) ? this.nodeTree[j][num6] : node;
 						for (int l = 0; l < node2.anchorOrder.Count; l++)
 						{
-							int num8 = node2.anchorOrder[l];
+							int num7 = node2.anchorOrder[l];
 							bool flag = this.spawnedHubHashSet.Contains(hubs[num5].gameObject.name);
-							if (node2.children[num8] == null && node2.attachAnchorIndex != num8 && !flag)
+							if (node2.children[num7] == null && node2.attachAnchorIndex != num7 && !flag)
 							{
-								Quaternion quaternion = node2.sectionInstance.Anchors[num8].rotation * this.flip180;
-								Vector3 position = node2.sectionInstance.Anchors[num8].position;
-								GhostReactorLevelSectionConnector ghostReactorLevelSectionConnector = connectors[num6];
-								Quaternion quaternion2 = Quaternion.Inverse(ghostReactorLevelSectionConnector.hubAnchor.localRotation) * quaternion;
-								Vector3 vector = quaternion2 * -ghostReactorLevelSectionConnector.hubAnchor.localPosition + position;
-								Vector3 vector2 = quaternion2 * ghostReactorLevelSectionConnector.sectionAnchor.localPosition + vector;
-								Quaternion quaternion3 = quaternion2 * ghostReactorLevelSectionConnector.sectionAnchor.localRotation;
+								Quaternion rhs = node2.sectionInstance.Anchors[num7].rotation * this.flip180;
+								Vector3 position = node2.sectionInstance.Anchors[num7].position;
+								GhostReactorLevelSectionConnector ghostReactorLevelSectionConnector = connectors[index];
+								Quaternion quaternion = Quaternion.Inverse(ghostReactorLevelSectionConnector.hubAnchor.localRotation) * rhs;
+								Vector3 vector = quaternion * -ghostReactorLevelSectionConnector.hubAnchor.localPosition + position;
+								Vector3 b = quaternion * ghostReactorLevelSectionConnector.sectionAnchor.localPosition + vector;
+								Quaternion rhs2 = quaternion * ghostReactorLevelSectionConnector.sectionAnchor.localRotation;
 								GhostReactorLevelSection ghostReactorLevelSection = hubs[num5];
 								bool flag2 = false;
 								if (ghostReactorLevelSection.Anchors.Count > 0)
@@ -233,24 +233,24 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 									this.RandomizeIndices(ref this.entryAnchorOrder, ghostReactorLevelSection.Anchors.Count);
 									for (int m = 0; m < this.entryAnchorOrder.Count; m++)
 									{
-										int num9 = this.entryAnchorOrder[m];
-										Transform transform = ghostReactorLevelSection.Anchors[num9];
-										Quaternion quaternion4 = Quaternion.Inverse(transform.localRotation) * quaternion3;
-										Vector3 vector3 = quaternion4 * -transform.localPosition + vector2;
-										if (!this.TestForCollision(ghostReactorLevelSection, vector3, quaternion4, j, k, num8))
+										int num8 = this.entryAnchorOrder[m];
+										Transform transform = ghostReactorLevelSection.Anchors[num8];
+										Quaternion rotation = Quaternion.Inverse(transform.localRotation) * rhs2;
+										Vector3 position2 = rotation * -transform.localPosition + b;
+										if (!this.TestForCollision(ghostReactorLevelSection, position2, rotation, j, k, num7))
 										{
 											GhostReactorLevelGenerator.Node node3 = new GhostReactorLevelGenerator.Node();
 											node3.type = GhostReactorLevelGenerator.NodeType.Hub;
 											node3.configIndex = num5;
 											node3.children = new GhostReactorLevelGenerator.Node[ghostReactorLevelSection.Anchors.Count];
-											node3.parentAnchorIndex = num8;
-											node3.attachAnchorIndex = num9;
+											node3.parentAnchorIndex = num7;
+											node3.attachAnchorIndex = num8;
 											node3.anchorCount = ghostReactorLevelSection.Anchors.Count;
 											node3.anchorOrder = new List<int>();
 											this.RandomizeIndices(ref node3.anchorOrder, node3.anchorCount);
-											GhostReactorLevelSectionConnector component = Object.Instantiate<GameObject>(ghostReactorLevelSectionConnector.gameObject, vector, quaternion2, this.treeParents[j]).GetComponent<GhostReactorLevelSectionConnector>();
+											GhostReactorLevelSectionConnector component = Object.Instantiate<GameObject>(ghostReactorLevelSectionConnector.gameObject, vector, quaternion, this.treeParents[j]).GetComponent<GhostReactorLevelSectionConnector>();
 											node3.connectorInstance = component;
-											GhostReactorLevelSection component2 = Object.Instantiate<GameObject>(ghostReactorLevelSection.gameObject, vector3, quaternion4, this.treeParents[j]).GetComponent<GhostReactorLevelSection>();
+											GhostReactorLevelSection component2 = Object.Instantiate<GameObject>(ghostReactorLevelSection.gameObject, position2, rotation, this.treeParents[j]).GetComponent<GhostReactorLevelSection>();
 											node3.sectionInstance = component2;
 											node2.children[node3.parentAnchorIndex] = node3;
 											this.nodeTree[j + 1].Add(node3);
@@ -277,68 +277,68 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 			List<GhostReactorLevelSection> blockers = this.TreeLevels[n].blockers;
 			this.RandomizeIndices(ref this.blockerOrder, blockers.Count);
 			this.RandomizeIndices(ref this.endCapOrder, endCaps.Count);
+			int num9 = 0;
 			int num10 = 0;
-			int num11 = 0;
-			for (int num12 = 0; num12 < this.nodeTree[n].Count; num12++)
+			for (int num11 = 0; num11 < this.nodeTree[n].Count; num11++)
 			{
-				GhostReactorLevelGenerator.Node node4 = this.nodeTree[n][num12];
-				int num13 = Mathf.Max(this.TreeLevels[n].maxCaps - this.TreeLevels[n].minCaps, 0);
-				int num14 = Mathf.Max(this.TreeLevels[n].minCaps, 0) + this.randomGenerator.NextInt(num13 + 1);
-				for (int num15 = 0; num15 < node4.children.Length; num15++)
+				GhostReactorLevelGenerator.Node node4 = this.nodeTree[n][num11];
+				int num12 = Mathf.Max(this.TreeLevels[n].maxCaps - this.TreeLevels[n].minCaps, 0);
+				int num13 = Mathf.Max(this.TreeLevels[n].minCaps, 0) + this.randomGenerator.NextInt(num12 + 1);
+				for (int num14 = 0; num14 < node4.children.Length; num14++)
 				{
-					if (node4.children[num15] == null && node4.attachAnchorIndex != num15)
+					if (node4.children[num14] == null && node4.attachAnchorIndex != num14)
 					{
 						bool flag3 = false;
-						if (num14 > 0 && this.endCapOrder.Count > 0)
+						if (num13 > 0 && this.endCapOrder.Count > 0)
 						{
-							int num16 = this.endCapOrder[num11 % this.endCapOrder.Count];
-							num11++;
-							num14--;
-							Quaternion quaternion5 = node4.sectionInstance.Anchors[num15].rotation * this.flip180;
-							Vector3 position2 = node4.sectionInstance.Anchors[num15].position;
-							GhostReactorLevelSection ghostReactorLevelSection2 = endCaps[num16];
-							Quaternion quaternion6 = Quaternion.Inverse(ghostReactorLevelSection2.Anchor.localRotation) * quaternion5;
-							Vector3 vector4 = quaternion6 * -ghostReactorLevelSection2.Anchor.localPosition + position2;
-							if (!this.TestForCollision(ghostReactorLevelSection2, vector4, quaternion6, n, num12, num15))
+							int num15 = this.endCapOrder[num10 % this.endCapOrder.Count];
+							num10++;
+							num13--;
+							Quaternion rhs3 = node4.sectionInstance.Anchors[num14].rotation * this.flip180;
+							Vector3 position3 = node4.sectionInstance.Anchors[num14].position;
+							GhostReactorLevelSection ghostReactorLevelSection2 = endCaps[num15];
+							Quaternion rotation2 = Quaternion.Inverse(ghostReactorLevelSection2.Anchor.localRotation) * rhs3;
+							Vector3 position4 = rotation2 * -ghostReactorLevelSection2.Anchor.localPosition + position3;
+							if (!this.TestForCollision(ghostReactorLevelSection2, position4, rotation2, n, num11, num14))
 							{
 								GhostReactorLevelGenerator.Node node5 = new GhostReactorLevelGenerator.Node();
 								node5.type = GhostReactorLevelGenerator.NodeType.EndCap;
-								node5.configIndex = num16;
-								node5.parentAnchorIndex = num15;
-								GhostReactorLevelSection component3 = Object.Instantiate<GameObject>(ghostReactorLevelSection2.gameObject, vector4, quaternion6, this.treeParents[n]).GetComponent<GhostReactorLevelSection>();
+								node5.configIndex = num15;
+								node5.parentAnchorIndex = num14;
+								GhostReactorLevelSection component3 = Object.Instantiate<GameObject>(ghostReactorLevelSection2.gameObject, position4, rotation2, this.treeParents[n]).GetComponent<GhostReactorLevelSection>();
 								node5.sectionInstance = component3;
-								node4.children[num15] = node5;
+								node4.children[num14] = node5;
 								flag3 = true;
 							}
 						}
 						if (!flag3 && this.blockerOrder.Count > 0)
 						{
-							int configIndex = this.blockerOrder[num10 % this.blockerOrder.Count];
-							num10++;
+							int configIndex = this.blockerOrder[num9 % this.blockerOrder.Count];
+							num9++;
 							GhostReactorLevelGenerator.Node node6 = new GhostReactorLevelGenerator.Node();
 							node6.type = GhostReactorLevelGenerator.NodeType.Blocker;
 							node6.configIndex = configIndex;
-							node6.parentAnchorIndex = num15;
-							Quaternion quaternion7 = node4.sectionInstance.Anchors[num15].rotation * this.flip180;
-							Vector3 position3 = node4.sectionInstance.Anchors[num15].position;
+							node6.parentAnchorIndex = num14;
+							Quaternion rhs4 = node4.sectionInstance.Anchors[num14].rotation * this.flip180;
+							Vector3 position5 = node4.sectionInstance.Anchors[num14].position;
 							GhostReactorLevelSection ghostReactorLevelSection3 = blockers[node6.configIndex];
-							Quaternion quaternion8 = Quaternion.Inverse(ghostReactorLevelSection3.Anchor.localRotation) * quaternion7;
-							Vector3 vector5 = quaternion8 * -ghostReactorLevelSection3.Anchor.localPosition + position3;
-							GhostReactorLevelSection component4 = Object.Instantiate<GameObject>(ghostReactorLevelSection3.gameObject, vector5, quaternion8, this.treeParents[n]).GetComponent<GhostReactorLevelSection>();
+							Quaternion rotation3 = Quaternion.Inverse(ghostReactorLevelSection3.Anchor.localRotation) * rhs4;
+							Vector3 position6 = rotation3 * -ghostReactorLevelSection3.Anchor.localPosition + position5;
+							GhostReactorLevelSection component4 = Object.Instantiate<GameObject>(ghostReactorLevelSection3.gameObject, position6, rotation3, this.treeParents[n]).GetComponent<GhostReactorLevelSection>();
 							node6.sectionInstance = component4;
-							node4.children[num15] = node6;
+							node4.children[num14] = node6;
 						}
 					}
 				}
 			}
 		}
-		for (int num17 = 0; num17 < this.nodeList.Count; num17++)
+		for (int num16 = 0; num16 < this.nodeList.Count; num16++)
 		{
-			if (this.nodeList[num17].connectorInstance != null)
+			if (this.nodeList[num16].connectorInstance != null)
 			{
-				this.nodeList[num17].connectorInstance.Init(this.reactor.grManager);
+				this.nodeList[num16].connectorInstance.Init(this.reactor.grManager);
 			}
-			this.nodeList[num17].sectionInstance.InitLevelSection(num17, this.reactor);
+			this.nodeList[num16].sectionInstance.InitLevelSection(num16, this.reactor);
 		}
 	}
 

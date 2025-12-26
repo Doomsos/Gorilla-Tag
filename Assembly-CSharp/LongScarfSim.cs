@@ -20,25 +20,25 @@ public class LongScarfSim : MonoBehaviour
 		this.velocity *= this.drag;
 		this.velocity.y = this.velocity.y - this.gravityStrength * Time.deltaTime;
 		Vector3 position = base.transform.position;
-		Vector3 vector = this.lastCenterPos + this.velocity * Time.deltaTime;
-		Vector3 vector2 = position + (vector - position).normalized * this.centerOfMassLength;
-		Vector3 vector3 = base.transform.InverseTransformPoint(vector2);
-		float num = Vector3.Dot(vector3, this.clampToPlane);
+		Vector3 a = this.lastCenterPos + this.velocity * Time.deltaTime;
+		Vector3 vector = position + (a - position).normalized * this.centerOfMassLength;
+		Vector3 vector2 = base.transform.InverseTransformPoint(vector);
+		float num = Vector3.Dot(vector2, this.clampToPlane);
 		if (num < 0f)
 		{
-			vector3 -= this.clampToPlane * num;
-			vector2 = base.transform.TransformPoint(vector3);
+			vector2 -= this.clampToPlane * num;
+			vector = base.transform.TransformPoint(vector2);
 		}
-		Vector3 vector4 = vector2;
-		this.velocity = (vector4 - this.lastCenterPos) / Time.deltaTime;
-		this.lastCenterPos = vector4;
-		float num2 = (float)(this.velocityEstimator.linearVelocity.IsLongerThan(this.speedThreshold) ? 1 : 0);
-		this.currentBlend = Mathf.MoveTowards(this.currentBlend, num2, this.blendAmountPerSecond * Time.deltaTime);
-		Quaternion quaternion = Quaternion.LookRotation(vector4 - position);
+		Vector3 a2 = vector;
+		this.velocity = (a2 - this.lastCenterPos) / Time.deltaTime;
+		this.lastCenterPos = a2;
+		float target = (float)(this.velocityEstimator.linearVelocity.IsLongerThan(this.speedThreshold) ? 1 : 0);
+		this.currentBlend = Mathf.MoveTowards(this.currentBlend, target, this.blendAmountPerSecond * Time.deltaTime);
+		Quaternion b = Quaternion.LookRotation(a2 - position);
 		for (int i = 0; i < this.gameObjects.Length; i++)
 		{
-			Quaternion quaternion2 = this.gameObjects[i].transform.parent.rotation * this.baseLocalRotations[i];
-			this.gameObjects[i].transform.rotation = Quaternion.Lerp(quaternion2, quaternion, this.currentBlend);
+			Quaternion a3 = this.gameObjects[i].transform.parent.rotation * this.baseLocalRotations[i];
+			this.gameObjects[i].transform.rotation = Quaternion.Lerp(a3, b, this.currentBlend);
 		}
 	}
 

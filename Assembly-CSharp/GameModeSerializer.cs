@@ -49,7 +49,7 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 		{
 			GorillaNot.IncrementRPCCall(wrappedInfo, "OnSpawnSetupCheck");
 		}
-		GameModeSerializer activeNetworkHandler = GameMode.ActiveNetworkHandler;
+		GameModeSerializer activeNetworkHandler = GorillaGameModes.GameMode.ActiveNetworkHandler;
 		if (player != null && player.InRoom)
 		{
 			if (!player.IsMasterClient)
@@ -85,7 +85,7 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 			{
 				int num = (int)obj;
 				this.gameModeKey = (GameModeType)num;
-				this.gameModeInstance = GameMode.GetGameModeInstance(this.gameModeKey);
+				this.gameModeInstance = GorillaGameModes.GameMode.GetGameModeInstance(this.gameModeKey);
 				if (this.gameModeInstance.IsNull() || !this.gameModeInstance.ValidGameMode())
 				{
 					return false;
@@ -108,12 +108,12 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 	protected override void OnSuccesfullySpawned(PhotonMessageInfoWrapped info)
 	{
 		this.netView.GetView.AddCallbackTarget(this);
-		GameMode.SetupGameModeRemote(this);
+		GorillaGameModes.GameMode.SetupGameModeRemote(this);
 	}
 
 	protected override void OnBeforeDespawn()
 	{
-		GameMode.RemoveNetworkLink(this);
+		GorillaGameModes.GameMode.RemoveNetworkLink(this);
 	}
 
 	protected override void OnFailedSpawn()
@@ -132,13 +132,13 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 		this.ReportHit(new PhotonMessageInfoWrapped(info));
 	}
 
-	[Rpc(7, 7)]
+	[Rpc(RpcSources.All, RpcTargets.All)]
 	internal unsafe void RPC_ReportTag(int taggedPlayer, RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != 4)
+			if (base.Runner.Stage != SimulationStages.Resimulate)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) == 0)
@@ -163,12 +163,12 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 							int num2 = 8;
 							*(int*)(ptr2 + num2) = taggedPlayer;
 							num2 += 4;
-							ptr.Offset = num2 * 8;
+							ptr->Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 7) != 0)
 						{
-							info = RpcInfo.FromLocal(base.Runner, 0, 0);
+							info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_12;
 						}
 					}
@@ -181,13 +181,13 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 		this.ReportTag(NetworkSystem.Instance.GetPlayer(taggedPlayer), new PhotonMessageInfoWrapped(info));
 	}
 
-	[Rpc(7, 7)]
+	[Rpc(RpcSources.All, RpcTargets.All)]
 	internal unsafe void RPC_ReportHit(RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != 4)
+			if (base.Runner.Stage != SimulationStages.Resimulate)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) == 0)
@@ -209,12 +209,12 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 							*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 2);
 							int num2 = 8;
-							ptr.Offset = num2 * 8;
+							ptr->Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 7) != 0)
 						{
-							info = RpcInfo.FromLocal(base.Runner, 0, 0);
+							info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_12;
 						}
 					}
@@ -302,7 +302,7 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 
 	void IStateAuthorityChanged.StateAuthorityChanged()
 	{
-		GameModeSerializer.FusionGameModeOwnerChanged.Invoke(NetworkSystem.Instance.GetPlayer(base.Object.StateAuthority));
+		GameModeSerializer.FusionGameModeOwnerChanged(NetworkSystem.Instance.GetPlayer(base.Object.StateAuthority));
 	}
 
 	[WeaverGenerated]
@@ -329,7 +329,7 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 		int num2 = *(int*)(ptr + num);
 		num += 4;
 		int taggedPlayer = num2;
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
 		behaviour.InvokeRpc = true;
 		((GameModeSerializer)behaviour).RPC_ReportTag(taggedPlayer, info);
 	}
@@ -340,14 +340,14 @@ internal class GameModeSerializer : GorillaSerializerMasterOnly, IStateAuthority
 	protected unsafe static void RPC_ReportHit@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 	{
 		byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
 		behaviour.InvokeRpc = true;
 		((GameModeSerializer)behaviour).RPC_ReportHit(info);
 	}
 
 	[WeaverGenerated]
 	[DefaultForProperty("gameModeKeyInt", 0, 1)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private int _gameModeKeyInt;
 
 	private GameModeType gameModeKey;

@@ -27,9 +27,9 @@ public class WingsWearable : MonoBehaviour, IGorillaSliceableSimple
 	public void SliceUpdate()
 	{
 		Vector3 position = this.xform.position;
-		float num = (position - this.oldPos).magnitude / Time.deltaTime;
-		float num2 = this.flapSpeedCurve.Evaluate(Mathf.Abs(num));
-		this.animator.SetFloat(this.flapSpeedParamID, num2);
+		float f = (position - this.oldPos).magnitude / Time.deltaTime;
+		float value = this.flapSpeedCurve.Evaluate(Mathf.Abs(f));
+		this.animator.SetFloat(this.flapSpeedParamID, value);
 		this.oldPos = position;
 	}
 

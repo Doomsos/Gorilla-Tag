@@ -50,7 +50,7 @@ namespace GorillaTagScripts.CustomMapSupport
 		public static void RegisterTrigger(string sceneName, CMSTrigger trigger)
 		{
 			Dictionary<byte, CMSTrigger> dictionary;
-			if (CMSSerializer.registeredTriggersPerScene.TryGetValue(sceneName, ref dictionary))
+			if (CMSSerializer.registeredTriggersPerScene.TryGetValue(sceneName, out dictionary))
 			{
 				if (!dictionary.ContainsKey(trigger.GetID()))
 				{
@@ -60,10 +60,13 @@ namespace GorillaTagScripts.CustomMapSupport
 			}
 			else
 			{
-				Dictionary<string, Dictionary<byte, CMSTrigger>> dictionary2 = CMSSerializer.registeredTriggersPerScene;
-				Dictionary<byte, CMSTrigger> dictionary3 = new Dictionary<byte, CMSTrigger>();
-				dictionary3.Add(trigger.GetID(), trigger);
-				dictionary2.Add(sceneName, dictionary3);
+				CMSSerializer.registeredTriggersPerScene.Add(sceneName, new Dictionary<byte, CMSTrigger>
+				{
+					{
+						trigger.GetID(),
+						trigger
+					}
+				});
 			}
 		}
 
@@ -72,7 +75,7 @@ namespace GorillaTagScripts.CustomMapSupport
 			trigger = null;
 			foreach (KeyValuePair<string, Dictionary<byte, CMSTrigger>> keyValuePair in CMSSerializer.registeredTriggersPerScene)
 			{
-				if (keyValuePair.Value.TryGetValue(triggerID, ref trigger))
+				if (keyValuePair.Value.TryGetValue(triggerID, out trigger))
 				{
 					return true;
 				}
@@ -209,12 +212,12 @@ namespace GorillaTagScripts.CustomMapSupport
 		private static void ProcessTriggerHistory(string forScene)
 		{
 			Dictionary<byte, CMSTrigger> dictionary;
-			if (CMSSerializer.registeredTriggersPerScene.TryGetValue(forScene, ref dictionary))
+			if (CMSSerializer.registeredTriggersPerScene.TryGetValue(forScene, out dictionary))
 			{
-				foreach (byte b in CMSSerializer.triggerHistory)
+				foreach (byte key in CMSSerializer.triggerHistory)
 				{
 					CMSTrigger cmstrigger;
-					if (dictionary.TryGetValue(b, ref cmstrigger))
+					if (dictionary.TryGetValue(key, out cmstrigger))
 					{
 						cmstrigger.Trigger(1.0, false, true);
 					}
@@ -231,13 +234,13 @@ namespace GorillaTagScripts.CustomMapSupport
 		private static void ProcessTriggerCounts(string forScene)
 		{
 			Dictionary<byte, CMSTrigger> dictionary;
-			if (CMSSerializer.registeredTriggersPerScene.TryGetValue(forScene, ref dictionary))
+			if (CMSSerializer.registeredTriggersPerScene.TryGetValue(forScene, out dictionary))
 			{
 				List<byte> list = new List<byte>();
 				foreach (KeyValuePair<byte, byte> keyValuePair in CMSSerializer.triggerCounts)
 				{
 					CMSTrigger cmstrigger;
-					if (dictionary.TryGetValue(keyValuePair.Key, ref cmstrigger))
+					if (dictionary.TryGetValue(keyValuePair.Key, out cmstrigger))
 					{
 						if (cmstrigger.numAllowedTriggers > 0)
 						{
@@ -249,9 +252,9 @@ namespace GorillaTagScripts.CustomMapSupport
 						}
 					}
 				}
-				foreach (byte b in list)
+				foreach (byte key in list)
 				{
-					CMSSerializer.triggerCounts.Remove(b);
+					CMSSerializer.triggerCounts.Remove(key);
 				}
 			}
 		}
@@ -356,7 +359,7 @@ namespace GorillaTagScripts.CustomMapSupport
 				triggerTime = -1.0;
 			}
 			byte b;
-			bool flag2 = CMSSerializer.triggerCounts.TryGetValue(triggerID, ref b);
+			bool flag2 = CMSSerializer.triggerCounts.TryGetValue(triggerID, out b);
 			bool flag3 = !flag || cmstrigger.numAllowedTriggers > 0;
 			if (flag2)
 			{

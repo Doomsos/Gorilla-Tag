@@ -189,7 +189,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		GameEntity gameEntity = this.gameEntityManager.GetGameEntity(collectibleEntityId);
 		if (gameEntity != null)
 		{
-			this.photonView.RPC("ApplyCollectItemRPC", 0, new object[]
+			this.photonView.RPC("ApplyCollectItemRPC", RpcTarget.All, new object[]
 			{
 				this.gameEntityManager.GetNetIdFromEntityId(collectibleEntityId),
 				-1,
@@ -216,7 +216,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		if (true)
 		{
-			this.photonView.RPC("ApplyCollectItemRPC", 0, new object[]
+			this.photonView.RPC("ApplyCollectItemRPC", RpcTarget.All, new object[]
 			{
 				collectibleEntityNetId,
 				collectorEntityNetId,
@@ -303,7 +303,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		{
 			return;
 		}
-		this.photonView.RPC("ApplySeedExtractorStateRPC", 0, new object[]
+		this.photonView.RPC("ApplySeedExtractorStateRPC", RpcTarget.All, new object[]
 		{
 			info.Sender.ActorNumber,
 			coreCount,
@@ -336,7 +336,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		GameEntity gameEntity = this.gameEntityManager.GetGameEntity(collectibleEntityId);
 		if (gameEntity != null)
 		{
-			this.photonView.RPC("DistillItemRPC", 0, new object[]
+			this.photonView.RPC("DistillItemRPC", RpcTarget.All, new object[]
 			{
 				this.gameEntityManager.GetNetIdFromEntityId(collectibleEntityId),
 				gameEntity.lastHeldByActorNumber
@@ -403,7 +403,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		if (true)
 		{
-			this.photonView.RPC("ApplyChargeToolRPC", 0, new object[]
+			this.photonView.RPC("ApplyChargeToolRPC", RpcTarget.All, new object[]
 			{
 				collectorEntityNetId,
 				targetToolNetId,
@@ -434,24 +434,24 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 				if (component != null && component.tool != null && component2 != null)
 				{
 					int num = (targetEnergyDelta != 0) ? targetEnergyDelta : 100;
-					int num2 = Mathf.Max(component2.GetEnergyMax() - component2.energy, 0);
-					int num3;
+					int b = Mathf.Max(component2.GetEnergyMax() - component2.energy, 0);
+					int num2;
 					if (!useCollectorEnergy)
 					{
-						num3 = Mathf.Min(num, num2);
-						Debug.Log(string.Format("Apply SelfCharge {0}", num3));
+						num2 = Mathf.Min(num, b);
+						Debug.Log(string.Format("Apply SelfCharge {0}", num2));
 					}
 					else
 					{
-						num3 = Mathf.Min(Mathf.Min(component.tool.energy, num), num2);
+						num2 = Mathf.Min(Mathf.Min(component.tool.energy, num), b);
 					}
-					if (num3 > 0)
+					if (num2 > 0)
 					{
 						if (useCollectorEnergy)
 						{
-							component.tool.SetEnergy(component.tool.energy - num3);
+							component.tool.SetEnergy(component.tool.energy - num2);
 						}
-						component2.RefillEnergy(num3, entityIdFromNetId);
+						component2.RefillEnergy(num2, entityIdFromNetId);
 						component.PlayChargeEffect(component2);
 					}
 				}
@@ -484,7 +484,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		GamePlayer player;
 		if (GamePlayer.TryGetGamePlayer(info.Sender.ActorNumber, out player) && this.gameEntityManager.IsPlayerHandNearEntity(player, collectorEntityNetId, false, true, 16f) && (grplayer.transform.position - this.reactor.currencyDepositor.transform.position).magnitude < 16f)
 		{
-			this.photonView.RPC("ApplyDepositCurrencyRPC", 0, new object[]
+			this.photonView.RPC("ApplyDepositCurrencyRPC", RpcTarget.All, new object[]
 			{
 				collectorEntityNetId,
 				info.Sender.ActorNumber
@@ -538,7 +538,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 
 	public void RequestEnemyHitPlayer(GhostReactor.EnemyType type, GameEntityId hitByEntityId, GRPlayer player, Vector3 hitPosition)
 	{
-		this.photonView.RPC("ApplyEnemyHitPlayerRPC", 0, new object[]
+		this.photonView.RPC("ApplyEnemyHitPlayerRPC", RpcTarget.All, new object[]
 		{
 			type,
 			this.gameEntityManager.GetNetIdFromEntityId(hitByEntityId),
@@ -549,7 +549,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 
 	public void RequestEnemyHitPlayer(GhostReactor.EnemyType type, GameEntityId hitByEntityId, GRPlayer player, Vector3 hitPosition, Vector3 hitImpulse)
 	{
-		this.photonView.RPC("ApplyEnemyHitPlayerRPC", 0, new object[]
+		this.photonView.RPC("ApplyEnemyHitPlayerRPC", RpcTarget.All, new object[]
 		{
 			type,
 			this.gameEntityManager.GetNetIdFromEntityId(hitByEntityId),
@@ -602,7 +602,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 
 	public void ReportLocalPlayerHit()
 	{
-		base.GetView.RPC("ReportLocalPlayerHitRPC", 0, Array.Empty<object>());
+		base.GetView.RPC("ReportLocalPlayerHitRPC", RpcTarget.All, Array.Empty<object>());
 	}
 
 	[PunRPC]
@@ -620,7 +620,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 	{
 		if ((NetworkSystem.Instance.InRoom && this.IsAuthority()) || !NetworkSystem.Instance.InRoom)
 		{
-			base.GetView.RPC("ApplyPlayerRevivedRPC", 0, new object[]
+			base.GetView.RPC("ApplyPlayerRevivedRPC", RpcTarget.All, new object[]
 			{
 				reviveStation.Index,
 				player.gamePlayer.rig.OwningNetPlayer.ActorNumber
@@ -656,7 +656,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 	{
 		if (NetworkSystem.Instance.InRoom)
 		{
-			base.GetView.RPC("PlayerStateChangeRPC", 0, new object[]
+			base.GetView.RPC("PlayerStateChangeRPC", RpcTarget.All, new object[]
 			{
 				PhotonNetwork.LocalPlayer.ActorNumber,
 				player.gamePlayer.rig.OwningNetPlayer.ActorNumber,
@@ -714,7 +714,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		{
 			return;
 		}
-		base.GetView.RPC("ApplyGrantPlayerShieldRPC", 0, new object[]
+		base.GetView.RPC("ApplyGrantPlayerShieldRPC", RpcTarget.All, new object[]
 		{
 			shieldingPlayer,
 			playerToGrantShieldActorNumber,
@@ -753,7 +753,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		if ((NetworkSystem.Instance.InRoom && base.IsMine) || !NetworkSystem.Instance.InRoom)
 		{
-			base.GetView.RPC("RequestFireProjectileRPC", 0, new object[]
+			base.GetView.RPC("RequestFireProjectileRPC", RpcTarget.All, new object[]
 			{
 				this.gameEntityManager.GetNetIdFromEntityId(entityId),
 				firingPosition,
@@ -840,7 +840,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			SRand srand = new SRand(Mathf.FloorToInt(Time.time * 100f));
 			int num = srand.NextInt(0, int.MaxValue);
 			string text = Guid.NewGuid().ToString();
-			this.photonView.RPC("ApplyShiftStartRPC", 0, new object[]
+			this.photonView.RPC("ApplyShiftStartRPC", RpcTarget.All, new object[]
 			{
 				time,
 				num,
@@ -865,14 +865,14 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		GhostReactorShiftManager shiftManager = this.reactor.shiftManager;
 		GhostReactorLevelGenerator levelGenerator = this.reactor.levelGenerator;
-		int num = Math.Clamp(this.reactor.NumActivePlayers, 0, this.reactor.difficultyScalingPerPlayer.Count - 1);
+		int index = Math.Clamp(this.reactor.NumActivePlayers, 0, this.reactor.difficultyScalingPerPlayer.Count - 1);
 		this.reactor.difficultyScalingForCurrentFloor = 1f;
 		if (this.reactor.difficultyScalingPerPlayer.Count > 0)
 		{
-			this.reactor.difficultyScalingForCurrentFloor = this.reactor.difficultyScalingPerPlayer[num];
+			this.reactor.difficultyScalingForCurrentFloor = this.reactor.difficultyScalingPerPlayer[index];
 		}
-		double num2 = PhotonNetwork.Time - shiftStartTime;
-		if (num2 < 0.0 || num2 > 10.0)
+		double num = PhotonNetwork.Time - shiftStartTime;
+		if (num < 0.0 || num > 10.0)
 		{
 			return;
 		}
@@ -934,7 +934,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			}
 		}
 		this.gameEntityManager.RequestDestroyItems(GhostReactorManager.tempEntitiesToDestroy);
-		this.photonView.RPC("ApplyShiftEndRPC", 1, new object[]
+		this.photonView.RPC("ApplyShiftEndRPC", RpcTarget.Others, new object[]
 		{
 			PhotonNetwork.Time
 		});
@@ -1104,7 +1104,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			state = 1;
 		}
 		int actorNumber = info.Sender.ActorNumber;
-		this.photonView.RPC("PromotionBotActivePlayerResponseRPC", 1, new object[]
+		this.photonView.RPC("PromotionBotActivePlayerResponseRPC", RpcTarget.Others, new object[]
 		{
 			actorNumber,
 			state
@@ -1312,7 +1312,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		if (flag)
 		{
-			this.photonView.RPC("ApplyPlayerActionRPC", 0, new object[]
+			this.photonView.RPC("ApplyPlayerActionRPC", RpcTarget.All, new object[]
 			{
 				playerAction,
 				param0,
@@ -1537,7 +1537,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		{
 			return;
 		}
-		this.photonView.RPC("ToolPurchaseV2_RPC", 1, new object[]
+		this.photonView.RPC("ToolPurchaseV2_RPC", RpcTarget.Others, new object[]
 		{
 			GhostReactorManager.ToolPurchaseActionV2.SelectShelfAndItem,
 			PhotonNetwork.LocalPlayer.ActorNumber,
@@ -1605,7 +1605,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		if (item2)
 		{
-			this.photonView.RPC("ToolPurchaseV2_RPC", 1, new object[]
+			this.photonView.RPC("ToolPurchaseV2_RPC", RpcTarget.Others, new object[]
 			{
 				GhostReactorManager.ToolPurchaseActionV2.NotifyPurchaseSuccess,
 				info.Sender.ActorNumber,
@@ -1616,7 +1616,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		else
 		{
-			this.photonView.RPC("ToolPurchaseV2_RPC", 1, new object[]
+			this.photonView.RPC("ToolPurchaseV2_RPC", RpcTarget.Others, new object[]
 			{
 				GhostReactorManager.ToolPurchaseActionV2.NotifyPurchaseFail,
 				info.Sender.ActorNumber,
@@ -1675,7 +1675,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			return;
 		}
 		station.SetActivePlayer(actorNumber);
-		this.photonView.RPC("ToolPurchaseV2_RPC", 1, new object[]
+		this.photonView.RPC("ToolPurchaseV2_RPC", RpcTarget.Others, new object[]
 		{
 			GhostReactorManager.ToolPurchaseActionV2.SetToolStationActivePlayer,
 			PhotonNetwork.LocalPlayer.ActorNumber,
@@ -1728,7 +1728,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		{
 			return;
 		}
-		this.photonView.RPC("ToolPurchaseV2_RPC", 1, new object[]
+		this.photonView.RPC("ToolPurchaseV2_RPC", RpcTarget.Others, new object[]
 		{
 			GhostReactorManager.ToolPurchaseActionV2.SetHandleAndSelectionWheelPosition,
 			PhotonNetwork.LocalPlayer.ActorNumber,
@@ -1828,7 +1828,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		{
 		case GhostReactorManager.ToolPurchaseStationAction.ShiftLeft:
 			grtoolPurchaseStation.ShiftLeftAuthority();
-			this.photonView.RPC("ToolPurchaseStationResponseRPC", 1, new object[]
+			this.photonView.RPC("ToolPurchaseStationResponseRPC", RpcTarget.Others, new object[]
 			{
 				stationIndex,
 				GhostReactorManager.ToolPurchaseStationResponse.SelectionUpdate,
@@ -1839,7 +1839,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			return;
 		case GhostReactorManager.ToolPurchaseStationAction.ShiftRight:
 			grtoolPurchaseStation.ShiftRightAuthority();
-			this.photonView.RPC("ToolPurchaseStationResponseRPC", 1, new object[]
+			this.photonView.RPC("ToolPurchaseStationResponseRPC", RpcTarget.Others, new object[]
 			{
 				stationIndex,
 				GhostReactorManager.ToolPurchaseStationResponse.SelectionUpdate,
@@ -1858,7 +1858,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 				int num;
 				if (component != null && grtoolPurchaseStation.TryPurchaseAuthority(component, out num))
 				{
-					this.photonView.RPC("ToolPurchaseStationResponseRPC", 1, new object[]
+					this.photonView.RPC("ToolPurchaseStationResponseRPC", RpcTarget.Others, new object[]
 					{
 						stationIndex,
 						GhostReactorManager.ToolPurchaseStationResponse.PurchaseSucceeded,
@@ -1871,7 +1871,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			}
 			if (!flag)
 			{
-				this.photonView.RPC("ToolPurchaseStationResponseRPC", 1, new object[]
+				this.photonView.RPC("ToolPurchaseStationResponseRPC", RpcTarget.Others, new object[]
 				{
 					stationIndex,
 					GhostReactorManager.ToolPurchaseStationResponse.PurchaseFailed,
@@ -1990,7 +1990,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			GameEntity gameEntity2 = this.gameEntityManager.GetGameEntity(this.gameEntityManager.GetEntityIdFromNetId(upgradeNetID));
 			if (component != null && gameEntity2 != null && GameEntityManager.IsPlayerHandNearPosition(grplayer.gamePlayer, gameEntity2.transform.position, false, true, 16f) && GameEntityManager.IsPlayerHandNearPosition(grplayer.gamePlayer, gameEntity2.transform.position, false, true, 16f))
 			{
-				this.photonView.RPC("UpgradeToolRemoteRPC", 0, new object[]
+				this.photonView.RPC("UpgradeToolRemoteRPC", RpcTarget.All, new object[]
 				{
 					UpgradeID,
 					entityNetId,
@@ -2040,7 +2040,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 
 	public void ToolPlacedInUpgradeStation(GameEntity entity)
 	{
-		this.photonView.RPC("PlacedToolInUpgradeStationRPC", 0, new object[]
+		this.photonView.RPC("PlacedToolInUpgradeStationRPC", RpcTarget.All, new object[]
 		{
 			this.gameEntityManager.GetNetIdFromEntityId(entity.id)
 		});
@@ -2052,7 +2052,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 
 	public void UpgradeToolAtToolStation()
 	{
-		this.photonView.RPC("UpgradeToolAtToolStationRPC", 0, Array.Empty<object>());
+		this.photonView.RPC("UpgradeToolAtToolStationRPC", RpcTarget.All, Array.Empty<object>());
 	}
 
 	public void UpgradeToolAtToolStationRPC(PhotonMessageInfo info)
@@ -2085,7 +2085,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 				num2 = BitPackUtils.PackQuaternionForNetwork(gruiemployeeBadgeDispenser.GetSpawnRotation());
 			}
 		}
-		this.photonView.RPC("EntityEnteredDropZoneRPC", 0, new object[]
+		this.photonView.RPC("EntityEnteredDropZoneRPC", RpcTarget.All, new object[]
 		{
 			this.gameEntityManager.GetNetIdFromEntityId(entity.id),
 			num,
@@ -2147,7 +2147,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			Action onReleased = gameEntity.OnReleased;
 			if (onReleased != null)
 			{
-				onReleased.Invoke();
+				onReleased();
 			}
 		}
 		gameEntity.transform.SetParent(null);
@@ -2178,7 +2178,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		{
 			return;
 		}
-		base.SendRPC("ApplyRecycleScanItemRPC", 0, new object[]
+		base.SendRPC("ApplyRecycleScanItemRPC", RpcTarget.All, new object[]
 		{
 			netIdFromEntityId
 		});
@@ -2210,7 +2210,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		{
 			return;
 		}
-		base.SendRPC("ApplyRecycleItemRPC", 0, new object[]
+		base.SendRPC("ApplyRecycleItemRPC", RpcTarget.All, new object[]
 		{
 			lastHeldActorNumber,
 			netIdFromEntityId,
@@ -2241,7 +2241,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		int netIdFromEntityId = this.gameEntityManager.GetNetIdFromEntityId(entity.id);
 		double num = PhotonNetwork.Time + (double)waitTime;
-		base.SendRPC("SentientCorePerformJumpRPC", 0, new object[]
+		base.SendRPC("SentientCorePerformJumpRPC", RpcTarget.All, new object[]
 		{
 			netIdFromEntityId,
 			startPos,
@@ -2450,8 +2450,8 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			writer.Write(respawnQueue[l].entityCreateData);
 			writer.Write(respawnQueue[l].entityNextRespawnTime);
 		}
-		bool flag = false;
-		writer.Write(flag);
+		bool value = false;
+		writer.Write(value);
 	}
 
 	public void DeserializeZoneData(BinaryReader reader)

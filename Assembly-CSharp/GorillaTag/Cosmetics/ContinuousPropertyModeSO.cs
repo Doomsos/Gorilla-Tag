@@ -92,7 +92,7 @@ namespace GorillaTag.Cosmetics
 						return this.castData[i].whatItSets + " the " + this.type.ToString() + " when entering the 'true' part of the range.";
 					case ContinuousPropertyModeSO.DescriptionStyle.DualThreshold:
 					{
-						string[] array = this.castData[i].whatItSets.Split('|', 0);
+						string[] array = this.castData[i].whatItSets.Split('|', StringSplitOptions.None);
 						if (array.Length != 2)
 						{
 							return string.Format("Error! '{0}'s '{1}.{2}' does not have two string separated by '|'.", base.name, this.castData[i].target, "whatItSets");
@@ -117,7 +117,8 @@ namespace GorillaTag.Cosmetics
 
 		public string ListValidCasts()
 		{
-			return "Valid targets: " + string.Join<ContinuousProperty.Cast>(", ", Enumerable.Select<ContinuousPropertyModeSO.CastData, ContinuousProperty.Cast>(this.castData, (ContinuousPropertyModeSO.CastData x) => x.target));
+			return "Valid targets: " + string.Join<ContinuousProperty.Cast>(", ", from x in this.castData
+			select x.target);
 		}
 
 		public ContinuousProperty.Type type;
