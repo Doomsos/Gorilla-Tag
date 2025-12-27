@@ -37,7 +37,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 		this.InitIfNeeded();
 		if (this.rig != null)
 		{
-			this.rig.OnColorChanged += this.UpdateColor;
+			this.rig.OnColorChanged += new Action<Color>(this.UpdateColor);
 			this.UpdateColor(this.rig.playerColor);
 		}
 	}
@@ -46,7 +46,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 	{
 		if (this.rig != null)
 		{
-			this.rig.OnColorChanged -= this.UpdateColor;
+			this.rig.OnColorChanged -= new Action<Color>(this.UpdateColor);
 		}
 	}
 
@@ -98,7 +98,7 @@ public class PlayerColoredCosmetic : MonoBehaviour
 				Debug.LogError("ERROR!!!  ColoringRule.Init: Default meshRenderer cannot be null! Path=" + this.meshRenderer.transform.GetPathQ());
 			}
 			List<Material> list;
-			using (CollectionPool<List<Material>, Material>.Get(out list))
+			using (CollectionPool<List<Material>, Material>.Get(ref list))
 			{
 				this.meshRenderer.GetSharedMaterials(list);
 				if (this.materialIndex < 0 || this.materialIndex >= list.Count)

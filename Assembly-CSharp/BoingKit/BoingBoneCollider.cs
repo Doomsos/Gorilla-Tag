@@ -81,53 +81,54 @@ namespace BoingKit
 			{
 			case BoingBoneCollider.Type.Sphere:
 			{
-				float radius = VectorUtil.MinComponent(base.transform.localScale) * this.Radius;
+				float num = VectorUtil.MinComponent(base.transform.localScale) * this.Radius;
 				Gizmos.matrix = Matrix4x4.TRS(base.transform.position, base.transform.rotation, Vector3.one);
 				if (this.Shape == BoingBoneCollider.Type.Sphere)
 				{
 					Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
-					Gizmos.DrawSphere(Vector3.zero, radius);
+					Gizmos.DrawSphere(Vector3.zero, num);
 				}
 				Gizmos.color = Color.white;
-				Gizmos.DrawWireSphere(Vector3.zero, radius);
+				Gizmos.DrawWireSphere(Vector3.zero, num);
 				Gizmos.matrix = Matrix4x4.identity;
 				return;
 			}
 			case BoingBoneCollider.Type.Capsule:
 			{
-				float num = VectorUtil.MinComponent(base.transform.localScale);
-				float num2 = num * this.Radius;
-				float d = 0.5f * num * this.Height;
+				float num2 = VectorUtil.MinComponent(base.transform.localScale);
+				float num3 = num2 * this.Radius;
+				float num4 = 0.5f * num2 * this.Height;
 				Gizmos.matrix = Matrix4x4.TRS(base.transform.position, base.transform.rotation, Vector3.one);
 				if (this.Shape == BoingBoneCollider.Type.Capsule)
 				{
 					Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
-					Gizmos.DrawSphere(d * Vector3.up, num2);
-					Gizmos.DrawSphere(d * Vector3.down, num2);
+					Gizmos.DrawSphere(num4 * Vector3.up, num3);
+					Gizmos.DrawSphere(num4 * Vector3.down, num3);
 				}
 				Gizmos.color = Color.white;
-				Gizmos.DrawWireSphere(d * Vector3.up, num2);
-				Gizmos.DrawWireSphere(d * Vector3.down, num2);
+				Gizmos.DrawWireSphere(num4 * Vector3.up, num3);
+				Gizmos.DrawWireSphere(num4 * Vector3.down, num3);
 				for (int i = 0; i < 4; i++)
 				{
-					float f = (float)i * MathUtil.HalfPi;
-					Vector3 a = new Vector3(num2 * Mathf.Cos(f), 0f, num2 * Mathf.Sin(f));
-					Gizmos.DrawLine(a + d * Vector3.up, a + d * Vector3.down);
+					float num5 = (float)i * MathUtil.HalfPi;
+					Vector3 vector;
+					vector..ctor(num3 * Mathf.Cos(num5), 0f, num3 * Mathf.Sin(num5));
+					Gizmos.DrawLine(vector + num4 * Vector3.up, vector + num4 * Vector3.down);
 				}
 				Gizmos.matrix = Matrix4x4.identity;
 				return;
 			}
 			case BoingBoneCollider.Type.Box:
 			{
-				Vector3 size = VectorUtil.ComponentWiseMult(base.transform.localScale, this.Dimensions);
+				Vector3 vector2 = VectorUtil.ComponentWiseMult(base.transform.localScale, this.Dimensions);
 				Gizmos.matrix = base.transform.localToWorldMatrix;
 				if (this.Shape == BoingBoneCollider.Type.Box)
 				{
 					Gizmos.color = new Color(1f, 1f, 1f, 0.5f);
-					Gizmos.DrawCube(Vector3.zero, size);
+					Gizmos.DrawCube(Vector3.zero, vector2);
 				}
 				Gizmos.color = Color.white;
-				Gizmos.DrawWireCube(Vector3.zero, size);
+				Gizmos.DrawWireCube(Vector3.zero, vector2);
 				Gizmos.matrix = Matrix4x4.identity;
 				return;
 			}

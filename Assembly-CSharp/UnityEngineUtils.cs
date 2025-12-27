@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class UnityEngineUtils
 {
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static bool EqualsColor(this Color32 c, Color32 other)
 	{
 		return c.r == other.r && c.g == other.g && c.b == other.b && c.a == other.a;
@@ -35,11 +35,11 @@ public static class UnityEngineUtils
 
 	public static Color32 ToHighViz(this Color32 c)
 	{
-		float h;
 		float num;
 		float num2;
-		Color.RGBToHSV(c, out h, out num, out num2);
-		return Color.HSVToRGB(h, 1f, 1f);
+		float num3;
+		Color.RGBToHSV(c, ref num, ref num2, ref num3);
+		return Color.HSVToRGB(num, 1f, 1f);
 	}
 
 	public unsafe static int Color32ToId(this Color32 c, bool distinct = true)
@@ -85,7 +85,7 @@ public static class UnityEngineUtils
 		return new Id128(a, b, c, d);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static long QuantizedHash64(this Vector4 v)
 	{
 		int a = (int)((double)v.x * 1000.0 + 0.5);
@@ -97,7 +97,7 @@ public static class UnityEngineUtils
 		return StaticHash.Compute128To64(a3, b3);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public unsafe static long QuantizedHash64(this Matrix4x4 m)
 	{
 		m4x4 m4x = *m4x4.From(ref m);
@@ -110,19 +110,19 @@ public static class UnityEngineUtils
 		return StaticHash.Compute128To64(a3, b3);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static ulong MergeTo64(int a, int b)
 	{
 		return (ulong)b << 32 | (ulong)a;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public unsafe static Vector4 ToVector(this Quaternion q)
 	{
 		return *Unsafe.As<Quaternion, Vector4>(ref q);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void CopyTo(this Quaternion q, ref Vector4 v)
 	{
 		v.x = q.x;

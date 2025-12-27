@@ -26,9 +26,7 @@ namespace GorillaTagScripts
 
 		public GorillaCaveCrystalSetup.CrystalDef[] GetCrystalDefs()
 		{
-			return (from f in typeof(GorillaCaveCrystalSetup).GetRuntimeFields()
-			where f != null && f.FieldType == typeof(GorillaCaveCrystalSetup.CrystalDef)
-			select (GorillaCaveCrystalSetup.CrystalDef)f.GetValue(this)).ToArray<GorillaCaveCrystalSetup.CrystalDef>();
+			return Enumerable.ToArray<GorillaCaveCrystalSetup.CrystalDef>(Enumerable.Select<FieldInfo, GorillaCaveCrystalSetup.CrystalDef>(Enumerable.Where<FieldInfo>(RuntimeReflectionExtensions.GetRuntimeFields(typeof(GorillaCaveCrystalSetup)), (FieldInfo f) => f != null && f.FieldType == typeof(GorillaCaveCrystalSetup.CrystalDef)), (FieldInfo f) => (GorillaCaveCrystalSetup.CrystalDef)f.GetValue(this)));
 		}
 
 		public Material SharedBase;

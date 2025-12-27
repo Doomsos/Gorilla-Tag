@@ -79,16 +79,14 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	private void CollectButtonColliders()
 	{
 		SITechTreeStation.<>c__DisplayClass77_0 CS$<>8__locals1;
-		CS$<>8__locals1.buttons = base.GetComponentsInChildren<SITouchscreenButton>(true).ToList<SITouchscreenButton>();
-		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|77_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
-		select d.gameObject).ToArray<GameObject>(), ref CS$<>8__locals1);
+		CS$<>8__locals1.buttons = Enumerable.ToList<SITouchscreenButton>(base.GetComponentsInChildren<SITouchscreenButton>(true));
+		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|77_2(Enumerable.ToArray<GameObject>(Enumerable.Select<DestroyIfNotBeta, GameObject>(base.GetComponentsInChildren<DestroyIfNotBeta>(), (DestroyIfNotBeta d) => d.gameObject)), ref CS$<>8__locals1);
 		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|77_2(new GameObject[]
 		{
 			this.techTreeHelpScreen,
 			this.nodePopupScreen
 		}, ref CS$<>8__locals1);
-		this._nonPopupButtonColliders = (from b in CS$<>8__locals1.buttons
-		select b.GetComponent<Collider>()).ToList<Collider>();
+		this._nonPopupButtonColliders = Enumerable.ToList<Collider>(Enumerable.Select<SITouchscreenButton, Collider>(CS$<>8__locals1.buttons, (SITouchscreenButton b) => b.GetComponent<Collider>()));
 	}
 
 	private void SetNonPopupButtonsEnabled(bool enable)
@@ -289,7 +287,7 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 				sitechTreeUIPage.gameObject.SetActive(sitechTreeUIPage.id == (SITechTreePageId)this.parentTerminal.ActivePage);
 			}
 			Sprite sprite;
-			this.techTreeIconById.TryGetValue((SITechTreePageId)this.parentTerminal.ActivePage, out sprite);
+			this.techTreeIconById.TryGetValue((SITechTreePageId)this.parentTerminal.ActivePage, ref sprite);
 			this.techTreeIcon.sprite = sprite;
 			return;
 		}
@@ -583,8 +581,7 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 			}
 			return text;
 		}
-		return string.Join<int>("\n", from c in node.nodeCost
-		select c.amount);
+		return string.Join<int>("\n", Enumerable.Select<SIResource.ResourceCost, int>(node.nodeCost, (SIResource.ResourceCost c) => c.amount));
 	}
 
 	public string FormattedCurrentResourceAmountsForNode(SITechTreeNode node)
@@ -696,9 +693,9 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	{
 		for (int i = 0; i < roots.Length; i++)
 		{
-			foreach (SITouchscreenButton item in roots[i].GetComponentsInChildren<SITouchscreenButton>(true))
+			foreach (SITouchscreenButton sitouchscreenButton in roots[i].GetComponentsInChildren<SITouchscreenButton>(true))
 			{
-				A_1.buttons.Remove(item);
+				A_1.buttons.Remove(sitouchscreenButton);
 			}
 		}
 	}

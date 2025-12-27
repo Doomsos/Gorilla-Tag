@@ -20,7 +20,7 @@ public class MockFriendServer : MonoBehaviourPun
 		{
 			MockFriendServer.Instance = this;
 			PhotonNetwork.AddCallbackTarget(this);
-			NetworkSystem.Instance.OnMultiplayerStarted += this.OnMultiplayerStarted;
+			NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnMultiplayerStarted);
 			return;
 		}
 		Object.Destroy(this);
@@ -65,7 +65,7 @@ public class MockFriendServer : MonoBehaviourPun
 							this.AddFriend(this.friendRequests[k].requestorPublicId, this.friendRequests[k].requesteePublicId, num, num2);
 							this.indexesToRemove.Add(l);
 							this.indexesToRemove.Add(k);
-							base.photonView.RPC("AddFriendPairRPC", RpcTarget.Others, new object[]
+							base.photonView.RPC("AddFriendPairRPC", 1, new object[]
 							{
 								this.friendRequests[k].requestorPublicId,
 								this.friendRequests[k].requesteePublicId,
@@ -92,7 +92,7 @@ public class MockFriendServer : MonoBehaviourPun
 			this.RegisterLocalPlayerInternal(localPlayerPublicId, hashCode);
 			return;
 		}
-		base.photonView.RPC("RegisterLocalPlayerRPC", RpcTarget.MasterClient, new object[]
+		base.photonView.RPC("RegisterLocalPlayerRPC", 2, new object[]
 		{
 			localPlayerPublicId,
 			hashCode
@@ -106,7 +106,7 @@ public class MockFriendServer : MonoBehaviourPun
 			this.RequestAddFriendInternal(this.LocalPlayerId, targetPlayerId);
 			return;
 		}
-		base.photonView.RPC("RequestAddFriendRPC", RpcTarget.MasterClient, new object[]
+		base.photonView.RPC("RequestAddFriendRPC", 2, new object[]
 		{
 			this.LocalPlayerId,
 			targetPlayerId
@@ -120,7 +120,7 @@ public class MockFriendServer : MonoBehaviourPun
 			this.RequestRemoveFriendInternal(this.LocalPlayerId, targetPlayerId);
 			return;
 		}
-		base.photonView.RPC("RequestRemoveFriendRPC", RpcTarget.MasterClient, new object[]
+		base.photonView.RPC("RequestRemoveFriendRPC", 2, new object[]
 		{
 			this.LocalPlayerId,
 			targetPlayerId
@@ -203,10 +203,10 @@ public class MockFriendServer : MonoBehaviourPun
 			{
 				if (publicId == this.privateIdLookup[i].playerPublicId || privateId == this.privateIdLookup[i].playerPrivateId)
 				{
-					MockFriendServer.PrivateIdEncryptionPlaceholder value = this.privateIdLookup[i];
-					value.playerPublicId = publicId;
-					value.playerPrivateId = privateId;
-					this.privateIdLookup[i] = value;
+					MockFriendServer.PrivateIdEncryptionPlaceholder privateIdEncryptionPlaceholder = this.privateIdLookup[i];
+					privateIdEncryptionPlaceholder.playerPublicId = publicId;
+					privateIdEncryptionPlaceholder.playerPrivateId = privateId;
+					this.privateIdLookup[i] = privateIdEncryptionPlaceholder;
 					flag = true;
 					break;
 				}

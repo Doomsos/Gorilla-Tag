@@ -41,7 +41,7 @@ namespace GorillaTag.Cosmetics
 			{
 				return;
 			}
-			XRNode node = this.inLeftHand ? XRNode.LeftHand : XRNode.RightHand;
+			XRNode node = this.inLeftHand ? 4 : 5;
 			switch (this.buttonType)
 			{
 			case ControllerButtonEvent.ButtonType.trigger:

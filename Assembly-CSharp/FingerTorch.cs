@@ -38,9 +38,9 @@ public class FingerTorch : MonoBehaviour, ISpawnable
 	private void UpdateLocal()
 	{
 		int node = this.attachedToLeftHand ? 4 : 5;
-		bool flag = ControllerInputPoller.GripFloat((XRNode)node) > 0.25f;
-		bool flag2 = ControllerInputPoller.PrimaryButtonPress((XRNode)node);
-		bool flag3 = ControllerInputPoller.SecondaryButtonPress((XRNode)node);
+		bool flag = ControllerInputPoller.GripFloat(node) > 0.25f;
+		bool flag2 = ControllerInputPoller.PrimaryButtonPress(node);
+		bool flag3 = ControllerInputPoller.SecondaryButtonPress(node);
 		bool flag4 = flag && (flag2 || flag3);
 		this.networkedExtended = flag4;
 		if (PhotonNetwork.InRoom && this.myRig)

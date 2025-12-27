@@ -34,28 +34,20 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 
 	public void OnConfirmPressed()
 	{
-		TelemetryData telemetryData = new TelemetryData
+		TelemetryData telemetryData = default(TelemetryData);
+		telemetryData.EventName = "kid_age_appeal_confirm_email";
+		telemetryData.CustomTags = new string[]
 		{
-			EventName = "kid_age_appeal_confirm_email",
-			CustomTags = new string[]
-			{
-				"kid_age_appeal",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"email_type",
-					this.hasChallenge ? "under_dac" : "over_dac"
-				},
-				{
-					"button_pressed",
-					"confirm"
-				}
-			}
+			"kid_age_appeal",
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		dictionary.Add("email_type", this.hasChallenge ? "under_dac" : "over_dac");
+		dictionary.Add("button_pressed", "confirm");
+		telemetryData.BodyData = dictionary;
+		TelemetryData telemetryData2 = telemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 		if (this.hasChallenge)
 		{
 			this.StartAgeAppealChallengeEmail();
@@ -66,28 +58,20 @@ public class KIDUI_AgeAppealEmailConfirmation : MonoBehaviour
 
 	public void OnBackPressed()
 	{
-		TelemetryData telemetryData = new TelemetryData
+		TelemetryData telemetryData = default(TelemetryData);
+		telemetryData.EventName = "kid_age_appeal_confirm_email";
+		telemetryData.CustomTags = new string[]
 		{
-			EventName = "kid_age_appeal_confirm_email",
-			CustomTags = new string[]
-			{
-				"kid_age_appeal",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"email_type",
-					this.hasChallenge ? "under_dac" : "over_dac"
-				},
-				{
-					"button_pressed",
-					"go_back"
-				}
-			}
+			"kid_age_appeal",
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		dictionary.Add("email_type", this.hasChallenge ? "under_dac" : "over_dac");
+		dictionary.Add("button_pressed", "go_back");
+		telemetryData.BodyData = dictionary;
+		TelemetryData telemetryData2 = telemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 		base.gameObject.SetActive(false);
 		this._ageAppealEmailScreen.ShowAgeAppealEmailScreen(this.hasChallenge, this.newAgeToAppeal);
 	}

@@ -8,12 +8,12 @@ public class GameModeSelectorButtonLayout : MonoBehaviour
 	private void OnEnable()
 	{
 		this.SetupButtons();
-		NetworkSystem.Instance.OnJoinedRoomEvent += this.SetupButtons;
+		NetworkSystem.Instance.OnJoinedRoomEvent += new Action(this.SetupButtons);
 	}
 
 	private void OnDisable()
 	{
-		NetworkSystem.Instance.OnJoinedRoomEvent -= this.SetupButtons;
+		NetworkSystem.Instance.OnJoinedRoomEvent -= new Action(this.SetupButtons);
 	}
 
 	public virtual void SetupButtons()

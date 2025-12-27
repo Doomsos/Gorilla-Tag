@@ -16,7 +16,7 @@ public class VRMapThumb : VRMap
 	public override void MapMyFinger(float lerpValue)
 	{
 		this.calcT = 0f;
-		if (this.vrTargetNode == XRNode.LeftHand)
+		if (this.vrTargetNode == 4)
 		{
 			this.primaryButtonPress = ControllerInputPoller.instance.leftControllerPrimaryButton;
 			this.primaryButtonTouch = ControllerInputPoller.instance.leftControllerPrimaryButtonTouch;

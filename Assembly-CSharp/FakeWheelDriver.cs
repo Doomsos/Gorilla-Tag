@@ -15,19 +15,19 @@ public class FakeWheelDriver : MonoBehaviour
 	private void OnCollisionStay(Collision collision)
 	{
 		int num = 0;
-		Vector3 a = Vector3.zero;
+		Vector3 vector = Vector3.zero;
 		foreach (ContactPoint contactPoint in collision.contacts)
 		{
 			if (contactPoint.thisCollider == this.wheelCollider)
 			{
-				a += contactPoint.point;
+				vector += contactPoint.point;
 				num++;
 			}
 		}
 		if (num > 0)
 		{
 			this.collisionNormal = collision.contacts[0].normal;
-			this.collisionPoint = a / (float)num;
+			this.collisionPoint = vector / (float)num;
 			this.hasCollision = true;
 		}
 	}
@@ -39,10 +39,10 @@ public class FakeWheelDriver : MonoBehaviour
 			Vector3 vector = base.transform.rotation * this.thrust;
 			if (this.myRigidBody.linearVelocity.IsShorterThan(this.maxSpeed))
 			{
-				vector = vector.ProjectOntoPlane(this.collisionNormal).normalized * this.thrust.magnitude;
+				vector = UnityVectorExtensions.ProjectOntoPlane(vector, this.collisionNormal).normalized * this.thrust.magnitude;
 				this.myRigidBody.AddForceAtPosition(vector, this.collisionPoint);
 			}
-			Vector3 vector2 = this.myRigidBody.linearVelocity.ProjectOntoPlane(this.collisionNormal).ProjectOntoPlane(vector.normalized);
+			Vector3 vector2 = UnityVectorExtensions.ProjectOntoPlane(UnityVectorExtensions.ProjectOntoPlane(this.myRigidBody.linearVelocity, this.collisionNormal), vector.normalized);
 			if (vector2.IsLongerThan(this.lateralFrictionForce))
 			{
 				this.myRigidBody.AddForceAtPosition(-vector2.normalized * this.lateralFrictionForce, this.collisionPoint);

@@ -117,5 +117,5 @@ public class JoinTriggerUI : MonoBehaviour
 	[SerializeField]
 	private JoinTriggerUITemplate template;
 
-	private new bool didStart;
+	private bool didStart;
 }

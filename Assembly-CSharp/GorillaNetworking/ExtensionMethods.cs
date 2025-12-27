@@ -12,12 +12,12 @@ namespace GorillaNetworking
 			{
 				if (action != null)
 				{
-					action(data);
+					action.Invoke(data);
 				}
 			}
-			catch (Exception arg)
+			catch (Exception ex)
 			{
-				Debug.LogError(string.Format("[PlayFabTitleDataCache::SafeInvoke] Failure invoking action: {0}", arg));
+				Debug.LogError(string.Format("[PlayFabTitleDataCache::SafeInvoke] Failure invoking action: {0}", ex));
 			}
 		}
 

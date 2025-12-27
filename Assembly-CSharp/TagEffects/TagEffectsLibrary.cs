@@ -53,10 +53,10 @@ namespace TagEffects
 			}
 			ModeTagEffect modeTagEffect = null;
 			TagEffectPack tagEffectPack = null;
-			GameModeType item = (GameMode.ActiveGameMode != null) ? GameMode.ActiveGameMode.GameType() : GameModeType.Casual;
+			GameModeType gameModeType = (GameMode.ActiveGameMode != null) ? GameMode.ActiveGameMode.GameType() : GameModeType.Casual;
 			for (int i = 0; i < TagEffectsLibrary._instance.defaultTagEffects.Length; i++)
 			{
-				if (TagEffectsLibrary._instance.defaultTagEffects[i] != null && TagEffectsLibrary._instance.defaultTagEffects[i].Modes.Contains(item))
+				if (TagEffectsLibrary._instance.defaultTagEffects[i] != null && TagEffectsLibrary._instance.defaultTagEffects[i].Modes.Contains(gameModeType))
 				{
 					modeTagEffect = TagEffectsLibrary._instance.defaultTagEffects[i];
 					tagEffectPack = modeTagEffect.tagEffect;
@@ -131,7 +131,7 @@ namespace TagEffects
 			tagEffectsCombo.inputA = playerCosmeticTagEffectPack;
 			tagEffectsCombo.inputB = otherPlayerCosmeticTagEffectPack;
 			TagEffectPack[] array;
-			if (!TagEffectsLibrary._instance.tagEffectsComboLookUp.TryGetValue(tagEffectsCombo, out array))
+			if (!TagEffectsLibrary._instance.tagEffectsComboLookUp.TryGetValue(tagEffectsCombo, ref array))
 			{
 				return playerCosmeticTagEffectPack;
 			}
@@ -150,7 +150,7 @@ namespace TagEffects
 				return;
 			}
 			Queue<GameObjectOnDisableDispatcher> queue;
-			if (!TagEffectsLibrary._instance.tagEffectsPool.TryGetValue(prefab.name, out queue))
+			if (!TagEffectsLibrary._instance.tagEffectsPool.TryGetValue(prefab.name, ref queue))
 			{
 				queue = new Queue<GameObjectOnDisableDispatcher>();
 				TagEffectsLibrary._instance.tagEffectsPool.Add(prefab.name, queue);
@@ -161,7 +161,7 @@ namespace TagEffects
 				gameObject.name = prefab.name;
 				gameObject.transform.localScale = (flipZAxis ? new Vector3(scale, scale, -scale) : (Vector3.one * scale));
 				GameObjectOnDisableDispatcher gameObjectOnDisableDispatcher;
-				if (!gameObject.TryGetComponent<GameObjectOnDisableDispatcher>(out gameObjectOnDisableDispatcher))
+				if (!gameObject.TryGetComponent<GameObjectOnDisableDispatcher>(ref gameObjectOnDisableDispatcher))
 				{
 					gameObjectOnDisableDispatcher = gameObject.AddComponent<GameObjectOnDisableDispatcher>();
 				}
@@ -192,7 +192,7 @@ namespace TagEffects
 			recycledGameObject.transform.localScale = (flipZAxis ? new Vector3(scale, scale, -scale) : (Vector3.one * scale));
 			recycledGameObject.transform.parent = (parentEffect ? target : TagEffectsLibrary._instance.transform);
 			Queue<GameObjectOnDisableDispatcher> queue;
-			if (TagEffectsLibrary._instance.tagEffectsPool.TryGetValue(recycledGameObject.gameObject.name, out queue))
+			if (TagEffectsLibrary._instance.tagEffectsPool.TryGetValue(recycledGameObject.gameObject.name, ref queue))
 			{
 				recycledGameObject.gameObject.SetActive(true);
 				queue.Enqueue(recycledGameObject);

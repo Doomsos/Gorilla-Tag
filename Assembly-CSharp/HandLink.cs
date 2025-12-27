@@ -145,7 +145,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		{
 			return;
 		}
-		onHandLinkChanged();
+		onHandLinkChanged.Invoke();
 	}
 
 	public void BreakLinkTo(HandLink targetLink)
@@ -173,7 +173,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		{
 			return;
 		}
-		onHandLinkChanged();
+		onHandLinkChanged.Invoke();
 	}
 
 	public static bool IsHandInChainWithOtherPlayer(HandLink startingLink, int targetPlayer)
@@ -292,7 +292,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 				Action onHandLinkChanged = HandLink.OnHandLinkChanged;
 				if (onHandLinkChanged != null)
 				{
-					onHandLinkChanged();
+					onHandLinkChanged.Invoke();
 				}
 			}
 		}
@@ -330,7 +330,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 						Action onHandLinkChanged2 = HandLink.OnHandLinkChanged;
 						if (onHandLinkChanged2 != null)
 						{
-							onHandLinkChanged2();
+							onHandLinkChanged2.Invoke();
 						}
 					}
 				}
@@ -344,7 +344,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 						Action onHandLinkChanged3 = HandLink.OnHandLinkChanged;
 						if (onHandLinkChanged3 != null)
 						{
-							onHandLinkChanged3();
+							onHandLinkChanged3.Invoke();
 						}
 					}
 				}
@@ -356,7 +356,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 					Action onHandLinkChanged4 = HandLink.OnHandLinkChanged;
 					if (onHandLinkChanged4 != null)
 					{
-						onHandLinkChanged4();
+						onHandLinkChanged4.Invoke();
 					}
 				}
 			}
@@ -370,7 +370,7 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 					Action onHandLinkChanged5 = HandLink.OnHandLinkChanged;
 					if (onHandLinkChanged5 != null)
 					{
-						onHandLinkChanged5();
+						onHandLinkChanged5.Invoke();
 					}
 				}
 			}
@@ -457,11 +457,11 @@ public class HandLink : HoldableObject, IGorillaSliceableSimple
 		}
 		Vector3 position = base.transform.position;
 		Vector3 position2 = this.grabbedLink.transform.position;
-		Vector3 a = (position + position2) / 2f;
-		Vector3 b = (this.isLeftHand ? this.myRig.leftHand.rigTarget : this.myRig.rightHand.rigTarget).position - position;
-		Vector3 b2 = (this.grabbedLink.isLeftHand ? this.grabbedLink.myRig.leftHand.rigTarget : this.grabbedLink.myRig.rightHand.rigTarget).position - position2;
-		Vector3 targetWorldPos = a + b;
-		Vector3 targetWorldPos2 = a + b2;
+		Vector3 vector = (position + position2) / 2f;
+		Vector3 vector2 = (this.isLeftHand ? this.myRig.leftHand.rigTarget : this.myRig.rightHand.rigTarget).position - position;
+		Vector3 vector3 = (this.grabbedLink.isLeftHand ? this.grabbedLink.myRig.leftHand.rigTarget : this.grabbedLink.myRig.rightHand.rigTarget).position - position2;
+		Vector3 targetWorldPos = vector + vector2;
+		Vector3 targetWorldPos2 = vector + vector3;
 		this.myIK.OverrideTargetPos(this.isLeftHand, targetWorldPos);
 		this.grabbedLink.myIK.OverrideTargetPos(this.grabbedLink.isLeftHand, targetWorldPos2);
 	}

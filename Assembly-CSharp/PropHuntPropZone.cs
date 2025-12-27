@@ -8,7 +8,7 @@ public class PropHuntPropZone : MonoBehaviour, IDelayedExecListener
 {
 	private void Awake()
 	{
-		this.hasBoxCollider = base.TryGetComponent<BoxCollider>(out this.boxCollider);
+		this.hasBoxCollider = base.TryGetComponent<BoxCollider>(ref this.boxCollider);
 	}
 
 	private void OnEnable()
@@ -54,19 +54,20 @@ public class PropHuntPropZone : MonoBehaviour, IDelayedExecListener
 			{
 				return;
 			}
-			Vector3 position2;
+			Vector3 position;
 			if (this.hasBoxCollider)
 			{
-				Vector3 position = new Vector3(srand.NextFloat(-this.boxCollider.size.x, this.boxCollider.size.x) / 2f, srand.NextFloat(-this.boxCollider.size.y, this.boxCollider.size.y) / 2f, srand.NextFloat(-this.boxCollider.size.z, this.boxCollider.size.z) / 2f);
-				position2 = base.transform.TransformPoint(position);
+				Vector3 vector;
+				vector..ctor(srand.NextFloat(-this.boxCollider.size.x, this.boxCollider.size.x) / 2f, srand.NextFloat(-this.boxCollider.size.y, this.boxCollider.size.y) / 2f, srand.NextFloat(-this.boxCollider.size.z, this.boxCollider.size.z) / 2f);
+				position = base.transform.TransformPoint(vector);
 			}
 			else
 			{
-				position2 = base.transform.position + srand.NextPointInsideSphere(this.radius);
+				position = base.transform.position + srand.NextPointInsideSphere(this.radius);
 			}
 			propPlacementRB.gameObject.SetActive(false);
 			propPlacementRB.transform.SetParent(null, false);
-			propPlacementRB.transform.position = position2;
+			propPlacementRB.transform.position = position;
 			propPlacementRB.transform.rotation = Quaternion.Euler(srand.NextFloat(360f), srand.NextFloat(360f), srand.NextFloat(360f));
 			propPlacementRB._placingProp.SetActive(false);
 			propPlacementRB._placingProp.transform.SetParent(null, false);

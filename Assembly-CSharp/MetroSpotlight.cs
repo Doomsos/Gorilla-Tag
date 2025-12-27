@@ -19,21 +19,21 @@ public class MetroSpotlight : MonoBehaviour
 		Vector3 normalized = (position - this._light.position).normalized;
 		Vector3 vector = Vector3.Cross(normalized, this._blimp.forward);
 		Vector3 yDir = Vector3.Cross(normalized, vector);
-		Vector3 worldPosition = MetroSpotlight.Figure8(position, vector, yDir, this._radius, this._time, this._offset, this._theta);
-		this._light.LookAt(worldPosition);
+		Vector3 vector2 = MetroSpotlight.Figure8(position, vector, yDir, this._radius, this._time, this._offset, this._theta);
+		this._light.LookAt(vector2);
 	}
 
 	private static Vector3 Figure8(Vector3 origin, Vector3 xDir, Vector3 yDir, float scale, float t, float offset, float theta)
 	{
 		float num = 2f / (3f - Mathf.Cos(2f * (t + offset)));
-		float d = scale * num * Mathf.Cos(t + offset);
-		float d2 = scale * num * Mathf.Sin(2f * (t + offset)) / 2f;
-		Vector3 axis = Vector3.Cross(xDir, yDir);
-		Quaternion rotation = Quaternion.AngleAxis(theta, axis);
-		xDir = rotation * xDir;
-		yDir = rotation * yDir;
-		Vector3 b = xDir * d + yDir * d2;
-		return origin + b;
+		float num2 = scale * num * Mathf.Cos(t + offset);
+		float num3 = scale * num * Mathf.Sin(2f * (t + offset)) / 2f;
+		Vector3 vector = Vector3.Cross(xDir, yDir);
+		Quaternion quaternion = Quaternion.AngleAxis(theta, vector);
+		xDir = quaternion * xDir;
+		yDir = quaternion * yDir;
+		Vector3 vector2 = xDir * num2 + yDir * num3;
+		return origin + vector2;
 	}
 
 	[SerializeField]

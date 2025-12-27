@@ -106,7 +106,7 @@ public class TabletSpawnInstance : IDisposable
 				{
 					return;
 				}
-				action();
+				action.Invoke();
 			};
 			this._lckSocialCameraManager.lckDirectGrabbable.onReleased += delegate()
 			{
@@ -115,7 +115,7 @@ public class TabletSpawnInstance : IDisposable
 				{
 					return;
 				}
-				action();
+				action.Invoke();
 			};
 			this._cameraSpawnInstanceTransform = this._cameraGameObjectInstance.transform;
 			this.Controller = this._cameraGameObjectInstance.GetComponent<GTLckController>();

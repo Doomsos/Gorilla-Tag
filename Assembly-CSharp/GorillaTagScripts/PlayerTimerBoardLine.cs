@@ -47,9 +47,9 @@ namespace GorillaTagScripts
 					this.UpdatePlayerText();
 					this.parentBoard.IsDirty = true;
 				}
-				string value = this.playerTimeStr;
+				string text = this.playerTimeStr;
 				this.UpdateTimeText();
-				if (!this.playerTimeStr.Equals(value))
+				if (!this.playerTimeStr.Equals(text))
 				{
 					this.parentBoard.IsDirty = true;
 				}

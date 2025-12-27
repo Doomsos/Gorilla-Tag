@@ -16,8 +16,8 @@ public class ServerTimeEvent : TimeEvent
 		{
 			return;
 		}
-		ServerTimeEvent.EventTime item = new ServerTimeEvent.EventTime(GorillaComputer.instance.GetServerTime().Hour, GorillaComputer.instance.GetServerTime().Minute);
-		bool flag = this.eventTimes.Contains(item);
+		ServerTimeEvent.EventTime eventTime = new ServerTimeEvent.EventTime(GorillaComputer.instance.GetServerTime().Hour, GorillaComputer.instance.GetServerTime().Minute);
+		bool flag = this.eventTimes.Contains(eventTime);
 		if (!this._ongoing && flag)
 		{
 			base.StartEvent();

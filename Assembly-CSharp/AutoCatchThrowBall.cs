@@ -16,9 +16,9 @@ public class AutoCatchThrowBall : MonoBehaviour
 		float time = Time.time;
 		Vector3 vector = this.vrRig.transform.position + this.vrRig.transform.forward * 0.5f;
 		Quaternion quaternion = this.vrRig.transform.rotation * Quaternion.AngleAxis(-this.throwPitch, Vector3.right);
-		Vector3 center = vector - quaternion * Vector3.forward * 0.5f;
-		int num = Physics.OverlapBoxNonAlloc(center, Vector3.one * 0.5f, this.overlapResults, quaternion);
-		DebugUtil.DrawBox(center, quaternion, Vector3.one, Color.green, true, DebugUtil.Style.Wireframe);
+		Vector3 vector2 = vector - quaternion * Vector3.forward * 0.5f;
+		int num = Physics.OverlapBoxNonAlloc(vector2, Vector3.one * 0.5f, this.overlapResults, quaternion);
+		DebugUtil.DrawBox(vector2, quaternion, Vector3.one, Color.green, true, DebugUtil.Style.Wireframe);
 		for (int i = 0; i < num; i++)
 		{
 			Collider collider = this.overlapResults[i];

@@ -12,8 +12,8 @@ public class Pendulum : MonoBehaviour
 	{
 		if (this.pendulum)
 		{
-			float z = this.MaxAngleDeflection * Mathf.Sin(Time.time * this.SpeedOfPendulum);
-			this.pendulum.localRotation = Quaternion.Euler(0f, 0f, z);
+			float num = this.MaxAngleDeflection * Mathf.Sin(Time.time * this.SpeedOfPendulum);
+			this.pendulum.localRotation = Quaternion.Euler(0f, 0f, num);
 			return;
 		}
 	}

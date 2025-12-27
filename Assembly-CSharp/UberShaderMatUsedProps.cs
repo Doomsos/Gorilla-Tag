@@ -668,125 +668,125 @@ public struct UberShaderMatUsedProps
 		}
 		else
 		{
-			string str = "_BaseColor = ";
+			string text2 = "_BaseColor = ";
 			int4 @int = this.fingerprint._BaseColor;
-			text = str + @int.ToString() + "\n";
+			text = text2 + @int.ToString() + "\n";
 		}
 		array[num2] = text;
 		int num3 = 7;
-		string text2;
-		if (this._GChannelColor <= 0)
-		{
-			text2 = "";
-		}
-		else
-		{
-			string str2 = "_GChannelColor = ";
-			int4 @int = this.fingerprint._GChannelColor;
-			text2 = str2 + @int.ToString() + "\n";
-		}
-		array[num3] = text2;
-		int num4 = 8;
 		string text3;
-		if (this._BChannelColor <= 0)
+		if (this._GChannelColor <= 0)
 		{
 			text3 = "";
 		}
 		else
 		{
-			string str3 = "_BChannelColor = ";
-			int4 @int = this.fingerprint._BChannelColor;
-			text3 = str3 + @int.ToString() + "\n";
+			string text4 = "_GChannelColor = ";
+			int4 @int = this.fingerprint._GChannelColor;
+			text3 = text4 + @int.ToString() + "\n";
 		}
-		array[num4] = text3;
-		int num5 = 9;
-		string text4;
-		if (this._AChannelColor <= 0)
-		{
-			text4 = "";
-		}
-		else
-		{
-			string str4 = "_AChannelColor = ";
-			int4 @int = this.fingerprint._AChannelColor;
-			text4 = str4 + @int.ToString() + "\n";
-		}
-		array[num5] = text4;
-		array[10] = ((this._TexMipBias > 0) ? ("_TexMipBias = " + this.fingerprint._TexMipBias.ToString() + "\n") : "");
-		array[11] = ((this._BaseMap > 0) ? ("_BaseMap = " + this.fingerprint._BaseMap + "\n") : "");
-		int num6 = 12;
+		array[num3] = text3;
+		int num4 = 8;
 		string text5;
-		if (this._BaseMap_ST <= 0)
+		if (this._BChannelColor <= 0)
 		{
 			text5 = "";
 		}
 		else
 		{
-			string str5 = "_BaseMap_ST = ";
-			int4 @int = this.fingerprint._BaseMap_ST;
-			text5 = str5 + @int.ToString() + "\n";
+			string text6 = "_BChannelColor = ";
+			int4 @int = this.fingerprint._BChannelColor;
+			text5 = text6 + @int.ToString() + "\n";
 		}
-		array[num6] = text5;
-		int num7 = 13;
-		string text6;
-		if (this._BaseMap_WH <= 0)
-		{
-			text6 = "";
-		}
-		else
-		{
-			string str6 = "_BaseMap_WH = ";
-			int4 @int = this.fingerprint._BaseMap_WH;
-			text6 = str6 + @int.ToString() + "\n";
-		}
-		array[num7] = text6;
-		array[14] = ((this._TexelSnapToggle > 0) ? ("_TexelSnapToggle = " + this.fingerprint._TexelSnapToggle.ToString() + "\n") : "");
-		array[15] = ((this._TexelSnap_Factor > 0) ? ("_TexelSnap_Factor = " + this.fingerprint._TexelSnap_Factor.ToString() + "\n") : "");
-		array[16] = ((this._UVSource > 0) ? ("_UVSource = " + this.fingerprint._UVSource.ToString() + "\n") : "");
-		array[17] = ((this._AlphaDetailToggle > 0) ? ("_AlphaDetailToggle = " + this.fingerprint._AlphaDetailToggle.ToString() + "\n") : "");
-		int num8 = 18;
+		array[num4] = text5;
+		int num5 = 9;
 		string text7;
-		if (this._AlphaDetail_ST <= 0)
+		if (this._AChannelColor <= 0)
 		{
 			text7 = "";
 		}
 		else
 		{
-			string str7 = "_AlphaDetail_ST = ";
-			int4 @int = this.fingerprint._AlphaDetail_ST;
-			text7 = str7 + @int.ToString() + "\n";
+			string text8 = "_AChannelColor = ";
+			int4 @int = this.fingerprint._AChannelColor;
+			text7 = text8 + @int.ToString() + "\n";
 		}
-		array[num8] = text7;
-		array[19] = ((this._AlphaDetail_Opacity > 0) ? ("_AlphaDetail_Opacity = " + this.fingerprint._AlphaDetail_Opacity.ToString() + "\n") : "");
-		array[20] = ((this._AlphaDetail_WorldSpace > 0) ? ("_AlphaDetail_WorldSpace = " + this.fingerprint._AlphaDetail_WorldSpace.ToString() + "\n") : "");
-		array[21] = ((this._MaskMapToggle > 0) ? ("_MaskMapToggle = " + this.fingerprint._MaskMapToggle.ToString() + "\n") : "");
-		array[22] = ((this._MaskMap > 0) ? ("_MaskMap = " + this.fingerprint._MaskMap + "\n") : "");
-		int num9 = 23;
-		string text8;
-		if (this._MaskMap_ST <= 0)
-		{
-			text8 = "";
-		}
-		else
-		{
-			string str8 = "_MaskMap_ST = ";
-			int4 @int = this.fingerprint._MaskMap_ST;
-			text8 = str8 + @int.ToString() + "\n";
-		}
-		array[num9] = text8;
-		int num10 = 24;
+		array[num5] = text7;
+		array[10] = ((this._TexMipBias > 0) ? ("_TexMipBias = " + this.fingerprint._TexMipBias.ToString() + "\n") : "");
+		array[11] = ((this._BaseMap > 0) ? ("_BaseMap = " + this.fingerprint._BaseMap + "\n") : "");
+		int num6 = 12;
 		string text9;
-		if (this._MaskMap_WH <= 0)
+		if (this._BaseMap_ST <= 0)
 		{
 			text9 = "";
 		}
 		else
 		{
-			string str9 = "_MaskMap_WH = ";
-			int4 @int = this.fingerprint._MaskMap_WH;
-			text9 = str9 + @int.ToString() + "\n";
+			string text10 = "_BaseMap_ST = ";
+			int4 @int = this.fingerprint._BaseMap_ST;
+			text9 = text10 + @int.ToString() + "\n";
 		}
-		array[num10] = text9;
+		array[num6] = text9;
+		int num7 = 13;
+		string text11;
+		if (this._BaseMap_WH <= 0)
+		{
+			text11 = "";
+		}
+		else
+		{
+			string text12 = "_BaseMap_WH = ";
+			int4 @int = this.fingerprint._BaseMap_WH;
+			text11 = text12 + @int.ToString() + "\n";
+		}
+		array[num7] = text11;
+		array[14] = ((this._TexelSnapToggle > 0) ? ("_TexelSnapToggle = " + this.fingerprint._TexelSnapToggle.ToString() + "\n") : "");
+		array[15] = ((this._TexelSnap_Factor > 0) ? ("_TexelSnap_Factor = " + this.fingerprint._TexelSnap_Factor.ToString() + "\n") : "");
+		array[16] = ((this._UVSource > 0) ? ("_UVSource = " + this.fingerprint._UVSource.ToString() + "\n") : "");
+		array[17] = ((this._AlphaDetailToggle > 0) ? ("_AlphaDetailToggle = " + this.fingerprint._AlphaDetailToggle.ToString() + "\n") : "");
+		int num8 = 18;
+		string text13;
+		if (this._AlphaDetail_ST <= 0)
+		{
+			text13 = "";
+		}
+		else
+		{
+			string text14 = "_AlphaDetail_ST = ";
+			int4 @int = this.fingerprint._AlphaDetail_ST;
+			text13 = text14 + @int.ToString() + "\n";
+		}
+		array[num8] = text13;
+		array[19] = ((this._AlphaDetail_Opacity > 0) ? ("_AlphaDetail_Opacity = " + this.fingerprint._AlphaDetail_Opacity.ToString() + "\n") : "");
+		array[20] = ((this._AlphaDetail_WorldSpace > 0) ? ("_AlphaDetail_WorldSpace = " + this.fingerprint._AlphaDetail_WorldSpace.ToString() + "\n") : "");
+		array[21] = ((this._MaskMapToggle > 0) ? ("_MaskMapToggle = " + this.fingerprint._MaskMapToggle.ToString() + "\n") : "");
+		array[22] = ((this._MaskMap > 0) ? ("_MaskMap = " + this.fingerprint._MaskMap + "\n") : "");
+		int num9 = 23;
+		string text15;
+		if (this._MaskMap_ST <= 0)
+		{
+			text15 = "";
+		}
+		else
+		{
+			string text16 = "_MaskMap_ST = ";
+			int4 @int = this.fingerprint._MaskMap_ST;
+			text15 = text16 + @int.ToString() + "\n";
+		}
+		array[num9] = text15;
+		int num10 = 24;
+		string text17;
+		if (this._MaskMap_WH <= 0)
+		{
+			text17 = "";
+		}
+		else
+		{
+			string text18 = "_MaskMap_WH = ";
+			int4 @int = this.fingerprint._MaskMap_WH;
+			text17 = text18 + @int.ToString() + "\n";
+		}
+		array[num10] = text17;
 		array[25] = ((this._LavaLampToggle > 0) ? ("_LavaLampToggle = " + this.fingerprint._LavaLampToggle.ToString() + "\n") : "");
 		array[26] = ((this._GradientMapToggle > 0) ? ("_GradientMapToggle = " + this.fingerprint._GradientMapToggle.ToString() + "\n") : "");
 		array[27] = ((this._GradientMap > 0) ? ("_GradientMap = " + this.fingerprint._GradientMap + "\n") : "");
@@ -804,44 +804,44 @@ public struct UberShaderMatUsedProps
 		array[39] = ((this._ReflectToggle > 0) ? ("_ReflectToggle = " + this.fingerprint._ReflectToggle.ToString() + "\n") : "");
 		array[40] = ((this._ReflectBoxProjectToggle > 0) ? ("_ReflectBoxProjectToggle = " + this.fingerprint._ReflectBoxProjectToggle.ToString() + "\n") : "");
 		int num11 = 41;
-		string text10;
+		string text19;
 		if (this._ReflectBoxCubePos <= 0)
 		{
-			text10 = "";
+			text19 = "";
 		}
 		else
 		{
-			string str10 = "_ReflectBoxCubePos = ";
+			string text20 = "_ReflectBoxCubePos = ";
 			int4 @int = this.fingerprint._ReflectBoxCubePos;
-			text10 = str10 + @int.ToString() + "\n";
+			text19 = text20 + @int.ToString() + "\n";
 		}
-		array[num11] = text10;
+		array[num11] = text19;
 		int num12 = 42;
-		string text11;
+		string text21;
 		if (this._ReflectBoxSize <= 0)
 		{
-			text11 = "";
+			text21 = "";
 		}
 		else
 		{
-			string str11 = "_ReflectBoxSize = ";
+			string text22 = "_ReflectBoxSize = ";
 			int4 @int = this.fingerprint._ReflectBoxSize;
-			text11 = str11 + @int.ToString() + "\n";
+			text21 = text22 + @int.ToString() + "\n";
 		}
-		array[num12] = text11;
+		array[num12] = text21;
 		int num13 = 43;
-		string text12;
+		string text23;
 		if (this._ReflectBoxRotation <= 0)
 		{
-			text12 = "";
+			text23 = "";
 		}
 		else
 		{
-			string str12 = "_ReflectBoxRotation = ";
+			string text24 = "_ReflectBoxRotation = ";
 			int4 @int = this.fingerprint._ReflectBoxRotation;
-			text12 = str12 + @int.ToString() + "\n";
+			text23 = text24 + @int.ToString() + "\n";
 		}
-		array[num13] = text12;
+		array[num13] = text23;
 		array[44] = ((this._ReflectMatcapToggle > 0) ? ("_ReflectMatcapToggle = " + this.fingerprint._ReflectMatcapToggle.ToString() + "\n") : "");
 		array[45] = ((this._ReflectMatcapPerspToggle > 0) ? ("_ReflectMatcapPerspToggle = " + this.fingerprint._ReflectMatcapPerspToggle.ToString() + "\n") : "");
 		array[46] = ((this._ReflectNormalToggle > 0) ? ("_ReflectNormalToggle = " + this.fingerprint._ReflectNormalToggle.ToString() + "\n") : "");
@@ -849,46 +849,46 @@ public struct UberShaderMatUsedProps
 		array[48] = ((this._ReflectNormalTex > 0) ? ("_ReflectNormalTex = " + this.fingerprint._ReflectNormalTex + "\n") : "");
 		array[49] = ((this._ReflectAlbedoTint > 0) ? ("_ReflectAlbedoTint = " + this.fingerprint._ReflectAlbedoTint.ToString() + "\n") : "");
 		int num14 = 50;
-		string text13;
+		string text25;
 		if (this._ReflectTint <= 0)
 		{
-			text13 = "";
+			text25 = "";
 		}
 		else
 		{
-			string str13 = "_ReflectTint = ";
+			string text26 = "_ReflectTint = ";
 			int4 @int = this.fingerprint._ReflectTint;
-			text13 = str13 + @int.ToString() + "\n";
+			text25 = text26 + @int.ToString() + "\n";
 		}
-		array[num14] = text13;
+		array[num14] = text25;
 		array[51] = ((this._ReflectOpacity > 0) ? ("_ReflectOpacity = " + this.fingerprint._ReflectOpacity.ToString() + "\n") : "");
 		array[52] = ((this._ReflectExposure > 0) ? ("_ReflectExposure = " + this.fingerprint._ReflectExposure.ToString() + "\n") : "");
 		int num15 = 53;
-		string text14;
+		string text27;
 		if (this._ReflectOffset <= 0)
 		{
-			text14 = "";
+			text27 = "";
 		}
 		else
 		{
-			string str14 = "_ReflectOffset = ";
+			string text28 = "_ReflectOffset = ";
 			int4 @int = this.fingerprint._ReflectOffset;
-			text14 = str14 + @int.ToString() + "\n";
+			text27 = text28 + @int.ToString() + "\n";
 		}
-		array[num15] = text14;
+		array[num15] = text27;
 		int num16 = 54;
-		string text15;
+		string text29;
 		if (this._ReflectScale <= 0)
 		{
-			text15 = "";
+			text29 = "";
 		}
 		else
 		{
-			string str15 = "_ReflectScale = ";
+			string text30 = "_ReflectScale = ";
 			int4 @int = this.fingerprint._ReflectScale;
-			text15 = str15 + @int.ToString() + "\n";
+			text29 = text30 + @int.ToString() + "\n";
 		}
-		array[num16] = text15;
+		array[num16] = text29;
 		array[55] = ((this._ReflectRotate > 0) ? ("_ReflectRotate = " + this.fingerprint._ReflectRotate.ToString() + "\n") : "");
 		array[56] = ((this._HalfLambertToggle > 0) ? ("_HalfLambertToggle = " + this.fingerprint._HalfLambertToggle.ToString() + "\n") : "");
 		array[57] = ((this._ParallaxPlanarToggle > 0) ? ("_ParallaxPlanarToggle = " + this.fingerprint._ParallaxPlanarToggle.ToString() + "\n") : "");
@@ -898,271 +898,271 @@ public struct UberShaderMatUsedProps
 		array[61] = ((this._DepthMap > 0) ? ("_DepthMap = " + this.fingerprint._DepthMap + "\n") : "");
 		array[62] = ((this._ParallaxAmplitude > 0) ? ("_ParallaxAmplitude = " + this.fingerprint._ParallaxAmplitude.ToString() + "\n") : "");
 		int num17 = 63;
-		string text16;
-		if (this._ParallaxSamplesMinMax <= 0)
-		{
-			text16 = "";
-		}
-		else
-		{
-			string str16 = "_ParallaxSamplesMinMax = ";
-			int4 @int = this.fingerprint._ParallaxSamplesMinMax;
-			text16 = str16 + @int.ToString() + "\n";
-		}
-		array[num17] = text16;
-		array[64] = ((this._UvShiftToggle > 0) ? ("_UvShiftToggle = " + this.fingerprint._UvShiftToggle.ToString() + "\n") : "");
-		int num18 = 65;
-		string text17;
-		if (this._UvShiftSteps <= 0)
-		{
-			text17 = "";
-		}
-		else
-		{
-			string str17 = "_UvShiftSteps = ";
-			int4 @int = this.fingerprint._UvShiftSteps;
-			text17 = str17 + @int.ToString() + "\n";
-		}
-		array[num18] = text17;
-		int num19 = 66;
-		string text18;
-		if (this._UvShiftRate <= 0)
-		{
-			text18 = "";
-		}
-		else
-		{
-			string str18 = "_UvShiftRate = ";
-			int4 @int = this.fingerprint._UvShiftRate;
-			text18 = str18 + @int.ToString() + "\n";
-		}
-		array[num19] = text18;
-		int num20 = 67;
-		string text19;
-		if (this._UvShiftOffset <= 0)
-		{
-			text19 = "";
-		}
-		else
-		{
-			string str19 = "_UvShiftOffset = ";
-			int4 @int = this.fingerprint._UvShiftOffset;
-			text19 = str19 + @int.ToString() + "\n";
-		}
-		array[num20] = text19;
-		array[68] = ((this._UseGridEffect > 0) ? ("_UseGridEffect = " + this.fingerprint._UseGridEffect.ToString() + "\n") : "");
-		array[69] = ((this._UseCrystalEffect > 0) ? ("_UseCrystalEffect = " + this.fingerprint._UseCrystalEffect.ToString() + "\n") : "");
-		array[70] = ((this._CrystalPower > 0) ? ("_CrystalPower = " + this.fingerprint._CrystalPower.ToString() + "\n") : "");
-		int num21 = 71;
-		string text20;
-		if (this._CrystalRimColor <= 0)
-		{
-			text20 = "";
-		}
-		else
-		{
-			string str20 = "_CrystalRimColor = ";
-			int4 @int = this.fingerprint._CrystalRimColor;
-			text20 = str20 + @int.ToString() + "\n";
-		}
-		array[num21] = text20;
-		array[72] = ((this._LiquidVolume > 0) ? ("_LiquidVolume = " + this.fingerprint._LiquidVolume.ToString() + "\n") : "");
-		array[73] = ((this._LiquidFill > 0) ? ("_LiquidFill = " + this.fingerprint._LiquidFill.ToString() + "\n") : "");
-		int num22 = 74;
-		string text21;
-		if (this._LiquidFillNormal <= 0)
-		{
-			text21 = "";
-		}
-		else
-		{
-			string str21 = "_LiquidFillNormal = ";
-			int4 @int = this.fingerprint._LiquidFillNormal;
-			text21 = str21 + @int.ToString() + "\n";
-		}
-		array[num22] = text21;
-		int num23 = 75;
-		string text22;
-		if (this._LiquidSurfaceColor <= 0)
-		{
-			text22 = "";
-		}
-		else
-		{
-			string str22 = "_LiquidSurfaceColor = ";
-			int4 @int = this.fingerprint._LiquidSurfaceColor;
-			text22 = str22 + @int.ToString() + "\n";
-		}
-		array[num23] = text22;
-		array[76] = ((this._LiquidSwayX > 0) ? ("_LiquidSwayX = " + this.fingerprint._LiquidSwayX.ToString() + "\n") : "");
-		array[77] = ((this._LiquidSwayY > 0) ? ("_LiquidSwayY = " + this.fingerprint._LiquidSwayY.ToString() + "\n") : "");
-		array[78] = ((this._LiquidContainer > 0) ? ("_LiquidContainer = " + this.fingerprint._LiquidContainer.ToString() + "\n") : "");
-		int num24 = 79;
-		string text23;
-		if (this._LiquidPlanePosition <= 0)
-		{
-			text23 = "";
-		}
-		else
-		{
-			string str23 = "_LiquidPlanePosition = ";
-			int4 @int = this.fingerprint._LiquidPlanePosition;
-			text23 = str23 + @int.ToString() + "\n";
-		}
-		array[num24] = text23;
-		int num25 = 80;
-		string text24;
-		if (this._LiquidPlaneNormal <= 0)
-		{
-			text24 = "";
-		}
-		else
-		{
-			string str24 = "_LiquidPlaneNormal = ";
-			int4 @int = this.fingerprint._LiquidPlaneNormal;
-			text24 = str24 + @int.ToString() + "\n";
-		}
-		array[num25] = text24;
-		array[81] = ((this._VertexFlapToggle > 0) ? ("_VertexFlapToggle = " + this.fingerprint._VertexFlapToggle.ToString() + "\n") : "");
-		int num26 = 82;
-		string text25;
-		if (this._VertexFlapAxis <= 0)
-		{
-			text25 = "";
-		}
-		else
-		{
-			string str25 = "_VertexFlapAxis = ";
-			int4 @int = this.fingerprint._VertexFlapAxis;
-			text25 = str25 + @int.ToString() + "\n";
-		}
-		array[num26] = text25;
-		int num27 = 83;
-		string text26;
-		if (this._VertexFlapDegreesMinMax <= 0)
-		{
-			text26 = "";
-		}
-		else
-		{
-			string str26 = "_VertexFlapDegreesMinMax = ";
-			int4 @int = this.fingerprint._VertexFlapDegreesMinMax;
-			text26 = str26 + @int.ToString() + "\n";
-		}
-		array[num27] = text26;
-		array[84] = ((this._VertexFlapSpeed > 0) ? ("_VertexFlapSpeed = " + this.fingerprint._VertexFlapSpeed.ToString() + "\n") : "");
-		array[85] = ((this._VertexFlapPhaseOffset > 0) ? ("_VertexFlapPhaseOffset = " + this.fingerprint._VertexFlapPhaseOffset.ToString() + "\n") : "");
-		array[86] = ((this._VertexWaveToggle > 0) ? ("_VertexWaveToggle = " + this.fingerprint._VertexWaveToggle.ToString() + "\n") : "");
-		array[87] = ((this._VertexWaveDebug > 0) ? ("_VertexWaveDebug = " + this.fingerprint._VertexWaveDebug.ToString() + "\n") : "");
-		int num28 = 88;
-		string text27;
-		if (this._VertexWaveEnd <= 0)
-		{
-			text27 = "";
-		}
-		else
-		{
-			string str27 = "_VertexWaveEnd = ";
-			int4 @int = this.fingerprint._VertexWaveEnd;
-			text27 = str27 + @int.ToString() + "\n";
-		}
-		array[num28] = text27;
-		int num29 = 89;
-		string text28;
-		if (this._VertexWaveParams <= 0)
-		{
-			text28 = "";
-		}
-		else
-		{
-			string str28 = "_VertexWaveParams = ";
-			int4 @int = this.fingerprint._VertexWaveParams;
-			text28 = str28 + @int.ToString() + "\n";
-		}
-		array[num29] = text28;
-		int num30 = 90;
-		string text29;
-		if (this._VertexWaveFalloff <= 0)
-		{
-			text29 = "";
-		}
-		else
-		{
-			string str29 = "_VertexWaveFalloff = ";
-			int4 @int = this.fingerprint._VertexWaveFalloff;
-			text29 = str29 + @int.ToString() + "\n";
-		}
-		array[num30] = text29;
-		int num31 = 91;
-		string text30;
-		if (this._VertexWaveSphereMask <= 0)
-		{
-			text30 = "";
-		}
-		else
-		{
-			string str30 = "_VertexWaveSphereMask = ";
-			int4 @int = this.fingerprint._VertexWaveSphereMask;
-			text30 = str30 + @int.ToString() + "\n";
-		}
-		array[num31] = text30;
-		array[92] = ((this._VertexWavePhaseOffset > 0) ? ("_VertexWavePhaseOffset = " + this.fingerprint._VertexWavePhaseOffset.ToString() + "\n") : "");
-		int num32 = 93;
 		string text31;
-		if (this._VertexWaveAxes <= 0)
+		if (this._ParallaxSamplesMinMax <= 0)
 		{
 			text31 = "";
 		}
 		else
 		{
-			string str31 = "_VertexWaveAxes = ";
-			int4 @int = this.fingerprint._VertexWaveAxes;
-			text31 = str31 + @int.ToString() + "\n";
+			string text32 = "_ParallaxSamplesMinMax = ";
+			int4 @int = this.fingerprint._ParallaxSamplesMinMax;
+			text31 = text32 + @int.ToString() + "\n";
 		}
-		array[num32] = text31;
-		array[94] = ((this._VertexRotateToggle > 0) ? ("_VertexRotateToggle = " + this.fingerprint._VertexRotateToggle.ToString() + "\n") : "");
-		int num33 = 95;
-		string text32;
-		if (this._VertexRotateAngles <= 0)
-		{
-			text32 = "";
-		}
-		else
-		{
-			string str32 = "_VertexRotateAngles = ";
-			int4 @int = this.fingerprint._VertexRotateAngles;
-			text32 = str32 + @int.ToString() + "\n";
-		}
-		array[num33] = text32;
-		array[96] = ((this._VertexRotateAnim > 0) ? ("_VertexRotateAnim = " + this.fingerprint._VertexRotateAnim.ToString() + "\n") : "");
-		array[97] = ((this._VertexLightToggle > 0) ? ("_VertexLightToggle = " + this.fingerprint._VertexLightToggle.ToString() + "\n") : "");
-		array[98] = ((this._InnerGlowOn > 0) ? ("_InnerGlowOn = " + this.fingerprint._InnerGlowOn.ToString() + "\n") : "");
-		int num34 = 99;
+		array[num17] = text31;
+		array[64] = ((this._UvShiftToggle > 0) ? ("_UvShiftToggle = " + this.fingerprint._UvShiftToggle.ToString() + "\n") : "");
+		int num18 = 65;
 		string text33;
-		if (this._InnerGlowColor <= 0)
+		if (this._UvShiftSteps <= 0)
 		{
 			text33 = "";
 		}
 		else
 		{
-			string str33 = "_InnerGlowColor = ";
-			int4 @int = this.fingerprint._InnerGlowColor;
-			text33 = str33 + @int.ToString() + "\n";
+			string text34 = "_UvShiftSteps = ";
+			int4 @int = this.fingerprint._UvShiftSteps;
+			text33 = text34 + @int.ToString() + "\n";
 		}
-		array[num34] = text33;
-		int num35 = 100;
-		string text34;
-		if (this._InnerGlowParams <= 0)
+		array[num18] = text33;
+		int num19 = 66;
+		string text35;
+		if (this._UvShiftRate <= 0)
 		{
-			text34 = "";
+			text35 = "";
 		}
 		else
 		{
-			string str34 = "_InnerGlowParams = ";
-			int4 @int = this.fingerprint._InnerGlowParams;
-			text34 = str34 + @int.ToString() + "\n";
+			string text36 = "_UvShiftRate = ";
+			int4 @int = this.fingerprint._UvShiftRate;
+			text35 = text36 + @int.ToString() + "\n";
 		}
-		array[num35] = text34;
+		array[num19] = text35;
+		int num20 = 67;
+		string text37;
+		if (this._UvShiftOffset <= 0)
+		{
+			text37 = "";
+		}
+		else
+		{
+			string text38 = "_UvShiftOffset = ";
+			int4 @int = this.fingerprint._UvShiftOffset;
+			text37 = text38 + @int.ToString() + "\n";
+		}
+		array[num20] = text37;
+		array[68] = ((this._UseGridEffect > 0) ? ("_UseGridEffect = " + this.fingerprint._UseGridEffect.ToString() + "\n") : "");
+		array[69] = ((this._UseCrystalEffect > 0) ? ("_UseCrystalEffect = " + this.fingerprint._UseCrystalEffect.ToString() + "\n") : "");
+		array[70] = ((this._CrystalPower > 0) ? ("_CrystalPower = " + this.fingerprint._CrystalPower.ToString() + "\n") : "");
+		int num21 = 71;
+		string text39;
+		if (this._CrystalRimColor <= 0)
+		{
+			text39 = "";
+		}
+		else
+		{
+			string text40 = "_CrystalRimColor = ";
+			int4 @int = this.fingerprint._CrystalRimColor;
+			text39 = text40 + @int.ToString() + "\n";
+		}
+		array[num21] = text39;
+		array[72] = ((this._LiquidVolume > 0) ? ("_LiquidVolume = " + this.fingerprint._LiquidVolume.ToString() + "\n") : "");
+		array[73] = ((this._LiquidFill > 0) ? ("_LiquidFill = " + this.fingerprint._LiquidFill.ToString() + "\n") : "");
+		int num22 = 74;
+		string text41;
+		if (this._LiquidFillNormal <= 0)
+		{
+			text41 = "";
+		}
+		else
+		{
+			string text42 = "_LiquidFillNormal = ";
+			int4 @int = this.fingerprint._LiquidFillNormal;
+			text41 = text42 + @int.ToString() + "\n";
+		}
+		array[num22] = text41;
+		int num23 = 75;
+		string text43;
+		if (this._LiquidSurfaceColor <= 0)
+		{
+			text43 = "";
+		}
+		else
+		{
+			string text44 = "_LiquidSurfaceColor = ";
+			int4 @int = this.fingerprint._LiquidSurfaceColor;
+			text43 = text44 + @int.ToString() + "\n";
+		}
+		array[num23] = text43;
+		array[76] = ((this._LiquidSwayX > 0) ? ("_LiquidSwayX = " + this.fingerprint._LiquidSwayX.ToString() + "\n") : "");
+		array[77] = ((this._LiquidSwayY > 0) ? ("_LiquidSwayY = " + this.fingerprint._LiquidSwayY.ToString() + "\n") : "");
+		array[78] = ((this._LiquidContainer > 0) ? ("_LiquidContainer = " + this.fingerprint._LiquidContainer.ToString() + "\n") : "");
+		int num24 = 79;
+		string text45;
+		if (this._LiquidPlanePosition <= 0)
+		{
+			text45 = "";
+		}
+		else
+		{
+			string text46 = "_LiquidPlanePosition = ";
+			int4 @int = this.fingerprint._LiquidPlanePosition;
+			text45 = text46 + @int.ToString() + "\n";
+		}
+		array[num24] = text45;
+		int num25 = 80;
+		string text47;
+		if (this._LiquidPlaneNormal <= 0)
+		{
+			text47 = "";
+		}
+		else
+		{
+			string text48 = "_LiquidPlaneNormal = ";
+			int4 @int = this.fingerprint._LiquidPlaneNormal;
+			text47 = text48 + @int.ToString() + "\n";
+		}
+		array[num25] = text47;
+		array[81] = ((this._VertexFlapToggle > 0) ? ("_VertexFlapToggle = " + this.fingerprint._VertexFlapToggle.ToString() + "\n") : "");
+		int num26 = 82;
+		string text49;
+		if (this._VertexFlapAxis <= 0)
+		{
+			text49 = "";
+		}
+		else
+		{
+			string text50 = "_VertexFlapAxis = ";
+			int4 @int = this.fingerprint._VertexFlapAxis;
+			text49 = text50 + @int.ToString() + "\n";
+		}
+		array[num26] = text49;
+		int num27 = 83;
+		string text51;
+		if (this._VertexFlapDegreesMinMax <= 0)
+		{
+			text51 = "";
+		}
+		else
+		{
+			string text52 = "_VertexFlapDegreesMinMax = ";
+			int4 @int = this.fingerprint._VertexFlapDegreesMinMax;
+			text51 = text52 + @int.ToString() + "\n";
+		}
+		array[num27] = text51;
+		array[84] = ((this._VertexFlapSpeed > 0) ? ("_VertexFlapSpeed = " + this.fingerprint._VertexFlapSpeed.ToString() + "\n") : "");
+		array[85] = ((this._VertexFlapPhaseOffset > 0) ? ("_VertexFlapPhaseOffset = " + this.fingerprint._VertexFlapPhaseOffset.ToString() + "\n") : "");
+		array[86] = ((this._VertexWaveToggle > 0) ? ("_VertexWaveToggle = " + this.fingerprint._VertexWaveToggle.ToString() + "\n") : "");
+		array[87] = ((this._VertexWaveDebug > 0) ? ("_VertexWaveDebug = " + this.fingerprint._VertexWaveDebug.ToString() + "\n") : "");
+		int num28 = 88;
+		string text53;
+		if (this._VertexWaveEnd <= 0)
+		{
+			text53 = "";
+		}
+		else
+		{
+			string text54 = "_VertexWaveEnd = ";
+			int4 @int = this.fingerprint._VertexWaveEnd;
+			text53 = text54 + @int.ToString() + "\n";
+		}
+		array[num28] = text53;
+		int num29 = 89;
+		string text55;
+		if (this._VertexWaveParams <= 0)
+		{
+			text55 = "";
+		}
+		else
+		{
+			string text56 = "_VertexWaveParams = ";
+			int4 @int = this.fingerprint._VertexWaveParams;
+			text55 = text56 + @int.ToString() + "\n";
+		}
+		array[num29] = text55;
+		int num30 = 90;
+		string text57;
+		if (this._VertexWaveFalloff <= 0)
+		{
+			text57 = "";
+		}
+		else
+		{
+			string text58 = "_VertexWaveFalloff = ";
+			int4 @int = this.fingerprint._VertexWaveFalloff;
+			text57 = text58 + @int.ToString() + "\n";
+		}
+		array[num30] = text57;
+		int num31 = 91;
+		string text59;
+		if (this._VertexWaveSphereMask <= 0)
+		{
+			text59 = "";
+		}
+		else
+		{
+			string text60 = "_VertexWaveSphereMask = ";
+			int4 @int = this.fingerprint._VertexWaveSphereMask;
+			text59 = text60 + @int.ToString() + "\n";
+		}
+		array[num31] = text59;
+		array[92] = ((this._VertexWavePhaseOffset > 0) ? ("_VertexWavePhaseOffset = " + this.fingerprint._VertexWavePhaseOffset.ToString() + "\n") : "");
+		int num32 = 93;
+		string text61;
+		if (this._VertexWaveAxes <= 0)
+		{
+			text61 = "";
+		}
+		else
+		{
+			string text62 = "_VertexWaveAxes = ";
+			int4 @int = this.fingerprint._VertexWaveAxes;
+			text61 = text62 + @int.ToString() + "\n";
+		}
+		array[num32] = text61;
+		array[94] = ((this._VertexRotateToggle > 0) ? ("_VertexRotateToggle = " + this.fingerprint._VertexRotateToggle.ToString() + "\n") : "");
+		int num33 = 95;
+		string text63;
+		if (this._VertexRotateAngles <= 0)
+		{
+			text63 = "";
+		}
+		else
+		{
+			string text64 = "_VertexRotateAngles = ";
+			int4 @int = this.fingerprint._VertexRotateAngles;
+			text63 = text64 + @int.ToString() + "\n";
+		}
+		array[num33] = text63;
+		array[96] = ((this._VertexRotateAnim > 0) ? ("_VertexRotateAnim = " + this.fingerprint._VertexRotateAnim.ToString() + "\n") : "");
+		array[97] = ((this._VertexLightToggle > 0) ? ("_VertexLightToggle = " + this.fingerprint._VertexLightToggle.ToString() + "\n") : "");
+		array[98] = ((this._InnerGlowOn > 0) ? ("_InnerGlowOn = " + this.fingerprint._InnerGlowOn.ToString() + "\n") : "");
+		int num34 = 99;
+		string text65;
+		if (this._InnerGlowColor <= 0)
+		{
+			text65 = "";
+		}
+		else
+		{
+			string text66 = "_InnerGlowColor = ";
+			int4 @int = this.fingerprint._InnerGlowColor;
+			text65 = text66 + @int.ToString() + "\n";
+		}
+		array[num34] = text65;
+		int num35 = 100;
+		string text67;
+		if (this._InnerGlowParams <= 0)
+		{
+			text67 = "";
+		}
+		else
+		{
+			string text68 = "_InnerGlowParams = ";
+			int4 @int = this.fingerprint._InnerGlowParams;
+			text67 = text68 + @int.ToString() + "\n";
+		}
+		array[num35] = text67;
 		array[101] = ((this._InnerGlowTap > 0) ? ("_InnerGlowTap = " + this.fingerprint._InnerGlowTap.ToString() + "\n") : "");
 		array[102] = ((this._InnerGlowSine > 0) ? ("_InnerGlowSine = " + this.fingerprint._InnerGlowSine.ToString() + "\n") : "");
 		array[103] = ((this._InnerGlowSinePeriod > 0) ? ("_InnerGlowSinePeriod = " + this.fingerprint._InnerGlowSinePeriod.ToString() + "\n") : "");
@@ -1170,47 +1170,47 @@ public struct UberShaderMatUsedProps
 		array[105] = ((this._StealthEffectOn > 0) ? ("_StealthEffectOn = " + this.fingerprint._StealthEffectOn.ToString() + "\n") : "");
 		array[106] = ((this._UseEyeTracking > 0) ? ("_UseEyeTracking = " + this.fingerprint._UseEyeTracking.ToString() + "\n") : "");
 		int num36 = 107;
-		string text35;
+		string text69;
 		if (this._EyeTileOffsetUV <= 0)
 		{
-			text35 = "";
+			text69 = "";
 		}
 		else
 		{
-			string str35 = "_EyeTileOffsetUV = ";
+			string text70 = "_EyeTileOffsetUV = ";
 			int4 @int = this.fingerprint._EyeTileOffsetUV;
-			text35 = str35 + @int.ToString() + "\n";
+			text69 = text70 + @int.ToString() + "\n";
 		}
-		array[num36] = text35;
+		array[num36] = text69;
 		array[108] = ((this._EyeOverrideUV > 0) ? ("_EyeOverrideUV = " + this.fingerprint._EyeOverrideUV.ToString() + "\n") : "");
 		int num37 = 109;
-		string text36;
+		string text71;
 		if (this._EyeOverrideUVTransform <= 0)
 		{
-			text36 = "";
+			text71 = "";
 		}
 		else
 		{
-			string str36 = "_EyeOverrideUVTransform = ";
+			string text72 = "_EyeOverrideUVTransform = ";
 			int4 @int = this.fingerprint._EyeOverrideUVTransform;
-			text36 = str36 + @int.ToString() + "\n";
+			text71 = text72 + @int.ToString() + "\n";
 		}
-		array[num37] = text36;
+		array[num37] = text71;
 		array[110] = ((this._UseMouthFlap > 0) ? ("_UseMouthFlap = " + this.fingerprint._UseMouthFlap.ToString() + "\n") : "");
 		array[111] = ((this._MouthMap > 0) ? ("_MouthMap = " + this.fingerprint._MouthMap + "\n") : "");
 		int num38 = 112;
-		string text37;
+		string text73;
 		if (this._MouthMap_ST <= 0)
 		{
-			text37 = "";
+			text73 = "";
 		}
 		else
 		{
-			string str37 = "_MouthMap_ST = ";
+			string text74 = "_MouthMap_ST = ";
 			int4 @int = this.fingerprint._MouthMap_ST;
-			text37 = str37 + @int.ToString() + "\n";
+			text73 = text74 + @int.ToString() + "\n";
 		}
-		array[num38] = text37;
+		array[num38] = text73;
 		array[113] = ((this._UseVertexColor > 0) ? ("_UseVertexColor = " + this.fingerprint._UseVertexColor.ToString() + "\n") : "");
 		array[114] = ((this._WaterEffect > 0) ? ("_WaterEffect = " + this.fingerprint._WaterEffect.ToString() + "\n") : "");
 		array[115] = ((this._HeightBasedWaterEffect > 0) ? ("_HeightBasedWaterEffect = " + this.fingerprint._HeightBasedWaterEffect.ToString() + "\n") : "");
@@ -1221,88 +1221,88 @@ public struct UberShaderMatUsedProps
 		array[120] = ((this._Smoothness > 0) ? ("_Smoothness = " + this.fingerprint._Smoothness.ToString() + "\n") : "");
 		array[121] = ((this._UseSpecHighlight > 0) ? ("_UseSpecHighlight = " + this.fingerprint._UseSpecHighlight.ToString() + "\n") : "");
 		int num39 = 122;
-		string text38;
+		string text75;
 		if (this._SpecularDir <= 0)
 		{
-			text38 = "";
+			text75 = "";
 		}
 		else
 		{
-			string str38 = "_SpecularDir = ";
+			string text76 = "_SpecularDir = ";
 			int4 @int = this.fingerprint._SpecularDir;
-			text38 = str38 + @int.ToString() + "\n";
+			text75 = text76 + @int.ToString() + "\n";
 		}
-		array[num39] = text38;
+		array[num39] = text75;
 		int num40 = 123;
-		string text39;
+		string text77;
 		if (this._SpecularPowerIntensity <= 0)
 		{
-			text39 = "";
+			text77 = "";
 		}
 		else
 		{
-			string str39 = "_SpecularPowerIntensity = ";
+			string text78 = "_SpecularPowerIntensity = ";
 			int4 @int = this.fingerprint._SpecularPowerIntensity;
-			text39 = str39 + @int.ToString() + "\n";
+			text77 = text78 + @int.ToString() + "\n";
 		}
-		array[num40] = text39;
+		array[num40] = text77;
 		int num41 = 124;
-		string text40;
+		string text79;
 		if (this._SpecularColor <= 0)
 		{
-			text40 = "";
+			text79 = "";
 		}
 		else
 		{
-			string str40 = "_SpecularColor = ";
+			string text80 = "_SpecularColor = ";
 			int4 @int = this.fingerprint._SpecularColor;
-			text40 = str40 + @int.ToString() + "\n";
+			text79 = text80 + @int.ToString() + "\n";
 		}
-		array[num41] = text40;
+		array[num41] = text79;
 		array[125] = ((this._SpecularUseDiffuseColor > 0) ? ("_SpecularUseDiffuseColor = " + this.fingerprint._SpecularUseDiffuseColor.ToString() + "\n") : "");
 		array[126] = ((this._EmissionToggle > 0) ? ("_EmissionToggle = " + this.fingerprint._EmissionToggle.ToString() + "\n") : "");
 		int num42 = 127;
-		string text41;
+		string text81;
 		if (this._EmissionColor <= 0)
 		{
-			text41 = "";
+			text81 = "";
 		}
 		else
 		{
-			string str41 = "_EmissionColor = ";
+			string text82 = "_EmissionColor = ";
 			int4 @int = this.fingerprint._EmissionColor;
-			text41 = str41 + @int.ToString() + "\n";
+			text81 = text82 + @int.ToString() + "\n";
 		}
-		array[num42] = text41;
+		array[num42] = text81;
 		array[128] = ((this._EmissionMap > 0) ? ("_EmissionMap = " + this.fingerprint._EmissionMap + "\n") : "");
 		array[129] = ((this._EmissionMaskByBaseMapAlpha > 0) ? ("_EmissionMaskByBaseMapAlpha = " + this.fingerprint._EmissionMaskByBaseMapAlpha.ToString() + "\n") : "");
 		int num43 = 130;
-		string text42;
+		string text83;
 		if (this._EmissionUVScrollSpeed <= 0)
 		{
-			text42 = "";
+			text83 = "";
 		}
 		else
 		{
-			string str42 = "_EmissionUVScrollSpeed = ";
+			string text84 = "_EmissionUVScrollSpeed = ";
 			int4 @int = this.fingerprint._EmissionUVScrollSpeed;
-			text42 = str42 + @int.ToString() + "\n";
+			text83 = text84 + @int.ToString() + "\n";
 		}
-		array[num43] = text42;
+		array[num43] = text83;
 		array[131] = ((this._EmissionDissolveProgress > 0) ? ("_EmissionDissolveProgress = " + this.fingerprint._EmissionDissolveProgress.ToString() + "\n") : "");
 		int num44 = 132;
-		string text43;
+		string text85;
 		if (this._EmissionDissolveAnimation <= 0)
 		{
-			text43 = "";
+			text85 = "";
 		}
 		else
 		{
-			string str43 = "_EmissionDissolveAnimation = ";
+			string text86 = "_EmissionDissolveAnimation = ";
 			int4 @int = this.fingerprint._EmissionDissolveAnimation;
-			text43 = str43 + @int.ToString() + "\n";
+			text85 = text86 + @int.ToString() + "\n";
 		}
-		array[num44] = text43;
+		array[num44] = text85;
 		array[133] = ((this._EmissionDissolveEdgeSize > 0) ? ("_EmissionDissolveEdgeSize = " + this.fingerprint._EmissionDissolveEdgeSize.ToString() + "\n") : "");
 		array[134] = ((this._EmissionIntensityInDynamic > 0) ? ("_EmissionIntensityInDynamic = " + this.fingerprint._EmissionIntensityInDynamic.ToString() + "\n") : "");
 		array[135] = ((this._EmissionUseUVWaveWarp > 0) ? ("_EmissionUseUVWaveWarp = " + this.fingerprint._EmissionUseUVWaveWarp.ToString() + "\n") : "");
@@ -1316,96 +1316,96 @@ public struct UberShaderMatUsedProps
 		array[143] = ((this._DeformMapIntensity > 0) ? ("_DeformMapIntensity = " + this.fingerprint._DeformMapIntensity.ToString() + "\n") : "");
 		array[144] = ((this._DeformMapMaskByVertColorRAmount > 0) ? ("_DeformMapMaskByVertColorRAmount = " + this.fingerprint._DeformMapMaskByVertColorRAmount.ToString() + "\n") : "");
 		int num45 = 145;
-		string text44;
+		string text87;
 		if (this._DeformMapScrollSpeed <= 0)
 		{
-			text44 = "";
+			text87 = "";
 		}
 		else
 		{
-			string str44 = "_DeformMapScrollSpeed = ";
+			string text88 = "_DeformMapScrollSpeed = ";
 			int4 @int = this.fingerprint._DeformMapScrollSpeed;
-			text44 = str44 + @int.ToString() + "\n";
+			text87 = text88 + @int.ToString() + "\n";
 		}
-		array[num45] = text44;
+		array[num45] = text87;
 		int num46 = 146;
-		string text45;
+		string text89;
 		if (this._DeformMapUV0Influence <= 0)
 		{
-			text45 = "";
+			text89 = "";
 		}
 		else
 		{
-			string str45 = "_DeformMapUV0Influence = ";
+			string text90 = "_DeformMapUV0Influence = ";
 			int4 @int = this.fingerprint._DeformMapUV0Influence;
-			text45 = str45 + @int.ToString() + "\n";
+			text89 = text90 + @int.ToString() + "\n";
 		}
-		array[num46] = text45;
+		array[num46] = text89;
 		int num47 = 147;
-		string text46;
+		string text91;
 		if (this._DeformMapObjectSpaceOffsetsU <= 0)
 		{
-			text46 = "";
+			text91 = "";
 		}
 		else
 		{
-			string str46 = "_DeformMapObjectSpaceOffsetsU = ";
+			string text92 = "_DeformMapObjectSpaceOffsetsU = ";
 			int4 @int = this.fingerprint._DeformMapObjectSpaceOffsetsU;
-			text46 = str46 + @int.ToString() + "\n";
+			text91 = text92 + @int.ToString() + "\n";
 		}
-		array[num47] = text46;
+		array[num47] = text91;
 		int num48 = 148;
-		string text47;
+		string text93;
 		if (this._DeformMapObjectSpaceOffsetsV <= 0)
 		{
-			text47 = "";
+			text93 = "";
 		}
 		else
 		{
-			string str47 = "_DeformMapObjectSpaceOffsetsV = ";
+			string text94 = "_DeformMapObjectSpaceOffsetsV = ";
 			int4 @int = this.fingerprint._DeformMapObjectSpaceOffsetsV;
-			text47 = str47 + @int.ToString() + "\n";
+			text93 = text94 + @int.ToString() + "\n";
 		}
-		array[num48] = text47;
+		array[num48] = text93;
 		int num49 = 149;
-		string text48;
+		string text95;
 		if (this._DeformMapWorldSpaceOffsetsU <= 0)
 		{
-			text48 = "";
+			text95 = "";
 		}
 		else
 		{
-			string str48 = "_DeformMapWorldSpaceOffsetsU = ";
+			string text96 = "_DeformMapWorldSpaceOffsetsU = ";
 			int4 @int = this.fingerprint._DeformMapWorldSpaceOffsetsU;
-			text48 = str48 + @int.ToString() + "\n";
+			text95 = text96 + @int.ToString() + "\n";
 		}
-		array[num49] = text48;
+		array[num49] = text95;
 		int num50 = 150;
-		string text49;
+		string text97;
 		if (this._DeformMapWorldSpaceOffsetsV <= 0)
 		{
-			text49 = "";
+			text97 = "";
 		}
 		else
 		{
-			string str49 = "_DeformMapWorldSpaceOffsetsV = ";
+			string text98 = "_DeformMapWorldSpaceOffsetsV = ";
 			int4 @int = this.fingerprint._DeformMapWorldSpaceOffsetsV;
-			text49 = str49 + @int.ToString() + "\n";
+			text97 = text98 + @int.ToString() + "\n";
 		}
-		array[num50] = text49;
+		array[num50] = text97;
 		int num51 = 151;
-		string text50;
+		string text99;
 		if (this._RotateOnYAxisBySinTime <= 0)
 		{
-			text50 = "";
+			text99 = "";
 		}
 		else
 		{
-			string str50 = "_RotateOnYAxisBySinTime = ";
+			string text100 = "_RotateOnYAxisBySinTime = ";
 			int4 @int = this.fingerprint._RotateOnYAxisBySinTime;
-			text50 = str50 + @int.ToString() + "\n";
+			text99 = text100 + @int.ToString() + "\n";
 		}
-		array[num51] = text50;
+		array[num51] = text99;
 		array[152] = ((this._USE_TEX_ARRAY_ATLAS > 0) ? ("_USE_TEX_ARRAY_ATLAS = " + this.fingerprint._USE_TEX_ARRAY_ATLAS.ToString() + "\n") : "");
 		array[153] = ((this._BaseMap_Atlas > 0) ? ("_BaseMap_Atlas = " + this.fingerprint._BaseMap_Atlas + "\n") : "");
 		array[154] = ((this._BaseMap_AtlasSlice > 0) ? ("_BaseMap_AtlasSlice = " + this.fingerprint._BaseMap_AtlasSlice.ToString() + "\n") : "");
@@ -1424,47 +1424,47 @@ public struct UberShaderMatUsedProps
 		array[167] = ((this._ZWrite > 0) ? ("_ZWrite = " + this.fingerprint._ZWrite.ToString() + "\n") : "");
 		array[168] = ((this._AlphaToMask > 0) ? ("_AlphaToMask = " + this.fingerprint._AlphaToMask.ToString() + "\n") : "");
 		int num52 = 169;
-		string text51;
+		string text101;
 		if (this._Color <= 0)
 		{
-			text51 = "";
+			text101 = "";
 		}
 		else
 		{
-			string str51 = "_Color = ";
+			string text102 = "_Color = ";
 			int4 @int = this.fingerprint._Color;
-			text51 = str51 + @int.ToString() + "\n";
+			text101 = text102 + @int.ToString() + "\n";
 		}
-		array[num52] = text51;
+		array[num52] = text101;
 		array[170] = ((this._Surface > 0) ? ("_Surface = " + this.fingerprint._Surface.ToString() + "\n") : "");
 		array[171] = ((this._Metallic > 0) ? ("_Metallic = " + this.fingerprint._Metallic.ToString() + "\n") : "");
 		int num53 = 172;
-		string text52;
+		string text103;
 		if (this._SpecColor <= 0)
 		{
-			text52 = "";
+			text103 = "";
 		}
 		else
 		{
-			string str52 = "_SpecColor = ";
+			string text104 = "_SpecColor = ";
 			int4 @int = this.fingerprint._SpecColor;
-			text52 = str52 + @int.ToString() + "\n";
+			text103 = text104 + @int.ToString() + "\n";
 		}
-		array[num53] = text52;
+		array[num53] = text103;
 		array[173] = ((this._DayNightLightmapArray > 0) ? ("_DayNightLightmapArray = " + this.fingerprint._DayNightLightmapArray + "\n") : "");
 		int num54 = 174;
-		string text53;
+		string text105;
 		if (this._DayNightLightmapArray_ST <= 0)
 		{
-			text53 = "";
+			text105 = "";
 		}
 		else
 		{
-			string str53 = "_DayNightLightmapArray_ST = ";
+			string text106 = "_DayNightLightmapArray_ST = ";
 			int4 @int = this.fingerprint._DayNightLightmapArray_ST;
-			text53 = str53 + @int.ToString() + "\n";
+			text105 = text106 + @int.ToString() + "\n";
 		}
-		array[num54] = text53;
+		array[num54] = text105;
 		array[175] = ((this._DayNightLightmapArray_AtlasSlice > 0) ? ("_DayNightLightmapArray_AtlasSlice = " + this.fingerprint._DayNightLightmapArray_AtlasSlice.ToString() + "\n") : "");
 		return string.Concat(array);
 	}

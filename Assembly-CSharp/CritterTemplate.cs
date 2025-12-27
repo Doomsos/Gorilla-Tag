@@ -348,7 +348,7 @@ public class CritterTemplate : ScriptableObject
 	public T GetTemplateValue<T>(string valueName)
 	{
 		object obj;
-		if (this.modifiedValues.TryGetValue(valueName, out obj))
+		if (this.modifiedValues.TryGetValue(valueName, ref obj))
 		{
 			return (T)((object)obj);
 		}

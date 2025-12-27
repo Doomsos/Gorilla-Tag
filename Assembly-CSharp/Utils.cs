@@ -51,7 +51,7 @@ public static class Utils
 
 	public static bool InRoom(this NetPlayer player)
 	{
-		return NetworkSystem.Instance.InRoom && NetworkSystem.Instance.AllNetPlayers.Contains(player);
+		return NetworkSystem.Instance.InRoom && Enumerable.Contains<NetPlayer>(NetworkSystem.Instance.AllNetPlayers, player);
 	}
 
 	public static bool PlayerInRoom(int actorNumber)
@@ -73,7 +73,7 @@ public static class Utils
 	public static bool PlayerInRoom(int actorNumer, out Player photonPlayer)
 	{
 		photonPlayer = null;
-		return PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.Players.TryGetValue(actorNumer, out photonPlayer);
+		return PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.Players.TryGetValue(actorNumer, ref photonPlayer);
 	}
 
 	public static bool PlayerInRoom(int actorNumber, out NetPlayer player)

@@ -167,28 +167,28 @@ namespace BoingKit
 						{
 							BoingBones.Bone bone3 = array[k];
 							BoingBones.Bone bone4 = array[bone3.ParentIndex];
-							Vector3 v = bone4.Instance.PositionSpring.Value - bone3.Instance.PositionSpring.Value;
-							Vector3 vector = VectorUtil.NormalizeSafe(v, Vector3.zero);
-							float magnitude = v.magnitude;
+							Vector3 vector = bone4.Instance.PositionSpring.Value - bone3.Instance.PositionSpring.Value;
+							Vector3 vector2 = VectorUtil.NormalizeSafe(vector, Vector3.zero);
+							float magnitude = vector.magnitude;
 							float num = magnitude - bone3.FullyStiffToParentLength;
-							float d = bone3.LengthStiffnessT * num;
+							float num2 = bone3.LengthStiffnessT * num;
 							BoingBones.Bone bone5 = bone3;
-							bone5.Instance.PositionSpring.Value = bone5.Instance.PositionSpring.Value + d * vector;
-							Vector3 a = Vector3.Project(bone3.Instance.PositionSpring.Velocity, vector);
+							bone5.Instance.PositionSpring.Value = bone5.Instance.PositionSpring.Value + num2 * vector2;
+							Vector3 vector3 = Vector3.Project(bone3.Instance.PositionSpring.Velocity, vector2);
 							BoingBones.Bone bone6 = bone3;
-							bone6.Instance.PositionSpring.Velocity = bone6.Instance.PositionSpring.Velocity - bone3.LengthStiffnessT * a;
+							bone6.Instance.PositionSpring.Velocity = bone6.Instance.PositionSpring.Velocity - bone3.LengthStiffnessT * vector3;
 							if (bone3.BendAngleCap < MathUtil.Pi - MathUtil.Epsilon)
 							{
 								Vector3 position2 = bone3.Position;
-								Vector3 vector2 = bone3.Instance.PositionSpring.Value - position;
-								vector2 = VectorUtil.ClampBend(vector2, position2 - position, bone3.BendAngleCap);
-								bone3.Instance.PositionSpring.Value = position + vector2;
+								Vector3 vector4 = bone3.Instance.PositionSpring.Value - position;
+								vector4 = VectorUtil.ClampBend(vector4, position2 - position, bone3.BendAngleCap);
+								bone3.Instance.PositionSpring.Value = position + vector4;
 							}
 							if (bone3.SquashAndStretch > 0f)
 							{
-								float num2 = magnitude * MathUtil.InvSafe(bone3.FullyStiffToParentLength);
-								Vector3 b = VectorUtil.ComponentWiseDivSafe(Mathf.Clamp(Mathf.Sqrt(1f / num2), 1f / Mathf.Max(1f, chain.MaxStretch), Mathf.Max(1f, chain.MaxSquash)) * Vector3.one, bone4.ScaleWs);
-								bone3.BlendedScaleLs = Vector3.Lerp(Vector3.Lerp(bone3.CachedScaleLs, b, bone3.SquashAndStretch), bone3.CachedScaleLs, bone3.AnimationBlend);
+								float num3 = magnitude * MathUtil.InvSafe(bone3.FullyStiffToParentLength);
+								Vector3 vector5 = VectorUtil.ComponentWiseDivSafe(Mathf.Clamp(Mathf.Sqrt(1f / num3), 1f / Mathf.Max(1f, chain.MaxStretch), Mathf.Max(1f, chain.MaxSquash)) * Vector3.one, bone4.ScaleWs);
+								bone3.BlendedScaleLs = Vector3.Lerp(Vector3.Lerp(bone3.CachedScaleLs, vector5, bone3.SquashAndStretch), bone3.CachedScaleLs, bone3.AnimationBlend);
 							}
 							else
 							{
@@ -207,13 +207,13 @@ namespace BoingKit
 								{
 									foreach (BoingBones.Bone bone7 in array)
 									{
-										Vector3 vector3;
-										if (bone7.Bounds.Intersects(boingBoneCollider.Bounds) && boingBoneCollider.Collide(bone7.Instance.PositionSpring.Value, bones.MinScale * bone7.CollisionRadius, out vector3))
+										Vector3 vector6;
+										if (bone7.Bounds.Intersects(boingBoneCollider.Bounds) && boingBoneCollider.Collide(bone7.Instance.PositionSpring.Value, bones.MinScale * bone7.CollisionRadius, out vector6))
 										{
 											BoingBones.Bone bone8 = bone7;
-											bone8.Instance.PositionSpring.Value = bone8.Instance.PositionSpring.Value + VectorUtil.ClampLength(vector3, 0f, maxLen);
+											bone8.Instance.PositionSpring.Value = bone8.Instance.PositionSpring.Value + VectorUtil.ClampLength(vector6, 0f, maxLen);
 											BoingBones.Bone bone9 = bone7;
-											bone9.Instance.PositionSpring.Velocity = bone9.Instance.PositionSpring.Velocity - Vector3.Project(bone7.Instance.PositionSpring.Velocity, vector3);
+											bone9.Instance.PositionSpring.Velocity = bone9.Instance.PositionSpring.Velocity - Vector3.Project(bone7.Instance.PositionSpring.Velocity, vector6);
 										}
 									}
 								}
@@ -233,14 +233,14 @@ namespace BoingKit
 										{
 											sharedSphereCollider.center = bone10.Instance.PositionSpring.Value;
 											sharedSphereCollider.radius = bone10.CollisionRadius;
-											Vector3 vector4;
-											float d2;
-											if (Physics.ComputePenetration(sharedSphereCollider, Vector3.zero, Quaternion.identity, collider, collider.transform.position, collider.transform.rotation, out vector4, out d2))
+											Vector3 vector7;
+											float num4;
+											if (Physics.ComputePenetration(sharedSphereCollider, Vector3.zero, Quaternion.identity, collider, collider.transform.position, collider.transform.rotation, ref vector7, ref num4))
 											{
 												BoingBones.Bone bone11 = bone10;
-												bone11.Instance.PositionSpring.Value = bone11.Instance.PositionSpring.Value + VectorUtil.ClampLength(vector4 * d2, 0f, maxLen);
+												bone11.Instance.PositionSpring.Value = bone11.Instance.PositionSpring.Value + VectorUtil.ClampLength(vector7 * num4, 0f, maxLen);
 												BoingBones.Bone bone12 = bone10;
-												bone12.Instance.PositionSpring.Velocity = bone12.Instance.PositionSpring.Velocity - Vector3.Project(bone10.Instance.PositionSpring.Velocity, vector4);
+												bone12.Instance.PositionSpring.Velocity = bone12.Instance.PositionSpring.Velocity - Vector3.Project(bone10.Instance.PositionSpring.Velocity, vector7);
 											}
 										}
 									}
@@ -260,19 +260,19 @@ namespace BoingKit
 									{
 										foreach (BoingBones.Bone bone14 in array3)
 										{
-											Vector3 vector5;
-											if (Collision.SphereSphere(bone13.Instance.PositionSpring.Value, bones.MinScale * bone13.CollisionRadius, bone14.Instance.PositionSpring.Value, bones.MinScale * bone14.CollisionRadius, out vector5))
+											Vector3 vector8;
+											if (Collision.SphereSphere(bone13.Instance.PositionSpring.Value, bones.MinScale * bone13.CollisionRadius, bone14.Instance.PositionSpring.Value, bones.MinScale * bone14.CollisionRadius, out vector8))
 											{
-												vector5 = VectorUtil.ClampLength(vector5, 0f, maxLen);
-												float num3 = bone14.CollisionRadius * MathUtil.InvSafe(bone13.CollisionRadius + bone14.CollisionRadius);
+												vector8 = VectorUtil.ClampLength(vector8, 0f, maxLen);
+												float num5 = bone14.CollisionRadius * MathUtil.InvSafe(bone13.CollisionRadius + bone14.CollisionRadius);
 												BoingBones.Bone bone15 = bone13;
-												bone15.Instance.PositionSpring.Value = bone15.Instance.PositionSpring.Value + num3 * vector5;
+												bone15.Instance.PositionSpring.Value = bone15.Instance.PositionSpring.Value + num5 * vector8;
 												BoingBones.Bone bone16 = bone14;
-												bone16.Instance.PositionSpring.Value = bone16.Instance.PositionSpring.Value - (1f - num3) * vector5;
+												bone16.Instance.PositionSpring.Value = bone16.Instance.PositionSpring.Value - (1f - num5) * vector8;
 												BoingBones.Bone bone17 = bone13;
-												bone17.Instance.PositionSpring.Velocity = bone17.Instance.PositionSpring.Velocity - Vector3.Project(bone13.Instance.PositionSpring.Velocity, vector5);
+												bone17.Instance.PositionSpring.Velocity = bone17.Instance.PositionSpring.Velocity - Vector3.Project(bone13.Instance.PositionSpring.Velocity, vector8);
 												BoingBones.Bone bone18 = bone14;
-												bone18.Instance.PositionSpring.Velocity = bone18.Instance.PositionSpring.Velocity - Vector3.Project(bone14.Instance.PositionSpring.Velocity, vector5);
+												bone18.Instance.PositionSpring.Velocity = bone18.Instance.PositionSpring.Velocity - Vector3.Project(bone14.Instance.PositionSpring.Velocity, vector8);
 											}
 										}
 									}
@@ -423,125 +423,125 @@ namespace BoingKit
 
 				public void AccumulateTarget(ref BoingWork.Params p, ref BoingEffector.Params effector, float dt)
 				{
-					Vector3 b = effector.Bits.IsBitSet(0) ? VectorUtil.GetClosestPointOnSegment(this.PositionOrigin, effector.PrevPosition, effector.CurrPosition) : effector.CurrPosition;
-					Vector3 vector = this.PositionOrigin - b;
-					Vector3 v = vector;
+					Vector3 vector = effector.Bits.IsBitSet(0) ? VectorUtil.GetClosestPointOnSegment(this.PositionOrigin, effector.PrevPosition, effector.CurrPosition) : effector.CurrPosition;
+					Vector3 vector2 = this.PositionOrigin - vector;
+					Vector3 vector3 = vector2;
 					if (p.Bits.IsBitSet(0))
 					{
 						switch (p.TwoDPlane)
 						{
 						case TwoDPlaneEnum.XY:
-							vector.z = 0f;
+							vector2.z = 0f;
 							break;
 						case TwoDPlaneEnum.XZ:
-							vector.y = 0f;
+							vector2.y = 0f;
 							break;
 						case TwoDPlaneEnum.YZ:
-							vector.x = 0f;
+							vector2.x = 0f;
 							break;
 						}
 					}
-					if (Mathf.Abs(vector.x) > effector.Radius || Mathf.Abs(vector.y) > effector.Radius || Mathf.Abs(vector.z) > effector.Radius || vector.sqrMagnitude > effector.Radius * effector.Radius)
+					if (Mathf.Abs(vector2.x) > effector.Radius || Mathf.Abs(vector2.y) > effector.Radius || Mathf.Abs(vector2.z) > effector.Radius || vector2.sqrMagnitude > effector.Radius * effector.Radius)
 					{
 						return;
 					}
-					float magnitude = vector.magnitude;
+					float magnitude = vector2.magnitude;
 					float num = (effector.Radius - effector.FullEffectRadius > MathUtil.Epsilon) ? (1f - Mathf.Clamp01((magnitude - effector.FullEffectRadius) / (effector.Radius - effector.FullEffectRadius))) : 1f;
-					Vector3 v2 = this.m_upWs;
-					Vector3 vector2 = this.m_upWs;
-					Vector3 vector3 = VectorUtil.NormalizeSafe(v, this.m_upWs);
-					Vector3 vector4 = vector3;
+					Vector3 vector4 = this.m_upWs;
+					Vector3 vector5 = this.m_upWs;
+					Vector3 vector6 = VectorUtil.NormalizeSafe(vector3, this.m_upWs);
+					Vector3 vector7 = vector6;
 					if (p.Bits.IsBitSet(1))
 					{
 						switch (p.TwoDPlane)
 						{
 						case TwoDPlaneEnum.XY:
-							vector3.z = 0f;
-							v2.z = 0f;
+							vector6.z = 0f;
+							vector4.z = 0f;
 							break;
 						case TwoDPlaneEnum.XZ:
-							vector3.y = 0f;
-							v2.y = 0f;
+							vector6.y = 0f;
+							vector4.y = 0f;
 							break;
 						case TwoDPlaneEnum.YZ:
-							vector3.x = 0f;
-							v2.x = 0f;
+							vector6.x = 0f;
+							vector4.x = 0f;
 							break;
 						}
-						if (v2.sqrMagnitude < MathUtil.Epsilon)
+						if (vector4.sqrMagnitude < MathUtil.Epsilon)
 						{
 							switch (p.TwoDPlane)
 							{
 							case TwoDPlaneEnum.XY:
-								v2 = Vector3.up;
+								vector4 = Vector3.up;
 								break;
 							case TwoDPlaneEnum.XZ:
-								v2 = Vector3.forward;
+								vector4 = Vector3.forward;
 								break;
 							case TwoDPlaneEnum.YZ:
-								v2 = Vector3.up;
+								vector4 = Vector3.up;
 								break;
 							}
 						}
 						else
 						{
-							v2.Normalize();
+							vector4.Normalize();
 						}
-						vector3 = VectorUtil.NormalizeSafe(vector3, v2);
+						vector6 = VectorUtil.NormalizeSafe(vector6, vector4);
 					}
 					if (p.Bits.IsBitSet(2))
 					{
 						switch (p.TwoDPlane)
 						{
 						case TwoDPlaneEnum.XY:
-							vector4.z = 0f;
-							vector2.z = 0f;
+							vector7.z = 0f;
+							vector5.z = 0f;
 							break;
 						case TwoDPlaneEnum.XZ:
-							vector4.y = 0f;
-							vector2.y = 0f;
+							vector7.y = 0f;
+							vector5.y = 0f;
 							break;
 						case TwoDPlaneEnum.YZ:
-							vector4.x = 0f;
-							vector2.x = 0f;
+							vector7.x = 0f;
+							vector5.x = 0f;
 							break;
 						}
-						if (vector2.sqrMagnitude < MathUtil.Epsilon)
+						if (vector5.sqrMagnitude < MathUtil.Epsilon)
 						{
 							switch (p.TwoDPlane)
 							{
 							case TwoDPlaneEnum.XY:
-								vector2 = Vector3.up;
+								vector5 = Vector3.up;
 								break;
 							case TwoDPlaneEnum.XZ:
-								vector2 = Vector3.forward;
+								vector5 = Vector3.forward;
 								break;
 							case TwoDPlaneEnum.YZ:
-								vector2 = Vector3.up;
+								vector5 = Vector3.up;
 								break;
 							}
 						}
 						else
 						{
-							vector2.Normalize();
+							vector5.Normalize();
 						}
-						vector4 = VectorUtil.NormalizeSafe(vector4, vector2);
+						vector7 = VectorUtil.NormalizeSafe(vector7, vector5);
 					}
 					if (p.Bits.IsBitSet(3))
 					{
-						Vector3 b2 = num * p.MoveReactionMultiplier * effector.MoveDistance * vector3;
-						this.PositionTarget += b2;
+						Vector3 vector8 = num * p.MoveReactionMultiplier * effector.MoveDistance * vector6;
+						this.PositionTarget += vector8;
 						this.PositionSpring.Velocity = this.PositionSpring.Velocity + num * p.LinearImpulseMultiplier * effector.LinearImpulse * effector.LinearVelocityDir * (60f * dt);
 					}
 					if (p.Bits.IsBitSet(4))
 					{
-						Vector3 vector5 = VectorUtil.NormalizeSafe(Vector3.Cross(vector2, vector4), VectorUtil.FindOrthogonal(vector2));
-						Vector3 v3 = num * p.RotationReactionMultiplier * effector.RotateAngle * vector5;
-						this.RotationTarget += QuaternionUtil.ToVector4(QuaternionUtil.FromAngularVector(v3));
-						Vector3 v4 = VectorUtil.NormalizeSafe(Vector3.Cross(effector.LinearVelocityDir, vector4 - 0.01f * Vector3.up), vector5);
-						float d = num * p.AngularImpulseMultiplier * effector.AngularImpulse * (60f * dt);
-						Vector4 a = QuaternionUtil.ToVector4(QuaternionUtil.FromAngularVector(v4));
-						this.RotationSpring.VelocityVec = this.RotationSpring.VelocityVec + d * a;
+						Vector3 vector9 = VectorUtil.NormalizeSafe(Vector3.Cross(vector5, vector7), VectorUtil.FindOrthogonal(vector5));
+						Vector3 v = num * p.RotationReactionMultiplier * effector.RotateAngle * vector9;
+						this.RotationTarget += QuaternionUtil.ToVector4(QuaternionUtil.FromAngularVector(v));
+						Vector3 v2 = VectorUtil.NormalizeSafe(Vector3.Cross(effector.LinearVelocityDir, vector7 - 0.01f * Vector3.up), vector9);
+						float num2 = num * p.AngularImpulseMultiplier * effector.AngularImpulse * (60f * dt);
+						Vector4 vector10 = QuaternionUtil.ToVector4(QuaternionUtil.FromAngularVector(v2));
+						this.RotationSpring.VelocityVec = this.RotationSpring.VelocityVec + num2 * vector10;
 					}
 					this.m_numEffectors++;
 				}
@@ -719,12 +719,12 @@ namespace BoingKit
 								else
 								{
 									Vector3 cachedPositionWs = bone3.CachedPositionWs;
-									Vector3 b = BoingWork.ComputeTranslationalResults(bone3.Transform, cachedPositionWs, bone3.BlendedPositionWs, bones);
+									Vector3 vector = BoingWork.ComputeTranslationalResults(bone3.Transform, cachedPositionWs, bone3.BlendedPositionWs, bones);
 									Quaternion quaternion = bones.TwistPropagation ? bone3.SpringRotationWs : bone3.CachedRotationWs;
-									Quaternion lhs = Quaternion.Inverse(quaternion);
+									Quaternion quaternion2 = Quaternion.Inverse(quaternion);
 									if (bones.EnableRotationEffect)
 									{
-										Vector4 a = Vector3.zero;
+										Vector4 vector2 = Vector3.zero;
 										float num = 0f;
 										foreach (int num2 in bone3.ChildIndices)
 										{
@@ -732,18 +732,18 @@ namespace BoingKit
 											{
 												BoingBones.Bone bone5 = array[num2];
 												Vector3 cachedPositionWs2 = bone5.CachedPositionWs;
-												Vector3 fromDirection = VectorUtil.NormalizeSafe(cachedPositionWs2 - cachedPositionWs, Vector3.zero);
-												Vector3 toDirection = VectorUtil.NormalizeSafe(BoingWork.ComputeTranslationalResults(bone5.Transform, cachedPositionWs2, bone5.BlendedPositionWs, bones) - b, Vector3.zero);
-												Quaternion rhs = Quaternion.FromToRotation(fromDirection, toDirection);
-												Vector4 a2 = QuaternionUtil.ToVector4(lhs * rhs);
+												Vector3 vector3 = VectorUtil.NormalizeSafe(cachedPositionWs2 - cachedPositionWs, Vector3.zero);
+												Vector3 vector4 = VectorUtil.NormalizeSafe(BoingWork.ComputeTranslationalResults(bone5.Transform, cachedPositionWs2, bone5.BlendedPositionWs, bones) - vector, Vector3.zero);
+												Quaternion quaternion3 = Quaternion.FromToRotation(vector3, vector4);
+												Vector4 vector5 = QuaternionUtil.ToVector4(quaternion2 * quaternion3);
 												float num3 = Mathf.Max(MathUtil.Epsilon, chain.MaxLengthFromRoot - bone5.LengthFromRoot);
-												a += num3 * a2;
+												vector2 += num3 * vector5;
 												num += num3;
 											}
 										}
 										if (num > 0f)
 										{
-											Vector4 v = a / num;
+											Vector4 v = vector2 / num;
 											bone3.RotationBackPropDeltaPs = QuaternionUtil.FromVector4(v, true);
 											bone3.BlendedRotationWs = quaternion * bone3.RotationBackPropDeltaPs * quaternion;
 										}
@@ -847,7 +847,7 @@ namespace BoingKit
 			public void GatherOutput(Dictionary<int, BoingBehavior> behaviorMap, BoingManager.UpdateMode updateMode)
 			{
 				BoingBehavior boingBehavior;
-				if (!behaviorMap.TryGetValue(this.InstanceID, out boingBehavior))
+				if (!behaviorMap.TryGetValue(this.InstanceID, ref boingBehavior))
 				{
 					return;
 				}
@@ -865,7 +865,7 @@ namespace BoingKit
 			public void GatherOutput(Dictionary<int, BoingReactor> reactorMap, BoingManager.UpdateMode updateMode)
 			{
 				BoingReactor boingReactor;
-				if (!reactorMap.TryGetValue(this.InstanceID, out boingReactor))
+				if (!reactorMap.TryGetValue(this.InstanceID, ref boingReactor))
 				{
 					return;
 				}

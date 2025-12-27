@@ -36,19 +36,19 @@ public class ProxyType : Type
 			throw new ArgumentNullException("input");
 		}
 		input = input.Trim();
-		if (!input.Contains(ProxyType.kPrefix, StringComparison.InvariantCultureIgnoreCase))
+		if (!input.Contains(ProxyType.kPrefix, 3))
 		{
 			return ProxyType.kInvalidType;
 		}
-		if (!input.StartsWith(ProxyType.kPrefix, StringComparison.InvariantCultureIgnoreCase))
+		if (!input.StartsWith(ProxyType.kPrefix, 3))
 		{
 			return ProxyType.kInvalidType;
 		}
 		if (input.Contains(','))
 		{
-			input = input.Split(',', StringSplitOptions.None)[0];
+			input = input.Split(',', 0)[0];
 		}
-		string text = input.Split('.', StringSplitOptions.None)[1].Trim();
+		string text = input.Split('.', 0)[1].Trim();
 		if (string.IsNullOrWhiteSpace(text))
 		{
 			return ProxyType.kInvalidType;
@@ -94,7 +94,7 @@ public class ProxyType : Type
 
 	protected override TypeAttributes GetAttributeFlagsImpl()
 	{
-		return TypeAttributes.NotPublic;
+		return 0;
 	}
 
 	protected override ConstructorInfo GetConstructorImpl(BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)

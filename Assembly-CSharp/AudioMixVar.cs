@@ -18,7 +18,7 @@ public class AudioMixVar
 				return 0f;
 			}
 			float result;
-			if (!this.mixer.GetFloat(this.name, out result))
+			if (!this.mixer.GetFloat(this.name, ref result))
 			{
 				return 0f;
 			}

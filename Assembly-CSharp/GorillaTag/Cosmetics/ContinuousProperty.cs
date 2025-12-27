@@ -295,7 +295,7 @@ namespace GorillaTag.Cosmetics
 			List<Object> list = new List<Object>();
 			List<Object> list2 = new List<Object>();
 			Transform transform4;
-			while (stack.TryPop(out transform4))
+			while (stack.TryPop(ref transform4))
 			{
 				if (num < 0 && transform4 == transform2)
 				{
@@ -950,20 +950,20 @@ namespace GorillaTag.Cosmetics
 							return;
 						case 12584968:
 						{
-							Vector3 a;
-							Quaternion a2;
-							this.transformA.GetPositionAndRotation(out a, out a2);
-							Vector3 b;
-							Quaternion b2;
-							this.transformB.GetPositionAndRotation(out b, out b2);
-							float t2 = this.curve.Evaluate(f);
-							((Transform)this.target).SetPositionAndRotation(Vector3.Lerp(a, b, t2), Quaternion.Slerp(a2, b2, t2));
+							Vector3 vector;
+							Quaternion quaternion;
+							this.transformA.GetPositionAndRotation(ref vector, ref quaternion);
+							Vector3 vector2;
+							Quaternion quaternion2;
+							this.transformB.GetPositionAndRotation(ref vector2, ref quaternion2);
+							float num4 = this.curve.Evaluate(f);
+							((Transform)this.target).SetPositionAndRotation(Vector3.Lerp(vector, vector2, num4), Quaternion.Slerp(quaternion, quaternion2, num4));
 							return;
 						}
 						case 12584969:
 						{
-							float t3 = this.curve.Evaluate(f);
-							((Transform)this.target).SetLocalPositionAndRotation(Vector3.Lerp(this.offsetA.pos, this.offsetB.pos, t3), Quaternion.Slerp(this.offsetA.rot, this.offsetB.rot, t3));
+							float num5 = this.curve.Evaluate(f);
+							((Transform)this.target).SetLocalPositionAndRotation(Vector3.Lerp(this.offsetA.pos, this.offsetB.pos, num5), Quaternion.Slerp(this.offsetA.rot, this.offsetB.rot, num5));
 							return;
 						}
 						default:
@@ -972,11 +972,11 @@ namespace GorillaTag.Cosmetics
 					}
 					else
 					{
-						float num4 = this.curve.Evaluate(f);
-						float num5 = 1f - Mathf.Exp(-num4 * deltaTime);
-						if (Random.value < num5)
+						float num6 = this.curve.Evaluate(f);
+						float num7 = 1f - Mathf.Exp(-num6 * deltaTime);
+						if (Random.value < num7)
 						{
-							this.unityEvent.Invoke(num4);
+							this.unityEvent.Invoke(num6);
 							return;
 						}
 						return;
@@ -1001,14 +1001,14 @@ namespace GorillaTag.Cosmetics
 			ParticleSystem.MinMaxCurve result = inCurve;
 			switch (result.mode)
 			{
-			case ParticleSystemCurveMode.Constant:
+			case 0:
 				result.constant *= scale;
 				break;
-			case ParticleSystemCurveMode.Curve:
-			case ParticleSystemCurveMode.TwoCurves:
+			case 1:
+			case 2:
 				result.curveMultiplier *= scale;
 				break;
-			case ParticleSystemCurveMode.TwoConstants:
+			case 3:
 				result.constantMin *= scale;
 				result.constantMax *= scale;
 				break;
@@ -1096,7 +1096,7 @@ namespace GorillaTag.Cosmetics
 		private ContinuousProperty.InterpolationMode interpolationMode = ContinuousProperty.InterpolationMode.PositionAndRotation;
 
 		[SerializeField]
-		private ParticleSystemStopBehavior stopType = ParticleSystemStopBehavior.StopEmitting;
+		private ParticleSystemStopBehavior stopType = 1;
 
 		[SerializeField]
 		private Transform transformA;

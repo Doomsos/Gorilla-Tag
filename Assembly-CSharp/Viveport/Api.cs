@@ -116,7 +116,7 @@ namespace Viveport
 		}
 
 		[MonoPInvokeCallback(typeof(GetLicenseCallback))]
-		private static void GetLicenseHandler([MarshalAs(UnmanagedType.LPStr)] string message, [MarshalAs(UnmanagedType.LPStr)] string signature)
+		private static void GetLicenseHandler([MarshalAs(20)] string message, [MarshalAs(20)] string signature)
 		{
 			if (string.IsNullOrEmpty(message))
 			{
@@ -165,7 +165,7 @@ namespace Viveport
 				}
 				return;
 			}
-			string @string = Encoding.UTF8.GetString(Convert.FromBase64String(message.Substring(message.IndexOf("\n", StringComparison.Ordinal) + 1)));
+			string @string = Encoding.UTF8.GetString(Convert.FromBase64String(message.Substring(message.IndexOf("\n", 4) + 1)));
 			JsonData jsonData2 = JsonMapper.ToObject(@string);
 			Logger.Log("License: " + @string);
 			long issueTime = -1L;
@@ -213,10 +213,10 @@ namespace Viveport
 			try
 			{
 				RSACryptoServiceProvider rsacryptoServiceProvider = PEMKeyLoader.CryptoServiceProviderFromPublicKeyInfo(appKey);
-				byte[] signature2 = Convert.FromBase64String(signature);
-				SHA1Managed halg = new SHA1Managed();
+				byte[] array = Convert.FromBase64String(signature);
+				SHA1Managed sha1Managed = new SHA1Managed();
 				byte[] bytes = Encoding.UTF8.GetBytes(appId + "\n" + message);
-				return rsacryptoServiceProvider.VerifyData(bytes, halg, signature2);
+				return rsacryptoServiceProvider.VerifyData(bytes, sha1Managed, array);
 			}
 			catch (Exception ex)
 			{

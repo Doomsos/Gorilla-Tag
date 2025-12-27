@@ -11,12 +11,12 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 
 	public void Initialize()
 	{
-		GorillaTagCompetitiveManager.onStateChanged += this.OnStateChanged;
-		GorillaTagCompetitiveManager.onRoundStart += this.OnGameStarted;
-		GorillaTagCompetitiveManager.onRoundEnd += this.OnGameEnded;
-		GorillaTagCompetitiveManager.onPlayerJoined += this.OnPlayerJoined;
-		GorillaTagCompetitiveManager.onPlayerLeft += this.OnPlayerLeft;
-		GorillaTagCompetitiveManager.onTagOccurred += this.OnTagReported;
+		GorillaTagCompetitiveManager.onStateChanged += new Action<GorillaTagCompetitiveManager.GameState>(this.OnStateChanged);
+		GorillaTagCompetitiveManager.onRoundStart += new Action(this.OnGameStarted);
+		GorillaTagCompetitiveManager.onRoundEnd += new Action(this.OnGameEnded);
+		GorillaTagCompetitiveManager.onPlayerJoined += new Action<NetPlayer>(this.OnPlayerJoined);
+		GorillaTagCompetitiveManager.onPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeft);
+		GorillaTagCompetitiveManager.onTagOccurred += new Action<NetPlayer, NetPlayer>(this.OnTagReported);
 		GorillaGameManager instance = GorillaGameManager.instance;
 		if (instance != null)
 		{
@@ -39,12 +39,12 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 
 	public void Unsubscribe()
 	{
-		GorillaTagCompetitiveManager.onStateChanged -= this.OnStateChanged;
-		GorillaTagCompetitiveManager.onRoundStart -= this.OnGameStarted;
-		GorillaTagCompetitiveManager.onRoundEnd -= this.OnGameEnded;
-		GorillaTagCompetitiveManager.onPlayerJoined -= this.OnPlayerJoined;
-		GorillaTagCompetitiveManager.onPlayerLeft -= this.OnPlayerLeft;
-		GorillaTagCompetitiveManager.onTagOccurred -= this.OnTagReported;
+		GorillaTagCompetitiveManager.onStateChanged -= new Action<GorillaTagCompetitiveManager.GameState>(this.OnStateChanged);
+		GorillaTagCompetitiveManager.onRoundStart -= new Action(this.OnGameStarted);
+		GorillaTagCompetitiveManager.onRoundEnd -= new Action(this.OnGameEnded);
+		GorillaTagCompetitiveManager.onPlayerJoined -= new Action<NetPlayer>(this.OnPlayerJoined);
+		GorillaTagCompetitiveManager.onPlayerLeft -= new Action<NetPlayer>(this.OnPlayerLeft);
+		GorillaTagCompetitiveManager.onTagOccurred -= new Action<NetPlayer, NetPlayer>(this.OnTagReported);
 		if (this.Progression != null)
 		{
 			RankedProgressionManager progression = this.Progression;
@@ -67,14 +67,14 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 
 	private void OnPerSecondTimerElapsed(int playersInGame, int infectedPlayers)
 	{
-		foreach (int num in this.AllPlayerInRoundScores.Keys.ToList<int>())
+		foreach (int num in Enumerable.ToList<int>(this.AllPlayerInRoundScores.Keys))
 		{
 			RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound = this.AllPlayerInRoundScores[num];
 			playerScoreInRound.Infected = this.CompetitiveManager.IsInfected(NetworkSystem.Instance.GetPlayer(num));
 			if (!playerScoreInRound.Infected)
 			{
-				float t = (float)infectedPlayers / (float)playersInGame;
-				playerScoreInRound.PointsOnDefense += Mathf.Lerp(this.PointsPerUninfectedSecMin, this.PointsPerUninfectedSecMax, t);
+				float num2 = (float)infectedPlayers / (float)playersInGame;
+				playerScoreInRound.PointsOnDefense += Mathf.Lerp(this.PointsPerUninfectedSecMin, this.PointsPerUninfectedSecMax, num2);
 			}
 			this.AllPlayerInRoundScores[num] = playerScoreInRound;
 		}
@@ -110,14 +110,14 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 
 	public void OnGameEnded()
 	{
-		foreach (int key in this.AllPlayerInRoundScores.Keys.ToList<int>())
+		foreach (int num in Enumerable.ToList<int>(this.AllPlayerInRoundScores.Keys))
 		{
-			RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound = this.AllPlayerInRoundScores[key];
+			RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound = this.AllPlayerInRoundScores[num];
 			if (!playerScoreInRound.Infected)
 			{
 				playerScoreInRound.TaggedTime = Time.time;
 			}
-			this.AllPlayerInRoundScores[key] = playerScoreInRound;
+			this.AllPlayerInRoundScores[num] = playerScoreInRound;
 		}
 		this.PerSecondTimer = -1f;
 		this.ReportScore();
@@ -172,19 +172,19 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 			for (int i = 0; i < playerIds.Length; i++)
 			{
 				int num = playerIds[i];
-				RankedMultiplayerScore.PlayerScoreInRound value = new RankedMultiplayerScore.PlayerScoreInRound(num, infected[i]);
-				value.NumTags = numTags[i];
-				value.PointsOnDefense = pointsOnDefense[i];
-				value.JoinTime = Time.time - joinTime[i];
+				RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound = new RankedMultiplayerScore.PlayerScoreInRound(num, infected[i]);
+				playerScoreInRound.NumTags = numTags[i];
+				playerScoreInRound.PointsOnDefense = pointsOnDefense[i];
+				playerScoreInRound.JoinTime = Time.time - joinTime[i];
 				if (!infected[i])
 				{
-					value.TaggedTime = 0f;
+					playerScoreInRound.TaggedTime = 0f;
 				}
 				else
 				{
-					value.TaggedTime = Time.time - taggedTime[i];
+					playerScoreInRound.TaggedTime = Time.time - taggedTime[i];
 				}
-				this.AllPlayerInRoundScores.TryAdd(num, value);
+				this.AllPlayerInRoundScores.TryAdd(num, playerScoreInRound);
 			}
 		}
 	}
@@ -215,7 +215,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 	public RankedMultiplayerScore.PlayerScoreInRound GetInGameScoreForSelf()
 	{
 		RankedMultiplayerScore.PlayerScoreInRound result;
-		if (this.AllPlayerInRoundScores.TryGetValue(NetworkSystem.Instance.LocalPlayerID, out result))
+		if (this.AllPlayerInRoundScores.TryGetValue(NetworkSystem.Instance.LocalPlayerID, ref result))
 		{
 			return result;
 		}
@@ -224,25 +224,25 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 
 	public void OnTagReported(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
 	{
-		RankedMultiplayerScore.PlayerScoreInRound value;
-		if (this.AllPlayerInRoundScores.TryGetValue(taggingPlayer.ActorNumber, out value))
+		RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound;
+		if (this.AllPlayerInRoundScores.TryGetValue(taggingPlayer.ActorNumber, ref playerScoreInRound))
 		{
-			value.NumTags++;
-			this.AllPlayerInRoundScores[taggingPlayer.ActorNumber] = value;
+			playerScoreInRound.NumTags++;
+			this.AllPlayerInRoundScores[taggingPlayer.ActorNumber] = playerScoreInRound;
 		}
-		RankedMultiplayerScore.PlayerScoreInRound value2;
-		if (this.AllPlayerInRoundScores.TryGetValue(taggedPlayer.ActorNumber, out value2))
+		RankedMultiplayerScore.PlayerScoreInRound playerScoreInRound2;
+		if (this.AllPlayerInRoundScores.TryGetValue(taggedPlayer.ActorNumber, ref playerScoreInRound2))
 		{
-			value2.Infected = true;
-			value2.TaggedTime = Time.time;
-			this.AllPlayerInRoundScores[taggedPlayer.ActorNumber] = value2;
+			playerScoreInRound2.Infected = true;
+			playerScoreInRound2.TaggedTime = Time.time;
+			this.AllPlayerInRoundScores[taggedPlayer.ActorNumber] = playerScoreInRound2;
 		}
 	}
 
 	private void ReportScore()
 	{
 		object obj;
-		if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", out obj))
+		if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("matchId", ref obj))
 		{
 			foreach (KeyValuePair<int, RankedMultiplayerScore.PlayerScoreInRound> keyValuePair in this.AllPlayerInRoundScores)
 			{
@@ -269,9 +269,7 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 	private void PredictPlayerEloChanges()
 	{
 		this.VisitedScoreCombintations.Clear();
-		this.AllFinalPlayerScores = (from s in this.AllFinalPlayerScores
-		orderby s.GameScore descending
-		select s).ToList<RankedMultiplayerScore.PlayerScore>();
+		this.AllFinalPlayerScores = Enumerable.ToList<RankedMultiplayerScore.PlayerScore>(Enumerable.OrderByDescending<RankedMultiplayerScore.PlayerScore, float>(this.AllFinalPlayerScores, (RankedMultiplayerScore.PlayerScore s) => s.GameScore));
 		float k = this.Progression.MaxEloConstant / (float)(this.AllFinalPlayerScores.Count - 1);
 		this.InProgressEloDeltaPerPlayer.Clear();
 		for (int i = 0; i < this.AllFinalPlayerScores.Count; i++)
@@ -287,8 +285,8 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 					bool flag = this.AllFinalPlayerScores[j].GameScore.Approx(this.AllFinalPlayerScores[l].GameScore, 1E-06f);
 					float eloWinProbability = RankedProgressionManager.GetEloWinProbability(this.AllFinalPlayerScores[l].EloScore, this.AllFinalPlayerScores[j].EloScore);
 					float eloWinProbability2 = RankedProgressionManager.GetEloWinProbability(this.AllFinalPlayerScores[j].EloScore, this.AllFinalPlayerScores[l].EloScore);
-					int key = j * this.AllFinalPlayerScores.Count + l;
-					if (!this.VisitedScoreCombintations.ContainsKey(key))
+					int num = j * this.AllFinalPlayerScores.Count + l;
+					if (!this.VisitedScoreCombintations.ContainsKey(num))
 					{
 						RankedMultiplayerScore.PlayerScore playerScore = this.AllFinalPlayerScores[j];
 						float actualResult;
@@ -301,14 +299,14 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 							actualResult = (float)((j < l) ? 1 : 0);
 						}
 						float eloScore = playerScore.EloScore;
-						float num = RankedProgressionManager.UpdateEloScore(eloScore, eloWinProbability, actualResult, k);
+						float num2 = RankedProgressionManager.UpdateEloScore(eloScore, eloWinProbability, actualResult, k);
 						Dictionary<int, float> inProgressEloDeltaPerPlayer = this.InProgressEloDeltaPerPlayer;
 						int playerId = playerScore.PlayerId;
-						inProgressEloDeltaPerPlayer[playerId] += num - eloScore;
-						this.VisitedScoreCombintations.Add(key, true);
+						inProgressEloDeltaPerPlayer[playerId] += num2 - eloScore;
+						this.VisitedScoreCombintations.Add(num, true);
 					}
-					int key2 = l * this.AllFinalPlayerScores.Count + j;
-					if (!this.VisitedScoreCombintations.ContainsKey(key2))
+					int num3 = l * this.AllFinalPlayerScores.Count + j;
+					if (!this.VisitedScoreCombintations.ContainsKey(num3))
 					{
 						RankedMultiplayerScore.PlayerScore playerScore2 = this.AllFinalPlayerScores[l];
 						float actualResult;
@@ -321,11 +319,11 @@ public class RankedMultiplayerScore : MonoBehaviourTick
 							actualResult = (float)((l < j) ? 1 : 0);
 						}
 						float eloScore2 = playerScore2.EloScore;
-						float num2 = RankedProgressionManager.UpdateEloScore(eloScore2, eloWinProbability2, actualResult, k);
+						float num4 = RankedProgressionManager.UpdateEloScore(eloScore2, eloWinProbability2, actualResult, k);
 						Dictionary<int, float> inProgressEloDeltaPerPlayer = this.InProgressEloDeltaPerPlayer;
 						int playerId = playerScore2.PlayerId;
-						inProgressEloDeltaPerPlayer[playerId] += num2 - eloScore2;
-						this.VisitedScoreCombintations.Add(key2, true);
+						inProgressEloDeltaPerPlayer[playerId] += num4 - eloScore2;
+						this.VisitedScoreCombintations.Add(num3, true);
 					}
 				}
 			}

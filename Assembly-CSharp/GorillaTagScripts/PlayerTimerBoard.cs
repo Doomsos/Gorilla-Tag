@@ -65,24 +65,24 @@ namespace GorillaTagScripts
 		{
 			this.stringBuilder.Clear();
 			this.stringBuilderTime.Clear();
-			string value;
-			if (!LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER", out value, "<b><color=yellow>PLAYER</color></b>"))
+			string text;
+			if (!LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER", out text, "<b><color=yellow>PLAYER</color></b>"))
 			{
 				Debug.LogError("[LOCALIZATION::MONKE_BLOCKS::TIMER] Failed to get key for Game Mode [MONKE_BLOCKS_TIMER_BOARD_COLUMN_PLAYER]");
 			}
 			this.stringBuilder.Append("<b><color=yellow>");
-			this.stringBuilder.Append(value);
+			this.stringBuilder.Append(text);
 			this.stringBuilder.Append("</color></b>");
-			if (!LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES", out value, "<b><color=yellow>LATEST TIME</color></b>"))
+			if (!LocalisationManager.TryGetKeyForCurrentLocale("MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES", out text, "<b><color=yellow>LATEST TIME</color></b>"))
 			{
 				Debug.LogError("[LOCALIZATION::MONKE_BLOCKS::TIMER] Failed to get key for Game Mode [MONKE_BLOCKS_TIMER_BOARD_COLUMN_TIMES]");
 			}
 			this.stringBuilderTime.Append("<b><color=yellow>");
-			this.stringBuilderTime.Append(value);
+			this.stringBuilderTime.Append(text);
 			this.stringBuilderTime.Append("</color></b>");
 			this.SortLines();
 			Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Custom_Nametags);
-			bool flag = (permissionDataByFeature.Enabled || permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PLAYER) && permissionDataByFeature.ManagedBy != Permission.ManagedByEnum.PROHIBITED;
+			bool flag = (permissionDataByFeature.Enabled || permissionDataByFeature.ManagedBy == 1) && permissionDataByFeature.ManagedBy != 3;
 			for (int i = 0; i < this.lines.Count; i++)
 			{
 				try

@@ -36,16 +36,16 @@ public class CalibrationCube : MonoBehaviour
 		this.lastCalibratedLength = this.calibratedLength;
 		this.calibratedLength = (this.rightController.transform.position - this.leftController.transform.position).magnitude;
 		this.calibratedLength = ((this.calibratedLength > this.maxLength) ? this.maxLength : ((this.calibratedLength < this.minLength) ? this.minLength : this.calibratedLength));
-		float d = this.calibratedLength / this.lastCalibratedLength;
+		float num = this.calibratedLength / this.lastCalibratedLength;
 		Vector3 localScale = this.playerBody.transform.localScale;
 		this.playerBody.GetComponentInChildren<RigBuilder>().Clear();
 		this.playerBody.transform.localScale = new Vector3(1f, 1f, 1f);
 		this.playerBody.GetComponentInChildren<TransformReset>().ResetTransforms();
-		this.playerBody.transform.localScale = d * localScale;
+		this.playerBody.transform.localScale = num * localScale;
 		this.playerBody.GetComponentInChildren<RigBuilder>().Build();
 		this.playerBody.GetComponentInChildren<VRRig>().SetHeadBodyOffset();
-		GorillaPlaySpace.Instance.bodyColliderOffset *= d;
-		GorillaPlaySpace.Instance.bodyCollider.gameObject.transform.localScale *= d;
+		GorillaPlaySpace.Instance.bodyColliderOffset *= num;
+		GorillaPlaySpace.Instance.bodyCollider.gameObject.transform.localScale *= num;
 	}
 
 	private void OnCollisionEnter(Collision collision)
@@ -66,7 +66,7 @@ public class CalibrationCube : MonoBehaviour
 					flag = true;
 				}
 			}
-			if (!flag || Application.platform == RuntimePlatform.Android)
+			if (!flag || Application.platform == 11)
 			{
 				GorillaComputer.instance.includeUpdatedServerSynchTest = 0;
 			}

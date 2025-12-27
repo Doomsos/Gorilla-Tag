@@ -32,7 +32,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		this.entities = new List<GameEntity>(64);
 		this.gameEntityData = new List<GameEntityData>(64);
 		this.netIdToIndex = new Dictionary<int, int>(16384);
-		this.netIds = new NativeArray<int>(16384, Unity.Collections.Allocator.Persistent, NativeArrayOptions.ClearMemory);
+		this.netIds = new NativeArray<int>(16384, 4, 1);
 		this.createdItemTypeCount = new Dictionary<int, int>();
 		this.OnEntityRemoved = (Action<GameEntity>)Delegate.Combine(this.OnEntityRemoved, new Action<GameEntity>(CustomGameMode.OnGameEntityRemoved));
 		this.zoneStateData = new GameEntityManager.ZoneStateData
@@ -73,8 +73,8 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		NetworkBehaviourUtils.InternalOnEnable(this);
 		base.OnEnable();
 		TickSystem<object>.AddTickCallback(this);
-		VRRigCache.OnRigDeactivated += this.OnRigDeactivated;
-		VRRigCache.OnActiveRigsChanged += this.RefreshRigList;
+		VRRigCache.OnRigDeactivated += new Action<RigContainer>(this.OnRigDeactivated);
+		VRRigCache.OnActiveRigsChanged += new Action(this.RefreshRigList);
 		this.RefreshRigList();
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
@@ -84,8 +84,8 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		NetworkBehaviourUtils.InternalOnDisable(this);
 		base.OnDisable();
 		TickSystem<object>.RemoveTickCallback(this);
-		VRRigCache.OnRigDeactivated -= this.OnRigDeactivated;
-		VRRigCache.OnActiveRigsChanged -= this.RefreshRigList;
+		VRRigCache.OnRigDeactivated -= new Action<RigContainer>(this.OnRigDeactivated);
+		VRRigCache.OnActiveRigsChanged -= new Action(this.RefreshRigList);
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
 
@@ -128,7 +128,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 				Action onTick = gameEntity.OnTick;
 				if (onTick != null)
 				{
-					onTick();
+					onTick.Invoke();
 				}
 				gameEntity.LastTickTime = time;
 			}
@@ -140,7 +140,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		if (this.netIdsForCreate.Count > 0 && Time.time > this.lastCreateSent + this.createCooldown)
 		{
 			this.lastCreateSent = Time.time;
-			this.photonView.RPC("CreateItemRPC", RpcTarget.Others, new object[]
+			this.photonView.RPC("CreateItemRPC", 1, new object[]
 			{
 				this.netIdsForCreate.ToArray(),
 				this.entityTypeIdsForCreate.ToArray(),
@@ -157,7 +157,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		if (this.netIdsForDelete.Count > 0 && Time.time > this.lastDestroySent + this.destroyCooldown)
 		{
 			this.lastDestroySent = Time.time;
-			this.photonView.RPC("DestroyItemRPC", RpcTarget.Others, new object[]
+			this.photonView.RPC("DestroyItemRPC", 1, new object[]
 			{
 				this.netIdsForDelete.ToArray()
 			});
@@ -166,7 +166,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		if (this.netIdsForState.Count > 0 && Time.time > this.lastStateSent + this.stateCooldown)
 		{
 			this.lastDestroySent = Time.time;
-			this.photonView.RPC("ApplyStateRPC", RpcTarget.All, new object[]
+			this.photonView.RPC("ApplyStateRPC", 0, new object[]
 			{
 				this.netIdsForState.ToArray(),
 				this.statesForState.ToArray()
@@ -185,8 +185,8 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	{
 		int num = this.FindNewEntityIndex();
 		this.entities[num] = gameEntity;
-		GameEntityData item = default(GameEntityData);
-		this.gameEntityData.Add(item);
+		GameEntityData gameEntityData = default(GameEntityData);
+		this.gameEntityData.Add(gameEntityData);
 		gameEntity.id = new GameEntityId
 		{
 			index = num
@@ -196,7 +196,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		Action<GameEntity> onEntityAdded = this.OnEntityAdded;
 		if (onEntityAdded != null)
 		{
-			onEntityAdded(gameEntity);
+			onEntityAdded.Invoke(gameEntity);
 		}
 		return gameEntity.id;
 	}
@@ -241,7 +241,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		{
 			return;
 		}
-		onEntityRemoved(entity);
+		onEntityRemoved.Invoke(entity);
 	}
 
 	public List<GameEntity> GetGameEntities()
@@ -252,7 +252,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	public bool IsValidNetId(int netId)
 	{
 		int num;
-		return this.netIdToIndex.TryGetValue(netId, out num) && num >= 0 && num < this.entities.Count;
+		return this.netIdToIndex.TryGetValue(netId, ref num) && num >= 0 && num < this.entities.Count;
 	}
 
 	public int FindOpenIndex()
@@ -270,7 +270,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	public GameEntityId GetEntityIdFromNetId(int netId)
 	{
 		int index;
-		if (this.netIdToIndex.TryGetValue(netId, out index))
+		if (this.netIdToIndex.TryGetValue(netId, ref index))
 		{
 			return new GameEntityId
 			{
@@ -390,7 +390,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	public GameEntity GetGameEntityFromNetId(int netId)
 	{
 		int index;
-		if (this.netIdToIndex.TryGetValue(netId, out index))
+		if (this.netIdToIndex.TryGetValue(netId, ref index))
 		{
 			return this.GetGameEntity(index);
 		}
@@ -442,18 +442,18 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	{
 		using (Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder(true))
 		{
-			string value = "[GameEntityManager]  BuildFactory: Entity names and typeIds for manager \"" + base.name + "\":";
-			utf16ValueStringBuilder.AppendLine(value);
+			string text = "[GameEntityManager]  BuildFactory: Entity names and typeIds for manager \"" + base.name + "\":";
+			utf16ValueStringBuilder.AppendLine(text);
 			foreach (IGameEntityZoneComponent gameEntityZoneComponent in this.zoneComponents)
 			{
 				IFactoryItemProvider factoryItemProvider = gameEntityZoneComponent as IFactoryItemProvider;
 				if (factoryItemProvider != null)
 				{
-					foreach (GameEntity item in factoryItemProvider.GetFactoryItems())
+					foreach (GameEntity gameEntity in factoryItemProvider.GetFactoryItems())
 					{
-						if (!this.tempFactoryItems.Contains(item))
+						if (!this.tempFactoryItems.Contains(gameEntity))
 						{
-							this.tempFactoryItems.Add(item);
+							this.tempFactoryItems.Add(gameEntity);
 						}
 					}
 				}
@@ -480,7 +480,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 					utf16ValueStringBuilder.Clear();
 					if (i + 1 < this.tempFactoryItems.Count)
 					{
-						utf16ValueStringBuilder.Append(value);
+						utf16ValueStringBuilder.Append(text);
 						utf16ValueStringBuilder.Append(" ... CONTINUED FROM PREVIOUS ...\n");
 					}
 				}
@@ -501,15 +501,15 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		{
 			return GameEntityId.Invalid;
 		}
-		long item = BitPackUtils.PackWorldPosForNetwork(position);
-		int item2 = BitPackUtils.PackQuaternionForNetwork(rotation);
-		int num = this.CreateNetId();
-		this.netIdsForCreate.Add(num);
+		long num = BitPackUtils.PackWorldPosForNetwork(position);
+		int num2 = BitPackUtils.PackQuaternionForNetwork(rotation);
+		int num3 = this.CreateNetId();
+		this.netIdsForCreate.Add(num3);
 		this.entityTypeIdsForCreate.Add(entityTypeId);
-		this.packedPositionsForCreate.Add(item);
-		this.packedRotationsForCreate.Add(item2);
+		this.packedPositionsForCreate.Add(num);
+		this.packedRotationsForCreate.Add(num2);
 		this.createDataForCreate.Add(createData);
-		return this.CreateAndInitItemLocal(num, entityTypeId, position, rotation, createData);
+		return this.CreateAndInitItemLocal(num3, entityTypeId, position, rotation, createData);
 	}
 
 	[PunRPC]
@@ -551,18 +551,18 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		for (int i = 0; i < entityData.Count; i++)
 		{
 			GameEntityCreateData gameEntityCreateData = entityData[i];
-			int value = this.CreateNetId();
-			long value2 = BitPackUtils.PackWorldPosForNetwork(gameEntityCreateData.position);
-			int value3 = BitPackUtils.PackQuaternionForNetwork(gameEntityCreateData.rotation);
-			binaryWriter.Write(value);
+			int num = this.CreateNetId();
+			long num2 = BitPackUtils.PackWorldPosForNetwork(gameEntityCreateData.position);
+			int num3 = BitPackUtils.PackQuaternionForNetwork(gameEntityCreateData.rotation);
+			binaryWriter.Write(num);
 			binaryWriter.Write(gameEntityCreateData.entityTypeId);
-			binaryWriter.Write(value2);
-			binaryWriter.Write(value3);
+			binaryWriter.Write(num2);
+			binaryWriter.Write(num3);
 			binaryWriter.Write(gameEntityCreateData.createData);
 		}
 		long position = memoryStream.Position;
 		byte[] array = GZipStream.CompressBuffer(GameEntityManager.tempSerializeGameState);
-		this.photonView.RPC("CreateItemsRPC", RpcTarget.All, new object[]
+		this.photonView.RPC("CreateItemsRPC", 0, new object[]
 		{
 			(int)this.zone,
 			array
@@ -632,31 +632,31 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			if (!(gameEntity == null))
 			{
 				int typeId = gameEntity.typeId;
-				long value = BitPackUtils.PackWorldPosForNetwork(gameEntity.transform.localPosition);
-				int value2 = BitPackUtils.PackQuaternionForNetwork(gameEntity.transform.localRotation);
-				long num2 = gameEntity.createData;
+				long num2 = BitPackUtils.PackWorldPosForNetwork(gameEntity.transform.localPosition);
+				int num3 = BitPackUtils.PackQuaternionForNetwork(gameEntity.transform.localRotation);
+				long num4 = gameEntity.createData;
 				for (int k = 0; k < this.zoneComponents.Count; k++)
 				{
-					num2 = this.zoneComponents[k].ProcessMigratedGameEntityCreateData(gameEntity, num2);
+					num4 = this.zoneComponents[k].ProcessMigratedGameEntityCreateData(gameEntity, num4);
 				}
-				byte value3;
+				byte b;
 				switch (gameEntity.snappedJoint)
 				{
 				default:
-					value3 = ((gameEntity.heldByHandIndex == 0) ? 1 : 0);
+					b = ((gameEntity.heldByHandIndex == 0) ? 1 : 0);
 					break;
 				case SnapJointType.HandL:
-					value3 = 3;
+					b = 3;
 					break;
 				case SnapJointType.HandR:
-					value3 = 2;
+					b = 2;
 					break;
 				}
 				binaryWriter.Write(typeId);
-				binaryWriter.Write(value);
-				binaryWriter.Write(value2);
 				binaryWriter.Write(num2);
-				binaryWriter.Write(value3);
+				binaryWriter.Write(num3);
+				binaryWriter.Write(num4);
+				binaryWriter.Write(b);
 			}
 		}
 		long position = memoryStream.Position;
@@ -690,7 +690,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		{
 			return;
 		}
-		onPlayerLeftZone();
+		onPlayerLeftZone.Invoke();
 	}
 
 	[PunRPC]
@@ -802,7 +802,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 								}
 								if (isAuthority)
 								{
-									this.photonView.RPC("JoinWithItemsRPC", RpcTarget.Others, new object[]
+									this.photonView.RPC("JoinWithItemsRPC", 1, new object[]
 									{
 										stateData,
 										netIds,
@@ -820,7 +820,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		};
 		if (joiningPlayer.AdditionalDataInitialized)
 		{
-			createItemsCallback();
+			createItemsCallback.Invoke();
 			return;
 		}
 		GamePlayer joiningPlayer3 = joiningPlayer;
@@ -830,13 +830,13 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	public bool FactoryHasEntity(int entityTypeId)
 	{
 		GameObject gameObject;
-		return this.itemPrefabFactory.TryGetValue(entityTypeId, out gameObject);
+		return this.itemPrefabFactory.TryGetValue(entityTypeId, ref gameObject);
 	}
 
 	public GameObject FactoryPrefabById(int entityTypeId)
 	{
 		GameObject result;
-		if (this.itemPrefabFactory.TryGetValue(entityTypeId, out result))
+		if (this.itemPrefabFactory.TryGetValue(entityTypeId, ref result))
 		{
 			return result;
 		}
@@ -845,7 +845,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 
 	public bool PriceLookup(int entityTypeId, out int price)
 	{
-		if (this.priceLookupByEntityId.TryGetValue(entityTypeId, out price))
+		if (this.priceLookupByEntityId.TryGetValue(entityTypeId, ref price))
 		{
 			return true;
 		}
@@ -878,8 +878,8 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	public GameEntity CreateItemLocal(int netId, int entityTypeId, Vector3 position, Quaternion rotation)
 	{
 		this.nextNetId = Mathf.Max(netId + 1, this.nextNetId);
-		GameObject original;
-		if (!this.itemPrefabFactory.TryGetValue(entityTypeId, out original))
+		GameObject gameObject;
+		if (!this.itemPrefabFactory.TryGetValue(entityTypeId, ref gameObject))
 		{
 			return null;
 		}
@@ -894,7 +894,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		Dictionary<int, int> dictionary = this.createdItemTypeCount;
 		int num = dictionary[entityTypeId];
 		dictionary[entityTypeId] = num + 1;
-		GameEntity componentInChildren = UnityEngine.Object.Instantiate<GameObject>(original, position, rotation).GetComponentInChildren<GameEntity>();
+		GameEntity componentInChildren = Object.Instantiate<GameObject>(gameObject, position, rotation).GetComponentInChildren<GameEntity>();
 		this.AddGameEntity(netId, componentInChildren);
 		componentInChildren.Create(this, entityTypeId);
 		return componentInChildren;
@@ -935,7 +935,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		}
 		if (PhotonNetwork.InRoom)
 		{
-			this.photonView.RPC("DestroyItemRPC", RpcTarget.All, new object[]
+			this.photonView.RPC("DestroyItemRPC", 0, new object[]
 			{
 				list.ToArray()
 			});
@@ -989,7 +989,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			gamePlayer2.ClearSnappedIfSnapped(gameEntity.id);
 		}
 		this.RemoveGameEntity(gameEntity);
-		UnityEngine.Object.Destroy(gameEntity.gameObject);
+		Object.Destroy(gameEntity.gameObject);
 	}
 
 	public void RequestState(GameEntityId entityId, long newState)
@@ -1172,7 +1172,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		{
 			return;
 		}
-		this.photonView.RPC("GrabEntityRPC", RpcTarget.All, new object[]
+		this.photonView.RPC("GrabEntityRPC", 0, new object[]
 		{
 			entityNetId,
 			isLeftHand,
@@ -1248,12 +1248,12 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		{
 			if (grabbedByPlayer.IsLocal)
 			{
-				component.constraints = RigidbodyConstraints.FreezeAll;
+				component.constraints = 126;
 				component.isKinematic = false;
 			}
 			else
 			{
-				component.constraints = RigidbodyConstraints.None;
+				component.constraints = 0;
 				component.isKinematic = true;
 			}
 		}
@@ -1282,7 +1282,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			Action onUnsnapped = gameEntity.OnUnsnapped;
 			if (onUnsnapped != null)
 			{
-				onUnsnapped();
+				onUnsnapped.Invoke();
 			}
 			gameEntity.snappedByActorNumber = -1;
 			gameEntity.snappedJoint = SnapJointType.None;
@@ -1291,7 +1291,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		Action onGrabbed = gameEntity.OnGrabbed;
 		if (onGrabbed != null)
 		{
-			onGrabbed();
+			onGrabbed.Invoke();
 		}
 		CustomGameMode.OnEntityGrabbed(gameEntity, true);
 	}
@@ -1307,36 +1307,36 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 
 	public GameEntityId TryGrabLocal(Vector3 handPosition, bool isLeftHand, out Vector3 closestPointOnBoundingBox)
 	{
-		float a = 0.03f;
+		float num = 0.03f;
 		float maxAdjustedGrabDistance = 0f;
-		float num = 0.1f;
-		float max = 0.25f;
+		float num2 = 0.1f;
+		float num3 = 0.25f;
 		int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
 		Vector3 rigidbodyVelocity = GTPlayer.Instance.RigidbodyVelocity;
 		GameEntity gameEntity = null;
-		float num2 = float.MaxValue;
+		float num4 = float.MaxValue;
 		Vector3 vector = handPosition;
 		for (int i = 0; i < this.entities.Count; i++)
 		{
 			GameEntity gameEntity2 = this.entities[i];
 			if (this.ValidateGrab(gameEntity2, actorNumber, isLeftHand))
 			{
-				float num3 = 0.75f;
+				float num5 = 0.75f;
 				float sqrMagnitude = (handPosition - gameEntity2.transform.position).sqrMagnitude;
-				if (sqrMagnitude <= num3 * num3)
+				if (sqrMagnitude <= num5 * num5)
 				{
 					Vector3 vector2 = gameEntity2.GetVelocity() - rigidbodyVelocity;
 					float magnitude = vector2.magnitude;
-					float num4 = Mathf.Clamp(magnitude * num, 0f, max);
-					Vector3 slopProjection = (magnitude > 0.2f) ? (vector2.normalized * num4) : Vector3.zero;
-					maxAdjustedGrabDistance = Mathf.Max(a, gameEntity2.pickupRangeFromSurface);
+					float num6 = Mathf.Clamp(magnitude * num2, 0f, num3);
+					Vector3 slopProjection = (magnitude > 0.2f) ? (vector2.normalized * num6) : Vector3.zero;
+					maxAdjustedGrabDistance = Mathf.Max(num, gameEntity2.pickupRangeFromSurface);
 					this.renderSearchList.Clear();
 					gameEntity2.GetComponentsInChildren<MeshFilter>(false, this.renderSearchList);
 					foreach (MeshFilter meshFilter in this.renderSearchList)
 					{
 						if (!(this.GetParentEntity<GameEntity>(meshFilter.transform) != gameEntity2))
 						{
-							GameEntityManager._TryGrabLocal_TestBounds(handPosition, meshFilter.transform, slopProjection, meshFilter.sharedMesh.bounds, num4, maxAdjustedGrabDistance, gameEntity2, ref num2, ref gameEntity, ref vector);
+							GameEntityManager._TryGrabLocal_TestBounds(handPosition, meshFilter.transform, slopProjection, meshFilter.sharedMesh.bounds, num6, maxAdjustedGrabDistance, gameEntity2, ref num4, ref gameEntity, ref vector);
 						}
 					}
 					this.renderSearchListSkinned.Clear();
@@ -1345,15 +1345,15 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 					{
 						if (!(this.GetParentEntity<GameEntity>(skinnedMeshRenderer.transform) != gameEntity2))
 						{
-							GameEntityManager._TryGrabLocal_TestBounds(handPosition, skinnedMeshRenderer.transform, slopProjection, skinnedMeshRenderer.localBounds, num4, maxAdjustedGrabDistance, gameEntity2, ref num2, ref gameEntity, ref vector);
+							GameEntityManager._TryGrabLocal_TestBounds(handPosition, skinnedMeshRenderer.transform, slopProjection, skinnedMeshRenderer.localBounds, num6, maxAdjustedGrabDistance, gameEntity2, ref num4, ref gameEntity, ref vector);
 						}
 					}
 					if (this.renderSearchList.Count == 0 && this.renderSearchListSkinned.Count == 0)
 					{
-						float num5 = Mathf.Sqrt(sqrMagnitude);
-						if (num5 < num2)
+						float num7 = Mathf.Sqrt(sqrMagnitude);
+						if (num7 < num4)
 						{
-							num2 = num5;
+							num4 = num7;
 							gameEntity = gameEntity2;
 							vector = gameEntity2.transform.position;
 						}
@@ -1366,40 +1366,40 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		{
 			return GameEntityId.Invalid;
 		}
-		if (num2 > Mathf.Max(a, gameEntity.pickupRangeFromSurface))
+		if (num4 > Mathf.Max(num, gameEntity.pickupRangeFromSurface))
 		{
 			return GameEntityId.Invalid;
 		}
 		return gameEntity.id;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static void _TryGrabLocal_TestBounds(Vector3 handPosition, Transform t, Vector3 slopProjection, Bounds bounds, float slopForSpeed, float maxAdjustedGrabDistance, GameEntity entity, ref float bestDist, ref GameEntity bestEntity, ref Vector3 closestPoint)
 	{
 		Vector3 vector = t.InverseTransformPoint(handPosition);
 		Vector3 b = t.InverseTransformPoint(handPosition + slopProjection);
 		bounds.extents != bounds.extents;
-		Vector3 b2;
+		Vector3 vector2;
 		float num;
-		Vector3 b3;
+		Vector3 vector3;
 		float num2;
-		if (GameEntityManager.SegmentHitsBounds(bounds, vector, b, out b2, out num))
+		if (GameEntityManager.SegmentHitsBounds(bounds, vector, b, out vector2, out num))
 		{
-			b3 = ((num <= 0f) ? Vector3.zero : t.TransformVector(vector - b2));
-			num2 = b3.magnitude - slopForSpeed;
+			vector3 = ((num <= 0f) ? Vector3.zero : t.TransformVector(vector - vector2));
+			num2 = vector3.magnitude - slopForSpeed;
 		}
 		else
 		{
-			b3 = t.TransformVector(vector - bounds.ClosestPoint(vector));
-			num2 = b3.magnitude;
+			vector3 = t.TransformVector(vector - bounds.ClosestPoint(vector));
+			num2 = vector3.magnitude;
 		}
 		num2 = Mathf.Max(0f, num2 - maxAdjustedGrabDistance);
-		b3 = b3.normalized * num2;
+		vector3 = vector3.normalized * num2;
 		if (num2 < bestDist)
 		{
 			bestDist = num2;
 			bestEntity = entity;
-			closestPoint = handPosition - b3;
+			closestPoint = handPosition - vector3;
 		}
 	}
 
@@ -1415,8 +1415,8 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	{
 		hitPoint = default(Vector3);
 		distance = float.MaxValue;
-		Vector3 a2 = b - a;
-		float magnitude = a2.magnitude;
+		Vector3 vector = b - a;
+		float magnitude = vector.magnitude;
 		if (magnitude <= Mathf.Epsilon)
 		{
 			if (bounds.Contains(a))
@@ -1429,8 +1429,9 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		}
 		else
 		{
-			Ray ray = new Ray(a, a2 / magnitude);
-			if (bounds.IntersectRay(ray, out distance) && distance <= magnitude)
+			Ray ray;
+			ray..ctor(a, vector / magnitude);
+			if (bounds.IntersectRay(ray, ref distance) && distance <= magnitude)
 			{
 				hitPoint = a + ray.direction * distance;
 				return true;
@@ -1540,19 +1541,20 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			{
 				vector3 /= magnitude;
 				RaycastHit raycastHit;
-				if (Physics.SphereCast(headPosition, 0.05f, vector3, out raycastHit, magnitude + 0.1f, 513, QueryTriggerInteraction.Ignore))
+				if (Physics.SphereCast(headPosition, 0.05f, vector3, ref raycastHit, magnitude + 0.1f, 513, 1))
 				{
 					component.GetComponentsInChildren<Collider>(this._collidersList);
-					Vector3 position = component.position + -raycastHit.normal * 1000f;
+					Vector3 vector4 = component.position + -raycastHit.normal * 1000f;
 					float num = float.MaxValue;
 					bool flag = false;
-					Plane plane = new Plane(raycastHit.normal, raycastHit.point);
+					Plane plane;
+					plane..ctor(raycastHit.normal, raycastHit.point);
 					foreach (Collider collider in this._collidersList)
 					{
 						if (collider.enabled && !collider.isTrigger)
 						{
-							Vector3 point = collider.ClosestPoint(position);
-							float num2 = Mathf.Abs(plane.GetDistanceToPoint(point));
+							Vector3 vector5 = collider.ClosestPoint(vector4);
+							float num2 = Mathf.Abs(plane.GetDistanceToPoint(vector5));
 							if (num2 < num)
 							{
 								num = num2;
@@ -1566,9 +1568,9 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 					}
 					else
 					{
-						float d = Mathf.Max(raycastHit.distance - 0.2f, 0f);
-						Vector3 a = headPosition + vector3 * d;
-						vector += a - vector2;
+						float num3 = Mathf.Max(raycastHit.distance - 0.2f, 0f);
+						Vector3 vector6 = headPosition + vector3 * num3;
+						vector += vector6 - vector2;
 					}
 				}
 			}
@@ -1612,7 +1614,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 						{
 							return;
 						}
-						this.photonView.RPC("ThrowEntityRPC", RpcTarget.All, new object[]
+						this.photonView.RPC("ThrowEntityRPC", 0, new object[]
 						{
 							entityNetId,
 							isLeftHand,
@@ -1679,7 +1681,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		if (component != null)
 		{
 			component.isKinematic = false;
-			component.constraints = RigidbodyConstraints.None;
+			component.constraints = 0;
 			component.position = position;
 			component.rotation = rotation;
 			component.linearVelocity = velocity;
@@ -1710,7 +1712,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		Action onReleased = gameEntity.OnReleased;
 		if (onReleased != null)
 		{
-			onReleased();
+			onReleased.Invoke();
 		}
 		CustomGameMode.OnEntityGrabbed(gameEntity, false);
 		GRBadge component2 = gameEntity.GetComponent<GRBadge>();
@@ -1761,7 +1763,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 				{
 					return;
 				}
-				this.photonView.RPC("SnapEntityRPC", RpcTarget.All, new object[]
+				this.photonView.RPC("SnapEntityRPC", 0, new object[]
 				{
 					entityNetId,
 					isLeftHand,
@@ -1861,7 +1863,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			if (component != null)
 			{
 				component.isKinematic = false;
-				component.constraints = RigidbodyConstraints.None;
+				component.constraints = 0;
 				component.position = position;
 				component.rotation = rotation;
 				component.linearVelocity = Vector3.up * 5f;
@@ -1874,7 +1876,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			Action onReleased = snappedEntity.OnReleased;
 			if (onReleased != null)
 			{
-				onReleased();
+				onReleased.Invoke();
 			}
 		}
 		superInfectionSnapPoint.Snapped(gameEntity);
@@ -1904,7 +1906,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		Action onSnapped = gameEntity.OnSnapped;
 		if (onSnapped != null)
 		{
-			onSnapped();
+			onSnapped.Invoke();
 		}
 		gameEntity.PlaySnapFx();
 	}
@@ -1938,7 +1940,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			Action onUnsnapped = gameEntity.OnUnsnapped;
 			if (onUnsnapped != null)
 			{
-				onUnsnapped();
+				onUnsnapped.Invoke();
 			}
 		}
 		gameEntity.snappedByActorNumber = -1;
@@ -1976,14 +1978,14 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		{
 			return;
 		}
-		this.photonView.RPC("AttachEntityRPC", RpcTarget.All, new object[]
+		this.photonView.RPC("AttachEntityRPC", 0, new object[]
 		{
 			this.GetNetIdFromEntityId(entityId),
 			this.GetNetIdFromEntityId(attachToEntityId),
 			slotId,
 			localPosition,
 			localRotation,
-			null,
+			default(object),
 			PhotonNetwork.Time
 		});
 		PhotonNetwork.SendAllOutgoingCommands();
@@ -2037,7 +2039,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 				{
 					return;
 				}
-				this.photonView.RPC("AttachEntityRPC", RpcTarget.All, new object[]
+				this.photonView.RPC("AttachEntityRPC", 0, new object[]
 				{
 					entityNetId,
 					attachToEntityNetId,
@@ -2093,7 +2095,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		if (component != null)
 		{
 			component.isKinematic = !flag;
-			component.constraints = RigidbodyConstraints.None;
+			component.constraints = 0;
 		}
 		GameDockable component2 = gameEntity.GetComponent<GameDockable>();
 		if (gameEntity2 != null)
@@ -2101,7 +2103,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			Action onAttached = gameEntity.OnAttached;
 			if (onAttached != null)
 			{
-				onAttached();
+				onAttached.Invoke();
 			}
 			GameDock component3 = gameEntity2.GetComponent<GameDock>();
 			if (component3 != null)
@@ -2143,7 +2145,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			Action onDetached = gameEntity.OnDetached;
 			if (onDetached != null)
 			{
-				onDetached();
+				onDetached.Invoke();
 			}
 		}
 		gameEntity.attachedToEntityId = GameEntityId.Invalid;
@@ -2172,7 +2174,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			Action onReleased = gameEntity.OnReleased;
 			if (onReleased != null)
 			{
-				onReleased();
+				onReleased.Invoke();
 			}
 		}
 		gameEntity.heldByActorNumber = -1;
@@ -2239,7 +2241,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 					{
 						return;
 					}
-					base.SendRPC("ApplyHitRPC", RpcTarget.All, new object[]
+					base.SendRPC("ApplyHitRPC", 0, new object[]
 					{
 						hittableNetId,
 						hitByNetId,
@@ -2455,10 +2457,10 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 				int netIdFromEntityId = this.GetNetIdFromEntityId(gameEntity2.id);
 				binaryWriter.Write(netIdFromEntityId);
 				binaryWriter.Write(gameEntity2.typeId);
-				long value = BitPackUtils.PackWorldPosForNetwork(gameEntity2.transform.position);
-				int value2 = BitPackUtils.PackQuaternionForNetwork(gameEntity2.transform.rotation);
-				binaryWriter.Write(value);
-				binaryWriter.Write(value2);
+				long num = BitPackUtils.PackWorldPosForNetwork(gameEntity2.transform.position);
+				int num2 = BitPackUtils.PackQuaternionForNetwork(gameEntity2.transform.rotation);
+				binaryWriter.Write(num);
+				binaryWriter.Write(num2);
 			}
 		}
 		for (int l = 0; l < GameEntityManager.tempEntitiesToSerialize.Count; l++)
@@ -2470,28 +2472,28 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 				binaryWriter.Write(netIdFromEntityId2);
 				binaryWriter.Write(gameEntity3.createData);
 				binaryWriter.Write(gameEntity3.GetState());
-				int num = -1;
+				int num3 = -1;
 				GameEntity gameEntity4 = this.GetGameEntity(gameEntity3.attachedToEntityId);
 				if (gameEntity4 != null)
 				{
-					num = this.GetNetIdFromEntityId(gameEntity4.id);
+					num3 = this.GetNetIdFromEntityId(gameEntity4.id);
 				}
-				binaryWriter.Write(num);
-				if (num != -1)
+				binaryWriter.Write(num3);
+				if (num3 != -1)
 				{
-					long value3 = BitPackUtils.PackHandPosRotForNetwork(gameEntity3.transform.localPosition, gameEntity3.transform.localRotation);
-					binaryWriter.Write(value3);
+					long num4 = BitPackUtils.PackHandPosRotForNetwork(gameEntity3.transform.localPosition, gameEntity3.transform.localRotation);
+					binaryWriter.Write(num4);
 				}
 				GameAgent component = gameEntity3.GetComponent<GameAgent>();
 				bool flag = component != null;
 				binaryWriter.Write(flag);
 				if (flag)
 				{
-					long value4 = BitPackUtils.PackWorldPosForNetwork(component.navAgent.destination);
-					binaryWriter.Write(value4);
+					long num5 = BitPackUtils.PackWorldPosForNetwork(component.navAgent.destination);
+					binaryWriter.Write(num5);
 					NetPlayer targetPlayer = component.targetPlayer;
-					int value5 = (targetPlayer != null) ? targetPlayer.ActorNumber : -1;
-					binaryWriter.Write(value5);
+					int num6 = (targetPlayer != null) ? targetPlayer.ActorNumber : -1;
+					binaryWriter.Write(num6);
 				}
 				byte b = (byte)gameEntity3.entitySerialize.Count;
 				binaryWriter.Write(b);
@@ -2507,9 +2509,9 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		}
 		int count = GameEntityManager.tempRigs.Count;
 		binaryWriter.Write(count);
-		for (int num2 = 0; num2 < GameEntityManager.tempRigs.Count; num2++)
+		for (int num7 = 0; num7 < GameEntityManager.tempRigs.Count; num7++)
 		{
-			VRRig vrrig = GameEntityManager.tempRigs[num2];
+			VRRig vrrig = GameEntityManager.tempRigs[num7];
 			NetPlayer owningNetPlayer = vrrig.OwningNetPlayer;
 			binaryWriter.Write(owningNetPlayer.ActorNumber);
 			GamePlayer gamePlayerRef = vrrig.GamePlayerRef;
@@ -2518,9 +2520,9 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			if (flag2)
 			{
 				gamePlayerRef.SerializeNetworkState(binaryWriter, owningNetPlayer, this);
-				for (int num3 = 0; num3 < this.zoneComponents.Count; num3++)
+				for (int num8 = 0; num8 < this.zoneComponents.Count; num8++)
 				{
-					this.zoneComponents[num3].SerializeZonePlayerData(binaryWriter, owningNetPlayer.ActorNumber);
+					this.zoneComponents[num8].SerializeZonePlayerData(binaryWriter, owningNetPlayer.ActorNumber);
 				}
 			}
 		}
@@ -2688,8 +2690,8 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 						break;
 					}
 					num++;
-					int index = Random.Range(0, allRigs.Count);
-					VRRig vrrig = allRigs[index];
+					int num2 = Random.Range(0, allRigs.Count);
+					VRRig vrrig = allRigs[num2];
 					GamePlayer gamePlayer;
 					if (GamePlayer.TryGetGamePlayer(vrrig, out gamePlayer) && !(gamePlayer.rig == null) && gamePlayer.rig.OwningNetPlayer != null && !gamePlayer.rig.isLocal && vrrig.zoneEntity.currentZone == this.zone)
 					{
@@ -2727,7 +2729,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			GameEntityManager.ZoneStateRequest zoneStateRequest = this.zoneStateData.zoneStateRequests[i];
 			if (zoneStateRequest.player != null && zoneStateRequest.zone == this.zone)
 			{
-				this.SendZoneStateToPlayerOrTarget(zoneStateRequest.zone, zoneStateRequest.player, RpcTarget.MasterClient);
+				this.SendZoneStateToPlayerOrTarget(zoneStateRequest.zone, zoneStateRequest.player, 2);
 				zoneStateRequest.completed = true;
 				this.zoneStateData.zoneStateRequests[i] = zoneStateRequest;
 				this.zoneStateData.zoneStateRequests.RemoveAt(i);
@@ -3169,7 +3171,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		{
 			return;
 		}
-		onPlayerLeftZone();
+		onPlayerLeftZone.Invoke();
 	}
 
 	public bool OnOwnershipRequest(NetPlayer fromPlayer)

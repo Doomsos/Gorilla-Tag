@@ -25,7 +25,7 @@ public class GRAbilityInterpolatedMovement
 		this.endPos = this.startPos + this.velocity * this.duration;
 		this.endTime = Time.timeAsDouble + (double)this.duration;
 		NavMeshHit navMeshHit;
-		if (NavMesh.SamplePosition(this.endPos, out navMeshHit, 5f, this.walkableArea))
+		if (NavMesh.SamplePosition(this.endPos, ref navMeshHit, 5f, this.walkableArea))
 		{
 			this.endPos = navMeshHit.position;
 		}
@@ -56,7 +56,7 @@ public class GRAbilityInterpolatedMovement
 		}
 		vector.y = Mathf.Lerp(this.startPos.y, this.endPos.y, num * num);
 		NavMeshHit navMeshHit;
-		if (NavMesh.Raycast(position, vector, out navMeshHit, this.walkableArea))
+		if (NavMesh.Raycast(position, vector, ref navMeshHit, this.walkableArea))
 		{
 			vector = navMeshHit.position;
 		}

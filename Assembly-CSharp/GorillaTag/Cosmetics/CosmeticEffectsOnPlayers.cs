@@ -407,8 +407,8 @@ namespace GorillaTag.Cosmetics
 
 			public bool IsGameModeAllowed()
 			{
-				GameModeType value = (GameMode.ActiveGameMode != null) ? GameMode.ActiveGameMode.GameType() : GameModeType.Casual;
-				return !this.excludeForGameModes.Contains(value);
+				GameModeType gameModeType = (GameMode.ActiveGameMode != null) ? GameMode.ActiveGameMode.GameType() : GameModeType.Casual;
+				return !Enumerable.Contains<GameModeType>(this.excludeForGameModes, gameModeType);
 			}
 
 			public float EffectDuration

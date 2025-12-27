@@ -120,7 +120,7 @@ public class EyeScannerMono : MonoBehaviour, ISpawnable, IGorillaSliceableSimple
 			if (num2 >= this.m_scanDistanceMin && num2 <= this.m_scanDistanceMax && num3 > num)
 			{
 				RaycastHit raycastHit;
-				if (!this.m_xrayVision && Physics.Raycast(position, normalized, out raycastHit, this.m_scanDistanceMax, this._layerMask.value))
+				if (!this.m_xrayVision && Physics.Raycast(position, normalized, ref raycastHit, this.m_scanDistanceMax, this._layerMask.value))
 				{
 					IEyeScannable componentInParent = raycastHit.collider.GetComponentInParent<IEyeScannable>();
 					if (componentInParent == null || componentInParent != eyeScannable2)
@@ -137,13 +137,13 @@ public class EyeScannerMono : MonoBehaviour, ISpawnable, IGorillaSliceableSimple
 		{
 			if (this._oldClosestScannable != null)
 			{
-				this._oldClosestScannable.OnDataChange -= this.Scannable_OnDataChange;
+				this._oldClosestScannable.OnDataChange -= new Action(this.Scannable_OnDataChange);
 			}
 			this._OnScannableChanged(eyeScannable, true);
 			this._oldClosestScannable = eyeScannable;
 			if (this._oldClosestScannable != null)
 			{
-				this._oldClosestScannable.OnDataChange += this.Scannable_OnDataChange;
+				this._oldClosestScannable.OnDataChange += new Action(this.Scannable_OnDataChange);
 			}
 		}
 	}
@@ -161,13 +161,13 @@ public class EyeScannerMono : MonoBehaviour, ISpawnable, IGorillaSliceableSimple
 			float num = math.distance(base.transform.position, this.m_reticle.position);
 			Mathf.Clamp(num * 0.33333f, 0f, 1f);
 			float num2 = num * this.m_reticleScale;
-			float d = num * this.m_textScale;
-			float num3 = num * this.m_overlayScale;
+			float num3 = num * this.m_textScale;
+			float num4 = num * this.m_overlayScale;
 			this.m_reticle.localScale = new Vector3(num2, num2, num2);
 			this.m_overlay.localPosition = new Vector3(this.m_position.x * num, this.m_position.y * num, num);
-			this.m_overlay.localScale = new Vector3(num3, num3, 1f);
+			this.m_overlay.localScale = new Vector3(num4, num4, 1f);
 			this._line.SetPosition(0, this.m_reticle.position);
-			this._line.SetPosition(1, this.m_textTyper.transform.position + this.m_pointerOffset * d);
+			this._line.SetPosition(1, this.m_textTyper.transform.position + this.m_pointerOffset * num3);
 			this._line.widthMultiplier = num2;
 		}
 	}

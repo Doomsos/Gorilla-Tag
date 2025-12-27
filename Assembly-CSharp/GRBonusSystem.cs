@@ -78,7 +78,7 @@ public class GRBonusSystem
 			{
 				if (grbonusEntry.customBonus != null)
 				{
-					num = grbonusEntry.customBonus(num, grbonusEntry);
+					num = grbonusEntry.customBonus.Invoke(num, grbonusEntry);
 				}
 				else
 				{
@@ -92,7 +92,7 @@ public class GRBonusSystem
 			{
 				if (grbonusEntry2.customBonus != null)
 				{
-					num = grbonusEntry2.customBonus(num, grbonusEntry2);
+					num = grbonusEntry2.customBonus.Invoke(num, grbonusEntry2);
 				}
 				else
 				{

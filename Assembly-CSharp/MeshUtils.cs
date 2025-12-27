@@ -10,24 +10,24 @@ public static class MeshUtils
 		mesh.indexFormat = sourceMesh.indexFormat;
 		GraphicsBuffer vertexBuffer = sourceMesh.GetVertexBuffer(0);
 		int num = vertexBuffer.stride * vertexBuffer.count;
-		byte[] data = new byte[num];
-		vertexBuffer.GetData(data);
+		byte[] array = new byte[num];
+		vertexBuffer.GetData(array);
 		mesh.SetVertexBufferParams(sourceMesh.vertexCount, sourceMesh.GetVertexAttributes());
-		mesh.SetVertexBufferData<byte>(data, 0, 0, num, 0, MeshUpdateFlags.Default);
+		mesh.SetVertexBufferData<byte>(array, 0, 0, num, 0, 0);
 		vertexBuffer.Release();
 		mesh.subMeshCount = sourceMesh.subMeshCount;
 		GraphicsBuffer indexBuffer = sourceMesh.GetIndexBuffer();
 		int num2 = indexBuffer.stride * indexBuffer.count;
-		byte[] data2 = new byte[num2];
-		indexBuffer.GetData(data2);
+		byte[] array2 = new byte[num2];
+		indexBuffer.GetData(array2);
 		mesh.SetIndexBufferParams(indexBuffer.count, sourceMesh.indexFormat);
-		mesh.SetIndexBufferData<byte>(data2, 0, 0, num2, MeshUpdateFlags.Default);
+		mesh.SetIndexBufferData<byte>(array2, 0, 0, num2, 0);
 		indexBuffer.Release();
 		uint num3 = 0U;
 		for (int i = 0; i < mesh.subMeshCount; i++)
 		{
 			uint indexCount = sourceMesh.GetIndexCount(i);
-			mesh.SetSubMesh(i, new SubMeshDescriptor((int)num3, (int)indexCount, MeshTopology.Triangles), MeshUpdateFlags.Default);
+			mesh.SetSubMesh(i, new SubMeshDescriptor((int)num3, (int)indexCount, 0), 0);
 			num3 += indexCount;
 		}
 		mesh.RecalculateNormals();

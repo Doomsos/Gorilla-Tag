@@ -47,7 +47,7 @@ public class CrittersRegion : MonoBehaviour
 	public static void AddCritterToRegion(CrittersPawn critter, int regionId)
 	{
 		CrittersRegion crittersRegion;
-		if (CrittersRegion._regionLookup.TryGetValue(regionId, out crittersRegion))
+		if (CrittersRegion._regionLookup.TryGetValue(regionId, ref crittersRegion))
 		{
 			crittersRegion.AddCritter(critter);
 			return;
@@ -58,7 +58,7 @@ public class CrittersRegion : MonoBehaviour
 	public static void RemoveCritterFromRegion(CrittersPawn critter)
 	{
 		CrittersRegion crittersRegion;
-		if (CrittersRegion._regionLookup.TryGetValue(critter.regionId, out crittersRegion))
+		if (CrittersRegion._regionLookup.TryGetValue(critter.regionId, ref crittersRegion))
 		{
 			crittersRegion.RemoveCritter(critter);
 			return;
@@ -82,7 +82,7 @@ public class CrittersRegion : MonoBehaviour
 		float num2 = base.transform.lossyScale.y * this.scale;
 		Vector3 vector = base.transform.TransformPoint(new Vector3(Random.Range(-num, num), num, Random.Range(-num, num)));
 		RaycastHit raycastHit;
-		if (Physics.Raycast(vector, -base.transform.up, out raycastHit, num2, -1, QueryTriggerInteraction.Ignore))
+		if (Physics.Raycast(vector, -base.transform.up, ref raycastHit, num2, -1, 1))
 		{
 			Debug.DrawLine(vector, raycastHit.point, Color.green, 5f);
 			return raycastHit.point;

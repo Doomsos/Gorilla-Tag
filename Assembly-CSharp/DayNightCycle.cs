@@ -3,7 +3,6 @@ using System.Collections;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 
 public class DayNightCycle : MonoBehaviour
 {
@@ -15,7 +14,7 @@ public class DayNightCycle : MonoBehaviour
 		this.toMap.SetPixels(this._dayMap.GetPixels());
 		this.toMap.Apply();
 		this.workBlockMix = new Color[this.subTextureSize * this.subTextureSize];
-		this.newTexture = new Texture2D(this.fromMap.width, this.fromMap.height, this.fromMap.graphicsFormat, TextureCreationFlags.None);
+		this.newTexture = new Texture2D(this.fromMap.width, this.fromMap.height, this.fromMap.graphicsFormat, 0);
 		this.newData = new LightmapData();
 		this.textureHeight = this.fromMap.height;
 		this.textureWidth = this.fromMap.width;
@@ -87,7 +86,7 @@ public class DayNightCycle : MonoBehaviour
 		int num;
 		for (int i = 0; i < this.subTextureArray.Length; i = num + 1)
 		{
-			this.subTextureArray[i] = new Texture2D(this.subTextureSize, this.subTextureSize, this.fromMap.graphicsFormat, TextureCreationFlags.None);
+			this.subTextureArray[i] = new Texture2D(this.subTextureSize, this.subTextureSize, this.fromMap.graphicsFormat, 0);
 			yield return 0;
 			num = i;
 		}

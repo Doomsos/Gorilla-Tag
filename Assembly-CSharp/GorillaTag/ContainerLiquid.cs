@@ -71,26 +71,28 @@ namespace GorillaTag
 			Vector3 position = transform.position;
 			Quaternion rotation = transform.rotation;
 			Bounds bounds = this.meshRenderer.bounds;
-			Vector3 a = new Vector3(bounds.center.x, bounds.min.y, bounds.center.z);
-			Vector3 b = new Vector3(bounds.center.x, bounds.max.y, bounds.center.z);
-			this.liquidPlaneWorldPos = Vector3.Lerp(a, b, this.fillAmount);
-			Vector3 v = transform.InverseTransformPoint(this.liquidPlaneWorldPos);
+			Vector3 vector;
+			vector..ctor(bounds.center.x, bounds.min.y, bounds.center.z);
+			Vector3 vector2;
+			vector2..ctor(bounds.center.x, bounds.max.y, bounds.center.z);
+			this.liquidPlaneWorldPos = Vector3.Lerp(vector, vector2, this.fillAmount);
+			Vector3 vector3 = transform.InverseTransformPoint(this.liquidPlaneWorldPos);
 			float deltaTime = Time.deltaTime;
 			this.temporalWobbleAmp = Vector2.Lerp(this.temporalWobbleAmp, Vector2.zero, deltaTime * this.recovery);
 			float num = 6.2831855f * this.wobbleFrequency;
-			float d = Mathf.Lerp(this.lastSineWave, Mathf.Sin(num * Time.realtimeSinceStartup), deltaTime * Mathf.Clamp(this.lastVelocity.magnitude + this.lastAngularVelocity.magnitude, this.thickness, 10f));
-			Vector2 vector = this.temporalWobbleAmp * d;
-			this.liquidPlaneWorldNormal = new Vector3(vector.x, -1f, vector.y).normalized;
-			Vector3 v2 = transform.InverseTransformDirection(this.liquidPlaneWorldNormal);
+			float num2 = Mathf.Lerp(this.lastSineWave, Mathf.Sin(num * Time.realtimeSinceStartup), deltaTime * Mathf.Clamp(this.lastVelocity.magnitude + this.lastAngularVelocity.magnitude, this.thickness, 10f));
+			Vector2 vector4 = this.temporalWobbleAmp * num2;
+			this.liquidPlaneWorldNormal = new Vector3(vector4.x, -1f, vector4.y).normalized;
+			Vector3 vector5 = transform.InverseTransformDirection(this.liquidPlaneWorldNormal);
 			if (this.useLiquidShader)
 			{
-				this.matPropBlock.SetVector(this.liquidPlaneNormalShaderProp, v2);
-				this.matPropBlock.SetVector(this.liquidPlanePositionShaderProp, v);
+				this.matPropBlock.SetVector(this.liquidPlaneNormalShaderProp, vector5);
+				this.matPropBlock.SetVector(this.liquidPlanePositionShaderProp, vector3);
 				this.matPropBlock.SetVector(this.liquidColorShaderProp, this.liquidColor.linear);
 				if (this.useLiquidVolume)
 				{
-					float value = MathUtils.Linear(this.fillAmount, 0f, 1f, this.liquidVolumeMinMax.x, this.liquidVolumeMinMax.y);
-					this.matPropBlock.SetFloat(ShaderProps._LiquidFill, value);
+					float num3 = MathUtils.Linear(this.fillAmount, 0f, 1f, this.liquidVolumeMinMax.x, this.liquidVolumeMinMax.y);
+					this.matPropBlock.SetFloat(ShaderProps._LiquidFill, num3);
 				}
 				this.meshRenderer.SetPropertyBlock(this.matPropBlock);
 			}
@@ -99,37 +101,37 @@ namespace GorillaTag
 				float y = Mathf.Lerp(this.localMeshBounds.min.y, this.localMeshBounds.max.y, this.fillAmount);
 				this.floater.localPosition = this.floater.localPosition.WithY(y);
 			}
-			Vector3 vector2 = (this.lastPos - position) / deltaTime;
+			Vector3 vector6 = (this.lastPos - position) / deltaTime;
 			Vector3 angularVelocity = GorillaMath.GetAngularVelocity(this.lastRot, rotation);
-			this.temporalWobbleAmp.x = this.temporalWobbleAmp.x + Mathf.Clamp((vector2.x + vector2.y * 0.2f + angularVelocity.z + angularVelocity.y) * this.wobbleMax, -this.wobbleMax, this.wobbleMax);
-			this.temporalWobbleAmp.y = this.temporalWobbleAmp.y + Mathf.Clamp((vector2.z + vector2.y * 0.2f + angularVelocity.x + angularVelocity.y) * this.wobbleMax, -this.wobbleMax, this.wobbleMax);
+			this.temporalWobbleAmp.x = this.temporalWobbleAmp.x + Mathf.Clamp((vector6.x + vector6.y * 0.2f + angularVelocity.z + angularVelocity.y) * this.wobbleMax, -this.wobbleMax, this.wobbleMax);
+			this.temporalWobbleAmp.y = this.temporalWobbleAmp.y + Mathf.Clamp((vector6.z + vector6.y * 0.2f + angularVelocity.x + angularVelocity.y) * this.wobbleMax, -this.wobbleMax, this.wobbleMax);
 			this.lastPos = position;
 			this.lastRot = rotation;
-			this.lastSineWave = d;
-			this.lastVelocity = vector2;
+			this.lastSineWave = num2;
+			this.lastVelocity = vector6;
 			this.lastAngularVelocity = angularVelocity;
 			this.meshRenderer.enabled = (!this.keepMeshHidden && !this.isEmpty);
 			float x = transform.lossyScale.x;
-			float num2 = this.localMeshBounds.extents.x * x;
+			float num4 = this.localMeshBounds.extents.x * x;
 			float y2 = this.localMeshBounds.extents.y;
-			Vector3 position2 = this.localMeshBounds.center + new Vector3(0f, y2, 0f);
-			this.cupTopWorldPos = transform.TransformPoint(position2);
+			Vector3 vector7 = this.localMeshBounds.center + new Vector3(0f, y2, 0f);
+			this.cupTopWorldPos = transform.TransformPoint(vector7);
 			Vector3 up = transform.up;
-			Vector3 rhs = transform.InverseTransformDirection(Vector3.down);
-			float num3 = float.MinValue;
-			Vector3 position3 = Vector3.zero;
+			Vector3 vector8 = transform.InverseTransformDirection(Vector3.down);
+			float num5 = float.MinValue;
+			Vector3 vector9 = Vector3.zero;
 			for (int i = 0; i < this.topVerts.Length; i++)
 			{
-				float num4 = Vector3.Dot(this.topVerts[i], rhs);
-				if (num4 > num3)
+				float num6 = Vector3.Dot(this.topVerts[i], vector8);
+				if (num6 > num5)
 				{
-					num3 = num4;
-					position3 = this.topVerts[i];
+					num5 = num6;
+					vector9 = this.topVerts[i];
 				}
 			}
-			this.bottomLipWorldPos = transform.TransformPoint(position3);
-			float num5 = Mathf.Clamp01((this.liquidPlaneWorldPos.y - this.bottomLipWorldPos.y) / (num2 * 2f));
-			bool flag = num5 > 1E-05f;
+			this.bottomLipWorldPos = transform.TransformPoint(vector9);
+			float num7 = Mathf.Clamp01((this.liquidPlaneWorldPos.y - this.bottomLipWorldPos.y) / (num4 * 2f));
+			bool flag = num7 > 1E-05f;
 			ParticleSystem.EmissionModule emission = this.spillParticleSystem.emission;
 			emission.enabled = flag;
 			if (flag)
@@ -138,13 +140,13 @@ namespace GorillaTag
 				{
 					this.spillSoundBankPlayer.Play();
 				}
-				this.spillParticleSystem.transform.position = Vector3.Lerp(this.bottomLipWorldPos, this.cupTopWorldPos, num5);
-				this.spillParticleSystem.shape.radius = num2 * num5;
+				this.spillParticleSystem.transform.position = Vector3.Lerp(this.bottomLipWorldPos, this.cupTopWorldPos, num7);
+				this.spillParticleSystem.shape.radius = num4 * num7;
 				ParticleSystem.MinMaxCurve rateOverTime = emission.rateOverTime;
-				float num6 = num5 * this.maxSpillRate;
-				rateOverTime.constant = num6;
+				float num8 = num7 * this.maxSpillRate;
+				rateOverTime.constant = num8;
 				emission.rateOverTime = rateOverTime;
-				this.fillAmount -= num6 * deltaTime * 0.01f;
+				this.fillAmount -= num8 * deltaTime * 0.01f;
 			}
 			if (this.isEmpty && !this.wasEmptyLastFrame && !this.emptySoundBankPlayer.isPlaying)
 			{

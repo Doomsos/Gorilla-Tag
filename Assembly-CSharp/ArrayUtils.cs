@@ -5,25 +5,25 @@ using UnityEngine;
 
 public static class ArrayUtils
 {
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static int BinarySearch<T>(this T[] array, T value) where T : IComparable<T>
 	{
 		return Array.BinarySearch<T>(array, 0, array.Length, value);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static bool IsNullOrEmpty<T>(this T[] array)
 	{
 		return array == null || array.Length == 0;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static bool IsNullOrEmpty<T>(this List<T> list)
 	{
 		return list == null || list.Count == 0;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void Swap<T>(this T[] array, int from, int to)
 	{
 		T t = array[from];
@@ -32,16 +32,16 @@ public static class ArrayUtils
 		array[from] = t2;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void Swap<T>(this List<T> list, int from, int to)
 	{
-		T value = list[from];
-		T value2 = list[to];
-		list[to] = value;
-		list[from] = value2;
+		T t = list[from];
+		T t2 = list[to];
+		list[to] = t;
+		list[from] = t2;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static T[] Clone<T>(T[] source)
 	{
 		if (source == null)
@@ -60,7 +60,7 @@ public static class ArrayUtils
 		return array;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static List<T> Clone<T>(List<T> source)
 	{
 		if (source == null)
@@ -74,7 +74,7 @@ public static class ArrayUtils
 		return new List<T>(source);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static int IndexOfRef<T>(this T[] array, T value) where T : class
 	{
 		if (array == null || array.Length == 0)
@@ -91,7 +91,7 @@ public static class ArrayUtils
 		return -1;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static int IndexOfRef<T>(this List<T> list, T value) where T : class
 	{
 		if (list == null || list.Count == 0)

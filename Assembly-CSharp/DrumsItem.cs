@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
-using Photon.Pun;
 using UnityEngine;
 
 public class DrumsItem : MonoBehaviour, ISpawnable
@@ -48,7 +47,7 @@ public class DrumsItem : MonoBehaviour, ISpawnable
 		{
 			this.collidersHit[i] = this.nullHit;
 		}
-		this.collidersHitCount = Physics.SphereCastNonAlloc(handIndicator.lastPosition, this.sphereRadius, this.spherecastSweep.normalized, this.collidersHit, this.spherecastSweep.magnitude, this.drumsTouchable, QueryTriggerInteraction.Collide);
+		this.collidersHitCount = Physics.SphereCastNonAlloc(handIndicator.lastPosition, this.sphereRadius, this.spherecastSweep.normalized, this.collidersHit, this.spherecastSweep.magnitude, this.drumsTouchable, 2);
 		this.drumHit = false;
 		if (this.collidersHitCount > 0)
 		{
@@ -127,7 +126,7 @@ public class DrumsItem : MonoBehaviour, ISpawnable
 				NetworkView netView = this.myRig.netView;
 				if (netView != null)
 				{
-					netView.SendRPC("RPC_PlayDrum", RpcTarget.Others, new object[]
+					netView.SendRPC("RPC_PlayDrum", 1, new object[]
 					{
 						tempDrumInner.myIndex + this.onlineOffset,
 						this.volToPlay
@@ -136,7 +135,7 @@ public class DrumsItem : MonoBehaviour, ISpawnable
 			}
 			else
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayDrum", RpcTarget.Others, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayDrum", 1, new object[]
 				{
 					tempDrumInner.myIndex + this.onlineOffset,
 					this.volToPlay

@@ -71,11 +71,11 @@ public class KIDUI_MainScreen : MonoBehaviour
 			Debug.LogErrorFormat("[KID::UI::MAIN] Failed to retrieve permission data for feature; [" + setup.linkedFeature.ToString() + "]", Array.Empty<object>());
 			return;
 		}
-		if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PROHIBITED)
+		if (permissionDataByFeature.ManagedBy == 3)
 		{
 			return;
 		}
-		if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PLAYER)
+		if (permissionDataByFeature.ManagedBy == 1)
 		{
 			if (permissionDataByFeature.Enabled)
 			{
@@ -92,7 +92,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		}
 		GameObject gameObject = Object.Instantiate<GameObject>(this._featurePrefab, this._featureRootTransform);
 		KIDUIFeatureSetting component = gameObject.GetComponent<KIDUIFeatureSetting>();
-		if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.GUARDIAN)
+		if (permissionDataByFeature.ManagedBy == 2)
 		{
 			Debug.LogFormat(string.Format("[KID::UI::MAIN_SCREEN] Adding new Locked Feature:  {0} Is enabled: {1}", setup.linkedFeature.ToString(), permissionDataByFeature.Enabled), Array.Empty<object>());
 			component.CreateNewFeatureSettingGuardianManaged(setup, permissionDataByFeature.Enabled);
@@ -136,7 +136,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 				{
 					Debug.LogErrorFormat("[KID::UI::MAIN] Failed to find permission data for feature: [" + keyValuePair.Key.ToString() + "]", Array.Empty<object>());
 				}
-				else if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.GUARDIAN)
+				else if (permissionDataByFeature.ManagedBy == 2)
 				{
 					keyValuePair.Value[i].SetGuardianManagedState(permissionDataByFeature.Enabled);
 				}
@@ -161,7 +161,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 			{
 				num2++;
 				Permission permissionDataByFeature2 = KIDManager.GetPermissionDataByFeature(keyValuePair2.Key);
-				if (keyValuePair2.Value[j].GetFeatureToggleState() || permissionDataByFeature2.ManagedBy == Permission.ManagedByEnum.PLAYER)
+				if (keyValuePair2.Value[j].GetFeatureToggleState() || permissionDataByFeature2.ManagedBy == 1)
 				{
 					num++;
 				}
@@ -185,12 +185,12 @@ public class KIDUI_MainScreen : MonoBehaviour
 
 	private bool IsFeatureToggledOn(EKIDFeatures permissionFeature)
 	{
-		List<KIDUIFeatureSetting> source;
-		if (!KIDUI_MainScreen._featuresList.TryGetValue(permissionFeature, out source))
+		List<KIDUIFeatureSetting> list;
+		if (!KIDUI_MainScreen._featuresList.TryGetValue(permissionFeature, ref list))
 		{
 			return true;
 		}
-		KIDUIFeatureSetting kiduifeatureSetting = source.FirstOrDefault<KIDUIFeatureSetting>();
+		KIDUIFeatureSetting kiduifeatureSetting = Enumerable.FirstOrDefault<KIDUIFeatureSetting>(list);
 		if (kiduifeatureSetting == null)
 		{
 			Debug.LogErrorFormat(string.Format("[KID::UI::MAIN] Empty list for permission Name [{0}]", permissionFeature), Array.Empty<object>());
@@ -221,31 +221,26 @@ public class KIDUI_MainScreen : MonoBehaviour
 	{
 		this.ShowMainScreen(showStatus);
 		this._mainScreenOpenedReason = reason;
-		string value = reason.ToString().Replace("_", "-").ToLower();
-		TelemetryData telemetryData = new TelemetryData
+		string text = reason.ToString().Replace("_", "-").ToLower();
+		TelemetryData telemetryData = default(TelemetryData);
+		telemetryData.EventName = "kid_game_settings";
+		telemetryData.CustomTags = new string[]
 		{
-			EventName = "kid_game_settings",
-			CustomTags = new string[]
-			{
-				"kid_setup",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment,
-				KIDTelemetry.Open_MetricActionCustomTag
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"screen_shown_reason",
-					value
-				}
-			}
+			"kid_setup",
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment,
+			KIDTelemetry.Open_MetricActionCustomTag
 		};
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		dictionary.Add("screen_shown_reason", text);
+		telemetryData.BodyData = dictionary;
+		TelemetryData telemetryData2 = telemetryData;
 		foreach (Permission permission in KIDManager.GetAllPermissionsData())
 		{
-			telemetryData.BodyData.Add(KIDTelemetry.GetPermissionManagedByBodyData(permission.Name), permission.ManagedBy.ToString().ToLower());
-			telemetryData.BodyData.Add(KIDTelemetry.GetPermissionEnabledBodyData(permission.Name), permission.Enabled.ToString().ToLower());
+			telemetryData2.BodyData.Add(KIDTelemetry.GetPermissionManagedByBodyData(permission.Name), permission.ManagedBy.ToString().ToLower());
+			telemetryData2.BodyData.Add(KIDTelemetry.GetPermissionEnabledBodyData(permission.Name), permission.Enabled.ToString().ToLower());
 		}
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
 	public void ShowMainScreen(EMainScreenStatus showStatus)
@@ -260,31 +255,26 @@ public class KIDUI_MainScreen : MonoBehaviour
 	{
 		if (sendMetrics && showStatus == EMainScreenStatus.Updated)
 		{
-			string value = this._mainScreenOpenedReason.ToString().Replace("_", "-").ToLower();
-			TelemetryData telemetryData = new TelemetryData
+			string text = this._mainScreenOpenedReason.ToString().Replace("_", "-").ToLower();
+			TelemetryData telemetryData = default(TelemetryData);
+			telemetryData.EventName = "kid_game_settings";
+			telemetryData.CustomTags = new string[]
 			{
-				EventName = "kid_game_settings",
-				CustomTags = new string[]
-				{
-					"kid_setup",
-					KIDTelemetry.GameVersionCustomTag,
-					KIDTelemetry.GameEnvironment,
-					KIDTelemetry.Updated_MetricActionCustomTag
-				},
-				BodyData = new Dictionary<string, string>
-				{
-					{
-						"screen_shown_reason",
-						value
-					}
-				}
+				"kid_setup",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment,
+				KIDTelemetry.Updated_MetricActionCustomTag
 			};
+			Dictionary<string, string> dictionary = new Dictionary<string, string>();
+			dictionary.Add("screen_shown_reason", text);
+			telemetryData.BodyData = dictionary;
+			TelemetryData telemetryData2 = telemetryData;
 			foreach (Permission permission in KIDManager.GetAllPermissionsData())
 			{
-				telemetryData.BodyData.Add(KIDTelemetry.GetPermissionManagedByBodyData(permission.Name), permission.ManagedBy.ToString().ToLower());
-				telemetryData.BodyData.Add(KIDTelemetry.GetPermissionEnabledBodyData(permission.Name), permission.Enabled.ToString().ToLower());
+				telemetryData2.BodyData.Add(KIDTelemetry.GetPermissionManagedByBodyData(permission.Name), permission.ManagedBy.ToString().ToLower());
+				telemetryData2.BodyData.Add(KIDTelemetry.GetPermissionEnabledBodyData(permission.Name), permission.Enabled.ToString().ToLower());
 			}
-			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 		}
 		GameObject activeStatusObject = this.GetActiveStatusObject();
 		this._declinedStatus.SetActive(false);
@@ -411,33 +401,22 @@ public class KIDUI_MainScreen : MonoBehaviour
 		KIDManager.SendOptInPermissions();
 		if (this._screenStatus != EMainScreenStatus.None)
 		{
-			string value = this._mainScreenOpenedReason.ToString().Replace("_", "-").ToLower();
-			TelemetryData telemetryData = new TelemetryData
+			string text = this._mainScreenOpenedReason.ToString().Replace("_", "-").ToLower();
+			TelemetryData telemetryData = default(TelemetryData);
+			telemetryData.EventName = "kid_game_settings";
+			telemetryData.CustomTags = new string[]
 			{
-				EventName = "kid_game_settings",
-				CustomTags = new string[]
-				{
-					"kid_setup",
-					KIDTelemetry.GameVersionCustomTag,
-					KIDTelemetry.GameEnvironment
-				},
-				BodyData = new Dictionary<string, string>
-				{
-					{
-						"screen_shown_reason",
-						value
-					},
-					{
-						"kid_status",
-						this._screenStatus.ToString().ToLower()
-					},
-					{
-						"button_pressed",
-						"save_and_continue"
-					}
-				}
+				"kid_setup",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
 			};
-			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+			Dictionary<string, string> dictionary = new Dictionary<string, string>();
+			dictionary.Add("screen_shown_reason", text);
+			dictionary.Add("kid_status", this._screenStatus.ToString().ToLower());
+			dictionary.Add("button_pressed", "save_and_continue");
+			telemetryData.BodyData = dictionary;
+			TelemetryData telemetryData2 = telemetryData;
+			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 		}
 		else
 		{
@@ -492,7 +471,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		KIDManager.SetFeatureOptIn(feature, flag);
 		if (onOptedIn != null)
 		{
-			onOptedIn(flag, permissionData, item);
+			onOptedIn.Invoke(flag, permissionData, item);
 		}
 	}
 
@@ -504,9 +483,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 
 	private IEnumerable<string> CollectPermissionsToUpgrade()
 	{
-		return from permission in KIDManager.GetAllPermissionsData()
-		where permission.ManagedBy == Permission.ManagedByEnum.GUARDIAN && !permission.Enabled
-		select permission.Name;
+		return Enumerable.Select<Permission, string>(Enumerable.Where<Permission>(KIDManager.GetAllPermissionsData(), (Permission permission) => permission.ManagedBy == 2 && !permission.Enabled), (Permission permission) => permission.Name);
 	}
 
 	private void ConfigurePermissionsButtons()
@@ -531,15 +508,14 @@ public class KIDUI_MainScreen : MonoBehaviour
 
 	private GameObject GetActiveStatusObject()
 	{
-		foreach (GameObject gameObject in new List<GameObject>
-		{
-			this._declinedStatus,
-			this._timeoutStatus,
-			this._pendingStatus,
-			this._updatedStatus,
-			this._setupRequiredStatus,
-			this._fullPlayerControlStatus
-		})
+		List<GameObject> list = new List<GameObject>();
+		list.Add(this._declinedStatus);
+		list.Add(this._timeoutStatus);
+		list.Add(this._pendingStatus);
+		list.Add(this._updatedStatus);
+		list.Add(this._setupRequiredStatus);
+		list.Add(this._fullPlayerControlStatus);
+		foreach (GameObject gameObject in list)
 		{
 			if (gameObject.activeInHierarchy)
 			{

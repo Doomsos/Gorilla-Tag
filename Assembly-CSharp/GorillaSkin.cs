@@ -66,10 +66,10 @@ public class GorillaSkin : ScriptableObject
 	public void ApplySkinToMannequin(GameObject mannequin, bool swapMesh = false)
 	{
 		SkinnedMeshRenderer skinnedMeshRenderer;
-		if (!mannequin.TryGetComponent<SkinnedMeshRenderer>(out skinnedMeshRenderer))
+		if (!mannequin.TryGetComponent<SkinnedMeshRenderer>(ref skinnedMeshRenderer))
 		{
 			MeshRenderer meshRenderer;
-			if (mannequin.TryGetComponent<MeshRenderer>(out meshRenderer))
+			if (mannequin.TryGetComponent<MeshRenderer>(ref meshRenderer))
 			{
 				meshRenderer.GetSharedMaterials(GorillaSkin._g_sharedMaterialsCache);
 				GorillaSkin._g_sharedMaterialsCache[0] = this.bodyMaterial;

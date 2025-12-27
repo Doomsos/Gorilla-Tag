@@ -112,7 +112,7 @@ namespace emotitron.Compression.HalfFloat
 
 		private static readonly byte[] FloatToHalfShiftTable = new byte[512];
 
-		[StructLayout(LayoutKind.Explicit)]
+		[StructLayout(2)]
 		private struct FloatToUint
 		{
 			[FieldOffset(0)]

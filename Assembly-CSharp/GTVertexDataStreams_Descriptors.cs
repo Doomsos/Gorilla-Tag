@@ -7,27 +7,27 @@ public static class GTVertexDataStreams_Descriptors
 {
 	public static void DoSetVertexBufferParams(ref Mesh.MeshData writeData, int totalVertexCount)
 	{
-		NativeArray<VertexAttributeDescriptor> attributes = new NativeArray<VertexAttributeDescriptor>(6, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+		NativeArray<VertexAttributeDescriptor> nativeArray = new NativeArray<VertexAttributeDescriptor>(6, 2, 0);
 		int num = 0;
-		attributes[num++] = GTVertexDataStreams_Descriptors.position;
-		attributes[num++] = GTVertexDataStreams_Descriptors.color;
-		attributes[num++] = GTVertexDataStreams_Descriptors.uv1;
-		attributes[num++] = GTVertexDataStreams_Descriptors.lightmapUv;
-		attributes[num++] = GTVertexDataStreams_Descriptors.normal;
-		attributes[num++] = GTVertexDataStreams_Descriptors.tangent;
-		writeData.SetVertexBufferParams(totalVertexCount, attributes);
-		attributes.Dispose();
+		nativeArray[num++] = GTVertexDataStreams_Descriptors.position;
+		nativeArray[num++] = GTVertexDataStreams_Descriptors.color;
+		nativeArray[num++] = GTVertexDataStreams_Descriptors.uv1;
+		nativeArray[num++] = GTVertexDataStreams_Descriptors.lightmapUv;
+		nativeArray[num++] = GTVertexDataStreams_Descriptors.normal;
+		nativeArray[num++] = GTVertexDataStreams_Descriptors.tangent;
+		writeData.SetVertexBufferParams(totalVertexCount, nativeArray);
+		nativeArray.Dispose();
 	}
 
-	public static readonly VertexAttributeDescriptor position = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
+	public static readonly VertexAttributeDescriptor position = new VertexAttributeDescriptor(0, 0, 3, 0);
 
-	public static readonly VertexAttributeDescriptor color = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4, 0);
+	public static readonly VertexAttributeDescriptor color = new VertexAttributeDescriptor(3, 2, 4, 0);
 
-	public static readonly VertexAttributeDescriptor uv1 = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float16, 4, 0);
+	public static readonly VertexAttributeDescriptor uv1 = new VertexAttributeDescriptor(4, 1, 4, 0);
 
-	public static readonly VertexAttributeDescriptor lightmapUv = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float16, 2, 0);
+	public static readonly VertexAttributeDescriptor lightmapUv = new VertexAttributeDescriptor(5, 1, 2, 0);
 
-	public static readonly VertexAttributeDescriptor normal = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3, 1);
+	public static readonly VertexAttributeDescriptor normal = new VertexAttributeDescriptor(1, 0, 3, 1);
 
-	public static readonly VertexAttributeDescriptor tangent = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.SNorm8, 4, 1);
+	public static readonly VertexAttributeDescriptor tangent = new VertexAttributeDescriptor(2, 3, 4, 1);
 }

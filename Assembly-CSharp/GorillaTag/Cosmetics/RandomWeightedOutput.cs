@@ -58,23 +58,23 @@ namespace GorillaTag.Cosmetics
 				return -1;
 			}
 			double num = 0.0;
-			foreach (int index in list)
+			foreach (int num2 in list)
 			{
-				num += (double)this.outputs[index].weight;
+				num += (double)this.outputs[num2].weight;
 			}
 			if (num <= 0.0)
 			{
 				return list[0];
 			}
-			double num2 = (double)this.networkProvider.GetSelectedAsFloat() * num;
-			double num3 = 0.0;
+			double num3 = (double)this.networkProvider.GetSelectedAsFloat() * num;
+			double num4 = 0.0;
 			for (int j = 0; j < list.Count; j++)
 			{
-				int num4 = list[j];
-				num3 += (double)this.outputs[num4].weight;
-				if (num2 < num3)
+				int num5 = list[j];
+				num4 += (double)this.outputs[num5].weight;
+				if (num3 < num4)
 				{
-					return num4;
+					return num5;
 				}
 			}
 			List<int> list2 = list;

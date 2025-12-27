@@ -61,7 +61,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 
 		public void CopySettings(CustomMapEjectButtonSettings customMapEjectButtonSettings)
 		{
-			this.ejectType = (CustomMapEjectButton.EjectType)customMapEjectButtonSettings.ejectType;
+			this.ejectType = customMapEjectButtonSettings.ejectType;
 		}
 
 		[SerializeField]

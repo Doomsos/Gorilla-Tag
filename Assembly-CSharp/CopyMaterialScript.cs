@@ -5,7 +5,7 @@ public class CopyMaterialScript : MonoBehaviour
 {
 	private void Start()
 	{
-		if (Application.platform == RuntimePlatform.Android)
+		if (Application.platform == 11)
 		{
 			base.gameObject.SetActive(false);
 		}

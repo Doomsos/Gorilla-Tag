@@ -145,14 +145,14 @@ namespace TagEffects
 					Action<IHandEffectsTrigger.Mode> onTrigger = this.OnTrigger;
 					if (onTrigger != null)
 					{
-						onTrigger(IHandEffectsTrigger.Mode.Tag1P);
+						onTrigger.Invoke(IHandEffectsTrigger.Mode.Tag1P);
 					}
 					if (other != null)
 					{
 						Action<IHandEffectsTrigger.Mode> onTrigger2 = other.OnTrigger;
 						if (onTrigger2 != null)
 						{
-							onTrigger2(IHandEffectsTrigger.Mode.Tag1P);
+							onTrigger2.Invoke(IHandEffectsTrigger.Mode.Tag1P);
 						}
 					}
 					break;
@@ -162,14 +162,14 @@ namespace TagEffects
 					Action<IHandEffectsTrigger.Mode> onTrigger3 = this.OnTrigger;
 					if (onTrigger3 != null)
 					{
-						onTrigger3(IHandEffectsTrigger.Mode.Tag3P);
+						onTrigger3.Invoke(IHandEffectsTrigger.Mode.Tag3P);
 					}
 					if (other != null)
 					{
 						Action<IHandEffectsTrigger.Mode> onTrigger4 = other.OnTrigger;
 						if (onTrigger4 != null)
 						{
-							onTrigger4(IHandEffectsTrigger.Mode.Tag3P);
+							onTrigger4.Invoke(IHandEffectsTrigger.Mode.Tag3P);
 						}
 					}
 					break;
@@ -179,14 +179,14 @@ namespace TagEffects
 					Action<IHandEffectsTrigger.Mode> onTrigger5 = this.OnTrigger;
 					if (onTrigger5 != null)
 					{
-						onTrigger5(IHandEffectsTrigger.Mode.HighFive);
+						onTrigger5.Invoke(IHandEffectsTrigger.Mode.HighFive);
 					}
 					if (other != null)
 					{
 						Action<IHandEffectsTrigger.Mode> onTrigger6 = other.OnTrigger;
 						if (onTrigger6 != null)
 						{
-							onTrigger6(IHandEffectsTrigger.Mode.HighFive);
+							onTrigger6.Invoke(IHandEffectsTrigger.Mode.HighFive);
 						}
 					}
 					break;
@@ -196,14 +196,14 @@ namespace TagEffects
 					Action<IHandEffectsTrigger.Mode> onTrigger7 = this.OnTrigger;
 					if (onTrigger7 != null)
 					{
-						onTrigger7(IHandEffectsTrigger.Mode.FistBump);
+						onTrigger7.Invoke(IHandEffectsTrigger.Mode.FistBump);
 					}
 					if (other != null)
 					{
 						Action<IHandEffectsTrigger.Mode> onTrigger8 = other.OnTrigger;
 						if (onTrigger8 != null)
 						{
-							onTrigger8(IHandEffectsTrigger.Mode.FistBump);
+							onTrigger8.Invoke(IHandEffectsTrigger.Mode.FistBump);
 						}
 					}
 					break;

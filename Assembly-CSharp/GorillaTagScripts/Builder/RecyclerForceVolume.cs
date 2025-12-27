@@ -82,50 +82,50 @@ namespace GorillaTagScripts.Builder
 			{
 				vector /= sizeManager.currentScale;
 			}
-			Vector3 a = Vector3.Dot(base.transform.position - transform.position, base.transform.up) * base.transform.up;
-			float num = a.magnitude + 0.0001f;
-			Vector3 vector2 = a / num;
-			float num2 = Vector3.Dot(vector, vector2);
-			float d = this.accel;
+			Vector3 vector2 = Vector3.Dot(base.transform.position - transform.position, base.transform.up) * base.transform.up;
+			float num = vector2.magnitude + 0.0001f;
+			Vector3 vector3 = vector2 / num;
+			float num2 = Vector3.Dot(vector, vector3);
+			float num3 = this.accel;
 			if (this.maxDepth > -1f)
 			{
-				float num3 = Vector3.Dot(transform.position - this.enterPos, vector2);
-				float num4 = this.maxDepth - num3;
-				float b = 0f;
-				if (num4 > 0.0001f)
+				float num4 = Vector3.Dot(transform.position - this.enterPos, vector3);
+				float num5 = this.maxDepth - num4;
+				float num6 = 0f;
+				if (num5 > 0.0001f)
 				{
-					b = num2 * num2 / num4;
+					num6 = num2 * num2 / num5;
 				}
-				d = Mathf.Max(this.accel, b);
+				num3 = Mathf.Max(this.accel, num6);
 			}
 			float deltaTime = Time.deltaTime;
-			Vector3 b2 = base.transform.forward * d * deltaTime;
-			vector += b2;
-			Vector3 a2 = Vector3.Dot(vector, base.transform.up) * base.transform.up;
-			Vector3 a3 = Vector3.Dot(vector, base.transform.right) * base.transform.right;
-			Vector3 b3 = Mathf.Clamp(Vector3.Dot(vector, base.transform.forward), -1f * this.maxSpeed, this.maxSpeed) * base.transform.forward;
-			float d2 = 1f;
-			float d3 = 1f;
+			Vector3 vector4 = base.transform.forward * num3 * deltaTime;
+			vector += vector4;
+			Vector3 vector5 = Vector3.Dot(vector, base.transform.up) * base.transform.up;
+			Vector3 vector6 = Vector3.Dot(vector, base.transform.right) * base.transform.right;
+			Vector3 vector7 = Mathf.Clamp(Vector3.Dot(vector, base.transform.forward), -1f * this.maxSpeed, this.maxSpeed) * base.transform.forward;
+			float num7 = 1f;
+			float num8 = 1f;
 			if (this.dampenLateralVelocity)
 			{
-				d2 = 1f - this.dampenXVelPerc * 0.01f * deltaTime;
-				d3 = 1f - this.dampenYVelPerc * 0.01f * deltaTime;
+				num7 = 1f - this.dampenXVelPerc * 0.01f * deltaTime;
+				num8 = 1f - this.dampenYVelPerc * 0.01f * deltaTime;
 			}
-			vector = d3 * a2 + d2 * a3 + b3;
+			vector = num8 * vector5 + num7 * vector6 + vector7;
 			if (this.applyPullToCenterAcceleration && this.pullToCenterAccel > 0f && this.pullToCenterMaxSpeed > 0f)
 			{
-				vector -= num2 * vector2;
+				vector -= num2 * vector3;
 				if (num > this.pullTOCenterMinDistance)
 				{
 					num2 += this.pullToCenterAccel * deltaTime;
-					float num5 = Mathf.Min(this.pullToCenterMaxSpeed, num / deltaTime);
-					num2 = Mathf.Clamp(num2, -1f * num5, num5);
+					float num9 = Mathf.Min(this.pullToCenterMaxSpeed, num / deltaTime);
+					num2 = Mathf.Clamp(num2, -1f * num9, num9);
 				}
 				else
 				{
 					num2 = 0f;
 				}
-				vector += num2 * vector2;
+				vector += num2 * vector3;
 			}
 			if (this.scaleWithSize && sizeManager)
 			{

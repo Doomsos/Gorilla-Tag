@@ -24,7 +24,7 @@ namespace GorillaTag
 			this.callback = cb;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public override void OnTimedEvent()
 		{
 			Action action = this.callback;
@@ -32,7 +32,7 @@ namespace GorillaTag
 			{
 				return;
 			}
-			action();
+			action.Invoke();
 		}
 
 		public Action callback;

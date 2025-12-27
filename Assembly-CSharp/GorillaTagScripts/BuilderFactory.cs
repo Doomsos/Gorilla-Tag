@@ -54,7 +54,7 @@ namespace GorillaTagScripts
 				{
 					this.pieceTypes.Add(staticHash);
 				}
-				else if (this.pieceTypeToIndex.TryGetValue(staticHash, out num))
+				else if (this.pieceTypeToIndex.TryGetValue(staticHash, ref num))
 				{
 					string text = "BuilderFactory: ERROR!! " + string.Format("Could not add pieceType \"{0}\" with hash {1} ", name, staticHash) + "to 'pieceTypeToIndex' Dictionary because because it was already added!";
 					if (num < 0 || num >= list.Count)
@@ -110,10 +110,10 @@ namespace GorillaTagScripts
 
 		public BuilderPiece GetPiecePrefab(int pieceType)
 		{
-			int index;
-			if (this.pieceTypeToIndex.TryGetValue(pieceType, out index))
+			int num;
+			if (this.pieceTypeToIndex.TryGetValue(pieceType, ref num))
 			{
-				return this.pieceList[index];
+				return this.pieceList[num];
 			}
 			Debug.LogErrorFormat("No Prefab found for type {0}", new object[]
 			{

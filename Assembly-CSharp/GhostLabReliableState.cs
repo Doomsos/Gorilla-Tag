@@ -90,7 +90,7 @@ public class GhostLabReliableState : NetworkComponent
 		}
 		if (NetworkSystem.Instance.InRoom && !NetworkSystem.Instance.IsMasterClient)
 		{
-			base.SendRPC("RemoteEntranceDoorState", RpcTarget.MasterClient, new object[]
+			base.SendRPC("RemoteEntranceDoorState", 2, new object[]
 			{
 				newState
 			});
@@ -106,20 +106,20 @@ public class GhostLabReliableState : NetworkComponent
 		}
 		if (NetworkSystem.Instance.InRoom && !NetworkSystem.Instance.IsMasterClient)
 		{
-			base.SendRPC("RemoteSingleDoorState", RpcTarget.MasterClient, new object[]
+			base.SendRPC("RemoteSingleDoorState", 2, new object[]
 			{
 				singleDoorIndex
 			});
 		}
 	}
 
-	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	[Rpc(7, 1)]
 	public unsafe void RPC_RemoteEntranceDoorState(GhostLab.EntranceDoorsState newState, RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage != 4)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) != 0)
@@ -141,7 +141,7 @@ public class GhostLabReliableState : NetworkComponent
 							int num2 = 8;
 							*(GhostLab.EntranceDoorsState*)(ptr2 + num2) = newState;
 							num2 += 4;
-							ptr->Offset = num2 * 8;
+							ptr.Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 1) == 0)
@@ -149,7 +149,7 @@ public class GhostLabReliableState : NetworkComponent
 							return;
 						}
 					}
-					info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+					info = RpcInfo.FromLocal(base.Runner, 0, 0);
 					goto IL_12;
 				}
 				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GhostLabReliableState::RPC_RemoteEntranceDoorState(GhostLab/EntranceDoorsState,Fusion.RpcInfo)", base.Object, 7);
@@ -166,13 +166,13 @@ public class GhostLabReliableState : NetworkComponent
 		this.doorState = newState;
 	}
 
-	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	[Rpc(7, 1)]
 	public unsafe void RPC_RemoteSingleDoorState(int doorIndex, RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage != 4)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) != 0)
@@ -194,7 +194,7 @@ public class GhostLabReliableState : NetworkComponent
 							int num2 = 8;
 							*(int*)(ptr2 + num2) = doorIndex;
 							num2 += 4;
-							ptr->Offset = num2 * 8;
+							ptr.Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 1) == 0)
@@ -202,7 +202,7 @@ public class GhostLabReliableState : NetworkComponent
 							return;
 						}
 					}
-					info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+					info = RpcInfo.FromLocal(base.Runner, 0, 0);
 					goto IL_12;
 				}
 				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GhostLabReliableState::RPC_RemoteSingleDoorState(System.Int32,Fusion.RpcInfo)", base.Object, 7);
@@ -273,7 +273,7 @@ public class GhostLabReliableState : NetworkComponent
 		GhostLab.EntranceDoorsState entranceDoorsState = *(GhostLab.EntranceDoorsState*)(ptr + num);
 		num += 4;
 		GhostLab.EntranceDoorsState newState = entranceDoorsState;
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 		behaviour.InvokeRpc = true;
 		((GhostLabReliableState)behaviour).RPC_RemoteEntranceDoorState(newState, info);
 	}
@@ -288,7 +288,7 @@ public class GhostLabReliableState : NetworkComponent
 		int num2 = *(int*)(ptr + num);
 		num += 4;
 		int doorIndex = num2;
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 		behaviour.InvokeRpc = true;
 		((GhostLabReliableState)behaviour).RPC_RemoteSingleDoorState(doorIndex, info);
 	}
@@ -301,6 +301,6 @@ public class GhostLabReliableState : NetworkComponent
 
 	[WeaverGenerated]
 	[DefaultForProperty("NetData", 0, 11)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private GhostLabData _NetData;
 }

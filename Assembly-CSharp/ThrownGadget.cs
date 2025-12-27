@@ -1,7 +1,6 @@
 ﻿using System;
 using Photon.Pun;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class ThrownGadget : MonoBehaviour
 {
@@ -48,7 +47,7 @@ public class ThrownGadget : MonoBehaviour
 			return false;
 		}
 		int num = gamePlayer.FindHandIndex(this.gameEntity.id);
-		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
+		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? 4 : 5) > 0.25f;
 	}
 
 	public void Update()
@@ -64,7 +63,7 @@ public class ThrownGadget : MonoBehaviour
 			Action onThrown = this.OnThrown;
 			if (onThrown != null)
 			{
-				onThrown();
+				onThrown.Invoke();
 			}
 		}
 		else if (this.IsHeldByAnother())
@@ -82,7 +81,7 @@ public class ThrownGadget : MonoBehaviour
 			Action onActivated = this.OnActivated;
 			if (onActivated != null)
 			{
-				onActivated();
+				onActivated.Invoke();
 			}
 		}
 		this.activationButtonLastInput = flag;
@@ -97,7 +96,7 @@ public class ThrownGadget : MonoBehaviour
 			{
 				return;
 			}
-			onHitSurface();
+			onHitSurface.Invoke();
 		}
 	}
 

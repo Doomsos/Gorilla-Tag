@@ -69,39 +69,39 @@ public class CatmullRomSpline : MonoBehaviour
 		{
 			Vector3 vector = controlPoints[i];
 			Vector3 vector2 = controlPoints[i + 1];
-			Vector3 a = vector2 - vector;
-			float magnitude = a.magnitude;
+			Vector3 vector3 = vector2 - vector;
+			float magnitude = vector3.magnitude;
 			if ((double)magnitude > 1E-05)
 			{
-				Vector3 vector3 = a / magnitude;
-				float num4 = Vector3.Dot(worldPoint - vector, vector3);
+				Vector3 vector4 = vector3 / magnitude;
+				float num4 = Vector3.Dot(worldPoint - vector, vector4);
 				float sqrMagnitude;
 				float num5;
-				Vector3 vector4;
+				Vector3 vector5;
 				if (num4 <= 0f)
 				{
 					sqrMagnitude = (worldPoint - vector).sqrMagnitude;
 					num5 = 0f;
-					vector4 = vector;
+					vector5 = vector;
 				}
 				else if (num4 >= magnitude)
 				{
 					sqrMagnitude = (worldPoint - vector2).sqrMagnitude;
 					num5 = 1f;
-					vector4 = vector2;
+					vector5 = vector2;
 				}
 				else
 				{
-					sqrMagnitude = (worldPoint - (vector + vector3 * num4)).sqrMagnitude;
+					sqrMagnitude = (worldPoint - (vector + vector4 * num4)).sqrMagnitude;
 					num5 = num4 / magnitude;
-					vector4 = vector + vector3 * num4;
+					vector5 = vector + vector4 * num4;
 				}
 				if (sqrMagnitude < num)
 				{
 					num = sqrMagnitude;
 					num2 = num5;
 					num3 = i;
-					linePoint = vector4;
+					linePoint = vector5;
 				}
 			}
 		}
@@ -116,24 +116,24 @@ public class CatmullRomSpline : MonoBehaviour
 	public static Vector3 GetForwardTangent(List<Vector3> controlPoints, float t, float step = 0.01f)
 	{
 		t = Mathf.Clamp(t, 0f, 1f - step - Mathf.Epsilon);
-		Vector3 b = CatmullRomSpline.Evaluate(controlPoints, t);
-		return (CatmullRomSpline.Evaluate(controlPoints, t + step) - b).normalized;
+		Vector3 vector = CatmullRomSpline.Evaluate(controlPoints, t);
+		return (CatmullRomSpline.Evaluate(controlPoints, t + step) - vector).normalized;
 	}
 
 	public Vector3 GetForwardTangent(float t, float step = 0.01f)
 	{
 		t = Mathf.Clamp(t, 0f, 1f - step - Mathf.Epsilon);
-		Vector3 b = this.Evaluate(t);
-		return (this.Evaluate(t + step) - b).normalized;
+		Vector3 vector = this.Evaluate(t);
+		return (this.Evaluate(t + step) - vector).normalized;
 	}
 
 	private static Vector3 CatmullRom(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
 	{
-		Vector3 a = 2f * p1;
-		Vector3 a2 = p2 - p0;
-		Vector3 a3 = 2f * p0 - 5f * p1 + 4f * p2 - p3;
-		Vector3 a4 = -p0 + 3f * p1 - 3f * p2 + p3;
-		return 0.5f * (a + a2 * t + a3 * t * t + a4 * t * t * t);
+		Vector3 vector = 2f * p1;
+		Vector3 vector2 = p2 - p0;
+		Vector3 vector3 = 2f * p0 - 5f * p1 + 4f * p2 - p3;
+		Vector3 vector4 = -p0 + 3f * p1 - 3f * p2 + p3;
+		return 0.5f * (vector + vector2 * t + vector3 * t * t + vector4 * t * t * t);
 	}
 
 	private void OnDrawGizmosSelected()
@@ -155,31 +155,31 @@ public class CatmullRomSpline : MonoBehaviour
 		this.RefreshControlPoints();
 		Gizmos.color = Color.yellow;
 		int num = 128;
-		Vector3 from = this.Evaluate(0f);
+		Vector3 vector2 = this.Evaluate(0f);
 		for (int i = 1; i <= num; i++)
 		{
 			float t = (float)i / (float)num;
-			Vector3 vector2 = this.Evaluate(t);
-			Gizmos.DrawLine(from, vector2);
-			from = vector2;
+			Vector3 vector3 = this.Evaluate(t);
+			Gizmos.DrawLine(vector2, vector3);
+			vector2 = vector3;
 		}
 		if (this.debugTransform != null)
 		{
-			Vector3 center;
-			float closestEvaluationOnSpline = this.GetClosestEvaluationOnSpline(this.debugTransform.position, out center);
+			Vector3 vector4;
+			float closestEvaluationOnSpline = this.GetClosestEvaluationOnSpline(this.debugTransform.position, out vector4);
 			Gizmos.color = Color.red;
 			Gizmos.DrawWireSphere(this.Evaluate(closestEvaluationOnSpline), 0.2f);
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireSphere(center, 0.25f);
+			Gizmos.DrawWireSphere(vector4, 0.25f);
 			if (this.controlPoints.Count > 3)
 			{
 				Gizmos.color = Color.green;
-				from = this.controlPoints[1];
+				vector2 = this.controlPoints[1];
 				for (int j = 2; j < this.controlPoints.Count - 2; j++)
 				{
-					Vector3 vector3 = this.controlPoints[j];
-					Gizmos.DrawLine(from, vector3);
-					from = vector3;
+					Vector3 vector5 = this.controlPoints[j];
+					Gizmos.DrawLine(vector2, vector5);
+					vector2 = vector5;
 				}
 			}
 		}
@@ -187,10 +187,10 @@ public class CatmullRomSpline : MonoBehaviour
 
 	public static Matrix4x4 CatmullRom(float t, Matrix4x4 p0, Matrix4x4 p1, Matrix4x4 p2, Matrix4x4 p3)
 	{
-		Vector3 pos = CatmullRomSpline.CatmullRom(t, p0.GetColumn(3), p1.GetColumn(3), p2.GetColumn(3), p3.GetColumn(3));
-		Quaternion q = Quaternion.Slerp(p1.rotation, p2.rotation, t);
-		Vector3 s = Vector3.Lerp(p1.lossyScale, p2.lossyScale, t);
-		return Matrix4x4.TRS(pos, q, s);
+		Vector3 vector = CatmullRomSpline.CatmullRom(t, p0.GetColumn(3), p1.GetColumn(3), p2.GetColumn(3), p3.GetColumn(3));
+		Quaternion quaternion = Quaternion.Slerp(p1.rotation, p2.rotation, t);
+		Vector3 vector2 = Vector3.Lerp(p1.lossyScale, p2.lossyScale, t);
+		return Matrix4x4.TRS(vector, quaternion, vector2);
 	}
 
 	public static Matrix4x4 Evaluate(List<Matrix4x4> controlPoints, float t)

@@ -98,13 +98,13 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 		}
 	}
 
-	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	[Rpc(7, 1)]
 	public unsafe void RPC_RemoteActiveGhost(RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage != 4)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) != 0)
@@ -123,7 +123,7 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 							*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 1);
 							int num2 = 8;
-							ptr->Offset = num2 * 8;
+							ptr.Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 1) == 0)
@@ -131,7 +131,7 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 							return;
 						}
 					}
-					info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+					info = RpcInfo.FromLocal(base.Runner, 0, 0);
 					goto IL_12;
 				}
 				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void SecondLookSkeletonSynchValues::RPC_RemoteActiveGhost(Fusion.RpcInfo)", base.Object, 7);
@@ -148,13 +148,13 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 		this.mySkeleton.RemoteActivateGhost();
 	}
 
-	[Rpc(RpcSources.All, RpcTargets.All)]
+	[Rpc(7, 7)]
 	public unsafe void RPC_RemotePlayerSeen(RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage != 4)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) == 0)
@@ -176,12 +176,12 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 							*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 2);
 							int num2 = 8;
-							ptr->Offset = num2 * 8;
+							ptr.Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 7) != 0)
 						{
-							info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+							info = RpcInfo.FromLocal(base.Runner, 0, 0);
 							goto IL_12;
 						}
 					}
@@ -199,13 +199,13 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 		}
 	}
 
-	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	[Rpc(7, 1)]
 	public unsafe void RPC_RemotePlayerCaught(RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage != 4)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) != 0)
@@ -224,7 +224,7 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 							byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 							*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 3);
 							int num2 = 8;
-							ptr->Offset = num2 * 8;
+							ptr.Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 1) == 0)
@@ -232,7 +232,7 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 							return;
 						}
 					}
-					info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+					info = RpcInfo.FromLocal(base.Runner, 0, 0);
 					goto IL_12;
 				}
 				NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void SecondLookSkeletonSynchValues::RPC_RemotePlayerCaught(Fusion.RpcInfo)", base.Object, 7);
@@ -310,7 +310,7 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 	protected unsafe static void RPC_RemoteActiveGhost@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 	{
 		byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 		behaviour.InvokeRpc = true;
 		((SecondLookSkeletonSynchValues)behaviour).RPC_RemoteActiveGhost(info);
 	}
@@ -321,7 +321,7 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 	protected unsafe static void RPC_RemotePlayerSeen@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 	{
 		byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 		behaviour.InvokeRpc = true;
 		((SecondLookSkeletonSynchValues)behaviour).RPC_RemotePlayerSeen(info);
 	}
@@ -332,7 +332,7 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 	protected unsafe static void RPC_RemotePlayerCaught@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 	{
 		byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 		behaviour.InvokeRpc = true;
 		((SecondLookSkeletonSynchValues)behaviour).RPC_RemotePlayerCaught(info);
 	}
@@ -354,6 +354,6 @@ public class SecondLookSkeletonSynchValues : NetworkComponent
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("NetData", 0, 11)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private SkeletonNetData _NetData;
 }

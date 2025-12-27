@@ -9,7 +9,7 @@ namespace Utilities
 		{
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		protected override double DefaultTypeValue()
 		{
 			return 1.0;

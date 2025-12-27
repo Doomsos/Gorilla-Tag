@@ -36,7 +36,7 @@ public class CodeRedemption : MonoBehaviour
 
 	private void OnCodeRedemptionResponse(UnityWebRequest completedRequest)
 	{
-		if (completedRequest.result != UnityWebRequest.Result.Success)
+		if (completedRequest.result != 1)
 		{
 			Debug.LogError("[CodeRedemption] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text);
 			GorillaComputer.instance.RedemptionStatus = GorillaComputer.RedemptionResult.Invalid;
@@ -46,7 +46,7 @@ public class CodeRedemption : MonoBehaviour
 		try
 		{
 			CodeRedemption.CodeRedemptionResponse codeRedemptionResponse = JsonUtility.FromJson<CodeRedemption.CodeRedemptionResponse>(completedRequest.downloadHandler.text);
-			if (codeRedemptionResponse.result.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
+			if (codeRedemptionResponse.result.Contains("AlreadyRedeemed", 5))
 			{
 				Debug.Log("[CodeRedemption] Item has already been redeemed!");
 				GorillaComputer.instance.RedemptionStatus = GorillaComputer.RedemptionResult.AlreadyUsed;
@@ -56,9 +56,9 @@ public class CodeRedemption : MonoBehaviour
 		}
 		catch (Exception ex)
 		{
-			string str = "[CodeRedemption] Error parsing JSON response: ";
+			string text2 = "[CodeRedemption] Error parsing JSON response: ";
 			Exception ex2 = ex;
-			Debug.LogError(str + ((ex2 != null) ? ex2.ToString() : null));
+			Debug.LogError(text2 + ((ex2 != null) ? ex2.ToString() : null));
 			GorillaComputer.instance.RedemptionStatus = GorillaComputer.RedemptionResult.Invalid;
 			return;
 		}
@@ -90,7 +90,7 @@ public class CodeRedemption : MonoBehaviour
 	{
 		UnityWebRequest request = UnityWebRequest.Post(url, data, contentType);
 		yield return request.SendWebRequest();
-		callback(request);
+		callback.Invoke(request);
 		yield break;
 	}
 

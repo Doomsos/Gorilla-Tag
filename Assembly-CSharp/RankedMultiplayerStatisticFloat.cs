@@ -34,11 +34,11 @@ public class RankedMultiplayerStatisticFloat : RankedMultiplayerStatistic
 
 	public override bool TrySetValue(string valAsString)
 	{
-		float value;
-		bool flag = float.TryParse(valAsString, out value);
+		float num;
+		bool flag = float.TryParse(valAsString, ref num);
 		if (flag)
 		{
-			this.floatValue = Mathf.Clamp(value, this.minValue, this.maxValue);
+			this.floatValue = Mathf.Clamp(num, this.minValue, this.maxValue);
 		}
 		return flag;
 	}

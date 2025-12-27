@@ -15,18 +15,18 @@ public class SpinWithGorillaSpeed : MonoBehaviour
 	{
 		Vector3 vector = (this.optionalVelocityEstimator != null) ? this.optionalVelocityEstimator.linearVelocity : this.rig.LatestVelocity();
 		vector.y *= this.verticalSpeedInfluence;
-		float time = vector.magnitude / this.maxSpeed;
-		float num = Time.deltaTime * this.degreesPerSecondAtSpeed.Evaluate(time) * (this.clockwise ? -1f : 1f);
-		this.currentAngle = Mathf.Repeat(this.currentAngle + num, 360f);
+		float num = vector.magnitude / this.maxSpeed;
+		float num2 = Time.deltaTime * this.degreesPerSecondAtSpeed.Evaluate(num) * (this.clockwise ? -1f : 1f);
+		this.currentAngle = Mathf.Repeat(this.currentAngle + num2, 360f);
 		Quaternion quaternion = this.initialRotation * Quaternion.AngleAxis(this.currentAngle, this.spinAxis);
 		base.transform.SetLocalPositionAndRotation(quaternion * this.centerOfRotation, quaternion);
 		if (this.tickSound != null && this.tickClips.Length != 0)
 		{
-			this.tickAngle += num;
+			this.tickAngle += num2;
 			if (this.tickAngle >= this.tickSoundDegrees)
 			{
-				this.tickSound.pitch = this.tickPitchAtSpeed.Evaluate(time);
-				this.tickSound.volume = this.tickVolumeAtSpeed.Evaluate(time);
+				this.tickSound.pitch = this.tickPitchAtSpeed.Evaluate(num);
+				this.tickSound.volume = this.tickVolumeAtSpeed.Evaluate(num);
 				this.tickSound.clip = this.tickClips.GetRandomItem<AudioClip>();
 				this.tickSound.GTPlay();
 				this.tickAngle = Mathf.Repeat(this.tickAngle, this.tickSoundDegrees);

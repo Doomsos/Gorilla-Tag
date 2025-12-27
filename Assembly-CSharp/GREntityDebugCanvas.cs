@@ -49,9 +49,9 @@ public class GREntityDebugCanvas : MonoBehaviour
 			{
 				List<string> list2 = new List<string>();
 				gameEntityDebugComponent.GetDebugTextLines(out list2);
-				foreach (string value in list2)
+				foreach (string text in list2)
 				{
-					this.builder.AppendLine(value);
+					this.builder.AppendLine(text);
 				}
 			}
 			this.text.text = this.builder.ToString();

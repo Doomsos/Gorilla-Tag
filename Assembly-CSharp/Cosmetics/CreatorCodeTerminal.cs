@@ -49,9 +49,9 @@ namespace Cosmetics
 
 		public void HookupToCreatorCodes()
 		{
-			CreatorCodes.InitializedEvent += this.OnCreatorCodesInitialized;
-			CreatorCodes.OnCreatorCodeChangedEvent += this.OnCreatorCodeChanged;
-			CreatorCodes.OnCreatorCodeFailureEvent += this.OnCreatorCodeFailure;
+			CreatorCodes.InitializedEvent += new Action(this.OnCreatorCodesInitialized);
+			CreatorCodes.OnCreatorCodeChangedEvent += new Action<string>(this.OnCreatorCodeChanged);
+			CreatorCodes.OnCreatorCodeFailureEvent += new Action<string>(this.OnCreatorCodeFailure);
 			if (CreatorCodes.Intialized)
 			{
 				this.OnCreatorCodesInitialized();
@@ -72,9 +72,9 @@ namespace Cosmetics
 
 		public void UnhookFromCreatorCodes()
 		{
-			CreatorCodes.InitializedEvent -= this.OnCreatorCodesInitialized;
-			CreatorCodes.OnCreatorCodeChangedEvent -= this.OnCreatorCodeChanged;
-			CreatorCodes.OnCreatorCodeFailureEvent -= this.OnCreatorCodeFailure;
+			CreatorCodes.InitializedEvent -= new Action(this.OnCreatorCodesInitialized);
+			CreatorCodes.OnCreatorCodeChangedEvent -= new Action<string>(this.OnCreatorCodeChanged);
+			CreatorCodes.OnCreatorCodeFailureEvent -= new Action<string>(this.OnCreatorCodeFailure);
 			CosmeticsController.PushTerminalMessage = (Action<string, string>)Delegate.Remove(CosmeticsController.PushTerminalMessage, new Action<string, string>(this.OnTerminalMessage));
 		}
 

@@ -7,14 +7,14 @@ public class LckCameraEvents : MonoBehaviour
 {
 	private void OnEnable()
 	{
-		RenderPipelineManager.beginCameraRendering += this.RenderPipelineManagerOnbeginCameraRendering;
-		RenderPipelineManager.endCameraRendering += this.RenderPipelineManagerOnendCameraRendering;
+		RenderPipelineManager.beginCameraRendering += new Action<ScriptableRenderContext, Camera>(this.RenderPipelineManagerOnbeginCameraRendering);
+		RenderPipelineManager.endCameraRendering += new Action<ScriptableRenderContext, Camera>(this.RenderPipelineManagerOnendCameraRendering);
 	}
 
 	private void OnDisable()
 	{
-		RenderPipelineManager.beginCameraRendering -= this.RenderPipelineManagerOnbeginCameraRendering;
-		RenderPipelineManager.endCameraRendering -= this.RenderPipelineManagerOnendCameraRendering;
+		RenderPipelineManager.beginCameraRendering -= new Action<ScriptableRenderContext, Camera>(this.RenderPipelineManagerOnbeginCameraRendering);
+		RenderPipelineManager.endCameraRendering -= new Action<ScriptableRenderContext, Camera>(this.RenderPipelineManagerOnendCameraRendering);
 	}
 
 	private void RenderPipelineManagerOnbeginCameraRendering(ScriptableRenderContext scriptableRenderContext, Camera camera)

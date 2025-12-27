@@ -7,7 +7,7 @@ public class GTEnumValueMap<T> : ISerializationCallbackReceiver
 {
 	public bool TryGet(long i, out T o)
 	{
-		return this._enumValue_to_unityObject.TryGetValue(i, out o);
+		return this._enumValue_to_unityObject.TryGetValue(i, ref o);
 	}
 
 	public IEnumerable<T> Values

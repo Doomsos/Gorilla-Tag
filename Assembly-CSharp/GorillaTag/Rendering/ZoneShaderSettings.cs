@@ -162,8 +162,8 @@ namespace GorillaTag.Rendering
 			}
 			Vector3 position = transform.position;
 			Vector3 up = transform.up;
-			float w = -Vector3.Dot(up, position);
-			Shader.SetGlobalVector(this.shaderParam_GlobalMainWaterSurfacePlane, new Vector4(up.x, up.y, up.z, w));
+			float num = -Vector3.Dot(up, position);
+			Shader.SetGlobalVector(this.shaderParam_GlobalMainWaterSurfacePlane, new Vector4(up.x, up.y, up.z, num));
 			ZoneShaderSettings.ELiquidShape eliquidShape;
 			if (this.liquidShape_overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues)
 			{
@@ -191,23 +191,23 @@ namespace GorillaTag.Rendering
 			{
 				y = this.liquidBottomPosY_previousValue;
 			}
-			float num;
+			float num2;
 			if (this.liquidShapeRadius_overrideMode == ZoneShaderSettings.EOverrideMode.ApplyNewValue || this.isDefaultValues)
 			{
-				num = this.liquidShapeRadius;
+				num2 = this.liquidShapeRadius;
 			}
 			else if (this.liquidShape_overrideMode == ZoneShaderSettings.EOverrideMode.ApplyDefaultValue && ZoneShaderSettings.hasDefaultsInstance)
 			{
-				num = ZoneShaderSettings.defaultsInstance.liquidShapeRadius;
+				num2 = ZoneShaderSettings.defaultsInstance.liquidShapeRadius;
 			}
 			else
 			{
-				num = ZoneShaderSettings.liquidShapeRadius_previousValue;
+				num2 = ZoneShaderSettings.liquidShapeRadius_previousValue;
 			}
 			if (eliquidShape == ZoneShaderSettings.ELiquidShape.Cylinder)
 			{
-				Shader.SetGlobalVector(ZoneShaderSettings.shaderParam_ZoneLiquidPosRadiusSq, new Vector4(position.x, y, position.z, num * num));
-				ZoneShaderSettings.liquidShapeRadius_previousValue = num;
+				Shader.SetGlobalVector(ZoneShaderSettings.shaderParam_ZoneLiquidPosRadiusSq, new Vector4(position.x, y, position.z, num2 * num2));
+				ZoneShaderSettings.liquidShapeRadius_previousValue = num2;
 			}
 		}
 

@@ -192,9 +192,9 @@ public class SIGadgetSlashDash : SIGadget
 
 	private float _CalculateDashSpeed(float currentYankSpeed)
 	{
-		float time = Mathf.InverseLerp(this.m_handMinSpeed, this.m_handMaxSpeed, currentYankSpeed);
-		float t = this.m_speedMappingCurve.Evaluate(time);
-		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, t);
+		float num = Mathf.InverseLerp(this.m_handMinSpeed, this.m_handMaxSpeed, currentYankSpeed);
+		float num2 = this.m_speedMappingCurve.Evaluate(num);
+		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, num2);
 	}
 
 	private void _PlayHaptic(float strengthMultiplier)

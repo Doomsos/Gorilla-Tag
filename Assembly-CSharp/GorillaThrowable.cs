@@ -100,7 +100,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		this.transformToFollow = null;
 		this.isHeld = false;
 		this.synchThrow = true;
-		this.rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+		this.rigidbody.interpolation = 1;
 		this.rigidbody.isKinematic = false;
 		this.rigidbody.useGravity = true;
 		if (this.isLinear || this.denormalizedVelocityAverage.magnitude < this.linearMax)
@@ -147,7 +147,7 @@ public class GorillaThrowable : MonoBehaviourPun, IPunObservable, IPhotonViewCal
 		{
 			if (NetworkSystem.Instance.InRoom)
 			{
-				base.photonView.RPC("PlaySurfaceHit", RpcTarget.Others, new object[]
+				base.photonView.RPC("PlaySurfaceHit", 1, new object[]
 				{
 					this.bounceAudioClip,
 					this.InterpolateVolume()

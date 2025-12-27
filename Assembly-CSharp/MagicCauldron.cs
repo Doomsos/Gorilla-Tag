@@ -189,13 +189,13 @@ public class MagicCauldron : NetworkComponent
 		this.OnIngredientAddShared(_ingredientIndex, info);
 	}
 
-	[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+	[Rpc(1, 7)]
 	public unsafe void RPC_OnIngredientAdd(int _ingredientIndex, RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage != 4)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 1) == 0)
@@ -220,12 +220,12 @@ public class MagicCauldron : NetworkComponent
 							int num2 = 8;
 							*(int*)(ptr2 + num2) = _ingredientIndex;
 							num2 += 4;
-							ptr->Offset = num2 * 8;
+							ptr.Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 7) != 0)
 						{
-							info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+							info = RpcInfo.FromLocal(base.Runner, 0, 0);
 							goto IL_12;
 						}
 					}
@@ -297,7 +297,7 @@ public class MagicCauldron : NetworkComponent
 	{
 		foreach (MagicCauldron.Recipe recipe in this.recipes)
 		{
-			if (this.currentIngredients.SequenceEqual(recipe.recipeIngredients))
+			if (Enumerable.SequenceEqual<MagicIngredientType>(this.currentIngredients, recipe.recipeIngredients))
 			{
 				this.currentRecipeIndex = this.recipes.IndexOf(recipe);
 				return true;
@@ -351,7 +351,7 @@ public class MagicCauldron : NetworkComponent
 			{
 				int num = this.allIngredients.IndexOfRef(componentInParent.IngredientTypeSO);
 				Debug.Log(string.Format("Sending ingredient RPC {0} = {1}", componentInParent.IngredientTypeSO, num));
-				base.SendRPC("OnIngredientAdd", RpcTarget.Others, new object[]
+				base.SendRPC("OnIngredientAdd", 1, new object[]
 				{
 					num
 				});
@@ -471,7 +471,7 @@ public class MagicCauldron : NetworkComponent
 		int num2 = *(int*)(ptr + num);
 		num += 4;
 		int num3 = num2;
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 		behaviour.InvokeRpc = true;
 		((MagicCauldron)behaviour).RPC_OnIngredientAdd(num3, info);
 	}
@@ -559,7 +559,7 @@ public class MagicCauldron : NetworkComponent
 
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 4)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private MagicCauldron.MagicCauldronData _Data;
 
 	private enum CauldronState
@@ -609,7 +609,7 @@ public class MagicCauldron : NetworkComponent
 	}
 
 	[NetworkStructWeaved(4)]
-	[StructLayout(LayoutKind.Explicit, Size = 16)]
+	[StructLayout(2, Size = 16)]
 	private struct MagicCauldronData : INetworkStruct
 	{
 		public float CurrentStateElapsedTime { readonly get; set; }

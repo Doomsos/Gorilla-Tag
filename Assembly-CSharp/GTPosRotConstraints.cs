@@ -26,10 +26,10 @@ public class GTPosRotConstraints : MonoBehaviour, ISpawnable
 	void ISpawnable.OnSpawn(VRRig rig)
 	{
 		Transform[] array = Array.Empty<Transform>();
-		string str;
-		if (rig != null && !GTHardCodedBones.TryGetBoneXforms(rig, out array, out str))
+		string text;
+		if (rig != null && !GTHardCodedBones.TryGetBoneXforms(rig, out array, out text))
 		{
-			Debug.LogError("GTPosRotConstraints: Error getting bone Transforms: " + str, this);
+			Debug.LogError("GTPosRotConstraints: Error getting bone Transforms: " + text, this);
 			return;
 		}
 		for (int i = 0; i < this.constraints.Length; i++)

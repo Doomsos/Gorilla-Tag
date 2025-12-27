@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Serialization;
-using UnityEngine.XR;
 
 public class GRToolCollector : MonoBehaviour, IGameEntityDebugComponent, IGameEntityComponent
 {
@@ -351,7 +350,7 @@ public class GRToolCollector : MonoBehaviour, IGameEntityDebugComponent, IGameEn
 			return false;
 		}
 		int num = gamePlayer.FindHandIndex(this.gameEntity.id);
-		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
+		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? 4 : 5) > 0.25f;
 	}
 
 	private void PlayVibration(float strength, float duration)

@@ -29,7 +29,7 @@ public class SpiderDangler : MonoBehaviour
 		this.endTransform.position = this.ropeSegs[this.ropeSegs.Length - 1].pos;
 		this.endTransform.up = normalized;
 		Vector4 vector = this.spinSpeeds * Time.time;
-		vector = new Vector4(Mathf.Sin(vector.x), Mathf.Sin(vector.y), Mathf.Sin(vector.z), Mathf.Sin(vector.w));
+		vector..ctor(Mathf.Sin(vector.x), Mathf.Sin(vector.y), Mathf.Sin(vector.z), Mathf.Sin(vector.w));
 		vector.Scale(this.spinScales);
 		this.endTransform.Rotate(Vector3.up, vector.x + vector.y + vector.z + vector.w);
 	}
@@ -37,17 +37,17 @@ public class SpiderDangler : MonoBehaviour
 	private void Simulate()
 	{
 		this.ropeSegLenScaled = this.ropeSegLen * base.transform.lossyScale.x;
-		Vector3 b = new Vector3(0f, -0.5f, 0f) * Time.fixedDeltaTime;
+		Vector3 vector = new Vector3(0f, -0.5f, 0f) * Time.fixedDeltaTime;
 		for (int i = 1; i < 6; i++)
 		{
-			Vector3 a = this.ropeSegs[i].pos - this.ropeSegs[i].posOld;
+			Vector3 vector2 = this.ropeSegs[i].pos - this.ropeSegs[i].posOld;
 			this.ropeSegs[i].posOld = this.ropeSegs[i].pos;
 			SpiderDangler.RopeSegment[] array = this.ropeSegs;
 			int num = i;
-			array[num].pos = array[num].pos + a * 0.95f;
+			array[num].pos = array[num].pos + vector2 * 0.95f;
 			SpiderDangler.RopeSegment[] array2 = this.ropeSegs;
 			int num2 = i;
-			array2[num2].pos = array2[num2].pos + b;
+			array2[num2].pos = array2[num2].pos + vector;
 		}
 		for (int j = 0; j < 8; j++)
 		{
@@ -67,10 +67,10 @@ public class SpiderDangler : MonoBehaviour
 
 	private void ApplyConstraintSegment(ref SpiderDangler.RopeSegment segA, ref SpiderDangler.RopeSegment segB, float dampenA, float dampenB)
 	{
-		float d = (segA.pos - segB.pos).magnitude - this.ropeSegLenScaled;
-		Vector3 a = (segA.pos - segB.pos).normalized * d;
-		segA.pos -= a * dampenA;
-		segB.pos += a * dampenB;
+		float num = (segA.pos - segB.pos).magnitude - this.ropeSegLenScaled;
+		Vector3 vector = (segA.pos - segB.pos).normalized * num;
+		segA.pos -= vector * dampenA;
+		segB.pos += vector * dampenB;
 	}
 
 	private void DrawRope()

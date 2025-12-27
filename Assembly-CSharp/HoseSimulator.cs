@@ -61,7 +61,7 @@ public class HoseSimulator : MonoBehaviour, ISpawnable
 		{
 			float num2 = num / this.totalHoseLength;
 			Vector3 vector = BezierUtils.BezierSolve(num2, position, ctrl, ctrl2, position2);
-			Vector3 a = BezierUtils.BezierSolve(num2 + 0.1f, position, ctrl, ctrl2, position2);
+			Vector3 vector2 = BezierUtils.BezierSolve(num2 + 0.1f, position, ctrl, ctrl2, position2);
 			if (this.firstUpdate)
 			{
 				this.hoseBones[j].transform.position = vector;
@@ -75,13 +75,13 @@ public class HoseSimulator : MonoBehaviour, ISpawnable
 				float num3 = this.hoseBoneMaxDisplacement[j] * x;
 				if ((vector - this.hoseBonePositions[j]).IsLongerThan(num3))
 				{
-					Vector3 vector2 = vector + (this.hoseBonePositions[j] - vector).normalized * num3;
-					this.hoseBoneVelocities[j] += (vector2 - this.hoseBonePositions[j]) / Time.deltaTime;
-					this.hoseBonePositions[j] = vector2;
+					Vector3 vector3 = vector + (this.hoseBonePositions[j] - vector).normalized * num3;
+					this.hoseBoneVelocities[j] += (vector3 - this.hoseBonePositions[j]) / Time.deltaTime;
+					this.hoseBonePositions[j] = vector3;
 				}
 				this.hoseBones[j].transform.position = this.hoseBonePositions[j];
 			}
-			this.hoseBones[j].transform.rotation = Quaternion.LookRotation(a - vector, this.endAnchor.transform.up);
+			this.hoseBones[j].transform.rotation = Quaternion.LookRotation(vector2 - vector, this.endAnchor.transform.up);
 			if (j < this.hoseSectionLengths.Length)
 			{
 				num += this.hoseSectionLengths[j];

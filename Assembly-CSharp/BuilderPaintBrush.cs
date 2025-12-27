@@ -93,7 +93,7 @@ public class BuilderPaintBrush : HoldableObject
 				return;
 			}
 			Array.Clear(this.hitColliders, 0, this.hitColliders.Length);
-			int num = Physics.OverlapBoxNonAlloc(this.brushSurface.transform.position - this.brushSurface.up * this.paintVolumeHalfExtents.y, this.paintVolumeHalfExtents, this.hitColliders, this.brushSurface.transform.rotation, this.pieceLayers, QueryTriggerInteraction.Ignore);
+			int num = Physics.OverlapBoxNonAlloc(this.brushSurface.transform.position - this.brushSurface.up * this.paintVolumeHalfExtents.y, this.paintVolumeHalfExtents, this.hitColliders, this.brushSurface.transform.rotation, this.pieceLayers, 1);
 			BuilderPieceCollider builderPieceCollider = null;
 			Collider collider = null;
 			float num2 = float.MaxValue;
@@ -140,8 +140,8 @@ public class BuilderPaintBrush : HoldableObject
 				return;
 			}
 			Vector3 vector = this.brushSurface.position - this.brushSurface.up * this.paintVolumeHalfExtents.y;
-			Vector3 b = this.hoveredPieceCollider.ClosestPointOnBounds(vector);
-			if (Vector3.SqrMagnitude(vector - b) > this.paintDistance)
+			Vector3 vector2 = this.hoveredPieceCollider.ClosestPointOnBounds(vector);
+			if (Vector3.SqrMagnitude(vector - vector2) > this.paintDistance)
 			{
 				this.ClearHoveredPiece();
 				return;

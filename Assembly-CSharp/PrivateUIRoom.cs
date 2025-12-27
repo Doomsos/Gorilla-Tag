@@ -38,13 +38,13 @@ public class PrivateUIRoom : MonoBehaviourTick
 	private new void OnEnable()
 	{
 		base.OnEnable();
-		SteamVR_Events.System(EVREventType.VREvent_InputFocusChanged).Listen(new UnityAction<VREvent_t>(this.ToggleHands));
+		SteamVR_Events.System(406).Listen(new UnityAction<VREvent_t>(this.ToggleHands));
 	}
 
 	private new void OnDisable()
 	{
 		base.OnDisable();
-		SteamVR_Events.System(EVREventType.VREvent_InputFocusChanged).Remove(new UnityAction<VREvent_t>(this.ToggleHands));
+		SteamVR_Events.System(406).Remove(new UnityAction<VREvent_t>(this.ToggleHands));
 	}
 
 	private static bool FindShoulderCamera()
@@ -69,7 +69,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 
 	private void ToggleHands(VREvent_t ev)
 	{
-		Debug.Log(string.Format("[PrivateUIRoom::ToggleHands] Toggling hands visibility. Event: {0} ({1})", ev.eventType, (EVREventType)ev.eventType));
+		Debug.Log(string.Format("[PrivateUIRoom::ToggleHands] Toggling hands visibility. Event: {0} ({1})", ev.eventType, ev.eventType));
 		Debug.Log(string.Format("[PrivateUIRoom::ToggleHands] _handsShowing: {0}", PrivateUIRoom.instance.rightHandObject.activeSelf));
 		if (PrivateUIRoom.instance.rightHandObject.activeSelf)
 		{
@@ -102,7 +102,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 			if (this.savedCullingLayersShoudlerCam != null)
 			{
 				PrivateUIRoom._shoulderCameraReference.cullingMask = this.savedCullingLayersShoudlerCam.Value;
-				this.savedCullingLayersShoudlerCam = null;
+				this.savedCullingLayersShoudlerCam = default(int?);
 				return;
 			}
 		}
@@ -290,8 +290,8 @@ public class PrivateUIRoom : MonoBehaviourTick
 	private bool ShouldUpdateRotation()
 	{
 		float magnitude = (GorillaTagger.Instance.mainCamera.transform.position - this.lastStablePosition).X_Z().magnitude;
-		Quaternion b = Quaternion.Euler(0f, GorillaTagger.Instance.mainCamera.transform.rotation.eulerAngles.y, 0f);
-		float num = Quaternion.Angle(this.lastStableRotation, b);
+		Quaternion quaternion = Quaternion.Euler(0f, GorillaTagger.Instance.mainCamera.transform.rotation.eulerAngles.y, 0f);
+		float num = Quaternion.Angle(this.lastStableRotation, quaternion);
 		return magnitude > this.lateralPlay || num >= this.rotationalPlay;
 	}
 

@@ -3,6 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace Viveport.Internal
 {
-	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+	[UnmanagedFunctionPointer(2)]
 	internal delegate void StatusCallback(int nResult);
 }

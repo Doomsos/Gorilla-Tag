@@ -13,7 +13,7 @@ public class BacktraceManager : MonoBehaviour
 	{
 		base.GetComponent<BacktraceClient>().BeforeSend = delegate(BacktraceData data)
 		{
-			if (new Unity.Mathematics.Random((uint)(Time.realtimeSinceStartupAsDouble * 1000.0)).NextDouble() > this.backtraceSampleRate)
+			if (new Random((uint)(Time.realtimeSinceStartupAsDouble * 1000.0)).NextDouble() > this.backtraceSampleRate)
 			{
 				return null;
 			}
@@ -27,7 +27,7 @@ public class BacktraceManager : MonoBehaviour
 		{
 			if (data != null)
 			{
-				double.TryParse(data.Trim('"'), NumberStyles.Any, CultureInfo.InvariantCulture, out this.backtraceSampleRate);
+				double.TryParse(data.Trim('"'), 511, CultureInfo.InvariantCulture, ref this.backtraceSampleRate);
 				Debug.Log(string.Format("Set backtrace sample rate to: {0}", this.backtraceSampleRate));
 			}
 		}, delegate(PlayFabError e)

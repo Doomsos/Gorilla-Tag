@@ -97,16 +97,16 @@ namespace com.AnotherAxiom.Paddleball
 					}
 					this.requestedPos[i] = Mathf.Clamp(this.requestedPos[i], -this.tableSizePaddle.y, this.tableSizePaddle.y);
 				}
-				float value;
+				float num2;
 				if (!NetworkSystem.Instance.InRoom || NetworkSystem.Instance.IsMasterClient)
 				{
-					value = Mathf.MoveTowards(this.p[i].transform.localPosition.y, this.requestedPos[i], Time.deltaTime * this.paddleSpeed);
+					num2 = Mathf.MoveTowards(this.p[i].transform.localPosition.y, this.requestedPos[i], Time.deltaTime * this.paddleSpeed);
 				}
 				else
 				{
-					value = Mathf.MoveTowards(this.p[i].transform.localPosition.y, this.officialPos[i], Time.deltaTime * this.paddleSpeed);
+					num2 = Mathf.MoveTowards(this.p[i].transform.localPosition.y, this.officialPos[i], Time.deltaTime * this.paddleSpeed);
 				}
-				this.p[i].transform.localPosition = this.p[i].transform.localPosition.WithY(Mathf.Clamp(value, -this.tableSizePaddle.y, this.tableSizePaddle.y));
+				this.p[i].transform.localPosition = this.p[i].transform.localPosition.WithY(Mathf.Clamp(num2, -this.tableSizePaddle.y, this.tableSizePaddle.y));
 				if (base.getButtonState(i, ArcadeButtons.GRAB))
 				{
 					this.paddleIdle[i] = 0f;
@@ -213,12 +213,13 @@ namespace com.AnotherAxiom.Paddleball
 			this.officialPos[1] = this.ByteToYPos(paddleballNetState.P1LocY);
 			this.officialPos[2] = this.ByteToYPos(paddleballNetState.P2LocY);
 			this.officialPos[3] = this.ByteToYPos(paddleballNetState.P3LocY);
-			Vector2 vector = new Vector2(paddleballNetState.BallLocX, this.ByteToYPos(paddleballNetState.BallLocY));
+			Vector2 vector;
+			vector..ctor(paddleballNetState.BallLocX, this.ByteToYPos(paddleballNetState.BallLocY));
 			Vector2 normalized = new Vector2((float)paddleballNetState.BallTrajectoryX * 0.007843138f - 1f, (float)paddleballNetState.BallTrajectoryY * 0.007843138f - 1f).normalized;
-			Vector2 a = vector - normalized * Vector2.Dot(vector, normalized);
-			Vector2 vector2 = this.ball.localPosition.xy();
-			Vector2 b2 = vector2 - this.ballTrajectory * Vector2.Dot(vector2, this.ballTrajectory);
-			if ((a - b2).IsLongerThan(0.1f))
+			Vector2 vector2 = vector - normalized * Vector2.Dot(vector, normalized);
+			Vector2 vector3 = this.ball.localPosition.xy();
+			Vector2 vector4 = vector3 - this.ballTrajectory * Vector2.Dot(vector3, this.ballTrajectory);
+			if ((vector2 - vector4).IsLongerThan(0.1f))
 			{
 				this.ball.localPosition = vector;
 				this.ballTrajectory = normalized.xy();

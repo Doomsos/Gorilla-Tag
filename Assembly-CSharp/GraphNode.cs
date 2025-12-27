@@ -114,9 +114,9 @@ public class GraphNode<T>
 		{
 			GraphNode<T> current = queue.Dequeue();
 			yield return current;
-			foreach (GraphNode<T> item in current.Children)
+			foreach (GraphNode<T> graphNode in current.Children)
 			{
-				queue.Enqueue(item);
+				queue.Enqueue(graphNode);
 			}
 			current = null;
 		}
@@ -135,9 +135,9 @@ public class GraphNode<T>
 			{
 				visited.Add(current);
 				yield return current;
-				foreach (GraphNode<T> item in current.Children)
+				foreach (GraphNode<T> graphNode in current.Children)
 				{
-					queue.Enqueue(item);
+					queue.Enqueue(graphNode);
 				}
 				current = null;
 			}

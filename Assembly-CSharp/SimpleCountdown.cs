@@ -40,7 +40,7 @@ public class SimpleCountdown : ObservableBehavior
 
 	private void ParseDateTime()
 	{
-		if (!DateTime.TryParse(this.date, out this.dt))
+		if (!DateTime.TryParse(this.date, ref this.dt))
 		{
 			Debug.Log(string.Concat(new string[]
 			{

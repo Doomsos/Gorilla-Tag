@@ -20,7 +20,7 @@ public class LuauClassBuilder<[IsUnmanaged] T> where T : struct, ValueType
 		{
 			fieldName = luaName;
 		}
-		FieldInfo field = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public);
+		FieldInfo field = typeof(T).GetField(fieldName, 20);
 		if (field == null)
 		{
 			throw new ArgumentException(string.Concat(new string[]

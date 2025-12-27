@@ -66,11 +66,11 @@ public class Ballista : MonoBehaviourPun
 				{
 					GTPlayer instance = GTPlayer.Instance;
 					Vector3 playerBodyCenterPosition = this.GetPlayerBodyCenterPosition(instance);
-					Vector3 b = Vector3.Dot(playerBodyCenterPosition - this.launchStart.position, this.launchDirection) * this.launchDirection + this.launchStart.position;
-					Vector3 b2 = playerBodyCenterPosition - b;
-					Vector3 a = Vector3.Lerp(Vector3.zero, b2, Mathf.Exp(-this.playerPullInRate * deltaTime));
-					instance.transform.position = instance.transform.position + (a - b2);
-					this.playerReadyToFire = (a.sqrMagnitude < this.playerReadyToFireDist * this.playerReadyToFireDist);
+					Vector3 vector = Vector3.Dot(playerBodyCenterPosition - this.launchStart.position, this.launchDirection) * this.launchDirection + this.launchStart.position;
+					Vector3 vector2 = playerBodyCenterPosition - vector;
+					Vector3 vector3 = Vector3.Lerp(Vector3.zero, vector2, Mathf.Exp(-this.playerPullInRate * deltaTime));
+					instance.transform.position = instance.transform.position + (vector3 - vector2);
+					this.playerReadyToFire = (vector3.sqrMagnitude < this.playerReadyToFireDist * this.playerReadyToFireDist);
 				}
 				else
 				{
@@ -80,7 +80,7 @@ public class Ballista : MonoBehaviourPun
 				{
 					if (PhotonNetwork.InRoom)
 					{
-						base.photonView.RPC("FireBallistaRPC", RpcTarget.Others, Array.Empty<object>());
+						base.photonView.RPC("FireBallistaRPC", 1, Array.Empty<object>());
 					}
 					this.FireLocal();
 				}
@@ -91,15 +91,15 @@ public class Ballista : MonoBehaviourPun
 			float num = Vector3.Dot(this.launchBone.position - this.launchStart.position, this.launchDirection) / this.launchRampDistance;
 			GTPlayer instance2 = GTPlayer.Instance;
 			Vector3 playerBodyCenterPosition2 = this.GetPlayerBodyCenterPosition(instance2);
-			float b3 = Vector3.Dot(playerBodyCenterPosition2 - this.launchStart.position, this.launchDirection) / this.launchRampDistance;
-			float num2 = 0.25f / this.launchRampDistance;
-			float num3 = Mathf.Max(num + num2, b3);
-			float d = num3 * this.launchRampDistance;
-			Vector3 a2 = this.launchDirection * d + this.launchStart.position;
-			instance2.transform.position + (a2 - playerBodyCenterPosition2);
-			instance2.transform.position = instance2.transform.position + (a2 - playerBodyCenterPosition2);
+			float num2 = Vector3.Dot(playerBodyCenterPosition2 - this.launchStart.position, this.launchDirection) / this.launchRampDistance;
+			float num3 = 0.25f / this.launchRampDistance;
+			float num4 = Mathf.Max(num + num3, num2);
+			float num5 = num4 * this.launchRampDistance;
+			Vector3 vector4 = this.launchDirection * num5 + this.launchStart.position;
+			instance2.transform.position + (vector4 - playerBodyCenterPosition2);
+			instance2.transform.position = instance2.transform.position + (vector4 - playerBodyCenterPosition2);
 			instance2.SetPlayerVelocity(Vector3.zero);
-			if (num3 >= 1f)
+			if (num4 >= 1f)
 			{
 				this.playerLaunched = true;
 				instance2.SetPlayerVelocity(this.LaunchSpeed * this.launchDirection);
@@ -150,14 +150,14 @@ public class Ballista : MonoBehaviourPun
 
 	private void UpdatePredictionLine()
 	{
-		float d = 0.033333335f;
+		float num = 0.033333335f;
 		Vector3 vector = this.launchEnd.position;
-		Vector3 a = (this.launchEnd.position - this.launchStart.position).normalized * this.LaunchSpeed;
+		Vector3 vector2 = (this.launchEnd.position - this.launchStart.position).normalized * this.LaunchSpeed;
 		for (int i = 0; i < 240; i++)
 		{
 			this.predictionLinePoints[i] = vector;
-			vector += a * d;
-			a += Vector3.down * 9.8f * d;
+			vector += vector2 * num;
+			vector2 += Vector3.down * 9.8f * num;
 		}
 	}
 

@@ -15,7 +15,7 @@ internal static class ProjectileTracker
 	public static void RemovePlayerProjectiles(NetPlayer player)
 	{
 		LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray;
-		if (ProjectileTracker.m_playerProjectiles.TryGetValue(player, out loopingArray))
+		if (ProjectileTracker.m_playerProjectiles.TryGetValue(player, ref loopingArray))
 		{
 			ProjectileTracker.ResetPlayerProjectiles(loopingArray);
 			ProjectileTracker.m_playerProjectiles.Remove(player);
@@ -91,7 +91,7 @@ internal static class ProjectileTracker
 	{
 		ValueTuple<bool, ProjectileTracker.ProjectileInfo> result = new ValueTuple<bool, ProjectileTracker.ProjectileInfo>(false, default(ProjectileTracker.ProjectileInfo));
 		LoopingArray<ProjectileTracker.ProjectileInfo> loopingArray;
-		if (index < 0 || index >= ProjectileTracker.m_localProjectiles.Length || !ProjectileTracker.m_playerProjectiles.TryGetValue(player, out loopingArray))
+		if (index < 0 || index >= ProjectileTracker.m_localProjectiles.Length || !ProjectileTracker.m_playerProjectiles.TryGetValue(player, ref loopingArray))
 		{
 			return result;
 		}

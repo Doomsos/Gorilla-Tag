@@ -7,7 +7,7 @@ public static class GTPosRotScaleToString
 	public static string ToString(Vector3 pos, Vector3 rot, Vector3 scale, bool isWorldSpace, string parentPath = null)
 	{
 		string text = isWorldSpace ? "WorldPRS" : "LocalPRS";
-		string str = string.Concat(new string[]
+		string text2 = string.Concat(new string[]
 		{
 			text,
 			" { p=",
@@ -19,9 +19,9 @@ public static class GTPosRotScaleToString
 		});
 		if (!string.IsNullOrEmpty(parentPath))
 		{
-			str = str + " parent=\"" + parentPath + "\"";
+			text2 = text2 + " parent=\"" + parentPath + "\"";
 		}
-		return str + " }";
+		return text2 + " }";
 	}
 
 	private static string ValToStr(Vector3 v)
@@ -78,10 +78,10 @@ public static class GTPosRotScaleToString
 
 	private static Vector3 StringToVector3(Match match)
 	{
-		float x = float.Parse(match.Groups["x"].Value);
-		float y = float.Parse(match.Groups["y"].Value);
-		float z = float.Parse(match.Groups["z"].Value);
-		return new Vector3(x, y, z);
+		float num = float.Parse(match.Groups["x"].Value);
+		float num2 = float.Parse(match.Groups["y"].Value);
+		float num3 = float.Parse(match.Groups["z"].Value);
+		return new Vector3(num, num2, num3);
 	}
 
 	public const string k_LocalPRSLabel = "LocalPRS";

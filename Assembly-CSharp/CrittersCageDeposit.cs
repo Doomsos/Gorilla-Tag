@@ -10,7 +10,7 @@ public class CrittersCageDeposit : CrittersActorDeposit
 
 	private void Awake()
 	{
-		this.attachPoint.OnGrabbedChild += this.StartProcessCage;
+		this.attachPoint.OnGrabbedChild += new Action<CrittersActor>(this.StartProcessCage);
 	}
 
 	protected override bool CanDeposit(CrittersActor depositActor)
@@ -52,7 +52,7 @@ public class CrittersCageDeposit : CrittersActorDeposit
 			Action<Menagerie.CritterData, int> onDepositCritter = this.OnDepositCritter;
 			if (onDepositCritter != null)
 			{
-				onDepositCritter(critterData, lastGrabbedPlayer);
+				onDepositCritter.Invoke(critterData, lastGrabbedPlayer);
 			}
 			CrittersActor crittersActor = crittersPawn;
 			bool keepWorldPosition = false;

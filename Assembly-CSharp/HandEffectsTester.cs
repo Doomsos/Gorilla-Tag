@@ -112,13 +112,13 @@ public class HandEffectsTester : MonoBehaviour, IHandEffectsTrigger
 		switch (this.mode)
 		{
 		case IHandEffectsTrigger.Mode.HighFive:
-			return t.FingersUp && this.triggerZone.Raycast(new Ray(t.Transform.position, t.Transform.right), out raycastHit, this.triggerRadius);
+			return t.FingersUp && this.triggerZone.Raycast(new Ray(t.Transform.position, t.Transform.right), ref raycastHit, this.triggerRadius);
 		case IHandEffectsTrigger.Mode.FistBump:
-			return t.FingersDown && this.triggerZone.Raycast(new Ray(t.Transform.position, t.Transform.up), out raycastHit, this.triggerRadius);
+			return t.FingersDown && this.triggerZone.Raycast(new Ray(t.Transform.position, t.Transform.up), ref raycastHit, this.triggerRadius);
 		case IHandEffectsTrigger.Mode.HighFive_And_FistBump:
-			return (t.FingersUp && this.triggerZone.Raycast(new Ray(t.Transform.position, t.Transform.right), out raycastHit, this.triggerRadius)) || (t.FingersDown && this.triggerZone.Raycast(new Ray(t.Transform.position, t.Transform.up), out raycastHit, this.triggerRadius));
+			return (t.FingersUp && this.triggerZone.Raycast(new Ray(t.Transform.position, t.Transform.right), ref raycastHit, this.triggerRadius)) || (t.FingersDown && this.triggerZone.Raycast(new Ray(t.Transform.position, t.Transform.up), ref raycastHit, this.triggerRadius));
 		}
-		return this.triggerZone.Raycast(new Ray(t.Transform.position, this.triggerZone.bounds.center - t.Transform.position), out raycastHit, this.triggerRadius);
+		return this.triggerZone.Raycast(new Ray(t.Transform.position, this.triggerZone.bounds.center - t.Transform.position), ref raycastHit, this.triggerRadius);
 	}
 
 	[SerializeField]

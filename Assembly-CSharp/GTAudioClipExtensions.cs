@@ -12,9 +12,9 @@ public static class GTAudioClipExtensions
 		float num = float.NegativeInfinity;
 		float[] array = new float[audioClip.samples];
 		audioClip.GetData(array, 0);
-		foreach (float f in array)
+		foreach (float num2 in array)
 		{
-			num = Mathf.Max(num, Mathf.Abs(f));
+			num = Mathf.Max(num, Mathf.Abs(num2));
 		}
 		return num;
 	}

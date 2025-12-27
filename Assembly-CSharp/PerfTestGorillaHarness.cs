@@ -29,8 +29,8 @@ public class PerfTestGorillaHarness : MonoBehaviour
 		}
 		foreach (PerfTestGorillaSlot perfTestGorillaSlot in this.dummySlots)
 		{
-			float y = perfTestGorillaSlot.localStartPosition.y + Mathf.Sin(Time.time * this.bounceSpeed) * this.bounceAmplitude;
-			perfTestGorillaSlot.transform.localPosition = new Vector3(perfTestGorillaSlot.localStartPosition.x, y, perfTestGorillaSlot.localStartPosition.z);
+			float num = perfTestGorillaSlot.localStartPosition.y + Mathf.Sin(Time.time * this.bounceSpeed) * this.bounceAmplitude;
+			perfTestGorillaSlot.transform.localPosition = new Vector3(perfTestGorillaSlot.localStartPosition.x, num, perfTestGorillaSlot.localStartPosition.z);
 		}
 	}
 

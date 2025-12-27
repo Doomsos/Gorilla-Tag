@@ -5,19 +5,19 @@ using UnityEngine.Rendering;
 
 public static class GTUberShaderUtils
 {
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void SetStencilComparison(this Material m, GTShaderStencilCompare cmp)
 	{
 		m.SetFloat(GTUberShaderUtils._StencilComparison, (float)cmp);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void SetStencilPassFrontOp(this Material m, GTShaderStencilOp op)
 	{
 		m.SetFloat(GTUberShaderUtils._StencilPassFront, (float)op);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void SetStencilReferenceValue(this Material m, int value)
 	{
 		m.SetFloat(GTUberShaderUtils._StencilReference, (float)value);
@@ -61,11 +61,11 @@ public static class GTUberShaderUtils
 				num2 = num4;
 			}
 		}
-		queue = (RenderQueue)num;
+		queue = num;
 		return num;
 	}
 
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+	[RuntimeInitializeOnLoadMethod(1)]
 	private static void InitOnLoad()
 	{
 		GTUberShaderUtils.kUberShader = Shader.Find("GorillaTag/UberShader");

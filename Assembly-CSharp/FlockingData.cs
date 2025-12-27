@@ -6,7 +6,7 @@ using Fusion.CodeGen;
 using UnityEngine;
 
 [NetworkStructWeaved(337)]
-[StructLayout(LayoutKind.Explicit, Size = 1348)]
+[StructLayout(2, Size = 1348)]
 public struct FlockingData : INetworkStruct
 {
 	public int count { readonly get; set; }

@@ -176,13 +176,13 @@ public class SIGadgetGrenadeGravity : SIGadgetGrenade
 
 	public void GravityOverrideFunction(GTPlayer player)
 	{
-		Vector3 a = Physics.gravity * this.standardGravityMultiplier;
-		Vector3 b = Vector3.zero;
+		Vector3 vector = Physics.gravity * this.standardGravityMultiplier;
+		Vector3 vector2 = Vector3.zero;
 		if (!this.thrownGadget.IsHeldLocal())
 		{
-			b = (base.transform.position - player.headCollider.transform.position).normalized * this.attractorStrength;
+			vector2 = (base.transform.position - player.headCollider.transform.position).normalized * this.attractorStrength;
 		}
-		player.AddForce((a + b) * player.scale, ForceMode.Acceleration);
+		player.AddForce((vector + vector2) * player.scale, 5);
 	}
 
 	[Header("Activation")]

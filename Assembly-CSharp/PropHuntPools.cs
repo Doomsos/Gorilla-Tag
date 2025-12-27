@@ -106,7 +106,7 @@ public static class PropHuntPools
 
 	private static void _HandleOnTitleDataPropsListLoaded(string titleDataPropsString)
 	{
-		PropHuntPools._allPropCosmeticIds = titleDataPropsString.Split(PropHuntPools._g_ph_titleDataSeparators, StringSplitOptions.RemoveEmptyEntries);
+		PropHuntPools._allPropCosmeticIds = titleDataPropsString.Split(PropHuntPools._g_ph_titleDataSeparators, 1);
 		PropHuntPools._propCosmeticIdsWaitingToLoad.UnionWith(PropHuntPools._allPropCosmeticIds);
 		string playFabID = PropHuntPools._fallbackProp_cosmeticSO.info.playFabID;
 		PropHuntPools._propCosmeticIdsWaitingToLoad.Add(playFabID);
@@ -185,11 +185,11 @@ public static class PropHuntPools
 				}
 			}
 			GTAssetRef<GameObject> prefabAssetRef = cosmeticSO.info.wardrobeParts[0].prefabAssetRef;
-			Queue<PropPlacementRB> value;
-			if (!PropHuntPools._cosmeticId_to_inactiveDecoys.TryGetValue(cosmeticId, out value))
+			Queue<PropPlacementRB> queue;
+			if (!PropHuntPools._cosmeticId_to_inactiveDecoys.TryGetValue(cosmeticId, ref queue))
 			{
-				value = new Queue<PropPlacementRB>(10);
-				PropHuntPools._cosmeticId_to_inactiveDecoys[cosmeticId] = value;
+				queue = new Queue<PropPlacementRB>(10);
+				PropHuntPools._cosmeticId_to_inactiveDecoys[cosmeticId] = queue;
 				prefabAssetRef.InstantiateAsync(PropHuntPools._taggableTemplatesParent, false).Completed += delegate(AsyncOperationHandle<GameObject> handle)
 				{
 					PropHuntPools._HandleOnPropTemplateLoaded(handle, cosmeticId, cosmeticSO);
@@ -201,7 +201,7 @@ public static class PropHuntPools
 	private static void _HandleOnPropTemplateLoaded(AsyncOperationHandle<GameObject> handle, string cosmeticId, CosmeticSO cosmeticSO)
 	{
 		bool flag = cosmeticSO == PropHuntPools._fallbackProp_cosmeticSO;
-		if (handle.Status != AsyncOperationStatus.Succeeded)
+		if (handle.Status != 1)
 		{
 			Debug.LogError("ERROR!!!  PropHuntPools: " + string.Format("Failed to load asset for pooling: {0} with error: {1}", cosmeticSO.name, handle.OperationException), cosmeticSO);
 			return;
@@ -346,7 +346,7 @@ public static class PropHuntPools
 			{
 				return;
 			}
-			onReady();
+			onReady.Invoke();
 		}
 	}
 
@@ -359,7 +359,7 @@ public static class PropHuntPools
 			return false;
 		}
 		Queue<PropPlacementRB> queue;
-		if (!PropHuntPools._cosmeticId_to_inactiveDecoys.TryGetValue(cosmeticId, out queue))
+		if (!PropHuntPools._cosmeticId_to_inactiveDecoys.TryGetValue(cosmeticId, ref queue))
 		{
 			Debug.LogError("ERROR!!!  PropHuntPools: (should never happen) Prop does not exist with cosmeticId \"" + cosmeticId + "\"!");
 			out_prop = null;
@@ -373,15 +373,15 @@ public static class PropHuntPools
 			PropHuntPools._activeDecoy_to_cosmeticId[out_prop] = cosmeticId;
 			return true;
 		}
-		PropPlacementRB original;
-		if (PropHuntPools._cosmeticId_to_decoyTemplate.TryGetValue(cosmeticId, out original))
+		PropPlacementRB propPlacementRB;
+		if (PropHuntPools._cosmeticId_to_decoyTemplate.TryGetValue(cosmeticId, ref propPlacementRB))
 		{
 			Dictionary<string, int> cosmeticId_to_decoyInitialCount = PropHuntPools._cosmeticId_to_decoyInitialCount;
 			int num = cosmeticId_to_decoyInitialCount[cosmeticId] + 1;
 			cosmeticId_to_decoyInitialCount[cosmeticId] = num;
-			int b = num;
-			PropHuntPools._debug_decoyMaxCountPerProp = Mathf.Max(PropHuntPools._debug_decoyMaxCountPerProp, b);
-			out_prop = Object.Instantiate<PropPlacementRB>(original);
+			int num2 = num;
+			PropHuntPools._debug_decoyMaxCountPerProp = Mathf.Max(PropHuntPools._debug_decoyMaxCountPerProp, num2);
+			out_prop = Object.Instantiate<PropPlacementRB>(propPlacementRB);
 			PropHuntPools._activeDecoy_to_cosmeticId[out_prop] = cosmeticId;
 			return true;
 		}
@@ -398,7 +398,7 @@ public static class PropHuntPools
 			return false;
 		}
 		Queue<PropHuntTaggableProp> queue;
-		if (PropHuntPools._cosmeticId_to_inactiveTaggables.TryGetValue(cosmeticId, out queue))
+		if (PropHuntPools._cosmeticId_to_inactiveTaggables.TryGetValue(cosmeticId, ref queue))
 		{
 			if (queue.Count > 0)
 			{
@@ -408,11 +408,11 @@ public static class PropHuntPools
 				PropHuntPools._activeTaggable_to_cosmeticId[out_prop] = cosmeticId;
 				return true;
 			}
-			PropHuntTaggableProp original;
-			if (PropHuntPools._cosmeticId_to_taggableTemplate.TryGetValue(cosmeticId, out original))
+			PropHuntTaggableProp propHuntTaggableProp;
+			if (PropHuntPools._cosmeticId_to_taggableTemplate.TryGetValue(cosmeticId, ref propHuntTaggableProp))
 			{
 				PropHuntPools._debug_decoyMaxCountPerProp = ((PropHuntPools._debug_decoyMaxCountPerProp >= queue.Count + 1) ? PropHuntPools._debug_decoyMaxCountPerProp : ((int)((double)queue.Count * 1.5)));
-				out_prop = Object.Instantiate<PropHuntTaggableProp>(original);
+				out_prop = Object.Instantiate<PropHuntTaggableProp>(propHuntTaggableProp);
 				PropHuntPools._activeTaggable_to_cosmeticId[out_prop] = cosmeticId;
 				return true;
 			}
@@ -431,7 +431,7 @@ public static class PropHuntPools
 			return false;
 		}
 		Queue<PropHuntGrabbableProp> queue;
-		if (PropHuntPools._cosmeticId_to_inactiveGrabbables.TryGetValue(cosmeticId, out queue) && queue.Count > 0)
+		if (PropHuntPools._cosmeticId_to_inactiveGrabbables.TryGetValue(cosmeticId, ref queue) && queue.Count > 0)
 		{
 			out_prop = queue.Dequeue();
 			out_prop.transform.SetParent(null);
@@ -439,10 +439,10 @@ public static class PropHuntPools
 			PropHuntPools._activeGrabbable_to_cosmeticId[out_prop] = cosmeticId;
 			return true;
 		}
-		PropHuntGrabbableProp original;
-		if (PropHuntPools._cosmeticId_to_grabbableTemplate.TryGetValue(cosmeticId, out original))
+		PropHuntGrabbableProp propHuntGrabbableProp;
+		if (PropHuntPools._cosmeticId_to_grabbableTemplate.TryGetValue(cosmeticId, ref propHuntGrabbableProp))
 		{
-			out_prop = Object.Instantiate<PropHuntGrabbableProp>(original);
+			out_prop = Object.Instantiate<PropHuntGrabbableProp>(propHuntGrabbableProp);
 			PropHuntPools._activeGrabbable_to_cosmeticId[out_prop] = cosmeticId;
 			return true;
 		}
@@ -458,9 +458,9 @@ public static class PropHuntPools
 			Debug.LogError("ERROR!!!  PropHuntPools: Tried to return a prop but it was null!");
 			return;
 		}
-		string key;
+		string text;
 		Queue<PropPlacementRB> queue;
-		if (PropHuntPools._activeDecoy_to_cosmeticId.TryGetValue(prop, out key) && PropHuntPools._cosmeticId_to_inactiveDecoys.TryGetValue(key, out queue))
+		if (PropHuntPools._activeDecoy_to_cosmeticId.TryGetValue(prop, ref text) && PropHuntPools._cosmeticId_to_inactiveDecoys.TryGetValue(text, ref queue))
 		{
 			prop.gameObject.SetActive(false);
 			prop.transform.SetParent(PropHuntPools._grabbableInactivePropsParent);
@@ -476,9 +476,9 @@ public static class PropHuntPools
 			Debug.LogError("ERROR!!!  PropHuntPools: Tried to return a prop but it was null!");
 			return;
 		}
-		string key;
+		string text;
 		Queue<PropHuntTaggableProp> queue;
-		if (PropHuntPools._activeTaggable_to_cosmeticId.TryGetValue(prop, out key) && PropHuntPools._cosmeticId_to_inactiveTaggables.TryGetValue(key, out queue))
+		if (PropHuntPools._activeTaggable_to_cosmeticId.TryGetValue(prop, ref text) && PropHuntPools._cosmeticId_to_inactiveTaggables.TryGetValue(text, ref queue))
 		{
 			prop.gameObject.SetActive(false);
 			prop.transform.SetParent(PropHuntPools._grabbableInactivePropsParent);
@@ -493,9 +493,9 @@ public static class PropHuntPools
 		{
 			return;
 		}
-		string key;
+		string text;
 		Queue<PropHuntGrabbableProp> queue;
-		if (PropHuntPools._activeGrabbable_to_cosmeticId.TryGetValue(prop, out key) && PropHuntPools._cosmeticId_to_inactiveGrabbables.TryGetValue(key, out queue))
+		if (PropHuntPools._activeGrabbable_to_cosmeticId.TryGetValue(prop, ref text) && PropHuntPools._cosmeticId_to_inactiveGrabbables.TryGetValue(text, ref queue))
 		{
 			prop.gameObject.SetActive(false);
 			prop.transform.SetParent(PropHuntPools._grabbableInactivePropsParent);

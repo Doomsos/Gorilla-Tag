@@ -116,7 +116,7 @@ namespace GorillaTag
 				this.drainBlockerSlideSpeed = num / this.drainBlockerSlideTime;
 				return;
 			}
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 
 		internal override void OnEnable()
@@ -298,11 +298,11 @@ namespace GorillaTag
 					}
 					if (flag2)
 					{
-						GorillaGameModes.GameMode.OptOut(this.allPlayersInRoom[k]);
+						GameMode.OptOut(this.allPlayersInRoom[k]);
 					}
 					else
 					{
-						GorillaGameModes.GameMode.OptIn(this.allPlayersInRoom[k]);
+						GameMode.OptIn(this.allPlayersInRoom[k]);
 					}
 				}
 			}
@@ -462,30 +462,30 @@ namespace GorillaTag
 			this.liquidMeshTransform.gameObject.SetActive(active);
 			if (this.entryWayLiquidMeshTransform != null)
 			{
-				float y = 0f;
-				float z;
-				float z2;
+				float num2 = 0f;
+				float num3;
+				float num4;
 				if (num < this.entryLiquidScaleSyncOpeningBottom.y)
 				{
-					z = this.entryLiquidScaleSyncOpeningBottom.x;
-					z2 = this.entryBridgeQuadMinMaxZHeight.x;
+					num3 = this.entryLiquidScaleSyncOpeningBottom.x;
+					num4 = this.entryBridgeQuadMinMaxZHeight.x;
 				}
 				else if (num < this.entryLiquidScaleSyncOpeningTop.y)
 				{
-					float num2 = Mathf.InverseLerp(this.entryLiquidScaleSyncOpeningBottom.y, this.entryLiquidScaleSyncOpeningTop.y, num);
-					z = Mathf.Lerp(this.entryLiquidScaleSyncOpeningBottom.x, this.entryLiquidScaleSyncOpeningTop.x, num2);
-					z2 = Mathf.Lerp(this.entryBridgeQuadMinMaxZHeight.x, this.entryBridgeQuadMinMaxZHeight.y, num2);
-					y = this.entryBridgeQuadMaxScaleY * Mathf.Sin(num2 * 3.1415927f);
+					float num5 = Mathf.InverseLerp(this.entryLiquidScaleSyncOpeningBottom.y, this.entryLiquidScaleSyncOpeningTop.y, num);
+					num3 = Mathf.Lerp(this.entryLiquidScaleSyncOpeningBottom.x, this.entryLiquidScaleSyncOpeningTop.x, num5);
+					num4 = Mathf.Lerp(this.entryBridgeQuadMinMaxZHeight.x, this.entryBridgeQuadMinMaxZHeight.y, num5);
+					num2 = this.entryBridgeQuadMaxScaleY * Mathf.Sin(num5 * 3.1415927f);
 				}
 				else
 				{
-					float t = Mathf.InverseLerp(this.entryLiquidScaleSyncOpeningTop.y, 0.6f * this.maxScale, num);
-					z = Mathf.Lerp(this.entryLiquidScaleSyncOpeningTop.x, this.entryLiquidMaxScale, t);
-					z2 = this.entryBridgeQuadMinMaxZHeight.y;
+					float num6 = Mathf.InverseLerp(this.entryLiquidScaleSyncOpeningTop.y, 0.6f * this.maxScale, num);
+					num3 = Mathf.Lerp(this.entryLiquidScaleSyncOpeningTop.x, this.entryLiquidMaxScale, num6);
+					num4 = this.entryBridgeQuadMinMaxZHeight.y;
 				}
-				this.entryWayLiquidMeshTransform.localScale = new Vector3(this.entryWayLiquidMeshTransform.localScale.x, this.entryWayLiquidMeshTransform.localScale.y, z);
-				this.entryWayBridgeQuadTransform.localScale = new Vector3(this.entryWayBridgeQuadTransform.localScale.x, y, this.entryWayBridgeQuadTransform.localScale.z);
-				this.entryWayBridgeQuadTransform.localPosition = new Vector3(this.entryWayBridgeQuadTransform.localPosition.x, this.entryWayBridgeQuadTransform.localPosition.y, z2);
+				this.entryWayLiquidMeshTransform.localScale = new Vector3(this.entryWayLiquidMeshTransform.localScale.x, this.entryWayLiquidMeshTransform.localScale.y, num3);
+				this.entryWayBridgeQuadTransform.localScale = new Vector3(this.entryWayBridgeQuadTransform.localScale.x, num2, this.entryWayBridgeQuadTransform.localScale.z);
+				this.entryWayBridgeQuadTransform.localPosition = new Vector3(this.entryWayBridgeQuadTransform.localPosition.x, this.entryWayBridgeQuadTransform.localPosition.y, num4);
 			}
 		}
 
@@ -493,8 +493,8 @@ namespace GorillaTag
 		{
 			for (int i = 0; i < this.rotatingRings.Length; i++)
 			{
-				float angle = Mathf.Lerp(this.rotatingRings[i].initialAngle, this.rotatingRings[i].resultingAngle, rotationProgress);
-				this.rotatingRings[i].ringTransform.rotation = Quaternion.AngleAxis(angle, Vector3.up);
+				float num = Mathf.Lerp(this.rotatingRings[i].initialAngle, this.rotatingRings[i].resultingAngle, rotationProgress);
+				this.rotatingRings[i].ringTransform.rotation = Quaternion.AngleAxis(num, Vector3.up);
 			}
 		}
 
@@ -599,7 +599,8 @@ namespace GorillaTag
 			{
 				return;
 			}
-			Plane plane = new Plane(this.liquidSurfacePlane.up, this.liquidSurfacePlane.position);
+			Plane plane;
+			plane..ctor(this.liquidSurfacePlane.up, this.liquidSurfacePlane.position);
 			if (this.reliableState.state == ScienceExperimentManager.RisingLiquidState.Rising)
 			{
 				for (int i = 0; i < this.elements.disableByLiquidList.Count; i++)
@@ -863,7 +864,7 @@ namespace GorillaTag
 					this.PlayerTouchedLava(NetworkSystem.Instance.LocalPlayer.ActorNumber);
 					return;
 				}
-				base.GetView.RPC("PlayerTouchedLavaRPC", RpcTarget.MasterClient, Array.Empty<object>());
+				base.GetView.RPC("PlayerTouchedLavaRPC", 2, Array.Empty<object>());
 			}
 		}
 
@@ -880,7 +881,7 @@ namespace GorillaTag
 					this.PlayerTouchedRefreshWater(NetworkSystem.Instance.LocalPlayer.ActorNumber);
 					return;
 				}
-				base.GetView.RPC("PlayerTouchedRefreshWaterRPC", RpcTarget.MasterClient, Array.Empty<object>());
+				base.GetView.RPC("PlayerTouchedRefreshWaterRPC", 2, Array.Empty<object>());
 			}
 		}
 
@@ -934,7 +935,7 @@ namespace GorillaTag
 					this.ValidateLocalPlayerWaterBalloonHit(hitPlayer.ActorNumber);
 					return;
 				}
-				base.GetView.RPC("ValidateLocalPlayerWaterBalloonHitRPC", RpcTarget.Others, new object[]
+				base.GetView.RPC("ValidateLocalPlayerWaterBalloonHitRPC", 1, new object[]
 				{
 					hitPlayer.ActorNumber
 				});
@@ -1082,7 +1083,7 @@ namespace GorillaTag
 					this.inGamePlayerCount++;
 					if (this.optPlayersOutOfRoomGameMode)
 					{
-						GorillaGameModes.GameMode.OptOut(pId);
+						GameMode.OptOut(pId);
 					}
 				}
 			}
@@ -1101,7 +1102,7 @@ namespace GorillaTag
 						this.inGamePlayerCount--;
 						if (this.optPlayersOutOfRoomGameMode)
 						{
-							GorillaGameModes.GameMode.OptIn(playerId);
+							GameMode.OptIn(playerId);
 							return;
 						}
 						break;
@@ -1121,13 +1122,13 @@ namespace GorillaTag
 			this.PlayerTouchedLava(info.Sender.ActorNumber);
 		}
 
-		[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+		[Rpc(7, 1)]
 		public unsafe void RPC_PlayerTouchedLava(RpcInfo info = default(RpcInfo))
 		{
 			if (!this.InvokeRpc)
 			{
 				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != SimulationStages.Resimulate)
+				if (base.Runner.Stage != 4)
 				{
 					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 					if ((localAuthorityMask & 7) != 0)
@@ -1146,7 +1147,7 @@ namespace GorillaTag
 								byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 								*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 1);
 								int num2 = 8;
-								ptr->Offset = num2 * 8;
+								ptr.Offset = num2 * 8;
 								base.Runner.SendRpc(ptr);
 							}
 							if ((localAuthorityMask & 1) == 0)
@@ -1154,7 +1155,7 @@ namespace GorillaTag
 								return;
 							}
 						}
-						info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+						info = RpcInfo.FromLocal(base.Runner, 0, 0);
 						goto IL_12;
 					}
 					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedLava(Fusion.RpcInfo)", base.Object, 7);
@@ -1196,13 +1197,13 @@ namespace GorillaTag
 			this.PlayerTouchedRefreshWater(info.Sender.ActorNumber);
 		}
 
-		[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+		[Rpc(7, 1)]
 		private unsafe void RPC_PlayerTouchedRefreshWater(RpcInfo info = default(RpcInfo))
 		{
 			if (!this.InvokeRpc)
 			{
 				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != SimulationStages.Resimulate)
+				if (base.Runner.Stage != 4)
 				{
 					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 					if ((localAuthorityMask & 7) != 0)
@@ -1221,7 +1222,7 @@ namespace GorillaTag
 								byte* ptr2 = (byte*)(ptr + 28 / sizeof(SimulationMessage));
 								*(RpcHeader*)ptr2 = RpcHeader.Create(base.Object.Id, this.ObjectIndex, 2);
 								int num2 = 8;
-								ptr->Offset = num2 * 8;
+								ptr.Offset = num2 * 8;
 								base.Runner.SendRpc(ptr);
 							}
 							if ((localAuthorityMask & 1) == 0)
@@ -1229,7 +1230,7 @@ namespace GorillaTag
 								return;
 							}
 						}
-						info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+						info = RpcInfo.FromLocal(base.Runner, 0, 0);
 						goto IL_12;
 					}
 					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerTouchedRefreshWater(Fusion.RpcInfo)", base.Object, 7);
@@ -1285,7 +1286,7 @@ namespace GorillaTag
 				return;
 			}
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage != 4)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) == 0)
@@ -1308,7 +1309,7 @@ namespace GorillaTag
 						int num2 = 8;
 						*(int*)(ptr2 + num2) = playerId;
 						num2 += 4;
-						ptr->Offset = num2 * 8;
+						ptr.Offset = num2 * 8;
 						base.Runner.SendRpc(ptr);
 					}
 				}
@@ -1324,7 +1325,7 @@ namespace GorillaTag
 					this.PlayerHitByWaterBalloon(NetworkSystem.Instance.LocalPlayer.ActorNumber);
 					return;
 				}
-				base.GetView.RPC("PlayerHitByWaterBalloonRPC", RpcTarget.MasterClient, new object[]
+				base.GetView.RPC("PlayerHitByWaterBalloonRPC", 2, new object[]
 				{
 					PhotonNetwork.LocalPlayer.ActorNumber
 				});
@@ -1338,13 +1339,13 @@ namespace GorillaTag
 			this.PlayerHitByWaterBalloon(playerId);
 		}
 
-		[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+		[Rpc(7, 1)]
 		private unsafe void RPC_PlayerHitByWaterBalloon(int playerId, RpcInfo info = default(RpcInfo))
 		{
 			if (!this.InvokeRpc)
 			{
 				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != SimulationStages.Resimulate)
+				if (base.Runner.Stage != 4)
 				{
 					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 					if ((localAuthorityMask & 7) != 0)
@@ -1366,7 +1367,7 @@ namespace GorillaTag
 								int num2 = 8;
 								*(int*)(ptr2 + num2) = playerId;
 								num2 += 4;
-								ptr->Offset = num2 * 8;
+								ptr.Offset = num2 * 8;
 								base.Runner.SendRpc(ptr);
 							}
 							if ((localAuthorityMask & 1) == 0)
@@ -1374,7 +1375,7 @@ namespace GorillaTag
 								return;
 							}
 						}
-						info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+						info = RpcInfo.FromLocal(base.Runner, 0, 0);
 						goto IL_12;
 					}
 					NetworkBehaviourUtils.NotifyLocalSimulationNotAllowedToSendRpc("System.Void GorillaTag.ScienceExperimentManager::RPC_PlayerHitByWaterBalloon(System.Int32,Fusion.RpcInfo)", base.Object, 7);
@@ -1476,7 +1477,7 @@ namespace GorillaTag
 		protected unsafe static void RPC_PlayerTouchedLava@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 			behaviour.InvokeRpc = true;
 			((ScienceExperimentManager)behaviour).RPC_PlayerTouchedLava(info);
 		}
@@ -1487,7 +1488,7 @@ namespace GorillaTag
 		protected unsafe static void RPC_PlayerTouchedRefreshWater@Invoker(NetworkBehaviour behaviour, SimulationMessage* message)
 		{
 			byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 			behaviour.InvokeRpc = true;
 			((ScienceExperimentManager)behaviour).RPC_PlayerTouchedRefreshWater(info);
 		}
@@ -1502,7 +1503,7 @@ namespace GorillaTag
 			int num2 = *(int*)(ptr + num);
 			num += 4;
 			int playerId = num2;
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 			behaviour.InvokeRpc = true;
 			((ScienceExperimentManager)behaviour).RPC_ValidateLocalPlayerWaterBalloonHit(playerId, info);
 		}
@@ -1517,7 +1518,7 @@ namespace GorillaTag
 			int num2 = *(int*)(ptr + num);
 			num += 4;
 			int playerId = num2;
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 			behaviour.InvokeRpc = true;
 			((ScienceExperimentManager)behaviour).RPC_PlayerHitByWaterBalloon(playerId, info);
 		}
@@ -1711,7 +1712,7 @@ namespace GorillaTag
 
 		[WeaverGenerated]
 		[DefaultForProperty("Data", 0, 76)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+		[DrawIf("IsEditorWritable", true, 0, 0)]
 		private ScienceExperimentManager.ScienceManagerData _Data;
 
 		public enum RisingLiquidState
@@ -1778,7 +1779,7 @@ namespace GorillaTag
 		}
 
 		[NetworkStructWeaved(76)]
-		[StructLayout(LayoutKind.Explicit, Size = 304)]
+		[StructLayout(2, Size = 304)]
 		private struct ScienceManagerData : INetworkStruct
 		{
 			[Networked]

@@ -24,11 +24,11 @@ namespace GorillaTagScripts.Builder
 			}
 			this.timeCreated -= num;
 			Vector3 vector = Vector3.ProjectOnPlane(velocity, Vector3.up);
-			float f = 0.017453292f * Vector3.Angle(vector, velocity);
-			float num2 = this.projectileRigidbody.mass * this.gravityMultiplier * ((scale < 1f) ? scale : 1f) * 9.8f;
-			Vector3 b = num * Mathf.Cos(f) * vector;
-			float d = velocity.z * num * Mathf.Sin(f) - 0.5f * num2 * num * num;
-			this.launchPosition = position + b + d * Vector3.down;
+			float num2 = 0.017453292f * Vector3.Angle(vector, velocity);
+			float num3 = this.projectileRigidbody.mass * this.gravityMultiplier * ((scale < 1f) ? scale : 1f) * 9.8f;
+			Vector3 vector2 = num * Mathf.Cos(num2) * vector;
+			float num4 = velocity.z * num * Mathf.Sin(num2) - 0.5f * num3 * num * num;
+			this.launchPosition = position + vector2 + num4 * Vector3.down;
 			Transform transform = base.transform;
 			transform.position = position;
 			transform.localScale = Vector3.one * scale;
@@ -39,9 +39,9 @@ namespace GorillaTagScripts.Builder
 				component.objectRadiusForWaterCollision = 0.02f * scale;
 			}
 			this.projectileRigidbody.useGravity = false;
-			Vector3 vector2 = this.projectileRigidbody.mass * this.gravityMultiplier * ((scale < 1f) ? scale : 1f) * Physics.gravity;
-			this.forceComponent.force = vector2;
-			this.projectileRigidbody.linearVelocity = velocity + num * vector2;
+			Vector3 vector3 = this.projectileRigidbody.mass * this.gravityMultiplier * ((scale < 1f) ? scale : 1f) * Physics.gravity;
+			this.forceComponent.force = vector3;
+			this.projectileRigidbody.linearVelocity = velocity + num * vector3;
 			this.projectileId = projectileCount;
 			this.projectileRigidbody.position = position;
 			this.projectileSource.RegisterProjectile(this);
@@ -60,9 +60,9 @@ namespace GorillaTagScripts.Builder
 			this.projectileRigidbody.useGravity = true;
 			this.forceComponent.force = Vector3.zero;
 			this.OnImpact = null;
-			this.aoeKnockbackConfig = null;
-			this.impactSoundVolumeOverride = null;
-			this.impactSoundPitchOverride = null;
+			this.aoeKnockbackConfig = default(SlingshotProjectile.AOEKnockbackConfig?);
+			this.impactSoundVolumeOverride = default(float?);
+			this.impactSoundPitchOverride = default(float?);
 			this.impactEffectScaleMultiplier = 1f;
 			this.gravityMultiplier = 1f;
 			ObjectPools.instance.Destroy(base.gameObject);
@@ -91,9 +91,9 @@ namespace GorillaTagScripts.Builder
 		{
 			if (this.aoeKnockbackConfig != null && this.aoeKnockbackConfig.Value.applyAOEKnockback)
 			{
-				Vector3 a = Vector3.ProjectOnPlane(hitNormal, Vector3.up);
-				a.Normalize();
-				Vector3 direction = 0.75f * a + 0.25f * Vector3.up;
+				Vector3 vector = Vector3.ProjectOnPlane(hitNormal, Vector3.up);
+				vector.Normalize();
+				Vector3 direction = 0.75f * vector + 0.25f * Vector3.up;
 				direction.Normalize();
 				GTPlayer instance = GTPlayer.Instance;
 				instance.ApplyKnockback(direction, this.aoeKnockbackConfig.Value.knockbackVelocity, instance.scale < 0.9f);
@@ -128,8 +128,8 @@ namespace GorillaTagScripts.Builder
 				{
 					Transform transform = base.transform;
 					Vector3 position = transform.position;
-					Vector3 forward = position - this.previousPosition;
-					transform.rotation = ((forward.sqrMagnitude > 0f) ? Quaternion.LookRotation(forward) : transform.rotation);
+					Vector3 vector = position - this.previousPosition;
+					transform.rotation = ((vector.sqrMagnitude > 0f) ? Quaternion.LookRotation(vector) : transform.rotation);
 					this.previousPosition = position;
 				}
 			}

@@ -160,7 +160,7 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 		{
 			return;
 		}
-		@delegate(sender, this._eventId, args, info);
+		@delegate.Invoke(sender, this._eventId, args, info);
 	}
 
 	public void RaiseLocal(params object[] args)
@@ -205,14 +205,14 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 			return;
 		case PhotonEvent.RaiseMode.RemoteOthers:
 		{
-			object[] eventContent = args.Prepend(this._eventId).ToArray<object>();
-			PhotonNetwork.RaiseEvent(176, eventContent, PhotonEvent.gReceiversOthers, sendOptions);
+			object[] array = Enumerable.ToArray<object>(Enumerable.Prepend<object>(args, this._eventId));
+			PhotonNetwork.RaiseEvent(176, array, PhotonEvent.gReceiversOthers, sendOptions);
 			return;
 		}
 		case PhotonEvent.RaiseMode.RemoteAll:
 		{
-			object[] eventContent2 = args.Prepend(this._eventId).ToArray<object>();
-			PhotonNetwork.RaiseEvent(176, eventContent2, PhotonEvent.gReceiversAll, sendOptions);
+			object[] array2 = Enumerable.ToArray<object>(Enumerable.Prepend<object>(args, this._eventId));
+			PhotonNetwork.RaiseEvent(176, array2, PhotonEvent.gReceiversAll, sendOptions);
 			return;
 		}
 		default:
@@ -242,11 +242,11 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 	{
 		PhotonEvent.gReceiversAll = new RaiseEventOptions
 		{
-			Receivers = ReceiverGroup.All
+			Receivers = 1
 		};
 		PhotonEvent.gReceiversOthers = new RaiseEventOptions
 		{
-			Receivers = ReceiverGroup.Others
+			Receivers = 0
 		};
 		PhotonEvent.gSendUnreliable = SendOptions.SendUnreliable;
 		PhotonEvent.gSendUnreliable.Encrypt = true;
@@ -254,10 +254,10 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 		PhotonEvent.gSendReliable.Encrypt = true;
 	}
 
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+	[RuntimeInitializeOnLoadMethod(3)]
 	private static void StaticLoadAfterPhotonNetwork()
 	{
-		PhotonNetwork.NetworkingClient.EventReceived += PhotonEvent.StaticOnEvent;
+		PhotonNetwork.NetworkingClient.EventReceived += new Action<EventData>(PhotonEvent.StaticOnEvent);
 	}
 
 	public static bool operator ==(PhotonEvent x, PhotonEvent y)
@@ -288,7 +288,7 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 					if (sender != -1)
 					{
 						ListProcessor<PhotonEvent> listProcessor;
-						if (PhotonEvent._photonEvents.TryGetValue(sender, out listProcessor))
+						if (PhotonEvent._photonEvents.TryGetValue(sender, ref listProcessor))
 						{
 							object[] args;
 							if (array.Length > 1)
@@ -315,12 +315,12 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 				}
 			}
 		}
-		catch (Exception arg)
+		catch (Exception ex)
 		{
 			Action<EventData, Exception> onError = PhotonEvent.OnError;
 			if (onError != null)
 			{
-				onError(evData, arg);
+				onError.Invoke(evData, ex);
 			}
 		}
 	}
@@ -333,7 +333,7 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 			return;
 		}
 		ListProcessor<PhotonEvent> listProcessor;
-		if (!PhotonEvent._photonEvents.TryGetValue(eventId, out listProcessor))
+		if (!PhotonEvent._photonEvents.TryGetValue(eventId, ref listProcessor))
 		{
 			listProcessor = new ListProcessor<PhotonEvent>(10, null);
 			PhotonEvent._photonEvents.Add(eventId, listProcessor);
@@ -348,7 +348,7 @@ public class PhotonEvent : IEquatable<PhotonEvent>
 	private static void RemovePhotonEvent(PhotonEvent photonEvent)
 	{
 		ListProcessor<PhotonEvent> listProcessor;
-		if (!PhotonEvent._photonEvents.TryGetValue(photonEvent._eventId, out listProcessor))
+		if (!PhotonEvent._photonEvents.TryGetValue(photonEvent._eventId, ref listProcessor))
 		{
 			return;
 		}

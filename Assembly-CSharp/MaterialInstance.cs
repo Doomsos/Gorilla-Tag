@@ -190,8 +190,8 @@ public class MaterialInstance : MonoBehaviour
 
 	private static bool MaterialsMatch(Material[] a, Material[] b)
 	{
-		int? num = (a != null) ? new int?(a.Length) : null;
-		int? num2 = (b != null) ? new int?(b.Length) : null;
+		int? num = (a != null) ? new int?(a.Length) : default(int?);
+		int? num2 = (b != null) ? new int?(b.Length) : default(int?);
 		if (!(num.GetValueOrDefault() == num2.GetValueOrDefault() & num != null == (num2 != null)))
 		{
 			return false;
@@ -200,7 +200,7 @@ public class MaterialInstance : MonoBehaviour
 		for (;;)
 		{
 			int num4 = num3;
-			num2 = ((a != null) ? new int?(a.Length) : null);
+			num2 = ((a != null) ? new int?(a.Length) : default(int?));
 			if (!(num4 < num2.GetValueOrDefault() & num2 != null))
 			{
 				return true;

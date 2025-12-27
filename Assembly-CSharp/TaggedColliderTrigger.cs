@@ -38,7 +38,7 @@ public class TaggedColliderTrigger : MonoBehaviour
 		}
 	}
 
-	public new UnityTag tag;
+	public UnityTag tag;
 
 	public UnityEvent<Collider> onEnter = new UnityEvent<Collider>();
 

@@ -87,7 +87,7 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 		{
 			this.transformFromPosition[TransferrableObject.PositionState.None] = this.transformOverridesDeprecated[0].overrideTransform;
 		}
-		foreach (TransferrableObject.PositionState positionState in Enum.GetValues(typeof(TransferrableObject.PositionState)).Cast<TransferrableObject.PositionState>())
+		foreach (TransferrableObject.PositionState positionState in Enumerable.Cast<TransferrableObject.PositionState>(Enum.GetValues(typeof(TransferrableObject.PositionState))))
 		{
 			if (positionState == TransferrableObject.PositionState.None)
 			{
@@ -95,16 +95,16 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 			}
 			else
 			{
-				Transform value = null;
+				Transform transform = null;
 				foreach (SlotTransformOverride slotTransformOverride in this.transformOverridesDeprecated)
 				{
 					if ((slotTransformOverride.positionState & positionState) != TransferrableObject.PositionState.None)
 					{
-						value = slotTransformOverride.overrideTransform;
+						transform = slotTransformOverride.overrideTransform;
 						break;
 					}
 				}
-				this.transformFromPosition[positionState] = value;
+				this.transformFromPosition[positionState] = transform;
 			}
 		}
 	}
@@ -189,7 +189,7 @@ public class TransferrableItemSlotTransformOverride : MonoBehaviour, IGorillaSli
 	{
 		if (TransferrableItemSlotTransformOverride.OnBringUpWindow != null)
 		{
-			TransferrableItemSlotTransformOverride.OnBringUpWindow(base.GetComponent<TransferrableObject>());
+			TransferrableItemSlotTransformOverride.OnBringUpWindow.Invoke(base.GetComponent<TransferrableObject>());
 		}
 	}
 

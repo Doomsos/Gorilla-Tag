@@ -52,7 +52,7 @@ public class DebugSpawnPointChanger : MonoBehaviour
 		if (spawnManager != null)
 		{
 			Transform[] spawnPts = spawnManager.ChildrenXfs();
-			foreach (VRRig rig in Object.FindObjectsByType<VRRig>(FindObjectsSortMode.None))
+			foreach (VRRig rig in Object.FindObjectsByType<VRRig>(0))
 			{
 				this.AttachSpawnPoint(rig, spawnPts, index);
 			}
@@ -61,8 +61,7 @@ public class DebugSpawnPointChanger : MonoBehaviour
 
 	public List<string> GetPlausibleJumpLocation()
 	{
-		return (from index in this.levelTriggers[this.lastLocationIndex].canJumpToIndex
-		select this.levelTriggers[index].levelName).ToList<string>();
+		return Enumerable.ToList<string>(Enumerable.Select<int, string>(this.levelTriggers[this.lastLocationIndex].canJumpToIndex, (int index) => this.levelTriggers[index].levelName));
 	}
 
 	public void JumpTo(int canJumpIndex)

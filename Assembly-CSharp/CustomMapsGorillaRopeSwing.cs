@@ -86,7 +86,7 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 		{
 			Vector3 vector = Vector3.zero;
 			float y = this.prefabRopeBit.GetComponentInChildren<Renderer>().bounds.size.y;
-			WaterVolume[] array = Object.FindObjectsByType<WaterVolume>(FindObjectsSortMode.None);
+			WaterVolume[] array = Object.FindObjectsByType<WaterVolume>(0);
 			List<Collider> list2 = new List<Collider>(array.Length);
 			WaterVolume[] array2 = array;
 			for (int j = 0; j < array2.Length; j++)
@@ -108,8 +108,8 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 					if (collider2 != null)
 					{
 						Vector3 vector2 = base.transform.position + vector;
-						Vector3 point = vector2 + new Vector3(0f, -y, 0f);
-						flag = (collider2.bounds.Contains(vector2) || collider2.bounds.Contains(point));
+						Vector3 vector3 = vector2 + new Vector3(0f, -y, 0f);
+						flag = (collider2.bounds.Contains(vector2) || collider2.bounds.Contains(vector3));
 					}
 				}
 				GameObject gameObject = Object.Instantiate<GameObject>(flag ? this.partiallyUnderwaterPrefab : this.prefabRopeBit, base.transform);
@@ -127,7 +127,7 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 		}
 		if (list.Count > 0)
 		{
-			list.Last<Transform>().gameObject.SetActive(false);
+			Enumerable.Last<Transform>(list).gameObject.SetActive(false);
 		}
 		this.nodes = list.ToArray();
 	}

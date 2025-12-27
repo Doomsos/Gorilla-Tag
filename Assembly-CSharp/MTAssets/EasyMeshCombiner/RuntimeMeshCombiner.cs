@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Rendering;
 
 namespace MTAssets.EasyMeshCombiner
 {
@@ -42,11 +41,11 @@ namespace MTAssets.EasyMeshCombiner
 				{
 					if (this.combineInChildren)
 					{
-						foreach (Transform item in this.targetMeshes[i].GetComponentsInChildren<Transform>(true))
+						foreach (Transform transform in this.targetMeshes[i].GetComponentsInChildren<Transform>(true))
 						{
-							if (!list.Contains(item))
+							if (!list.Contains(transform))
 							{
-								list.Add(item);
+								list.Add(transform);
 							}
 						}
 					}
@@ -194,17 +193,18 @@ namespace MTAssets.EasyMeshCombiner
 			{
 				for (int j = 0; j < gameObjectWithMesh.meshFilter.sharedMesh.subMeshCount; j++)
 				{
-					Material key = gameObjectWithMesh.meshRenderer.sharedMaterials[j];
-					if (dictionary.ContainsKey(key))
+					Material material = gameObjectWithMesh.meshRenderer.sharedMaterials[j];
+					if (dictionary.ContainsKey(material))
 					{
-						dictionary[key].Add(new RuntimeMeshCombiner.SubMeshToCombine(gameObjectWithMesh.gameObject.transform, gameObjectWithMesh.meshFilter, gameObjectWithMesh.meshRenderer, j));
+						dictionary[material].Add(new RuntimeMeshCombiner.SubMeshToCombine(gameObjectWithMesh.gameObject.transform, gameObjectWithMesh.meshFilter, gameObjectWithMesh.meshRenderer, j));
 					}
-					if (!dictionary.ContainsKey(key))
+					if (!dictionary.ContainsKey(material))
 					{
-						dictionary.Add(key, new List<RuntimeMeshCombiner.SubMeshToCombine>
-						{
-							new RuntimeMeshCombiner.SubMeshToCombine(gameObjectWithMesh.gameObject.transform, gameObjectWithMesh.meshFilter, gameObjectWithMesh.meshRenderer, j)
-						});
+						Dictionary<Material, List<RuntimeMeshCombiner.SubMeshToCombine>> dictionary2 = dictionary;
+						Material material2 = material;
+						List<RuntimeMeshCombiner.SubMeshToCombine> list = new List<RuntimeMeshCombiner.SubMeshToCombine>();
+						list.Add(new RuntimeMeshCombiner.SubMeshToCombine(gameObjectWithMesh.gameObject.transform, gameObjectWithMesh.meshFilter, gameObjectWithMesh.meshRenderer, j));
+						dictionary2.Add(material2, list);
 					}
 				}
 			}
@@ -215,53 +215,51 @@ namespace MTAssets.EasyMeshCombiner
 			{
 				num += gameObjectWithMesh2.meshFilter.sharedMesh.vertexCount;
 			}
-			List<Mesh> list = new List<Mesh>();
+			List<Mesh> list2 = new List<Mesh>();
 			foreach (KeyValuePair<Material, List<RuntimeMeshCombiner.SubMeshToCombine>> keyValuePair in dictionary)
 			{
 				List<RuntimeMeshCombiner.SubMeshToCombine> value = keyValuePair.Value;
-				List<CombineInstance> list2 = new List<CombineInstance>();
+				List<CombineInstance> list3 = new List<CombineInstance>();
 				for (int l = 0; l < value.Count; l++)
 				{
-					list2.Add(new CombineInstance
-					{
-						mesh = value[l].meshFilter.sharedMesh,
-						subMeshIndex = value[l].subMeshIndex,
-						transform = value[l].transform.localToWorldMatrix
-					});
+					CombineInstance combineInstance = default(CombineInstance);
+					combineInstance.mesh = value[l].meshFilter.sharedMesh;
+					combineInstance.subMeshIndex = value[l].subMeshIndex;
+					combineInstance.transform = value[l].transform.localToWorldMatrix;
+					list3.Add(combineInstance);
 				}
 				Mesh mesh = new Mesh();
 				if (num <= this.MAX_VERTICES_FOR_16BITS_MESH)
 				{
-					mesh.indexFormat = IndexFormat.UInt16;
+					mesh.indexFormat = 0;
 				}
 				if (num > this.MAX_VERTICES_FOR_16BITS_MESH)
 				{
-					mesh.indexFormat = IndexFormat.UInt32;
+					mesh.indexFormat = 1;
 				}
-				mesh.CombineMeshes(list2.ToArray(), true, true);
-				list.Add(mesh);
+				mesh.CombineMeshes(list3.ToArray(), true, true);
+				list2.Add(mesh);
 			}
-			List<CombineInstance> list3 = new List<CombineInstance>();
-			foreach (Mesh mesh2 in list)
+			List<CombineInstance> list4 = new List<CombineInstance>();
+			foreach (Mesh mesh2 in list2)
 			{
-				list3.Add(new CombineInstance
-				{
-					mesh = mesh2,
-					subMeshIndex = 0,
-					transform = Matrix4x4.identity
-				});
+				CombineInstance combineInstance2 = default(CombineInstance);
+				combineInstance2.mesh = mesh2;
+				combineInstance2.subMeshIndex = 0;
+				combineInstance2.transform = Matrix4x4.identity;
+				list4.Add(combineInstance2);
 			}
 			Mesh mesh3 = new Mesh();
 			if (num <= this.MAX_VERTICES_FOR_16BITS_MESH)
 			{
-				mesh3.indexFormat = IndexFormat.UInt16;
+				mesh3.indexFormat = 0;
 			}
 			if (num > this.MAX_VERTICES_FOR_16BITS_MESH)
 			{
-				mesh3.indexFormat = IndexFormat.UInt32;
+				mesh3.indexFormat = 1;
 			}
 			mesh3.name = base.gameObject.name + " (Temp Merge)";
-			mesh3.CombineMeshes(list3.ToArray(), false);
+			mesh3.CombineMeshes(list4.ToArray(), false);
 			mesh3.RecalculateBounds();
 			if (this.recalculateNormals)
 			{
@@ -276,12 +274,12 @@ namespace MTAssets.EasyMeshCombiner
 				mesh3.Optimize();
 			}
 			meshFilter.sharedMesh = mesh3;
-			List<Material> list4 = new List<Material>();
+			List<Material> list5 = new List<Material>();
 			foreach (KeyValuePair<Material, List<RuntimeMeshCombiner.SubMeshToCombine>> keyValuePair2 in dictionary)
 			{
-				list4.Add(keyValuePair2.Key);
+				list5.Add(keyValuePair2.Key);
 			}
-			meshRenderer.sharedMaterials = list4.ToArray();
+			meshRenderer.sharedMaterials = list5.ToArray();
 			if (this.afterMerge == RuntimeMeshCombiner.AfterMerge.DeactiveOriginalGameObjects)
 			{
 				foreach (RuntimeMeshCombiner.GameObjectWithMesh gameObjectWithMesh3 in validatedTargetGameObjects)

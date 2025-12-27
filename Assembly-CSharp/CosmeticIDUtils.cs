@@ -15,7 +15,7 @@ public static class CosmeticIDUtils
 		return CosmeticIDUtils._PlayFabIdToInt(playFabIdString, 1);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static int _PlayFabIdToInt(string playFabIdString, int start)
 	{
 		if (playFabIdString == null)
@@ -30,7 +30,7 @@ public static class CosmeticIDUtils
 		{
 			throw new ArgumentException("_PlayFabIdToInt: playFabId \"" + playFabIdString + "\" cannot be greater than 8 chars.");
 		}
-		if (playFabIdString[0] != 'L' || playFabIdString[playFabIdString.Length - 1] != '.')
+		if (playFabIdString.get_Chars(0) != 'L' || playFabIdString.get_Chars(playFabIdString.Length - 1) != '.')
 		{
 			throw new ArgumentException("PlayFabIdToIndexInCategory: playFabId must start with 'L' and end with '.', instead got " + playFabIdString + ".");
 		}
@@ -38,18 +38,18 @@ public static class CosmeticIDUtils
 		int num2 = 0;
 		for (int i = start; i <= num; i++)
 		{
-			char c = playFabIdString[i];
+			char c = playFabIdString.get_Chars(i);
 			if (c < 'A' || c > 'Z')
 			{
 				throw new ArgumentException("String must contain only uppercase letters A-Z.");
 			}
-			int num3 = (int)(playFabIdString[i] - 'A');
+			int num3 = (int)(playFabIdString.get_Chars(i) - 'A');
 			num2 += num3 * (int)math.pow(26f, (float)(num - i));
 		}
 		return num2;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static string IntToPlayFabId(int id)
 	{
 		if (id < 0)
@@ -66,8 +66,8 @@ public static class CosmeticIDUtils
 			for (int i = id; i > 0; i /= 26)
 			{
 				int num = i % 26;
-				char value = (char)(65 + num);
-				stringBuilder.Insert(0, value);
+				char c = (char)(65 + num);
+				stringBuilder.Insert(0, c);
 			}
 		}
 		stringBuilder.Insert(0, 'L');

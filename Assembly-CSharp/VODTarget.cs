@@ -41,7 +41,7 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 	{
 		if (VODTarget.AlertDisabled != null)
 		{
-			VODTarget.AlertDisabled(this);
+			VODTarget.AlertDisabled.Invoke(this);
 		}
 	}
 
@@ -49,7 +49,7 @@ public class VODTarget : ObservableBehavior, IBuildValidation
 	{
 		if (VODTarget.AlertEnabled != null)
 		{
-			VODTarget.AlertEnabled(this);
+			VODTarget.AlertEnabled.Invoke(this);
 		}
 	}
 

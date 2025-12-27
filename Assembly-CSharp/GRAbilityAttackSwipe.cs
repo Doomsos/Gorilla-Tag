@@ -81,13 +81,13 @@ public class GRAbilityAttackSwipe : GRAbilityBase
 			break;
 		case GRAbilityAttackSwipe.State.Attack:
 		{
-			float d = num - this.tellDuration;
-			Vector3 vector = this.initialPos + this.initialVel * d;
+			float num2 = num - this.tellDuration;
+			Vector3 vector = this.initialPos + this.initialVel * num2;
 			NavMeshHit navMeshHit;
-			if (NavMesh.SamplePosition(vector, out navMeshHit, 0.5f, this.walkableArea))
+			if (NavMesh.SamplePosition(vector, ref navMeshHit, 0.5f, this.walkableArea))
 			{
 				vector = navMeshHit.position;
-				if (NavMesh.Raycast(this.initialPos, vector, out navMeshHit, this.walkableArea))
+				if (NavMesh.Raycast(this.initialPos, vector, ref navMeshHit, this.walkableArea))
 				{
 					vector = navMeshHit.position;
 				}

@@ -20,7 +20,7 @@ public class TriggerOnJump : MonoBehaviour, ITickSystemTick
 		}
 		if (this._events != null)
 		{
-			this._events.Activate += this.OnActivate;
+			this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnActivate);
 		}
 		bool flag = !PhotonNetwork.InRoom && this.myRig != null && this.myRig.isOfflineVRRig;
 		RigContainer rigContainer;
@@ -40,7 +40,7 @@ public class TriggerOnJump : MonoBehaviour, ITickSystemTick
 		this.waitingForGrounding = false;
 		if (this._events != null)
 		{
-			this._events.Activate -= this.OnActivate;
+			this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnActivate);
 			Object.Destroy(this._events);
 			this._events = null;
 		}

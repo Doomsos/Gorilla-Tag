@@ -4,7 +4,7 @@ using Fusion;
 
 [NetworkStructWeaved(1)]
 [Serializable]
-[StructLayout(LayoutKind.Explicit, Size = 4)]
+[StructLayout(2, Size = 4)]
 public struct HitTargetStruct : INetworkStruct
 {
 	public HitTargetStruct(int v)

@@ -80,7 +80,7 @@ namespace GorillaNetworking
 				return null;
 			}
 			CosmeticItemInstance result;
-			if (!this.nameToCosmeticMap.TryGetValue(itemName, out result))
+			if (!this.nameToCosmeticMap.TryGetValue(itemName, ref result))
 			{
 				return null;
 			}

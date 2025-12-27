@@ -26,7 +26,7 @@ namespace CjLib
 				DebugUtil.s_materialPool = new Dictionary<int, Material>();
 			}
 			Material material;
-			if (!DebugUtil.s_materialPool.TryGetValue(num, out material) || material == null)
+			if (!DebugUtil.s_materialPool.TryGetValue(num, ref material) || material == null)
 			{
 				if (material == null)
 				{
@@ -116,12 +116,12 @@ namespace CjLib
 			Vector3[] array = new Vector3[numSegments + 1];
 			array[0] = center + from;
 			float num = 1f / (float)numSegments;
-			Quaternion rotation = QuaternionUtil.AxisAngle(normal, angle * num);
-			Vector3 vector = rotation * from;
+			Quaternion quaternion = QuaternionUtil.AxisAngle(normal, angle * num);
+			Vector3 vector = quaternion * from;
 			for (int i = 1; i <= numSegments; i++)
 			{
 				array[i] = center + vector;
-				vector = rotation * vector;
+				vector = quaternion * vector;
 			}
 			DebugUtil.DrawLineStrip(array, color, depthTest);
 		}

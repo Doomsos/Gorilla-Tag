@@ -8,14 +8,14 @@ namespace GorillaExtensions
 		public static TValue MinBy<TValue, TKey>(this IEnumerable<TValue> ts, Func<TValue, TKey> keyGetter) where TKey : struct, IComparable<TKey>
 		{
 			TValue result = default(TValue);
-			TKey? tkey = null;
+			TKey? tkey = default(TKey?);
 			foreach (TValue tvalue in ts)
 			{
-				TKey value = keyGetter(tvalue);
-				if (tkey == null || value.CompareTo(tkey.Value) < 0)
+				TKey tkey2 = keyGetter.Invoke(tvalue);
+				if (tkey == null || tkey2.CompareTo(tkey.Value) < 0)
 				{
 					result = tvalue;
-					tkey = new TKey?(value);
+					tkey = new TKey?(tkey2);
 				}
 			}
 			if (tkey == null)
@@ -29,7 +29,7 @@ namespace GorillaExtensions
 		{
 			foreach (T t in ts)
 			{
-				action(t);
+				action.Invoke(t);
 				yield return t;
 			}
 			IEnumerator<T> enumerator = null;

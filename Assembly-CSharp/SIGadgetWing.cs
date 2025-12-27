@@ -53,13 +53,13 @@ public class SIGadgetWing : SIGadget
 		{
 			return;
 		}
-		Vector3 lhs = this._lastWingPos - position;
+		Vector3 vector = this._lastWingPos - position;
 		Vector3 up = this.m_wingCenter.transform.up;
-		float num = Mathf.Max(Vector3.Dot(lhs, up), 0f);
+		float num = Mathf.Max(Vector3.Dot(vector, up), 0f);
 		double num2 = PhotonNetwork.Time - (double)GTPlayer.Instance.LastTouchedGroundAtNetworkTime;
 		float num3 = Mathf.Lerp(this.m_flapStrength, this.m_flapDecayedStrength, (float)num2 / this.m_decayDuration);
 		Vector3 force = up * (num * num3);
-		GTPlayer.Instance.AddForce(force, ForceMode.Impulse);
+		GTPlayer.Instance.AddForce(force, 1);
 		this._lastWingPos = position;
 	}
 

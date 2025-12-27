@@ -88,7 +88,7 @@ public class AnnouncementManager : MonoBehaviour
 	{
 		this._announcementString = data;
 		this._announcementData = JsonMapper.ToObject<SAnnouncementData>(this._announcementString);
-		if (!bool.TryParse(this._announcementData.ShowAnnouncement, out this._showAnnouncement))
+		if (!bool.TryParse(this._announcementData.ShowAnnouncement, ref this._showAnnouncement))
 		{
 			this._completedSetup = true;
 			Debug.LogError("[ANNOUNCEMENT] Failed to parse [ShowAnnouncement] with value [" + this._announcementData.ShowAnnouncement + "] to a bool, assuming false");

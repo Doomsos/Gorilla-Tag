@@ -132,17 +132,18 @@ public class SIGadgetSlipMitt : SIGadget
 	private void _HandleGTPlayerOnUpdateGravity(GTPlayer gtPlayer)
 	{
 		Transform handFollower = this._attachedHandState.handFollower;
-		Ray ray = new Ray(handFollower.position, handFollower.forward);
+		Ray ray;
+		ray..ctor(handFollower.position, handFollower.forward);
 		int value = gtPlayer.locomotionEnabledLayers.value;
-		float maxDistance = 1f;
-		float d = 20f;
-		int num = Physics.RaycastNonAlloc(ray, this._raycastHitResults, maxDistance, value, QueryTriggerInteraction.Ignore);
+		float num = 1f;
+		float num2 = 20f;
+		int num3 = Physics.RaycastNonAlloc(ray, this._raycastHitResults, num, value, 1);
 		RaycastHit[] raycastHitResults = this._raycastHitResults;
 		Vector3 gravity = Physics.gravity;
-		Vector3 vector = ray.direction * d;
-		Vector3 a = (num > 0) ? vector : gravity;
+		Vector3 vector = ray.direction * num2;
+		Vector3 vector2 = (num3 > 0) ? vector : gravity;
 		Draw.ingame.Arrow(ray.origin, ray.origin + ray.direction);
-		gtPlayer.AddForce(a * gtPlayer.scale, ForceMode.Acceleration);
+		gtPlayer.AddForce(vector2 * gtPlayer.scale, 5);
 	}
 
 	protected override void OnUpdateRemote(float dt)
@@ -204,9 +205,9 @@ public class SIGadgetSlipMitt : SIGadget
 
 	private float _CalculateDashSpeed(float currentYankSpeed)
 	{
-		float time = Mathf.InverseLerp(this.m_yankMinSpeed, this.m_yankMaxSpeed, currentYankSpeed);
-		float t = this.m_speedMappingCurve.Evaluate(time);
-		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, t);
+		float num = Mathf.InverseLerp(this.m_yankMinSpeed, this.m_yankMaxSpeed, currentYankSpeed);
+		float num2 = this.m_speedMappingCurve.Evaluate(num);
+		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, num2);
 	}
 
 	private void _PlayHaptic(float strengthMultiplier)

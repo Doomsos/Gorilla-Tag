@@ -116,11 +116,11 @@ public class DevConsole : MonoBehaviour, IDebugObject
 			this.Type = type;
 			this.Trace = trace;
 			StringBuilder stringBuilder = new StringBuilder();
-			string[] array = trace.Split("\n".ToCharArray(), StringSplitOptions.None);
+			string[] array = trace.Split("\n".ToCharArray(), 0);
 			for (int i = 0; i < array.Length; i++)
 			{
 				string line = array[i];
-				if (!DevConsole.tracebackScrubbing.Any((string scrubString) => line.Contains(scrubString)))
+				if (!Enumerable.Any<string>(DevConsole.tracebackScrubbing, (string scrubString) => line.Contains(scrubString)))
 				{
 					stringBuilder.AppendLine(line);
 				}
@@ -209,12 +209,12 @@ public class DevConsole : MonoBehaviour, IDebugObject
 			{
 				string[] array = logEntry.Trace.Split("\n".ToCharArray());
 				string text2 = "";
-				foreach (string str in array)
+				foreach (string text3 in array)
 				{
-					text2 = text2 + "    " + str + "\n";
+					text2 = text2 + "    " + text3 + "\n";
 				}
-				string text3 = string.Format("({0}) {1}\n{2}\n", logEntry.Type, logEntry.Message, text2);
-				if (text.Length + text3.Length > 3000)
+				string text4 = string.Format("({0}) {1}\n{2}\n", logEntry.Type, logEntry.Message, text2);
+				if (text.Length + text4.Length > 3000)
 				{
 					text += "```";
 					list2.Add(new DevConsole.MessagePayload.Block(text));

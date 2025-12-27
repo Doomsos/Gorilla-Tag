@@ -254,20 +254,20 @@ public class SnowballThrowable : HoldableObject
 		{
 			return;
 		}
-		Vector3 b = Vector3.zero;
+		Vector3 vector = Vector3.zero;
 		Rigidbody component = GorillaTagger.Instance.GetComponent<Rigidbody>();
 		if (component != null)
 		{
-			b = component.linearVelocity;
+			vector = component.linearVelocity;
 		}
-		Vector3 a = this.velocityEstimator.linearVelocity - b;
-		float magnitude = a.magnitude;
+		Vector3 vector2 = this.velocityEstimator.linearVelocity - vector;
+		float magnitude = vector2.magnitude;
 		if (magnitude > 0.001f)
 		{
 			float num = Mathf.Clamp(magnitude * this.linSpeedMultiplier, 0f, this.maxLinSpeed);
-			a *= num / magnitude;
+			vector2 *= num / magnitude;
 		}
-		Vector3 velocity = a + b;
+		Vector3 velocity = vector2 + vector;
 		Color32 throwableProjectileColor = this.targetRig.GetThrowableProjectileColor(this.isLeftHanded);
 		Transform transform = base.transform;
 		Vector3 position = transform.position;
@@ -380,11 +380,20 @@ public class SnowballThrowable : HoldableObject
 		this.SetSnowballActiveLocal(enable);
 	}
 
-	[GorillaSoundLookup]
-	public List<int> matDataIndexes = new List<int>
+	public SnowballThrowable()
 	{
-		32
-	};
+		List<int> list = new List<int>();
+		list.Add(32);
+		this.matDataIndexes = list;
+		this.linSpeedMultiplier = 1f;
+		this.maxLinSpeed = 12f;
+		this.randomColorHSVRanges = new GTColor.HSVRanges(0f, 1f, 0.7f, 1f, 1f, 1f);
+		this.destroyTimer = -1f;
+		base..ctor();
+	}
+
+	[GorillaSoundLookup]
+	public List<int> matDataIndexes;
 
 	[Tooltip("prefab to spawn from global object pools when thrown")]
 	public GameObject projectilePrefab;
@@ -397,16 +406,16 @@ public class SnowballThrowable : HoldableObject
 	public int throwableMakerIndex;
 
 	[Tooltip("Multiplier is applied to hand speed to get launch speed of the projectile")]
-	public float linSpeedMultiplier = 1f;
+	public float linSpeedMultiplier;
 
 	[Tooltip("Maximum launch speed of the projectile")]
-	public float maxLinSpeed = 12f;
+	public float maxLinSpeed;
 
 	[Space]
 	[FormerlySerializedAs("shouldColorize")]
 	public bool randomizeColor;
 
-	public GTColor.HSVRanges randomColorHSVRanges = new GTColor.HSVRanges(0f, 1f, 0.7f, 1f, 1f, 1f);
+	public GTColor.HSVRanges randomColorHSVRanges;
 
 	[Tooltip("Check this part only if we want to randomize the prefab meshes and projectile")]
 	public bool randomModelSelection;
@@ -430,7 +439,7 @@ public class SnowballThrowable : HoldableObject
 
 	protected int randModelIndex;
 
-	private float destroyTimer = -1f;
+	private float destroyTimer;
 
 	private XformOffset spawnOffset;
 }

@@ -51,7 +51,7 @@ public struct GTDateTimeSerializable : ISerializationCallbackReceiver
 			"yyyy-MM-dd HH:mm",
 			"yyyy-MM-dd",
 			"yyyy-MM"
-		}, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
+		}, CultureInfo.InvariantCulture, 0, ref result))
 		{
 			DateTime dateTime = result;
 			if (dateTime.Hour == 0 && dateTime.Minute == 0)

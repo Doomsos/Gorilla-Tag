@@ -53,16 +53,16 @@ public class GRAbilityAttackJump : GRAbilityBase
 				this.targetPos = this.agent.transform.position + this.agent.transform.forward * 0.5f;
 				if (this.target != null)
 				{
-					Vector3 a = this.target.transform.position - this.agent.transform.position;
-					this.targetPos = this.agent.transform.position + a * this.jumpLengthScale;
+					Vector3 vector = this.target.transform.position - this.agent.transform.position;
+					this.targetPos = this.agent.transform.position + vector * this.jumpLengthScale;
 					this.targetPos.y = this.target.transform.position.y;
 				}
 				float num2 = this.attackLandTime - this.jumpTime;
 				num2 = Mathf.Max(0.1f, num2);
 				this.initialPos = this.agent.transform.position;
-				Vector3 vector = this.targetPos - this.initialPos;
-				float y = vector.y;
-				vector.y = 0f;
+				Vector3 vector2 = this.targetPos - this.initialPos;
+				float y = vector2.y;
+				vector2.y = 0f;
 				float num3 = num2;
 				float y2 = 0f;
 				if (num3 > 0f)
@@ -70,7 +70,7 @@ public class GRAbilityAttackJump : GRAbilityBase
 					Vector3 gravity = Physics.gravity;
 					y2 = (y - 0.5f * gravity.y * num3 * num3) / num3;
 				}
-				this.initialVel = vector / num2;
+				this.initialVel = vector2 / num2;
 				this.initialVel.y = y2;
 				if (this.damageTrigger != null)
 				{
@@ -83,8 +83,8 @@ public class GRAbilityAttackJump : GRAbilityBase
 			break;
 		case GRAbilityAttackJump.State.Jump:
 		{
-			float d = (float)(num - (double)this.jumpTime);
-			Vector3 position = this.initialPos + this.initialVel * d + 0.5f * Physics.gravity * d * d;
+			float num4 = (float)(num - (double)this.jumpTime);
+			Vector3 position = this.initialPos + this.initialVel * num4 + 0.5f * Physics.gravity * num4 * num4;
 			this.root.position = position;
 			if (num > (double)this.attackLandTime)
 			{
@@ -94,11 +94,11 @@ public class GRAbilityAttackJump : GRAbilityBase
 				}
 				if (this.doReturnPhase)
 				{
-					float num4 = this.attackReturnTime - this.attackLandTime;
-					num4 = Mathf.Max(0.1f, num4);
-					Vector3 a2 = this.initialPos;
+					float num5 = this.attackReturnTime - this.attackLandTime;
+					num5 = Mathf.Max(0.1f, num5);
+					Vector3 vector3 = this.initialPos;
 					this.initialPos = this.agent.transform.position;
-					this.initialVel = (a2 - this.initialPos) / num4;
+					this.initialVel = (vector3 - this.initialPos) / num5;
 					this.state = GRAbilityAttackJump.State.Return;
 				}
 				else
@@ -110,8 +110,8 @@ public class GRAbilityAttackJump : GRAbilityBase
 		}
 		case GRAbilityAttackJump.State.Return:
 		{
-			float d2 = (float)(num - (double)this.attackLandTime);
-			Vector3 position2 = this.initialPos + this.initialVel * d2;
+			float num6 = (float)(num - (double)this.attackLandTime);
+			Vector3 position2 = this.initialPos + this.initialVel * num6;
 			this.root.position = position2;
 			if (num > (double)this.attackReturnTime)
 			{

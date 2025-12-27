@@ -30,10 +30,10 @@ public class CustomMapsGrabbablesController : MonoBehaviour, IGameEntityComponen
 			return;
 		}
 		base.transform.parent = MapSpawnManager.instance.transform;
-		byte enemyTypeIndex;
-		GrabbableEntity.UnpackCreateData(this.entity.createData, out enemyTypeIndex, out this.luaAgentID);
+		byte b;
+		GrabbableEntity.UnpackCreateData(this.entity.createData, ref b, ref this.luaAgentID);
 		MapEntity mapEntity;
-		if (!MapSpawnManager.instance.SpawnEntity((int)enemyTypeIndex, out mapEntity))
+		if (!MapSpawnManager.instance.SpawnEntity((int)b, ref mapEntity))
 		{
 			GTDev.LogError<string>("CustomMapsGrabbablesController::OnEntityInit could not spawn grabbable", null);
 			Object.Destroy(base.gameObject);

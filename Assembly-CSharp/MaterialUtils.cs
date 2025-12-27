@@ -13,7 +13,7 @@ public static class MaterialUtils
 	public static void SwapMaterial(MeshAndMaterials meshAndMaterial, bool isOnToOff)
 	{
 		List<Material> list;
-		using (ListPool<Material>.Get(out list))
+		using (ListPool<Material>.Get(ref list))
 		{
 			meshAndMaterial.meshRenderer.GetSharedMaterials(list);
 			for (int i = 0; i < list.Count; i++)

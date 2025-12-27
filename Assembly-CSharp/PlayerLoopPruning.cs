@@ -8,46 +8,44 @@ public class PlayerLoopPruning : MonoBehaviour
 {
 	private void Start()
 	{
-		this.isAndroid = (Application.platform == RuntimePlatform.Android);
+		this.isAndroid = (Application.platform == 11);
 		PlayerLoopSystem currentPlayerLoop = PlayerLoop.GetCurrentPlayerLoop();
 		PlayerLoop.SetPlayerLoop(this.RemoveSystem<PreLateUpdate>(currentPlayerLoop));
 	}
 
 	private PlayerLoopSystem RemoveSystem<T>(in PlayerLoopSystem loopSystem) where T : struct
 	{
-		PlayerLoopSystem result = new PlayerLoopSystem
-		{
-			loopConditionFunction = loopSystem.loopConditionFunction,
-			type = loopSystem.type,
-			updateDelegate = loopSystem.updateDelegate,
-			updateFunction = loopSystem.updateFunction
-		};
+		PlayerLoopSystem playerLoopSystem = default(PlayerLoopSystem);
+		playerLoopSystem.loopConditionFunction = loopSystem.loopConditionFunction;
+		playerLoopSystem.type = loopSystem.type;
+		playerLoopSystem.updateDelegate = loopSystem.updateDelegate;
+		playerLoopSystem.updateFunction = loopSystem.updateFunction;
+		PlayerLoopSystem result = playerLoopSystem;
 		List<PlayerLoopSystem> list = new List<PlayerLoopSystem>();
 		if (loopSystem.subSystemList != null)
 		{
 			for (int i = 0; i < loopSystem.subSystemList.Length; i++)
 			{
-				PlayerLoopSystem playerLoopSystem = loopSystem.subSystemList[i];
-				PlayerLoopSystem item = new PlayerLoopSystem
-				{
-					loopConditionFunction = playerLoopSystem.loopConditionFunction,
-					type = playerLoopSystem.type,
-					updateDelegate = playerLoopSystem.updateDelegate,
-					updateFunction = playerLoopSystem.updateFunction
-				};
-				if (playerLoopSystem.subSystemList != null)
+				PlayerLoopSystem playerLoopSystem2 = loopSystem.subSystemList[i];
+				playerLoopSystem = default(PlayerLoopSystem);
+				playerLoopSystem.loopConditionFunction = playerLoopSystem2.loopConditionFunction;
+				playerLoopSystem.type = playerLoopSystem2.type;
+				playerLoopSystem.updateDelegate = playerLoopSystem2.updateDelegate;
+				playerLoopSystem.updateFunction = playerLoopSystem2.updateFunction;
+				PlayerLoopSystem playerLoopSystem3 = playerLoopSystem;
+				if (playerLoopSystem2.subSystemList != null)
 				{
 					List<PlayerLoopSystem> list2 = new List<PlayerLoopSystem>();
-					for (int j = 0; j < playerLoopSystem.subSystemList.Length; j++)
+					for (int j = 0; j < playerLoopSystem2.subSystemList.Length; j++)
 					{
-						if (!this.removeSubsystemList.Contains(playerLoopSystem.subSystemList[j].type.Name) && (!this.isAndroid || !this.androidSubsystemExtras.Contains(playerLoopSystem.subSystemList[j].type.Name)))
+						if (!this.removeSubsystemList.Contains(playerLoopSystem2.subSystemList[j].type.Name) && (!this.isAndroid || !this.androidSubsystemExtras.Contains(playerLoopSystem2.subSystemList[j].type.Name)))
 						{
-							list2.Add(playerLoopSystem.subSystemList[j]);
+							list2.Add(playerLoopSystem2.subSystemList[j]);
 						}
 					}
-					item.subSystemList = list2.ToArray();
+					playerLoopSystem3.subSystemList = list2.ToArray();
 				}
-				list.Add(item);
+				list.Add(playerLoopSystem3);
 			}
 		}
 		result.subSystemList = list.ToArray();

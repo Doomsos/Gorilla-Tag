@@ -160,6 +160,6 @@ public class GTSplineAnimateFixedUpdater : NetworkComponent
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("Netdata", 0, 1)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private float _Netdata;
 }

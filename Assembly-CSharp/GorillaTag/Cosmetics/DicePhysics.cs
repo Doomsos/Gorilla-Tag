@@ -16,10 +16,10 @@ namespace GorillaTag.Cosmetics
 				{
 					return Mathf.Clamp(this.forcedLandingSide, 1, 20);
 				}
-				int value;
-				if (this.CheckCosmeticRollOverride(out value))
+				int num;
+				if (this.CheckCosmeticRollOverride(out num))
 				{
-					return Mathf.Clamp(value, 1, 20);
+					return Mathf.Clamp(num, 1, 20);
 				}
 				return Random.Range(1, 21);
 			}
@@ -29,10 +29,10 @@ namespace GorillaTag.Cosmetics
 				{
 					return Mathf.Clamp(this.forcedLandingSide, 1, 6);
 				}
-				int value2;
-				if (this.CheckCosmeticRollOverride(out value2))
+				int num2;
+				if (this.CheckCosmeticRollOverride(out num2))
 				{
-					return Mathf.Clamp(value2, 1, 6);
+					return Mathf.Clamp(num2, 1, 6);
 				}
 				return Random.Range(1, 7);
 			}
@@ -98,7 +98,7 @@ namespace GorillaTag.Cosmetics
 			double num = PhotonNetwork.InRoom ? PhotonNetwork.Time : ((double)Time.time);
 			float num2 = (float)(num - this.throwStartTime);
 			RaycastHit raycastHit;
-			if (Physics.Raycast(base.transform.position, Vector3.down, out raycastHit, 0.1f * this.scale, this.surfaceLayers.value, QueryTriggerInteraction.Ignore))
+			if (Physics.Raycast(base.transform.position, Vector3.down, ref raycastHit, 0.1f * this.scale, this.surfaceLayers.value, 1))
 			{
 				Vector3 normal = raycastHit.normal;
 				Vector3 sideDirection = this.GetSideDirection(this.landingSide);
@@ -110,8 +110,8 @@ namespace GorillaTag.Cosmetics
 				float magnitude = this.rb.linearVelocity.magnitude;
 				float num6 = Mathf.Clamp01(1f - Mathf.Min(magnitude, 1f));
 				float num7 = Mathf.Max(num5, num6);
-				Vector3 torque = this.strength * (num7 * num4 * normalized) - this.damping * this.rb.angularVelocity;
-				this.rb.AddTorque(torque, ForceMode.Acceleration);
+				Vector3 vector2 = this.strength * (num7 * num4 * normalized) - this.damping * this.rb.angularVelocity;
+				this.rb.AddTorque(vector2, 5);
 				if (!this.rb.isKinematic && magnitude < 0.01f && num3 < 2f)
 				{
 					this.rb.isKinematic = true;

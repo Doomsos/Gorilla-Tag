@@ -8,7 +8,7 @@ using UnityEngine;
 namespace GorillaTagScripts
 {
 	[NetworkStructWeaved(13)]
-	[StructLayout(LayoutKind.Explicit, Size = 52)]
+	[StructLayout(2, Size = 52)]
 	public struct FlowersDataStruct : INetworkStruct
 	{
 		public int FlowerCount { readonly get; set; }

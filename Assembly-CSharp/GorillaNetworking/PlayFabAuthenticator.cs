@@ -74,16 +74,16 @@ namespace GorillaNetworking
 			{
 				PlayFabAuthenticator.instance.mothershipAuthenticator = (MothershipAuthenticator.Instance ?? PlayFabAuthenticator.instance.gameObject.GetOrAddComponent<MothershipAuthenticator>());
 				MothershipAuthenticator mothershipAuthenticator = PlayFabAuthenticator.instance.mothershipAuthenticator;
-				mothershipAuthenticator.OnLoginSuccess = (Action)Delegate.Combine(mothershipAuthenticator.OnLoginSuccess, new Action(delegate()
+				mothershipAuthenticator.OnLoginSuccess = (Action)Delegate.Combine(mothershipAuthenticator.OnLoginSuccess, delegate()
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
-				}));
+				});
 				MothershipAuthenticator mothershipAuthenticator2 = PlayFabAuthenticator.instance.mothershipAuthenticator;
-				mothershipAuthenticator2.OnLoginFailure = (Action<string, string, string>)Delegate.Combine(mothershipAuthenticator2.OnLoginFailure, new Action<string, string, string>(delegate(string errorMessage, string errorCode, string traceId)
+				mothershipAuthenticator2.OnLoginFailure = (Action<string, string, string>)Delegate.Combine(mothershipAuthenticator2.OnLoginFailure, delegate(string errorMessage, string errorCode, string traceId)
 				{
 					this.loginFailed = true;
 					this.ShowMothershipAuthErrorMessage(errorMessage, errorCode, traceId);
-				}));
+				});
 				PlayFabAuthenticator.instance.mothershipAuthenticator.BeginLoginFlow();
 			}
 		}
@@ -94,12 +94,12 @@ namespace GorillaNetworking
 
 		private void OnEnable()
 		{
-			NetworkSystem.Instance.OnCustomAuthenticationResponse += this.OnCustomAuthenticationResponse;
+			NetworkSystem.Instance.OnCustomAuthenticationResponse += new Action<Dictionary<string, object>>(this.OnCustomAuthenticationResponse);
 		}
 
 		private void OnDisable()
 		{
-			NetworkSystem.Instance.OnCustomAuthenticationResponse -= this.OnCustomAuthenticationResponse;
+			NetworkSystem.Instance.OnCustomAuthenticationResponse -= new Action<Dictionary<string, object>>(this.OnCustomAuthenticationResponse);
 			SteamAuthTicket steamAuthTicket = this.steamAuthTicketForPhoton;
 			if (steamAuthTicket != null)
 			{
@@ -131,7 +131,7 @@ namespace GorillaNetworking
 				steamAuthTicket.Dispose();
 			}
 			object obj;
-			if (response.TryGetValue("SteamAuthIdForPhoton", out obj))
+			if (response.TryGetValue("SteamAuthIdForPhoton", ref obj))
 			{
 				string text = obj as string;
 				if (text != null)
@@ -231,7 +231,7 @@ namespace GorillaNetworking
 			{
 				this.steamAuthIdForPhoton = response.SteamAuthIdForPhoton;
 				DateTime accountCreationDateTime;
-				if (DateTime.TryParse(response.AccountCreationIsoTimestamp, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out accountCreationDateTime))
+				if (DateTime.TryParse(response.AccountCreationIsoTimestamp, CultureInfo.InvariantCulture, 128, ref accountCreationDateTime))
 				{
 					base.StartCoroutine(this.VerifyKidAuthenticated(accountCreationDateTime));
 				}
@@ -259,37 +259,16 @@ namespace GorillaNetworking
 
 		private void AuthenticateWithPhoton()
 		{
-			this.photonAuthenticator.SetCustomAuthenticationParameters(new Dictionary<string, object>
-			{
-				{
-					"AppId",
-					PlayFabSettings.TitleId
-				},
-				{
-					"AppVersion",
-					NetworkSystemConfig.AppVersion ?? "-1"
-				},
-				{
-					"Ticket",
-					this._sessionTicket
-				},
-				{
-					"Nonce",
-					this._nonce
-				},
-				{
-					"MothershipEnvId",
-					MothershipClientApiUnity.EnvironmentId
-				},
-				{
-					"MothershipDeploymentId",
-					MothershipClientApiUnity.DeploymentId
-				},
-				{
-					"MothershipToken",
-					MothershipClientContext.Token
-				}
-			});
+			PhotonAuthenticator photonAuthenticator = this.photonAuthenticator;
+			Dictionary<string, object> dictionary = new Dictionary<string, object>();
+			dictionary.Add("AppId", PlayFabSettings.TitleId);
+			dictionary.Add("AppVersion", NetworkSystemConfig.AppVersion ?? "-1");
+			dictionary.Add("Ticket", this._sessionTicket);
+			dictionary.Add("Nonce", this._nonce);
+			dictionary.Add("MothershipEnvId", MothershipClientApiUnity.EnvironmentId);
+			dictionary.Add("MothershipDeploymentId", MothershipClientApiUnity.DeploymentId);
+			dictionary.Add("MothershipToken", MothershipClientContext.Token);
+			photonAuthenticator.SetCustomAuthenticationParameters(dictionary);
 			this.GetPlayerDisplayName(this._playFabPlayerIdCache);
 			GorillaServer.Instance.AddOrRemoveDLCOwnership(delegate(ExecuteFunctionResult result)
 			{
@@ -451,10 +430,10 @@ namespace GorillaNetworking
 			request.SetRequestHeader("Content-Type", "application/json");
 			request.timeout = 30;
 			yield return request.SendWebRequest();
-			if (request.result != UnityWebRequest.Result.ConnectionError && request.result != UnityWebRequest.Result.ProtocolError)
+			if (request.result != 2 && request.result != 3)
 			{
-				PlayFabAuthenticator.PlayfabAuthResponseData obj = JsonUtility.FromJson<PlayFabAuthenticator.PlayfabAuthResponseData>(request.downloadHandler.text);
-				callback(obj);
+				PlayFabAuthenticator.PlayfabAuthResponseData playfabAuthResponseData = JsonUtility.FromJson<PlayFabAuthenticator.PlayfabAuthResponseData>(request.downloadHandler.text);
+				callback.Invoke(playfabAuthResponseData);
 			}
 			else
 			{
@@ -463,14 +442,14 @@ namespace GorillaNetworking
 					Debug.LogError(string.Format("HTTP {0}: {1}, with body: {2}", request.responseCode, request.error, request.downloadHandler.text));
 					PlayFabAuthenticator.BanInfo banInfo = JsonUtility.FromJson<PlayFabAuthenticator.BanInfo>(request.downloadHandler.text);
 					this.ShowBanMessage(banInfo);
-					callback(null);
+					callback.Invoke(null);
 				}
-				if (request.result == UnityWebRequest.Result.ProtocolError && request.responseCode != 400L)
+				if (request.result == 3 && request.responseCode != 400L)
 				{
 					retry = true;
 					Debug.LogError(string.Format("HTTP {0} error: {1} message:{2}", request.responseCode, request.error, request.downloadHandler.text));
 				}
-				else if (request.result == UnityWebRequest.Result.ConnectionError)
+				else if (request.result == 2)
 				{
 					retry = true;
 					Debug.LogError("NETWORK ERROR: " + request.error + "\nMessage: " + request.downloadHandler.text);
@@ -493,7 +472,7 @@ namespace GorillaNetworking
 				else
 				{
 					Debug.LogError("Maximum retries attempted. Please check your network connection.");
-					callback(null);
+					callback.Invoke(null);
 					this.ShowPlayFabAuthErrorMessage(request.downloadHandler.text);
 				}
 			}
@@ -506,7 +485,7 @@ namespace GorillaNetworking
 			{
 				StringBuilder stringBuilder = new StringBuilder("UNABLE TO AUTHENTICATE WITH MOTHERSHIP.\nREASON: " + errorMessage);
 				StringBuilder stringBuilder2 = stringBuilder;
-				if (!char.IsPunctuation(stringBuilder2[stringBuilder2.Length - 1]))
+				if (!char.IsPunctuation(stringBuilder2.get_Chars(stringBuilder2.Length - 1)))
 				{
 					stringBuilder.Append('.');
 				}
@@ -520,9 +499,9 @@ namespace GorillaNetworking
 				}
 				this.gorillaComputer.GeneralFailureMessage(stringBuilder.ToString());
 			}
-			catch (Exception arg)
+			catch (Exception ex)
 			{
-				Debug.LogError(string.Format("Failed to show Mothership auth error message: {0}", arg));
+				Debug.LogError(string.Format("Failed to show Mothership auth error message: {0}", ex));
 			}
 		}
 
@@ -533,15 +512,15 @@ namespace GorillaNetworking
 				PlayFabAuthenticator.ErrorInfo errorInfo = JsonUtility.FromJson<PlayFabAuthenticator.ErrorInfo>(errorJson);
 				StringBuilder stringBuilder = new StringBuilder("UNABLE TO AUTHENTICATE WITH PLAYFAB.\nREASON: " + errorInfo.Message);
 				StringBuilder stringBuilder2 = stringBuilder;
-				if (!char.IsPunctuation(stringBuilder2[stringBuilder2.Length - 1]))
+				if (!char.IsPunctuation(stringBuilder2.get_Chars(stringBuilder2.Length - 1)))
 				{
 					stringBuilder.Append('.');
 				}
 				this.gorillaComputer.GeneralFailureMessage(stringBuilder.ToString());
 			}
-			catch (Exception arg)
+			catch (Exception ex)
 			{
-				Debug.LogError(string.Format("Failed to show PlayFab auth error message: {0}", arg));
+				Debug.LogError(string.Format("Failed to show PlayFab auth error message: {0}", ex));
 			}
 		}
 
@@ -561,9 +540,9 @@ namespace GorillaNetworking
 					}
 				}
 			}
-			catch (Exception arg)
+			catch (Exception ex)
 			{
-				Debug.LogError(string.Format("Failed to show ban message: {0}", arg));
+				Debug.LogError(string.Format("Failed to show ban message: {0}", ex));
 			}
 		}
 
@@ -578,22 +557,22 @@ namespace GorillaNetworking
 			request.SetRequestHeader("Content-Type", "application/json");
 			request.timeout = 30;
 			yield return request.SendWebRequest();
-			if (request.result != UnityWebRequest.Result.ConnectionError && request.result != UnityWebRequest.Result.ProtocolError)
+			if (request.result != 2 && request.result != 3)
 			{
 				if (request.responseCode == 200L)
 				{
-					PlayFabAuthenticator.CachePlayFabIdResponse obj = JsonUtility.FromJson<PlayFabAuthenticator.CachePlayFabIdResponse>(request.downloadHandler.text);
-					callback(obj);
+					PlayFabAuthenticator.CachePlayFabIdResponse cachePlayFabIdResponse = JsonUtility.FromJson<PlayFabAuthenticator.CachePlayFabIdResponse>(request.downloadHandler.text);
+					callback.Invoke(cachePlayFabIdResponse);
 				}
 			}
-			else if (request.result == UnityWebRequest.Result.ProtocolError && request.responseCode != 400L)
+			else if (request.result == 3 && request.responseCode != 400L)
 			{
 				retry = true;
 				Debug.LogError(string.Format("HTTP {0} error: {1}", request.responseCode, request.error));
 			}
 			else
 			{
-				retry = (request.result != UnityWebRequest.Result.ConnectionError || true);
+				retry = (request.result != 2 || true);
 			}
 			if (retry)
 			{
@@ -618,7 +597,7 @@ namespace GorillaNetworking
 				else
 				{
 					Debug.LogError("Maximum retries attempted. Please check your network connection.");
-					callback(null);
+					callback.Invoke(null);
 					this.ShowPlayFabAuthErrorMessage(request.downloadHandler.text);
 				}
 			}
@@ -637,7 +616,7 @@ namespace GorillaNetworking
 			Action<bool> onSafetyUpdate = this.OnSafetyUpdate;
 			if (onSafetyUpdate != null)
 			{
-				onSafetyUpdate(isSafety);
+				onSafetyUpdate.Invoke(isSafety);
 			}
 			Debug.Log("[KID] Setting safety to: [" + isSafety.ToString() + "]");
 			this.isSafeAccount = isSafety;

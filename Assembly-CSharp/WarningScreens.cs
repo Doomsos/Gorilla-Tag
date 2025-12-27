@@ -94,7 +94,7 @@ public class WarningScreens : MonoBehaviour
 		{
 			return;
 		}
-		onLeftButtonPressedAction();
+		onLeftButtonPressedAction.Invoke();
 	}
 
 	public static void OnRightButtonClicked()
@@ -111,7 +111,7 @@ public class WarningScreens : MonoBehaviour
 		{
 			return;
 		}
-		onRightButtonPressedAction();
+		onRightButtonPressedAction.Invoke();
 	}
 
 	private static WarningScreens _activeReference;

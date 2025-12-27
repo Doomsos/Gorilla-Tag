@@ -16,19 +16,18 @@ public class GRAbilityChase : GRAbilityBase
 		{
 			int num = 8;
 			GRAbilityChase.targetOffsets = new List<Vector3>(num);
-			float x2 = 1f;
+			float num2 = 1f;
 			for (int i = 0; i < num; i++)
 			{
-				Vector3 vector = new Vector3(x2, 0f, 0f);
+				Vector3 vector;
+				vector..ctor(num2, 0f, 0f);
 				vector = Quaternion.Euler(0f, (float)i / (float)num * 360f, 0f) * vector;
 				GRAbilityChase.targetOffsets.Add(vector);
 			}
 			Random random = new Random();
-			List<Vector3> collection = (from x in GRAbilityChase.targetOffsets
-			orderby random.Next()
-			select x).ToList<Vector3>();
+			List<Vector3> list = Enumerable.ToList<Vector3>(Enumerable.OrderBy<Vector3, int>(GRAbilityChase.targetOffsets, (Vector3 x) => random.Next()));
 			GRAbilityChase.targetOffsets.Clear();
-			GRAbilityChase.targetOffsets.AddRange(collection);
+			GRAbilityChase.targetOffsets.AddRange(list);
 		}
 		if (this.attributes && this.chaseSpeed == 0f)
 		{
@@ -84,8 +83,8 @@ public class GRAbilityChase : GRAbilityBase
 
 	public static Vector3 GetMoveTargetOffset(Vector3 targetPos, GameEntity attackingEntity)
 	{
-		int index = attackingEntity.id.index % GRAbilityChase.targetOffsets.Count;
-		return GRAbilityChase.targetOffsets[index];
+		int num = attackingEntity.id.index % GRAbilityChase.targetOffsets.Count;
+		return GRAbilityChase.targetOffsets[num];
 	}
 
 	public float chaseSpeed;

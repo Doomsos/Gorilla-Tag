@@ -8,12 +8,12 @@ public class FixedScrollbarSize : MonoBehaviour
 	{
 		this.EnforceScrollbarSize();
 		CanvasUpdateRegistry.instance.Equals(null);
-		Canvas.willRenderCanvases += this.EnforceScrollbarSize;
+		Canvas.willRenderCanvases += new Canvas.WillRenderCanvases(this.EnforceScrollbarSize);
 	}
 
 	private void OnDisable()
 	{
-		Canvas.willRenderCanvases -= this.EnforceScrollbarSize;
+		Canvas.willRenderCanvases -= new Canvas.WillRenderCanvases(this.EnforceScrollbarSize);
 	}
 
 	private void EnforceScrollbarSize()

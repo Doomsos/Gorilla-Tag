@@ -35,143 +35,72 @@ public static class XSceneRefGlobalHub
 
 	public static bool TryResolve(SceneIndex sceneIndex, int ID, out XSceneRefTarget result)
 	{
-		return XSceneRefGlobalHub.registry[(int)sceneIndex].TryGetValue(ID, out result);
+		return XSceneRefGlobalHub.registry[(int)sceneIndex].TryGetValue(ID, ref result);
 	}
 
-	private static List<Dictionary<int, XSceneRefTarget>> registry = new List<Dictionary<int, XSceneRefTarget>>
+	// Note: this type is marked as 'beforefieldinit'.
+	static XSceneRefGlobalHub()
 	{
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		},
-		new Dictionary<int, XSceneRefTarget>
-		{
-			{
-				0,
-				null
-			}
-		}
-	};
+		List<Dictionary<int, XSceneRefTarget>> list = new List<Dictionary<int, XSceneRefTarget>>();
+		Dictionary<int, XSceneRefTarget> dictionary = new Dictionary<int, XSceneRefTarget>();
+		dictionary.Add(0, null);
+		list.Add(dictionary);
+		Dictionary<int, XSceneRefTarget> dictionary2 = new Dictionary<int, XSceneRefTarget>();
+		dictionary2.Add(0, null);
+		list.Add(dictionary2);
+		Dictionary<int, XSceneRefTarget> dictionary3 = new Dictionary<int, XSceneRefTarget>();
+		dictionary3.Add(0, null);
+		list.Add(dictionary3);
+		Dictionary<int, XSceneRefTarget> dictionary4 = new Dictionary<int, XSceneRefTarget>();
+		dictionary4.Add(0, null);
+		list.Add(dictionary4);
+		Dictionary<int, XSceneRefTarget> dictionary5 = new Dictionary<int, XSceneRefTarget>();
+		dictionary5.Add(0, null);
+		list.Add(dictionary5);
+		Dictionary<int, XSceneRefTarget> dictionary6 = new Dictionary<int, XSceneRefTarget>();
+		dictionary6.Add(0, null);
+		list.Add(dictionary6);
+		Dictionary<int, XSceneRefTarget> dictionary7 = new Dictionary<int, XSceneRefTarget>();
+		dictionary7.Add(0, null);
+		list.Add(dictionary7);
+		Dictionary<int, XSceneRefTarget> dictionary8 = new Dictionary<int, XSceneRefTarget>();
+		dictionary8.Add(0, null);
+		list.Add(dictionary8);
+		Dictionary<int, XSceneRefTarget> dictionary9 = new Dictionary<int, XSceneRefTarget>();
+		dictionary9.Add(0, null);
+		list.Add(dictionary9);
+		Dictionary<int, XSceneRefTarget> dictionary10 = new Dictionary<int, XSceneRefTarget>();
+		dictionary10.Add(0, null);
+		list.Add(dictionary10);
+		Dictionary<int, XSceneRefTarget> dictionary11 = new Dictionary<int, XSceneRefTarget>();
+		dictionary11.Add(0, null);
+		list.Add(dictionary11);
+		Dictionary<int, XSceneRefTarget> dictionary12 = new Dictionary<int, XSceneRefTarget>();
+		dictionary12.Add(0, null);
+		list.Add(dictionary12);
+		Dictionary<int, XSceneRefTarget> dictionary13 = new Dictionary<int, XSceneRefTarget>();
+		dictionary13.Add(0, null);
+		list.Add(dictionary13);
+		Dictionary<int, XSceneRefTarget> dictionary14 = new Dictionary<int, XSceneRefTarget>();
+		dictionary14.Add(0, null);
+		list.Add(dictionary14);
+		Dictionary<int, XSceneRefTarget> dictionary15 = new Dictionary<int, XSceneRefTarget>();
+		dictionary15.Add(0, null);
+		list.Add(dictionary15);
+		Dictionary<int, XSceneRefTarget> dictionary16 = new Dictionary<int, XSceneRefTarget>();
+		dictionary16.Add(0, null);
+		list.Add(dictionary16);
+		Dictionary<int, XSceneRefTarget> dictionary17 = new Dictionary<int, XSceneRefTarget>();
+		dictionary17.Add(0, null);
+		list.Add(dictionary17);
+		Dictionary<int, XSceneRefTarget> dictionary18 = new Dictionary<int, XSceneRefTarget>();
+		dictionary18.Add(0, null);
+		list.Add(dictionary18);
+		Dictionary<int, XSceneRefTarget> dictionary19 = new Dictionary<int, XSceneRefTarget>();
+		dictionary19.Add(0, null);
+		list.Add(dictionary19);
+		XSceneRefGlobalHub.registry = list;
+	}
+
+	private static List<Dictionary<int, XSceneRefTarget>> registry;
 }

@@ -212,7 +212,7 @@ namespace LitJson
 			}
 		}
 
-		object IDictionary.this[object key]
+		object IDictionary.Item
 		{
 			get
 			{
@@ -229,7 +229,7 @@ namespace LitJson
 			}
 		}
 
-		object IOrderedDictionary.this[int idx]
+		object IOrderedDictionary.Item
 		{
 			get
 			{
@@ -239,15 +239,15 @@ namespace LitJson
 			set
 			{
 				this.EnsureDictionary();
-				JsonData value2 = this.ToJsonData(value);
+				JsonData jsonData = this.ToJsonData(value);
 				KeyValuePair<string, JsonData> keyValuePair = this.object_list[idx];
-				this.inst_object[keyValuePair.Key] = value2;
-				KeyValuePair<string, JsonData> value3 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value2);
-				this.object_list[idx] = value3;
+				this.inst_object[keyValuePair.Key] = jsonData;
+				KeyValuePair<string, JsonData> keyValuePair2 = new KeyValuePair<string, JsonData>(keyValuePair.Key, jsonData);
+				this.object_list[idx] = keyValuePair2;
 			}
 		}
 
-		object IList.this[int index]
+		object IList.Item
 		{
 			get
 			{
@@ -313,8 +313,8 @@ namespace LitJson
 				else
 				{
 					KeyValuePair<string, JsonData> keyValuePair = this.object_list[index];
-					KeyValuePair<string, JsonData> value2 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value);
-					this.object_list[index] = value2;
+					KeyValuePair<string, JsonData> keyValuePair2 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value);
+					this.object_list[index] = keyValuePair2;
 					this.inst_object[keyValuePair.Key] = value;
 				}
 				this.json = null;
@@ -467,10 +467,10 @@ namespace LitJson
 
 		void IDictionary.Add(object key, object value)
 		{
-			JsonData value2 = this.ToJsonData(value);
-			this.EnsureDictionary().Add(key, value2);
-			KeyValuePair<string, JsonData> item = new KeyValuePair<string, JsonData>((string)key, value2);
-			this.object_list.Add(item);
+			JsonData jsonData = this.ToJsonData(value);
+			this.EnsureDictionary().Add(key, jsonData);
+			KeyValuePair<string, JsonData> keyValuePair = new KeyValuePair<string, JsonData>((string)key, jsonData);
+			this.object_list.Add(keyValuePair);
 			this.json = null;
 		}
 
@@ -488,7 +488,7 @@ namespace LitJson
 
 		IDictionaryEnumerator IDictionary.GetEnumerator()
 		{
-			return ((IOrderedDictionary)this).GetEnumerator();
+			return this.GetEnumerator();
 		}
 
 		void IDictionary.Remove(object key)
@@ -648,10 +648,10 @@ namespace LitJson
 		void IOrderedDictionary.Insert(int idx, object key, object value)
 		{
 			string text = (string)key;
-			JsonData value2 = this.ToJsonData(value);
-			this[text] = value2;
-			KeyValuePair<string, JsonData> item = new KeyValuePair<string, JsonData>(text, value2);
-			this.object_list.Insert(idx, item);
+			JsonData jsonData = this.ToJsonData(value);
+			this[text] = jsonData;
+			KeyValuePair<string, JsonData> keyValuePair = new KeyValuePair<string, JsonData>(text, jsonData);
+			this.object_list.Insert(idx, keyValuePair);
 		}
 
 		void IOrderedDictionary.RemoveAt(int idx)
@@ -771,21 +771,21 @@ namespace LitJson
 
 		public int Add(object value)
 		{
-			JsonData value2 = this.ToJsonData(value);
+			JsonData jsonData = this.ToJsonData(value);
 			this.json = null;
-			return this.EnsureList().Add(value2);
+			return this.EnsureList().Add(jsonData);
 		}
 
 		public void Clear()
 		{
 			if (this.IsObject)
 			{
-				((IDictionary)this).Clear();
+				this.Clear();
 				return;
 			}
 			if (this.IsArray)
 			{
-				((IList)this).Clear();
+				this.Clear();
 				return;
 			}
 		}

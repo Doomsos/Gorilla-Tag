@@ -65,29 +65,29 @@ public class CustomMapsAccessScreen : CustomMapsTerminalScreen
 	public void SetDriverName()
 	{
 		bool flag = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
-		string str;
+		string text;
 		if (NetworkSystem.Instance.InRoom)
 		{
 			NetPlayer netPlayerByID = NetworkSystem.Instance.GetNetPlayerByID(CustomMapsTerminal.GetDriverID());
-			str = netPlayerByID.DefaultName;
+			text = netPlayerByID.DefaultName;
 			if (this.useNametags && flag)
 			{
 				RigContainer rigContainer;
 				if (netPlayerByID.IsLocal)
 				{
-					str = netPlayerByID.NickName;
+					text = netPlayerByID.NickName;
 				}
 				else if (VRRigCache.Instance.TryGetVrrig(netPlayerByID, out rigContainer))
 				{
-					str = rigContainer.Rig.playerNameVisible;
+					text = rigContainer.Rig.playerNameVisible;
 				}
 			}
 		}
 		else
 		{
-			str = ((this.useNametags && flag) ? NetworkSystem.Instance.LocalPlayer.NickName : NetworkSystem.Instance.LocalPlayer.DefaultName);
+			text = ((this.useNametags && flag) ? NetworkSystem.Instance.LocalPlayer.NickName : NetworkSystem.Instance.LocalPlayer.DefaultName);
 		}
-		this.displayedText = "TERMINAL CONTROLLED BY: " + str;
+		this.displayedText = "TERMINAL CONTROLLED BY: " + text;
 		if (!this.isControlScreen)
 		{
 			this.displayedText += this.detailsScreenText;

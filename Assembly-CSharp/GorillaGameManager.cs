@@ -23,7 +23,7 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 	{
 		get
 		{
-			return GorillaGameModes.GameMode.ActiveGameMode;
+			return GameMode.ActiveGameMode;
 		}
 	}
 
@@ -33,11 +33,11 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 	{
 	}
 
-	private new void OnEnable()
+	private void OnEnable()
 	{
 	}
 
-	private new void OnDisable()
+	private void OnDisable()
 	{
 	}
 
@@ -48,7 +48,7 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 			this.lastCheck = Time.time;
 			if (NetworkSystem.Instance.IsMasterClient && !this.ValidGameMode())
 			{
-				GorillaGameModes.GameMode.ChangeGameFromProperty();
+				GameMode.ChangeGameFromProperty();
 				return;
 			}
 			this.InfrequentUpdate();
@@ -57,7 +57,7 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 
 	public virtual void InfrequentUpdate()
 	{
-		GorillaGameModes.GameMode.RefreshPlayers();
+		GameMode.RefreshPlayers();
 		this.currentNetPlayerArray = NetworkSystem.Instance.AllNetPlayers;
 	}
 
@@ -204,7 +204,7 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 		{
 			if (GorillaGameManager.instance)
 			{
-				action();
+				action.Invoke();
 				return;
 			}
 			GorillaGameManager.onInstanceReady = (Action)Delegate.Combine(GorillaGameManager.onInstanceReady, action);
@@ -220,7 +220,7 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 	{
 		if (GorillaGameManager.replicatedClientReady)
 		{
-			action();
+			action.Invoke();
 			return;
 		}
 		GorillaGameManager.onReplicatedClientReady = (Action)Delegate.Combine(GorillaGameManager.onReplicatedClientReady, action);
@@ -271,9 +271,9 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 	public virtual void StartPlaying()
 	{
 		TickSystem<object>.AddTickCallback(this);
-		NetworkSystem.Instance.OnPlayerJoined += this.OnPlayerEnteredRoom;
-		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
-		NetworkSystem.Instance.OnMasterClientSwitchedEvent += this.OnMasterClientSwitched;
+		NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(this.OnPlayerEnteredRoom);
+		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeftRoom);
+		NetworkSystem.Instance.OnMasterClientSwitchedEvent += new Action<NetPlayer>(this.OnMasterClientSwitched);
 		this.currentNetPlayerArray = NetworkSystem.Instance.AllNetPlayers;
 		GorillaTelemetry.PostGameModeEvent(GTGameModeEventType.game_mode_start, this.GameType());
 	}
@@ -281,21 +281,21 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 	public virtual void StopPlaying()
 	{
 		TickSystem<object>.RemoveTickCallback(this);
-		NetworkSystem.Instance.OnPlayerJoined -= this.OnPlayerEnteredRoom;
-		NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerLeftRoom;
-		NetworkSystem.Instance.OnMasterClientSwitchedEvent -= this.OnMasterClientSwitched;
+		NetworkSystem.Instance.OnPlayerJoined -= new Action<NetPlayer>(this.OnPlayerEnteredRoom);
+		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(this.OnPlayerLeftRoom);
+		NetworkSystem.Instance.OnMasterClientSwitchedEvent -= new Action<NetPlayer>(this.OnMasterClientSwitched);
 		this.lastCheck = 0f;
 	}
 
-	public new virtual void OnMasterClientSwitched(Player newMaster)
+	public virtual void OnMasterClientSwitched(Player newMaster)
 	{
 	}
 
-	public new virtual void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+	public virtual void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
 	{
 	}
 
-	public new virtual void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+	public virtual void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
 	{
 	}
 
@@ -327,7 +327,7 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 		}
 		Object.DestroyImmediate(PhotonNetworkController.Instance);
 		Object.DestroyImmediate(GTPlayer.Instance);
-		GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+		GameObject[] array = Object.FindObjectsByType<GameObject>(0);
 		for (int i = 0; i < array.Length; i++)
 		{
 			Object.Destroy(array[i]);

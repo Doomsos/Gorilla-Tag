@@ -26,7 +26,7 @@ public class GorillaGrabber : MonoBehaviour
 	{
 		get
 		{
-			return this.XrNode == XRNode.LeftHand;
+			return this.XrNode == 4;
 		}
 	}
 
@@ -34,7 +34,7 @@ public class GorillaGrabber : MonoBehaviour
 	{
 		get
 		{
-			return this.XrNode == XRNode.RightHand;
+			return this.XrNode == 5;
 		}
 	}
 
@@ -108,7 +108,7 @@ public class GorillaGrabber : MonoBehaviour
 		for (int i = 0; i < num; i++)
 		{
 			IGorillaGrabable gorillaGrabable2;
-			if (this.grabCastResults[i].TryGetComponent<IGorillaGrabable>(out gorillaGrabable2))
+			if (this.grabCastResults[i].TryGetComponent<IGorillaGrabable>(ref gorillaGrabable2))
 			{
 				float num3 = Vector3.Distance(base.transform.position, this.FindClosestPoint(this.grabCastResults[i], base.transform.position));
 				if (num3 < num2)
@@ -157,7 +157,7 @@ public class GorillaGrabber : MonoBehaviour
 	private GTPlayer player;
 
 	[SerializeField]
-	private XRNode xrNode = XRNode.LeftHand;
+	private XRNode xrNode = 4;
 
 	private AudioSource audioSource;
 

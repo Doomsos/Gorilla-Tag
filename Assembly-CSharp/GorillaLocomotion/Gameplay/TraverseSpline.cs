@@ -193,7 +193,7 @@ namespace GorillaLocomotion.Gameplay
 		[WeaverGenerated]
 		[SerializeField]
 		[DefaultForProperty("Data", 0, 1)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+		[DrawIf("IsEditorWritable", true, 0, 0)]
 		private float _Data;
 	}
 }

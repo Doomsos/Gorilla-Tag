@@ -85,13 +85,13 @@ public struct GTSturdyEnum<TEnum> : ISerializationCallbackReceiver where TEnum :
 				long num = 0L;
 				foreach (GTSturdyEnum<TEnum>.EnumPair enumPair in this.m_stringValuePairs)
 				{
-					TEnum key;
+					TEnum tenum;
 					long num2;
-					if (shared.NameToEnum.TryGetValue(enumPair.Name, out key))
+					if (shared.NameToEnum.TryGetValue(enumPair.Name, ref tenum))
 					{
-						num |= shared.EnumToLong[key];
+						num |= shared.EnumToLong[tenum];
 					}
-					else if (shared.EnumToLong.TryGetValue(enumPair.FallbackValue, out num2))
+					else if (shared.EnumToLong.TryGetValue(enumPair.FallbackValue, ref num2))
 					{
 						num |= num2;
 					}
@@ -101,7 +101,7 @@ public struct GTSturdyEnum<TEnum> : ISerializationCallbackReceiver where TEnum :
 			}
 			GTSturdyEnum<TEnum>.EnumPair enumPair2 = this.m_stringValuePairs[0];
 			TEnum value;
-			if (shared.NameToEnum.TryGetValue(enumPair2.Name, out value))
+			if (shared.NameToEnum.TryGetValue(enumPair2.Name, ref value))
 			{
 				this.Value = value;
 				return;

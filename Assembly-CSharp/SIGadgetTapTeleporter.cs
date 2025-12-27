@@ -54,7 +54,7 @@ public class SIGadgetTapTeleporter : SIGadget
 		if (this.IsEquippedLocal())
 		{
 			this.isHandTapSetup = true;
-			GorillaTagger.Instance.OnHandTap += this.HandleOnHandTap;
+			GorillaTagger.Instance.OnHandTap += new Action<bool, Vector3, Vector3>(this.HandleOnHandTap);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class SIGadgetTapTeleporter : SIGadget
 		if (this.isHandTapSetup)
 		{
 			this.isHandTapSetup = false;
-			GorillaTagger.Instance.OnHandTap -= this.HandleOnHandTap;
+			GorillaTagger.Instance.OnHandTap -= new Action<bool, Vector3, Vector3>(this.HandleOnHandTap);
 		}
 		this.isActivated = false;
 	}
@@ -138,9 +138,9 @@ public class SIGadgetTapTeleporter : SIGadget
 
 	private bool CheckValidTeleporterPlacement(Vector3 position, Vector3 direction)
 	{
-		Vector3 point = position + direction * this.nearOffset;
-		Vector3 point2 = position + direction * this.farOffset;
-		return Physics.OverlapCapsuleNonAlloc(point, point2, this.overlapCheckRadius, this.overlapCheckResults, this.overlapCheckLayers) == 0;
+		Vector3 vector = position + direction * this.nearOffset;
+		Vector3 vector2 = position + direction * this.farOffset;
+		return Physics.OverlapCapsuleNonAlloc(vector, vector2, this.overlapCheckRadius, this.overlapCheckResults, this.overlapCheckLayers) == 0;
 	}
 
 	public override void ApplyUpgradeNodes(SIUpgradeSet withUpgrades)
@@ -164,8 +164,8 @@ public class SIGadgetTapTeleporter : SIGadget
 			{
 				return;
 			}
-			Quaternion rotation;
-			if (!GameEntityManager.ValidateDataType<Quaternion>(data[1], out rotation))
+			Quaternion quaternion;
+			if (!GameEntityManager.ValidateDataType<Quaternion>(data[1], out quaternion))
 			{
 				return;
 			}
@@ -191,12 +191,12 @@ public class SIGadgetTapTeleporter : SIGadget
 			{
 				return;
 			}
-			if (!this.CheckValidTeleporterPlacement(vector, rotation * Vector3.forward))
+			if (!this.CheckValidTeleporterPlacement(vector, quaternion * Vector3.forward))
 			{
 				return;
 			}
 			this.RemoveTeleporter(num);
-			this.PlaceNewTapTeleporter(vector, rotation, num, duration);
+			this.PlaceNewTapTeleporter(vector, quaternion, num, duration);
 		}
 	}
 

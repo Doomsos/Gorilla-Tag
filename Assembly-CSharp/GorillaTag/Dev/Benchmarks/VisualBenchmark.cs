@@ -19,9 +19,9 @@ namespace GorillaTag.Dev.Benchmarks
 			ProfilerRecorderHandle.GetAvailable(list);
 			Debug.Log(string.Format("poop Available stats: {0}", list.Count), this);
 			List<VisualBenchmark.StatInfo> list2 = new List<VisualBenchmark.StatInfo>(600);
-			foreach (ProfilerRecorderHandle handle in list)
+			foreach (ProfilerRecorderHandle profilerRecorderHandle in list)
 			{
-				ProfilerRecorderDescription description = ProfilerRecorderHandle.GetDescription(handle);
+				ProfilerRecorderDescription description = ProfilerRecorderHandle.GetDescription(profilerRecorderHandle);
 				if (description.Category == ProfilerCategory.Render)
 				{
 					list2.Add(new VisualBenchmark.StatInfo
@@ -49,7 +49,7 @@ namespace GorillaTag.Dev.Benchmarks
 			this.renderStatsRecorders = new ProfilerRecorder[this.availableRenderStats.Length];
 			for (int i = 0; i < this.availableRenderStats.Length; i++)
 			{
-				this.renderStatsRecorders[i] = ProfilerRecorder.StartNew(ProfilerCategory.Render, this.availableRenderStats[i].name, 1, ProfilerRecorderOptions.Default);
+				this.renderStatsRecorders[i] = ProfilerRecorder.StartNew(ProfilerCategory.Render, this.availableRenderStats[i].name, 1, 24);
 			}
 			this.state = VisualBenchmark.EState.Setup;
 		}
@@ -134,9 +134,9 @@ namespace GorillaTag.Dev.Benchmarks
 				this.sb.Append(this.availableRenderStats[i].name);
 				this.sb.Append(": ");
 				ProfilerMarkerDataUnit unit = this.availableRenderStats[i].unit;
-				if (unit != ProfilerMarkerDataUnit.TimeNanoseconds)
+				if (unit != 1)
 				{
-					if (unit == ProfilerMarkerDataUnit.Bytes)
+					if (unit == 2)
 					{
 						this.sb.Append((double)this.renderStatsRecorders[i].LastValue / 1024.0);
 						this.sb.Append("kb");

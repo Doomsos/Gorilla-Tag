@@ -24,7 +24,7 @@ public class CrittersActorDeposit : MonoBehaviour
 			return false;
 		}
 		CrittersActor crittersActor;
-		if (CrittersManager.instance.actorById.TryGetValue(depositActor.parentActorId, out crittersActor))
+		if (CrittersManager.instance.actorById.TryGetValue(depositActor.parentActorId, ref crittersActor))
 		{
 			return crittersActor.crittersActorType == CrittersActor.CrittersActorType.Grabber;
 		}

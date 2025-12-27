@@ -8,7 +8,7 @@ public class ComponentMember
 	{
 		get
 		{
-			return this.getValue();
+			return this.getValue.Invoke();
 		}
 	}
 

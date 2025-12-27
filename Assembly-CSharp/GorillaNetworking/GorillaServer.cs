@@ -18,11 +18,11 @@ namespace GorillaNetworking
 			}
 		}
 
-		private PlayFab.CloudScriptModels.EntityKey playerEntity
+		private EntityKey playerEntity
 		{
 			get
 			{
-				return new PlayFab.CloudScriptModels.EntityKey
+				return new EntityKey
 				{
 					Id = PlayFabSettings.staticPlayer.EntityId,
 					Type = PlayFabSettings.staticPlayer.EntityType
@@ -175,15 +175,15 @@ namespace GorillaNetworking
 			{
 				try
 				{
-					string value = Convert.ToString(result.FunctionResult);
-					successCallback(JsonConvert.DeserializeObject<Dictionary<string, string>>(value));
+					string text = Convert.ToString(result.FunctionResult);
+					successCallback.Invoke(JsonConvert.DeserializeObject<Dictionary<string, string>>(text));
 				}
-				catch (Exception arg)
+				catch (Exception ex)
 				{
-					errorCallback(new PlayFabError
+					errorCallback.Invoke(new PlayFabError
 					{
-						ErrorMessage = string.Format("Invalid format for GetAcceptedAgreements ({0})", arg),
-						Error = PlayFabErrorCode.JsonParseError
+						ErrorMessage = string.Format("Invalid format for GetAcceptedAgreements ({0})", ex),
+						Error = 3
 					});
 				}
 			}, errorCallback, null, null);
@@ -286,16 +286,16 @@ namespace GorillaNetworking
 							")"
 						}));
 					}
-					catch (Exception arg2)
+					catch (Exception ex)
 					{
-						Debug.LogError(string.Format("GorillaServer: {0} Error printing failure log: {1}", label, arg2));
+						Debug.LogError(string.Format("GorillaServer: {0} Error printing failure log: {1}", label, ex));
 					}
 				}
-				cb(arg);
+				cb.Invoke(arg);
 			};
 		}
 
-		private ExecuteFunctionResult toFunctionResult(PlayFab.ClientModels.ExecuteCloudScriptResult csResult)
+		private ExecuteFunctionResult toFunctionResult(ExecuteCloudScriptResult csResult)
 		{
 			FunctionExecutionError error = null;
 			if (csResult.Error != null)
@@ -382,12 +382,12 @@ namespace GorillaNetworking
 
 		private JsonSerializerSettings serializationSettings = new JsonSerializerSettings
 		{
-			NullValueHandling = NullValueHandling.Ignore,
-			DefaultValueHandling = DefaultValueHandling.Ignore,
-			MissingMemberHandling = MissingMemberHandling.Ignore,
-			ObjectCreationHandling = ObjectCreationHandling.Replace,
-			ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-			TypeNameHandling = TypeNameHandling.Auto
+			NullValueHandling = 1,
+			DefaultValueHandling = 1,
+			MissingMemberHandling = 0,
+			ObjectCreationHandling = 2,
+			ReferenceLoopHandling = 1,
+			TypeNameHandling = 4
 		};
 	}
 }

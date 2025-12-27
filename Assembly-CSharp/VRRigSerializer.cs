@@ -253,7 +253,7 @@ internal class VRRigSerializer : GorillaWrappedSerializer, IFXContextParems<Hand
 		NetworkBehaviourUtils.InternalOnDestroy(this);
 		if (this.networkSpeaker != null && this.networkSpeaker.parent != base.transform)
 		{
-			UnityEngine.Object.Destroy(this.networkSpeaker.gameObject);
+			Object.Destroy(this.networkSpeaker.gameObject);
 		}
 	}
 
@@ -417,7 +417,7 @@ internal class VRRigSerializer : GorillaWrappedSerializer, IFXContextParems<Hand
 	[PunRPC]
 	public void GrabbedByPlayer(bool grabbedBody, bool grabbedLeftHand, bool grabbedWithLeftHand, PhotonMessageInfo info)
 	{
-		GorillaGuardianManager gorillaGuardianManager = GorillaGameModes.GameMode.ActiveGameMode as GorillaGuardianManager;
+		GorillaGuardianManager gorillaGuardianManager = GameMode.ActiveGameMode as GorillaGuardianManager;
 		if (gorillaGuardianManager == null || !gorillaGuardianManager.IsPlayerGuardian(info.Sender))
 		{
 			return;
@@ -484,7 +484,7 @@ internal class VRRigSerializer : GorillaWrappedSerializer, IFXContextParems<Hand
 			tapDir.Normalize();
 		}
 		float max = GorillaTagger.Instance.DefaultHandTapVolume;
-		GorillaAmbushManager gorillaAmbushManager = GorillaGameModes.GameMode.ActiveGameMode as GorillaAmbushManager;
+		GorillaAmbushManager gorillaAmbushManager = GameMode.ActiveGameMode as GorillaAmbushManager;
 		if (gorillaAmbushManager != null && gorillaAmbushManager.IsInfected(this.rigContainer.Creator))
 		{
 			max = gorillaAmbushManager.crawlingSpeedForMaxVolume;
@@ -693,19 +693,19 @@ internal class VRRigSerializer : GorillaWrappedSerializer, IFXContextParems<Hand
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("nickName", 0, 17)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private NetworkString<_16> _nickName;
 
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("defaultName", 17, 17)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private NetworkString<_16> _defaultName;
 
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("tutorialComplete", 34, 1)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private bool _tutorialComplete;
 
 	[SerializeField]

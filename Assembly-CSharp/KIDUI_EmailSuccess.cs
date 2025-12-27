@@ -9,48 +9,38 @@ public class KIDUI_EmailSuccess : MonoBehaviour
 	{
 		this._emailTxt.text = email;
 		base.gameObject.SetActive(true);
-		TelemetryData telemetryData = new TelemetryData
+		TelemetryData telemetryData = default(TelemetryData);
+		telemetryData.EventName = "kid_screen_shown";
+		telemetryData.CustomTags = new string[]
 		{
-			EventName = "kid_screen_shown",
-			CustomTags = new string[]
-			{
-				"kid_setup",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"screen",
-					"email_sent"
-				}
-			}
+			"kid_setup",
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		dictionary.Add("screen", "email_sent");
+		telemetryData.BodyData = dictionary;
+		TelemetryData telemetryData2 = telemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
 	public void ShowSuccessScreenAppeal(string email)
 	{
 		this._emailTxt.text = email;
 		base.gameObject.SetActive(true);
-		TelemetryData telemetryData = new TelemetryData
+		TelemetryData telemetryData = default(TelemetryData);
+		telemetryData.EventName = "kid_screen_shown";
+		telemetryData.CustomTags = new string[]
 		{
-			EventName = "kid_screen_shown",
-			CustomTags = new string[]
-			{
-				"kid_age_appeal",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"screen",
-					"age_appeal_email_sent"
-				}
-			}
+			"kid_age_appeal",
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		dictionary.Add("screen", "age_appeal_email_sent");
+		telemetryData.BodyData = dictionary;
+		TelemetryData telemetryData2 = telemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
 	public void OnClose()

@@ -152,7 +152,7 @@ public sealed class GorillaHuntManager : GorillaGameManager
 			this.inStartCountdown = false;
 			this.CleanUpHunt();
 			this.iterator1 = 0;
-			while (this.iterator1 < NetworkSystem.Instance.AllNetPlayers.Count<NetPlayer>())
+			while (this.iterator1 < Enumerable.Count<NetPlayer>(NetworkSystem.Instance.AllNetPlayers))
 			{
 				if (this.currentTarget.Count < 10)
 				{
@@ -199,9 +199,9 @@ public sealed class GorillaHuntManager : GorillaGameManager
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
 			this.notHuntedCount = 0;
-			foreach (NetPlayer item in RoomSystem.PlayersInRoom)
+			foreach (NetPlayer netPlayer in RoomSystem.PlayersInRoom)
 			{
-				if (this.currentTarget.Contains(item) && !this.currentHunted.Contains(item))
+				if (this.currentTarget.Contains(netPlayer) && !this.currentHunted.Contains(netPlayer))
 				{
 					this.notHuntedCount++;
 				}

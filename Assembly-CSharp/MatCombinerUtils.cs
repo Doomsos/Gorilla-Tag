@@ -68,7 +68,7 @@ public static class MatCombinerUtils
 					ShaderPropertyType propertyType = shader.GetPropertyType(i);
 					switch (propertyType)
 					{
-					case ShaderPropertyType.Color:
+					case 0:
 					{
 						Color color = Color.black;
 						foreach (Material material2 in oldMats)
@@ -79,7 +79,7 @@ public static class MatCombinerUtils
 						material.SetColor(propertyNameId, color);
 						break;
 					}
-					case ShaderPropertyType.Vector:
+					case 1:
 					{
 						Vector4 vector = Vector4.zero;
 						foreach (Material material3 in oldMats)
@@ -90,8 +90,8 @@ public static class MatCombinerUtils
 						material.SetVector(propertyNameId, vector);
 						break;
 					}
-					case ShaderPropertyType.Float:
-					case ShaderPropertyType.Range:
+					case 2:
+					case 3:
 					{
 						double num = 0.0;
 						foreach (Material material4 in oldMats)
@@ -102,9 +102,9 @@ public static class MatCombinerUtils
 						material.SetFloat(propertyNameId, (float)num);
 						break;
 					}
-					case ShaderPropertyType.Texture:
+					case 4:
 						break;
-					case ShaderPropertyType.Int:
+					case 5:
 					{
 						double num2 = 0.0;
 						foreach (Material material5 in oldMats)

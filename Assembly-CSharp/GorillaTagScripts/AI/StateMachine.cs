@@ -32,7 +32,7 @@ namespace GorillaTagScripts.AI
 				currentState.OnExit();
 			}
 			this._currentState = state;
-			this._transitions.TryGetValue(this._currentState.GetType(), out this._currentTransitions);
+			this._transitions.TryGetValue(this._currentState.GetType(), ref this._currentTransitions);
 			if (this._currentTransitions == null)
 			{
 				this._currentTransitions = StateMachine.EmptyTransitions;
@@ -48,7 +48,7 @@ namespace GorillaTagScripts.AI
 		public void AddTransition(IState from, IState to, Func<bool> predicate)
 		{
 			List<StateMachine.Transition> list;
-			if (!this._transitions.TryGetValue(from.GetType(), out list))
+			if (!this._transitions.TryGetValue(from.GetType(), ref list))
 			{
 				list = new List<StateMachine.Transition>();
 				this._transitions[from.GetType()] = list;
@@ -65,14 +65,14 @@ namespace GorillaTagScripts.AI
 		{
 			foreach (StateMachine.Transition transition in this._anyTransitions)
 			{
-				if (transition.Condition())
+				if (transition.Condition.Invoke())
 				{
 					return transition;
 				}
 			}
 			foreach (StateMachine.Transition transition2 in this._currentTransitions)
 			{
-				if (transition2.Condition())
+				if (transition2.Condition.Invoke())
 				{
 					return transition2;
 				}

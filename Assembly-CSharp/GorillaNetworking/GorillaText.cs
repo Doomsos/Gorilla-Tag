@@ -26,10 +26,10 @@ namespace GorillaNetworking
 				return;
 			}
 			this.modified = false;
-			string b = this.stringBuilder.ToString();
-			if (this.currentText != b)
+			string text = this.stringBuilder.ToString();
+			if (this.currentText != text)
 			{
-				this.currentText = b;
+				this.currentText = text;
 				UnityEvent<string> unityEvent = this.updateTextCallback;
 				if (unityEvent == null)
 				{

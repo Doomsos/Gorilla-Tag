@@ -28,24 +28,19 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 		AgeStatusType ageStatusType;
 		if (KIDManager.TryGetAgeStatusTypeFromAge(KIDAgeGate.UserAge, out ageStatusType))
 		{
-			TelemetryData telemetryData = new TelemetryData
+			TelemetryData telemetryData = default(TelemetryData);
+			telemetryData.EventName = "kid_age_appeal";
+			telemetryData.CustomTags = new string[]
 			{
-				EventName = "kid_age_appeal",
-				CustomTags = new string[]
-				{
-					"kid_age_appeal",
-					KIDTelemetry.GameVersionCustomTag,
-					KIDTelemetry.GameEnvironment
-				},
-				BodyData = new Dictionary<string, string>
-				{
-					{
-						"submitted_age",
-						ageStatusType.ToString()
-					}
-				}
+				"kid_age_appeal",
+				KIDTelemetry.GameVersionCustomTag,
+				KIDTelemetry.GameEnvironment
 			};
-			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+			Dictionary<string, string> dictionary = new Dictionary<string, string>();
+			dictionary.Add("submitted_age", ageStatusType.ToString());
+			telemetryData.BodyData = dictionary;
+			TelemetryData telemetryData2 = telemetryData;
+			GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 		}
 	}
 
@@ -63,24 +58,19 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 		HandRayController.Instance.EnableHandRays();
 		PrivateUIRoom.AddUI(base.transform);
 		this._tooYoungToPlayScreen.ShowTooYoungToPlayScreen();
-		TelemetryData telemetryData = new TelemetryData
+		TelemetryData telemetryData = default(TelemetryData);
+		telemetryData.EventName = "kid_screen_shown";
+		telemetryData.CustomTags = new string[]
 		{
-			EventName = "kid_screen_shown",
-			CustomTags = new string[]
-			{
-				"kid_age_appeal",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"screen",
-					"blocked"
-				}
-			}
+			"kid_age_appeal",
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		dictionary.Add("screen", "blocked");
+		telemetryData.BodyData = dictionary;
+		TelemetryData telemetryData2 = telemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
 	public void OnQuitGamePressed()

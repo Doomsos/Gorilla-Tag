@@ -12,9 +12,9 @@ public struct BoundsInt
 
 	public BoundsInt(Vector3 center, Vector3 size)
 	{
-		Vector3 b = size * 0.5f;
-		this.min = global::BoundsInt.FloatToInt(center - b);
-		this.max = global::BoundsInt.FloatToInt(center + b);
+		Vector3 vector = size * 0.5f;
+		this.min = BoundsInt.FloatToInt(center - vector);
+		this.max = BoundsInt.FloatToInt(center + vector);
 	}
 
 	public Vector3Int center
@@ -37,7 +37,7 @@ public struct BoundsInt
 	{
 		get
 		{
-			return global::BoundsInt.IntToFloat(this.center);
+			return BoundsInt.IntToFloat(this.center);
 		}
 	}
 
@@ -45,7 +45,7 @@ public struct BoundsInt
 	{
 		get
 		{
-			return global::BoundsInt.IntToFloat(this.size);
+			return BoundsInt.IntToFloat(this.size);
 		}
 	}
 
@@ -59,9 +59,9 @@ public struct BoundsInt
 		return new Vector3((float)v.x / 1000f, (float)v.y / 1000f, (float)v.z / 1000f);
 	}
 
-	public static global::BoundsInt FromBounds(Bounds bounds)
+	public static BoundsInt FromBounds(Bounds bounds)
 	{
-		return new global::BoundsInt(bounds.center, bounds.size);
+		return new BoundsInt(bounds.center, bounds.size);
 	}
 
 	public Bounds ToBounds()
@@ -77,11 +77,11 @@ public struct BoundsInt
 
 	public void SetMinMax(Vector3 min, Vector3 max)
 	{
-		this.min = global::BoundsInt.FloatToInt(min);
-		this.max = global::BoundsInt.FloatToInt(max);
+		this.min = BoundsInt.FloatToInt(min);
+		this.max = BoundsInt.FloatToInt(max);
 	}
 
-	public void Encapsulate(global::BoundsInt other)
+	public void Encapsulate(BoundsInt other)
 	{
 		this.min = new Vector3Int(Mathf.Min(this.min.x, other.min.x), Mathf.Min(this.min.y, other.min.y), Mathf.Min(this.min.z, other.min.z));
 		this.max = new Vector3Int(Mathf.Max(this.max.x, other.max.x), Mathf.Max(this.max.y, other.max.y), Mathf.Max(this.max.z, other.max.z));
@@ -90,36 +90,39 @@ public struct BoundsInt
 	public void Expand(float amount)
 	{
 		int num = Mathf.RoundToInt(amount * 1000f);
-		Vector3Int b = new Vector3Int(num, num, num);
-		this.min -= b;
-		this.max += b;
+		Vector3Int vector3Int;
+		vector3Int..ctor(num, num, num);
+		this.min -= vector3Int;
+		this.max += vector3Int;
 	}
 
-	public bool Intersects(global::BoundsInt other)
+	public bool Intersects(BoundsInt other)
 	{
 		return this.min.x < other.max.x && this.max.x > other.min.x && this.min.y < other.max.y && this.max.y > other.min.y && this.min.z < other.max.z && this.max.z > other.min.z;
 	}
 
-	public bool Contains(global::BoundsInt other)
+	public bool Contains(BoundsInt other)
 	{
 		return this.min.x <= other.min.x && this.min.y <= other.min.y && this.min.z <= other.min.z && this.max.x >= other.max.x && this.max.y >= other.max.y && this.max.z >= other.max.z;
 	}
 
 	public bool Contains(Vector3 point)
 	{
-		Vector3Int vector3Int = global::BoundsInt.FloatToInt(point);
+		Vector3Int vector3Int = BoundsInt.FloatToInt(point);
 		return vector3Int.x >= this.min.x && vector3Int.x <= this.max.x && vector3Int.y >= this.min.y && vector3Int.y <= this.max.y && vector3Int.z >= this.min.z && vector3Int.z <= this.max.z;
 	}
 
-	public global::BoundsInt GetIntersection(global::BoundsInt other)
+	public BoundsInt GetIntersection(BoundsInt other)
 	{
-		Vector3Int vector3Int = new Vector3Int(Mathf.Max(this.min.x, other.min.x), Mathf.Max(this.min.y, other.min.y), Mathf.Max(this.min.z, other.min.z));
-		Vector3Int vector3Int2 = new Vector3Int(Mathf.Min(this.max.x, other.max.x), Mathf.Min(this.max.y, other.max.y), Mathf.Min(this.max.z, other.max.z));
+		Vector3Int vector3Int;
+		vector3Int..ctor(Mathf.Max(this.min.x, other.min.x), Mathf.Max(this.min.y, other.min.y), Mathf.Max(this.min.z, other.min.z));
+		Vector3Int vector3Int2;
+		vector3Int2..ctor(Mathf.Min(this.max.x, other.max.x), Mathf.Min(this.max.y, other.max.y), Mathf.Min(this.max.z, other.max.z));
 		if (vector3Int.x > vector3Int2.x || vector3Int.y > vector3Int2.y || vector3Int.z > vector3Int2.z)
 		{
-			return new global::BoundsInt(Vector3Int.zero, Vector3Int.zero);
+			return new BoundsInt(Vector3Int.zero, Vector3Int.zero);
 		}
-		return new global::BoundsInt(vector3Int, vector3Int2);
+		return new BoundsInt(vector3Int, vector3Int2);
 	}
 
 	public long Volume()
@@ -133,21 +136,21 @@ public struct BoundsInt
 		return (float)this.Volume() / 1E+09f;
 	}
 
-	public static bool operator ==(global::BoundsInt a, global::BoundsInt b)
+	public static bool operator ==(BoundsInt a, BoundsInt b)
 	{
 		return a.min == b.min && a.max == b.max;
 	}
 
-	public static bool operator !=(global::BoundsInt a, global::BoundsInt b)
+	public static bool operator !=(BoundsInt a, BoundsInt b)
 	{
 		return !(a == b);
 	}
 
 	public override bool Equals(object obj)
 	{
-		if (obj is global::BoundsInt)
+		if (obj is BoundsInt)
 		{
-			global::BoundsInt b = (global::BoundsInt)obj;
+			BoundsInt b = (BoundsInt)obj;
 			return this == b;
 		}
 		return false;

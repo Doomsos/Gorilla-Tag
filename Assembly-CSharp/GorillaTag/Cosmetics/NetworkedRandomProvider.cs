@@ -130,15 +130,15 @@ namespace GorillaTag.Cosmetics
 
 		public float NextFloat(float min, float max)
 		{
-			float t = this.NextFloat01();
+			float num = this.NextFloat01();
 			if (max < min)
 			{
-				float num = max;
-				float num2 = min;
-				min = num;
-				max = num2;
+				float num2 = max;
+				float num3 = min;
+				min = num2;
+				max = num3;
 			}
-			return Mathf.Lerp(min, max, t);
+			return Mathf.Lerp(min, max, num);
 		}
 
 		public double NextDouble(double min, double max)
@@ -217,7 +217,7 @@ namespace GorillaTag.Cosmetics
 			uint num = 2166136261U;
 			for (int i = 0; i < s.Length; i++)
 			{
-				num ^= (uint)s[i];
+				num ^= (uint)s.get_Chars(i);
 				num *= 16777619U;
 			}
 			return num;
@@ -236,10 +236,10 @@ namespace GorillaTag.Cosmetics
 			if (this.parentTransferable == null)
 			{
 				string name = base.gameObject.scene.name;
-				string str = "/";
+				string text = "/";
 				string hierarchyPath = NetworkedRandomProvider.GetHierarchyPath(base.transform);
 				Type type = base.GetType();
-				string s = name + str + hierarchyPath + ((type != null) ? type.ToString() : null);
+				string s = name + text + hierarchyPath + ((type != null) ? type.ToString() : null);
 				this.OwnerID = s.GetStaticHash();
 				return;
 			}

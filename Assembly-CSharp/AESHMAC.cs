@@ -77,13 +77,13 @@ public static class AESHMAC
 			salt = new byte[0];
 		}
 		byte[] iv;
-		byte[] buffer;
+		byte[] array;
 		using (AesManaged aesManaged = new AesManaged
 		{
 			KeySize = 256,
 			BlockSize = 128,
-			Mode = CipherMode.CBC,
-			Padding = PaddingMode.PKCS7
+			Mode = 1,
+			Padding = 2
 		})
 		{
 			aesManaged.GenerateIV();
@@ -92,14 +92,14 @@ public static class AESHMAC
 			{
 				using (MemoryStream memoryStream = new MemoryStream())
 				{
-					using (CryptoStream cryptoStream = new CryptoStream(memoryStream, cryptoTransform, CryptoStreamMode.Write))
+					using (CryptoStream cryptoStream = new CryptoStream(memoryStream, cryptoTransform, 1))
 					{
 						using (BinaryWriter binaryWriter = new BinaryWriter(cryptoStream))
 						{
 							binaryWriter.Write(plaintext);
 						}
 					}
-					buffer = memoryStream.ToArray();
+					array = memoryStream.ToArray();
 				}
 			}
 		}
@@ -112,10 +112,10 @@ public static class AESHMAC
 				{
 					binaryWriter2.Write(salt);
 					binaryWriter2.Write(iv);
-					binaryWriter2.Write(buffer);
+					binaryWriter2.Write(array);
 					binaryWriter2.Flush();
-					byte[] buffer2 = hmacsha.ComputeHash(memoryStream2.ToArray());
-					binaryWriter2.Write(buffer2);
+					byte[] array2 = hmacsha.ComputeHash(memoryStream2.ToArray());
+					binaryWriter2.Write(array2);
 				}
 				result = memoryStream2.ToArray();
 			}
@@ -165,8 +165,8 @@ public static class AESHMAC
 					{
 						KeySize = 256,
 						BlockSize = 128,
-						Mode = CipherMode.CBC,
-						Padding = PaddingMode.PKCS7
+						Mode = 1,
+						Padding = 2
 					})
 					{
 						byte[] array3 = new byte[num];
@@ -175,7 +175,7 @@ public static class AESHMAC
 						{
 							using (MemoryStream memoryStream = new MemoryStream())
 							{
-								using (CryptoStream cryptoStream = new CryptoStream(memoryStream, cryptoTransform, CryptoStreamMode.Write))
+								using (CryptoStream cryptoStream = new CryptoStream(memoryStream, cryptoTransform, 1))
 								{
 									using (BinaryWriter binaryWriter = new BinaryWriter(cryptoStream))
 									{

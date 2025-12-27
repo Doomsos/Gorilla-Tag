@@ -32,8 +32,8 @@ namespace GorillaTag.Cosmetics
 			{
 				this._events.Activate.reliable = true;
 				this._events.Deactivate.reliable = true;
-				this._events.Activate += this.OnReleaseEvent;
-				this._events.Deactivate += this.OnReturnToDockEvent;
+				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnReleaseEvent);
+				this._events.Deactivate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnReturnToDockEvent);
 			}
 		}
 
@@ -42,8 +42,8 @@ namespace GorillaTag.Cosmetics
 			base.OnDisable();
 			if (this._events != null)
 			{
-				this._events.Activate -= this.OnReleaseEvent;
-				this._events.Deactivate -= this.OnReturnToDockEvent;
+				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnReleaseEvent);
+				this._events.Deactivate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnReturnToDockEvent);
 				this._events.Dispose();
 				this._events = null;
 			}

@@ -1,6 +1,5 @@
 ﻿using System;
 using GorillaTag;
-using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -80,7 +79,7 @@ public class GeodeItem : TransferrableObject
 		}
 		if (base.InHand())
 		{
-			int num = Physics.SphereCastNonAlloc(this.geodeFullMesh.transform.position, this.sphereRayRadius * Mathf.Abs(this.geodeFullMesh.transform.lossyScale.x), this.geodeFullMesh.transform.TransformDirection(Vector3.forward), this.collidersHit, this.rayCastMaxDistance, this.collisionLayerMask, QueryTriggerInteraction.Collide);
+			int num = Physics.SphereCastNonAlloc(this.geodeFullMesh.transform.position, this.sphereRayRadius * Mathf.Abs(this.geodeFullMesh.transform.lossyScale.x), this.geodeFullMesh.transform.TransformDirection(Vector3.forward), this.collidersHit, this.rayCastMaxDistance, this.collisionLayerMask, 2);
 			this.hitLastFrame = (num > 0);
 		}
 		if (!this.hitLastFrame)
@@ -127,7 +126,7 @@ public class GeodeItem : TransferrableObject
 		RigContainer rigContainer;
 		if (NetworkSystem.Instance.InRoom && GorillaGameManager.instance != null && !this.effectsHaveBeenPlayed && VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.LocalPlayer, out rigContainer))
 		{
-			rigContainer.Rig.netView.SendRPC("RPC_PlayGeodeEffect", RpcTarget.All, new object[]
+			rigContainer.Rig.netView.SendRPC("RPC_PlayGeodeEffect", 0, new object[]
 			{
 				this.geodeFullMesh.transform.position
 			});

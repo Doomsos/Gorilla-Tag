@@ -127,63 +127,63 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 		{
 			vector /= sizeManager.currentScale;
 		}
-		Vector3 b = Vector3.Dot(transform.position - base.transform.position, base.transform.up) * base.transform.up;
-		Vector3 a = base.transform.position + b - transform.position;
-		float num = a.magnitude + 0.0001f;
-		Vector3 vector2 = a / num;
-		float num2 = Vector3.Dot(vector, vector2);
-		float d = this.accel;
+		Vector3 vector2 = Vector3.Dot(transform.position - base.transform.position, base.transform.up) * base.transform.up;
+		Vector3 vector3 = base.transform.position + vector2 - transform.position;
+		float num = vector3.magnitude + 0.0001f;
+		Vector3 vector4 = vector3 / num;
+		float num2 = Vector3.Dot(vector, vector4);
+		float num3 = this.accel;
 		if (this.maxDepth > -1f)
 		{
-			float num3 = Vector3.Dot(transform.position - this.enterPos, vector2);
-			float num4 = this.maxDepth - num3;
-			float b2 = 0f;
-			if (num4 > 0.0001f)
+			float num4 = Vector3.Dot(transform.position - this.enterPos, vector4);
+			float num5 = this.maxDepth - num4;
+			float num6 = 0f;
+			if (num5 > 0.0001f)
 			{
-				b2 = num2 * num2 / num4;
+				num6 = num2 * num2 / num5;
 			}
-			d = Mathf.Max(this.accel, b2);
+			num3 = Mathf.Max(this.accel, num6);
 		}
 		float deltaTime = Time.deltaTime;
-		Vector3 b3 = base.transform.up * d * deltaTime;
-		vector += b3;
-		Vector3 a2 = Mathf.Min(Vector3.Dot(vector, base.transform.up), this.maxSpeed) * base.transform.up;
-		Vector3 a3 = Vector3.Dot(vector, base.transform.right) * base.transform.right;
-		Vector3 a4 = Vector3.Dot(vector, base.transform.forward) * base.transform.forward;
-		float d2 = 1f;
-		float d3 = 1f;
+		Vector3 vector5 = base.transform.up * num3 * deltaTime;
+		vector += vector5;
+		Vector3 vector6 = Mathf.Min(Vector3.Dot(vector, base.transform.up), this.maxSpeed) * base.transform.up;
+		Vector3 vector7 = Vector3.Dot(vector, base.transform.right) * base.transform.right;
+		Vector3 vector8 = Vector3.Dot(vector, base.transform.forward) * base.transform.forward;
+		float num7 = 1f;
+		float num8 = 1f;
 		if (this.dampenLateralVelocity)
 		{
-			d2 = 1f - this.dampenXVelPerc * 0.01f * deltaTime;
-			d3 = 1f - this.dampenZVelPerc * 0.01f * deltaTime;
+			num7 = 1f - this.dampenXVelPerc * 0.01f * deltaTime;
+			num8 = 1f - this.dampenZVelPerc * 0.01f * deltaTime;
 		}
-		vector = a2 + d2 * a3 + d3 * a4;
+		vector = vector6 + num7 * vector7 + num8 * vector8;
 		if (this.applyPullToCenterAcceleration && this.pullToCenterAccel > 0f && this.pullToCenterMaxSpeed > 0f)
 		{
-			vector -= num2 * vector2;
+			vector -= num2 * vector4;
 			if (num > this.pullTOCenterMinDistance)
 			{
 				num2 += this.pullToCenterAccel * deltaTime;
-				float b4 = Mathf.Min(this.pullToCenterMaxSpeed, num / deltaTime);
-				num2 = Mathf.Min(num2, b4);
+				float num9 = Mathf.Min(this.pullToCenterMaxSpeed, num / deltaTime);
+				num2 = Mathf.Min(num2, num9);
 			}
 			else
 			{
 				num2 = 0f;
 			}
-			vector += num2 * vector2;
+			vector += num2 * vector4;
 			if (vector.magnitude > 0.0001f)
 			{
-				Vector3 vector3 = Vector3.Cross(base.transform.up, vector2);
-				float magnitude = vector3.magnitude;
+				Vector3 vector9 = Vector3.Cross(base.transform.up, vector4);
+				float magnitude = vector9.magnitude;
 				if (magnitude > 0.0001f)
 				{
-					vector3 /= magnitude;
-					num2 = Vector3.Dot(vector, vector3);
-					vector -= num2 * vector3;
+					vector9 /= magnitude;
+					num2 = Vector3.Dot(vector, vector9);
+					vector -= num2 * vector9;
 					num2 -= this.pullToCenterAccel * deltaTime;
 					num2 = Mathf.Max(0f, num2);
-					vector += num2 * vector3;
+					vector += num2 * vector9;
 				}
 			}
 		}

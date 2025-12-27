@@ -233,6 +233,6 @@ public class HitTargetNetworkState : NetworkComponent
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("Data", 0, 1)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private int _Data;
 }

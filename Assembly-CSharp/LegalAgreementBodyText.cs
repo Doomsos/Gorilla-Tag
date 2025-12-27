@@ -22,7 +22,7 @@ public class LegalAgreementBodyText : MonoBehaviour
 			Environment.NewLine,
 			"\\r\\n",
 			"\n"
-		}, StringSplitOptions.None);
+		}, 0);
 		for (int i = 0; i < array.Length; i++)
 		{
 			Text text2;

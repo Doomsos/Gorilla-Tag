@@ -35,13 +35,13 @@ public class FusionPlayerProperties : NetworkBehaviour
 		playerAttributeOnChanged();
 	}
 
-	[Rpc(RpcSources.All, RpcTargets.All, InvokeLocal = true, TickAligned = true)]
+	[Rpc(7, 7, InvokeLocal = true, TickAligned = true)]
 	public unsafe void RPC_UpdatePlayerAttributes(FusionPlayerProperties.PlayerInfo newInfo, RpcInfo info = default(RpcInfo))
 	{
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != SimulationStages.Resimulate)
+			if (base.Runner.Stage != 4)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) == 0)
@@ -66,12 +66,12 @@ public class FusionPlayerProperties : NetworkBehaviour
 							int num2 = 8;
 							*(FusionPlayerProperties.PlayerInfo*)(ptr2 + num2) = newInfo;
 							num2 += 960;
-							ptr->Offset = num2 * 8;
+							ptr.Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 7) != 0)
 						{
-							info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+							info = RpcInfo.FromLocal(base.Runner, 0, 0);
 							goto IL_12;
 						}
 					}
@@ -99,7 +99,7 @@ public class FusionPlayerProperties : NetworkBehaviour
 	public override void Spawned()
 	{
 		Debug.Log("Player props SPAWNED!");
-		if (base.Runner.Mode == SimulationModes.Client)
+		if (base.Runner.Mode == 4)
 		{
 			Debug.Log("SET Player Properties manager!");
 		}
@@ -118,7 +118,7 @@ public class FusionPlayerProperties : NetworkBehaviour
 	public bool GetProperty(PlayerRef player, string propertyName, out string propertyValue)
 	{
 		NetworkString<_32> networkString;
-		if (this.netPlayerAttributes[player].properties.TryGet(propertyName, out networkString))
+		if (this.netPlayerAttributes[player].properties.TryGet(propertyName, ref networkString))
 		{
 			propertyValue = networkString.Value;
 			return true;
@@ -162,7 +162,7 @@ public class FusionPlayerProperties : NetworkBehaviour
 		FusionPlayerProperties.PlayerInfo playerInfo = *(FusionPlayerProperties.PlayerInfo*)(ptr + num);
 		num += 960;
 		FusionPlayerProperties.PlayerInfo newInfo = playerInfo;
-		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
 		behaviour.InvokeRpc = true;
 		((FusionPlayerProperties)behaviour).RPC_UpdatePlayerAttributes(newInfo, info);
 	}
@@ -170,7 +170,7 @@ public class FusionPlayerProperties : NetworkBehaviour
 	public FusionPlayerProperties.PlayerAttributeOnChanged playerAttributeOnChanged;
 
 	[NetworkStructWeaved(240)]
-	[StructLayout(LayoutKind.Explicit, Size = 960)]
+	[StructLayout(2, Size = 960)]
 	public struct PlayerInfo : INetworkStruct
 	{
 		[Networked]

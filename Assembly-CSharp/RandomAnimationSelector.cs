@@ -32,8 +32,8 @@ public class RandomAnimationSelector : MonoBehaviour, IGorillaSliceableSimple
 		float num2 = 1f - Mathf.Exp(-this.animationChancePerSecond * num);
 		if (Random.value < num2)
 		{
-			float value = Time.time - (float)((int)Time.time);
-			this.animator.SetFloat(this.animationSelect, value);
+			float num3 = Time.time - (float)((int)Time.time);
+			this.animator.SetFloat(this.animationSelect, num3);
 			this.animator.SetTrigger(this.animationTrigger);
 		}
 	}

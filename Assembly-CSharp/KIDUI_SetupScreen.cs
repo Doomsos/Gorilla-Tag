@@ -45,24 +45,19 @@ public class KIDUI_SetupScreen : MonoBehaviour
 	public void OnStartSetup()
 	{
 		base.gameObject.SetActive(true);
-		TelemetryData telemetryData = new TelemetryData
+		TelemetryData telemetryData = default(TelemetryData);
+		telemetryData.EventName = "kid_screen_shown";
+		telemetryData.CustomTags = new string[]
 		{
-			EventName = "kid_screen_shown",
-			CustomTags = new string[]
-			{
-				"kid_setup",
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, string>
-			{
-				{
-					"screen",
-					"enter_email"
-				}
-			}
+			"kid_setup",
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData.EventName, telemetryData.BodyData, telemetryData.CustomTags);
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		dictionary.Add("screen", "enter_email");
+		telemetryData.BodyData = dictionary;
+		TelemetryData telemetryData2 = telemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(telemetryData2.EventName, telemetryData2.BodyData, telemetryData2.CustomTags);
 	}
 
 	public void OnInputSelected()

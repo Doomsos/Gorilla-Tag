@@ -37,9 +37,9 @@ public class EnumData<TEnum> where TEnum : struct, Enum
 		}
 		for (int j = 0; j < this.Names.Length; j++)
 		{
-			string key = this.Names[j];
-			TEnum value = this.Values[j];
-			this.NameToEnum[key] = value;
+			string text2 = this.Names[j];
+			TEnum tenum2 = this.Values[j];
+			this.NameToEnum[text2] = tenum2;
 		}
 		this.MinValue = this.LongToEnum[num2];
 		this.MaxValue = this.LongToEnum[num3];

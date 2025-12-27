@@ -35,7 +35,7 @@ public class PropPlacementRB : MonoBehaviour, IDelayedExecListener
 		base.transform.rotation = rot;
 		base.gameObject.SetActive(false);
 		this._isInstantiatingAsync = true;
-		propRef.InstantiateAsync(null, false).Completed += this.OnPropLoaded_NoPool;
+		propRef.InstantiateAsync(null, false).Completed += new Action<AsyncOperationHandle<GameObject>>(this.OnPropLoaded_NoPool);
 	}
 
 	public void OnPropLoaded_NoPool(AsyncOperationHandle<GameObject> handle)
@@ -69,7 +69,7 @@ public class PropPlacementRB : MonoBehaviour, IDelayedExecListener
 		MeshFilter[] componentsInChildren = rendererGobj.GetComponentsInChildren<MeshFilter>(true);
 		List<MeshCollider> list;
 		bool result;
-		using (ListPool<MeshCollider>.Get(out list))
+		using (ListPool<MeshCollider>.Get(ref list))
 		{
 			list.Capacity = math.max(list.Capacity, 8);
 			foreach (MeshFilter meshFilter in componentsInChildren)

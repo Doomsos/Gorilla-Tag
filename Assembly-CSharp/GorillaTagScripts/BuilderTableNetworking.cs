@@ -51,13 +51,13 @@ namespace GorillaTagScripts
 			this.armShelfRequests = new List<Player>(10);
 		}
 
-		private new void OnEnable()
+		private void OnEnable()
 		{
 			base.OnEnable();
 			TickSystem<object>.AddTickCallback(this);
 		}
 
-		private new void OnDisable()
+		private void OnDisable()
 		{
 			base.OnDisable();
 			TickSystem<object>.RemoveTickCallback(this);
@@ -185,7 +185,7 @@ namespace GorillaTagScripts
 				table.linkedTerminal.ResetTerminalControl();
 				if (NetworkSystem.Instance.IsMasterClient)
 				{
-					base.photonView.RPC("SetBlocksTerminalDriverRPC", RpcTarget.All, new object[]
+					base.photonView.RPC("SetBlocksTerminalDriverRPC", 0, new object[]
 					{
 						-2
 					});
@@ -645,7 +645,7 @@ namespace GorillaTagScripts
 			int num = table.CreatePieceId();
 			long num2 = BitPackUtils.PackWorldPosForNetwork(position);
 			int num3 = BitPackUtils.PackQuaternionForNetwork(rotation);
-			base.photonView.RPC("PieceCreatedByShelfRPC", RpcTarget.All, new object[]
+			base.photonView.RPC("PieceCreatedByShelfRPC", 0, new object[]
 			{
 				pieceType,
 				num,
@@ -718,7 +718,7 @@ namespace GorillaTagScripts
 			}
 			long num2 = BitPackUtils.PackWorldPosForNetwork(position);
 			int num3 = BitPackUtils.PackQuaternionForNetwork(rotation);
-			base.photonView.RPC("PieceDestroyedRPC", RpcTarget.All, new object[]
+			base.photonView.RPC("PieceDestroyedRPC", 0, new object[]
 			{
 				pieceId,
 				num2,
@@ -780,7 +780,7 @@ namespace GorillaTagScripts
 			int num4 = BuilderTable.PackPiecePlacement(twist, bumpOffsetX, bumpOffsetZ);
 			if (table.GetTableState() == BuilderTable.TableState.Ready)
 			{
-				base.photonView.RPC("RequestPlacePieceRPC", RpcTarget.MasterClient, new object[]
+				base.photonView.RPC("RequestPlacePieceRPC", 2, new object[]
 				{
 					num3,
 					pieceId,
@@ -831,14 +831,14 @@ namespace GorillaTagScripts
 				BuilderPiecePrivatePlot builderPiecePrivatePlot;
 				if (piece != null && piece.TryGetPlotComponent(out builderPiecePrivatePlot) && !builderPiecePrivatePlot.IsPlotClaimed())
 				{
-					base.photonView.RPC("PlotClaimedRPC", RpcTarget.All, new object[]
+					base.photonView.RPC("PlotClaimedRPC", 0, new object[]
 					{
 						parentPieceId,
 						placedByPlayer,
 						true
 					});
 				}
-				base.photonView.RPC("PiecePlacedRPC", RpcTarget.All, new object[]
+				base.photonView.RPC("PiecePlacedRPC", 0, new object[]
 				{
 					localCommandId,
 					pieceId,
@@ -914,7 +914,7 @@ namespace GorillaTagScripts
 			if (table.GetTableState() == BuilderTable.TableState.Ready)
 			{
 				long num2 = BitPackUtils.PackHandPosRotForNetwork(localPosition, localRotation);
-				base.photonView.RPC("RequestGrabPieceRPC", RpcTarget.MasterClient, new object[]
+				base.photonView.RPC("RequestGrabPieceRPC", 2, new object[]
 				{
 					num,
 					piece.pieceId,
@@ -963,7 +963,7 @@ namespace GorillaTagScripts
 					{
 						this.CheckForFreedPlot(pieceId, grabbedByPlayer);
 					}
-					base.photonView.RPC("PieceGrabbedRPC", RpcTarget.All, new object[]
+					base.photonView.RPC("PieceGrabbedRPC", 0, new object[]
 					{
 						localCommandId,
 						pieceId,
@@ -989,7 +989,7 @@ namespace GorillaTagScripts
 			BuilderPiece piece = this.GetTable().GetPiece(pieceId);
 			if (piece != null && piece.parentPiece != null && piece.parentPiece.IsPrivatePlot() && piece.parentPiece.firstChildPiece.Equals(piece) && piece.nextSiblingPiece == null)
 			{
-				base.photonView.RPC("PlotClaimedRPC", RpcTarget.All, new object[]
+				base.photonView.RPC("PlotClaimedRPC", 0, new object[]
 				{
 					piece.parentPiece.pieceId,
 					grabbedByPlayer,
@@ -1051,7 +1051,7 @@ namespace GorillaTagScripts
 			table.DropPiece(num2, pieceId, position, rotation, velocity, angVelocity, NetPlayer.Get(PhotonNetwork.LocalPlayer), true);
 			if (table.GetTableState() == BuilderTable.TableState.Ready)
 			{
-				base.photonView.RPC("RequestDropPieceRPC", RpcTarget.MasterClient, new object[]
+				base.photonView.RPC("RequestDropPieceRPC", 2, new object[]
 				{
 					num2,
 					pieceId,
@@ -1097,7 +1097,7 @@ namespace GorillaTagScripts
 			}
 			if (flag)
 			{
-				base.photonView.RPC("PieceDroppedRPC", RpcTarget.All, new object[]
+				base.photonView.RPC("PieceDroppedRPC", 0, new object[]
 				{
 					localCommandId,
 					pieceId,
@@ -1166,7 +1166,7 @@ namespace GorillaTagScripts
 			}
 			long num = BitPackUtils.PackWorldPosForNetwork(rootPiece.transform.position);
 			int num2 = BitPackUtils.PackQuaternionForNetwork(rootPiece.transform.rotation);
-			base.photonView.RPC("PieceEnteredDropZoneRPC", RpcTarget.All, new object[]
+			base.photonView.RPC("PieceEnteredDropZoneRPC", 0, new object[]
 			{
 				rootPiece.pieceId,
 				num,
@@ -1257,7 +1257,7 @@ namespace GorillaTagScripts
 			int num = table.CreatePieceId();
 			int num2 = table.CreatePieceId();
 			int staticHash = table.armShelfPieceType.name.GetStaticHash();
-			base.photonView.RPC("ArmShelfCreatedRPC", RpcTarget.All, new object[]
+			base.photonView.RPC("ArmShelfCreatedRPC", 0, new object[]
 			{
 				num,
 				num2,
@@ -1310,7 +1310,7 @@ namespace GorillaTagScripts
 			}
 			if (table.GetTableState() == BuilderTable.TableState.Ready)
 			{
-				base.photonView.RPC("RequestShelfSelectionRPC", RpcTarget.MasterClient, new object[]
+				base.photonView.RPC("RequestShelfSelectionRPC", 2, new object[]
 				{
 					shelfID,
 					groupID,
@@ -1344,7 +1344,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			base.photonView.RPC("ShelfSelectionChangedRPC", RpcTarget.All, new object[]
+			base.photonView.RPC("ShelfSelectionChangedRPC", 0, new object[]
 			{
 				shelfId,
 				setId,
@@ -1386,7 +1386,7 @@ namespace GorillaTagScripts
 			}
 			if (table.GetTableState() == BuilderTable.TableState.Ready)
 			{
-				base.photonView.RPC("RequestFunctionalPieceStateChangeRPC", RpcTarget.MasterClient, new object[]
+				base.photonView.RPC("RequestFunctionalPieceStateChangeRPC", 2, new object[]
 				{
 					pieceID,
 					state
@@ -1430,7 +1430,7 @@ namespace GorillaTagScripts
 			BuilderTable table = this.GetTable();
 			if (table.ValidateFunctionalPieceState(pieceID, state, NetPlayer.Get(instigator)) && state != table.GetPiece(pieceID).functionalPieceState)
 			{
-				base.photonView.RPC("FunctionalPieceStateChangeRPC", RpcTarget.All, new object[]
+				base.photonView.RPC("FunctionalPieceStateChangeRPC", 0, new object[]
 				{
 					pieceID,
 					state,
@@ -1478,7 +1478,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			base.photonView.RPC("RequestBlocksTerminalControlRPC", RpcTarget.MasterClient, new object[]
+			base.photonView.RPC("RequestBlocksTerminalControlRPC", 2, new object[]
 			{
 				locked
 			});
@@ -1517,7 +1517,7 @@ namespace GorillaTagScripts
 			if (table.linkedTerminal.ValidateTerminalControlRequest(lockedStatus, info.Sender.ActorNumber))
 			{
 				int num = lockedStatus ? info.Sender.ActorNumber : -2;
-				base.photonView.RPC("SetBlocksTerminalDriverRPC", RpcTarget.All, new object[]
+				base.photonView.RPC("SetBlocksTerminalDriverRPC", 0, new object[]
 				{
 					num
 				});
@@ -1550,7 +1550,7 @@ namespace GorillaTagScripts
 
 		public void RequestLoadSharedBlocksMap(string mapID)
 		{
-			base.photonView.RPC("LoadSharedBlocksMapRPC", RpcTarget.MasterClient, new object[]
+			base.photonView.RPC("LoadSharedBlocksMapRPC", 2, new object[]
 			{
 				mapID
 			});
@@ -1586,7 +1586,7 @@ namespace GorillaTagScripts
 			if (tableState == BuilderTable.TableState.Ready || tableState == BuilderTable.TableState.BadData)
 			{
 				table.SetPendingMap(mapID);
-				base.photonView.RPC("SharedTableEventRPC", RpcTarget.Others, new object[]
+				base.photonView.RPC("SharedTableEventRPC", 1, new object[]
 				{
 					0,
 					mapID
@@ -1615,7 +1615,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			base.photonView.RPC("SharedTableEventRPC", RpcTarget.All, new object[]
+			base.photonView.RPC("SharedTableEventRPC", 0, new object[]
 			{
 				1,
 				mapID
@@ -1632,7 +1632,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			base.photonView.RPC("SharedTableEventRPC", RpcTarget.All, new object[]
+			base.photonView.RPC("SharedTableEventRPC", 0, new object[]
 			{
 				2,
 				mapID

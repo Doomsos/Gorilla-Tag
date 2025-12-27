@@ -41,14 +41,14 @@ public class ParticleEffectsPool : MonoBehaviour
 	private RingBuffer<ParticleEffect> InitPoolForPrefab(int index, ParticleEffect prefab)
 	{
 		RingBuffer<ParticleEffect> ringBuffer = new RingBuffer<ParticleEffect>(this.poolSize);
-		string arg = prefab.name.Trim();
+		string text = prefab.name.Trim();
 		for (int i = 0; i < this.poolSize; i++)
 		{
 			ParticleEffect particleEffect = Object.Instantiate<ParticleEffect>(prefab, base.transform);
 			particleEffect.gameObject.SetActive(false);
 			particleEffect.pool = this;
 			particleEffect.poolIndex = index;
-			particleEffect.name = ZString.Concat<string, string, int>(arg, "*", i);
+			particleEffect.name = ZString.Concat<string, string, int>(text, "*", i);
 			ringBuffer.Push(particleEffect);
 		}
 		return ringBuffer;
@@ -114,7 +114,7 @@ public class ParticleEffectsPool : MonoBehaviour
 	public int GetPoolIndex(long effectID)
 	{
 		int result;
-		if (this._effectToPool.TryGetValue(effectID, out result))
+		if (this._effectToPool.TryGetValue(effectID, ref result))
 		{
 			return result;
 		}

@@ -157,8 +157,8 @@ public class GhostReactorSoak
 		}
 		else if (Random.value <= 0.005f)
 		{
-			int index = Random.Range(0, this._soakTasks.Count);
-			this._activeTask = this._soakTasks[index];
+			int num = Random.Range(0, this._soakTasks.Count);
+			this._activeTask = this._soakTasks[num];
 		}
 	}
 

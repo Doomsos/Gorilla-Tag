@@ -14,10 +14,10 @@ public class VirtualStumpBarrierSFX : MonoBehaviour
 			return;
 		}
 		VRRig vrrig;
-		if (other.gameObject.TryGetComponent<VRRig>(out vrrig) && !vrrig.isLocal)
+		if (other.gameObject.TryGetComponent<VRRig>(ref vrrig) && !vrrig.isLocal)
 		{
-			bool value = other.gameObject.transform.position.z < base.gameObject.transform.position.z;
-			this.trackedGameObjects.Add(other.gameObject, value);
+			bool flag = other.gameObject.transform.position.z < base.gameObject.transform.position.z;
+			this.trackedGameObjects.Add(other.gameObject, flag);
 			this.OnTriggerStay(other);
 		}
 	}
@@ -25,7 +25,7 @@ public class VirtualStumpBarrierSFX : MonoBehaviour
 	public void OnTriggerStay(Collider other)
 	{
 		bool flag;
-		if (!this.trackedGameObjects.TryGetValue(other.gameObject, out flag))
+		if (!this.trackedGameObjects.TryGetValue(other.gameObject, ref flag))
 		{
 			return;
 		}
@@ -40,7 +40,7 @@ public class VirtualStumpBarrierSFX : MonoBehaviour
 	public void OnTriggerExit(Collider other)
 	{
 		bool flag;
-		if (this.trackedGameObjects.TryGetValue(other.gameObject, out flag))
+		if (this.trackedGameObjects.TryGetValue(other.gameObject, ref flag))
 		{
 			bool flag2 = other.gameObject.transform.position.z < base.gameObject.transform.position.z;
 			if (flag != flag2)

@@ -25,14 +25,14 @@ public class DJScratchSoundPlayer : MonoBehaviour, ISpawnable
 				this._events.Init(netPlayer);
 			}
 		}
-		this._events.Activate += this.OnPlayEvent;
+		this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnPlayEvent);
 	}
 
 	private void OnDisable()
 	{
 		if (this._events.IsNotNull())
 		{
-			this._events.Activate -= this.OnPlayEvent;
+			this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnPlayEvent);
 			this._events.Dispose();
 		}
 	}

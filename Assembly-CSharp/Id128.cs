@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 
 [Serializable]
-[StructLayout(LayoutKind.Explicit)]
+[StructLayout(2)]
 public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, IEquatable<Hash128>
 {
 	public Id128(int a, int b, int c, int d)
@@ -164,13 +164,13 @@ public struct Id128 : IEquatable<Id128>, IComparable<Id128>, IEquatable<Guid>, I
 		}
 		if (obj is Guid)
 		{
-			Guid value = (Guid)obj;
-			return this.guid.CompareTo(value);
+			Guid guid = (Guid)obj;
+			return this.guid.CompareTo(guid);
 		}
 		if (obj is Hash128)
 		{
-			Hash128 rhs = (Hash128)obj;
-			return this.h128.CompareTo(rhs);
+			Hash128 hash = (Hash128)obj;
+			return this.h128.CompareTo(hash);
 		}
 		throw new ArgumentException("Object must be of type Id128 or Guid");
 	}

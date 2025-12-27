@@ -112,7 +112,7 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 	{
 	}
 
-	[Rpc(Channel = RpcChannel.Reliable)]
+	[Rpc(Channel = 0)]
 	public unsafe static void RPC_OnEventRaisedReliable(NetworkRunner runner, byte eventCode, byte[] byteData, bool hasOps, byte[] netOptsData, RpcInfo info = default(RpcInfo))
 	{
 		if (NetworkBehaviourUtils.InvokeRpc)
@@ -125,7 +125,7 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 			{
 				throw new ArgumentNullException("runner");
 			}
-			if (runner.Stage != SimulationStages.Resimulate)
+			if (runner.Stage != 4)
 			{
 				int num = 8;
 				num += 4;
@@ -150,11 +150,11 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 						*(int*)(ptr2 + num2) = netOptsData.Length;
 						num2 += 4;
 						num2 = (Native.CopyFromArray<byte>((void*)(ptr2 + num2), netOptsData) + 3 & -4) + num2;
-						ptr->Offset = num2 * 8;
-						ptr->SetStatic();
+						ptr.Offset = num2 * 8;
+						ptr.SetStatic();
 						runner.SendRpc(ptr);
 					}
-					info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+					info = RpcInfo.FromLocal(runner, 0, 0);
 					goto IL_10;
 				}
 				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void FusionCallbackHandler::RPC_OnEventRaisedReliable(Fusion.NetworkRunner,System.Byte,System.Byte[],System.Boolean,System.Byte[],Fusion.RpcInfo)", num);
@@ -175,7 +175,7 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 		NetworkSystem.Instance.RaiseEvent(eventCode, data, info.Source.PlayerId);
 	}
 
-	[Rpc(Channel = RpcChannel.Unreliable)]
+	[Rpc(Channel = 1)]
 	public unsafe static void RPC_OnEventRaisedUnreliable(NetworkRunner runner, byte eventCode, byte[] byteData, bool hasOps, byte[] netOptsData, RpcInfo info = default(RpcInfo))
 	{
 		if (NetworkBehaviourUtils.InvokeRpc)
@@ -188,7 +188,7 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 			{
 				throw new ArgumentNullException("runner");
 			}
-			if (runner.Stage != SimulationStages.Resimulate)
+			if (runner.Stage != 4)
 			{
 				int num = 8;
 				num += 4;
@@ -213,12 +213,12 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 						*(int*)(ptr2 + num2) = netOptsData.Length;
 						num2 += 4;
 						num2 = (Native.CopyFromArray<byte>((void*)(ptr2 + num2), netOptsData) + 3 & -4) + num2;
-						ptr->Offset = num2 * 8;
-						ptr->SetUnreliable();
-						ptr->SetStatic();
+						ptr.Offset = num2 * 8;
+						ptr.SetUnreliable();
+						ptr.SetStatic();
 						runner.SendRpc(ptr);
 					}
-					info = RpcInfo.FromLocal(runner, RpcChannel.Unreliable, RpcHostMode.SourceIsServer);
+					info = RpcInfo.FromLocal(runner, 1, 0);
 					goto IL_10;
 				}
 				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void FusionCallbackHandler::RPC_OnEventRaisedUnreliable(Fusion.NetworkRunner,System.Byte,System.Byte[],System.Boolean,System.Byte[],Fusion.RpcInfo)", num);
@@ -254,7 +254,7 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 					return false;
 				}
 			}
-			if (opts.TargetActors != null && !opts.TargetActors.Contains(runner.LocalPlayer.PlayerId))
+			if (opts.TargetActors != null && !Enumerable.Contains<int>(opts.TargetActors, runner.LocalPlayer.PlayerId))
 			{
 				return false;
 			}
@@ -301,7 +301,7 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 		byte[] array2 = new byte[*(int*)(ptr + num)];
 		num += 4;
 		num = (Native.CopyToArray<byte>(array2, (void*)(ptr + num)) + 3 & -4) + num;
-		RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
 		NetworkBehaviourUtils.InvokeRpc = true;
 		FusionCallbackHandler.RPC_OnEventRaisedReliable(runner, eventCode, array, hasOps, array2, info);
 	}
@@ -325,7 +325,7 @@ public class FusionCallbackHandler : SimulationBehaviour, INetworkRunnerCallback
 		byte[] array2 = new byte[*(int*)(ptr + num)];
 		num += 4;
 		num = (Native.CopyToArray<byte>(array2, (void*)(ptr + num)) + 3 & -4) + num;
-		RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
+		RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
 		NetworkBehaviourUtils.InvokeRpc = true;
 		FusionCallbackHandler.RPC_OnEventRaisedUnreliable(runner, eventCode, array, hasOps, array2, info);
 	}

@@ -97,7 +97,7 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 			this.EjectGuardian(player);
 			return;
 		}
-		GorillaGameModes.GameMode.ActiveNetworkHandler.SendRPC("GuardianRequestEject", false, Array.Empty<object>());
+		GameMode.ActiveNetworkHandler.SendRPC("GuardianRequestEject", false, Array.Empty<object>());
 	}
 
 	public void EjectGuardian(NetPlayer player)
@@ -140,12 +140,12 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		Vector3 vector;
 		if (VRRigCache.Instance.TryGetVrrig(taggedPlayer, out rigContainer) && this.CheckSlap(taggingPlayer, taggedPlayer, leftHand, out vector))
 		{
-			GorillaGameModes.GameMode.ActiveNetworkHandler.SendRPC("GuardianLaunchPlayer", taggedPlayer, new object[]
+			GameMode.ActiveNetworkHandler.SendRPC("GuardianLaunchPlayer", taggedPlayer, new object[]
 			{
 				vector
 			});
 			rigContainer.Rig.ApplyLocalTrajectoryOverride(vector);
-			GorillaGameModes.GameMode.ActiveNetworkHandler.SendRPC("ShowSlapEffects", true, new object[]
+			GameMode.ActiveNetworkHandler.SendRPC("ShowSlapEffects", true, new object[]
 			{
 				rigContainer.Rig.transform.position,
 				vector.normalized
@@ -167,8 +167,8 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 			return false;
 		}
 		Vector3 vector = GTPlayer.Instance.GetHandVelocityTracker(leftHand).GetAverageVelocity(true, 0.15f, false);
-		Vector3 rhs = leftHand ? rigContainer.Rig.leftHandHoldsPlayer.transform.right : rigContainer.Rig.rightHandHoldsPlayer.transform.right;
-		if (Vector3.Dot(vector.normalized, rhs) < this.slapFrontAlignmentThreshold && Vector3.Dot(vector.normalized, rhs) > this.slapBackAlignmentThreshold)
+		Vector3 vector2 = leftHand ? rigContainer.Rig.leftHandHoldsPlayer.transform.right : rigContainer.Rig.rightHandHoldsPlayer.transform.right;
+		if (Vector3.Dot(vector.normalized, vector2) < this.slapFrontAlignmentThreshold && Vector3.Dot(vector.normalized, vector2) > this.slapBackAlignmentThreshold)
 		{
 			return false;
 		}
@@ -191,10 +191,10 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 			return false;
 		}
 		vector *= this.launchStrengthMultiplier;
-		Vector3 vector2;
-		if (rigContainer2.Rig.IsOnGround(this.launchGroundHeadCheckDist, this.launchGroundHandCheckDist, out vector2))
+		Vector3 vector3;
+		if (rigContainer2.Rig.IsOnGround(this.launchGroundHeadCheckDist, this.launchGroundHandCheckDist, out vector3))
 		{
-			vector += vector2 * this.launchGroundKickup * Mathf.Clamp01(1f - Vector3.Dot(vector2, vector.normalized));
+			vector += vector3 * this.launchGroundKickup * Mathf.Clamp01(1f - Vector3.Dot(vector3, vector.normalized));
 		}
 		velocity = vector;
 		return true;
@@ -231,8 +231,8 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 			return;
 		}
 		VRMap vrmap = leftHand ? rigContainer.Rig.leftHand : rigContainer.Rig.rightHand;
-		Vector3 b = vrmap.rigTarget.rotation * vrmap.trackingPositionOffset * rigContainer.Rig.scaleFactor;
-		Vector3 vector = vrmap.rigTarget.position - b;
+		Vector3 vector = vrmap.rigTarget.rotation * vrmap.trackingPositionOffset * rigContainer.Rig.scaleFactor;
+		Vector3 vector2 = vrmap.rigTarget.position - vector;
 		float num2 = Mathf.Clamp01((num - this.slamTriggerTapSpeed) / (this.slamMaxTapSpeed - this.slamTriggerTapSpeed));
 		num2 = Mathf.Lerp(this.slamMinStrengthMultiplier, this.slamMaxStrengthMultiplier, num2);
 		for (int i = 0; i < RoomSystem.PlayersInRoom.Count; i++)
@@ -244,22 +244,22 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 				if (!this.IsRigBeingHeld(rig) && this.CheckLaunchRetriggerDelay(rig))
 				{
 					Vector3 position = rig.transform.position;
-					if (Vector3.SqrMagnitude(position - vector) < this.slamRadius * this.slamRadius)
+					if (Vector3.SqrMagnitude(position - vector2) < this.slamRadius * this.slamRadius)
 					{
-						Vector3 vector2 = (position - vector).normalized * num2;
-						vector2 = Vector3.ClampMagnitude(vector2, this.maxLaunchVelocity);
-						GorillaGameModes.GameMode.ActiveNetworkHandler.SendRPC("GuardianLaunchPlayer", RoomSystem.PlayersInRoom[i], new object[]
+						Vector3 vector3 = (position - vector2).normalized * num2;
+						vector3 = Vector3.ClampMagnitude(vector3, this.maxLaunchVelocity);
+						GameMode.ActiveNetworkHandler.SendRPC("GuardianLaunchPlayer", RoomSystem.PlayersInRoom[i], new object[]
 						{
-							vector2
+							vector3
 						});
 					}
 				}
 			}
 		}
-		this.LocalPlaySlamEffect(vector, Vector3.up);
-		GorillaGameModes.GameMode.ActiveNetworkHandler.SendRPC("ShowSlamEffect", true, new object[]
+		this.LocalPlaySlamEffect(vector2, Vector3.up);
+		GameMode.ActiveNetworkHandler.SendRPC("ShowSlamEffect", true, new object[]
 		{
-			vector,
+			vector2,
 			Vector3.up
 		});
 	}

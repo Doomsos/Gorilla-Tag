@@ -43,7 +43,7 @@ public class GorillaFireball : GorillaThrowable, IPunInstantiateMagicCallback
 	{
 		if (base.photonView.IsMine && this.canExplode)
 		{
-			base.photonView.RPC("Explode", RpcTarget.All, null);
+			base.photonView.RPC("Explode", 0, null);
 		}
 	}
 

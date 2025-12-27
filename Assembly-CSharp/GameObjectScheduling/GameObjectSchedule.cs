@@ -63,7 +63,7 @@ namespace GameObjectScheduling
 
 		public static void GenerateDailyShuffle(DateTime startDate, DateTime endDate, GameObjectSchedule[] schedules)
 		{
-			TimeSpan t = TimeSpan.FromDays(1.0);
+			TimeSpan timeSpan = TimeSpan.FromDays(1.0);
 			int num = schedules.Length - 1;
 			int num2 = schedules.Length - 2;
 			DateTime dateTime = startDate;
@@ -101,7 +101,7 @@ namespace GameObjectScheduling
 					activeDateTime = dateTime.ToString(),
 					activeState = true
 				});
-				dateTime += t;
+				dateTime += timeSpan;
 				num2 = num;
 				num = num3;
 			}

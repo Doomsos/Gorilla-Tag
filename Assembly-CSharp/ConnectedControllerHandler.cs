@@ -43,13 +43,13 @@ internal class ConnectedControllerHandler : MonoBehaviour
 		this.leftcontrollerList = new List<XRController>();
 		this.rightControllerList.Add(this.rightXRController);
 		this.leftcontrollerList.Add(this.leftXRController);
-		InputDevice deviceAtXRNode = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-		InputDevice deviceAtXRNode2 = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-		Debug.Log(string.Format("right controller? {0}", (deviceAtXRNode.characteristics & (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right)) == (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right)));
+		InputDevice deviceAtXRNode = InputDevices.GetDeviceAtXRNode(5);
+		InputDevice deviceAtXRNode2 = InputDevices.GetDeviceAtXRNode(4);
+		Debug.Log(string.Format("right controller? {0}", (deviceAtXRNode.characteristics & 576) == 576));
 		this.rightControllerValid = deviceAtXRNode.isValid;
 		this.leftControllerValid = deviceAtXRNode2.isValid;
-		InputDevices.deviceConnected += this.DeviceConnected;
-		InputDevices.deviceDisconnected += this.DeviceDisconnected;
+		InputDevices.deviceConnected += new Action<InputDevice>(this.DeviceConnected);
+		InputDevices.deviceDisconnected += new Action<InputDevice>(this.DeviceDisconnected);
 		this.UpdateControllerStates();
 	}
 
@@ -80,8 +80,8 @@ internal class ConnectedControllerHandler : MonoBehaviour
 		{
 			ConnectedControllerHandler.Instance = null;
 		}
-		InputDevices.deviceConnected -= this.DeviceConnected;
-		InputDevices.deviceDisconnected -= this.DeviceDisconnected;
+		InputDevices.deviceConnected -= new Action<InputDevice>(this.DeviceConnected);
+		InputDevices.deviceDisconnected -= new Action<InputDevice>(this.DeviceDisconnected);
 	}
 
 	private void LateUpdate()
@@ -99,8 +99,8 @@ internal class ConnectedControllerHandler : MonoBehaviour
 	private IEnumerator ControllerValidator()
 	{
 		yield return null;
-		this.lastRightPos = ControllerInputPoller.DevicePosition(XRNode.RightHand);
-		this.lastLeftPos = ControllerInputPoller.DevicePosition(XRNode.LeftHand);
+		this.lastRightPos = ControllerInputPoller.DevicePosition(5);
+		this.lastLeftPos = ControllerInputPoller.DevicePosition(4);
 		for (;;)
 		{
 			yield return new WaitForSeconds(this.overridePollRate);
@@ -109,7 +109,7 @@ internal class ConnectedControllerHandler : MonoBehaviour
 			{
 				if (this.rightControllerValid)
 				{
-					this.tempRightPos = ControllerInputPoller.DevicePosition(XRNode.RightHand);
+					this.tempRightPos = ControllerInputPoller.DevicePosition(5);
 					if (this.tempRightPos == this.lastRightPos)
 					{
 						if ((this.overrideController & OverrideControllers.RightController) != OverrideControllers.RightController)
@@ -127,7 +127,7 @@ internal class ConnectedControllerHandler : MonoBehaviour
 				}
 				if (this.leftControllerValid)
 				{
-					this.tempLeftPos = ControllerInputPoller.DevicePosition(XRNode.LeftHand);
+					this.tempLeftPos = ControllerInputPoller.DevicePosition(4);
 					if (this.tempLeftPos == this.lastLeftPos)
 					{
 						if ((this.overrideController & OverrideControllers.LeftController) != OverrideControllers.LeftController)
@@ -155,11 +155,11 @@ internal class ConnectedControllerHandler : MonoBehaviour
 
 	private void DeviceDisconnected(InputDevice device)
 	{
-		if ((device.characteristics & (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right)) == (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right))
+		if ((device.characteristics & 576) == 576)
 		{
 			this.rightControllerValid = false;
 		}
-		if ((device.characteristics & (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Left)) == (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Left))
+		if ((device.characteristics & 320) == 320)
 		{
 			this.leftControllerValid = false;
 		}
@@ -168,11 +168,11 @@ internal class ConnectedControllerHandler : MonoBehaviour
 
 	private void DeviceConnected(InputDevice device)
 	{
-		if ((device.characteristics & (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right)) == (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right))
+		if ((device.characteristics & 576) == 576)
 		{
 			this.rightControllerValid = true;
 		}
-		if ((device.characteristics & (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Left)) == (InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Left))
+		if ((device.characteristics & 320) == 320)
 		{
 			this.leftControllerValid = true;
 		}
@@ -214,9 +214,9 @@ internal class ConnectedControllerHandler : MonoBehaviour
 	public bool GetValidForXRNode(XRNode controllerNode)
 	{
 		bool result;
-		if (controllerNode != XRNode.LeftHand)
+		if (controllerNode != 4)
 		{
-			result = (controllerNode != XRNode.RightHand || this.rightValid);
+			result = (controllerNode != 5 || this.rightValid);
 		}
 		else
 		{
@@ -244,9 +244,9 @@ internal class ConnectedControllerHandler : MonoBehaviour
 
 	private List<XRController> leftcontrollerList;
 
-	private const InputDeviceCharacteristics rightCharecteristics = InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right;
+	private const InputDeviceCharacteristics rightCharecteristics = 576;
 
-	private const InputDeviceCharacteristics leftCharecteristics = InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Left;
+	private const InputDeviceCharacteristics leftCharecteristics = 320;
 
 	private bool rightControllerValid = true;
 

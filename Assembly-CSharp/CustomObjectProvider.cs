@@ -21,8 +21,8 @@ public class CustomObjectProvider : NetworkObjectProviderDefault
 
 	public override NetworkObjectAcquireResult AcquirePrefabInstance(NetworkRunner runner, in NetworkPrefabAcquireContext context, out NetworkObject instance)
 	{
-		NetworkObjectAcquireResult networkObjectAcquireResult = base.AcquirePrefabInstance(runner, context, out instance);
-		if (networkObjectAcquireResult == NetworkObjectAcquireResult.Success)
+		NetworkObjectAcquireResult networkObjectAcquireResult = base.AcquirePrefabInstance(runner, ref context, ref instance);
+		if (networkObjectAcquireResult == null)
 		{
 			this.IsGameMode(instance);
 			return networkObjectAcquireResult;
@@ -35,7 +35,7 @@ public class CustomObjectProvider : NetworkObjectProviderDefault
 	{
 		if (instance.gameObject.GetComponent<GameModeSerializer>() != null)
 		{
-			GorillaGameModes.GameMode.GetGameModeInstance(GorillaGameModes.GameMode.GetGameModeKeyFromRoomProp()).AddFusionDataBehaviour(instance);
+			GameMode.GetGameModeInstance(GameMode.GetGameModeKeyFromRoomProp()).AddFusionDataBehaviour(instance);
 			CustomObjectProvider.Baker.Bake(instance.gameObject);
 		}
 	}

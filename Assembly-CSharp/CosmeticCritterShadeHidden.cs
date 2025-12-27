@@ -18,9 +18,9 @@ public class CosmeticCritterShadeHidden : CosmeticCritter
 	public override void Tick()
 	{
 		float num = (float)base.GetAliveTime();
-		float f = this.initialAngle + this.orbitDegreesPerSecond * num * this.orbitDirection;
-		float y = this.verticalBobMagnitude * Mathf.Sin(num * this.verticalBobFrequency);
-		base.transform.position = this.orbitCenter + new Vector3(this.orbitRadius * Mathf.Cos(f), y, this.orbitRadius * Mathf.Sin(f));
+		float num2 = this.initialAngle + this.orbitDegreesPerSecond * num * this.orbitDirection;
+		float num3 = this.verticalBobMagnitude * Mathf.Sin(num * this.verticalBobFrequency);
+		base.transform.position = this.orbitCenter + new Vector3(this.orbitRadius * Mathf.Cos(num2), num3, this.orbitRadius * Mathf.Sin(num2));
 	}
 
 	[Space]

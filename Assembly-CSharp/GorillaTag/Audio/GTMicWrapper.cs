@@ -7,7 +7,7 @@ namespace GorillaTag.Audio
 {
 	public class GTMicWrapper : MicWrapper
 	{
-		public GTMicWrapper(string device, int suggestedFrequency, bool allowPitchAdjustment, float pitchAdjustment, bool allowVolumeAdjustment, float volumeAdjustment, Photon.Voice.ILogger logger) : base(device, suggestedFrequency, logger)
+		public GTMicWrapper(string device, int suggestedFrequency, bool allowPitchAdjustment, float pitchAdjustment, bool allowVolumeAdjustment, float volumeAdjustment, ILogger logger) : base(device, suggestedFrequency, logger)
 		{
 			this.UpdatePitchAdjustment(allowPitchAdjustment, pitchAdjustment);
 			this.UpdateVolumeAdjustment(allowVolumeAdjustment, volumeAdjustment);

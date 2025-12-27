@@ -14,8 +14,8 @@ public class PinwheelAnimator : MonoBehaviour
 		Vector3 position = this.spinnerTransform.position;
 		Vector3 forward = base.transform.forward;
 		Vector3 vector = position - this.oldPos;
-		float b = Mathf.Clamp(vector.magnitude / Time.deltaTime * Vector3.Dot(vector.normalized, forward) * this.spinSpeedMultiplier, -this.maxSpinSpeed, this.maxSpinSpeed);
-		this.spinSpeed = Mathf.Lerp(this.spinSpeed, b, Time.deltaTime * this.damping);
+		float num = Mathf.Clamp(vector.magnitude / Time.deltaTime * Vector3.Dot(vector.normalized, forward) * this.spinSpeedMultiplier, -this.maxSpinSpeed, this.maxSpinSpeed);
+		this.spinSpeed = Mathf.Lerp(this.spinSpeed, num, Time.deltaTime * this.damping);
 		this.spinnerTransform.Rotate(Vector3.forward, this.spinSpeed * 360f * Time.deltaTime);
 		this.oldPos = position;
 	}

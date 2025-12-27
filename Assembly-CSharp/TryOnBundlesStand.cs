@@ -21,7 +21,7 @@ public class TryOnBundlesStand : MonoBehaviour, IBuildValidation
 	public static string CleanUpTitleDataValues(string titleDataResult)
 	{
 		string text = titleDataResult.Replace("\\r", "\r").Replace("\\n", "\n");
-		if (text[0] == '"' && text[text.Length - 1] == '"')
+		if (text.get_Chars(0) == '"' && text.get_Chars(text.Length - 1) == '"')
 		{
 			text = text.Substring(1, text.Length - 2);
 		}
@@ -146,7 +146,7 @@ public class TryOnBundlesStand : MonoBehaviour, IBuildValidation
 		}
 		foreach (CosmeticsController.CosmeticItem cosmeticItem in CosmeticsController.instance.tryOnSet.items)
 		{
-			if (!itemFromDict.bundledItems.Contains(cosmeticItem.itemName))
+			if (!Enumerable.Contains<string>(itemFromDict.bundledItems, cosmeticItem.itemName))
 			{
 				CosmeticsController.instance.RemoveCosmeticItemFromSet(CosmeticsController.instance.tryOnSet, cosmeticItem.itemName, false);
 			}
@@ -309,7 +309,7 @@ public class TryOnBundlesStand : MonoBehaviour, IBuildValidation
 	private string GetBundleComputerText(string PlayFabID)
 	{
 		StoreBundle storeBundle;
-		if (BundleManager.instance.storeBundlesById.TryGetValue(PlayFabID, out storeBundle))
+		if (BundleManager.instance.storeBundlesById.TryGetValue(PlayFabID, ref storeBundle))
 		{
 			return storeBundle.bundleDescriptionText;
 		}
@@ -326,7 +326,7 @@ public class TryOnBundlesStand : MonoBehaviour, IBuildValidation
 	bool IBuildValidation.BuildValidationCheck()
 	{
 		ICreatorCodeProvider creatorCodeProvider;
-		if (this.creatorCodeProvider == null || !this.creatorCodeProvider.TryGetComponent<ICreatorCodeProvider>(out creatorCodeProvider))
+		if (this.creatorCodeProvider == null || !this.creatorCodeProvider.TryGetComponent<ICreatorCodeProvider>(ref creatorCodeProvider))
 		{
 			Debug.LogError(base.name + " has no Creator Code Provider. This will break bundle purchasing.");
 			return false;

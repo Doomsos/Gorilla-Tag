@@ -119,10 +119,10 @@ public class SimpleSpeedTracker : MonoBehaviour, IGorillaSliceableSimple
 
 	public Vector3 GetVelocityInAxisSpace()
 	{
-		Vector3 rhs = this.ResolveAxisRight();
-		Vector3 rhs2 = this.ResolveAxisUp();
-		Vector3 rhs3 = this.ResolveAxisForward();
-		return new Vector3(Vector3.Dot(this.lastVelocity, rhs), Vector3.Dot(this.lastVelocity, rhs2), Vector3.Dot(this.lastVelocity, rhs3));
+		Vector3 vector = this.ResolveAxisRight();
+		Vector3 vector2 = this.ResolveAxisUp();
+		Vector3 vector3 = this.ResolveAxisForward();
+		return new Vector3(Vector3.Dot(this.lastVelocity, vector), Vector3.Dot(this.lastVelocity, vector2), Vector3.Dot(this.lastVelocity, vector3));
 	}
 
 	private Vector3 ResolveAxisRight()

@@ -26,15 +26,15 @@ public class BspTestPlayer : MonoBehaviour
 	private void HandleMovement()
 	{
 		Vector3 vector = Vector3.zero;
-		if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+		if (Input.GetKey(276) || Input.GetKey(97))
 		{
 			vector.x -= 1f;
 		}
-		if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+		if (Input.GetKey(275) || Input.GetKey(100))
 		{
 			vector.x += 1f;
 		}
-		if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
+		if (Input.GetKey(273) || Input.GetKey(119))
 		{
 			if (this.use3DMovement)
 			{
@@ -45,7 +45,7 @@ public class BspTestPlayer : MonoBehaviour
 				vector.y += 1f;
 			}
 		}
-		if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+		if (Input.GetKey(274) || Input.GetKey(115))
 		{
 			if (this.use3DMovement)
 			{
@@ -58,11 +58,11 @@ public class BspTestPlayer : MonoBehaviour
 		}
 		if (this.use3DMovement)
 		{
-			if (Input.GetKey(KeyCode.Q))
+			if (Input.GetKey(113))
 			{
 				vector.y += 1f;
 			}
-			if (Input.GetKey(KeyCode.E))
+			if (Input.GetKey(101))
 			{
 				vector.y -= 1f;
 			}
@@ -156,7 +156,8 @@ public class BspTestPlayer : MonoBehaviour
 		{
 			return;
 		}
-		Bounds bounds = new Bounds(array[0].bounds.center, array[0].bounds.size);
+		Bounds bounds;
+		bounds..ctor(array[0].bounds.center, array[0].bounds.size);
 		foreach (BoxCollider boxCollider in array)
 		{
 			bounds.Encapsulate(boxCollider.bounds);
@@ -279,24 +280,24 @@ public class BspTestPlayer : MonoBehaviour
 
 	private Color GetAxisColor(SerializableBSPNode.Axis axis, int depth)
 	{
-		float a = 1f - (float)depth * 0.15f;
-		a = Mathf.Max(a, 0.3f);
+		float num = 1f - (float)depth * 0.15f;
+		num = Mathf.Max(num, 0.3f);
 		switch (axis)
 		{
 		case SerializableBSPNode.Axis.X:
-			return new Color(1f, 0f, 0f, a);
+			return new Color(1f, 0f, 0f, num);
 		case SerializableBSPNode.Axis.Y:
-			return new Color(0f, 1f, 0f, a);
+			return new Color(0f, 1f, 0f, num);
 		case SerializableBSPNode.Axis.Z:
-			return new Color(0f, 0f, 1f, a);
+			return new Color(0f, 0f, 1f, num);
 		case SerializableBSPNode.Axis.MatrixChain:
-			return new Color(1f, 0f, 1f, a);
+			return new Color(1f, 0f, 1f, num);
 		case SerializableBSPNode.Axis.MatrixFinal:
-			return new Color(0.5f, 0f, 1f, a);
+			return new Color(0.5f, 0f, 1f, num);
 		case SerializableBSPNode.Axis.Zone:
-			return new Color(0f, 1f, 0f, a);
+			return new Color(0f, 1f, 0f, num);
 		default:
-			return new Color(1f, 1f, 1f, a);
+			return new Color(1f, 1f, 1f, num);
 		}
 	}
 

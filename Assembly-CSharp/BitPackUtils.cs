@@ -345,7 +345,8 @@ public static class BitPackUtils
 	{
 		Vector3Int parityForWorldPos = BitPackUtils.GetParityForWorldPos(anchorPos);
 		long num = packed & 31L;
-		Vector3Int vector3Int = new Vector3Int((int)(num % 3L), (int)(num / 3L % 3L), (int)(num / 9L % 3L));
+		Vector3Int vector3Int;
+		vector3Int..ctor((int)(num % 3L), (int)(num / 3L % 3L), (int)(num / 9L % 3L));
 		pos = new Vector3((float)(packed >> 5 & 511L) / 102.3f + BitPackUtils.GetParityOffset(anchorPos.x, parityForWorldPos.x, vector3Int.x), (float)(packed >> 14 & 511L) / 102.3f + BitPackUtils.GetParityOffset(anchorPos.y, parityForWorldPos.y, vector3Int.y), (float)(packed >> 23 & 511L) / 102.3f + BitPackUtils.GetParityOffset(anchorPos.z, parityForWorldPos.z, vector3Int.z));
 		rot = BitPackUtils.UnpackQuaternionFromNetwork((int)(packed >> 32));
 	}

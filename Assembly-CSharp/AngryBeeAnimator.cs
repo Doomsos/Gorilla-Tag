@@ -30,10 +30,10 @@ public class AngryBeeAnimator : MonoBehaviour
 
 	private void Update()
 	{
-		float angle = this.orbitSpeed * Time.deltaTime;
+		float num = this.orbitSpeed * Time.deltaTime;
 		for (int i = 0; i < this.numBees; i++)
 		{
-			this.beeOrbits[i].transform.Rotate(this.beeOrbitalAxes[i], angle);
+			this.beeOrbits[i].transform.Rotate(this.beeOrbitalAxes[i], num);
 		}
 	}
 

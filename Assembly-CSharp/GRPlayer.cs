@@ -170,8 +170,8 @@ public class GRPlayer : MonoBehaviourTick
 		if (this.gamePlayer != null && this.gamePlayer.IsLocal())
 		{
 			this.LoadMyProgression();
-			ProgressionManager.Instance.OnGetShiftCredit += this.OnShiftCreditChanged;
-			ProgressionManager.Instance.OnGetShiftCreditCapData += this.OnShiftCreditCapChanged;
+			ProgressionManager.Instance.OnGetShiftCredit += new Action<string, int>(this.OnShiftCreditChanged);
+			ProgressionManager.Instance.OnGetShiftCreditCapData += new Action<string, int, int>(this.OnShiftCreditCapChanged);
 			this.soak = new GhostReactorSoak();
 			this.soak.Setup(this);
 		}
@@ -185,8 +185,8 @@ public class GRPlayer : MonoBehaviourTick
 		}
 		if (ProgressionManager.Instance != null)
 		{
-			ProgressionManager.Instance.OnGetShiftCredit += this.OnShiftCreditChanged;
-			ProgressionManager.Instance.OnGetShiftCreditCapData += this.OnShiftCreditCapChanged;
+			ProgressionManager.Instance.OnGetShiftCredit += new Action<string, int>(this.OnShiftCreditChanged);
+			ProgressionManager.Instance.OnGetShiftCreditCapData += new Action<string, int, int>(this.OnShiftCreditCapChanged);
 		}
 	}
 
@@ -425,28 +425,28 @@ public class GRPlayer : MonoBehaviourTick
 			{
 				this.shieldHeadVisual.gameObject.SetActive(true);
 				this.shieldBodyVisual.gameObject.SetActive(true);
-				Color value = this.shieldColorNormal;
+				Color color = this.shieldColorNormal;
 				if ((this.shieldFlags & 1) != 0)
 				{
-					value = this.shieldColorLight;
+					color = this.shieldColorLight;
 				}
 				else if ((this.shieldFlags & 2) != 0)
 				{
-					value = this.shieldColorStealth;
+					color = this.shieldColorStealth;
 				}
 				else if ((this.shieldFlags & 4) != 0)
 				{
-					value = this.shieldColorHeal;
+					color = this.shieldColorHeal;
 				}
 				Renderer component = this.shieldBodyVisual.GetComponent<Renderer>();
 				if (component != null)
 				{
-					component.material.SetColor("_BaseColor", value);
+					component.material.SetColor("_BaseColor", color);
 				}
 				Renderer component2 = this.shieldHeadVisual.GetComponent<Renderer>();
 				if (component2 != null)
 				{
-					component2.material.SetColor("_BaseColor", value);
+					component2.material.SetColor("_BaseColor", color);
 				}
 			}
 			else
@@ -649,10 +649,10 @@ public class GRPlayer : MonoBehaviourTick
 		{
 			Vector3 vector = attackLocation - this.bodyCenter.position;
 			vector.y = 0f;
-			Vector3 b = vector.normalized * this.playerDamageOffsetDist;
+			Vector3 vector2 = vector.normalized * this.playerDamageOffsetDist;
 			if (this.playerDamageEffect != null)
 			{
-				this.playerDamageEffect.transform.position = this.bodyCenter.position + b;
+				this.playerDamageEffect.transform.position = this.bodyCenter.position + vector2;
 				this.playerDamageEffect.Play();
 			}
 			if (this.vrRig.isLocal)
@@ -983,10 +983,10 @@ public class GRPlayer : MonoBehaviourTick
 			float startTime = Time.time;
 			while (Time.time - startTime < this.damageOverlayValues[index].effectDuration)
 			{
-				float time = Mathf.Clamp01((Time.time - startTime) / this.damageOverlayValues[index].effectDuration);
-				float num = this.damageOverlayValues[index].effectCurve.Evaluate(time);
+				float num = Mathf.Clamp01((Time.time - startTime) / this.damageOverlayValues[index].effectDuration);
+				float num2 = this.damageOverlayValues[index].effectCurve.Evaluate(num);
 				Color tint = this.damageOverlayValues[index].tint;
-				tint.a *= num;
+				tint.a *= num2;
 				this.damageEffects.lowHealthVisualRenderer.GetPropertyBlock(this.lowHealthVisualPropertyBlock);
 				this.lowHealthVisualPropertyBlock.SetColor(this.lowHealthTintPropertyId, tint);
 				this.damageEffects.lowHealthVisualRenderer.SetPropertyBlock(this.lowHealthVisualPropertyBlock);
@@ -1110,8 +1110,8 @@ public class GRPlayer : MonoBehaviourTick
 
 	private void OnSetMothershipUserDataFail(MothershipError error, int status)
 	{
-		string str = (error == null) ? status.ToString() : error.Message;
-		GTDev.LogError<string>("GRPlayer OnSetMothershipUserDataFail: " + str, null);
+		string text = (error == null) ? status.ToString() : error.Message;
+		GTDev.LogError<string>("GRPlayer OnSetMothershipUserDataFail: " + text, null);
 		this.OnSetMothershipDataComplete(false);
 		if (error != null)
 		{
@@ -1157,8 +1157,8 @@ public class GRPlayer : MonoBehaviourTick
 
 	private void OnGetMothershipFetchUserDataFail(MothershipError error, int status)
 	{
-		string str = (error == null) ? status.ToString() : error.Message;
-		GTDev.LogError<string>("GRPlayer OnGetMothershipFetchUserDataFail: " + str, null);
+		string text = (error == null) ? status.ToString() : error.Message;
+		GTDev.LogError<string>("GRPlayer OnGetMothershipFetchUserDataFail: " + text, null);
 		if (error != null)
 		{
 			error.Dispose();

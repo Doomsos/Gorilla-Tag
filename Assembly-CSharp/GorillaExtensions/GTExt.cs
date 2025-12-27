@@ -130,14 +130,14 @@ namespace GorillaExtensions
 
 		public static PooledObject<List<T>> GTGetComponentsListPool<T>(this Component root, bool includeInactive, out List<T> pooledList) where T : Component
 		{
-			PooledObject<List<T>> result = UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out pooledList);
+			PooledObject<List<T>> result = CollectionPool<List<T>, T>.Get(ref pooledList);
 			root.GetComponentsInChildren<T>(includeInactive, pooledList);
 			return result;
 		}
 
 		public static PooledObject<List<T>> GTGetComponentsListPool<T>(this Component root, out List<T> pooledList) where T : Component
 		{
-			PooledObject<List<T>> result = UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out pooledList);
+			PooledObject<List<T>> result = CollectionPool<List<T>, T>.Get(ref pooledList);
 			root.GetComponentsInChildren<T>(pooledList);
 			return result;
 		}
@@ -192,17 +192,17 @@ namespace GorillaExtensions
 				Transform transform = (Transform)obj;
 				if (includeInactive || transform.gameObject.activeSelf)
 				{
-					Component item;
-					if (GTExt._HasAnyComponents<TStop1, TStop2, TStop3>(transform, out item))
+					Component component;
+					if (GTExt._HasAnyComponents<TStop1, TStop2, TStop3>(transform, out component))
 					{
-						excluded.Add(item);
+						excluded.Add(component);
 					}
 					else
 					{
-						T component = transform.GetComponent<T>();
-						if (component != null)
+						T component2 = transform.GetComponent<T>();
+						if (component2 != null)
 						{
-							included.Add(component);
+							included.Add(component2);
 						}
 						GTExt._GetComponentsInChildrenUntil_OutExclusions_GetRecursive<T, TStop1, TStop2, TStop3>(transform, included, excluded, includeInactive);
 					}
@@ -330,15 +330,15 @@ namespace GorillaExtensions
 			foreach (T t in componentsInHierarchy)
 			{
 				bool flag = false;
-				foreach (string pattern in regexStrings)
+				foreach (string text in regexStrings)
 				{
-					if (!flag && Regex.IsMatch(t.name, pattern))
+					if (!flag && Regex.IsMatch(t.name, text))
 					{
-						foreach (string pattern2 in excludeRegexStrings)
+						foreach (string text2 in excludeRegexStrings)
 						{
 							if (!flag)
 							{
-								flag = Regex.IsMatch(t.name, pattern2);
+								flag = Regex.IsMatch(t.name, text2);
 							}
 						}
 						if (!flag)
@@ -436,7 +436,7 @@ namespace GorillaExtensions
 		public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
 		{
 			T result;
-			if (!gameObject.TryGetComponent<T>(out result))
+			if (!gameObject.TryGetComponent<T>(ref result))
 			{
 				result = gameObject.AddComponent<T>();
 			}
@@ -469,14 +469,14 @@ namespace GorillaExtensions
 		{
 			for (int i = list.Count - 1; i >= 0; i--)
 			{
-				T obj = list[i];
+				T t = list[i];
 				try
 				{
-					action(obj);
+					action.Invoke(t);
 				}
-				catch (Exception exception)
+				catch (Exception ex)
 				{
-					Debug.LogException(exception);
+					Debug.LogException(ex);
 				}
 			}
 		}
@@ -508,14 +508,14 @@ namespace GorillaExtensions
 		{
 			for (int i = list.Count - 1; i >= 0; i--)
 			{
-				T obj = list[i];
+				T t = list[i];
 				try
 				{
-					action(obj);
+					action.Invoke(t);
 				}
-				catch (Exception exception)
+				catch (Exception ex)
 				{
-					Debug.LogException(exception);
+					Debug.LogException(ex);
 				}
 			}
 		}
@@ -548,7 +548,8 @@ namespace GorillaExtensions
 			Debug.Log(vector);
 			Debug.Log(vector.magnitude);
 			Debug.Log(Vector3.Dot(fromVector, toVector) + 1f);
-			Quaternion quaternion = new Quaternion(vector.x, vector.y, vector.z, 1f + Vector3.Dot(toVector, fromVector));
+			Quaternion quaternion;
+			quaternion..ctor(vector.x, vector.y, vector.z, 1f + Vector3.Dot(toVector, fromVector));
 			Debug.Log(quaternion);
 			Debug.Log(quaternion.eulerAngles);
 			Debug.Log(quaternion.normalized);
@@ -565,7 +566,8 @@ namespace GorillaExtensions
 
 		public static Vector3 Scale(this Matrix4x4 m)
 		{
-			Vector3 result = new Vector3(m.GetColumn(0).magnitude, m.GetColumn(1).magnitude, m.GetColumn(2).magnitude);
+			Vector3 result;
+			result..ctor(m.GetColumn(0).magnitude, m.GetColumn(1).magnitude, m.GetColumn(2).magnitude);
 			if (Vector3.Cross(m.GetColumn(0), m.GetColumn(1)).normalized != m.GetColumn(2).normalized)
 			{
 				result.x *= -1f;
@@ -597,22 +599,22 @@ namespace GorillaExtensions
 			else
 			{
 				int num = 2;
-				Vector3 forward = matrix2.GetColumnNoCopy(num);
+				Vector3 vector = matrix2.GetColumnNoCopy(num);
 				int num2 = 1;
-				quaternion = Quaternion.LookRotation(forward, matrix2.GetColumnNoCopy(num2));
+				quaternion = Quaternion.LookRotation(vector, matrix2.GetColumnNoCopy(num2));
 			}
 			rotation = quaternion;
-			Vector3 vector;
+			Vector3 vector2;
 			if (!flag)
 			{
-				vector = Vector3.zero;
+				vector2 = Vector3.zero;
 			}
 			else
 			{
 				Matrix4x4 matrix4x = matrix;
-				vector = matrix4x.lossyScale;
+				vector2 = matrix4x.lossyScale;
 			}
-			scale = vector;
+			scale = vector2;
 		}
 
 		public static void SetLocalMatrixRelativeToParentWithXParity(this Transform transform, in Matrix4x4 matrix4X4)
@@ -669,17 +671,17 @@ namespace GorillaExtensions
 		{
 			Matrix4x4 matrix4x = m * GTExt.Matrix4x4Scale(scale);
 			int num = 2;
-			Vector3 forward = matrix4x.GetColumnNoCopy(num);
+			Vector3 vector = matrix4x.GetColumnNoCopy(num);
 			int num2 = 1;
-			return Quaternion.LookRotation(forward, matrix4x.GetColumnNoCopy(num2));
+			return Quaternion.LookRotation(vector, matrix4x.GetColumnNoCopy(num2));
 		}
 
 		public static Quaternion Rotation(this Matrix4x4 m)
 		{
 			int num = 2;
-			Vector3 forward = m.GetColumnNoCopy(num);
+			Vector3 vector = m.GetColumnNoCopy(num);
 			int num2 = 1;
-			return Quaternion.LookRotation(forward, m.GetColumnNoCopy(num2));
+			return Quaternion.LookRotation(vector, m.GetColumnNoCopy(num2));
 		}
 
 		public static Vector3 x0y(this Vector2 v)
@@ -767,43 +769,43 @@ namespace GorillaExtensions
 			return GTExt.Matrix4X4LerpNoScale(a, b, t);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool IsNaN(this Vector3 v)
 		{
 			return float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool IsNan(this Quaternion q)
 		{
 			return float.IsNaN(q.x) || float.IsNaN(q.y) || float.IsNaN(q.z) || float.IsNaN(q.w);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool IsInfinity(this Vector3 v)
 		{
 			return float.IsInfinity(v.x) || float.IsInfinity(v.y) || float.IsInfinity(v.z);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool IsInfinity(this Quaternion q)
 		{
 			return float.IsInfinity(q.x) || float.IsInfinity(q.y) || float.IsInfinity(q.z) || float.IsInfinity(q.w);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool ValuesInRange(this Vector3 v, in float maxVal)
 		{
 			return Mathf.Abs(v.x) < maxVal && Mathf.Abs(v.y) < maxVal && Mathf.Abs(v.z) < maxVal;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool IsValid(this Vector3 v, in float maxVal = 10000f)
 		{
 			return !v.IsNaN() && !v.IsInfinity() && v.ValuesInRange(maxVal);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static Vector3 GetValidWithFallback(this Vector3 v, in Vector3 safeVal)
 		{
 			float num = 10000f;
@@ -814,7 +816,7 @@ namespace GorillaExtensions
 			return v;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void SetValueSafe(this Vector3 v, in Vector3 newVal)
 		{
 			float num = 10000f;
@@ -824,13 +826,13 @@ namespace GorillaExtensions
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool IsValid(this Quaternion q)
 		{
 			return !q.IsNan() && !q.IsInfinity();
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static Quaternion GetValidWithFallback(this Quaternion q, in Quaternion safeVal)
 		{
 			if (!q.IsValid())
@@ -840,7 +842,7 @@ namespace GorillaExtensions
 			return q;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void SetValueSafe(this Quaternion q, in Quaternion newVal)
 		{
 			if (newVal.IsValid())
@@ -849,7 +851,7 @@ namespace GorillaExtensions
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static Vector2 ClampMagnitudeSafe(this Vector2 v2, float magnitude)
 		{
 			if (!float.IsFinite(v2.x))
@@ -867,7 +869,7 @@ namespace GorillaExtensions
 			return Vector2.ClampMagnitude(v2, magnitude);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void ClampThisMagnitudeSafe(this Vector2 v2, float magnitude)
 		{
 			if (!float.IsFinite(v2.x))
@@ -885,7 +887,7 @@ namespace GorillaExtensions
 			v2 = Vector2.ClampMagnitude(v2, magnitude);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static Vector3 ClampMagnitudeSafe(this Vector3 v3, float magnitude)
 		{
 			if (!float.IsFinite(v3.x))
@@ -907,7 +909,7 @@ namespace GorillaExtensions
 			return Vector3.ClampMagnitude(v3, magnitude);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void ClampThisMagnitudeSafe(this Vector3 v3, float magnitude)
 		{
 			if (!float.IsFinite(v3.x))
@@ -929,7 +931,7 @@ namespace GorillaExtensions
 			v3 = Vector3.ClampMagnitude(v3, magnitude);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static float MinSafe(this float value, float min)
 		{
 			if (!float.IsFinite(value))
@@ -947,7 +949,7 @@ namespace GorillaExtensions
 			return value;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void ThisMinSafe(this float value, float min)
 		{
 			if (!float.IsFinite(value))
@@ -961,7 +963,7 @@ namespace GorillaExtensions
 			value = ((value < min) ? value : min);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static double MinSafe(this double value, float min)
 		{
 			if (!double.IsFinite(value))
@@ -979,7 +981,7 @@ namespace GorillaExtensions
 			return value;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void ThisMinSafe(this double value, float min)
 		{
 			if (!double.IsFinite(value))
@@ -993,7 +995,7 @@ namespace GorillaExtensions
 			value = ((value < (double)min) ? value : ((double)min));
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static float MaxSafe(this float value, float max)
 		{
 			if (!float.IsFinite(value))
@@ -1011,7 +1013,7 @@ namespace GorillaExtensions
 			return value;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void ThisMaxSafe(this float value, float max)
 		{
 			if (!float.IsFinite(value))
@@ -1025,7 +1027,7 @@ namespace GorillaExtensions
 			value = ((value > max) ? value : max);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static double MaxSafe(this double value, float max)
 		{
 			if (!double.IsFinite(value))
@@ -1043,7 +1045,7 @@ namespace GorillaExtensions
 			return value;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void ThisMaxSafe(this double value, float max)
 		{
 			if (!double.IsFinite(value))
@@ -1057,7 +1059,7 @@ namespace GorillaExtensions
 			value = ((value > (double)max) ? value : ((double)max));
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static float ClampSafe(this float value, float min, float max)
 		{
 			if (!float.IsFinite(value))
@@ -1083,7 +1085,7 @@ namespace GorillaExtensions
 			return min;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static double ClampSafe(this double value, double min, double max)
 		{
 			if (!double.IsFinite(value))
@@ -1109,7 +1111,7 @@ namespace GorillaExtensions
 			return min;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static float GetFinite(this float value)
 		{
 			if (!float.IsFinite(value))
@@ -1119,7 +1121,7 @@ namespace GorillaExtensions
 			return value;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static double GetFinite(this double value)
 		{
 			if (!double.IsFinite(value))
@@ -1821,8 +1823,8 @@ namespace GorillaExtensions
 
 		public static Vector3 GetClosestPoint(this Ray ray, Vector3 target)
 		{
-			float d = Vector3.Dot(target - ray.origin, ray.direction);
-			return ray.origin + ray.direction * d;
+			float num = Vector3.Dot(target - ray.origin, ray.direction);
+			return ray.origin + ray.direction * num;
 		}
 
 		public static float GetClosestDistSqr(this Ray ray, Vector3 target)
@@ -1837,10 +1839,10 @@ namespace GorillaExtensions
 
 		public static Vector3 ProjectToPlane(this Ray ray, Vector3 planeOrigin, Vector3 planeNormalMustBeLength1)
 		{
-			Vector3 rhs = planeOrigin - ray.origin;
-			float d = Vector3.Dot(planeNormalMustBeLength1, rhs);
-			float d2 = Vector3.Dot(planeNormalMustBeLength1, ray.direction);
-			return ray.origin + ray.direction * d / d2;
+			Vector3 vector = planeOrigin - ray.origin;
+			float num = Vector3.Dot(planeNormalMustBeLength1, vector);
+			float num2 = Vector3.Dot(planeNormalMustBeLength1, ray.direction);
+			return ray.origin + ray.direction * num / num2;
 		}
 
 		public static Vector3 ProjectToLine(this Ray ray, Vector3 lineStart, Vector3 lineEnd)
@@ -1962,7 +1964,7 @@ namespace GorillaExtensions
 			return array;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void GetRelativePath(string fromPath, string toPath, ref Utf16ValueStringBuilder ZStringBuilder)
 		{
 			if (string.IsNullOrEmpty(fromPath) || string.IsNullOrEmpty(toPath))
@@ -1970,12 +1972,12 @@ namespace GorillaExtensions
 				return;
 			}
 			int num = 0;
-			while (num < fromPath.Length && fromPath[num] == '/')
+			while (num < fromPath.Length && fromPath.get_Chars(num) == '/')
 			{
 				num++;
 			}
 			int num2 = 0;
-			while (num2 < toPath.Length && toPath[num2] == '/')
+			while (num2 < toPath.Length && toPath.get_Chars(num2) == '/')
 			{
 				num2++;
 			}
@@ -1984,23 +1986,23 @@ namespace GorillaExtensions
 			bool flag = true;
 			for (int i = 0; i < num4; i++)
 			{
-				if (fromPath[num + i] != toPath[num2 + i])
+				if (fromPath.get_Chars(num + i) != toPath.get_Chars(num2 + i))
 				{
 					flag = false;
 					break;
 				}
-				if (fromPath[num + i] == '/')
+				if (fromPath.get_Chars(num + i) == '/')
 				{
 					num3 = i;
 				}
 			}
 			if (flag && fromPath.Length - num > num4)
 			{
-				flag = (fromPath[num + num4] == '/');
+				flag = (fromPath.get_Chars(num + num4) == '/');
 			}
 			else if (flag && toPath.Length - num2 > num4)
 			{
-				flag = (toPath[num2 + num4] == '/');
+				flag = (toPath.get_Chars(num2 + num4) == '/');
 			}
 			num3 = (flag ? num4 : num3);
 			int num5 = (num3 < fromPath.Length - num) ? (num3 + 1) : (fromPath.Length - num);
@@ -2010,7 +2012,7 @@ namespace GorillaExtensions
 				ZStringBuilder.Append("../");
 				for (int j = num5; j < fromPath.Length - num; j++)
 				{
-					if (fromPath[num + j] == '/')
+					if (fromPath.get_Chars(num + j) == '/')
 					{
 						ZStringBuilder.Append("../");
 					}
@@ -2039,13 +2041,13 @@ namespace GorillaExtensions
 			return result;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static void GetRelativePath(this Transform fromXform, Transform toXform, ref Utf16ValueStringBuilder ZStringBuilder)
 		{
 			GTExt.GetRelativePath(fromXform.GetPath(), toXform.GetPath(), ref ZStringBuilder);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static string GetRelativePath(this Transform fromXform, Transform toXform)
 		{
 			Utf16ValueStringBuilder utf16ValueStringBuilder = ZString.CreateStringBuilder();
@@ -2171,7 +2173,7 @@ namespace GorillaExtensions
 			string[] array = path.Split(new string[]
 			{
 				"/->/"
-			}, StringSplitOptions.None);
+			}, 0);
 			if (array.Length < 2)
 			{
 				return default(T);
@@ -2179,18 +2181,18 @@ namespace GorillaExtensions
 			string[] array2 = array[0].Split(new string[]
 			{
 				"/"
-			}, StringSplitOptions.RemoveEmptyEntries);
+			}, 1);
 			Transform transform = root.transform;
 			for (int i = 1; i < array2.Length; i++)
 			{
-				string n = array2[i];
-				transform = transform.Find(n);
+				string text = array2[i];
+				transform = transform.Find(text);
 				if (transform == null)
 				{
 					return default(T);
 				}
 			}
-			Type type = Type.GetType(array[1].Split('#', StringSplitOptions.None)[0]);
+			Type type = Type.GetType(array[1].Split('#', 0)[0]);
 			if (type == null)
 			{
 				return default(T);
@@ -2285,13 +2287,13 @@ namespace GorillaExtensions
 			GTExt.caseInsenseInner = new Dictionary<Transform, Dictionary<string, Transform>>();
 		}
 
-		public static bool TryFindByExactPath([NotNull] string path, out Transform result, FindObjectsInactive findObjectsInactive = FindObjectsInactive.Include)
+		public static bool TryFindByExactPath([NotNull] string path, out Transform result, FindObjectsInactive findObjectsInactive = 1)
 		{
 			if (string.IsNullOrEmpty(path))
 			{
 				throw new Exception("TryFindByExactPath: Provided path cannot be null or empty.");
 			}
-			if (findObjectsInactive != FindObjectsInactive.Exclude)
+			if (findObjectsInactive != null)
 			{
 				for (int i = 0; i < SceneManager.sceneCount; i++)
 				{
@@ -2304,7 +2306,7 @@ namespace GorillaExtensions
 				result = null;
 				return false;
 			}
-			if (path[0] != '/')
+			if (path.get_Chars(0) != '/')
 			{
 				path = "/" + path;
 			}
@@ -2324,7 +2326,7 @@ namespace GorillaExtensions
 			{
 				throw new Exception("TryFindByExactPath: Provided path cannot be null or empty.");
 			}
-			string[] splitPath = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+			string[] splitPath = path.Split('/', 1);
 			return scene.TryFindByExactPath(splitPath, out result);
 		}
 
@@ -2348,7 +2350,7 @@ namespace GorillaExtensions
 			{
 				throw new Exception("TryFindByExactPath: Provided path cannot be null or empty.");
 			}
-			string[] splitPath = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+			string[] splitPath = path.Split('/', 1);
 			using (IEnumerator enumerator = rootXform.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
@@ -2441,10 +2443,10 @@ namespace GorillaExtensions
 			{
 				throw new Exception("TryFindByPath: Provided path cannot be null or empty.");
 			}
-			char c = globPath[0];
+			char c = globPath.get_Chars(0);
 			if (c != ' ' && c != '\n' && c != '\t')
 			{
-				c = globPath[globPath.Length - 1];
+				c = globPath.get_Chars(globPath.Length - 1);
 				if (c != ' ' && c != '\n' && c != '\t')
 				{
 					string[] pathPartsRegex = GTExt._GlobPathToPathPartsRegex(globPath);
@@ -2456,7 +2458,7 @@ namespace GorillaExtensions
 
 		public static List<string> ShowAllStringsUsed()
 		{
-			return GTExt.allStringsUsed.Keys.ToList<string>();
+			return Enumerable.ToList<string>(GTExt.allStringsUsed.Keys);
 		}
 
 		private static bool _TryFindByPath(Transform current, IReadOnlyList<string> pathPartsRegex, int index, out Transform result, bool caseSensitive, bool isAtSceneLevel, string joinedPath)
@@ -2492,12 +2494,12 @@ namespace GorillaExtensions
 			{
 				GTExt.caseInsenseInner[current] = new Dictionary<string, Transform>();
 			}
-			string a;
+			string text;
 			if (isAtSceneLevel)
 			{
 				index = ((index == -1) ? 0 : index);
-				a = pathPartsRegex[index];
-				if (a == ".." || a == "..**" || a == "**..")
+				text = pathPartsRegex[index];
+				if (text == ".." || text == "..**" || text == "**..")
 				{
 					result = null;
 					return false;
@@ -2528,18 +2530,18 @@ namespace GorillaExtensions
 			}
 			if (index != -1)
 			{
-				a = pathPartsRegex[index];
-				if (!(a == "."))
+				text = pathPartsRegex[index];
+				if (!(text == "."))
 				{
-					if (!(a == ".."))
+					if (!(text == ".."))
 					{
-						if (a == "**")
+						if (text == "**")
 						{
 							goto IL_50A;
 						}
-						if (!(a == "..**") && !(a == "**.."))
+						if (!(text == "..**") && !(text == "**.."))
 						{
-							if (!Regex.IsMatch(current.name, pathPartsRegex[index], caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase))
+							if (!Regex.IsMatch(current.name, pathPartsRegex[index], caseSensitive ? 0 : 1))
 							{
 								goto IL_8CB;
 							}
@@ -2578,7 +2580,7 @@ namespace GorillaExtensions
 						}
 						else
 						{
-							string a2;
+							string text2;
 							do
 							{
 								index++;
@@ -2586,9 +2588,9 @@ namespace GorillaExtensions
 								{
 									break;
 								}
-								a2 = pathPartsRegex[index];
+								text2 = pathPartsRegex[index];
 							}
-							while (a2 == "..**" || a2 == "**..");
+							while (text2 == "..**" || text2 == "**..");
 							if (index == pathPartsRegex.Count)
 							{
 								result = current.root;
@@ -2746,7 +2748,7 @@ namespace GorillaExtensions
 					result = ((current.childCount > 0) ? current.GetChild(0) : null);
 					return current.childCount > 0;
 				}
-				if (index <= pathPartsRegex.Count - 1 && Regex.IsMatch(current.name, pathPartsRegex[index + 1], caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase))
+				if (index <= pathPartsRegex.Count - 1 && Regex.IsMatch(current.name, pathPartsRegex[index + 1], caseSensitive ? 0 : 1))
 				{
 					if (index + 2 == pathPartsRegex.Count)
 					{
@@ -2810,8 +2812,8 @@ namespace GorillaExtensions
 				result = null;
 				return false;
 			}
-			a = pathPartsRegex[0];
-			if (!(a == ".") && !(a == "..") && !(a == "..**") && !(a == "**.."))
+			text = pathPartsRegex[0];
+			if (!(text == ".") && !(text == "..") && !(text == "..**") && !(text == "**.."))
 			{
 				using (IEnumerator enumerator = current.GetEnumerator())
 				{
@@ -2860,22 +2862,22 @@ namespace GorillaExtensions
 				while (enumerator.MoveNext())
 				{
 					object obj = enumerator.Current;
-					Transform item = (Transform)obj;
-					queue.Enqueue(item);
+					Transform transform = (Transform)obj;
+					queue.Enqueue(transform);
 				}
 				goto IL_9B;
 			}
 			IL_3D:
-			Transform transform = queue.Dequeue();
-			if (Regex.IsMatch(transform.name, regexPattern, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase))
+			Transform transform2 = queue.Dequeue();
+			if (Regex.IsMatch(transform2.name, regexPattern, caseSensitive ? 0 : 1))
 			{
-				result = transform;
+				result = transform2;
 				return true;
 			}
-			foreach (object obj2 in transform)
+			foreach (object obj2 in transform2)
 			{
-				Transform item2 = (Transform)obj2;
-				queue.Enqueue(item2);
+				Transform transform3 = (Transform)obj2;
+				queue.Enqueue(transform3);
 			}
 			IL_9B:
 			if (queue.Count <= 0)
@@ -2890,9 +2892,9 @@ namespace GorillaExtensions
 		{
 			List<T> list;
 			T[] result;
-			using (UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out list))
+			using (CollectionPool<List<T>, T>.Get(ref list))
 			{
-				list.EnsureCapacity(64);
+				ListExtensions.EnsureCapacity<T>(list, 64);
 				for (int i = 0; i < SceneManager.sceneCount; i++)
 				{
 					Scene sceneAt = SceneManager.GetSceneAt(i);
@@ -2912,7 +2914,7 @@ namespace GorillaExtensions
 			{
 				throw new Exception("FindComponentsByExactPath: Provided path cannot be null or empty.");
 			}
-			string[] splitPath = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+			string[] splitPath = path.Split('/', 1);
 			return scene.FindComponentsByExactPath(splitPath);
 		}
 
@@ -2920,9 +2922,9 @@ namespace GorillaExtensions
 		{
 			List<T> list;
 			T[] result;
-			using (UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out list))
+			using (CollectionPool<List<T>, T>.Get(ref list))
 			{
-				list.EnsureCapacity(64);
+				ListExtensions.EnsureCapacity<T>(list, 64);
 				GameObject[] rootGameObjects = scene.GetRootGameObjects();
 				for (int i = 0; i < rootGameObjects.Length; i++)
 				{
@@ -2939,12 +2941,12 @@ namespace GorillaExtensions
 			{
 				throw new Exception("FindComponentsByExactPath: Provided path cannot be null or empty.");
 			}
-			string[] splitPath = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+			string[] splitPath = path.Split('/', 1);
 			List<T> list;
 			T[] result;
-			using (UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out list))
+			using (CollectionPool<List<T>, T>.Get(ref list))
 			{
-				list.EnsureCapacity(64);
+				ListExtensions.EnsureCapacity<T>(list, 64);
 				foreach (object obj in rootXform)
 				{
 					GTExt._FindComponentsByExactPath<T>((Transform)obj, splitPath, 0, list);
@@ -2958,9 +2960,9 @@ namespace GorillaExtensions
 		{
 			List<T> list;
 			T[] result;
-			using (UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out list))
+			using (CollectionPool<List<T>, T>.Get(ref list))
 			{
-				list.EnsureCapacity(64);
+				ListExtensions.EnsureCapacity<T>(list, 64);
 				foreach (object obj in rootXform)
 				{
 					GTExt._FindComponentsByExactPath<T>((Transform)obj, splitPath, 0, list);
@@ -2995,9 +2997,9 @@ namespace GorillaExtensions
 		{
 			List<T> list;
 			T[] result;
-			using (UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out list))
+			using (CollectionPool<List<T>, T>.Get(ref list))
 			{
-				list.EnsureCapacity(64);
+				ListExtensions.EnsureCapacity<T>(list, 64);
 				string[] pathPartsRegex = GTExt._GlobPathToPathPartsRegex(wildcardPath);
 				for (int i = 0; i < SceneManager.sceneCount; i++)
 				{
@@ -3030,9 +3032,9 @@ namespace GorillaExtensions
 		{
 			List<T> list;
 			T[] result;
-			using (UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out list))
+			using (CollectionPool<List<T>, T>.Get(ref list))
 			{
-				list.EnsureCapacity(64);
+				ListExtensions.EnsureCapacity<T>(list, 64);
 				GameObject[] rootGameObjects = scene.GetRootGameObjects();
 				for (int i = 0; i < rootGameObjects.Length; i++)
 				{
@@ -3057,9 +3059,9 @@ namespace GorillaExtensions
 		{
 			List<T> list;
 			T[] result;
-			using (UnityEngine.Pool.CollectionPool<List<T>, T>.Get(out list))
+			using (CollectionPool<List<T>, T>.Get(ref list))
 			{
-				list.EnsureCapacity(64);
+				ListExtensions.EnsureCapacity<T>(list, 64);
 				GTExt._FindComponentsByPath<T>(rootXform, pathPartsRegex, list, caseSensitive);
 				result = list.ToArray();
 			}
@@ -3069,9 +3071,9 @@ namespace GorillaExtensions
 		public static void _FindComponentsByPath<T>(Transform current, string[] pathPartsRegex, List<T> components, bool caseSensitive) where T : Component
 		{
 			List<Transform> list;
-			using (UnityEngine.Pool.CollectionPool<List<Transform>, Transform>.Get(out list))
+			using (CollectionPool<List<Transform>, Transform>.Get(ref list))
 			{
-				list.EnsureCapacity(64);
+				ListExtensions.EnsureCapacity<Transform>(list, 64);
 				if (GTExt._TryFindAllByPath(current, pathPartsRegex, 0, list, caseSensitive, false))
 				{
 					for (int i = 0; i < list.Count; i++)
@@ -3086,11 +3088,11 @@ namespace GorillaExtensions
 		private static bool _TryFindAllByPath(Transform current, IReadOnlyList<string> pathPartsRegex, int index, List<Transform> results, bool caseSensitive, bool isAtSceneLevel = false)
 		{
 			bool flag = false;
-			string a;
+			string text;
 			if (isAtSceneLevel)
 			{
-				a = pathPartsRegex[index];
-				if (a == ".." || a == "..**" || a == "**..")
+				text = pathPartsRegex[index];
+				if (text == ".." || text == "..**" || text == "**..")
 				{
 					return false;
 				}
@@ -3106,17 +3108,17 @@ namespace GorillaExtensions
 					}
 				}
 			}
-			a = pathPartsRegex[index];
-			if (!(a == "."))
+			text = pathPartsRegex[index];
+			if (!(text == "."))
 			{
-				if (!(a == ".."))
+				if (!(text == ".."))
 				{
 					Transform transform2;
-					if (!(a == "**"))
+					if (!(text == "**"))
 					{
-						if (!(a == "..**") && !(a == "**.."))
+						if (!(text == "..**") && !(text == "**.."))
 						{
-							if (Regex.IsMatch(current.name, pathPartsRegex[index], caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase))
+							if (Regex.IsMatch(current.name, pathPartsRegex[index], caseSensitive ? 0 : 1))
 							{
 								if (index == pathPartsRegex.Count - 1)
 								{
@@ -3135,8 +3137,8 @@ namespace GorillaExtensions
 							int k;
 							for (k = index + 1; k < pathPartsRegex.Count; k++)
 							{
-								string a2 = pathPartsRegex[k];
-								if (!(a2 == "..**") && !(a2 == "**.."))
+								string text2 = pathPartsRegex[k];
+								if (!(text2 == "..**") && !(text2 == "**.."))
 								{
 									break;
 								}
@@ -3196,17 +3198,17 @@ namespace GorillaExtensions
 
 		public static string[] _GlobPathToPathPartsRegex(string path)
 		{
-			string[] array = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+			string[] array = path.Split('/', 1);
 			int num = 0;
 			for (int i = 0; i < array.Length; i++)
 			{
 				if (i > 0)
 				{
-					string a = array[i];
-					if (a == "**" || a == "..**" || a == "**..")
+					string text = array[i];
+					if (text == "**" || text == "..**" || text == "**..")
 					{
-						a = array[i - 1];
-						if (a == "**" || a == "..**" || a == "**..")
+						text = array[i - 1];
+						if (text == "**" || text == "..**" || text == "**..")
 						{
 							num++;
 						}

@@ -89,12 +89,12 @@ public class LegacyTransferrableObject : HoldableObject
 		{
 			return;
 		}
-		object[] data = new object[]
+		object[] array = new object[]
 		{
 			this.myIndex,
 			PhotonNetwork.LocalPlayer
 		};
-		this.worldShareableInstance = PhotonNetwork.Instantiate("Objects/equipment/WorldShareableItem", base.transform.position, base.transform.rotation, 0, data);
+		this.worldShareableInstance = PhotonNetwork.Instantiate("Objects/equipment/WorldShareableItem", base.transform.position, base.transform.rotation, 0, array);
 		if (this.myRig != null && this.worldShareableInstance != null)
 		{
 			this.OnWorldShareableItemSpawn();
@@ -246,9 +246,9 @@ public class LegacyTransferrableObject : HoldableObject
 			{
 				return;
 			}
-			float t = Mathf.Clamp((this.interpTime - this.interpDt) / this.interpTime, 0f, 1f);
-			transform.transform.position = Vector3.Lerp(this.interpStartPos, transform2.transform.position, t);
-			transform.transform.rotation = Quaternion.Slerp(this.interpStartRot, transform2.transform.rotation, t);
+			float num = Mathf.Clamp((this.interpTime - this.interpDt) / this.interpTime, 0f, 1f);
+			transform.transform.position = Vector3.Lerp(this.interpStartPos, transform2.transform.position, num);
+			transform.transform.rotation = Quaternion.Slerp(this.interpStartRot, transform2.transform.rotation, num);
 			this.interpDt -= Time.deltaTime;
 			if (this.interpDt <= 0f)
 			{
@@ -360,7 +360,7 @@ public class LegacyTransferrableObject : HoldableObject
 		{
 			array[i].SetActive(true);
 		}
-		XRNode node = (this.currentState == TransferrableObject.PositionState.InLeftHand) ? XRNode.LeftHand : XRNode.RightHand;
+		XRNode node = (this.currentState == TransferrableObject.PositionState.InLeftHand) ? 4 : 5;
 		this.indexTrigger = ControllerInputPoller.TriggerFloat(node);
 		bool flag = !this.latched && this.indexTrigger >= this.myThreshold;
 		bool flag2 = this.latched && this.indexTrigger < this.myThreshold - this.hysterisis;

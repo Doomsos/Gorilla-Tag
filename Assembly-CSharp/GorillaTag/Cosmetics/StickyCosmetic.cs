@@ -41,8 +41,8 @@ namespace GorillaTag.Cosmetics
 		private void Retract_Internal()
 		{
 			this.endRigidbody.isKinematic = false;
-			Vector3 position = Vector3.MoveTowards(this.endRigidbody.position, this.startPosition.position, this.retractSpeed * Time.fixedDeltaTime);
-			this.endRigidbody.MovePosition(position);
+			Vector3 vector = Vector3.MoveTowards(this.endRigidbody.position, this.startPosition.position, this.retractSpeed * Time.fixedDeltaTime);
+			this.endRigidbody.MovePosition(vector);
 		}
 
 		private void FixedUpdate()
@@ -57,7 +57,7 @@ namespace GorillaTag.Cosmetics
 				}
 				this.Extend_Internal();
 				RaycastHit raycastHit;
-				if (Physics.Raycast(this.rayOrigin.position, this.rayOrigin.forward, out raycastHit, this.rayLength, this.collisionLayers))
+				if (Physics.Raycast(this.rayOrigin.position, this.rayOrigin.forward, ref raycastHit, this.rayLength, this.collisionLayers))
 				{
 					this.endRigidbody.isKinematic = true;
 					this.endRigidbody.transform.parent = null;

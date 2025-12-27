@@ -46,7 +46,7 @@ public class GravityOverrideVolume : MonoBehaviour
 		if (gravityType == GravityOverrideVolume.GravityType.Directional)
 		{
 			Vector3 forward = this.referenceTransform.forward;
-			player.AddForce(forward * this.strength, ForceMode.Acceleration);
+			player.AddForce(forward * this.strength, 5);
 			return;
 		}
 		if (gravityType != GravityOverrideVolume.GravityType.Radial)
@@ -54,7 +54,7 @@ public class GravityOverrideVolume : MonoBehaviour
 			return;
 		}
 		Vector3 normalized = (this.referenceTransform.position - player.headCollider.transform.position).normalized;
-		player.AddForce(normalized * this.strength, ForceMode.Acceleration);
+		player.AddForce(normalized * this.strength, 5);
 	}
 
 	[SerializeField]

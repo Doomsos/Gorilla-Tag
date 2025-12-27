@@ -45,8 +45,8 @@ public class HalloweenWatcherEyes : MonoBehaviour
 			this.LookNormal();
 			return;
 		}
-		Quaternion b = Quaternion.LookRotation(normalized, base.transform.up);
-		Quaternion rotation = Quaternion.Lerp(base.transform.rotation, b, this.lerpValue);
+		Quaternion quaternion = Quaternion.LookRotation(normalized, base.transform.up);
+		Quaternion rotation = Quaternion.Lerp(base.transform.rotation, quaternion, this.lerpValue);
 		this.leftEye.transform.rotation = rotation;
 		this.rightEye.transform.rotation = rotation;
 		if (this.lerpDuration > 0f)

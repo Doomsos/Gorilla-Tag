@@ -63,12 +63,12 @@ public class KIDUIScrollRectangle : ScrollRect, IPointerEnterHandler, IEventSyst
 		}
 		XRRayInteractor xrrayInteractor2 = xrrayInteractor;
 		RaycastResult raycastResult;
-		if (!xrrayInteractor2.TryGetCurrentUIRaycastResult(out raycastResult))
+		if (!xrrayInteractor2.TryGetCurrentUIRaycastResult(ref raycastResult))
 		{
 			return;
 		}
 		Vector2 vector;
-		RectTransformUtility.ScreenPointToLocalPointInRectangle(base.viewRect, raycastResult.screenPosition, this.thirdPersonCamera, out vector);
+		RectTransformUtility.ScreenPointToLocalPointInRectangle(base.viewRect, raycastResult.screenPosition, this.thirdPersonCamera, ref vector);
 		if (!this._isHolding && this._isPointerInside && ControllerBehaviour.Instance.TriggerDown)
 		{
 			this._isHolding = true;
@@ -80,8 +80,8 @@ public class KIDUIScrollRectangle : ScrollRect, IPointerEnterHandler, IEventSyst
 			return;
 		}
 		base.UpdateBounds();
-		Vector2 b = vector - this.m_PointerStartLocalCursor;
-		Vector2 contentAnchoredPosition = this.m_ContentStartPosition + b;
+		Vector2 vector2 = vector - this.m_PointerStartLocalCursor;
+		Vector2 contentAnchoredPosition = this.m_ContentStartPosition + vector2;
 		this.SetContentAnchoredPosition(contentAnchoredPosition);
 	}
 

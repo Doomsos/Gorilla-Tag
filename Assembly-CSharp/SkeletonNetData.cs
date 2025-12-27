@@ -5,7 +5,7 @@ using Fusion.CodeGen;
 using UnityEngine;
 
 [NetworkStructWeaved(11)]
-[StructLayout(LayoutKind.Explicit, Size = 44)]
+[StructLayout(2, Size = 44)]
 public struct SkeletonNetData : INetworkStruct
 {
 	public int CurrentState { readonly get; set; }

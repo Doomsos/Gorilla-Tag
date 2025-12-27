@@ -130,7 +130,7 @@ public class GamePlayerLocal : MonoBehaviour
 			return;
 		}
 		GamePlayerLocal.HandData handData = this.hands[handIndex];
-		bool flag = GamePlayerLocal.IsLeftHand(handIndex) ? (EquipmentInteractor.instance.isLeftGrabbing && ControllerInputPoller.GetGrab(XRNode.LeftHand)) : (EquipmentInteractor.instance.isRightGrabbing && ControllerInputPoller.GetGrab(XRNode.RightHand));
+		bool flag = GamePlayerLocal.IsLeftHand(handIndex) ? (EquipmentInteractor.instance.isLeftGrabbing && ControllerInputPoller.GetGrab(4)) : (EquipmentInteractor.instance.isRightGrabbing && ControllerInputPoller.GetGrab(5));
 		double timeAsDouble = Time.timeAsDouble;
 		if (flag && !handData.gripWasHeld)
 		{
@@ -138,7 +138,7 @@ public class GamePlayerLocal : MonoBehaviour
 		}
 		double num = timeAsDouble - handData.gripPressedTime;
 		handData.gripWasHeld = flag;
-		bool flag2 = GamePlayerLocal.IsLeftHand(handIndex) ? ControllerInputPoller.GetIndexPressed(XRNode.LeftHand) : ControllerInputPoller.GetIndexPressed(XRNode.RightHand);
+		bool flag2 = GamePlayerLocal.IsLeftHand(handIndex) ? ControllerInputPoller.GetIndexPressed(4) : ControllerInputPoller.GetIndexPressed(5);
 		if (flag2 && !handData.gripWasHeld)
 		{
 			handData.triggerPressedTime = timeAsDouble;
@@ -150,39 +150,39 @@ public class GamePlayerLocal : MonoBehaviour
 		{
 			Transform handTransform = this.GetHandTransform(handIndex);
 			Vector3 position = handTransform.position;
-			Vector3 b = position;
+			Vector3 vector = position;
 			Quaternion rotation = handTransform.rotation;
 			bool isLeftHand = GamePlayerLocal.IsLeftHand(handIndex);
-			GameEntityId gameEntityId = gameEntityManager.TryGrabLocal(position, isLeftHand, out b);
+			GameEntityId gameEntityId = gameEntityManager.TryGrabLocal(position, isLeftHand, out vector);
 			if (gameEntityId.IsValid())
 			{
 				Transform handTransform2 = this.GetHandTransform(handIndex);
 				GameEntity gameEntity = gameEntityManager.GetGameEntity(gameEntityId);
-				Vector3 position2 = gameEntity.transform.position + (position - b);
+				Vector3 vector2 = gameEntity.transform.position + (position - vector);
 				Quaternion rotation2 = gameEntity.transform.rotation;
 				GameGrabbable component = gameEntity.GetComponent<GameGrabbable>();
 				GameGrab gameGrab;
 				if (component && component.GetBestGrabPoint(position, rotation, handIndex, out gameGrab))
 				{
-					position2 = gameGrab.position;
+					vector2 = gameGrab.position;
 					rotation2 = gameGrab.rotation;
 				}
-				Vector3 localPosition = handTransform2.InverseTransformPoint(position2);
+				Vector3 localPosition = handTransform2.InverseTransformPoint(vector2);
 				Quaternion localRotation = Quaternion.Inverse(handTransform2.rotation) * rotation2;
 				gameEntityManager.RequestGrabEntity(gameEntityId, isLeftHand, localPosition, localRotation);
 			}
 		}
 		if (flag2 && num2 < 0.15000000596046448)
 		{
-			Vector3 position3 = this.GetHandTransform(handIndex).position;
+			Vector3 position2 = this.GetHandTransform(handIndex).position;
 			GameTriggerInteractable gameTriggerInteractable = null;
 			float num3 = float.MaxValue;
 			int num4 = 0;
 			while (num4 < GameTriggerInteractable.LocalInteractableTriggers.Count && !GameTriggerInteractable.LocalInteractableTriggers[num4].triggerInteractionActive)
 			{
-				if (GameTriggerInteractable.LocalInteractableTriggers[num4].PointWithinInteractableArea(position3))
+				if (GameTriggerInteractable.LocalInteractableTriggers[num4].PointWithinInteractableArea(position2))
 				{
-					float magnitude = (GameTriggerInteractable.LocalInteractableTriggers[num4].interactableCenter.position - position3).magnitude;
+					float magnitude = (GameTriggerInteractable.LocalInteractableTriggers[num4].interactableCenter.position - position2).magnitude;
 					if (magnitude <= num3)
 					{
 						num3 = magnitude;
@@ -209,7 +209,7 @@ public class GamePlayerLocal : MonoBehaviour
 			return;
 		}
 		XRNode xrnode = this.GetXRNode(handIndex);
-		if (!(GamePlayerLocal.IsLeftHand(handIndex) ? (EquipmentInteractor.instance.isLeftGrabbing && ControllerInputPoller.GetGrab(XRNode.LeftHand)) : (EquipmentInteractor.instance.isRightGrabbing && ControllerInputPoller.GetGrab(XRNode.RightHand))))
+		if (!(GamePlayerLocal.IsLeftHand(handIndex) ? (EquipmentInteractor.instance.isLeftGrabbing && ControllerInputPoller.GetGrab(4)) : (EquipmentInteractor.instance.isRightGrabbing && ControllerInputPoller.GetGrab(5))))
 		{
 			GameEntityId grabbedGameEntityId = this.gamePlayer.GetGrabbedGameEntityId(handIndex);
 			GameEntity gameEntity = gameEntityManager.GetGameEntity(grabbedGameEntityId);
@@ -239,30 +239,30 @@ public class GamePlayerLocal : MonoBehaviour
 						if (component3 != null)
 						{
 							Transform dockMarker = component3.dockMarker;
-							Vector3 position = dockMarker.transform.TransformPoint(vector);
-							vector = gameEntity2.transform.InverseTransformPoint(position);
-							Quaternion rhs = dockMarker.rotation * quaternion;
-							quaternion = Quaternion.Inverse(gameEntity2.transform.rotation) * rhs;
+							Vector3 vector2 = dockMarker.transform.TransformPoint(vector);
+							vector = gameEntity2.transform.InverseTransformPoint(vector2);
+							Quaternion quaternion2 = dockMarker.rotation * quaternion;
+							quaternion = Quaternion.Inverse(gameEntity2.transform.rotation) * quaternion2;
 						}
 					}
 					gameEntityManager.RequestAttachEntity(grabbedGameEntityId, gameEntityId, 0, vector, quaternion);
 					return;
 				}
 			}
-			Vector3 vector2 = ControllerInputPoller.DeviceAngularVelocity(xrnode);
-			Quaternion rhs2 = ControllerInputPoller.DeviceRotation(xrnode);
+			Vector3 vector3 = ControllerInputPoller.DeviceAngularVelocity(xrnode);
+			Quaternion quaternion3 = ControllerInputPoller.DeviceRotation(xrnode);
 			Quaternion handRotOffset = GTPlayer.Instance.GetHandRotOffset(GamePlayerLocal.IsLeftHand(handIndex));
 			Transform transform = GorillaTagger.Instance.offlineVRRig.transform;
 			Quaternion rotation = GTPlayer.Instance.turnParent.transform.rotation;
 			GamePlayerLocal.InputData inputData = this.inputData[handIndex];
-			Vector3 vector3 = inputData.GetMaxSpeed(0f, 0.05f) * inputData.GetAvgVel(0f, 0.05f).normalized;
-			vector3 = rotation * vector3;
-			vector3 *= transform.localScale.x;
-			vector2 = rotation * rhs2 * handRotOffset * vector2;
+			Vector3 vector4 = inputData.GetMaxSpeed(0f, 0.05f) * inputData.GetAvgVel(0f, 0.05f).normalized;
+			vector4 = rotation * vector4;
+			vector4 *= transform.localScale.x;
+			vector3 = rotation * quaternion3 * handRotOffset * vector3;
 			this.gamePlayer.GetGrabbedGameEntityId(handIndex);
 			GorillaVelocityTracker bodyVelocityTracker = GTPlayer.Instance.bodyVelocityTracker;
-			vector3 += bodyVelocityTracker.GetAverageVelocity(true, 0.05f, false);
-			gameEntityManager.RequestThrowEntity(grabbedGameEntityId, GamePlayerLocal.IsLeftHand(handIndex), GTPlayer.Instance.HeadCenterPosition, vector3, vector2);
+			vector4 += bodyVelocityTracker.GetAverageVelocity(true, 0.05f, false);
+			gameEntityManager.RequestThrowEntity(grabbedGameEntityId, GamePlayerLocal.IsLeftHand(handIndex), GTPlayer.Instance.HeadCenterPosition, vector4, vector3);
 		}
 		this.ClearTriggerInteractables(handIndex);
 	}
@@ -271,9 +271,9 @@ public class GamePlayerLocal : MonoBehaviour
 	{
 		if (handIndex != 0)
 		{
-			return XRNode.RightHand;
+			return 5;
 		}
-		return XRNode.LeftHand;
+		return 4;
 	}
 
 	public Transform GetHandTransform(int handIndex)
@@ -317,9 +317,9 @@ public class GamePlayerLocal : MonoBehaviour
 		object obj = (handIndex == 0) ? 4 : 5;
 		Quaternion rotation = GTPlayer.Instance.turnParent.transform.rotation;
 		object node = obj;
-		Quaternion rotation2 = ControllerInputPoller.DeviceRotation(node);
-		Vector3 point = ControllerInputPoller.DeviceAngularVelocity(node);
-		return rotation * -(Quaternion.Inverse(rotation2) * point);
+		Quaternion quaternion = ControllerInputPoller.DeviceRotation(node);
+		Vector3 vector = ControllerInputPoller.DeviceAngularVelocity(node);
+		return rotation * -(Quaternion.Inverse(quaternion) * vector);
 	}
 
 	public float GetHandSpeed(int handIndex)
@@ -349,7 +349,7 @@ public class GamePlayerLocal : MonoBehaviour
 
 	public static bool IsHandHolding(XRNode xrNode)
 	{
-		return GamePlayerLocal.IsHandHolding((xrNode == XRNode.LeftHand) ? 0 : 1);
+		return GamePlayerLocal.IsHandHolding((xrNode == 4) ? 0 : 1);
 	}
 
 	public void PlayCatchFx(bool isLeftHand)
@@ -468,7 +468,7 @@ public class GamePlayerLocal : MonoBehaviour
 			double timeAsDouble = Time.timeAsDouble;
 			double num = timeAsDouble - (double)ignoreRecent - (double)window;
 			double num2 = timeAsDouble - (double)ignoreRecent;
-			Vector3 a = Vector3.zero;
+			Vector3 vector = Vector3.zero;
 			int num3 = 0;
 			for (int i = this.inputMotionHistory.Count - 1; i >= 0; i--)
 			{
@@ -479,7 +479,7 @@ public class GamePlayerLocal : MonoBehaviour
 					{
 						break;
 					}
-					a += inputDataMotion.velocity;
+					vector += inputDataMotion.velocity;
 					num3++;
 				}
 			}
@@ -487,7 +487,7 @@ public class GamePlayerLocal : MonoBehaviour
 			{
 				return Vector3.zero;
 			}
-			return a / (float)num3;
+			return vector / (float)num3;
 		}
 
 		public int maxInputs;

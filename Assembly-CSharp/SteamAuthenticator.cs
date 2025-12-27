@@ -19,14 +19,14 @@ public class SteamAuthenticator : MonoBehaviour
 			}
 			ticketCallback.Dispose();
 			ticketCallback = null;
-			if (response.m_eResult != EResult.k_EResultOK)
+			if (response.m_eResult != 1)
 			{
 				Action<EResult> failureCallback3 = failureCallback;
 				if (failureCallback3 == null)
 				{
 					return;
 				}
-				failureCallback3(response.m_eResult);
+				failureCallback3.Invoke(response.m_eResult);
 				return;
 			}
 			else
@@ -41,18 +41,18 @@ public class SteamAuthenticator : MonoBehaviour
 				{
 					return;
 				}
-				successCallback2(stringBuilder.ToString());
+				successCallback2.Invoke(stringBuilder.ToString());
 				return;
 			}
 		});
 		SteamNetworkingIdentity steamNetworkingIdentity = default(SteamNetworkingIdentity);
-		ticketHandle = SteamUser.GetAuthSessionTicket(ticketBlob, ticketBlob.Length, out ticketSize, ref steamNetworkingIdentity);
+		ticketHandle = SteamUser.GetAuthSessionTicket(ticketBlob, ticketBlob.Length, ref ticketSize, ref steamNetworkingIdentity);
 		if (ticketHandle == HAuthTicket.Invalid)
 		{
 			Action<EResult> failureCallback2 = failureCallback;
 			if (failureCallback2 != null)
 			{
-				failureCallback2(EResult.k_EResultFail);
+				failureCallback2.Invoke(2);
 			}
 		}
 		return ticketHandle;
@@ -70,14 +70,14 @@ public class SteamAuthenticator : MonoBehaviour
 			}
 			ticketCallback.Dispose();
 			ticketCallback = null;
-			if (response.m_eResult != EResult.k_EResultOK)
+			if (response.m_eResult != 1)
 			{
 				Action<EResult> failureCallback3 = failureCallback;
 				if (failureCallback3 == null)
 				{
 					return;
 				}
-				failureCallback3(response.m_eResult);
+				failureCallback3.Invoke(response.m_eResult);
 				return;
 			}
 			else
@@ -92,7 +92,7 @@ public class SteamAuthenticator : MonoBehaviour
 				{
 					return;
 				}
-				successCallback2(stringBuilder.ToString());
+				successCallback2.Invoke(stringBuilder.ToString());
 				return;
 			}
 		});
@@ -102,7 +102,7 @@ public class SteamAuthenticator : MonoBehaviour
 			Action<EResult> failureCallback2 = failureCallback;
 			if (failureCallback2 != null)
 			{
-				failureCallback2(EResult.k_EResultFail);
+				failureCallback2.Invoke(2);
 			}
 		}
 		return ticketHandle;

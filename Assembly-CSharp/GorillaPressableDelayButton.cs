@@ -43,7 +43,7 @@ public class GorillaPressableDelayButton : GorillaPressableButton, IGorillaSlice
 		{
 			return;
 		}
-		action();
+		action.Invoke();
 	}
 
 	private void OnTriggerExit(Collider other)
@@ -60,7 +60,7 @@ public class GorillaPressableDelayButton : GorillaPressableButton, IGorillaSlice
 		{
 			return;
 		}
-		action();
+		action.Invoke();
 	}
 
 	public new void OnEnable()

@@ -28,11 +28,11 @@ namespace BoingKit
 
 		public static float PointSegmentDist(Vector2 point, Vector2 segmentPosA, Vector2 segmentPosB)
 		{
-			Vector2 a = segmentPosB - segmentPosA;
-			float num = 1f / a.magnitude;
-			Vector2 rhs = a * num;
-			float value = Vector2.Dot(point - segmentPosA, rhs) * num;
-			return (segmentPosA + Mathf.Clamp(value, 0f, 1f) * a - point).magnitude;
+			Vector2 vector = segmentPosB - segmentPosA;
+			float num = 1f / vector.magnitude;
+			Vector2 vector2 = vector * num;
+			float num2 = Vector2.Dot(point - segmentPosA, vector2) * num;
+			return (segmentPosA + Mathf.Clamp(num2, 0f, 1f) * vector - point).magnitude;
 		}
 
 		public static float Seek(float current, float target, float maxDelta)
@@ -44,14 +44,14 @@ namespace BoingKit
 
 		public static Vector2 Seek(Vector2 current, Vector2 target, float maxDelta)
 		{
-			Vector2 b = target - current;
-			float magnitude = b.magnitude;
+			Vector2 vector = target - current;
+			float magnitude = vector.magnitude;
 			if (magnitude < MathUtil.Epsilon)
 			{
 				return target;
 			}
-			b = Mathf.Min(maxDelta, magnitude) * b.normalized;
-			return current + b;
+			vector = Mathf.Min(maxDelta, magnitude) * vector.normalized;
+			return current + vector;
 		}
 
 		public static float Remainder(float a, float b)

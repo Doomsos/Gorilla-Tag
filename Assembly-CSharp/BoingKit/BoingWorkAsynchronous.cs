@@ -34,8 +34,8 @@ namespace BoingKit
 		internal static void ExecuteBehaviors(Dictionary<int, BoingBehavior> behaviorMap, BoingManager.UpdateMode updateMode)
 		{
 			int num = 0;
-			BoingWorkAsynchronous.s_aBehaviorParams = new NativeArray<BoingWork.Params>(behaviorMap.Count, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-			BoingWorkAsynchronous.s_aBehaviorOutput = new NativeArray<BoingWork.Output>(behaviorMap.Count, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+			BoingWorkAsynchronous.s_aBehaviorParams = new NativeArray<BoingWork.Params>(behaviorMap.Count, 3, 0);
+			BoingWorkAsynchronous.s_aBehaviorOutput = new NativeArray<BoingWork.Output>(behaviorMap.Count, 3, 0);
 			foreach (KeyValuePair<int, BoingBehavior> keyValuePair in behaviorMap)
 			{
 				BoingBehavior value = keyValuePair.Value;
@@ -47,15 +47,15 @@ namespace BoingKit
 			}
 			if (num > 0)
 			{
-				BoingWorkAsynchronous.BehaviorJob jobData = new BoingWorkAsynchronous.BehaviorJob
+				BoingWorkAsynchronous.BehaviorJob behaviorJob = new BoingWorkAsynchronous.BehaviorJob
 				{
 					Params = BoingWorkAsynchronous.s_aBehaviorParams,
 					Output = BoingWorkAsynchronous.s_aBehaviorOutput,
 					DeltaTime = BoingManager.DeltaTime,
 					FixedDeltaTime = BoingManager.FixedDeltaTime
 				};
-				int innerloopBatchCount = (int)Mathf.Ceil((float)num / (float)Environment.ProcessorCount);
-				BoingWorkAsynchronous.s_hBehaviorJob = jobData.Schedule(num, innerloopBatchCount, default(JobHandle));
+				int num2 = (int)Mathf.Ceil((float)num / (float)Environment.ProcessorCount);
+				BoingWorkAsynchronous.s_hBehaviorJob = IJobParallelForExtensions.Schedule<BoingWorkAsynchronous.BehaviorJob>(behaviorJob, num, num2, default(JobHandle));
 				JobHandle.ScheduleBatchedJobs();
 			}
 			BoingWorkAsynchronous.s_behaviorJobNeedsGather = true;
@@ -78,9 +78,9 @@ namespace BoingKit
 		internal static void ExecuteReactors(Dictionary<int, BoingEffector> effectorMap, Dictionary<int, BoingReactor> reactorMap, Dictionary<int, BoingReactorField> fieldMap, Dictionary<int, BoingReactorFieldCPUSampler> cpuSamplerMap, BoingManager.UpdateMode updateMode)
 		{
 			int num = 0;
-			BoingWorkAsynchronous.s_aEffectors = new NativeArray<BoingEffector.Params>(effectorMap.Count, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-			BoingWorkAsynchronous.s_aReactorExecParams = new NativeArray<BoingWork.Params>(reactorMap.Count, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-			BoingWorkAsynchronous.s_aReactorExecOutput = new NativeArray<BoingWork.Output>(reactorMap.Count, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+			BoingWorkAsynchronous.s_aEffectors = new NativeArray<BoingEffector.Params>(effectorMap.Count, 3, 0);
+			BoingWorkAsynchronous.s_aReactorExecParams = new NativeArray<BoingWork.Params>(reactorMap.Count, 3, 0);
+			BoingWorkAsynchronous.s_aReactorExecOutput = new NativeArray<BoingWork.Output>(reactorMap.Count, 3, 0);
 			foreach (KeyValuePair<int, BoingReactor> keyValuePair in reactorMap)
 			{
 				BoingReactor value = keyValuePair.Value;
@@ -93,37 +93,37 @@ namespace BoingKit
 			if (num > 0)
 			{
 				int num2 = 0;
-				BoingEffector.Params value2 = default(BoingEffector.Params);
+				BoingEffector.Params @params = default(BoingEffector.Params);
 				foreach (KeyValuePair<int, BoingEffector> keyValuePair2 in effectorMap)
 				{
-					BoingEffector value3 = keyValuePair2.Value;
-					value2.Fill(keyValuePair2.Value);
-					BoingWorkAsynchronous.s_aEffectors[num2++] = value2;
+					BoingEffector value2 = keyValuePair2.Value;
+					@params.Fill(keyValuePair2.Value);
+					BoingWorkAsynchronous.s_aEffectors[num2++] = @params;
 				}
 			}
 			if (num > 0)
 			{
-				BoingWorkAsynchronous.s_hReactorJob = new BoingWorkAsynchronous.ReactorJob
+				BoingWorkAsynchronous.s_hReactorJob = IJobParallelForExtensions.Schedule<BoingWorkAsynchronous.ReactorJob>(new BoingWorkAsynchronous.ReactorJob
 				{
 					Effectors = BoingWorkAsynchronous.s_aEffectors,
 					Params = BoingWorkAsynchronous.s_aReactorExecParams,
 					Output = BoingWorkAsynchronous.s_aReactorExecOutput,
 					DeltaTime = BoingManager.DeltaTime,
 					FixedDeltaTime = BoingManager.FixedDeltaTime
-				}.Schedule(num, 32, default(JobHandle));
+				}, num, 32, default(JobHandle));
 				JobHandle.ScheduleBatchedJobs();
 			}
 			foreach (KeyValuePair<int, BoingReactorField> keyValuePair3 in fieldMap)
 			{
-				BoingReactorField value4 = keyValuePair3.Value;
-				if (value4.HardwareMode == BoingReactorField.HardwareModeEnum.CPU)
+				BoingReactorField value3 = keyValuePair3.Value;
+				if (value3.HardwareMode == BoingReactorField.HardwareModeEnum.CPU)
 				{
-					value4.ExecuteCpu(BoingManager.DeltaTime);
+					value3.ExecuteCpu(BoingManager.DeltaTime);
 				}
 			}
 			foreach (KeyValuePair<int, BoingReactorFieldCPUSampler> keyValuePair4 in cpuSamplerMap)
 			{
-				BoingReactorFieldCPUSampler value5 = keyValuePair4.Value;
+				BoingReactorFieldCPUSampler value4 = keyValuePair4.Value;
 			}
 			BoingWorkAsynchronous.s_reactorJobNeedsGather = true;
 			if (BoingWorkAsynchronous.s_reactorJobNeedsGather)

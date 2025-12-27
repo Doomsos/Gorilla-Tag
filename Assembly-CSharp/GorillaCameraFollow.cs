@@ -7,7 +7,7 @@ public class GorillaCameraFollow : MonoBehaviour
 {
 	private void Start()
 	{
-		if (Application.platform == RuntimePlatform.Android)
+		if (Application.platform == 11)
 		{
 			this.cameraParent.SetActive(false);
 		}

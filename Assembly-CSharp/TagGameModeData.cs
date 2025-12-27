@@ -54,6 +54,6 @@ public class TagGameModeData : FusionGameModeData
 
 	[WeaverGenerated]
 	[DefaultForProperty("tagData", 0, 12)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private TagData _tagData;
 }

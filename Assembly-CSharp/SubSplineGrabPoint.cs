@@ -35,9 +35,9 @@ public class SubSplineGrabPoint : SubLineGrabPoint
 	public override float EvaluateScore(Transform objectTransform, Transform handTransform, Transform targetDock)
 	{
 		Vector3 vector = objectTransform.InverseTransformPoint(handTransform.position);
-		Vector3 a;
-		CatmullRomSpline.GetClosestEvaluationOnSpline(this.controlPointsRelativeToGrabOrigin, vector, out a);
-		return Vector3.SqrMagnitude(a - vector);
+		Vector3 vector2;
+		CatmullRomSpline.GetClosestEvaluationOnSpline(this.controlPointsRelativeToGrabOrigin, vector, out vector2);
+		return Vector3.SqrMagnitude(vector2 - vector);
 	}
 
 	public CatmullRomSpline spline;

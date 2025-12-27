@@ -13,8 +13,8 @@ public class PredicatableRandomRotation : MonoBehaviour
 
 	private void Update()
 	{
-		float d = (this.source.position.x * this.source.position.x + this.source.position.y * this.source.position.y + this.source.position.z * this.source.position.z) % 1f;
-		base.transform.Rotate(this.rot * d);
+		float num = (this.source.position.x * this.source.position.x + this.source.position.y * this.source.position.y + this.source.position.z * this.source.position.z) % 1f;
+		base.transform.Rotate(this.rot * num);
 	}
 
 	[SerializeField]

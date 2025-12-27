@@ -32,8 +32,8 @@ namespace GorillaTag.Cosmetics
 			if (this.localState == RCVehicle.State.Mobilized)
 			{
 				float num = Mathf.Lerp(this.mainPropellerSpinRateRange.x, this.mainPropellerSpinRateRange.y, this.activeInput.trigger);
-				this.verticalPropeller.Rotate(new Vector3(0f, num * dt, 0f), Space.Self);
-				this.turnPropeller.Rotate(new Vector3(this.activeInput.joystick.x * this.backPropellerSpinRate * dt, 0f, 0f), Space.Self);
+				this.verticalPropeller.Rotate(new Vector3(0f, num * dt, 0f), 1);
+				this.turnPropeller.Rotate(new Vector3(this.activeInput.joystick.x * this.backPropellerSpinRate * dt, 0f, 0f), 1);
 			}
 		}
 
@@ -46,26 +46,26 @@ namespace GorillaTag.Cosmetics
 			float fixedDeltaTime = Time.fixedDeltaTime;
 			Vector3 linearVelocity = this.rb.linearVelocity;
 			float magnitude = linearVelocity.magnitude;
-			float target = this.activeInput.joystick.x * this.maxTurnRate;
-			this.turnRate = Mathf.MoveTowards(this.turnRate, target, this.turnAccel * fixedDeltaTime);
-			float num = this.activeInput.joystick.y * this.maxHorizontalSpeed;
-			float x = Mathf.Sign(this.activeInput.joystick.y) * Mathf.Lerp(0f, this.maxHorizontalTiltAngle, Mathf.Abs(this.activeInput.joystick.y));
-			base.transform.rotation = Quaternion.Euler(new Vector3(x, this.turnAccel, 0f));
-			float num2 = Mathf.Abs(num);
+			float num = this.activeInput.joystick.x * this.maxTurnRate;
+			this.turnRate = Mathf.MoveTowards(this.turnRate, num, this.turnAccel * fixedDeltaTime);
+			float num2 = this.activeInput.joystick.y * this.maxHorizontalSpeed;
+			float num3 = Mathf.Sign(this.activeInput.joystick.y) * Mathf.Lerp(0f, this.maxHorizontalTiltAngle, Mathf.Abs(this.activeInput.joystick.y));
+			base.transform.rotation = Quaternion.Euler(new Vector3(num3, this.turnAccel, 0f));
+			float num4 = Mathf.Abs(num2);
 			Vector3 normalized = Vector3.ProjectOnPlane(base.transform.forward, Vector3.up).normalized;
-			float num3 = Vector3.Dot(normalized, linearVelocity);
-			if (num2 > 0.01f && ((num > 0f && num > num3) || (num < 0f && num < num3)))
+			float num5 = Vector3.Dot(normalized, linearVelocity);
+			if (num4 > 0.01f && ((num2 > 0f && num2 > num5) || (num2 < 0f && num2 < num5)))
 			{
-				this.rb.AddForce(normalized * Mathf.Sign(num) * this.horizontalAccel * fixedDeltaTime * this.rb.mass, ForceMode.Force);
+				this.rb.AddForce(normalized * Mathf.Sign(num2) * this.horizontalAccel * fixedDeltaTime * this.rb.mass, 0);
 			}
-			float num4 = this.activeInput.trigger * this.maxAscendSpeed;
-			if (num4 > 0.01f && linearVelocity.y < num4)
+			float num6 = this.activeInput.trigger * this.maxAscendSpeed;
+			if (num6 > 0.01f && linearVelocity.y < num6)
 			{
-				this.rb.AddForce(Vector3.up * this.ascendAccel * this.rb.mass, ForceMode.Force);
+				this.rb.AddForce(Vector3.up * this.ascendAccel * this.rb.mass, 0);
 			}
 			if (this.rb.useGravity)
 			{
-				this.rb.AddForce(-Physics.gravity * this.gravityCompensation * this.rb.mass, ForceMode.Force);
+				this.rb.AddForce(-Physics.gravity * this.gravityCompensation * this.rb.mass, 0);
 			}
 		}
 

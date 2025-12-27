@@ -38,13 +38,13 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 			return;
 		}
 		CustomMapsGameManager.tempCreateEntitiesList.Clear();
-		int b = (Constants.aiAgentLimit - gameAgentCount < 0) ? 0 : (Constants.aiAgentLimit - gameAgentCount);
-		int num = Mathf.Min(entities.Count, b);
-		if (num < entities.Count)
+		int num = (Constants.aiAgentLimit - gameAgentCount < 0) ? 0 : (Constants.aiAgentLimit - gameAgentCount);
+		int num2 = Mathf.Min(entities.Count, num);
+		if (num2 < entities.Count)
 		{
-			GTDev.LogWarning<string>(string.Format("[CustomMapsGameManager::CreateAIAgents] Only creating {0} out of the ", num) + string.Format("requested {0} agents. Max Agent count ({1}) has been reached.!", entities.Count, Constants.aiAgentLimit), null);
+			GTDev.LogWarning<string>(string.Format("[CustomMapsGameManager::CreateAIAgents] Only creating {0} out of the ", num2) + string.Format("requested {0} agents. Max Agent count ({1}) has been reached.!", entities.Count, Constants.aiAgentLimit), null);
 		}
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < num2; i++)
 		{
 			if (entities[i].IsNull())
 			{
@@ -52,25 +52,25 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 			}
 			else
 			{
-				int num2 = (entities[i] is AIAgent) ? "CustomMapsAIAgent".GetStaticHash() : "CustomMapsGrabbableEntity".GetStaticHash();
-				if (!this.gameEntityManager.FactoryHasEntity(num2))
+				int num3 = (entities[i] is AIAgent) ? "CustomMapsAIAgent".GetStaticHash() : "CustomMapsGrabbableEntity".GetStaticHash();
+				if (!this.gameEntityManager.FactoryHasEntity(num3))
 				{
 					Debug.LogErrorFormat("[CustomMapsManager::CreateAIAgents] Cannot Find Entity in Factory {0} {1}", new object[]
 					{
 						entities[i].gameObject.name,
-						num2
+						num3
 					});
 				}
 				else
 				{
-					GameEntityCreateData item = new GameEntityCreateData
+					GameEntityCreateData gameEntityCreateData = new GameEntityCreateData
 					{
-						entityTypeId = num2,
+						entityTypeId = num3,
 						position = entities[i].transform.position,
 						rotation = entities[i].transform.rotation,
 						createData = entities[i].GetPackedCreateData()
 					};
-					CustomMapsGameManager.tempCreateEntitiesList.Add(item);
+					CustomMapsGameManager.tempCreateEntitiesList.Add(gameEntityCreateData);
 				}
 			}
 		}
@@ -103,7 +103,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 	public GameEntityId SpawnEnemyFromPoint(string spawnPointId, int enemyTypeId)
 	{
 		AISpawnPoint aispawnPoint;
-		if (!AISpawnManager.instance.GetSpawnPoint(spawnPointId, out aispawnPoint))
+		if (!AISpawnManager.instance.GetSpawnPoint(spawnPointId, ref aispawnPoint))
 		{
 			GTDev.LogError<string>("CustomMapsGameManager::SpawnEnemyFromPoint cannot find spawn point", null);
 			return GameEntityId.Invalid;
@@ -143,14 +143,14 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 			return;
 		}
 		AIAgent aiagent;
-		if (AISpawnManager.HasInstance && AISpawnManager.instance.SpawnEnemy(enemyTypeId, out aiagent))
+		if (AISpawnManager.HasInstance && AISpawnManager.instance.SpawnEnemy(enemyTypeId, ref aiagent))
 		{
 			aiagent.transform.parent = AISpawnManager.instance.transform;
 			this.customMapsAgents[agentId] = aiagent;
 			return;
 		}
 		MapEntity mapEntity;
-		if (MapSpawnManager.instance.SpawnEntity(enemyTypeId, out mapEntity))
+		if (MapSpawnManager.instance.SpawnEntity(enemyTypeId, ref mapEntity))
 		{
 			aiagent = (AIAgent)mapEntity;
 			aiagent.transform.parent = AISpawnManager.instance.transform;

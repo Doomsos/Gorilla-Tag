@@ -87,7 +87,7 @@ namespace GorillaTagScripts.ObstacleCourse
 				UberShaderProperty baseColor = UberShader.BaseColor;
 				Material material = this.bannerRenderer.material;
 				RigContainer rigContainer = this.winnerRig;
-				baseColor.SetValue<Color?>(material, (rigContainer != null) ? new Color?(rigContainer.Rig.playerColor) : null);
+				baseColor.SetValue<Color?>(material, (rigContainer != null) ? new Color?(rigContainer.Rig.playerColor) : default(Color?));
 			}
 			this.audioSource.GTPlay();
 		}

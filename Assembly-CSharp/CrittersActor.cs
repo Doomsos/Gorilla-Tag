@@ -181,7 +181,7 @@ public class CrittersActor : MonoBehaviour
 			if (this.parentActorId >= 0)
 			{
 				CrittersActor crittersActor;
-				if (!CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
+				if (!CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor))
 				{
 					return;
 				}
@@ -235,13 +235,13 @@ public class CrittersActor : MonoBehaviour
 		if (enable)
 		{
 			this.rb.isKinematic = false;
-			this.rb.interpolation = RigidbodyInterpolation.Interpolate;
-			this.rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+			this.rb.interpolation = 1;
+			this.rb.collisionDetectionMode = 3;
 			return;
 		}
 		this.rb.isKinematic = true;
-		this.rb.interpolation = RigidbodyInterpolation.None;
-		this.rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+		this.rb.interpolation = 0;
+		this.rb.collisionDetectionMode = 3;
 	}
 
 	public void AddPlayerCrittersActorDataToList(ref List<object> objList)
@@ -451,7 +451,7 @@ public class CrittersActor : MonoBehaviour
 	public static CrittersActor GetRootActor(int actorId)
 	{
 		CrittersActor crittersActor;
-		if (!CrittersManager.instance.actorById.TryGetValue(actorId, out crittersActor))
+		if (!CrittersManager.instance.actorById.TryGetValue(actorId, ref crittersActor))
 		{
 			return null;
 		}
@@ -465,7 +465,7 @@ public class CrittersActor : MonoBehaviour
 	public static CrittersActor GetParentActor(int actorId)
 	{
 		CrittersActor result;
-		if (CrittersManager.instance.actorById.TryGetValue(actorId, out result))
+		if (CrittersManager.instance.actorById.TryGetValue(actorId, ref result))
 		{
 			return result;
 		}
@@ -484,7 +484,7 @@ public class CrittersActor : MonoBehaviour
 		}
 		CrittersActor rootActor = CrittersActor.GetRootActor(grabbedBy.actorId);
 		CrittersActor crittersActor;
-		if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
+		if (CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor))
 		{
 			if (crittersActor.crittersActorType == CrittersActor.CrittersActorType.Bag)
 			{
@@ -535,7 +535,7 @@ public class CrittersActor : MonoBehaviour
 	public bool IsCurrentlyAttachedToBag()
 	{
 		CrittersActor crittersActor;
-		return CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor) && crittersActor.crittersActorType == CrittersActor.CrittersActorType.Bag;
+		return CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor) && crittersActor.crittersActorType == CrittersActor.CrittersActorType.Bag;
 	}
 
 	public void SetTransformToDefaultParent(bool resetOrigin = false)
@@ -562,7 +562,7 @@ public class CrittersActor : MonoBehaviour
 		Action<CrittersActor> onGrabbedChild = this.OnGrabbedChild;
 		if (onGrabbedChild != null)
 		{
-			onGrabbedChild(actor);
+			onGrabbedChild.Invoke(actor);
 		}
 		actor.RemoteGrabbedBy(this);
 	}
@@ -596,8 +596,8 @@ public class CrittersActor : MonoBehaviour
 		}
 		this.UpdateImpulses(true, true);
 		this.rb.isKinematic = true;
-		this.rb.interpolation = RigidbodyInterpolation.None;
-		this.rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+		this.rb.interpolation = 0;
+		this.rb.collisionDetectionMode = 0;
 		if (CrittersManager.instance.IsNotNull() && PhotonNetwork.InRoom && !CrittersManager.instance.LocalAuthority())
 		{
 			CrittersManager.instance.SendRPC("RemoteCrittersActorGrabbedby", CrittersManager.instance.guard.currentOwner, new object[]
@@ -612,7 +612,7 @@ public class CrittersActor : MonoBehaviour
 		Action<CrittersActor> onGrabbedChild = grabbingActor.OnGrabbedChild;
 		if (onGrabbedChild != null)
 		{
-			onGrabbedChild(this);
+			onGrabbedChild.Invoke(this);
 		}
 		this.AttemptAddStoredObjectCollider(grabbingActor);
 	}
@@ -695,12 +695,12 @@ public class CrittersActor : MonoBehaviour
 		}
 		RigContainer rigContainer;
 		CrittersRigActorSetup crittersRigActorSetup;
-		if (!VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(this.rigPlayerId), out rigContainer) || !CrittersManager.instance.rigSetupByRig.TryGetValue(rigContainer.Rig, out crittersRigActorSetup))
+		if (!VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.GetPlayer(this.rigPlayerId), out rigContainer) || !CrittersManager.instance.rigSetupByRig.TryGetValue(rigContainer.Rig, ref crittersRigActorSetup))
 		{
 			rigContainer != null;
 			return;
 		}
-		if (this.rigPlayerId == NetworkSystem.Instance.LocalPlayer.ActorNumber && !CrittersManager.instance.rigSetupByRig.TryGetValue(GorillaTagger.Instance.offlineVRRig, out crittersRigActorSetup))
+		if (this.rigPlayerId == NetworkSystem.Instance.LocalPlayer.ActorNumber && !CrittersManager.instance.rigSetupByRig.TryGetValue(GorillaTagger.Instance.offlineVRRig, ref crittersRigActorSetup))
 		{
 			return;
 		}
@@ -816,13 +816,13 @@ public class CrittersActor : MonoBehaviour
 		{
 			return false;
 		}
-		Vector3 b = this.storeCollider.transform.up * MathF.Max(0f, this.storeCollider.height / 2f - this.storeCollider.radius);
-		int num = Physics.OverlapCapsuleNonAlloc(this.storeCollider.transform.position + b, this.storeCollider.transform.position - b, this.storeCollider.radius, this.colliders, CrittersManager.instance.containerLayer, QueryTriggerInteraction.Collide);
+		Vector3 vector = this.storeCollider.transform.up * MathF.Max(0f, this.storeCollider.height / 2f - this.storeCollider.radius);
+		int num = Physics.OverlapCapsuleNonAlloc(this.storeCollider.transform.position + vector, this.storeCollider.transform.position - vector, this.storeCollider.radius, this.colliders, CrittersManager.instance.containerLayer, 2);
 		bool flag = false;
 		CrittersBag crittersBag = null;
 		bool flag2 = true;
 		CrittersActor crittersActor = null;
-		if (this.lastGrabbedPlayer == PhotonNetwork.LocalPlayer.ActorNumber && CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor) && crittersActor.GetAverageSpeed > CrittersManager.instance.MaxAttachSpeed)
+		if (this.lastGrabbedPlayer == PhotonNetwork.LocalPlayer.ActorNumber && CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor) && crittersActor.GetAverageSpeed > CrittersManager.instance.MaxAttachSpeed)
 		{
 			return false;
 		}
@@ -846,9 +846,9 @@ public class CrittersActor : MonoBehaviour
 						{
 							if (crittersBag2.attachableCollider != this.colliders[i] && !this.colliders[i].isTrigger)
 							{
-								Vector3 vector;
+								Vector3 vector2;
 								float num2;
-								Physics.ComputePenetration(this.colliders[i], this.colliders[i].transform.position, this.colliders[i].transform.rotation, this.storeCollider, this.storeCollider.transform.position, this.storeCollider.transform.rotation, out vector, out num2);
+								Physics.ComputePenetration(this.colliders[i], this.colliders[i].transform.position, this.colliders[i].transform.rotation, this.storeCollider, this.storeCollider.transform.position, this.storeCollider.transform.rotation, ref vector2, ref num2);
 								if (num2 >= CrittersManager.instance.overlapDistanceMax)
 								{
 									flag2 = false;
@@ -893,16 +893,16 @@ public class CrittersActor : MonoBehaviour
 		{
 			return;
 		}
-		string str = "Critters SetJointRigid ";
+		string text = "Critters SetJointRigid ";
 		GameObject gameObject = base.gameObject;
-		Debug.Log(str + ((gameObject != null) ? gameObject.ToString() : null));
+		Debug.Log(text + ((gameObject != null) ? gameObject.ToString() : null));
 		this.CreateJoint(rbToConnect, false);
-		this.joint.xMotion = ConfigurableJointMotion.Locked;
-		this.joint.yMotion = ConfigurableJointMotion.Locked;
-		this.joint.zMotion = ConfigurableJointMotion.Locked;
-		this.joint.angularXMotion = ConfigurableJointMotion.Locked;
-		this.joint.angularYMotion = ConfigurableJointMotion.Locked;
-		this.joint.angularZMotion = ConfigurableJointMotion.Locked;
+		this.joint.xMotion = 0;
+		this.joint.yMotion = 0;
+		this.joint.zMotion = 0;
+		this.joint.angularXMotion = 0;
+		this.joint.angularYMotion = 0;
+		this.joint.angularZMotion = 0;
 		this.rb.mass = CrittersManager.instance.heavyMass;
 		this.TogglePhysics(true);
 	}
@@ -913,16 +913,16 @@ public class CrittersActor : MonoBehaviour
 		{
 			return;
 		}
-		string str = "Critters SetJointSoft ";
+		string text = "Critters SetJointSoft ";
 		GameObject gameObject = base.gameObject;
-		Debug.Log(str + ((gameObject != null) ? gameObject.ToString() : null));
+		Debug.Log(text + ((gameObject != null) ? gameObject.ToString() : null));
 		this.CreateJoint(rbToConnect, true);
-		this.joint.xMotion = ConfigurableJointMotion.Limited;
-		this.joint.yMotion = ConfigurableJointMotion.Limited;
-		this.joint.zMotion = ConfigurableJointMotion.Limited;
-		this.joint.angularXMotion = ConfigurableJointMotion.Limited;
-		this.joint.angularYMotion = ConfigurableJointMotion.Limited;
-		this.joint.angularZMotion = ConfigurableJointMotion.Limited;
+		this.joint.xMotion = 1;
+		this.joint.yMotion = 1;
+		this.joint.zMotion = 1;
+		this.joint.angularXMotion = 1;
+		this.joint.angularYMotion = 1;
+		this.joint.angularZMotion = 1;
 		this.rb.mass = CrittersManager.instance.lightMass;
 		this.TogglePhysics(true);
 	}
@@ -934,26 +934,22 @@ public class CrittersActor : MonoBehaviour
 			return;
 		}
 		this.joint = base.gameObject.AddComponent<ConfigurableJoint>();
-		this.drive = new JointDrive
-		{
-			positionSpring = CrittersManager.instance.springForce,
-			positionDamper = CrittersManager.instance.damperForce,
-			maximumForce = 10000f
-		};
-		this.angularDrive = new JointDrive
-		{
-			positionSpring = CrittersManager.instance.springAngularForce,
-			positionDamper = CrittersManager.instance.damperAngularForce,
-			maximumForce = 10000f
-		};
-		this.linearLimitDrive = new SoftJointLimit
-		{
-			limit = CrittersManager.instance.springForce
-		};
-		this.linearLimitSpringDrive = new SoftJointLimitSpring
-		{
-			spring = CrittersManager.instance.springForce
-		};
+		JointDrive jointDrive = default(JointDrive);
+		jointDrive.positionSpring = CrittersManager.instance.springForce;
+		jointDrive.positionDamper = CrittersManager.instance.damperForce;
+		jointDrive.maximumForce = 10000f;
+		this.drive = jointDrive;
+		jointDrive = default(JointDrive);
+		jointDrive.positionSpring = CrittersManager.instance.springAngularForce;
+		jointDrive.positionDamper = CrittersManager.instance.damperAngularForce;
+		jointDrive.maximumForce = 10000f;
+		this.angularDrive = jointDrive;
+		SoftJointLimit softJointLimit = default(SoftJointLimit);
+		softJointLimit.limit = CrittersManager.instance.springForce;
+		this.linearLimitDrive = softJointLimit;
+		SoftJointLimitSpring softJointLimitSpring = default(SoftJointLimitSpring);
+		softJointLimitSpring.spring = CrittersManager.instance.springForce;
+		this.linearLimitSpringDrive = softJointLimitSpring;
 		this.joint.linearLimit = this.linearLimitDrive;
 		this.joint.linearLimitSpring = this.linearLimitSpringDrive;
 		this.joint.angularYLimit = this.joint.linearLimit;
@@ -986,7 +982,7 @@ public class CrittersActor : MonoBehaviour
 		if (this.parentActorId != -1)
 		{
 			CrittersActor crittersActor;
-			CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor);
+			CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor);
 			base.transform.SetParent(crittersActor.transform, true);
 			this.MoveActor(this.lastImpulsePosition, this.lastImpulseQuaternion, true, false, true);
 			this.TogglePhysics(false);
@@ -996,7 +992,7 @@ public class CrittersActor : MonoBehaviour
 	public void AttemptRemoveStoredObjectCollider(int oldParentId, bool playSound = true)
 	{
 		CrittersActor crittersActor;
-		if (CrittersManager.instance.actorById.TryGetValue(oldParentId, out crittersActor) && crittersActor is CrittersBag)
+		if (CrittersManager.instance.actorById.TryGetValue(oldParentId, ref crittersActor) && crittersActor is CrittersBag)
 		{
 			((CrittersBag)crittersActor).RemoveStoredObjectCollider(this, playSound);
 		}

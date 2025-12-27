@@ -13,12 +13,12 @@ public class StiltRBHandFollower : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		Vector3 a = this.targetHand.TransformPoint(this.handOffset);
-		float d;
-		Vector3 a2;
-		(this.targetHand.TransformRotation(this.handRotOffset) * Quaternion.Inverse(this.rb.transform.rotation)).ToAngleAxis(out d, out a2);
-		this.rb.linearVelocity = (a - this.rb.transform.position) / Time.fixedDeltaTime;
-		this.rb.angularVelocity = a2 * d * 0.017453292f / Time.fixedDeltaTime;
+		Vector3 vector = this.targetHand.TransformPoint(this.handOffset);
+		float num;
+		Vector3 vector2;
+		(this.targetHand.TransformRotation(this.handRotOffset) * Quaternion.Inverse(this.rb.transform.rotation)).ToAngleAxis(ref num, ref vector2);
+		this.rb.linearVelocity = (vector - this.rb.transform.position) / Time.fixedDeltaTime;
+		this.rb.angularVelocity = vector2 * num * 0.017453292f / Time.fixedDeltaTime;
 	}
 
 	private void OnCollisionEnter(Collision collision)

@@ -13,9 +13,9 @@ namespace GorillaTagScripts.AI
 			this.animator = base.gameObject.GetComponent<Animator>();
 			if (this.waypointsContainer != null)
 			{
-				foreach (Transform item in this.waypointsContainer.GetComponentsInChildren<Transform>())
+				foreach (Transform transform in this.waypointsContainer.GetComponentsInChildren<Transform>())
 				{
-					this.waypoints.Add(item);
+					this.waypoints.Add(transform);
 				}
 			}
 		}
@@ -33,7 +33,7 @@ namespace GorillaTagScripts.AI
 				this.targetPlayer = GorillaParent.instance.vrrigs[num].creator;
 				this.followTarget = GorillaParent.instance.vrrigs[num].head.rigTarget;
 				NavMeshHit navMeshHit;
-				this.targetIsOnNavMesh = NavMesh.SamplePosition(this.followTarget.position, out navMeshHit, this.navMeshSampleRange, 1);
+				this.targetIsOnNavMesh = NavMesh.SamplePosition(this.followTarget.position, ref navMeshHit, this.navMeshSampleRange, 1);
 				return;
 			}
 			this.targetPlayer = null;
@@ -61,7 +61,7 @@ namespace GorillaTagScripts.AI
 				this.targetPlayer = vrrig.creator;
 				this.followTarget = vrrig.head.rigTarget;
 				NavMeshHit navMeshHit;
-				this.targetIsOnNavMesh = NavMesh.SamplePosition(this.followTarget.position, out navMeshHit, this.navMeshSampleRange, 1);
+				this.targetIsOnNavMesh = NavMesh.SamplePosition(this.followTarget.position, ref navMeshHit, this.navMeshSampleRange, 1);
 				return;
 			}
 			this.targetPlayer = null;

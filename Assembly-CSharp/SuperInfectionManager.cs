@@ -43,7 +43,7 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	public static SuperInfectionManager GetSIManagerForZone(GTZone targetZone)
 	{
 		SuperInfectionManager result;
-		if (SuperInfectionManager.siManagerByZone.TryGetValue(targetZone, out result))
+		if (SuperInfectionManager.siManagerByZone.TryGetValue(targetZone, ref result))
 		{
 			return result;
 		}
@@ -218,7 +218,7 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 			}
 			else
 			{
-				this.progression.OnClientReady += this.<OnZoneInit>g__WhenReady|39_0;
+				this.progression.OnClientReady += new Action(this.<OnZoneInit>g__WhenReady|39_0);
 			}
 		}
 		this.allSnapPoints.Clear();
@@ -237,7 +237,7 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	public void RegisterSnapPoint(SuperInfectionSnapPoint snapPoint)
 	{
 		List<SuperInfectionSnapPoint> list;
-		if (!this.allSnapPoints.TryGetValue(snapPoint.jointType, out list))
+		if (!this.allSnapPoints.TryGetValue(snapPoint.jointType, ref list))
 		{
 			list = (this.allSnapPoints[snapPoint.jointType] = new List<SuperInfectionSnapPoint>());
 		}
@@ -309,7 +309,7 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	{
 		if (NetworkSystem.Instance.InRoom)
 		{
-			this.photonView.RPC("SIClientToClientRPC", RpcTarget.Others, new object[]
+			this.photonView.RPC("SIClientToClientRPC", 1, new object[]
 			{
 				(int)clientToClientRPC,
 				data
@@ -321,7 +321,7 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	{
 		if (NetworkSystem.Instance.InRoom)
 		{
-			this.photonView.RPC("SIAuthorityToClientRPC", RpcTarget.Others, new object[]
+			this.photonView.RPC("SIAuthorityToClientRPC", 1, new object[]
 			{
 				(int)authorityToClientRPC,
 				data
@@ -870,7 +870,7 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	private void OnEntityRemoved(GameEntity entity)
 	{
 		SIGadget sigadget;
-		entity.TryGetComponent<SIGadget>(out sigadget);
+		entity.TryGetComponent<SIGadget>(ref sigadget);
 		if (this.zoneSuperInfection != null && sigadget != null)
 		{
 			this.zoneSuperInfection.RemoveGadget(sigadget);
@@ -912,8 +912,8 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 		{
 			return false;
 		}
-		SIPlayer y = SIPlayer.Get((int)(createData & (long)((ulong)-1)));
-		if (siplayer != y)
+		SIPlayer siplayer2 = SIPlayer.Get((int)(createData & (long)((ulong)-1)));
+		if (siplayer != siplayer2)
 		{
 			return false;
 		}
@@ -970,7 +970,7 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	[CompilerGenerated]
 	private void <OnZoneInit>g__WhenReady|39_0()
 	{
-		this.progression.OnClientReady -= this.<OnZoneInit>g__WhenReady|39_0;
+		this.progression.OnClientReady -= new Action(this.<OnZoneInit>g__WhenReady|39_0);
 		SIPlayer.SetAndBroadcastProgression();
 	}
 

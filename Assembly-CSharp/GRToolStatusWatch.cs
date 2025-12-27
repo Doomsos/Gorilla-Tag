@@ -116,7 +116,7 @@ public class GRToolStatusWatch : MonoBehaviour, IGameEntityComponent
 		this.sb.Append("\n\n");
 		this.sb.Append(shiftCredits);
 		this.sb.Append("\n\n\n");
-		this.sb.Append(GhostReactorProgression.GetTitleNameFromLevel(item)[0]);
+		this.sb.Append(GhostReactorProgression.GetTitleNameFromLevel(item).get_Chars(0));
 		this.sb.Append(item2);
 		this.statsText.text = this.sb.ToString();
 		this.lastKills = num;

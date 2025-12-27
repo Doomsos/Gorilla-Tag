@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class FishingRod : TransferrableObject
 {
@@ -8,8 +7,8 @@ public class FishingRod : TransferrableObject
 	{
 		base.OnActivate();
 		Transform transform = base.transform;
-		Vector3 force = transform.up + transform.forward * 640f;
-		this.bobRigidbody.AddForce(force, ForceMode.Impulse);
+		Vector3 vector = transform.up + transform.forward * 640f;
+		this.bobRigidbody.AddForce(vector, 1);
 		this.line.tensionScale = 0.86f;
 		this.ReelOut();
 	}
@@ -136,7 +135,7 @@ public class FishingRod : TransferrableObject
 	{
 		base.TriggeredLateUpdate();
 		this._manualReeling = (this._isGrippingHandle = this.IsFreeHandGripping());
-		if (ControllerInputPoller.instance && ControllerInputPoller.PrimaryButtonPress(base.InLeftHand() ? XRNode.LeftHand : XRNode.RightHand))
+		if (ControllerInputPoller.instance && ControllerInputPoller.PrimaryButtonPress(base.InLeftHand() ? 4 : 5))
 		{
 			this.QuickReel();
 		}
@@ -189,8 +188,8 @@ public class FishingRod : TransferrableObject
 			quaternion = (base.InRightHand() ? quaternion : Quaternion.Inverse(quaternion));
 			this._localRotDelta = FishingRod.GetSignedDeltaYZ(ref this._lastLocalRot, ref quaternion);
 			this._lastLocalRot = quaternion;
-			Quaternion rot = transform.rotation * quaternion;
-			this.handleRigidbody.MoveRotation(rot);
+			Quaternion quaternion2 = transform.rotation * quaternion;
+			this.handleRigidbody.MoveRotation(quaternion2);
 		}
 		else
 		{
@@ -258,9 +257,9 @@ public class FishingRod : TransferrableObject
 		Vector3 forward = Vector3.forward;
 		Vector3 vector = a * forward;
 		Vector3 vector2 = b * forward;
-		float current = Mathf.Atan2(vector.y, vector.z) * 57.29578f;
-		float target = Mathf.Atan2(vector2.y, vector2.z) * 57.29578f;
-		return Mathf.DeltaAngle(current, target);
+		float num = Mathf.Atan2(vector.y, vector.z) * 57.29578f;
+		float num2 = Mathf.Atan2(vector2.y, vector2.z) * 57.29578f;
+		return Mathf.DeltaAngle(num, num2);
 	}
 
 	public Transform handleTransform;

@@ -38,7 +38,7 @@ public static class ComponentUtils
 
 	public static void GetOrAddComponent<T>(this Component c, out T result) where T : Component
 	{
-		if (!c.TryGetComponent<T>(out result))
+		if (!c.TryGetComponent<T>(ref result))
 		{
 			result = c.gameObject.AddComponent<T>();
 		}
@@ -121,7 +121,8 @@ public static class ComponentUtils
 		array[3] = (uint)num6;
 		SRand srand = new SRand(StaticHash.Compute(num3, num4, num5, num6));
 		srand.Shuffle<uint>(array);
-		Hash128 result = new Hash128(array[0], array[1], array[2], array[3]);
+		Hash128 result;
+		result..ctor(array[0], array[1], array[2], array[3]);
 		Hash128 hash = Hash128.Compute(c.GetType().FullName);
 		Hash128 hash2 = TransformUtils.ComputePathHash(transform);
 		Hash128 hash3 = transform.localToWorldMatrix.QuantizedHash128();

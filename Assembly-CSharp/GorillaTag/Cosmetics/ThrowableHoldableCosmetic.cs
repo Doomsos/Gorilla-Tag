@@ -26,7 +26,7 @@ namespace GorillaTag.Cosmetics
 			}
 			if (this._events != null)
 			{
-				this._events.Activate += this.OnThrowEvent;
+				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnThrowEvent);
 			}
 			this.forceBackToDock = false;
 		}
@@ -87,7 +87,7 @@ namespace GorillaTag.Cosmetics
 			base.OnDisable();
 			if (this._events != null)
 			{
-				this._events.Activate -= this.OnThrowEvent;
+				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnThrowEvent);
 				this._events.Dispose();
 				this._events = null;
 			}
@@ -192,7 +192,7 @@ namespace GorillaTag.Cosmetics
 				FartBagThrowable fartBagThrowable = component as FartBagThrowable;
 				if (fartBagThrowable != null)
 				{
-					fartBagThrowable.OnDeflated += this.HitComplete;
+					fartBagThrowable.OnDeflated += new Action<IProjectile>(this.HitComplete);
 					fartBagThrowable.ParentTransferable = this;
 				}
 			}
@@ -246,7 +246,7 @@ namespace GorillaTag.Cosmetics
 				FartBagThrowable fartBagThrowable = projectile as FartBagThrowable;
 				if (fartBagThrowable != null)
 				{
-					fartBagThrowable.OnDeflated -= this.HitComplete;
+					fartBagThrowable.OnDeflated -= new Action<IProjectile>(this.HitComplete);
 					ObjectPools.instance.Destroy(fartBagThrowable.gameObject);
 				}
 			}

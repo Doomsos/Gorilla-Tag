@@ -8,13 +8,13 @@ public class PlatformerCollectiblesMain : MonoBehaviour
 		int num = 0;
 		while ((float)num < this.CoinGridCount)
 		{
-			float x = -0.5f * this.CoinGridSize + this.CoinGridSize * (float)num / (this.CoinGridCount - 1f);
-			int num2 = 0;
-			while ((float)num2 < this.CoinGridCount)
+			float num2 = -0.5f * this.CoinGridSize + this.CoinGridSize * (float)num / (this.CoinGridCount - 1f);
+			int num3 = 0;
+			while ((float)num3 < this.CoinGridCount)
 			{
-				float z = -0.5f * this.CoinGridSize + this.CoinGridSize * (float)num2 / (this.CoinGridCount - 1f);
-				Object.Instantiate<GameObject>(this.Coin).transform.position = new Vector3(x, 0.2f, z);
-				num2++;
+				float num4 = -0.5f * this.CoinGridSize + this.CoinGridSize * (float)num3 / (this.CoinGridCount - 1f);
+				Object.Instantiate<GameObject>(this.Coin).transform.position = new Vector3(num2, 0.2f, num4);
+				num3++;
 			}
 			num++;
 		}

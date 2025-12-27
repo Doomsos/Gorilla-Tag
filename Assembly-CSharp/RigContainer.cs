@@ -181,15 +181,15 @@ public class RigContainer : MonoBehaviour
 
 	public void UpdateAutomuteLevel(string autoMuteLevel)
 	{
-		if (autoMuteLevel.Equals("LOW", StringComparison.OrdinalIgnoreCase))
+		if (autoMuteLevel.Equals("LOW", 5))
 		{
 			this.playerChatQuality = 1;
 		}
-		else if (autoMuteLevel.Equals("HIGH", StringComparison.OrdinalIgnoreCase))
+		else if (autoMuteLevel.Equals("HIGH", 5))
 		{
 			this.playerChatQuality = 0;
 		}
-		else if (autoMuteLevel.Equals("ERROR", StringComparison.OrdinalIgnoreCase))
+		else if (autoMuteLevel.Equals("ERROR", 5))
 		{
 			this.playerChatQuality = 2;
 		}
@@ -215,7 +215,7 @@ public class RigContainer : MonoBehaviour
 		}
 		else
 		{
-			this.rigEvents.enableEvent += this.RigPostEnable;
+			this.rigEvents.enableEvent += new Action<RigContainer>(this.RigPostEnable);
 		}
 		this.Rig.rigContainer = this;
 	}
@@ -331,8 +331,7 @@ public class RigContainer : MonoBehaviour
 		RigContainer.playersToCheckAutomute.RemoveAll((NetPlayer player) => player == null);
 		RigContainer.requestedAutomutePlayers = new List<NetPlayer>(RigContainer.playersToCheckAutomute);
 		RigContainer.playersToCheckAutomute.Clear();
-		string[] value = (from x in RigContainer.requestedAutomutePlayers
-		select x.UserId).ToArray<string>();
+		string[] array = Enumerable.ToArray<string>(Enumerable.Select<NetPlayer, string>(RigContainer.requestedAutomutePlayers, (NetPlayer x) => x.UserId));
 		foreach (NetPlayer netPlayer in RigContainer.requestedAutomutePlayers)
 		{
 		}
@@ -343,7 +342,7 @@ public class RigContainer : MonoBehaviour
 			Type = PlayFabSettings.staticPlayer.EntityType
 		};
 		executeFunctionRequest.FunctionName = "ShouldUserAutomutePlayer";
-		executeFunctionRequest.FunctionParameter = string.Join(",", value);
+		executeFunctionRequest.FunctionParameter = string.Join(",", array);
 		PlayFabCloudScriptAPI.ExecuteFunction(executeFunctionRequest, delegate(ExecuteFunctionResult result)
 		{
 			Dictionary<string, string> dictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(result.FunctionResult.ToString());
@@ -367,7 +366,7 @@ public class RigContainer : MonoBehaviour
 				if (netPlayer3 != null)
 				{
 					string score;
-					if (dictionary.TryGetValue(netPlayer3.UserId, out score))
+					if (dictionary.TryGetValue(netPlayer3.UserId, ref score))
 					{
 						RigContainer.ReceiveAutomuteSettings(netPlayer3, score);
 					}

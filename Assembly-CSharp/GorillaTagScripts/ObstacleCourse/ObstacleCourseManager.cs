@@ -138,7 +138,7 @@ namespace GorillaTagScripts.ObstacleCourse
 		[WeaverGenerated]
 		[SerializeField]
 		[DefaultForProperty("Data", 0, 9)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+		[DrawIf("IsEditorWritable", true, 0, 0)]
 		private ObstacleCourseData _Data;
 	}
 }

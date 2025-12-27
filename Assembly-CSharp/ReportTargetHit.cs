@@ -49,9 +49,9 @@ public class ReportTargetHit : MonoBehaviour
 	{
 		if (this.targets.Length != 0)
 		{
-			Vector3 direction = this.targets[ReportTargetHit.rand.NextInt(this.targets.Length)].position - base.transform.position;
+			Vector3 vector = this.targets[ReportTargetHit.rand.NextInt(this.targets.Length)].position - base.transform.position;
 			RaycastHit raycastHit;
-			if (Physics.Raycast(base.transform.position, direction, out raycastHit) && this.colliderFound != null)
+			if (Physics.Raycast(base.transform.position, vector, ref raycastHit) && this.colliderFound != null)
 			{
 				this.colliderFound.Invoke(base.transform.position, raycastHit.point);
 			}

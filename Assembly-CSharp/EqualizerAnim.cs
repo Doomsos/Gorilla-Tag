@@ -23,8 +23,8 @@ public class EqualizerAnim : MonoBehaviour
 			EqualizerAnim.thisFrame = Time.frameCount;
 			EqualizerAnim.materialsUpdatedThisFrame.Clear();
 		}
-		float time = Time.time % this.loopDuration;
-		this.material.SetColor(this.inputColorHash, new Color(this.redCurve.Evaluate(time), this.greenCurve.Evaluate(time), this.blueCurve.Evaluate(time)));
+		float num = Time.time % this.loopDuration;
+		this.material.SetColor(this.inputColorHash, new Color(this.redCurve.Evaluate(num), this.greenCurve.Evaluate(num), this.blueCurve.Evaluate(num)));
 		EqualizerAnim.materialsUpdatedThisFrame.Add(this.material);
 	}
 

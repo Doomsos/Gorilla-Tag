@@ -121,7 +121,7 @@ public class GRNoiseEventManager : MonoBehaviourTick
 		{
 			if (!this.noiseEvents[i].IsValid())
 			{
-				this.noiseEvents.RemoveAtSwapBack(i);
+				ListExtensions.RemoveAtSwapBack<GameNoiseEvent>(this.noiseEvents, i);
 				i--;
 			}
 		}

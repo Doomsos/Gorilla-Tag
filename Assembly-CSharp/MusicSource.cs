@@ -64,7 +64,7 @@ public class MusicSource : MonoBehaviour
 
 	public void UnsetVolumeOverride()
 	{
-		this.volumeOverride = null;
+		this.volumeOverride = default(float?);
 		this.audioSource.volume = this.defaultVolume;
 	}
 

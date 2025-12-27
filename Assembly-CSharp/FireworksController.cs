@@ -7,7 +7,7 @@ public class FireworksController : MonoBehaviour
 {
 	private void Awake()
 	{
-		this._launchOrder = this.fireworks.ToArray<Firework>();
+		this._launchOrder = Enumerable.ToArray<Firework>(this.fireworks);
 		this._rnd = new SRand(this.seed);
 	}
 
@@ -21,8 +21,8 @@ public class FireworksController : MonoBehaviour
 		for (int i = 0; i < this._launchOrder.Length; i++)
 		{
 			MonoBehaviour monoBehaviour = this._launchOrder[i];
-			float time = this._rnd.NextFloat() * this.roundLength;
-			monoBehaviour.Invoke("Launch", time);
+			float num = this._rnd.NextFloat() * this.roundLength;
+			monoBehaviour.Invoke("Launch", num);
 		}
 	}
 
@@ -31,8 +31,8 @@ public class FireworksController : MonoBehaviour
 		int num = 0;
 		while ((long)num < (long)((ulong)this.roundNumVolleys))
 		{
-			float time = this._rnd.NextFloat() * this.roundLength;
-			base.Invoke("LaunchVolley", time);
+			float num2 = this._rnd.NextFloat() * this.roundLength;
+			base.Invoke("LaunchVolley", num2);
 			num++;
 		}
 	}
@@ -132,7 +132,8 @@ public class FireworksController : MonoBehaviour
 	{
 		Firework firework = ev.firework;
 		ParticleSystem particleSystem = firework.explosions[ev.explosionIndex];
-		ParticleSystem.MinMaxGradient color = new ParticleSystem.MinMaxGradient(firework.colorOrigin, firework.colorTarget);
+		ParticleSystem.MinMaxGradient color;
+		color..ctor(firework.colorOrigin, firework.colorTarget);
 		ParticleSystem.ColorOverLifetimeModule colorOverLifetime = particleSystem.colorOverLifetime;
 		ParticleSystem.ColorOverLifetimeModule colorOverLifetime2 = particleSystem.subEmitters.GetSubEmitterSystem(0).colorOverLifetime;
 		colorOverLifetime.color = color;

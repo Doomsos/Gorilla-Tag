@@ -157,7 +157,7 @@ public class ControllerInputPoller : MonoBehaviour
 	{
 		if (!this.leftControllerDevice.isValid)
 		{
-			this.leftControllerDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+			this.leftControllerDevice = InputDevices.GetDeviceAtXRNode(4);
 			if (this.leftControllerDevice.isValid)
 			{
 				this.controllerType = GorillaControllerType.OCULUS_DEFAULT;
@@ -170,53 +170,53 @@ public class ControllerInputPoller : MonoBehaviour
 		}
 		if (!this.rightControllerDevice.isValid)
 		{
-			this.rightControllerDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+			this.rightControllerDevice = InputDevices.GetDeviceAtXRNode(5);
 		}
 		if (!this.headDevice.isValid)
 		{
-			this.headDevice = InputDevices.GetDeviceAtXRNode(XRNode.CenterEye);
+			this.headDevice = InputDevices.GetDeviceAtXRNode(2);
 		}
 		InputDevice inputDevice = this.leftControllerDevice;
 		InputDevice inputDevice2 = this.rightControllerDevice;
 		InputDevice inputDevice3 = this.headDevice;
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.primaryButton, out this.leftControllerPrimaryButton);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.secondaryButton, out this.leftControllerSecondaryButton);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.primaryTouch, out this.leftControllerPrimaryButtonTouch);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.secondaryTouch, out this.leftControllerSecondaryButtonTouch);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.grip, out this.leftControllerGripFloat);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.trigger, out this.leftControllerIndexFloat);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.devicePosition, out this.leftControllerPosition);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out this.leftControllerRotation);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out this.leftControllerPrimary2DAxis);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.triggerButton, out this.leftControllerTriggerButton);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.primaryButton, out this.rightControllerPrimaryButton);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.secondaryButton, out this.rightControllerSecondaryButton);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.primaryTouch, out this.rightControllerPrimaryButtonTouch);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.secondaryTouch, out this.rightControllerSecondaryButtonTouch);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.grip, out this.rightControllerGripFloat);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.trigger, out this.rightControllerIndexFloat);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.devicePosition, out this.rightControllerPosition);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out this.rightControllerRotation);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out this.rightControllerPrimary2DAxis);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.triggerButton, out this.rightControllerTriggerButton);
-		this.leftControllerPrimaryButton = SteamVR_Actions.gorillaTag_LeftPrimaryClick.GetState(SteamVR_Input_Sources.LeftHand);
-		this.leftControllerSecondaryButton = SteamVR_Actions.gorillaTag_LeftSecondaryClick.GetState(SteamVR_Input_Sources.LeftHand);
-		this.leftControllerPrimaryButtonTouch = SteamVR_Actions.gorillaTag_LeftPrimaryTouch.GetState(SteamVR_Input_Sources.LeftHand);
-		this.leftControllerSecondaryButtonTouch = SteamVR_Actions.gorillaTag_LeftSecondaryTouch.GetState(SteamVR_Input_Sources.LeftHand);
-		this.leftControllerGripFloat = SteamVR_Actions.gorillaTag_LeftGripFloat.GetAxis(SteamVR_Input_Sources.LeftHand);
-		this.leftControllerIndexFloat = SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(SteamVR_Input_Sources.LeftHand);
-		this.leftControllerTriggerButton = SteamVR_Actions.gorillaTag_LeftTriggerClick.GetState(SteamVR_Input_Sources.LeftHand);
-		this.leftControllerPrimary2DAxis = SteamVR_Actions.gorillaTag_LeftJoystick2DAxis.GetAxis(SteamVR_Input_Sources.LeftHand);
-		this.rightControllerPrimaryButton = SteamVR_Actions.gorillaTag_RightPrimaryClick.GetState(SteamVR_Input_Sources.RightHand);
-		this.rightControllerSecondaryButton = SteamVR_Actions.gorillaTag_RightSecondaryClick.GetState(SteamVR_Input_Sources.RightHand);
-		this.rightControllerPrimaryButtonTouch = SteamVR_Actions.gorillaTag_RightPrimaryTouch.GetState(SteamVR_Input_Sources.RightHand);
-		this.rightControllerSecondaryButtonTouch = SteamVR_Actions.gorillaTag_RightSecondaryTouch.GetState(SteamVR_Input_Sources.RightHand);
-		this.rightControllerGripFloat = SteamVR_Actions.gorillaTag_RightGripFloat.GetAxis(SteamVR_Input_Sources.RightHand);
-		this.rightControllerIndexFloat = SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(SteamVR_Input_Sources.RightHand);
-		this.rightControllerTriggerButton = SteamVR_Actions.gorillaTag_RightTriggerClick.GetState(SteamVR_Input_Sources.RightHand);
-		this.rightControllerPrimary2DAxis = SteamVR_Actions.gorillaTag_RightJoystick2DAxis.GetAxis(SteamVR_Input_Sources.RightHand);
-		this.headDevice.TryGetFeatureValue(CommonUsages.devicePosition, out this.headPosition);
-		this.headDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out this.headRotation);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.primaryButton, ref this.leftControllerPrimaryButton);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.secondaryButton, ref this.leftControllerSecondaryButton);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.primaryTouch, ref this.leftControllerPrimaryButtonTouch);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.secondaryTouch, ref this.leftControllerSecondaryButtonTouch);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.grip, ref this.leftControllerGripFloat);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.trigger, ref this.leftControllerIndexFloat);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.devicePosition, ref this.leftControllerPosition);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.deviceRotation, ref this.leftControllerRotation);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, ref this.leftControllerPrimary2DAxis);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.triggerButton, ref this.leftControllerTriggerButton);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.primaryButton, ref this.rightControllerPrimaryButton);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.secondaryButton, ref this.rightControllerSecondaryButton);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.primaryTouch, ref this.rightControllerPrimaryButtonTouch);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.secondaryTouch, ref this.rightControllerSecondaryButtonTouch);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.grip, ref this.rightControllerGripFloat);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.trigger, ref this.rightControllerIndexFloat);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.devicePosition, ref this.rightControllerPosition);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.deviceRotation, ref this.rightControllerRotation);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, ref this.rightControllerPrimary2DAxis);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.triggerButton, ref this.rightControllerTriggerButton);
+		this.leftControllerPrimaryButton = SteamVR_Actions.gorillaTag_LeftPrimaryClick.GetState(1);
+		this.leftControllerSecondaryButton = SteamVR_Actions.gorillaTag_LeftSecondaryClick.GetState(1);
+		this.leftControllerPrimaryButtonTouch = SteamVR_Actions.gorillaTag_LeftPrimaryTouch.GetState(1);
+		this.leftControllerSecondaryButtonTouch = SteamVR_Actions.gorillaTag_LeftSecondaryTouch.GetState(1);
+		this.leftControllerGripFloat = SteamVR_Actions.gorillaTag_LeftGripFloat.GetAxis(1);
+		this.leftControllerIndexFloat = SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(1);
+		this.leftControllerTriggerButton = SteamVR_Actions.gorillaTag_LeftTriggerClick.GetState(1);
+		this.leftControllerPrimary2DAxis = SteamVR_Actions.gorillaTag_LeftJoystick2DAxis.GetAxis(1);
+		this.rightControllerPrimaryButton = SteamVR_Actions.gorillaTag_RightPrimaryClick.GetState(2);
+		this.rightControllerSecondaryButton = SteamVR_Actions.gorillaTag_RightSecondaryClick.GetState(2);
+		this.rightControllerPrimaryButtonTouch = SteamVR_Actions.gorillaTag_RightPrimaryTouch.GetState(2);
+		this.rightControllerSecondaryButtonTouch = SteamVR_Actions.gorillaTag_RightSecondaryTouch.GetState(2);
+		this.rightControllerGripFloat = SteamVR_Actions.gorillaTag_RightGripFloat.GetAxis(2);
+		this.rightControllerIndexFloat = SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(2);
+		this.rightControllerTriggerButton = SteamVR_Actions.gorillaTag_RightTriggerClick.GetState(2);
+		this.rightControllerPrimary2DAxis = SteamVR_Actions.gorillaTag_RightJoystick2DAxis.GetAxis(2);
+		this.headDevice.TryGetFeatureValue(CommonUsages.devicePosition, ref this.headPosition);
+		this.headDevice.TryGetFeatureValue(CommonUsages.deviceRotation, ref this.headRotation);
 		this.CalculateGrabState(this.leftControllerIndexFloat, ref this._leftIndexPressed, ref this._leftIndexReleased, out this._leftIndexPressedThisFrame, out this._leftIndexReleasedThisFrame, 0.75f, 0.65f);
 		this.CalculateGrabState(this.rightControllerIndexFloat, ref this._rightIndexPressed, ref this._rightIndexReleased, out this._rightIndexPressedThisFrame, out this._rightIndexReleasedThisFrame, 0.75f, 0.65f);
 		if (this.controllerType == GorillaControllerType.OCULUS_DEFAULT)
@@ -229,10 +229,10 @@ public class ControllerInputPoller : MonoBehaviour
 			this.CalculateGrabState(this.leftControllerGripFloat, ref this.leftGrab, ref this.leftGrabRelease, out this.leftGrabMomentary, out this.leftGrabReleaseMomentary, 0.1f, 0.01f);
 			this.CalculateGrabState(this.rightControllerGripFloat, ref this.rightGrab, ref this.rightGrabRelease, out this.rightGrabMomentary, out this.rightGrabReleaseMomentary, 0.1f, 0.01f);
 		}
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.deviceVelocity, out this._leftVelocity);
-		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out this._leftAngularVelocity);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.deviceVelocity, out this._rightVelocity);
-		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out this._rightAngularVelocity);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.deviceVelocity, ref this._leftVelocity);
+		this.leftControllerDevice.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, ref this._leftAngularVelocity);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.deviceVelocity, ref this._rightVelocity);
+		this.rightControllerDevice.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, ref this._rightAngularVelocity);
 		this._UpdatePressFlags();
 		if (this.didModifyOnUpdate)
 		{
@@ -244,7 +244,7 @@ public class ControllerInputPoller : MonoBehaviour
 		}
 		foreach (Action action in this.onUpdate)
 		{
-			action();
+			action.Invoke();
 		}
 	}
 
@@ -277,79 +277,79 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static bool GetIndexPressed(XRNode node)
 	{
-		if (node != XRNode.LeftHand)
+		if (node != 4)
 		{
-			return node == XRNode.RightHand && ControllerInputPoller.instance.rightIndexPressed;
+			return node == 5 && ControllerInputPoller.instance.rightIndexPressed;
 		}
 		return ControllerInputPoller.instance.leftIndexPressed;
 	}
 
 	public static bool GetIndexReleased(XRNode node)
 	{
-		if (node != XRNode.LeftHand)
+		if (node != 4)
 		{
-			return node == XRNode.RightHand && ControllerInputPoller.instance.rightIndexReleased;
+			return node == 5 && ControllerInputPoller.instance.rightIndexReleased;
 		}
 		return ControllerInputPoller.instance.leftIndexReleased;
 	}
 
 	public static bool GetIndexPressedThisFrame(XRNode node)
 	{
-		if (node != XRNode.LeftHand)
+		if (node != 4)
 		{
-			return node == XRNode.RightHand && ControllerInputPoller.instance.leftIndexPressedThisFrame;
+			return node == 5 && ControllerInputPoller.instance.leftIndexPressedThisFrame;
 		}
 		return ControllerInputPoller.instance.leftIndexPressedThisFrame;
 	}
 
 	public static bool GetIndexReleasedThisFrame(XRNode node)
 	{
-		if (node != XRNode.LeftHand)
+		if (node != 4)
 		{
-			return node == XRNode.RightHand && ControllerInputPoller.instance.leftIndexReleasedThisFrame;
+			return node == 5 && ControllerInputPoller.instance.leftIndexReleasedThisFrame;
 		}
 		return ControllerInputPoller.instance.leftIndexReleasedThisFrame;
 	}
 
 	public static bool GetGrab(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftGrab;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightGrab;
+		return node == 5 && ControllerInputPoller.instance.rightGrab;
 	}
 
 	public static bool GetGrabRelease(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftGrabRelease;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightGrabRelease;
+		return node == 5 && ControllerInputPoller.instance.rightGrabRelease;
 	}
 
 	public static bool GetGrabMomentary(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftGrabMomentary;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightGrabMomentary;
+		return node == 5 && ControllerInputPoller.instance.rightGrabMomentary;
 	}
 
 	public static bool GetGrabReleaseMomentary(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftGrabReleaseMomentary;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightGrabReleaseMomentary;
+		return node == 5 && ControllerInputPoller.instance.rightGrabReleaseMomentary;
 	}
 
 	public static Vector2 Primary2DAxis(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerPrimary2DAxis;
 		}
@@ -358,47 +358,47 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static bool PrimaryButtonPress(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerPrimaryButton;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightControllerPrimaryButton;
+		return node == 5 && ControllerInputPoller.instance.rightControllerPrimaryButton;
 	}
 
 	public static bool SecondaryButtonPress(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerSecondaryButton;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightControllerSecondaryButton;
+		return node == 5 && ControllerInputPoller.instance.rightControllerSecondaryButton;
 	}
 
 	public static bool PrimaryButtonTouch(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerPrimaryButtonTouch;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightControllerPrimaryButtonTouch;
+		return node == 5 && ControllerInputPoller.instance.rightControllerPrimaryButtonTouch;
 	}
 
 	public static bool SecondaryButtonTouch(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerSecondaryButtonTouch;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightControllerSecondaryButtonTouch;
+		return node == 5 && ControllerInputPoller.instance.rightControllerSecondaryButtonTouch;
 	}
 
 	public static float GripFloat(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerGripFloat;
 		}
-		if (node == XRNode.RightHand)
+		if (node == 5)
 		{
 			return ControllerInputPoller.instance.rightControllerGripFloat;
 		}
@@ -407,11 +407,11 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static float TriggerFloat(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerIndexFloat;
 		}
-		if (node == XRNode.RightHand)
+		if (node == 5)
 		{
 			return ControllerInputPoller.instance.rightControllerIndexFloat;
 		}
@@ -420,11 +420,11 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static float TriggerTouch(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerIndexTouch;
 		}
-		if (node == XRNode.RightHand)
+		if (node == 5)
 		{
 			return ControllerInputPoller.instance.rightControllerIndexTouch;
 		}
@@ -433,15 +433,15 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static Vector3 DevicePosition(XRNode node)
 	{
-		if (node == XRNode.Head)
+		if (node == 3)
 		{
 			return ControllerInputPoller.instance.headPosition;
 		}
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerPosition;
 		}
-		if (node == XRNode.RightHand)
+		if (node == 5)
 		{
 			return ControllerInputPoller.instance.rightControllerPosition;
 		}
@@ -450,15 +450,15 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static Quaternion DeviceRotation(XRNode node)
 	{
-		if (node == XRNode.Head)
+		if (node == 3)
 		{
 			return ControllerInputPoller.instance.headRotation;
 		}
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerRotation;
 		}
-		if (node == XRNode.RightHand)
+		if (node == 5)
 		{
 			return ControllerInputPoller.instance.rightControllerRotation;
 		}
@@ -467,11 +467,11 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static Vector3 DeviceVelocity(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftVelocity;
 		}
-		if (node == XRNode.RightHand)
+		if (node == 5)
 		{
 			return ControllerInputPoller.instance.rightVelocity;
 		}
@@ -480,11 +480,11 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static Vector3 DeviceAngularVelocity(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftAngularVelocity;
 		}
-		if (node == XRNode.RightHand)
+		if (node == 5)
 		{
 			return ControllerInputPoller.instance.rightAngularVelocity;
 		}
@@ -493,15 +493,15 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static bool PositionValid(XRNode node)
 	{
-		if (node == XRNode.Head)
+		if (node == 3)
 		{
 			return ControllerInputPoller.instance.headDevice.isValid;
 		}
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftControllerDevice.isValid;
 		}
-		return node == XRNode.RightHand && ControllerInputPoller.instance.rightControllerDevice.isValid;
+		return node == 5 && ControllerInputPoller.instance.rightControllerDevice.isValid;
 	}
 
 	public static bool HasPressFlags(XRNode node, EControllerInputPressFlags inputStateFlags)
@@ -520,11 +520,11 @@ public class ControllerInputPoller : MonoBehaviour
 
 	public static EControllerInputPressFlags GetInputStateFlags(XRNode node)
 	{
-		if (node == XRNode.LeftHand)
+		if (node == 4)
 		{
 			return ControllerInputPoller.instance.leftPressFlags;
 		}
-		if (node != XRNode.RightHand)
+		if (node != 5)
 		{
 			return EControllerInputPressFlags.None;
 		}
@@ -594,7 +594,7 @@ public class ControllerInputPoller : MonoBehaviour
 		ControllerInputPoller._UpdatePressFlags_Callbacks(ref ControllerInputPoller._g_callbacks_onPressUpdate, ControllerInputPoller._EPressCadence.Held, this.leftPressFlags, this.leftPressFlagsLastFrame, this.rightPressFlags, this.rightPressFlagsLastFrame);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static void _UpdatePressFlags_Callbacks(ref ControllerInputPoller._InputCallbacksCadenceInfo callbacksInfo, ControllerInputPoller._EPressCadence cadence, EControllerInputPressFlags lFlags_now, EControllerInputPressFlags lFlags_old, EControllerInputPressFlags rFlags_now, EControllerInputPressFlags rFlags_old)
 	{
 		for (int i = 0; i < callbacksInfo.list.Count; i++)
@@ -606,17 +606,17 @@ public class ControllerInputPoller : MonoBehaviour
 			{
 				try
 				{
-					callbacksInfo.list[i].callback(ehandednessFlags);
+					callbacksInfo.list[i].callback.Invoke(ehandednessFlags);
 				}
-				catch (Exception exception)
+				catch (Exception ex)
 				{
-					Debug.LogException(exception);
+					Debug.LogException(ex);
 				}
 			}
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static EHandednessFlags _IsHandContributingToPressCadence(EHandednessFlags hand, ControllerInputPoller._EPressCadence pressCadence, EControllerInputPressFlags cbFlags, EControllerInputPressFlags flags_now, EControllerInputPressFlags flags_old)
 	{
 		if ((pressCadence != ControllerInputPoller._EPressCadence.Held || (cbFlags & flags_now) != cbFlags) && (pressCadence != ControllerInputPoller._EPressCadence.Start || (cbFlags & flags_now) != cbFlags || (cbFlags & flags_old) == cbFlags) && (pressCadence != ControllerInputPoller._EPressCadence.End || (cbFlags & flags_now) == cbFlags || (cbFlags & flags_old) != cbFlags))

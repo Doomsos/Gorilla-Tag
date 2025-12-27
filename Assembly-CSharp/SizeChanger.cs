@@ -173,7 +173,7 @@ public class SizeChanger : GorillaTriggerBox
 		{
 			return;
 		}
-		onEnter();
+		onEnter.Invoke();
 	}
 
 	public void OnTriggerExit(Collider other)
@@ -198,7 +198,7 @@ public class SizeChanger : GorillaTriggerBox
 		{
 			return;
 		}
-		onExit();
+		onExit.Invoke();
 	}
 
 	public Vector3 ClosestPoint(Vector3 position)

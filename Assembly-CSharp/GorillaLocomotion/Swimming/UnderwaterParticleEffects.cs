@@ -9,54 +9,55 @@ namespace GorillaLocomotion.Swimming
 		public void UpdateParticleEffect(bool waterSurfaceDetected, ref WaterVolume.SurfaceQuery waterSurface)
 		{
 			GTPlayer instance = GTPlayer.Instance;
-			Plane plane = new Plane(waterSurface.surfaceNormal, waterSurface.surfacePoint);
+			Plane plane;
+			plane..ctor(waterSurface.surfaceNormal, waterSurface.surfacePoint);
 			if (waterSurfaceDetected && plane.GetDistanceToPoint(instance.headCollider.transform.position) < instance.headCollider.radius)
 			{
 				this.underwaterFloaterParticles.gameObject.SetActive(true);
 				Vector3 averagedVelocity = instance.AveragedVelocity;
 				float magnitude = averagedVelocity.magnitude;
-				Vector3 a = (magnitude > 0.001f) ? (averagedVelocity / magnitude) : this.playerCamera.transform.forward;
-				float d = this.floaterSpeedVsOffsetDist.Evaluate(Mathf.Clamp(magnitude, this.floaterSpeedVsOffsetDistMinMax.x, this.floaterSpeedVsOffsetDistMinMax.y));
+				Vector3 vector = (magnitude > 0.001f) ? (averagedVelocity / magnitude) : this.playerCamera.transform.forward;
+				float num = this.floaterSpeedVsOffsetDist.Evaluate(Mathf.Clamp(magnitude, this.floaterSpeedVsOffsetDistMinMax.x, this.floaterSpeedVsOffsetDistMinMax.y));
 				Quaternion rotation = this.playerCamera.transform.rotation;
-				Vector3 vector = this.playerCamera.transform.position + this.playerCamera.transform.rotation * this.floaterParticleBaseOffset + a * d;
-				Vector3 vector2 = vector + rotation * new Vector3(0f, this.floaterParticleBoxExtents.y, -this.floaterParticleBoxExtents.z);
-				Vector3 vector3 = vector + rotation * new Vector3(0f, this.floaterParticleBoxExtents.y, this.floaterParticleBoxExtents.z);
-				float num = this.floaterParticleBoxExtents.z * 2f;
-				float num2 = plane.GetDistanceToPoint(vector2);
+				Vector3 vector2 = this.playerCamera.transform.position + this.playerCamera.transform.rotation * this.floaterParticleBaseOffset + vector * num;
+				Vector3 vector3 = vector2 + rotation * new Vector3(0f, this.floaterParticleBoxExtents.y, -this.floaterParticleBoxExtents.z);
+				Vector3 vector4 = vector2 + rotation * new Vector3(0f, this.floaterParticleBoxExtents.y, this.floaterParticleBoxExtents.z);
+				float num2 = this.floaterParticleBoxExtents.z * 2f;
 				float num3 = plane.GetDistanceToPoint(vector3);
-				Quaternion rotation2 = rotation;
-				Vector3 vector4 = vector;
-				if (num2 > 0f || num3 > 0f)
+				float num4 = plane.GetDistanceToPoint(vector4);
+				Quaternion quaternion = rotation;
+				Vector3 vector5 = vector2;
+				if (num3 > 0f || num4 > 0f)
 				{
-					if (vector2.y < vector3.y)
-					{
-						if (num2 > 0f)
-						{
-							vector2 -= plane.normal * num2;
-							num2 = 0f;
-						}
-						Vector3 rhs = (new Vector3(vector3.x, vector2.y, vector3.z) - vector2).normalized * num;
-						Vector3 axis = Vector3.Cross(vector3 - vector2, rhs);
-						rotation2 = Quaternion.AngleAxis((Mathf.Asin((vector3.y - vector2.y) / num) - Mathf.Asin(-num2 / num)) * 57.29578f, axis) * this.playerCamera.transform.rotation;
-						vector4 = vector2 + rotation2 * new Vector3(0f, -this.floaterParticleBoxExtents.y, this.floaterParticleBoxExtents.z);
-					}
-					else
+					if (vector3.y < vector4.y)
 					{
 						if (num3 > 0f)
 						{
 							vector3 -= plane.normal * num3;
 							num3 = 0f;
 						}
-						Vector3 rhs2 = (new Vector3(vector2.x, vector3.y, vector2.z) - vector3).normalized * num;
-						Vector3 axis2 = Vector3.Cross(vector2 - vector3, rhs2);
-						rotation2 = Quaternion.AngleAxis((Mathf.Asin((vector2.y - vector3.y) / num) - Mathf.Asin(-num3 / num)) * 57.29578f, axis2) * this.playerCamera.transform.rotation;
-						vector4 = vector3 + rotation2 * new Vector3(0f, -this.floaterParticleBoxExtents.y, -this.floaterParticleBoxExtents.z);
+						Vector3 vector6 = (new Vector3(vector4.x, vector3.y, vector4.z) - vector3).normalized * num2;
+						Vector3 vector7 = Vector3.Cross(vector4 - vector3, vector6);
+						quaternion = Quaternion.AngleAxis((Mathf.Asin((vector4.y - vector3.y) / num2) - Mathf.Asin(-num3 / num2)) * 57.29578f, vector7) * this.playerCamera.transform.rotation;
+						vector5 = vector3 + quaternion * new Vector3(0f, -this.floaterParticleBoxExtents.y, this.floaterParticleBoxExtents.z);
+					}
+					else
+					{
+						if (num4 > 0f)
+						{
+							vector4 -= plane.normal * num4;
+							num4 = 0f;
+						}
+						Vector3 vector8 = (new Vector3(vector3.x, vector4.y, vector3.z) - vector4).normalized * num2;
+						Vector3 vector9 = Vector3.Cross(vector3 - vector4, vector8);
+						quaternion = Quaternion.AngleAxis((Mathf.Asin((vector3.y - vector4.y) / num2) - Mathf.Asin(-num4 / num2)) * 57.29578f, vector9) * this.playerCamera.transform.rotation;
+						vector5 = vector4 + quaternion * new Vector3(0f, -this.floaterParticleBoxExtents.y, -this.floaterParticleBoxExtents.z);
 					}
 				}
-				if (this.IsValid(vector4))
+				if (this.IsValid(vector5))
 				{
-					this.underwaterFloaterParticles.transform.rotation = rotation2;
-					this.underwaterFloaterParticles.transform.position = vector4;
+					this.underwaterFloaterParticles.transform.rotation = quaternion;
+					this.underwaterFloaterParticles.transform.position = vector5;
 				}
 				else
 				{
@@ -64,16 +65,16 @@ namespace GorillaLocomotion.Swimming
 				}
 				if (this.debugDraw)
 				{
-					vector2 = vector + rotation * new Vector3(0f, this.floaterParticleBoxExtents.y, -this.floaterParticleBoxExtents.z);
-					vector3 = vector + rotation * new Vector3(0f, this.floaterParticleBoxExtents.y, this.floaterParticleBoxExtents.z);
-					DebugUtil.DrawSphere(vector2, 0.1f, 12, 12, Color.red, false, DebugUtil.Style.SolidColor);
+					vector3 = vector2 + rotation * new Vector3(0f, this.floaterParticleBoxExtents.y, -this.floaterParticleBoxExtents.z);
+					vector4 = vector2 + rotation * new Vector3(0f, this.floaterParticleBoxExtents.y, this.floaterParticleBoxExtents.z);
 					DebugUtil.DrawSphere(vector3, 0.1f, 12, 12, Color.red, false, DebugUtil.Style.SolidColor);
-					DebugUtil.DrawLine(vector2, vector3, Color.red, false);
-					vector2 = vector4 + rotation2 * new Vector3(0f, this.floaterParticleBoxExtents.y, -this.floaterParticleBoxExtents.z);
-					vector3 = vector4 + rotation2 * new Vector3(0f, this.floaterParticleBoxExtents.y, this.floaterParticleBoxExtents.z);
-					DebugUtil.DrawSphere(vector2, 0.1f, 12, 12, Color.green, false, DebugUtil.Style.SolidColor);
+					DebugUtil.DrawSphere(vector4, 0.1f, 12, 12, Color.red, false, DebugUtil.Style.SolidColor);
+					DebugUtil.DrawLine(vector3, vector4, Color.red, false);
+					vector3 = vector5 + quaternion * new Vector3(0f, this.floaterParticleBoxExtents.y, -this.floaterParticleBoxExtents.z);
+					vector4 = vector5 + quaternion * new Vector3(0f, this.floaterParticleBoxExtents.y, this.floaterParticleBoxExtents.z);
 					DebugUtil.DrawSphere(vector3, 0.1f, 12, 12, Color.green, false, DebugUtil.Style.SolidColor);
-					DebugUtil.DrawLine(vector2, vector3, Color.green, false);
+					DebugUtil.DrawSphere(vector4, 0.1f, 12, 12, Color.green, false, DebugUtil.Style.SolidColor);
+					DebugUtil.DrawLine(vector3, vector4, Color.green, false);
 					return;
 				}
 			}

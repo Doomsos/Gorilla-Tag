@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage(64)]
 public class OnExitPlay_Run : OnExitPlay_Attribute
 {
 	public override void OnEnterPlay(MethodInfo method)

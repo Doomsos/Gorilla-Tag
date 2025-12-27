@@ -17,9 +17,9 @@ internal class VirtualStumpSerializer : GorillaSerializer
 
 	protected void Start()
 	{
-		NetworkSystem.Instance.OnMultiplayerStarted += this.OnJoinedRoom;
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnLeftRoom;
-		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnJoinedRoom);
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnLeftRoom);
+		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeftRoom);
 	}
 
 	private void OnPlayerLeftRoom(NetPlayer leavingPlayer)

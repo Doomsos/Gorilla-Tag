@@ -6,7 +6,7 @@ namespace GorillaTag.GuidedRefs
 {
 	public static class GRef
 	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool ShouldResolveNow(GRef.EResolveModes mode)
 		{
 			return Application.isPlaying && (mode & GRef.EResolveModes.Runtime) == GRef.EResolveModes.Runtime;

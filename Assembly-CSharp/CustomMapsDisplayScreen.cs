@@ -86,8 +86,8 @@ public class CustomMapsDisplayScreen : CustomMapsTerminalScreen
 	{
 		if (base.isActiveAndEnabled && this.hasModProfile && this.GetModId() == mod.Id)
 		{
-			this.UpdateStatus(jobPhase == ModInstallationManagement.OperationPhase.Cancelled || jobPhase == ModInstallationManagement.OperationPhase.Failed);
-			if (jobPhase == ModInstallationManagement.OperationPhase.Failed)
+			this.UpdateStatus(jobPhase == 3 || jobPhase == 4);
+			if (jobPhase == 4)
 			{
 				this.modDescriptionText.gameObject.SetActive(false);
 				this.loadingMapLabelText.text = this.mapLoadingErrorString;
@@ -165,7 +165,8 @@ public class CustomMapsDisplayScreen : CustomMapsTerminalScreen
 		this.loadingText.gameObject.SetActive(true);
 		if (CustomMapLoader.IsMapLoaded() || CustomMapManager.IsLoading() || CustomMapManager.IsUnloading())
 		{
-			ModId modId = new ModId(CustomMapLoader.IsMapLoaded() ? CustomMapLoader.LoadedMapModId : (CustomMapManager.IsLoading() ? CustomMapManager.LoadingMapId : CustomMapManager.UnloadingMapId));
+			ModId modId;
+			modId..ctor(CustomMapLoader.IsMapLoaded() ? CustomMapLoader.LoadedMapModId : (CustomMapManager.IsLoading() ? CustomMapManager.LoadingMapId : CustomMapManager.UnloadingMapId));
 			if (this.hasModProfile && this.GetModId() == modId)
 			{
 				this.UpdateMapDetails(true);
@@ -233,7 +234,8 @@ public class CustomMapsDisplayScreen : CustomMapsTerminalScreen
 			}
 			if (CustomMapLoader.IsMapLoaded())
 			{
-				ModId modId = new ModId(CustomMapLoader.LoadedMapModId);
+				ModId modId;
+				modId..ctor(CustomMapLoader.LoadedMapModId);
 				if (this.GetModId() == modId)
 				{
 					this.OnMapLoadComplete_UIUpdate();

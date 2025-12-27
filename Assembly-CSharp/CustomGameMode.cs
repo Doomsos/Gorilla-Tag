@@ -49,10 +49,10 @@ public sealed class CustomGameMode : GorillaGameManager
 		{
 			return 0;
 		}
-		IntPtr value;
-		if (Bindings.LuauPlayerList.TryGetValue(forPlayer.ActorNumber, out value))
+		IntPtr intPtr;
+		if (Bindings.LuauPlayerList.TryGetValue(forPlayer.ActorNumber, ref intPtr))
 		{
-			return ((Bindings.LuauPlayer*)((void*)value))->PlayerMaterial;
+			return ((Bindings.LuauPlayer*)((void*)intPtr))->PlayerMaterial;
 		}
 		return 0;
 	}
@@ -149,9 +149,9 @@ public sealed class CustomGameMode : GorillaGameManager
 						Bindings.LuauPlayer* ptr = (Bindings.LuauPlayer*)((void*)keyValuePair.Value);
 						ptr->IsMasterClient = false;
 					}
-					IntPtr value;
-					Bindings.LuauPlayerList.TryGetValue(newMasterClient.ActorNumber, out value);
-					Bindings.LuauPlayer* ptr2 = (Bindings.LuauPlayer*)((void*)value);
+					IntPtr intPtr;
+					Bindings.LuauPlayerList.TryGetValue(newMasterClient.ActorNumber, ref intPtr);
+					Bindings.LuauPlayer* ptr2 = (Bindings.LuauPlayer*)((void*)intPtr);
 					ptr2->IsMasterClient = true;
 				}
 			}
@@ -172,14 +172,14 @@ public sealed class CustomGameMode : GorillaGameManager
 		{
 			return;
 		}
-		object[] item = new object[]
+		object[] array = new object[]
 		{
 			"playerHit",
 			(double)entity.GetNetId(),
 			(double)hitPlayer,
 			(double)damage
 		};
-		LuauVm.eventQueue.Enqueue(item);
+		LuauVm.eventQueue.Enqueue(array);
 	}
 
 	public static void TaggedByAI(GameEntity entity, int taggedPlayer)
@@ -192,13 +192,13 @@ public sealed class CustomGameMode : GorillaGameManager
 		{
 			return;
 		}
-		object[] item = new object[]
+		object[] array = new object[]
 		{
 			"taggedByAI",
 			(double)entity.GetNetId(),
 			(double)taggedPlayer
 		};
-		LuauVm.eventQueue.Enqueue(item);
+		LuauVm.eventQueue.Enqueue(array);
 	}
 
 	public override void HitPlayer(NetPlayer taggedPlayer)
@@ -222,20 +222,20 @@ public sealed class CustomGameMode : GorillaGameManager
 		}
 		if (isGrabbed)
 		{
-			object[] item = new object[]
+			object[] array = new object[]
 			{
 				"entityGrabbed",
 				(double)entity.GetNetId()
 			};
-			LuauVm.localEventQueue.Enqueue(item);
+			LuauVm.localEventQueue.Enqueue(array);
 			return;
 		}
-		object[] item2 = new object[]
+		object[] array2 = new object[]
 		{
 			"entityReleased",
 			(double)entity.GetNetId()
 		};
-		LuauVm.localEventQueue.Enqueue(item2);
+		LuauVm.localEventQueue.Enqueue(array2);
 	}
 
 	public unsafe static void OnGameEntityRemoved(GameEntity entity)
@@ -267,12 +267,12 @@ public sealed class CustomGameMode : GorillaGameManager
 				}
 			}
 			Luau.lua_pop(l, 1);
-			object[] item = new object[]
+			object[] array = new object[]
 			{
 				"agentDestroyed",
 				(double)entity.id.index
 			};
-			LuauVm.localEventQueue.Enqueue(item);
+			LuauVm.localEventQueue.Enqueue(array);
 			return;
 		}
 		if (Bindings.LuauGrabbablesList.ContainsKey(entity.GetNetId()))
@@ -293,12 +293,12 @@ public sealed class CustomGameMode : GorillaGameManager
 				}
 			}
 			Luau.lua_pop(l, 1);
-			object[] item2 = new object[]
+			object[] array2 = new object[]
 			{
 				"entityDestroyed",
 				(double)entity.id.index
 			};
-			LuauVm.localEventQueue.Enqueue(item2);
+			LuauVm.localEventQueue.Enqueue(array2);
 		}
 	}
 
@@ -493,12 +493,12 @@ public sealed class CustomGameMode : GorillaGameManager
 		{
 			return;
 		}
-		object[] item = new object[]
+		object[] array = new object[]
 		{
 			"touchedPlayer",
 			touchedPlayer.GetPlayerRef()
 		};
-		LuauVm.localEventQueue.Enqueue(item);
+		LuauVm.localEventQueue.Enqueue(array);
 	}
 
 	public static void TaggedByEnvironment()
@@ -513,8 +513,8 @@ public sealed class CustomGameMode : GorillaGameManager
 		}
 		object[] array = new object[2];
 		array[0] = "taggedByEnvironment";
-		object[] item = array;
-		LuauVm.localEventQueue.Enqueue(item);
+		object[] array2 = array;
+		LuauVm.localEventQueue.Enqueue(array2);
 	}
 
 	[MonoPInvokeCallback(typeof(lua_CFunction))]
@@ -573,7 +573,7 @@ public sealed class CustomGameMode : GorillaGameManager
 					Transform transform = key.transform;
 					Bindings.LuauGameObject* ptr = (Bindings.LuauGameObject*)((void*)keyValuePair.Value);
 					Vector3 position = ptr->Position;
-					position = new Vector3((float)Math.Round((double)position.x, 4), (float)Math.Round((double)position.y, 4), (float)Math.Round((double)position.z, 4));
+					position..ctor((float)Math.Round((double)position.x, 4), (float)Math.Round((double)position.y, 4), (float)Math.Round((double)position.z, 4));
 					transform.SetPositionAndRotation(position, ptr->Rotation);
 					transform.localScale = ptr->Scale;
 				}
@@ -596,7 +596,7 @@ public sealed class CustomGameMode : GorillaGameManager
 			{
 				Bindings.LuauPlayer* ptr = (Bindings.LuauPlayer*)((void*)keyValuePair.Value);
 				VRRig vrrig;
-				Bindings.LuauVRRigList.TryGetValue(keyValuePair.Key, out vrrig);
+				Bindings.LuauVRRigList.TryGetValue(keyValuePair.Key, ref vrrig);
 				if (!vrrig.IsNotNull())
 				{
 					LuauHud.Instance.LuauLog("Unknown Rig for player");
@@ -627,7 +627,7 @@ public sealed class CustomGameMode : GorillaGameManager
 			for (;;)
 			{
 				int num2 = num;
-				int? num3 = (list2 != null) ? new int?(list2.Count) : null;
+				int? num3 = (list2 != null) ? new int?(list2.Count) : default(int?);
 				if (!(num2 < num3.GetValueOrDefault() & num3 != null))
 				{
 					break;
@@ -635,10 +635,10 @@ public sealed class CustomGameMode : GorillaGameManager
 				GameAgent gameAgent = list2[num];
 				if (!gameAgent.IsNull() && !gameAgent.entity.IsNull())
 				{
-					IntPtr value;
-					if (Bindings.LuauAIAgentList.TryGetValue(gameAgent.entity.GetNetId(), out value))
+					IntPtr intPtr;
+					if (Bindings.LuauAIAgentList.TryGetValue(gameAgent.entity.GetNetId(), ref intPtr))
 					{
-						Bindings.AIAgentFunctions.UpdateEntity(gameAgent.entity, (Bindings.LuauAIAgent*)((void*)value));
+						Bindings.AIAgentFunctions.UpdateEntity(gameAgent.entity, (Bindings.LuauAIAgent*)((void*)intPtr));
 					}
 					else if (Bindings.LuauAIAgentList.Count + Bindings.LuauGrabbablesList.Count == Constants.aiAgentLimit)
 					{
@@ -663,7 +663,7 @@ public sealed class CustomGameMode : GorillaGameManager
 					Transform transform = key.transform;
 					Bindings.LuauGameObject* ptr3 = (Bindings.LuauGameObject*)((void*)keyValuePair2.Value);
 					Vector3 position = transform.position;
-					position = new Vector3((float)Math.Round((double)position.x, 4), (float)Math.Round((double)position.y, 4), (float)Math.Round((double)position.z, 4));
+					position..ctor((float)Math.Round((double)position.x, 4), (float)Math.Round((double)position.y, 4), (float)Math.Round((double)position.z, 4));
 					ptr3->Position = position;
 					ptr3->Rotation = transform.rotation;
 					ptr3->Scale = transform.localScale;

@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace UniLabs.Time
 {
-	[AttributeUsage(AttributeTargets.All)]
+	[AttributeUsage(32767)]
 	[Conditional("UNITY_EDITOR")]
 	public class TimeSpanRangeAttribute : Attribute
 	{

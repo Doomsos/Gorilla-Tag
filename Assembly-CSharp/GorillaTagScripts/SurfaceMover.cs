@@ -40,8 +40,10 @@ namespace GorillaTagScripts
 				this.cycleDuration += this.cycleDelay;
 			}
 			float num2 = this.cycleDelay / this.cycleDuration;
-			Vector2 vector = new Vector2(num2 / 2f, 0f);
-			Vector2 vector2 = new Vector2(1f - num2 / 2f, 1f);
+			Vector2 vector;
+			vector..ctor(num2 / 2f, 0f);
+			Vector2 vector2;
+			vector2..ctor(1f - num2 / 2f, 1f);
 			float num3 = (vector2.y - vector.y) / (vector2.x - vector.x);
 			this.lerpAlpha = new AnimationCurve(new Keyframe[]
 			{
@@ -118,8 +120,8 @@ namespace GorillaTagScripts
 
 		private Vector3 UpdatePointToPoint(float perc)
 		{
-			float t = this.lerpAlpha.Evaluate(perc);
-			return Vector3.Lerp(this.startXf.localPosition, this.endXf.localPosition, t);
+			float num = this.lerpAlpha.Evaluate(perc);
+			return Vector3.Lerp(this.startXf.localPosition, this.endXf.localPosition, num);
 		}
 
 		private void UpdateRotation(float perc)
@@ -127,20 +129,20 @@ namespace GorillaTagScripts
 			float num = this.lerpAlpha.Evaluate(perc) * this.rotationAmount;
 			if (this.rotationRelativeToStarting)
 			{
-				Vector3 euler = this.startingRotation;
+				Vector3 vector = this.startingRotation;
 				switch (this.rotationAxis)
 				{
 				case RotationAxis.X:
-					euler.x += num;
+					vector.x += num;
 					break;
 				case RotationAxis.Y:
-					euler.y += num;
+					vector.y += num;
 					break;
 				case RotationAxis.Z:
-					euler.z += num;
+					vector.z += num;
 					break;
 				}
-				base.transform.localRotation = Quaternion.Euler(euler);
+				base.transform.localRotation = Quaternion.Euler(vector);
 				return;
 			}
 			switch (this.rotationAxis)
@@ -176,7 +178,7 @@ namespace GorillaTagScripts
 
 		public void CopySettings(SurfaceMoverSettings settings)
 		{
-			this.moveType = (BuilderMovingPart.BuilderMovingPartType)settings.moveType;
+			this.moveType = settings.moveType;
 			this.startPercentage = 0f;
 			this.velocity = Math.Clamp(settings.velocity, 0.001f, Math.Abs(settings.velocity));
 			this.reverseDirOnCycle = settings.reverseDirOnCycle;
@@ -184,7 +186,7 @@ namespace GorillaTagScripts
 			this.cycleDelay = Math.Clamp(settings.cycleDelay, 0f, Math.Abs(settings.cycleDelay));
 			this.startXf = settings.start;
 			this.endXf = settings.end;
-			this.rotationAxis = (RotationAxis)settings.rotationAxis;
+			this.rotationAxis = settings.rotationAxis;
 			this.rotationAmount = Math.Clamp(settings.rotationAmount, 0.001f, Math.Abs(settings.rotationAmount));
 			this.rotationRelativeToStarting = settings.rotationRelativeToStarting;
 		}

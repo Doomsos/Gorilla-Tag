@@ -78,7 +78,7 @@ public class BuilderSetSelector : MonoBehaviour
 		GorillaPressableButton[] array = this.groupButtons;
 		for (int i = 0; i < array.Length; i++)
 		{
-			array[i].onPressed += this.OnSetButtonPressed;
+			array[i].onPressed += new Action<GorillaPressableButton, bool>(this.OnSetButtonPressed);
 		}
 		this.UpdateLabels();
 	}
@@ -102,7 +102,7 @@ public class BuilderSetSelector : MonoBehaviour
 		{
 			if (!(gorillaPressableButton == null))
 			{
-				gorillaPressableButton.onPressed -= this.OnSetButtonPressed;
+				gorillaPressableButton.onPressed -= new Action<GorillaPressableButton, bool>(this.OnSetButtonPressed);
 			}
 		}
 		if (ZoneManagement.instance != null)
@@ -170,16 +170,16 @@ public class BuilderSetSelector : MonoBehaviour
 		List<BuilderPieceSet.BuilderDisplayGroup> liveDisplayGroups = BuilderSetManager.instance.GetLiveDisplayGroups();
 		if (liveDisplayGroups.Count != this.numLiveDisplayGroups)
 		{
-			string value = (this.currentGroup != null) ? this.currentGroup.displayName : "";
+			string text = (this.currentGroup != null) ? this.currentGroup.displayName : "";
 			this.numLiveDisplayGroups = liveDisplayGroups.Count;
-			this.includedGroups.EnsureCapacity(this.numLiveDisplayGroups);
+			ListExtensions.EnsureCapacity<BuilderPieceSet.BuilderDisplayGroup>(this.includedGroups, this.numLiveDisplayGroups);
 			this.includedGroups.Clear();
 			int num = 0;
 			foreach (BuilderPieceSet.BuilderDisplayGroup builderDisplayGroup in liveDisplayGroups)
 			{
 				if (this.DoesDisplayGroupHaveIncludedCategories(builderDisplayGroup))
 				{
-					if (builderDisplayGroup.displayName.Equals(value))
+					if (builderDisplayGroup.displayName.Equals(text))
 					{
 						num = this.includedGroups.Count;
 					}

@@ -19,7 +19,7 @@ namespace GorillaNetworking.Store
 		bool IBuildValidation.BuildValidationCheck()
 		{
 			ICreatorCodeProvider creatorCodeProvider;
-			if (this.creatorCodeProvider == null || !this.creatorCodeProvider.TryGetComponent<ICreatorCodeProvider>(out creatorCodeProvider))
+			if (this.creatorCodeProvider == null || !this.creatorCodeProvider.TryGetComponent<ICreatorCodeProvider>(ref creatorCodeProvider))
 			{
 				Debug.LogError(base.name + " has no Creator Code Provider. This will break bundle purchasing.");
 				return false;

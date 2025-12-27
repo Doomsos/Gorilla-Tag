@@ -55,7 +55,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 			Action onProgressionUpdated = this.OnProgressionUpdated;
 			if (onProgressionUpdated != null)
 			{
-				onProgressionUpdated();
+				onProgressionUpdated.Invoke();
 			}
 			this.sendUpdate = false;
 		}
@@ -79,7 +79,7 @@ public class GRToolProgressionManager : MonoBehaviourTick
 	public GRToolProgressionManager.ToolProgressionMetaData GetPartMetadata(GRToolProgressionManager.ToolParts part)
 	{
 		GRToolProgressionManager.ToolProgressionMetaData result;
-		this.partMetadata.TryGetValue(part, out result);
+		this.partMetadata.TryGetValue(part, ref result);
 		return result;
 	}
 

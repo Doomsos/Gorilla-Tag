@@ -5,9 +5,9 @@ public class CosmeticCritterSpawnerShadeHidden : CosmeticCritterSpawnerTimed
 {
 	public override void SetRandomVariables(CosmeticCritter critter)
 	{
-		float y = Random.Range(this.orbitHeightOffsetMinMax.x, this.orbitHeightOffsetMinMax.y);
+		float num = Random.Range(this.orbitHeightOffsetMinMax.x, this.orbitHeightOffsetMinMax.y);
 		float radius = Random.Range(this.orbitRadiusMinMax.x, this.orbitRadiusMinMax.y);
-		(critter as CosmeticCritterShadeHidden).SetCenterAndRadius(base.transform.position + new Vector3(0f, y, 0f), radius);
+		(critter as CosmeticCritterShadeHidden).SetCenterAndRadius(base.transform.position + new Vector3(0f, num, 0f), radius);
 	}
 
 	[Tooltip("Add between X and Y extra height to the base orbit height.")]

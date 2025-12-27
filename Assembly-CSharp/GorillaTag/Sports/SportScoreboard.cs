@@ -194,7 +194,7 @@ namespace GorillaTag.Sports
 		[WeaverGenerated]
 		[SerializeField]
 		[DefaultForProperty("Data", 0, 2)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+		[DrawIf("IsEditorWritable", true, 0, 0)]
 		private int[] _Data;
 
 		[Serializable]

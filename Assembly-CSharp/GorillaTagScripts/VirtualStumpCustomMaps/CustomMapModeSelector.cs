@@ -23,8 +23,8 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 				GorillaComputer.instance.SetGameModeWithoutButton(CustomMapModeSelector.defaultGamemodeForLoadedMap.ToString());
 			}
 			RoomSystem.JoinedRoomEvent += new Action(this.OnJoinedRoom);
-			NetworkSystem.Instance.OnMasterClientSwitchedEvent += this.OnRoomHostSwitched;
-			NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnDisconnected;
+			NetworkSystem.Instance.OnMasterClientSwitchedEvent += new Action<NetPlayer>(this.OnRoomHostSwitched);
+			NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnDisconnected);
 			this.roomHostDescriptionText.SetActive(false);
 			this.roomHostText.gameObject.SetActive(false);
 			if (NetworkSystem.Instance.InRoom && NetworkSystem.Instance.SessionIsPrivate)
@@ -36,8 +36,8 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 		public void OnDisable()
 		{
 			RoomSystem.JoinedRoomEvent -= new Action(this.OnJoinedRoom);
-			NetworkSystem.Instance.OnMasterClientSwitchedEvent -= this.OnRoomHostSwitched;
-			NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnDisconnected;
+			NetworkSystem.Instance.OnMasterClientSwitchedEvent -= new Action<NetPlayer>(this.OnRoomHostSwitched);
+			NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnDisconnected);
 		}
 
 		private void OnJoinedRoom()
@@ -81,10 +81,9 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 
 		public static void ResetButtons()
 		{
-			CustomMapModeSelector.gamemodes = new List<GameModeType>
-			{
-				GameModeType.Casual
-			};
+			List<GameModeType> list = new List<GameModeType>();
+			list.Add(GameModeType.Casual);
+			CustomMapModeSelector.gamemodes = list;
 			CustomMapModeSelector.defaultGamemodeForLoadedMap = GameModeType.Casual;
 			foreach (CustomMapModeSelector customMapModeSelector in CustomMapModeSelector.instances)
 			{
@@ -99,9 +98,9 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			CustomMapModeSelector.gamemodes.Add(GameModeType.Casual);
 			if (availableModes != null)
 			{
-				foreach (int item in availableModes)
+				foreach (int num in availableModes)
 				{
-					CustomMapModeSelector.gamemodes.Add((GameModeType)item);
+					CustomMapModeSelector.gamemodes.Add((GameModeType)num);
 				}
 			}
 			CustomMapModeSelector.defaultGamemodeForLoadedMap = (GameModeType)defaultMode;
@@ -129,6 +128,17 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 		}
 
+		// Note: this type is marked as 'beforefieldinit'.
+		static CustomMapModeSelector()
+		{
+			List<GameModeType> list = new List<GameModeType>();
+			list.Add(GameModeType.Casual);
+			CustomMapModeSelector.gamemodes = list;
+			CustomMapModeSelector.defaultGamemodeForLoadedMap = GameModeType.Casual;
+			CustomMapModeSelector.instances = new List<CustomMapModeSelector>();
+			CustomMapModeSelector.reusableString = "";
+		}
+
 		[SerializeField]
 		private TMP_Text roomHostText;
 
@@ -141,15 +151,12 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 		[SerializeField]
 		private string roomHostLabel = "ROOM HOST: ";
 
-		private static List<GameModeType> gamemodes = new List<GameModeType>
-		{
-			GameModeType.Casual
-		};
+		private static List<GameModeType> gamemodes;
 
-		private static GameModeType defaultGamemodeForLoadedMap = GameModeType.Casual;
+		private static GameModeType defaultGamemodeForLoadedMap;
 
-		private static List<CustomMapModeSelector> instances = new List<CustomMapModeSelector>();
+		private static List<CustomMapModeSelector> instances;
 
-		private static string reusableString = "";
+		private static string reusableString;
 	}
 }

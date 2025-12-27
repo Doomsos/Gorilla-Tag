@@ -21,13 +21,13 @@ public class GameModeSpecificObjectRegistry : MonoBehaviour
 
 	private void GameModeSpecificObject_OnAwake(GameModeSpecificObject obj)
 	{
-		foreach (GameModeType key in obj.GameModes)
+		foreach (GameModeType gameModeType in obj.GameModes)
 		{
-			if (!this.gameModeSpecificObjects.ContainsKey(key))
+			if (!this.gameModeSpecificObjects.ContainsKey(gameModeType))
 			{
-				this.gameModeSpecificObjects.Add(key, new List<GameModeSpecificObject>());
+				this.gameModeSpecificObjects.Add(gameModeType, new List<GameModeSpecificObject>());
 			}
-			this.gameModeSpecificObjects[key].Add(obj);
+			this.gameModeSpecificObjects[gameModeType].Add(obj);
 		}
 		if (GameMode.ActiveGameMode == null)
 		{
@@ -39,11 +39,11 @@ public class GameModeSpecificObjectRegistry : MonoBehaviour
 
 	private void GameModeSpecificObject_OnDestroyed(GameModeSpecificObject obj)
 	{
-		foreach (GameModeType key in obj.GameModes)
+		foreach (GameModeType gameModeType in obj.GameModes)
 		{
-			if (this.gameModeSpecificObjects.ContainsKey(key))
+			if (this.gameModeSpecificObjects.ContainsKey(gameModeType))
 			{
-				this.gameModeSpecificObjects[key].Remove(obj);
+				this.gameModeSpecificObjects[gameModeType].Remove(obj);
 			}
 		}
 	}

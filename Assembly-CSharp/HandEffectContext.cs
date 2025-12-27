@@ -141,7 +141,7 @@ internal class HandEffectContext : IFXEffectContextObject
 			{
 				return;
 			}
-			action(this);
+			action.Invoke(this);
 			return;
 		}
 		else
@@ -151,7 +151,7 @@ internal class HandEffectContext : IFXEffectContextObject
 			{
 				return;
 			}
-			action2(this);
+			action2.Invoke(this);
 			return;
 		}
 	}
@@ -159,7 +159,7 @@ internal class HandEffectContext : IFXEffectContextObject
 	public void OnPlayVisualFX(int fxID, GameObject fx)
 	{
 		FXModifier fxmodifier;
-		if (fx.TryGetComponent<FXModifier>(out fxmodifier))
+		if (fx.TryGetComponent<FXModifier>(ref fxmodifier))
 		{
 			fxmodifier.UpdateScale(this.soundVolume * ((fxID == GorillaAmbushManager.HandEffectHash) ? GorillaAmbushManager.HandFXScaleModifier : 1f), this.color);
 		}
@@ -169,11 +169,17 @@ internal class HandEffectContext : IFXEffectContextObject
 	{
 	}
 
-	internal List<int> prefabHashes = new List<int>
+	public HandEffectContext()
 	{
-		-1,
-		-1
-	};
+		List<int> list = new List<int>();
+		list.Add(-1);
+		list.Add(-1);
+		this.prefabHashes = list;
+		this.color = Color.white;
+		base..ctor();
+	}
+
+	internal List<int> prefabHashes;
 
 	internal Vector3 position;
 
@@ -181,7 +187,7 @@ internal class HandEffectContext : IFXEffectContextObject
 
 	internal float speed;
 
-	internal Color color = Color.white;
+	internal Color color;
 
 	[SerializeField]
 	internal AudioSource handSoundSource;

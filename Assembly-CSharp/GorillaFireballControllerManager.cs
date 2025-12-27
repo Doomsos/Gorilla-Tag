@@ -14,8 +14,8 @@ public class GorillaFireballControllerManager : MonoBehaviour
 			this.hasInitialized = true;
 			List<InputDevice> list = new List<InputDevice>();
 			List<InputDevice> list2 = new List<InputDevice>();
-			InputDevices.GetDevicesAtXRNode(XRNode.LeftHand, list);
-			InputDevices.GetDevicesAtXRNode(XRNode.RightHand, list2);
+			InputDevices.GetDevicesAtXRNode(4, list);
+			InputDevices.GetDevicesAtXRNode(5, list2);
 			if (list.Count == 1)
 			{
 				this.leftHand = list[0];
@@ -25,7 +25,7 @@ public class GorillaFireballControllerManager : MonoBehaviour
 				this.rightHand = list2[0];
 			}
 		}
-		float axis = SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(SteamVR_Input_Sources.LeftHand);
+		float axis = SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(1);
 		if (this.leftHandLastState <= this.throwingThreshold && axis > this.throwingThreshold)
 		{
 			this.CreateFireball(true);
@@ -35,7 +35,7 @@ public class GorillaFireballControllerManager : MonoBehaviour
 			this.TryThrowFireball(true);
 		}
 		this.leftHandLastState = axis;
-		axis = SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(SteamVR_Input_Sources.RightHand);
+		axis = SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(2);
 		if (this.rightHandLastState <= this.throwingThreshold && axis > this.throwingThreshold)
 		{
 			this.CreateFireball(false);

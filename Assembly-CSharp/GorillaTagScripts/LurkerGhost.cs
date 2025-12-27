@@ -54,14 +54,14 @@ namespace GorillaTagScripts
 				this.waypoints.Clear();
 				foreach (object obj in zoneBasedObject.transform)
 				{
-					Transform item = (Transform)obj;
-					this.waypoints.Add(item);
+					Transform transform = (Transform)obj;
+					this.waypoints.Add(transform);
 				}
 			}
-			int index = Random.Range(0, this.waypoints.Count);
-			this.currentWaypoint = this.waypoints[index];
+			int num = Random.Range(0, this.waypoints.Count);
+			this.currentWaypoint = this.waypoints[num];
 			this.targetRotation = Quaternion.LookRotation(this.currentWaypoint.position - base.transform.position);
-			this.waypoints.RemoveAt(index);
+			this.waypoints.RemoveAt(num);
 		}
 
 		private void Patrol()
@@ -105,8 +105,8 @@ namespace GorillaTagScripts
 				this.targetVRRig = null;
 				if (this.possibleTargets.Count > 0)
 				{
-					int index = Random.Range(0, this.possibleTargets.Count);
-					this.PickPlayer(this.possibleTargets[index]);
+					int num = Random.Range(0, this.possibleTargets.Count);
+					this.PickPlayer(this.possibleTargets[num]);
 				}
 			}
 			else
@@ -193,7 +193,7 @@ namespace GorillaTagScripts
 					UnityAction<GameObject> triggerHauntedObjects = this.TriggerHauntedObjects;
 					if (triggerHauntedObjects != null)
 					{
-						triggerHauntedObjects(array[i].gameObject);
+						triggerHauntedObjects.Invoke(array[i].gameObject);
 					}
 				}
 			}
@@ -296,9 +296,9 @@ namespace GorillaTagScripts
 				{
 					float num = this.SpookyMagicNumbers.x + MathF.Abs(MathF.Sin(Time.time * this.SpookyMagicNumbers.y));
 					float num2 = this.HauntedMagicNumbers.x * MathF.Sin(Time.time * this.HauntedMagicNumbers.y) + this.HauntedMagicNumbers.z * MathF.Sin(Time.time * this.HauntedMagicNumbers.w);
-					float y = 0.5f + 0.5f * MathF.Sin(Time.time * this.SpookyMagicNumbers.z);
-					Vector3 target = this.targetTransform.position + new Vector3(num * (float)Math.Sin((double)num2), y, num * (float)Math.Cos((double)num2));
-					base.transform.position = Vector3.MoveTowards(base.transform.position, target, this.chargeSpeed);
+					float num3 = 0.5f + 0.5f * MathF.Sin(Time.time * this.SpookyMagicNumbers.z);
+					Vector3 vector = this.targetTransform.position + new Vector3(num * (float)Math.Sin((double)num2), num3, num * (float)Math.Cos((double)num2));
+					base.transform.position = Vector3.MoveTowards(base.transform.position, vector, this.chargeSpeed);
 					base.transform.rotation = Quaternion.LookRotation(base.transform.position - this.targetTransform.position);
 				}
 				if (base.IsMine)
@@ -564,7 +564,7 @@ namespace GorillaTagScripts
 
 		[WeaverGenerated]
 		[DefaultForProperty("Data", 0, 6)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+		[DrawIf("IsEditorWritable", true, 0, 0)]
 		private LurkerGhost.LurkerGhostData _Data;
 
 		private enum ghostState
@@ -576,7 +576,7 @@ namespace GorillaTagScripts
 		}
 
 		[NetworkStructWeaved(6)]
-		[StructLayout(LayoutKind.Explicit, Size = 24)]
+		[StructLayout(2, Size = 24)]
 		private struct LurkerGhostData : INetworkStruct
 		{
 			public LurkerGhost.ghostState CurrentState { readonly get; set; }

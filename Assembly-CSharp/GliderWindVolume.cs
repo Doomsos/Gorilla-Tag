@@ -22,9 +22,9 @@ public class GliderWindVolume : MonoBehaviour
 	public Vector3 GetAccelFromVelocity(Vector3 velocity)
 	{
 		Vector3 windDirection = this.WindDirection;
-		float time = Mathf.Clamp(Vector3.Dot(velocity, windDirection), -this.maxSpeed, this.maxSpeed) / this.maxSpeed;
-		float d = this.speedVsAccelCurve.Evaluate(time) * this.maxAccel;
-		return windDirection * d;
+		float num = Mathf.Clamp(Vector3.Dot(velocity, windDirection), -this.maxSpeed, this.maxSpeed) / this.maxSpeed;
+		float num2 = this.speedVsAccelCurve.Evaluate(num) * this.maxAccel;
+		return windDirection * num2;
 	}
 
 	[SerializeField]

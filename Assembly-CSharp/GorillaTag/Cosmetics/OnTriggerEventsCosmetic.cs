@@ -125,8 +125,8 @@ namespace GorillaTag.Cosmetics
 				return;
 			}
 			int layer = other.gameObject.layer;
-			bool arg = this.parentTransferable && this.parentTransferable.InLeftHand();
-			Vector3 position = (this.myCollider != null) ? this.myCollider.bounds.center : base.transform.position;
+			bool flag = this.parentTransferable && this.parentTransferable.InLeftHand();
+			Vector3 vector = (this.myCollider != null) ? this.myCollider.bounds.center : base.transform.position;
 			foreach (OnTriggerEventsCosmetic.Listener listener in listeners)
 			{
 				if ((listener.syncForEveryoneInRoom || this.IsMyItem()) && (!listener.fireOnlyWhileHeld || !this.parentTransferable || this.parentTransferable.InHand()) && (listener.tagSet == null || listener.tagSet.Count <= 0 || OnTriggerEventsCosmetic.CompareTagAny(other.gameObject, listener.tagSet)) && (1 << layer & listener.triggerLayerMask.value) != 0)
@@ -134,13 +134,13 @@ namespace GorillaTag.Cosmetics
 					UnityEvent<bool, Collider> listenerComponent = listener.listenerComponent;
 					if (listenerComponent != null)
 					{
-						listenerComponent.Invoke(arg, other);
+						listenerComponent.Invoke(flag, other);
 					}
-					Vector3 arg2 = other.ClosestPoint(position);
+					Vector3 vector2 = other.ClosestPoint(vector);
 					UnityEvent<Vector3> listenerComponentContactPoint = listener.listenerComponentContactPoint;
 					if (listenerComponentContactPoint != null)
 					{
-						listenerComponentContactPoint.Invoke(arg2);
+						listenerComponentContactPoint.Invoke(vector2);
 					}
 					VRRig componentInParent = other.GetComponentInParent<VRRig>();
 					if (componentInParent != null)

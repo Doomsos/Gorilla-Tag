@@ -21,8 +21,8 @@ public class BuilderPortraitEyes : MonoBehaviour, IGorillaSliceableSimple
 		{
 			return;
 		}
-		Vector3 b = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(GorillaTagger.Instance.headCollider.transform.position - this.eyeCenter.position, this.eyeCenter.forward), this.moveRadius * this.scale);
-		this.eyes.transform.position = this.eyeCenter.position + b;
+		Vector3 vector = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(GorillaTagger.Instance.headCollider.transform.position - this.eyeCenter.position, this.eyeCenter.forward), this.moveRadius * this.scale);
+		this.eyes.transform.position = this.eyeCenter.position + vector;
 	}
 
 	[SerializeField]

@@ -5,7 +5,7 @@ using UnityEngine;
 
 [NetworkStructWeaved(37)]
 [Serializable]
-[StructLayout(LayoutKind.Explicit, Size = 148)]
+[StructLayout(2, Size = 148)]
 public struct InputStruct : INetworkStruct
 {
 	[FieldOffset(0)]

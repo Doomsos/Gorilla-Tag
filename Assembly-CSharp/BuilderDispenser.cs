@@ -115,9 +115,9 @@ public class BuilderDispenser : MonoBehaviour
 			else
 			{
 				Vector3 desiredShelfOffset = this.pieceToSpawn.piecePrefab.desiredShelfOffset;
-				Vector3 position = this.displayTransform.position + this.displayTransform.rotation * desiredShelfOffset;
-				Quaternion rotation = this.displayTransform.rotation * Quaternion.Euler(this.pieceToSpawn.piecePrefab.desiredShelfRotationOffset);
-				this.spawnedPieceInstance.transform.SetPositionAndRotation(position, rotation);
+				Vector3 vector = this.displayTransform.position + this.displayTransform.rotation * desiredShelfOffset;
+				Quaternion quaternion = this.displayTransform.rotation * Quaternion.Euler(this.pieceToSpawn.piecePrefab.desiredShelfRotationOffset);
+				this.spawnedPieceInstance.transform.SetPositionAndRotation(vector, quaternion);
 				this.spawnedPieceInstance.SetState(BuilderPiece.State.OnShelf, false);
 				this.playFX = true;
 			}
@@ -136,9 +136,9 @@ public class BuilderDispenser : MonoBehaviour
 		{
 			this.spawnedPieceInstance.transform.SetParent(null);
 			Vector3 desiredShelfOffset = this.pieceToSpawn.piecePrefab.desiredShelfOffset;
-			Vector3 position = this.displayTransform.position + this.displayTransform.rotation * desiredShelfOffset;
-			Quaternion rotation = this.displayTransform.rotation * Quaternion.Euler(this.pieceToSpawn.piecePrefab.desiredShelfRotationOffset);
-			this.spawnedPieceInstance.transform.SetPositionAndRotation(position, rotation);
+			Vector3 vector = this.displayTransform.position + this.displayTransform.rotation * desiredShelfOffset;
+			Quaternion quaternion = this.displayTransform.rotation * Quaternion.Euler(this.pieceToSpawn.piecePrefab.desiredShelfRotationOffset);
+			this.spawnedPieceInstance.transform.SetPositionAndRotation(vector, quaternion);
 			this.spawnedPieceInstance.SetState(BuilderPiece.State.OnShelf, false);
 		}
 		yield break;

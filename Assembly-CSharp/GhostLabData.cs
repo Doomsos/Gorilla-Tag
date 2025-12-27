@@ -5,7 +5,7 @@ using Fusion.CodeGen;
 using UnityEngine;
 
 [NetworkStructWeaved(11)]
-[StructLayout(LayoutKind.Explicit, Size = 44)]
+[StructLayout(2, Size = 44)]
 public struct GhostLabData : INetworkStruct
 {
 	public int DoorState { readonly get; set; }
@@ -27,8 +27,8 @@ public struct GhostLabData : INetworkStruct
 		this.DoorState = state;
 		for (int i = 0; i < openDoors.Length; i++)
 		{
-			bool val = openDoors[i];
-			this.OpenDoors.Set(i, val);
+			bool flag = openDoors[i];
+			this.OpenDoors.Set(i, flag);
 		}
 	}
 

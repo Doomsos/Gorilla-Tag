@@ -10,7 +10,7 @@ public class LightningStrike : MonoBehaviour
 		this.ps = base.GetComponent<ParticleSystem>();
 		this.psMain = this.ps.main;
 		this.psMain.playOnAwake = true;
-		this.psMain.stopAction = ParticleSystemStopAction.Disable;
+		this.psMain.stopAction = 1;
 		this.psShape = this.ps.shape;
 		this.psTrails = this.ps.trails;
 		this.audioSource = base.GetComponent<AudioSource>();

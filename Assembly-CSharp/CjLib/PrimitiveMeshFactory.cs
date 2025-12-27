@@ -46,13 +46,13 @@ namespace CjLib
 				v0,
 				v1
 			};
-			int[] indices = new int[]
+			int[] array = new int[]
 			{
-				0,
+				default(int),
 				1
 			};
 			pooledLineMesh.vertices = vertices;
-			pooledLineMesh.SetIndices(indices, MeshTopology.Lines, 0);
+			pooledLineMesh.SetIndices(array, 3, 0);
 			pooledLineMesh.RecalculateBounds();
 			return pooledLineMesh;
 		}
@@ -74,7 +74,7 @@ namespace CjLib
 				array[i] = i;
 			}
 			pooledLineMesh.vertices = aVert;
-			pooledLineMesh.SetIndices(array, MeshTopology.Lines, 0);
+			pooledLineMesh.SetIndices(array, 3, 0);
 			return pooledLineMesh;
 		}
 
@@ -95,7 +95,7 @@ namespace CjLib
 				array[i] = i;
 			}
 			pooledLineMesh.vertices = aVert;
-			pooledLineMesh.SetIndices(array, MeshTopology.LineStrip, 0);
+			pooledLineMesh.SetIndices(array, 4, 0);
 			return pooledLineMesh;
 		}
 
@@ -115,7 +115,7 @@ namespace CjLib
 					new Vector3(0.5f, 0.5f, 0.5f),
 					new Vector3(0.5f, -0.5f, 0.5f)
 				};
-				int[] indices = new int[]
+				int[] array2 = new int[]
 				{
 					0,
 					1,
@@ -146,7 +146,7 @@ namespace CjLib
 				};
 				PrimitiveMeshFactory.s_boxWireframeMesh.vertices = array;
 				PrimitiveMeshFactory.s_boxWireframeMesh.normals = array;
-				PrimitiveMeshFactory.s_boxWireframeMesh.SetIndices(indices, MeshTopology.Lines, 0);
+				PrimitiveMeshFactory.s_boxWireframeMesh.SetIndices(array2, 3, 0);
 			}
 			return PrimitiveMeshFactory.s_boxWireframeMesh;
 		}
@@ -167,7 +167,7 @@ namespace CjLib
 					new Vector3(0.5f, 0.5f, 0.5f),
 					new Vector3(0.5f, -0.5f, 0.5f)
 				};
-				int[] indices = new int[]
+				int[] array = new int[]
 				{
 					0,
 					1,
@@ -207,7 +207,7 @@ namespace CjLib
 					4
 				};
 				PrimitiveMeshFactory.s_boxSolidColorMesh.vertices = vertices;
-				PrimitiveMeshFactory.s_boxSolidColorMesh.SetIndices(indices, MeshTopology.Triangles, 0);
+				PrimitiveMeshFactory.s_boxSolidColorMesh.SetIndices(array, 0, 0);
 			}
 			return PrimitiveMeshFactory.s_boxSolidColorMesh;
 		}
@@ -322,7 +322,7 @@ namespace CjLib
 				}
 				PrimitiveMeshFactory.s_boxFlatShadedMesh.vertices = array2;
 				PrimitiveMeshFactory.s_boxFlatShadedMesh.normals = normals;
-				PrimitiveMeshFactory.s_boxFlatShadedMesh.SetIndices(array4, MeshTopology.Triangles, 0);
+				PrimitiveMeshFactory.s_boxFlatShadedMesh.SetIndices(array4, 0, 0);
 			}
 			return PrimitiveMeshFactory.s_boxFlatShadedMesh;
 		}
@@ -339,7 +339,7 @@ namespace CjLib
 					new Vector3(0.5f, 0f, 0.5f),
 					new Vector3(0.5f, 0f, -0.5f)
 				};
-				int[] indices = new int[]
+				int[] array2 = new int[]
 				{
 					0,
 					1,
@@ -352,7 +352,7 @@ namespace CjLib
 				};
 				PrimitiveMeshFactory.s_rectWireframeMesh.vertices = array;
 				PrimitiveMeshFactory.s_rectWireframeMesh.normals = array;
-				PrimitiveMeshFactory.s_rectWireframeMesh.SetIndices(indices, MeshTopology.Lines, 0);
+				PrimitiveMeshFactory.s_rectWireframeMesh.SetIndices(array2, 3, 0);
 			}
 			return PrimitiveMeshFactory.s_rectWireframeMesh;
 		}
@@ -369,7 +369,7 @@ namespace CjLib
 					new Vector3(0.5f, 0f, 0.5f),
 					new Vector3(0.5f, 0f, -0.5f)
 				};
-				int[] indices = new int[]
+				int[] array = new int[]
 				{
 					0,
 					1,
@@ -385,7 +385,7 @@ namespace CjLib
 					2
 				};
 				PrimitiveMeshFactory.s_rectSolidColorMesh.vertices = vertices;
-				PrimitiveMeshFactory.s_rectSolidColorMesh.SetIndices(indices, MeshTopology.Triangles, 0);
+				PrimitiveMeshFactory.s_rectSolidColorMesh.SetIndices(array, 0, 0);
 			}
 			return PrimitiveMeshFactory.s_rectSolidColorMesh;
 		}
@@ -417,7 +417,7 @@ namespace CjLib
 					new Vector3(0f, -1f, 0f),
 					new Vector3(0f, -1f, 0f)
 				};
-				int[] indices = new int[]
+				int[] array = new int[]
 				{
 					0,
 					1,
@@ -434,7 +434,7 @@ namespace CjLib
 				};
 				PrimitiveMeshFactory.s_rectFlatShadedMesh.vertices = vertices;
 				PrimitiveMeshFactory.s_rectFlatShadedMesh.normals = normals;
-				PrimitiveMeshFactory.s_rectFlatShadedMesh.SetIndices(indices, MeshTopology.Triangles, 0);
+				PrimitiveMeshFactory.s_rectFlatShadedMesh.SetIndices(array, 0, 0);
 			}
 			return PrimitiveMeshFactory.s_rectFlatShadedMesh;
 		}
@@ -450,7 +450,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_circleWireframeMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_circleWireframeMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_circleWireframeMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments];
@@ -466,7 +466,7 @@ namespace CjLib
 				array2[numSegments] = 0;
 				mesh.vertices = array;
 				mesh.normals = array;
-				mesh.SetIndices(array2, MeshTopology.LineStrip, 0);
+				mesh.SetIndices(array2, 4, 0);
 				if (PrimitiveMeshFactory.s_circleWireframeMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_circleWireframeMeshPool.Remove(numSegments);
@@ -487,7 +487,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_circleSolidColorMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_circleSolidColorMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_circleSolidColorMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments + 1];
@@ -508,7 +508,7 @@ namespace CjLib
 				}
 				array[numSegments] = Vector3.zero;
 				mesh.vertices = array;
-				mesh.SetIndices(array2, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array2, 0, 0);
 				if (PrimitiveMeshFactory.s_circleSolidColorMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_circleSolidColorMeshPool.Remove(numSegments);
@@ -529,7 +529,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_circleFlatShadedMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_circleFlatShadedMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_circleFlatShadedMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[(numSegments + 1) * 2];
@@ -563,7 +563,7 @@ namespace CjLib
 				array2[numSegments * 2 + 1] = new Vector3(0f, -1f, 0f);
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array3, 0, 0);
 				if (PrimitiveMeshFactory.s_circleFlatShadedMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_circleFlatShadedMeshPool.Remove(numSegments);
@@ -584,21 +584,23 @@ namespace CjLib
 				PrimitiveMeshFactory.s_cylinderWireframeMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_cylinderWireframeMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_cylinderWireframeMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments * 2];
 				int[] array2 = new int[numSegments * 6];
-				Vector3 a = new Vector3(0f, -0.5f, 0f);
-				Vector3 a2 = new Vector3(0f, 0.5f, 0f);
+				Vector3 vector;
+				vector..ctor(0f, -0.5f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, 0.5f, 0f);
 				int num = 0;
 				float num2 = 6.2831855f / (float)numSegments;
 				float num3 = 0f;
 				for (int i = 0; i < numSegments; i++)
 				{
-					Vector3 b = Mathf.Cos(num3) * Vector3.right + Mathf.Sin(num3) * Vector3.forward;
-					array[i] = a + b;
-					array[numSegments + i] = a2 + b;
+					Vector3 vector3 = Mathf.Cos(num3) * Vector3.right + Mathf.Sin(num3) * Vector3.forward;
+					array[i] = vector + vector3;
+					array[numSegments + i] = vector2 + vector3;
 					array2[num++] = i;
 					array2[num++] = (i + 1) % numSegments;
 					array2[num++] = i;
@@ -609,7 +611,7 @@ namespace CjLib
 				}
 				mesh.vertices = array;
 				mesh.normals = array;
-				mesh.SetIndices(array2, MeshTopology.Lines, 0);
+				mesh.SetIndices(array2, 3, 0);
 				if (PrimitiveMeshFactory.s_cylinderWireframeMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_cylinderWireframeMeshPool.Remove(numSegments);
@@ -630,13 +632,15 @@ namespace CjLib
 				PrimitiveMeshFactory.s_cylinderSolidColorMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_cylinderSolidColorMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_cylinderSolidColorMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments * 2 + 2];
 				int[] array2 = new int[numSegments * 12];
-				Vector3 vector = new Vector3(0f, -0.5f, 0f);
-				Vector3 vector2 = new Vector3(0f, 0.5f, 0f);
+				Vector3 vector;
+				vector..ctor(0f, -0.5f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, 0.5f, 0f);
 				int num = 0;
 				int num2 = numSegments * 2;
 				int num3 = numSegments * 2 + 1;
@@ -647,9 +651,9 @@ namespace CjLib
 				float num6 = 0f;
 				for (int i = 0; i < numSegments; i++)
 				{
-					Vector3 b = Mathf.Cos(num6) * Vector3.right + Mathf.Sin(num6) * Vector3.forward;
-					array[num + i] = vector + b;
-					array[numSegments + i] = vector2 + b;
+					Vector3 vector3 = Mathf.Cos(num6) * Vector3.right + Mathf.Sin(num6) * Vector3.forward;
+					array[num + i] = vector + vector3;
+					array[numSegments + i] = vector2 + vector3;
 					array2[num4++] = num2;
 					array2[num4++] = num + i;
 					array2[num4++] = num + (i + 1) % numSegments;
@@ -665,7 +669,7 @@ namespace CjLib
 					num6 += num5;
 				}
 				mesh.vertices = array;
-				mesh.SetIndices(array2, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array2, 0, 0);
 				if (PrimitiveMeshFactory.s_cylinderSolidColorMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_cylinderSolidColorMeshPool.Remove(numSegments);
@@ -686,14 +690,16 @@ namespace CjLib
 				PrimitiveMeshFactory.s_cylinderFlatShadedMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_cylinderFlatShadedMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_cylinderFlatShadedMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments * 6 + 2];
 				Vector3[] array2 = new Vector3[array.Length];
 				int[] array3 = new int[numSegments * 12];
-				Vector3 vector = new Vector3(0f, -0.5f, 0f);
-				Vector3 vector2 = new Vector3(0f, 0.5f, 0f);
+				Vector3 vector;
+				vector..ctor(0f, -0.5f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, 0.5f, 0f);
 				int num = 0;
 				int num2 = numSegments * 2;
 				int num3 = numSegments * 6;
@@ -707,9 +713,9 @@ namespace CjLib
 				float num7 = 0f;
 				for (int i = 0; i < numSegments; i++)
 				{
-					Vector3 b = Mathf.Cos(num7) * Vector3.right + Mathf.Sin(num7) * Vector3.forward;
-					array[num + i] = vector + b;
-					array[numSegments + i] = vector2 + b;
+					Vector3 vector3 = Mathf.Cos(num7) * Vector3.right + Mathf.Sin(num7) * Vector3.forward;
+					array[num + i] = vector + vector3;
+					array[numSegments + i] = vector2 + vector3;
 					array2[num + i] = new Vector3(0f, -1f, 0f);
 					array2[numSegments + i] = new Vector3(0f, 1f, 0f);
 					array3[num5++] = num3;
@@ -719,12 +725,12 @@ namespace CjLib
 					array3[num5++] = numSegments + (i + 1) % numSegments;
 					array3[num5++] = numSegments + i;
 					num7 += num6;
-					Vector3 vector3 = Mathf.Cos(num7) * Vector3.right + Mathf.Sin(num7) * Vector3.forward;
-					array[num2 + i * 4] = vector + b;
-					array[num2 + i * 4 + 1] = vector2 + b;
-					array[num2 + i * 4 + 2] = vector + vector3;
-					array[num2 + i * 4 + 3] = vector2 + vector3;
-					Vector3 normalized = Vector3.Cross(vector2 - vector, vector3 - b).normalized;
+					Vector3 vector4 = Mathf.Cos(num7) * Vector3.right + Mathf.Sin(num7) * Vector3.forward;
+					array[num2 + i * 4] = vector + vector3;
+					array[num2 + i * 4 + 1] = vector2 + vector3;
+					array[num2 + i * 4 + 2] = vector + vector4;
+					array[num2 + i * 4 + 3] = vector2 + vector4;
+					Vector3 normalized = Vector3.Cross(vector2 - vector, vector4 - vector3).normalized;
 					array2[num2 + i * 4] = normalized;
 					array2[num2 + i * 4 + 1] = normalized;
 					array2[num2 + i * 4 + 2] = normalized;
@@ -738,7 +744,7 @@ namespace CjLib
 				}
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array3, 0, 0);
 				if (PrimitiveMeshFactory.s_cylinderFlatShadedMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_cylinderFlatShadedMeshPool.Remove(numSegments);
@@ -759,14 +765,16 @@ namespace CjLib
 				PrimitiveMeshFactory.s_cylinderSmoothShadedMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_cylinderSmoothShadedMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_cylinderSmoothShadedMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments * 4 + 2];
 				Vector3[] array2 = new Vector3[array.Length];
 				int[] array3 = new int[numSegments * 12];
-				Vector3 vector = new Vector3(0f, -0.5f, 0f);
-				Vector3 vector2 = new Vector3(0f, 0.5f, 0f);
+				Vector3 vector;
+				vector..ctor(0f, -0.5f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, 0.5f, 0f);
 				int num = 0;
 				int num2 = numSegments * 2;
 				int num3 = numSegments * 4;
@@ -805,7 +813,7 @@ namespace CjLib
 				}
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array3, 0, 0);
 				if (PrimitiveMeshFactory.s_cylinderSmoothShadedMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_cylinderSmoothShadedMeshPool.Remove(numSegments);
@@ -825,78 +833,80 @@ namespace CjLib
 			{
 				PrimitiveMeshFactory.s_sphereWireframeMeshPool = new Dictionary<int, Mesh>();
 			}
-			int key = latSegments << 16 ^ longSegments;
+			int num = latSegments << 16 ^ longSegments;
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_sphereWireframeMeshPool.TryGetValue(key, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_sphereWireframeMeshPool.TryGetValue(num, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[longSegments * (latSegments - 1) + 2];
 				int[] array2 = new int[longSegments * (latSegments * 2 - 1) * 2];
-				Vector3 vector = new Vector3(0f, 1f, 0f);
-				Vector3 vector2 = new Vector3(0f, -1f, 0f);
-				int num = array.Length - 2;
-				int num2 = array.Length - 1;
-				array[num] = vector;
-				array[num2] = vector2;
+				Vector3 vector;
+				vector..ctor(0f, 1f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, -1f, 0f);
+				int num2 = array.Length - 2;
+				int num3 = array.Length - 1;
+				array[num2] = vector;
+				array[num3] = vector2;
 				float[] array3 = new float[latSegments];
 				float[] array4 = new float[latSegments];
-				float num3 = 3.1415927f / (float)latSegments;
-				float num4 = 0f;
+				float num4 = 3.1415927f / (float)latSegments;
+				float num5 = 0f;
 				for (int i = 0; i < latSegments; i++)
 				{
-					num4 += num3;
-					array3[i] = Mathf.Sin(num4);
-					array4[i] = Mathf.Cos(num4);
+					num5 += num4;
+					array3[i] = Mathf.Sin(num5);
+					array4[i] = Mathf.Cos(num5);
 				}
 				float[] array5 = new float[longSegments];
 				float[] array6 = new float[longSegments];
-				float num5 = 6.2831855f / (float)longSegments;
-				float num6 = 0f;
+				float num6 = 6.2831855f / (float)longSegments;
+				float num7 = 0f;
 				for (int j = 0; j < longSegments; j++)
 				{
-					num6 += num5;
-					array5[j] = Mathf.Sin(num6);
-					array6[j] = Mathf.Cos(num6);
+					num7 += num6;
+					array5[j] = Mathf.Sin(num7);
+					array6[j] = Mathf.Cos(num7);
 				}
-				int num7 = 0;
 				int num8 = 0;
+				int num9 = 0;
 				for (int k = 0; k < longSegments; k++)
 				{
-					float num9 = array5[k];
-					float num10 = array6[k];
+					float num10 = array5[k];
+					float num11 = array6[k];
 					for (int l = 0; l < latSegments - 1; l++)
 					{
-						float num11 = array3[l];
-						float y = array4[l];
-						array[num7] = new Vector3(num10 * num11, y, num9 * num11);
+						float num12 = array3[l];
+						float num13 = array4[l];
+						array[num8] = new Vector3(num11 * num12, num13, num10 * num12);
 						if (l == 0)
 						{
-							array2[num8++] = num;
-							array2[num8++] = num7;
+							array2[num9++] = num2;
+							array2[num9++] = num8;
 						}
 						else
 						{
-							array2[num8++] = num7 - 1;
-							array2[num8++] = num7;
+							array2[num9++] = num8 - 1;
+							array2[num9++] = num8;
 						}
-						array2[num8++] = num7;
-						array2[num8++] = (num7 + latSegments - 1) % (longSegments * (latSegments - 1));
+						array2[num9++] = num8;
+						array2[num9++] = (num8 + latSegments - 1) % (longSegments * (latSegments - 1));
 						if (l == latSegments - 2)
 						{
-							array2[num8++] = num7;
-							array2[num8++] = num2;
+							array2[num9++] = num8;
+							array2[num9++] = num3;
 						}
-						num7++;
+						num8++;
 					}
 				}
 				mesh.vertices = array;
 				mesh.normals = array;
-				mesh.SetIndices(array2, MeshTopology.Lines, 0);
-				if (PrimitiveMeshFactory.s_sphereWireframeMeshPool.ContainsKey(key))
+				mesh.SetIndices(array2, 3, 0);
+				if (PrimitiveMeshFactory.s_sphereWireframeMeshPool.ContainsKey(num))
 				{
-					PrimitiveMeshFactory.s_sphereWireframeMeshPool.Remove(key);
+					PrimitiveMeshFactory.s_sphereWireframeMeshPool.Remove(num);
 				}
-				PrimitiveMeshFactory.s_sphereWireframeMeshPool.Add(key, mesh);
+				PrimitiveMeshFactory.s_sphereWireframeMeshPool.Add(num, mesh);
 			}
 			return mesh;
 		}
@@ -911,81 +921,83 @@ namespace CjLib
 			{
 				PrimitiveMeshFactory.s_sphereSolidColorMeshPool = new Dictionary<int, Mesh>();
 			}
-			int key = latSegments << 16 ^ longSegments;
+			int num = latSegments << 16 ^ longSegments;
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_sphereSolidColorMeshPool.TryGetValue(key, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_sphereSolidColorMeshPool.TryGetValue(num, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[longSegments * (latSegments - 1) + 2];
 				int[] array2 = new int[longSegments * (latSegments - 1) * 2 * 3];
-				Vector3 vector = new Vector3(0f, 1f, 0f);
-				Vector3 vector2 = new Vector3(0f, -1f, 0f);
-				int num = array.Length - 2;
-				int num2 = array.Length - 1;
-				array[num] = vector;
-				array[num2] = vector2;
+				Vector3 vector;
+				vector..ctor(0f, 1f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, -1f, 0f);
+				int num2 = array.Length - 2;
+				int num3 = array.Length - 1;
+				array[num2] = vector;
+				array[num3] = vector2;
 				float[] array3 = new float[latSegments];
 				float[] array4 = new float[latSegments];
-				float num3 = 3.1415927f / (float)latSegments;
-				float num4 = 0f;
+				float num4 = 3.1415927f / (float)latSegments;
+				float num5 = 0f;
 				for (int i = 0; i < latSegments; i++)
 				{
-					num4 += num3;
-					array3[i] = Mathf.Sin(num4);
-					array4[i] = Mathf.Cos(num4);
+					num5 += num4;
+					array3[i] = Mathf.Sin(num5);
+					array4[i] = Mathf.Cos(num5);
 				}
 				float[] array5 = new float[longSegments];
 				float[] array6 = new float[longSegments];
-				float num5 = 6.2831855f / (float)longSegments;
-				float num6 = 0f;
+				float num6 = 6.2831855f / (float)longSegments;
+				float num7 = 0f;
 				for (int j = 0; j < longSegments; j++)
 				{
-					num6 += num5;
-					array5[j] = Mathf.Sin(num6);
-					array6[j] = Mathf.Cos(num6);
+					num7 += num6;
+					array5[j] = Mathf.Sin(num7);
+					array6[j] = Mathf.Cos(num7);
 				}
-				int num7 = 0;
 				int num8 = 0;
+				int num9 = 0;
 				for (int k = 0; k < longSegments; k++)
 				{
-					float num9 = array5[k];
-					float num10 = array6[k];
+					float num10 = array5[k];
+					float num11 = array6[k];
 					for (int l = 0; l < latSegments - 1; l++)
 					{
-						float num11 = array3[l];
-						float y = array4[l];
-						array[num7] = new Vector3(num10 * num11, y, num9 * num11);
+						float num12 = array3[l];
+						float num13 = array4[l];
+						array[num8] = new Vector3(num11 * num12, num13, num10 * num12);
 						if (l == 0)
 						{
-							array2[num8++] = num;
-							array2[num8++] = (num7 + latSegments - 1) % (longSegments * (latSegments - 1));
-							array2[num8++] = num7;
+							array2[num9++] = num2;
+							array2[num9++] = (num8 + latSegments - 1) % (longSegments * (latSegments - 1));
+							array2[num9++] = num8;
 						}
 						if (l < latSegments - 2)
 						{
-							array2[num8++] = num7 + 1;
-							array2[num8++] = num7;
-							array2[num8++] = (num7 + latSegments - 1) % (longSegments * (latSegments - 1));
-							array2[num8++] = num7 + 1;
-							array2[num8++] = (num7 + latSegments - 1) % (longSegments * (latSegments - 1));
-							array2[num8++] = (num7 + latSegments) % (longSegments * (latSegments - 1));
+							array2[num9++] = num8 + 1;
+							array2[num9++] = num8;
+							array2[num9++] = (num8 + latSegments - 1) % (longSegments * (latSegments - 1));
+							array2[num9++] = num8 + 1;
+							array2[num9++] = (num8 + latSegments - 1) % (longSegments * (latSegments - 1));
+							array2[num9++] = (num8 + latSegments) % (longSegments * (latSegments - 1));
 						}
 						if (l == latSegments - 2)
 						{
-							array2[num8++] = num7;
-							array2[num8++] = (num7 + latSegments - 1) % (longSegments * (latSegments - 1));
-							array2[num8++] = num2;
+							array2[num9++] = num8;
+							array2[num9++] = (num8 + latSegments - 1) % (longSegments * (latSegments - 1));
+							array2[num9++] = num3;
 						}
-						num7++;
+						num8++;
 					}
 				}
 				mesh.vertices = array;
-				mesh.SetIndices(array2, MeshTopology.Triangles, 0);
-				if (PrimitiveMeshFactory.s_sphereSolidColorMeshPool.ContainsKey(key))
+				mesh.SetIndices(array2, 0, 0);
+				if (PrimitiveMeshFactory.s_sphereSolidColorMeshPool.ContainsKey(num))
 				{
-					PrimitiveMeshFactory.s_sphereSolidColorMeshPool.Remove(key);
+					PrimitiveMeshFactory.s_sphereSolidColorMeshPool.Remove(num);
 				}
-				PrimitiveMeshFactory.s_sphereSolidColorMeshPool.Add(key, mesh);
+				PrimitiveMeshFactory.s_sphereSolidColorMeshPool.Add(num, mesh);
 			}
 			return mesh;
 		}
@@ -1000,101 +1012,103 @@ namespace CjLib
 			{
 				PrimitiveMeshFactory.s_sphereFlatShadedMeshPool = new Dictionary<int, Mesh>();
 			}
-			int key = latSegments << 16 ^ longSegments;
+			int num = latSegments << 16 ^ longSegments;
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_sphereFlatShadedMeshPool.TryGetValue(key, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_sphereFlatShadedMeshPool.TryGetValue(num, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
-				int num = (latSegments - 2) * 4 + 6;
-				int num2 = (latSegments - 2) * 2 + 2;
-				Vector3[] array = new Vector3[longSegments * num];
+				int num2 = (latSegments - 2) * 4 + 6;
+				int num3 = (latSegments - 2) * 2 + 2;
+				Vector3[] array = new Vector3[longSegments * num2];
 				Vector3[] array2 = new Vector3[array.Length];
-				int[] array3 = new int[longSegments * num2 * 3];
-				Vector3 vector = new Vector3(0f, 1f, 0f);
-				Vector3 vector2 = new Vector3(0f, -1f, 0f);
+				int[] array3 = new int[longSegments * num3 * 3];
+				Vector3 vector;
+				vector..ctor(0f, 1f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, -1f, 0f);
 				float[] array4 = new float[latSegments];
 				float[] array5 = new float[latSegments];
-				float num3 = 3.1415927f / (float)latSegments;
-				float num4 = 0f;
+				float num4 = 3.1415927f / (float)latSegments;
+				float num5 = 0f;
 				for (int i = 0; i < latSegments; i++)
 				{
-					num4 += num3;
-					array4[i] = Mathf.Sin(num4);
-					array5[i] = Mathf.Cos(num4);
+					num5 += num4;
+					array4[i] = Mathf.Sin(num5);
+					array5[i] = Mathf.Cos(num5);
 				}
 				float[] array6 = new float[longSegments];
 				float[] array7 = new float[longSegments];
-				float num5 = 6.2831855f / (float)longSegments;
-				float num6 = 0f;
+				float num6 = 6.2831855f / (float)longSegments;
+				float num7 = 0f;
 				for (int j = 0; j < longSegments; j++)
 				{
-					num6 += num5;
-					array6[j] = Mathf.Sin(num6);
-					array7[j] = Mathf.Cos(num6);
+					num7 += num6;
+					array6[j] = Mathf.Sin(num7);
+					array7[j] = Mathf.Cos(num7);
 				}
-				int num7 = 0;
 				int num8 = 0;
 				int num9 = 0;
+				int num10 = 0;
 				for (int k = 0; k < longSegments; k++)
 				{
-					float num10 = array6[k];
-					float num11 = array7[k];
-					float num12 = array6[(k + 1) % longSegments];
-					float num13 = array7[(k + 1) % longSegments];
-					int num14 = num7;
-					array[num7++] = vector;
-					array[num7++] = new Vector3(num11 * array4[0], array5[0], num10 * array4[0]);
-					array[num7++] = new Vector3(num13 * array4[0], array5[0], num12 * array4[0]);
-					int num15 = num7;
-					array[num7++] = vector2;
-					array[num7++] = new Vector3(num11 * array4[latSegments - 2], array5[latSegments - 2], num10 * array4[latSegments - 2]);
-					array[num7++] = new Vector3(num13 * array4[latSegments - 2], array5[latSegments - 2], num12 * array4[latSegments - 2]);
-					Vector3 normalized = Vector3.Cross(array[num14 + 2] - array[num14], array[num14 + 1] - array[num14]).normalized;
-					array2[num8++] = normalized;
-					array2[num8++] = normalized;
-					array2[num8++] = normalized;
-					Vector3 normalized2 = Vector3.Cross(array[num15 + 1] - array[num15], array[num15 + 2] - array[num15]).normalized;
-					array2[num8++] = normalized2;
-					array2[num8++] = normalized2;
-					array2[num8++] = normalized2;
-					array3[num9++] = num14;
-					array3[num9++] = num14 + 2;
-					array3[num9++] = num14 + 1;
-					array3[num9++] = num15;
-					array3[num9++] = num15 + 1;
-					array3[num9++] = num15 + 2;
+					float num11 = array6[k];
+					float num12 = array7[k];
+					float num13 = array6[(k + 1) % longSegments];
+					float num14 = array7[(k + 1) % longSegments];
+					int num15 = num8;
+					array[num8++] = vector;
+					array[num8++] = new Vector3(num12 * array4[0], array5[0], num11 * array4[0]);
+					array[num8++] = new Vector3(num14 * array4[0], array5[0], num13 * array4[0]);
+					int num16 = num8;
+					array[num8++] = vector2;
+					array[num8++] = new Vector3(num12 * array4[latSegments - 2], array5[latSegments - 2], num11 * array4[latSegments - 2]);
+					array[num8++] = new Vector3(num14 * array4[latSegments - 2], array5[latSegments - 2], num13 * array4[latSegments - 2]);
+					Vector3 normalized = Vector3.Cross(array[num15 + 2] - array[num15], array[num15 + 1] - array[num15]).normalized;
+					array2[num9++] = normalized;
+					array2[num9++] = normalized;
+					array2[num9++] = normalized;
+					Vector3 normalized2 = Vector3.Cross(array[num16 + 1] - array[num16], array[num16 + 2] - array[num16]).normalized;
+					array2[num9++] = normalized2;
+					array2[num9++] = normalized2;
+					array2[num9++] = normalized2;
+					array3[num10++] = num15;
+					array3[num10++] = num15 + 2;
+					array3[num10++] = num15 + 1;
+					array3[num10++] = num16;
+					array3[num10++] = num16 + 1;
+					array3[num10++] = num16 + 2;
 					for (int l = 0; l < latSegments - 2; l++)
 					{
-						float num16 = array4[l];
-						float y = array5[l];
-						float num17 = array4[l + 1];
-						float y2 = array5[l + 1];
-						int num18 = num7;
-						array[num7++] = new Vector3(num11 * num16, y, num10 * num16);
-						array[num7++] = new Vector3(num13 * num16, y, num12 * num16);
-						array[num7++] = new Vector3(num13 * num17, y2, num12 * num17);
-						array[num7++] = new Vector3(num11 * num17, y2, num10 * num17);
-						Vector3 normalized3 = Vector3.Cross(array[num18 + 1] - array[num18], array[num18 + 2] - array[num18]).normalized;
-						array2[num8++] = normalized3;
-						array2[num8++] = normalized3;
-						array2[num8++] = normalized3;
-						array2[num8++] = normalized3;
-						array3[num9++] = num18;
-						array3[num9++] = num18 + 1;
-						array3[num9++] = num18 + 2;
-						array3[num9++] = num18;
-						array3[num9++] = num18 + 2;
-						array3[num9++] = num18 + 3;
+						float num17 = array4[l];
+						float num18 = array5[l];
+						float num19 = array4[l + 1];
+						float num20 = array5[l + 1];
+						int num21 = num8;
+						array[num8++] = new Vector3(num12 * num17, num18, num11 * num17);
+						array[num8++] = new Vector3(num14 * num17, num18, num13 * num17);
+						array[num8++] = new Vector3(num14 * num19, num20, num13 * num19);
+						array[num8++] = new Vector3(num12 * num19, num20, num11 * num19);
+						Vector3 normalized3 = Vector3.Cross(array[num21 + 1] - array[num21], array[num21 + 2] - array[num21]).normalized;
+						array2[num9++] = normalized3;
+						array2[num9++] = normalized3;
+						array2[num9++] = normalized3;
+						array2[num9++] = normalized3;
+						array3[num10++] = num21;
+						array3[num10++] = num21 + 1;
+						array3[num10++] = num21 + 2;
+						array3[num10++] = num21;
+						array3[num10++] = num21 + 2;
+						array3[num10++] = num21 + 3;
 					}
 				}
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
-				if (PrimitiveMeshFactory.s_sphereFlatShadedMeshPool.ContainsKey(key))
+				mesh.SetIndices(array3, 0, 0);
+				if (PrimitiveMeshFactory.s_sphereFlatShadedMeshPool.ContainsKey(num))
 				{
-					PrimitiveMeshFactory.s_sphereFlatShadedMeshPool.Remove(key);
+					PrimitiveMeshFactory.s_sphereFlatShadedMeshPool.Remove(num);
 				}
-				PrimitiveMeshFactory.s_sphereFlatShadedMeshPool.Add(key, mesh);
+				PrimitiveMeshFactory.s_sphereFlatShadedMeshPool.Add(num, mesh);
 			}
 			return mesh;
 		}
@@ -1109,102 +1123,105 @@ namespace CjLib
 			{
 				PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool = new Dictionary<int, Mesh>();
 			}
-			int key = latSegments << 16 ^ longSegments;
+			int num = latSegments << 16 ^ longSegments;
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool.TryGetValue(key, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool.TryGetValue(num, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
-				int num = latSegments - 1;
-				int num2 = (latSegments - 2) * 2 + 2;
-				Vector3[] array = new Vector3[longSegments * num + 2];
+				int num2 = latSegments - 1;
+				int num3 = (latSegments - 2) * 2 + 2;
+				Vector3[] array = new Vector3[longSegments * num2 + 2];
 				Vector3[] array2 = new Vector3[array.Length];
-				int[] array3 = new int[longSegments * num2 * 3];
-				Vector3 vector = new Vector3(0f, 1f, 0f);
-				Vector3 vector2 = new Vector3(0f, -1f, 0f);
-				int num3 = longSegments * num;
-				int num4 = num3 + 1;
-				array[num3] = vector;
-				array[num4] = vector2;
-				array2[num3] = new Vector3(0f, 1f, 0f);
-				array2[num4] = new Vector3(0f, -1f, 0f);
+				int[] array3 = new int[longSegments * num3 * 3];
+				Vector3 vector;
+				vector..ctor(0f, 1f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, -1f, 0f);
+				int num4 = longSegments * num2;
+				int num5 = num4 + 1;
+				array[num4] = vector;
+				array[num5] = vector2;
+				array2[num4] = new Vector3(0f, 1f, 0f);
+				array2[num5] = new Vector3(0f, -1f, 0f);
 				float[] array4 = new float[latSegments];
 				float[] array5 = new float[latSegments];
-				float num5 = 3.1415927f / (float)latSegments;
-				float num6 = 0f;
+				float num6 = 3.1415927f / (float)latSegments;
+				float num7 = 0f;
 				for (int i = 0; i < latSegments; i++)
 				{
-					num6 += num5;
-					array4[i] = Mathf.Sin(num6);
-					array5[i] = Mathf.Cos(num6);
+					num7 += num6;
+					array4[i] = Mathf.Sin(num7);
+					array5[i] = Mathf.Cos(num7);
 				}
 				float[] array6 = new float[longSegments];
 				float[] array7 = new float[longSegments];
-				float num7 = 6.2831855f / (float)longSegments;
-				float num8 = 0f;
+				float num8 = 6.2831855f / (float)longSegments;
+				float num9 = 0f;
 				for (int j = 0; j < longSegments; j++)
 				{
-					num8 += num7;
-					array6[j] = Mathf.Sin(num8);
-					array7[j] = Mathf.Cos(num8);
+					num9 += num8;
+					array6[j] = Mathf.Sin(num9);
+					array7[j] = Mathf.Cos(num9);
 				}
-				int num9 = 0;
 				int num10 = 0;
 				int num11 = 0;
+				int num12 = 0;
 				for (int k = 0; k < longSegments; k++)
 				{
-					float num12 = array6[k];
-					float num13 = array7[k];
+					float num13 = array6[k];
+					float num14 = array7[k];
 					for (int l = 0; l < latSegments - 1; l++)
 					{
-						float num14 = array4[l];
-						float y = array5[l];
-						Vector3 vector3 = new Vector3(num13 * num14, y, num12 * num14);
-						array[num9++] = vector3;
-						array2[num10++] = vector3;
-						int num15 = num9 - 1;
-						int num16 = num15 + 1;
-						int num17 = (num15 + num) % (longSegments * num);
-						int num18 = (num15 + num + 1) % (longSegments * num);
+						float num15 = array4[l];
+						float num16 = array5[l];
+						Vector3 vector3;
+						vector3..ctor(num14 * num15, num16, num13 * num15);
+						array[num10++] = vector3;
+						array2[num11++] = vector3;
+						int num17 = num10 - 1;
+						int num18 = num17 + 1;
+						int num19 = (num17 + num2) % (longSegments * num2);
+						int num20 = (num17 + num2 + 1) % (longSegments * num2);
 						if (latSegments == 2)
 						{
-							array3[num11++] = num3;
-							array3[num11++] = num17;
-							array3[num11++] = num15;
-							array3[num11++] = num4;
-							array3[num11++] = num16;
-							array3[num11++] = num18;
+							array3[num12++] = num4;
+							array3[num12++] = num19;
+							array3[num12++] = num17;
+							array3[num12++] = num5;
+							array3[num12++] = num18;
+							array3[num12++] = num20;
 						}
 						else if (l < latSegments - 2)
 						{
 							if (l == 0)
 							{
-								array3[num11++] = num3;
-								array3[num11++] = num17;
-								array3[num11++] = num15;
+								array3[num12++] = num4;
+								array3[num12++] = num19;
+								array3[num12++] = num17;
 							}
 							else if (l == latSegments - 3)
 							{
-								array3[num11++] = num4;
-								array3[num11++] = num16;
-								array3[num11++] = num18;
+								array3[num12++] = num5;
+								array3[num12++] = num18;
+								array3[num12++] = num20;
 							}
-							array3[num11++] = num15;
-							array3[num11++] = num18;
-							array3[num11++] = num16;
-							array3[num11++] = num15;
-							array3[num11++] = num17;
-							array3[num11++] = num18;
+							array3[num12++] = num17;
+							array3[num12++] = num20;
+							array3[num12++] = num18;
+							array3[num12++] = num17;
+							array3[num12++] = num19;
+							array3[num12++] = num20;
 						}
 					}
 				}
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
-				if (PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool.ContainsKey(key))
+				mesh.SetIndices(array3, 0, 0);
+				if (PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool.ContainsKey(num))
 				{
-					PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool.Remove(key);
+					PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool.Remove(num);
 				}
-				PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool.Add(key, mesh);
+				PrimitiveMeshFactory.s_sphereSmoothShadedMeshPool.Add(num, mesh);
 			}
 			return mesh;
 		}
@@ -1223,101 +1240,103 @@ namespace CjLib
 			{
 				PrimitiveMeshFactory.s_capsuleWireframeMeshPool = new Dictionary<int, Mesh>();
 			}
-			int key = latSegmentsPerCap << 12 ^ longSegmentsPerCap ^ (caps ? 268435456 : 0) ^ (topCapOnly ? 536870912 : 0) ^ (sides ? 1073741824 : 0);
+			int num = latSegmentsPerCap << 12 ^ longSegmentsPerCap ^ (caps ? 268435456 : 0) ^ (topCapOnly ? 536870912 : 0) ^ (sides ? 1073741824 : 0);
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_capsuleWireframeMeshPool.TryGetValue(key, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_capsuleWireframeMeshPool.TryGetValue(num, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[longSegmentsPerCap * latSegmentsPerCap * 2 + 2];
 				int[] array2 = new int[longSegmentsPerCap * (latSegmentsPerCap * 4 + 1) * 2];
-				Vector3 vector = new Vector3(0f, 1.5f, 0f);
-				Vector3 vector2 = new Vector3(0f, -1.5f, 0f);
-				int num = array.Length - 2;
-				int num2 = array.Length - 1;
-				array[num] = vector;
-				array[num2] = vector2;
+				Vector3 vector;
+				vector..ctor(0f, 1.5f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, -1.5f, 0f);
+				int num2 = array.Length - 2;
+				int num3 = array.Length - 1;
+				array[num2] = vector;
+				array[num3] = vector2;
 				float[] array3 = new float[latSegmentsPerCap];
 				float[] array4 = new float[latSegmentsPerCap];
-				float num3 = 1.5707964f / (float)latSegmentsPerCap;
-				float num4 = 0f;
+				float num4 = 1.5707964f / (float)latSegmentsPerCap;
+				float num5 = 0f;
 				for (int i = 0; i < latSegmentsPerCap; i++)
 				{
-					num4 += num3;
-					array3[i] = Mathf.Sin(num4);
-					array4[i] = Mathf.Cos(num4);
+					num5 += num4;
+					array3[i] = Mathf.Sin(num5);
+					array4[i] = Mathf.Cos(num5);
 				}
 				float[] array5 = new float[longSegmentsPerCap];
 				float[] array6 = new float[longSegmentsPerCap];
-				float num5 = 6.2831855f / (float)longSegmentsPerCap;
-				float num6 = 0f;
+				float num6 = 6.2831855f / (float)longSegmentsPerCap;
+				float num7 = 0f;
 				for (int j = 0; j < longSegmentsPerCap; j++)
 				{
-					num6 += num5;
-					array5[j] = Mathf.Sin(num6);
-					array6[j] = Mathf.Cos(num6);
+					num7 += num6;
+					array5[j] = Mathf.Sin(num7);
+					array6[j] = Mathf.Cos(num7);
 				}
-				int num7 = 0;
-				int newSize = 0;
+				int num8 = 0;
+				int num9 = 0;
 				for (int k = 0; k < longSegmentsPerCap; k++)
 				{
-					float num8 = array5[k];
-					float num9 = array6[k];
+					float num10 = array5[k];
+					float num11 = array6[k];
 					for (int l = 0; l < latSegmentsPerCap; l++)
 					{
-						float num10 = array3[l];
-						float num11 = array4[l];
-						array[num7] = new Vector3(num9 * num10, num11 + 0.5f, num8 * num10);
-						array[num7 + 1] = new Vector3(num9 * num10, -num11 - 0.5f, num8 * num10);
+						float num12 = array3[l];
+						float num13 = array4[l];
+						array[num8] = new Vector3(num11 * num12, num13 + 0.5f, num10 * num12);
+						array[num8 + 1] = new Vector3(num11 * num12, -num13 - 0.5f, num10 * num12);
 						if (caps)
 						{
 							if (l == 0)
 							{
-								array2[newSize++] = num;
-								array2[newSize++] = num7;
+								array2[num9++] = num2;
+								array2[num9++] = num8;
 								if (!topCapOnly)
 								{
-									array2[newSize++] = num2;
-									array2[newSize++] = num7 + 1;
+									array2[num9++] = num3;
+									array2[num9++] = num8 + 1;
 								}
 							}
 							else
 							{
-								array2[newSize++] = num7 - 2;
-								array2[newSize++] = num7;
+								array2[num9++] = num8 - 2;
+								array2[num9++] = num8;
 								if (!topCapOnly)
 								{
-									array2[newSize++] = num7 - 1;
-									array2[newSize++] = num7 + 1;
+									array2[num9++] = num8 - 1;
+									array2[num9++] = num8 + 1;
 								}
 							}
 						}
 						if (caps || l == latSegmentsPerCap - 1)
 						{
-							array2[newSize++] = num7;
-							array2[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+							array2[num9++] = num8;
+							array2[num9++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 							if (!topCapOnly)
 							{
-								array2[newSize++] = num7 + 1;
-								array2[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array2[num9++] = num8 + 1;
+								array2[num9++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 							}
 						}
 						if (sides && l == latSegmentsPerCap - 1)
 						{
-							array2[newSize++] = num7;
-							array2[newSize++] = num7 + 1;
+							array2[num9++] = num8;
+							array2[num9++] = num8 + 1;
 						}
-						num7 += 2;
+						num8 += 2;
 					}
 				}
-				Array.Resize<int>(ref array2, newSize);
+				Array.Resize<int>(ref array2, num9);
 				mesh.vertices = array;
 				mesh.normals = array;
-				mesh.SetIndices(array2, MeshTopology.Lines, 0);
-				if (PrimitiveMeshFactory.s_capsuleWireframeMeshPool.ContainsKey(key))
+				mesh.SetIndices(array2, 3, 0);
+				if (PrimitiveMeshFactory.s_capsuleWireframeMeshPool.ContainsKey(num))
 				{
-					PrimitiveMeshFactory.s_capsuleWireframeMeshPool.Remove(key);
+					PrimitiveMeshFactory.s_capsuleWireframeMeshPool.Remove(num);
 				}
-				PrimitiveMeshFactory.s_capsuleWireframeMeshPool.Add(key, mesh);
+				PrimitiveMeshFactory.s_capsuleWireframeMeshPool.Add(num, mesh);
 			}
 			return mesh;
 		}
@@ -1336,63 +1355,65 @@ namespace CjLib
 			{
 				PrimitiveMeshFactory.s_capsuleSolidColorMeshPool = new Dictionary<int, Mesh>();
 			}
-			int key = latSegmentsPerCap << 12 ^ longSegmentsPerCap ^ (caps ? 268435456 : 0) ^ (topCapOnly ? 536870912 : 0) ^ (sides ? 1073741824 : 0);
+			int num = latSegmentsPerCap << 12 ^ longSegmentsPerCap ^ (caps ? 268435456 : 0) ^ (topCapOnly ? 536870912 : 0) ^ (sides ? 1073741824 : 0);
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_capsuleSolidColorMeshPool.TryGetValue(key, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_capsuleSolidColorMeshPool.TryGetValue(num, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[longSegmentsPerCap * latSegmentsPerCap * 2 + 2];
 				int[] array2 = new int[longSegmentsPerCap * (latSegmentsPerCap * 4) * 3];
-				Vector3 vector = new Vector3(0f, 1.5f, 0f);
-				Vector3 vector2 = new Vector3(0f, -1.5f, 0f);
-				int num = array.Length - 2;
-				int num2 = array.Length - 1;
-				array[num] = vector;
-				array[num2] = vector2;
+				Vector3 vector;
+				vector..ctor(0f, 1.5f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, -1.5f, 0f);
+				int num2 = array.Length - 2;
+				int num3 = array.Length - 1;
+				array[num2] = vector;
+				array[num3] = vector2;
 				float[] array3 = new float[latSegmentsPerCap];
 				float[] array4 = new float[latSegmentsPerCap];
-				float num3 = 1.5707964f / (float)latSegmentsPerCap;
-				float num4 = 0f;
+				float num4 = 1.5707964f / (float)latSegmentsPerCap;
+				float num5 = 0f;
 				for (int i = 0; i < latSegmentsPerCap; i++)
 				{
-					num4 += num3;
-					array3[i] = Mathf.Sin(num4);
-					array4[i] = Mathf.Cos(num4);
+					num5 += num4;
+					array3[i] = Mathf.Sin(num5);
+					array4[i] = Mathf.Cos(num5);
 				}
 				float[] array5 = new float[longSegmentsPerCap];
 				float[] array6 = new float[longSegmentsPerCap];
-				float num5 = 6.2831855f / (float)longSegmentsPerCap;
-				float num6 = 0f;
+				float num6 = 6.2831855f / (float)longSegmentsPerCap;
+				float num7 = 0f;
 				for (int j = 0; j < longSegmentsPerCap; j++)
 				{
-					num6 += num5;
-					array5[j] = Mathf.Sin(num6);
-					array6[j] = Mathf.Cos(num6);
+					num7 += num6;
+					array5[j] = Mathf.Sin(num7);
+					array6[j] = Mathf.Cos(num7);
 				}
-				int num7 = 0;
-				int newSize = 0;
+				int num8 = 0;
+				int num9 = 0;
 				for (int k = 0; k < longSegmentsPerCap; k++)
 				{
-					float num8 = array5[k];
-					float num9 = array6[k];
+					float num10 = array5[k];
+					float num11 = array6[k];
 					for (int l = 0; l < latSegmentsPerCap; l++)
 					{
-						float num10 = array3[l];
-						float num11 = array4[l];
-						array[num7] = new Vector3(num9 * num10, num11 + 0.5f, num8 * num10);
-						array[num7 + 1] = new Vector3(num9 * num10, -num11 - 0.5f, num8 * num10);
+						float num12 = array3[l];
+						float num13 = array4[l];
+						array[num8] = new Vector3(num11 * num12, num13 + 0.5f, num10 * num12);
+						array[num8 + 1] = new Vector3(num11 * num12, -num13 - 0.5f, num10 * num12);
 						if (l == 0)
 						{
 							if (caps)
 							{
-								array2[newSize++] = num;
-								array2[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array2[newSize++] = num7;
+								array2[num9++] = num2;
+								array2[num9++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array2[num9++] = num8;
 								if (!topCapOnly)
 								{
-									array2[newSize++] = num2;
-									array2[newSize++] = num7 + 1;
-									array2[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+									array2[num9++] = num3;
+									array2[num9++] = num8 + 1;
+									array2[num9++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 								}
 							}
 						}
@@ -1400,43 +1421,43 @@ namespace CjLib
 						{
 							if (caps)
 							{
-								array2[newSize++] = num7 - 2;
-								array2[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array2[newSize++] = num7;
-								array2[newSize++] = num7 - 2;
-								array2[newSize++] = (num7 - 2 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array2[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array2[num9++] = num8 - 2;
+								array2[num9++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array2[num9++] = num8;
+								array2[num9++] = num8 - 2;
+								array2[num9++] = (num8 - 2 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array2[num9++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 								if (!topCapOnly)
 								{
-									array2[newSize++] = num7 - 1;
-									array2[newSize++] = num7 + 1;
-									array2[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-									array2[newSize++] = num7 - 1;
-									array2[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-									array2[newSize++] = (num7 - 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+									array2[num9++] = num8 - 1;
+									array2[num9++] = num8 + 1;
+									array2[num9++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+									array2[num9++] = num8 - 1;
+									array2[num9++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+									array2[num9++] = (num8 - 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 								}
 							}
 							if (sides && l == latSegmentsPerCap - 1)
 							{
-								array2[newSize++] = num7;
-								array2[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array2[newSize++] = num7 + 1;
-								array2[newSize++] = num7;
-								array2[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array2[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array2[num9++] = num8;
+								array2[num9++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array2[num9++] = num8 + 1;
+								array2[num9++] = num8;
+								array2[num9++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array2[num9++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 							}
 						}
-						num7 += 2;
+						num8 += 2;
 					}
 				}
-				Array.Resize<int>(ref array2, newSize);
+				Array.Resize<int>(ref array2, num9);
 				mesh.vertices = array;
-				mesh.SetIndices(array2, MeshTopology.Triangles, 0);
-				if (PrimitiveMeshFactory.s_capsuleSolidColorMeshPool.ContainsKey(key))
+				mesh.SetIndices(array2, 0, 0);
+				if (PrimitiveMeshFactory.s_capsuleSolidColorMeshPool.ContainsKey(num))
 				{
-					PrimitiveMeshFactory.s_capsuleSolidColorMeshPool.Remove(key);
+					PrimitiveMeshFactory.s_capsuleSolidColorMeshPool.Remove(num);
 				}
-				PrimitiveMeshFactory.s_capsuleSolidColorMeshPool.Add(key, mesh);
+				PrimitiveMeshFactory.s_capsuleSolidColorMeshPool.Add(num, mesh);
 			}
 			return mesh;
 		}
@@ -1455,156 +1476,158 @@ namespace CjLib
 			{
 				PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool = new Dictionary<int, Mesh>();
 			}
-			int key = latSegmentsPerCap << 12 ^ longSegmentsPerCap ^ (caps ? 268435456 : 0) ^ (topCapOnly ? 536870912 : 0) ^ (sides ? 1073741824 : 0);
+			int num = latSegmentsPerCap << 12 ^ longSegmentsPerCap ^ (caps ? 268435456 : 0) ^ (topCapOnly ? 536870912 : 0) ^ (sides ? 1073741824 : 0);
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool.TryGetValue(key, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool.TryGetValue(num, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[longSegmentsPerCap * (latSegmentsPerCap - 1) * 8 + longSegmentsPerCap * 10];
 				Vector3[] array2 = new Vector3[array.Length];
 				int[] array3 = new int[longSegmentsPerCap * (latSegmentsPerCap * 4) * 3];
-				Vector3 vector = new Vector3(0f, 1.5f, 0f);
-				Vector3 vector2 = new Vector3(0f, -1.5f, 0f);
-				int num = array.Length - 2;
-				int num2 = array.Length - 1;
-				array[num] = vector;
-				array[num2] = vector2;
-				array2[num] = new Vector3(0f, 1f, 0f);
-				array2[num2] = new Vector3(0f, -1f, 0f);
+				Vector3 vector;
+				vector..ctor(0f, 1.5f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, -1.5f, 0f);
+				int num2 = array.Length - 2;
+				int num3 = array.Length - 1;
+				array[num2] = vector;
+				array[num3] = vector2;
+				array2[num2] = new Vector3(0f, 1f, 0f);
+				array2[num3] = new Vector3(0f, -1f, 0f);
 				float[] array4 = new float[latSegmentsPerCap];
 				float[] array5 = new float[latSegmentsPerCap];
-				float num3 = 1.5707964f / (float)latSegmentsPerCap;
-				float num4 = 0f;
+				float num4 = 1.5707964f / (float)latSegmentsPerCap;
+				float num5 = 0f;
 				for (int i = 0; i < latSegmentsPerCap; i++)
 				{
-					num4 += num3;
-					array4[i] = Mathf.Sin(num4);
-					array5[i] = Mathf.Cos(num4);
+					num5 += num4;
+					array4[i] = Mathf.Sin(num5);
+					array5[i] = Mathf.Cos(num5);
 				}
 				float[] array6 = new float[longSegmentsPerCap];
 				float[] array7 = new float[longSegmentsPerCap];
-				float num5 = 6.2831855f / (float)longSegmentsPerCap;
-				float num6 = 0f;
+				float num6 = 6.2831855f / (float)longSegmentsPerCap;
+				float num7 = 0f;
 				for (int j = 0; j < longSegmentsPerCap; j++)
 				{
-					num6 += num5;
-					array6[j] = Mathf.Sin(num6);
-					array7[j] = Mathf.Cos(num6);
+					num7 += num6;
+					array6[j] = Mathf.Sin(num7);
+					array7[j] = Mathf.Cos(num7);
 				}
-				int num7 = 0;
 				int num8 = 0;
-				int newSize = 0;
+				int num9 = 0;
+				int num10 = 0;
 				for (int k = 0; k < longSegmentsPerCap; k++)
 				{
-					float num9 = array6[k];
-					float num10 = array7[k];
-					float num11 = array6[(k + 1) % longSegmentsPerCap];
-					float num12 = array7[(k + 1) % longSegmentsPerCap];
+					float num11 = array6[k];
+					float num12 = array7[k];
+					float num13 = array6[(k + 1) % longSegmentsPerCap];
+					float num14 = array7[(k + 1) % longSegmentsPerCap];
 					for (int l = 0; l < latSegmentsPerCap; l++)
 					{
-						float num13 = array4[l];
-						float num14 = array5[l];
+						float num15 = array4[l];
+						float num16 = array5[l];
 						if (caps && l < latSegmentsPerCap - 1)
 						{
 							if (l == 0)
 							{
-								int num15 = num7;
-								array[num7++] = vector;
-								array[num7++] = new Vector3(num10 * num13, num14 + 0.5f, num9 * num13);
-								array[num7++] = new Vector3(num12 * num13, num14 + 0.5f, num11 * num13);
-								Vector3 vector3 = Vector3.Cross(array[num15 + 2] - array[num15], array[num15 + 1] - array[num15]);
-								array2[num8++] = vector3;
-								array2[num8++] = vector3;
-								array2[num8++] = vector3;
-								array3[newSize++] = num15;
-								array3[newSize++] = num15 + 2;
-								array3[newSize++] = num15 + 1;
+								int num17 = num8;
+								array[num8++] = vector;
+								array[num8++] = new Vector3(num12 * num15, num16 + 0.5f, num11 * num15);
+								array[num8++] = new Vector3(num14 * num15, num16 + 0.5f, num13 * num15);
+								Vector3 vector3 = Vector3.Cross(array[num17 + 2] - array[num17], array[num17 + 1] - array[num17]);
+								array2[num9++] = vector3;
+								array2[num9++] = vector3;
+								array2[num9++] = vector3;
+								array3[num10++] = num17;
+								array3[num10++] = num17 + 2;
+								array3[num10++] = num17 + 1;
 								if (!topCapOnly)
 								{
-									int num16 = num7;
-									array[num7++] = vector2;
-									array[num7++] = new Vector3(num10 * num13, -num14 - 0.5f, num9 * num13);
-									array[num7++] = new Vector3(num12 * num13, -num14 - 0.5f, num11 * num13);
-									Vector3 normalized = Vector3.Cross(array[num16 + 1] - array[num16], array[num16 + 2] - array[num16]).normalized;
-									array2[num8++] = normalized;
-									array2[num8++] = normalized;
-									array2[num8++] = normalized;
-									array3[newSize++] = num16;
-									array3[newSize++] = num16 + 1;
-									array3[newSize++] = num16 + 2;
+									int num18 = num8;
+									array[num8++] = vector2;
+									array[num8++] = new Vector3(num12 * num15, -num16 - 0.5f, num11 * num15);
+									array[num8++] = new Vector3(num14 * num15, -num16 - 0.5f, num13 * num15);
+									Vector3 normalized = Vector3.Cross(array[num18 + 1] - array[num18], array[num18 + 2] - array[num18]).normalized;
+									array2[num9++] = normalized;
+									array2[num9++] = normalized;
+									array2[num9++] = normalized;
+									array3[num10++] = num18;
+									array3[num10++] = num18 + 1;
+									array3[num10++] = num18 + 2;
 								}
 							}
-							float num17 = array4[l + 1];
-							float num18 = array5[l + 1];
+							float num19 = array4[l + 1];
+							float num20 = array5[l + 1];
 							if (caps)
 							{
-								int num19 = num7;
-								array[num7++] = new Vector3(num10 * num13, num14 + 0.5f, num9 * num13);
-								array[num7++] = new Vector3(num10 * num17, num18 + 0.5f, num9 * num17);
-								array[num7++] = new Vector3(num12 * num17, num18 + 0.5f, num11 * num17);
-								array[num7++] = new Vector3(num12 * num13, num14 + 0.5f, num11 * num13);
-								Vector3 vector4 = Vector3.Cross(array[num19 + 3] - array[num19], array[num19 + 1] - array[num19]);
-								array2[num8++] = vector4;
-								array2[num8++] = vector4;
-								array2[num8++] = vector4;
-								array2[num8++] = vector4;
-								array3[newSize++] = num19;
-								array3[newSize++] = num19 + 2;
-								array3[newSize++] = num19 + 1;
-								array3[newSize++] = num19;
-								array3[newSize++] = num19 + 3;
-								array3[newSize++] = num19 + 2;
+								int num21 = num8;
+								array[num8++] = new Vector3(num12 * num15, num16 + 0.5f, num11 * num15);
+								array[num8++] = new Vector3(num12 * num19, num20 + 0.5f, num11 * num19);
+								array[num8++] = new Vector3(num14 * num19, num20 + 0.5f, num13 * num19);
+								array[num8++] = new Vector3(num14 * num15, num16 + 0.5f, num13 * num15);
+								Vector3 vector4 = Vector3.Cross(array[num21 + 3] - array[num21], array[num21 + 1] - array[num21]);
+								array2[num9++] = vector4;
+								array2[num9++] = vector4;
+								array2[num9++] = vector4;
+								array2[num9++] = vector4;
+								array3[num10++] = num21;
+								array3[num10++] = num21 + 2;
+								array3[num10++] = num21 + 1;
+								array3[num10++] = num21;
+								array3[num10++] = num21 + 3;
+								array3[num10++] = num21 + 2;
 								if (!topCapOnly)
 								{
-									int num20 = num7;
-									array[num7++] = new Vector3(num10 * num13, -num14 - 0.5f, num9 * num13);
-									array[num7++] = new Vector3(num10 * num17, -num18 - 0.5f, num9 * num17);
-									array[num7++] = new Vector3(num12 * num17, -num18 - 0.5f, num11 * num17);
-									array[num7++] = new Vector3(num12 * num13, -num14 - 0.5f, num11 * num13);
-									Vector3 vector5 = Vector3.Cross(array[num20 + 1] - array[num20], array[num20 + 3] - array[num20]);
-									array2[num8++] = vector5;
-									array2[num8++] = vector5;
-									array2[num8++] = vector5;
-									array2[num8++] = vector5;
-									array3[newSize++] = num20;
-									array3[newSize++] = num20 + 1;
-									array3[newSize++] = num20 + 2;
-									array3[newSize++] = num20;
-									array3[newSize++] = num20 + 2;
-									array3[newSize++] = num20 + 3;
+									int num22 = num8;
+									array[num8++] = new Vector3(num12 * num15, -num16 - 0.5f, num11 * num15);
+									array[num8++] = new Vector3(num12 * num19, -num20 - 0.5f, num11 * num19);
+									array[num8++] = new Vector3(num14 * num19, -num20 - 0.5f, num13 * num19);
+									array[num8++] = new Vector3(num14 * num15, -num16 - 0.5f, num13 * num15);
+									Vector3 vector5 = Vector3.Cross(array[num22 + 1] - array[num22], array[num22 + 3] - array[num22]);
+									array2[num9++] = vector5;
+									array2[num9++] = vector5;
+									array2[num9++] = vector5;
+									array2[num9++] = vector5;
+									array3[num10++] = num22;
+									array3[num10++] = num22 + 1;
+									array3[num10++] = num22 + 2;
+									array3[num10++] = num22;
+									array3[num10++] = num22 + 2;
+									array3[num10++] = num22 + 3;
 								}
 							}
 						}
 						else if (sides && l == latSegmentsPerCap - 1)
 						{
-							int num21 = num7;
-							array[num7++] = new Vector3(num10 * num13, num14 + 0.5f, num9 * num13);
-							array[num7++] = new Vector3(num10 * num13, -num14 - 0.5f, num9 * num13);
-							array[num7++] = new Vector3(num12 * num13, -num14 - 0.5f, num11 * num13);
-							array[num7++] = new Vector3(num12 * num13, num14 + 0.5f, num11 * num13);
-							Vector3 normalized2 = Vector3.Cross(array[num21 + 3] - array[num21], array[num21 + 1] - array[num21]).normalized;
-							array2[num8++] = normalized2;
-							array2[num8++] = normalized2;
-							array2[num8++] = normalized2;
-							array2[num8++] = normalized2;
-							array3[newSize++] = num21;
-							array3[newSize++] = num21 + 2;
-							array3[newSize++] = num21 + 1;
-							array3[newSize++] = num21;
-							array3[newSize++] = num21 + 3;
-							array3[newSize++] = num21 + 2;
+							int num23 = num8;
+							array[num8++] = new Vector3(num12 * num15, num16 + 0.5f, num11 * num15);
+							array[num8++] = new Vector3(num12 * num15, -num16 - 0.5f, num11 * num15);
+							array[num8++] = new Vector3(num14 * num15, -num16 - 0.5f, num13 * num15);
+							array[num8++] = new Vector3(num14 * num15, num16 + 0.5f, num13 * num15);
+							Vector3 normalized2 = Vector3.Cross(array[num23 + 3] - array[num23], array[num23 + 1] - array[num23]).normalized;
+							array2[num9++] = normalized2;
+							array2[num9++] = normalized2;
+							array2[num9++] = normalized2;
+							array2[num9++] = normalized2;
+							array3[num10++] = num23;
+							array3[num10++] = num23 + 2;
+							array3[num10++] = num23 + 1;
+							array3[num10++] = num23;
+							array3[num10++] = num23 + 3;
+							array3[num10++] = num23 + 2;
 						}
 					}
 				}
-				Array.Resize<int>(ref array3, newSize);
+				Array.Resize<int>(ref array3, num10);
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
-				if (PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool.ContainsKey(key))
+				mesh.SetIndices(array3, 0, 0);
+				if (PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool.ContainsKey(num))
 				{
-					PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool.Remove(key);
+					PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool.Remove(num);
 				}
-				PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool.Add(key, mesh);
+				PrimitiveMeshFactory.s_capsuleFlatShadedMeshPool.Add(num, mesh);
 			}
 			return mesh;
 		}
@@ -1623,112 +1646,114 @@ namespace CjLib
 			{
 				PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool = new Dictionary<int, Mesh>();
 			}
-			int key = latSegmentsPerCap << 12 ^ longSegmentsPerCap ^ (caps ? 268435456 : 0) ^ (topCapOnly ? 536870912 : 0) ^ (sides ? 1073741824 : 0);
+			int num = latSegmentsPerCap << 12 ^ longSegmentsPerCap ^ (caps ? 268435456 : 0) ^ (topCapOnly ? 536870912 : 0) ^ (sides ? 1073741824 : 0);
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool.TryGetValue(key, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool.TryGetValue(num, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[longSegmentsPerCap * latSegmentsPerCap * 2 + 2];
 				Vector3[] array2 = new Vector3[array.Length];
 				int[] array3 = new int[longSegmentsPerCap * (latSegmentsPerCap * 4) * 3];
-				Vector3 vector = new Vector3(0f, 1.5f, 0f);
-				Vector3 vector2 = new Vector3(0f, -1.5f, 0f);
-				int num = array.Length - 2;
-				int num2 = array.Length - 1;
-				array[num] = vector;
-				array[num2] = vector2;
-				array2[num] = new Vector3(0f, 1f, 0f);
-				array2[num2] = new Vector3(0f, -1f, 0f);
+				Vector3 vector;
+				vector..ctor(0f, 1.5f, 0f);
+				Vector3 vector2;
+				vector2..ctor(0f, -1.5f, 0f);
+				int num2 = array.Length - 2;
+				int num3 = array.Length - 1;
+				array[num2] = vector;
+				array[num3] = vector2;
+				array2[num2] = new Vector3(0f, 1f, 0f);
+				array2[num3] = new Vector3(0f, -1f, 0f);
 				float[] array4 = new float[latSegmentsPerCap];
 				float[] array5 = new float[latSegmentsPerCap];
-				float num3 = 1.5707964f / (float)latSegmentsPerCap;
-				float num4 = 0f;
+				float num4 = 1.5707964f / (float)latSegmentsPerCap;
+				float num5 = 0f;
 				for (int i = 0; i < latSegmentsPerCap; i++)
 				{
-					num4 += num3;
-					array4[i] = Mathf.Sin(num4);
-					array5[i] = Mathf.Cos(num4);
+					num5 += num4;
+					array4[i] = Mathf.Sin(num5);
+					array5[i] = Mathf.Cos(num5);
 				}
 				float[] array6 = new float[longSegmentsPerCap];
 				float[] array7 = new float[longSegmentsPerCap];
-				float num5 = 6.2831855f / (float)longSegmentsPerCap;
-				float num6 = 0f;
+				float num6 = 6.2831855f / (float)longSegmentsPerCap;
+				float num7 = 0f;
 				for (int j = 0; j < longSegmentsPerCap; j++)
 				{
-					num6 += num5;
-					array6[j] = Mathf.Sin(num6);
-					array7[j] = Mathf.Cos(num6);
+					num7 += num6;
+					array6[j] = Mathf.Sin(num7);
+					array7[j] = Mathf.Cos(num7);
 				}
-				int num7 = 0;
 				int num8 = 0;
-				int newSize = 0;
+				int num9 = 0;
+				int num10 = 0;
 				for (int k = 0; k < longSegmentsPerCap; k++)
 				{
-					float num9 = array6[k];
-					float num10 = array7[k];
+					float num11 = array6[k];
+					float num12 = array7[k];
 					for (int l = 0; l < latSegmentsPerCap; l++)
 					{
-						float num11 = array4[l];
-						float num12 = array5[l];
-						array[num7] = new Vector3(num10 * num11, num12 + 0.5f, num9 * num11);
-						array[num7 + 1] = new Vector3(num10 * num11, -num12 - 0.5f, num9 * num11);
-						array2[num8] = new Vector3(num10 * num11, num12, num9 * num11);
-						array2[num8 + 1] = new Vector3(num10 * num11, -num12, num9 * num11);
+						float num13 = array4[l];
+						float num14 = array5[l];
+						array[num8] = new Vector3(num12 * num13, num14 + 0.5f, num11 * num13);
+						array[num8 + 1] = new Vector3(num12 * num13, -num14 - 0.5f, num11 * num13);
+						array2[num9] = new Vector3(num12 * num13, num14, num11 * num13);
+						array2[num9 + 1] = new Vector3(num12 * num13, -num14, num11 * num13);
 						if (caps && l == 0)
 						{
-							array3[newSize++] = num;
-							array3[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-							array3[newSize++] = num7;
+							array3[num10++] = num2;
+							array3[num10++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+							array3[num10++] = num8;
 							if (!topCapOnly)
 							{
-								array3[newSize++] = num2;
-								array3[newSize++] = num7 + 1;
-								array3[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array3[num10++] = num3;
+								array3[num10++] = num8 + 1;
+								array3[num10++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 							}
 						}
 						else
 						{
 							if (caps)
 							{
-								array3[newSize++] = num7 - 2;
-								array3[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array3[newSize++] = num7;
-								array3[newSize++] = num7 - 2;
-								array3[newSize++] = (num7 - 2 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array3[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array3[num10++] = num8 - 2;
+								array3[num10++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array3[num10++] = num8;
+								array3[num10++] = num8 - 2;
+								array3[num10++] = (num8 - 2 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array3[num10++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 								if (!topCapOnly)
 								{
-									array3[newSize++] = num7 - 1;
-									array3[newSize++] = num7 + 1;
-									array3[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-									array3[newSize++] = num7 - 1;
-									array3[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-									array3[newSize++] = (num7 - 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+									array3[num10++] = num8 - 1;
+									array3[num10++] = num8 + 1;
+									array3[num10++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+									array3[num10++] = num8 - 1;
+									array3[num10++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+									array3[num10++] = (num8 - 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 								}
 							}
 							if (sides && l == latSegmentsPerCap - 1)
 							{
-								array3[newSize++] = num7;
-								array3[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array3[newSize++] = num7 + 1;
-								array3[newSize++] = num7;
-								array3[newSize++] = (num7 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
-								array3[newSize++] = (num7 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array3[num10++] = num8;
+								array3[num10++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array3[num10++] = num8 + 1;
+								array3[num10++] = num8;
+								array3[num10++] = (num8 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
+								array3[num10++] = (num8 + 1 + latSegmentsPerCap * 2) % (longSegmentsPerCap * latSegmentsPerCap * 2);
 							}
 						}
-						num7 += 2;
 						num8 += 2;
+						num9 += 2;
 					}
 				}
-				Array.Resize<int>(ref array3, newSize);
+				Array.Resize<int>(ref array3, num10);
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
-				if (PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool.ContainsKey(key))
+				mesh.SetIndices(array3, 0, 0);
+				if (PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool.ContainsKey(num))
 				{
-					PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool.Remove(key);
+					PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool.Remove(num);
 				}
-				PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool.Add(key, mesh);
+				PrimitiveMeshFactory.s_capsuleSmoothShadedMeshPool.Add(num, mesh);
 			}
 			return mesh;
 		}
@@ -1744,7 +1769,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_capsule2dWireframeMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_capsule2dWireframeMeshPool.TryGetValue(capSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_capsule2dWireframeMeshPool.TryGetValue(capSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[(capSegments + 1) * 2];
@@ -1772,7 +1797,7 @@ namespace CjLib
 				}
 				mesh.vertices = array;
 				mesh.normals = array;
-				mesh.SetIndices(array2, MeshTopology.LineStrip, 0);
+				mesh.SetIndices(array2, 4, 0);
 				if (PrimitiveMeshFactory.s_capsule2dWireframeMeshPool.ContainsKey(capSegments))
 				{
 					PrimitiveMeshFactory.s_capsule2dWireframeMeshPool.Remove(capSegments);
@@ -1793,7 +1818,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_capsule2dSolidColorMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_capsule2dSolidColorMeshPool.TryGetValue(capSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_capsule2dSolidColorMeshPool.TryGetValue(capSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[(capSegments + 1) * 2];
@@ -1824,7 +1849,7 @@ namespace CjLib
 					array2[num2++] = (k + 1) % array.Length;
 				}
 				mesh.vertices = array;
-				mesh.SetIndices(array2, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array2, 0, 0);
 				if (PrimitiveMeshFactory.s_capsule2dSolidColorMeshPool.ContainsKey(capSegments))
 				{
 					PrimitiveMeshFactory.s_capsule2dSolidColorMeshPool.Remove(capSegments);
@@ -1845,7 +1870,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_capsule2dFlatShadedMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_capsule2dFlatShadedMeshPool.TryGetValue(capSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_capsule2dFlatShadedMeshPool.TryGetValue(capSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				int num = (capSegments + 1) * 2;
@@ -1871,7 +1896,8 @@ namespace CjLib
 						num6 += num5;
 					}
 					array[num2++] = new Vector3(Mathf.Cos(num6), Mathf.Sin(num6) - 0.5f, 0f);
-					Vector3 vector = new Vector3(0f, 0f, (i == 0) ? -1f : 1f);
+					Vector3 vector;
+					vector..ctor(0f, 0f, (i == 0) ? -1f : 1f);
 					for (int l = 0; l < num; l++)
 					{
 						array2[num3++] = vector;
@@ -1888,7 +1914,7 @@ namespace CjLib
 				}
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array3, 0, 0);
 				if (PrimitiveMeshFactory.s_capsule2dFlatShadedMeshPool.ContainsKey(capSegments))
 				{
 					PrimitiveMeshFactory.s_capsule2dFlatShadedMeshPool.Remove(capSegments);
@@ -1909,7 +1935,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_coneWireframeMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_coneWireframeMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_coneWireframeMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments + 1];
@@ -1929,7 +1955,7 @@ namespace CjLib
 				}
 				mesh.vertices = array;
 				mesh.normals = array;
-				mesh.SetIndices(array2, MeshTopology.Lines, 0);
+				mesh.SetIndices(array2, 3, 0);
 				if (PrimitiveMeshFactory.s_coneWireframeMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_coneWireframeMeshPool.Remove(numSegments);
@@ -1950,7 +1976,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_coneSolidColorMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_coneSolidColorMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_coneSolidColorMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments + 1];
@@ -1974,7 +2000,7 @@ namespace CjLib
 					num3 += num2;
 				}
 				mesh.vertices = array;
-				mesh.SetIndices(array2, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array2, 0, 0);
 				if (PrimitiveMeshFactory.s_coneSolidColorMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_coneSolidColorMeshPool.Remove(numSegments);
@@ -1995,13 +2021,14 @@ namespace CjLib
 				PrimitiveMeshFactory.s_coneFlatShadedMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_coneFlatShadedMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_coneFlatShadedMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments * 3 + numSegments];
 				Vector3[] array2 = new Vector3[array.Length];
 				int[] array3 = new int[numSegments * 3 + (numSegments - 2) * 3];
-				Vector3 vector = new Vector3(0f, 1f, 0f);
+				Vector3 vector;
+				vector..ctor(0f, 1f, 0f);
 				Vector3[] array4 = new Vector3[numSegments];
 				float num = 6.2831855f / (float)numSegments;
 				float num2 = 0f;
@@ -2041,7 +2068,7 @@ namespace CjLib
 				}
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array3, 0, 0);
 				if (PrimitiveMeshFactory.s_coneFlatShadedMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_coneFlatShadedMeshPool.Remove(numSegments);
@@ -2062,7 +2089,7 @@ namespace CjLib
 				PrimitiveMeshFactory.s_coneSmoothhadedMeshPool = new Dictionary<int, Mesh>();
 			}
 			Mesh mesh;
-			if (!PrimitiveMeshFactory.s_coneSmoothhadedMeshPool.TryGetValue(numSegments, out mesh) || mesh == null)
+			if (!PrimitiveMeshFactory.s_coneSmoothhadedMeshPool.TryGetValue(numSegments, ref mesh) || mesh == null)
 			{
 				mesh = new Mesh();
 				Vector3[] array = new Vector3[numSegments * 2 + 1];
@@ -2097,7 +2124,7 @@ namespace CjLib
 				}
 				mesh.vertices = array;
 				mesh.normals = array2;
-				mesh.SetIndices(array3, MeshTopology.Triangles, 0);
+				mesh.SetIndices(array3, 0, 0);
 				if (PrimitiveMeshFactory.s_coneSmoothhadedMeshPool.ContainsKey(numSegments))
 				{
 					PrimitiveMeshFactory.s_coneSmoothhadedMeshPool.Remove(numSegments);

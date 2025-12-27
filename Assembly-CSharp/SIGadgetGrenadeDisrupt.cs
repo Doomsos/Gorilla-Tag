@@ -65,7 +65,7 @@ public class SIGadgetGrenadeDisrupt : SIGadgetGrenade
 		{
 			return;
 		}
-		grenadeFinished();
+		grenadeFinished.Invoke();
 	}
 
 	protected override void HandleActivated()

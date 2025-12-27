@@ -108,7 +108,7 @@ public class LCKSocialCameraFollower : MonoBehaviour, ITickSystemTick
 
 	private void TryAddTick()
 	{
-		if (this.isParentedToRig && this.m_transformToFollow != null)
+		if (!this.isParentedToRig && this.m_transformToFollow != null)
 		{
 			TickSystem<object>.AddTickCallback(this);
 		}
@@ -118,6 +118,10 @@ public class LCKSocialCameraFollower : MonoBehaviour, ITickSystemTick
 
 	void ITickSystemTick.Tick()
 	{
+		if (this.isParentedToRig)
+		{
+			return;
+		}
 		base.transform.position = this.m_transformToFollow.position;
 		base.transform.root.rotation = this.m_transformToFollow.rotation;
 	}

@@ -31,8 +31,8 @@ public class HandEffectsTriggerRegistry : MonoBehaviour, ITickSystemTick, ITickS
 		HandEffectsTriggerRegistry.HasInstance = true;
 		this.job = new HandEffectsTriggerRegistry.HandEffectsJob
 		{
-			positionInput = new NativeArray<Vector3>(30, Allocator.Persistent, NativeArrayOptions.ClearMemory),
-			closeOutput = new NativeArray<bool>(900, Allocator.Persistent, NativeArrayOptions.ClearMemory),
+			positionInput = new NativeArray<Vector3>(30, 4, 1),
+			closeOutput = new NativeArray<bool>(900, 4, 1),
 			actualListSize = this.actualListSz
 		};
 	}
@@ -80,7 +80,7 @@ public class HandEffectsTriggerRegistry : MonoBehaviour, ITickSystemTick, ITickS
 	public void Tick()
 	{
 		this.CopyInput();
-		this.jobHandle = this.job.Schedule(this.actualListSz, 20, default(JobHandle));
+		this.jobHandle = IJobParallelForExtensions.Schedule<HandEffectsTriggerRegistry.HandEffectsJob>(this.job, this.actualListSz, 20, default(JobHandle));
 	}
 
 	public void PostTick()

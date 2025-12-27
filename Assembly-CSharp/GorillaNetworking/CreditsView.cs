@@ -15,68 +15,64 @@ namespace GorillaNetworking
 		{
 			get
 			{
-				return this.creditsSections.Sum((CreditsSection section) => this.PagesPerSection(section));
+				return Enumerable.Sum<CreditsSection>(this.creditsSections, (CreditsSection section) => this.PagesPerSection(section));
 			}
 		}
 
 		private void Start()
 		{
-			this.creditsSections = new CreditsSection[]
-			{
-				new CreditsSection
-				{
-					Title = "DEV TEAM",
-					Entries = new List<string>
-					{
-						"Anton \"NtsFranz\" Franzluebbers",
-						"Carlo Grossi Jr",
-						"Cody O'Quinn",
-						"David Neubelt",
-						"David \"AA_DavidY\" Yee",
-						"Derek \"DunkTrain\" Arabian",
-						"Elie Arabian",
-						"John Sleeper",
-						"Haunted Army",
-						"Kerestell Smith",
-						"Keith \"ElectronicWall\" Taylor",
-						"Laura \"Poppy\" Lorian",
-						"Lilly Tothill",
-						"Matt \"Crimity\" Ostgard",
-						"Nick Taylor",
-						"Ross Furmidge",
-						"Sasha \"Kayze\" Sanders"
-					}
-				},
-				new CreditsSection
-				{
-					Title = "SPECIAL THANKS",
-					Entries = new List<string>
-					{
-						"The \"Sticks\"",
-						"Alpha Squad",
-						"Meta",
-						"Scout House",
-						"Mighty PR",
-						"Caroline Arabian",
-						"Clarissa & Declan",
-						"Calum Haigh",
-						"EZ ICE",
-						"Gwen"
-					}
-				},
-				new CreditsSection
-				{
-					Title = "MUSIC BY",
-					Entries = new List<string>
-					{
-						"Stunshine",
-						"David Anderson Kirk",
-						"Jaguar Jen",
-						"Audiopfeil",
-						"Owlobe"
-					}
-				}
-			};
+			CreditsSection[] array = new CreditsSection[3];
+			int num = 0;
+			CreditsSection creditsSection = new CreditsSection();
+			creditsSection.Title = "DEV TEAM";
+			List<string> list = new List<string>();
+			list.Add("Anton \"NtsFranz\" Franzluebbers");
+			list.Add("Carlo Grossi Jr");
+			list.Add("Cody O'Quinn");
+			list.Add("David Neubelt");
+			list.Add("David \"AA_DavidY\" Yee");
+			list.Add("Derek \"DunkTrain\" Arabian");
+			list.Add("Elie Arabian");
+			list.Add("John Sleeper");
+			list.Add("Haunted Army");
+			list.Add("Kerestell Smith");
+			list.Add("Keith \"ElectronicWall\" Taylor");
+			list.Add("Laura \"Poppy\" Lorian");
+			list.Add("Lilly Tothill");
+			list.Add("Matt \"Crimity\" Ostgard");
+			list.Add("Nick Taylor");
+			list.Add("Ross Furmidge");
+			list.Add("Sasha \"Kayze\" Sanders");
+			creditsSection.Entries = list;
+			array[num] = creditsSection;
+			int num2 = 1;
+			CreditsSection creditsSection2 = new CreditsSection();
+			creditsSection2.Title = "SPECIAL THANKS";
+			List<string> list2 = new List<string>();
+			list2.Add("The \"Sticks\"");
+			list2.Add("Alpha Squad");
+			list2.Add("Meta");
+			list2.Add("Scout House");
+			list2.Add("Mighty PR");
+			list2.Add("Caroline Arabian");
+			list2.Add("Clarissa & Declan");
+			list2.Add("Calum Haigh");
+			list2.Add("EZ ICE");
+			list2.Add("Gwen");
+			creditsSection2.Entries = list2;
+			array[num2] = creditsSection2;
+			int num3 = 2;
+			CreditsSection creditsSection3 = new CreditsSection();
+			creditsSection3.Title = "MUSIC BY";
+			List<string> list3 = new List<string>();
+			list3.Add("Stunshine");
+			list3.Add("David Anderson Kirk");
+			list3.Add("Jaguar Jen");
+			list3.Add("Audiopfeil");
+			list3.Add("Owlobe");
+			creditsSection3.Entries = list3;
+			array[num3] = creditsSection3;
+			this.creditsSections = array;
 			PlayFabTitleDataCache.Instance.GetTitleData("CreditsData", delegate(string result)
 			{
 				this.creditsSections = JsonMapper.ToObject<CreditsSection[]>(result);
@@ -93,7 +89,7 @@ namespace GorillaNetworking
 
 		private IEnumerable<string> PageOfSection(CreditsSection section, int page)
 		{
-			return section.Entries.Skip(this.pageSize * page).Take(this.pageSize);
+			return Enumerable.Take<string>(Enumerable.Skip<string>(section.Entries, this.pageSize * page), this.pageSize);
 		}
 
 		[return: TupleElementNames(new string[]
@@ -109,12 +105,12 @@ namespace GorillaNetworking
 				int num2 = this.PagesPerSection(creditsSection);
 				if (num + num2 > page)
 				{
-					int item = page - num;
-					return new ValueTuple<CreditsSection, int>(creditsSection, item);
+					int num3 = page - num;
+					return new ValueTuple<CreditsSection, int>(creditsSection, num3);
 				}
 				num += num2;
 			}
-			return new ValueTuple<CreditsSection, int>(this.creditsSections.First<CreditsSection>(), 0);
+			return new ValueTuple<CreditsSection, int>(Enumerable.First<CreditsSection>(this.creditsSections), 0);
 		}
 
 		public void ProcessButtonPress(GorillaKeyboardBindings buttonPressed)
@@ -138,28 +134,28 @@ namespace GorillaNetworking
 			int item2 = pageEntries.Item2;
 			IEnumerable<string> enumerable = this.PageOfSection(item, item2);
 			string defaultResult = "CREDITS";
-			string str;
-			LocalisationManager.TryGetKeyForCurrentLocale("CREDITS", out str, defaultResult);
+			string text;
+			LocalisationManager.TryGetKeyForCurrentLocale("CREDITS", out text, defaultResult);
 			defaultResult = "(CONT)";
-			string str2;
-			LocalisationManager.TryGetKeyForCurrentLocale("CREDITS_CONTINUED", out str2, defaultResult);
-			string value = str + " - " + ((item2 == 0) ? item.Title : (item.Title + " " + str2));
+			string text2;
+			LocalisationManager.TryGetKeyForCurrentLocale("CREDITS_CONTINUED", out text2, defaultResult);
+			string text3 = text + " - " + ((item2 == 0) ? item.Title : (item.Title + " " + text2));
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine(value);
+			stringBuilder.AppendLine(text3);
 			stringBuilder.AppendLine();
-			foreach (string value2 in enumerable)
+			foreach (string text4 in enumerable)
 			{
-				stringBuilder.AppendLine(value2);
+				stringBuilder.AppendLine(text4);
 			}
-			for (int i = 0; i < this.pageSize - enumerable.Count<string>(); i++)
+			for (int i = 0; i < this.pageSize - Enumerable.Count<string>(enumerable); i++)
 			{
 				stringBuilder.AppendLine();
 			}
 			stringBuilder.AppendLine();
 			defaultResult = "PRESS ENTER TO CHANGE PAGES";
-			string value3;
-			LocalisationManager.TryGetKeyForCurrentLocale("CREDITS_PRESS_ENTER", out value3, defaultResult);
-			stringBuilder.AppendLine(value3);
+			string text5;
+			LocalisationManager.TryGetKeyForCurrentLocale("CREDITS_PRESS_ENTER", out text5, defaultResult);
+			stringBuilder.AppendLine(text5);
 			return stringBuilder.ToString();
 		}
 

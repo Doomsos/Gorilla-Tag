@@ -60,7 +60,7 @@ public static class CreatorCodes
 		{
 			return;
 		}
-		initializedEvent();
+		initializedEvent.Invoke();
 	}
 
 	public static void DeleteCharacter(string id)
@@ -75,7 +75,7 @@ public static class CreatorCodes
 			{
 				return;
 			}
-			onCreatorCodeChangedEvent(id);
+			onCreatorCodeChangedEvent.Invoke(id);
 		}
 	}
 
@@ -96,7 +96,7 @@ public static class CreatorCodes
 			{
 				return;
 			}
-			onCreatorCodeChangedEvent(id);
+			onCreatorCodeChangedEvent.Invoke(id);
 		}
 	}
 
@@ -113,7 +113,7 @@ public static class CreatorCodes
 		{
 			return;
 		}
-		onCreatorCodeChangedEvent(id);
+		onCreatorCodeChangedEvent.Invoke(id);
 	}
 
 	public static Task<NexusManager.MemberCode> CheckValidationCoroutineJIT(string terminalId, string code, NexusGroupId[] group)
@@ -141,11 +141,11 @@ public static class CreatorCodes
 			return;
 		}
 		CreatorCodes.data = JsonConvert.DeserializeObject<CreatorCodes.CreatorCodesData>(@string);
-		foreach (string key in CreatorCodes.data.currentCreatorCode.Keys)
+		foreach (string text in CreatorCodes.data.currentCreatorCode.Keys)
 		{
-			if (CreatorCodes.data.codeFirstUsedTime.ContainsKey(key) && DateTime.UtcNow.Subtract(CreatorCodes.data.codeFirstUsedTime[key]).Days > 14)
+			if (CreatorCodes.data.codeFirstUsedTime.ContainsKey(text) && DateTime.UtcNow.Subtract(CreatorCodes.data.codeFirstUsedTime[text]).Days > 14)
 			{
-				CreatorCodes.data.currentCreatorCode[key] = string.Empty;
+				CreatorCodes.data.currentCreatorCode[text] = string.Empty;
 			}
 		}
 	}

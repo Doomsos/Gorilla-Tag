@@ -14,7 +14,7 @@ public class HandHoldBehaviourActivation : Tappable
 
 	public override void OnGrabLocal(float tapTime, PhotonMessageInfoWrapped sender)
 	{
-		byte b = this.m_playerGrabCounts.GetValueOrDefault(sender.Sender.ActorNumber, 0);
+		byte b = CollectionExtensions.GetValueOrDefault<int, byte>(this.m_playerGrabCounts, sender.Sender.ActorNumber, 0);
 		b += 1;
 		if (b > 2)
 		{
@@ -31,7 +31,7 @@ public class HandHoldBehaviourActivation : Tappable
 	public override void OnReleaseLocal(float tapTime, PhotonMessageInfoWrapped sender)
 	{
 		byte b;
-		if (!this.m_playerGrabCounts.TryGetValue(sender.Sender.ActorNumber, out b) || b < 1)
+		if (!this.m_playerGrabCounts.TryGetValue(sender.Sender.ActorNumber, ref b) || b < 1)
 		{
 			return;
 		}
@@ -48,7 +48,7 @@ public class HandHoldBehaviourActivation : Tappable
 	private void OnPlayerLeftRoom(NetPlayer player)
 	{
 		byte b;
-		if (!this.m_playerGrabCounts.TryGetValue(player.ActorNumber, out b))
+		if (!this.m_playerGrabCounts.TryGetValue(player.ActorNumber, ref b))
 		{
 			return;
 		}
@@ -63,7 +63,7 @@ public class HandHoldBehaviourActivation : Tappable
 
 	private void OnLeftRoom()
 	{
-		byte valueOrDefault = this.m_playerGrabCounts.GetValueOrDefault(NetworkSystem.Instance.LocalPlayer.ActorNumber, 0);
+		byte valueOrDefault = CollectionExtensions.GetValueOrDefault<int, byte>(this.m_playerGrabCounts, NetworkSystem.Instance.LocalPlayer.ActorNumber, 0);
 		if (this.grabs > 0 && valueOrDefault < 1)
 		{
 			this.ActivationStop.Invoke();

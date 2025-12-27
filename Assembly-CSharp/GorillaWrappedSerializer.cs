@@ -157,7 +157,7 @@ internal abstract class GorillaWrappedSerializer : NetworkBehaviour, IPunObserva
 
 	public void SendRPC(string rpcName, bool targetOthers, params object[] data)
 	{
-		RpcTarget target = targetOthers ? RpcTarget.Others : RpcTarget.MasterClient;
+		RpcTarget target = targetOthers ? 1 : 2;
 		this.netView.SendRPC(rpcName, target, data);
 	}
 

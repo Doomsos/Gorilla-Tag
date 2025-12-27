@@ -19,37 +19,37 @@ public struct AnimatedBee
 		Vector3 vector;
 		Vector3 vector2;
 		this.GetPositionAndDestinationAtTime(syncTime, out vector, out vector2);
-		Vector3 target = (vector2 - this.oldPosition).normalized * this.speed;
-		this.velocity = Vector3.MoveTowards(this.velocity * manager.BeeJitterDamping, target, manager.BeeAcceleration * Time.deltaTime);
+		Vector3 vector3 = (vector2 - this.oldPosition).normalized * this.speed;
+		this.velocity = Vector3.MoveTowards(this.velocity * manager.BeeJitterDamping, vector3, manager.BeeAcceleration * Time.deltaTime);
 		if ((this.oldPosition - vector2).IsLongerThan(manager.BeeNearDestinationRadius))
 		{
 			this.velocity += Random.insideUnitSphere * manager.BeeJitterStrength * Time.deltaTime;
 		}
-		Vector3 vector3 = this.oldPosition + this.velocity * Time.deltaTime;
-		if ((vector3 - vector).IsLongerThan(manager.BeeMaxJitterRadius))
+		Vector3 vector4 = this.oldPosition + this.velocity * Time.deltaTime;
+		if ((vector4 - vector).IsLongerThan(manager.BeeMaxJitterRadius))
 		{
-			vector3 = vector + (vector3 - vector).normalized * manager.BeeMaxJitterRadius;
-			this.velocity = (vector3 - this.oldPosition) / Time.deltaTime;
+			vector4 = vector + (vector4 - vector).normalized * manager.BeeMaxJitterRadius;
+			this.velocity = (vector4 - this.oldPosition) / Time.deltaTime;
 		}
 		foreach (GameObject gameObject in BeeSwarmManager.avoidPoints)
 		{
 			Vector3 position = gameObject.transform.position;
-			if ((vector3 - position).IsShorterThan(manager.AvoidPointRadius))
+			if ((vector4 - position).IsShorterThan(manager.AvoidPointRadius))
 			{
-				Vector3 normalized = Vector3.Cross(position - vector3, vector2 - vector3).normalized;
+				Vector3 normalized = Vector3.Cross(position - vector4, vector2 - vector4).normalized;
 				Vector3 normalized2 = (vector2 - position).normalized;
-				float num = Vector3.Dot(vector3 - position, normalized);
-				Vector3 b = (manager.AvoidPointRadius - num) * normalized;
-				vector3 += b;
-				this.velocity += b;
+				float num = Vector3.Dot(vector4 - position, normalized);
+				Vector3 vector5 = (manager.AvoidPointRadius - num) * normalized;
+				vector4 += vector5;
+				this.velocity += vector5;
 			}
 		}
-		this.visual.transform.position = vector3;
-		if ((vector2 - vector3).IsLongerThan(0.01f))
+		this.visual.transform.position = vector4;
+		if ((vector2 - vector4).IsLongerThan(0.01f))
 		{
-			this.visual.transform.rotation = Quaternion.LookRotation(Vector3.up, vector3 - vector2);
+			this.visual.transform.rotation = Quaternion.LookRotation(Vector3.up, vector4 - vector2);
 		}
-		this.oldPosition = vector3;
+		this.oldPosition = vector4;
 		this.oldSyncTime = syncTime;
 	}
 
@@ -81,9 +81,9 @@ public struct AnimatedBee
 			this.destinationA = this.destinationCache[num];
 			this.destinationB = this.destinationCache[num2];
 		}
-		float t = Mathf.InverseLerp(this.destinationA.syncEndTime, this.destinationB.syncTime, syncTime);
+		float num4 = Mathf.InverseLerp(this.destinationA.syncEndTime, this.destinationB.syncTime, syncTime);
 		destination = this.destinationB.destination.GetPoint();
-		idealPosition = Vector3.Lerp(this.destinationA.destination.GetPoint(), destination, t);
+		idealPosition = Vector3.Lerp(this.destinationA.destination.GetPoint(), destination, num4);
 	}
 
 	public void InitVisual(MeshRenderer prefab, BeeSwarmManager manager)

@@ -219,7 +219,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		this.playersInRoom.Remove(netPlayer);
 		this.UpdateActiveScoreboards();
 		ReportMuteTimer reportMuteTimer;
-		if (GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.TryGetValue(netPlayer.ActorNumber, out reportMuteTimer))
+		if (GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.TryGetValue(netPlayer.ActorNumber, ref reportMuteTimer))
 		{
 			GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.Remove(netPlayer.ActorNumber);
 			GorillaScoreboardTotalUpdater.m_reportMuteTimerPool.Return(reportMuteTimer);
@@ -229,9 +229,9 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 	internal void JoinedRoom()
 	{
 		this.joinedRoom = true;
-		foreach (NetPlayer item in NetworkSystem.Instance.AllNetPlayers)
+		foreach (NetPlayer netPlayer in NetworkSystem.Instance.AllNetPlayers)
 		{
-			this.playersInRoom.Add(item);
+			this.playersInRoom.Add(netPlayer);
 		}
 		this.playersInRoom.Sort((NetPlayer x, NetPlayer y) => x.ActorNumber.CompareTo(y.ActorNumber));
 		foreach (GorillaScoreBoard sB in GorillaScoreboardTotalUpdater.allScoreboards)
@@ -259,7 +259,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 	public static void ReportMute(NetPlayer player, int muted)
 	{
 		ReportMuteTimer reportMuteTimer;
-		if (GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.TryGetValue(player.ActorNumber, out reportMuteTimer))
+		if (GorillaScoreboardTotalUpdater.m_reportMuteTimerDict.TryGetValue(player.ActorNumber, ref reportMuteTimer))
 		{
 			reportMuteTimer.Muted = muted;
 			if (!reportMuteTimer.Running)

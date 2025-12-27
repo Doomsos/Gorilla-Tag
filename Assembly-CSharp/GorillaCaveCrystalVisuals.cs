@@ -18,7 +18,7 @@ public class GorillaCaveCrystalVisuals : MonoBehaviour
 
 	public void Setup()
 	{
-		base.TryGetComponent<MeshRenderer>(out this._renderer);
+		base.TryGetComponent<MeshRenderer>(ref this._renderer);
 		if (this._renderer == null)
 		{
 			return;
@@ -81,11 +81,11 @@ public class GorillaCaveCrystalVisuals : MonoBehaviour
 		}
 		CrystalVisualsPreset.VisualState stateA = this.crysalPreset.stateA;
 		CrystalVisualsPreset.VisualState stateB = this.crysalPreset.stateB;
-		Color value = Color.Lerp(stateA.albedo, stateB.albedo, this._lerp);
-		Color value2 = Color.Lerp(stateA.emission, stateB.emission, this._lerp);
+		Color color = Color.Lerp(stateA.albedo, stateB.albedo, this._lerp);
+		Color color2 = Color.Lerp(stateA.emission, stateB.emission, this._lerp);
 		this._renderer.GetPropertyBlock(this._block);
-		this._block.SetColor(GorillaCaveCrystalVisuals._Color, value);
-		this._block.SetColor(GorillaCaveCrystalVisuals._EmissionColor, value2);
+		this._block.SetColor(GorillaCaveCrystalVisuals._Color, color);
+		this._block.SetColor(GorillaCaveCrystalVisuals._EmissionColor, color2);
 		this._renderer.SetPropertyBlock(this._block);
 	}
 
@@ -97,7 +97,7 @@ public class GorillaCaveCrystalVisuals : MonoBehaviour
 
 	private static void InitializeCrystals()
 	{
-		foreach (GorillaCaveCrystalVisuals gorillaCaveCrystalVisuals in Object.FindObjectsByType<GorillaCaveCrystalVisuals>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID))
+		foreach (GorillaCaveCrystalVisuals gorillaCaveCrystalVisuals in Object.FindObjectsByType<GorillaCaveCrystalVisuals>(1, 1))
 		{
 			gorillaCaveCrystalVisuals.UpdateAlbedo();
 			gorillaCaveCrystalVisuals.ForceUpdate();

@@ -23,10 +23,10 @@ namespace FXP
 			this.lastUpdated = -this.updateClock;
 			this.isValid = (this.goPedestal && this.goMannequin && this.goCosmeticItem && this.goCosmeticItemNameplate && this.goClock && this.goPreviewMode && this.goAttractMode && this.goPurchaseMode);
 			this.goPreviewModeSFX = this.goPreviewMode.transform.GetComponentInChildren<AudioSource>();
-			this.goAttractModeSFX = this.goAttractMode.transform.FindChildRecursive("SFXAttractMode").GetComponent<AudioSource>();
-			this.goPurchaseModeSFX = this.goPurchaseMode.transform.FindChildRecursive("SFXPurchaseMode").GetComponent<AudioSource>();
-			this.goAttractModeVFX = this.goAttractMode.transform.FindChildRecursive("VFXAttractMode").GetComponent<ParticleSystem>();
-			this.goPurchaseModeVFX = this.goPurchaseMode.transform.FindChildRecursive("VFXPurchaseMode").GetComponent<ParticleSystem>();
+			this.goAttractModeSFX = OVRExtensions.FindChildRecursive(this.goAttractMode.transform, "SFXAttractMode").GetComponent<AudioSource>();
+			this.goPurchaseModeSFX = OVRExtensions.FindChildRecursive(this.goPurchaseMode.transform, "SFXPurchaseMode").GetComponent<AudioSource>();
+			this.goAttractModeVFX = OVRExtensions.FindChildRecursive(this.goAttractMode.transform, "VFXAttractMode").GetComponent<ParticleSystem>();
+			this.goPurchaseModeVFX = OVRExtensions.FindChildRecursive(this.goPurchaseMode.transform, "VFXPurchaseMode").GetComponent<ParticleSystem>();
 			this.clockTextMesh = this.goClock.GetComponent<TextMeshPro>();
 			this.clockTextMeshIsValid = (this.clockTextMesh != null);
 			if (this.clockTextMeshIsValid)
@@ -318,7 +318,7 @@ namespace FXP
 				return;
 			}
 			Guid guid;
-			if (!Guid.TryParse(WhichGUID, out guid))
+			if (!Guid.TryParse(WhichGUID, ref guid))
 			{
 				return;
 			}

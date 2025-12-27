@@ -23,7 +23,7 @@ public class ClackerCosmetic : MonoBehaviour
 		Vector3 lastWorldPosition = this.arm1.lastWorldPosition;
 		this.arm1.UpdateArm();
 		this.arm2.UpdateArm();
-		ref Vector3 eulerAngles = this.clackerArm1.transform.eulerAngles;
+		Vector3 eulerAngles = this.clackerArm1.transform.eulerAngles;
 		Vector3 eulerAngles2 = this.clackerArm2.transform.eulerAngles;
 		Mathf.DeltaAngle(eulerAngles.y, eulerAngles2.y);
 		if ((this.arm1.lastWorldPosition - this.arm2.lastWorldPosition).IsShorterThan(this.collisionDistance))
@@ -44,24 +44,24 @@ public class ClackerCosmetic : MonoBehaviour
 					this.lightClackAudio.Play();
 				}
 			}
-			Vector3 a = (this.arm1.lastWorldPosition + this.arm2.lastWorldPosition) / 2f;
-			Vector3 vector = (this.arm1.lastWorldPosition - this.arm2.lastWorldPosition).normalized * (this.collisionDistance + 0.001f) / 2f;
-			Vector3 b = a + vector;
-			Vector3 b2 = a - vector;
-			if ((lastWorldPosition - b).IsLongerThan(lastWorldPosition - b2))
+			Vector3 vector = (this.arm1.lastWorldPosition + this.arm2.lastWorldPosition) / 2f;
+			Vector3 vector2 = (this.arm1.lastWorldPosition - this.arm2.lastWorldPosition).normalized * (this.collisionDistance + 0.001f) / 2f;
+			Vector3 vector3 = vector + vector2;
+			Vector3 vector4 = vector - vector2;
+			if ((lastWorldPosition - vector3).IsLongerThan(lastWorldPosition - vector4))
 			{
-				vector = -vector;
+				vector2 = -vector2;
 			}
-			this.arm1.SetPosition(a + vector);
-			this.arm2.SetPosition(a - vector);
+			this.arm1.SetPosition(vector + vector2);
+			this.arm2.SetPosition(vector - vector2);
 			ref Vector3 ptr = ref this.arm1.velocity;
 			Vector3 velocity = this.arm2.velocity;
 			Vector3 velocity2 = this.arm1.velocity;
 			ptr = velocity;
 			this.arm2.velocity = velocity2;
-			Vector3 b3 = (this.arm1.lastWorldPosition - this.arm2.lastWorldPosition).normalized * this.pushApartStrength * Mathf.Sqrt(sqrMagnitude);
-			this.arm1.velocity = this.arm1.velocity + b3;
-			this.arm2.velocity = this.arm2.velocity - b3;
+			Vector3 vector5 = (this.arm1.lastWorldPosition - this.arm2.lastWorldPosition).normalized * this.pushApartStrength * Mathf.Sqrt(sqrMagnitude);
+			this.arm1.velocity = this.arm1.velocity + vector5;
+			this.arm2.velocity = this.arm2.velocity - vector5;
 		}
 	}
 
@@ -128,22 +128,22 @@ public class ClackerCosmetic : MonoBehaviour
 	{
 		public void UpdateArm()
 		{
-			Vector3 target = this.transform.TransformPoint(this.parent.LocalCenterOfMass);
-			Vector3 a = this.lastWorldPosition + this.velocity * Time.deltaTime * this.parent.drag;
-			Vector3 vector = this.transform.parent.TransformDirection(this.parent.LocalRotationAxis);
-			Vector3 vector2 = this.transform.position + (a - this.transform.position).ProjectOntoPlane(vector).normalized * this.parent.centerOfMassRadius;
-			vector2 = Vector3.MoveTowards(vector2, target, this.parent.localFriction * Time.deltaTime);
-			this.velocity = (vector2 - this.lastWorldPosition) / Time.deltaTime;
+			Vector3 vector = this.transform.TransformPoint(this.parent.LocalCenterOfMass);
+			Vector3 vector2 = this.lastWorldPosition + this.velocity * Time.deltaTime * this.parent.drag;
+			Vector3 vector3 = this.transform.parent.TransformDirection(this.parent.LocalRotationAxis);
+			Vector3 vector4 = this.transform.position + UnityVectorExtensions.ProjectOntoPlane(vector2 - this.transform.position, vector3).normalized * this.parent.centerOfMassRadius;
+			vector4 = Vector3.MoveTowards(vector4, vector, this.parent.localFriction * Time.deltaTime);
+			this.velocity = (vector4 - this.lastWorldPosition) / Time.deltaTime;
 			this.velocity += Vector3.down * this.parent.gravity * Time.deltaTime;
-			this.lastWorldPosition = vector2;
-			this.transform.rotation = Quaternion.LookRotation(vector, vector2 - this.transform.position) * this.parent.RotationCorrection;
+			this.lastWorldPosition = vector4;
+			this.transform.rotation = Quaternion.LookRotation(vector3, vector4 - this.transform.position) * this.parent.RotationCorrection;
 			this.lastWorldPosition = this.transform.TransformPoint(this.parent.LocalCenterOfMass);
 		}
 
 		public void SetPosition(Vector3 newPosition)
 		{
-			Vector3 forward = this.transform.parent.TransformDirection(this.parent.LocalRotationAxis);
-			this.transform.rotation = Quaternion.LookRotation(forward, newPosition - this.transform.position) * this.parent.RotationCorrection;
+			Vector3 vector = this.transform.parent.TransformDirection(this.parent.LocalRotationAxis);
+			this.transform.rotation = Quaternion.LookRotation(vector, newPosition - this.transform.position) * this.parent.RotationCorrection;
 			this.lastWorldPosition = this.transform.TransformPoint(this.parent.LocalCenterOfMass);
 		}
 

@@ -48,12 +48,13 @@ namespace GorillaTag.Cosmetics
 				return;
 			}
 			Vector3 averageVelocity = this.velocityTracker.GetAverageVelocity(true, 0.15f, false);
-			Vector3 vector = new Vector3(averageVelocity.x, 0f, averageVelocity.z);
+			Vector3 vector;
+			vector..ctor(averageVelocity.x, 0f, averageVelocity.z);
 			float magnitude = vector.magnitude;
 			Vector3 normalized = vector.normalized;
-			float x = Mathf.Clamp(-normalized.z, -1f, 1f) * this.maxRotationAngle * (magnitude * this.rotationSpeedMultiplier);
-			float z = Mathf.Clamp(normalized.x, -1f, 1f) * this.maxRotationAngle * (magnitude * this.rotationSpeedMultiplier);
-			this.targetRotation = this.initialRotation * Quaternion.Euler(x, 0f, z);
+			float num = Mathf.Clamp(-normalized.z, -1f, 1f) * this.maxRotationAngle * (magnitude * this.rotationSpeedMultiplier);
+			float num2 = Mathf.Clamp(normalized.x, -1f, 1f) * this.maxRotationAngle * (magnitude * this.rotationSpeedMultiplier);
+			this.targetRotation = this.initialRotation * Quaternion.Euler(num, 0f, num2);
 			if (magnitude > this.sloshVelocityThreshold)
 			{
 				this.SwitchState(MedusaEyeLantern.State.SLOSHING);
@@ -87,7 +88,8 @@ namespace GorillaTag.Cosmetics
 		private void Sloshing()
 		{
 			Vector3 averageVelocity = this.velocityTracker.GetAverageVelocity(true, 0.15f, false);
-			Vector3 vector = new Vector3(averageVelocity.x, 0f, averageVelocity.z);
+			Vector3 vector;
+			vector..ctor(averageVelocity.x, 0f, averageVelocity.z);
 			if ((double)vector.magnitude < 0.01)
 			{
 				this.SwitchState(MedusaEyeLantern.State.DORMANT);
@@ -112,8 +114,8 @@ namespace GorillaTag.Cosmetics
 					this.SwitchState(MedusaEyeLantern.State.WARMUP);
 					return;
 				}
-				Quaternion to = Quaternion.LookRotation(-normalized2, Vector3.up);
-				this.rotatingObjectTransform.rotation = Quaternion.RotateTowards(this.rotatingObjectTransform.rotation, to, this.lookAtTargetSpeed * Time.deltaTime);
+				Quaternion quaternion = Quaternion.LookRotation(-normalized2, Vector3.up);
+				this.rotatingObjectTransform.rotation = Quaternion.RotateTowards(this.rotatingObjectTransform.rotation, quaternion, this.lookAtTargetSpeed * Time.deltaTime);
 			}
 		}
 
@@ -200,7 +202,7 @@ namespace GorillaTag.Cosmetics
 			this.lastState = this.currentState;
 			this.currentState = newState;
 			MedusaEyeLantern.EyeState eyeState;
-			if (this.lastState != this.currentState && this.allStatesDict.TryGetValue(newState, out eyeState))
+			if (this.lastState != this.currentState && this.allStatesDict.TryGetValue(newState, ref eyeState))
 			{
 				UnityEvent onEnterState = eyeState.onEnterState;
 				if (onEnterState != null)
@@ -209,7 +211,7 @@ namespace GorillaTag.Cosmetics
 				}
 			}
 			MedusaEyeLantern.EyeState eyeState2;
-			if (this.lastState != this.currentState && this.allStatesDict.TryGetValue(this.lastState, out eyeState2))
+			if (this.lastState != this.currentState && this.allStatesDict.TryGetValue(this.lastState, ref eyeState2))
 			{
 				UnityEvent onExitState = eyeState2.onExitState;
 				if (onExitState == null)
@@ -227,13 +229,13 @@ namespace GorillaTag.Cosmetics
 				return;
 			}
 			MedusaEyeLantern.EyeState eyeState;
-			this.allStatesDict.TryGetValue(state, out eyeState);
+			this.allStatesDict.TryGetValue(state, ref eyeState);
 			if (this.currentState == MedusaEyeLantern.State.WARMUP)
 			{
-				float time = Mathf.Clamp01(this.warmupCounter / this.warmUpProgressTime);
+				float num = Mathf.Clamp01(this.warmupCounter / this.warmUpProgressTime);
 				if (eyeState != null && eyeState.hapticStrength != null)
 				{
-					float amplitude = eyeState.hapticStrength.Evaluate(time);
+					float amplitude = eyeState.hapticStrength.Evaluate(num);
 					bool forLeftController = this.transferableParent.InLeftHand();
 					GorillaTagger.Instance.StartVibration(forLeftController, amplitude, Time.deltaTime);
 					return;

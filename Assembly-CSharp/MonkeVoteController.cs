@@ -45,7 +45,7 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 			{
 				return;
 			}
-			onCurrentPollEnded();
+			onCurrentPollEnded.Invoke();
 		}
 	}
 
@@ -97,10 +97,10 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 		request.downloadHandler = new DownloadHandlerBuffer();
 		request.SetRequestHeader("Content-Type", "application/json");
 		yield return request.SendWebRequest();
-		if (request.result == UnityWebRequest.Result.Success)
+		if (request.result == 1)
 		{
-			List<MonkeVoteController.FetchPollsResponse> obj = JsonConvert.DeserializeObject<List<MonkeVoteController.FetchPollsResponse>>(request.downloadHandler.text);
-			callback(obj);
+			List<MonkeVoteController.FetchPollsResponse> list = JsonConvert.DeserializeObject<List<MonkeVoteController.FetchPollsResponse>>(request.downloadHandler.text);
+			callback.Invoke(list);
 		}
 		else
 		{
@@ -109,7 +109,7 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 			{
 				retry = true;
 			}
-			else if (request.result == UnityWebRequest.Result.ConnectionError)
+			else if (request.result == 2)
 			{
 				retry = true;
 			}
@@ -127,7 +127,7 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 			{
 				GTDev.LogError<string>("Maximum FetchPolls retries attempted. Please check your network connection.", null);
 				this.fetchPollsRetryCount = 0;
-				callback(null);
+				callback.Invoke(null);
 			}
 		}
 		yield break;
@@ -176,7 +176,7 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 		{
 			return;
 		}
-		onPollsUpdated();
+		onPollsUpdated.Invoke();
 	}
 
 	public void Vote(int pollId, int option, bool isPrediction)
@@ -231,10 +231,10 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 		request.downloadHandler = new DownloadHandlerBuffer();
 		request.SetRequestHeader("Content-Type", "application/json");
 		yield return request.SendWebRequest();
-		if (request.result == UnityWebRequest.Result.Success)
+		if (request.result == 1)
 		{
-			MonkeVoteController.VoteResponse obj = JsonConvert.DeserializeObject<MonkeVoteController.VoteResponse>(request.downloadHandler.text);
-			callback(obj);
+			MonkeVoteController.VoteResponse voteResponse = JsonConvert.DeserializeObject<MonkeVoteController.VoteResponse>(request.downloadHandler.text);
+			callback.Invoke(voteResponse);
 		}
 		else
 		{
@@ -246,9 +246,9 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 			else if (request.responseCode == 429L)
 			{
 				GTDev.LogWarning<string>("User already voted on this poll!", null);
-				callback(null);
+				callback.Invoke(null);
 			}
-			else if (request.result == UnityWebRequest.Result.ConnectionError)
+			else if (request.result == 2)
 			{
 				retry = true;
 			}
@@ -266,7 +266,7 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 			{
 				GTDev.LogError<string>("Maximum Vote retries attempted. Please check your network connection.", null);
 				this.voteRetryCount = 0;
-				callback(null);
+				callback.Invoke(null);
 			}
 		}
 		else
@@ -287,7 +287,7 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 			{
 				return;
 			}
-			onVoteAccepted();
+			onVoteAccepted.Invoke();
 			return;
 		}
 		else
@@ -297,7 +297,7 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 			{
 				return;
 			}
-			onVoteFailed();
+			onVoteFailed.Invoke();
 			return;
 		}
 	}

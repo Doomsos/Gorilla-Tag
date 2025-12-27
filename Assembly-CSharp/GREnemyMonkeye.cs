@@ -193,7 +193,7 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			break;
 		case GREnemyMonkeye.Behavior.Chase:
 			this.abilityChase.Start();
-			this.investigateLocation = null;
+			this.investigateLocation = default(Vector3?);
 			this.abilityChase.SetTargetPlayer(this.agent.targetPlayer);
 			break;
 		case GREnemyMonkeye.Behavior.Search:
@@ -201,16 +201,16 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			break;
 		case GREnemyMonkeye.Behavior.Attack:
 			this.abilityAttackLaser.Start();
-			this.investigateLocation = null;
+			this.investigateLocation = default(Vector3?);
 			this.abilityAttackLaser.SetTargetPlayer(this.agent.targetPlayer);
 			break;
 		case GREnemyMonkeye.Behavior.AttackDisco:
 			this.abilityAttackDiscoWander.Start();
-			this.investigateLocation = null;
+			this.investigateLocation = default(Vector3?);
 			break;
 		case GREnemyMonkeye.Behavior.AttackSlamdown:
 			this.abilityAttackSlamdown.Start();
-			this.investigateLocation = null;
+			this.investigateLocation = default(Vector3?);
 			this.abilityAttackSlamdown.SetTargetPlayer(this.agent.targetPlayer);
 			break;
 		case GREnemyMonkeye.Behavior.Investigate:
@@ -372,18 +372,18 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			if (this.agent.targetPlayer != null)
 			{
 				Vector3 position = GRPlayer.Get(this.agent.targetPlayer).transform.position;
-				Vector3 a = position - base.transform.position;
-				float magnitude = a.magnitude;
+				Vector3 vector = position - base.transform.position;
+				float magnitude = vector.magnitude;
 				if (this.TryChooseAttackBehavior(magnitude * magnitude))
 				{
 					return;
 				}
 				if (this.canChaseJump && this.abilityJump.IsCoolDownOver(this.chaseJumpMinInterval) && magnitude > this.attackRange + this.minChaseJumpDistance && GRSenseLineOfSight.HasNavmeshLineOfSight(base.transform.position, position, 10f))
 				{
-					Vector3 a2 = a / magnitude;
-					float d = Mathf.Clamp(this.chaseJumpDistance, this.minChaseJumpDistance, magnitude - this.attackRange * 0.5f);
+					Vector3 vector2 = vector / magnitude;
+					float num = Mathf.Clamp(this.chaseJumpDistance, this.minChaseJumpDistance, magnitude - this.attackRange * 0.5f);
 					NavMeshHit navMeshHit;
-					if (NavMesh.SamplePosition(base.transform.position + a2 * d, out navMeshHit, 0.5f, AbilityHelperFunctions.GetNavMeshWalkableArea()))
+					if (NavMesh.SamplePosition(base.transform.position + vector2 * num, ref navMeshHit, 0.5f, AbilityHelperFunctions.GetNavMeshWalkableArea()))
 					{
 						this.agent.GetGameAgentManager().RequestJump(this.agent, base.transform.position, navMeshHit.position, 0.25f, 1.5f);
 						return;
@@ -506,7 +506,7 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			this.abilityInvestigate.UpdateAuthority(dt);
 			if (this.abilityInvestigate.IsDone())
 			{
-				this.investigateLocation = null;
+				this.investigateLocation = default(Vector3?);
 			}
 			if (GhostReactorManager.noiseDebugEnabled)
 			{
@@ -688,15 +688,15 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 
 	public void OnGameEntitySerialize(BinaryWriter writer)
 	{
-		byte value = (byte)this.currBehavior;
-		byte value2 = (byte)this.currBodyState;
-		byte value3 = (byte)this.abilityPatrol.nextPatrolNode;
-		int value4 = (this.targetPlayer == null) ? -1 : this.targetPlayer.ActorNumber;
-		writer.Write(value);
-		writer.Write(value2);
+		byte b = (byte)this.currBehavior;
+		byte b2 = (byte)this.currBodyState;
+		byte b3 = (byte)this.abilityPatrol.nextPatrolNode;
+		int num = (this.targetPlayer == null) ? -1 : this.targetPlayer.ActorNumber;
+		writer.Write(b);
+		writer.Write(b2);
 		writer.Write(this.hp);
-		writer.Write(value3);
-		writer.Write(value4);
+		writer.Write(b3);
+		writer.Write(num);
 	}
 
 	public void OnGameEntityDeserialize(BinaryReader reader)

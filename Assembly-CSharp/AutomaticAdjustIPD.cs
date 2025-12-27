@@ -18,9 +18,9 @@ public class AutomaticAdjustIPD : MonoBehaviour, IGorillaSliceableSimple
 	{
 		if (!this.headset.isValid)
 		{
-			this.headset = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+			this.headset = InputDevices.GetDeviceAtXRNode(3);
 		}
-		if (this.headset.isValid && this.headset.TryGetFeatureValue(CommonUsages.leftEyePosition, out this.leftEyePosition) && this.headset.TryGetFeatureValue(CommonUsages.rightEyePosition, out this.rightEyePosition))
+		if (this.headset.isValid && this.headset.TryGetFeatureValue(CommonUsages.leftEyePosition, ref this.leftEyePosition) && this.headset.TryGetFeatureValue(CommonUsages.rightEyePosition, ref this.rightEyePosition))
 		{
 			this.currentIPD = (this.rightEyePosition - this.leftEyePosition).magnitude;
 			if (Mathf.Abs(this.lastIPD - this.currentIPD) < 0.01f)

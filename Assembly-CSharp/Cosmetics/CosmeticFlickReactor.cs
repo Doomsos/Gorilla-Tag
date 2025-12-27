@@ -123,14 +123,14 @@ namespace Cosmetics
 
 		private float GetSignedSpeedAlong(Vector3 axis)
 		{
-			Vector3 lhs;
+			Vector3 vector;
 			if (this.speedTracker != null)
 			{
-				lhs = this.speedTracker.GetWorldVelocity();
+				vector = this.speedTracker.GetWorldVelocity();
 			}
 			else if (this.rb != null)
 			{
-				lhs = this.rb.linearVelocity;
+				vector = this.rb.linearVelocity;
 			}
 			else
 			{
@@ -140,12 +140,12 @@ namespace Cosmetics
 					this.hasLastPosition = true;
 					return 0f;
 				}
-				Vector3 a = base.transform.position - this.lastPosition;
-				float d = (Time.deltaTime > Mathf.Epsilon) ? (1f / Time.deltaTime) : 0f;
-				lhs = a * d;
+				Vector3 vector2 = base.transform.position - this.lastPosition;
+				float num = (Time.deltaTime > Mathf.Epsilon) ? (1f / Time.deltaTime) : 0f;
+				vector = vector2 * num;
 				this.lastPosition = base.transform.position;
 			}
-			return Vector3.Dot(lhs, axis.normalized);
+			return Vector3.Dot(vector, axis.normalized);
 		}
 
 		private void FireEvents(float currentAbsSpeed)
@@ -165,13 +165,13 @@ namespace Cosmetics
 			}
 			if (this.maxSpeedThreshold > 0f)
 			{
-				float value = Mathf.InverseLerp(this.minSpeedThreshold, this.maxSpeedThreshold, currentAbsSpeed);
+				float num = Mathf.InverseLerp(this.minSpeedThreshold, this.maxSpeedThreshold, currentAbsSpeed);
 				UnityEvent<float> unityEvent = this.onFlickStrength;
 				if (unityEvent == null)
 				{
 					return;
 				}
-				unityEvent.Invoke(Mathf.Clamp01(value));
+				unityEvent.Invoke(Mathf.Clamp01(num));
 			}
 		}
 

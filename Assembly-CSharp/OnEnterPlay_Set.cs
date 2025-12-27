@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(256)]
 public class OnEnterPlay_Set : OnEnterPlay_Attribute
 {
 	public OnEnterPlay_Set(object value)

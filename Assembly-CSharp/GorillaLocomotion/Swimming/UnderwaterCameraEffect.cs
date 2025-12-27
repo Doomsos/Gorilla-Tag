@@ -88,16 +88,18 @@ namespace GorillaLocomotion.Swimming
 			}
 			if (flag)
 			{
-				Vector3 inPoint = this.targetCamera.transform.InverseTransformPoint(this.waterSurface.surfacePoint);
-				Vector3 inNormal = this.targetCamera.transform.InverseTransformDirection(this.waterSurface.surfaceNormal);
-				Plane p = new Plane(inNormal, inPoint);
-				Plane p2 = new Plane(Vector3.forward, -this.distanceFromCamera);
-				Vector3 vector;
-				Vector3 vector2;
-				if (this.IntersectPlanes(p2, p, out vector, out vector2))
+				Vector3 vector = this.targetCamera.transform.InverseTransformPoint(this.waterSurface.surfacePoint);
+				Vector3 vector2 = this.targetCamera.transform.InverseTransformDirection(this.waterSurface.surfaceNormal);
+				Plane p;
+				p..ctor(vector2, vector);
+				Plane p2;
+				p2..ctor(Vector3.forward, -this.distanceFromCamera);
+				Vector3 vector3;
+				Vector3 vector4;
+				if (this.IntersectPlanes(p2, p, out vector3, out vector4))
 				{
-					Vector3 normalized = Vector3.Cross(vector2, Vector3.forward).normalized;
-					float num3 = Vector3.Dot(new Vector3(vector.x, vector.y, 0f), normalized);
+					Vector3 normalized = Vector3.Cross(vector4, Vector3.forward).normalized;
+					float num3 = Vector3.Dot(new Vector3(vector3.x, vector3.y, 0f), normalized);
 					if (num3 > this.frustumPlaneExtents.y + 0.04f)
 					{
 						this.SetFullScreenPosition();
@@ -112,19 +114,19 @@ namespace GorillaLocomotion.Swimming
 					{
 						float num4 = num3;
 						num4 += this.GetFrustumCoverageDistance(-normalized) + 0.04f;
-						float num5 = this.GetFrustumCoverageDistance(vector2) + 0.04f;
-						num5 += this.GetFrustumCoverageDistance(-vector2) + 0.04f;
+						float num5 = this.GetFrustumCoverageDistance(vector4) + 0.04f;
+						num5 += this.GetFrustumCoverageDistance(-vector4) + 0.04f;
 						base.transform.localScale = new Vector3(num5, num4, 1f);
 						base.transform.localPosition = normalized * (num3 - num4 * 0.5f) + new Vector3(0f, 0f, this.distanceFromCamera);
-						float angle = Vector3.SignedAngle(Vector3.up, normalized, Vector3.forward);
-						base.transform.localRotation = Quaternion.AngleAxis(angle, Vector3.forward);
+						float num6 = Vector3.SignedAngle(Vector3.up, normalized, Vector3.forward);
+						base.transform.localRotation = Quaternion.AngleAxis(num6, Vector3.forward);
 						this.SetCameraOverlapState(UnderwaterCameraEffect.CameraOverlapWaterState.PartiallySubmerged);
 					}
 					if (this.debugDraw)
 					{
-						Vector3 a = this.targetCamera.transform.TransformPoint(vector);
-						Vector3 a2 = this.targetCamera.transform.TransformDirection(vector2);
-						DebugUtil.DrawLine(a - 2f * this.frustumPlaneExtents.x * a2, a + 2f * this.frustumPlaneExtents.x * a2, Color.white, false);
+						Vector3 vector5 = this.targetCamera.transform.TransformPoint(vector3);
+						Vector3 vector6 = this.targetCamera.transform.TransformDirection(vector4);
+						DebugUtil.DrawLine(vector5 - 2f * this.frustumPlaneExtents.x * vector6, vector5 + 2f * this.frustumPlaneExtents.x * vector6, Color.white, false);
 					}
 				}
 				else if (new Plane(this.waterSurface.surfaceNormal, this.waterSurface.surfacePoint).GetSide(this.targetCamera.transform.position))
@@ -154,8 +156,8 @@ namespace GorillaLocomotion.Swimming
 		{
 			Shader.DisableKeyword("_GLOBAL_CAMERA_TOUCHING_WATER");
 			Shader.DisableKeyword("_GLOBAL_CAMERA_FULLY_UNDERWATER");
-			float w = -Vector3.Dot(this.waterSurface.surfaceNormal, this.waterSurface.surfacePoint);
-			Shader.SetGlobalVector(this.shaderParam_GlobalCameraOverlapWaterSurfacePlane, new Vector4(this.waterSurface.surfaceNormal.x, this.waterSurface.surfaceNormal.y, this.waterSurface.surfaceNormal.z, w));
+			float num = -Vector3.Dot(this.waterSurface.surfaceNormal, this.waterSurface.surfacePoint);
+			Shader.SetGlobalVector(this.shaderParam_GlobalCameraOverlapWaterSurfacePlane, new Vector4(this.waterSurface.surfaceNormal.x, this.waterSurface.surfaceNormal.y, this.waterSurface.surfaceNormal.z, num));
 		}
 
 		private void SetCameraOverlapState(UnderwaterCameraEffect.CameraOverlapWaterState state)
@@ -182,7 +184,8 @@ namespace GorillaLocomotion.Swimming
 			}
 			if (this.cameraOverlapWaterState == UnderwaterCameraEffect.CameraOverlapWaterState.PartiallySubmerged)
 			{
-				Plane plane = new Plane(this.waterSurface.surfaceNormal, this.waterSurface.surfacePoint);
+				Plane plane;
+				plane..ctor(this.waterSurface.surfaceNormal, this.waterSurface.surfacePoint);
 				Shader.SetGlobalVector(this.shaderParam_GlobalCameraOverlapWaterSurfacePlane, new Vector4(plane.normal.x, plane.normal.y, plane.normal.z, plane.distance));
 			}
 		}

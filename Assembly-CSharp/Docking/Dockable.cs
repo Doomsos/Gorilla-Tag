@@ -8,7 +8,7 @@ namespace Docking
 		protected virtual void OnTriggerEnter(Collider other)
 		{
 			Dock dock;
-			if (other.TryGetComponent<Dock>(out dock))
+			if (other.TryGetComponent<Dock>(ref dock))
 			{
 				this.potentialDock = other.transform;
 			}

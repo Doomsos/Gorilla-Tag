@@ -148,7 +148,7 @@ public class RacingManager : NetworkSceneObject, ITickSystemTick
 
 	public void OnCheckpointPassed(int raceId, int checkpointIndex)
 	{
-		this.photonView.RPC("PassCheckpoint_RPC", RpcTarget.All, new object[]
+		this.photonView.RPC("PassCheckpoint_RPC", 0, new object[]
 		{
 			(byte)raceId,
 			(byte)checkpointIndex
@@ -316,7 +316,7 @@ public class RacingManager : NetworkSceneObject, ITickSystemTick
 			case RacingManager.RacingState.Results:
 				return;
 			case RacingManager.RacingState.Countdown:
-				this.photonView.RPC("RaceBeginCountdown_RPC", RpcTarget.All, new object[]
+				this.photonView.RPC("RaceBeginCountdown_RPC", 0, new object[]
 				{
 					(byte)this.raceIndex,
 					(byte)this.numLapsSelected,
@@ -372,7 +372,7 @@ public class RacingManager : NetworkSceneObject, ITickSystemTick
 				{
 					if (PhotonNetwork.Time > this.abortRaceAtTimestamp)
 					{
-						this.photonView.RPC("RaceEnded_RPC", RpcTarget.All, new object[]
+						this.photonView.RPC("RaceEnded_RPC", 0, new object[]
 						{
 							(byte)this.raceIndex
 						});
@@ -389,7 +389,7 @@ public class RacingManager : NetworkSceneObject, ITickSystemTick
 						}
 						if (num == 0)
 						{
-							this.photonView.RPC("RaceEnded_RPC", RpcTarget.All, new object[]
+							this.photonView.RPC("RaceEnded_RPC", 0, new object[]
 							{
 								(byte)this.raceIndex
 							});
@@ -467,7 +467,7 @@ public class RacingManager : NetworkSceneObject, ITickSystemTick
 			{
 				return;
 			}
-			this.photonView.RPC("RequestRaceStart_RPC", RpcTarget.MasterClient, new object[]
+			this.photonView.RPC("RequestRaceStart_RPC", 2, new object[]
 			{
 				this.raceIndex,
 				laps
@@ -483,7 +483,7 @@ public class RacingManager : NetworkSceneObject, ITickSystemTick
 			this.UpdateActorsInStartZone();
 			if (this.actorsInStartZone.Contains(requestedByActorNumber))
 			{
-				this.photonView.RPC("RaceBeginCountdown_RPC", RpcTarget.All, new object[]
+				this.photonView.RPC("RaceBeginCountdown_RPC", 0, new object[]
 				{
 					(byte)this.raceIndex,
 					(byte)laps,
@@ -524,7 +524,7 @@ public class RacingManager : NetworkSceneObject, ITickSystemTick
 			this.UpdateActorsInStartZone();
 			if (PhotonNetwork.IsMasterClient)
 			{
-				this.photonView.RPC("RaceLockInParticipants_RPC", RpcTarget.All, new object[]
+				this.photonView.RPC("RaceLockInParticipants_RPC", 0, new object[]
 				{
 					(byte)this.raceIndex,
 					this.actorsInStartZone.ToArray()

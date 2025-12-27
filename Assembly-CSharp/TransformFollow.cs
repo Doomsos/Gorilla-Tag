@@ -12,10 +12,10 @@ public class TransformFollow : MonoBehaviour
 	private void LateUpdate()
 	{
 		this.prevPos = base.transform.position;
-		Vector3 a;
-		Quaternion rotation;
-		this.transformToFollow.GetPositionAndRotation(out a, out rotation);
-		base.transform.SetPositionAndRotation(a + rotation * this.offset, rotation);
+		Vector3 vector;
+		Quaternion quaternion;
+		this.transformToFollow.GetPositionAndRotation(ref vector, ref quaternion);
+		base.transform.SetPositionAndRotation(vector + quaternion * this.offset, quaternion);
 	}
 
 	public Transform transformToFollow;

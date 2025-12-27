@@ -72,7 +72,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 	public void RegisterTickForEachCritter(Type type, ICosmeticCritterTickForEach target)
 	{
 		List<ICosmeticCritterTickForEach> list;
-		if (!this.tickForEachCritterOfType.TryGetValue(type, out list) || list == null)
+		if (!this.tickForEachCritterOfType.TryGetValue(type, ref list) || list == null)
 		{
 			list = new List<ICosmeticCritterTickForEach>();
 			this.tickForEachCritterOfType.Add(type, list);
@@ -83,7 +83,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 	public void UnregisterTickForEachCritter(Type type, ICosmeticCritterTickForEach target)
 	{
 		List<ICosmeticCritterTickForEach> list;
-		if (this.tickForEachCritterOfType.TryGetValue(type, out list) && list != null)
+		if (this.tickForEachCritterOfType.TryGetValue(type, ref list) && list != null)
 		{
 			list.Remove(target);
 		}
@@ -123,7 +123,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 	{
 		if (CosmeticCritterManager.Instance != null && CosmeticCritterManager.Instance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		CosmeticCritterManager.Instance = this;
@@ -137,8 +137,8 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 		this.activeCrittersBySeed = new Dictionary<int, CosmeticCritter>();
 		this.inactiveCrittersByType = new Dictionary<Type, Stack<CosmeticCritter>>();
 		this.tickForEachCritterOfType = new Dictionary<Type, List<ICosmeticCritterTickForEach>>();
-		NetworkSystem.Instance.OnPlayerJoined += this.ResetCosmeticCritters;
-		NetworkSystem.Instance.OnPlayerLeft += this.ResetCosmeticCritters;
+		NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(this.ResetCosmeticCritters);
+		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.ResetCosmeticCritters);
 	}
 
 	private void ReuseOrSpawnNewCritter(CosmeticCritterSpawner spawner, int seed, double time)
@@ -146,19 +146,19 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 		Type critterType = spawner.GetCritterType();
 		Stack<CosmeticCritter> stack;
 		CosmeticCritter component;
-		if (!this.inactiveCrittersByType.TryGetValue(critterType, out stack))
+		if (!this.inactiveCrittersByType.TryGetValue(critterType, ref stack))
 		{
 			stack = new Stack<CosmeticCritter>();
 			this.inactiveCrittersByType.Add(critterType, stack);
-			component = UnityEngine.Object.Instantiate<GameObject>(spawner.GetCritterPrefab(), base.transform).GetComponent<CosmeticCritter>();
+			component = Object.Instantiate<GameObject>(spawner.GetCritterPrefab(), base.transform).GetComponent<CosmeticCritter>();
 		}
-		else if (stack.TryPop(out component))
+		else if (stack.TryPop(ref component))
 		{
 			component.gameObject.SetActive(true);
 		}
 		else
 		{
-			component = UnityEngine.Object.Instantiate<GameObject>(spawner.GetCritterPrefab(), base.transform).GetComponent<CosmeticCritter>();
+			component = Object.Instantiate<GameObject>(spawner.GetCritterPrefab(), base.transform).GetComponent<CosmeticCritter>();
 		}
 		component.SetSeedSpawnerTypeAndTime(seed, spawner, critterType, time);
 		this.activeCritters.Add(component);
@@ -169,8 +169,8 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 		else
 		{
 			Dictionary<Type, int> dictionary = this.activeCrittersPerType;
-			Type key = critterType;
-			dictionary[key]++;
+			Type type = critterType;
+			dictionary[type]++;
 		}
 		this.activeCrittersBySeed.Add(seed, component);
 		Random.State state = Random.state;
@@ -192,7 +192,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 		critter.gameObject.SetActive(false);
 		Type cachedType = critter.CachedType;
 		Stack<CosmeticCritter> stack;
-		if (!this.inactiveCrittersByType.TryGetValue(cachedType, out stack))
+		if (!this.inactiveCrittersByType.TryGetValue(cachedType, ref stack))
 		{
 			stack = new Stack<CosmeticCritter>();
 			this.inactiveCrittersByType.Add(cachedType, stack);
@@ -200,7 +200,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 		stack.Push(critter);
 		this.activeCritters.Remove(critter);
 		int num;
-		if (this.activeCrittersPerType.TryGetValue(cachedType, out num))
+		if (this.activeCrittersPerType.TryGetValue(cachedType, ref num))
 		{
 			this.activeCrittersPerType[cachedType] = Math.Max(num - 1, 0);
 		}
@@ -220,7 +220,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 			{
 				cosmeticCritter.Tick();
 				List<ICosmeticCritterTickForEach> list;
-				if (this.tickForEachCritterOfType.TryGetValue(cosmeticCritter.CachedType, out list))
+				if (this.tickForEachCritterOfType.TryGetValue(cosmeticCritter.CachedType, ref list))
 				{
 					for (int j = 0; j < list.Count; j++)
 					{
@@ -247,7 +247,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 						}
 						if (PhotonNetwork.InRoom && (localCatchAction & CosmeticCritterAction.RPC) != CosmeticCritterAction.None)
 						{
-							this.photonView.RPC("CosmeticCritterRPC", RpcTarget.Others, new object[]
+							this.photonView.RPC("CosmeticCritterRPC", 1, new object[]
 							{
 								localCatchAction,
 								cosmeticCritterCatcher.OwnerID,
@@ -268,7 +268,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 		{
 			CosmeticCritterSpawnerIndependent cosmeticCritterSpawnerIndependent = this.localCritterSpawners[l];
 			int num2;
-			if ((!this.activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), out num2) || num2 < cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) && cosmeticCritterSpawnerIndependent.CanSpawnLocal())
+			if ((!this.activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), ref num2) || num2 < cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) && cosmeticCritterSpawnerIndependent.CanSpawnLocal())
 			{
 				int num3 = Random.Range(0, int.MaxValue);
 				if (!this.activeCrittersBySeed.ContainsKey(num3))
@@ -276,7 +276,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 					this.ReuseOrSpawnNewCritter(cosmeticCritterSpawnerIndependent, num3, PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.timeAsDouble);
 					if (PhotonNetwork.InRoom)
 					{
-						this.photonView.RPC("CosmeticCritterRPC", RpcTarget.Others, new object[]
+						this.photonView.RPC("CosmeticCritterRPC", 1, new object[]
 						{
 							CosmeticCritterAction.RPC | CosmeticCritterAction.Spawn,
 							cosmeticCritterSpawnerIndependent.OwnerID,
@@ -308,7 +308,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 	private void CatchCosmeticCritterRPC(CosmeticCritterAction catchAction, int catcherID, int seed, PhotonMessageInfoWrapped info)
 	{
 		CosmeticCritter critter;
-		if (!this.activeCrittersBySeed.TryGetValue(seed, out critter))
+		if (!this.activeCrittersBySeed.TryGetValue(seed, ref critter))
 		{
 			return;
 		}
@@ -330,7 +330,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 						this.FreeCritter(critter);
 					}
 					int num;
-					if ((catchAction & CosmeticCritterAction.SpawnLinked) != CosmeticCritterAction.None && cosmeticCritterCatcher.GetLinkedSpawner() != null && (!this.activeCrittersPerType.TryGetValue(cosmeticCritterCatcher.GetLinkedSpawner().GetCritterType(), out num) || num < cosmeticCritterCatcher.GetLinkedSpawner().GetCritter().GetGlobalMaxCritters() + 1))
+					if ((catchAction & CosmeticCritterAction.SpawnLinked) != CosmeticCritterAction.None && cosmeticCritterCatcher.GetLinkedSpawner() != null && (!this.activeCrittersPerType.TryGetValue(cosmeticCritterCatcher.GetLinkedSpawner().GetCritterType(), ref num) || num < cosmeticCritterCatcher.GetLinkedSpawner().GetCritter().GetGlobalMaxCritters() + 1))
 					{
 						this.ReuseOrSpawnNewCritter(cosmeticCritterCatcher.GetLinkedSpawner(), seed + 1, info.SentServerTime);
 					}
@@ -361,7 +361,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 					return;
 				}
 				int num;
-				if ((!this.activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), out num) || num < cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) && cosmeticCritterSpawnerIndependent.CanSpawnRemote(info.SentServerTime))
+				if ((!this.activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), ref num) || num < cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) && cosmeticCritterSpawnerIndependent.CanSpawnRemote(info.SentServerTime))
 				{
 					this.ReuseOrSpawnNewCritter(cosmeticCritterSpawnerIndependent, seed, info.SentServerTime);
 				}

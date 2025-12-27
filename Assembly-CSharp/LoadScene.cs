@@ -8,7 +8,7 @@ public class LoadScene : MonoBehaviour
 	public IEnumerator Start()
 	{
 		yield return new WaitForSecondsRealtime(this._delay);
-		AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(this._sceneName, LoadSceneMode.Single);
+		AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(this._sceneName, 0);
 		while (asyncOperation.progress < 0.99f)
 		{
 			yield return null;

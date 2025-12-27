@@ -97,7 +97,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 							this._heldEntity.gameObject.transform.position = this._coreDepositor.gameObject.transform.position;
 						}
 						this._heldEntity = null;
-						this._depositCollectibleTime = null;
+						this._depositCollectibleTime = default(float?);
 						this.Complete = true;
 					}
 				}
@@ -108,7 +108,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 		public void Reset()
 		{
 			this._heldEntity = null;
-			this._depositCollectibleTime = null;
+			this._depositCollectibleTime = default(float?);
 			this.Complete = false;
 		}
 

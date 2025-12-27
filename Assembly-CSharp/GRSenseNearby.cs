@@ -72,8 +72,8 @@ public class GRSenseNearby
 			GRPlayer component = vrrig.GetComponent<GRPlayer>();
 			if (component.State != GRPlayer.GRPlayerState.Ghost && !component.InStealthMode && !this.rigsNearby.Contains(vrrig))
 			{
-				Vector3 a = GRSenseNearby.GetRigTestLocation(vrrig) - position;
-				float sqrMagnitude = a.sqrMagnitude;
+				Vector3 vector = GRSenseNearby.GetRigTestLocation(vrrig) - position;
+				float sqrMagnitude = vector.sqrMagnitude;
 				float num3 = this.hearingRange * this.hearingRange;
 				if (sqrMagnitude >= num3)
 				{
@@ -83,8 +83,8 @@ public class GRSenseNearby
 					}
 					if (sqrMagnitude > 0f)
 					{
-						float d = Mathf.Sqrt(sqrMagnitude);
-						if (Vector3.Dot(a / d, forward) < num2)
+						float num4 = Mathf.Sqrt(sqrMagnitude);
+						if (Vector3.Dot(vector / num4, forward) < num2)
 						{
 							goto IL_C4;
 						}

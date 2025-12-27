@@ -24,7 +24,7 @@ public class CopySpawnerData : MonoBehaviour
 
 	private void CopyCageDeposits()
 	{
-		List<CrittersCageDepositShim> list = Object.FindObjectsByType<CrittersCageDepositShim>(FindObjectsSortMode.None).ToList<CrittersCageDepositShim>();
+		List<CrittersCageDepositShim> list = Enumerable.ToList<CrittersCageDepositShim>(Object.FindObjectsByType<CrittersCageDepositShim>(0));
 		for (int i = 0; i < list.Count; i++)
 		{
 			CrittersCageDepositShim crittersCageDepositShim = list[i];
@@ -63,7 +63,7 @@ public class CopySpawnerData : MonoBehaviour
 			gameObject2.transform.position = crittersCageDepositShim.attachPointTransform.position;
 			gameObject2.transform.rotation = crittersCageDepositShim.attachPointTransform.rotation;
 			AudioSource audioSource = gameObject2.AddComponent<AudioSource>();
-			audioSource.rolloffMode = AudioRolloffMode.Linear;
+			audioSource.rolloffMode = 1;
 			audioSource.maxDistance = 15f;
 			audioSource.spatialBlend = 1f;
 			crittersCageDeposit.depositAudio = audioSource;
@@ -85,7 +85,7 @@ public class CopySpawnerData : MonoBehaviour
 
 	private void CopyEquipmentSpawner()
 	{
-		List<CrittersActorSpawnerShim> list = Object.FindObjectsByType<CrittersActorSpawnerShim>(FindObjectsSortMode.None).ToList<CrittersActorSpawnerShim>();
+		List<CrittersActorSpawnerShim> list = Enumerable.ToList<CrittersActorSpawnerShim>(Object.FindObjectsByType<CrittersActorSpawnerShim>(0));
 		for (int i = 0; i < list.Count; i++)
 		{
 			CrittersActorSpawnerShim crittersActorSpawnerShim = list[i];

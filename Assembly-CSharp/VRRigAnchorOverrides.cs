@@ -412,8 +412,8 @@ public class VRRigAnchorOverrides : MonoBehaviour
 		{
 			if (this.badgeOffsets[i].enabled)
 			{
-				Matrix4x4 rhs = Matrix4x4.TRS(this.badgeDefaultPos, this.badgeDefaultRot, this.currentBadgeTransform.localScale);
-				Matrix4x4 matrix = Matrix4x4.TRS(this.badgeOffsets[i].offset.pos, this.badgeOffsets[i].offset.rot, Vector3.one) * rhs;
+				Matrix4x4 matrix4x = Matrix4x4.TRS(this.badgeDefaultPos, this.badgeDefaultRot, this.currentBadgeTransform.localScale);
+				Matrix4x4 matrix = Matrix4x4.TRS(this.badgeOffsets[i].offset.pos, this.badgeOffsets[i].offset.rot, Vector3.one) * matrix4x;
 				this.currentBadgeTransform.localRotation = matrix.rotation;
 				this.currentBadgeTransform.localPosition = matrix.Position();
 				return;

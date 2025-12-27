@@ -1,6 +1,6 @@
 ﻿using System;
 
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+[AttributeUsage(384)]
 public class DevInspectorColor : Attribute
 {
 	public string Color { get; }

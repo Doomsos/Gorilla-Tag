@@ -31,12 +31,13 @@ public class MirrorCameraScript : MonoBehaviour
 	{
 		Vector3 position = base.transform.position;
 		Vector3 right = base.transform.right;
-		Vector4 plane = new Vector4(right.x, right.y, right.z, -Vector3.Dot(right, position));
+		Vector4 plane;
+		plane..ctor(right.x, right.y, right.z, -Vector3.Dot(right, position));
 		Matrix4x4 zero = Matrix4x4.zero;
 		this.CalculateReflectionMatrix(ref zero, plane);
 		this.mirrorCamera.worldToCameraMatrix = this.mainCamera.worldToCameraMatrix * zero;
-		Vector4 clipPlane = this.CameraSpacePlane(this.mirrorCamera, position, right, 1f);
-		this.mirrorCamera.projectionMatrix = this.mainCamera.CalculateObliqueMatrix(clipPlane);
+		Vector4 vector = this.CameraSpacePlane(this.mirrorCamera, position, right, 1f);
+		this.mirrorCamera.projectionMatrix = this.mainCamera.CalculateObliqueMatrix(vector);
 		Debug.Log(string.Format("Main Camera position {0}", this.mainCamera.transform.position));
 		this.mirrorCamera.transform.position = zero.MultiplyPoint(this.mainCamera.transform.position);
 		Debug.Log(string.Format("Reflected Camera position {0}", this.mirrorCamera.transform.position));
@@ -44,7 +45,7 @@ public class MirrorCameraScript : MonoBehaviour
 		foreach (Renderer renderer in base.GetComponentsInChildren<Renderer>())
 		{
 			List<Material> list;
-			using (CollectionPool<List<Material>, Material>.Get(out list))
+			using (CollectionPool<List<Material>, Material>.Get(ref list))
 			{
 				renderer.GetSharedMaterials(list);
 				foreach (Material material in list)
@@ -80,11 +81,11 @@ public class MirrorCameraScript : MonoBehaviour
 
 	private Vector4 CameraSpacePlane(Camera cam, Vector3 pos, Vector3 normal, float sideSign)
 	{
-		Vector3 point = pos + normal * 0.07f;
+		Vector3 vector = pos + normal * 0.07f;
 		Matrix4x4 worldToCameraMatrix = cam.worldToCameraMatrix;
-		Vector3 lhs = worldToCameraMatrix.MultiplyPoint(point);
-		Vector3 vector = worldToCameraMatrix.MultiplyVector(normal).normalized * sideSign;
-		return new Vector4(vector.x, vector.y, vector.z, -Vector3.Dot(lhs, vector));
+		Vector3 vector2 = worldToCameraMatrix.MultiplyPoint(vector);
+		Vector3 vector3 = worldToCameraMatrix.MultiplyVector(normal).normalized * sideSign;
+		return new Vector4(vector3.x, vector3.y, vector3.z, -Vector3.Dot(vector2, vector3));
 	}
 
 	public Camera mainCamera;

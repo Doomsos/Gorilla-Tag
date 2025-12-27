@@ -69,7 +69,7 @@ public class SITechTreeUINode : MonoBehaviour
 
 	private int GetMaxWordLength(string text)
 	{
-		string[] array = text.Split(' ', StringSplitOptions.None);
+		string[] array = text.Split(' ', 0);
 		int num = 0;
 		foreach (string text2 in array)
 		{

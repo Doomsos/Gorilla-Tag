@@ -176,15 +176,15 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		GameHittable parentEnemy = this.GetParentEnemy<GameHittable>(collider);
 		if (parentEnemy != null)
 		{
-			Vector3 a = parentEnemy.transform.position - base.transform.position;
-			a.Normalize();
+			Vector3 vector = parentEnemy.transform.position - base.transform.position;
+			vector.Normalize();
 			if (!flag && gamePlayer != null)
 			{
-				a = GamePlayerLocal.instance.GetHandVelocity(gamePlayer.FindHandIndex(this.gameEntity.id)).normalized;
+				vector = GamePlayerLocal.instance.GetHandVelocity(gamePlayer.FindHandIndex(this.gameEntity.id)).normalized;
 			}
 			float num2 = Mathf.Sqrt(num);
 			num2 = Mathf.Min(num2, this.maxImpulseSpeed);
-			a *= num2;
+			vector *= num2;
 			Vector3 position = parentEnemy.transform.position;
 			GameHitData hitData = new GameHitData
 			{
@@ -192,7 +192,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 				hitEntityId = parentEnemy.gameEntity.id,
 				hitByEntityId = this.gameEntity.id,
 				hitEntityPosition = position,
-				hitImpulse = a * this.knockbackMultiplier,
+				hitImpulse = vector * this.knockbackMultiplier,
 				hitPosition = collision.GetContact(0).point,
 				hitAmount = this.CalcHitAmount(this.hitType, parentEnemy, this.gameEntity)
 			};

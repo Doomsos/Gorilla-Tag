@@ -94,7 +94,7 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 				float num4 = Mathf.Clamp01(num3 / this.minDistToStartMagnetize);
 				this.humAudioSource.volume = Mathf.Lerp(this.magnetizingLoopMaxVolume, this.magnetizingLoopMinVolume, num4);
 				float num5 = this.shakeMaxAmount * (1f - num4);
-				float t = Mathf.Clamp01((this.visualDistanceCurve != null) ? this.visualDistanceCurve.Evaluate(num4) : num4);
+				float num6 = Mathf.Clamp01((this.visualDistanceCurve != null) ? this.visualDistanceCurve.Evaluate(num4) : num4);
 				this.shakePhase += Time.deltaTime * this.shakeFrequency;
 				if (this.shakePhase > 6.2831855f)
 				{
@@ -103,9 +103,9 @@ public class GRToolUpgradePiece : MonoBehaviour, IGameEntityComponent
 				Transform transform = base.transform;
 				if (this.childVisualTransform != null)
 				{
-					Vector3 position2 = Vector3.Lerp(upgradeAttachTransform.position, transform.position, t);
-					Quaternion quaternion = Quaternion.Slerp(upgradeAttachTransform.rotation, transform.rotation, t);
-					Vector3 localScale = Vector3.Lerp(upgradeAttachTransform.localScale, transform.localScale, t);
+					Vector3 position2 = Vector3.Lerp(upgradeAttachTransform.position, transform.position, num6);
+					Quaternion quaternion = Quaternion.Slerp(upgradeAttachTransform.rotation, transform.rotation, num6);
+					Vector3 localScale = Vector3.Lerp(upgradeAttachTransform.localScale, transform.localScale, num6);
 					localScale.x /= transform.localScale.x;
 					localScale.y /= transform.localScale.y;
 					localScale.z /= transform.localScale.y;

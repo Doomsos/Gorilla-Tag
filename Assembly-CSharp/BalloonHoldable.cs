@@ -105,7 +105,7 @@ public class BalloonHoldable : TransferrableObject, IFXContext
 			PhotonView photonView = PhotonView.Get(this.worldShareableInstance);
 			if (photonView != null)
 			{
-				photonView.RPC("RPCWorldShareable", RpcTarget.Others, Array.Empty<object>());
+				photonView.RPC("RPCWorldShareable", 1, Array.Empty<object>());
 			}
 			this.worldShareableInstance.guard.RequestOwnershipImmediatelyWithGuaranteedAuthority();
 		}
@@ -223,7 +223,7 @@ public class BalloonHoldable : TransferrableObject, IFXContext
 		}
 		if (!this.rb.isKinematic)
 		{
-			this.rb.AddForceAtPosition(this.forceAppliedAsRemote * this.rb.mass, this.collisionPtAsRemote, ForceMode.Impulse);
+			this.rb.AddForceAtPosition(this.forceAppliedAsRemote * this.rb.mass, this.collisionPtAsRemote, 1);
 		}
 		this.forceAppliedAsRemote = Vector3.zero;
 		this.collisionPtAsRemote = Vector3.zero;
@@ -236,7 +236,7 @@ public class BalloonHoldable : TransferrableObject, IFXContext
 			PhotonView photonView = PhotonView.Get(this.worldShareableInstance);
 			if (photonView != null)
 			{
-				photonView.RPC("RPCWorldShareable", RpcTarget.Others, Array.Empty<object>());
+				photonView.RPC("RPCWorldShareable", 1, Array.Empty<object>());
 			}
 		}
 		this.balloonState = BalloonHoldable.BalloonStates.Pop;
@@ -311,8 +311,8 @@ public class BalloonHoldable : TransferrableObject, IFXContext
 				}
 			}
 			num = Mathf.Clamp01(num / this.scaleTimerLength);
-			float d = Mathf.Lerp(this.beginScale, 1f, num);
-			base.transform.localScale = this.fullyInflatedScale * d;
+			float num2 = Mathf.Lerp(this.beginScale, 1f, num);
+			base.transform.localScale = this.fullyInflatedScale * num2;
 			return;
 		}
 		case BalloonHoldable.BalloonStates.Returning:
@@ -358,8 +358,8 @@ public class BalloonHoldable : TransferrableObject, IFXContext
 		}
 		if (base.InHand() && this.detatchOnGrab)
 		{
-			float d = (this.targetRig != null) ? this.targetRig.transform.localScale.x : 1f;
-			base.transform.localScale = Vector3.one * d;
+			float num = (this.targetRig != null) ? this.targetRig.transform.localScale.x : 1f;
+			base.transform.localScale = Vector3.one * num;
 		}
 		if (base.Dropped() && this.balloonState == BalloonHoldable.BalloonStates.Normal && this.maxDistanceFromOwner > 0f && (!NetworkSystem.Instance.InRoom || this.originalOwner.IsLocal) && (VRRig.LocalRig.transform.position - base.transform.position).IsLongerThan(this.maxDistanceFromOwner * base.transform.localScale.x))
 		{

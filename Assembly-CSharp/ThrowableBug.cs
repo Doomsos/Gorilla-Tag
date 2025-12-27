@@ -10,8 +10,8 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 	protected override void Start()
 	{
 		base.Start();
-		float f = Random.Range(0f, 6.2831855f);
-		this.targetVelocity = new Vector3(Mathf.Sin(f) * this.maxNaturalSpeed, 0f, Mathf.Cos(f) * this.maxNaturalSpeed);
+		float num = Random.Range(0f, 6.2831855f);
+		this.targetVelocity = new Vector3(Mathf.Sin(num) * this.maxNaturalSpeed, 0f, Mathf.Cos(num) * this.maxNaturalSpeed);
 		this.currentState = TransferrableObject.PositionState.Dropped;
 		this.rayCastNonAllocColliders = new RaycastHit[5];
 		this.rayCastNonAllocColliders2 = new RaycastHit[5];
@@ -219,11 +219,11 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 			this.bobingState -= 6.2831855f;
 		}
 		vector += this.reliableState.travelingDirection * Time.deltaTime;
-		float maxDistance = this.isTooHighTravelingDown ? this.minimumHeightOffOfTheGroundBeforeStoppingDescent : this.maximumHeightOffOfTheGroundBeforeStartingDescent;
-		float num3 = this.isTooLowTravelingUp ? this.maximumHeightOffOfTheGroundBeforeStoppingAscent : this.minimumHeightOffOfTheGroundBeforeStartingAscent;
+		float num3 = this.isTooHighTravelingDown ? this.minimumHeightOffOfTheGroundBeforeStoppingDescent : this.maximumHeightOffOfTheGroundBeforeStartingDescent;
+		float num4 = this.isTooLowTravelingUp ? this.maximumHeightOffOfTheGroundBeforeStoppingAscent : this.minimumHeightOffOfTheGroundBeforeStartingAscent;
 		if (this.raycastFrameCounter == 0)
 		{
-			if (Physics.RaycastNonAlloc(base.transform.position, Vector3.down, this.rayCastNonAllocColliders2, maxDistance, this.collisionCheckMask) > 0)
+			if (Physics.RaycastNonAlloc(base.transform.position, Vector3.down, this.rayCastNonAllocColliders2, num3, this.collisionCheckMask) > 0)
 			{
 				this.isTooHighTravelingDown = false;
 				if (this.descentSlerp > 0f)
@@ -231,7 +231,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 					this.descentSlerp = Mathf.Clamp01(this.descentSlerp - this.descentSlerpRate * Time.deltaTime);
 				}
 				RaycastHit raycastHit = this.rayCastNonAllocColliders2[0];
-				this.isTooLowTravelingUp = (raycastHit.distance < num3);
+				this.isTooLowTravelingUp = (raycastHit.distance < num4);
 				if (this.isTooLowTravelingUp)
 				{
 					if (this.ascentSlerp < 1f)
@@ -255,15 +255,15 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 		}
 		vector += Time.deltaTime * Mathf.SmoothStep(0f, 1f, this.descentSlerp) * this.descentRate * Vector3.down;
 		vector += Time.deltaTime * Mathf.SmoothStep(0f, 1f, this.ascentSlerp) * this.ascentRate * Vector3.up;
-		float num4;
-		Vector3 axis;
-		Quaternion.FromToRotation(base.transform.rotation * Vector3.up, Quaternion.identity * Vector3.up).ToAngleAxis(out num4, out axis);
-		Quaternion quaternion = Quaternion.AngleAxis(num4 * 0.02f, axis);
 		float num5;
-		Vector3 axis2;
-		Quaternion.FromToRotation(base.transform.rotation * Vector3.forward, this.reliableState.travelingDirection.normalized).ToAngleAxis(out num5, out axis2);
-		Quaternion lhs = Quaternion.AngleAxis(num5 * 0.005f, axis2);
-		quaternion = lhs * quaternion;
+		Vector3 vector2;
+		Quaternion.FromToRotation(base.transform.rotation * Vector3.up, Quaternion.identity * Vector3.up).ToAngleAxis(ref num5, ref vector2);
+		Quaternion quaternion = Quaternion.AngleAxis(num5 * 0.02f, vector2);
+		float num6;
+		Vector3 vector3;
+		Quaternion.FromToRotation(base.transform.rotation * Vector3.forward, this.reliableState.travelingDirection.normalized).ToAngleAxis(ref num6, ref vector3);
+		Quaternion quaternion2 = Quaternion.AngleAxis(num6 * 0.005f, vector3);
+		quaternion = quaternion2 * quaternion;
 		vector = quaternion * quaternion * quaternion * quaternion * vector;
 		vector *= this.speedMultiplier;
 		this.speedMultiplier = Mathf.MoveTowards(this.speedMultiplier, 1f, Time.deltaTime);
@@ -287,10 +287,10 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 			base.transform.position += vector;
 		}
 		this.bugRotationalVelocity = quaternion * this.bugRotationalVelocity;
-		float num6;
-		Vector3 axis3;
-		this.bugRotationalVelocity.ToAngleAxis(out num6, out axis3);
-		this.bugRotationalVelocity = Quaternion.AngleAxis(num6 * 0.9f, axis3);
+		float num7;
+		Vector3 vector4;
+		this.bugRotationalVelocity.ToAngleAxis(ref num7, ref vector4);
+		this.bugRotationalVelocity = Quaternion.AngleAxis(num7 * 0.9f, vector4);
 		base.transform.rotation = this.bugRotationalVelocity * base.transform.rotation;
 	}
 

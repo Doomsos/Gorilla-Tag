@@ -202,7 +202,7 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			this.abilityChase.Start();
 			this.soundChase.Play(this.audioSource);
 			this.abilityChase.SetTargetPlayer(this.agent.targetPlayer);
-			this.investigateLocation = null;
+			this.investigateLocation = default(Vector3?);
 			if (this.negativeLight != null)
 			{
 				this.negativeLight.gameObject.SetActive(true);
@@ -211,7 +211,7 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 		case GREnemyPhantom.Behavior.Attack:
 			this.abilityAttack.Start();
 			this.abilityAttack.SetTargetPlayer(this.agent.targetPlayer);
-			this.investigateLocation = null;
+			this.investigateLocation = default(Vector3?);
 			this.soundAttack.Play(this.audioSource);
 			if (this.attackLight != null)
 			{
@@ -278,7 +278,7 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 	{
 		if (!GhostReactorManager.AggroDisabled && this.senseNearby.IsAnyoneNearby())
 		{
-			this.investigateLocation = null;
+			this.investigateLocation = default(Vector3?);
 			this.SetBehavior(GREnemyPhantom.Behavior.Alert, false);
 			return;
 		}
@@ -520,13 +520,13 @@ public class GREnemyPhantom : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 
 	public void OnGameEntitySerialize(BinaryWriter writer)
 	{
-		byte value = (byte)this.currBehavior;
-		byte value2 = (byte)this.currBodyState;
-		byte value3 = (byte)this.nextPatrolNode;
-		writer.Write(value);
-		writer.Write(value2);
+		byte b = (byte)this.currBehavior;
+		byte b2 = (byte)this.currBodyState;
+		byte b3 = (byte)this.nextPatrolNode;
+		writer.Write(b);
+		writer.Write(b2);
 		writer.Write(this.hp);
-		writer.Write(value3);
+		writer.Write(b3);
 	}
 
 	public void OnGameEntityDeserialize(BinaryReader reader)

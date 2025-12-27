@@ -30,14 +30,14 @@ public class GRSenseLineOfSight
 	public static bool HasGeoLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist, int layerMask)
 	{
 		float num = Vector3.Distance(targetPos, headPos);
-		return num <= sightDist && Physics.RaycastNonAlloc(new Ray(headPos, targetPos - headPos), GRSenseLineOfSight.visibilityHits, Mathf.Min(num, sightDist), layerMask, QueryTriggerInteraction.Ignore) < 1;
+		return num <= sightDist && Physics.RaycastNonAlloc(new Ray(headPos, targetPos - headPos), GRSenseLineOfSight.visibilityHits, Mathf.Min(num, sightDist), layerMask, 1) < 1;
 	}
 
 	public static bool HasNavmeshLineOfSight(Vector3 headPos, Vector3 targetPos, float sightDist)
 	{
 		NavMeshHit navMeshHit;
 		NavMeshHit navMeshHit2;
-		return (targetPos - headPos).sqrMagnitude <= sightDist * sightDist && NavMesh.SamplePosition(headPos, out navMeshHit, 1f, -1) && !NavMesh.Raycast(navMeshHit.position, targetPos, out navMeshHit2, -1);
+		return (targetPos - headPos).sqrMagnitude <= sightDist * sightDist && NavMesh.SamplePosition(headPos, ref navMeshHit, 1f, -1) && !NavMesh.Raycast(navMeshHit.position, targetPos, ref navMeshHit2, -1);
 	}
 
 	public float sightDist;

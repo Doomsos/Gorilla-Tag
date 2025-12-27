@@ -131,11 +131,11 @@ namespace UnityEngine.XR.Interaction.Toolkit
 					if (!(xrcontroller == null) && xrcontroller.enableInputActions)
 					{
 						float num = 0f;
-						if (xrcontroller.controllerNode == XRNode.RightHand)
+						if (xrcontroller.controllerNode == 5)
 						{
 							num = ControllerInputPoller.instance.rightControllerPrimary2DAxis.x;
 						}
-						else if (xrcontroller.controllerNode == XRNode.LeftHand)
+						else if (xrcontroller.controllerNode == 4)
 						{
 							num = ControllerInputPoller.instance.leftControllerPrimary2DAxis.x;
 						}
@@ -298,8 +298,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			{
 				return;
 			}
-			string defaultValue = (Application.platform == RuntimePlatform.Android) ? "NONE" : "SNAP";
-			string @string = PlayerPrefs.GetString("stickTurning", defaultValue);
+			string text = (Application.platform == 11) ? "NONE" : "SNAP";
+			string @string = PlayerPrefs.GetString("stickTurning", text);
 			int @int = PlayerPrefs.GetInt("turnFactor", 4);
 			GorillaSnapTurn.CachedSnapTurnRef.ChangeTurnMode(@string, @int);
 		}
@@ -312,7 +312,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 			}
 			if (string.IsNullOrEmpty(GorillaSnapTurn._cachedTurnType))
 			{
-				GorillaSnapTurn._cachedTurnType = ((Application.platform == RuntimePlatform.Android) ? "NONE" : "SNAP");
+				GorillaSnapTurn._cachedTurnType = ((Application.platform == 11) ? "NONE" : "SNAP");
 			}
 			string cachedTurnType = GorillaSnapTurn._cachedTurnType;
 			int cachedTurnFactor = GorillaSnapTurn._cachedTurnFactor;

@@ -12,8 +12,8 @@ namespace GorillaTagScripts.Builder
 		{
 			foreach (BuilderSmallMonkeTrigger builderSmallMonkeTrigger in this.doorHoldTriggers)
 			{
-				builderSmallMonkeTrigger.onTriggerFirstEntered += this.OnHoldTriggerEntered;
-				builderSmallMonkeTrigger.onTriggerLastExited += this.OnHoldTriggerExited;
+				builderSmallMonkeTrigger.onTriggerFirstEntered += new Action(this.OnHoldTriggerEntered);
+				builderSmallMonkeTrigger.onTriggerLastExited += new Action(this.OnHoldTriggerExited);
 			}
 			BuilderSmallHandTrigger[] array2 = this.doorButtonTriggers;
 			for (int i = 0; i < array2.Length; i++)
@@ -26,8 +26,8 @@ namespace GorillaTagScripts.Builder
 		{
 			foreach (BuilderSmallMonkeTrigger builderSmallMonkeTrigger in this.doorHoldTriggers)
 			{
-				builderSmallMonkeTrigger.onTriggerFirstEntered -= this.OnHoldTriggerEntered;
-				builderSmallMonkeTrigger.onTriggerLastExited -= this.OnHoldTriggerExited;
+				builderSmallMonkeTrigger.onTriggerFirstEntered -= new Action(this.OnHoldTriggerEntered);
+				builderSmallMonkeTrigger.onTriggerLastExited -= new Action(this.OnHoldTriggerExited);
 			}
 			BuilderSmallHandTrigger[] array2 = this.doorButtonTriggers;
 			for (int i = 0; i < array2.Length; i++)

@@ -51,7 +51,7 @@ public class LckBodyCameraSpawner : MonoBehaviourTick
 				this._tabletSpawnInstance.uiVisible = false;
 				this._tabletSpawnInstance.cameraActive = true;
 				this.ResetCameraModel();
-				if (Application.platform == RuntimePlatform.Android)
+				if (Application.platform == 11)
 				{
 					this.SetPreviewActive(false);
 				}
@@ -63,7 +63,7 @@ public class LckBodyCameraSpawner : MonoBehaviourTick
 				this.cameraPosition = LckBodyCameraSpawner.CameraPosition.CameraDefault;
 				this._tabletSpawnInstance.uiVisible = true;
 				this._tabletSpawnInstance.cameraActive = true;
-				if (Application.platform == RuntimePlatform.Android)
+				if (Application.platform == 11)
 				{
 					this.SetPreviewActive(true);
 				}
@@ -184,9 +184,9 @@ public class LckBodyCameraSpawner : MonoBehaviourTick
 		if (this._followTransform != null && base.transform.parent != null)
 		{
 			Matrix4x4 localToWorldMatrix = base.transform.parent.localToWorldMatrix;
-			Vector3 position = localToWorldMatrix.MultiplyPoint(this._followTransform.localPosition + this._followTransform.localRotation * new Vector3(0f, -0.05f, 0.1f));
-			Quaternion rotation = Quaternion.LookRotation(localToWorldMatrix.MultiplyVector(this._followTransform.localRotation * Vector3.forward), localToWorldMatrix.MultiplyVector(this._followTransform.localRotation * Vector3.up));
-			base.transform.SetPositionAndRotation(position, rotation);
+			Vector3 vector = localToWorldMatrix.MultiplyPoint(this._followTransform.localPosition + this._followTransform.localRotation * new Vector3(0f, -0.05f, 0.1f));
+			Quaternion quaternion = Quaternion.LookRotation(localToWorldMatrix.MultiplyVector(this._followTransform.localRotation * Vector3.forward), localToWorldMatrix.MultiplyVector(this._followTransform.localRotation * Vector3.up));
+			base.transform.SetPositionAndRotation(vector, quaternion);
 		}
 		LckBodyCameraSpawner.CameraState cameraState = this._cameraState;
 		if (cameraState != LckBodyCameraSpawner.CameraState.CameraOnNeck)
@@ -222,15 +222,15 @@ public class LckBodyCameraSpawner : MonoBehaviourTick
 							this._tabletSpawnInstance.SetParent(this._cameraModelTransform);
 							this._tabletSpawnInstance.ResetLocalPose();
 							this._cameraModelGrabbable.ForceGrab(grabber2);
-							this._cameraModelGrabbable.onReleased += this.OnCameraModelReleased;
+							this._cameraModelGrabbable.onReleased += new Action(this.OnCameraModelReleased);
 							this._previousMode = this._tabletSpawnInstance.Controller.CurrentCameraMode;
-							if (this._previousMode == CameraMode.Selfie)
+							if (this._previousMode == null)
 							{
-								this._tabletSpawnInstance.Controller.SetCameraMode(CameraMode.FirstPerson);
+								this._tabletSpawnInstance.Controller.SetCameraMode(1);
 							}
 						}
 					}
-					else if (this._shouldMoveCameraToNeck && GtTag.TryGetTransform(GtTagType.HMD, out transform3) && Vector3.SqrMagnitude(transform3.position - this.tabletSpawnInstance.position) >= this._snapToNeckDistance * this._snapToNeckDistance)
+					else if (this._shouldMoveCameraToNeck && GtTag.TryGetTransform(1, ref transform3) && Vector3.SqrMagnitude(transform3.position - this.tabletSpawnInstance.position) >= this._snapToNeckDistance * this._snapToNeckDistance)
 					{
 						this.cameraState = LckBodyCameraSpawner.CameraState.CameraOnNeck;
 						this._tabletSpawnInstance.SetParent(this._cameraModelTransform);
@@ -296,16 +296,16 @@ public class LckBodyCameraSpawner : MonoBehaviourTick
 			this._tabletSpawnInstance.ResetLocalPose();
 			this._shouldMoveCameraToNeck = false;
 			this._previousMode = this._tabletSpawnInstance.Controller.CurrentCameraMode;
-			if (this._previousMode == CameraMode.Selfie)
+			if (this._previousMode == null)
 			{
-				this._tabletSpawnInstance.Controller.SetCameraMode(CameraMode.FirstPerson);
+				this._tabletSpawnInstance.Controller.SetCameraMode(1);
 			}
 		}
 	}
 
 	private void OnCameraModelReleased()
 	{
-		this._cameraModelGrabbable.onReleased -= this.OnCameraModelReleased;
+		this._cameraModelGrabbable.onReleased -= new Action(this.OnCameraModelReleased);
 		this.ResetCameraModel();
 	}
 
@@ -315,37 +315,37 @@ public class LckBodyCameraSpawner : MonoBehaviourTick
 		{
 			this._tabletSpawnInstance.SpawnCamera();
 		}
-		if (this._previousMode == CameraMode.Selfie)
+		if (this._previousMode == null)
 		{
-			this._tabletSpawnInstance.Controller.SetCameraMode(CameraMode.Selfie);
-			this._previousMode = CameraMode.Selfie;
+			this._tabletSpawnInstance.Controller.SetCameraMode(0);
+			this._previousMode = 0;
 		}
 		this.cameraState = LckBodyCameraSpawner.CameraState.CameraSpawned;
 		this._cameraModelGrabbable.ForceRelease();
 		this._tabletSpawnInstance.ResetParent();
 		Vector3 vector = Vector3.zero;
-		Vector3 euler = Vector3.zero;
-		euler = this._rotationOffsetWindows;
+		Vector3 vector2 = Vector3.zero;
+		vector2 = this._rotationOffsetWindows;
 		XRNode xrNode = overrideGorillaGrabber.XrNode;
-		if (xrNode != XRNode.LeftHand)
+		if (xrNode != 4)
 		{
-			if (xrNode == XRNode.RightHand)
+			if (xrNode == 5)
 			{
 				vector = this._rightHandSpawnOffsetWindows;
-				euler.z = -12f;
+				vector2.z = -12f;
 			}
 		}
 		else
 		{
 			vector = this._leftHandSpawnOffsetWindows;
-			euler.z = 12f;
+			vector2.z = 12f;
 		}
 		if (!GTPlayer.Instance.IsDefaultScale)
 		{
 			vector *= 0.06f;
 		}
 		vector = transform.rotation * vector;
-		this._tabletSpawnInstance.SetPositionAndRotation(transform.position + vector, transform.rotation * Quaternion.Euler(euler));
+		this._tabletSpawnInstance.SetPositionAndRotation(transform.position + vector, transform.rotation * Quaternion.Euler(vector2));
 		this._tabletSpawnInstance.directGrabbable.ForceGrab(overrideGorillaGrabber);
 		this._tabletSpawnInstance.SetLocalScale(Vector3.one);
 	}
@@ -353,9 +353,9 @@ public class LckBodyCameraSpawner : MonoBehaviourTick
 	private bool ShouldSpawnCamera(Transform gorillaGrabberTransform)
 	{
 		Matrix4x4 worldToLocalMatrix = base.transform.worldToLocalMatrix;
-		Vector3 a = worldToLocalMatrix.MultiplyPoint(this._cameraModelOriginTransform.position);
-		Vector3 b = worldToLocalMatrix.MultiplyPoint(gorillaGrabberTransform.position);
-		return Vector3.SqrMagnitude(a - b) >= this._activateDistance * this._activateDistance;
+		Vector3 vector = worldToLocalMatrix.MultiplyPoint(this._cameraModelOriginTransform.position);
+		Vector3 vector2 = worldToLocalMatrix.MultiplyPoint(gorillaGrabberTransform.position);
+		return Vector3.SqrMagnitude(vector - vector2) >= this._activateDistance * this._activateDistance;
 	}
 
 	private void ChangeCameraModelParent(Transform transform)

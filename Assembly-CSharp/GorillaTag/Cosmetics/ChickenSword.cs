@@ -32,7 +32,7 @@ namespace GorillaTag.Cosmetics
 			}
 			if (this._events != null)
 			{
-				this._events.Activate += this.OnReachedLastTransformationStep;
+				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnReachedLastTransformationStep);
 			}
 		}
 
@@ -40,7 +40,7 @@ namespace GorillaTag.Cosmetics
 		{
 			if (this._events != null)
 			{
-				this._events.Activate -= this.OnReachedLastTransformationStep;
+				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnReachedLastTransformationStep);
 				this._events.Dispose();
 				this._events = null;
 			}
@@ -115,11 +115,11 @@ namespace GorillaTag.Cosmetics
 				}
 				if (this.transferrableObject && this.transferrableObject.IsMyItem())
 				{
-					bool arg = this.transferrableObject.InLeftHand();
+					bool flag = this.transferrableObject.InLeftHand();
 					UnityEvent<bool> onHitTargetLocal = this.OnHitTargetLocal;
 					if (onHitTargetLocal != null)
 					{
-						onHitTargetLocal.Invoke(arg);
+						onHitTargetLocal.Invoke(flag);
 					}
 				}
 				if (this.cosmeticSwapper != null && playerRig == GorillaTagger.Instance.offlineVRRig && this.cosmeticSwapper.GetCurrentStepIndex(playerRig) >= this.cosmeticSwapper.GetNumberOfSteps() && PhotonNetwork.InRoom && this._events != null && this._events.Activate != null)

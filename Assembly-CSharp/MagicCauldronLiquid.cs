@@ -63,7 +63,7 @@ public class MagicCauldronLiquid : MonoBehaviour
 			return;
 		}
 		float num = this._animationCurve.Evaluate(this._animProgress / this.animLength);
-		float t = this._waveCurve.Evaluate(this._animProgress / this.animLength);
+		float num2 = this._waveCurve.Evaluate(this._animProgress / this.animLength);
 		if (num >= 1f)
 		{
 			this.ApplyColor(this._colorEnd);
@@ -72,10 +72,10 @@ public class MagicCauldronLiquid : MonoBehaviour
 			return;
 		}
 		Color color = Color.Lerp(this._colorStart, this._colorEnd, num);
-		Mathf.Lerp(this.waveNormal.frequency, this.waveAnimating.frequency, t);
-		Mathf.Lerp(this.waveNormal.amplitude, this.waveAnimating.amplitude, t);
-		Mathf.Lerp(this.waveNormal.scale, this.waveAnimating.scale, t);
-		Mathf.Lerp(this.waveNormal.rotation, this.waveAnimating.rotation, t);
+		Mathf.Lerp(this.waveNormal.frequency, this.waveAnimating.frequency, num2);
+		Mathf.Lerp(this.waveNormal.amplitude, this.waveAnimating.amplitude, num2);
+		Mathf.Lerp(this.waveNormal.scale, this.waveAnimating.scale, num2);
+		Mathf.Lerp(this.waveNormal.rotation, this.waveAnimating.rotation, num2);
 		this.ApplyColor(color);
 		this._animProgress += Time.deltaTime;
 	}

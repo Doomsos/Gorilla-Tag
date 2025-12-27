@@ -39,18 +39,18 @@ public class XRaySkeleton : SyncToPlayerColor
 			return;
 		}
 		Material material = this.tagMaterials[0];
-		float h;
-		float s;
-		float value;
-		Color.RGBToHSV(color, out h, out s, out value);
-		Color value2 = Color.HSVToRGB(h, s, Mathf.Clamp(value, this.baseValueMinMax.x, this.baseValueMinMax.y));
-		material.SetColor(XRaySkeleton._BaseColor, value2);
-		float h2;
 		float num;
 		float num2;
-		Color.RGBToHSV(color, out h2, out num, out num2);
-		Color color2 = Color.HSVToRGB(h2, 0.82f, 0.9f, true);
-		color2 = new Color(color2.r * 1.4f, color2.g * 1.4f, color2.b * 1.4f);
+		float num3;
+		Color.RGBToHSV(color, ref num, ref num2, ref num3);
+		Color color2 = Color.HSVToRGB(num, num2, Mathf.Clamp(num3, this.baseValueMinMax.x, this.baseValueMinMax.y));
+		material.SetColor(XRaySkeleton._BaseColor, color2);
+		float num4;
+		float num5;
+		float num6;
+		Color.RGBToHSV(color, ref num4, ref num5, ref num6);
+		Color color3 = Color.HSVToRGB(num4, 0.82f, 0.9f, true);
+		color3..ctor(color3.r * 1.4f, color3.g * 1.4f, color3.b * 1.4f);
 		material.SetColor(XRaySkeleton._EmissionColor, ColorUtils.ComposeHDR(new Color32(36, 191, 136, byte.MaxValue), 2f));
 		this.renderer.sharedMaterial = material;
 	}

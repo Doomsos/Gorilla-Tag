@@ -40,7 +40,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			transform.GetPositionAndRotation(out builderGridPlaneData.position, out builderGridPlaneData.rotation);
+			transform.GetPositionAndRotation(ref builderGridPlaneData.position, ref builderGridPlaneData.rotation);
 			checkGridPlanes.AddNoResize(builderGridPlaneData);
 		}
 

@@ -25,7 +25,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 			{
 				Debug.Log(string.Format("soak breakable {0} is broken", this._breakable.id.index));
 				this._breakable = null;
-				this._nextHitTime = null;
+				this._nextHitTime = default(float?);
 				this.Complete = true;
 			}
 			else
@@ -81,7 +81,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 		public void Reset()
 		{
 			this._breakable = null;
-			this._nextHitTime = null;
+			this._nextHitTime = default(float?);
 			this.Complete = false;
 		}
 

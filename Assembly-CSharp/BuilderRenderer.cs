@@ -6,7 +6,6 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Jobs;
-using UnityEngine.Rendering;
 
 public class BuilderRenderer : MonoBehaviourPostTick
 {
@@ -135,9 +134,9 @@ public class BuilderRenderer : MonoBehaviourPostTick
 			this.serializeMeshes = this.renderData.meshes;
 			this.serializeMeshInstanceCount = this.renderData.meshInstanceCount;
 			this.serializeSubMeshes = new List<BuilderTableSubMesh>(512);
-			foreach (BuilderTableSubMesh item in this.renderData.subMeshes)
+			foreach (BuilderTableSubMesh builderTableSubMesh in this.renderData.subMeshes)
 			{
-				this.serializeSubMeshes.Add(item);
+				this.serializeSubMeshes.Add(builderTableSubMesh);
 			}
 			this.serializeSharedMesh = this.renderData.sharedMesh;
 		}
@@ -174,10 +173,10 @@ public class BuilderRenderer : MonoBehaviourPostTick
 			}
 			this.renderData.meshes = this.serializeMeshes;
 			this.renderData.meshInstanceCount = this.serializeMeshInstanceCount;
-			this.renderData.subMeshes = new NativeList<BuilderTableSubMesh>(512, Allocator.Persistent);
-			foreach (BuilderTableSubMesh value in this.serializeSubMeshes)
+			this.renderData.subMeshes = new NativeList<BuilderTableSubMesh>(512, 4);
+			foreach (BuilderTableSubMesh builderTableSubMesh in this.serializeSubMeshes)
 			{
-				this.renderData.subMeshes.AddNoResize(value);
+				this.renderData.subMeshes.AddNoResize(builderTableSubMesh);
 			}
 			this.renderData.sharedMesh = this.serializeSharedMesh;
 		}
@@ -238,7 +237,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 				{
 					Mesh sharedMesh = component.sharedMesh;
 					int num;
-					if (sharedMesh != null && !this.renderData.meshToIndex.TryGetValue(sharedMesh, out num))
+					if (sharedMesh != null && !this.renderData.meshToIndex.TryGetValue(sharedMesh, ref num))
 					{
 						this.renderData.meshToIndex.Add(sharedMesh, this.renderData.meshToIndex.Count);
 						this.renderData.meshInstanceCount.Add(0);
@@ -336,13 +335,13 @@ public class BuilderRenderer : MonoBehaviourPostTick
 			return false;
 		}
 		int num;
-		if (!this.renderData.materialToIndex.TryGetValue(material, out num))
+		if (!this.renderData.materialToIndex.TryGetValue(material, ref num))
 		{
 			this.renderData.materialToIndex.Add(material, this.renderData.materials.Count);
 			this.renderData.materials.Add(material);
 		}
 		int num2;
-		if (!this.renderData.textureToIndex.TryGetValue(texture2D, out num2))
+		if (!this.renderData.textureToIndex.TryGetValue(texture2D, ref num2))
 		{
 			this.renderData.textureToIndex.Add(texture2D, this.renderData.textures.Count);
 			this.renderData.textures.Add(texture2D);
@@ -363,9 +362,9 @@ public class BuilderRenderer : MonoBehaviourPostTick
 			Debug.Log("Already have shared material. Not building new one.");
 			return;
 		}
-		TextureFormat textureFormat = TextureFormat.RGBA32;
+		TextureFormat textureFormat = 4;
 		this.renderData.sharedTexArray = new Texture2DArray(this.renderData.texWidth, this.renderData.texHeight, this.renderData.textures.Count, textureFormat, true);
-		this.renderData.sharedTexArray.filterMode = FilterMode.Point;
+		this.renderData.sharedTexArray.filterMode = 0;
 		for (int i = 0; i < this.renderData.textures.Count; i++)
 		{
 			this.renderData.sharedTexArray.SetPixels(this.renderData.textures[i].GetPixels(), i);
@@ -393,12 +392,12 @@ public class BuilderRenderer : MonoBehaviourPostTick
 			return;
 		}
 		this.renderData.sharedMesh = new Mesh();
-		this.renderData.sharedMesh.indexFormat = IndexFormat.UInt32;
+		this.renderData.sharedMesh.indexFormat = 1;
 		BuilderRenderer.verticesAll.Clear();
 		BuilderRenderer.normalsAll.Clear();
 		BuilderRenderer.uv1All.Clear();
 		BuilderRenderer.trianglesAll.Clear();
-		this.renderData.subMeshes = new NativeList<BuilderTableSubMesh>(512, Allocator.Persistent);
+		this.renderData.subMeshes = new NativeList<BuilderTableSubMesh>(512, 4);
 		for (int i = 0; i < this.renderData.meshes.Count; i++)
 		{
 			Mesh mesh = this.renderData.meshes[i];
@@ -423,7 +422,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 				indexCount = indexCount,
 				startVertex = count2
 			};
-			this.renderData.subMeshes.Add(builderTableSubMesh);
+			this.renderData.subMeshes.Add(ref builderTableSubMesh);
 		}
 		this.renderData.sharedMesh.SetVertices(BuilderRenderer.verticesAll);
 		this.renderData.sharedMesh.SetNormals(BuilderRenderer.normalsAll);
@@ -443,31 +442,31 @@ public class BuilderRenderer : MonoBehaviourPostTick
 	{
 		indirectBatch.totalInstances = 0;
 		indirectBatch.commandCount = meshCount;
-		indirectBatch.commandBuf = new GraphicsBuffer(GraphicsBuffer.Target.IndirectArguments, indirectBatch.commandCount, 20);
-		indirectBatch.commandData = new NativeArray<GraphicsBuffer.IndirectDrawIndexedArgs>(indirectBatch.commandCount, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		indirectBatch.matrixBuf = new GraphicsBuffer(GraphicsBuffer.Target.Structured, maxInstances * 2, 64);
-		indirectBatch.texIndexBuf = new GraphicsBuffer(GraphicsBuffer.Target.Structured, maxInstances * 2, 4);
-		indirectBatch.tintBuf = new GraphicsBuffer(GraphicsBuffer.Target.Structured, maxInstances * 2, 4);
+		indirectBatch.commandBuf = new GraphicsBuffer(256, indirectBatch.commandCount, 20);
+		indirectBatch.commandData = new NativeArray<GraphicsBuffer.IndirectDrawIndexedArgs>(indirectBatch.commandCount, 4, 1);
+		indirectBatch.matrixBuf = new GraphicsBuffer(16, maxInstances * 2, 64);
+		indirectBatch.texIndexBuf = new GraphicsBuffer(16, maxInstances * 2, 4);
+		indirectBatch.tintBuf = new GraphicsBuffer(16, maxInstances * 2, 4);
 		indirectBatch.instanceTransform = new TransformAccessArray(maxInstances, 3);
-		indirectBatch.instanceTransformIndexToDataIndex = new NativeArray<int>(maxInstances, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+		indirectBatch.instanceTransformIndexToDataIndex = new NativeArray<int>(maxInstances, 4, 1);
 		for (int i = 0; i < maxInstances; i++)
 		{
 			indirectBatch.instanceTransformIndexToDataIndex[i] = -1;
 		}
 		indirectBatch.pieceIDPerTransform = new List<int>(maxInstances);
-		indirectBatch.instanceObjectToWorld = new NativeArray<Matrix4x4>(maxInstances * 2, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		indirectBatch.instanceTexIndex = new NativeArray<int>(maxInstances * 2, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		indirectBatch.instanceTint = new NativeArray<float>(maxInstances * 2, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-		indirectBatch.renderMeshes = new NativeList<BuilderTableMeshInstances>(512, Allocator.Persistent);
+		indirectBatch.instanceObjectToWorld = new NativeArray<Matrix4x4>(maxInstances * 2, 4, 1);
+		indirectBatch.instanceTexIndex = new NativeArray<int>(maxInstances * 2, 4, 1);
+		indirectBatch.instanceTint = new NativeArray<float>(maxInstances * 2, 4, 1);
+		indirectBatch.renderMeshes = new NativeList<BuilderTableMeshInstances>(512, 4);
 		for (int j = 0; j < meshCount; j++)
 		{
 			BuilderTableMeshInstances builderTableMeshInstances = new BuilderTableMeshInstances
 			{
 				transforms = new TransformAccessArray(maxInstances, 3),
-				texIndex = new NativeList<int>(Allocator.Persistent),
-				tint = new NativeList<float>(Allocator.Persistent)
+				texIndex = new NativeList<int>(4),
+				tint = new NativeList<float>(4)
 			};
-			indirectBatch.renderMeshes.Add(builderTableMeshInstances);
+			indirectBatch.renderMeshes.Add(ref builderTableMeshInstances);
 		}
 		indirectBatch.rp = new RenderParams(sharedMaterialIndirect);
 		indirectBatch.rp.worldBounds = new Bounds(Vector3.zero, 10000f * Vector3.one);
@@ -525,12 +524,12 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		}
 		this.renderData.setupInstancesJobs = default(JobHandle);
 		BuilderRenderer.SetupIndirectBatchArgs(this.renderData.staticBatch, this.renderData.subMeshes);
-		BuilderRenderer.SetupInstanceDataForMeshStatic jobData = new BuilderRenderer.SetupInstanceDataForMeshStatic
+		BuilderRenderer.SetupInstanceDataForMeshStatic setupInstanceDataForMeshStatic = new BuilderRenderer.SetupInstanceDataForMeshStatic
 		{
 			transformIndexToDataIndex = this.renderData.staticBatch.instanceTransformIndexToDataIndex,
 			objectToWorld = this.renderData.staticBatch.instanceObjectToWorld
 		};
-		this.renderData.setupInstancesJobs = jobData.ScheduleReadOnly(this.renderData.staticBatch.instanceTransform, 32, default(JobHandle));
+		this.renderData.setupInstancesJobs = IJobParallelForTransformExtensions.ScheduleReadOnly<BuilderRenderer.SetupInstanceDataForMeshStatic>(setupInstanceDataForMeshStatic, this.renderData.staticBatch.instanceTransform, 32, default(JobHandle));
 		JobHandle.ScheduleBatchedJobs();
 	}
 
@@ -547,14 +546,14 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		{
 			BuilderTableMeshInstances builderTableMeshInstances = indirectBatch.renderMeshes[i];
 			BuilderTableSubMesh builderTableSubMesh = subMeshes[i];
-			GraphicsBuffer.IndirectDrawIndexedArgs value = default(GraphicsBuffer.IndirectDrawIndexedArgs);
-			value.indexCountPerInstance = (uint)builderTableSubMesh.indexCount;
-			value.startIndex = (uint)builderTableSubMesh.startIndex;
-			value.baseVertexIndex = (uint)builderTableSubMesh.startVertex;
-			value.startInstance = num;
-			value.instanceCount = (uint)(builderTableMeshInstances.transforms.length * 2);
-			num += value.instanceCount;
-			indirectBatch.commandData[i] = value;
+			GraphicsBuffer.IndirectDrawIndexedArgs indirectDrawIndexedArgs = default(GraphicsBuffer.IndirectDrawIndexedArgs);
+			indirectDrawIndexedArgs.indexCountPerInstance = (uint)builderTableSubMesh.indexCount;
+			indirectDrawIndexedArgs.startIndex = (uint)builderTableSubMesh.startIndex;
+			indirectDrawIndexedArgs.baseVertexIndex = (uint)builderTableSubMesh.startVertex;
+			indirectDrawIndexedArgs.startInstance = num;
+			indirectDrawIndexedArgs.instanceCount = (uint)(builderTableMeshInstances.transforms.length * 2);
+			num += indirectDrawIndexedArgs.instanceCount;
+			indirectBatch.commandData[i] = indirectDrawIndexedArgs;
 		}
 	}
 
@@ -564,7 +563,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 		indirectBatch.texIndexBuf.SetData<int>(indirectBatch.instanceTexIndex);
 		indirectBatch.tintBuf.SetData<float>(indirectBatch.instanceTint);
 		indirectBatch.commandBuf.SetData<GraphicsBuffer.IndirectDrawIndexedArgs>(indirectBatch.commandData);
-		Graphics.RenderMeshIndirect(indirectBatch.rp, this.renderData.sharedMesh, indirectBatch.commandBuf, indirectBatch.commandCount, 0);
+		Graphics.RenderMeshIndirect(ref indirectBatch.rp, this.renderData.sharedMesh, indirectBatch.commandBuf, indirectBatch.commandCount, 0);
 	}
 
 	public void AddPiece(BuilderPiece piece)
@@ -583,8 +582,8 @@ public class BuilderRenderer : MonoBehaviourPostTick
 					Texture2D texture2D = material.GetTexture("_BaseMap") as Texture2D;
 					if (!(texture2D == null))
 					{
-						int value;
-						if (!this.renderData.textureToIndex.TryGetValue(texture2D, out value))
+						int num;
+						if (!this.renderData.textureToIndex.TryGetValue(texture2D, ref num))
 						{
 							if (!piece.suppressMaterialWarnings)
 							{
@@ -603,8 +602,8 @@ public class BuilderRenderer : MonoBehaviourPostTick
 								Mesh sharedMesh = component.sharedMesh;
 								if (!(sharedMesh == null))
 								{
-									int num;
-									if (!this.renderData.meshToIndex.TryGetValue(sharedMesh, out num))
+									int num2;
+									if (!this.renderData.meshToIndex.TryGetValue(sharedMesh, ref num2))
 									{
 										Debug.LogWarningFormat("builder piece {0} mesh {1} not found in render data", new object[]
 										{
@@ -614,10 +613,10 @@ public class BuilderRenderer : MonoBehaviourPostTick
 									}
 									else
 									{
-										int num2 = this.renderData.meshInstanceCount[num] % 1;
-										this.renderData.meshInstanceCount[num] = this.renderData.meshInstanceCount[num] + 1;
-										num += num2;
-										int num3 = -1;
+										int num3 = this.renderData.meshInstanceCount[num2] % 1;
+										this.renderData.meshInstanceCount[num2] = this.renderData.meshInstanceCount[num2] + 1;
+										num2 += num3;
+										int num4 = -1;
 										if (isStatic)
 										{
 											NativeArray<int> instanceTransformIndexToDataIndex = this.renderData.staticBatch.instanceTransformIndexToDataIndex;
@@ -627,58 +626,58 @@ public class BuilderRenderer : MonoBehaviourPostTick
 												GTDev.LogError<string>("Too Many Builder Mesh Instances", null);
 												return;
 											}
-											num3 = length;
-											BuilderTableMeshInstances builderTableMeshInstances = this.renderData.staticBatch.renderMeshes[num];
-											int num4 = 0;
-											for (int j = 0; j <= num; j++)
+											num4 = length;
+											BuilderTableMeshInstances builderTableMeshInstances = this.renderData.staticBatch.renderMeshes[num2];
+											int num5 = 0;
+											for (int j = 0; j <= num2; j++)
 											{
-												num4 += this.renderData.staticBatch.renderMeshes[j].transforms.length * 2;
+												num5 += this.renderData.staticBatch.renderMeshes[j].transforms.length * 2;
 											}
 											for (int k = 0; k < length; k++)
 											{
-												if (this.renderData.staticBatch.instanceTransformIndexToDataIndex[k] >= num4)
+												if (this.renderData.staticBatch.instanceTransformIndexToDataIndex[k] >= num5)
 												{
 													this.renderData.staticBatch.instanceTransformIndexToDataIndex[k] = this.renderData.staticBatch.instanceTransformIndexToDataIndex[k] + 2;
 												}
 											}
 											this.renderData.staticBatch.pieceIDPerTransform.Add(piece.pieceId);
 											this.renderData.staticBatch.instanceTransform.Add(meshRenderer.transform);
-											this.renderData.staticBatch.instanceTransformIndexToDataIndex[num3] = num4;
+											this.renderData.staticBatch.instanceTransformIndexToDataIndex[num4] = num5;
 											builderTableMeshInstances.transforms.Add(meshRenderer.transform);
-											builderTableMeshInstances.texIndex.Add(value);
-											builderTableMeshInstances.tint.Add(piece.tint);
-											int num5 = this.renderData.staticBatch.totalInstances - 1;
-											for (int l = num5; l >= num4; l--)
+											builderTableMeshInstances.texIndex.Add(ref num);
+											builderTableMeshInstances.tint.Add(ref piece.tint);
+											int num6 = this.renderData.staticBatch.totalInstances - 1;
+											for (int l = num6; l >= num5; l--)
 											{
 												this.renderData.staticBatch.instanceTexIndex[l + 2] = this.renderData.staticBatch.instanceTexIndex[l];
 											}
-											for (int m = num5; m >= num4; m--)
+											for (int m = num6; m >= num5; m--)
 											{
 												this.renderData.staticBatch.instanceObjectToWorld[m + 2] = this.renderData.staticBatch.instanceObjectToWorld[m];
 											}
-											for (int n = num5; n >= num4; n--)
+											for (int n = num6; n >= num5; n--)
 											{
 												this.renderData.staticBatch.instanceTint[n + 2] = this.renderData.staticBatch.instanceTint[n];
 											}
-											for (int num6 = 0; num6 < 2; num6++)
+											for (int num7 = 0; num7 < 2; num7++)
 											{
-												this.renderData.staticBatch.instanceObjectToWorld[num4 + num6] = meshRenderer.transform.localToWorldMatrix;
-												this.renderData.staticBatch.instanceTexIndex[num4 + num6] = value;
-												this.renderData.staticBatch.instanceTint[num4 + num6] = 1f;
+												this.renderData.staticBatch.instanceObjectToWorld[num5 + num7] = meshRenderer.transform.localToWorldMatrix;
+												this.renderData.staticBatch.instanceTexIndex[num5 + num7] = num;
+												this.renderData.staticBatch.instanceTint[num5 + num7] = 1f;
 												this.renderData.staticBatch.totalInstances++;
 											}
 										}
 										else
 										{
-											BuilderTableMeshInstances builderTableMeshInstances2 = this.renderData.dynamicBatch.renderMeshes[num];
+											BuilderTableMeshInstances builderTableMeshInstances2 = this.renderData.dynamicBatch.renderMeshes[num2];
 											builderTableMeshInstances2.transforms.Add(meshRenderer.transform);
-											builderTableMeshInstances2.texIndex.Add(value);
-											builderTableMeshInstances2.tint.Add(piece.tint);
+											builderTableMeshInstances2.texIndex.Add(ref num);
+											builderTableMeshInstances2.tint.Add(ref piece.tint);
 											this.renderData.dynamicBatch.totalInstances++;
 										}
 										piece.renderingIndirect.Add(meshRenderer);
 										piece.renderingDirect.Remove(meshRenderer);
-										piece.renderingIndirectTransformIndex.Add(num3);
+										piece.renderingIndirectTransformIndex.Add(num4);
 										meshRenderer.enabled = false;
 									}
 								}
@@ -703,14 +702,14 @@ public class BuilderRenderer : MonoBehaviourPostTick
 				{
 					Texture2D texture2D = sharedMaterial.GetTexture("_BaseMap") as Texture2D;
 					int num;
-					if (!(texture2D == null) && this.renderData.textureToIndex.TryGetValue(texture2D, out num))
+					if (!(texture2D == null) && this.renderData.textureToIndex.TryGetValue(texture2D, ref num))
 					{
 						MeshFilter component = meshRenderer.GetComponent<MeshFilter>();
 						if (!(component == null))
 						{
 							Mesh sharedMesh = component.sharedMesh;
 							int num2;
-							if (this.renderData.meshToIndex.TryGetValue(sharedMesh, out num2))
+							if (this.renderData.meshToIndex.TryGetValue(sharedMesh, ref num2))
 							{
 								Transform transform = meshRenderer.transform;
 								bool flag = false;
@@ -729,7 +728,7 @@ public class BuilderRenderer : MonoBehaviourPostTick
 									int num6 = this.renderData.staticBatch.instanceTransform.length - 1;
 									int pieceId = this.renderData.staticBatch.pieceIDPerTransform[num6];
 									this.renderData.staticBatch.instanceTransform.RemoveAtSwapBack(num5);
-									this.renderData.staticBatch.pieceIDPerTransform.RemoveAtSwapBack(num5);
+									ListExtensions.RemoveAtSwapBack<int>(this.renderData.staticBatch.pieceIDPerTransform, num5);
 									this.renderData.staticBatch.instanceTransformIndexToDataIndex[num5] = this.renderData.staticBatch.instanceTransformIndexToDataIndex[num6];
 									this.renderData.staticBatch.instanceTransformIndexToDataIndex[num6] = -1;
 									BuilderPiece piece2 = piece.GetTable().GetPiece(pieceId);
@@ -753,10 +752,10 @@ public class BuilderRenderer : MonoBehaviourPostTick
 								}
 								for (int m = 0; m < 1; m++)
 								{
-									int index = num2 + m;
+									int num7 = num2 + m;
 									if (isStatic)
 									{
-										BuilderTableMeshInstances builderTableMeshInstances = this.renderData.staticBatch.renderMeshes[index];
+										BuilderTableMeshInstances builderTableMeshInstances = this.renderData.staticBatch.renderMeshes[num7];
 										for (int n = 0; n < builderTableMeshInstances.transforms.length; n++)
 										{
 											if (builderTableMeshInstances.transforms[n] == transform)
@@ -773,14 +772,14 @@ public class BuilderRenderer : MonoBehaviourPostTick
 									}
 									else
 									{
-										BuilderTableMeshInstances builderTableMeshInstances2 = this.renderData.dynamicBatch.renderMeshes[index];
-										for (int num7 = 0; num7 < builderTableMeshInstances2.transforms.length; num7++)
+										BuilderTableMeshInstances builderTableMeshInstances2 = this.renderData.dynamicBatch.renderMeshes[num7];
+										for (int num8 = 0; num8 < builderTableMeshInstances2.transforms.length; num8++)
 										{
-											if (builderTableMeshInstances2.transforms[num7] == transform)
+											if (builderTableMeshInstances2.transforms[num8] == transform)
 											{
-												BuilderRenderer.RemoveAt(builderTableMeshInstances2.transforms, num7);
-												builderTableMeshInstances2.texIndex.RemoveAt(num7);
-												builderTableMeshInstances2.tint.RemoveAt(num7);
+												BuilderRenderer.RemoveAt(builderTableMeshInstances2.transforms, num8);
+												builderTableMeshInstances2.texIndex.RemoveAt(num8);
+												builderTableMeshInstances2.tint.RemoveAt(num8);
 												flag = true;
 												this.renderData.dynamicBatch.totalInstances--;
 												break;
@@ -795,18 +794,18 @@ public class BuilderRenderer : MonoBehaviourPostTick
 								}
 								if (flag && isStatic)
 								{
-									int num8 = this.renderData.staticBatch.totalInstances + 1;
-									for (int num9 = num4; num9 < num8; num9++)
+									int num9 = this.renderData.staticBatch.totalInstances + 1;
+									for (int num10 = num4; num10 < num9; num10++)
 									{
-										this.renderData.staticBatch.instanceTexIndex[num9] = this.renderData.staticBatch.instanceTexIndex[num9 + 2];
+										this.renderData.staticBatch.instanceTexIndex[num10] = this.renderData.staticBatch.instanceTexIndex[num10 + 2];
 									}
-									for (int num10 = num4; num10 < num8; num10++)
+									for (int num11 = num4; num11 < num9; num11++)
 									{
-										this.renderData.staticBatch.instanceObjectToWorld[num10] = this.renderData.staticBatch.instanceObjectToWorld[num10 + 2];
+										this.renderData.staticBatch.instanceObjectToWorld[num11] = this.renderData.staticBatch.instanceObjectToWorld[num11 + 2];
 									}
-									for (int num11 = num4; num11 < num8; num11++)
+									for (int num12 = num4; num12 < num9; num12++)
 									{
-										this.renderData.staticBatch.instanceTint[num11] = this.renderData.staticBatch.instanceTint[num11 + 2];
+										this.renderData.staticBatch.instanceTint[num12] = this.renderData.staticBatch.instanceTint[num12 + 2];
 									}
 								}
 								meshRenderer.enabled = true;
@@ -837,8 +836,8 @@ public class BuilderRenderer : MonoBehaviourPostTick
 			Debug.LogError("New Material does not have a \"_BaseMap\" property");
 			return;
 		}
-		int value;
-		if (!this.renderData.textureToIndex.TryGetValue(texture2D, out value))
+		int num;
+		if (!this.renderData.textureToIndex.TryGetValue(texture2D, ref num))
 		{
 			Debug.LogError("New Material is not in the texture array");
 			return;
@@ -858,20 +857,20 @@ public class BuilderRenderer : MonoBehaviourPostTick
 				if (!(component == null))
 				{
 					Mesh sharedMesh = component.sharedMesh;
-					int num;
-					if (this.renderData.meshToIndex.TryGetValue(sharedMesh, out num))
+					int num2;
+					if (this.renderData.meshToIndex.TryGetValue(sharedMesh, ref num2))
 					{
 						Transform transform = meshRenderer.transform;
 						bool flag = false;
 						if (isStatic)
 						{
-							int index = piece.renderingIndirectTransformIndex[i];
-							int num2 = this.renderData.staticBatch.instanceTransformIndexToDataIndex[index];
-							if (num2 >= 0)
+							int num3 = piece.renderingIndirectTransformIndex[i];
+							int num4 = this.renderData.staticBatch.instanceTransformIndexToDataIndex[num3];
+							if (num4 >= 0)
 							{
 								for (int j = 0; j < 2; j++)
 								{
-									this.renderData.staticBatch.instanceTexIndex[num2 + j] = value;
+									this.renderData.staticBatch.instanceTexIndex[num4 + j] = num;
 								}
 							}
 						}
@@ -879,13 +878,13 @@ public class BuilderRenderer : MonoBehaviourPostTick
 						{
 							for (int k = 0; k < 1; k++)
 							{
-								int index2 = num + k;
-								BuilderTableMeshInstances builderTableMeshInstances = this.renderData.dynamicBatch.renderMeshes[index2];
+								int num5 = num2 + k;
+								BuilderTableMeshInstances builderTableMeshInstances = this.renderData.dynamicBatch.renderMeshes[num5];
 								for (int l = 0; l < builderTableMeshInstances.transforms.length; l++)
 								{
 									if (builderTableMeshInstances.transforms[l] == transform)
 									{
-										this.renderData.dynamicBatch.renderMeshes.ElementAt(index2).texIndex[l] = value;
+										this.renderData.dynamicBatch.renderMeshes.ElementAt(num5).texIndex[l] = num;
 										flag = true;
 										break;
 									}
@@ -922,25 +921,25 @@ public class BuilderRenderer : MonoBehaviourPostTick
 			{
 				Texture2D texture2D = sharedMaterial.GetTexture("_BaseMap") as Texture2D;
 				int num;
-				if (!(texture2D == null) && this.renderData.textureToIndex.TryGetValue(texture2D, out num))
+				if (!(texture2D == null) && this.renderData.textureToIndex.TryGetValue(texture2D, ref num))
 				{
 					MeshFilter component = meshRenderer.GetComponent<MeshFilter>();
 					if (!(component == null))
 					{
 						Mesh sharedMesh = component.sharedMesh;
 						int num2;
-						if (this.renderData.meshToIndex.TryGetValue(sharedMesh, out num2))
+						if (this.renderData.meshToIndex.TryGetValue(sharedMesh, ref num2))
 						{
 							Transform transform = meshRenderer.transform;
 							if (piece.isStatic)
 							{
-								int index = piece.renderingIndirectTransformIndex[i];
-								int num3 = this.renderData.staticBatch.instanceTransformIndexToDataIndex[index];
-								if (num3 >= 0)
+								int num3 = piece.renderingIndirectTransformIndex[i];
+								int num4 = this.renderData.staticBatch.instanceTransformIndexToDataIndex[num3];
+								if (num4 >= 0)
 								{
 									for (int j = 0; j < 2; j++)
 									{
-										this.renderData.staticBatch.instanceTint[num3 + j] = tint;
+										this.renderData.staticBatch.instanceTint[num4 + j] = tint;
 									}
 								}
 							}
@@ -948,8 +947,8 @@ public class BuilderRenderer : MonoBehaviourPostTick
 							{
 								for (int k = 0; k < 1; k++)
 								{
-									int index2 = num2 + k;
-									BuilderTableMeshInstances builderTableMeshInstances = this.renderData.dynamicBatch.renderMeshes[index2];
+									int num5 = num2 + k;
+									BuilderTableMeshInstances builderTableMeshInstances = this.renderData.dynamicBatch.renderMeshes[num5];
 									for (int l = 0; l < builderTableMeshInstances.transforms.length; l++)
 									{
 										if (builderTableMeshInstances.transforms[l] == transform)
@@ -1084,10 +1083,10 @@ public class BuilderRenderer : MonoBehaviourPostTick
 	{
 		public void Execute(int index, TransformAccess transform)
 		{
-			int index2 = index + (int)this.commandData.startInstance;
-			this.objectToWorld[index2] = transform.localToWorldMatrix;
-			this.instanceTexIndex[index2] = this.texIndex[index];
-			this.instanceTint[index2] = this.tint[index];
+			int num = index + (int)this.commandData.startInstance;
+			this.objectToWorld[num] = transform.localToWorldMatrix;
+			this.instanceTexIndex[num] = this.texIndex[index];
+			this.instanceTint[num] = this.tint[index];
 		}
 
 		[ReadOnly]

@@ -48,9 +48,9 @@ public class CosmeticCritterShadeFleeing : CosmeticCritter
 	{
 		float num = (float)base.GetAliveTime();
 		Vector3 vector = this.origin + num * this.fleeForward + this.pullVector + Mathf.Sin(this.fleeBobFrequencyXY.x * num) * this.fleeBobMagnitudeXY.x * this.fleeRight + Mathf.Sin(this.fleeBobFrequencyXY.y * num) * this.fleeBobMagnitudeXY.y * this.fleeUp;
-		Quaternion rotation = Quaternion.LookRotation((vector - this.trailingPosition).normalized, Vector3.up);
+		Quaternion quaternion = Quaternion.LookRotation((vector - this.trailingPosition).normalized, Vector3.up);
 		this.trailingPosition = Vector3.Lerp(this.trailingPosition, vector, 0.05f);
-		base.transform.SetPositionAndRotation(vector, rotation);
+		base.transform.SetPositionAndRotation(vector, quaternion);
 		this.animator.SetFloat(this.animatorProperty, Mathf.Sin(num * 3f) * 0.5f + 0.5f);
 	}
 

@@ -82,9 +82,9 @@ public class SlingshotProjectile : MonoBehaviour
 			this.forceComponent.force = Vector3.zero;
 		}
 		this.OnImpact = null;
-		this.aoeKnockbackConfig = null;
-		this.impactSoundVolumeOverride = null;
-		this.impactSoundPitchOverride = null;
+		this.aoeKnockbackConfig = default(SlingshotProjectile.AOEKnockbackConfig?);
+		this.impactSoundVolumeOverride = default(float?);
+		this.impactSoundPitchOverride = default(float?);
 		this.impactEffectScaleMultiplier = 1f;
 		this.projectileRigidbody.isKinematic = false;
 		ObjectPools.instance.Destroy(base.gameObject);
@@ -132,11 +132,11 @@ public class SlingshotProjectile : MonoBehaviour
 	{
 		if (this.aoeKnockbackConfig != null && this.aoeKnockbackConfig.Value.applyAOEKnockback)
 		{
-			Vector3 a = GTPlayer.Instance.HeadCenterPosition - impactPosition;
-			if (a.sqrMagnitude < this.aoeKnockbackConfig.Value.aeoOuterRadius * this.aoeKnockbackConfig.Value.aeoOuterRadius)
+			Vector3 vector = GTPlayer.Instance.HeadCenterPosition - impactPosition;
+			if (vector.sqrMagnitude < this.aoeKnockbackConfig.Value.aeoOuterRadius * this.aoeKnockbackConfig.Value.aeoOuterRadius)
 			{
-				float magnitude = a.magnitude;
-				Vector3 direction = (magnitude > 0.001f) ? (a / magnitude) : Vector3.up;
+				float magnitude = vector.magnitude;
+				Vector3 direction = (magnitude > 0.001f) ? (vector / magnitude) : Vector3.up;
 				float num = Mathf.InverseLerp(this.aoeKnockbackConfig.Value.aeoOuterRadius, this.aoeKnockbackConfig.Value.aeoInnerRadius, magnitude);
 				float num2 = Mathf.InverseLerp(0f, this.aoeKnockbackConfig.Value.impactVelocityThreshold, impactSpeed);
 				GTPlayer.Instance.ApplyKnockback(direction, this.aoeKnockbackConfig.Value.knockbackVelocity * num * num2, false);
@@ -146,7 +146,7 @@ public class SlingshotProjectile : MonoBehaviour
 					this.impactSoundVolumeOverride = new float?(Mathf.Lerp(this.impactSoundVolumeOverride.Value * 0.5f, this.impactSoundVolumeOverride.Value, num2));
 				}
 				float num3 = Mathf.Lerp(this.aoeKnockbackConfig.Value.aeoInnerRadius, this.aoeKnockbackConfig.Value.aeoOuterRadius, 0.25f);
-				if (this.aoeKnockbackConfig.Value.playerProximityEffect != PlayerEffect.NONE && a.sqrMagnitude < num3 * num3)
+				if (this.aoeKnockbackConfig.Value.playerProximityEffect != PlayerEffect.NONE && vector.sqrMagnitude < num3 * num3)
 				{
 					RoomSystem.SendPlayerEffect(PlayerEffect.SNOWBALL_IMPACT, NetworkSystem.Instance.LocalPlayer);
 				}
@@ -196,8 +196,8 @@ public class SlingshotProjectile : MonoBehaviour
 			{
 				Transform transform = base.transform;
 				Vector3 position = transform.position;
-				Vector3 forward = position - this.previousPosition;
-				transform.rotation = ((forward.sqrMagnitude > 0f) ? Quaternion.LookRotation(forward) : transform.rotation);
+				Vector3 vector = position - this.previousPosition;
+				transform.rotation = ((vector.sqrMagnitude > 0f) ? Quaternion.LookRotation(vector) : transform.rotation);
 				this.previousPosition = position;
 			}
 		}
@@ -234,7 +234,7 @@ public class SlingshotProjectile : MonoBehaviour
 		{
 			int value = this.floorLayerMask.value;
 			RaycastHit raycastHit;
-			if (Physics.Raycast(base.transform.position, Vector3.down, out raycastHit, 0.1f, value, QueryTriggerInteraction.Ignore) && Vector3.Angle(raycastHit.normal, Vector3.up) < 40f)
+			if (Physics.Raycast(base.transform.position, Vector3.down, ref raycastHit, 0.1f, value, 1) && Vector3.Angle(raycastHit.normal, Vector3.up) < 40f)
 			{
 				if (this.forceComponent)
 				{
@@ -266,7 +266,7 @@ public class SlingshotProjectile : MonoBehaviour
 			return;
 		}
 		SlingshotProjectileHitNotifier slingshotProjectileHitNotifier;
-		if (collision.collider.gameObject.TryGetComponent<SlingshotProjectileHitNotifier>(out slingshotProjectileHitNotifier))
+		if (collision.collider.gameObject.TryGetComponent<SlingshotProjectileHitNotifier>(ref slingshotProjectileHitNotifier))
 		{
 			slingshotProjectileHitNotifier.InvokeHit(this, collision);
 		}
@@ -292,7 +292,7 @@ public class SlingshotProjectile : MonoBehaviour
 			return;
 		}
 		SlingshotProjectileHitNotifier slingshotProjectileHitNotifier;
-		if (collision.gameObject.TryGetComponent<SlingshotProjectileHitNotifier>(out slingshotProjectileHitNotifier))
+		if (collision.gameObject.TryGetComponent<SlingshotProjectileHitNotifier>(ref slingshotProjectileHitNotifier))
 		{
 			slingshotProjectileHitNotifier.InvokeCollisionStay(this, collision);
 		}
@@ -314,7 +314,7 @@ public class SlingshotProjectile : MonoBehaviour
 			return;
 		}
 		SlingshotProjectileHitNotifier slingshotProjectileHitNotifier;
-		if (other.gameObject.TryGetComponent<SlingshotProjectileHitNotifier>(out slingshotProjectileHitNotifier))
+		if (other.gameObject.TryGetComponent<SlingshotProjectileHitNotifier>(ref slingshotProjectileHitNotifier))
 		{
 			slingshotProjectileHitNotifier.InvokeTriggerExit(this, other);
 		}
@@ -327,7 +327,7 @@ public class SlingshotProjectile : MonoBehaviour
 			return;
 		}
 		SlingshotProjectileHitNotifier slingshotProjectileHitNotifier;
-		if (other.gameObject.TryGetComponent<SlingshotProjectileHitNotifier>(out slingshotProjectileHitNotifier))
+		if (other.gameObject.TryGetComponent<SlingshotProjectileHitNotifier>(ref slingshotProjectileHitNotifier))
 		{
 			slingshotProjectileHitNotifier.InvokeTriggerEnter(this, other);
 		}
@@ -378,15 +378,15 @@ public class SlingshotProjectile : MonoBehaviour
 			this.Deactivate();
 		}
 		Rigidbody attachedRigidbody = other.attachedRigidbody;
-		VRRig arg;
-		if (attachedRigidbody.IsNotNull() && attachedRigidbody.gameObject.TryGetComponent<VRRig>(out arg))
+		VRRig vrrig;
+		if (attachedRigidbody.IsNotNull() && attachedRigidbody.gameObject.TryGetComponent<VRRig>(ref vrrig))
 		{
 			UnityEvent<VRRig> onHitPlayer = this.OnHitPlayer;
 			if (onHitPlayer == null)
 			{
 				return;
 			}
-			onHitPlayer.Invoke(arg);
+			onHitPlayer.Invoke(vrrig);
 		}
 	}
 

@@ -43,18 +43,18 @@ public class GRHazardTower : MonoBehaviour, IGameEntityComponent, IGameProjectil
 			return;
 		}
 		Vector3 vector = vrrig.transform.position;
-		Vector3 b = Vector3.up * 0.1f;
-		vector += b;
+		Vector3 vector2 = Vector3.up * 0.1f;
+		vector += vector2;
 		GhostReactorManager.Get(this.gameEntity).RequestFireProjectile(this.gameEntity.id, this.fireFrom.position, vector, PhotonNetwork.Time + 0.0);
 		this.nextFireTime = timeAsDouble + (double)this.fireCooldownTime;
 	}
 
 	public void OnFire(Vector3 fireFromPos, Vector3 fireAtPos, double fireAtTime)
 	{
-		Vector3 forward;
-		if (this.gameEntity.IsAuthority() && GREnemyRanged.CalculateLaunchDirection(fireFromPos, fireAtPos, this.projectileSpeed, out forward))
+		Vector3 vector;
+		if (this.gameEntity.IsAuthority() && GREnemyRanged.CalculateLaunchDirection(fireFromPos, fireAtPos, this.projectileSpeed, out vector))
 		{
-			this.gameEntity.manager.RequestCreateItem(this.projectilePrefab.name.GetStaticHash(), fireFromPos, Quaternion.LookRotation(forward, Vector3.up), (long)this.gameEntity.GetNetId());
+			this.gameEntity.manager.RequestCreateItem(this.projectilePrefab.name.GetStaticHash(), fireFromPos, Quaternion.LookRotation(vector, Vector3.up), (long)this.gameEntity.GetNetId());
 		}
 		double timeAsDouble = Time.timeAsDouble;
 		this.nextFireTime = timeAsDouble + (double)this.fireCooldownTime;

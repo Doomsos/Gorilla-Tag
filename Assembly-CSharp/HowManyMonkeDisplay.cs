@@ -31,9 +31,9 @@ public class HowManyMonkeDisplay : MonoBehaviour, IGorillaSliceableSimple
 
 	public void SliceUpdate()
 	{
-		float time = Mathf.Lerp((float)this.currValue, (float)this.nextValue, (Time.time - this.checkTime) / HowManyMonke.RecheckDelay);
-		this.text.text = time.ToString("N0");
-		this.particleSystem.emission.rateOverTime = this.particleSystemRateToCount.Evaluate(time);
+		float num = Mathf.Lerp((float)this.currValue, (float)this.nextValue, (Time.time - this.checkTime) / HowManyMonke.RecheckDelay);
+		this.text.text = num.ToString("N0");
+		this.particleSystem.emission.rateOverTime = this.particleSystemRateToCount.Evaluate(num);
 		float sqrMagnitude = (VRRig.LocalRig.transform.position - base.transform.position).sqrMagnitude;
 		if (this.observable && sqrMagnitude > this.observableDistance)
 		{

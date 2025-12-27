@@ -8,7 +8,7 @@ namespace Critters.Scripts
 	{
 		private void Awake()
 		{
-			this.spawnPoint.OnSpawnChanged += this.HandleSpawnedActor;
+			this.spawnPoint.OnSpawnChanged += new Action<CrittersActor>(this.HandleSpawnedActor);
 		}
 
 		private void OnEnable()
@@ -101,7 +101,7 @@ namespace Critters.Scripts
 			if (this.attachSpawnedObjectToSpawnLocation)
 			{
 				CrittersActor crittersActor;
-				CrittersManager.instance.actorById.TryGetValue(this.currentSpawnedObject.parentActorId, out crittersActor);
+				CrittersManager.instance.actorById.TryGetValue(this.currentSpawnedObject.parentActorId, ref crittersActor);
 				if (crittersActor.IsNull() || crittersActor != this.spawnPoint)
 				{
 					return false;

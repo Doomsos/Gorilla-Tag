@@ -37,13 +37,13 @@ public class MonkeCandle : RubberDuck
 				this.currentParticles.Remove(this.fxParticleArray[i].randomSeed);
 			}
 		}
-		foreach (uint key in this.currentParticles)
+		foreach (uint num in this.currentParticles)
 		{
-			if (this.particleInfoDict.TryGetValue(key, out this.outPosition))
+			if (this.particleInfoDict.TryGetValue(num, ref this.outPosition))
 			{
 				this.fxExplodeAudio.transform.position = this.outPosition;
 				this.fxExplodeAudio.GTPlayOneShot(this.fxExplodeAudio.clip, 1f);
-				this.particleInfoDict.Remove(key);
+				this.particleInfoDict.Remove(num);
 			}
 		}
 		this.currentParticles.Clear();
@@ -53,7 +53,7 @@ public class MonkeCandle : RubberDuck
 			{
 				this.movingFxAudio.transform.position = this.fxParticleArray[j].position;
 			}
-			if (this.particleInfoDict.TryGetValue(this.fxParticleArray[j].randomSeed, out this.outPosition))
+			if (this.particleInfoDict.TryGetValue(this.fxParticleArray[j].randomSeed, ref this.outPosition))
 			{
 				this.particleInfoDict[this.fxParticleArray[j].randomSeed] = this.fxParticleArray[j].position;
 			}

@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 		public void OnBasket(bool isLeftHand, Collider other)
 		{
 			SlingshotProjectile slingshotProjectile;
-			if (other.TryGetComponent<SlingshotProjectile>(out slingshotProjectile) && slingshotProjectile.GetDistanceTraveled() >= this.minScoringDistance)
+			if (other.TryGetComponent<SlingshotProjectile>(ref slingshotProjectile) && slingshotProjectile.GetDistanceTraveled() >= this.minScoringDistance)
 			{
 				UnityEvent onScored = this.OnScored;
 				if (onScored != null)

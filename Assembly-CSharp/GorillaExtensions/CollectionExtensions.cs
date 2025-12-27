@@ -7,9 +7,9 @@ namespace GorillaExtensions
 	{
 		public static void AddAll<T>(this ICollection<T> collection, IEnumerable<T> ts)
 		{
-			foreach (T item in ts)
+			foreach (T t in ts)
 			{
-				collection.Add(item);
+				collection.Add(t);
 			}
 		}
 	}

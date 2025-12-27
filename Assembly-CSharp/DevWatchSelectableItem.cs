@@ -12,7 +12,7 @@ public class DevWatchSelectableItem : MonoBehaviour
 		this.ItemName.text = obj.name;
 		this.Button.onClick.AddListener(delegate()
 		{
-			this.OnSelected(this.ItemName.text, this.SelectedObject);
+			this.OnSelected.Invoke(this.ItemName.text, this.SelectedObject);
 		});
 	}
 

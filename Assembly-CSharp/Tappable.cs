@@ -39,7 +39,7 @@ public class Tappable : MonoBehaviour
 		{
 			return;
 		}
-		this.manager.photonView.RPC("SendOnTapRPC", RpcTarget.All, new object[]
+		this.manager.photonView.RPC("SendOnTapRPC", 0, new object[]
 		{
 			this.tappableId,
 			tapStrength
@@ -56,7 +56,7 @@ public class Tappable : MonoBehaviour
 		{
 			return;
 		}
-		this.manager.photonView.RPC("SendOnGrabRPC", RpcTarget.All, new object[]
+		this.manager.photonView.RPC("SendOnGrabRPC", 0, new object[]
 		{
 			this.tappableId
 		});
@@ -72,7 +72,7 @@ public class Tappable : MonoBehaviour
 		{
 			return;
 		}
-		this.manager.photonView.RPC("SendOnReleaseRPC", RpcTarget.All, new object[]
+		this.manager.photonView.RPC("SendOnReleaseRPC", 0, new object[]
 		{
 			this.tappableId
 		});

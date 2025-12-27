@@ -85,7 +85,7 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack
 	{
 		Vector3 position = GTPlayer.Instance.bodyCollider.transform.position;
 		Vector3 position2 = base.transform.position;
-		Vector3 b = position2 - position;
+		Vector3 vector = position2 - position;
 		Component controllerTransform = (this.isLeftHanded ? GTPlayer.Instance.LeftHand : GTPlayer.Instance.RightHand).controllerTransform;
 		float num = this.isLeftHanded ? ControllerInputPoller.instance.leftControllerIndexFloat : ControllerInputPoller.instance.rightControllerIndexFloat;
 		bool flag = num >= 0.9f;
@@ -101,25 +101,25 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack
 				this.isGripBroken = false;
 			}
 		}
-		Vector3 vector = position2 + b;
+		Vector3 vector2 = position2 + vector;
 		Quaternion quaternion = controllerTransform.transform.rotation * Quaternion.Euler(90f, 0f, 0f);
-		if ((this.knownSafePosition - vector).IsLongerThan(1f))
+		if ((this.knownSafePosition - vector2).IsLongerThan(1f))
 		{
 			this.knownSafePosition = position2;
 		}
 		float num2 = 0.15f;
 		this.clawVisualRot = base.transform.rotation;
 		RaycastHit raycastHit;
-		bool flag2 = Physics.SphereCast(new Ray(this.knownSafePosition, vector - this.knownSafePosition), num2, out raycastHit, (vector - this.knownSafePosition).magnitude, this.worldCollisionLayers);
+		bool flag2 = Physics.SphereCast(new Ray(this.knownSafePosition, vector2 - this.knownSafePosition), num2, ref raycastHit, (vector2 - this.knownSafePosition).magnitude, this.worldCollisionLayers);
 		if (this.isAnchored)
 		{
 			if (flag)
 			{
 				Vector3 position3 = GTPlayer.Instance.transform.position;
 				this.clawHoldAdjustment -= position3 - this.lastRequestedPlayerPosition;
-				Vector3 vector2 = this.clawAnchorPosition - (vector + this.clawHoldAdjustment);
-				GTPlayer.Instance.RequestTentacleMove(this.isLeftHanded, vector2);
-				this.lastRequestedPlayerPosition = position3 + vector2;
+				Vector3 vector3 = this.clawAnchorPosition - (vector2 + this.clawHoldAdjustment);
+				GTPlayer.Instance.RequestTentacleMove(this.isLeftHanded, vector3);
+				this.lastRequestedPlayerPosition = position3 + vector3;
 				if ((this.clawAnchorPosition - base.transform.position).IsLongerThan(this.maxTentacleLength))
 				{
 					this.isGripBroken = true;
@@ -135,25 +135,25 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack
 				this.ClearClawAnchor();
 			}
 		}
-		Vector3 vector3 = vector;
+		Vector3 vector4 = vector2;
 		Quaternion clawRotation = quaternion;
 		if (flag2)
 		{
-			this.knownSafePosition += (vector - this.knownSafePosition).normalized * (raycastHit.distance - num2 * 2.01f);
+			this.knownSafePosition += (vector2 - this.knownSafePosition).normalized * (raycastHit.distance - num2 * 2.01f);
 			this.marker.transform.position = raycastHit.point;
 			this.marker.transform.rotation = Quaternion.LookRotation(-raycastHit.normal, quaternion * Vector3.up);
-			vector3 = raycastHit.point + raycastHit.normal * Mathf.Lerp(0.1f, 0.01f, num);
+			vector4 = raycastHit.point + raycastHit.normal * Mathf.Lerp(0.1f, 0.01f, num);
 			clawRotation = Quaternion.Lerp(quaternion, Quaternion.LookRotation(-raycastHit.normal, quaternion * Vector3.up), num * 0.5f + 0.5f);
 		}
 		else
 		{
-			this.knownSafePosition = vector;
+			this.knownSafePosition = vector2;
 		}
-		this.clawVisualPos = vector3;
+		this.clawVisualPos = vector4;
 		this.clawVisualRot = clawRotation;
 		if (!this.isAnchored && flag && flag2)
 		{
-			this.SetClawAnchor(vector3, clawRotation, vector3 - vector);
+			this.SetClawAnchor(vector4, clawRotation, vector4 - vector2);
 		}
 	}
 
@@ -171,28 +171,28 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack
 		}
 		Vector3 position = gamePlayer.rig.bodyTransform.position;
 		Vector3 position2 = base.transform.position;
-		Vector3 b = position2 - position;
-		Vector3 vector = position2 + b;
+		Vector3 vector = position2 - position;
+		Vector3 vector2 = position2 + vector;
 		Quaternion quaternion = base.transform.rotation * Quaternion.Euler(90f, 0f, 0f);
-		if ((this.knownSafePosition - vector).IsLongerThan(1f))
+		if ((this.knownSafePosition - vector2).IsLongerThan(1f))
 		{
 			this.knownSafePosition = position2;
 		}
 		float num = 0.15f;
 		RaycastHit raycastHit;
-		bool flag = Physics.SphereCast(new Ray(this.knownSafePosition, vector - this.knownSafePosition), num, out raycastHit, (vector - this.knownSafePosition).magnitude, this.worldCollisionLayers);
-		Vector3 vector2 = vector;
+		bool flag = Physics.SphereCast(new Ray(this.knownSafePosition, vector2 - this.knownSafePosition), num, ref raycastHit, (vector2 - this.knownSafePosition).magnitude, this.worldCollisionLayers);
+		Vector3 vector3 = vector2;
 		Quaternion quaternion2 = quaternion;
 		if (flag)
 		{
-			this.knownSafePosition += (vector - this.knownSafePosition).normalized * (raycastHit.distance - num * 2.01f);
-			vector2 = raycastHit.point + raycastHit.normal * 0.1f;
+			this.knownSafePosition += (vector2 - this.knownSafePosition).normalized * (raycastHit.distance - num * 2.01f);
+			vector3 = raycastHit.point + raycastHit.normal * 0.1f;
 		}
 		else
 		{
-			this.knownSafePosition = vector;
+			this.knownSafePosition = vector2;
 		}
-		this.clawVisualPos = vector2;
+		this.clawVisualPos = vector3;
 		this.clawVisualRot = quaternion2;
 	}
 
@@ -265,10 +265,10 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack
 	{
 		this.claw.transform.position = this.clawVisualPos;
 		this.claw.transform.rotation = this.clawVisualRot;
-		Vector3 v = this.tentacleRenderer.transform.InverseTransformPoint(this.tentacleAnchor.position);
-		this.tentacleMat.SetVector(this.tentacleEnd, v);
-		Vector3 v2 = -this.tentacleRenderer.transform.InverseTransformDirection(this.tentacleAnchor.forward);
-		this.tentacleMat.SetVector(this.tentacleEndDir, v2);
+		Vector3 vector = this.tentacleRenderer.transform.InverseTransformPoint(this.tentacleAnchor.position);
+		this.tentacleMat.SetVector(this.tentacleEnd, vector);
+		Vector3 vector2 = -this.tentacleRenderer.transform.InverseTransformDirection(this.tentacleAnchor.forward);
+		this.tentacleMat.SetVector(this.tentacleEndDir, vector2);
 	}
 
 	[SerializeField]

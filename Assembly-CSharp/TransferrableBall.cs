@@ -4,7 +4,6 @@ using CjLib;
 using GorillaLocomotion;
 using GorillaLocomotion.Climbing;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class TransferrableBall : TransferrableObject
 {
@@ -27,20 +26,20 @@ public class TransferrableBall : TransferrableObject
 			if (keyValuePair.Value > 0)
 			{
 				flag2 = true;
-				Vector3 a = Vector3.zero;
-				bool flag6 = keyValuePair.Key.xrNode == XRNode.LeftHand;
+				Vector3 vector = Vector3.zero;
+				bool flag6 = keyValuePair.Key.xrNode == 4;
 				Vector3 position = instance.GetHandFollower(flag6).position;
 				Quaternion rotation = instance.GetHandFollower(flag6).rotation;
 				Transform handFollower = instance.GetHandFollower(flag6);
-				Vector3 vector;
-				Vector3 a2;
+				Vector3 vector2;
+				Vector3 vector3;
 				if (flag6)
 				{
 					float num2;
-					this.leftHandOverlapping = this.CheckCollisionWithHand(position, rotation, rotation * Vector3.right, out vector, out a2, out num2);
+					this.leftHandOverlapping = this.CheckCollisionWithHand(position, rotation, rotation * Vector3.right, out vector2, out vector3, out num2);
 					if (this.leftHandOverlapping)
 					{
-						a = instance.GetHandVelocityTracker(flag6).GetAverageVelocity(true, 0.15f, false);
+						vector = instance.GetHandVelocityTracker(flag6).GetAverageVelocity(true, 0.15f, false);
 					}
 					else if ((position - base.transform.position).sqrMagnitude > num * num)
 					{
@@ -51,10 +50,10 @@ public class TransferrableBall : TransferrableObject
 				else
 				{
 					float num2;
-					this.rightHandOverlapping = this.CheckCollisionWithHand(position, rotation, rotation * -Vector3.right, out vector, out a2, out num2);
+					this.rightHandOverlapping = this.CheckCollisionWithHand(position, rotation, rotation * -Vector3.right, out vector2, out vector3, out num2);
 					if (this.rightHandOverlapping)
 					{
-						a = instance.GetHandVelocityTracker(flag6).GetAverageVelocity(true, 0.15f, false);
+						vector = instance.GetHandVelocityTracker(flag6).GetAverageVelocity(true, 0.15f, false);
 					}
 					else if ((position - base.transform.position).sqrMagnitude > num * num)
 					{
@@ -71,16 +70,16 @@ public class TransferrableBall : TransferrableObject
 							if (!flag3)
 							{
 								Vector3 normalized = (handFollower.position - base.transform.position).normalized;
-								Vector3 position2 = normalized * this.ballRadius + base.transform.position;
-								this.frictionHoldLocalPosLeft = base.transform.InverseTransformPoint(position2);
+								Vector3 vector4 = normalized * this.ballRadius + base.transform.position;
+								this.frictionHoldLocalPosLeft = base.transform.InverseTransformPoint(vector4);
 								this.frictionHoldLocalRotLeft = Quaternion.LookRotation(normalized, handFollower.forward);
 							}
-							Vector3 vector2 = base.transform.TransformPoint(this.frictionHoldLocalPosLeft);
-							this.frictionHoldLocalRotLeft = Quaternion.LookRotation(vector2 - base.transform.position, handFollower.forward);
+							Vector3 vector5 = base.transform.TransformPoint(this.frictionHoldLocalPosLeft);
+							this.frictionHoldLocalRotLeft = Quaternion.LookRotation(vector5 - base.transform.position, handFollower.forward);
 							if (this.debugDraw)
 							{
 								Quaternion rotation2 = this.frictionHoldLocalRotLeft * Quaternion.AngleAxis(90f, Vector3.right);
-								DebugUtil.DrawRect(vector2, rotation2, new Vector2(0.08f, 0.15f), Color.green, false, DebugUtil.Style.Wireframe);
+								DebugUtil.DrawRect(vector5, rotation2, new Vector2(0.08f, 0.15f), Color.green, false, DebugUtil.Style.Wireframe);
 								Vector3 normalized2 = (instance.GetHandFollower(flag6).position - base.transform.position).normalized;
 								Vector3 center = normalized2 * this.ballRadius + base.transform.position;
 								Quaternion rotation3 = Quaternion.LookRotation(normalized2, handFollower.forward) * Quaternion.AngleAxis(90f, Vector3.right);
@@ -92,16 +91,16 @@ public class TransferrableBall : TransferrableObject
 							if (!flag4)
 							{
 								Vector3 normalized3 = (handFollower.position - base.transform.position).normalized;
-								Vector3 position3 = normalized3 * this.ballRadius + base.transform.position;
-								this.frictionHoldLocalPosRight = base.transform.InverseTransformPoint(position3);
+								Vector3 vector6 = normalized3 * this.ballRadius + base.transform.position;
+								this.frictionHoldLocalPosRight = base.transform.InverseTransformPoint(vector6);
 								this.frictionHoldLocalRotRight = Quaternion.LookRotation(normalized3, handFollower.forward);
 							}
-							Vector3 vector3 = base.transform.TransformPoint(this.frictionHoldLocalPosRight);
-							this.frictionHoldLocalRotRight = Quaternion.LookRotation(vector3 - base.transform.position, handFollower.forward);
+							Vector3 vector7 = base.transform.TransformPoint(this.frictionHoldLocalPosRight);
+							this.frictionHoldLocalRotRight = Quaternion.LookRotation(vector7 - base.transform.position, handFollower.forward);
 							if (this.debugDraw)
 							{
 								Quaternion rotation4 = this.frictionHoldLocalRotRight * Quaternion.AngleAxis(90f, Vector3.right);
-								DebugUtil.DrawRect(vector3, rotation4, new Vector2(0.08f, 0.15f), Color.green, false, DebugUtil.Style.Wireframe);
+								DebugUtil.DrawRect(vector7, rotation4, new Vector2(0.08f, 0.15f), Color.green, false, DebugUtil.Style.Wireframe);
 								Vector3 normalized4 = (handFollower.position - base.transform.position).normalized;
 								Vector3 center2 = normalized4 * this.ballRadius + base.transform.position;
 								Quaternion rotation5 = Quaternion.LookRotation(normalized4, handFollower.forward) * Quaternion.AngleAxis(90f, Vector3.right);
@@ -112,37 +111,37 @@ public class TransferrableBall : TransferrableObject
 					bool flag7 = (flag6 && this.leftHandOverlapping && !flag3) || (!flag6 && this.rightHandOverlapping && !flag4);
 					if (!flag5 && flag7)
 					{
-						Vector3 position4 = handFollower.position;
-						float magnitude = a.magnitude;
-						Vector3 a3 = a / magnitude;
-						Vector3 b = -(position4 - base.transform.position).normalized;
-						Vector3 hitDir = (a3 + b) * 0.5f;
-						flag5 = this.ApplyHit(position4, hitDir, magnitude);
+						Vector3 position2 = handFollower.position;
+						float magnitude = vector.magnitude;
+						Vector3 vector8 = vector / magnitude;
+						Vector3 vector9 = -(position2 - base.transform.position).normalized;
+						Vector3 hitDir = (vector8 + vector9) * 0.5f;
+						flag5 = this.ApplyHit(position2, hitDir, magnitude);
 					}
 					if (!flag5)
 					{
-						Vector3 position5 = handFollower.position;
-						Vector3 a4 = position5 - base.transform.position;
-						float magnitude2 = a4.magnitude;
-						float num3 = this.ballRadius - a4.magnitude;
+						Vector3 position3 = handFollower.position;
+						Vector3 vector10 = position3 - base.transform.position;
+						float magnitude2 = vector10.magnitude;
+						float num3 = this.ballRadius - vector10.magnitude;
 						if (num3 > 0f)
 						{
-							Vector3 vector4 = -(a4 / magnitude2) * num3;
-							this.rigidbodyInstance.AddForce(-(a4 / magnitude2) * this.depenetrationSpeed * Time.deltaTime * this.rigidbodyInstance.mass, ForceMode.Impulse);
+							Vector3 vector11 = -(vector10 / magnitude2) * num3;
+							this.rigidbodyInstance.AddForce(-(vector10 / magnitude2) * this.depenetrationSpeed * Time.deltaTime * this.rigidbodyInstance.mass, 1);
 							if (this.collisionContactsCount == 0)
 							{
-								this.rigidbodyInstance.MovePosition(base.transform.position + vector4 * this.depenetrationBias);
+								this.rigidbodyInstance.MovePosition(base.transform.position + vector11 * this.depenetrationBias);
 							}
 							if (this.debugDraw)
 							{
-								DebugUtil.DrawLine(position5, position5 - vector4, Color.magenta, false);
+								DebugUtil.DrawLine(position3, position3 - vector11, Color.magenta, false);
 							}
 						}
 					}
 					if (this.debugDraw)
 					{
-						DebugUtil.DrawSphere(vector, 0.01f, 6, 6, Color.green, true, DebugUtil.Style.SolidColor);
-						DebugUtil.DrawArrow(vector, vector - a2 * 0.05f, 0.01f, Color.green, true, DebugUtil.Style.Wireframe);
+						DebugUtil.DrawSphere(vector2, 0.01f, 6, 6, Color.green, true, DebugUtil.Style.SolidColor);
+						DebugUtil.DrawArrow(vector2, vector2 - vector3 * 0.05f, 0.01f, Color.green, true, DebugUtil.Style.Wireframe);
 					}
 				}
 				flag = (flag || this.leftHandOverlapping || this.rightHandOverlapping);
@@ -153,9 +152,9 @@ public class TransferrableBall : TransferrableObject
 		if (this.allowHeadButting && !flag5 && this.playerHeadCollider != null)
 		{
 			Vector3 hitPoint;
-			Vector3 vector5;
+			Vector3 vector12;
 			float num4;
-			this.headOverlapping = this.CheckCollisionWithHead(this.playerHeadCollider, out hitPoint, out vector5, out num4);
+			this.headOverlapping = this.CheckCollisionWithHead(this.playerHeadCollider, out hitPoint, out vector12, out num4);
 			Vector3 averagedVelocity = instance.AveragedVelocity;
 			float magnitude3 = averagedVelocity.magnitude;
 			if (this.headOverlapping && !flag8 && (double)magnitude3 > 0.0001)
@@ -207,19 +206,19 @@ public class TransferrableBall : TransferrableObject
 		hitPoint = position;
 		hitNormal = Vector3.forward;
 		penetrationDist = 0f;
-		Vector3 lhs = position - handCenter;
-		Vector3 vector = position - Vector3.Dot(lhs, palmForward) * palmForward;
-		Vector3 vector2 = vector;
-		if ((vector - handCenter).sqrMagnitude > this.handRadius * this.handRadius)
+		Vector3 vector = position - handCenter;
+		Vector3 vector2 = position - Vector3.Dot(vector, palmForward) * palmForward;
+		Vector3 vector3 = vector2;
+		if ((vector2 - handCenter).sqrMagnitude > this.handRadius * this.handRadius)
 		{
-			vector2 = handCenter + (vector - handCenter).normalized * this.handRadius;
+			vector3 = handCenter + (vector2 - handCenter).normalized * this.handRadius;
 		}
-		if ((vector2 - position).sqrMagnitude < this.ballRadius * this.ballRadius)
+		if ((vector3 - position).sqrMagnitude < this.ballRadius * this.ballRadius)
 		{
 			flag = true;
-			hitNormal = (position - vector2).normalized;
+			hitNormal = (position - vector3).normalized;
 			hitPoint = position - hitNormal * this.ballRadius;
-			penetrationDist = this.ballRadius - (vector2 - position).magnitude;
+			penetrationDist = this.ballRadius - (vector3 - position).magnitude;
 		}
 		if (this.debugDraw)
 		{
@@ -232,13 +231,13 @@ public class TransferrableBall : TransferrableObject
 
 	private bool CheckCollisionWithHead(SphereCollider headCollider, out Vector3 hitPoint, out Vector3 hitNormal, out float penetrationDist)
 	{
-		Vector3 a = base.transform.position - headCollider.transform.position;
-		float sqrMagnitude = a.sqrMagnitude;
+		Vector3 vector = base.transform.position - headCollider.transform.position;
+		float sqrMagnitude = vector.sqrMagnitude;
 		float num = this.ballRadius + this.headButtRadius;
 		if (sqrMagnitude < num * num)
 		{
 			float num2 = Mathf.Sqrt(sqrMagnitude);
-			hitNormal = a / num2;
+			hitNormal = vector / num2;
 			penetrationDist = num - num2;
 			hitPoint = headCollider.transform.position + hitNormal * this.headButtRadius;
 			return true;
@@ -269,13 +268,13 @@ public class TransferrableBall : TransferrableObject
 		float num4 = Vector3.Dot(this.rigidbodyInstance.linearVelocity, -normalized);
 		if (num4 < 0f)
 		{
-			float d = Mathf.Lerp(this.reflectOffHandAmountOutputMinMax.x, this.reflectOffHandAmountOutputMinMax.y, Mathf.InverseLerp(this.reflectOffHandSpeedInputMinMax.x, this.reflectOffHandSpeedInputMinMax.y, num4));
-			this.rigidbodyInstance.linearVelocity = d * Vector3.Reflect(this.rigidbodyInstance.linearVelocity, -normalized);
+			float num5 = Mathf.Lerp(this.reflectOffHandAmountOutputMinMax.x, this.reflectOffHandAmountOutputMinMax.y, Mathf.InverseLerp(this.reflectOffHandSpeedInputMinMax.x, this.reflectOffHandSpeedInputMinMax.y, num4));
+			this.rigidbodyInstance.linearVelocity = num5 * Vector3.Reflect(this.rigidbodyInstance.linearVelocity, -normalized);
 		}
 		if (num > this.hitSpeedThreshold)
 		{
 			result = true;
-			float num5 = this.hitMultiplierCurve.Evaluate(Mathf.InverseLerp(this.hitSpeedToHitMultiplierMinMax.x, this.hitSpeedToHitMultiplierMinMax.y, num));
+			float num6 = this.hitMultiplierCurve.Evaluate(Mathf.InverseLerp(this.hitSpeedToHitMultiplierMinMax.x, this.hitSpeedToHitMultiplierMinMax.y, num));
 			if (this.onGround)
 			{
 				if (Vector3.Dot(vector, this.groundContact.normal) < 0f)
@@ -288,14 +287,14 @@ public class TransferrableBall : TransferrableObject
 					vector = num * (vector2 + this.groundContact.normal) * 0.5f;
 				}
 			}
-			this.rigidbodyInstance.AddForce(Vector3.ClampMagnitude(vector * num5, this.maxHitSpeed) * this.rigidbodyInstance.mass, ForceMode.Impulse);
-			Vector3 rhs = hitDir * hitSpeed - Vector3.Dot(hitDir * hitSpeed, normalized) * normalized;
-			Vector3 normalized2 = Vector3.Cross(normalized, rhs).normalized;
-			float num6 = Vector3.Dot(this.rigidbodyInstance.angularVelocity, normalized2);
-			float num7 = rhs.magnitude / this.ballRadius - num6;
-			if (num7 > 0f)
+			this.rigidbodyInstance.AddForce(Vector3.ClampMagnitude(vector * num6, this.maxHitSpeed) * this.rigidbodyInstance.mass, 1);
+			Vector3 vector3 = hitDir * hitSpeed - Vector3.Dot(hitDir * hitSpeed, normalized) * normalized;
+			Vector3 normalized2 = Vector3.Cross(normalized, vector3).normalized;
+			float num7 = Vector3.Dot(this.rigidbodyInstance.angularVelocity, normalized2);
+			float num8 = vector3.magnitude / this.ballRadius - num7;
+			if (num8 > 0f)
 			{
-				this.rigidbodyInstance.AddTorque(num5 * this.hitTorqueMultiplier * num7 * normalized2, ForceMode.VelocityChange);
+				this.rigidbodyInstance.AddTorque(num6 * this.hitTorqueMultiplier * num8 * normalized2, 2);
 			}
 		}
 		this.PlayHitSound(num * this.handHitAudioMultiplier);
@@ -304,14 +303,14 @@ public class TransferrableBall : TransferrableObject
 
 	private void PlayHitSound(float hitSpeed)
 	{
-		float t = Mathf.InverseLerp(this.hitSpeedToAudioMinMax.x, this.hitSpeedToAudioMinMax.y, hitSpeed);
-		float value = Mathf.Lerp(this.hitSoundVolumeMinMax.x, this.hitSoundVolumeMinMax.y, t);
-		float value2 = Mathf.Lerp(this.hitSoundPitchMinMax.x, this.hitSoundPitchMinMax.y, t);
+		float num = Mathf.InverseLerp(this.hitSpeedToAudioMinMax.x, this.hitSpeedToAudioMinMax.y, hitSpeed);
+		float num2 = Mathf.Lerp(this.hitSoundVolumeMinMax.x, this.hitSoundVolumeMinMax.y, num);
+		float num3 = Mathf.Lerp(this.hitSoundPitchMinMax.x, this.hitSoundPitchMinMax.y, num);
 		if (this.hitSoundBank != null && this.hitSoundSpamCount < this.hitSoundSpamLimit)
 		{
 			this.hitSoundSpamLastHitTime = Time.time;
 			this.hitSoundSpamCount++;
-			this.hitSoundBank.Play(new float?(value), new float?(value2));
+			this.hitSoundBank.Play(new float?(num2), new float?(num3));
 		}
 	}
 
@@ -319,7 +318,7 @@ public class TransferrableBall : TransferrableObject
 	{
 		this.collisionContactsCount = 0;
 		this.onGround = false;
-		this.rigidbodyInstance.AddForce(-Physics.gravity * this.gravityCounterAmount * this.rigidbodyInstance.mass, ForceMode.Force);
+		this.rigidbodyInstance.AddForce(-Physics.gravity * this.gravityCounterAmount * this.rigidbodyInstance.mass, 0);
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -334,7 +333,7 @@ public class TransferrableBall : TransferrableObject
 			return;
 		}
 		int num;
-		if (this.handClimberMap.TryGetValue(component, out num))
+		if (this.handClimberMap.TryGetValue(component, ref num))
 		{
 			this.handClimberMap[component] = Mathf.Min(num + 1, 2);
 			return;
@@ -348,7 +347,7 @@ public class TransferrableBall : TransferrableObject
 		if (component != null)
 		{
 			int num;
-			if (this.handClimberMap.TryGetValue(component, out num))
+			if (this.handClimberMap.TryGetValue(component, ref num))
 			{
 				this.handClimberMap[component] = Mathf.Max(num - 1, 0);
 				return;

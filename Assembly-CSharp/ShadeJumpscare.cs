@@ -20,11 +20,11 @@ public class ShadeJumpscare : MonoBehaviour
 	private void Update()
 	{
 		float num = Time.time - this.startTime;
-		float time = num / this.animationTime;
-		this.shadeTransform.SetPositionAndRotation(base.transform.position + new Vector3(0f, this.shadeHeightFunction.Evaluate(time), 0f), Quaternion.Euler(0f, this.startAngle + num * this.shadeRotationSpeed, 0f));
-		float num2 = this.shadeScaleFunction.Evaluate(time);
-		this.shadeTransform.localScale = new Vector3(num2, num2 * this.shadeYScaleMultFunction.Evaluate(time), num2);
-		this.audioSource.volume = this.soundVolumeFunction.Evaluate(time);
+		float num2 = num / this.animationTime;
+		this.shadeTransform.SetPositionAndRotation(base.transform.position + new Vector3(0f, this.shadeHeightFunction.Evaluate(num2), 0f), Quaternion.Euler(0f, this.startAngle + num * this.shadeRotationSpeed, 0f));
+		float num3 = this.shadeScaleFunction.Evaluate(num2);
+		this.shadeTransform.localScale = new Vector3(num3, num3 * this.shadeYScaleMultFunction.Evaluate(num2), num3);
+		this.audioSource.volume = this.soundVolumeFunction.Evaluate(num2);
 	}
 
 	[SerializeField]

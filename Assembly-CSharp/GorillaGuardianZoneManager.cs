@@ -322,9 +322,9 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		{
 			list.Remove(this.idolPositions[this.currentIdol]);
 		}
-		int index = Random.Range(list.Count / 2, list.Count);
-		Transform item = list[index];
-		return this.idolPositions.IndexOf(item);
+		int num = Random.Range(list.Count / 2, list.Count);
+		Transform transform = list[num];
+		return this.idolPositions.IndexOf(transform);
 	}
 
 	private List<Transform> SortByDistanceToNearestPlayer()
@@ -339,9 +339,9 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 			}
 		}
 		this._sortedIdolPositions.Clear();
-		foreach (Transform item in this.idolPositions)
+		foreach (Transform transform in this.idolPositions)
 		{
-			this._sortedIdolPositions.Add(item);
+			this._sortedIdolPositions.Add(transform);
 		}
 		this._sortedIdolPositions.Sort(new Comparison<Transform>(CS$<>8__locals1.<SortByDistanceToNearestPlayer>g__CompareNearestPlayerDistance|0));
 		return this._sortedIdolPositions;

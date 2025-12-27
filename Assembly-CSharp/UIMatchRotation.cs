@@ -11,9 +11,9 @@ public class UIMatchRotation : MonoBehaviour
 
 	private void Update()
 	{
-		Vector3 lhs = this.x0z(base.transform.forward);
-		Vector3 vector = this.x0z(this.referenceTransform.forward);
-		float num = Vector3.Dot(lhs, vector);
+		Vector3 vector = this.x0z(base.transform.forward);
+		Vector3 vector2 = this.x0z(this.referenceTransform.forward);
+		float num = Vector3.Dot(vector, vector2);
 		UIMatchRotation.State state = this.state;
 		if (state != UIMatchRotation.State.Ready)
 		{
@@ -21,8 +21,8 @@ public class UIMatchRotation : MonoBehaviour
 			{
 				return;
 			}
-			base.transform.forward = Vector3.Lerp(base.transform.forward, vector, Time.deltaTime * this.lerpSpeed);
-			if (Vector3.Dot(base.transform.forward, vector) > 0.995f)
+			base.transform.forward = Vector3.Lerp(base.transform.forward, vector2, Time.deltaTime * this.lerpSpeed);
+			if (Vector3.Dot(base.transform.forward, vector2) > 0.995f)
 			{
 				this.state = UIMatchRotation.State.Ready;
 			}

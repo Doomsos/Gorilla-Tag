@@ -89,8 +89,8 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			ModIOManager.OnModManagementEvent.AddListener(new UnityAction<Mod, Modfile, ModInstallationManagement.OperationType, ModInstallationManagement.OperationPhase>(this.HandleModManagementEvent));
 			RoomSystem.JoinedRoomEvent -= new Action(this.OnJoinedRoom);
 			RoomSystem.JoinedRoomEvent += new Action(this.OnJoinedRoom);
-			NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnDisconnected;
-			NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnDisconnected;
+			NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnDisconnected);
+			NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnDisconnected);
 		}
 
 		public void OnDisable()
@@ -100,7 +100,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			CMSSerializer.OnTriggerHistoryProcessedForScene.RemoveListener(new UnityAction<string>(CustomMapManager.OnSceneTriggerHistoryProcessed));
 			ModIOManager.OnModManagementEvent.RemoveListener(new UnityAction<Mod, Modfile, ModInstallationManagement.OperationType, ModInstallationManagement.OperationPhase>(this.HandleModManagementEvent));
 			RoomSystem.JoinedRoomEvent -= new Action(this.OnJoinedRoom);
-			NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnDisconnected;
+			NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnDisconnected);
 		}
 
 		private void OnUGCEnabled()
@@ -141,7 +141,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			CMSSerializer.OnTriggerHistoryProcessedForScene.RemoveListener(new UnityAction<string>(CustomMapManager.OnSceneTriggerHistoryProcessed));
 			ModIOManager.OnModManagementEvent.RemoveListener(new UnityAction<Mod, Modfile, ModInstallationManagement.OperationType, ModInstallationManagement.OperationPhase>(this.HandleModManagementEvent));
 			RoomSystem.JoinedRoomEvent -= new Action(this.OnJoinedRoom);
-			NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnDisconnected;
+			NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnDisconnected);
 		}
 
 		private void HandleModManagementEvent(Mod mod, Modfile modfile, ModInstallationManagement.OperationType jobType, ModInstallationManagement.OperationPhase jobPhase)
@@ -161,33 +161,33 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 				}
 				switch (modfile.State)
 				{
-				case ModFileState.Downloading:
-				case ModFileState.Updating:
+				case 2:
+				case 6:
 					CustomMapManager.waitingForModDownload = true;
 					return;
-				case ModFileState.Downloaded:
+				case 3:
 					CustomMapManager.waitingForModDownload = false;
 					return;
-				case ModFileState.Installing:
-				case ModFileState.Uninstalling:
+				case 4:
+				case 7:
 					break;
-				case ModFileState.Installed:
+				case 5:
 					CustomMapManager.waitingForModDownload = false;
 					this.LoadInstalledMap(mod);
 					break;
-				case ModFileState.FileOperationFailed:
+				case 8:
 					switch (jobType)
 					{
-					case ModInstallationManagement.OperationType.Download:
+					case 0:
 						Debug.LogError("[CustomMapManager::HandleModManagementEvent] Failed to download map with modID " + mod.Id.ToString() + ", error: " + modfile.FileStateErrorCause.GetMessage());
 						CustomMapManager.HandleMapLoadFailed("FAILED TO DOWNLOAD MAP: " + modfile.FileStateErrorCause.GetMessage());
 						CustomMapManager.waitingForModDownload = false;
 						return;
-					case ModInstallationManagement.OperationType.Install:
+					case 1:
 						Debug.LogError("[CustomMapManager::HandleModManagementEvent] Failed to install map with modID " + mod.Id.ToString() + ", error: " + modfile.FileStateErrorCause.GetMessage());
 						CustomMapManager.HandleMapLoadFailed("FAILED TO INSTALL MAP: " + modfile.FileStateErrorCause.GetMessage());
 						return;
-					case ModInstallationManagement.OperationType.Update:
+					case 2:
 						Debug.LogError("[CustomMapManager::HandleModManagementEvent] Failed to update map with modID " + mod.Id.ToString() + ", error: " + modfile.FileStateErrorCause.GetMessage());
 						CustomMapManager.HandleMapLoadFailed("FAILED TO UPDATE MAP: " + modfile.FileStateErrorCause.GetMessage());
 						return;
@@ -211,7 +211,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			{
 				if (callback != null)
 				{
-					callback(false);
+					callback.Invoke(false);
 				}
 				return;
 			}
@@ -237,8 +237,8 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 			if (CustomMapManager.instance.virtualStumpTeleportLocations.Count > 0)
 			{
-				int index = Random.Range(0, CustomMapManager.instance.virtualStumpTeleportLocations.Count);
-				Transform randTeleportTarget = CustomMapManager.instance.virtualStumpTeleportLocations[index];
+				int num = Random.Range(0, CustomMapManager.instance.virtualStumpTeleportLocations.Count);
+				Transform randTeleportTarget = CustomMapManager.instance.virtualStumpTeleportLocations[num];
 				CustomMapManager.instance.EnableTeleportHUD(true);
 				CustomMapManager.lastUsedTeleporter.PlayTeleportEffects(true, true, CustomMapManager.instance.localTeleportSFXSource, true);
 				yield return new WaitForSeconds(0.75f);
@@ -353,7 +353,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 				{
 					if (callback != null)
 					{
-						callback(false);
+						callback.Invoke(false);
 					}
 				}
 				else
@@ -437,7 +437,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			if (CustomMapManager.preTeleportInPrivateRoom)
 			{
 				CustomMapManager.waitingForRoomJoin = true;
-				CustomMapManager.pendingNewPrivateRoomName = CustomMapManager.pendingNewPrivateRoomName.RemoveAll(GorillaComputer.instance.VStumpRoomPrepend, StringComparison.OrdinalIgnoreCase);
+				CustomMapManager.pendingNewPrivateRoomName = CustomMapManager.pendingNewPrivateRoomName.RemoveAll(GorillaComputer.instance.VStumpRoomPrepend, 5);
 				PhotonNetworkController.Instance.AttemptToJoinSpecificRoomWithCallback(CustomMapManager.pendingNewPrivateRoomName, JoinType.Solo, new Action<NetJoinResult>(CustomMapManager.OnJoinSpecificRoomResult));
 				return;
 			}
@@ -446,7 +446,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 				if (NetworkSystem.Instance.SessionIsPrivate)
 				{
 					CustomMapManager.waitingForRoomJoin = true;
-					CustomMapManager.pendingNewPrivateRoomName = NetworkSystem.Instance.RoomName.RemoveAll(GorillaComputer.instance.VStumpRoomPrepend, StringComparison.OrdinalIgnoreCase);
+					CustomMapManager.pendingNewPrivateRoomName = NetworkSystem.Instance.RoomName.RemoveAll(GorillaComputer.instance.VStumpRoomPrepend, 5);
 					PhotonNetworkController.Instance.AttemptToJoinSpecificRoomWithCallback(CustomMapManager.pendingNewPrivateRoomName, JoinType.Solo, new Action<NetJoinResult>(CustomMapManager.OnJoinSpecificRoomResult));
 					return;
 				}
@@ -617,7 +617,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			Action<bool> action = CustomMapManager.currentTeleportCallback;
 			if (action != null)
 			{
-				action(teleportSuccessful);
+				action.Invoke(teleportSuccessful);
 			}
 			CustomMapManager.currentTeleportCallback = null;
 			if (CustomMapManager.hasInstance && !GorillaComputer.instance.IsPlayerInVirtualStump())
@@ -972,10 +972,10 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 		{
 			CapsuleCollider bodyCollider = GTPlayer.Instance.bodyCollider;
 			SphereCollider headCollider = GTPlayer.Instance.headCollider;
-			Vector3 position = bodyCollider.transform.TransformPoint(bodyCollider.center);
-			float radius = Mathf.Max(bodyCollider.height, bodyCollider.radius) * GTPlayer.Instance.scale;
+			Vector3 vector = bodyCollider.transform.TransformPoint(bodyCollider.center);
+			float num = Mathf.Max(bodyCollider.height, bodyCollider.radius) * GTPlayer.Instance.scale;
 			Collider[] array = new Collider[100];
-			Physics.OverlapSphereNonAlloc(position, radius, array);
+			Physics.OverlapSphereNonAlloc(vector, num, array);
 			foreach (Collider collider in array)
 			{
 				if (collider != null && collider.gameObject.scene.name.Equals(sceneName))

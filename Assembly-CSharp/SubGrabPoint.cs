@@ -41,23 +41,23 @@ public class SubGrabPoint
 
 	public virtual Matrix4x4 GetTransformFromPositionState(AdvancedItemState advancedItemState, SlotTransformOverride slotTransformOverride, Transform targetDockXf)
 	{
-		Quaternion q = advancedItemState.deltaRotation;
-		if (!q.IsValid())
+		Quaternion quaternion = advancedItemState.deltaRotation;
+		if (!quaternion.IsValid())
 		{
-			q = Quaternion.identity;
+			quaternion = Quaternion.identity;
 		}
-		Matrix4x4 matrix4x = Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
+		Matrix4x4 matrix4x = Matrix4x4.TRS(Vector3.zero, quaternion, Vector3.one);
 		Matrix4x4 matrix4x2 = this.GetTransformation_GripPointLocalToAdvOriginLocal(advancedItemState.preData, slotTransformOverride) * matrix4x.inverse;
-		Matrix4x4 rhs = slotTransformOverride.AdvAnchorLocalToAdvOriginLocal * matrix4x2.inverse;
-		return slotTransformOverride.AdvOriginLocalToParentAnchorLocal * rhs;
+		Matrix4x4 matrix4x3 = slotTransformOverride.AdvAnchorLocalToAdvOriginLocal * matrix4x2.inverse;
+		return slotTransformOverride.AdvOriginLocalToParentAnchorLocal * matrix4x3;
 	}
 
 	public AdvancedItemState GetAdvancedItemStateFromHand(Transform objectTransform, Transform handTransform, Transform targetDock, SlotTransformOverride slotTransformOverride)
 	{
 		AdvancedItemState.PreData preData = this.GetPreData(objectTransform, handTransform, targetDock, slotTransformOverride);
 		Matrix4x4 matrix4x = targetDock.localToWorldMatrix * slotTransformOverride.AdvOriginLocalToParentAnchorLocal * slotTransformOverride.AdvAnchorLocalToAdvOriginLocal;
-		Matrix4x4 rhs = objectTransform.localToWorldMatrix * this.GetTransformation_GripPointLocalToAdvOriginLocal(preData, slotTransformOverride);
-		Quaternion quaternion = (matrix4x.inverse * rhs).rotation;
+		Matrix4x4 matrix4x2 = objectTransform.localToWorldMatrix * this.GetTransformation_GripPointLocalToAdvOriginLocal(preData, slotTransformOverride);
+		Quaternion quaternion = (matrix4x.inverse * matrix4x2).rotation;
 		Vector3 vector = quaternion * Vector3.up;
 		Vector3 vector2 = quaternion * Vector3.right;
 		Vector3 vector3 = quaternion * Vector3.forward;
@@ -89,7 +89,7 @@ public class SubGrabPoint
 			}
 			vector2 = Vector3.Cross(vector, vector3);
 			vector3 = Vector3.Cross(vector2, vector);
-			up = new Vector2(vector3.z, vector3.x);
+			up..ctor(vector3.z, vector3.x);
 			quaternion = Quaternion.LookRotation(vector3, vector);
 			break;
 		case LimitAxis.XAxis:
@@ -126,12 +126,12 @@ public class SubGrabPoint
 
 	public virtual float EvaluateScore(Transform objectTransform, Transform handTransform, Transform targetDock)
 	{
-		Vector3 b = objectTransform.InverseTransformPoint(handTransform.position);
-		float num = Vector3.SqrMagnitude(this.gripPoint_AdvOriginLocal - b);
-		float f;
-		Vector3 vector;
-		(Quaternion.Inverse(objectTransform.rotation * this.gripRotation_AdvOriginLocal) * targetDock.rotation * this.advAnchor_ParentAnchorLocal).ToAngleAxis(out f, out vector);
-		return num + Mathf.Abs(f) * 0.0001f;
+		Vector3 vector = objectTransform.InverseTransformPoint(handTransform.position);
+		float num = Vector3.SqrMagnitude(this.gripPoint_AdvOriginLocal - vector);
+		float num2;
+		Vector3 vector2;
+		(Quaternion.Inverse(objectTransform.rotation * this.gripRotation_AdvOriginLocal) * targetDock.rotation * this.advAnchor_ParentAnchorLocal).ToAngleAxis(ref num2, ref vector2);
+		return num + Mathf.Abs(num2) * 0.0001f;
 	}
 
 	[FormerlySerializedAs("transform")]

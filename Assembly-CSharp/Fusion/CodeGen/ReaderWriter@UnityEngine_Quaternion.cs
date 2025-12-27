@@ -7,42 +7,42 @@ namespace Fusion.CodeGen
 	[WeaverGenerated]
 	internal struct ReaderWriter@UnityEngine_Quaternion : IElementReaderWriter<Quaternion>
 	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe Quaternion Read(byte* data, int index)
 		{
 			return *(Quaternion*)(data + index * 16);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe ref Quaternion ReadRef(byte* data, int index)
 		{
 			return ref *(Quaternion*)(data + index * 16);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe void Write(byte* data, int index, Quaternion val)
 		{
 			*(Quaternion*)(data + index * 16) = val;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementWordCount()
 		{
 			return 4;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementHashCode(Quaternion val)
 		{
 			return val.GetHashCode();
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public static IElementReaderWriter<Quaternion> GetInstance()
 		{

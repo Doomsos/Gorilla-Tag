@@ -121,16 +121,16 @@ namespace GorillaTag.Cosmetics
 				return;
 			}
 			int layer = gameObject.layer;
-			bool arg = this.parentTransferable && this.parentTransferable.InLeftHand();
-			Vector3 position = (this.myCollider != null) ? this.myCollider.bounds.center : base.transform.position;
-			Vector3 arg2;
+			bool flag = this.parentTransferable && this.parentTransferable.InLeftHand();
+			Vector3 vector = (this.myCollider != null) ? this.myCollider.bounds.center : base.transform.position;
+			Vector3 vector2;
 			if (collision.contactCount > 0)
 			{
-				arg2 = collision.GetContact(0).point;
+				vector2 = collision.GetContact(0).point;
 			}
 			else
 			{
-				arg2 = collider.ClosestPoint(position);
+				vector2 = collider.ClosestPoint(vector);
 			}
 			foreach (OnCollisionEventsCosmetic.Listener listener in listeners)
 			{
@@ -138,11 +138,11 @@ namespace GorillaTag.Cosmetics
 				{
 					if (listener.listenerComponent != null)
 					{
-						listener.listenerComponent.Invoke(arg, collision);
+						listener.listenerComponent.Invoke(flag, collision);
 					}
 					if (listener.listenerComponentContactPoint != null)
 					{
-						listener.listenerComponentContactPoint.Invoke(arg2);
+						listener.listenerComponentContactPoint.Invoke(vector2);
 					}
 					VRRig componentInParent = gameObject.GetComponentInParent<VRRig>();
 					if (componentInParent != null && listener.onCollidedVRRig != null)

@@ -59,7 +59,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		PlayFabTitleDataCache.Instance.GetTitleData("PublicCrittersGrabSettings", delegate(string data)
 		{
 			int num;
-			if (int.TryParse(data, out num))
+			if (int.TryParse(data, ref num))
 			{
 				this.publicRoomGrabbingFlags = (CrittersManager.AllowGrabbingFlags)num;
 			}
@@ -69,7 +69,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		PlayFabTitleDataCache.Instance.GetTitleData("PrivateCrittersGrabSettings", delegate(string data)
 		{
 			int num;
-			if (int.TryParse(data, out num))
+			if (int.TryParse(data, ref num))
 			{
 				this.privateRoomGrabbingFlags = (CrittersManager.AllowGrabbingFlags)num;
 			}
@@ -117,7 +117,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 			return;
 		}
 		CrittersManager.hasInstance = true;
-		CrittersManager.instance = UnityEngine.Object.FindAnyObjectByType<CrittersManager>();
+		CrittersManager.instance = Object.FindAnyObjectByType<CrittersManager>();
 		CrittersManager.instance.crittersActors = new List<CrittersActor>();
 		CrittersManager.instance.crittersPawns = new List<CrittersPawn>();
 		CrittersManager.instance.awareOfActors = new Dictionary<CrittersPawn, List<CrittersActor>>();
@@ -128,7 +128,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		CrittersManager.instance.updatesToSend = new List<int>();
 		CrittersManager.instance.objList = new List<object>();
 		CrittersManager.instance.lowPriorityPawnsToProcess = new List<CrittersActor>();
-		CrittersManager.instance.actorSpawners = UnityEngine.Object.FindObjectsByType<CrittersActorSpawner>(FindObjectsSortMode.None).ToList<CrittersActorSpawner>();
+		CrittersManager.instance.actorSpawners = Enumerable.ToList<CrittersActorSpawner>(Object.FindObjectsByType<CrittersActorSpawner>(0));
 		CrittersManager.instance._spawnRegions = CrittersRegion.Regions;
 		CrittersManager.instance.poolCounts = new Dictionary<CrittersActor.CrittersActorType, int>();
 		CrittersManager.instance.despawnDecayValue = new Dictionary<CrittersActor.CrittersActorType, float>();
@@ -140,7 +140,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 			CrittersManager.instance.despawnDecayValue[CrittersManager.instance.actorTypes[i]] = 0f;
 		}
 		CrittersManager.instance.PopulatePools();
-		List<CrittersRigActorSetup> list = UnityEngine.Object.FindObjectsByType<CrittersRigActorSetup>(FindObjectsSortMode.None).ToList<CrittersRigActorSetup>();
+		List<CrittersRigActorSetup> list = Enumerable.ToList<CrittersRigActorSetup>(Object.FindObjectsByType<CrittersRigActorSetup>(0));
 		for (int j = 0; j < list.Count; j++)
 		{
 			if (list[j].enabled)
@@ -148,7 +148,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 				CrittersManager.RegisterRigActorSetup(list[j]);
 			}
 		}
-		CrittersActorGrabber[] array = UnityEngine.Object.FindObjectsByType<CrittersActorGrabber>(FindObjectsSortMode.None);
+		CrittersActorGrabber[] array = Object.FindObjectsByType<CrittersActorGrabber>(0);
 		for (int k = 0; k < array.Length; k++)
 		{
 			if (array[k].isLeft)
@@ -234,7 +234,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		}
 		if (this.objList.Count > 0 && NetworkSystem.Instance.InRoom)
 		{
-			CrittersManager.instance.SendRPC("RemoteUpdatePlayerCrittersActorData", RpcTarget.Others, new object[]
+			CrittersManager.instance.SendRPC("RemoteUpdatePlayerCrittersActorData", 1, new object[]
 			{
 				this.objList.ToArray()
 			});
@@ -252,17 +252,17 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		int i = 0;
 		while (i < this.crittersPawns.Count)
 		{
-			CrittersPawn key = this.crittersPawns[i];
-			if (!this.awareOfActors.ContainsKey(key))
+			CrittersPawn crittersPawn = this.crittersPawns[i];
+			if (!this.awareOfActors.ContainsKey(crittersPawn))
 			{
-				this.awareOfActors[key] = new List<CrittersActor>();
+				this.awareOfActors[crittersPawn] = new List<CrittersActor>();
 			}
 			else
 			{
-				this.awareOfActors[key].Clear();
+				this.awareOfActors[crittersPawn].Clear();
 			}
 			this.nearbyActors.Clear();
-			int num2 = this.actorBinIndices[key];
+			int num2 = this.actorBinIndices[crittersPawn];
 			if (this.priorityBins[num2])
 			{
 				goto IL_D9;
@@ -456,7 +456,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 	public void IncrementPoolCount(CrittersActor.CrittersActorType type)
 	{
 		int num;
-		if (!this.poolCounts.TryGetValue(type, out num))
+		if (!this.poolCounts.TryGetValue(type, ref num))
 		{
 			this.poolCounts[type] = 1;
 		}
@@ -465,7 +465,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 			this.poolCounts[type] = this.poolCounts[type] + 1;
 		}
 		float num2;
-		if (!this.despawnDecayValue.TryGetValue(type, out num2))
+		if (!this.despawnDecayValue.TryGetValue(type, ref num2))
 		{
 			this.despawnDecayValue[type] = 1f;
 			return;
@@ -476,7 +476,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 	public void DecrementPoolCount(CrittersActor.CrittersActorType type)
 	{
 		int num;
-		if (this.poolCounts.TryGetValue(type, out num))
+		if (this.poolCounts.TryGetValue(type, ref num))
 		{
 			this.poolCounts[type] = Mathf.Max(0, num - 1);
 			return;
@@ -666,7 +666,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		crittersPawn.SetState(CrittersPawn.CreatureState.Spawning);
 		if (NetworkSystem.Instance.InRoom && this.LocalAuthority())
 		{
-			base.SendRPC("RemoteSpawnCreature", RpcTarget.Others, new object[]
+			base.SendRPC("RemoteSpawnCreature", 1, new object[]
 			{
 				crittersPawn.actorId,
 				crittersPawn.regionId,
@@ -726,8 +726,8 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		texture2D.ReadPixels(new Rect(0f, 0f, (float)component.targetTexture.width, (float)component.targetTexture.height), 0, 0);
 		texture2D.Apply();
 		RenderTexture.active = active;
-		texture2D.EncodeToPNG();
-		UnityEngine.Object.Destroy(texture2D);
+		ImageConversion.EncodeToPNG(texture2D);
+		Object.Destroy(texture2D);
 	}
 
 	private IEnumerator RemoteDataInitialization(NetPlayer player, int actorNumber)
@@ -925,7 +925,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 	{
 		int num;
 		CrittersActor crittersActor;
-		return CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num) && num >= 0 && num < this.universalActorId && this.actorById.TryGetValue(num, out crittersActor) && crittersActor.UpdateSpecificActor(stream);
+		return CrittersManager.ValidateDataType<int>(stream.ReceiveNext(), out num) && num >= 0 && num < this.universalActorId && this.actorById.TryGetValue(num, ref crittersActor) && crittersActor.UpdateSpecificActor(stream);
 	}
 
 	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
@@ -999,7 +999,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 			return;
 		}
 		CrittersActor crittersActor;
-		if (this.actorById.TryGetValue(actorID, out crittersActor))
+		if (this.actorById.TryGetValue(actorID, ref crittersActor))
 		{
 			CrittersPawn crittersPawn = (CrittersPawn)crittersActor;
 			this.SetCritterRegion(crittersPawn, regionId);
@@ -1049,12 +1049,12 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		CrittersActor crittersActor;
 		for (int i = 0; i < data.Length; i += crittersActor.UpdatePlayerCrittersActorFromRPC(data, i))
 		{
-			int key;
-			if (!CrittersManager.ValidateDataType<int>(data[i], out key))
+			int num;
+			if (!CrittersManager.ValidateDataType<int>(data[i], out num))
 			{
 				return;
 			}
-			if (!this.actorById.TryGetValue(key, out crittersActor))
+			if (!this.actorById.TryGetValue(num, ref crittersActor))
 			{
 				return;
 			}
@@ -1085,12 +1085,12 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		CrittersActor crittersActor;
 		for (int i = 0; i < data.Length; i += crittersActor.UpdateFromRPC(data, i))
 		{
-			int key;
-			if (!CrittersManager.ValidateDataType<int>(data[i], out key))
+			int num;
+			if (!CrittersManager.ValidateDataType<int>(data[i], out num))
 			{
 				return;
 			}
-			if (!this.actorById.TryGetValue(key, out crittersActor))
+			if (!this.actorById.TryGetValue(num, ref crittersActor))
 			{
 				return;
 			}
@@ -1100,7 +1100,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 	public CrittersActor SpawnActor(CrittersActor.CrittersActorType type, int subObjectIndex = -1)
 	{
 		List<CrittersActor> list;
-		if (!this.actorPools.TryGetValue(type, out list))
+		if (!this.actorPools.TryGetValue(type, ref list))
 		{
 			return null;
 		}
@@ -1118,8 +1118,8 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		}
 		for (int j = 0; j < list.Count; j++)
 		{
-			CrittersActor key = list[j];
-			int num2 = this.actorBinIndices[key];
+			CrittersActor crittersActor = list[j];
+			int num2 = this.actorBinIndices[crittersActor];
 			if (!this.priorityBins[num2])
 			{
 				list[j].gameObject.SetActive(false);
@@ -1145,17 +1145,17 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		this.binDimensionZMin = this.crittersRange.position.z - this.crittersRange.localScale.z / 2f;
 		this.xLength = this.crittersRange.localScale.x;
 		this.zLength = this.crittersRange.localScale.z;
-		float f = this.xLength * this.zLength / (float)this.totalBinsApproximate;
-		this.individualBinSide = Mathf.Sqrt(f);
+		float num = this.xLength * this.zLength / (float)this.totalBinsApproximate;
+		this.individualBinSide = Mathf.Sqrt(num);
 		this.binXCount = Mathf.CeilToInt(this.xLength / this.individualBinSide);
 		this.binZCount = Mathf.CeilToInt(this.zLength / this.individualBinSide);
-		int num = this.binXCount * this.binZCount;
-		this.actorBins = new List<CrittersActor>[num];
-		for (int i = 0; i < num; i++)
+		int num2 = this.binXCount * this.binZCount;
+		this.actorBins = new List<CrittersActor>[num2];
+		for (int i = 0; i < num2; i++)
 		{
 			this.actorBins[i] = new List<CrittersActor>();
 		}
-		this.priorityBins = new bool[num];
+		this.priorityBins = new bool[num2];
 		this.actorBinIndices = new Dictionary<CrittersActor, int>();
 		this.nearbyActors = new List<CrittersActor>();
 		this.allActors = new List<CrittersActor>();
@@ -1180,8 +1180,8 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		this.poolParent = gameObject.transform;
 		this.poolParent.name = "Critter Actors Pool Parent";
 		List<CrittersActor> list;
-		this.actorPools.TryGetValue(CrittersActor.CrittersActorType.Food, out list);
-		this.persistentActors = UnityEngine.Object.FindObjectsByType<CrittersActor>(FindObjectsSortMode.InstanceID).ToList<CrittersActor>();
+		this.actorPools.TryGetValue(CrittersActor.CrittersActorType.Food, ref list);
+		this.persistentActors = Enumerable.ToList<CrittersActor>(Object.FindObjectsByType<CrittersActor>(1));
 		this.persistentActors.Sort((CrittersActor x, CrittersActor y) => x.transform.position.magnitude.CompareTo(y.transform.position.magnitude));
 		this.persistentActors.Sort((CrittersActor x, CrittersActor y) => x.gameObject.name.CompareTo(y.gameObject.name));
 		this.UpdatePool<CrittersActor>(ref this.actorPools, this.bagPrefab, CrittersActor.CrittersActorType.Bag, gameObject.transform, 80, this.persistentActors);
@@ -1227,7 +1227,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		}
 		for (int j = 0; j < poolAmount - num; j++)
 		{
-			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(prefab);
+			GameObject gameObject = Object.Instantiate<GameObject>(prefab);
 			gameObject.transform.parent = parent;
 			gameObject.name += j.ToString();
 			gameObject.SetActive(false);
@@ -1247,13 +1247,13 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		Action<CrittersManager.CritterEvent, int, Vector3, Quaternion> onCritterEventReceived = this.OnCritterEventReceived;
 		if (onCritterEventReceived != null)
 		{
-			onCritterEventReceived(eventType, sourceActor, position, rotation);
+			onCritterEventReceived.Invoke(eventType, sourceActor, position, rotation);
 		}
 		if (!this.LocalAuthority() || !NetworkSystem.Instance.InRoom)
 		{
 			return;
 		}
-		base.SendRPC("RemoteReceivedCritterEvent", RpcTarget.Others, new object[]
+		base.SendRPC("RemoteReceivedCritterEvent", 1, new object[]
 		{
 			eventType,
 			sourceActor,
@@ -1298,7 +1298,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		{
 			return;
 		}
-		onCritterEventReceived(eventType, sourceActor, position, rotation);
+		onCritterEventReceived.Invoke(eventType, sourceActor, position, rotation);
 	}
 
 	public static bool ValidateDataType<T>(object obj, out T dataAsType)
@@ -1315,7 +1315,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 	public void CheckValidRemoteActorRelease(int releasedActorID, bool keepWorldPosition, Quaternion rotation, Vector3 position, Vector3 velocity, Vector3 angularVelocity, PhotonMessageInfo info)
 	{
 		CrittersActor crittersActor;
-		if (!this.actorById.TryGetValue(releasedActorID, out crittersActor))
+		if (!this.actorById.TryGetValue(releasedActorID, ref crittersActor))
 		{
 			return;
 		}
@@ -1334,7 +1334,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 	{
 		CrittersActor crittersActor;
 		CrittersActor crittersActor2;
-		if (!this.actorById.TryGetValue(actorBeingGrabbedActorID, out crittersActor) || !this.actorById.TryGetValue(grabbingActorID, out crittersActor2))
+		if (!this.actorById.TryGetValue(actorBeingGrabbedActorID, ref crittersActor) || !this.actorById.TryGetValue(grabbingActorID, ref crittersActor2))
 		{
 			return;
 		}
@@ -1353,10 +1353,10 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 	private CrittersActor TopLevelCritterGrabber(CrittersActor baseActor)
 	{
 		CrittersActor crittersActor = null;
-		this.actorById.TryGetValue(baseActor.parentActorId, out crittersActor);
+		this.actorById.TryGetValue(baseActor.parentActorId, ref crittersActor);
 		while (crittersActor != null && crittersActor.parentActorId != -1)
 		{
-			this.actorById.TryGetValue(crittersActor.parentActorId, out crittersActor);
+			this.actorById.TryGetValue(crittersActor.parentActorId, ref crittersActor);
 		}
 		return crittersActor;
 	}

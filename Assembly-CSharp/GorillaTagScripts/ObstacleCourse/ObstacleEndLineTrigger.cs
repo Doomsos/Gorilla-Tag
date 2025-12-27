@@ -10,7 +10,7 @@ namespace GorillaTagScripts.ObstacleCourse
 		private void OnTriggerEnter(Collider other)
 		{
 			VRRig vrrig;
-			if (other.attachedRigidbody.gameObject.TryGetComponent<VRRig>(out vrrig))
+			if (other.attachedRigidbody.gameObject.TryGetComponent<VRRig>(ref vrrig))
 			{
 				ObstacleEndLineTrigger.ObstacleCourseTriggerEvent onPlayerTriggerEnter = this.OnPlayerTriggerEnter;
 				if (onPlayerTriggerEnter == null)

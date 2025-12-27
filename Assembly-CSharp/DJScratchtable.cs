@@ -22,28 +22,28 @@ public class DJScratchtable : MonoBehaviour
 			return;
 		}
 		Vector3 vector = (base.transform.parent.InverseTransformPoint(collider.transform.position) - base.transform.localPosition).WithY(0f);
-		float target = Mathf.Atan2(vector.z, vector.x) * 57.29578f;
+		float num = Mathf.Atan2(vector.z, vector.x) * 57.29578f;
 		if (this.isTouching)
 		{
 			base.transform.localRotation = Quaternion.LookRotation(vector) * this.firstTouchRotation;
 			if (this.isPlaying)
 			{
-				float num = Mathf.DeltaAngle(this.lastScratchSoundAngle, target);
-				if (num > this.scratchMinAngle)
+				float num2 = Mathf.DeltaAngle(this.lastScratchSoundAngle, num);
+				if (num2 > this.scratchMinAngle)
 				{
 					if (Time.time > this.cantForwardScratchUntilTimestamp)
 					{
 						this.scratchPlayer.Play(ScratchSoundType.Forward, this.isLeft);
 						this.cantForwardScratchUntilTimestamp = Time.time + this.scratchCooldown;
-						this.lastScratchSoundAngle = target;
+						this.lastScratchSoundAngle = num;
 						GorillaTagger.Instance.StartVibration(componentInParent.isLeftHand, this.hapticStrength, this.hapticDuration);
 					}
 				}
-				else if (num < -this.scratchMinAngle && Time.time > this.cantBackScratchUntilTimestamp)
+				else if (num2 < -this.scratchMinAngle && Time.time > this.cantBackScratchUntilTimestamp)
 				{
 					this.scratchPlayer.Play(ScratchSoundType.Back, this.isLeft);
 					this.cantBackScratchUntilTimestamp = Time.time + this.scratchCooldown;
-					this.lastScratchSoundAngle = target;
+					this.lastScratchSoundAngle = num;
 					GorillaTagger.Instance.StartVibration(componentInParent.isLeftHand, this.hapticStrength, this.hapticDuration);
 				}
 			}
@@ -55,7 +55,7 @@ public class DJScratchtable : MonoBehaviour
 			{
 				this.PauseTrack();
 				this.scratchPlayer.Play(ScratchSoundType.Pause, this.isLeft);
-				this.lastScratchSoundAngle = target;
+				this.lastScratchSoundAngle = num;
 				this.cantForwardScratchUntilTimestamp = Time.time + this.scratchCooldown;
 				this.cantBackScratchUntilTimestamp = Time.time + this.scratchCooldown;
 			}

@@ -17,7 +17,7 @@ public class BitmapFontText : MonoBehaviour
 	public void Init()
 	{
 		this.texture = new Texture2D(this.textArea.x, this.textArea.y, this.font.fontImage.format, false);
-		this.texture.filterMode = FilterMode.Point;
+		this.texture.filterMode = 0;
 		this.material = new Material(this.renderer.sharedMaterial);
 		this.material.mainTexture = this.texture;
 		this.renderer.sharedMaterial = this.material;

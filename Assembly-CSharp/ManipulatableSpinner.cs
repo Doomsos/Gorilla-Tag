@@ -79,12 +79,12 @@ public class ManipulatableSpinner : ManipulatableObject
 		int num = 200;
 		float num2 = 0.001f;
 		float num3 = 1f / (float)num;
-		float3 y = base.transform.InverseTransformPoint(grabPoint);
+		float3 @float = base.transform.InverseTransformPoint(grabPoint);
 		float result = 0f;
 		float num4 = float.PositiveInfinity;
 		while (i < num)
 		{
-			float num5 = math.distancesq(this.spline.GetPointLocal(num2), y);
+			float num5 = math.distancesq(this.spline.GetPointLocal(num2), @float);
 			if (num5 < num4)
 			{
 				num4 = num5;

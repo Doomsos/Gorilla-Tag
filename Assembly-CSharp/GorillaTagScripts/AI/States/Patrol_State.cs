@@ -23,9 +23,9 @@ namespace GorillaTagScripts.AI.States
 
 		public void OnEnter()
 		{
-			string str = "Current State: ";
+			string text = "Current State: ";
 			Type typeFromHandle = typeof(Patrol_State);
-			Debug.Log(str + ((typeFromHandle != null) ? typeFromHandle.ToString() : null));
+			Debug.Log(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null));
 			if (this.entity.waypoints.Count > 0)
 			{
 				this.agent.SetDestination(this.entity.waypoints[0].transform.position);

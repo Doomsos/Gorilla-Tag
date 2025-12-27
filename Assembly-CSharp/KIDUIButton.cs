@@ -133,19 +133,19 @@ public class KIDUIButton : Button, IPointerEnterHandler, IEventSystemHandler, IP
 			this._buttonText.color = this._normalTextColor;
 			this.SetIcons(true, false);
 			return;
-		case Selectable.SelectionState.Highlighted:
+		case 1:
 			this._buttonText.color = this._highlightedTextColor;
 			this.SetIcons(false, true);
 			return;
-		case Selectable.SelectionState.Pressed:
+		case 2:
 			this._buttonText.color = this._pressedTextColor;
 			this.SetIcons(true, false);
 			return;
-		case Selectable.SelectionState.Selected:
+		case 3:
 			this._buttonText.color = this._selectedTextColor;
 			this.SetIcons(true, false);
 			return;
-		case Selectable.SelectionState.Disabled:
+		case 4:
 			this._buttonText.color = this._disabledTextColor;
 			this.SetIcons(true, false);
 			return;

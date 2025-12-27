@@ -47,12 +47,12 @@ public static class LuaHashing
 		int num2 = num;
 		for (int i = 0; i < length; i += 2)
 		{
-			num = ((num << 5) + num ^ (int)bytes[i]);
+			num = ((num << 5) + num ^ (int)bytes.get_Chars(i));
 			if (i == length - 1)
 			{
 				break;
 			}
-			num2 = ((num2 << 5) + num2 ^ (int)bytes[i + 1]);
+			num2 = ((num2 << 5) + num2 ^ (int)bytes.get_Chars(i + 1));
 		}
 		return num + num2 * 1648465312;
 	}

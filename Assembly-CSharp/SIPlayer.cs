@@ -71,7 +71,7 @@ public class SIPlayer : MonoBehaviour
 	public static SIPlayer Get(int actorNumber)
 	{
 		SIPlayer result;
-		if (SIPlayer.siPlayerByActorNr.TryGetValue(actorNumber, out result))
+		if (SIPlayer.siPlayerByActorNr.TryGetValue(actorNumber, ref result))
 		{
 			return result;
 		}

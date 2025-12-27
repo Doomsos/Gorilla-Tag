@@ -121,7 +121,7 @@ namespace BoingKit
 					else
 					{
 						chain.m_scannedRoot = chain.Root;
-						chain.m_scannedExclusion = chain.Exclusion.ToArray<Transform>();
+						chain.m_scannedExclusion = Enumerable.ToArray<Transform>(chain.Exclusion);
 						chain.m_hierarchyHash = num3;
 						chain.MaxLengthFromRoot = 0f;
 						List<BoingBones.Bone> list = new List<BoingBones.Bone>();
@@ -129,7 +129,7 @@ namespace BoingKit
 						while (queue.Count > 0)
 						{
 							BoingBones.RescanEntry rescanEntry = queue.Dequeue();
-							if (!chain.Exclusion.Contains(rescanEntry.Transform))
+							if (!Enumerable.Contains<Transform>(chain.Exclusion, rescanEntry.Transform))
 							{
 								int count = list.Count;
 								Transform transform2 = rescanEntry.Transform;
@@ -144,7 +144,7 @@ namespace BoingKit
 								while (m < childCount)
 								{
 									Transform child = transform2.GetChild(m);
-									if (!chain.Exclusion.Contains(child))
+									if (!Enumerable.Contains<Transform>(chain.Exclusion, child))
 									{
 										float num5 = Vector3.Distance(rescanEntry.Transform.position, child.position);
 										float lengthFromRoot = rescanEntry.LengthFromRoot + num5;
@@ -256,7 +256,7 @@ namespace BoingKit
 			base.PrepareExecute();
 			this.Params.Bits.SetBit(4, false);
 			float fixedDeltaTime = Time.fixedDeltaTime;
-			float d = (this.UpdateMode == BoingManager.UpdateMode.FixedUpdate) ? fixedDeltaTime : Time.deltaTime;
+			float num = (this.UpdateMode == BoingManager.UpdateMode.FixedUpdate) ? fixedDeltaTime : Time.deltaTime;
 			this.m_minScale = Mathf.Min(base.transform.localScale.x, Mathf.Min(base.transform.localScale.y, base.transform.localScale.z));
 			for (int i = 0; i < this.BoneData.Length; i++)
 			{
@@ -264,8 +264,8 @@ namespace BoingKit
 				BoingBones.Bone[] array = this.BoneData[i];
 				if (array != null && !(chain.Root == null) && array.Length != 0)
 				{
-					Vector3 b = chain.Gravity * d;
-					float num = 0f;
+					Vector3 vector = chain.Gravity * num;
+					float num2 = 0f;
 					foreach (BoingBones.Bone bone in array)
 					{
 						if (bone.ParentIndex < 0)
@@ -280,15 +280,15 @@ namespace BoingKit
 						else
 						{
 							BoingBones.Bone bone2 = array[bone.ParentIndex];
-							float num2 = Vector3.Distance(bone.Position, bone2.Position);
-							bone.LengthFromRoot = bone2.LengthFromRoot + num2;
-							num = Mathf.Max(num, bone.LengthFromRoot);
+							float num3 = Vector3.Distance(bone.Position, bone2.Position);
+							bone.LengthFromRoot = bone2.LengthFromRoot + num3;
+							num2 = Mathf.Max(num2, bone.LengthFromRoot);
 						}
 					}
-					float num3 = MathUtil.InvSafe(num);
+					float num4 = MathUtil.InvSafe(num2);
 					foreach (BoingBones.Bone bone3 in array)
 					{
-						float t = bone3.LengthFromRoot * num3;
+						float t = bone3.LengthFromRoot * num4;
 						bone3.AnimationBlend = BoingBones.Chain.EvaluateCurve(chain.AnimationBlendCurveType, t, chain.AnimationBlendCustomCurve);
 						bone3.LengthStiffness = BoingBones.Chain.EvaluateCurve(chain.LengthStiffnessCurveType, t, chain.LengthStiffnessCustomCurve);
 						bone3.LengthStiffnessT = 1f - Mathf.Pow(1f - bone3.LengthStiffness, 30f * fixedDeltaTime);
@@ -302,7 +302,7 @@ namespace BoingKit
 					for (int l = 0; l < array.Length; l++)
 					{
 						BoingBones.Bone bone4 = array[l];
-						float t2 = bone4.LengthFromRoot * num3;
+						float t2 = bone4.LengthFromRoot * num4;
 						bone4.AnimationBlend = BoingBones.Chain.EvaluateCurve(chain.AnimationBlendCurveType, t2, chain.AnimationBlendCustomCurve);
 						bone4.LengthStiffness = BoingBones.Chain.EvaluateCurve(chain.LengthStiffnessCurveType, t2, chain.LengthStiffnessCustomCurve);
 						bone4.PoseStiffness = BoingBones.Chain.EvaluateCurve(chain.PoseStiffnessCurveType, t2, chain.PoseStiffnessCustomCurve);
@@ -312,12 +312,12 @@ namespace BoingKit
 						if (l > 0)
 						{
 							BoingBones.Bone bone5 = bone4;
-							bone5.Instance.PositionSpring.Velocity = bone5.Instance.PositionSpring.Velocity + b;
+							bone5.Instance.PositionSpring.Velocity = bone5.Instance.PositionSpring.Velocity + vector;
 						}
 						bone4.RotationInverseWs = Quaternion.Inverse(bone4.Rotation);
 						bone4.SpringRotationWs = bone4.Instance.RotationSpring.ValueQuat;
 						bone4.SpringRotationInverseWs = Quaternion.Inverse(bone4.SpringRotationWs);
-						Vector3 vector = bone4.Position;
+						Vector3 vector2 = bone4.Position;
 						Quaternion rotation = bone4.Rotation;
 						Vector3 localScale = bone4.LocalScale;
 						if (bone4.ParentIndex >= 0)
@@ -325,31 +325,31 @@ namespace BoingKit
 							BoingBones.Bone bone6 = array[bone4.ParentIndex];
 							Vector3 position2 = bone6.Position;
 							Vector3 value = bone6.Instance.PositionSpring.Value;
-							Vector3 a = bone6.SpringRotationInverseWs * (bone4.Instance.PositionSpring.Value - value);
-							Quaternion a2 = bone6.SpringRotationInverseWs * bone4.Instance.RotationSpring.ValueQuat;
+							Vector3 vector3 = bone6.SpringRotationInverseWs * (bone4.Instance.PositionSpring.Value - value);
+							Quaternion quaternion = bone6.SpringRotationInverseWs * bone4.Instance.RotationSpring.ValueQuat;
 							Vector3 position3 = bone4.Position;
 							Quaternion rotation2 = bone4.Rotation;
-							Vector3 b2 = bone6.RotationInverseWs * (position3 - position2);
-							Quaternion b3 = bone6.RotationInverseWs * rotation2;
+							Vector3 vector4 = bone6.RotationInverseWs * (position3 - position2);
+							Quaternion quaternion2 = bone6.RotationInverseWs * rotation2;
 							float poseStiffness = bone4.PoseStiffness;
-							Vector3 point = Vector3.Lerp(a, b2, poseStiffness);
-							Quaternion rhs = Quaternion.Slerp(a2, b3, poseStiffness);
-							vector = value + bone6.SpringRotationWs * point;
-							rotation = bone6.SpringRotationWs * rhs;
+							Vector3 vector5 = Vector3.Lerp(vector3, vector4, poseStiffness);
+							Quaternion quaternion3 = Quaternion.Slerp(quaternion, quaternion2, poseStiffness);
+							vector2 = value + bone6.SpringRotationWs * vector5;
+							rotation = bone6.SpringRotationWs * quaternion3;
 							if (bone4.BendAngleCap < MathUtil.Pi - MathUtil.Epsilon)
 							{
-								Vector3 vector2 = vector - position;
-								vector2 = VectorUtil.ClampBend(vector2, position3 - position, bone4.BendAngleCap);
-								vector = position + vector2;
+								Vector3 vector6 = vector2 - position;
+								vector6 = VectorUtil.ClampBend(vector6, position3 - position, bone4.BendAngleCap);
+								vector2 = position + vector6;
 							}
 						}
 						if (chain.ParamsOverride == null)
 						{
-							bone4.Instance.PrepareExecute(ref this.Params, vector, rotation, localScale, true);
+							bone4.Instance.PrepareExecute(ref this.Params, vector2, rotation, localScale, true);
 						}
 						else
 						{
-							bone4.Instance.PrepareExecute(ref chain.ParamsOverride.Params, vector, rotation, localScale, true);
+							bone4.Instance.PrepareExecute(ref chain.ParamsOverride.Params, vector2, rotation, localScale, true);
 						}
 					}
 				}

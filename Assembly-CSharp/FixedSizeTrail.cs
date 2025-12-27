@@ -63,10 +63,10 @@ public class FixedSizeTrail : MonoBehaviour
 		Vector3 forward = this._transform.forward;
 		int num = this._segments + 1;
 		this._points = new Vector3[num];
-		float d = this._length / (float)this._segments;
+		float num2 = this._length / (float)this._segments;
 		for (int i = 0; i < num; i++)
 		{
-			this._points[i] = position - forward * d * (float)i;
+			this._points[i] = position - forward * num2 * (float)i;
 		}
 		this._lineRenderer.positionCount = num;
 		this._lineRenderer.SetPositions(this._points);
@@ -92,11 +92,11 @@ public class FixedSizeTrail : MonoBehaviour
 		float num2 = this._length / (float)num;
 		for (int i = 1; i < num; i++)
 		{
-			float time = (float)(i - 1) / (float)num;
-			float num3 = this.gravityCurve.Evaluate(time);
-			Vector3 b = this.gravity * (num3 * deltaTime);
-			this._points[i] += b;
-			this._points[i + 1] += b;
+			float num3 = (float)(i - 1) / (float)num;
+			float num4 = this.gravityCurve.Evaluate(num3);
+			Vector3 vector = this.gravity * (num4 * deltaTime);
+			this._points[i] += vector;
+			this._points[i + 1] += vector;
 		}
 	}
 
@@ -125,13 +125,13 @@ public class FixedSizeTrail : MonoBehaviour
 			int num4 = this._points.Length - 1;
 			int num5 = num4 - 1;
 			Vector3 vector3 = this._points[num4] - this._points[num5];
-			Vector3 a = vector3.normalized;
+			Vector3 vector4 = vector3.normalized;
 			if (this.applyPhysics)
 			{
 				Vector3 normalized = (this._points[num5] - this._points[num5 - 1]).normalized;
-				a = Vector3.Lerp(a, normalized, 0.5f);
+				vector4 = Vector3.Lerp(vector4, normalized, 0.5f);
 			}
-			this._points[num4] = this._points[num5] + a * Math.Min(vector3.magnitude, num3);
+			this._points[num4] = this._points[num5] + vector4 * Math.Min(vector3.magnitude, num3);
 		}
 		this._lineRenderer.SetPositions(this._points);
 	}

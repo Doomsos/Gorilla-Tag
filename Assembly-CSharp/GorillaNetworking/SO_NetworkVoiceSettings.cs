@@ -17,11 +17,11 @@ namespace GorillaNetworking
 
 		public bool WorkInOfflineMode = true;
 
-		public DebugLevel LogLevel = DebugLevel.ERROR;
+		public DebugLevel LogLevel = 1;
 
-		public DebugLevel GlobalRecordersLogLevel = DebugLevel.INFO;
+		public DebugLevel GlobalRecordersLogLevel = 3;
 
-		public DebugLevel GlobalSpeakersLogLevel = DebugLevel.INFO;
+		public DebugLevel GlobalSpeakersLogLevel = 3;
 
 		public bool CreateSpeakerIfNotFound;
 
@@ -51,9 +51,9 @@ namespace GorillaNetworking
 		public bool ReliableMode;
 
 		[Header("Recorder Codec Parameters")]
-		public OpusCodec.FrameDuration FrameDuration = OpusCodec.FrameDuration.Frame60ms;
+		public OpusCodec.FrameDuration FrameDuration = 60000;
 
-		public SamplingRate SamplingRate = SamplingRate.Sampling16000;
+		public SamplingRate SamplingRate = 16000;
 
 		[Range(6000f, 510000f)]
 		public int Bitrate = 20000;

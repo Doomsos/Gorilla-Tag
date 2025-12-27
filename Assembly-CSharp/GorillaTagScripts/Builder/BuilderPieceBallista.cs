@@ -112,9 +112,9 @@ namespace GorillaTagScripts.Builder
 					return;
 				}
 				Vector3 playerBodyCenterPosition = this.GetPlayerBodyCenterPosition(this.playerRigInTrigger.transform, this.playerRigInTrigger.scaleFactor);
-				Vector3 b = Vector3.Dot(playerBodyCenterPosition - this.launchStart.position, this.launchDirection) * this.launchDirection + this.launchStart.position;
-				Vector3 b2 = playerBodyCenterPosition - b;
-				if (Vector3.Lerp(Vector3.zero, b2, Mathf.Exp(-this.playerPullInRate * Time.deltaTime)).sqrMagnitude < this.playerReadyToFireDist * this.myPiece.GetScale() * this.playerReadyToFireDist * this.myPiece.GetScale())
+				Vector3 vector = Vector3.Dot(playerBodyCenterPosition - this.launchStart.position, this.launchDirection) * this.launchDirection + this.launchStart.position;
+				Vector3 vector2 = playerBodyCenterPosition - vector;
+				if (Vector3.Lerp(Vector3.zero, vector2, Mathf.Exp(-this.playerPullInRate * Time.deltaTime)).sqrMagnitude < this.playerReadyToFireDist * this.myPiece.GetScale() * this.playerReadyToFireDist * this.myPiece.GetScale())
 				{
 					this.myPiece.GetTable().builderNetworking.FunctionalPieceStateChangeMaster(this.myPiece.pieceId, 6, this.playerRigInTrigger.Creator.GetPlayerRef(), NetworkSystem.Instance.ServerTimestamp);
 					return;
@@ -148,14 +148,14 @@ namespace GorillaTagScripts.Builder
 			float deltaTime = Time.deltaTime;
 			GTPlayer instance = GTPlayer.Instance;
 			Vector3 playerBodyCenterPosition = this.GetPlayerBodyCenterPosition(instance.headCollider.transform, instance.scale);
-			Vector3 lhs = playerBodyCenterPosition - this.launchStart.position;
+			Vector3 vector = playerBodyCenterPosition - this.launchStart.position;
 			BuilderPieceBallista.BallistaState ballistaState = this.ballistaState;
 			if (ballistaState == BuilderPieceBallista.BallistaState.PrepareForLaunchLocal)
 			{
-				Vector3 b = Vector3.Dot(lhs, this.launchDirection) * this.launchDirection + this.launchStart.position;
-				Vector3 b2 = playerBodyCenterPosition - b;
-				Vector3 a = Vector3.Lerp(Vector3.zero, b2, Mathf.Exp(-this.playerPullInRate * deltaTime));
-				instance.transform.position = instance.transform.position + (a - b2);
+				Vector3 vector2 = Vector3.Dot(vector, this.launchDirection) * this.launchDirection + this.launchStart.position;
+				Vector3 vector3 = playerBodyCenterPosition - vector2;
+				Vector3 vector4 = Vector3.Lerp(Vector3.zero, vector3, Mathf.Exp(-this.playerPullInRate * deltaTime));
+				instance.transform.position = instance.transform.position + (vector4 - vector3);
 				instance.SetPlayerVelocity(Vector3.zero);
 				instance.SetMaximumSlipThisFrame();
 				return;
@@ -167,16 +167,16 @@ namespace GorillaTagScripts.Builder
 			if (!this.playerLaunched)
 			{
 				float num = Vector3.Dot(this.launchBone.position - this.launchStart.position, this.launchDirection) / this.launchRampDistance;
-				float b3 = Vector3.Dot(lhs, this.launchDirection) / this.launchRampDistance;
-				float num2 = 0.25f * this.myPiece.GetScale() / this.launchRampDistance;
-				float num3 = Mathf.Max(num + num2, b3);
-				float d = num3 * this.launchRampDistance;
-				Vector3 a2 = this.launchDirection * d + this.launchStart.position;
-				instance.transform.position + (a2 - playerBodyCenterPosition);
-				instance.transform.position = instance.transform.position + (a2 - playerBodyCenterPosition);
+				float num2 = Vector3.Dot(vector, this.launchDirection) / this.launchRampDistance;
+				float num3 = 0.25f * this.myPiece.GetScale() / this.launchRampDistance;
+				float num4 = Mathf.Max(num + num3, num2);
+				float num5 = num4 * this.launchRampDistance;
+				Vector3 vector5 = this.launchDirection * num5 + this.launchStart.position;
+				instance.transform.position + (vector5 - playerBodyCenterPosition);
+				instance.transform.position = instance.transform.position + (vector5 - playerBodyCenterPosition);
 				instance.SetPlayerVelocity(Vector3.zero);
 				instance.SetMaximumSlipThisFrame();
-				if (num3 >= 1f)
+				if (num4 >= 1f)
 				{
 					this.playerLaunched = true;
 					this.launchedTime = (double)Time.time;
@@ -467,14 +467,14 @@ namespace GorillaTagScripts.Builder
 
 		private void UpdatePredictionLine()
 		{
-			float d = 0.033333335f;
+			float num = 0.033333335f;
 			Vector3 vector = this.launchEnd.position;
-			Vector3 a = (this.launchEnd.position - this.launchStart.position).normalized * this.launchSpeed;
+			Vector3 vector2 = (this.launchEnd.position - this.launchStart.position).normalized * this.launchSpeed;
 			for (int i = 0; i < 240; i++)
 			{
 				this.predictionLinePoints[i] = vector;
-				vector += a * d;
-				a += Vector3.down * 9.8f * d;
+				vector += vector2 * num;
+				vector2 += Vector3.down * 9.8f * num;
 			}
 		}
 

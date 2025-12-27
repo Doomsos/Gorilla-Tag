@@ -96,11 +96,11 @@ public class ThrowableBugReliableState : NetworkComponent, IRequestableOwnership
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("Data", 0, 3)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private ThrowableBugReliableState.BugData _Data;
 
 	[NetworkStructWeaved(3)]
-	[StructLayout(LayoutKind.Explicit, Size = 12)]
+	[StructLayout(2, Size = 12)]
 	public struct BugData : INetworkStruct
 	{
 		[Networked]

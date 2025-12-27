@@ -12,12 +12,11 @@ public class GRUIEmployeeTerminal : MonoBehaviour
 	public void Setup()
 	{
 		this.signupButton.onPressButton.AddListener(new UnityAction(this.OnSignup));
-		PlayFab.ClientModels.GetUserDataRequest getUserDataRequest = new PlayFab.ClientModels.GetUserDataRequest();
+		GetUserDataRequest getUserDataRequest = new GetUserDataRequest();
 		getUserDataRequest.PlayFabId = PlayFabAuthenticator.instance.GetPlayFabPlayerId();
-		getUserDataRequest.Keys = new List<string>
-		{
-			"GRData"
-		};
+		List<string> list = new List<string>();
+		list.Add("GRData");
+		getUserDataRequest.Keys = list;
 		this.isSigningUp = true;
 		PlayFabClientAPI.GetUserData(getUserDataRequest, new Action<GetUserDataResult>(this.OnGetUserDataInitialState), new Action<PlayFabError>(this.OnGetUserDataInitialStateFail), null, null);
 		this.Refresh();
@@ -29,16 +28,11 @@ public class GRUIEmployeeTerminal : MonoBehaviour
 		{
 			return;
 		}
-		UpdateUserDataRequest request = new UpdateUserDataRequest
-		{
-			Data = new Dictionary<string, string>
-			{
-				{
-					"GRData",
-					"Now we have data"
-				}
-			}
-		};
+		UpdateUserDataRequest updateUserDataRequest = new UpdateUserDataRequest();
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		dictionary.Add("GRData", "Now we have data");
+		updateUserDataRequest.Data = dictionary;
+		UpdateUserDataRequest updateUserDataRequest2 = updateUserDataRequest;
 		if (!PlayFabClientAPI.IsClientLoggedIn())
 		{
 			if (PlayFabAuthenticator.instance != null)
@@ -48,7 +42,7 @@ public class GRUIEmployeeTerminal : MonoBehaviour
 			return;
 		}
 		this.isSigningUp = true;
-		PlayFabClientAPI.UpdateUserData(request, new Action<UpdateUserDataResult>(this.OnSaveTableSuccess), new Action<PlayFabError>(this.OnSaveTableFailure), null, null);
+		PlayFabClientAPI.UpdateUserData(updateUserDataRequest2, new Action<UpdateUserDataResult>(this.OnSaveTableSuccess), new Action<PlayFabError>(this.OnSaveTableFailure), null, null);
 	}
 
 	public Transform GetSpawnMarker()
@@ -74,7 +68,7 @@ public class GRUIEmployeeTerminal : MonoBehaviour
 	private void OnGetUserDataInitialState(GetUserDataResult result)
 	{
 		UserDataRecord userDataRecord;
-		if (result.Data.TryGetValue("GRData", out userDataRecord))
+		if (result.Data.TryGetValue("GRData", ref userDataRecord))
 		{
 			string value = userDataRecord.Value;
 			this.isEmployee = true;

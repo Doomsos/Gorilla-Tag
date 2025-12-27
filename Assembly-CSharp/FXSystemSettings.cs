@@ -14,8 +14,8 @@ public class FXSystemSettings : ScriptableObject
 			int num3 = (int)key;
 			if (num3 < 0 || num3 >= 24)
 			{
-				string str = "NO_PATH_AT_RUNTIME";
-				Debug.LogError("FXSystemSettings: (this should never happen) `callLimits.Key` is out of bounds of `callSettings`! Path=\"" + str + "\"", this);
+				string text = "NO_PATH_AT_RUNTIME";
+				Debug.LogError("FXSystemSettings: (this should never happen) `callLimits.Key` is out of bounds of `callSettings`! Path=\"" + text + "\"", this);
 			}
 			if (this.callSettings[num3] != null)
 			{

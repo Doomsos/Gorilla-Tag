@@ -26,9 +26,9 @@ namespace GorillaTagScripts.AI.States
 		public void OnEnter()
 		{
 			this.chaseOver = false;
-			string str = "Current State: ";
+			string text = "Current State: ";
 			Type typeFromHandle = typeof(Chase_State);
-			Debug.Log(str + ((typeFromHandle != null) ? typeFromHandle.ToString() : null));
+			Debug.Log(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null));
 		}
 
 		public void OnExit()

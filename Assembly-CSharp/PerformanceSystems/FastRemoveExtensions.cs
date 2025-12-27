@@ -13,13 +13,13 @@ namespace PerformanceSystems
 			{
 				return false;
 			}
-			int index = count - 1;
+			int num = count - 1;
 			for (int i = 0; i < count; i++)
 			{
 				if (@default.Equals(list[i], itemToRemove))
 				{
-					list[i] = list[index];
-					list.RemoveAt(index);
+					list[i] = list[num];
+					list.RemoveAt(num);
 					return true;
 				}
 			}
@@ -35,12 +35,12 @@ namespace PerformanceSystems
 			bool result = false;
 			for (int i = list.Count - 1; i >= 0; i--)
 			{
-				T item = list[i];
-				if (setToRemove.Contains(item))
+				T t = list[i];
+				if (setToRemove.Contains(t))
 				{
-					int index = list.Count - 1;
-					list[i] = list[index];
-					list.RemoveAt(index);
+					int num = list.Count - 1;
+					list[i] = list[num];
+					list.RemoveAt(num);
 					result = true;
 				}
 			}

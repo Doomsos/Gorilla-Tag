@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugComponent, IGameEntityComponent
 {
@@ -137,8 +136,8 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 	private void SetExtendedAmount(float newExtendedAmount)
 	{
 		this.extendedAmount = newExtendedAmount;
-		float y = Mathf.Lerp(this.retractableSectionMin, this.retractableSectionMax, this.extendedAmount);
-		this.retractableSection.localPosition = new Vector3(0f, y, 0f);
+		float num = Mathf.Lerp(this.retractableSectionMin, this.retractableSectionMax, this.extendedAmount);
+		this.retractableSection.localPosition = new Vector3(0f, num, 0f);
 	}
 
 	private void SetState(GRToolClub.State newState)
@@ -212,7 +211,7 @@ public class GRToolClub : MonoBehaviourTick, IGameHitter, IGameEntityDebugCompon
 			return false;
 		}
 		int num = gamePlayer.FindHandIndex(this.gameEntity.id);
-		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
+		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? 4 : 5) > 0.25f;
 	}
 
 	public void OnSuccessfulHit(GameHitData hitData)

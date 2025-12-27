@@ -22,22 +22,22 @@ public class ColliderOffsetOverride : MonoBehaviour
 
 	public void FindColliders()
 	{
-		foreach (Collider item in base.gameObject.GetComponents<Collider>().ToList<Collider>())
+		foreach (Collider collider in Enumerable.ToList<Collider>(base.gameObject.GetComponents<Collider>()))
 		{
-			if (!this.colliders.Contains(item))
+			if (!this.colliders.Contains(collider))
 			{
-				this.colliders.Add(item);
+				this.colliders.Add(collider);
 			}
 		}
 	}
 
 	public void FindCollidersRecursively()
 	{
-		foreach (Collider item in base.gameObject.GetComponentsInChildren<Collider>().ToList<Collider>())
+		foreach (Collider collider in Enumerable.ToList<Collider>(base.gameObject.GetComponentsInChildren<Collider>()))
 		{
-			if (!this.colliders.Contains(item))
+			if (!this.colliders.Contains(collider))
 			{
-				this.colliders.Add(item);
+				this.colliders.Add(collider);
 			}
 		}
 	}

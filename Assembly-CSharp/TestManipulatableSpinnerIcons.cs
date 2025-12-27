@@ -21,10 +21,10 @@ public class TestManipulatableSpinnerIcons : MonoBehaviour
 	{
 		for (int i = 0; i < this.rollerElementCount; i++)
 		{
-			float x = this.rollerElementAngle * (float)i + this.rollerElementAngle * 0.5f;
-			Object.Instantiate<GameObject>(this.rollerElementTemplate, base.transform).transform.localRotation = Quaternion.Euler(x, 0f, 0f);
+			float num = this.rollerElementAngle * (float)i + this.rollerElementAngle * 0.5f;
+			Object.Instantiate<GameObject>(this.rollerElementTemplate, base.transform).transform.localRotation = Quaternion.Euler(num, 0f, 0f);
 			GameObject gameObject = Object.Instantiate<GameObject>(this.iconElementTemplate, this.iconCanvas.transform);
-			gameObject.transform.localRotation = Quaternion.Euler(x, 0f, 0f);
+			gameObject.transform.localRotation = Quaternion.Euler(num, 0f, 0f);
 			this.visibleIcons.Add(gameObject.GetComponentInChildren<Text>());
 		}
 		this.rollerElementTemplate.SetActive(false);

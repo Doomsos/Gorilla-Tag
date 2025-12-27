@@ -144,14 +144,14 @@ namespace GorillaTagScripts.Builder
 		{
 			switch (curve.mode)
 			{
-			case ParticleSystemCurveMode.Constant:
+			case 0:
 				curve.constant *= scale;
 				return;
-			case ParticleSystemCurveMode.Curve:
-			case ParticleSystemCurveMode.TwoCurves:
+			case 1:
+			case 2:
 				curve.curveMultiplier *= scale;
 				return;
-			case ParticleSystemCurveMode.TwoConstants:
+			case 3:
 				curve.constantMin *= scale;
 				curve.constantMax *= scale;
 				return;

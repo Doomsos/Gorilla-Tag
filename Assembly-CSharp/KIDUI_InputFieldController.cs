@@ -24,8 +24,8 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		{
 			ControllerBehaviour.Instance.OnAction += this.PostUpdate;
 		}
-		SteamVR_Events.System(EVREventType.VREvent_KeyboardClosed).Listen(new UnityAction<VREvent_t>(this.OnKeyboardClosed));
-		SteamVR_Events.System(EVREventType.VREvent_KeyboardCharInput).Listen(new UnityAction<VREvent_t>(this.OnChar));
+		SteamVR_Events.System(1200).Listen(new UnityAction<VREvent_t>(this.OnKeyboardClosed));
+		SteamVR_Events.System(1201).Listen(new UnityAction<VREvent_t>(this.OnChar));
 	}
 
 	protected void OnDisable()
@@ -34,8 +34,8 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		{
 			ControllerBehaviour.Instance.OnAction -= this.PostUpdate;
 		}
-		SteamVR_Events.System(EVREventType.VREvent_KeyboardClosed).Remove(new UnityAction<VREvent_t>(this.OnKeyboardClosed));
-		SteamVR_Events.System(EVREventType.VREvent_KeyboardCharInput).Remove(new UnityAction<VREvent_t>(this.OnChar));
+		SteamVR_Events.System(1200).Remove(new UnityAction<VREvent_t>(this.OnKeyboardClosed));
+		SteamVR_Events.System(1201).Remove(new UnityAction<VREvent_t>(this.OnChar));
 	}
 
 	private void Update()
@@ -110,7 +110,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		}
 		Debug.Log("[KID::INPUT_FIELD_CONTROLLER] Selecting and Activating Input Field");
 		EVROverlayError evroverlayError = OpenVR.Overlay.ShowKeyboard(0, 0, 1U, "Enter Email", 1024U, this._inputField.text ?? "", 0UL);
-		if (evroverlayError != EVROverlayError.None)
+		if (evroverlayError != null)
 		{
 			Debug.LogError("[KID::INPUT_FIELD_CONTROLLER] Failed to open keyboard. Resulted with error: [" + evroverlayError.ToString() + "]");
 			return;
@@ -126,7 +126,7 @@ public class KIDUI_InputFieldController : MonoBehaviour, IPointerEnterHandler, I
 		{
 			return;
 		}
-		char c = ev.data.keyboard.cNewInput[0];
+		char c = ev.data.keyboard.cNewInput.get_Chars(0);
 		if (c == '\b')
 		{
 			this._inputBuffer = this._inputBuffer.Remove(this._inputBuffer.Length - 1, 1);

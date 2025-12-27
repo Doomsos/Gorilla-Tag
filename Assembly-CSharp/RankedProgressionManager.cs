@@ -177,7 +177,7 @@ public class RankedProgressionManager : MonoBehaviour
 					Action<int, float, int> onPlayerEloAcquired = this.OnPlayerEloAcquired;
 					if (onPlayerEloAcquired != null)
 					{
-						onPlayerEloAcquired(num, rankedModeProgressionPlatformData3.elo, rankFromTiers);
+						onPlayerEloAcquired.Invoke(num, rankedModeProgressionPlatformData3.elo, rankFromTiers);
 					}
 					if (num == NetworkSystem.Instance.LocalPlayerID)
 					{
@@ -225,7 +225,7 @@ public class RankedProgressionManager : MonoBehaviour
 		{
 			return;
 		}
-		onPlayerEloAcquired(actorNum, elo, tier);
+		onPlayerEloAcquired.Invoke(actorNum, elo, tier);
 	}
 
 	public void SetLocalProgressionData(GorillaTagCompetitiveServerApi.RankedModePlayerProgressionData data)
@@ -530,9 +530,9 @@ public class RankedProgressionManager : MonoBehaviour
 		{
 			return null;
 		}
-		int index = (this.ProgressionData == null) ? 0 : this.ProgressionData.platformData[0].minorTier;
-		int index2 = (this.ProgressionData == null) ? 0 : this.ProgressionData.platformData[0].majorTier;
-		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier = this.majorTiers[index2].subTiers[index];
+		int num = (this.ProgressionData == null) ? 0 : this.ProgressionData.platformData[0].minorTier;
+		int num2 = (this.ProgressionData == null) ? 0 : this.ProgressionData.platformData[0].majorTier;
+		RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier = this.majorTiers[num2].subTiers[num];
 		if (rankedProgressionSubTier == null)
 		{
 			return null;
@@ -806,11 +806,11 @@ public class RankedProgressionManager : MonoBehaviour
 	{
 		public void InsertSubTierAt(int idx, float tierMin)
 		{
-			RankedProgressionManager.RankedProgressionSubTier item = new RankedProgressionManager.RankedProgressionSubTier
+			RankedProgressionManager.RankedProgressionSubTier rankedProgressionSubTier = new RankedProgressionManager.RankedProgressionSubTier
 			{
 				name = "NewTier"
 			};
-			this.subTiers.Insert(idx, item);
+			this.subTiers.Insert(idx, rankedProgressionSubTier);
 			this.EnforceSubTierValidity(tierMin);
 		}
 

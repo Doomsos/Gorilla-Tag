@@ -111,7 +111,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 			this.cachedPlayerList = (NetworkSystem.Instance.AllNetPlayers ?? new NetPlayer[0]);
 		};
 		this.logErrorCount = 0;
-		Application.logMessageReceived += this.LogErrorCount;
+		Application.logMessageReceived += new Application.LogCallback(this.LogErrorCount);
 	}
 
 	private void OnApplicationPause(bool paused)
@@ -126,7 +126,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 
 	public void LogErrorCount(string logString, string stackTrace, LogType type)
 	{
-		if (type == LogType.Error)
+		if (type == null)
 		{
 			this.logErrorCount++;
 			this.stringIndex = logString.LastIndexOf("Sender is ");
@@ -164,7 +164,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		this.sendReport = true;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private void DispatchReport()
 	{
 		if ((this.sendReport || this.testAssault) && this.suspiciousPlayerId != "" && this.reportedPlayers.IndexOf(this.suspiciousPlayerId) == -1)
@@ -295,7 +295,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 	{
 		this.cachedPlayerList = (NetworkSystem.Instance.AllNetPlayers ?? new NetPlayer[0]);
 		Dictionary<string, GorillaNot.RPCCallTracker> dictionary;
-		if (this.userRPCCalls.TryGetValue(otherPlayer.UserId, out dictionary))
+		if (this.userRPCCalls.TryGetValue(otherPlayer.UserId, ref dictionary))
 		{
 			this.userRPCCalls.Remove(otherPlayer.UserId);
 		}
@@ -365,7 +365,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 		}
 		GorillaNot.RPCCallTracker rpccallTracker = null;
 		Dictionary<string, GorillaNot.RPCCallTracker> dictionary;
-		if (!this.userRPCCalls.TryGetValue(userID, out dictionary))
+		if (!this.userRPCCalls.TryGetValue(userID, ref dictionary))
 		{
 			rpccallTracker = new GorillaNot.RPCCallTracker
 			{
@@ -376,7 +376,7 @@ public class GorillaNot : MonoBehaviour, IGorillaSliceableSimple
 			dictionary2.Add(rpcFunction, rpccallTracker);
 			this.userRPCCalls.Add(userID, dictionary2);
 		}
-		else if (!dictionary.TryGetValue(rpcFunction, out rpccallTracker))
+		else if (!dictionary.TryGetValue(rpcFunction, ref rpccallTracker))
 		{
 			rpccallTracker = new GorillaNot.RPCCallTracker
 			{

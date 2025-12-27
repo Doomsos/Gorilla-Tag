@@ -34,20 +34,20 @@ public class LiquidMain : MonoBehaviour
 			0,
 			2,
 			3
-		}, MeshTopology.Triangles, 0);
+		}, 0, 0);
 		LiquidMain.kNumPlaneCells = LiquidMain.kPlaneMeshResolution * LiquidMain.kPlaneMeshResolution;
 		this.m_aaInstancedPlaneCellMatrix = new Matrix4x4[(LiquidMain.kNumPlaneCells + LiquidMain.kNumInstancedPlaneCellPerDrawCall - 1) / LiquidMain.kNumInstancedPlaneCellPerDrawCall][];
 		for (int i = 0; i < this.m_aaInstancedPlaneCellMatrix.Length; i++)
 		{
 			this.m_aaInstancedPlaneCellMatrix[i] = new Matrix4x4[LiquidMain.kNumInstancedPlaneCellPerDrawCall];
 		}
-		Vector3 b = new Vector3(-0.5f, 0f, -0.5f) * LiquidMain.kPlaneMeshCellSize * (float)LiquidMain.kPlaneMeshResolution;
+		Vector3 vector = new Vector3(-0.5f, 0f, -0.5f) * LiquidMain.kPlaneMeshCellSize * (float)LiquidMain.kPlaneMeshResolution;
 		for (int j = 0; j < LiquidMain.kPlaneMeshResolution; j++)
 		{
 			for (int k = 0; k < LiquidMain.kPlaneMeshResolution; k++)
 			{
 				int num = j * LiquidMain.kPlaneMeshResolution + k;
-				Matrix4x4 matrix4x = Matrix4x4.TRS(new Vector3((float)k, 0f, (float)j) * LiquidMain.kPlaneMeshCellSize + b, Quaternion.identity, Vector3.one);
+				Matrix4x4 matrix4x = Matrix4x4.TRS(new Vector3((float)k, 0f, (float)j) * LiquidMain.kPlaneMeshCellSize + vector, Quaternion.identity, Vector3.one);
 				this.m_aaInstancedPlaneCellMatrix[num / LiquidMain.kNumInstancedPlaneCellPerDrawCall][num % LiquidMain.kNumInstancedPlaneCellPerDrawCall] = matrix4x;
 			}
 		}
@@ -71,8 +71,8 @@ public class LiquidMain : MonoBehaviour
 		int num = LiquidMain.kNumPlaneCells;
 		for (int i = 0; i < this.m_aaInstancedPlaneCellMatrix.Length; i++)
 		{
-			Matrix4x4[] matrices = this.m_aaInstancedPlaneCellMatrix[i];
-			Graphics.DrawMeshInstanced(this.m_planeMesh, 0, this.PlaneMaterial, matrices, Mathf.Min(num, LiquidMain.kNumInstancedPlaneCellPerDrawCall));
+			Matrix4x4[] array = this.m_aaInstancedPlaneCellMatrix[i];
+			Graphics.DrawMeshInstanced(this.m_planeMesh, 0, this.PlaneMaterial, array, Mathf.Min(num, LiquidMain.kNumInstancedPlaneCellPerDrawCall));
 			num -= LiquidMain.kNumInstancedPlaneCellPerDrawCall;
 		}
 		for (int j = 0; j < LiquidMain.kNumMovingEffectors; j++)

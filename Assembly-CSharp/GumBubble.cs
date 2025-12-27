@@ -68,8 +68,8 @@ public class GumBubble : LerpComponent
 
 	private void Update()
 	{
-		float t = Mathf.Clamp01(this._sinceInflate / this._lerpLength);
-		this._lerp = Mathf.Lerp(0f, 1f, t);
+		float num = Mathf.Clamp01(this._sinceInflate / this._lerpLength);
+		this._lerp = Mathf.Lerp(0f, 1f, num);
 		if (this._lerp <= 1f && !this._done)
 		{
 			base.RenderLerp();
@@ -78,8 +78,8 @@ public class GumBubble : LerpComponent
 				this._done = true;
 			}
 		}
-		float num = this._lerpLength + this._delayPop;
-		if (this._sinceInflate >= num)
+		float num2 = this._lerpLength + this._delayPop;
+		if (this._sinceInflate >= num2)
 		{
 			this.Pop();
 		}

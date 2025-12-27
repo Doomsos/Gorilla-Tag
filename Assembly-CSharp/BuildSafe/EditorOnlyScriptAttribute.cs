@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace BuildSafe
 {
 	[Conditional("UNITY_EDITOR")]
-	[AttributeUsage(AttributeTargets.Class)]
+	[AttributeUsage(4)]
 	public class EditorOnlyScriptAttribute : Attribute
 	{
 	}

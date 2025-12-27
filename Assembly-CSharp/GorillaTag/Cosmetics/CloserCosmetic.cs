@@ -52,14 +52,14 @@ namespace GorillaTag.Cosmetics
 
 		private void Closing()
 		{
-			float t = this.useFingerFlexValueAsStrength ? Mathf.Clamp01(this.fingerValue) : 1f;
-			Quaternion b = Quaternion.Euler(this.maxRotationB);
-			Quaternion quaternion = Quaternion.Slerp(this.localRotB, b, t);
-			this.sideB.transform.localRotation = quaternion;
-			Quaternion b2 = Quaternion.Euler(this.maxRotationA);
-			Quaternion quaternion2 = Quaternion.Slerp(this.localRotA, b2, t);
-			this.sideA.transform.localRotation = quaternion2;
-			if (Quaternion.Angle(this.sideB.transform.localRotation, quaternion) < 0.1f && Quaternion.Angle(this.sideA.transform.localRotation, quaternion2) < 0.1f)
+			float num = this.useFingerFlexValueAsStrength ? Mathf.Clamp01(this.fingerValue) : 1f;
+			Quaternion quaternion = Quaternion.Euler(this.maxRotationB);
+			Quaternion quaternion2 = Quaternion.Slerp(this.localRotB, quaternion, num);
+			this.sideB.transform.localRotation = quaternion2;
+			Quaternion quaternion3 = Quaternion.Euler(this.maxRotationA);
+			Quaternion quaternion4 = Quaternion.Slerp(this.localRotA, quaternion3, num);
+			this.sideA.transform.localRotation = quaternion4;
+			if (Quaternion.Angle(this.sideB.transform.localRotation, quaternion2) < 0.1f && Quaternion.Angle(this.sideA.transform.localRotation, quaternion4) < 0.1f)
 			{
 				this.UpdateState(CloserCosmetic.State.None);
 			}
@@ -67,10 +67,10 @@ namespace GorillaTag.Cosmetics
 
 		private void Opening()
 		{
-			float t = this.useFingerFlexValueAsStrength ? Mathf.Clamp01(this.fingerValue) : 1f;
-			Quaternion quaternion = Quaternion.Slerp(this.sideB.transform.localRotation, this.localRotB, t);
+			float num = this.useFingerFlexValueAsStrength ? Mathf.Clamp01(this.fingerValue) : 1f;
+			Quaternion quaternion = Quaternion.Slerp(this.sideB.transform.localRotation, this.localRotB, num);
 			this.sideB.transform.localRotation = quaternion;
-			Quaternion quaternion2 = Quaternion.Slerp(this.sideA.transform.localRotation, this.localRotA, t);
+			Quaternion quaternion2 = Quaternion.Slerp(this.sideA.transform.localRotation, this.localRotA, num);
 			this.sideA.transform.localRotation = quaternion2;
 			if (Quaternion.Angle(this.sideB.transform.localRotation, quaternion) < 0.1f && Quaternion.Angle(this.sideA.transform.localRotation, quaternion2) < 0.1f)
 			{

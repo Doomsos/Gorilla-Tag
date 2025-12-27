@@ -8,17 +8,17 @@ namespace GorillaTag.CosmeticSystem
 {
 	public static class GTHardCodedBones
 	{
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		[RuntimeInitializeOnLoadMethod(1)]
 		private static void HandleRuntimeInitialize_OnBeforeSceneLoad()
 		{
-			VRRigCache.OnPostInitialize += GTHardCodedBones.HandleVRRigCache_OnPostInitialize;
+			VRRigCache.OnPostInitialize += new Action(GTHardCodedBones.HandleVRRigCache_OnPostInitialize);
 		}
 
 		private static void HandleVRRigCache_OnPostInitialize()
 		{
-			VRRigCache.OnPostInitialize -= GTHardCodedBones.HandleVRRigCache_OnPostInitialize;
+			VRRigCache.OnPostInitialize -= new Action(GTHardCodedBones.HandleVRRigCache_OnPostInitialize);
 			GTHardCodedBones.HandleVRRigCache_OnPostSpawnRig();
-			VRRigCache.OnPostSpawnRig += GTHardCodedBones.HandleVRRigCache_OnPostSpawnRig;
+			VRRigCache.OnPostSpawnRig += new Action(GTHardCodedBones.HandleVRRigCache_OnPostSpawnRig);
 		}
 
 		private static void HandleVRRigCache_OnPostSpawnRig()
@@ -29,13 +29,13 @@ namespace GorillaTag.CosmeticSystem
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static int GetBoneIndex(GTHardCodedBones.EBone bone)
 		{
 			return (int)bone;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static int GetBoneIndex(string name)
 		{
 			for (int i = 0; i < GTHardCodedBones.kBoneNames.Length; i++)
@@ -48,7 +48,7 @@ namespace GorillaTag.CosmeticSystem
 			return 0;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool TryGetBoneIndexByName(string name, out int out_index)
 		{
 			for (int i = 0; i < GTHardCodedBones.kBoneNames.Length; i++)
@@ -63,13 +63,13 @@ namespace GorillaTag.CosmeticSystem
 			return false;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static GTHardCodedBones.EBone GetBone(string name)
 		{
 			return (GTHardCodedBones.EBone)GTHardCodedBones.GetBoneIndex(name);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool TryGetBoneByName(string name, out GTHardCodedBones.EBone out_eBone)
 		{
 			int num;
@@ -82,13 +82,13 @@ namespace GorillaTag.CosmeticSystem
 			return false;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static string GetBoneName(int boneIndex)
 		{
 			return GTHardCodedBones.kBoneNames[boneIndex];
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool TryGetBoneName(int boneIndex, out string out_name)
 		{
 			if (boneIndex >= 0 && boneIndex < GTHardCodedBones.kBoneNames.Length)
@@ -100,19 +100,19 @@ namespace GorillaTag.CosmeticSystem
 			return false;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static string GetBoneName(GTHardCodedBones.EBone bone)
 		{
 			return GTHardCodedBones.GetBoneName((int)bone);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool TryGetBoneName(GTHardCodedBones.EBone bone, out string out_name)
 		{
 			return GTHardCodedBones.TryGetBoneName((int)bone, out out_name);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static long GetBoneBitFlag(string name)
 		{
 			if (name == "None")
@@ -129,7 +129,7 @@ namespace GorillaTag.CosmeticSystem
 			return 0L;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static long GetBoneBitFlag(GTHardCodedBones.EBone bone)
 		{
 			if (bone == GTHardCodedBones.EBone.None)
@@ -139,7 +139,7 @@ namespace GorillaTag.CosmeticSystem
 			return 1L << bone - GTHardCodedBones.EBone.rig;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static EHandedness GetHandednessFromBone(GTHardCodedBones.EBone bone)
 		{
 			if ((GTHardCodedBones.GetBoneBitFlag(bone) & 1728432283058160L) != 0L)
@@ -163,7 +163,7 @@ namespace GorillaTag.CosmeticSystem
 				return false;
 			}
 			int instanceID = vrRig.GetInstanceID();
-			if (GTHardCodedBones._gInstIds_To_boneXforms.TryGetValue(instanceID, out outBoneXforms))
+			if (GTHardCodedBones._gInstIds_To_boneXforms.TryGetValue(instanceID, ref outBoneXforms))
 			{
 				return true;
 			}
@@ -195,7 +195,7 @@ namespace GorillaTag.CosmeticSystem
 				return false;
 			}
 			int instanceID = vrRig.GetInstanceID();
-			if (GTHardCodedBones._gInstIds_To_slotXforms.TryGetValue(instanceID, out outSlotXforms))
+			if (GTHardCodedBones._gInstIds_To_slotXforms.TryGetValue(instanceID, ref outSlotXforms))
 			{
 				return true;
 			}
@@ -228,7 +228,7 @@ namespace GorillaTag.CosmeticSystem
 				return false;
 			}
 			int instanceID = skinnedMeshRenderer.GetInstanceID();
-			if (GTHardCodedBones._gInstIds_To_boneXforms.TryGetValue(instanceID, out outBoneXforms))
+			if (GTHardCodedBones._gInstIds_To_boneXforms.TryGetValue(instanceID, ref outBoneXforms))
 			{
 				return true;
 			}
@@ -345,21 +345,21 @@ namespace GorillaTag.CosmeticSystem
 			return true;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool TryGetBoneXform(Transform[] boneXforms, string boneName, out Transform boneXform)
 		{
 			boneXform = boneXforms[GTHardCodedBones.GetBoneIndex(boneName)];
 			return boneXform != null;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool TryGetBoneXform(Transform[] boneXforms, GTHardCodedBones.EBone eBone, out Transform boneXform)
 		{
 			boneXform = boneXforms[GTHardCodedBones.GetBoneIndex(eBone)];
 			return boneXform != null;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool TryGetFirstBoneInParents(Transform transform, out GTHardCodedBones.EBone eBone, out Transform boneXform)
 		{
 			while (transform != null)
@@ -422,7 +422,7 @@ namespace GorillaTag.CosmeticSystem
 			return false;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static GTHardCodedBones.EBone GetBoneEnumOfCosmeticPosStateFlag(TransferrableObject.PositionState positionState)
 		{
 			if (positionState <= TransferrableObject.PositionState.OnChest)
@@ -472,7 +472,7 @@ namespace GorillaTag.CosmeticSystem
 			throw new ArgumentOutOfRangeException(positionState.ToString());
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static List<GTHardCodedBones.EBone> GetBoneEnumsFromCosmeticBodyDockDropPosFlags(BodyDockPositions.DropPositions enumFlags)
 		{
 			BodyDockPositions.DropPositions[] values = EnumData<BodyDockPositions.DropPositions>.Shared.Values;
@@ -487,7 +487,7 @@ namespace GorillaTag.CosmeticSystem
 			return list;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static List<GTHardCodedBones.EBone> GetBoneEnumsFromCosmeticTransferrablePosStateFlags(TransferrableObject.PositionState enumFlags)
 		{
 			TransferrableObject.PositionState[] values = EnumData<TransferrableObject.PositionState>.Shared.Values;
@@ -502,13 +502,13 @@ namespace GorillaTag.CosmeticSystem
 			return list;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static bool TryGetTransferrablePosStateFromBoneEnum(GTHardCodedBones.EBone eBone, out TransferrableObject.PositionState outPosState)
 		{
-			return GTHardCodedBones._k_eBone_to_transferrablePosState.TryGetValue(eBone, out outPosState);
+			return GTHardCodedBones._k_eBone_to_transferrablePosState.TryGetValue(eBone, ref outPosState);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static Transform GetBoneXformOfCosmeticPosStateFlag(TransferrableObject.PositionState anchorPosState, Transform[] bones)
 		{
 			if (bones.Length != 53)
@@ -521,6 +521,43 @@ namespace GorillaTag.CosmeticSystem
 				return bones[boneIndex];
 			}
 			return null;
+		}
+
+		// Note: this type is marked as 'beforefieldinit'.
+		static GTHardCodedBones()
+		{
+			Dictionary<BodyDockPositions.DropPositions, GTHardCodedBones.EBone> dictionary = new Dictionary<BodyDockPositions.DropPositions, GTHardCodedBones.EBone>();
+			dictionary.Add(BodyDockPositions.DropPositions.None, GTHardCodedBones.EBone.None);
+			dictionary.Add(BodyDockPositions.DropPositions.LeftArm, GTHardCodedBones.EBone.forearm_L);
+			dictionary.Add(BodyDockPositions.DropPositions.RightArm, GTHardCodedBones.EBone.forearm_R);
+			dictionary.Add(BodyDockPositions.DropPositions.Chest, GTHardCodedBones.EBone.body_AnchorFront_StowSlot);
+			dictionary.Add(BodyDockPositions.DropPositions.LeftBack, GTHardCodedBones.EBone.body_AnchorBackLeft_StowSlot);
+			dictionary.Add(BodyDockPositions.DropPositions.RightBack, GTHardCodedBones.EBone.body_AnchorBackRight_StowSlot);
+			GTHardCodedBones._k_bodyDockDropPosition_to_eBone = dictionary;
+			Dictionary<TransferrableObject.PositionState, GTHardCodedBones.EBone> dictionary2 = new Dictionary<TransferrableObject.PositionState, GTHardCodedBones.EBone>();
+			dictionary2.Add(TransferrableObject.PositionState.None, GTHardCodedBones.EBone.None);
+			dictionary2.Add(TransferrableObject.PositionState.OnLeftArm, GTHardCodedBones.EBone.forearm_L);
+			dictionary2.Add(TransferrableObject.PositionState.OnRightArm, GTHardCodedBones.EBone.forearm_R);
+			dictionary2.Add(TransferrableObject.PositionState.InLeftHand, GTHardCodedBones.EBone.hand_L);
+			dictionary2.Add(TransferrableObject.PositionState.InRightHand, GTHardCodedBones.EBone.hand_R);
+			dictionary2.Add(TransferrableObject.PositionState.OnChest, GTHardCodedBones.EBone.body_AnchorFront_StowSlot);
+			dictionary2.Add(TransferrableObject.PositionState.OnLeftShoulder, GTHardCodedBones.EBone.body_AnchorBackLeft_StowSlot);
+			dictionary2.Add(TransferrableObject.PositionState.OnRightShoulder, GTHardCodedBones.EBone.body_AnchorBackRight_StowSlot);
+			dictionary2.Add(TransferrableObject.PositionState.Dropped, GTHardCodedBones.EBone.None);
+			GTHardCodedBones._k_transferrablePosState_to_eBone = dictionary2;
+			Dictionary<GTHardCodedBones.EBone, TransferrableObject.PositionState> dictionary3 = new Dictionary<GTHardCodedBones.EBone, TransferrableObject.PositionState>();
+			dictionary3.Add(GTHardCodedBones.EBone.None, TransferrableObject.PositionState.None);
+			dictionary3.Add(GTHardCodedBones.EBone.forearm_L, TransferrableObject.PositionState.OnLeftArm);
+			dictionary3.Add(GTHardCodedBones.EBone.forearm_R, TransferrableObject.PositionState.OnRightArm);
+			dictionary3.Add(GTHardCodedBones.EBone.hand_L, TransferrableObject.PositionState.InLeftHand);
+			dictionary3.Add(GTHardCodedBones.EBone.hand_R, TransferrableObject.PositionState.InRightHand);
+			dictionary3.Add(GTHardCodedBones.EBone.body_AnchorFront_StowSlot, TransferrableObject.PositionState.OnChest);
+			dictionary3.Add(GTHardCodedBones.EBone.body_AnchorBackLeft_StowSlot, TransferrableObject.PositionState.OnLeftShoulder);
+			dictionary3.Add(GTHardCodedBones.EBone.body_AnchorBackRight_StowSlot, TransferrableObject.PositionState.OnRightShoulder);
+			GTHardCodedBones._k_eBone_to_transferrablePosState = dictionary3;
+			GTHardCodedBones._gMissingBonesReport = new List<int>(53);
+			GTHardCodedBones._gInstIds_To_boneXforms = new Dictionary<int, Transform[]>(20);
+			GTHardCodedBones._gInstIds_To_slotXforms = new Dictionary<int, Transform[]>(20);
 		}
 
 		public const int kBoneCount = 53;
@@ -586,121 +623,23 @@ namespace GorillaTag.CosmeticSystem
 
 		private const long kRightSideMask = 1769114204897280L;
 
-		private static readonly Dictionary<BodyDockPositions.DropPositions, GTHardCodedBones.EBone> _k_bodyDockDropPosition_to_eBone = new Dictionary<BodyDockPositions.DropPositions, GTHardCodedBones.EBone>
-		{
-			{
-				BodyDockPositions.DropPositions.None,
-				GTHardCodedBones.EBone.None
-			},
-			{
-				BodyDockPositions.DropPositions.LeftArm,
-				GTHardCodedBones.EBone.forearm_L
-			},
-			{
-				BodyDockPositions.DropPositions.RightArm,
-				GTHardCodedBones.EBone.forearm_R
-			},
-			{
-				BodyDockPositions.DropPositions.Chest,
-				GTHardCodedBones.EBone.body_AnchorFront_StowSlot
-			},
-			{
-				BodyDockPositions.DropPositions.LeftBack,
-				GTHardCodedBones.EBone.body_AnchorBackLeft_StowSlot
-			},
-			{
-				BodyDockPositions.DropPositions.RightBack,
-				GTHardCodedBones.EBone.body_AnchorBackRight_StowSlot
-			}
-		};
+		private static readonly Dictionary<BodyDockPositions.DropPositions, GTHardCodedBones.EBone> _k_bodyDockDropPosition_to_eBone;
 
-		private static readonly Dictionary<TransferrableObject.PositionState, GTHardCodedBones.EBone> _k_transferrablePosState_to_eBone = new Dictionary<TransferrableObject.PositionState, GTHardCodedBones.EBone>
-		{
-			{
-				TransferrableObject.PositionState.None,
-				GTHardCodedBones.EBone.None
-			},
-			{
-				TransferrableObject.PositionState.OnLeftArm,
-				GTHardCodedBones.EBone.forearm_L
-			},
-			{
-				TransferrableObject.PositionState.OnRightArm,
-				GTHardCodedBones.EBone.forearm_R
-			},
-			{
-				TransferrableObject.PositionState.InLeftHand,
-				GTHardCodedBones.EBone.hand_L
-			},
-			{
-				TransferrableObject.PositionState.InRightHand,
-				GTHardCodedBones.EBone.hand_R
-			},
-			{
-				TransferrableObject.PositionState.OnChest,
-				GTHardCodedBones.EBone.body_AnchorFront_StowSlot
-			},
-			{
-				TransferrableObject.PositionState.OnLeftShoulder,
-				GTHardCodedBones.EBone.body_AnchorBackLeft_StowSlot
-			},
-			{
-				TransferrableObject.PositionState.OnRightShoulder,
-				GTHardCodedBones.EBone.body_AnchorBackRight_StowSlot
-			},
-			{
-				TransferrableObject.PositionState.Dropped,
-				GTHardCodedBones.EBone.None
-			}
-		};
+		private static readonly Dictionary<TransferrableObject.PositionState, GTHardCodedBones.EBone> _k_transferrablePosState_to_eBone;
 
-		private static readonly Dictionary<GTHardCodedBones.EBone, TransferrableObject.PositionState> _k_eBone_to_transferrablePosState = new Dictionary<GTHardCodedBones.EBone, TransferrableObject.PositionState>
-		{
-			{
-				GTHardCodedBones.EBone.None,
-				TransferrableObject.PositionState.None
-			},
-			{
-				GTHardCodedBones.EBone.forearm_L,
-				TransferrableObject.PositionState.OnLeftArm
-			},
-			{
-				GTHardCodedBones.EBone.forearm_R,
-				TransferrableObject.PositionState.OnRightArm
-			},
-			{
-				GTHardCodedBones.EBone.hand_L,
-				TransferrableObject.PositionState.InLeftHand
-			},
-			{
-				GTHardCodedBones.EBone.hand_R,
-				TransferrableObject.PositionState.InRightHand
-			},
-			{
-				GTHardCodedBones.EBone.body_AnchorFront_StowSlot,
-				TransferrableObject.PositionState.OnChest
-			},
-			{
-				GTHardCodedBones.EBone.body_AnchorBackLeft_StowSlot,
-				TransferrableObject.PositionState.OnLeftShoulder
-			},
-			{
-				GTHardCodedBones.EBone.body_AnchorBackRight_StowSlot,
-				TransferrableObject.PositionState.OnRightShoulder
-			}
-		};
+		private static readonly Dictionary<GTHardCodedBones.EBone, TransferrableObject.PositionState> _k_eBone_to_transferrablePosState;
 
 		[OnEnterPlay_Clear]
 		[OnExitPlay_Clear]
-		private static readonly List<int> _gMissingBonesReport = new List<int>(53);
+		private static readonly List<int> _gMissingBonesReport;
 
 		[OnEnterPlay_Clear]
 		[OnExitPlay_Clear]
-		private static readonly Dictionary<int, Transform[]> _gInstIds_To_boneXforms = new Dictionary<int, Transform[]>(20);
+		private static readonly Dictionary<int, Transform[]> _gInstIds_To_boneXforms;
 
 		[OnEnterPlay_Clear]
 		[OnExitPlay_Clear]
-		private static readonly Dictionary<int, Transform[]> _gInstIds_To_slotXforms = new Dictionary<int, Transform[]>(20);
+		private static readonly Dictionary<int, Transform[]> _gInstIds_To_slotXforms;
 
 		public enum EBone
 		{

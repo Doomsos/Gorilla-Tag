@@ -53,24 +53,24 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 			this.sortType = value;
 			switch (this.sortType)
 			{
-			case SortModsBy.Name:
+			case 0:
 				this.isAscendingOrder = true;
 				return;
-			case SortModsBy.Price:
+			case 1:
 				break;
-			case SortModsBy.Rating:
+			case 2:
 				this.isAscendingOrder = false;
 				return;
-			case SortModsBy.Popular:
+			case 3:
 				this.isAscendingOrder = false;
 				return;
-			case SortModsBy.Downloads:
+			case 4:
 				this.isAscendingOrder = false;
 				return;
-			case SortModsBy.Subscribers:
+			case 5:
 				this.isAscendingOrder = false;
 				return;
-			case SortModsBy.DateSubmitted:
+			case 6:
 				this.isAscendingOrder = false;
 				break;
 			default:
@@ -216,7 +216,7 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 		{
 			bool flag = this.officialMapsOnly;
 			this.officialMapsOnly = false;
-			this.displayFeaturedMods = (this.sortType == SortModsBy.Popular);
+			this.displayFeaturedMods = (this.sortType == 3);
 			if (flag)
 			{
 				this.RefreshModSearch();
@@ -274,38 +274,38 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 		switch (this.sortTypeIndex)
 		{
 		case 0:
-			this.SortType = SortModsBy.Popular;
+			this.SortType = 3;
 			this.useMapName = true;
 			this.displayFeaturedMods = !this.officialMapsOnly;
 			return;
 		case 1:
-			this.SortType = SortModsBy.DateSubmitted;
+			this.SortType = 6;
 			this.useMapName = true;
 			this.displayFeaturedMods = false;
 			return;
 		case 2:
-			this.SortType = SortModsBy.Rating;
+			this.SortType = 2;
 			this.useMapName = false;
 			this.displayFeaturedMods = false;
 			return;
 		case 3:
-			this.SortType = SortModsBy.Downloads;
+			this.SortType = 4;
 			this.useMapName = true;
 			this.displayFeaturedMods = false;
 			return;
 		case 4:
-			this.SortType = SortModsBy.Subscribers;
+			this.SortType = 5;
 			this.useMapName = true;
 			this.displayFeaturedMods = false;
 			return;
 		case 5:
-			this.SortType = SortModsBy.Name;
+			this.SortType = 0;
 			this.useMapName = true;
 			this.displayFeaturedMods = false;
 			return;
 		default:
 			this.sortTypeIndex = 0;
-			this.SortType = SortModsBy.Popular;
+			this.SortType = 3;
 			this.useMapName = true;
 			this.displayFeaturedMods = !this.officialMapsOnly;
 			return;
@@ -453,9 +453,9 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 		this.totalAvailableMods = Mathf.Max(0, this.totalAvailableMods - 1);
 		foreach (Mod mod in this.availableMods)
 		{
-			ModId right;
-			ModIOManager.TryGetNewMapsModId(out right);
-			if (!(mod.Id == right) && (!this.displayFeaturedMods || this.featuredModIds.IsNullOrEmpty<long>() || !this.featuredModIds.Contains(mod.Id)))
+			ModId modId;
+			ModIOManager.TryGetNewMapsModId(out modId);
+			if (!(mod.Id == modId) && (!this.displayFeaturedMods || this.featuredModIds.IsNullOrEmpty<long>() || !this.featuredModIds.Contains(mod.Id)))
 			{
 				this.filteredAvailableMods.Add(mod);
 			}
@@ -485,9 +485,9 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 		}
 		foreach (Mod mod in this.subscribedMods)
 		{
-			ModId right;
-			ModIOManager.TryGetNewMapsModId(out right);
-			if (!(mod.Id == right))
+			ModId modId;
+			ModIOManager.TryGetNewMapsModId(out modId);
+			if (!(mod.Id == modId))
 			{
 				this.filteredSubscribedMods.Add(mod);
 			}
@@ -514,8 +514,8 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 		}
 		foreach (Mod mod in this.installedMods)
 		{
-			ModId right;
-			if (!ModIOManager.TryGetNewMapsModId(out right) || !(mod.Id == right))
+			ModId modId;
+			if (!ModIOManager.TryGetNewMapsModId(out modId) || !(mod.Id == modId))
 			{
 				this.filteredInstalledMods.Add(mod);
 			}
@@ -542,8 +542,8 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 		}
 		foreach (Mod mod in this.favoriteMods)
 		{
-			ModId right;
-			if (!ModIOManager.TryGetNewMapsModId(out right) || !(mod.Id == right))
+			ModId modId;
+			if (!ModIOManager.TryGetNewMapsModId(out modId) || !(mod.Id == modId))
 			{
 				this.filteredFavoriteMods.Add(mod);
 			}
@@ -595,7 +595,7 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 
 	private void RefreshScreenForAvailableMods()
 	{
-		string text = (this.sortType == SortModsBy.DateSubmitted) ? "NEWEST" : this.sortType.ToString().ToUpper();
+		string text = (this.sortType == 6) ? "NEWEST" : this.sortType.ToString().ToUpper();
 		this.sortByButton.SetActive(true);
 		this.sortTypeText.gameObject.SetActive(true);
 		this.sortTypeText.text = text;
@@ -1042,7 +1042,7 @@ public class CustomMapsListScreen : CustomMapsTerminalScreen
 
 	private int sortTypeIndex;
 
-	private SortModsBy sortType = SortModsBy.Popular;
+	private SortModsBy sortType = 3;
 
 	private const int MAX_SORT_TYPES = 6;
 

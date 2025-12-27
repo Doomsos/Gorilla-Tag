@@ -52,10 +52,10 @@ public class GRSeedExtractor : MonoBehaviour
 	{
 		this.ghostReactor = gr;
 		this.toolProgressionManager = progression;
-		this.toolProgressionManager.OnProgressionUpdated += this.OnResearchPointsUpdated;
-		ProgressionManager.Instance.OnJucierStatusUpdated += this.OnPlayerStatusReceived;
-		ProgressionManager.Instance.OnPurchaseOverdrive += this.OnPurchaseOverdrive;
-		ProgressionManager.Instance.OnChaosDepositSuccess += this.TryDepositSeedServerResponse;
+		this.toolProgressionManager.OnProgressionUpdated += new Action(this.OnResearchPointsUpdated);
+		ProgressionManager.Instance.OnJucierStatusUpdated += new Action<ProgressionManager.JuicerStatusResponse>(this.OnPlayerStatusReceived);
+		ProgressionManager.Instance.OnPurchaseOverdrive += new Action<bool>(this.OnPurchaseOverdrive);
+		ProgressionManager.Instance.OnChaosDepositSuccess += new Action<bool>(this.TryDepositSeedServerResponse);
 	}
 
 	private void OnEnable()
@@ -119,7 +119,7 @@ public class GRSeedExtractor : MonoBehaviour
 		bool flag = this.seedProcessingStates.Count > 0 && this.seedProcessingStates[0].dropProgress >= 1f;
 		if (this.overdriveActive)
 		{
-			this.overdriveLightSpinnerOn.Rotate(Vector3.forward, 360f * this.overdriveLightSpinRate * Time.deltaTime, Space.Self);
+			this.overdriveLightSpinnerOn.Rotate(Vector3.forward, 360f * this.overdriveLightSpinRate * Time.deltaTime, 1);
 			this.overdriveAmountVisual = this.overdriveAmount;
 			this.overdriveLiquidScaleParent.transform.localScale = new Vector3(1f, Mathf.Clamp01(this.overdriveAmountVisual), 1f);
 			this.processingAmountVisual = this.processingAmount;
@@ -406,9 +406,9 @@ public class GRSeedExtractor : MonoBehaviour
 					flag = true;
 					if (this.seedDepositsPending[i].Item2 == NetworkSystem.Instance.LocalPlayer.ActorNumber && !this.seedDepositsPending[i].Item4)
 					{
-						ValueTuple<int, int, float, bool> value = this.seedDepositsPending[i];
-						value.Item4 = true;
-						this.seedDepositsPending[i] = value;
+						ValueTuple<int, int, float, bool> valueTuple = this.seedDepositsPending[i];
+						valueTuple.Item4 = true;
+						this.seedDepositsPending[i] = valueTuple;
 						ProgressionManager.Instance.DepositCore(ProgressionManager.CoreType.ChaosSeed);
 					}
 				}
@@ -614,7 +614,7 @@ public class GRSeedExtractor : MonoBehaviour
 		{
 			if (!this.chaosSeedVisuals[i].activeSelf)
 			{
-				GRSeedExtractor.SeedProcessingVisualState item = new GRSeedExtractor.SeedProcessingVisualState
+				GRSeedExtractor.SeedProcessingVisualState seedProcessingVisualState = new GRSeedExtractor.SeedProcessingVisualState
 				{
 					poolIndex = i,
 					rollAngle = 0f,
@@ -622,7 +622,7 @@ public class GRSeedExtractor : MonoBehaviour
 					rampProgress = 0f,
 					dropProgress = 0f
 				};
-				this.seedProcessingStates.Add(item);
+				this.seedProcessingStates.Add(seedProcessingVisualState);
 				this.chaosSeedVisuals[i].SetActive(true);
 				this.chaosSeedVisuals[i].transform.localPosition = this.seedTubeStart.localPosition;
 				this.chaosSeedVisuals[i].transform.localRotation = Quaternion.identity;
@@ -742,14 +742,14 @@ public class GRSeedExtractor : MonoBehaviour
 				{
 					seedProcessingVisualState.dropProgress += 1f / this.seedVisualDropTime * dt;
 					seedProcessingVisualState.rampProgress = 1f + seedProcessingVisualState.dropProgress;
-					float t = this.tubeEndToProcessingPathY.Evaluate(seedProcessingVisualState.dropProgress);
-					float t2 = this.tubeEndToProcessingPathX.Evaluate(seedProcessingVisualState.dropProgress);
+					float num5 = this.tubeEndToProcessingPathY.Evaluate(seedProcessingVisualState.dropProgress);
+					float num6 = this.tubeEndToProcessingPathX.Evaluate(seedProcessingVisualState.dropProgress);
 					Vector3 localPosition = gameObject2.transform.localPosition;
-					localPosition.y = Mathf.Lerp(this.seedTubeEnd.localPosition.y, this.seedProcessingPosition.localPosition.y, t);
-					localPosition.x = Mathf.Lerp(this.seedTubeEnd.localPosition.x, this.seedProcessingPosition.localPosition.x, t2);
+					localPosition.y = Mathf.Lerp(this.seedTubeEnd.localPosition.y, this.seedProcessingPosition.localPosition.y, num5);
+					localPosition.x = Mathf.Lerp(this.seedTubeEnd.localPosition.x, this.seedProcessingPosition.localPosition.x, num6);
 					gameObject2.transform.localPosition = localPosition;
-					float num5 = seedProcessingVisualState.speed * dt;
-					seedProcessingVisualState.rollAngle += num5 / this.visualChaosSeedRadius;
+					float num7 = seedProcessingVisualState.speed * dt;
+					seedProcessingVisualState.rollAngle += num7 / this.visualChaosSeedRadius;
 					gameObject2.transform.localRotation = Quaternion.AngleAxis(seedProcessingVisualState.rollAngle * 57.29578f, Vector3.forward);
 					if (seedProcessingVisualState.dropProgress >= 1f)
 					{
@@ -794,8 +794,8 @@ public class GRSeedExtractor : MonoBehaviour
 			yield return null;
 		}
 		this.overdriveMeterAudioSource.Stop();
-		int num4;
-		for (int i = 0; i < coresToProcess; i = num4)
+		int num6;
+		for (int i = 0; i < coresToProcess; i = num6)
 		{
 			float waitForSeedDepositStartTime = Time.time;
 			bool flag = this.seedProcessingStates.Count > 0 && this.seedProcessingStates[0].dropProgress >= 1f;
@@ -816,9 +816,9 @@ public class GRSeedExtractor : MonoBehaviour
 			while (timeProcessing < timeToProcess)
 			{
 				timeProcessing += Time.deltaTime;
-				float t = timeProcessing / timeToProcess;
-				this.overdriveAmount = Mathf.Lerp(startingOverdrive, resultingOverdrive, t);
-				this.processingAmount = Mathf.Lerp(startingProcessingAmount, 1f, t);
+				float num4 = timeProcessing / timeToProcess;
+				this.overdriveAmount = Mathf.Lerp(startingOverdrive, resultingOverdrive, num4);
+				this.processingAmount = Mathf.Lerp(startingProcessingAmount, 1f, num4);
 				this.estimatedJuiceTimeRemaining = timeToProcess - timeProcessing;
 				yield return null;
 			}
@@ -829,12 +829,12 @@ public class GRSeedExtractor : MonoBehaviour
 			while (timeDepositing < this.juiceDepositTime)
 			{
 				timeDepositing += Time.deltaTime;
-				float t2 = timeDepositing / this.juiceDepositTime;
-				this.processingAmount = Mathf.Lerp(1f, 0f, t2);
+				float num5 = timeDepositing / this.juiceDepositTime;
+				this.processingAmount = Mathf.Lerp(1f, 0f, num5);
 				yield return null;
 			}
 			this.drainingProcessingBeaker = false;
-			num4 = i + 1;
+			num6 = i + 1;
 		}
 		if (this.currentPlayerData.coresPendingOverdriveProcessing == 0 && this.currentPlayerData.coreCount == 1)
 		{
@@ -856,9 +856,9 @@ public class GRSeedExtractor : MonoBehaviour
 			while (timeProcessing < startingProcessingAmount)
 			{
 				timeProcessing += Time.deltaTime;
-				float t3 = timeProcessing / startingProcessingAmount;
-				this.processingAmount = Mathf.Clamp01(Mathf.Lerp(resultingOverdrive, this.currentPlayerData.coreProcessingPercentage, t3));
-				this.overdriveAmount = Mathf.Clamp01(Mathf.Lerp(startingOverdrive, this.currentPlayerData.overdriveSupply, t3));
+				float num7 = timeProcessing / startingProcessingAmount;
+				this.processingAmount = Mathf.Clamp01(Mathf.Lerp(resultingOverdrive, this.currentPlayerData.coreProcessingPercentage, num7));
+				this.overdriveAmount = Mathf.Clamp01(Mathf.Lerp(startingOverdrive, this.currentPlayerData.overdriveSupply, num7));
 				yield return null;
 			}
 		}

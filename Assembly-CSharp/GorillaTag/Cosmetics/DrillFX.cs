@@ -11,7 +11,7 @@ namespace GorillaTag.Cosmetics
 			if (!DrillFX.appIsQuittingHandlerIsSubscribed)
 			{
 				DrillFX.appIsQuittingHandlerIsSubscribed = true;
-				Application.quitting += DrillFX.HandleApplicationQuitting;
+				Application.quitting += new Action(DrillFX.HandleApplicationQuitting);
 			}
 			this.hasFX = (this.fx != null);
 			if (this.hasFX)
@@ -75,13 +75,13 @@ namespace GorillaTag.Cosmetics
 			}
 			Transform transform = base.transform;
 			RaycastHit raycastHit;
-			Vector3 position = Physics.Linecast(transform.TransformPoint(this.lineCastStart), transform.TransformPoint(this.lineCastEnd), out raycastHit, this.lineCastLayerMask, QueryTriggerInteraction.Ignore) ? raycastHit.point : this.lineCastEnd;
-			Vector3 vector = transform.InverseTransformPoint(position);
-			float num = Mathf.Clamp01(Vector3.Distance(this.lineCastStart, vector) / this.maxDepth);
+			Vector3 vector = Physics.Linecast(transform.TransformPoint(this.lineCastStart), transform.TransformPoint(this.lineCastEnd), ref raycastHit, this.lineCastLayerMask, 1) ? raycastHit.point : this.lineCastEnd;
+			Vector3 vector2 = transform.InverseTransformPoint(vector);
+			float num = Mathf.Clamp01(Vector3.Distance(this.lineCastStart, vector2) / this.maxDepth);
 			if (this.hasFX)
 			{
 				this.fxEmissionModule.rateOverTimeMultiplier = this.fxEmissionMaxRate * this.fxEmissionCurve.Evaluate(num);
-				this.fxShapeModule.position = vector;
+				this.fxShapeModule.position = vector2;
 				this.fxShapeModule.radius = Mathf.Lerp(this.fxShapeMaxRadius, this.fxMinRadiusScale * this.fxShapeMaxRadius, num);
 			}
 			if (this.hasAudio)

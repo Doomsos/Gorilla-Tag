@@ -115,7 +115,7 @@ namespace GorillaTag.Cosmetics
 		private LayerMask layerMask = -1;
 
 		[SerializeField]
-		private QueryTriggerInteraction triggerInteraction = QueryTriggerInteraction.Collide;
+		private QueryTriggerInteraction triggerInteraction = 2;
 
 		[Tooltip("If empty, all AOEReceiver targets pass. If not empty, only receivers with these tags pass.")]
 		[SerializeField]

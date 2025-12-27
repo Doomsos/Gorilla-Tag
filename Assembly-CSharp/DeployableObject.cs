@@ -3,7 +3,6 @@ using GorillaExtensions;
 using GorillaLocomotion;
 using GorillaLocomotion.Climbing;
 using GorillaTag;
-using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -98,7 +97,7 @@ public class DeployableObject : TransferrableObject
 		Quaternion rotation = transform.rotation;
 		Vector3 averageVelocity = interactPointVelocityTracker.GetAverageVelocity(true, 0.15f, false);
 		this.DeployLocal(vector, rotation, averageVelocity, false);
-		this._deploySignal.Raise(ReceiverGroup.Others, BitPackUtils.PackWorldPosForNetwork(vector), BitPackUtils.PackQuaternionForNetwork(rotation), BitPackUtils.PackWorldPosForNetwork(averageVelocity * 100f));
+		this._deploySignal.Raise(0, BitPackUtils.PackWorldPosForNetwork(vector), BitPackUtils.PackQuaternionForNetwork(rotation), BitPackUtils.PackWorldPosForNetwork(averageVelocity * 100f));
 		return true;
 	}
 

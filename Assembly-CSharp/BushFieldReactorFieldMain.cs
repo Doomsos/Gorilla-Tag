@@ -40,9 +40,10 @@ public class BushFieldReactorFieldMain : MonoBehaviour
 			for (int k = 0; k < this.NumBushes; k++)
 			{
 				float num2 = Random.Range(this.BushScaleRange.x, this.BushScaleRange.y);
-				Vector3 pos = new Vector3(Random.Range(-0.5f * this.FieldBounds.x, 0.5f * this.FieldBounds.x), 0.2f * num2, Random.Range(-0.5f * this.FieldBounds.y, 0.5f * this.FieldBounds.y));
-				Quaternion q = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-				this.m_aaInstancedBushMatrix[k / BushFieldReactorFieldMain.kNumInstancedBushesPerDrawCall][k % BushFieldReactorFieldMain.kNumInstancedBushesPerDrawCall].SetTRS(pos, q, num2 * Vector3.one);
+				Vector3 vector;
+				vector..ctor(Random.Range(-0.5f * this.FieldBounds.x, 0.5f * this.FieldBounds.x), 0.2f * num2, Random.Range(-0.5f * this.FieldBounds.y, 0.5f * this.FieldBounds.y));
+				Quaternion quaternion = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+				this.m_aaInstancedBushMatrix[k / BushFieldReactorFieldMain.kNumInstancedBushesPerDrawCall][k % BushFieldReactorFieldMain.kNumInstancedBushesPerDrawCall].SetTRS(vector, quaternion, num2 * Vector3.one);
 			}
 		}
 		for (int l = 0; l < this.NumBlossoms; l++)
@@ -64,7 +65,7 @@ public class BushFieldReactorFieldMain : MonoBehaviour
 			}
 		}
 		BoingReactorField component3 = this.ReactorField.GetComponent<BoingReactorField>();
-		component3.Effectors = ((component3.Effectors != null) ? component3.Effectors.Concat(this.m_aSphere.ToArray()).ToArray<BoingEffector>() : this.m_aSphere.ToArray());
+		component3.Effectors = ((component3.Effectors != null) ? Enumerable.ToArray<BoingEffector>(Enumerable.Concat<BoingEffector>(component3.Effectors, this.m_aSphere.ToArray())) : this.m_aSphere.ToArray());
 		this.m_basePhase = 0f;
 	}
 

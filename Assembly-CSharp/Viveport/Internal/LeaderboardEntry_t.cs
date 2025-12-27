@@ -9,7 +9,7 @@ namespace Viveport.Internal
 
 		internal int m_nScore;
 
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+		[MarshalAs(23, SizeConst = 64)]
 		internal string m_pUserName;
 	}
 }

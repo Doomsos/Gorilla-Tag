@@ -55,22 +55,22 @@ namespace GorillaTag.Cosmetics
 				this.ResetClosestPlayer();
 				return;
 			}
-			VRRig y = this.currentClosestPlayer;
+			VRRig vrrig = this.currentClosestPlayer;
 			this.closestDistance = Vector3.positiveInfinity;
 			this.currentClosestPlayer = null;
-			foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+			foreach (VRRig vrrig2 in GorillaParent.instance.vrrigs)
 			{
-				if (!others || !(this.ownerRig != null) || !(vrrig == this.ownerRig))
+				if (!others || !(this.ownerRig != null) || !(vrrig2 == this.ownerRig))
 				{
-					Vector3 distance = vrrig.transform.position - this.distanceFrom.position;
+					Vector3 distance = vrrig2.transform.position - this.distanceFrom.position;
 					if (this.IsBelowThreshold(distance) && distance.sqrMagnitude < this.closestDistance.sqrMagnitude)
 					{
 						this.closestDistance = distance;
-						this.currentClosestPlayer = vrrig;
+						this.currentClosestPlayer = vrrig2;
 					}
 				}
 			}
-			if (this.currentClosestPlayer != null && this.currentClosestPlayer != y)
+			if (this.currentClosestPlayer != null && this.currentClosestPlayer != vrrig)
 			{
 				UnityEvent<VRRig, float> unityEvent = this.onClosestPlayerBelowThresholdChanged;
 				if (unityEvent == null)

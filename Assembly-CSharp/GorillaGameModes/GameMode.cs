@@ -114,7 +114,7 @@ namespace GorillaGameModes
 		{
 			string text = GameMode.FindGameModeFromRoomProperty();
 			int result;
-			if (string.IsNullOrEmpty(text) || !GameMode.gameModeKeyByName.TryGetValue(text, out result))
+			if (string.IsNullOrEmpty(text) || !GameMode.gameModeKeyByName.TryGetValue(text, ref result))
 			{
 				GTDev.LogWarning<string>("Unable to find game mode key for " + text, null);
 				return -1;
@@ -157,7 +157,7 @@ namespace GorillaGameModes
 				return false;
 			}
 			int key;
-			if (!GameMode.gameModeKeyByName.TryGetValue(gameMode, out key))
+			if (!GameMode.gameModeKeyByName.TryGetValue(gameMode, ref key))
 			{
 				Debug.LogWarning("Unable to find game mode key for " + gameMode);
 				return false;
@@ -176,7 +176,7 @@ namespace GorillaGameModes
 				return false;
 			}
 			PrefabType prefabType;
-			VRRigCache.Instance.GetComponent<PhotonPrefabPool>().networkPrefabs.TryGetValue("GameMode", out prefabType);
+			VRRigCache.Instance.GetComponent<PhotonPrefabPool>().networkPrefabs.TryGetValue("GameMode", ref prefabType);
 			GameObject prefab = prefabType.prefab;
 			if (prefab == null)
 			{
@@ -204,7 +204,7 @@ namespace GorillaGameModes
 				return false;
 			}
 			int key;
-			if (!GameMode.gameModeKeyByName.TryGetValue(gameMode, out key))
+			if (!GameMode.gameModeKeyByName.TryGetValue(gameMode, ref key))
 			{
 				Debug.LogWarning("Unable to find game mode key for " + gameMode);
 				return false;
@@ -214,8 +214,8 @@ namespace GorillaGameModes
 
 		internal static bool ChangeGameMode(int key)
 		{
-			GorillaGameManager x;
-			if (!NetworkSystem.Instance.IsMasterClient || !GameMode.gameModeTable.TryGetValue(key, out x) || x == GameMode.activeGameMode)
+			GorillaGameManager gorillaGameManager;
+			if (!NetworkSystem.Instance.IsMasterClient || !GameMode.gameModeTable.TryGetValue(key, ref gorillaGameManager) || gorillaGameManager == GameMode.activeGameMode)
 			{
 				return false;
 			}
@@ -273,7 +273,7 @@ namespace GorillaGameModes
 		public static GorillaGameManager GetGameModeInstance(int type)
 		{
 			GorillaGameManager gorillaGameManager;
-			if (GameMode.gameModeTable.TryGetValue(type, out gorillaGameManager))
+			if (GameMode.gameModeTable.TryGetValue(type, ref gorillaGameManager))
 			{
 				if (gorillaGameManager == null)
 				{
@@ -445,7 +445,7 @@ namespace GorillaGameModes
 			}
 			if ((GameMode._tempAddedPlayers.Count > 0 || GameMode._tempRemovedPlayers.Count > 0) && GameMode.ParticipatingPlayersChanged != null)
 			{
-				GameMode.ParticipatingPlayersChanged(GameMode._tempAddedPlayers, GameMode._tempRemovedPlayers);
+				GameMode.ParticipatingPlayersChanged.Invoke(GameMode._tempAddedPlayers, GameMode._tempRemovedPlayers);
 			}
 		}
 

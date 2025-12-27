@@ -13,7 +13,7 @@ public static class GizmoUtils
 		{
 			return;
 		}
-		if (color == default(Color) && !GizmoUtils.gColliderToColor.TryGetValue(c, out color))
+		if (color == default(Color) && !GizmoUtils.gColliderToColor.TryGetValue(c, ref color))
 		{
 			color = new SRand(c.GetHashCode()).NextColor();
 			GizmoUtils.gColliderToColor.Add(c, color);

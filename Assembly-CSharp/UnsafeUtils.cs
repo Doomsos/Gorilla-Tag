@@ -24,13 +24,13 @@ public static class UnsafeUtils
 		return Unsafe.As<Delegate[], T[]>(ref Unsafe.As<T, UnsafeUtils._MultiDelegateFields>(ref @delegate)->delegates);
 	}
 
-	[StructLayout(LayoutKind.Sequential)]
+	[StructLayout(0)]
 	private class _MultiDelegateFields : UnsafeUtils._DelegateFields
 	{
 		public Delegate[] delegates;
 	}
 
-	[StructLayout(LayoutKind.Sequential)]
+	[StructLayout(0)]
 	private class _DelegateFields
 	{
 		public IntPtr method_ptr;
@@ -60,7 +60,7 @@ public static class UnsafeUtils
 		public bool method_is_virtual;
 	}
 
-	[StructLayout(LayoutKind.Sequential)]
+	[StructLayout(0)]
 	private class _DelegateData
 	{
 		public Type target_type;

@@ -42,13 +42,13 @@ public class ButterflySwarmManager : MonoBehaviour
 		this.butterflies = new List<AnimatedButterfly>(this.numBees);
 		for (int i = 0; i < this.numBees; i++)
 		{
-			AnimatedButterfly item = default(AnimatedButterfly);
-			item.InitVisual(this.beePrefab, this);
+			AnimatedButterfly animatedButterfly = default(AnimatedButterfly);
+			animatedButterfly.InitVisual(this.beePrefab, this);
 			if (this.BeeColors.Length != 0)
 			{
-				item.SetColor(this.BeeColors[i % this.BeeColors.Length]);
+				animatedButterfly.SetColor(this.BeeColors[i % this.BeeColors.Length]);
 			}
-			this.butterflies.Add(item);
+			this.butterflies.Add(animatedButterfly);
 		}
 	}
 
@@ -81,9 +81,9 @@ public class ButterflySwarmManager : MonoBehaviour
 	{
 		for (int i = 0; i < this.butterflies.Count; i++)
 		{
-			AnimatedButterfly value = this.butterflies[i];
-			value.UpdateVisual(RandomTimedSeedManager.instance.currentSyncTime, this);
-			this.butterflies[i] = value;
+			AnimatedButterfly animatedButterfly = this.butterflies[i];
+			animatedButterfly.UpdateVisual(RandomTimedSeedManager.instance.currentSyncTime, this);
+			this.butterflies[i] = animatedButterfly;
 		}
 	}
 
@@ -101,8 +101,8 @@ public class ButterflySwarmManager : MonoBehaviour
 		List<float> list4 = new List<float>(this.loopSizePerBee);
 		for (int j = 0; j < this.butterflies.Count; j++)
 		{
-			AnimatedButterfly value = this.butterflies[j];
-			value.SetFlapSpeed(srand.NextFloat(this.minFlapSpeed, this.maxFlapSpeed));
+			AnimatedButterfly animatedButterfly = this.butterflies[j];
+			animatedButterfly.SetFlapSpeed(srand.NextFloat(this.minFlapSpeed, this.maxFlapSpeed));
 			list3.Clear();
 			list4.Clear();
 			this.PickPoints(this.loopSizePerBee, list, ref srand, list3);
@@ -115,8 +115,8 @@ public class ButterflySwarmManager : MonoBehaviour
 				this.butterflies.Clear();
 				return;
 			}
-			value.InitRoute(list3, list4, this);
-			this.butterflies[j] = value;
+			animatedButterfly.InitRoute(list3, list4, this);
+			this.butterflies[j] = animatedButterfly;
 		}
 	}
 

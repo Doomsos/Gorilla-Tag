@@ -69,13 +69,13 @@ public class PlayableBoundaryManager : MonoBehaviour
 				if (this.m_smallCylindersMoveTimeScale > 0.0)
 				{
 					Vector3 position = base.transform.position;
-					float d = (float)((double)(GTTime.TimeAsMilliseconds() % 86400000L) * this.m_smallCylindersMoveTimeScale / 1000.0);
+					float num = (float)((double)(GTTime.TimeAsMilliseconds() % 86400000L) * this.m_smallCylindersMoveTimeScale / 1000.0);
 					this._cylinders_centers[0] = new Vector3(position.x, position.y, position.z);
 					this._cylinders_radiusHeights[0] = new Vector2(this.m_bigCylinderRadius * this.radiusScale, 100f);
 					for (int i = 1; i < 8; i++)
 					{
-						float num = (float)i * 0.125f;
-						Vector3 v = *PlayableBoundaryManager.Hash3(num * 1.17f) + *PlayableBoundaryManager.Hash3(num * 13.7f) * d;
+						float num2 = (float)i * 0.125f;
+						Vector3 v = *PlayableBoundaryManager.Hash3(num2 * 1.17f) + *PlayableBoundaryManager.Hash3(num2 * 13.7f) * num;
 						Vector3 vector = position + v.Sin() * this.m_bigCylinderRadius * this.radiusScale;
 						this._cylinders_centers[i] = new Vector4(vector.x, vector.y, vector.z, 0f);
 						this._cylinders_radiusHeights[i] = new Vector4(this.m_smallCylindersRadius * this.radiusScale, 100f, 0f, 0f);
@@ -97,7 +97,7 @@ public class PlayableBoundaryManager : MonoBehaviour
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private float _GetSignedDistanceToBoundary(float3 tracked_center, float tracked_radius)
 	{
 		float num = float.MaxValue;
@@ -112,7 +112,7 @@ public class PlayableBoundaryManager : MonoBehaviour
 		return num - tracked_radius;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private float SDFSmoothMerge(float signedDist1, float signedDist2, float smoothRadius)
 	{
 		float num = -math.length(math.min(new float2(signedDist1 - smoothRadius, signedDist2 - smoothRadius), new float2(0f, 0f)));

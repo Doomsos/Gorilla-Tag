@@ -3,10 +3,8 @@ using System.Runtime.CompilerServices;
 using GorillaLocomotion;
 using GorillaLocomotion.Climbing;
 using GorillaTag.Cosmetics;
-using Photon.Pun;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class RCHoverboard : RCVehicle
 {
@@ -83,8 +81,8 @@ public class RCHoverboard : RCVehicle
 		base.AuthorityUpdate(dt);
 		if (this.localState == RCVehicle.State.Mobilized)
 		{
-			float x = math.length(this.activeInput.joystick);
-			this._motorLevel = math.saturate(x);
+			float num = math.length(this.activeInput.joystick);
+			this._motorLevel = math.saturate(num);
 			if (this.hasNetworkSync)
 			{
 				this.networkSync.syncedState.dataA = (byte)((uint)(this._motorLevel * 255f));
@@ -150,11 +148,11 @@ public class RCHoverboard : RCVehicle
 		float num2 = this.m_inputTurn.Get(this.activeInput);
 		float num3 = this.m_inputJump.Get(this.activeInput);
 		RaycastHit raycastHit;
-		bool flag = Physics.Raycast(base.transform.position, Vector3.down, out raycastHit, 10f, this.raycastLayers, QueryTriggerInteraction.Collide);
+		bool flag = Physics.Raycast(base.transform.position, Vector3.down, ref raycastHit, 10f, this.raycastLayers, 2);
 		bool flag2 = flag && raycastHit.distance <= this.m_hoverHeight + 0.1f;
 		if (this.enableJumpInput && num3 > 0.001f && flag2 && !this._hasJumped)
 		{
-			this.rb.AddForce(Vector3.up * this.m_jumpForce, ForceMode.Impulse);
+			this.rb.AddForce(Vector3.up * this.m_jumpForce, 1);
 			this._hasJumped = true;
 		}
 		else if (num3 <= 0.001f)
@@ -170,14 +168,14 @@ public class RCHoverboard : RCVehicle
 		float3 @float = base.transform.forward;
 		float num4 = math.dot(@float, this.rb.linearVelocity);
 		float num5 = num * this.m_maxForwardSpeed;
-		float rhs = (math.abs(num5) > 0.001f && ((num5 > 0f && num4 < num5) || (num5 < 0f && num4 > num5))) ? math.sign(num5) : 0f;
-		this.rb.AddForce(@float * this._forwardAccel * rhs * this.rb.mass, ForceMode.Force);
+		float num6 = (math.abs(num5) > 0.001f && ((num5 > 0f && num4 < num5) || (num5 < 0f && num4 > num5))) ? math.sign(num5) : 0f;
+		this.rb.AddForce(@float * this._forwardAccel * num6 * this.rb.mass, 0);
 		if (flag)
 		{
-			float num6 = math.saturate(this.m_hoverHeight - raycastHit.distance);
-			float num7 = math.dot(this.rb.linearVelocity, Vector3.up);
-			float rhs2 = num6 * this.m_hoverForce - num7 * this.m_hoverDamp;
-			this.rb.AddForce(math.up() * rhs2, ForceMode.Force);
+			float num7 = math.saturate(this.m_hoverHeight - raycastHit.distance);
+			float num8 = math.dot(this.rb.linearVelocity, Vector3.up);
+			float num9 = num7 * this.m_hoverForce - num8 * this.m_hoverDamp;
+			this.rb.AddForce(math.up() * num9, 0);
 		}
 	}
 
@@ -194,7 +192,7 @@ public class RCHoverboard : RCVehicle
 				GorillaHandClimber component = gameObject.GetComponent<GorillaHandClimber>();
 				if (component != null)
 				{
-					vector = GTPlayer.Instance.GetHandVelocityTracker(component.xrNode == XRNode.LeftHand).GetAverageVelocity(true, 0.15f, false);
+					vector = GTPlayer.Instance.GetHandVelocityTracker(component.xrNode == 4).GetAverageVelocity(true, 0.15f, false);
 				}
 			}
 			else if (collision.rigidbody != null)
@@ -206,7 +204,7 @@ public class RCHoverboard : RCVehicle
 				this.AuthorityApplyImpact(vector, flag);
 				if (this.networkSync != null)
 				{
-					this.networkSync.photonView.RPC("HitRCVehicleRPC", RpcTarget.Others, new object[]
+					this.networkSync.photonView.RPC("HitRCVehicleRPC", 1, new object[]
 					{
 						vector,
 						flag
@@ -216,7 +214,7 @@ public class RCHoverboard : RCVehicle
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private float _MoveTowards(float current, float target, float maxDelta)
 	{
 		if (math.abs(target - current) > maxDelta)
@@ -226,17 +224,17 @@ public class RCHoverboard : RCVehicle
 		return target;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private float _SignedAngle(float3 from, float3 to, float3 axis)
 	{
-		float3 x = math.normalize(from);
-		float3 y = math.normalize(to);
-		float x2 = math.acos(math.dot(x, y));
-		float num = math.sign(math.dot(math.cross(x, y), axis));
-		return math.degrees(x2) * num;
+		float3 @float = math.normalize(from);
+		float3 float2 = math.normalize(to);
+		float num = math.acos(math.dot(@float, float2));
+		float num2 = math.sign(math.dot(math.cross(@float, float2), axis));
+		return math.degrees(num) * num2;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private float3 _ProjectOnPlane(float3 vector, float3 planeNormal)
 	{
 		return vector - math.dot(vector, planeNormal) * planeNormal;
@@ -393,8 +391,8 @@ public class RCHoverboard : RCVehicle
 				num = 0f;
 				break;
 			}
-			float x = num;
-			return this.remapCurve.ResolvedValue.Evaluate(math.abs(x)) * math.sign(x);
+			float num2 = num;
+			return this.remapCurve.ResolvedValue.Evaluate(math.abs(num2)) * math.sign(num2);
 		}
 
 		public GTOption<StringEnum<RCHoverboard._EInputSource>> source;

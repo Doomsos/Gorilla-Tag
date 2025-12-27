@@ -30,17 +30,17 @@ namespace CjLib
 				this.Velocity = Vector3.zero;
 				return this.Value;
 			}
-			Vector3 a = targetValue - this.Value;
+			Vector3 vector = targetValue - this.Value;
 			float num = 1f + 2f * deltaTime * dampingRatio * angularFrequency;
 			float num2 = angularFrequency * angularFrequency;
 			float num3 = deltaTime * num2;
 			float num4 = deltaTime * num3;
-			float d = 1f / (num + num4);
-			Vector3 a2 = num * this.Value + deltaTime * this.Velocity + num4 * targetValue;
-			Vector3 a3 = this.Velocity + num3 * a;
-			this.Velocity = a3 * d;
-			this.Value = a2 * d;
-			if (this.Velocity.magnitude < MathUtil.Epsilon && a.magnitude < MathUtil.Epsilon)
+			float num5 = 1f / (num + num4);
+			Vector3 vector2 = num * this.Value + deltaTime * this.Velocity + num4 * targetValue;
+			Vector3 vector3 = this.Velocity + num3 * vector;
+			this.Velocity = vector3 * num5;
+			this.Value = vector2 * num5;
+			if (this.Velocity.magnitude < MathUtil.Epsilon && vector.magnitude < MathUtil.Epsilon)
 			{
 				this.Velocity = Vector3.zero;
 				this.Value = targetValue;

@@ -2,6 +2,7 @@
 using GorillaLocomotion;
 using Liv.Lck.GorillaTag;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class LckTabletSizeManager : MonoBehaviour
 {
@@ -9,20 +10,20 @@ public class LckTabletSizeManager : MonoBehaviour
 	{
 		GTLckController controller = this._controller;
 		controller.OnFOVUpdated = (Action<CameraMode>)Delegate.Combine(controller.OnFOVUpdated, new Action<CameraMode>(this.UpdateCustomNearClip));
-		this._controller.OnHorizontalModeChanged += this.OnHorizontalModeChanged;
+		this._controller.OnHorizontalModeChanged += new UnityAction<bool>(this.OnHorizontalModeChanged);
 	}
 
 	private void OnDestroy()
 	{
-		this._controller.OnHorizontalModeChanged -= this.OnHorizontalModeChanged;
+		this._controller.OnHorizontalModeChanged -= new UnityAction<bool>(this.OnHorizontalModeChanged);
 		GTLckController controller = this._controller;
 		controller.OnFOVUpdated = (Action<CameraMode>)Delegate.Remove(controller.OnFOVUpdated, new Action<CameraMode>(this.UpdateCustomNearClip));
 	}
 
 	private void OnHorizontalModeChanged(bool mode)
 	{
-		this.UpdateCustomNearClip(CameraMode.Selfie);
-		this.UpdateCustomNearClip(CameraMode.FirstPerson);
+		this.UpdateCustomNearClip(0);
+		this.UpdateCustomNearClip(1);
 	}
 
 	private void UpdateCustomNearClip(CameraMode mode)
@@ -33,14 +34,14 @@ public class LckTabletSizeManager : MonoBehaviour
 		}
 		switch (mode)
 		{
-		case CameraMode.Selfie:
+		case 0:
 			this.SetCustomNearClip(this._selfieCamera);
 			return;
-		case CameraMode.FirstPerson:
+		case 1:
 			this.SetCustomNearClip(this._firstPersonCamera);
 			break;
-		case CameraMode.ThirdPerson:
-		case CameraMode.Drone:
+		case 2:
+		case 3:
 			break;
 		default:
 			return;

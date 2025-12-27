@@ -58,7 +58,7 @@ public class ReportForwardHit : MonoBehaviour
 			base.transform.lossyScale.z
 		});
 		RaycastHit raycastHit;
-		if (Physics.Raycast(base.transform.position, base.transform.forward, out raycastHit, this.maxRadias * num) && this.colliderFound != null)
+		if (Physics.Raycast(base.transform.position, base.transform.forward, ref raycastHit, this.maxRadias * num) && this.colliderFound != null)
 		{
 			this.colliderFound.Invoke(base.transform.position, raycastHit.point);
 		}

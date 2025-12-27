@@ -132,17 +132,17 @@ public class GhostReactorShiftManager : MonoBehaviourTick
 			{
 				this.isPlayingLogoAnimation = false;
 			}
-			float f = Mathf.Clamp01((float)(time - this.lastReactorLogoAnimationTime) / num2) * 3.1415925f;
-			int num3 = (int)(3.5f - Mathf.Abs(Mathf.Cos(f) * 3f));
+			float num3 = Mathf.Clamp01((float)(time - this.lastReactorLogoAnimationTime) / num2) * 3.1415925f;
+			int num4 = (int)(3.5f - Mathf.Abs(Mathf.Cos(num3) * 3f));
 			if (!this.isPlayingLogoAnimation)
 			{
-				num3 = 0;
+				num4 = 0;
 			}
-			if (this.lastReactorLogoAnimFrame != num3)
+			if (this.lastReactorLogoAnimFrame != num4)
 			{
 				frames[this.lastReactorLogoAnimFrame].gameObject.SetActive(false);
-				frames[num3].gameObject.SetActive(true);
-				this.lastReactorLogoAnimFrame = num3;
+				frames[num4].gameObject.SetActive(true);
+				this.lastReactorLogoAnimFrame = num4;
 			}
 			return;
 		}
@@ -389,10 +389,10 @@ public class GhostReactorShiftManager : MonoBehaviourTick
 					Vector3 normalized = vector.normalized;
 					float num5 = 0.5235988f;
 					Vector3 position2 = this.ringTransform.position + normalized * num4;
-					Quaternion rotation = Quaternion.AngleAxis(num5, Vector3.up);
-					Quaternion rotation2 = Quaternion.AngleAxis(-num5, Vector3.up);
-					Vector3 position3 = this.ringTransform.position + rotation * normalized * num4;
-					Vector3 position4 = this.ringTransform.position + rotation2 * normalized * num4;
+					Quaternion quaternion = Quaternion.AngleAxis(num5, Vector3.up);
+					Quaternion quaternion2 = Quaternion.AngleAxis(-num5, Vector3.up);
+					Vector3 position3 = this.ringTransform.position + quaternion * normalized * num4;
+					Vector3 position4 = this.ringTransform.position + quaternion2 * normalized * num4;
 					position2.y = position.y;
 					position3.y = position.y;
 					position4.y = position.y;
@@ -820,16 +820,16 @@ public class GhostReactorShiftManager : MonoBehaviourTick
 		{
 		case GhostReactorShiftManager.State.WaitingForShiftStart:
 		{
-			int b = this.GetPreShiftDuration() - Mathf.FloorToInt((float)(time - this.stateStartTime));
-			b = Mathf.Max(0, b);
-			this.shiftTimerText.text = ":" + b.ToString("D2");
+			int num = this.GetPreShiftDuration() - Mathf.FloorToInt((float)(time - this.stateStartTime));
+			num = Mathf.Max(0, num);
+			this.shiftTimerText.text = ":" + num.ToString("D2");
 			return;
 		}
 		case GhostReactorShiftManager.State.WaitingForFirstShiftStart:
 		{
-			int b2 = this.GetPreShiftDurationFirstArrive() - Mathf.FloorToInt((float)(time - this.stateStartTime));
-			b2 = Mathf.Max(0, b2);
-			this.shiftTimerText.text = ":" + b2.ToString("D2");
+			int num2 = this.GetPreShiftDurationFirstArrive() - Mathf.FloorToInt((float)(time - this.stateStartTime));
+			num2 = Mathf.Max(0, num2);
+			this.shiftTimerText.text = ":" + num2.ToString("D2");
 			return;
 		}
 		case GhostReactorShiftManager.State.ReadyForShift:
@@ -837,23 +837,23 @@ public class GhostReactorShiftManager : MonoBehaviourTick
 			break;
 		case GhostReactorShiftManager.State.PostShift:
 		{
-			int b3 = this.GetPostShiftDuration() - Mathf.FloorToInt((float)(time - this.stateStartTime));
-			b3 = Mathf.Max(0, b3);
-			this.shiftTimerText.text = ":" + b3.ToString("D2");
+			int num3 = this.GetPostShiftDuration() - Mathf.FloorToInt((float)(time - this.stateStartTime));
+			num3 = Mathf.Max(0, num3);
+			this.shiftTimerText.text = ":" + num3.ToString("D2");
 			return;
 		}
 		case GhostReactorShiftManager.State.PreparingToDrill:
 		{
-			int b4 = 5 - Mathf.FloorToInt((float)(time - this.stateStartTime));
-			b4 = Mathf.Max(0, b4);
-			this.shiftTimerText.text = ":" + b4.ToString("D2");
+			int num4 = 5 - Mathf.FloorToInt((float)(time - this.stateStartTime));
+			num4 = Mathf.Max(0, num4);
+			this.shiftTimerText.text = ":" + num4.ToString("D2");
 			return;
 		}
 		case GhostReactorShiftManager.State.Drilling:
 		{
-			int b5 = this.GetDrillingDuration() - Mathf.FloorToInt((float)(time - this.stateStartTime));
-			b5 = Mathf.Max(0, b5);
-			this.shiftTimerText.text = ":" + b5.ToString("D2");
+			int num5 = this.GetDrillingDuration() - Mathf.FloorToInt((float)(time - this.stateStartTime));
+			num5 = Mathf.Max(0, num5);
+			this.shiftTimerText.text = ":" + num5.ToString("D2");
 			this.UpdateLogoAnimations(this.depthDisplay.logoFrames);
 			break;
 		}

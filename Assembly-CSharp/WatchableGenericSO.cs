@@ -19,7 +19,7 @@ public class WatchableGenericSO<T> : ScriptableObject
 			this._value = value;
 			foreach (Action<T> action in this.callbacks)
 			{
-				action(value);
+				action.Invoke(value);
 			}
 		}
 	}
@@ -43,7 +43,7 @@ public class WatchableGenericSO<T> : ScriptableObject
 			T value = this._value;
 			foreach (Action<T> action in this.callbacks)
 			{
-				action(value);
+				action.Invoke(value);
 			}
 		}
 	}

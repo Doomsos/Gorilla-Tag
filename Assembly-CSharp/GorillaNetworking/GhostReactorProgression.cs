@@ -15,8 +15,8 @@ namespace GorillaNetworking
 		{
 			if (ProgressionManager.Instance != null)
 			{
-				ProgressionManager.Instance.OnTrackRead += this.OnTrackRead;
-				ProgressionManager.Instance.OnTrackSet += this.OnTrackSet;
+				ProgressionManager.Instance.OnTrackRead += new Action<string, int>(this.OnTrackRead);
+				ProgressionManager.Instance.OnTrackSet += new Action<string, int>(this.OnTrackSet);
 				ProgressionManager.Instance.OnNodeUnlocked += delegate(string a, string b)
 				{
 					this.OnNodeUnlocked();
@@ -113,9 +113,9 @@ namespace GorillaNetworking
 				return new ValueTuple<int, int, int, int>(i - 1, 0, 0, 0);
 			}
 			int pointsPerGrade = GhostReactorProgression.grPSO.progressionData[i].pointsPerGrade;
-			int item = (points - num2) / pointsPerGrade;
-			int item2 = (points - num2) % pointsPerGrade;
-			return new ValueTuple<int, int, int, int>(i, item, pointsPerGrade, item2);
+			int num3 = (points - num2) / pointsPerGrade;
+			int num4 = (points - num2) % pointsPerGrade;
+			return new ValueTuple<int, int, int, int>(i, num3, pointsPerGrade, num4);
 		}
 
 		public static string GetTitleNameAndGrade(int points)

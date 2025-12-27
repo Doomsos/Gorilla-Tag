@@ -255,11 +255,11 @@ namespace GorillaTagScripts
 		{
 			int num = otherGridPlane.width;
 			int num2 = otherGridPlane.length;
-			Quaternion rotation = otherPieceLocalRot * otherGridPlane.pieceToGridRotation;
+			Quaternion quaternion = otherPieceLocalRot * otherGridPlane.pieceToGridRotation;
 			Vector3 lossyScale = base.transform.lossyScale;
 			otherPieceLocalPos.Scale(base.transform.lossyScale);
 			Vector3 vector = otherPieceLocalPos + otherPieceLocalRot * otherGridPlane.pieceToGridPosition;
-			if (Mathf.Abs(Vector3.Dot(rotation * Vector3.forward, Vector3.forward)) < 0.707f)
+			if (Mathf.Abs(Vector3.Dot(quaternion * Vector3.forward, Vector3.forward)) < 0.707f)
 			{
 				num = otherGridPlane.length;
 				num2 = otherGridPlane.width;
@@ -274,14 +274,14 @@ namespace GorillaTagScripts
 			int num10 = Mathf.RoundToInt((vector.z - num8) / gridSize);
 			int num11 = num9 + Mathf.FloorToInt((float)num / 2f);
 			int num12 = num10 + Mathf.FloorToInt((float)num2 / 2f);
-			int a = num11 - (num - 1);
-			int a2 = num12 - (num2 - 1);
-			int num13 = Mathf.FloorToInt((float)this.width / 2f);
-			int num14 = Mathf.FloorToInt((float)this.length / 2f);
-			int b = num13 - (this.width - 1);
-			int b2 = num14 - (this.length - 1);
-			min = new Vector2Int(Mathf.Max(a, b), Mathf.Max(a2, b2));
-			max = new Vector2Int(Mathf.Min(num11, num13), Mathf.Min(num12, num14));
+			int num13 = num11 - (num - 1);
+			int num14 = num12 - (num2 - 1);
+			int num15 = Mathf.FloorToInt((float)this.width / 2f);
+			int num16 = Mathf.FloorToInt((float)this.length / 2f);
+			int num17 = num15 - (this.width - 1);
+			int num18 = num16 - (this.length - 1);
+			min = new Vector2Int(Mathf.Max(num13, num17), Mathf.Max(num14, num18));
+			max = new Vector2Int(Mathf.Min(num11, num15), Mathf.Min(num12, num16));
 		}
 
 		public bool IsAttachedToMovingGrid()

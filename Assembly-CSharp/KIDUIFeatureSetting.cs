@@ -57,9 +57,9 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		this.SetFeatureName();
 		GameObject gameObject = base.gameObject;
 		string name = gameObject.name;
-		string str = "_";
+		string text2 = "_";
 		LocalizedString featureName = feature.featureName;
-		gameObject.name = name + str + ((featureName != null) ? featureName.ToString() : null);
+		gameObject.name = name + text2 + ((featureName != null) ? featureName.ToString() : null);
 		this._permissionName = feature.permissionName;
 		this._featureToggle.gameObject.SetActive(featureToggleEnabled);
 		this.AlwaysCheckFeatureSetting = alwaysCheckFeatureSetting;
@@ -122,7 +122,7 @@ public class KIDUIFeatureSetting : MonoBehaviour
 			return this._featureToggle.IsOn;
 		}
 		Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(this._featureType);
-		if (permissionDataByFeature.ManagedBy != Permission.ManagedByEnum.GUARDIAN)
+		if (permissionDataByFeature.ManagedBy != 2)
 		{
 			Debug.LogError("[KID::FeatureSetting] GetToggleState: feature has no toggle AND is not managed by Guardian");
 		}
@@ -188,7 +188,7 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		}
 		EventTrigger eventTrigger = obj.AddComponent<EventTrigger>();
 		EventTrigger.Entry entry = new EventTrigger.Entry();
-		entry.eventID = EventTriggerType.PointerDown;
+		entry.eventID = 2;
 		entry.callback.AddListener(delegate(BaseEventData data)
 		{
 			Debug.Log("[KIDUIFeatureSetting] Guardian-managed feature clicked - playing denied sound");

@@ -12,7 +12,7 @@ public class SimpleStateMachine<State> where State : Enum
 		this.currState = initialState;
 		if (onStateStart != null)
 		{
-			onStateStart(this.currState);
+			onStateStart.Invoke(this.currState);
 		}
 	}
 
@@ -23,7 +23,7 @@ public class SimpleStateMachine<State> where State : Enum
 		{
 			return;
 		}
-		action(this.currState);
+		action.Invoke(this.currState);
 	}
 
 	public void SetState(State state, bool force = false)
@@ -35,7 +35,7 @@ public class SimpleStateMachine<State> where State : Enum
 		Action<State> action = this.onStateEnd;
 		if (action != null)
 		{
-			action(this.currState);
+			action.Invoke(this.currState);
 		}
 		this.currState = state;
 		this.stateStartTime = Time.timeAsDouble;
@@ -44,7 +44,7 @@ public class SimpleStateMachine<State> where State : Enum
 		{
 			return;
 		}
-		action2(this.currState);
+		action2.Invoke(this.currState);
 	}
 
 	public State GetState()

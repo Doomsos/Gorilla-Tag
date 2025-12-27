@@ -8,16 +8,16 @@ public class UseableObjectEvents : MonoBehaviour
 	{
 		bool isLocal = player.IsLocal;
 		PlayFabAuthenticator instance = PlayFabAuthenticator.instance;
-		string str;
+		string text;
 		if (isLocal && instance != null)
 		{
-			str = instance.GetPlayFabPlayerId();
+			text = instance.GetPlayFabPlayerId();
 		}
 		else
 		{
-			str = player.NickName;
+			text = player.NickName;
 		}
-		this.PlayerIdString = str + "." + base.gameObject.name;
+		this.PlayerIdString = text + "." + base.gameObject.name;
 		this.PlayerId = this.PlayerIdString.GetStaticHash();
 		this.DisposeEvents();
 		this.Activate = new PhotonEvent(this.PlayerId.ToString() + ".Activate");

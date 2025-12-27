@@ -193,11 +193,11 @@ namespace GorillaTagScripts.Builder
 			}
 			this.currT = this.CowboyCycleCompletionPercent();
 			this.currForward = this.IsEvenCycle();
-			float time = this.currForward ? this.currT : (1f - this.currT);
-			float num = this.WheelCycleCompletionPercent();
-			float t = this.cowboyCurve.Evaluate(time);
-			this.cowboyTransform.localPosition = Vector3.Lerp(this.cowboyStart.localPosition, this.cowboyEnd.localPosition, t);
-			Quaternion localRotation = Quaternion.AngleAxis(num * 360f, Vector3.right);
+			float num = this.currForward ? this.currT : (1f - this.currT);
+			float num2 = this.WheelCycleCompletionPercent();
+			float num3 = this.cowboyCurve.Evaluate(num);
+			this.cowboyTransform.localPosition = Vector3.Lerp(this.cowboyStart.localPosition, this.cowboyEnd.localPosition, num3);
+			Quaternion localRotation = Quaternion.AngleAxis(num2 * 360f, Vector3.right);
 			this.wheelTransform.localRotation = localRotation;
 		}
 

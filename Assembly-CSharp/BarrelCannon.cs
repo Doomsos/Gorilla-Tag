@@ -64,8 +64,8 @@ public class BarrelCannon : NetworkComponent
 		case BarrelCannon.BarrelCannonState.Firing:
 			if (this.localPlayerInside && this.localPlayerRigidbody != null)
 			{
-				Vector3 b = base.transform.position - GorillaTagger.Instance.headCollider.transform.position;
-				this.localPlayerRigidbody.MovePosition(this.localPlayerRigidbody.position + b);
+				Vector3 vector = base.transform.position - GorillaTagger.Instance.headCollider.transform.position;
+				this.localPlayerRigidbody.MovePosition(this.localPlayerRigidbody.position + vector);
 			}
 			if (time - this.stateStartTime > this.preFiringDelayTime)
 			{
@@ -74,7 +74,7 @@ public class BarrelCannon : NetworkComponent
 				this.FireBarrelCannonLocal(base.transform.position, base.transform.up);
 				if (PhotonNetwork.InRoom && GorillaGameManager.instance != null)
 				{
-					base.SendRPC("FireBarrelCannonRPC", RpcTarget.Others, new object[]
+					base.SendRPC("FireBarrelCannonRPC", 1, new object[]
 					{
 						base.transform.position,
 						base.transform.up
@@ -152,8 +152,8 @@ public class BarrelCannon : NetworkComponent
 		}
 		if (this.localPlayerInside && this.localPlayerRigidbody != null)
 		{
-			Vector3 b = cannonCenter - GorillaTagger.Instance.headCollider.transform.position;
-			this.localPlayerRigidbody.position = this.localPlayerRigidbody.position + b;
+			Vector3 vector = cannonCenter - GorillaTagger.Instance.headCollider.transform.position;
+			this.localPlayerRigidbody.position = this.localPlayerRigidbody.position + vector;
 			this.localPlayerRigidbody.linearVelocity = firingDirection * this.firingSpeed;
 		}
 	}
@@ -190,10 +190,10 @@ public class BarrelCannon : NetworkComponent
 
 	private bool IsLocalPlayerInCannon()
 	{
-		Vector3 point;
-		Vector3 point2;
-		this.GetCapsulePoints(this.triggerCollider, out point, out point2);
-		Physics.OverlapCapsuleNonAlloc(point, point2, this.triggerCollider.radius, this.triggerOverlapResults);
+		Vector3 vector;
+		Vector3 vector2;
+		this.GetCapsulePoints(this.triggerCollider, out vector, out vector2);
+		Physics.OverlapCapsuleNonAlloc(vector, vector2, this.triggerCollider.radius, this.triggerOverlapResults);
 		for (int i = 0; i < this.triggerOverlapResults.Length; i++)
 		{
 			Rigidbody rigidbody;
@@ -207,9 +207,9 @@ public class BarrelCannon : NetworkComponent
 
 	private void GetCapsulePoints(CapsuleCollider capsule, out Vector3 pointA, out Vector3 pointB)
 	{
-		float d = capsule.height * 0.5f - capsule.radius;
-		pointA = capsule.transform.position + capsule.transform.up * d;
-		pointB = capsule.transform.position - capsule.transform.up * d;
+		float num = capsule.height * 0.5f - capsule.radius;
+		pointA = capsule.transform.position + capsule.transform.up * num;
+		pointB = capsule.transform.position - capsule.transform.up * num;
 	}
 
 	[Networked]
@@ -338,7 +338,7 @@ public class BarrelCannon : NetworkComponent
 
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 3)]
-	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+	[DrawIf("IsEditorWritable", true, 0, 0)]
 	private BarrelCannon.BarrelCannonSyncedStateData _Data;
 
 	private enum BarrelCannonState
@@ -361,7 +361,7 @@ public class BarrelCannon : NetworkComponent
 	}
 
 	[NetworkStructWeaved(3)]
-	[StructLayout(LayoutKind.Explicit, Size = 12)]
+	[StructLayout(2, Size = 12)]
 	private struct BarrelCannonSyncedStateData : INetworkStruct
 	{
 		[Networked]

@@ -26,26 +26,26 @@ public class ArcingProjectileLauncher : ElfLauncher
 			vector = Vector3.ProjectOnPlane(direction, Vector3.up);
 		}
 		vector.Normalize();
-		Vector3 axis = Vector3.Cross(vector, Vector3.up);
-		float num2 = Vector3.SignedAngle(vector, direction, axis);
+		Vector3 vector2 = Vector3.Cross(vector, Vector3.up);
+		float num2 = Vector3.SignedAngle(vector, direction, vector2);
 		float num3 = this.angleVelocityMultiplier.Evaluate(num2);
 		float num4 = Mathf.Clamp(num2, this.fireAngleLimits.x, this.fireAngleLimits.y);
-		float d = Mathf.Sin(num4 * 0.017453292f);
-		float d2 = Mathf.Cos(num4 * 0.017453292f);
-		Vector3 a = d * Vector3.up + d2 * vector;
-		a.Normalize();
-		Vector3 vector2 = a * (this.muzzleVelocity * lossyScale.x * num3);
+		float num5 = Mathf.Sin(num4 * 0.017453292f);
+		float num6 = Mathf.Cos(num4 * 0.017453292f);
+		Vector3 vector3 = num5 * Vector3.up + num6 * vector;
+		vector3.Normalize();
+		Vector3 vector4 = vector3 * (this.muzzleVelocity * lossyScale.x * num3);
 		GameObject gameObject = ObjectPools.instance.Instantiate(this.elfProjectileHash, true);
 		IProjectile component = gameObject.GetComponent<IProjectile>();
 		if (component != null)
 		{
-			component.Launch(origin, Quaternion.LookRotation(vector, Vector3.up), vector2, 1f, this.parentHoldable.myRig, -1);
+			component.Launch(origin, Quaternion.LookRotation(vector, Vector3.up), vector4, 1f, this.parentHoldable.myRig, -1);
 			return;
 		}
 		gameObject.transform.position = origin;
 		gameObject.transform.rotation = Quaternion.LookRotation(direction);
 		gameObject.transform.localScale = lossyScale;
-		gameObject.GetComponent<Rigidbody>().linearVelocity = vector2;
+		gameObject.GetComponent<Rigidbody>().linearVelocity = vector4;
 	}
 
 	[SerializeField]

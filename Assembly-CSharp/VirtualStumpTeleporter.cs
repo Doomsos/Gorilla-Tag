@@ -163,13 +163,13 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 		}
 		if (!this.countdownTexts.IsNullOrEmpty<TMP_Text>())
 		{
-			float f = this.stayInTriggerDuration - (Time.time - this.triggerEntryTime);
-			int num = 1 + Mathf.FloorToInt(f);
+			float num = this.stayInTriggerDuration - (Time.time - this.triggerEntryTime);
+			int num2 = 1 + Mathf.FloorToInt(num);
 			for (int i = 0; i < this.countdownTexts.Length; i++)
 			{
 				if (!this.countdownTexts[i].IsNull())
 				{
-					this.countdownTexts[i].text = num.ToString();
+					this.countdownTexts[i].text = num2.ToString();
 				}
 			}
 		}

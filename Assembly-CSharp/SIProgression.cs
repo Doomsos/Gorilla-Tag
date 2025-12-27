@@ -21,15 +21,15 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 		}
 		this.emptyNode = default(SIProgression.SINode);
 		SIProgression.InitResourceToStringDictionary();
-		this.resourceCapsArray = Enumerable.Repeat<int>(int.MaxValue, 6).ToArray<int>();
+		this.resourceCapsArray = Enumerable.ToArray<int>(Enumerable.Repeat<int>(int.MaxValue, 6));
 		for (int i = 0; i < this.resourceCaps.Length; i++)
 		{
 			this.resourceCapsArray[(int)this.resourceCaps[i].resourceType] = this.resourceCaps[i].resourceMax;
 		}
 		foreach (object obj in Enum.GetValues(typeof(SITechTreePageId)))
 		{
-			SITechTreePageId key = (SITechTreePageId)obj;
-			this.heldOrSnappedByGadgetPageType.Add(key, 0);
+			SITechTreePageId sitechTreePageId = (SITechTreePageId)obj;
+			this.heldOrSnappedByGadgetPageType.Add(sitechTreePageId, 0);
 		}
 		this.EnsureInitialized();
 		SIProgression.InitializeQuests();
@@ -41,9 +41,9 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 	{
 		if (ProgressionManager.Instance != null)
 		{
-			ProgressionManager.Instance.OnTreeUpdated += this.HandleTreeUpdated;
-			ProgressionManager.Instance.OnInventoryUpdated += this.HandleInventoryUpdated;
-			ProgressionManager.Instance.OnNodeUnlocked += this.HandleNodeUnlocked;
+			ProgressionManager.Instance.OnTreeUpdated += new Action(this.HandleTreeUpdated);
+			ProgressionManager.Instance.OnInventoryUpdated += new Action(this.HandleInventoryUpdated);
+			ProgressionManager.Instance.OnNodeUnlocked += new Action<string, string>(this.HandleNodeUnlocked);
 		}
 		GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
@@ -52,9 +52,9 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 	{
 		if (ProgressionManager.Instance != null)
 		{
-			ProgressionManager.Instance.OnTreeUpdated -= this.HandleTreeUpdated;
-			ProgressionManager.Instance.OnInventoryUpdated -= this.HandleInventoryUpdated;
-			ProgressionManager.Instance.OnNodeUnlocked -= this.HandleNodeUnlocked;
+			ProgressionManager.Instance.OnTreeUpdated -= new Action(this.HandleTreeUpdated);
+			ProgressionManager.Instance.OnInventoryUpdated -= new Action(this.HandleInventoryUpdated);
+			ProgressionManager.Instance.OnNodeUnlocked -= new Action<string, string>(this.HandleNodeUnlocked);
 		}
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
 	}
@@ -162,7 +162,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			{
 				return;
 			}
-			onClientReady();
+			onClientReady.Invoke();
 		}
 	}
 
@@ -181,7 +181,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 		if (this.siNodes != null)
 		{
 			SIProgression.SINode sinode;
-			return this.siNodes.TryGetValue(upgradeType, out sinode) && sinode.unlocked;
+			return this.siNodes.TryGetValue(upgradeType, ref sinode) && sinode.unlocked;
 		}
 		ProgressionManager instance = ProgressionManager.Instance;
 		UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse = (instance != null) ? instance.GetTree("SI_Gadgets") : null;
@@ -206,7 +206,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			ProgressionManager instance = ProgressionManager.Instance;
 			UserHydratedProgressionTreeResponse userHydratedProgressionTreeResponse = (instance != null) ? instance.GetTree("SI_Gadgets") : null;
 			SIProgression.SINode sinode;
-			if (this.siNodes == null || !this.siNodes.TryGetValue(upgradeType, out sinode) || sinode.unlocked)
+			if (this.siNodes == null || !this.siNodes.TryGetValue(upgradeType, ref sinode) || sinode.unlocked)
 			{
 				return;
 			}
@@ -243,7 +243,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 		{
 			return;
 		}
-		onTreeReady();
+		onTreeReady.Invoke();
 	}
 
 	private void HandleInventoryUpdated()
@@ -255,7 +255,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 		{
 			return;
 		}
-		onInventoryReady();
+		onInventoryReady.Invoke();
 	}
 
 	private IEnumerator TryClaimNewPlayerPackage()
@@ -280,7 +280,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			{
 				return;
 			}
-			onNodeUnlocked(nodeFromID.upgradeType);
+			onNodeUnlocked.Invoke(nodeFromID.upgradeType);
 		}
 	}
 
@@ -292,7 +292,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 		foreach (UserHydratedNodeDefinition userHydratedNodeDefinition in userHydratedProgressionTreeResponse.Nodes)
 		{
 			SIUpgradeType siupgradeType;
-			if (!Enum.TryParse<SIUpgradeType>(userHydratedNodeDefinition.name, out siupgradeType))
+			if (!Enum.TryParse<SIUpgradeType>(userHydratedNodeDefinition.name, ref siupgradeType))
 			{
 				siupgradeType = SIUpgradeType.InvalidNode;
 			}
@@ -312,7 +312,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 					}
 				}
 			}
-			SIProgression.SINode value = new SIProgression.SINode
+			SIProgression.SINode sinode = new SIProgression.SINode
 			{
 				id = userHydratedNodeDefinition.id,
 				unlocked = userHydratedNodeDefinition.unlocked,
@@ -320,7 +320,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 				parents = new List<SIProgression.SINode>(),
 				upgradeType = siupgradeType
 			};
-			this.siNodes[siupgradeType] = value;
+			this.siNodes[siupgradeType] = sinode;
 		}
 	}
 
@@ -387,17 +387,17 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	private void UpdateCurrencyOnPlayer()
 	{
-		foreach (SIResource.ResourceType resourceType in this.resourceDict.Keys.ToList<SIResource.ResourceType>())
+		foreach (SIResource.ResourceType resourceType in Enumerable.ToList<SIResource.ResourceType>(this.resourceDict.Keys))
 		{
-			int value = 0;
+			int num = 0;
 			try
 			{
-				value = this.GetCurrencyAmount(resourceType);
+				num = this.GetCurrencyAmount(resourceType);
 			}
 			catch
 			{
 			}
-			this.resourceDict[resourceType] = value;
+			this.resourceDict[resourceType] = num;
 		}
 		SIPlayer.SetAndBroadcastProgression();
 		if (!this.ClientReady && this.questSourceList != null)
@@ -408,7 +408,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			{
 				return;
 			}
-			onClientReady();
+			onClientReady.Invoke();
 		}
 	}
 
@@ -433,7 +433,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			{
 				return;
 			}
-			onClientReady();
+			onClientReady.Invoke();
 		}
 	}
 
@@ -468,9 +468,9 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	private void ProcessAllQuests(Action<RotatingQuest> action)
 	{
-		foreach (RotatingQuest obj in this.questSourceList.quests)
+		foreach (RotatingQuest rotatingQuest in this.questSourceList.quests)
 		{
-			action(obj);
+			action.Invoke(rotatingQuest);
 		}
 	}
 
@@ -959,22 +959,27 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	private void SelectCurrentTurnInDate()
 	{
-		DateTime dateTime = new DateTime(2025, 1, 10, 18, 0, 0, DateTimeKind.Utc);
+		DateTime dateTime;
+		dateTime..ctor(2025, 1, 10, 18, 0, 0, 1);
 		TimeSpan timeSpan = TimeSpan.FromHours(-8.0);
-		DateTime dateStart = new DateTime(1, 1, 1, 0, 0, 0);
-		DateTime dateEnd = new DateTime(2006, 12, 31, 0, 0, 0);
-		TimeSpan daylightDelta = TimeSpan.FromHours(1.0);
-		TimeZoneInfo.TransitionTime daylightTransitionStart = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 4, 1, DayOfWeek.Sunday);
-		TimeZoneInfo.TransitionTime daylightTransitionEnd = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, DayOfWeek.Sunday);
-		DateTime dateStart2 = new DateTime(2007, 1, 1, 0, 0, 0);
-		DateTime dateEnd2 = new DateTime(9999, 12, 31, 0, 0, 0);
-		TimeSpan daylightDelta2 = TimeSpan.FromHours(1.0);
-		TimeZoneInfo.TransitionTime daylightTransitionStart2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 2, DayOfWeek.Sunday);
-		TimeZoneInfo.TransitionTime daylightTransitionEnd2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 11, 1, DayOfWeek.Sunday);
+		DateTime dateTime2;
+		dateTime2..ctor(1, 1, 1, 0, 0, 0);
+		DateTime dateTime3;
+		dateTime3..ctor(2006, 12, 31, 0, 0, 0);
+		TimeSpan timeSpan2 = TimeSpan.FromHours(1.0);
+		TimeZoneInfo.TransitionTime transitionTime = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 4, 1, 0);
+		TimeZoneInfo.TransitionTime transitionTime2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, 0);
+		DateTime dateTime4;
+		dateTime4..ctor(2007, 1, 1, 0, 0, 0);
+		DateTime dateTime5;
+		dateTime5..ctor(9999, 12, 31, 0, 0, 0);
+		TimeSpan timeSpan3 = TimeSpan.FromHours(1.0);
+		TimeZoneInfo.TransitionTime transitionTime3 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 2, 0);
+		TimeZoneInfo.TransitionTime transitionTime4 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 11, 1, 0);
 		TimeZoneInfo timeZoneInfo = TimeZoneInfo.CreateCustomTimeZone("Pacific Standard Time", timeSpan, "Pacific Standard Time", "Pacific Standard Time", "Pacific Standard Time", new TimeZoneInfo.AdjustmentRule[]
 		{
-			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart, dateEnd, daylightDelta, daylightTransitionStart, daylightTransitionEnd),
-			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart2, dateEnd2, daylightDelta2, daylightTransitionStart2, daylightTransitionEnd2)
+			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateTime2, dateTime3, timeSpan2, transitionTime, transitionTime2),
+			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateTime4, dateTime5, timeSpan3, transitionTime3, transitionTime4)
 		});
 		if (timeZoneInfo != null && timeZoneInfo.IsDaylightSavingTime(DateTime.UtcNow - timeSpan))
 		{
@@ -1029,7 +1034,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			node = this.emptyNode;
 			return false;
 		}
-		return this.siNodes.TryGetValue(type, out node);
+		return this.siNodes.TryGetValue(type, ref node);
 	}
 
 	public static bool ResourcesMaxed()
@@ -1075,11 +1080,11 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			if (SIProgression.Instance.heldOrSnappedByGadgetPageType[sitechTreePageId] > 0)
 			{
 				Dictionary<SITechTreePageId, float> dictionary = this.timeUsingGadgetTypeInterval;
-				SITechTreePageId key = sitechTreePageId;
-				dictionary[key] += num;
+				SITechTreePageId sitechTreePageId2 = sitechTreePageId;
+				dictionary[sitechTreePageId2] += num;
 				dictionary = this.timeUsingGadgetTypeTotal;
-				key = sitechTreePageId;
-				dictionary[key] += num;
+				sitechTreePageId2 = sitechTreePageId;
+				dictionary[sitechTreePageId2] += num;
 			}
 		}
 		if (SIProgression.Instance.heldOrSnappedOwnGadgets > 0)
@@ -1174,9 +1179,9 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 		this.activeTerminalTimeInterval = 0f;
 		for (int i = 0; i < 11; i++)
 		{
-			SITechTreePageId key = (SITechTreePageId)i;
-			this.timeUsingGadgetTypeInterval[key] = 0f;
-			this.tagsUsingGadgetTypeInterval[key] = 0;
+			SITechTreePageId sitechTreePageId = (SITechTreePageId)i;
+			this.timeUsingGadgetTypeInterval[sitechTreePageId] = 0f;
+			this.tagsUsingGadgetTypeInterval[sitechTreePageId] = 0;
 		}
 		this.timeUsingOwnGadgetsInterval = 0f;
 		this.timeUsingOthersGadgetsInterval = 0f;
@@ -1184,8 +1189,8 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 		this.tagsHoldingOwnGadgetInterval = 0;
 		for (int j = 0; j < 6; j++)
 		{
-			SIResource.ResourceType key2 = (SIResource.ResourceType)j;
-			this.resourcesCollectedInterval[key2] = 0;
+			SIResource.ResourceType resourceType = (SIResource.ResourceType)j;
+			this.resourcesCollectedInterval[resourceType] = 0;
 		}
 		this.roundsPlayedInterval = 0;
 	}
@@ -1202,13 +1207,13 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			if (SIProgression.Instance.heldOrSnappedByGadgetPageType[sitechTreePageId] > 0)
 			{
 				Dictionary<SITechTreePageId, int> dictionary = this.tagsUsingGadgetTypeTotal;
-				SITechTreePageId key = sitechTreePageId;
-				int num = dictionary[key];
-				dictionary[key] = num + 1;
+				SITechTreePageId sitechTreePageId2 = sitechTreePageId;
+				int num = dictionary[sitechTreePageId2];
+				dictionary[sitechTreePageId2] = num + 1;
 				Dictionary<SITechTreePageId, int> dictionary2 = this.tagsUsingGadgetTypeInterval;
-				key = sitechTreePageId;
-				num = dictionary2[key];
-				dictionary2[key] = num + 1;
+				sitechTreePageId2 = sitechTreePageId;
+				num = dictionary2[sitechTreePageId2];
+				dictionary2[sitechTreePageId2] = num + 1;
 			}
 		}
 		if (SIProgression.Instance.heldOrSnappedOwnGadgets > 0)

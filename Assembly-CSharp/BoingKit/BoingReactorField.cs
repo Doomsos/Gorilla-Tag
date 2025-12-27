@@ -171,12 +171,12 @@ namespace BoingKit
 				return false;
 			}
 			float num = 0.5f * this.CellSize;
-			Vector3 a = p - (this.m_gridCenter + this.GetCellCenterOffset(0, 0, 0));
-			Vector3 vector = this.QuantizeNorm(a + new Vector3(-num, -num, -num));
-			Vector3 b = vector * this.CellSize;
-			int num2 = Mathf.Clamp((int)vector.x, 0, this.CellsX - 1);
-			int num3 = Mathf.Clamp((int)vector.y, 0, this.CellsY - 1);
-			int num4 = Mathf.Clamp((int)vector.z, 0, this.CellsZ - 1);
+			Vector3 vector = p - (this.m_gridCenter + this.GetCellCenterOffset(0, 0, 0));
+			Vector3 vector2 = this.QuantizeNorm(vector + new Vector3(-num, -num, -num));
+			Vector3 vector3 = vector2 * this.CellSize;
+			int num2 = Mathf.Clamp((int)vector2.x, 0, this.CellsX - 1);
+			int num3 = Mathf.Clamp((int)vector2.y, 0, this.CellsY - 1);
+			int num4 = Mathf.Clamp((int)vector2.z, 0, this.CellsZ - 1);
 			int x = Mathf.Min(num2 + 1, this.CellsX - 1);
 			int y = Mathf.Min(num3 + 1, this.CellsY - 1);
 			int z = Mathf.Min(num4 + 1, this.CellsZ - 1);
@@ -191,18 +191,18 @@ namespace BoingKit
 			bool lerpX = num5 != num8;
 			bool lerpY = num6 != num9;
 			bool lerpZ = num7 != num10;
-			Vector3 vector2 = (a - b) / this.CellSize;
-			Vector3 vector3 = p - base.transform.position;
+			Vector3 vector4 = (vector - vector3) / this.CellSize;
+			Vector3 vector5 = p - base.transform.position;
 			switch (this.FalloffDimensions)
 			{
 			case BoingReactorField.FalloffDimensionsEnum.XY:
-				vector3.z = 0f;
+				vector5.z = 0f;
 				break;
 			case BoingReactorField.FalloffDimensionsEnum.XZ:
-				vector3.y = 0f;
+				vector5.y = 0f;
 				break;
 			case BoingReactorField.FalloffDimensionsEnum.YZ:
-				vector3.x = 0f;
+				vector5.x = 0f;
 				break;
 			}
 			int num11 = Mathf.Max(this.CellsX, Mathf.Max(this.CellsY, this.CellsZ));
@@ -212,39 +212,41 @@ namespace BoingKit
 			{
 				if (falloffMode == BoingReactorField.FalloffModeEnum.Square)
 				{
-					Vector3 a2 = num * new Vector3((float)this.CellsX, (float)this.CellsY, (float)this.CellsZ);
-					Vector3 vector4 = this.FalloffRatio * a2 - num * Vector3.one;
-					vector4.x = Mathf.Max(0f, vector4.x);
-					vector4.y = Mathf.Max(0f, vector4.y);
-					vector4.z = Mathf.Max(0f, vector4.z);
-					Vector3 vector5 = (1f - this.FalloffRatio) * a2 - num * Vector3.one;
-					vector5.x = Mathf.Max(MathUtil.Epsilon, vector5.x);
-					vector5.y = Mathf.Max(MathUtil.Epsilon, vector5.y);
-					vector5.z = Mathf.Max(MathUtil.Epsilon, vector5.z);
-					Vector3 vector6 = new Vector3(1f - Mathf.Clamp01((Mathf.Abs(vector3.x) - vector4.x) / vector5.x), 1f - Mathf.Clamp01((Mathf.Abs(vector3.y) - vector4.y) / vector5.y), 1f - Mathf.Clamp01((Mathf.Abs(vector3.z) - vector4.z) / vector5.z));
+					Vector3 vector6 = num * new Vector3((float)this.CellsX, (float)this.CellsY, (float)this.CellsZ);
+					Vector3 vector7 = this.FalloffRatio * vector6 - num * Vector3.one;
+					vector7.x = Mathf.Max(0f, vector7.x);
+					vector7.y = Mathf.Max(0f, vector7.y);
+					vector7.z = Mathf.Max(0f, vector7.z);
+					Vector3 vector8 = (1f - this.FalloffRatio) * vector6 - num * Vector3.one;
+					vector8.x = Mathf.Max(MathUtil.Epsilon, vector8.x);
+					vector8.y = Mathf.Max(MathUtil.Epsilon, vector8.y);
+					vector8.z = Mathf.Max(MathUtil.Epsilon, vector8.z);
+					Vector3 vector9;
+					vector9..ctor(1f - Mathf.Clamp01((Mathf.Abs(vector5.x) - vector7.x) / vector8.x), 1f - Mathf.Clamp01((Mathf.Abs(vector5.y) - vector7.y) / vector8.y), 1f - Mathf.Clamp01((Mathf.Abs(vector5.z) - vector7.z) / vector8.z));
 					switch (this.FalloffDimensions)
 					{
 					case BoingReactorField.FalloffDimensionsEnum.XY:
-						vector6.x = 1f;
+						vector9.x = 1f;
 						break;
 					case BoingReactorField.FalloffDimensionsEnum.XZ:
-						vector6.y = 1f;
+						vector9.y = 1f;
 						break;
 					case BoingReactorField.FalloffDimensionsEnum.YZ:
-						vector6.z = 1f;
+						vector9.z = 1f;
 						break;
 					}
-					num12 = Mathf.Min(vector6.x, Mathf.Min(vector6.y, vector6.z));
+					num12 = Mathf.Min(vector9.x, Mathf.Min(vector9.y, vector9.z));
 				}
 			}
 			else
 			{
 				float num13 = num * (float)num11;
-				Vector3 vector7 = new Vector3((float)num11 / (float)this.CellsX, (float)num11 / (float)this.CellsY, (float)num11 / (float)this.CellsZ);
-				vector3.x *= vector7.x;
-				vector3.y *= vector7.y;
-				vector3.z *= vector7.z;
-				float magnitude = vector3.magnitude;
+				Vector3 vector10;
+				vector10..ctor((float)num11 / (float)this.CellsX, (float)num11 / (float)this.CellsY, (float)num11 / (float)this.CellsZ);
+				vector5.x *= vector10.x;
+				vector5.y *= vector10.y;
+				vector5.z *= vector10.z;
+				float magnitude = vector5.magnitude;
 				float num14 = Mathf.Max(0f, this.FalloffRatio * num13 - num);
 				float num15 = Mathf.Max(MathUtil.Epsilon, (1f - this.FalloffRatio) * num13 - num);
 				num12 = 1f - Mathf.Clamp01((magnitude - num14) / num15);
@@ -257,8 +259,8 @@ namespace BoingKit
 			BoingReactorField.s_aCellOffset[5] = this.m_aCpuCell[num10, num6, num8].PositionSpring.Value - this.m_gridCenter - this.GetCellCenterOffset(x, num3, z);
 			BoingReactorField.s_aCellOffset[6] = this.m_aCpuCell[num10, num9, num5].PositionSpring.Value - this.m_gridCenter - this.GetCellCenterOffset(num2, y, z);
 			BoingReactorField.s_aCellOffset[7] = this.m_aCpuCell[num10, num9, num8].PositionSpring.Value - this.m_gridCenter - this.GetCellCenterOffset(x, y, z);
-			positionOffset = VectorUtil.TriLerp(ref BoingReactorField.s_aCellOffset[0], ref BoingReactorField.s_aCellOffset[1], ref BoingReactorField.s_aCellOffset[2], ref BoingReactorField.s_aCellOffset[3], ref BoingReactorField.s_aCellOffset[4], ref BoingReactorField.s_aCellOffset[5], ref BoingReactorField.s_aCellOffset[6], ref BoingReactorField.s_aCellOffset[7], lerpX, lerpY, lerpZ, vector2.x, vector2.y, vector2.z);
-			rotationOffset = VectorUtil.TriLerp(ref this.m_aCpuCell[num7, num6, num5].RotationSpring.ValueVec, ref this.m_aCpuCell[num7, num6, num8].RotationSpring.ValueVec, ref this.m_aCpuCell[num7, num9, num5].RotationSpring.ValueVec, ref this.m_aCpuCell[num7, num9, num8].RotationSpring.ValueVec, ref this.m_aCpuCell[num10, num6, num5].RotationSpring.ValueVec, ref this.m_aCpuCell[num10, num6, num8].RotationSpring.ValueVec, ref this.m_aCpuCell[num10, num9, num5].RotationSpring.ValueVec, ref this.m_aCpuCell[num10, num9, num8].RotationSpring.ValueVec, lerpX, lerpY, lerpZ, vector2.x, vector2.y, vector2.z);
+			positionOffset = VectorUtil.TriLerp(ref BoingReactorField.s_aCellOffset[0], ref BoingReactorField.s_aCellOffset[1], ref BoingReactorField.s_aCellOffset[2], ref BoingReactorField.s_aCellOffset[3], ref BoingReactorField.s_aCellOffset[4], ref BoingReactorField.s_aCellOffset[5], ref BoingReactorField.s_aCellOffset[6], ref BoingReactorField.s_aCellOffset[7], lerpX, lerpY, lerpZ, vector4.x, vector4.y, vector4.z);
+			rotationOffset = VectorUtil.TriLerp(ref this.m_aCpuCell[num7, num6, num5].RotationSpring.ValueVec, ref this.m_aCpuCell[num7, num6, num8].RotationSpring.ValueVec, ref this.m_aCpuCell[num7, num9, num5].RotationSpring.ValueVec, ref this.m_aCpuCell[num7, num9, num8].RotationSpring.ValueVec, ref this.m_aCpuCell[num10, num6, num5].RotationSpring.ValueVec, ref this.m_aCpuCell[num10, num6, num8].RotationSpring.ValueVec, ref this.m_aCpuCell[num10, num9, num5].RotationSpring.ValueVec, ref this.m_aCpuCell[num10, num9, num8].RotationSpring.ValueVec, lerpX, lerpY, lerpZ, vector4.x, vector4.y, vector4.z);
 			positionOffset *= num12;
 			rotationOffset = QuaternionUtil.ToVector4(QuaternionUtil.Pow(QuaternionUtil.FromVector4(rotationOffset, true), num12));
 			return true;
@@ -909,7 +911,7 @@ namespace BoingKit
 					{
 						BoingEffector component = boingEffector.GetComponent<BoingEffector>();
 						int num2;
-						if (!(component == null) && component.isActiveAndEnabled && effectorParamsIndexMap.TryGetValue(component.GetInstanceID(), out num2))
+						if (!(component == null) && component.isActiveAndEnabled && effectorParamsIndexMap.TryGetValue(component.GetInstanceID(), ref num2))
 						{
 							array[num++] = num2;
 						}
@@ -987,7 +989,7 @@ namespace BoingKit
 						int y;
 						int z;
 						this.ResolveCellIndex(k, j, i, -1, out x, out y, out z);
-						Vector3 center = vector + this.GetCellCenterOffset(x, y, z);
+						Vector3 vector2 = vector + this.GetCellCenterOffset(x, y, z);
 						if (array != null && k % num == 0 && j % num == 0 && i % num == 0)
 						{
 							BoingWork.Params.InstanceData instanceData = array[i, j, k];
@@ -997,7 +999,7 @@ namespace BoingKit
 							Gizmos.matrix = Matrix4x4.identity;
 						}
 						Gizmos.color = new Color(1f, 0.5f, 0.2f, 1f);
-						Gizmos.DrawWireCube(center, this.CellSize * Vector3.one);
+						Gizmos.DrawWireCube(vector2, this.CellSize * Vector3.one);
 					}
 				}
 			}
@@ -1006,9 +1008,9 @@ namespace BoingKit
 			{
 				if (falloffMode == BoingReactorField.FalloffModeEnum.Square)
 				{
-					Vector3 size = this.CellSize * this.FalloffRatio * new Vector3((float)this.CellsX, (float)this.CellsY, (float)this.CellsZ);
+					Vector3 vector3 = this.CellSize * this.FalloffRatio * new Vector3((float)this.CellsX, (float)this.CellsY, (float)this.CellsZ);
 					Gizmos.color = new Color(1f, 1f, 0.2f, 0.5f);
-					Gizmos.DrawWireCube(vector, size);
+					Gizmos.DrawWireCube(vector, vector3);
 				}
 			}
 			else

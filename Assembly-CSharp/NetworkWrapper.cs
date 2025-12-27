@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class NetworkWrapper : MonoBehaviour
 {
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+	[RuntimeInitializeOnLoadMethod(1)]
 	public static void AutoInstantiate()
 	{
 		Object.DontDestroyOnLoad(Object.Instantiate<GameObject>(Resources.Load<GameObject>("P_NetworkWrapper")));
@@ -21,10 +21,10 @@ public class NetworkWrapper : MonoBehaviour
 		this.activeNetworkSystem.AddVoiceSettings(this.VoiceSettings);
 		this.activeNetworkSystem.config = this.netSysConfig;
 		this.activeNetworkSystem.regionNames = this.networkRegionNames;
-		this.activeNetworkSystem.OnPlayerJoined += this.UpdatePlayerCountWrapper;
-		this.activeNetworkSystem.OnPlayerLeft += this.UpdatePlayerCountWrapper;
-		this.activeNetworkSystem.OnMultiplayerStarted += this.UpdatePlayerCount;
-		this.activeNetworkSystem.OnReturnedToSinglePlayer += this.UpdatePlayerCount;
+		this.activeNetworkSystem.OnPlayerJoined += new Action<NetPlayer>(this.UpdatePlayerCountWrapper);
+		this.activeNetworkSystem.OnPlayerLeft += new Action<NetPlayer>(this.UpdatePlayerCountWrapper);
+		this.activeNetworkSystem.OnMultiplayerStarted += new Action(this.UpdatePlayerCount);
+		this.activeNetworkSystem.OnReturnedToSinglePlayer += new Action(this.UpdatePlayerCount);
 		Debug.Log("<color=green>initialize Network System</color>");
 		this.activeNetworkSystem.Initialise();
 	}

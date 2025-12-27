@@ -11,8 +11,8 @@ public static class DelegateExtensions
 			foreach (Delegate @delegate in invocationList)
 			{
 				string name = @delegate.Method.Name;
-				string str = (@delegate.Target != null) ? @delegate.Target.GetType().FullName : "Static Method";
-				list.Add(str + "." + name);
+				string text = (@delegate.Target != null) ? @delegate.Target.GetType().FullName : "Static Method";
+				list.Add(text + "." + name);
 			}
 		}
 		return list;

@@ -24,13 +24,13 @@ public class GorillaIKMgr : MonoBehaviour
 		this.transformList = new List<Transform>();
 		this.job = new GorillaIKMgr.IKJob
 		{
-			constantInput = new NativeArray<GorillaIKMgr.IKConstantInput>(40, Allocator.Persistent, NativeArrayOptions.ClearMemory),
-			input = new NativeArray<GorillaIKMgr.IKInput>(40, Allocator.Persistent, NativeArrayOptions.ClearMemory),
-			output = new NativeArray<GorillaIKMgr.IKOutput>(40, Allocator.Persistent, NativeArrayOptions.ClearMemory)
+			constantInput = new NativeArray<GorillaIKMgr.IKConstantInput>(40, 4, 1),
+			input = new NativeArray<GorillaIKMgr.IKInput>(40, 4, 1),
+			output = new NativeArray<GorillaIKMgr.IKOutput>(40, 4, 1)
 		};
 		this.jobXform = new GorillaIKMgr.IKTransformJob
 		{
-			transformRotations = new NativeArray<Quaternion>(140, Allocator.Persistent, NativeArrayOptions.ClearMemory)
+			transformRotations = new NativeArray<Quaternion>(140, 4, 1)
 		};
 	}
 
@@ -150,10 +150,10 @@ public class GorillaIKMgr : MonoBehaviour
 			this.jobXformHandle.Complete();
 		}
 		this.CopyInput();
-		this.jobHandle = this.job.Schedule(this.actualListSz, 20, default(JobHandle));
+		this.jobHandle = IJobParallelForExtensions.Schedule<GorillaIKMgr.IKJob>(this.job, this.actualListSz, 20, default(JobHandle));
 		this.jobHandle.Complete();
 		this.CopyOutput();
-		this.jobXformHandle = this.jobXform.Schedule(this.tAA, default(JobHandle));
+		this.jobXformHandle = IJobParallelForTransformExtensions.Schedule<GorillaIKMgr.IKTransformJob>(this.jobXform, this.tAA, default(JobHandle));
 		this.firstFrame = false;
 	}
 
@@ -216,30 +216,30 @@ public class GorillaIKMgr : MonoBehaviour
 		{
 			Quaternion initRotUpper = this.constantInput[i].initRotUpper;
 			Vector3 vector = GorillaIKMgr.IKJob.upperArmLocalPos;
-			Quaternion rotation = initRotUpper * this.constantInput[i].initRotLower;
+			Quaternion quaternion = initRotUpper * this.constantInput[i].initRotLower;
 			Vector3 vector2 = vector + initRotUpper * GorillaIKMgr.IKJob.forearmLocalPos;
-			Vector3 vector3 = vector2 + rotation * GorillaIKMgr.IKJob.handLocalPos;
+			Vector3 vector3 = vector2 + quaternion * GorillaIKMgr.IKJob.handLocalPos;
 			float num = 0f;
 			float magnitude = (vector - vector2).magnitude;
 			float magnitude2 = (vector2 - vector3).magnitude;
-			float max = magnitude + magnitude2 - num;
+			float num2 = magnitude + magnitude2 - num;
 			Vector3 normalized = (vector3 - vector).normalized;
 			Vector3 normalized2 = (vector2 - vector).normalized;
 			Vector3 normalized3 = (vector3 - vector2).normalized;
 			Vector3 normalized4 = (this.input[i].targetPos - vector).normalized;
-			float num2 = Mathf.Clamp((this.input[i].targetPos - vector).magnitude, num, max);
-			float num3 = Mathf.Acos(Mathf.Clamp(Vector3.Dot(normalized, normalized2), -1f, 1f));
-			float num4 = Mathf.Acos(Mathf.Clamp(Vector3.Dot(-normalized2, normalized3), -1f, 1f));
-			float num5 = Mathf.Acos(Mathf.Clamp(Vector3.Dot(normalized, normalized4), -1f, 1f));
-			float num6 = Mathf.Acos(Mathf.Clamp((magnitude2 * magnitude2 - magnitude * magnitude - num2 * num2) / (-2f * magnitude * num2), -1f, 1f));
-			float num7 = Mathf.Acos(Mathf.Clamp((num2 * num2 - magnitude * magnitude - magnitude2 * magnitude2) / (-2f * magnitude * magnitude2), -1f, 1f));
+			float num3 = Mathf.Clamp((this.input[i].targetPos - vector).magnitude, num, num2);
+			float num4 = Mathf.Acos(Mathf.Clamp(Vector3.Dot(normalized, normalized2), -1f, 1f));
+			float num5 = Mathf.Acos(Mathf.Clamp(Vector3.Dot(-normalized2, normalized3), -1f, 1f));
+			float num6 = Mathf.Acos(Mathf.Clamp(Vector3.Dot(normalized, normalized4), -1f, 1f));
+			float num7 = Mathf.Acos(Mathf.Clamp((magnitude2 * magnitude2 - magnitude * magnitude - num3 * num3) / (-2f * magnitude * num3), -1f, 1f));
+			float num8 = Mathf.Acos(Mathf.Clamp((num3 * num3 - magnitude * magnitude - magnitude2 * magnitude2) / (-2f * magnitude * magnitude2), -1f, 1f));
 			Vector3 normalized5 = Vector3.Cross(normalized, normalized2).normalized;
 			Vector3 normalized6 = Vector3.Cross(normalized, normalized4).normalized;
-			Quaternion rhs = Quaternion.AngleAxis((num6 - num3) * 57.29578f, Quaternion.Inverse(initRotUpper) * normalized5);
-			Quaternion rhs2 = Quaternion.AngleAxis((num7 - num4) * 57.29578f, Quaternion.Inverse(rotation) * normalized5);
-			Quaternion rhs3 = Quaternion.AngleAxis(num5 * 57.29578f, Quaternion.Inverse(initRotUpper) * normalized6);
-			Quaternion upperArmLocalRot_ = this.constantInput[i].initRotUpper * rhs3 * rhs;
-			Quaternion lowerArmLocalRot_ = this.constantInput[i].initRotLower * rhs2;
+			Quaternion quaternion2 = Quaternion.AngleAxis((num7 - num4) * 57.29578f, Quaternion.Inverse(initRotUpper) * normalized5);
+			Quaternion quaternion3 = Quaternion.AngleAxis((num8 - num5) * 57.29578f, Quaternion.Inverse(quaternion) * normalized5);
+			Quaternion quaternion4 = Quaternion.AngleAxis(num6 * 57.29578f, Quaternion.Inverse(initRotUpper) * normalized6);
+			Quaternion upperArmLocalRot_ = this.constantInput[i].initRotUpper * quaternion4 * quaternion2;
+			Quaternion lowerArmLocalRot_ = this.constantInput[i].initRotLower * quaternion3;
 			this.output[i] = new GorillaIKMgr.IKOutput(upperArmLocalRot_, lowerArmLocalRot_);
 		}
 

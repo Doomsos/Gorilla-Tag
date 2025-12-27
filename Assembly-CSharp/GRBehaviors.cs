@@ -5,12 +5,12 @@ public class GRBehaviors<T> : GRBehaviorsBase where T : Enum
 {
 	public void AddBehavior(T behavior, GRAbilityBase ability)
 	{
-		GRBehaviors<T>.BehaviorData item = new GRBehaviors<T>.BehaviorData
+		GRBehaviors<T>.BehaviorData behaviorData = new GRBehaviors<T>.BehaviorData
 		{
 			behavior = behavior,
 			ability = ability
 		};
-		this.behaviorData.Add(item);
+		this.behaviorData.Add(behaviorData);
 	}
 
 	public List<GRBehaviors<T>.BehaviorData> behaviorData;

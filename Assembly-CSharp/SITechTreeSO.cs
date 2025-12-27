@@ -26,7 +26,7 @@ public class SITechTreeSO : ScriptableObject
 
 	public bool TryGetNode(SIUpgradeType upgradeType, out GraphNode<SITechTreeNode> node)
 	{
-		return this._nodeLookup.TryGetValue(upgradeType, out node);
+		return this._nodeLookup.TryGetValue(upgradeType, ref node);
 	}
 
 	public bool IsValidPage(SITechTreePageId id)
@@ -83,7 +83,7 @@ public class SITechTreeSO : ScriptableObject
 	public SITechTreeNode GetTreeNode(SIUpgradeType upgradeType)
 	{
 		GraphNode<SITechTreeNode> graphNode;
-		if (this._nodeLookup.TryGetValue(upgradeType, out graphNode))
+		if (this._nodeLookup.TryGetValue(upgradeType, ref graphNode))
 		{
 			return graphNode.Value;
 		}
@@ -130,8 +130,7 @@ public class SITechTreeSO : ScriptableObject
 			}
 		}
 		this.AllNodes = new List<GraphNode<SITechTreeNode>>(this._nodeLookup.Values);
-		this.TreePageCount = (from v in (SIUpgradeType[])Enum.GetValues(typeof(SIUpgradeType))
-		select v.GetPageId()).Max() + 1;
+		this.TreePageCount = Enumerable.Max(Enumerable.Select<SIUpgradeType, int>((SIUpgradeType[])Enum.GetValues(typeof(SIUpgradeType)), (SIUpgradeType v) => v.GetPageId())) + 1;
 		this.TreeNodeCounts = new int[this.TreePageCount];
 		foreach (SIUpgradeType self in (SIUpgradeType[])Enum.GetValues(typeof(SIUpgradeType)))
 		{
@@ -148,9 +147,9 @@ public class SITechTreeSO : ScriptableObject
 		IPrefabRequirements component = entity.GetComponent<IPrefabRequirements>();
 		if (component != null)
 		{
-			foreach (GameEntity item in component.RequiredPrefabs)
+			foreach (GameEntity gameEntity in component.RequiredPrefabs)
 			{
-				this._spawnableEntities.Add(item);
+				this._spawnableEntities.Add(gameEntity);
 			}
 		}
 	}

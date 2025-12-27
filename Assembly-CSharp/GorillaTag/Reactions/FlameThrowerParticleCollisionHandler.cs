@@ -61,7 +61,7 @@ namespace GorillaTag.Reactions
 			{
 				return;
 			}
-			if (this._particleSystem.GetCollisionEvents(other, this._collisionEvents) <= 0)
+			if (ParticlePhysicsExtensions.GetCollisionEvents(this._particleSystem, other, this._collisionEvents) <= 0)
 			{
 				return;
 			}

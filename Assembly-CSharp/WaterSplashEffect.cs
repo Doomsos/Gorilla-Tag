@@ -46,8 +46,8 @@ public class WaterSplashEffect : MonoBehaviour
 	{
 		if (this.waterVolume != null && !this.waterVolume.isStationary && this.waterVolume.surfacePlane != null)
 		{
-			Vector3 b = Vector3.Dot(base.transform.position - this.waterVolume.surfacePlane.position, this.waterVolume.surfacePlane.up) * this.waterVolume.surfacePlane.up;
-			base.transform.position = base.transform.position - b;
+			Vector3 vector = Vector3.Dot(base.transform.position - this.waterVolume.surfacePlane.position, this.waterVolume.surfacePlane.up) * this.waterVolume.surfacePlane.up;
+			base.transform.position = base.transform.position - vector;
 		}
 		if ((Time.time - this.startTime) / this.lifeTime >= 1f)
 		{

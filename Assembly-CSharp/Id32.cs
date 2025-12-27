@@ -28,14 +28,14 @@ public struct Id32
 		return Id32.ComputeID(s);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public unsafe static Id32 ComputeID(string s)
 	{
 		int num = Id32.ComputeHash(s);
 		return *Unsafe.As<int, Id32>(ref num);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static int ComputeHash(string s)
 	{
 		if (s == null)

@@ -28,7 +28,7 @@ public class StringFormatter
 		StringFormatter.builder.Append(this.spans[0]);
 		for (int i = 1; i < this.spans.Length; i++)
 		{
-			StringFormatter.builder.Append(term1());
+			StringFormatter.builder.Append(term1.Invoke());
 			StringFormatter.builder.Append(this.spans[i]);
 		}
 		return StringFormatter.builder.ToString();
@@ -81,11 +81,11 @@ public class StringFormatter
 		{
 			if (this.indices[i - 1] == 0)
 			{
-				StringFormatter.builder.Append(term1());
+				StringFormatter.builder.Append(term1.Invoke());
 			}
 			else
 			{
-				StringFormatter.builder.Append(term2());
+				StringFormatter.builder.Append(term2.Invoke());
 			}
 			StringFormatter.builder.Append(this.spans[i]);
 		}
@@ -103,16 +103,16 @@ public class StringFormatter
 			{
 				if (num != 1)
 				{
-					StringFormatter.builder.Append(term3());
+					StringFormatter.builder.Append(term3.Invoke());
 				}
 				else
 				{
-					StringFormatter.builder.Append(term2());
+					StringFormatter.builder.Append(term2.Invoke());
 				}
 			}
 			else
 			{
-				StringFormatter.builder.Append(term1());
+				StringFormatter.builder.Append(term1.Invoke());
 			}
 			StringFormatter.builder.Append(this.spans[i]);
 		}
@@ -128,16 +128,16 @@ public class StringFormatter
 			switch (this.indices[i - 1])
 			{
 			case 0:
-				StringFormatter.builder.Append(term1());
+				StringFormatter.builder.Append(term1.Invoke());
 				break;
 			case 1:
-				StringFormatter.builder.Append(term2());
+				StringFormatter.builder.Append(term2.Invoke());
 				break;
 			case 2:
-				StringFormatter.builder.Append(term3());
+				StringFormatter.builder.Append(term3.Invoke());
 				break;
 			default:
-				StringFormatter.builder.Append(term4());
+				StringFormatter.builder.Append(term4.Invoke());
 				break;
 			}
 			StringFormatter.builder.Append(this.spans[i]);
@@ -163,7 +163,7 @@ public class StringFormatter
 		StringFormatter.builder.Append(this.spans[0]);
 		for (int i = 1; i < this.spans.Length; i++)
 		{
-			StringFormatter.builder.Append(terms[this.indices[i - 1]]());
+			StringFormatter.builder.Append(terms[this.indices[i - 1]].Invoke());
 			StringFormatter.builder.Append(this.spans[i]);
 		}
 		return StringFormatter.builder.ToString();
@@ -182,7 +182,7 @@ public class StringFormatter
 				break;
 			}
 			list.Add(input.Substring(num, num2 - num));
-			list2.Add((int)(input[num2 + 1] - '0'));
+			list2.Add((int)(input.get_Chars(num2 + 1) - '0'));
 			num = num2 + 2;
 		}
 		list.Add(input.Substring(num));

@@ -5,7 +5,6 @@ using System.Text;
 using GorillaGameModes;
 using TMPro;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class LuauHud : MonoBehaviour
 {
@@ -70,8 +69,8 @@ public class LuauHud : MonoBehaviour
 		{
 			return;
 		}
-		bool flag = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
-		bool flag2 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
+		bool flag = ControllerInputPoller.SecondaryButtonPress(4);
+		bool flag2 = ControllerInputPoller.SecondaryButtonPress(5);
 		if (flag != this.buttonDown && this.useLuauHud)
 		{
 			this.buttonDown = flag;

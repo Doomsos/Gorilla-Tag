@@ -6,42 +6,42 @@ namespace Fusion.CodeGen
 	[WeaverGenerated]
 	internal struct ReaderWriter@Fusion_NetworkString : IElementReaderWriter<NetworkString<_32>>
 	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe NetworkString<_32> Read(byte* data, int index)
 		{
 			return *(NetworkString<_32>*)(data + index * 132);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe ref NetworkString<_32> ReadRef(byte* data, int index)
 		{
 			return ref *(NetworkString<_32>*)(data + index * 132);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public unsafe void Write(byte* data, int index, NetworkString<_32> val)
 		{
 			*(NetworkString<_32>*)(data + index * 132) = val;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementWordCount()
 		{
 			return 33;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public int GetElementHashCode(NetworkString<_32> val)
 		{
 			return val.GetHashCode();
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		[WeaverGenerated]
 		public static IElementReaderWriter<NetworkString<_32>> GetInstance()
 		{

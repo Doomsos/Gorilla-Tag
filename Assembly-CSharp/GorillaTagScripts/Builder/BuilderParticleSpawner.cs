@@ -7,16 +7,16 @@ namespace GorillaTagScripts.Builder
 	{
 		private void Start()
 		{
-			this.spawnTrigger.onTriggerFirstEntered += this.OnEnter;
-			this.spawnTrigger.onTriggerLastExited += this.OnExit;
+			this.spawnTrigger.onTriggerFirstEntered += new Action(this.OnEnter);
+			this.spawnTrigger.onTriggerLastExited += new Action(this.OnExit);
 		}
 
 		private void OnDestroy()
 		{
 			if (this.spawnTrigger != null)
 			{
-				this.spawnTrigger.onTriggerFirstEntered -= this.OnEnter;
-				this.spawnTrigger.onTriggerLastExited -= this.OnExit;
+				this.spawnTrigger.onTriggerFirstEntered -= new Action(this.OnEnter);
+				this.spawnTrigger.onTriggerLastExited -= new Action(this.OnExit);
 			}
 		}
 

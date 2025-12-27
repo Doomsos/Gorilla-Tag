@@ -33,9 +33,9 @@ public class BeeSwarmManager : MonoBehaviour
 		this.bees = new List<AnimatedBee>(this.numBees);
 		for (int i = 0; i < this.numBees; i++)
 		{
-			AnimatedBee item = default(AnimatedBee);
-			item.InitVisual(this.beePrefab, this);
-			this.bees.Add(item);
+			AnimatedBee animatedBee = default(AnimatedBee);
+			animatedBee.InitVisual(this.beePrefab, this);
+			this.bees.Add(animatedBee);
 		}
 		this.playerCamera = Camera.main.transform;
 	}
@@ -47,9 +47,9 @@ public class BeeSwarmManager : MonoBehaviour
 			GameObject gameObject;
 			if (xsceneRef.TryResolve(out gameObject))
 			{
-				foreach (BeePerchPoint item in gameObject.GetComponentsInChildren<BeePerchPoint>())
+				foreach (BeePerchPoint beePerchPoint in gameObject.GetComponentsInChildren<BeePerchPoint>())
 				{
-					this.allPerchPoints.Add(item);
+					this.allPerchPoints.Add(beePerchPoint);
 				}
 			}
 		}
@@ -66,7 +66,7 @@ public class BeeSwarmManager : MonoBehaviour
 	{
 		Vector3 position = this.playerCamera.transform.position;
 		Vector3 position2 = Vector3.zero;
-		Vector3 a = Vector3.zero;
+		Vector3 vector = Vector3.zero;
 		float num = 1f / (float)this.bees.Count;
 		float num2 = float.PositiveInfinity;
 		float num3 = this.GeneralBuzzRange * this.GeneralBuzzRange;
@@ -84,7 +84,7 @@ public class BeeSwarmManager : MonoBehaviour
 			}
 			if (sqrMagnitude < num3)
 			{
-				a += position3;
+				vector += position3;
 				num4++;
 			}
 			this.bees[i] = animatedBee;
@@ -92,7 +92,7 @@ public class BeeSwarmManager : MonoBehaviour
 		this.nearbyBeeBuzz.transform.position = position2;
 		if (num4 > 0)
 		{
-			this.generalBeeBuzz.transform.position = a / (float)num4;
+			this.generalBeeBuzz.transform.position = vector / (float)num4;
 			this.generalBeeBuzz.enabled = true;
 			return;
 		}
@@ -107,7 +107,7 @@ public class BeeSwarmManager : MonoBehaviour
 		List<float> list2 = new List<float>(this.loopSizePerBee);
 		for (int i = 0; i < this.bees.Count; i++)
 		{
-			AnimatedBee value = this.bees[i];
+			AnimatedBee animatedBee = this.bees[i];
 			list = new List<BeePerchPoint>(this.loopSizePerBee);
 			list2 = new List<float>(this.loopSizePerBee);
 			this.PickPoints(this.loopSizePerBee, pickBuffer, this.allPerchPoints, ref srand, list);
@@ -115,9 +115,9 @@ public class BeeSwarmManager : MonoBehaviour
 			{
 				list2.Add(srand.NextFloat(this.BeeMinFlowerDuration, this.BeeMaxFlowerDuration));
 			}
-			value.InitRoute(list, list2, this);
-			value.InitRouteTimestamps();
-			this.bees[i] = value;
+			animatedBee.InitRoute(list, list2, this);
+			animatedBee.InitRouteTimestamps();
+			this.bees[i] = animatedBee;
 		}
 	}
 

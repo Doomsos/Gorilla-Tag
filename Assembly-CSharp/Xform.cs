@@ -30,9 +30,9 @@ public class Xform : MonoBehaviour
 
 	private unsafe void Update()
 	{
-		Matrix4x4 matrix = this.TRS();
+		Matrix4x4 matrix4x = this.TRS();
 		CommandBuilder commandBuilder = *Draw.ingame;
-		using (commandBuilder.WithMatrix(matrix))
+		using (commandBuilder.WithMatrix(matrix4x))
 		{
 			using (commandBuilder.WithLineWidth(2f, true))
 			{

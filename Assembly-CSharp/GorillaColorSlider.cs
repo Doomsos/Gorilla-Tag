@@ -15,8 +15,8 @@ public class GorillaColorSlider : MonoBehaviour
 	{
 		float num = this.startingLocation.x - this.zRange / 2f;
 		float num2 = this.startingLocation.x + this.zRange / 2f;
-		float x = (speed - this.minValue) * (num2 - num) / (this.maxValue - this.minValue) + num;
-		base.transform.position = new Vector3(x, this.startingLocation.y, this.startingLocation.z);
+		float num3 = (speed - this.minValue) * (num2 - num) / (this.maxValue - this.minValue) + num;
+		base.transform.position = new Vector3(num3, this.startingLocation.y, this.startingLocation.z);
 		this.valueImReporting = this.InterpolateValue(base.transform.position.x);
 	}
 

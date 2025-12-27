@@ -97,7 +97,7 @@ public class GameAgentManager : NetworkComponent, ITickSystemTick
 			if (this.netIdsForDestination.Count > 0 && Time.time > this.lastDestinationSentTime + this.destinationCooldown)
 			{
 				this.lastDestinationSentTime = Time.time;
-				base.SendRPC("ApplyDestinationRPC", RpcTarget.All, new object[]
+				base.SendRPC("ApplyDestinationRPC", 0, new object[]
 				{
 					this.netIdsForDestination.ToArray(),
 					this.destinationsForDestination.ToArray()
@@ -108,7 +108,7 @@ public class GameAgentManager : NetworkComponent, ITickSystemTick
 			if (this.netIdsForState.Count > 0 && Time.time > this.lastStateSentTime + this.stateCooldown)
 			{
 				this.lastStateSentTime = Time.time;
-				base.SendRPC("ApplyStateRPC", RpcTarget.All, new object[]
+				base.SendRPC("ApplyStateRPC", 0, new object[]
 				{
 					this.netIdsForState.ToArray(),
 					this.statesForState.ToArray()
@@ -119,7 +119,7 @@ public class GameAgentManager : NetworkComponent, ITickSystemTick
 			if (this.netIdsForBehavior.Count > 0 && Time.time > this.lastBehaviorSentTime + this.behaviorCooldown)
 			{
 				this.lastBehaviorSentTime = Time.time;
-				base.SendRPC("ApplyBehaviorRPC", RpcTarget.All, new object[]
+				base.SendRPC("ApplyBehaviorRPC", 0, new object[]
 				{
 					this.netIdsForBehavior.ToArray(),
 					this.behaviorsForBehavior.ToArray()
@@ -359,7 +359,7 @@ public class GameAgentManager : NetworkComponent, ITickSystemTick
 			return;
 		}
 		agent.targetPlayer = player;
-		base.SendRPC("ApplyTargetRPC", RpcTarget.Others, new object[]
+		base.SendRPC("ApplyTargetRPC", 1, new object[]
 		{
 			this.entityManager.GetNetIdFromEntityId(agent.entity.id),
 			(player == null) ? null : player.GetPlayerRef()
@@ -397,7 +397,7 @@ public class GameAgentManager : NetworkComponent, ITickSystemTick
 			return;
 		}
 		agent.OnJumpRequested(start, end, heightScale, speedScale);
-		base.SendRPC("ApplyJumpRPC", RpcTarget.Others, new object[]
+		base.SendRPC("ApplyJumpRPC", 1, new object[]
 		{
 			this.entityManager.GetNetIdFromEntityId(agent.entity.id),
 			start,

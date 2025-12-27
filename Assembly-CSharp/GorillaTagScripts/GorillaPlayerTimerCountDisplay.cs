@@ -63,8 +63,8 @@ namespace GorillaTagScripts
 		{
 			if (actorNum == NetworkSystem.Instance.LocalPlayer.ActorNumber)
 			{
-				double value = timeDelta / 1000.0;
-				this.displayText.text = "TIME: " + TimeSpan.FromSeconds(value).ToString("mm\\:ss\\:f");
+				double num = timeDelta / 1000.0;
+				this.displayText.text = "TIME: " + TimeSpan.FromSeconds(num).ToString("mm\\:ss\\:f");
 				if (this.TickRunning)
 				{
 					TickSystem<object>.RemoveTickCallback(this);

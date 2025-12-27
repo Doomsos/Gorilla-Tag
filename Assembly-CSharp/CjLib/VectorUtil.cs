@@ -53,8 +53,8 @@ namespace CjLib
 			}
 			if (num < -0.99999f)
 			{
-				Vector3 axis = VectorUtil.FindOrthogonal(a);
-				return Quaternion.AngleAxis(180f * t, axis) * a;
+				Vector3 vector = VectorUtil.FindOrthogonal(a);
+				return Quaternion.AngleAxis(180f * t, vector) * a;
 			}
 			float num2 = MathUtil.AcosSafe(num);
 			return (Mathf.Sin((1f - t) * num2) * a + Mathf.Sin(t * num2) * b) / Mathf.Sin(num2);
@@ -62,8 +62,8 @@ namespace CjLib
 
 		public static Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
 		{
-			float d = t * t;
-			return 0.5f * (2f * p1 + (-p0 + p2) * t + (2f * p0 - 5f * p1 + 4f * p2 - p3) * d + (-p0 + 3f * p1 - 3f * p2 + p3) * d * t);
+			float num = t * t;
+			return 0.5f * (2f * p1 + (-p0 + p2) * t + (2f * p0 - 5f * p1 + 4f * p2 - p3) * num + (-p0 + 3f * p1 - 3f * p2 + p3) * num * t);
 		}
 	}
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class VectorMath
 {
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3Int Clamped(this Vector3Int v, int min, int max)
 	{
 		v.x = Math.Clamp(v.x, min, max);
@@ -14,7 +14,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void SetXYZ(this Vector3 v, float f)
 	{
 		v.x = f;
@@ -22,7 +22,7 @@ public static class VectorMath
 		v.z = f;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3Int Abs(this Vector3Int v)
 	{
 		v.x = Math.Abs(v.x);
@@ -31,7 +31,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Abs(this Vector3 v)
 	{
 		v.x = Math.Abs(v.x);
@@ -40,19 +40,19 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Min(this Vector3 v, Vector3 other)
 	{
 		return new Vector3(Math.Min(v.x, other.x), Math.Min(v.y, other.y), Math.Min(v.z, other.z));
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Max(this Vector3 v, Vector3 other)
 	{
 		return new Vector3(Math.Max(v.x, other.x), Math.Max(v.y, other.y), Math.Max(v.z, other.z));
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Add(this Vector3 v, float amount)
 	{
 		v.x += amount;
@@ -61,7 +61,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Sub(this Vector3 v, float amount)
 	{
 		v.x -= amount;
@@ -70,7 +70,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Mul(this Vector3 v, float amount)
 	{
 		v.x *= amount;
@@ -79,7 +79,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Div(this Vector3 v, float amount)
 	{
 		float num = 1f / amount;
@@ -89,7 +89,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Max(this Vector3 v)
 	{
 		float num = Math.Max(Math.Max(v.x, v.y), v.z);
@@ -99,7 +99,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Max(this Vector3 v, float max)
 	{
 		float num = Math.Max(Math.Max(Math.Max(v.x, v.y), v.z), max);
@@ -109,7 +109,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static float3 Max(this float3 v)
 	{
 		float num = Math.Max(v.x, Math.Max(v.y, v.z));
@@ -119,13 +119,13 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static bool IsFinite(this Vector3 v)
 	{
 		return float.IsFinite(v.x) && float.IsFinite(v.y) && float.IsFinite(v.z);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3 Clamped(this Vector3 v, Vector3 min, Vector3 max)
 	{
 		v.x = Math.Clamp(v.x, min.x, max.x);
@@ -134,7 +134,7 @@ public static class VectorMath
 		return v;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static bool Approx0(this Vector3 v, float epsilon = 1E-05f)
 	{
 		float x = v.x;
@@ -143,7 +143,7 @@ public static class VectorMath
 		return x * x + y * y + z * z <= epsilon * epsilon;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static bool Approx1(this Vector3 v, float epsilon = 1E-05f)
 	{
 		float num = v.x - 1f;
@@ -152,7 +152,7 @@ public static class VectorMath
 		return num * num + num2 * num2 + num3 * num3 <= epsilon * epsilon;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static bool Approx(this Vector3 a, Vector3 b, float epsilon = 1E-05f)
 	{
 		float num = a.x - b.x;
@@ -161,7 +161,7 @@ public static class VectorMath
 		return num * num + num2 * num2 + num3 * num3 <= epsilon * epsilon;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static bool Approx(this Vector4 a, Vector4 b, float epsilon = 1E-05f)
 	{
 		float num = a.x - b.x;

@@ -109,30 +109,35 @@ public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQues
 
 	private void SelectActiveQuests()
 	{
-		DateTime dateTime = new DateTime(2025, 1, 10, 18, 0, 0, DateTimeKind.Utc);
+		DateTime dateTime;
+		dateTime..ctor(2025, 1, 10, 18, 0, 0, 1);
 		TimeSpan timeSpan = TimeSpan.FromHours(-8.0);
-		DateTime dateStart = new DateTime(1, 1, 1, 0, 0, 0);
-		DateTime dateEnd = new DateTime(2006, 12, 31, 0, 0, 0);
-		TimeSpan daylightDelta = TimeSpan.FromHours(1.0);
-		TimeZoneInfo.TransitionTime daylightTransitionStart = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 4, 1, DayOfWeek.Sunday);
-		TimeZoneInfo.TransitionTime daylightTransitionEnd = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, DayOfWeek.Sunday);
-		DateTime dateStart2 = new DateTime(2007, 1, 1, 0, 0, 0);
-		DateTime dateEnd2 = new DateTime(9999, 12, 31, 0, 0, 0);
-		TimeSpan daylightDelta2 = TimeSpan.FromHours(1.0);
-		TimeZoneInfo.TransitionTime daylightTransitionStart2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 2, DayOfWeek.Sunday);
-		TimeZoneInfo.TransitionTime daylightTransitionEnd2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 11, 1, DayOfWeek.Sunday);
+		DateTime dateTime2;
+		dateTime2..ctor(1, 1, 1, 0, 0, 0);
+		DateTime dateTime3;
+		dateTime3..ctor(2006, 12, 31, 0, 0, 0);
+		TimeSpan timeSpan2 = TimeSpan.FromHours(1.0);
+		TimeZoneInfo.TransitionTime transitionTime = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 4, 1, 0);
+		TimeZoneInfo.TransitionTime transitionTime2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, 0);
+		DateTime dateTime4;
+		dateTime4..ctor(2007, 1, 1, 0, 0, 0);
+		DateTime dateTime5;
+		dateTime5..ctor(9999, 12, 31, 0, 0, 0);
+		TimeSpan timeSpan3 = TimeSpan.FromHours(1.0);
+		TimeZoneInfo.TransitionTime transitionTime3 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 2, 0);
+		TimeZoneInfo.TransitionTime transitionTime4 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 11, 1, 0);
 		TimeZoneInfo timeZoneInfo = TimeZoneInfo.CreateCustomTimeZone("Pacific Standard Time", timeSpan, "Pacific Standard Time", "Pacific Standard Time", "Pacific Standard Time", new TimeZoneInfo.AdjustmentRule[]
 		{
-			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart, dateEnd, daylightDelta, daylightTransitionStart, daylightTransitionEnd),
-			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateStart2, dateEnd2, daylightDelta2, daylightTransitionStart2, daylightTransitionEnd2)
+			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateTime2, dateTime3, timeSpan2, transitionTime, transitionTime2),
+			TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(dateTime4, dateTime5, timeSpan3, transitionTime3, transitionTime4)
 		});
 		if (timeZoneInfo != null && timeZoneInfo.IsDaylightSavingTime(DateTime.UtcNow - timeSpan))
 		{
 			dateTime -= TimeSpan.FromHours(1.0);
 		}
-		TimeSpan timeSpan2 = DateTime.UtcNow - dateTime;
+		TimeSpan timeSpan4 = DateTime.UtcNow - dateTime;
 		this.RemoveDisabledQuests();
-		int days = timeSpan2.Days;
+		int days = timeSpan4.Days;
 		this.dailyQuestSetID = days;
 		this.weeklyQuestSetID = days / 7;
 		RotatingQuestsManager.LastQuestDailyID = this.dailyQuestSetID;
@@ -386,9 +391,9 @@ public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQues
 	{
 		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in questGroups)
 		{
-			foreach (RotatingQuest obj in rotatingQuestGroup.quests)
+			foreach (RotatingQuest rotatingQuest in rotatingQuestGroup.quests)
 			{
-				A_1.action(obj);
+				A_1.action.Invoke(rotatingQuest);
 			}
 		}
 	}

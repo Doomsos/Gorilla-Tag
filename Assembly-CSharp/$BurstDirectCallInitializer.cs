@@ -4,7 +4,7 @@ using UnityEngine;
 
 internal static class $BurstDirectCallInitializer
 {
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+	[RuntimeInitializeOnLoadMethod(2)]
 	private static void Initialize()
 	{
 		BurstCompilerOptions options = BurstCompiler.Options;

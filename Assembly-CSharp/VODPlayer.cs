@@ -70,7 +70,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	public void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		this.player.loopPointReached -= this.Player_loopPointReached;
+		this.player.loopPointReached -= new VideoPlayer.EventHandler(this.Player_loopPointReached);
 		VODTarget.AlertEnabled = (Action<VODTarget>)Delegate.Remove(VODTarget.AlertEnabled, new Action<VODTarget>(this.VODTarget_AlertEnabled));
 		VODTarget.AlertDisabled = (Action<VODTarget>)Delegate.Remove(VODTarget.AlertDisabled, new Action<VODTarget>(this.VODTarget_AlertDisabled));
 	}
@@ -206,7 +206,8 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		DateTime serverTime = GorillaComputer.instance.GetServerTime();
 		int hour = serverTime.Hour;
 		int minute = serverTime.Minute;
-		DateTime dateTime = new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, hour, minute, 0);
+		DateTime dateTime;
+		dateTime..ctor(serverTime.Year, serverTime.Month, serverTime.Day, hour, minute, 0);
 		int num = -1;
 		for (int i = 0; i < this.schedule.hourly.Length; i++)
 		{
@@ -262,7 +263,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		VODPlayer.state = VODPlayer.State.CRASHED;
 		if (VODPlayer.OnCrash != null)
 		{
-			VODPlayer.OnCrash();
+			VODPlayer.OnCrash.Invoke();
 		}
 		for (int i = 0; i < this.targets.Count; i++)
 		{

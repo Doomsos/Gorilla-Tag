@@ -49,7 +49,7 @@ public class GorillaSkinToggle : MonoBehaviour, ISpawnable
 	{
 		if (this.coloringRules.Length != 0)
 		{
-			this._rig.OnColorChanged += this.OnPlayerColorChanged;
+			this._rig.OnColorChanged += new Action<Color>(this.OnPlayerColorChanged);
 			this.OnPlayerColorChanged(this._rig.playerColor);
 		}
 		this.Apply();
@@ -64,7 +64,7 @@ public class GorillaSkinToggle : MonoBehaviour, ISpawnable
 		this.Remove();
 		if (this.coloringRules.Length != 0)
 		{
-			this._rig.OnColorChanged -= this.OnPlayerColorChanged;
+			this._rig.OnColorChanged -= new Action<Color>(this.OnPlayerColorChanged);
 		}
 	}
 

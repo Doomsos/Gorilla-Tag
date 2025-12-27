@@ -16,7 +16,7 @@ namespace GorillaLocomotion.Gameplay
 			if (RopeSwingManager.instance != null && RopeSwingManager.instance != this)
 			{
 				GTDev.LogWarning<string>("Instance of RopeSwingManager already exists. Destroying.", null);
-				UnityEngine.Object.Destroy(this);
+				Object.Destroy(this);
 				return;
 			}
 			if (RopeSwingManager.instance == null)
@@ -49,7 +49,7 @@ namespace GorillaLocomotion.Gameplay
 		{
 			if (NetworkSystem.Instance.InRoom)
 			{
-				this.photonView.RPC("SetVelocity", RpcTarget.All, new object[]
+				this.photonView.RPC("SetVelocity", 0, new object[]
 				{
 					ropeId,
 					boneIndex,
@@ -63,7 +63,7 @@ namespace GorillaLocomotion.Gameplay
 
 		public bool TryGetRope(int ropeId, out GorillaRopeSwing result)
 		{
-			return this.ropes.TryGetValue(ropeId, out result);
+			return this.ropes.TryGetValue(ropeId, ref result);
 		}
 
 		[PunRPC]
@@ -87,7 +87,7 @@ namespace GorillaLocomotion.Gameplay
 				{
 					throw new ArgumentNullException("runner");
 				}
-				if (runner.Stage != SimulationStages.Resimulate)
+				if (runner.Stage != 4)
 				{
 					int num = 8;
 					num += 4;
@@ -110,11 +110,11 @@ namespace GorillaLocomotion.Gameplay
 							num2 += 12;
 							ReadWriteUtilsForWeaver.WriteBoolean((int*)(ptr2 + num2), wholeRope);
 							num2 += 4;
-							ptr->Offset = num2 * 8;
-							ptr->SetStatic();
+							ptr.Offset = num2 * 8;
+							ptr.SetStatic();
 							runner.SendRpc(ptr);
 						}
-						info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
+						info = RpcInfo.FromLocal(runner, 0, 0);
 						goto IL_10;
 					}
 					NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void GorillaLocomotion.Gameplay.RopeSwingManager::RPC_SetVelocity(Fusion.NetworkRunner,System.Int32,System.Int32,UnityEngine.Vector3,System.Boolean,Fusion.RpcInfo)", num);
@@ -158,7 +158,7 @@ namespace GorillaLocomotion.Gameplay
 			bool flag = ReadWriteUtilsForWeaver.ReadBoolean((int*)(ptr + num));
 			num += 4;
 			bool wholeRope = flag;
-			RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
+			RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
 			NetworkBehaviourUtils.InvokeRpc = true;
 			RopeSwingManager.RPC_SetVelocity(runner, ropeId, boneIndex, velocity, wholeRope, info);
 		}

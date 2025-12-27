@@ -31,12 +31,12 @@ public class LinearSpline : MonoBehaviour
 			for (int k = 0; k < this.controlPoints.Count; k++)
 			{
 				int num3 = (k > 0) ? (k - 1) : (this.controlPoints.Count - 1);
-				int index = (k + 1) % this.controlPoints.Count;
-				float num4 = Mathf.Min(Mathf.Min(this.cornerRadius, this.distances[num3 % this.distances.Count] * 0.5f), this.distances[k % this.distances.Count] * 0.5f);
+				int num4 = (k + 1) % this.controlPoints.Count;
+				float num5 = Mathf.Min(Mathf.Min(this.cornerRadius, this.distances[num3 % this.distances.Count] * 0.5f), this.distances[k % this.distances.Count] * 0.5f);
 				this.curveBoundaries.Add(new LinearSpline.CurveBoundary
 				{
-					start = Vector3.Lerp(this.controlPoints[num3], this.controlPoints[k], 1f - num4 / this.distances[num3 % this.distances.Count]),
-					end = Vector3.Lerp(this.controlPoints[k], this.controlPoints[index], num4 / this.distances[k])
+					start = Vector3.Lerp(this.controlPoints[num3], this.controlPoints[k], 1f - num5 / this.distances[num3 % this.distances.Count]),
+					end = Vector3.Lerp(this.controlPoints[k], this.controlPoints[num4], num5 / this.distances[k])
 				});
 			}
 		}
@@ -92,24 +92,24 @@ public class LinearSpline : MonoBehaviour
 				{
 					Vector3 start = this.curveBoundaries[num5].start;
 					Vector3 end = this.curveBoundaries[num5].end;
-					float t2 = 0.5f * Mathf.Clamp01((num3 - num8) / (1f - num8));
-					Vector3 a = Vector3.Lerp(start, this.controlPoints[num5], t2);
-					Vector3 b = Vector3.Lerp(this.controlPoints[num5], end, t2);
-					return Vector3.Lerp(a, b, t2);
+					float num9 = 0.5f * Mathf.Clamp01((num3 - num8) / (1f - num8));
+					Vector3 vector = Vector3.Lerp(start, this.controlPoints[num5], num9);
+					Vector3 vector2 = Vector3.Lerp(this.controlPoints[num5], end, num9);
+					return Vector3.Lerp(vector, vector2, num9);
 				}
 			}
 			else if (num3 <= 0.5f && (this.looping || num2 > 0))
 			{
-				int num9 = (num2 > 0) ? (num2 - 1) : (this.controlPoints.Count - 1);
-				float num10 = Mathf.Min(Mathf.Min(this.cornerRadius, this.distances[num2] * 0.5f), this.distances[num9 % this.distances.Count] * 0.5f) / this.distances[num2];
-				if (num3 < num10)
+				int num10 = (num2 > 0) ? (num2 - 1) : (this.controlPoints.Count - 1);
+				float num11 = Mathf.Min(Mathf.Min(this.cornerRadius, this.distances[num2] * 0.5f), this.distances[num10 % this.distances.Count] * 0.5f) / this.distances[num2];
+				if (num3 < num11)
 				{
 					Vector3 start2 = this.curveBoundaries[num2].start;
 					Vector3 end2 = this.curveBoundaries[num2].end;
-					float t3 = 0.5f + 0.5f * Mathf.Clamp01(num3 / num10);
-					Vector3 a2 = Vector3.Lerp(start2, this.controlPoints[num2], t3);
-					Vector3 b2 = Vector3.Lerp(this.controlPoints[num2], end2, t3);
-					return Vector3.Lerp(a2, b2, t3);
+					float num12 = 0.5f + 0.5f * Mathf.Clamp01(num3 / num11);
+					Vector3 vector3 = Vector3.Lerp(start2, this.controlPoints[num2], num12);
+					Vector3 vector4 = Vector3.Lerp(this.controlPoints[num2], end2, num12);
+					return Vector3.Lerp(vector3, vector4, num12);
 				}
 			}
 		}
@@ -119,8 +119,8 @@ public class LinearSpline : MonoBehaviour
 	public Vector3 GetForwardTangent(float t, float step = 0.01f)
 	{
 		t = Mathf.Clamp(t, 0f, 1f - step - Mathf.Epsilon);
-		Vector3 b = this.Evaluate(t);
-		return (this.Evaluate(t + step) - b).normalized;
+		Vector3 vector = this.Evaluate(t);
+		return (this.Evaluate(t + step) - vector).normalized;
 	}
 
 	private void OnDrawGizmosSelected()
@@ -128,16 +128,16 @@ public class LinearSpline : MonoBehaviour
 		this.RefreshControlPoints();
 		Gizmos.color = Color.yellow;
 		int num = this.gizmoResolution;
-		Vector3 from = this.Evaluate(0f);
+		Vector3 vector = this.Evaluate(0f);
 		for (int i = 1; i <= num; i++)
 		{
 			float t = (float)i / (float)num;
-			Vector3 vector = this.Evaluate(t);
-			Gizmos.DrawLine(from, vector);
-			from = vector;
+			Vector3 vector2 = this.Evaluate(t);
+			Gizmos.DrawLine(vector, vector2);
+			vector = vector2;
 		}
-		Vector3 to = this.Evaluate(1f);
-		Gizmos.DrawLine(from, to);
+		Vector3 vector3 = this.Evaluate(1f);
+		Gizmos.DrawLine(vector, vector3);
 	}
 
 	public Transform[] controlPointTransforms = new Transform[0];

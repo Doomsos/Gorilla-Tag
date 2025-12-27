@@ -23,26 +23,26 @@ public static class KIDFeaturesExtensions
 
 	public static EKIDFeatures? FromString(string name)
 	{
-		string a = name.ToLower();
-		if (a == "voice-chat")
+		string text = name.ToLower();
+		if (text == "voice-chat")
 		{
 			return new EKIDFeatures?(EKIDFeatures.Voice_Chat);
 		}
-		if (a == "custom-username")
+		if (text == "custom-username")
 		{
 			return new EKIDFeatures?(EKIDFeatures.Custom_Nametags);
 		}
-		if (a == "multiplayer")
+		if (text == "multiplayer")
 		{
 			return new EKIDFeatures?(EKIDFeatures.Multiplayer);
 		}
-		if (a == "mods")
+		if (text == "mods")
 		{
 			return new EKIDFeatures?(EKIDFeatures.Mods);
 		}
-		if (!(a == "join-groups"))
+		if (!(text == "join-groups"))
 		{
-			return null;
+			return default(EKIDFeatures?);
 		}
 		return new EKIDFeatures?(EKIDFeatures.Groups);
 	}

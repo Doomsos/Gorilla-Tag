@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UniLabs.Time
 {
-	[JsonObject(MemberSerialization.OptIn)]
+	[JsonObject(1)]
 	[Serializable]
 	public class UTimeSpanRange
 	{

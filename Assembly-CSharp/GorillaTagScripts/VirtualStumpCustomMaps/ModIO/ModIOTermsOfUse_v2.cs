@@ -85,55 +85,55 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps.ModIO
 			{
 				text = text.Remove(match.Index, match.Length);
 				text = text.Insert(match.Index, "\n<align=\"center\">");
-				int startIndex = text.IndexOf("</p>", match.Index, StringComparison.Ordinal);
-				text = text.Remove(startIndex, 4);
-				text = text.Insert(startIndex, "</align>");
+				int num = text.IndexOf("</p>", match.Index, 4);
+				text = text.Remove(num, 4);
+				text = text.Insert(num, "</align>");
 				match = Regex.Match(text, "<p[^>]*align:center[^>]*>{1}");
 			}
 			text = text.Replace("<p>", "\n");
 			text = text.Replace("</p>", "");
 			text = Regex.Replace(text, "<ol[^>]*>{1}", "<ol>");
-			int num = text.IndexOf("<ol>", StringComparison.OrdinalIgnoreCase);
-			bool flag = num != -1;
+			int num2 = text.IndexOf("<ol>", 5);
+			bool flag = num2 != -1;
 			while (flag)
 			{
-				int num2 = text.IndexOf("</ol>", num, StringComparison.OrdinalIgnoreCase);
-				text = text.Remove(num, "<ol>".Length);
-				int num3 = text.IndexOf("<li>", num, StringComparison.OrdinalIgnoreCase);
-				bool flag2 = num3 != -1;
-				int num4 = 0;
+				int num3 = text.IndexOf("</ol>", num2, 5);
+				text = text.Remove(num2, "<ol>".Length);
+				int num4 = text.IndexOf("<li>", num2, 5);
+				bool flag2 = num4 != -1;
+				int num5 = 0;
 				while (flag2)
 				{
-					text = text.Remove(num3, "<li>".Length);
-					text = text.Insert(num3, this.GetStringForListItemIdx_LowerAlpha(num4++));
-					num2 = text.IndexOf("</ol>", num, StringComparison.OrdinalIgnoreCase);
-					num3 = text.IndexOf("<li>", num, StringComparison.OrdinalIgnoreCase);
-					flag2 = (num3 != -1 && num3 < num2);
+					text = text.Remove(num4, "<li>".Length);
+					text = text.Insert(num4, this.GetStringForListItemIdx_LowerAlpha(num5++));
+					num3 = text.IndexOf("</ol>", num2, 5);
+					num4 = text.IndexOf("<li>", num2, 5);
+					flag2 = (num4 != -1 && num4 < num3);
 				}
-				text = text.Remove(num2, "</ol>".Length);
-				num = text.IndexOf("<ol>", StringComparison.OrdinalIgnoreCase);
-				flag = (num != -1);
+				text = text.Remove(num3, "</ol>".Length);
+				num2 = text.IndexOf("<ol>", 5);
+				flag = (num2 != -1);
 			}
 			text = Regex.Replace(text, "<ul[^>]*>{1}", "<ul>");
-			int num5 = text.IndexOf("<ul>", StringComparison.OrdinalIgnoreCase);
-			bool flag3 = num5 != -1;
+			int num6 = text.IndexOf("<ul>", 5);
+			bool flag3 = num6 != -1;
 			while (flag3)
 			{
-				int num6 = text.IndexOf("</ul>", num5, StringComparison.OrdinalIgnoreCase);
-				text = text.Remove(num5, "<ul>".Length);
-				int num7 = text.IndexOf("<li>", num5, StringComparison.OrdinalIgnoreCase);
-				bool flag4 = num7 != -1;
+				int num7 = text.IndexOf("</ul>", num6, 5);
+				text = text.Remove(num6, "<ul>".Length);
+				int num8 = text.IndexOf("<li>", num6, 5);
+				bool flag4 = num8 != -1;
 				while (flag4)
 				{
-					text = text.Remove(num7, "<li>".Length);
-					text = text.Insert(num7, "  - <indent=5%>");
-					num6 = text.IndexOf("</ul>", num5, StringComparison.OrdinalIgnoreCase);
-					num7 = text.IndexOf("<li>", num5, StringComparison.OrdinalIgnoreCase);
-					flag4 = (num7 != -1 && num7 < num6);
+					text = text.Remove(num8, "<li>".Length);
+					text = text.Insert(num8, "  - <indent=5%>");
+					num7 = text.IndexOf("</ul>", num6, 5);
+					num8 = text.IndexOf("<li>", num6, 5);
+					flag4 = (num8 != -1 && num8 < num7);
 				}
-				text = text.Remove(num6, "</ul>".Length);
-				num5 = text.IndexOf("<ul>", StringComparison.OrdinalIgnoreCase);
-				flag3 = (num5 != -1);
+				text = text.Remove(num7, "</ul>".Length);
+				num6 = text.IndexOf("<ul>", 5);
+				flag3 = (num6 != -1);
 			}
 			text = Regex.Replace(text, "<table[^>]*>{1}", "");
 			text = text.Replace("<tbody>", "");

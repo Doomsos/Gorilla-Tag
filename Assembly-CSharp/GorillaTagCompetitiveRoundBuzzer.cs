@@ -5,14 +5,14 @@ public class GorillaTagCompetitiveRoundBuzzer : MonoBehaviour
 {
 	private void OnEnable()
 	{
-		GorillaTagCompetitiveManager.onStateChanged += this.OnStateChanged;
-		GorillaTagCompetitiveManager.onUpdateRemainingTime += this.OnUpdateRemainingTime;
+		GorillaTagCompetitiveManager.onStateChanged += new Action<GorillaTagCompetitiveManager.GameState>(this.OnStateChanged);
+		GorillaTagCompetitiveManager.onUpdateRemainingTime += new Action<float>(this.OnUpdateRemainingTime);
 	}
 
 	private void OnDisable()
 	{
-		GorillaTagCompetitiveManager.onStateChanged -= this.OnStateChanged;
-		GorillaTagCompetitiveManager.onUpdateRemainingTime -= this.OnUpdateRemainingTime;
+		GorillaTagCompetitiveManager.onStateChanged -= new Action<GorillaTagCompetitiveManager.GameState>(this.OnStateChanged);
+		GorillaTagCompetitiveManager.onUpdateRemainingTime -= new Action<float>(this.OnUpdateRemainingTime);
 	}
 
 	private void OnStateChanged(GorillaTagCompetitiveManager.GameState newState)

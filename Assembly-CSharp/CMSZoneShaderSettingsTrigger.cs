@@ -20,7 +20,7 @@ public class CMSZoneShaderSettingsTrigger : MonoBehaviour
 	{
 		base.gameObject.layer = UnityLayer.GorillaBoundary.ToLayerIndex();
 		this.activateOnEnable = triggerSettings.activateOnEnable;
-		if (triggerSettings.activationType == ZoneShaderTriggerSettings.ActivationType.ActivateCustomMapDefaults)
+		if (triggerSettings.activationType == 1)
 		{
 			this.activateCustomMapDefaults = true;
 			return;

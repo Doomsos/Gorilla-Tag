@@ -40,39 +40,39 @@ public class GorillaVelocityEstimator : MonoBehaviour
 	public void TriggeredLateUpdate()
 	{
 		Vector3 vector;
-		Quaternion lhs;
-		base.transform.GetPositionAndRotation(out vector, out lhs);
-		Vector3 b = Vector3.zero;
+		Quaternion quaternion;
+		base.transform.GetPositionAndRotation(ref vector, ref quaternion);
+		Vector3 vector2 = Vector3.zero;
 		if (!this.useGlobalSpace)
 		{
-			b = GTPlayer.Instance.InstantaneousVelocity;
+			vector2 = GTPlayer.Instance.InstantaneousVelocity;
 		}
-		Vector3 vector2 = (vector - this.lastPos) / Time.deltaTime - b;
-		Vector3 vector3 = (lhs * Quaternion.Inverse(this.lastRotation)).eulerAngles;
-		if (vector3.x > 180f)
+		Vector3 vector3 = (vector - this.lastPos) / Time.deltaTime - vector2;
+		Vector3 vector4 = (quaternion * Quaternion.Inverse(this.lastRotation)).eulerAngles;
+		if (vector4.x > 180f)
 		{
-			vector3.x -= 360f;
+			vector4.x -= 360f;
 		}
-		if (vector3.y > 180f)
+		if (vector4.y > 180f)
 		{
-			vector3.y -= 360f;
+			vector4.y -= 360f;
 		}
-		if (vector3.z > 180f)
+		if (vector4.z > 180f)
 		{
-			vector3.z -= 360f;
+			vector4.z -= 360f;
 		}
-		vector3 *= 0.017453292f / Time.fixedDeltaTime;
-		this.linearVelocity += (vector2 - this.history[this.currentFrame].linear) / (float)this.numFrames;
-		this.angularVelocity += (vector3 - this.history[this.currentFrame].angular) / (float)this.numFrames;
+		vector4 *= 0.017453292f / Time.fixedDeltaTime;
+		this.linearVelocity += (vector3 - this.history[this.currentFrame].linear) / (float)this.numFrames;
+		this.angularVelocity += (vector4 - this.history[this.currentFrame].angular) / (float)this.numFrames;
 		this.history[this.currentFrame] = new GorillaVelocityEstimator.VelocityHistorySample
 		{
-			linear = vector2,
-			angular = vector3
+			linear = vector3,
+			angular = vector4
 		};
 		this.handPos = vector;
 		this.currentFrame = (this.currentFrame + 1) % this.numFrames;
 		this.lastPos = vector;
-		this.lastRotation = lhs;
+		this.lastRotation = quaternion;
 	}
 
 	[Min(1f)]

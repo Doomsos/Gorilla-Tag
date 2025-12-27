@@ -6,12 +6,12 @@ public class MazePlayerCollection : MonoBehaviour
 {
 	private void Start()
 	{
-		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeftRoom);
 	}
 
 	private void OnDestroy()
 	{
-		NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(this.OnPlayerLeftRoom);
 	}
 
 	public void OnTriggerEnter(Collider other)

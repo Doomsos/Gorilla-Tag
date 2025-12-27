@@ -54,7 +54,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			unityAction();
+			unityAction.Invoke();
 		}
 
 		public bool IsHooked()

@@ -4,11 +4,11 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 [CompilerGenerated]
-[EditorBrowsable(EditorBrowsableState.Never)]
+[EditorBrowsable(1)]
 [GeneratedCode("Unity.MonoScriptGenerator.MonoScriptInfoGenerator", null)]
 internal class UnitySourceGeneratedAssemblyMonoScriptTypes_v1
 {
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static UnitySourceGeneratedAssemblyMonoScriptTypes_v1.MonoScriptData Get()
 	{
 		UnitySourceGeneratedAssemblyMonoScriptTypes_v1.MonoScriptData result = default(UnitySourceGeneratedAssemblyMonoScriptTypes_v1.MonoScriptData);

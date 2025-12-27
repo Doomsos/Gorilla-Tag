@@ -172,9 +172,9 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.Append(this.cachedError);
 			TMP_Text tmp_Text = this.mainScreenText;
-			string str = "<color=\"red\">";
+			string text = "<color=\"red\">";
 			StringBuilder stringBuilder2 = stringBuilder;
-			tmp_Text.text = str + ((stringBuilder2 != null) ? stringBuilder2.ToString() : null);
+			tmp_Text.text = text + ((stringBuilder2 != null) ? stringBuilder2.ToString() : null);
 			return;
 		}
 		VirtualStumpOptionsTerminal.ETerminalState eterminalState = this.currentState;
@@ -261,9 +261,9 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 				{
 					ModIOManager.RequestPlatformLogin();
 				}
-				catch (Exception arg)
+				catch (Exception ex)
 				{
-					GTDev.Log<string>(string.Format("VirtualStumpOptionsTerminal::OnKeyPressed_ModIOAccount platform login error: {0}", arg), null);
+					GTDev.Log<string>(string.Format("VirtualStumpOptionsTerminal::OnKeyPressed_ModIOAccount platform login error: {0}", ex), null);
 					throw;
 				}
 			}
@@ -357,6 +357,32 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 		return stringBuilder.ToString();
 	}
 
+	public VirtualStumpOptionsTerminal()
+	{
+		List<string> list = new List<string>();
+		list.Add("MOD.IO");
+		list.Add("ROOM SIZE");
+		this.optionStrings = list;
+		this.loggedInAsString = "LOGGED INTO MOD.IO AS: ";
+		this.notLoggedInString = "LOGGED OUT OF MOD.IO";
+		this.loginPromptString = "PRESS THE 'PLATFORM LOGIN' OR 'LINK MOD.IO ACCOUNT' BUTTON TO LOGIN";
+		this.loggingInString = "LOGGING IN TO MOD.IO...";
+		this.loggingOutString = "LOGGING OUT OF MOD.IO...";
+		this.linkAccountPromptString = "IF YOU HAVE AN EXISTING MOD.IO ACCOUNT, YOU CAN LINK IT BY PRESSING THE 'LINK MOD.IO ACCOUNT' BUTTON.";
+		this.alreadyLinkedAccountString = "YOU'VE ALREADY LINKED YOUR MOD.IO ACCOUNT.";
+		this.accountLinkingPromptString = "PLEASE GO TO THIS URL IN YOUR BROWSER AND LOG IN TO YOUR MOD.IO ACCOUNT. ONCE LOGGED IN, ENTER THE FOLLOWING CODE TO PROCEED: ";
+		this.urlLabelString = "URL: ";
+		this.linkCodeLabelString = "CODE: ";
+		this.roomSizeDescriptionString = "THIS SETTING WILL CHANGE THE MAXIMUM AMOUNT OF PLAYERS ALLOWED IN PRIVATE ROOMS YOU CREATE. WHEN JOINING A PUBLIC ROOM, THE MAP YOU'VE LOADED WILL CONTROL THE ROOM SIZE.";
+		this.roomSizeLabelString = "MAX PLAYERS: ";
+		this.contextualButtons = new List<GameObject>();
+		this.buttonsToShow_MODIO = new List<GameObject>();
+		this.buttonsToShow_ROOMSIZE = new List<GameObject>();
+		this.cachedLinkURL = "";
+		this.cachedLinkCode = "";
+		base..ctor();
+	}
+
 	[SerializeField]
 	private TMP_Text optionList;
 
@@ -367,65 +393,61 @@ public class VirtualStumpOptionsTerminal : MonoBehaviour, IWssAuthPrompter
 	private CustomMapsKeyboard keyboard;
 
 	[SerializeField]
-	private List<string> optionStrings = new List<string>
-	{
-		"MOD.IO",
-		"ROOM SIZE"
-	};
+	private List<string> optionStrings;
 
 	[SerializeField]
-	private string loggedInAsString = "LOGGED INTO MOD.IO AS: ";
+	private string loggedInAsString;
 
 	[SerializeField]
-	private string notLoggedInString = "LOGGED OUT OF MOD.IO";
+	private string notLoggedInString;
 
 	[SerializeField]
-	private string loginPromptString = "PRESS THE 'PLATFORM LOGIN' OR 'LINK MOD.IO ACCOUNT' BUTTON TO LOGIN";
+	private string loginPromptString;
 
 	[SerializeField]
-	private string loggingInString = "LOGGING IN TO MOD.IO...";
+	private string loggingInString;
 
 	[SerializeField]
-	private string loggingOutString = "LOGGING OUT OF MOD.IO...";
+	private string loggingOutString;
 
 	[SerializeField]
-	private string linkAccountPromptString = "IF YOU HAVE AN EXISTING MOD.IO ACCOUNT, YOU CAN LINK IT BY PRESSING THE 'LINK MOD.IO ACCOUNT' BUTTON.";
+	private string linkAccountPromptString;
 
 	[SerializeField]
-	private string alreadyLinkedAccountString = "YOU'VE ALREADY LINKED YOUR MOD.IO ACCOUNT.";
+	private string alreadyLinkedAccountString;
 
 	[SerializeField]
-	private string accountLinkingPromptString = "PLEASE GO TO THIS URL IN YOUR BROWSER AND LOG IN TO YOUR MOD.IO ACCOUNT. ONCE LOGGED IN, ENTER THE FOLLOWING CODE TO PROCEED: ";
+	private string accountLinkingPromptString;
 
 	[SerializeField]
-	private string urlLabelString = "URL: ";
+	private string urlLabelString;
 
 	[SerializeField]
-	private string linkCodeLabelString = "CODE: ";
+	private string linkCodeLabelString;
 
 	[SerializeField]
-	private string roomSizeDescriptionString = "THIS SETTING WILL CHANGE THE MAXIMUM AMOUNT OF PLAYERS ALLOWED IN PRIVATE ROOMS YOU CREATE. WHEN JOINING A PUBLIC ROOM, THE MAP YOU'VE LOADED WILL CONTROL THE ROOM SIZE.";
+	private string roomSizeDescriptionString;
 
 	[SerializeField]
-	private string roomSizeLabelString = "MAX PLAYERS: ";
+	private string roomSizeLabelString;
 
 	[SerializeField]
 	private GameObject OKButton;
 
 	[SerializeField]
-	private List<GameObject> contextualButtons = new List<GameObject>();
+	private List<GameObject> contextualButtons;
 
 	[SerializeField]
-	private List<GameObject> buttonsToShow_MODIO = new List<GameObject>();
+	private List<GameObject> buttonsToShow_MODIO;
 
 	[SerializeField]
-	private List<GameObject> buttonsToShow_ROOMSIZE = new List<GameObject>();
+	private List<GameObject> buttonsToShow_ROOMSIZE;
 
 	private bool processingAccountLink;
 
-	private string cachedLinkURL = "";
+	private string cachedLinkURL;
 
-	private string cachedLinkCode = "";
+	private string cachedLinkCode;
 
 	private string cachedError;
 

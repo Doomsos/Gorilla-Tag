@@ -46,7 +46,7 @@ public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 				this.mergedBottom = false;
 				this.mergedMiddle = false;
 				this.mergedTop = false;
-				Color.RGBToHSV(this.mat.color, out this.h, out this.s, out this.v);
+				Color.RGBToHSV(this.mat.color, ref this.h, ref this.s, ref this.v);
 				this.mat.color = Color.HSVToRGB(this.h, this.s, 1f);
 			}
 			this.Flap(ref this.perlinBottom, this.perlinStepBottom, ref this.lastAngleBottom, ref this.baseFire, this.bottomRange, this.baseMultiplier, ref this.mergedBottom);
@@ -61,7 +61,7 @@ public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 				this.mergedBottom = false;
 				this.mergedMiddle = false;
 				this.mergedTop = false;
-				Color.RGBToHSV(this.mat.color, out this.h, out this.s, out this.v);
+				Color.RGBToHSV(this.mat.color, ref this.h, ref this.s, ref this.v);
 				this.mat.color = Color.HSVToRGB(this.h, this.s, 0.25f);
 			}
 			this.ReturnToOff(ref this.baseFire, this.startingRotationBottom, ref this.mergedBottom);

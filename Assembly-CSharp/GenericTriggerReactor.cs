@@ -21,7 +21,7 @@ public class GenericTriggerReactor : MonoBehaviour, IBuildValidation
 	private void Awake()
 	{
 		this.componentType = Type.GetType(this.ComponentName);
-		base.TryGetComponent<GorillaVelocityEstimator>(out this.gorillaVelocityEstimator);
+		base.TryGetComponent<GorillaVelocityEstimator>(ref this.gorillaVelocityEstimator);
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -37,7 +37,7 @@ public class GenericTriggerReactor : MonoBehaviour, IBuildValidation
 	private void OnTriggerTest(Collider other, Vector2 speedRange, UnityEvent unityEvent, Vector2 idealMotionPlay)
 	{
 		Component component;
-		if (unityEvent != null && (this.componentType == null || other.TryGetComponent(this.componentType, out component)))
+		if (unityEvent != null && (this.componentType == null || other.TryGetComponent(this.componentType, ref component)))
 		{
 			if (this.gorillaVelocityEstimator != null)
 			{

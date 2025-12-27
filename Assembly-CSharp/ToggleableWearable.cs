@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class ToggleableWearable : MonoBehaviour
@@ -53,7 +52,7 @@ public class ToggleableWearable : MonoBehaviour
 				XRController componentInParent = this.colliders[0].GetComponentInParent<XRController>();
 				if (componentInParent != null)
 				{
-					this.LocalToggle(componentInParent.controllerNode == XRNode.LeftHand, true, true);
+					this.LocalToggle(componentInParent.controllerNode == 4, true, true);
 				}
 				this.toggleCooldownTimer = Random.Range(this.toggleCooldownRange.x, this.toggleCooldownRange.y);
 				this.toggleTimer = 0f;

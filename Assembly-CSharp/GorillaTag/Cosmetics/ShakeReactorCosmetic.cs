@@ -39,7 +39,7 @@ namespace GorillaTag.Cosmetics
 			if (!this.subscribed && this._events.Activate != null)
 			{
 				this._events.Activate.reliable = true;
-				this._events.Activate += this.OnShake;
+				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnShake);
 				this.subscribed = true;
 			}
 		}
@@ -48,7 +48,7 @@ namespace GorillaTag.Cosmetics
 		{
 			if (this._events != null)
 			{
-				this._events.Activate -= this.OnShake;
+				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnShake);
 				this.subscribed = false;
 				this._events.Dispose();
 				this._events = null;
@@ -96,11 +96,11 @@ namespace GorillaTag.Cosmetics
 			}
 			Vector3 worldVelocity = this.speedTracker.GetWorldVelocity();
 			float magnitude2 = worldVelocity.magnitude;
-			Vector3 to = (worldVelocity.sqrMagnitude > 1E-06f) ? worldVelocity.normalized : this.lastVelocityDir;
+			Vector3 vector = (worldVelocity.sqrMagnitude > 1E-06f) ? worldVelocity.normalized : this.lastVelocityDir;
 			bool flag = false;
 			if (this.hasLastDir)
 			{
-				if (Vector3.Angle(this.lastVelocityDir, to) >= this.angleToleranceDeg && magnitude2 >= this.minSpeedForReversal)
+				if (Vector3.Angle(this.lastVelocityDir, vector) >= this.angleToleranceDeg && magnitude2 >= this.minSpeedForReversal)
 				{
 					float num = Time.time - this.lastReversalTime;
 					if (num > 0.0005f)
@@ -116,17 +116,17 @@ namespace GorillaTag.Cosmetics
 			else
 			{
 				this.hasLastDir = true;
-				this.lastVelocityDir = to;
+				this.lastVelocityDir = vector;
 				this.lastReversalTime = Time.time;
 			}
-			this.lastVelocityDir = to;
+			this.lastVelocityDir = vector;
 			this.lastPosition = position;
 			float averageHalfCycleDuration = this.GetAverageHalfCycleDuration();
-			float b = Time.time - this.lastReversalTime;
-			float num2 = Mathf.Max((averageHalfCycleDuration > 1E-05f) ? averageHalfCycleDuration : float.PositiveInfinity, b);
-			float num3 = (num2 < float.PositiveInfinity) ? (0.5f / num2) : 0f;
-			this.debugCurrentRateHz = num3;
-			bool flag2 = num3 >= this.shakeRateThreshold;
+			float num2 = Time.time - this.lastReversalTime;
+			float num3 = Mathf.Max((averageHalfCycleDuration > 1E-05f) ? averageHalfCycleDuration : float.PositiveInfinity, num2);
+			float num4 = (num3 < float.PositiveInfinity) ? (0.5f / num3) : 0f;
+			this.debugCurrentRateHz = num4;
+			bool flag2 = num4 >= this.shakeRateThreshold;
 			bool flag3 = this.lastAmplitudeMeters >= this.shakeAmplitudeThreshold;
 			if (!this.isShaking)
 			{
@@ -154,9 +154,9 @@ namespace GorillaTag.Cosmetics
 			}
 			else
 			{
-				float num4 = (this.shakeRateThreshold > 1E-05f) ? (0.5f / this.shakeRateThreshold) : float.PositiveInfinity;
-				float num5 = 1f * num4;
-				bool flag4 = Time.time - this.lastReversalTime > num5;
+				float num5 = (this.shakeRateThreshold > 1E-05f) ? (0.5f / this.shakeRateThreshold) : float.PositiveInfinity;
+				float num6 = 1f * num5;
+				bool flag4 = Time.time - this.lastReversalTime > num6;
 				if ((!flag2 && !flag) || flag4)
 				{
 					this.isShaking = false;
@@ -182,7 +182,7 @@ namespace GorillaTag.Cosmetics
 			}
 			if (this.useMaxes && this.isShaking)
 			{
-				bool flag5 = num3 >= this.maxShakeRate;
+				bool flag5 = num4 >= this.maxShakeRate;
 				bool flag6 = this.lastAmplitudeMeters >= this.maxShakeAmplitude;
 				if (flag5 || flag6)
 				{
@@ -196,15 +196,15 @@ namespace GorillaTag.Cosmetics
 			float strength = 0f;
 			if (this.isShaking)
 			{
-				float num6 = Mathf.Max(1E-05f, this.shakeAmplitudeThreshold);
-				if (this.useMaxes && this.maxShakeAmplitude > num6)
+				float num7 = Mathf.Max(1E-05f, this.shakeAmplitudeThreshold);
+				if (this.useMaxes && this.maxShakeAmplitude > num7)
 				{
-					strength = Mathf.InverseLerp(num6, this.maxShakeAmplitude, this.lastAmplitudeMeters);
+					strength = Mathf.InverseLerp(num7, this.maxShakeAmplitude, this.lastAmplitudeMeters);
 				}
 				else
 				{
-					float b2 = Mathf.Max(num6, this.shakeAmplitudeThreshold * Mathf.Max(1f, this.softMaxMultiplier));
-					strength = Mathf.InverseLerp(num6, b2, this.lastAmplitudeMeters);
+					float num8 = Mathf.Max(num7, this.shakeAmplitudeThreshold * Mathf.Max(1f, this.softMaxMultiplier));
+					strength = Mathf.InverseLerp(num7, num8, this.lastAmplitudeMeters);
 				}
 			}
 			this.ApplyStrength(strength);

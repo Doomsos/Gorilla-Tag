@@ -30,14 +30,14 @@ namespace GorillaTag.Rendering
 			}
 			Transform transform = main.transform;
 			Vector3 position = transform.position;
-			Vector3 a = Vector3.Normalize(transform.forward);
+			Vector3 vector = Vector3.Normalize(transform.forward);
 			float nearClipPlane = main.nearClipPlane;
-			float d = (main.farClipPlane - nearClipPlane) / 2f + nearClipPlane;
-			Vector3 position2 = position + a * d;
+			float num = (main.farClipPlane - nearClipPlane) / 2f + nearClipPlane;
+			Vector3 vector2 = position + vector * num;
 			for (int i = 0; i < this.meshes.Length; i++)
 			{
-				Vector3 center = this.xforms[i].InverseTransformPoint(position2);
-				this.meshes[i].bounds = new Bounds(center, Vector3.one);
+				Vector3 vector3 = this.xforms[i].InverseTransformPoint(vector2);
+				this.meshes[i].bounds = new Bounds(vector3, Vector3.one);
 			}
 		}
 

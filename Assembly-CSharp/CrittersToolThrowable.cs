@@ -24,7 +24,7 @@ public class CrittersToolThrowable : CrittersActor
 
 	public void OnCollisionEnter(Collision collision)
 	{
-		if (CrittersManager.instance.containerLayer.Contains(collision.gameObject.layer))
+		if (LayerMaskExtensions.Contains(CrittersManager.instance.containerLayer, collision.gameObject.layer))
 		{
 			return;
 		}
@@ -105,13 +105,13 @@ public class CrittersToolThrowable : CrittersActor
 		if (enable)
 		{
 			this.rb.isKinematic = false;
-			this.rb.interpolation = RigidbodyInterpolation.Interpolate;
-			this.rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+			this.rb.interpolation = 1;
+			this.rb.collisionDetectionMode = 1;
 			return;
 		}
 		this.rb.isKinematic = true;
-		this.rb.interpolation = RigidbodyInterpolation.None;
-		this.rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+		this.rb.interpolation = 0;
+		this.rb.collisionDetectionMode = 1;
 	}
 
 	[Header("Throwable")]

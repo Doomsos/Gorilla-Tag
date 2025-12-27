@@ -13,16 +13,16 @@ namespace GorillaLocomotion
 
 		private void Update()
 		{
-			Vector3 b = this._localGorillaHead.transform.position - base.transform.position;
-			float sqrMagnitude = b.sqrMagnitude;
-			if (GTPlayer.Instance.enableHoverMode || GTPlayer.Instance.isClimbing || b.sqrMagnitude > this._sqrSnapToThreshold)
+			Vector3 vector = this._localGorillaHead.transform.position - base.transform.position;
+			float sqrMagnitude = vector.sqrMagnitude;
+			if (GTPlayer.Instance.enableHoverMode || GTPlayer.Instance.isClimbing || vector.sqrMagnitude > this._sqrSnapToThreshold)
 			{
 				base.transform.position = this._localGorillaHead.transform.position;
 				return;
 			}
-			Vector3 normalized = b.normalized;
-			b = this.GetChaseSpeed() * Time.deltaTime * normalized;
-			base.transform.position = ((b.sqrMagnitude > sqrMagnitude) ? this._localGorillaHead.transform.position : (base.transform.position + b));
+			Vector3 normalized = vector.normalized;
+			vector = this.GetChaseSpeed() * Time.deltaTime * normalized;
+			base.transform.position = ((vector.sqrMagnitude > sqrMagnitude) ? this._localGorillaHead.transform.position : (base.transform.position + vector));
 			if ((this._localGorillaHead.transform.position - base.transform.position).sqrMagnitude > this._sqrSphereRadius)
 			{
 				this._localGorillaHead.transform.position = base.transform.position + this._sphereRadius * normalized;

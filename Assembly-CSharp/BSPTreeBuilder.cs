@@ -20,7 +20,7 @@ public static class BSPTreeBuilder
 			foreach (BoxCollider boxCollider in list3)
 			{
 				int count = list2.Count;
-				int zoneIndex = Array.IndexOf<ZoneDef>(zones.ToArray<ZoneDef>(), zoneDef);
+				int zoneIndex = Array.IndexOf<ZoneDef>(Enumerable.ToArray<ZoneDef>(zones), zoneDef);
 				list2.Add(new MatrixZonePair
 				{
 					matrix = BoxColliderUtils.GetWorldToNormalizedBoxMatrix(boxCollider),
@@ -42,8 +42,8 @@ public static class BSPTreeBuilder
 			matrixIndex = -1,
 			outsideChildIndex = 0
 		});
-		global::BoundsInt bounds = BSPTreeBuilder.CalculateWorldBounds(list);
-		int num2 = BSPTreeBuilder.BuildTreeRecursive(zones.ToArray<ZoneDef>(), list, bounds, 0, SerializableBSPNode.Axis.X, list4, list5, matrixNodeCache, ref num);
+		BoundsInt bounds = BSPTreeBuilder.CalculateWorldBounds(list);
+		int num2 = BSPTreeBuilder.BuildTreeRecursive(Enumerable.ToArray<ZoneDef>(zones), list, bounds, 0, SerializableBSPNode.Axis.X, list4, list5, matrixNodeCache, ref num);
 		BSPTreeBuilder.CleanupUnreferencedMatrices(list5, list2);
 		List<SerializableBSPNode> list6 = new List<SerializableBSPNode>(list4);
 		int count2 = list6.Count;
@@ -59,8 +59,8 @@ public static class BSPTreeBuilder
 					leftChildIndex = (short)matrixBSPNode.outsideChildIndex,
 					rightChildIndex = 0
 				};
-				SerializableBSPNode item = serializableBSPNode;
-				list6.Add(item);
+				SerializableBSPNode serializableBSPNode2 = serializableBSPNode;
+				list6.Add(serializableBSPNode2);
 			}
 			else
 			{
@@ -72,31 +72,31 @@ public static class BSPTreeBuilder
 					leftChildIndex = (short)matrixBSPNode.matrixIndex,
 					rightChildIndex = (short)(flag ? matrixBSPNode.outsideChildIndex : (count2 - matrixBSPNode.outsideChildIndex))
 				};
-				SerializableBSPNode item2 = serializableBSPNode;
-				list6.Add(item2);
+				SerializableBSPNode serializableBSPNode3 = serializableBSPNode;
+				list6.Add(serializableBSPNode3);
 			}
 		}
 		for (int k = 0; k < list6.Count; k++)
 		{
-			SerializableBSPNode serializableBSPNode2 = list6[k];
+			SerializableBSPNode serializableBSPNode4 = list6[k];
 			bool flag2 = false;
-			SerializableBSPNode.Axis axis = serializableBSPNode2.axis;
+			SerializableBSPNode.Axis axis = serializableBSPNode4.axis;
 			if (axis <= SerializableBSPNode.Axis.Z)
 			{
-				if (serializableBSPNode2.leftChildIndex < 0)
+				if (serializableBSPNode4.leftChildIndex < 0)
 				{
-					serializableBSPNode2.leftChildIndex = (short)(count2 - (int)serializableBSPNode2.leftChildIndex);
+					serializableBSPNode4.leftChildIndex = (short)(count2 - (int)serializableBSPNode4.leftChildIndex);
 					flag2 = true;
 				}
-				if (serializableBSPNode2.rightChildIndex < 0)
+				if (serializableBSPNode4.rightChildIndex < 0)
 				{
-					serializableBSPNode2.rightChildIndex = (short)(count2 - (int)serializableBSPNode2.rightChildIndex);
+					serializableBSPNode4.rightChildIndex = (short)(count2 - (int)serializableBSPNode4.rightChildIndex);
 					flag2 = true;
 				}
 			}
 			if (flag2)
 			{
-				list6[k] = serializableBSPNode2;
+				list6[k] = serializableBSPNode4;
 			}
 		}
 		if (num2 < 0)
@@ -106,7 +106,7 @@ public static class BSPTreeBuilder
 		SerializableBSPTree serializableBSPTree = new SerializableBSPTree();
 		serializableBSPTree.nodes = list6.ToArray();
 		serializableBSPTree.matrices = list2.ToArray();
-		serializableBSPTree.zones = zones.ToArray<ZoneDef>();
+		serializableBSPTree.zones = Enumerable.ToArray<ZoneDef>(zones);
 		serializableBSPTree.rootIndex = num2;
 		int num3 = serializableBSPTree.nodes.Length * 12;
 		int num4 = serializableBSPTree.matrices.Length * 68;
@@ -125,7 +125,7 @@ public static class BSPTreeBuilder
 		return serializableBSPTree;
 	}
 
-	private static int BuildTreeRecursive(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, global::BoundsInt bounds, int depth, SerializableBSPNode.Axis axis, List<SerializableBSPNode> nodeList, List<MatrixBSPNode> matrixNodeList, [TupleElementNames(new string[]
+	private static int BuildTreeRecursive(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, int depth, SerializableBSPNode.Axis axis, List<SerializableBSPNode> nodeList, List<MatrixBSPNode> matrixNodeList, [TupleElementNames(new string[]
 	{
 		"matrixIndex",
 		"outsideIndex"
@@ -208,8 +208,8 @@ public static class BSPTreeBuilder
 		serializableBSPNode.axis = axis2;
 		serializableBSPNode.splitValue = (float)num2 / 1000f;
 		Debug.Log(string.Format("Best axis: {0}, split value: {1}", axis2, num2));
-		global::BoundsInt boundsInt = bounds;
-		global::BoundsInt boundsInt2 = bounds;
+		BoundsInt boundsInt = bounds;
+		BoundsInt boundsInt2 = bounds;
 		switch (axis2)
 		{
 		case SerializableBSPNode.Axis.X:
@@ -242,7 +242,7 @@ public static class BSPTreeBuilder
 		return count;
 	}
 
-	private static SerializableBSPNode.Axis FindBestAxis(List<BSPTreeBuilder.BoxMetadata> boxes, global::BoundsInt bounds, SerializableBSPNode.Axis preferredAxis, out int bestSplitValue)
+	private static SerializableBSPNode.Axis FindBestAxis(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis preferredAxis, out int bestSplitValue)
 	{
 		SerializableBSPNode.Axis[] array = new SerializableBSPNode.Axis[]
 		{
@@ -269,10 +269,10 @@ public static class BSPTreeBuilder
 		return axis;
 	}
 
-	private static int EvaluateBestSplit(List<BSPTreeBuilder.BoxMetadata> boxes, global::BoundsInt bounds, SerializableBSPNode.Axis axis, int splitValue)
+	private static int EvaluateBestSplit(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis axis, int splitValue)
 	{
-		global::BoundsInt boundsInt = bounds;
-		global::BoundsInt boundsInt2 = bounds;
+		BoundsInt boundsInt = bounds;
+		BoundsInt boundsInt2 = bounds;
 		switch (axis)
 		{
 		case SerializableBSPNode.Axis.X:
@@ -291,12 +291,12 @@ public static class BSPTreeBuilder
 		return BSPTreeBuilder.EvaluateSplit(boxes, splitValue, axis, bounds);
 	}
 
-	private static int FindOptimalSplit(List<BSPTreeBuilder.BoxMetadata> boxes, global::BoundsInt bounds, SerializableBSPNode.Axis axis, out int bestScore)
+	private static int FindOptimalSplit(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt bounds, SerializableBSPNode.Axis axis, out int bestScore)
 	{
 		List<int> list = new List<int>();
 		foreach (BSPTreeBuilder.BoxMetadata boxMetadata in boxes)
 		{
-			global::BoundsInt bounds2 = boxMetadata.bounds;
+			BoundsInt bounds2 = boxMetadata.bounds;
 			switch (axis)
 			{
 			case SerializableBSPNode.Axis.X:
@@ -313,9 +313,7 @@ public static class BSPTreeBuilder
 				break;
 			}
 		}
-		list = (from x in list.Distinct<int>()
-		orderby x
-		select x).ToList<int>();
+		list = Enumerable.ToList<int>(Enumerable.OrderBy<int, int>(Enumerable.Distinct<int>(list), (int x) => x));
 		int num = BSPTreeBuilder.GetFallbackSplit(bounds, axis);
 		bestScore = int.MaxValue;
 		Debug.Log(string.Format("Evaluating {0} split candidates for {1} axis", list.Count, axis));
@@ -337,7 +335,7 @@ public static class BSPTreeBuilder
 		return num;
 	}
 
-	private static int GetFallbackSplit(global::BoundsInt bounds, SerializableBSPNode.Axis axis)
+	private static int GetFallbackSplit(BoundsInt bounds, SerializableBSPNode.Axis axis)
 	{
 		switch (axis)
 		{
@@ -352,10 +350,10 @@ public static class BSPTreeBuilder
 		}
 	}
 
-	private static int EvaluateSplit(List<BSPTreeBuilder.BoxMetadata> boxes, int splitValue, SerializableBSPNode.Axis axis, global::BoundsInt bounds)
+	private static int EvaluateSplit(List<BSPTreeBuilder.BoxMetadata> boxes, int splitValue, SerializableBSPNode.Axis axis, BoundsInt bounds)
 	{
-		global::BoundsInt region = bounds;
-		global::BoundsInt region2 = bounds;
+		BoundsInt region = bounds;
+		BoundsInt region2 = bounds;
 		switch (axis)
 		{
 		case SerializableBSPNode.Axis.X:
@@ -393,7 +391,7 @@ public static class BSPTreeBuilder
 		return -((num + 1) * (num2 + 1));
 	}
 
-	private static List<BSPTreeBuilder.BoxMetadata> GetEffectiveBoxes(List<BSPTreeBuilder.BoxMetadata> boxes, global::BoundsInt region)
+	private static List<BSPTreeBuilder.BoxMetadata> GetEffectiveBoxes(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt region)
 	{
 		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
 		List<BSPTreeBuilder.BoxMetadata> list2 = new List<BSPTreeBuilder.BoxMetadata>();
@@ -407,7 +405,7 @@ public static class BSPTreeBuilder
 		foreach (BSPTreeBuilder.BoxMetadata boxMetadata2 in list2)
 		{
 			bool flag = false;
-			global::BoundsInt intersection = boxMetadata2.bounds.GetIntersection(region);
+			BoundsInt intersection = boxMetadata2.bounds.GetIntersection(region);
 			foreach (BSPTreeBuilder.BoxMetadata boxMetadata3 in list2)
 			{
 				if (boxMetadata3 != boxMetadata2 && boxMetadata3.priority > boxMetadata2.priority && boxMetadata3.bounds.GetIntersection(region).Contains(intersection) && BoxColliderUtils.DoesBoxContainBox(boxMetadata3.box, boxMetadata2.box))
@@ -424,17 +422,17 @@ public static class BSPTreeBuilder
 		return list;
 	}
 
-	private static List<BSPTreeBuilder.BoxMetadata> GetEffectiveSpanningBoxes(List<BSPTreeBuilder.BoxMetadata> boxes, global::BoundsInt leftBounds, global::BoundsInt rightBounds)
+	private static List<BSPTreeBuilder.BoxMetadata> GetEffectiveSpanningBoxes(List<BSPTreeBuilder.BoxMetadata> boxes, BoundsInt leftBounds, BoundsInt rightBounds)
 	{
 		List<BSPTreeBuilder.BoxMetadata> list = new List<BSPTreeBuilder.BoxMetadata>();
-		Dictionary<BSPTreeBuilder.BoxMetadata, global::BoundsInt> dictionary = new Dictionary<BSPTreeBuilder.BoxMetadata, global::BoundsInt>();
+		Dictionary<BSPTreeBuilder.BoxMetadata, BoundsInt> dictionary = new Dictionary<BSPTreeBuilder.BoxMetadata, BoundsInt>();
 		foreach (BSPTreeBuilder.BoxMetadata boxMetadata in boxes)
 		{
 			dictionary[boxMetadata] = boxMetadata.bounds;
 		}
 		foreach (BSPTreeBuilder.BoxMetadata boxMetadata2 in boxes)
 		{
-			global::BoundsInt boundsInt = dictionary[boxMetadata2];
+			BoundsInt boundsInt = dictionary[boxMetadata2];
 			if (boundsInt.Intersects(leftBounds) && boundsInt.Intersects(rightBounds))
 			{
 				list.Add(boxMetadata2);
@@ -473,13 +471,13 @@ public static class BSPTreeBuilder
 		}
 	}
 
-	private static global::BoundsInt CalculateWorldBounds(List<BSPTreeBuilder.BoxMetadata> boxes)
+	private static BoundsInt CalculateWorldBounds(List<BSPTreeBuilder.BoxMetadata> boxes)
 	{
 		if (boxes.Count == 0)
 		{
-			return default(global::BoundsInt);
+			return default(BoundsInt);
 		}
-		global::BoundsInt bounds = boxes[0].bounds;
+		BoundsInt bounds = boxes[0].bounds;
 		for (int i = 1; i < boxes.Count; i++)
 		{
 			bounds.Encapsulate(boxes[i].bounds);
@@ -487,7 +485,7 @@ public static class BSPTreeBuilder
 		return bounds;
 	}
 
-	private static float CalculateIntersectionVolume(global::BoundsInt box, global::BoundsInt region)
+	private static float CalculateIntersectionVolume(BoundsInt box, BoundsInt region)
 	{
 		if (!box.Intersects(region))
 		{
@@ -496,7 +494,7 @@ public static class BSPTreeBuilder
 		return box.GetIntersection(region).VolumeFloat();
 	}
 
-	private static int CreateMatrixNodeTree(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, List<MatrixBSPNode> matrixNodeList, global::BoundsInt bounds, [TupleElementNames(new string[]
+	private static int CreateMatrixNodeTree(ZoneDef[] zones, List<BSPTreeBuilder.BoxMetadata> boxes, List<MatrixBSPNode> matrixNodeList, BoundsInt bounds, [TupleElementNames(new string[]
 	{
 		"matrixIndex",
 		"outsideIndex"
@@ -601,16 +599,16 @@ public static class BSPTreeBuilder
 		"outsideIndex"
 	})] Dictionary<ValueTuple<int, int>, int> matrixNodeCache, ref int matrixNodeCacheHits)
 	{
-		ValueTuple<int, int> key = new ValueTuple<int, int>(matrixNode.matrixIndex, matrixNode.outsideChildIndex);
+		ValueTuple<int, int> valueTuple = new ValueTuple<int, int>(matrixNode.matrixIndex, matrixNode.outsideChildIndex);
 		int num;
-		if (matrixNodeCache.TryGetValue(key, out num))
+		if (matrixNodeCache.TryGetValue(valueTuple, ref num))
 		{
 			matrixNodeCacheHits++;
 			return -num;
 		}
 		int count = matrixNodeList.Count;
 		matrixNodeList.Add(matrixNode);
-		matrixNodeCache[key] = count;
+		matrixNodeCache[valueTuple] = count;
 		return -count;
 	}
 
@@ -645,7 +643,7 @@ public static class BSPTreeBuilder
 		{
 			MatrixBSPNode matrixBSPNode2 = matrixNodeList[j];
 			int matrixIndex;
-			if (dictionary.TryGetValue(matrixBSPNode2.matrixIndex, out matrixIndex))
+			if (dictionary.TryGetValue(matrixBSPNode2.matrixIndex, ref matrixIndex))
 			{
 				matrixBSPNode2.matrixIndex = matrixIndex;
 				matrixNodeList[j] = matrixBSPNode2;
@@ -676,7 +674,7 @@ public static class BSPTreeBuilder
 			this.box = boxCollider;
 			this.zone = zoneData;
 			this.matrixIndex = matrixIdx;
-			this.bounds = global::BoundsInt.FromBounds(boxCollider.bounds);
+			this.bounds = BoundsInt.FromBounds(boxCollider.bounds);
 			this.priority = priority;
 		}
 
@@ -690,7 +688,7 @@ public static class BSPTreeBuilder
 			return vector.x >= vector2.x && vector.x <= vector3.x && vector.y >= vector2.y && vector.y <= vector3.y && vector.z >= vector2.z && vector.z <= vector3.z;
 		}
 
-		public global::BoundsInt GetWorldBounds()
+		public BoundsInt GetWorldBounds()
 		{
 			return this.bounds;
 		}
@@ -703,6 +701,6 @@ public static class BSPTreeBuilder
 
 		public int priority;
 
-		public readonly global::BoundsInt bounds;
+		public readonly BoundsInt bounds;
 	}
 }

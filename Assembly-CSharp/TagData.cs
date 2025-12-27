@@ -5,7 +5,7 @@ using Fusion.CodeGen;
 using UnityEngine;
 
 [NetworkStructWeaved(12)]
-[StructLayout(LayoutKind.Explicit, Size = 48)]
+[StructLayout(2, Size = 48)]
 public struct TagData : INetworkStruct
 {
 	[Networked]

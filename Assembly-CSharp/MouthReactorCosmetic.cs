@@ -57,8 +57,8 @@ public class MouthReactorCosmetic : MonoBehaviour, ITickSystemTick
 
 	public void Tick()
 	{
-		Vector3 b = this.myRig.head.rigTarget.TransformPoint(this.mouthOffset);
-		float sqrMagnitude = (this.reactorTransform.TransformPoint(this.reactorOffset) - b).sqrMagnitude;
+		Vector3 vector = this.myRig.head.rigTarget.TransformPoint(this.mouthOffset);
+		float sqrMagnitude = (this.reactorTransform.TransformPoint(this.reactorOffset) - vector).sqrMagnitude;
 		if (sqrMagnitude < this.reactorRadius * this.reactorRadius)
 		{
 			if ((!this.mustExitBeforeRefire || !this.wasInside) && Time.time - this.lastInsideTime >= this.eventRefireDelay)

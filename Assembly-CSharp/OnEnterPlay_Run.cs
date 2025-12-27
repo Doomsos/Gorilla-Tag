@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage(64)]
 public class OnEnterPlay_Run : OnEnterPlay_Attribute
 {
 	public override void OnEnterPlay(MethodInfo method)

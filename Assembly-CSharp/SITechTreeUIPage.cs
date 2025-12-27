@@ -16,21 +16,22 @@ public class SITechTreeUIPage : MonoBehaviour
 		base.name = treePage.nickName;
 		this.id = treePage.pageId;
 		int count = treePage.Roots.Count;
-		Vector3 a = new Vector3(0f, this.nodeContainer.rect.min.y + 20f, 0f);
+		Vector3 vector;
+		vector..ctor(0f, this.nodeContainer.rect.min.y + 20f, 0f);
 		if (count < 2)
 		{
 			float num = (float)(treePage.Roots[0].GetSubtreeWidth(int.MaxValue) * 50 + 100);
 			if (num > this.nodeContainer.rect.width)
 			{
 				float num2 = (this.nodeContainer.rect.width - num) / 2f;
-				a.x += num2;
+				vector.x += num2;
 			}
 		}
 		float num3 = this.nodeContainer.rect.width / (float)count;
 		for (int i = 0; i < count; i++)
 		{
-			float x = (count < 2) ? 0f : (-22f + -num3 * (float)(count - 1) / 2f + num3 * (float)i);
-			this.<Configure>g__AddNodes|5_0(null, treePage.Roots[i], a + new Vector3(x, 0f, 0f), ref CS$<>8__locals1);
+			float num4 = (count < 2) ? 0f : (-22f + -num3 * (float)(count - 1) / 2f + num3 * (float)i);
+			this.<Configure>g__AddNodes|5_0(null, treePage.Roots[i], vector + new Vector3(num4, 0f, 0f), ref CS$<>8__locals1);
 		}
 		foreach (SITechTreeUINode sitechTreeUINode in this._pageNodes)
 		{
@@ -110,19 +111,19 @@ public class SITechTreeUIPage : MonoBehaviour
 		float num5 = 0f;
 		if (CS$<>8__locals1.childCount > 1)
 		{
-			int index = 0;
+			int num6 = 0;
 			for (int i = 0; i < CS$<>8__locals1.childCount; i++)
 			{
-				float num6 = CS$<>8__locals1.subtreeWidths[index];
-				float num7 = (i == 0 || i == CS$<>8__locals1.childCount - 1) ? (num6 / 2f) : num6;
-				num5 -= num7 / 2f;
+				float num7 = CS$<>8__locals1.subtreeWidths[num6];
+				float num8 = (i == 0 || i == CS$<>8__locals1.childCount - 1) ? (num7 / 2f) : num7;
+				num5 -= num8 / 2f;
 			}
 		}
 		for (int j = 0; j < CS$<>8__locals1.childCount; j++)
 		{
-			float y = num + (float)((j + 1) % 2 * num2);
+			float num9 = num + (float)((j + 1) % 2 * num2);
 			GraphNode<SITechTreeNode> node2 = node.Children[j];
-			Vector3 position2 = position + new Vector3(num5, y, 0f);
+			Vector3 position2 = position + new Vector3(num5, num9, 0f);
 			this.<Configure>g__AddNodes|5_0(node, node2, position2, ref A_4);
 			num5 += SITechTreeUIPage.<Configure>g__GetSpacing|5_3(j, ref CS$<>8__locals1);
 		}
@@ -158,17 +159,17 @@ public class SITechTreeUIPage : MonoBehaviour
 		foreach (SITechTreeUINode sitechTreeUINode in uiNode.Parents)
 		{
 			Vector3 localPosition = sitechTreeUINode.transform.localPosition;
-			Vector3 a = uiNode.transform.localPosition - localPosition;
-			Vector3 normalized = a.normalized;
+			Vector3 vector = uiNode.transform.localPosition - localPosition;
+			Vector3 normalized = vector.normalized;
 			Image image = Object.Instantiate<Image>(this.upgradeLinePrefab, this.nodeContainer);
 			ObjectHierarchyFlattener component = image.GetComponent<ObjectHierarchyFlattener>();
 			image.transform.SetSiblingIndex(0);
 			uiNode.UpgradeLines.Add(image);
 			RectTransform rectTransform = image.rectTransform;
-			rectTransform.localPosition = localPosition + a * 0.5f;
+			rectTransform.localPosition = localPosition + vector * 0.5f;
 			rectTransform.localRotation = Quaternion.FromToRotation(Vector3.up, normalized);
 			Vector2 sizeDelta = rectTransform.sizeDelta;
-			sizeDelta.y = a.magnitude - 20f;
+			sizeDelta.y = vector.magnitude - 20f;
 			rectTransform.sizeDelta = sizeDelta;
 			component.overrideParentTransform = A_2.imageTarget;
 			component.enabled = true;

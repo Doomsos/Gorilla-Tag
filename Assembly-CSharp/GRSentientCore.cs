@@ -253,19 +253,19 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 			}
 			float deltaTime = Time.deltaTime;
 			Vector3 vector = base.transform.position + this.jumpVelocity * deltaTime;
-			Vector3 a = this.useSurfaceNormalForGravityDirection ? (-this.surfaceNormal) : Vector3.down;
-			this.jumpVelocity += a * (this.jumpGravityAccel * deltaTime);
+			Vector3 vector2 = this.useSurfaceNormalForGravityDirection ? (-this.surfaceNormal) : Vector3.down;
+			this.jumpVelocity += vector2 * (this.jumpGravityAccel * deltaTime);
 			float magnitude = this.jumpVelocity.magnitude;
 			if (magnitude > this.maxSpeed && this.maxSpeed > 0f)
 			{
 				this.jumpVelocity *= this.maxSpeed / magnitude;
 			}
 			float magnitude2 = (vector - base.transform.position).magnitude;
-			Vector3 vector2 = (magnitude2 > 0.001f) ? ((vector - base.transform.position) / magnitude2) : Vector3.zero;
+			Vector3 vector3 = (magnitude2 > 0.001f) ? ((vector - base.transform.position) / magnitude2) : Vector3.zero;
 			RaycastHit raycastHit;
-			if (Physics.SphereCast(new Ray(base.transform.position, vector2), this.radius, out raycastHit, magnitude2, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+			if (Physics.SphereCast(new Ray(base.transform.position, vector3), this.radius, ref raycastHit, magnitude2, GTPlayer.Instance.locomotionEnabledLayers.value, 1))
 			{
-				vector = base.transform.position + vector2 * raycastHit.distance;
+				vector = base.transform.position + vector3 * raycastHit.distance;
 				this.surfaceNormal = raycastHit.normal;
 				this.SetState(GRSentientCore.SentientCoreState.Awake);
 				this.landSound.Play(null);
@@ -309,15 +309,15 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		case GRSentientCore.SentientCoreState.Dropped:
 		{
 			float deltaTime2 = Time.deltaTime;
-			Vector3 vector3 = base.transform.position + this.rb.linearVelocity * deltaTime2;
-			float magnitude3 = (vector3 - base.transform.position).magnitude;
-			Vector3 vector4 = (magnitude3 > 0.001f) ? ((vector3 - base.transform.position) / magnitude3) : Vector3.zero;
+			Vector3 vector4 = base.transform.position + this.rb.linearVelocity * deltaTime2;
+			float magnitude3 = (vector4 - base.transform.position).magnitude;
+			Vector3 vector5 = (magnitude3 > 0.001f) ? ((vector4 - base.transform.position) / magnitude3) : Vector3.zero;
 			RaycastHit raycastHit2;
-			if (Physics.SphereCast(new Ray(base.transform.position, vector4), this.radius, out raycastHit2, magnitude3, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+			if (Physics.SphereCast(new Ray(base.transform.position, vector5), this.radius, ref raycastHit2, magnitude3, GTPlayer.Instance.locomotionEnabledLayers.value, 1))
 			{
-				vector3 = base.transform.position + vector4 * raycastHit2.distance;
+				vector4 = base.transform.position + vector5 * raycastHit2.distance;
 				this.surfaceNormal = raycastHit2.normal;
-				base.transform.position = vector3;
+				base.transform.position = vector4;
 				this.rb.isKinematic = true;
 				this.SetState(GRSentientCore.SentientCoreState.Awake);
 			}
@@ -366,24 +366,24 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		float num = 0.016666f;
 		int num2 = 100;
 		Vector3 vector = this.jumpStartPosition;
-		Vector3 a = this.jumpDirection * this.jumpSpeed;
+		Vector3 vector2 = this.jumpDirection * this.jumpSpeed;
 		for (int i = 0; i < num2; i++)
 		{
-			Vector3 vector2 = vector + a * num;
-			a += -this.surfaceNormal * (this.jumpGravityAccel * num);
-			float magnitude = (vector2 - vector).magnitude;
-			Vector3 direction = (magnitude > 0.001f) ? ((vector2 - vector) / magnitude) : Vector3.zero;
+			Vector3 vector3 = vector + vector2 * num;
+			vector2 += -this.surfaceNormal * (this.jumpGravityAccel * num);
+			float magnitude = (vector3 - vector).magnitude;
+			Vector3 vector4 = (magnitude > 0.001f) ? ((vector3 - vector) / magnitude) : Vector3.zero;
 			RaycastHit raycastHit;
-			if (Physics.SphereCast(new Ray(vector, direction), this.radius, out raycastHit, magnitude, GTPlayer.Instance.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+			if (Physics.SphereCast(new Ray(vector, vector4), this.radius, ref raycastHit, magnitude, GTPlayer.Instance.locomotionEnabledLayers.value, 1))
 			{
-				vector2 = raycastHit.point;
-				DebugUtil.DrawLine(vector, vector2, pathColor, true);
-				DebugUtil.DrawLine(vector2, vector2 + raycastHit.normal * 0.15f, Color.cyan, true);
+				vector3 = raycastHit.point;
+				DebugUtil.DrawLine(vector, vector3, pathColor, true);
+				DebugUtil.DrawLine(vector3, vector3 + raycastHit.normal * 0.15f, Color.cyan, true);
 				DebugUtil.DrawSphere(raycastHit.point, 0.1f, 12, 12, pathColor, true, DebugUtil.Style.Wireframe);
 				return;
 			}
-			DebugUtil.DrawLine(vector, vector2, pathColor, true);
-			vector = vector2;
+			DebugUtil.DrawLine(vector, vector3, pathColor, true);
+			vector = vector3;
 		}
 	}
 
@@ -396,7 +396,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		Vector3 insideUnitSphere = Random.insideUnitSphere;
 		if (Vector3.Dot(insideUnitSphere, this.surfaceNormal) > 0.99f)
 		{
-			insideUnitSphere = new Vector3(this.surfaceNormal.y, this.surfaceNormal.z, this.surfaceNormal.x);
+			insideUnitSphere..ctor(this.surfaceNormal.y, this.surfaceNormal.z, this.surfaceNormal.x);
 		}
 		float num = Random.Range(this.jumpAngleMinMax.x, this.jumpAngleMinMax.y);
 		Vector3 direction = Quaternion.AngleAxis(90f - num, Vector3.Cross(this.surfaceNormal, insideUnitSphere)) * this.surfaceNormal;

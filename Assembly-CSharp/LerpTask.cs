@@ -5,7 +5,7 @@ public class LerpTask<T>
 {
 	public void Reset()
 	{
-		this.onLerp(this.lerpFrom, this.lerpTo, 0f);
+		this.onLerp.Invoke(this.lerpFrom, this.lerpTo, 0f);
 		this.active = false;
 		this.elapsed = 0f;
 	}
@@ -21,11 +21,11 @@ public class LerpTask<T>
 
 	public void Finish()
 	{
-		this.onLerp(this.lerpFrom, this.lerpTo, 1f);
+		this.onLerp.Invoke(this.lerpFrom, this.lerpTo, 1f);
 		Action action = this.onLerpEnd;
 		if (action != null)
 		{
-			action();
+			action.Invoke();
 		}
 		this.active = false;
 		this.elapsed = 0f;
@@ -40,8 +40,8 @@ public class LerpTask<T>
 		float deltaTime = Time.deltaTime;
 		if (this.elapsed < this.duration)
 		{
-			float arg = (this.elapsed + deltaTime >= this.duration) ? 1f : (this.elapsed / this.duration);
-			this.onLerp(this.lerpFrom, this.lerpTo, arg);
+			float num = (this.elapsed + deltaTime >= this.duration) ? 1f : (this.elapsed / this.duration);
+			this.onLerp.Invoke(this.lerpFrom, this.lerpTo, num);
 			this.elapsed += deltaTime;
 			return;
 		}

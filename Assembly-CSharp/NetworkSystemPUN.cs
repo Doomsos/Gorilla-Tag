@@ -146,7 +146,7 @@ public class NetworkSystemPUN : NetworkSystem
 		get
 		{
 			object obj;
-			PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("gameMode", out obj);
+			PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("gameMode", ref obj);
 			if (obj != null)
 			{
 				return obj.ToString();
@@ -532,7 +532,7 @@ public class NetworkSystemPUN : NetworkSystem
 	public override void NetDestroy(GameObject instance)
 	{
 		PhotonView photonView;
-		if (instance.TryGetComponent<PhotonView>(out photonView) && photonView.AmOwner)
+		if (instance.TryGetComponent<PhotonView>(ref photonView) && photonView.AmOwner)
 		{
 			PhotonNetwork.Destroy(instance);
 			return;
@@ -546,8 +546,8 @@ public class NetworkSystemPUN : NetworkSystem
 
 	public override void CallRPC(MonoBehaviour component, NetworkSystem.RPC rpcMethod, bool sendToSelf = true)
 	{
-		RpcTarget target = sendToSelf ? RpcTarget.All : RpcTarget.Others;
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, new object[]
+		RpcTarget rpcTarget = sendToSelf ? 0 : 1;
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, rpcTarget, new object[]
 		{
 			NetworkSystem.EmptyArgs
 		});
@@ -555,9 +555,9 @@ public class NetworkSystemPUN : NetworkSystem
 
 	public override void CallRPC<T>(MonoBehaviour component, NetworkSystem.RPC rpcMethod, RPCArgBuffer<T> args, bool sendToSelf = true)
 	{
-		RpcTarget target = sendToSelf ? RpcTarget.All : RpcTarget.Others;
+		RpcTarget rpcTarget = sendToSelf ? 0 : 1;
 		ref args.SerializeToRPCData<T>();
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, new object[]
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, rpcTarget, new object[]
 		{
 			args.Data
 		});
@@ -565,8 +565,8 @@ public class NetworkSystemPUN : NetworkSystem
 
 	public override void CallRPC(MonoBehaviour component, NetworkSystem.StringRPC rpcMethod, string message, bool sendToSelf = true)
 	{
-		RpcTarget target = sendToSelf ? RpcTarget.All : RpcTarget.Others;
-		PhotonView.Get(component).RPC(rpcMethod.Method.Name, target, new object[]
+		RpcTarget rpcTarget = sendToSelf ? 0 : 1;
+		PhotonView.Get(component).RPC(rpcMethod.Method.Name, rpcTarget, new object[]
 		{
 			message
 		});
@@ -719,7 +719,7 @@ public class NetworkSystemPUN : NetworkSystem
 			return false;
 		}
 		object obj;
-		if (player2.CustomProperties.TryGetValue("didTutorial", out obj))
+		if (player2.CustomProperties.TryGetValue("didTutorial", ref obj))
 		{
 			bool flag;
 			bool flag2;
@@ -775,7 +775,7 @@ public class NetworkSystemPUN : NetworkSystem
 	public override bool IsObjectLocallyOwned(GameObject obj)
 	{
 		PhotonView photonView;
-		return !this.IsOnline || !obj.TryGetComponent<PhotonView>(out photonView) || photonView.IsMine;
+		return !this.IsOnline || !obj.TryGetComponent<PhotonView>(ref photonView) || photonView.IsMine;
 	}
 
 	protected override void UpdateNetPlayerList()
@@ -897,7 +897,7 @@ public class NetworkSystemPUN : NetworkSystem
 	public override int GetOwningPlayerID(GameObject obj)
 	{
 		PhotonView photonView;
-		if (obj.TryGetComponent<PhotonView>(out photonView) && photonView.Owner != null)
+		if (obj.TryGetComponent<PhotonView>(ref photonView) && photonView.Owner != null)
 		{
 			return photonView.Owner.ActorNumber;
 		}
@@ -1021,7 +1021,7 @@ public class NetworkSystemPUN : NetworkSystem
 		Dictionary<string, object> dictionary = ((authenticationValues != null) ? authenticationValues.AuthPostData : null) as Dictionary<string, object>;
 		if (dictionary != null)
 		{
-			dictionary["Zone"] = ((zoneName != null) ? zoneName : ((ZoneManagement.instance.activeZones.Count > 0) ? ZoneManagement.instance.activeZones.First<GTZone>().GetName<GTZone>() : ""));
+			dictionary["Zone"] = ((zoneName != null) ? zoneName : ((ZoneManagement.instance.activeZones.Count > 0) ? Enumerable.First<GTZone>(ZoneManagement.instance.activeZones).GetName<GTZone>() : ""));
 			dictionary["SubZone"] = GTSubZone.none.GetName<GTSubZone>();
 			dictionary["IsPublic"] = roomIsPublic;
 			authenticationValues.SetAuthPostData(dictionary);

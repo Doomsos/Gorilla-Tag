@@ -553,23 +553,22 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		if (!this._rigBuildFullyInitialized)
 		{
 			Dictionary<string, GameObject> dictionary = new Dictionary<string, GameObject>();
+			GameObject gameObject2;
 			foreach (GameObject gameObject in this.cosmetics)
 			{
-				GameObject gameObject2;
-				if (!dictionary.TryGetValue(gameObject.name, out gameObject2))
+				if (!dictionary.TryGetValue(gameObject.name, ref gameObject2))
 				{
 					dictionary.Add(gameObject.name, gameObject);
 				}
 			}
 			foreach (GameObject gameObject3 in this.overrideCosmetics)
 			{
-				GameObject gameObject2;
-				if (dictionary.TryGetValue(gameObject3.name, out gameObject2) && gameObject2.name == gameObject3.name)
+				if (dictionary.TryGetValue(gameObject3.name, ref gameObject2) && gameObject2.name == gameObject3.name)
 				{
 					gameObject2.name = "OVERRIDDEN";
 				}
 			}
-			this.cosmetics = this.cosmetics.Concat(this.overrideCosmetics).ToArray<GameObject>();
+			this.cosmetics = Enumerable.ToArray<GameObject>(Enumerable.Concat<GameObject>(this.cosmetics, this.overrideCosmetics));
 		}
 		this.cosmeticsObjectRegistry.Initialize(this.cosmetics);
 		this._rigBuildFullyInitialized = true;
@@ -590,10 +589,10 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	private void ApplyColorCode()
 	{
-		float defaultValue = 0f;
-		float @float = PlayerPrefs.GetFloat("redValue", defaultValue);
-		float float2 = PlayerPrefs.GetFloat("greenValue", defaultValue);
-		float float3 = PlayerPrefs.GetFloat("blueValue", defaultValue);
+		float num = 0f;
+		float @float = PlayerPrefs.GetFloat("redValue", num);
+		float float2 = PlayerPrefs.GetFloat("greenValue", num);
+		float float3 = PlayerPrefs.GetFloat("blueValue", num);
 		GorillaTagger.Instance.UpdateColor(@float, float2, float3);
 	}
 
@@ -616,7 +615,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			{
 				CosmeticsController.instance.currentWornSet.LoadFromPlayerPreferences(CosmeticsController.instance);
 			}
-			if (Application.platform == RuntimePlatform.Android && this.spectatorSkin != null)
+			if (Application.platform == 11 && this.spectatorSkin != null)
 			{
 				Object.Destroy(this.spectatorSkin);
 			}
@@ -632,8 +631,8 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		}
 		GorillaSkin.ShowActiveSkin(this);
 		base.Invoke("ApplyColorCode", 1f);
-		List<Material> m = new List<Material>();
-		this.mainSkin.GetSharedMaterials(m);
+		List<Material> list = new List<Material>();
+		this.mainSkin.GetSharedMaterials(list);
 		this.layerChanger = base.GetComponent<LayerChanger>();
 		if (this.layerChanger != null)
 		{
@@ -662,9 +661,9 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			return;
 		}
 		this._nextUpdateTime = time + 1f;
-		if (RoomSystem.JoinedRoom && NetworkSystem.Instance.IsMasterClient && GorillaGameModes.GameMode.ActiveNetworkHandler.IsNull())
+		if (RoomSystem.JoinedRoom && NetworkSystem.Instance.IsMasterClient && GameMode.ActiveNetworkHandler.IsNull())
 		{
-			GorillaGameModes.GameMode.LoadGameModeFromProperty();
+			GameMode.LoadGameModeFromProperty();
 		}
 	}
 
@@ -748,15 +747,15 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			}
 			else
 			{
-				float time = GorillaTagger.Instance.offlineVRRig.scaleFactor / this.scaleFactor;
-				float num2 = this.voicePitchForRelativeScale.Evaluate(time);
-				if (float.IsNaN(num2) || num2 <= 0f)
+				float num2 = GorillaTagger.Instance.offlineVRRig.scaleFactor / this.scaleFactor;
+				float num3 = this.voicePitchForRelativeScale.Evaluate(num2);
+				if (float.IsNaN(num3) || num3 <= 0f)
 				{
 					Debug.LogError("Voice pitch curve is invalid, please fix!");
 				}
 				else
 				{
-					num = num2;
+					num = num3;
 				}
 			}
 			if (!Mathf.Approximately(this.voiceAudio.pitch, num))
@@ -770,18 +769,18 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			this.jobPos = Vector3.Lerp(base.transform.position, this.SanitizeVector3(this.syncPos), this.lerpValueBody * 0.66f);
 			if (this.currentRopeSwing && this.currentRopeSwingTarget)
 			{
-				Vector3 b;
+				Vector3 vector;
 				if (this.grabbedRopeIsLeft)
 				{
-					b = this.currentRopeSwingTarget.position - this.leftHandTransform.position;
+					vector = this.currentRopeSwingTarget.position - this.leftHandTransform.position;
 				}
 				else
 				{
-					b = this.currentRopeSwingTarget.position - this.rightHandTransform.position;
+					vector = this.currentRopeSwingTarget.position - this.rightHandTransform.position;
 				}
 				if (this.shouldLerpToRope)
 				{
-					this.jobPos += Vector3.Lerp(Vector3.zero, b, this.lastRopeGrabTimer * 4f);
+					this.jobPos += Vector3.Lerp(Vector3.zero, vector, this.lastRopeGrabTimer * 4f);
 					if (this.lastRopeGrabTimer < 1f)
 					{
 						this.lastRopeGrabTimer += Time.deltaTime;
@@ -789,7 +788,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 				}
 				else
 				{
-					this.jobPos += b;
+					this.jobPos += vector;
 				}
 			}
 			else if (this.currentHoldParent)
@@ -812,8 +811,8 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			else if (this.mountedMonkeBlock || this.mountedMovingSurface)
 			{
 				Transform transform2 = this.movingSurfaceIsMonkeBlock ? this.mountedMonkeBlock.transform : this.mountedMovingSurface.transform;
-				Vector3 b2 = Vector3.zero;
-				Vector3 b3 = this.jobPos - base.transform.position;
+				Vector3 vector2 = Vector3.zero;
+				Vector3 vector3 = this.jobPos - base.transform.position;
 				Transform transform3;
 				if (this.mountedMovingSurfaceIsBody)
 				{
@@ -827,11 +826,11 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 				{
 					transform3 = this.rightHandTransform;
 				}
-				b2 = transform2.TransformPoint(this.mountedMonkeBlockOffset) - (transform3.position + b3);
+				vector2 = transform2.TransformPoint(this.mountedMonkeBlockOffset) - (transform3.position + vector3);
 				if (this.shouldLerpToMovingSurface)
 				{
 					this.lastMountedSurfaceTimer += Time.deltaTime;
-					this.jobPos += Vector3.Lerp(Vector3.zero, b2, this.lastMountedSurfaceTimer * 4f);
+					this.jobPos += Vector3.Lerp(Vector3.zero, vector2, this.lastMountedSurfaceTimer * 4f);
 					if (this.lastMountedSurfaceTimer * 4f >= 1f)
 					{
 						this.shouldLerpToMovingSurface = false;
@@ -839,7 +838,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 				}
 				else
 				{
-					this.jobPos += b2;
+					this.jobPos += vector2;
 				}
 			}
 		}
@@ -1075,7 +1074,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		}
 		if (this.TemporaryCosmeticEffects.Count > 0)
 		{
-			foreach (KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect in this.TemporaryCosmeticEffects.ToArray<KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect>>())
+			foreach (KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect in Enumerable.ToArray<KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect>>(this.TemporaryCosmeticEffects))
 			{
 				if (Time.time - effect.Value.EffectStartedTime >= effect.Value.EffectDuration)
 				{
@@ -1091,7 +1090,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		Vector3 localScale = this.frozenEffect.transform.localScale;
 		Vector3 vector = localScale;
 		vector.y = Mathf.Lerp(this.frozenEffectMinY, this.frozenEffectMaxY, this.frozenTimeElapsed / freezeDuration);
-		localScale = new Vector3(localScale.x, vector.y, localScale.z);
+		localScale..ctor(localScale.x, vector.y, localScale.z);
 		this.frozenEffect.transform.localScale = localScale;
 		this.frozenTimeElapsed += dt;
 	}
@@ -1139,7 +1138,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	public void DisableHitWithKnockBack()
 	{
-		foreach (KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect in this.TemporaryCosmeticEffects.ToArray<KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect>>())
+		foreach (KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect in Enumerable.ToArray<KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect>>(this.TemporaryCosmeticEffects))
 		{
 			bool flag;
 			if (effect.Key == CosmeticEffectsOnPlayers.EFFECTTYPE.TagWithKnockback)
@@ -1172,14 +1171,14 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			value = null;
 			return false;
 		}
-		return this.TemporaryCosmeticEffects.TryGetValue(key, out value);
+		return this.TemporaryCosmeticEffects.TryGetValue(key, ref value);
 	}
 
 	public void PlayCosmeticEffectSFX(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect)
 	{
 		this.TemporaryCosmeticEffects.TryAdd(effect.Key, effect.Value);
-		int index = UnityEngine.Random.Range(0, effect.Value.sfxAudioClip.Count);
-		this.tagSound.PlayOneShot(effect.Value.sfxAudioClip[index]);
+		int num = Random.Range(0, effect.Value.sfxAudioClip.Count);
+		this.tagSound.PlayOneShot(effect.Value.sfxAudioClip[num]);
 	}
 
 	public void SpawnVFXEffect(KeyValuePair<CosmeticEffectsOnPlayers.EFFECTTYPE, CosmeticEffectsOnPlayers.CosmeticEffect> effect)
@@ -1276,7 +1275,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		int num = Mathf.Clamp(Mathf.RoundToInt(base.transform.rotation.eulerAngles.y + 360f) % 360, 0, 360);
 		int num2 = Mathf.RoundToInt(Mathf.Clamp01(this.SpeakingLoudness) * 255f);
 		bool flag = this.leftHandLink.IsLinkActive() || this.rightHandLink.IsLinkActive();
-		GorillaGameManager activeGameMode = GorillaGameModes.GameMode.ActiveGameMode;
+		GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
 		bool flag2 = activeGameMode != null && activeGameMode.GameType() == GameModeType.PropHunt;
 		int packedFields = num + (this.remoteUseReplacementVoice ? 512 : 0) + ((this.grabbedRopeIndex != -1) ? 1024 : 0) + (this.grabbedRopeIsPhotonView ? 2048 : 0) + (flag ? 4096 : 0) + (this.hoverboardVisual.IsHeld ? 8192 : 0) + (this.hoverboardVisual.IsLeftHanded ? 16384 : 0) + ((this.mountedMovingSurfaceId != -1) ? 32768 : 0) + (flag2 ? 65536 : 0) + (this.propHuntHandFollower.IsLeftHand ? 131072 : 0) + (this.leftHandLink.CanBeGrabbed() ? 262144 : 0) + (this.rightHandLink.CanBeGrabbed() ? 524288 : 0) + (num2 << 24);
 		result.packedFields = packedFields;
@@ -1549,16 +1548,16 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 				GorillaClimbable gorillaClimbable;
 				HandHoldXSceneRef handHoldXSceneRef;
 				VRRigSerializer vrrigSerializer;
-				if (photonView.TryGetComponent<GorillaClimbable>(out gorillaClimbable))
+				if (photonView.TryGetComponent<GorillaClimbable>(ref gorillaClimbable))
 				{
 					this.currentHoldParent = photonView.transform;
 				}
-				else if (photonView.TryGetComponent<HandHoldXSceneRef>(out handHoldXSceneRef))
+				else if (photonView.TryGetComponent<HandHoldXSceneRef>(ref handHoldXSceneRef))
 				{
 					GameObject targetObject = handHoldXSceneRef.targetObject;
 					this.currentHoldParent = ((targetObject != null) ? targetObject.transform : null);
 				}
-				else if (photonView && photonView.TryGetComponent<VRRigSerializer>(out vrrigSerializer))
+				else if (photonView && photonView.TryGetComponent<VRRigSerializer>(ref vrrigSerializer))
 				{
 					this.currentHoldParent = ((this.grabbedRopeBoneIndex == 1) ? vrrigSerializer.VRRig.leftHandHoldsPlayer.transform : vrrigSerializer.VRRig.rightHandHoldsPlayer.transform);
 				}
@@ -1580,7 +1579,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			PhotonView photonView2 = PhotonView.Find(this.previousGrabbedRope);
 			VRRigSerializer vrrigSerializer2;
-			if (photonView2 && photonView2.TryGetComponent<VRRigSerializer>(out vrrigSerializer2) && vrrigSerializer2.VRRig == VRRig.LocalRig)
+			if (photonView2 && photonView2.TryGetComponent<VRRigSerializer>(ref vrrigSerializer2) && vrrigSerializer2.VRRig == VRRig.LocalRig)
 			{
 				EquipmentInteractor.instance.ForceDropEquipment(this.bodyHolds);
 				EquipmentInteractor.instance.ForceDropEquipment(this.leftHolds);
@@ -1676,7 +1675,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		if (GorillaTagger.hasInstance && GorillaTagger.Instance.offlineVRRig)
 		{
 			GorillaTagger.Instance.offlineVRRig.grabbedRopeIndex = view.ViewID;
-			GorillaTagger.Instance.offlineVRRig.grabbedRopeIsLeft = (xrNode == XRNode.LeftHand);
+			GorillaTagger.Instance.offlineVRRig.grabbedRopeIsLeft = (xrNode == 4);
 			GorillaTagger.Instance.offlineVRRig.grabbedRopeOffset = offset;
 			GorillaTagger.Instance.offlineVRRig.grabbedRopeIsPhotonView = true;
 		}
@@ -1724,7 +1723,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			else
 			{
 				Vector3 localScale = this.frozenEffect.transform.localScale;
-				localScale = new Vector3(localScale.x, this.frozenEffectMinY, localScale.z);
+				localScale..ctor(localScale.x, this.frozenEffectMinY, localScale.z);
 				this.frozenEffect.transform.localScale = localScale;
 			}
 		}
@@ -1751,7 +1750,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			return;
 		}
-		int arg = this.setMatIndex;
+		int num = this.setMatIndex;
 		this.setMatIndex = materialIndex;
 		if (this.setMatIndex > -1 && this.setMatIndex < this.materialsToChangeTo.Length)
 		{
@@ -1767,17 +1766,17 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			return;
 		}
-		onMaterialIndexChanged(arg, this.setMatIndex);
+		onMaterialIndexChanged.Invoke(num, this.setMatIndex);
 	}
 
 	public void PlayTaggedEffect()
 	{
 		TagEffectPack tagEffectPack = null;
-		quaternion q = base.transform.rotation;
+		quaternion quaternion = base.transform.rotation;
 		TagEffectsLibrary.EffectType effectType = (VRRig.LocalRig == this) ? TagEffectsLibrary.EffectType.FIRST_PERSON : TagEffectsLibrary.EffectType.THIRD_PERSON;
 		if (GorillaGameManager.instance != null && this.OwningNetPlayer != null)
 		{
-			GorillaGameManager.instance.lastTaggedActorNr.TryGetValue(this.OwningNetPlayer.ActorNumber, out this.taggedById);
+			GorillaGameManager.instance.lastTaggedActorNr.TryGetValue(this.OwningNetPlayer.ActorNumber, ref this.taggedById);
 		}
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(this.taggedById);
 		RigContainer rigContainer;
@@ -1786,10 +1785,10 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			tagEffectPack = rigContainer.Rig.CosmeticEffectPack;
 			if (tagEffectPack && tagEffectPack.shouldFaceTagger && effectType == TagEffectsLibrary.EffectType.THIRD_PERSON)
 			{
-				q = Quaternion.LookRotation((rigContainer.Rig.transform.position - base.transform.position).normalized);
+				quaternion = Quaternion.LookRotation((rigContainer.Rig.transform.position - base.transform.position).normalized);
 			}
 		}
-		TagEffectsLibrary.PlayEffect(base.transform, false, this.scaleFactor, effectType, this.CosmeticEffectPack, tagEffectPack, q);
+		TagEffectsLibrary.PlayEffect(base.transform, false, this.scaleFactor, effectType, this.CosmeticEffectPack, tagEffectPack, quaternion);
 	}
 
 	public void UpdateMatParticles(int materialIndex)
@@ -1858,7 +1857,8 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	public void InitializeNoobMaterialLocal(float red, float green, float blue)
 	{
-		Color color = new Color(red, green, blue);
+		Color color;
+		color..ctor(red, green, blue);
 		color.r = Mathf.Clamp(color.r, 0f, 1f);
 		color.g = Mathf.Clamp(color.g, 0f, 1f);
 		color.b = Mathf.Clamp(color.b, 0f, 1f);
@@ -1889,7 +1889,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			return;
 		}
-		onPlayerNameVisibleChanged();
+		onPlayerNameVisibleChanged.Invoke();
 	}
 
 	public void SetNameTagText(string name)
@@ -1901,13 +1901,13 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			return;
 		}
-		onNameChanged(this.rigContainer);
+		onNameChanged.Invoke(this.rigContainer);
 	}
 
 	public void UpdateName()
 	{
 		Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(EKIDFeatures.Custom_Nametags);
-		bool isNamePermissionEnabled = (permissionDataByFeature.Enabled || permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PLAYER) && permissionDataByFeature.ManagedBy != Permission.ManagedByEnum.PROHIBITED;
+		bool isNamePermissionEnabled = (permissionDataByFeature.Enabled || permissionDataByFeature.ManagedBy == 1) && permissionDataByFeature.ManagedBy != 3;
 		this.UpdateName(isNamePermissionEnabled);
 	}
 
@@ -2100,28 +2100,28 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	internal void SetHandEffectData(HandEffectContext effectContext, int audioClipIndex, bool isDownTap, bool isLeftHand, StiltID stiltID, float handTapVolume, float handTapSpeed, Vector3 dirFromHitToHand)
 	{
 		VRMap vrmap = isLeftHand ? this.leftHand : this.rightHand;
-		Vector3 b = dirFromHitToHand * this.tapPointDistance * this.scaleFactor;
+		Vector3 vector = dirFromHitToHand * this.tapPointDistance * this.scaleFactor;
 		if (this.isOfflineVRRig)
 		{
-			Vector3 b2 = vrmap.rigTarget.rotation * vrmap.trackingPositionOffset * this.scaleFactor;
-			Vector3 position = (stiltID != StiltID.None) ? GTPlayer.Instance.GetHandPosition(isLeftHand, stiltID) : (vrmap.rigTarget.position - b2 + b);
+			Vector3 vector2 = vrmap.rigTarget.rotation * vrmap.trackingPositionOffset * this.scaleFactor;
+			Vector3 position = (stiltID != StiltID.None) ? GTPlayer.Instance.GetHandPosition(isLeftHand, stiltID) : (vrmap.rigTarget.position - vector2 + vector);
 			effectContext.position = position;
 			effectContext.handSoundSource.transform.position = position;
 		}
 		else
 		{
-			Quaternion rotation = vrmap.rigTarget.parent.rotation * vrmap.syncRotation;
-			Vector3 b3 = this.netSyncPos.GetPredictedFuture() - base.transform.position;
-			Vector3 b2 = rotation * vrmap.trackingPositionOffset * this.scaleFactor;
-			effectContext.position = vrmap.rigTarget.parent.TransformPoint(vrmap.netSyncPos.GetPredictedFuture()) - b2 + b + b3;
+			Quaternion quaternion = vrmap.rigTarget.parent.rotation * vrmap.syncRotation;
+			Vector3 vector3 = this.netSyncPos.GetPredictedFuture() - base.transform.position;
+			Vector3 vector2 = quaternion * vrmap.trackingPositionOffset * this.scaleFactor;
+			effectContext.position = vrmap.rigTarget.parent.TransformPoint(vrmap.netSyncPos.GetPredictedFuture()) - vector2 + vector + vector3;
 		}
 		GTPlayer.MaterialData handSurfaceData = this.GetHandSurfaceData(audioClipIndex);
 		HandTapOverrides handTapOverrides = isDownTap ? effectContext.DownTapOverrides : effectContext.UpTapOverrides;
 		List<int> prefabHashes = effectContext.prefabHashes;
-		int index = 0;
+		int num = 0;
 		HashWrapper hashWrapper = handTapOverrides.overrideSurfacePrefab ? handTapOverrides.surfaceTapPrefab : GTPlayer.Instance.materialDatasSO.surfaceEffects[handSurfaceData.surfaceEffectIndex];
-		prefabHashes[index] = hashWrapper;
-		effectContext.prefabHashes[1] = (ref handTapOverrides.overrideGamemodePrefab ? handTapOverrides.gamemodeTapPrefab : ((RoomSystem.JoinedRoom && GorillaGameModes.GameMode.ActiveGameMode.IsNotNull()) ? GorillaGameModes.GameMode.ActiveGameMode.SpecialHandFX(this.creator, this.rigContainer) : -1));
+		prefabHashes[num] = hashWrapper;
+		effectContext.prefabHashes[1] = (ref handTapOverrides.overrideGamemodePrefab ? handTapOverrides.gamemodeTapPrefab : ((RoomSystem.JoinedRoom && GameMode.ActiveGameMode.IsNotNull()) ? GameMode.ActiveGameMode.SpecialHandFX(this.creator, this.rigContainer) : -1));
 		effectContext.soundFX = (handTapOverrides.overrideSound ? handTapOverrides.tapSound : handSurfaceData.audio);
 		effectContext.isDownTap = isDownTap;
 		effectContext.isLeftHand = isLeftHand;
@@ -2189,7 +2189,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		GorillaNot.instance.SendReport("inappropriate tag data being sent splash effect", player.UserId, player.NickName);
 	}
 
-	[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+	[Rpc(1, 7)]
 	public void RPC_EnableNonCosmeticHandItem(bool enable, bool isLeftHand, RpcInfo info = default(RpcInfo))
 	{
 		PhotonMessageInfoWrapped photonMessageInfoWrapped = new PhotonMessageInfoWrapped(info);
@@ -2251,7 +2251,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	{
 		if (this.isOfflineVRRig)
 		{
-			return ControllerInputPoller.GripFloat(XRNode.LeftHand) > 0.25f && ControllerInputPoller.TriggerFloat(XRNode.LeftHand) > 0.25f;
+			return ControllerInputPoller.GripFloat(4) > 0.25f && ControllerInputPoller.TriggerFloat(4) > 0.25f;
 		}
 		return this.leftIndex.calcT > 0.25f && this.leftMiddle.calcT > 0.25f;
 	}
@@ -2260,7 +2260,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	{
 		if (this.isOfflineVRRig)
 		{
-			return ControllerInputPoller.GripFloat(XRNode.RightHand) > 0.25f && ControllerInputPoller.TriggerFloat(XRNode.RightHand) > 0.25f;
+			return ControllerInputPoller.GripFloat(5) > 0.25f && ControllerInputPoller.TriggerFloat(5) > 0.25f;
 		}
 		return this.rightIndex.calcT > 0.25f && this.rightMiddle.calcT > 0.25f;
 	}
@@ -2269,7 +2269,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	{
 		if (this.isOfflineVRRig)
 		{
-			return ControllerInputPoller.GripFloat(XRNode.LeftHand) < 0.25f && ControllerInputPoller.TriggerFloat(XRNode.LeftHand) < 0.25f;
+			return ControllerInputPoller.GripFloat(4) < 0.25f && ControllerInputPoller.TriggerFloat(4) < 0.25f;
 		}
 		return this.leftIndex.calcT < 0.25f && this.leftMiddle.calcT < 0.25f;
 	}
@@ -2278,7 +2278,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	{
 		if (this.isOfflineVRRig)
 		{
-			return ControllerInputPoller.GripFloat(XRNode.RightHand) < 0.25f && ControllerInputPoller.TriggerFloat(XRNode.RightHand) < 0.25f;
+			return ControllerInputPoller.GripFloat(5) < 0.25f && ControllerInputPoller.TriggerFloat(5) < 0.25f;
 		}
 		return this.rightIndex.calcT < 0.25f && this.rightMiddle.calcT < 0.25f;
 	}
@@ -2594,10 +2594,10 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	public bool CheckTagDistanceRollback(VRRig otherRig, float max, float timeInterval)
 	{
-		Vector3 a;
-		Vector3 b;
-		GorillaMath.LineSegClosestPoints(this.syncPos, -this.LatestVelocity() * timeInterval, otherRig.syncPos, -otherRig.LatestVelocity() * timeInterval, out a, out b);
-		return Vector3.SqrMagnitude(a - b) < max * max * this.scaleFactor;
+		Vector3 vector;
+		Vector3 vector2;
+		GorillaMath.LineSegClosestPoints(this.syncPos, -this.LatestVelocity() * timeInterval, otherRig.syncPos, -otherRig.LatestVelocity() * timeInterval, out vector, out vector2);
+		return Vector3.SqrMagnitude(vector - vector2) < max * max * this.scaleFactor;
 	}
 
 	public Vector3 ClampVelocityRelativeToPlayerSafe(Vector3 inVel, float max, float teleportSpeedThreshold = 100f)
@@ -2625,12 +2625,12 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		Action<Color> onColorChanged = this.OnColorChanged;
 		if (onColorChanged != null)
 		{
-			onColorChanged(color);
+			onColorChanged.Invoke(color);
 		}
 		Action<Color> action = this.onColorInitialized;
 		if (action != null)
 		{
-			action(color);
+			action.Invoke(color);
 		}
 		this.onColorInitialized = delegate(Color color1)
 		{
@@ -2639,7 +2639,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		this.playerColor = color;
 		if (this.OnDataChange != null)
 		{
-			this.OnDataChange();
+			this.OnDataChange.Invoke();
 		}
 	}
 
@@ -2647,7 +2647,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	{
 		if (this.colorInitialized)
 		{
-			action(this.playerColor);
+			action.Invoke(this.playerColor);
 			return;
 		}
 		this.onColorInitialized = (Action<Color>)Delegate.Combine(this.onColorInitialized, action);
@@ -2657,7 +2657,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	{
 		if (this.netView != null && this._scoreUpdated)
 		{
-			this.netView.SendRPC("RPC_UpdateQuestScore", RpcTarget.Others, new object[]
+			this.netView.SendRPC("RPC_UpdateQuestScore", 1, new object[]
 			{
 				this.currentQuestScore
 			});
@@ -2669,7 +2669,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		if (this.netView != null && this._rankedInfoUpdated && newGameModeType != GameModeType.InfectionCompetitive && !this.m_sentRankedScore)
 		{
 			this.m_sentRankedScore = true;
-			this.netView.SendRPC("RPC_UpdateRankedInfo", RpcTarget.Others, new object[]
+			this.netView.SendRPC("RPC_UpdateRankedInfo", 1, new object[]
 			{
 				this.currentRankedELO,
 				this.currentRankedSubTierQuest,
@@ -2709,11 +2709,11 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		Action<int> onQuestScoreChanged = this.OnQuestScoreChanged;
 		if (onQuestScoreChanged != null)
 		{
-			onQuestScoreChanged(this.currentQuestScore);
+			onQuestScoreChanged.Invoke(this.currentQuestScore);
 		}
 		if (this.netView != null)
 		{
-			this.netView.SendRPC("RPC_UpdateQuestScore", RpcTarget.Others, new object[]
+			this.netView.SendRPC("RPC_UpdateQuestScore", 1, new object[]
 			{
 				this.currentQuestScore
 			});
@@ -2757,7 +2757,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			return;
 		}
-		onQuestScoreChanged(this.currentQuestScore);
+		onQuestScoreChanged.Invoke(this.currentQuestScore);
 	}
 
 	public event Action<int, int> OnRankedSubtierChanged;
@@ -2768,11 +2768,11 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		Action<int, int> onRankedSubtierChanged = this.OnRankedSubtierChanged;
 		if (onRankedSubtierChanged != null)
 		{
-			onRankedSubtierChanged(rankedSubtierQuest, rankedSubtierPC);
+			onRankedSubtierChanged.Invoke(rankedSubtierQuest, rankedSubtierPC);
 		}
 		if (this.netView != null && broadcastToOtherClients)
 		{
-			this.netView.SendRPC("RPC_UpdateRankedInfo", RpcTarget.Others, new object[]
+			this.netView.SendRPC("RPC_UpdateRankedInfo", 1, new object[]
 			{
 				this.currentRankedELO,
 				this.currentRankedSubTierQuest,
@@ -2804,7 +2804,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	private bool IsInRankedMode()
 	{
-		return GorillaGameModes.GameMode.ActiveGameMode != null && GorillaGameModes.GameMode.ActiveGameMode.GameType() == GameModeType.InfectionCompetitive;
+		return GameMode.ActiveGameMode != null && GameMode.ActiveGameMode.GameType() == GameModeType.InfectionCompetitive;
 	}
 
 	public void UpdateRankedInfo(float rankedELO, int rankedSubtierQuest, int rankedSubtierPC, PhotonMessageInfoWrapped info)
@@ -2832,7 +2832,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		Action<int, int> onRankedSubtierChanged = this.OnRankedSubtierChanged;
 		if (onRankedSubtierChanged != null)
 		{
-			onRankedSubtierChanged(rankedSubtierQuest, rankedSubtierPC);
+			onRankedSubtierChanged.Invoke(rankedSubtierQuest, rankedSubtierPC);
 		}
 		RankedProgressionManager.Instance.HandlePlayerRankedInfoReceived(this.creator.ActorNumber, rankedELO, rankedSubtierPC);
 	}
@@ -2855,7 +2855,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			HandHold.HandPositionRequestOverride += this.HandHold_HandPositionRequestOverride;
 			HandHold.HandPositionReleaseOverride += this.HandHold_HandPositionReleaseOverride;
-			GorillaGameModes.GameMode.OnStartGameMode += this.SendScoresToGameModeRoom;
+			GameMode.OnStartGameMode += this.SendScoresToGameModeRoom;
 			RoomSystem.JoinedRoomEvent += new Action(this.SendScoresToRoom);
 			RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(this.SendScoresToNewPlayer);
 		}
@@ -2957,7 +2957,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			HandHold.HandPositionRequestOverride -= this.HandHold_HandPositionRequestOverride;
 			HandHold.HandPositionReleaseOverride -= this.HandHold_HandPositionReleaseOverride;
-			GorillaGameModes.GameMode.OnStartGameMode -= this.SendScoresToGameModeRoom;
+			GameMode.OnStartGameMode -= this.SendScoresToGameModeRoom;
 			RoomSystem.JoinedRoomEvent -= new Action(this.SendScoresToRoom);
 			RoomSystem.PlayerJoinedEvent -= new Action<NetPlayer>(this.SendScoresToNewPlayer);
 		}
@@ -3042,12 +3042,12 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			Action action = VRRig.newPlayerJoined;
 			if (action != null)
 			{
-				action();
+				action.Invoke();
 			}
 		}
-		catch (Exception message)
+		catch (Exception ex)
 		{
-			Debug.LogError(message);
+			Debug.LogError(ex);
 		}
 	}
 
@@ -3144,30 +3144,30 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		Vector3 vector = startVelocity * Time.deltaTime;
 		finalPosition = startPosition + vector;
 		modifiedVelocity = startVelocity;
-		Vector3 a;
+		Vector3 vector2;
 		RaycastHit raycastHit;
-		bool flag = this.LocalCheckCollision(startPosition, vector, instance.headCollider.radius * this.scaleFactor, out a, out raycastHit);
+		bool flag = this.LocalCheckCollision(startPosition, vector, instance.headCollider.radius * this.scaleFactor, out vector2, out raycastHit);
 		if (flag)
 		{
-			finalPosition = a - vector.normalized * 0.01f;
+			finalPosition = vector2 - vector.normalized * 0.01f;
 			modifiedVelocity = startVelocity - raycastHit.normal * Vector3.Dot(raycastHit.normal, startVelocity);
 		}
 		Vector3 position = this.leftHand.rigTarget.position;
-		Vector3 a2;
+		Vector3 vector3;
 		RaycastHit raycastHit2;
-		bool flag2 = this.LocalCheckCollision(position, vector, instance.minimumRaycastDistance * this.scaleFactor, out a2, out raycastHit2);
+		bool flag2 = this.LocalCheckCollision(position, vector, instance.minimumRaycastDistance * this.scaleFactor, out vector3, out raycastHit2);
 		if (flag2)
 		{
-			finalPosition = a2 - (this.leftHand.rigTarget.position - startPosition) - vector.normalized * 0.01f;
+			finalPosition = vector3 - (this.leftHand.rigTarget.position - startPosition) - vector.normalized * 0.01f;
 			modifiedVelocity = Vector3.zero;
 		}
 		Vector3 position2 = this.rightHand.rigTarget.position;
-		Vector3 a3;
+		Vector3 vector4;
 		RaycastHit raycastHit3;
-		bool flag3 = this.LocalCheckCollision(position2, vector, instance.minimumRaycastDistance * this.scaleFactor, out a3, out raycastHit3);
+		bool flag3 = this.LocalCheckCollision(position2, vector, instance.minimumRaycastDistance * this.scaleFactor, out vector4, out raycastHit3);
 		if (flag3)
 		{
-			finalPosition = a3 - (this.rightHand.rigTarget.position - startPosition) - vector.normalized * 0.01f;
+			finalPosition = vector4 - (this.rightHand.rigTarget.position - startPosition) - vector.normalized * 0.01f;
 			modifiedVelocity = Vector3.zero;
 		}
 		return flag || flag2 || flag3;
@@ -3187,9 +3187,9 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		Vector3 startPosition = position;
 		handCollided = false;
 		buttCollided = false;
-		Vector3 a;
+		Vector3 vector2;
 		RaycastHit raycastHit;
-		if (this.LocalCheckCollision(startPosition, movement, instance.headCollider.radius * this.scaleFactor, out a, out raycastHit))
+		if (this.LocalCheckCollision(startPosition, movement, instance.headCollider.radius * this.scaleFactor, out vector2, out raycastHit))
 		{
 			if (movement.IsShorterThan(0.01f))
 			{
@@ -3197,15 +3197,15 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			}
 			else
 			{
-				vector = a - movement.normalized * 0.01f;
+				vector = vector2 - movement.normalized * 0.01f;
 			}
 			movement = vector - position;
 			buttCollided = true;
 		}
 		Vector3 position2 = this.leftHand.rigTarget.position;
-		Vector3 a2;
+		Vector3 vector3;
 		RaycastHit raycastHit2;
-		if (this.LocalCheckCollision(position2, movement, instance.minimumRaycastDistance * this.scaleFactor, out a2, out raycastHit2))
+		if (this.LocalCheckCollision(position2, movement, instance.minimumRaycastDistance * this.scaleFactor, out vector3, out raycastHit2))
 		{
 			if (movement.IsShorterThan(0.01f))
 			{
@@ -3213,15 +3213,15 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			}
 			else
 			{
-				vector = a2 - (this.leftHand.rigTarget.position - position) - movement.normalized * 0.01f;
+				vector = vector3 - (this.leftHand.rigTarget.position - position) - movement.normalized * 0.01f;
 			}
 			movement = vector - position;
 			handCollided = true;
 		}
 		Vector3 position3 = this.rightHand.rigTarget.position;
-		Vector3 a3;
+		Vector3 vector4;
 		RaycastHit raycastHit3;
-		if (this.LocalCheckCollision(position3, movement, instance.minimumRaycastDistance * this.scaleFactor, out a3, out raycastHit3))
+		if (this.LocalCheckCollision(position3, movement, instance.minimumRaycastDistance * this.scaleFactor, out vector4, out raycastHit3))
 		{
 			if (movement.IsShorterThan(0.01f))
 			{
@@ -3229,7 +3229,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			}
 			else
 			{
-				vector = a3 - (this.rightHand.rigTarget.position - position) - movement.normalized * 0.01f;
+				vector = vector4 - (this.rightHand.rigTarget.position - position) - movement.normalized * 0.01f;
 			}
 			movement = vector - position;
 			handCollided = true;
@@ -3501,10 +3501,10 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			this.turnFactor = this.GorillaSnapTurningComp.turnFactor;
 			this.turnType = this.GorillaSnapTurningComp.turnType;
-			string a = this.turnType;
-			if (!(a == "SNAP"))
+			string text = this.turnType;
+			if (!(text == "SNAP"))
 			{
-				if (a == "SMOOTH")
+				if (text == "SMOOTH")
 				{
 					num = 2;
 				}
@@ -3542,7 +3542,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	private void OnKIDSessionUpdated(bool showCustomNames, Permission.ManagedByEnum managedBy)
 	{
-		bool flag = (showCustomNames || managedBy == Permission.ManagedByEnum.PLAYER) && managedBy != Permission.ManagedByEnum.PROHIBITED;
+		bool flag = (showCustomNames || managedBy == 1) && managedBy != 3;
 		GorillaComputer.instance.SetComputerSettingsBySafety(!flag, new GorillaComputer.ComputerState[]
 		{
 			GorillaComputer.ComputerState.Name
@@ -3550,13 +3550,13 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		bool flag2 = PlayerPrefs.GetInt("nameTagsOn", -1) > 0;
 		switch (managedBy)
 		{
-		case Permission.ManagedByEnum.PLAYER:
+		case 1:
 			flag = GorillaComputer.instance.NametagsEnabled;
 			break;
-		case Permission.ManagedByEnum.GUARDIAN:
+		case 2:
 			flag = (showCustomNames && flag2);
 			break;
-		case Permission.ManagedByEnum.PROHIBITED:
+		case 3:
 			flag = false;
 			break;
 		}

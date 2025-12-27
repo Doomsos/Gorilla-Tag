@@ -111,7 +111,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 
 	private void _ProcessPropsList_NoPool(string titleDataPropsLines)
 	{
-		this._ph_allPropIDs_noPool = titleDataPropsLines.Split(GorillaPropHuntGameManager._g_ph_titleDataSeparators, StringSplitOptions.RemoveEmptyEntries);
+		this._ph_allPropIDs_noPool = titleDataPropsLines.Split(GorillaPropHuntGameManager._g_ph_titleDataSeparators, 1);
 	}
 
 	public override void StartPlaying()
@@ -119,7 +119,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		base.StartPlaying();
 		bool isMasterClient = PhotonNetwork.IsMasterClient;
 		this._ResolveXSceneRefs();
-		GameMode.ParticipatingPlayersChanged += this._OnParticipatingPlayersChanged;
+		GameMode.ParticipatingPlayersChanged += new Action<List<NetPlayer>, List<NetPlayer>>(this._OnParticipatingPlayersChanged);
 		this._UpdateParticipatingPlayers();
 		if (this.m_ph_soundNearBorder_audioSource != null)
 		{
@@ -131,7 +131,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 	{
 		base.StopPlaying();
 		this._ph_gameState = GorillaPropHuntGameManager.EPropHuntGameState.StoppedGameMode;
-		GameMode.ParticipatingPlayersChanged -= this._OnParticipatingPlayersChanged;
+		GameMode.ParticipatingPlayersChanged -= new Action<List<NetPlayer>, List<NetPlayer>>(this._OnParticipatingPlayersChanged);
 		foreach (VRRig rig in GorillaParent.instance.vrrigs)
 		{
 			GorillaSkin.ApplyToRig(rig, null, GorillaSkin.SkinType.gameMode);
@@ -282,7 +282,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 			}
 		}
 		PlayableBoundaryTracker playableBoundaryTracker2;
-		if (!this._ph_isLocalPlayerParticipating && GorillaPropHuntGameManager._g_ph_rig_to_propHuntZoneTrackers.TryGetValue(VRRig.LocalRig.GetInstanceID(), out playableBoundaryTracker2))
+		if (!this._ph_isLocalPlayerParticipating && GorillaPropHuntGameManager._g_ph_rig_to_propHuntZoneTrackers.TryGetValue(VRRig.LocalRig.GetInstanceID(), ref playableBoundaryTracker2))
 		{
 			playableBoundaryTracker2.ResetValues();
 		}
@@ -443,7 +443,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		if (isSkeleton)
 		{
 			PlayableBoundaryTracker playableBoundaryTracker;
-			if (!GorillaPropHuntGameManager._g_ph_rig_to_propHuntZoneTrackers.TryGetValue(rig.GetInstanceID(), out playableBoundaryTracker))
+			if (!GorillaPropHuntGameManager._g_ph_rig_to_propHuntZoneTrackers.TryGetValue(rig.GetInstanceID(), ref playableBoundaryTracker))
 			{
 				rig.bodyTransform.GetOrAddComponent(out playableBoundaryTracker);
 				GorillaPropHuntGameManager._g_ph_rig_to_propHuntZoneTrackers[rig.GetInstanceID()] = playableBoundaryTracker;
@@ -464,10 +464,10 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 			CosmeticsController.instance.SetHideCosmeticsFromRemotePlayers(isSkeleton);
 			if (isSkeleton)
 			{
-				float time = 1f - math.saturate(-num / this.m_ph_soundNearBorder_maxDistance);
+				float num3 = 1f - math.saturate(-num / this.m_ph_soundNearBorder_maxDistance);
 				AudioSource ph_soundNearBorder_audioSource = this.m_ph_soundNearBorder_audioSource;
 				GorillaPropHuntGameManager.EPropHuntGameState ph_gameState = this._ph_gameState;
-				ph_soundNearBorder_audioSource.volume = ((ph_gameState == GorillaPropHuntGameManager.EPropHuntGameState.Hiding || ph_gameState == GorillaPropHuntGameManager.EPropHuntGameState.Playing) ? (this.m_ph_soundNearBorder_baseVolume * this.m_ph_soundNearBorder_volumeCurve.Evaluate(time)) : 0f);
+				ph_soundNearBorder_audioSource.volume = ((ph_gameState == GorillaPropHuntGameManager.EPropHuntGameState.Hiding || ph_gameState == GorillaPropHuntGameManager.EPropHuntGameState.Playing) ? (this.m_ph_soundNearBorder_baseVolume * this.m_ph_soundNearBorder_volumeCurve.Evaluate(num3)) : 0f);
 				if (num >= 0f && num2 < 0f && !this.m_ph_planeCrossingSoundBank.isPlaying)
 				{
 					this.m_ph_planeCrossingSoundBank.Play();
@@ -488,12 +488,12 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		{
 			return;
 		}
-		float time = 1f - math.saturate(-signedDistToBoundary / this.m_ph_hapticsNearBorder_borderProximity);
-		float num = this.m_ph_hapticsNearBorder_ampCurve.Evaluate(time);
-		float amplitude = math.saturate(this.m_ph_hapticsNearBorder_baseAmp * num * (GorillaTagger.Instance.tapHapticStrength * 2f));
+		float num = 1f - math.saturate(-signedDistToBoundary / this.m_ph_hapticsNearBorder_borderProximity);
+		float num2 = this.m_ph_hapticsNearBorder_ampCurve.Evaluate(num);
+		float num3 = math.saturate(this.m_ph_hapticsNearBorder_baseAmp * num2 * (GorillaTagger.Instance.tapHapticStrength * 2f));
 		GorillaPropHuntGameManager._g_ph_hapticsLastImpulseEndTime = Time.unscaledTime + 0.1f;
-		InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).SendHapticImpulse(0U, amplitude, 0.1f);
-		InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0U, amplitude, 0.1f);
+		InputDevices.GetDeviceAtXRNode(4).SendHapticImpulse(0U, num3, 0.1f);
+		InputDevices.GetDeviceAtXRNode(5).SendHapticImpulse(0U, num3, 0.1f);
 	}
 
 	private void _Initialize_defaultStencilRefOfSkeletonMat()
@@ -598,7 +598,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		this._roundIsPlaying = true;
 		if (PhotonNetwork.IsMasterClient)
 		{
-			this._ph_randomSeed = UnityEngine.Random.Range(1, int.MaxValue);
+			this._ph_randomSeed = Random.Range(1, int.MaxValue);
 			this.PH_OnRoundStartRPC(GTTime.TimeAsMilliseconds(), this._ph_randomSeed);
 		}
 	}
@@ -707,8 +707,8 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		if (this._ph_playBoundary_isResolved)
 		{
 			SRand srand = new SRand(this._ph_randomSeed);
-			int index = srand.NextInt(this.m_ph_playBoundary_endPointTransforms.Count);
-			Transform transform = this.m_ph_playBoundary_endPointTransforms[index];
+			int num = srand.NextInt(this.m_ph_playBoundary_endPointTransforms.Count);
+			Transform transform = this.m_ph_playBoundary_endPointTransforms[num];
 			if (transform != null)
 			{
 				this._ph_playBoundary_currentTargetPosition = transform.position;
@@ -871,7 +871,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		else
 		{
 			GameObject gameObject;
-			if (!this._ph_vrRig_to_blindfolds.TryGetValue(vrRig.GetInstanceID(), out gameObject))
+			if (!this._ph_vrRig_to_blindfolds.TryGetValue(vrRig.GetInstanceID(), ref gameObject))
 			{
 				Transform[] boneXforms;
 				string text;
@@ -879,8 +879,8 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 				{
 					return;
 				}
-				Transform parent;
-				if (!GTHardCodedBones.TryGetBoneXform(boneXforms, GTHardCodedBones.EBone.head, out parent))
+				Transform transform;
+				if (!GTHardCodedBones.TryGetBoneXform(boneXforms, GTHardCodedBones.EBone.head, out transform))
 				{
 					return;
 				}
@@ -888,7 +888,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 				{
 					return;
 				}
-				gameObject = Object.Instantiate<GameObject>(this.m_ph_blindfold_forAvatarPrefab, parent);
+				gameObject = Object.Instantiate<GameObject>(this.m_ph_blindfold_forAvatarPrefab, transform);
 				this._ph_vrRig_to_blindfolds[vrRig.GetInstanceID()] = gameObject;
 			}
 			gameObject.SetActive(shouldEnable);

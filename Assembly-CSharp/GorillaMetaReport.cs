@@ -21,7 +21,7 @@ public class GorillaMetaReport : MonoBehaviour
 	private void Start()
 	{
 		this.localPlayer.inOverlay = false;
-		MothershipClientApiUnity.OnMessageNotificationSocket += this.OnNotification;
+		MothershipClientApiUnity.OnMessageNotificationSocket += new Action<NotificationsMessageResponse, IntPtr>(this.OnNotification);
 		base.gameObject.SetActive(false);
 	}
 
@@ -39,19 +39,19 @@ public class GorillaMetaReport : MonoBehaviour
 	{
 		if (message.IsError)
 		{
-			AbuseReport.ReportRequestHandled(ReportRequestResponse.Unhandled);
+			AbuseReport.ReportRequestHandled(2);
 			return;
 		}
 		if (!PhotonNetwork.InRoom)
 		{
 			this.ReportText.SetActive(true);
-			AbuseReport.ReportRequestHandled(ReportRequestResponse.Handled);
+			AbuseReport.ReportRequestHandled(1);
 			this.StartOverlay(false);
 			return;
 		}
 		if (!message.IsError)
 		{
-			AbuseReport.ReportRequestHandled(ReportRequestResponse.Handled);
+			AbuseReport.ReportRequestHandled(1);
 			this.StartOverlay(false);
 		}
 	}
@@ -84,14 +84,14 @@ public class GorillaMetaReport : MonoBehaviour
 
 	private void OnWarning(string warningNotification)
 	{
-		string[] array = warningNotification.Split('|', StringSplitOptions.None);
+		string[] array = warningNotification.Split('|', 0);
 		if (array.Length != 2)
 		{
 			Debug.LogError("Invalid warning notification");
 			return;
 		}
 		string text = array[0];
-		string[] array2 = array[1].Split(',', StringSplitOptions.None);
+		string[] array2 = array[1].Split(',', 0);
 		if (array2.Length == 0)
 		{
 			Debug.LogError("Missing warning notification reasons");
@@ -104,18 +104,18 @@ public class GorillaMetaReport : MonoBehaviour
 
 	private void OnMuteSanction(string muteNotification)
 	{
-		string[] array = muteNotification.Split('|', StringSplitOptions.None);
+		string[] array = muteNotification.Split('|', 0);
 		if (array.Length != 3)
 		{
 			Debug.LogError("Invalid mute notification");
 			return;
 		}
-		if (!array[0].Equals("voice", StringComparison.OrdinalIgnoreCase))
+		if (!array[0].Equals("voice", 5))
 		{
 			return;
 		}
 		int num;
-		if (array[2].Length > 0 && int.TryParse(array[2], out num))
+		if (array[2].Length > 0 && int.TryParse(array[2], ref num))
 		{
 			int num2 = num / 60;
 			this.ReportText.GetComponent<Text>().text = string.Format("MUTED FOR {0} MINUTES\nBAD MONKE", num2);
@@ -143,10 +143,10 @@ public class GorillaMetaReport : MonoBehaviour
 		{
 			if (num != 2)
 			{
-				string str = RuntimeHelpers.GetSubArray<string>(list, Range.EndAt(new Index(1, true))).Join(", ");
-				string str2 = ", AND ";
+				string text = RuntimeHelpers.GetSubArray<string>(list, Range.EndAt(new Index(1, true))).Join(", ");
+				string text2 = ", AND ";
 				string[] array = list;
-				result = str + str2 + array[array.Length - 1];
+				result = text + text2 + array[array.Length - 1];
 			}
 			else
 			{
@@ -174,12 +174,12 @@ public class GorillaMetaReport : MonoBehaviour
 		{
 			GorillaScoreboardTotalUpdater.instance.UpdateScoreboard(this.currentScoreboard);
 		}
-		Vector3 position;
-		Quaternion rotation;
 		Vector3 vector;
-		this.GetIdealScreenPositionRotation(out position, out rotation, out vector);
-		this.currentScoreboard.transform.SetPositionAndRotation(position, rotation);
-		this.reportScoreboard.transform.SetPositionAndRotation(position, rotation);
+		Quaternion quaternion;
+		Vector3 vector2;
+		this.GetIdealScreenPositionRotation(out vector, out quaternion, out vector2);
+		this.currentScoreboard.transform.SetPositionAndRotation(vector, quaternion);
+		this.reportScoreboard.transform.SetPositionAndRotation(vector, quaternion);
 	}
 
 	private void ToggleLevelVisibility(bool state)
@@ -256,15 +256,15 @@ public class GorillaMetaReport : MonoBehaviour
 		{
 			return;
 		}
-		Vector3 position;
-		Quaternion rotation;
 		Vector3 vector;
-		this.GetIdealScreenPositionRotation(out position, out rotation, out vector);
-		this.currentScoreboard.transform.localScale = vector * 2f;
-		this.reportScoreboard.transform.localScale = vector;
-		this.leftHandObject.transform.localScale = vector;
-		this.rightHandObject.transform.localScale = vector;
-		this.occluder.transform.localScale = vector;
+		Quaternion quaternion;
+		Vector3 vector2;
+		this.GetIdealScreenPositionRotation(out vector, out quaternion, out vector2);
+		this.currentScoreboard.transform.localScale = vector2 * 2f;
+		this.reportScoreboard.transform.localScale = vector2;
+		this.leftHandObject.transform.localScale = vector2;
+		this.rightHandObject.transform.localScale = vector2;
+		this.occluder.transform.localScale = vector2;
 		if (!PhotonNetwork.InRoom)
 		{
 			return;
@@ -280,8 +280,8 @@ public class GorillaMetaReport : MonoBehaviour
 		else
 		{
 			this.ReportText.SetActive(true);
-			this.reportScoreboard.transform.SetPositionAndRotation(position, rotation);
-			this.currentScoreboard.transform.SetPositionAndRotation(position, rotation);
+			this.reportScoreboard.transform.SetPositionAndRotation(vector, quaternion);
+			this.currentScoreboard.transform.SetPositionAndRotation(vector, quaternion);
 		}
 		this.ToggleLevelVisibility(false);
 		Transform controllerTransform = this.localPlayer.GetControllerTransform(true);
@@ -298,11 +298,11 @@ public class GorillaMetaReport : MonoBehaviour
 
 	private void CheckDistance()
 	{
-		Vector3 b;
-		Quaternion b2;
 		Vector3 vector;
-		this.GetIdealScreenPositionRotation(out b, out b2, out vector);
-		float num = Vector3.Distance(this.reportScoreboard.transform.position, b);
+		Quaternion quaternion;
+		Vector3 vector2;
+		this.GetIdealScreenPositionRotation(out vector, out quaternion, out vector2);
+		float num = Vector3.Distance(this.reportScoreboard.transform.position, vector);
 		float num2 = 1f;
 		if (num > num2 && !this.isMoving)
 		{
@@ -313,10 +313,10 @@ public class GorillaMetaReport : MonoBehaviour
 		{
 			this.movementTime += Time.deltaTime;
 			float num3 = this.movementTime;
-			this.reportScoreboard.transform.SetPositionAndRotation(Vector3.Lerp(this.reportScoreboard.transform.position, b, num3), Quaternion.Lerp(this.reportScoreboard.transform.rotation, b2, num3));
+			this.reportScoreboard.transform.SetPositionAndRotation(Vector3.Lerp(this.reportScoreboard.transform.position, vector, num3), Quaternion.Lerp(this.reportScoreboard.transform.rotation, quaternion, num3));
 			if (this.currentScoreboard != null)
 			{
-				this.currentScoreboard.transform.SetPositionAndRotation(Vector3.Lerp(this.currentScoreboard.transform.position, b, num3), Quaternion.Lerp(this.currentScoreboard.transform.rotation, b2, num3));
+				this.currentScoreboard.transform.SetPositionAndRotation(Vector3.Lerp(this.currentScoreboard.transform.position, vector, num3), Quaternion.Lerp(this.currentScoreboard.transform.rotation, quaternion, num3));
 			}
 			if (num3 >= 1f)
 			{
@@ -332,7 +332,7 @@ public class GorillaMetaReport : MonoBehaviour
 		{
 			return;
 		}
-		if (SteamVR_Actions.gorillaTag_System.GetState(SteamVR_Input_Sources.LeftHand) && this.localPlayer.InReportMenu)
+		if (SteamVR_Actions.gorillaTag_System.GetState(1) && this.localPlayer.InReportMenu)
 		{
 			this.Teardown();
 			this.blockButtonsUntilTimestamp = Time.time + 0.75f;

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 
 [Conditional("UNITY_EDITOR")]
-[AttributeUsage(AttributeTargets.All)]
+[AttributeUsage(32767)]
 public class InlineBoxAttribute : Attribute
 {
 }

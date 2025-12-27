@@ -50,9 +50,9 @@ public class PartyHornTransferableObject : TransferrableObject
 			return;
 		}
 		Transform transform = base.transform;
-		Vector3 b = this.CalcMouthPiecePos();
+		Vector3 vector = this.CalcMouthPiecePos();
 		float num = this.mouthPieceRadius * this.mouthPieceRadius * GTPlayer.Instance.scale * GTPlayer.Instance.scale;
-		bool flag = (GorillaTagger.Instance.offlineVRRig.GetMouthPosition() - b).sqrMagnitude < num;
+		bool flag = (GorillaTagger.Instance.offlineVRRig.GetMouthPosition() - vector).sqrMagnitude < num;
 		if (this.soundActivated && PhotonNetwork.InRoom)
 		{
 			bool flag2;
@@ -66,7 +66,7 @@ public class PartyHornTransferableObject : TransferrableObject
 				else
 				{
 					Recorder myRecorder = instance.myRecorder;
-					bool? flag3 = (myRecorder != null) ? new bool?(myRecorder.IsCurrentlyTransmitting) : null;
+					bool? flag3 = (myRecorder != null) ? new bool?(myRecorder.IsCurrentlyTransmitting) : default(bool?);
 					bool flag4 = true;
 					flag2 = (flag3.GetValueOrDefault() == flag4 & flag3 != null);
 				}
@@ -84,7 +84,7 @@ public class PartyHornTransferableObject : TransferrableObject
 			{
 				break;
 			}
-			flag = ((vrrig.GetMouthPosition() - b).sqrMagnitude < num);
+			flag = ((vrrig.GetMouthPosition() - vector).sqrMagnitude < num);
 			if (this.soundActivated)
 			{
 				bool flag5;
@@ -98,7 +98,7 @@ public class PartyHornTransferableObject : TransferrableObject
 					else
 					{
 						PhotonVoiceView voice = rigContainer.Voice;
-						bool? flag3 = (voice != null) ? new bool?(voice.IsSpeaking) : null;
+						bool? flag3 = (voice != null) ? new bool?(voice.IsSpeaking) : default(bool?);
 						bool flag4 = true;
 						flag5 = (flag3.GetValueOrDefault() == flag4 & flag3 != null);
 					}

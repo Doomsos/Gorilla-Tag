@@ -61,7 +61,7 @@ public class PaperPlaneThrowable : TransferrableObject
 
 	internal override void OnEnable()
 	{
-		PhotonNetwork.NetworkingClient.EventReceived += this.OnPhotonEvent;
+		PhotonNetwork.NetworkingClient.EventReceived += new Action<EventData>(this.OnPhotonEvent);
 		this._lastWorldPos = base.transform.position;
 		this._renderer.forceRenderingOff = false;
 		base.OnEnable();
@@ -69,7 +69,7 @@ public class PaperPlaneThrowable : TransferrableObject
 
 	internal override void OnDisable()
 	{
-		PhotonNetwork.NetworkingClient.EventReceived -= this.OnPhotonEvent;
+		PhotonNetwork.NetworkingClient.EventReceived -= new Action<EventData>(this.OnPhotonEvent);
 		base.OnDisable();
 	}
 
@@ -198,7 +198,7 @@ public class PaperPlaneThrowable : TransferrableObject
 		if (PaperPlaneThrowable.gRaiseOpts == null)
 		{
 			PaperPlaneThrowable.gRaiseOpts = RaiseEventOptions.Default;
-			PaperPlaneThrowable.gRaiseOpts.Receivers = ReceiverGroup.Others;
+			PaperPlaneThrowable.gRaiseOpts.Receivers = 0;
 		}
 		PaperPlaneThrowable.gEventArgs[0] = PaperPlaneThrowable.kProjectileEvent;
 		PaperPlaneThrowable.gEventArgs[1] = currentState;

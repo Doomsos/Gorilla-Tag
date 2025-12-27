@@ -19,8 +19,8 @@ namespace GorillaTagScripts.UI.ModIO
 			this.roomMapNameText.gameObject.SetActive(true);
 			this.roomMapStatusLabelText.gameObject.SetActive(false);
 			this.roomMapStatusText.gameObject.SetActive(false);
-			NetworkSystem.Instance.OnMultiplayerStarted += this.OnJoinedRoom;
-			NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnDisconnectedFromRoom;
+			NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.OnJoinedRoom);
+			NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnDisconnectedFromRoom);
 			CustomMapManager.OnRoomMapChanged.AddListener(new UnityAction<ModId>(this.OnRoomMapChanged));
 			CustomMapManager.OnMapLoadStatusChanged.AddListener(new UnityAction<MapLoadStatus, int, string>(this.OnMapLoadProgress));
 			CustomMapManager.OnMapLoadComplete.AddListener(new UnityAction<bool>(this.OnMapLoadComplete));
@@ -28,8 +28,8 @@ namespace GorillaTagScripts.UI.ModIO
 
 		public void OnDestroy()
 		{
-			NetworkSystem.Instance.OnMultiplayerStarted -= this.OnJoinedRoom;
-			NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnDisconnectedFromRoom;
+			NetworkSystem.Instance.OnMultiplayerStarted -= new Action(this.OnJoinedRoom);
+			NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnDisconnectedFromRoom);
 			CustomMapManager.OnRoomMapChanged.RemoveListener(new UnityAction<ModId>(this.OnRoomMapChanged));
 		}
 

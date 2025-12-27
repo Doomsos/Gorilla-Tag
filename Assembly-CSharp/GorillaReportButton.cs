@@ -1,5 +1,4 @@
 ﻿using System;
-using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +21,7 @@ public class GorillaReportButton : MonoBehaviour
 			GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, false, 0.05f);
 			if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", 1, new object[]
 				{
 					67,
 					false,

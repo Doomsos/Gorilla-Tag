@@ -34,23 +34,23 @@ public class AudioAnimator : MonoBehaviour
 		for (int i = 0; i < this.targets.Length; i++)
 		{
 			AudioAnimator.AudioTarget audioTarget = this.targets[i];
-			float p = audioTarget.pitchCurve.Evaluate(pitchValue);
-			float pitch = Mathf.Pow(1.05946f, p);
+			float num = audioTarget.pitchCurve.Evaluate(pitchValue);
+			float pitch = Mathf.Pow(1.05946f, num);
 			audioTarget.audioSource.pitch = pitch;
-			float num = audioTarget.volumeCurve.Evaluate(volumeValue);
+			float num2 = audioTarget.volumeCurve.Evaluate(volumeValue);
 			float volume = audioTarget.audioSource.volume;
-			float num2 = audioTarget.baseVolume * num;
+			float num3 = audioTarget.baseVolume * num2;
 			if (ignoreSmoothing)
 			{
-				audioTarget.audioSource.volume = num2;
+				audioTarget.audioSource.volume = num3;
 			}
-			else if (volume > num2)
+			else if (volume > num3)
 			{
-				audioTarget.audioSource.volume = Mathf.MoveTowards(audioTarget.audioSource.volume, audioTarget.baseVolume * num, (1f - audioTarget.lowerSmoothing) * audioTarget.baseVolume * Time.deltaTime * 90f);
+				audioTarget.audioSource.volume = Mathf.MoveTowards(audioTarget.audioSource.volume, audioTarget.baseVolume * num2, (1f - audioTarget.lowerSmoothing) * audioTarget.baseVolume * Time.deltaTime * 90f);
 			}
 			else
 			{
-				audioTarget.audioSource.volume = Mathf.MoveTowards(audioTarget.audioSource.volume, audioTarget.baseVolume * num, (1f - audioTarget.riseSmoothing) * audioTarget.baseVolume * Time.deltaTime * 90f);
+				audioTarget.audioSource.volume = Mathf.MoveTowards(audioTarget.audioSource.volume, audioTarget.baseVolume * num2, (1f - audioTarget.riseSmoothing) * audioTarget.baseVolume * Time.deltaTime * 90f);
 			}
 		}
 	}

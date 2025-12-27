@@ -81,7 +81,7 @@ namespace GorillaTag.MonkeFX
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static float GetScaleToFitInBounds(Mesh mesh)
 		{
 			Bounds bounds = mesh.bounds;
@@ -93,7 +93,7 @@ namespace GorillaTag.MonkeFX
 			return 1f / num;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public static float Pack0To1Floats(float x, float y)
 		{
 			return Mathf.Clamp01(x) * 65536f + Mathf.Clamp01(y);
@@ -113,7 +113,7 @@ namespace GorillaTag.MonkeFX
 			MonkeFX.hasInstance = true;
 		}
 
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+		[RuntimeInitializeOnLoadMethod(0)]
 		private static void OnAfterFirstSceneLoaded()
 		{
 			MonkeFX.EnsureInstance();

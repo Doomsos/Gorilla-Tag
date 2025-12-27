@@ -27,16 +27,14 @@ public class Firework : MonoBehaviour
 			return;
 		}
 		Firework[] array = this._controller.fireworks;
-		if (array.Contains(this))
+		if (Enumerable.Contains<Firework>(array, this))
 		{
 			return;
 		}
-		array = (from x in array.Concat(new Firework[]
+		array = Enumerable.ToArray<Firework>(Enumerable.Where<Firework>(Enumerable.Concat<Firework>(array, new Firework[]
 		{
 			this
-		})
-		where x != null
-		select x).ToArray<Firework>();
+		}), (Firework x) => x != null));
 		this._controller.fireworks = array;
 	}
 

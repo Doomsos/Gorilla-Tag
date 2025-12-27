@@ -20,11 +20,11 @@ public class VelocityHelperTest : MonoBehaviour
 	{
 		float deltaTime = Time.deltaTime;
 		Vector3 position = base.transform.position;
-		Vector3 b = (position - this.lastPosition) / deltaTime;
-		this.velocity = Vector3.Lerp(this.lastVelocity, b, deltaTime);
+		Vector3 vector = (position - this.lastPosition) / deltaTime;
+		this.velocity = Vector3.Lerp(this.lastVelocity, vector, deltaTime);
 		this.speed = this.velocity.magnitude;
 		this.lastPosition = position;
-		this.lastVelocity = b;
+		this.lastVelocity = vector;
 	}
 
 	private void Update()

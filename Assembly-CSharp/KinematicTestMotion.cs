@@ -32,16 +32,16 @@ public class KinematicTestMotion : MonoBehaviour
 
 	private void UpdatePosition(float time)
 	{
-		float t = Mathf.Sin(time * 2f * 3.1415927f * this.period) * 0.5f + 0.5f;
-		Vector3 position = Vector3.Lerp(this.start.position, this.end.position, t);
+		float num = Mathf.Sin(time * 2f * 3.1415927f * this.period) * 0.5f + 0.5f;
+		Vector3 vector = Vector3.Lerp(this.start.position, this.end.position, num);
 		if (this.moveType == KinematicTestMotion.MoveType.TransformPosition)
 		{
-			base.transform.position = position;
+			base.transform.position = vector;
 			return;
 		}
 		if (this.moveType == KinematicTestMotion.MoveType.RigidbodyMovePosition)
 		{
-			this.rigidbody.MovePosition(position);
+			this.rigidbody.MovePosition(vector);
 		}
 	}
 

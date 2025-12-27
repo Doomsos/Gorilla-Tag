@@ -20,7 +20,7 @@ public class LengthStiffnessComparison : MonoBehaviour
 			this.BonesA.transform,
 			this.BonesB.transform
 		};
-		IEnumerable<BoingBones> enumerable = components.Concat(components2);
+		IEnumerable<BoingBones> enumerable = Enumerable.Concat<BoingBones>(components, components2);
 		float fixedDeltaTime = Time.fixedDeltaTime;
 		float num = 0.5f * this.Run;
 		this.m_timer += fixedDeltaTime;

@@ -23,40 +23,40 @@ namespace GorillaLocomotion.Gameplay
 			for (int i = 0; i < this.nodes.Length; i++)
 			{
 				BurstRopeNode burstRopeNode = this.nodes[i];
-				Vector3 b = burstRopeNode.curPos - burstRopeNode.lastPos;
+				Vector3 vector = burstRopeNode.curPos - burstRopeNode.lastPos;
 				burstRopeNode.lastPos = burstRopeNode.curPos;
-				Vector3 vector = burstRopeNode.curPos + b;
-				vector += this.gravity * this.fixedDeltaTime;
-				burstRopeNode.curPos = vector;
+				Vector3 vector2 = burstRopeNode.curPos + vector;
+				vector2 += this.gravity * this.fixedDeltaTime;
+				burstRopeNode.curPos = vector2;
 				this.nodes[i] = burstRopeNode;
 			}
 		}
 
 		private void ApplyConstraint()
 		{
-			BurstRopeNode value = this.nodes[0];
-			value.curPos = this.rootPos;
-			this.nodes[0] = value;
+			BurstRopeNode burstRopeNode = this.nodes[0];
+			burstRopeNode.curPos = this.rootPos;
+			this.nodes[0] = burstRopeNode;
 			for (int i = 0; i < this.nodes.Length - 1; i++)
 			{
-				BurstRopeNode burstRopeNode = this.nodes[i];
-				BurstRopeNode burstRopeNode2 = this.nodes[i + 1];
-				float magnitude = (burstRopeNode.curPos - burstRopeNode2.curPos).magnitude;
-				float d = Mathf.Abs(magnitude - this.nodeDistance);
-				Vector3 a = Vector3.zero;
+				BurstRopeNode burstRopeNode2 = this.nodes[i];
+				BurstRopeNode burstRopeNode3 = this.nodes[i + 1];
+				float magnitude = (burstRopeNode2.curPos - burstRopeNode3.curPos).magnitude;
+				float num = Mathf.Abs(magnitude - this.nodeDistance);
+				Vector3 vector = Vector3.zero;
 				if (magnitude > this.nodeDistance)
 				{
-					a = (burstRopeNode.curPos - burstRopeNode2.curPos).normalized;
+					vector = (burstRopeNode2.curPos - burstRopeNode3.curPos).normalized;
 				}
 				else if (magnitude < this.nodeDistance)
 				{
-					a = (burstRopeNode2.curPos - burstRopeNode.curPos).normalized;
+					vector = (burstRopeNode3.curPos - burstRopeNode2.curPos).normalized;
 				}
-				Vector3 a2 = a * d;
-				burstRopeNode.curPos -= a2 * 0.5f;
-				burstRopeNode2.curPos += a2 * 0.5f;
-				this.nodes[i] = burstRopeNode;
-				this.nodes[i + 1] = burstRopeNode2;
+				Vector3 vector2 = vector * num;
+				burstRopeNode2.curPos -= vector2 * 0.5f;
+				burstRopeNode3.curPos += vector2 * 0.5f;
+				this.nodes[i] = burstRopeNode2;
+				this.nodes[i + 1] = burstRopeNode3;
 			}
 		}
 

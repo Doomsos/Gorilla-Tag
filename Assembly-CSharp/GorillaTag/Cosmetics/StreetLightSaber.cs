@@ -27,7 +27,7 @@ namespace GorillaTag.Cosmetics
 			this.autoSwitchEnabledTime = 0f;
 			this.hashId = Shader.PropertyToID(this.shaderColorProperty);
 			List<Material> list;
-			using (CollectionPool<List<Material>, Material>.Get(out list))
+			using (CollectionPool<List<Material>, Material>.Get(ref list))
 			{
 				this.meshRenderer.GetSharedMaterials(list);
 				this.instancedMaterial = new Material(list[this.materialIndex]);
@@ -62,8 +62,8 @@ namespace GorillaTag.Cosmetics
 
 		private void UpdateStateAuto()
 		{
-			StreetLightSaber.State value = (this.CurrentState == StreetLightSaber.State.Green) ? StreetLightSaber.State.Red : StreetLightSaber.State.Green;
-			int newIndex = Array.IndexOf<StreetLightSaber.State>(StreetLightSaber.values, value);
+			StreetLightSaber.State state = (this.CurrentState == StreetLightSaber.State.Green) ? StreetLightSaber.State.Red : StreetLightSaber.State.Green;
+			int newIndex = Array.IndexOf<StreetLightSaber.State>(StreetLightSaber.values, state);
 			this.SwitchState(newIndex);
 			this.autoSwitchEnabledTime = Time.time;
 		}
@@ -98,9 +98,9 @@ namespace GorillaTag.Cosmetics
 				return;
 			}
 			StreetLightSaber.State currentState = this.CurrentState;
-			StreetLightSaber.State key = StreetLightSaber.values[newIndex];
+			StreetLightSaber.State state = StreetLightSaber.values[newIndex];
 			StreetLightSaber.StaffStates staffStates;
-			if (this.allStatesDict.TryGetValue(currentState, out staffStates))
+			if (this.allStatesDict.TryGetValue(currentState, ref staffStates))
 			{
 				UnityEvent onExitState = staffStates.onExitState;
 				if (onExitState != null)
@@ -110,7 +110,7 @@ namespace GorillaTag.Cosmetics
 			}
 			this.currentIndex = newIndex;
 			StreetLightSaber.StaffStates staffStates2;
-			if (this.allStatesDict.TryGetValue(key, out staffStates2))
+			if (this.allStatesDict.TryGetValue(state, ref staffStates2))
 			{
 				UnityEvent onEnterState = staffStates2.onEnterState;
 				if (onEnterState != null)

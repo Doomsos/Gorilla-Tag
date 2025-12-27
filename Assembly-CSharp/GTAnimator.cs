@@ -170,7 +170,7 @@ public class GTAnimator : MonoBehaviour, IDelayedExecListener
 			return false;
 		}
 		WrapMode wrapMode = clip.wrapMode;
-		return wrapMode == WrapMode.Loop || wrapMode == WrapMode.PingPong;
+		return wrapMode == 2 || wrapMode == 4;
 	}
 
 	private const string preLog = "[GTAnimator]  ";

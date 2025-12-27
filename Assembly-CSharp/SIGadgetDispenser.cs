@@ -86,16 +86,14 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 	private void CollectButtonColliders()
 	{
 		SIGadgetDispenser.<>c__DisplayClass52_0 CS$<>8__locals1;
-		CS$<>8__locals1.buttons = base.GetComponentsInChildren<SITouchscreenButton>(true).ToList<SITouchscreenButton>();
-		SIGadgetDispenser.<CollectButtonColliders>g__RemoveButtonsInside|52_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
-		select d.gameObject).ToArray<GameObject>(), ref CS$<>8__locals1);
+		CS$<>8__locals1.buttons = Enumerable.ToList<SITouchscreenButton>(base.GetComponentsInChildren<SITouchscreenButton>(true));
+		SIGadgetDispenser.<CollectButtonColliders>g__RemoveButtonsInside|52_2(Enumerable.ToArray<GameObject>(Enumerable.Select<DestroyIfNotBeta, GameObject>(base.GetComponentsInChildren<DestroyIfNotBeta>(), (DestroyIfNotBeta d) => d.gameObject)), ref CS$<>8__locals1);
 		SIGadgetDispenser.<CollectButtonColliders>g__RemoveButtonsInside|52_2(new GameObject[]
 		{
 			this.gadgetDispensedScreen,
 			this.gadgetsHelpScreen
 		}, ref CS$<>8__locals1);
-		this._nonPopupButtonColliders = (from b in CS$<>8__locals1.buttons
-		select b.GetComponent<Collider>()).ToList<Collider>();
+		this._nonPopupButtonColliders = Enumerable.ToList<Collider>(Enumerable.Select<SITouchscreenButton, Collider>(CS$<>8__locals1.buttons, (SITouchscreenButton b) => b.GetComponent<Collider>()));
 	}
 
 	private void SetNonPopupButtonsEnabled(bool enable)
@@ -192,10 +190,10 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 	public void ZoneDataSerializeRead(BinaryReader reader)
 	{
 		this.helpScreenIndex = Mathf.Clamp(reader.ReadInt32(), 0, this.helpPopupScreens.Length - 1);
-		int value = reader.ReadInt32();
+		int num = reader.ReadInt32();
 		if (this.CurrentPage != null && this.CurrentPage.AllNodes != null)
 		{
-			this._currentNode = Mathf.Clamp(value, 0, this.CurrentPage.AllNodes.Count - 1);
+			this._currentNode = Mathf.Clamp(num, 0, this.CurrentPage.AllNodes.Count - 1);
 		}
 		else
 		{
@@ -496,9 +494,9 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 	{
 		for (int i = 0; i < roots.Length; i++)
 		{
-			foreach (SITouchscreenButton item in roots[i].GetComponentsInChildren<SITouchscreenButton>(true))
+			foreach (SITouchscreenButton sitouchscreenButton in roots[i].GetComponentsInChildren<SITouchscreenButton>(true))
 			{
-				A_1.buttons.Remove(item);
+				A_1.buttons.Remove(sitouchscreenButton);
 			}
 		}
 	}

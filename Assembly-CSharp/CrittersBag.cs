@@ -30,7 +30,7 @@ public class CrittersBag : CrittersActor
 		base.CleanupActor();
 		for (int i = this.attachedColliders.Count - 1; i >= 0; i--)
 		{
-			this.attachedColliders[this.attachedColliders.ElementAt(i).Key].gameObject.Destroy();
+			this.attachedColliders[Enumerable.ElementAt<KeyValuePair<int, GameObject>>(this.attachedColliders, i).Key].gameObject.Destroy();
 		}
 		this.attachedColliders.Clear();
 	}
@@ -71,7 +71,7 @@ public class CrittersBag : CrittersActor
 		{
 			base.AttemptRemoveStoredObjectCollider(this.parentActorId, true);
 		}
-		int num = Physics.OverlapBoxNonAlloc(this.dropCube.transform.position, this.dropCube.size / 2f, this.overlapColliders, this.dropCube.transform.rotation, CrittersManager.instance.objectLayers, QueryTriggerInteraction.Collide);
+		int num = Physics.OverlapBoxNonAlloc(this.dropCube.transform.position, this.dropCube.size / 2f, this.overlapColliders, this.dropCube.transform.rotation, CrittersManager.instance.objectLayers, 2);
 		if (num > 0)
 		{
 			for (int i = 0; i < num; i++)
@@ -83,7 +83,7 @@ public class CrittersBag : CrittersActor
 					if (!(component == null) && component.anchorLocation == this.anchorLocation && !(component.GetComponentInChildren<CrittersBag>() != null))
 					{
 						CrittersActor crittersActor;
-						if (this.lastGrabbedPlayer == PhotonNetwork.LocalPlayer.ActorNumber && CrittersManager.instance.actorById.TryGetValue(this.parentActorId, out crittersActor))
+						if (this.lastGrabbedPlayer == PhotonNetwork.LocalPlayer.ActorNumber && CrittersManager.instance.actorById.TryGetValue(this.parentActorId, ref crittersActor))
 						{
 							CrittersGrabber crittersGrabber = crittersActor as CrittersGrabber;
 							if (crittersGrabber != null)
@@ -119,10 +119,10 @@ public class CrittersBag : CrittersActor
 
 	public void RemoveStoredObjectCollider(CrittersActor actor, bool playSound = true)
 	{
-		GameObject obj;
-		if (this.attachedColliders.TryGetValue(actor.actorId, out obj))
+		GameObject gameObject;
+		if (this.attachedColliders.TryGetValue(actor.actorId, ref gameObject))
 		{
-			Object.Destroy(obj);
+			Object.Destroy(gameObject);
 			this.attachedColliders.Remove(actor.actorId);
 		}
 		if (playSound)

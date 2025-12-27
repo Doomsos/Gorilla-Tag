@@ -83,7 +83,7 @@ public class BuilderSetManager : MonoBehaviour
 		{
 			dictionary.Clear();
 			int num = 0;
-			BuilderSetManager.BuilderSetStoreItem value = new BuilderSetManager.BuilderSetStoreItem
+			BuilderSetManager.BuilderSetStoreItem builderSetStoreItem = new BuilderSetManager.BuilderSetStoreItem
 			{
 				displayName = builderPieceSet.SetName,
 				playfabID = builderPieceSet.playfabID,
@@ -93,7 +93,7 @@ public class BuilderSetManager : MonoBehaviour
 				displayModel = builderPieceSet.displayModel,
 				isNullItem = false
 			};
-			BuilderSetManager._setIdToStoreItem.TryAdd(builderPieceSet.GetIntIdentifier(), value);
+			BuilderSetManager._setIdToStoreItem.TryAdd(builderPieceSet.GetIntIdentifier(), builderSetStoreItem);
 			int num2 = -1;
 			if (!string.IsNullOrEmpty(builderPieceSet.materialId))
 			{
@@ -110,14 +110,14 @@ public class BuilderSetManager : MonoBehaviour
 						text = builderPieceSet.setName;
 					}
 					text = text.ToUpper();
-					int key;
-					if (dictionary.TryGetValue(text, out key))
+					int num3;
+					if (dictionary.TryGetValue(text, ref num3))
 					{
-						int index;
-						this.displayGroupMap.TryGetValue(key, out index);
-						BuilderPieceSet.BuilderDisplayGroup builderDisplayGroup = this.displayGroups[index];
+						int num4;
+						this.displayGroupMap.TryGetValue(num3, ref num4);
+						BuilderPieceSet.BuilderDisplayGroup builderDisplayGroup = this.displayGroups[num4];
 						builderDisplayGroup.pieceSubsets.Add(builderPieceSet.subsets[i]);
-						this.displayGroups[index] = builderDisplayGroup;
+						this.displayGroups[num4] = builderDisplayGroup;
 					}
 					else
 					{
@@ -174,10 +174,10 @@ public class BuilderSetManager : MonoBehaviour
 					}
 					else
 					{
-						Material x;
-						int num3;
-						piecePrefab.materialOptions.GetMaterialFromType(num2, out x, out num3);
-						if (x == null)
+						Material material;
+						int num5;
+						piecePrefab.materialOptions.GetMaterialFromType(num2, out material, out num5);
+						if (material == null)
 						{
 							pieceMaterial = -1;
 						}
@@ -247,10 +247,10 @@ public class BuilderSetManager : MonoBehaviour
 
 	public BuilderPiece GetPiecePrefab(int pieceType)
 	{
-		int index;
-		if (BuilderSetManager.pieceTypeToIndex.TryGetValue(pieceType, out index))
+		int num;
+		if (BuilderSetManager.pieceTypeToIndex.TryGetValue(pieceType, ref num))
 		{
-			return BuilderSetManager.pieceList[index];
+			return BuilderSetManager.pieceList[num];
 		}
 		Debug.LogErrorFormat("No Prefab found for type {0}", new object[]
 		{
@@ -315,28 +315,26 @@ public class BuilderSetManager : MonoBehaviour
 
 	private void AddPieceToInfoMap(int pieceType, int pieceMaterial, int setID)
 	{
-		int index;
-		if (BuilderSetManager.pieceSetInfoMap.TryGetValue(HashCode.Combine<int, int>(pieceType, pieceMaterial), out index))
+		int num;
+		if (BuilderSetManager.pieceSetInfoMap.TryGetValue(HashCode.Combine<int, int>(pieceType, pieceMaterial), ref num))
 		{
-			BuilderSetManager.BuilderPieceSetInfo builderPieceSetInfo = BuilderSetManager.pieceSetInfos[index];
+			BuilderSetManager.BuilderPieceSetInfo builderPieceSetInfo = BuilderSetManager.pieceSetInfos[num];
 			if (!builderPieceSetInfo.setIds.Contains(setID))
 			{
 				builderPieceSetInfo.setIds.Add(setID);
 			}
-			BuilderSetManager.pieceSetInfos[index] = builderPieceSetInfo;
+			BuilderSetManager.pieceSetInfos[num] = builderPieceSetInfo;
 			return;
 		}
-		BuilderSetManager.BuilderPieceSetInfo item = new BuilderSetManager.BuilderPieceSetInfo
-		{
-			pieceType = pieceType,
-			materialType = pieceMaterial,
-			setIds = new List<int>
-			{
-				setID
-			}
-		};
+		BuilderSetManager.BuilderPieceSetInfo builderPieceSetInfo2 = default(BuilderSetManager.BuilderPieceSetInfo);
+		builderPieceSetInfo2.pieceType = pieceType;
+		builderPieceSetInfo2.materialType = pieceMaterial;
+		List<int> list = new List<int>();
+		list.Add(setID);
+		builderPieceSetInfo2.setIds = list;
+		BuilderSetManager.BuilderPieceSetInfo builderPieceSetInfo3 = builderPieceSetInfo2;
 		BuilderSetManager.pieceSetInfoMap.Add(HashCode.Combine<int, int>(pieceType, pieceMaterial), BuilderSetManager.pieceSetInfos.Count);
-		BuilderSetManager.pieceSetInfos.Add(item);
+		BuilderSetManager.pieceSetInfos.Add(builderPieceSetInfo3);
 	}
 
 	public static bool IsItemIDBuilderItem(string playfabID)
@@ -353,11 +351,11 @@ public class BuilderSetManager : MonoBehaviour
 		foreach (CatalogItem catalogItem in catalogResult.Catalog)
 		{
 			BuilderSetManager.BuilderSetStoreItem builderSetStoreItem;
-			if (BuilderSetManager.IsItemIDBuilderItem(catalogItem.ItemId) && BuilderSetManager._setIdToStoreItem.TryGetValue(catalogItem.ItemId.GetStaticHash(), out builderSetStoreItem))
+			if (BuilderSetManager.IsItemIDBuilderItem(catalogItem.ItemId) && BuilderSetManager._setIdToStoreItem.TryGetValue(catalogItem.ItemId.GetStaticHash(), ref builderSetStoreItem))
 			{
 				bool hasPrice = false;
 				uint cost = 0U;
-				if (catalogItem.VirtualCurrencyPrices.TryGetValue(this.currencyName, out cost))
+				if (catalogItem.VirtualCurrencyPrices.TryGetValue(this.currencyName, ref cost))
 				{
 					hasPrice = true;
 				}
@@ -372,7 +370,7 @@ public class BuilderSetManager : MonoBehaviour
 			if (BuilderSetManager.IsItemIDBuilderItem(itemInstance.ItemId))
 			{
 				BuilderSetManager.BuilderSetStoreItem builderSetStoreItem2;
-				if (BuilderSetManager._setIdToStoreItem.TryGetValue(itemInstance.ItemId.GetStaticHash(), out builderSetStoreItem2))
+				if (BuilderSetManager._setIdToStoreItem.TryGetValue(itemInstance.ItemId.GetStaticHash(), ref builderSetStoreItem2))
 				{
 					Debug.LogFormat("BuilderSetManager: Unlocking Inventory Item {0}", new object[]
 					{
@@ -399,13 +397,13 @@ public class BuilderSetManager : MonoBehaviour
 
 	public BuilderSetManager.BuilderSetStoreItem GetStoreItemFromSetID(int setID)
 	{
-		return BuilderSetManager._setIdToStoreItem.GetValueOrDefault(setID, BuilderKiosk.nullItem);
+		return CollectionExtensions.GetValueOrDefault<int, BuilderSetManager.BuilderSetStoreItem>(BuilderSetManager._setIdToStoreItem, setID, BuilderKiosk.nullItem);
 	}
 
 	public BuilderPieceSet GetPieceSetFromID(int setID)
 	{
 		BuilderSetManager.BuilderSetStoreItem builderSetStoreItem;
-		if (BuilderSetManager._setIdToStoreItem.TryGetValue(setID, out builderSetStoreItem))
+		if (BuilderSetManager._setIdToStoreItem.TryGetValue(setID, ref builderSetStoreItem))
 		{
 			return builderSetStoreItem.setRef;
 		}
@@ -414,10 +412,10 @@ public class BuilderSetManager : MonoBehaviour
 
 	public BuilderPieceSet.BuilderDisplayGroup GetDisplayGroupFromIndex(int groupID)
 	{
-		int index;
-		if (this.displayGroupMap.TryGetValue(groupID, out index))
+		int num;
+		if (this.displayGroupMap.TryGetValue(groupID, ref num))
 		{
-			return this.displayGroups[index];
+			return this.displayGroups[num];
 		}
 		return null;
 	}
@@ -464,7 +462,7 @@ public class BuilderSetManager : MonoBehaviour
 			return false;
 		}
 		int num;
-		if (!this.displayGroupMap.TryGetValue(groupID, out num))
+		if (!this.displayGroupMap.TryGetValue(groupID, ref num))
 		{
 			return false;
 		}
@@ -526,10 +524,10 @@ public class BuilderSetManager : MonoBehaviour
 
 	public bool IsPieceOwnedByRoom(int pieceType, int materialType)
 	{
-		int index;
-		if (BuilderSetManager.pieceSetInfoMap.TryGetValue(HashCode.Combine<int, int>(pieceType, materialType), out index))
+		int num;
+		if (BuilderSetManager.pieceSetInfoMap.TryGetValue(HashCode.Combine<int, int>(pieceType, materialType), ref num))
 		{
-			foreach (int setID in BuilderSetManager.pieceSetInfos[index].setIds)
+			foreach (int setID in BuilderSetManager.pieceSetInfos[num].setIds)
 			{
 				if (this.DoesAnyPlayerInRoomOwnPieceSet(setID))
 				{
@@ -543,10 +541,10 @@ public class BuilderSetManager : MonoBehaviour
 
 	public bool IsPieceOwnedLocally(int pieceType, int materialType)
 	{
-		int index;
-		if (BuilderSetManager.pieceSetInfoMap.TryGetValue(HashCode.Combine<int, int>(pieceType, materialType), out index))
+		int num;
+		if (BuilderSetManager.pieceSetInfoMap.TryGetValue(HashCode.Combine<int, int>(pieceType, materialType), ref num))
 		{
-			foreach (int setID in BuilderSetManager.pieceSetInfos[index].setIds)
+			foreach (int setID in BuilderSetManager.pieceSetInfos[num].setIds)
 			{
 				if (this.IsPieceSetOwnedLocally(setID))
 				{
@@ -582,7 +580,7 @@ public class BuilderSetManager : MonoBehaviour
 	public void TryPurchaseItem(int setID, Action<bool> resultCallback)
 	{
 		BuilderSetManager.BuilderSetStoreItem storeItem;
-		if (!BuilderSetManager._setIdToStoreItem.TryGetValue(setID, out storeItem))
+		if (!BuilderSetManager._setIdToStoreItem.TryGetValue(setID, ref storeItem))
 		{
 			Debug.Log("BuilderSetManager: no store Item for set " + setID.ToString());
 			Action<bool> resultCallback2 = resultCallback;
@@ -590,7 +588,7 @@ public class BuilderSetManager : MonoBehaviour
 			{
 				return;
 			}
-			resultCallback2(false);
+			resultCallback2.Invoke(false);
 			return;
 		}
 		else
@@ -622,7 +620,7 @@ public class BuilderSetManager : MonoBehaviour
 						{
 							return;
 						}
-						resultCallback4(true);
+						resultCallback4.Invoke(true);
 						return;
 					}
 					else
@@ -633,7 +631,7 @@ public class BuilderSetManager : MonoBehaviour
 						{
 							return;
 						}
-						resultCallback5(false);
+						resultCallback5.Invoke(false);
 						return;
 					}
 				}, delegate(PlayFabError error)
@@ -648,7 +646,7 @@ public class BuilderSetManager : MonoBehaviour
 					{
 						return;
 					}
-					resultCallback4(false);
+					resultCallback4.Invoke(false);
 				}, null, null);
 				return;
 			}
@@ -658,7 +656,7 @@ public class BuilderSetManager : MonoBehaviour
 			{
 				return;
 			}
-			resultCallback3(false);
+			resultCallback3.Invoke(false);
 			return;
 		}
 	}
@@ -674,20 +672,20 @@ public class BuilderSetManager : MonoBehaviour
 			if (GorillaServer.Instance != null && GorillaServer.Instance.NewCosmeticsPath())
 			{
 				this.playerIDList.Add("Inventory");
-				PlayFabClientAPI.GetSharedGroupData(new PlayFab.ClientModels.GetSharedGroupDataRequest
+				PlayFabClientAPI.GetSharedGroupData(new GetSharedGroupDataRequest
 				{
 					Keys = this.playerIDList,
 					SharedGroupId = PhotonNetwork.LocalPlayer.UserId + "Inventory"
 				}, delegate(GetSharedGroupDataResult result)
 				{
 					this.attempts++;
-					foreach (KeyValuePair<string, PlayFab.ClientModels.SharedGroupDataRecord> keyValuePair in result.Data)
+					foreach (KeyValuePair<string, SharedGroupDataRecord> keyValuePair in result.Data)
 					{
 						if (keyValuePair.Value.Value.Contains(itemToBuyID))
 						{
 							PhotonNetwork.RaiseEvent(199, null, new RaiseEventOptions
 							{
-								Receivers = ReceiverGroup.Others
+								Receivers = 0
 							}, SendOptions.SendReliable);
 							this.foundCosmetic = true;
 						}
@@ -703,21 +701,21 @@ public class BuilderSetManager : MonoBehaviour
 			else
 			{
 				this.playerIDList.Add(PhotonNetwork.LocalPlayer.ActorNumber.ToString());
-				PlayFabClientAPI.GetSharedGroupData(new PlayFab.ClientModels.GetSharedGroupDataRequest
+				PlayFabClientAPI.GetSharedGroupData(new GetSharedGroupDataRequest
 				{
 					Keys = this.playerIDList,
 					SharedGroupId = PhotonNetwork.CurrentRoom.Name + Regex.Replace(PhotonNetwork.CloudRegion, "[^a-zA-Z0-9]", "").ToUpper()
 				}, delegate(GetSharedGroupDataResult result)
 				{
 					this.attempts++;
-					foreach (KeyValuePair<string, PlayFab.ClientModels.SharedGroupDataRecord> keyValuePair in result.Data)
+					foreach (KeyValuePair<string, SharedGroupDataRecord> keyValuePair in result.Data)
 					{
 						if (keyValuePair.Value.Value.Contains(itemToBuyID))
 						{
 							Debug.Log("BuilderSetManager: found it! updating others cosmetic!");
 							PhotonNetwork.RaiseEvent(199, null, new RaiseEventOptions
 							{
-								Receivers = ReceiverGroup.Others
+								Receivers = 0
 							}, SendOptions.SendReliable);
 							this.foundCosmetic = true;
 						}
@@ -729,17 +727,17 @@ public class BuilderSetManager : MonoBehaviour
 				}, delegate(PlayFabError error)
 				{
 					this.attempts++;
-					if (error.Error == PlayFabErrorCode.NotAuthenticated)
+					if (error.Error == 1074)
 					{
 						PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					}
-					else if (error.Error == PlayFabErrorCode.AccountBanned)
+					else if (error.Error == 1002)
 					{
 						Application.Quit();
 						PhotonNetwork.Disconnect();
 						Object.DestroyImmediate(PhotonNetworkController.Instance);
 						Object.DestroyImmediate(GTPlayer.Instance);
-						GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+						GameObject[] array = Object.FindObjectsByType<GameObject>(0);
 						for (int i = 0; i < array.Length; i++)
 						{
 							Object.Destroy(array[i]);

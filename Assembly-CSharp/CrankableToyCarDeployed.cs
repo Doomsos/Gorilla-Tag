@@ -40,9 +40,9 @@ public class CrankableToyCarDeployed : MonoBehaviour
 			this.drivingAudio.GTPlay();
 			this.offGroundDrivingAudio.Stop();
 		}
-		float time = Mathf.InverseLerp(this.startedAtTimestamp, this.expiresAtTimestamp, Time.time);
-		float d = this.thrustCurve.Evaluate(time);
-		this.wheelDriver.SetThrust(this.maxThrust * d);
+		float num = Mathf.InverseLerp(this.startedAtTimestamp, this.expiresAtTimestamp, Time.time);
+		float num2 = this.thrustCurve.Evaluate(num);
+		this.wheelDriver.SetThrust(this.maxThrust * num2);
 	}
 
 	[SerializeField]

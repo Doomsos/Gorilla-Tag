@@ -22,12 +22,12 @@ public class AverageVector3
 	public Vector3 GetAverage()
 	{
 		this.RefreshSamples();
-		Vector3 a = Vector3.zero;
+		Vector3 vector = Vector3.zero;
 		for (int i = 0; i < this.samples.Count; i++)
 		{
-			a += this.samples[i].value;
+			vector += this.samples[i].value;
 		}
-		return a / (float)this.samples.Count;
+		return vector / (float)this.samples.Count;
 	}
 
 	public void Clear()

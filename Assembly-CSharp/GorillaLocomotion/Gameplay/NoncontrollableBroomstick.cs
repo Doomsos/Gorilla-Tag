@@ -1,6 +1,5 @@
 ﻿using System;
 using Photon.Pun;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -17,7 +16,7 @@ namespace GorillaLocomotion.Gameplay
 			this.secondsToCycles = 1.0 / (double)this.duration;
 			if (this.unitySpline != null)
 			{
-				this.nativeSpline = new NativeSpline(this.unitySpline.Spline, this.unitySpline.transform.localToWorldMatrix, Allocator.Persistent);
+				this.nativeSpline = new NativeSpline(this.unitySpline.Spline, this.unitySpline.transform.localToWorldMatrix, 4);
 			}
 		}
 
@@ -32,17 +31,17 @@ namespace GorillaLocomotion.Gameplay
 			{
 				this.progress = (this.progress + this.progressPerFixedUpdate) % 1f;
 			}
-			Quaternion a = Quaternion.identity;
+			Quaternion quaternion = Quaternion.identity;
 			if (this.unitySpline != null)
 			{
-				float3 v;
 				float3 @float;
 				float3 float2;
-				this.nativeSpline.Evaluate(this.progress, out v, out @float, out float2);
-				base.transform.position = v;
+				float3 float3;
+				SplineUtility.Evaluate<NativeSpline>(this.nativeSpline, this.progress, ref @float, ref float2, ref float3);
+				base.transform.position = @float;
 				if (this.lookForward)
 				{
-					a = Quaternion.LookRotation(new Vector3(@float.x, @float.y, @float.z));
+					quaternion = Quaternion.LookRotation(new Vector3(float2.x, float2.y, float2.z));
 				}
 			}
 			else if (this.spline != null)
@@ -51,12 +50,12 @@ namespace GorillaLocomotion.Gameplay
 				base.transform.position = point;
 				if (this.lookForward)
 				{
-					a = Quaternion.LookRotation(this.spline.GetDirection(this.progress, this.constantVelocity));
+					quaternion = Quaternion.LookRotation(this.spline.GetDirection(this.progress, this.constantVelocity));
 				}
 			}
 			if (this.lookForward)
 			{
-				base.transform.rotation = Quaternion.Slerp(a, base.transform.rotation, Mathf.Exp(-this.smoothRotationTrackingRateExp * Time.deltaTime));
+				base.transform.rotation = Quaternion.Slerp(quaternion, base.transform.rotation, Mathf.Exp(-this.smoothRotationTrackingRateExp * Time.deltaTime));
 			}
 		}
 

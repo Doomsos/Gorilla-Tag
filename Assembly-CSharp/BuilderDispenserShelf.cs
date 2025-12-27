@@ -56,8 +56,8 @@ public class BuilderDispenserShelf : MonoBehaviour
 			{
 				BuilderDispenser builderDispenser = this.dispenserPool[i];
 				builderDispenser.gameObject.SetActive(true);
-				float x = this.shelfWidth / -2f + this.shelfWidth / (float)(count * 2) + this.shelfWidth / (float)count * (float)i;
-				builderDispenser.transform.localPosition = new Vector3(x, 0f, 0f);
+				float num = this.shelfWidth / -2f + this.shelfWidth / (float)(count * 2) + this.shelfWidth / (float)count * (float)i;
+				builderDispenser.transform.localPosition = new Vector3(num, 0f, 0f);
 				builderDispenser.AssignPieceType(this.piecesInSet[i], this.currentGroup.defaultMaterial.GetHashCode());
 				this.activeDispensers.Add(builderDispenser);
 			}

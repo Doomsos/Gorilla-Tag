@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.XR;
 
 [RequireComponent(typeof(GameEntity))]
 public class GRToolRevive : MonoBehaviour
@@ -149,7 +148,7 @@ public class GRToolRevive : MonoBehaviour
 			return false;
 		}
 		int num = gamePlayer.FindHandIndex(this.gameEntity.id);
-		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
+		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? 4 : 5) > 0.25f;
 	}
 
 	public GameEntity gameEntity;

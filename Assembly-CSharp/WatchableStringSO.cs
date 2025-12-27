@@ -20,7 +20,7 @@ public class WatchableStringSO : ScriptableObject
 			this._value = value;
 			foreach (Action<string> action in this.callbacks)
 			{
-				action(value);
+				action.Invoke(value);
 			}
 		}
 	}
@@ -44,7 +44,7 @@ public class WatchableStringSO : ScriptableObject
 			string value = this._value;
 			foreach (Action<string> action in this.callbacks)
 			{
-				action(value);
+				action.Invoke(value);
 			}
 		}
 	}

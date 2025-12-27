@@ -19,7 +19,7 @@ public class RotatingQuestBadge : MonoBehaviour, ISpawnable
 			return;
 		}
 		this.myRig = rig;
-		this.myRig.OnQuestScoreChanged += this.OnProgressScoreChanged;
+		this.myRig.OnQuestScoreChanged += new Action<int>(this.OnProgressScoreChanged);
 		this.OnProgressScoreChanged(this.myRig.GetCurrentQuestScore());
 	}
 
@@ -43,7 +43,7 @@ public class RotatingQuestBadge : MonoBehaviour, ISpawnable
 	{
 		if (this.forWardrobe && this.myRig)
 		{
-			this.myRig.OnQuestScoreChanged -= this.OnProgressScoreChanged;
+			this.myRig.OnQuestScoreChanged -= new Action<int>(this.OnProgressScoreChanged);
 			this.myRig = null;
 		}
 	}
@@ -64,7 +64,7 @@ public class RotatingQuestBadge : MonoBehaviour, ISpawnable
 		this.myRig = ((instance != null) ? instance.offlineVRRig : null);
 		if (this.myRig)
 		{
-			this.myRig.OnQuestScoreChanged += this.OnProgressScoreChanged;
+			this.myRig.OnQuestScoreChanged += new Action<int>(this.OnProgressScoreChanged);
 			this.OnProgressScoreChanged(this.myRig.GetCurrentQuestScore());
 			return true;
 		}

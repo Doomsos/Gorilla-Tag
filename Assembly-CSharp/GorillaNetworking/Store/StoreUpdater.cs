@@ -44,10 +44,10 @@ namespace GorillaNetworking.Store
 		public void Initialize()
 		{
 			this.FindAllCosmeticItemPrefabs();
-			OVRManager.HMDMounted += this.HandleHMDMounted;
-			OVRManager.HMDUnmounted += this.HandleHMDUnmounted;
-			OVRManager.HMDLost += this.HandleHMDUnmounted;
-			OVRManager.HMDAcquired += this.HandleHMDMounted;
+			OVRManager.HMDMounted += new Action(this.HandleHMDMounted);
+			OVRManager.HMDUnmounted += new Action(this.HandleHMDUnmounted);
+			OVRManager.HMDLost += new Action(this.HandleHMDUnmounted);
+			OVRManager.HMDAcquired += new Action(this.HandleHMDMounted);
 			Debug.Log("StoreUpdater - Starting");
 			if (this.bLoadFromJSON)
 			{
@@ -62,26 +62,26 @@ namespace GorillaNetworking.Store
 
 		public void OnDestroy()
 		{
-			OVRManager.HMDMounted -= this.HandleHMDMounted;
-			OVRManager.HMDUnmounted -= this.HandleHMDUnmounted;
-			OVRManager.HMDLost -= this.HandleHMDUnmounted;
-			OVRManager.HMDAcquired -= this.HandleHMDMounted;
+			OVRManager.HMDMounted -= new Action(this.HandleHMDMounted);
+			OVRManager.HMDUnmounted -= new Action(this.HandleHMDUnmounted);
+			OVRManager.HMDLost -= new Action(this.HandleHMDUnmounted);
+			OVRManager.HMDAcquired -= new Action(this.HandleHMDMounted);
 		}
 
 		private void HandleHMDUnmounted()
 		{
-			foreach (string key in this.pedestalUpdateCoroutines.Keys)
+			foreach (string text in this.pedestalUpdateCoroutines.Keys)
 			{
-				if (this.pedestalUpdateCoroutines[key] != null)
+				if (this.pedestalUpdateCoroutines[text] != null)
 				{
-					base.StopCoroutine(this.pedestalUpdateCoroutines[key]);
+					base.StopCoroutine(this.pedestalUpdateCoroutines[text]);
 				}
 			}
-			foreach (string key2 in this.cosmeticItemPrefabsDictionary.Keys)
+			foreach (string text2 in this.cosmeticItemPrefabsDictionary.Keys)
 			{
-				if (this.cosmeticItemPrefabsDictionary[key2] != null)
+				if (this.cosmeticItemPrefabsDictionary[text2] != null)
 				{
-					this.cosmeticItemPrefabsDictionary[key2].StopCountdownCoroutine();
+					this.cosmeticItemPrefabsDictionary[text2].StopCountdownCoroutine();
 				}
 			}
 		}
@@ -100,7 +100,7 @@ namespace GorillaNetworking.Store
 
 		private void FindAllCosmeticItemPrefabs()
 		{
-			foreach (CosmeticItemPrefab cosmeticItemPrefab in Object.FindObjectsByType<CosmeticItemPrefab>(FindObjectsSortMode.None))
+			foreach (CosmeticItemPrefab cosmeticItemPrefab in Object.FindObjectsByType<CosmeticItemPrefab>(0))
 			{
 				if (this.cosmeticItemPrefabsDictionary.ContainsKey(cosmeticItemPrefab.PedestalID))
 				{
@@ -140,8 +140,8 @@ namespace GorillaNetworking.Store
 
 		private IEnumerator HandleClearCart(StoreUpdateEvent updateEvent)
 		{
-			float seconds = Math.Clamp((float)(updateEvent.EndTimeUTC.ToUniversalTime() - this.DateTimeNowServerAdjusted).TotalSeconds + 60f, 0f, 60f);
-			yield return new WaitForSeconds(seconds);
+			float num = Math.Clamp((float)(updateEvent.EndTimeUTC.ToUniversalTime() - this.DateTimeNowServerAdjusted).TotalSeconds + 60f, 0f, 60f);
+			yield return new WaitForSeconds(num);
 			if (CosmeticsController.instance.RemoveItemFromCart(CosmeticsController.instance.GetItemFromDict(updateEvent.ItemName)))
 			{
 				CosmeticsController.instance.ClearCheckout(true);
@@ -155,18 +155,18 @@ namespace GorillaNetworking.Store
 		{
 			if (this.pedestalUpdateEvents[pedestalID].Count > 0)
 			{
-				Coroutine value = base.StartCoroutine(this.HandlePedestalUpdate(this.pedestalUpdateEvents[pedestalID].First<StoreUpdateEvent>(), playFX));
+				Coroutine coroutine = base.StartCoroutine(this.HandlePedestalUpdate(Enumerable.First<StoreUpdateEvent>(this.pedestalUpdateEvents[pedestalID]), playFX));
 				if (this.pedestalUpdateCoroutines.ContainsKey(pedestalID))
 				{
 					if (this.pedestalUpdateCoroutines[pedestalID] != null && this.pedestalUpdateCoroutines[pedestalID] != null)
 					{
 						base.StopCoroutine(this.pedestalUpdateCoroutines[pedestalID]);
 					}
-					this.pedestalUpdateCoroutines[pedestalID] = value;
+					this.pedestalUpdateCoroutines[pedestalID] = coroutine;
 				}
 				else
 				{
-					this.pedestalUpdateCoroutines.Add(pedestalID, value);
+					this.pedestalUpdateCoroutines.Add(pedestalID, coroutine);
 				}
 				if (this.pedestalUpdateEvents[pedestalID].Count == 0 && !this.bLoadFromJSON)
 				{
@@ -255,7 +255,8 @@ namespace GorillaNetworking.Store
 			Debug.Log("StoreUpdater - GetEventsFromTitleData");
 			if (this.bUsePlaceHolderJSON)
 			{
-				DateTime startTime = new DateTime(2024, 2, 13, 16, 0, 0, DateTimeKind.Utc);
+				DateTime startTime;
+				startTime..ctor(2024, 2, 13, 16, 0, 0, 1);
 				List<StoreUpdateEvent> updateEvents = StoreUpdateEvent.DeserializeFromJSonList(StoreUpdateEvent.SerializeArrayAsJSon(this.CreateTempEvents("Pedestal1", 2, 120, startTime).ToArray()));
 				this.HandleRecievingEventsFromTitleData(updateEvents);
 				return;
@@ -354,8 +355,8 @@ namespace GorillaNetworking.Store
 			List<StoreUpdateEvent> list = new List<StoreUpdateEvent>();
 			for (int i = 0; i < totalEvents; i++)
 			{
-				StoreUpdateEvent item = new StoreUpdateEvent(PedestalID, array[i % 14], DateTime.UtcNow + TimeSpan.FromMinutes((double)(minuteDelay * i)), DateTime.UtcNow + TimeSpan.FromMinutes((double)(minuteDelay * (i + 1))));
-				list.Add(item);
+				StoreUpdateEvent storeUpdateEvent = new StoreUpdateEvent(PedestalID, array[i % 14], DateTime.UtcNow + TimeSpan.FromMinutes((double)(minuteDelay * i)), DateTime.UtcNow + TimeSpan.FromMinutes((double)(minuteDelay * (i + 1))));
+				list.Add(storeUpdateEvent);
 			}
 			return list;
 		}
@@ -382,8 +383,8 @@ namespace GorillaNetworking.Store
 			List<StoreUpdateEvent> list = new List<StoreUpdateEvent>();
 			for (int i = 0; i < totalEvents; i++)
 			{
-				StoreUpdateEvent item = new StoreUpdateEvent(PedestalID, array[i % 14], startTime + TimeSpan.FromMinutes((double)(minuteDelay * i)), startTime + TimeSpan.FromMinutes((double)(minuteDelay * (i + 1))));
-				list.Add(item);
+				StoreUpdateEvent storeUpdateEvent = new StoreUpdateEvent(PedestalID, array[i % 14], startTime + TimeSpan.FromMinutes((double)(minuteDelay * i)), startTime + TimeSpan.FromMinutes((double)(minuteDelay * (i + 1))));
+				list.Add(storeUpdateEvent);
 			}
 			return list;
 		}

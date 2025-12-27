@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UniLabs.Time
 {
-	[JsonObject(MemberSerialization.OptIn)]
+	[JsonObject(1)]
 	[Serializable]
 	public class UTimeSpan : ISerializationCallbackReceiver, IComparable<UTimeSpan>, IComparable<TimeSpan>
 	{
@@ -90,7 +90,7 @@ namespace UniLabs.Time
 		public void OnAfterDeserialize()
 		{
 			TimeSpan timeSpan;
-			this.TimeSpan = (TimeSpan.TryParse(this._TimeSpan, CultureInfo.InvariantCulture, out timeSpan) ? timeSpan : TimeSpan.Zero);
+			this.TimeSpan = (TimeSpan.TryParse(this._TimeSpan, CultureInfo.InvariantCulture, ref timeSpan) ? timeSpan : TimeSpan.Zero);
 		}
 
 		public void OnBeforeSerialize()

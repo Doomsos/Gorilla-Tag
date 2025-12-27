@@ -100,11 +100,11 @@ namespace GorillaLocomotion.Gameplay
 				this.bones[i].isKinematic = kinematic;
 				if (kinematic)
 				{
-					this.bones[i].interpolation = RigidbodyInterpolation.None;
+					this.bones[i].interpolation = 0;
 				}
 				else
 				{
-					this.bones[i].interpolation = RigidbodyInterpolation.Interpolate;
+					this.bones[i].interpolation = 1;
 				}
 			}
 		}
@@ -113,7 +113,7 @@ namespace GorillaLocomotion.Gameplay
 		{
 			if (index >= this.bones.Length)
 			{
-				return this.bones.Last<Rigidbody>();
+				return Enumerable.Last<Rigidbody>(this.bones);
 			}
 			return this.bones[index];
 		}
@@ -138,7 +138,7 @@ namespace GorillaLocomotion.Gameplay
 			{
 				GorillaTagger.Instance.offlineVRRig.grabbedRopeIndex = base.photonView.ViewID;
 				GorillaTagger.Instance.offlineVRRig.grabbedRopeBoneIndex = boneIndex;
-				GorillaTagger.Instance.offlineVRRig.grabbedRopeIsLeft = (xrNode == XRNode.LeftHand);
+				GorillaTagger.Instance.offlineVRRig.grabbedRopeIsLeft = (xrNode == 4);
 				GorillaTagger.Instance.offlineVRRig.grabbedRopeOffset = offset;
 			}
 			List<Vector3> list = new List<Vector3>();
@@ -201,7 +201,7 @@ namespace GorillaLocomotion.Gameplay
 		{
 			if (NetworkSystem.Instance.InRoom)
 			{
-				base.photonView.RPC("SetVelocity", RpcTarget.All, new object[]
+				base.photonView.RPC("SetVelocity", 0, new object[]
 				{
 					boneIndex,
 					velocity,
@@ -237,11 +237,11 @@ namespace GorillaLocomotion.Gameplay
 				if (wholeRope)
 				{
 					int num = 0;
-					float maxLength = Mathf.Min(velocity.magnitude, 15f);
+					float num2 = Mathf.Min(velocity.magnitude, 15f);
 					foreach (Rigidbody rigidbody in this.bones)
 					{
 						Vector3 vector = velocity / (float)boneIndex * (float)num;
-						vector = Vector3.ClampMagnitude(vector, maxLength);
+						vector = Vector3.ClampMagnitude(vector, num2);
 						rigidbody.linearVelocity = vector;
 						num++;
 					}

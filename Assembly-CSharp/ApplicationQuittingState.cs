@@ -8,7 +8,7 @@ public static class ApplicationQuittingState
 	[RuntimeInitializeOnLoadMethod]
 	private static void Init()
 	{
-		Application.quitting += ApplicationQuittingState.HandleApplicationQuitting;
+		Application.quitting += new Action(ApplicationQuittingState.HandleApplicationQuitting);
 	}
 
 	private static void HandleApplicationQuitting()

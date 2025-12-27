@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	{
 		public BuilderGridPlaneData(BuilderAttachGridPlane gridPlane, int pieceIndex)
 		{
-			gridPlane.center.transform.GetPositionAndRotation(out this.position, out this.rotation);
+			gridPlane.center.transform.GetPositionAndRotation(ref this.position, ref this.rotation);
 			this.localPosition = gridPlane.pieceToGridPosition;
 			this.localRotation = gridPlane.pieceToGridRotation;
 			this.width = gridPlane.width;

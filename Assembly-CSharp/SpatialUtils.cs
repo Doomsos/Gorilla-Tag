@@ -5,19 +5,19 @@ using UnityEngine;
 
 public static class SpatialUtils
 {
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static int XYZToFlatIndex(int x, int y, int z, int xMax, int yMax)
 	{
 		return z * xMax * yMax + y * xMax + x;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static int XYZToFlatIndex(Vector3Int xyz, int xMax, int yMax)
 	{
 		return xyz.z * xMax * yMax + xyz.y * xMax + xyz.x;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void FlatIndexToXYZ(int idx, int xMax, int yMax, out int x, out int y, out int z)
 	{
 		z = idx / (xMax * yMax);
@@ -26,32 +26,32 @@ public static class SpatialUtils
 		x = idx % xMax;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3Int FlatIndexToXYZ(int idx, int xMax, int yMax)
 	{
 		int num = idx / (xMax * yMax);
 		idx -= num * xMax * yMax;
-		int y = idx / xMax;
-		return new Vector3Int(idx % xMax, y, num);
+		int num2 = idx / xMax;
+		return new Vector3Int(idx % xMax, num2, num);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static int CompareByZOrder(Vector3Int a, Vector3Int b)
 	{
 		ulong num;
 		SpatialUtils.ZOrderEncode64((uint)a.x, (uint)a.y, (uint)a.z, out num);
-		ulong value;
-		SpatialUtils.ZOrderEncode64((uint)b.x, (uint)b.y, (uint)b.z, out value);
-		return num.CompareTo(value);
+		ulong num2;
+		SpatialUtils.ZOrderEncode64((uint)b.x, (uint)b.y, (uint)b.z, out num2);
+		return num.CompareTo(num2);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void ZOrderEncode64(uint x, uint y, uint z, out ulong code)
 	{
 		code = (SpatialUtils.Encode64((ulong)x) | SpatialUtils.Encode64((ulong)y) << 1 | SpatialUtils.Encode64((ulong)z) << 2);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void ZOrderDecode64(ulong code, out uint x, out uint y, out uint z)
 	{
 		x = SpatialUtils.Decode64(code);
@@ -59,7 +59,7 @@ public static class SpatialUtils
 		z = SpatialUtils.Decode64(code >> 2);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static ulong Encode64(ulong w)
 	{
 		w &= 2097151UL;
@@ -71,7 +71,7 @@ public static class SpatialUtils
 		return w;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static uint Decode64(ulong w)
 	{
 		w &= 1317624576693539401UL;
@@ -83,7 +83,7 @@ public static class SpatialUtils
 		return (uint)w;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static uint ZOrderEncode(uint x, uint y)
 	{
 		x = ((x | x << 16) & 65535U);
@@ -99,7 +99,7 @@ public static class SpatialUtils
 		return x | y << 1;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void ZOrderDecode(uint code, out uint x, out uint y)
 	{
 		x = (code & 1431655765U);
@@ -114,7 +114,7 @@ public static class SpatialUtils
 		y = ((y ^ y >> 8) & 65535U);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static uint ZOrderEncode(uint x, uint y, uint z)
 	{
 		x = ((x | x << 16) & 50331903U);
@@ -132,7 +132,7 @@ public static class SpatialUtils
 		return x | y << 1 | z << 2;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static void ZOrderDecode(uint code, out uint x, out uint y, out uint z)
 	{
 		x = (code & 153391689U);
@@ -282,63 +282,66 @@ public static class SpatialUtils
 	{
 		Vector3 center = bounds.center;
 		Vector3 extents = bounds.extents;
-		Vector3 b = new Vector3(extents.x, 0f, 0f);
-		Vector3 b2 = new Vector3(0f, extents.y, 0f);
-		Vector3 b3 = new Vector3(0f, 0f, extents.z);
-		Vector3 a = xform.MultiplyPoint(center + b + b2 + b3);
-		Vector3 vector = xform.MultiplyPoint(center + b + b2 - b3);
-		Vector3 vector2 = xform.MultiplyPoint(center - b + b2 - b3);
-		Vector3 vector3 = xform.MultiplyPoint(center - b + b2 + b3);
-		Vector3 vector4 = xform.MultiplyPoint(center + b - b2 + b3);
-		Vector3 vector5 = xform.MultiplyPoint(center + b - b2 - b3);
-		Vector3 vector6 = xform.MultiplyPoint(center - b - b2 - b3);
-		Vector3 vector7 = xform.MultiplyPoint(center - b - b2 + b3);
-		Vector3 vector8 = (a + vector + vector2 + vector3 + vector4 + vector5 + vector6 + vector7) * 0.125f;
+		Vector3 vector;
+		vector..ctor(extents.x, 0f, 0f);
+		Vector3 vector2;
+		vector2..ctor(0f, extents.y, 0f);
+		Vector3 vector3;
+		vector3..ctor(0f, 0f, extents.z);
+		Vector3 vector4 = xform.MultiplyPoint(center + vector + vector2 + vector3);
+		Vector3 vector5 = xform.MultiplyPoint(center + vector + vector2 - vector3);
+		Vector3 vector6 = xform.MultiplyPoint(center - vector + vector2 - vector3);
+		Vector3 vector7 = xform.MultiplyPoint(center - vector + vector2 + vector3);
+		Vector3 vector8 = xform.MultiplyPoint(center + vector - vector2 + vector3);
+		Vector3 vector9 = xform.MultiplyPoint(center + vector - vector2 - vector3);
+		Vector3 vector10 = xform.MultiplyPoint(center - vector - vector2 - vector3);
+		Vector3 vector11 = xform.MultiplyPoint(center - vector - vector2 + vector3);
+		Vector3 vector12 = (vector4 + vector5 + vector6 + vector7 + vector8 + vector9 + vector10 + vector11) * 0.125f;
 		float num = 0f;
-		float num2 = SpatialUtils.DistSq(a, vector8);
+		float num2 = SpatialUtils.DistSq(vector4, vector12);
 		if (num2 > num)
 		{
 			num = num2;
 		}
-		num2 = SpatialUtils.DistSq(vector, vector8);
+		num2 = SpatialUtils.DistSq(vector5, vector12);
 		if (num2 > num)
 		{
 			num = num2;
 		}
-		num2 = SpatialUtils.DistSq(vector2, vector8);
+		num2 = SpatialUtils.DistSq(vector6, vector12);
 		if (num2 > num)
 		{
 			num = num2;
 		}
-		num2 = SpatialUtils.DistSq(vector3, vector8);
+		num2 = SpatialUtils.DistSq(vector7, vector12);
 		if (num2 > num)
 		{
 			num = num2;
 		}
-		num2 = SpatialUtils.DistSq(vector4, vector8);
+		num2 = SpatialUtils.DistSq(vector8, vector12);
 		if (num2 > num)
 		{
 			num = num2;
 		}
-		num2 = SpatialUtils.DistSq(vector5, vector8);
+		num2 = SpatialUtils.DistSq(vector9, vector12);
 		if (num2 > num)
 		{
 			num = num2;
 		}
-		num2 = SpatialUtils.DistSq(vector6, vector8);
+		num2 = SpatialUtils.DistSq(vector10, vector12);
 		if (num2 > num)
 		{
 			num = num2;
 		}
-		num2 = SpatialUtils.DistSq(vector7, vector8);
+		num2 = SpatialUtils.DistSq(vector11, vector12);
 		if (num2 > num)
 		{
 			num = num2;
 		}
-		return new BoundingSphere(vector8, Mathf.Sqrt(num));
+		return new BoundingSphere(vector12, Mathf.Sqrt(num));
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	private static float DistSq(Vector3 a, Vector3 b)
 	{
 		float num = b.x - a.x;
@@ -347,13 +350,13 @@ public static class SpatialUtils
 		return num * num + num2 * num2 + num3 * num3;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3[] GetCorners(this Bounds b)
 	{
 		return SpatialUtils.GetCorners(b.min, b.max);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3[] GetCorners(Vector3 min, Vector3 max)
 	{
 		return new Vector3[]
@@ -369,7 +372,7 @@ public static class SpatialUtils
 		};
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Vector3[] GetCorners(this Bounds b, Matrix4x4 transform)
 	{
 		Vector3[] corners = b.GetCorners();
@@ -380,22 +383,22 @@ public static class SpatialUtils
 		return corners;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(256)]
 	public static Bounds TransformedBy(this Bounds b, Matrix4x4 transform)
 	{
 		Vector3 position = transform.GetPosition();
-		Vector3 a = transform.MultiplyVector(Vector3.right);
-		Vector3 a2 = transform.MultiplyVector(Vector3.up);
-		Vector3 a3 = transform.MultiplyVector(Vector3.forward);
+		Vector3 vector = transform.MultiplyVector(Vector3.right);
+		Vector3 vector2 = transform.MultiplyVector(Vector3.up);
+		Vector3 vector3 = transform.MultiplyVector(Vector3.forward);
 		Vector3 min = b.min;
 		Vector3 max = b.max;
-		Vector3 lhs = a * min.x;
-		Vector3 rhs = a * max.x;
-		Vector3 lhs2 = a2 * min.y;
-		Vector3 rhs2 = a2 * max.y;
-		Vector3 lhs3 = a3 * min.z;
-		Vector3 rhs3 = a3 * max.z;
-		b.SetMinMax(Vector3.Min(lhs, rhs) + Vector3.Min(lhs2, rhs2) + Vector3.Min(lhs3, rhs3) + position, Vector3.Max(lhs, rhs) + Vector3.Max(lhs2, rhs2) + Vector3.Max(lhs3, rhs3) + position);
+		Vector3 vector4 = vector * min.x;
+		Vector3 vector5 = vector * max.x;
+		Vector3 vector6 = vector2 * min.y;
+		Vector3 vector7 = vector2 * max.y;
+		Vector3 vector8 = vector3 * min.z;
+		Vector3 vector9 = vector3 * max.z;
+		b.SetMinMax(Vector3.Min(vector4, vector5) + Vector3.Min(vector6, vector7) + Vector3.Min(vector8, vector9) + position, Vector3.Max(vector4, vector5) + Vector3.Max(vector6, vector7) + Vector3.Max(vector8, vector9) + position);
 		return b;
 	}
 

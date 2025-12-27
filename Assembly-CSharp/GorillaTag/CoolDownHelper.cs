@@ -19,7 +19,7 @@ namespace GorillaTag
 			this.checkTime = 0f;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public bool CheckCooldown()
 		{
 			float unscaledTime = Time.unscaledTime;
@@ -42,7 +42,7 @@ namespace GorillaTag
 			this.checkTime = float.MaxValue;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(256)]
 		public virtual void OnCheckPass()
 		{
 		}

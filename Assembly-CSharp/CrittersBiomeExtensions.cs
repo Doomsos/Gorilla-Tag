@@ -19,7 +19,7 @@ public static class CrittersBiomeExtensions
 	public static string GetHabitatDescription(this CrittersBiome biome)
 	{
 		string text;
-		if (!CrittersBiomeExtensions._habitatLookup.TryGetValue(biome, out text))
+		if (!CrittersBiomeExtensions._habitatLookup.TryGetValue(biome, ref text))
 		{
 			if (biome == CrittersBiome.Any)
 			{

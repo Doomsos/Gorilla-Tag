@@ -102,7 +102,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 			}
 		}
 		this.wasOnOffMeshNavLink = this.navAgent.isOnOffMeshLink;
-		if (!this.hasNotifiedNavigationFailure && !this.navAgent.pathPending && (this.navAgent.pathStatus == NavMeshPathStatus.PathPartial || this.navAgent.pathStatus == NavMeshPathStatus.PathInvalid))
+		if (!this.hasNotifiedNavigationFailure && !this.navAgent.pathPending && (this.navAgent.pathStatus == 1 || this.navAgent.pathStatus == 2))
 		{
 			GameAgent.NavigationFailedEvent navigationFailedEvent = this.onNavigationFailed;
 			if (navigationFailedEvent != null)
@@ -172,7 +172,7 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 	public void ApplyDestination(Vector3 dest)
 	{
 		NavMeshHit navMeshHit;
-		if (!NavMesh.SamplePosition(dest, out navMeshHit, 1.5f, -1))
+		if (!NavMesh.SamplePosition(dest, ref navMeshHit, 1.5f, -1))
 		{
 			return;
 		}
@@ -261,48 +261,48 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 
 	public static void UpdateFacingTarget(Transform transform, NavMeshAgent navAgent, Transform target, float turnspeed = 3600f)
 	{
-		Vector3 forward = transform.forward;
+		Vector3 vector = transform.forward;
 		if (target != null)
 		{
 			Vector3 position = target.position;
 			Vector3 position2 = transform.position;
-			Vector3 a = position - position2;
-			a.y = 0f;
-			float magnitude = a.magnitude;
+			Vector3 vector2 = position - position2;
+			vector2.y = 0f;
+			float magnitude = vector2.magnitude;
 			if (magnitude > 0f)
 			{
-				forward = a / magnitude;
+				vector = vector2 / magnitude;
 			}
 		}
 		else
 		{
-			Vector3 a2 = (navAgent == null) ? Vector3.zero : navAgent.desiredVelocity;
-			a2.y = 0f;
-			float magnitude2 = a2.magnitude;
+			Vector3 vector3 = (navAgent == null) ? Vector3.zero : navAgent.desiredVelocity;
+			vector3.y = 0f;
+			float magnitude2 = vector3.magnitude;
 			if (magnitude2 > 0f)
 			{
-				forward = a2 / magnitude2;
+				vector = vector3 / magnitude2;
 			}
 		}
-		Quaternion b = Quaternion.LookRotation(forward);
+		Quaternion quaternion = Quaternion.LookRotation(vector);
 		if (navAgent != null && navAgent.speed > 0f)
 		{
-			transform.rotation = Quaternion.Lerp(transform.rotation, b, Mathf.Clamp(turnspeed * navAgent.speed / Quaternion.Angle(transform.rotation, b) * Time.deltaTime, 0f, 1f));
+			transform.rotation = Quaternion.Lerp(transform.rotation, quaternion, Mathf.Clamp(turnspeed * navAgent.speed / Quaternion.Angle(transform.rotation, quaternion) * Time.deltaTime, 0f, 1f));
 			return;
 		}
-		transform.rotation = Quaternion.Lerp(transform.rotation, b, Mathf.Clamp(turnspeed / Quaternion.Angle(transform.rotation, b) * Time.deltaTime, 0f, 1f));
+		transform.rotation = Quaternion.Lerp(transform.rotation, quaternion, Mathf.Clamp(turnspeed / Quaternion.Angle(transform.rotation, quaternion) * Time.deltaTime, 0f, 1f));
 	}
 
 	public static void UpdateFacingForward(Transform transform, NavMeshAgent navAgent, float turnspeed = 3600f)
 	{
-		Vector3 a = (navAgent == null) ? Vector3.zero : navAgent.desiredVelocity;
-		a.y = 0f;
-		float magnitude = a.magnitude;
+		Vector3 vector = (navAgent == null) ? Vector3.zero : navAgent.desiredVelocity;
+		vector.y = 0f;
+		float magnitude = vector.magnitude;
 		if (magnitude <= 0f)
 		{
 			return;
 		}
-		Vector3 facingDir = a / magnitude;
+		Vector3 facingDir = vector / magnitude;
 		GameAgent.UpdateFacingDir(transform, navAgent, facingDir, turnspeed);
 	}
 
@@ -317,8 +317,8 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 	public static void UpdateFacingDir(Transform transform, NavMeshAgent navAgent, Vector3 facingDir, float turnspeed = 3600f)
 	{
 		float num = (navAgent == null) ? 0f : navAgent.speed;
-		Quaternion b = Quaternion.LookRotation(facingDir);
-		transform.rotation = Quaternion.Lerp(transform.rotation, b, Mathf.Clamp(turnspeed * num / Quaternion.Angle(transform.rotation, b) * Time.deltaTime, 0f, 1f));
+		Quaternion quaternion = Quaternion.LookRotation(facingDir);
+		transform.rotation = Quaternion.Lerp(transform.rotation, quaternion, Mathf.Clamp(turnspeed * num / Quaternion.Angle(transform.rotation, quaternion) * Time.deltaTime, 0f, 1f));
 	}
 
 	public GameEntity entity;

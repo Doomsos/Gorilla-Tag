@@ -97,9 +97,9 @@ public abstract class NetworkSystem : MonoBehaviour
 				onReturnedToSinglePlayer.InvokeSafe();
 			}
 		}
-		catch (Exception exception)
+		catch (Exception ex)
 		{
-			Debug.LogException(exception);
+			Debug.LogException(ex);
 		}
 		VRRigCache.Instance.OnLeftRoom();
 	}
@@ -128,9 +128,9 @@ public abstract class NetworkSystem : MonoBehaviour
 				onPlayerLeft.InvokeSafe(netPlayer);
 			}
 		}
-		catch (Exception exception)
+		catch (Exception ex)
 		{
-			Debug.LogException(exception);
+			Debug.LogException(ex);
 		}
 		VRRigCache.Instance.OnPlayerLeftRoom(netPlayer);
 	}
@@ -154,7 +154,7 @@ public abstract class NetworkSystem : MonoBehaviour
 		{
 			return;
 		}
-		onRaiseEvent(eventCode, data, source);
+		onRaiseEvent.Invoke(eventCode, data, source);
 	}
 
 	public event Action<Dictionary<string, object>> OnCustomAuthenticationResponse;
@@ -166,7 +166,7 @@ public abstract class NetworkSystem : MonoBehaviour
 		{
 			return;
 		}
-		onCustomAuthenticationResponse(response);
+		onCustomAuthenticationResponse.Invoke(response);
 	}
 
 	public virtual void Initialise()
@@ -352,16 +352,15 @@ public abstract class NetworkSystem : MonoBehaviour
 	public bool InstantCheckGroupData(string userID, string keyToFollow)
 	{
 		bool success = false;
-		PlayFab.ClientModels.GetSharedGroupDataRequest getSharedGroupDataRequest = new PlayFab.ClientModels.GetSharedGroupDataRequest();
-		getSharedGroupDataRequest.Keys = new List<string>
-		{
-			keyToFollow
-		};
+		GetSharedGroupDataRequest getSharedGroupDataRequest = new GetSharedGroupDataRequest();
+		List<string> list = new List<string>();
+		list.Add(keyToFollow);
+		getSharedGroupDataRequest.Keys = list;
 		getSharedGroupDataRequest.SharedGroupId = userID;
 		PlayFabClientAPI.GetSharedGroupData(getSharedGroupDataRequest, delegate(GetSharedGroupDataResult result)
 		{
 			Debug.Log("Get Shared Group Data returned a success");
-			Debug.Log(result.Data.ToStringFull());
+			Debug.Log(Extensions.ToStringFull(result.Data));
 			if (result.Data.Count > 0)
 			{
 				success = true;
@@ -400,7 +399,7 @@ public abstract class NetworkSystem : MonoBehaviour
 	{
 		NetworkSystem.shuffleStringBuilder.Clear();
 		int num;
-		if (!int.TryParse(shuffle, out num))
+		if (!int.TryParse(shuffle, ref num))
 		{
 			Debug.Log("Shuffle room failed");
 			return "";
@@ -408,8 +407,8 @@ public abstract class NetworkSystem : MonoBehaviour
 		for (int i = 0; i < room.Length; i++)
 		{
 			int num2 = int.Parse(shuffle.Substring(i * 2 % (shuffle.Length - 1), 2));
-			int index = NetworkSystem.mod("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".IndexOf(room[i]) + (encode ? num2 : (-num2)), "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".Length);
-			NetworkSystem.shuffleStringBuilder.Append("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"[index]);
+			int num3 = NetworkSystem.mod("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".IndexOf(room.get_Chars(i)) + (encode ? num2 : (-num2)), "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".Length);
+			NetworkSystem.shuffleStringBuilder.Append("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".get_Chars(num3));
 		}
 		return NetworkSystem.shuffleStringBuilder.ToString();
 	}
@@ -512,7 +511,7 @@ public abstract class NetworkSystem : MonoBehaviour
 			this.CurrentRoom.isJoinable ? "open" : "closed",
 			this.CurrentRoom.MaxPlayers,
 			this.RoomPlayerCount,
-			this.CurrentRoom.CustomProps.ToStringFull()
+			Extensions.ToStringFull(this.CurrentRoom.CustomProps)
 		});
 	}
 

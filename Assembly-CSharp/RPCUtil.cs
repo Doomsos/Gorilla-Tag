@@ -6,15 +6,15 @@ internal class RPCUtil
 {
 	public static bool NotSpam(string id, PhotonMessageInfoWrapped info, float delay)
 	{
-		RPCUtil.RPCCallID key = new RPCUtil.RPCCallID(id, info.senderID);
-		if (!RPCUtil.RPCCallLog.ContainsKey(key))
+		RPCUtil.RPCCallID rpccallID = new RPCUtil.RPCCallID(id, info.senderID);
+		if (!RPCUtil.RPCCallLog.ContainsKey(rpccallID))
 		{
-			RPCUtil.RPCCallLog.Add(key, Time.time);
+			RPCUtil.RPCCallLog.Add(rpccallID, Time.time);
 			return true;
 		}
-		if (Time.time - RPCUtil.RPCCallLog[key] > delay)
+		if (Time.time - RPCUtil.RPCCallLog[rpccallID] > delay)
 		{
-			RPCUtil.RPCCallLog[key] = Time.time;
+			RPCUtil.RPCCallLog[rpccallID] = Time.time;
 			return true;
 		}
 		return false;

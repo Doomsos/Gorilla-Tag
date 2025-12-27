@@ -328,7 +328,7 @@ public static class GorillaTelemetry
 			for (i = 0; i < count; i++)
 			{
 				EventContents eventContents;
-				array[i] = (GorillaTelemetry.telemetryEventsQueuePlayFab.TryDequeue(out eventContents) ? eventContents : null);
+				array[i] = (GorillaTelemetry.telemetryEventsQueuePlayFab.TryDequeue(ref eventContents) ? eventContents : null);
 			}
 			if (i == 0)
 			{
@@ -365,7 +365,7 @@ public static class GorillaTelemetry
 			for (j = 0; j < count; j++)
 			{
 				MothershipAnalyticsEvent mothershipAnalyticsEvent;
-				array[j] = (GorillaTelemetry.telemetryEventsQueueMothership.TryDequeue(out mothershipAnalyticsEvent) ? mothershipAnalyticsEvent : null);
+				array[j] = (GorillaTelemetry.telemetryEventsQueueMothership.TryDequeue(ref mothershipAnalyticsEvent) ? mothershipAnalyticsEvent : null);
 			}
 			if (j == 0)
 			{
@@ -373,14 +373,14 @@ public static class GorillaTelemetry
 			}
 			else
 			{
-				MothershipWriteEventsRequest req = new MothershipWriteEventsRequest
+				MothershipWriteEventsRequest mothershipWriteEventsRequest = new MothershipWriteEventsRequest
 				{
 					title_id = MothershipClientApiUnity.TitleId,
 					deployment_id = MothershipClientApiUnity.DeploymentId,
 					env_id = MothershipClientApiUnity.EnvironmentId,
 					events = new AnalyticsRequestVector(GorillaTelemetry.GetEventListForArrayMothership(array, j))
 				};
-				MothershipClientApiUnity.WriteEvents(MothershipClientContext.MothershipId, req, delegate(MothershipWriteEventsResponse resp)
+				MothershipClientApiUnity.WriteEvents(MothershipClientContext.MothershipId, mothershipWriteEventsRequest, delegate(MothershipWriteEventsResponse resp)
 				{
 				}, delegate(MothershipError err, int i)
 				{
@@ -404,7 +404,7 @@ public static class GorillaTelemetry
 			}
 		}
 		List<EventContents> list;
-		if (!GorillaTelemetry.gListPoolPlayFab.TryGetValue(num, out list))
+		if (!GorillaTelemetry.gListPoolPlayFab.TryGetValue(num, ref list))
 		{
 			list = new List<EventContents>(num);
 			GorillaTelemetry.gListPoolPlayFab.TryAdd(num, list);
@@ -434,7 +434,7 @@ public static class GorillaTelemetry
 			}
 		}
 		List<MothershipAnalyticsEvent> list;
-		if (!GorillaTelemetry.gListPoolMothership.TryGetValue(num, out list))
+		if (!GorillaTelemetry.gListPoolMothership.TryGetValue(num, ref list))
 		{
 			list = new List<MothershipAnalyticsEvent>(num);
 			GorillaTelemetry.gListPoolMothership.TryAdd(num, list);
@@ -520,13 +520,13 @@ public static class GorillaTelemetry
 		{
 			return;
 		}
-		string value = GorillaTelemetry.PlayFabUserId();
+		string text = GorillaTelemetry.PlayFabUserId();
 		string name = zoneEventType.GetName<GTZoneEventType>();
 		string name2 = zone.zoneId.GetName<GTZone>();
 		string name3 = zone.subZoneId.GetName<GTSubZone>();
 		bool sessionIsPrivate = NetworkSystem.Instance.SessionIsPrivate;
 		Dictionary<string, object> dictionary = GorillaTelemetry.gZoneEventArgs;
-		dictionary["User"] = value;
+		dictionary["User"] = text;
 		dictionary["EventType"] = name;
 		dictionary["ZoneId"] = name2;
 		dictionary["SubZoneId"] = name3;
@@ -546,11 +546,11 @@ public static class GorillaTelemetry
 		{
 			return;
 		}
-		string value = GorillaTelemetry.PlayFabUserId();
+		string text = GorillaTelemetry.PlayFabUserId();
 		string name = gameModeEvent.GetName<GTGameModeEventType>();
 		string name2 = gameMode.GetName<GameModeType>();
 		Dictionary<string, object> dictionary = GorillaTelemetry.gGameModeStartEventArgs;
-		dictionary["User"] = value;
+		dictionary["User"] = text;
 		dictionary["EventType"] = name;
 		dictionary["game_mode"] = name2;
 		GorillaTelemetry.EnqueueTelemetryEventPlayFab(new EventContents
@@ -584,7 +584,7 @@ public static class GorillaTelemetry
 			if (!cosmeticItem.isNullItem)
 			{
 				string itemName = cosmeticItem.itemName;
-				if (!string.IsNullOrWhiteSpace(itemName) && !itemName.Contains("NOTHING", StringComparison.InvariantCultureIgnoreCase) && hashSet.Add(itemName))
+				if (!string.IsNullOrWhiteSpace(itemName) && !itemName.Contains("NOTHING", 3) && hashSet.Add(itemName))
 				{
 					num++;
 				}
@@ -605,13 +605,13 @@ public static class GorillaTelemetry
 		{
 			return;
 		}
-		string value = GorillaTelemetry.PlayFabUserId();
+		string text = GorillaTelemetry.PlayFabUserId();
 		string name = shopEvent.GetName<GTShopEventType>();
-		string[] value2 = GorillaTelemetry.FetchItemArgs(items);
+		string[] array = GorillaTelemetry.FetchItemArgs(items);
 		Dictionary<string, object> dictionary = GorillaTelemetry.gShopEventArgs;
-		dictionary["User"] = value;
+		dictionary["User"] = text;
 		dictionary["EventType"] = name;
-		dictionary["Items"] = value2;
+		dictionary["Items"] = array;
 		GorillaTelemetry.EnqueueTelemetryEventPlayFab(new EventContents
 		{
 			Name = "telemetry_shop_event",
@@ -651,7 +651,7 @@ public static class GorillaTelemetry
 			if (!builderSetStoreItem.isNullItem)
 			{
 				string playfabID = builderSetStoreItem.playfabID;
-				if (!string.IsNullOrWhiteSpace(playfabID) && !playfabID.Contains("NOTHING", StringComparison.InvariantCultureIgnoreCase) && hashSet.Add(playfabID))
+				if (!string.IsNullOrWhiteSpace(playfabID) && !playfabID.Contains("NOTHING", 3) && hashSet.Add(playfabID))
 				{
 					num++;
 				}
@@ -672,13 +672,13 @@ public static class GorillaTelemetry
 		{
 			return;
 		}
-		string value = GorillaTelemetry.PlayFabUserId();
+		string text = GorillaTelemetry.PlayFabUserId();
 		string name = shopEvent.GetName<GTShopEventType>();
-		string[] value2 = GorillaTelemetry.BuilderItemsToStrings(items);
+		string[] array = GorillaTelemetry.BuilderItemsToStrings(items);
 		Dictionary<string, object> dictionary = GorillaTelemetry.gShopEventArgs;
-		dictionary["User"] = value;
+		dictionary["User"] = text;
 		dictionary["EventType"] = name;
-		dictionary["Items"] = value2;
+		dictionary["Items"] = array;
 		GorillaTelemetry.EnqueueTelemetryEventPlayFab(new EventContents
 		{
 			Name = "telemetry_shop_event",
@@ -698,19 +698,19 @@ public static class GorillaTelemetry
 		{
 			return;
 		}
-		string value = GorillaTelemetry.PlayFabUserId();
+		string text = GorillaTelemetry.PlayFabUserId();
 		string name = kidEvent.GetName<GTKidEventType>();
-		string value2 = (ageCategory == AgeStatusType.LEGALADULT) ? "Not_Managed_Account" : "Managed_Account";
-		string value3 = joinGroupsEnabled.ToString().ToUpper();
-		string value4 = voiceChatEnabled.ToString().ToUpper();
-		string value5 = customUsernamesEnabled.ToString().ToUpper();
+		string text2 = (ageCategory == 3) ? "Not_Managed_Account" : "Managed_Account";
+		string text3 = joinGroupsEnabled.ToString().ToUpper();
+		string text4 = voiceChatEnabled.ToString().ToUpper();
+		string text5 = customUsernamesEnabled.ToString().ToUpper();
 		Dictionary<string, object> dictionary = GorillaTelemetry.gKidEventArgs;
-		dictionary["User"] = value;
+		dictionary["User"] = text;
 		dictionary["EventType"] = name;
-		dictionary["AgeCategory"] = value2;
-		dictionary["VoiceChatEnabled"] = value4;
-		dictionary["CustomUsernameEnabled"] = value5;
-		dictionary["JoinGroups"] = value3;
+		dictionary["AgeCategory"] = text2;
+		dictionary["VoiceChatEnabled"] = text4;
+		dictionary["CustomUsernameEnabled"] = text5;
+		dictionary["JoinGroups"] = text3;
 		GorillaTelemetry.EnqueueTelemetryEventPlayFab(new EventContents
 		{
 			Name = "telemetry_kid_event",
@@ -801,7 +801,7 @@ public static class GorillaTelemetry
 		int num2 = (playtime - num) / 60;
 		int num3 = num2 % 60;
 		int num4 = (num2 - num3) / 60;
-		string value = string.Format("{0}.{1}.{2}", num4, num3, num);
+		string text = string.Format("{0}.{1}.{2}", num4, num3, num);
 		Dictionary<string, object> dictionary = GorillaTelemetry.gCustomMapTrackingMetrics;
 		dictionary["User"] = GorillaTelemetry.PlayFabUserId();
 		dictionary["CustomMapName"] = mapName;
@@ -811,7 +811,7 @@ public static class GorillaTelemetry
 		dictionary["MaxPlayerCount"] = maxPlayers.ToString();
 		dictionary["PlaytimeInSeconds"] = playtime.ToString();
 		dictionary["PrivateRoom"] = privateRoom.ToString();
-		dictionary["PlaytimeOnMap"] = value;
+		dictionary["PlaytimeOnMap"] = text;
 		GorillaTelemetry.EnqueueTelemetryEventPlayFab(new EventContents
 		{
 			Name = "CustomMapTracking",
@@ -847,55 +847,26 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorShiftStartArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_game_start";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_game_start",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"initial_cores_balance",
-					initialCores.ToString()
-				},
-				{
-					"number_of_players",
-					numPlayers.ToString()
-				},
-				{
-					"start_at_beginning",
-					wasPlayerInAtStart.ToString()
-				},
-				{
-					"seconds_into_shift_at_join",
-					timeIntoShift.ToString()
-				},
-				{
-					"floor_joined",
-					floorJoined.ToString()
-				},
-				{
-					"player_rank",
-					playerRank
-				},
-				{
-					"is_private_room",
-					NetworkSystem.Instance.SessionIsPrivate.ToString()
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("initial_cores_balance", initialCores.ToString());
+		dictionary.Add("number_of_players", numPlayers.ToString());
+		dictionary.Add("start_at_beginning", wasPlayerInAtStart.ToString());
+		dictionary.Add("seconds_into_shift_at_join", timeIntoShift.ToString());
+		dictionary.Add("floor_joined", floorJoined.ToString());
+		dictionary.Add("player_rank", playerRank);
+		dictionary.Add("is_private_room", NetworkSystem.Instance.SessionIsPrivate.ToString());
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorGameEnd(string gameId, int finalCores, int totalCoresCollectedByPlayer, int totalCoresCollectedByGroup, int totalCoresSpentByPlayer, int totalCoresSpentByGroup, int gatesUnlocked, int deaths, List<string> itemsPurchased, int shiftCut, bool isShiftActuallyEnding, float timeIntoShiftAtJoin, float playDuration, bool wasPlayerInAtStart, ZoneClearReason zoneClearReason, int maxNumberOfPlayersInShift, int endNumberOfPlayers, Dictionary<string, int> itemTypesHeldThisShift, int revives, int numShiftsPlayed)
@@ -920,19 +891,19 @@ public static class GorillaTelemetry
 		GorillaTelemetry.gGhostReactorShiftEndArgs["started_late"] = (!wasPlayerInAtStart).ToString();
 		GorillaTelemetry.gGhostReactorShiftEndArgs["time_started"] = timeIntoShiftAtJoin.ToString();
 		GorillaTelemetry.gGhostReactorShiftEndArgs["revives"] = revives.ToString();
-		string value = "shift_ended";
+		string text = "shift_ended";
 		if (!isShiftActuallyEnding)
 		{
 			if (zoneClearReason == ZoneClearReason.LeaveZone)
 			{
-				value = "left_zone";
+				text = "left_zone";
 			}
 			else
 			{
-				value = "disconnect";
+				text = "disconnect";
 			}
 		}
-		GorillaTelemetry.gGhostReactorShiftEndArgs["reason"] = value;
+		GorillaTelemetry.gGhostReactorShiftEndArgs["reason"] = text;
 		GorillaTelemetry.gGhostReactorShiftEndArgs["max_number_in_game"] = maxNumberOfPlayersInShift.ToString();
 		GorillaTelemetry.gGhostReactorShiftEndArgs["end_number_in_game"] = endNumberOfPlayers.ToString();
 		GorillaTelemetry.gGhostReactorShiftEndArgs["items_picked_up"] = itemTypesHeldThisShift.ToJson(true);
@@ -943,99 +914,37 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorShiftEndArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_game_end";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_game_end",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"final_cores_balance",
-					finalCores.ToString()
-				},
-				{
-					"total_cores_collected_by_player",
-					totalCoresCollectedByPlayer.ToString()
-				},
-				{
-					"total_cores_collected_by_group",
-					totalCoresCollectedByGroup.ToString()
-				},
-				{
-					"total_cores_spent_by_player",
-					totalCoresSpentByPlayer.ToString()
-				},
-				{
-					"total_cores_spent_by_group",
-					totalCoresSpentByGroup.ToString()
-				},
-				{
-					"gates_unlocked",
-					gatesUnlocked.ToString()
-				},
-				{
-					"died",
-					deaths.ToString()
-				},
-				{
-					"items_purchased",
-					itemsPurchased.ToJson(true)
-				},
-				{
-					"shift_cut_data",
-					shiftCut.ToJson(true)
-				},
-				{
-					"play_duration",
-					playDuration.ToString()
-				},
-				{
-					"started_late",
-					(!wasPlayerInAtStart).ToString()
-				},
-				{
-					"time_started",
-					timeIntoShiftAtJoin.ToString()
-				},
-				{
-					"reason",
-					value
-				},
-				{
-					"max_number_in_game",
-					maxNumberOfPlayersInShift.ToString()
-				},
-				{
-					"end_number_in_game",
-					endNumberOfPlayers.ToString()
-				},
-				{
-					"items_picked_up",
-					itemTypesHeldThisShift.ToJson(true)
-				},
-				{
-					"revives",
-					revives.ToString()
-				},
-				{
-					"num_shifts_played",
-					numShiftsPlayed.ToString()
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("final_cores_balance", finalCores.ToString());
+		dictionary.Add("total_cores_collected_by_player", totalCoresCollectedByPlayer.ToString());
+		dictionary.Add("total_cores_collected_by_group", totalCoresCollectedByGroup.ToString());
+		dictionary.Add("total_cores_spent_by_player", totalCoresSpentByPlayer.ToString());
+		dictionary.Add("total_cores_spent_by_group", totalCoresSpentByGroup.ToString());
+		dictionary.Add("gates_unlocked", gatesUnlocked.ToString());
+		dictionary.Add("died", deaths.ToString());
+		dictionary.Add("items_purchased", itemsPurchased.ToJson(true));
+		dictionary.Add("shift_cut_data", shiftCut.ToJson(true));
+		dictionary.Add("play_duration", playDuration.ToString());
+		dictionary.Add("started_late", (!wasPlayerInAtStart).ToString());
+		dictionary.Add("time_started", timeIntoShiftAtJoin.ToString());
+		dictionary.Add("reason", text);
+		dictionary.Add("max_number_in_game", maxNumberOfPlayersInShift.ToString());
+		dictionary.Add("end_number_in_game", endNumberOfPlayers.ToString());
+		dictionary.Add("items_picked_up", itemTypesHeldThisShift.ToJson(true));
+		dictionary.Add("revives", revives.ToString());
+		dictionary.Add("num_shifts_played", numShiftsPlayed.ToString());
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorFloorStart(string gameId, int initialCores, float timeIntoShift, bool wasPlayerInAtStart, int numPlayers, string playerRank, int floor, string preset, string modifier)
@@ -1062,63 +971,28 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorFloorStartArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_floor_start";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_floor_start",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"initial_cores_balance",
-					initialCores.ToString()
-				},
-				{
-					"number_of_players",
-					numPlayers.ToString()
-				},
-				{
-					"start_at_beginning",
-					wasPlayerInAtStart.ToString()
-				},
-				{
-					"seconds_into_shift_at_join",
-					timeIntoShift.ToString()
-				},
-				{
-					"player_rank",
-					playerRank
-				},
-				{
-					"floor",
-					floor.ToString()
-				},
-				{
-					"preset",
-					preset.ToString()
-				},
-				{
-					"modifier",
-					modifier.ToString()
-				},
-				{
-					"is_private_room",
-					NetworkSystem.Instance.SessionIsPrivate.ToString()
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("initial_cores_balance", initialCores.ToString());
+		dictionary.Add("number_of_players", numPlayers.ToString());
+		dictionary.Add("start_at_beginning", wasPlayerInAtStart.ToString());
+		dictionary.Add("seconds_into_shift_at_join", timeIntoShift.ToString());
+		dictionary.Add("player_rank", playerRank);
+		dictionary.Add("floor", floor.ToString());
+		dictionary.Add("preset", preset.ToString());
+		dictionary.Add("modifier", modifier.ToString());
+		dictionary.Add("is_private_room", NetworkSystem.Instance.SessionIsPrivate.ToString());
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorFloorComplete(string gameId, int finalCores, int totalCoresCollectedByPlayer, int totalCoresCollectedByGroup, int totalCoresSpentByPlayer, int totalCoresSpentByGroup, int gatesUnlocked, int deaths, List<string> itemsPurchased, int shiftCut, bool isShiftActuallyEnding, float timeIntoShiftAtJoin, float playDuration, bool wasPlayerInAtStart, ZoneClearReason zoneClearReason, int maxNumberOfPlayersInShift, int endNumberOfPlayers, Dictionary<string, int> itemTypesHeldThisShift, int revives, int floor, string preset, string modifier, int chaosSeedsCollected, bool objectivesCompleted, string section, int xpGained)
@@ -1143,19 +1017,19 @@ public static class GorillaTelemetry
 		GorillaTelemetry.gGhostReactorFloorEndArgs["started_late"] = (!wasPlayerInAtStart).ToString();
 		GorillaTelemetry.gGhostReactorFloorEndArgs["time_started"] = timeIntoShiftAtJoin.ToString();
 		GorillaTelemetry.gGhostReactorFloorEndArgs["revives"] = revives.ToString();
-		string value = "shift_ended";
+		string text = "shift_ended";
 		if (!isShiftActuallyEnding)
 		{
 			if (zoneClearReason == ZoneClearReason.LeaveZone)
 			{
-				value = "left_zone";
+				text = "left_zone";
 			}
 			else
 			{
-				value = "disconnect";
+				text = "disconnect";
 			}
 		}
-		GorillaTelemetry.gGhostReactorFloorEndArgs["reason"] = value;
+		GorillaTelemetry.gGhostReactorFloorEndArgs["reason"] = text;
 		GorillaTelemetry.gGhostReactorFloorEndArgs["max_number_in_game"] = maxNumberOfPlayersInShift.ToString();
 		GorillaTelemetry.gGhostReactorFloorEndArgs["end_number_in_game"] = endNumberOfPlayers.ToString();
 		GorillaTelemetry.gGhostReactorFloorEndArgs["items_picked_up"] = itemTypesHeldThisShift.ToJson(true);
@@ -1172,123 +1046,43 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorFloorEndArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_floor_end";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_floor_end",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"final_cores_balance",
-					finalCores.ToString()
-				},
-				{
-					"total_cores_collected_by_player",
-					totalCoresCollectedByPlayer.ToString()
-				},
-				{
-					"total_cores_collected_by_group",
-					totalCoresCollectedByGroup.ToString()
-				},
-				{
-					"total_cores_spent_by_player",
-					totalCoresSpentByPlayer.ToString()
-				},
-				{
-					"total_cores_spent_by_group",
-					totalCoresSpentByGroup.ToString()
-				},
-				{
-					"gates_unlocked",
-					gatesUnlocked.ToString()
-				},
-				{
-					"died",
-					deaths.ToString()
-				},
-				{
-					"items_purchased",
-					itemsPurchased.ToJson(true)
-				},
-				{
-					"shift_cut_data",
-					shiftCut.ToJson(true)
-				},
-				{
-					"play_duration",
-					playDuration.ToString()
-				},
-				{
-					"started_late",
-					(!wasPlayerInAtStart).ToString()
-				},
-				{
-					"time_started",
-					timeIntoShiftAtJoin.ToString()
-				},
-				{
-					"reason",
-					value
-				},
-				{
-					"max_number_in_game",
-					maxNumberOfPlayersInShift.ToString()
-				},
-				{
-					"end_number_in_game",
-					endNumberOfPlayers.ToString()
-				},
-				{
-					"items_picked_up",
-					itemTypesHeldThisShift.ToJson(true)
-				},
-				{
-					"revives",
-					revives.ToString()
-				},
-				{
-					"floor",
-					floor.ToString()
-				},
-				{
-					"preset",
-					preset
-				},
-				{
-					"modifier",
-					modifier
-				},
-				{
-					"chaos_seeds_collected",
-					chaosSeedsCollected.ToString()
-				},
-				{
-					"objectives_completed",
-					objectivesCompleted.ToString()
-				},
-				{
-					"section",
-					section
-				},
-				{
-					"xp_gained",
-					xpGained.ToString()
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("final_cores_balance", finalCores.ToString());
+		dictionary.Add("total_cores_collected_by_player", totalCoresCollectedByPlayer.ToString());
+		dictionary.Add("total_cores_collected_by_group", totalCoresCollectedByGroup.ToString());
+		dictionary.Add("total_cores_spent_by_player", totalCoresSpentByPlayer.ToString());
+		dictionary.Add("total_cores_spent_by_group", totalCoresSpentByGroup.ToString());
+		dictionary.Add("gates_unlocked", gatesUnlocked.ToString());
+		dictionary.Add("died", deaths.ToString());
+		dictionary.Add("items_purchased", itemsPurchased.ToJson(true));
+		dictionary.Add("shift_cut_data", shiftCut.ToJson(true));
+		dictionary.Add("play_duration", playDuration.ToString());
+		dictionary.Add("started_late", (!wasPlayerInAtStart).ToString());
+		dictionary.Add("time_started", timeIntoShiftAtJoin.ToString());
+		dictionary.Add("reason", text);
+		dictionary.Add("max_number_in_game", maxNumberOfPlayersInShift.ToString());
+		dictionary.Add("end_number_in_game", endNumberOfPlayers.ToString());
+		dictionary.Add("items_picked_up", itemTypesHeldThisShift.ToJson(true));
+		dictionary.Add("revives", revives.ToString());
+		dictionary.Add("floor", floor.ToString());
+		dictionary.Add("preset", preset);
+		dictionary.Add("modifier", modifier);
+		dictionary.Add("chaos_seeds_collected", chaosSeedsCollected.ToString());
+		dictionary.Add("objectives_completed", objectivesCompleted.ToString());
+		dictionary.Add("section", section);
+		dictionary.Add("xp_gained", xpGained.ToString());
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorToolPurchased(string gameId, string toolName, int toolLevel, int coresSpent, int shinyRocksSpent, int floor, string preset)
@@ -1312,51 +1106,25 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorToolPurchasedArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_tool_purchased";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_tool_purchased",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"tool",
-					toolName
-				},
-				{
-					"tool_level",
-					toolLevel.ToString()
-				},
-				{
-					"cores_spent",
-					coresSpent.ToString()
-				},
-				{
-					"shiny_rocks_spent",
-					shinyRocksSpent.ToString()
-				},
-				{
-					"floor",
-					floor.ToString()
-				},
-				{
-					"preset",
-					preset
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("tool", toolName);
+		dictionary.Add("tool_level", toolLevel.ToString());
+		dictionary.Add("cores_spent", coresSpent.ToString());
+		dictionary.Add("shiny_rocks_spent", shinyRocksSpent.ToString());
+		dictionary.Add("floor", floor.ToString());
+		dictionary.Add("preset", preset);
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorRankUp(string gameId, string newRank, int floor, string preset)
@@ -1377,39 +1145,22 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorRankUpArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_game_rank_up";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_game_rank_up",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"new_rank",
-					newRank
-				},
-				{
-					"floor",
-					floor.ToString()
-				},
-				{
-					"preset",
-					preset
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("new_rank", newRank);
+		dictionary.Add("floor", floor.ToString());
+		dictionary.Add("preset", preset);
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorToolUnlock(string gameId, string toolName)
@@ -1428,31 +1179,20 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorToolUnlockArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_game_tool_unlock";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_game_tool_unlock",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"tool",
-					toolName
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("tool", toolName);
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorPodUpgradePurchased(string gameId, string toolName, int level, int shinyRocksSpent, int juiceSpent)
@@ -1474,43 +1214,23 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorPodUpgradePurchasedArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_pod_upgrade_purchased";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_pod_upgrade_purchased",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"tool",
-					toolName
-				},
-				{
-					"new_level",
-					level.ToString()
-				},
-				{
-					"shiny_rocks_spent",
-					shinyRocksSpent.ToString()
-				},
-				{
-					"juice_spent",
-					juiceSpent.ToString()
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("tool", toolName);
+		dictionary.Add("new_level", level.ToString());
+		dictionary.Add("shiny_rocks_spent", shinyRocksSpent.ToString());
+		dictionary.Add("juice_spent", juiceSpent.ToString());
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorToolUpgrade(string gameId, string upgradeType, string toolName, int newLevel, int juiceSpent, int griftSpent, int coresSpent, int floor, string preset)
@@ -1536,59 +1256,27 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorToolUpgradeArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_game_tool_upgrade";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_game_tool_upgrade",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"type",
-					upgradeType
-				},
-				{
-					"tool",
-					toolName
-				},
-				{
-					"new_level",
-					newLevel.ToString()
-				},
-				{
-					"juice_spent",
-					juiceSpent.ToString()
-				},
-				{
-					"grift_spent",
-					griftSpent.ToString()
-				},
-				{
-					"cores_spent",
-					coresSpent.ToString()
-				},
-				{
-					"floor",
-					floor.ToString()
-				},
-				{
-					"preset",
-					preset
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("type", upgradeType);
+		dictionary.Add("tool", toolName);
+		dictionary.Add("new_level", newLevel.ToString());
+		dictionary.Add("juice_spent", juiceSpent.ToString());
+		dictionary.Add("grift_spent", griftSpent.ToString());
+		dictionary.Add("cores_spent", coresSpent.ToString());
+		dictionary.Add("floor", floor.ToString());
+		dictionary.Add("preset", preset);
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorChaosSeedStart(string gameId, string unlockTime, int chaosSeedsInQueue, int floor, string preset)
@@ -1610,43 +1298,23 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorChaosSeedStartArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_chaos_seed_start";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_chaos_seed_start",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"unlock_time",
-					unlockTime
-				},
-				{
-					"chaos_seeds_in_queue",
-					chaosSeedsInQueue.ToString()
-				},
-				{
-					"floor",
-					floor.ToString()
-				},
-				{
-					"preset",
-					preset
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("unlock_time", unlockTime);
+		dictionary.Add("chaos_seeds_in_queue", chaosSeedsInQueue.ToString());
+		dictionary.Add("floor", floor.ToString());
+		dictionary.Add("preset", preset);
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorChaosJuiceCollected(string gameId, int juiceCollected, int coresProcessedByOverdrive)
@@ -1666,35 +1334,21 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorChaosJuiceCollectedArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_chaos_juice_collected";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_chaos_juice_collected",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"juice_collected",
-					juiceCollected.ToString()
-				},
-				{
-					"cores_processed_by_overdrive",
-					coresProcessedByOverdrive.ToString()
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("juice_collected", juiceCollected.ToString());
+		dictionary.Add("cores_processed_by_overdrive", coresProcessedByOverdrive.ToString());
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorOverdrivePurchased(string gameId, int shinyRocksUsed, int chaosSeedsInQueue, int floor, string preset)
@@ -1716,43 +1370,23 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorOverdrivePurchasedArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_overdrive_purchased";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_overdrive_purchased",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"shiny_rocks_used",
-					shinyRocksUsed.ToString()
-				},
-				{
-					"chaos_seeds_in_queue",
-					chaosSeedsInQueue.ToString()
-				},
-				{
-					"floor",
-					floor.ToString()
-				},
-				{
-					"preset",
-					preset
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("shiny_rocks_used", shinyRocksUsed.ToString());
+		dictionary.Add("chaos_seeds_in_queue", chaosSeedsInQueue.ToString());
+		dictionary.Add("floor", floor.ToString());
+		dictionary.Add("preset", preset);
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void GhostReactorCreditsRefillPurchased(string gameId, int shinyRocksSpent, int finalCredits, int floor, string preset)
@@ -1774,43 +1408,23 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gGhostReactorCreditsRefillPurchasedArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "ghost_credits_refill_purchased";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "ghost_credits_refill_purchased",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"ghost_game_id",
-					gameId
-				},
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"shiny_rocks_spent",
-					shinyRocksSpent.ToString()
-				},
-				{
-					"final_credits",
-					finalCredits.ToString()
-				},
-				{
-					"floor",
-					floor.ToString()
-				},
-				{
-					"preset",
-					preset
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("ghost_game_id", gameId);
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("shiny_rocks_spent", shinyRocksSpent.ToString());
+		dictionary.Add("final_credits", finalCredits.ToString());
+		dictionary.Add("floor", floor.ToString());
+		dictionary.Add("preset", preset);
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void SuperInfectionEvent(bool roomDisconnect, float totalPlayTime, float roomPlayTime, float sessionPlayTime, float intervalPlayTime, float terminalTotalTime, float terminalIntervalTime, Dictionary<SITechTreePageId, float> timeUsingGadgetsTotal, Dictionary<SITechTreePageId, float> timeUsingGadgetsInterval, float timeUsingOwnGadgetsTotal, float timeUsingOwnGadgetsInterval, float timeUsingOthersGadgetsTotal, float timeUsingOthersGadgetsInterval, Dictionary<SITechTreePageId, int> tagsUsingGadgetsTotal, Dictionary<SITechTreePageId, int> tagsUsingGadgetsInterval, int tagsHoldingOwnGadgetsTotal, int tagsHoldingOwnGadgetsInterval, int tagsHoldingOthersGadgetsTotal, int tagsHoldingOthersGadgetsInterval, Dictionary<SIResource.ResourceType, int> resourcesGatheredTotal, Dictionary<SIResource.ResourceType, int> resourcesGatheredInterval, int roundsPlayedTotal, int roundsPlayedInterval, bool[][] unlockedNodes, int numberOfPlayers)
@@ -1848,33 +1462,33 @@ public static class GorillaTelemetry
 		Dictionary<string, object> dictionary4 = new Dictionary<string, object>();
 		for (int l = 0; l < 11; l++)
 		{
-			SITechTreePageId key = (SITechTreePageId)l;
+			SITechTreePageId sitechTreePageId = (SITechTreePageId)l;
 			float num2;
-			timeUsingGadgetsTotal.TryGetValue(key, out num2);
+			timeUsingGadgetsTotal.TryGetValue(sitechTreePageId, ref num2);
 			float num3;
-			timeUsingGadgetsInterval.TryGetValue(key, out num3);
+			timeUsingGadgetsInterval.TryGetValue(sitechTreePageId, ref num3);
 			int num4;
-			tagsUsingGadgetsTotal.TryGetValue(key, out num4);
+			tagsUsingGadgetsTotal.TryGetValue(sitechTreePageId, ref num4);
 			int num5;
-			tagsUsingGadgetsInterval.TryGetValue(key, out num5);
-			string key2 = key.ToString();
-			dictionary[key2] = num2.ToString();
-			dictionary2[key2] = num3.ToString();
-			dictionary3[key2] = num4.ToString();
-			dictionary4[key2] = num5.ToString();
+			tagsUsingGadgetsInterval.TryGetValue(sitechTreePageId, ref num5);
+			string text = sitechTreePageId.ToString();
+			dictionary[text] = num2.ToString();
+			dictionary2[text] = num3.ToString();
+			dictionary3[text] = num4.ToString();
+			dictionary4[text] = num5.ToString();
 		}
 		Dictionary<string, object> dictionary5 = new Dictionary<string, object>();
 		Dictionary<string, object> dictionary6 = new Dictionary<string, object>();
 		for (int m = 0; m < 6; m++)
 		{
-			SIResource.ResourceType key3 = (SIResource.ResourceType)m;
+			SIResource.ResourceType resourceType = (SIResource.ResourceType)m;
 			int num6;
-			resourcesGatheredTotal.TryGetValue(key3, out num6);
+			resourcesGatheredTotal.TryGetValue(resourceType, ref num6);
 			int num7;
-			resourcesGatheredInterval.TryGetValue(key3, out num7);
-			string key4 = key3.ToString();
-			dictionary5[key4] = num6.ToString();
-			dictionary6[key4] = num7.ToString();
+			resourcesGatheredInterval.TryGetValue(resourceType, ref num7);
+			string text2 = resourceType.ToString();
+			dictionary5[text2] = num6.ToString();
+			dictionary6[text2] = num7.ToString();
 		}
 		GorillaTelemetry.gSuperInfectionArgs["time_holding_gadget_type_total"] = dictionary;
 		GorillaTelemetry.gSuperInfectionArgs["time_holding_gadget_type_interval"] = dictionary2;
@@ -1900,119 +1514,42 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gSuperInfectionArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = (roomDisconnect ? "super_infection_room_left" : "super_infection_interval");
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = (roomDisconnect ? "super_infection_room_left" : "super_infection_interval"),
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"total_play_time",
-					totalPlayTime.ToString()
-				},
-				{
-					"room_play_time",
-					roomPlayTime.ToString()
-				},
-				{
-					"session_play_time",
-					sessionPlayTime.ToString()
-				},
-				{
-					"interval_play_time",
-					intervalPlayTime.ToString()
-				},
-				{
-					"terminal_total_time",
-					terminalTotalTime.ToString()
-				},
-				{
-					"terminal_interval_time",
-					terminalIntervalTime.ToString()
-				},
-				{
-					"time_holding_gadget_type_total",
-					timeUsingGadgetsTotal
-				},
-				{
-					"time_holding_gadget_type_interval",
-					timeUsingGadgetsInterval
-				},
-				{
-					"time_holding_own_gadgets_total",
-					timeUsingOwnGadgetsTotal.ToString()
-				},
-				{
-					"time_holding_own_gadgets_interval",
-					timeUsingOwnGadgetsInterval.ToString()
-				},
-				{
-					"time_holding_others_gadgets_total",
-					timeUsingOthersGadgetsTotal.ToString()
-				},
-				{
-					"time_holding_others_gadgets_interval",
-					timeUsingOthersGadgetsInterval.ToString()
-				},
-				{
-					"tags_holding_gadget_type_total",
-					dictionary3
-				},
-				{
-					"tags_holding_gadget_type_interval",
-					dictionary4
-				},
-				{
-					"tags_holding_own_gadgets_total",
-					tagsHoldingOwnGadgetsTotal.ToString()
-				},
-				{
-					"tags_holding_own_gadgets_interval",
-					tagsHoldingOwnGadgetsInterval.ToString()
-				},
-				{
-					"tags_holding_others_gadgets_total",
-					tagsHoldingOthersGadgetsTotal.ToString()
-				},
-				{
-					"tags_holding_others_gadgets_interval",
-					tagsHoldingOthersGadgetsInterval.ToString()
-				},
-				{
-					"resource_type_collected_total",
-					dictionary5
-				},
-				{
-					"resource_type_collected_interval",
-					dictionary6
-				},
-				{
-					"rounds_played_total",
-					roundsPlayedTotal.ToString()
-				},
-				{
-					"rounds_played_interval",
-					roundsPlayedInterval.ToString()
-				},
-				{
-					"unlocked_nodes",
-					new string(array)
-				},
-				{
-					"player_count",
-					numberOfPlayers.ToString()
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary7 = new Dictionary<string, object>();
+		dictionary7.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary7.Add("total_play_time", totalPlayTime.ToString());
+		dictionary7.Add("room_play_time", roomPlayTime.ToString());
+		dictionary7.Add("session_play_time", sessionPlayTime.ToString());
+		dictionary7.Add("interval_play_time", intervalPlayTime.ToString());
+		dictionary7.Add("terminal_total_time", terminalTotalTime.ToString());
+		dictionary7.Add("terminal_interval_time", terminalIntervalTime.ToString());
+		dictionary7.Add("time_holding_gadget_type_total", timeUsingGadgetsTotal);
+		dictionary7.Add("time_holding_gadget_type_interval", timeUsingGadgetsInterval);
+		dictionary7.Add("time_holding_own_gadgets_total", timeUsingOwnGadgetsTotal.ToString());
+		dictionary7.Add("time_holding_own_gadgets_interval", timeUsingOwnGadgetsInterval.ToString());
+		dictionary7.Add("time_holding_others_gadgets_total", timeUsingOthersGadgetsTotal.ToString());
+		dictionary7.Add("time_holding_others_gadgets_interval", timeUsingOthersGadgetsInterval.ToString());
+		dictionary7.Add("tags_holding_gadget_type_total", dictionary3);
+		dictionary7.Add("tags_holding_gadget_type_interval", dictionary4);
+		dictionary7.Add("tags_holding_own_gadgets_total", tagsHoldingOwnGadgetsTotal.ToString());
+		dictionary7.Add("tags_holding_own_gadgets_interval", tagsHoldingOwnGadgetsInterval.ToString());
+		dictionary7.Add("tags_holding_others_gadgets_total", tagsHoldingOthersGadgetsTotal.ToString());
+		dictionary7.Add("tags_holding_others_gadgets_interval", tagsHoldingOthersGadgetsInterval.ToString());
+		dictionary7.Add("resource_type_collected_total", dictionary5);
+		dictionary7.Add("resource_type_collected_interval", dictionary6);
+		dictionary7.Add("rounds_played_total", roundsPlayedTotal.ToString());
+		dictionary7.Add("rounds_played_interval", roundsPlayedInterval.ToString());
+		dictionary7.Add("unlocked_nodes", new string(array));
+		dictionary7.Add("player_count", numberOfPlayers.ToString());
+		ghostReactorTelemetryData.BodyData = dictionary7;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void SuperInfectionEvent(string purchaseType, int shinyRockCost, int techPointsPurchased, float totalPlayTime, float roomPlayTime, float sessionPlayTime)
@@ -2035,47 +1572,24 @@ public static class GorillaTelemetry
 			EventNamespace = GorillaTelemetry.EVENT_NAMESPACE,
 			Payload = GorillaTelemetry.gSuperInfectionArgs
 		});
-		GhostReactorTelemetryData ghostReactorTelemetryData = new GhostReactorTelemetryData
+		GhostReactorTelemetryData ghostReactorTelemetryData = default(GhostReactorTelemetryData);
+		ghostReactorTelemetryData.EventName = "super_infection_purchase";
+		ghostReactorTelemetryData.CustomTags = new string[]
 		{
-			EventName = "super_infection_purchase",
-			CustomTags = new string[]
-			{
-				KIDTelemetry.GameVersionCustomTag,
-				KIDTelemetry.GameEnvironment
-			},
-			BodyData = new Dictionary<string, object>
-			{
-				{
-					"event_timestamp",
-					DateTime.Now.ToString()
-				},
-				{
-					"total_play_time",
-					totalPlayTime.ToString()
-				},
-				{
-					"room_play_time",
-					roomPlayTime.ToString()
-				},
-				{
-					"session_play_time",
-					sessionPlayTime.ToString()
-				},
-				{
-					"si_purchase_type",
-					purchaseType.ToString()
-				},
-				{
-					"si_shiny_rock_cost",
-					shinyRockCost.ToString()
-				},
-				{
-					"si_tech_points_purchased",
-					techPointsPurchased.ToString()
-				}
-			}
+			KIDTelemetry.GameVersionCustomTag,
+			KIDTelemetry.GameEnvironment
 		};
-		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData.EventName, ghostReactorTelemetryData.BodyData, ghostReactorTelemetryData.CustomTags);
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary.Add("event_timestamp", DateTime.Now.ToString());
+		dictionary.Add("total_play_time", totalPlayTime.ToString());
+		dictionary.Add("room_play_time", roomPlayTime.ToString());
+		dictionary.Add("session_play_time", sessionPlayTime.ToString());
+		dictionary.Add("si_purchase_type", purchaseType.ToString());
+		dictionary.Add("si_shiny_rock_cost", shinyRockCost.ToString());
+		dictionary.Add("si_tech_points_purchased", techPointsPurchased.ToString());
+		ghostReactorTelemetryData.BodyData = dictionary;
+		GhostReactorTelemetryData ghostReactorTelemetryData2 = ghostReactorTelemetryData;
+		GorillaTelemetry.EnqueueTelemetryEvent(ghostReactorTelemetryData2.EventName, ghostReactorTelemetryData2.BodyData, ghostReactorTelemetryData2.CustomTags);
 	}
 
 	public static void PostNotificationEvent(string notificationType)
@@ -2084,9 +1598,9 @@ public static class GorillaTelemetry
 		{
 			return;
 		}
-		string value = GorillaTelemetry.PlayFabUserId();
+		string text = GorillaTelemetry.PlayFabUserId();
 		Dictionary<string, object> dictionary = GorillaTelemetry.gNotifEventArgs;
-		dictionary["User"] = value;
+		dictionary["User"] = text;
 		dictionary["EventType"] = notificationType;
 		GorillaTelemetry.EnqueueTelemetryEventPlayFab(new EventContents
 		{

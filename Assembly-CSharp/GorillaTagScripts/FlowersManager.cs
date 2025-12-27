@@ -35,7 +35,7 @@ namespace GorillaTagScripts
 					this.sectionToZonesDict[gameObject] = flowersInZone.zone;
 					Flower[] componentsInChildren = gameObject.GetComponentsInChildren<Flower>();
 					this.allFlowers.AddRange(componentsInChildren);
-					this.sectionToFlowersDict[gameObject] = componentsInChildren.ToList<Flower>();
+					this.sectionToFlowersDict[gameObject] = Enumerable.ToList<Flower>(componentsInChildren);
 				}
 			}
 		}
@@ -253,7 +253,7 @@ namespace GorillaTagScripts
 
 		[WeaverGenerated]
 		[DefaultForProperty("Data", 0, 13)]
-		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
+		[DrawIf("IsEditorWritable", true, 0, 0)]
 		private FlowersDataStruct _Data;
 
 		[Serializable]

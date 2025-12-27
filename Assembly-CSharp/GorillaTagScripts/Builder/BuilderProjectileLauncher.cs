@@ -25,7 +25,7 @@ namespace GorillaTagScripts.Builder
 						this.allProjectiles.Remove(num);
 					}
 					this.allProjectiles.Add(num, component);
-					SlingshotProjectile.AOEKnockbackConfig value = new SlingshotProjectile.AOEKnockbackConfig
+					SlingshotProjectile.AOEKnockbackConfig aoeknockbackConfig = new SlingshotProjectile.AOEKnockbackConfig
 					{
 						aeoOuterRadius = this.knockbackConfig.aeoOuterRadius * this.projectileScale,
 						aeoInnerRadius = this.knockbackConfig.aeoInnerRadius * this.projectileScale,
@@ -34,7 +34,7 @@ namespace GorillaTagScripts.Builder
 						knockbackVelocity = this.knockbackConfig.knockbackVelocity * this.projectileScale,
 						playerProximityEffect = this.knockbackConfig.playerProximityEffect
 					};
-					component.aoeKnockbackConfig = new SlingshotProjectile.AOEKnockbackConfig?(value);
+					component.aoeKnockbackConfig = new SlingshotProjectile.AOEKnockbackConfig?(aoeknockbackConfig);
 					component.gravityMultiplier = this.gravityMultiplier;
 					component.Launch(this.launchPosition.position, this.launchVelocity * this.projectileScale * this.launchPosition.up, this, num, this.projectileScale, timeStamp);
 					if (this.launchSound != null && this.launchSound.clip != null)
@@ -42,9 +42,9 @@ namespace GorillaTagScripts.Builder
 						this.launchSound.Play();
 					}
 				}
-				catch (Exception value2)
+				catch (Exception ex)
 				{
-					Console.WriteLine(value2);
+					Console.WriteLine(ex);
 					throw;
 				}
 			}

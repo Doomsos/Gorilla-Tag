@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(256)]
 public class OnEnterPlay_SetNew : OnEnterPlay_Attribute
 {
 	public override void OnEnterPlay(FieldInfo field)
@@ -12,7 +12,7 @@ public class OnEnterPlay_SetNew : OnEnterPlay_Attribute
 			Debug.LogError(string.Format("Can't SetNew non-static field {0}.{1}", field.DeclaringType, field.Name));
 			return;
 		}
-		object value = field.FieldType.GetConstructor(new Type[0]).Invoke(new object[0]);
-		field.SetValue(null, value);
+		object obj = field.FieldType.GetConstructor(new Type[0]).Invoke(new object[0]);
+		field.SetValue(null, obj);
 	}
 }

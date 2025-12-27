@@ -156,12 +156,12 @@ public class SICombinedTerminal : MonoBehaviour, IGorillaSliceableSimple
 			});
 			return;
 		}
-		SIPlayer x = SIPlayer.Get(actorNr);
-		if (this.activePlayer != null && this.activePlayer.isActiveAndEnabled && x != this.activePlayer && this.activeUserBounds.bounds.Contains(this.activePlayer.transform.position))
+		SIPlayer siplayer = SIPlayer.Get(actorNr);
+		if (this.activePlayer != null && this.activePlayer.isActiveAndEnabled && siplayer != this.activePlayer && this.activeUserBounds.bounds.Contains(this.activePlayer.transform.position))
 		{
 			return;
 		}
-		this.activePlayer = x;
+		this.activePlayer = siplayer;
 		this.dispenser.PlayerHandScanned(actorNr);
 		this.techTree.PlayerHandScanned(actorNr);
 		this.resourceCollection.PlayerHandScanned(actorNr);

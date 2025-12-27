@@ -84,23 +84,23 @@ namespace GorillaLocomotion.Swimming
 				Vector3 vector3 = Vector3.zero;
 				if (this.applyWaterCurrents)
 				{
-					Vector3 a = Vector3.zero;
+					Vector3 vector4 = Vector3.zero;
 					for (int j = 0; j < this.activeWaterCurrents.Count; j++)
 					{
 						WaterCurrent waterCurrent2 = this.activeWaterCurrents[j];
 						Vector3 startingVelocity = vector2 + vector3;
-						Vector3 b;
-						Vector3 b2;
-						if (waterCurrent2.GetCurrentAtPoint(base.transform.position, startingVelocity, fixedDeltaTime, out b, out b2))
+						Vector3 vector5;
+						Vector3 vector6;
+						if (waterCurrent2.GetCurrentAtPoint(base.transform.position, startingVelocity, fixedDeltaTime, out vector5, out vector6))
 						{
-							a += b;
-							vector3 += b2;
+							vector4 += vector5;
+							vector3 += vector6;
 						}
 					}
 					if (this.enablePreciseWaterCollision)
 					{
-						Vector3 position = (surfaceQuery.surfacePoint + (base.transform.position + Vector3.down * this.objectRadiusForWaterCollision)) * 0.5f;
-						this.rb.AddForceAtPosition(vector3 * this.rb.mass, position, ForceMode.Impulse);
+						Vector3 vector7 = (surfaceQuery.surfacePoint + (base.transform.position + Vector3.down * this.objectRadiusForWaterCollision)) * 0.5f;
+						this.rb.AddForceAtPosition(vector3 * this.rb.mass, vector7, 1);
 					}
 					else
 					{
@@ -109,57 +109,57 @@ namespace GorillaLocomotion.Swimming
 				}
 				if (this.applyBuoyancyForce)
 				{
-					Vector3 vector4 = Vector3.zero;
+					Vector3 vector8 = Vector3.zero;
 					if (this.enablePreciseWaterCollision)
 					{
-						float b3 = 2f * this.objectRadiusForWaterCollision * this.buoyancyEquilibrium;
-						float d = Mathf.InverseLerp(0f, b3, num);
-						vector4 = -Physics.gravity * this.underWaterBuoyancyFactor * d * fixedDeltaTime;
+						float num4 = 2f * this.objectRadiusForWaterCollision * this.buoyancyEquilibrium;
+						float num5 = Mathf.InverseLerp(0f, num4, num);
+						vector8 = -Physics.gravity * this.underWaterBuoyancyFactor * num5 * fixedDeltaTime;
 					}
 					else
 					{
-						vector4 = -Physics.gravity * this.underWaterBuoyancyFactor * fixedDeltaTime;
+						vector8 = -Physics.gravity * this.underWaterBuoyancyFactor * fixedDeltaTime;
 					}
 					if (vector3.sqrMagnitude > 0.001f)
 					{
 						float magnitude = vector3.magnitude;
-						Vector3 vector5 = vector3 / magnitude;
-						float num4 = Vector3.Dot(vector4, vector5);
-						if (num4 < 0f)
+						Vector3 vector9 = vector3 / magnitude;
+						float num6 = Vector3.Dot(vector8, vector9);
+						if (num6 < 0f)
 						{
-							vector4 -= num4 * vector5;
+							vector8 -= num6 * vector9;
 						}
 					}
-					vector2 += vector4;
+					vector2 += vector8;
 				}
 				float magnitude2 = vector2.magnitude;
 				if (magnitude2 > 0.001f && this.applyDamping)
 				{
-					Vector3 a2 = vector2 / magnitude2;
-					float num5 = Spring.DamperDecayExact(magnitude2, this.underWaterDampingHalfLife, fixedDeltaTime, 1E-05f);
+					Vector3 vector10 = vector2 / magnitude2;
+					float num7 = Spring.DamperDecayExact(magnitude2, this.underWaterDampingHalfLife, fixedDeltaTime, 1E-05f);
 					if (this.enablePreciseWaterCollision)
 					{
-						float a3 = Spring.DamperDecayExact(magnitude2, this.waterSurfaceDampingHalfLife, fixedDeltaTime, 1E-05f);
-						float t = Mathf.Clamp(-(base.transform.position.y - surfaceQuery.surfacePoint.y) / this.objectRadiusForWaterCollision, -1f, 1f) * 0.5f + 0.5f;
-						vector2 = Mathf.Lerp(a3, num5, t) * a2;
+						float num8 = Spring.DamperDecayExact(magnitude2, this.waterSurfaceDampingHalfLife, fixedDeltaTime, 1E-05f);
+						float num9 = Mathf.Clamp(-(base.transform.position.y - surfaceQuery.surfacePoint.y) / this.objectRadiusForWaterCollision, -1f, 1f) * 0.5f + 0.5f;
+						vector2 = Mathf.Lerp(num8, num7, num9) * vector10;
 					}
 					else
 					{
-						vector2 = num5 * a2;
+						vector2 = num7 * vector10;
 					}
 				}
 				if (this.applySurfaceTorque && this.enablePreciseWaterCollision)
 				{
-					float num6 = base.transform.position.y - surfaceQuery.surfacePoint.y;
-					if (num6 < this.objectRadiusForWaterCollision && num6 > 0f)
+					float num10 = base.transform.position.y - surfaceQuery.surfacePoint.y;
+					if (num10 < this.objectRadiusForWaterCollision && num10 > 0f)
 					{
-						Vector3 rhs = vector2 - Vector3.Dot(vector2, surfaceQuery.surfaceNormal) * surfaceQuery.surfaceNormal;
-						Vector3 normalized = Vector3.Cross(surfaceQuery.surfaceNormal, rhs).normalized;
-						float num7 = Vector3.Dot(this.rb.angularVelocity, normalized);
-						float num8 = rhs.magnitude / this.objectRadiusForWaterCollision - num7;
-						if (num8 > 0f)
+						Vector3 vector11 = vector2 - Vector3.Dot(vector2, surfaceQuery.surfaceNormal) * surfaceQuery.surfaceNormal;
+						Vector3 normalized = Vector3.Cross(surfaceQuery.surfaceNormal, vector11).normalized;
+						float num11 = Vector3.Dot(this.rb.angularVelocity, normalized);
+						float num12 = vector11.magnitude / this.objectRadiusForWaterCollision - num11;
+						if (num12 > 0f)
 						{
-							this.rb.AddTorque(this.surfaceTorqueAmount * num8 * normalized, ForceMode.Acceleration);
+							this.rb.AddTorque(this.surfaceTorqueAmount * num12 * normalized, 5);
 						}
 					}
 				}

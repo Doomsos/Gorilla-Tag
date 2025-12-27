@@ -37,7 +37,7 @@ internal class __JobReflectionRegistrationOutput__1221673671587648887
 		}
 	}
 
-	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+	[RuntimeInitializeOnLoadMethod(2)]
 	public static void EarlyInit()
 	{
 		__JobReflectionRegistrationOutput__1221673671587648887.CreateJobReflectionData();

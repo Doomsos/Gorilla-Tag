@@ -319,14 +319,14 @@ public class SIGadgetPlatformDeployer : SIGadget, I_SIDisruptable
 			{
 				this.deployedPlatformCount++;
 				SIGadgetPlatformDeployerPlatform sigadgetPlatformDeployerPlatform = component;
-				sigadgetPlatformDeployerPlatform.OnDisabled = (Action)Delegate.Combine(sigadgetPlatformDeployerPlatform.OnDisabled, new Action(delegate()
+				sigadgetPlatformDeployerPlatform.OnDisabled = (Action)Delegate.Combine(sigadgetPlatformDeployerPlatform.OnDisabled, delegate()
 				{
 					this.deployedPlatformCount--;
-				}));
+				});
 			}
 			gameObject.transform.SetPositionAndRotation(pos, rot);
 			ISIGameDeployable isigameDeployable;
-			if (gameObject.TryGetComponent<ISIGameDeployable>(out isigameDeployable))
+			if (gameObject.TryGetComponent<ISIGameDeployable>(ref isigameDeployable))
 			{
 				isigameDeployable.ApplyUpgrades(this.instanceUpgrades);
 			}
@@ -375,19 +375,19 @@ public class SIGadgetPlatformDeployer : SIGadget, I_SIDisruptable
 
 	private void UpdatePreview()
 	{
-		Vector3 position;
-		Quaternion rotation;
+		Vector3 vector;
+		Quaternion quaternion;
 		Vector3 localScale;
-		if (this.TryGetPlatformPosRotScale(out position, out rotation, out localScale))
+		if (this.TryGetPlatformPosRotScale(out vector, out quaternion, out localScale))
 		{
-			this.previewPlatform.transform.SetPositionAndRotation(position, rotation);
+			this.previewPlatform.transform.SetPositionAndRotation(vector, quaternion);
 			this.previewPlatform.transform.localScale = localScale;
 			GamePlayer gamePlayer;
 			if (this.TryGetGamePlayer(out gamePlayer))
 			{
-				Vector3 position2 = gamePlayer.leftHand.position;
-				Vector3 position3 = gamePlayer.rightHand.position;
-				if (Vector3.Distance(position2, position3) > this.deployMinRequiredHandDistance)
+				Vector3 position = gamePlayer.leftHand.position;
+				Vector3 position2 = gamePlayer.rightHand.position;
+				if (Vector3.Distance(position, position2) > this.deployMinRequiredHandDistance)
 				{
 					this.previewMesh.material = this.validPreviewMaterial;
 					return;
@@ -410,9 +410,9 @@ public class SIGadgetPlatformDeployer : SIGadget, I_SIDisruptable
 			Vector3 position3 = gamePlayer.rig.head.rigTarget.position;
 			Vector3 vector = (position + position2) / 2f;
 			Vector3 normalized = (position3 - vector).normalized;
-			Vector3 forward = Vector3.ProjectOnPlane((position - position2).normalized, normalized);
+			Vector3 vector2 = Vector3.ProjectOnPlane((position - position2).normalized, normalized);
 			pos = vector + -normalized * this.handDepthOffset;
-			rot = Quaternion.LookRotation(forward, normalized);
+			rot = Quaternion.LookRotation(vector2, normalized);
 			return true;
 		}
 		return false;

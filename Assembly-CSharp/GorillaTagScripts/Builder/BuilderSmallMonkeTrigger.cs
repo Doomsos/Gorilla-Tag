@@ -92,7 +92,7 @@ namespace GorillaTagScripts.Builder
 				Action<int> action = this.onPlayerEnteredTrigger;
 				if (action != null)
 				{
-					action(vrrig.OwningNetPlayer.ActorNumber);
+					action.Invoke(vrrig.OwningNetPlayer.ActorNumber);
 				}
 			}
 			bool flag = this.overlappingColliders.Count == 0;
@@ -108,7 +108,7 @@ namespace GorillaTagScripts.Builder
 				{
 					return;
 				}
-				action2();
+				action2.Invoke();
 			}
 		}
 
@@ -121,7 +121,7 @@ namespace GorillaTagScripts.Builder
 				{
 					return;
 				}
-				action();
+				action.Invoke();
 			}
 		}
 

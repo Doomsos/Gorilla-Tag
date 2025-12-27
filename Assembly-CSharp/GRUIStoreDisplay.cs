@@ -25,7 +25,7 @@ public class GRUIStoreDisplay : MonoBehaviour
 		this.toolProgressionManager = reactor.toolProgression;
 		this.playerActorId = playerActorId;
 		this.RefreshUI();
-		this.toolProgressionManager.OnProgressionUpdated += this.onProgressionUpdated;
+		this.toolProgressionManager.OnProgressionUpdated += new Action(this.onProgressionUpdated);
 	}
 
 	private void onProgressionUpdated()

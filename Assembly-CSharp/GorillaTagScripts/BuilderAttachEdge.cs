@@ -21,8 +21,8 @@ namespace GorillaTagScripts
 			{
 				transform = base.transform;
 			}
-			Vector3 a = transform.rotation * Vector3.right;
-			Gizmos.DrawLine(transform.position - a * this.length * 0.5f, transform.position + a * this.length * 0.5f);
+			Vector3 vector = transform.rotation * Vector3.right;
+			Gizmos.DrawLine(transform.position - vector * this.length * 0.5f, transform.position + vector * this.length * 0.5f);
 		}
 
 		public Transform center;

@@ -4,7 +4,6 @@ using GorillaLocomotion;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
 using JetBrains.Annotations;
-using Photon.Pun;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
@@ -198,9 +197,9 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 				}
 			}
 		}
-		catch (Exception exception)
+		catch (Exception ex)
 		{
-			Debug.LogException(exception, this);
+			Debug.LogException(ex, this);
 			base.enabled = false;
 			base.gameObject.SetActive(false);
 			Debug.LogError("TransferrableObject: Disabled & deactivated self because of the exception logged above. Path: " + base.transform.GetPathQ(), this);
@@ -223,9 +222,9 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 				}
 			}
 		}
-		catch (Exception exception)
+		catch (Exception ex)
 		{
-			Debug.LogException(exception, this);
+			Debug.LogException(ex, this);
 			base.enabled = false;
 			base.gameObject.SetActive(false);
 			Debug.LogError("TransferrableObject: Disabled & deactivated self because of the exception logged above. Path: " + base.transform.GetPathQ(), this);
@@ -288,9 +287,9 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 				this.OnEnable_AfterAllCosmeticsSpawnedOrIsSceneObject();
 			}
 		}
-		catch (Exception exception)
+		catch (Exception ex)
 		{
-			Debug.LogException(exception, this);
+			Debug.LogException(ex, this);
 			base.enabled = false;
 			base.gameObject.SetActive(false);
 			Debug.LogError("TransferrableObject: Disabled & deactivated self because of the exception logged above. Path: " + base.transform.GetPathQ(), this);
@@ -426,9 +425,9 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 				}
 			}
 		}
-		catch (Exception exception)
+		catch (Exception ex)
 		{
-			Debug.LogException(exception, this);
+			Debug.LogException(ex, this);
 			base.enabled = false;
 			base.gameObject.SetActive(false);
 			Debug.LogError("TransferrableObject: Disabled & deactivated self because of the exception logged above. Path: " + base.transform.GetPathQ(), this);
@@ -476,9 +475,9 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 				this.OnDespawn();
 			}
 		}
-		catch (Exception exception)
+		catch (Exception ex)
 		{
-			Debug.LogException(exception, this);
+			Debug.LogException(ex, this);
 			base.enabled = false;
 			base.gameObject.SetActive(false);
 			Debug.LogError("TransferrableObject: Disabled & deactivated self because of the exception logged above. Path: " + base.transform.GetPathQ(), this);
@@ -894,17 +893,17 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 				}
 				if (Time.frameCount == this.enabledOnFrame || Time.frameCount == this.enabledOnFrame + 1)
 				{
-					Matrix4x4 rhs = this.GetDefaultTransformationMatrix();
+					Matrix4x4 matrix4x = this.GetDefaultTransformationMatrix();
 					if ((this.currentState != TransferrableObject.PositionState.InLeftHand || !(this.handPoseLeft != null)) && this.currentState == TransferrableObject.PositionState.InRightHand)
 					{
 						this.handPoseRight != null;
 					}
-					Matrix4x4 matrix4x;
-					if (this.transferrableItemSlotTransformOverride && this.transferrableItemSlotTransformOverride.GetTransformFromPositionState(this.currentState, this.advancedGrabState, transform2, out matrix4x))
+					Matrix4x4 matrix4x2;
+					if (this.transferrableItemSlotTransformOverride && this.transferrableItemSlotTransformOverride.GetTransformFromPositionState(this.currentState, this.advancedGrabState, transform2, out matrix4x2))
 					{
-						rhs = matrix4x;
+						matrix4x = matrix4x2;
 					}
-					Matrix4x4 matrix = transform.localToWorldMatrix * rhs;
+					Matrix4x4 matrix = transform.localToWorldMatrix * matrix4x;
 					base.transform.SetLocalToWorldMatrixNoScale(matrix);
 					base.transform.localScale = matrix.lossyScale;
 				}
@@ -936,28 +935,28 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 		}
 		if (this.interpState == TransferrableObject.InterpolateState.Interpolating)
 		{
-			Matrix4x4 rhs2 = this.GetDefaultTransformationMatrix();
+			Matrix4x4 matrix4x3 = this.GetDefaultTransformationMatrix();
 			if (this.transferrableItemSlotTransformOverride != null)
 			{
 				if (this.transferrableItemSlotTransformOverrideCachedMatrix == null)
 				{
-					Matrix4x4 value;
-					this.transferrableItemSlotTransformOverrideApplicable = this.transferrableItemSlotTransformOverride.GetTransformFromPositionState(this.currentState, this.advancedGrabState, transform2, out value);
-					this.transferrableItemSlotTransformOverrideCachedMatrix = new Matrix4x4?(value);
+					Matrix4x4 matrix4x4;
+					this.transferrableItemSlotTransformOverrideApplicable = this.transferrableItemSlotTransformOverride.GetTransformFromPositionState(this.currentState, this.advancedGrabState, transform2, out matrix4x4);
+					this.transferrableItemSlotTransformOverrideCachedMatrix = new Matrix4x4?(matrix4x4);
 				}
 				if (this.transferrableItemSlotTransformOverrideApplicable)
 				{
-					rhs2 = this.transferrableItemSlotTransformOverrideCachedMatrix.Value;
+					matrix4x3 = this.transferrableItemSlotTransformOverrideCachedMatrix.Value;
 				}
 			}
-			float t = Mathf.Clamp((this.interpTime - this.interpDt) / this.interpTime, 0f, 1f);
-			Mathf.SmoothStep(0f, 1f, t);
-			Matrix4x4 matrix2 = transform.localToWorldMatrix * rhs2;
+			float num = Mathf.Clamp((this.interpTime - this.interpDt) / this.interpTime, 0f, 1f);
+			Mathf.SmoothStep(0f, 1f, num);
+			Matrix4x4 matrix2 = transform.localToWorldMatrix * matrix4x3;
 			Transform transform3 = base.transform;
 			Vector3 vector = matrix2.Position();
-			transform3.position = this.interpStartPos.LerpToUnclamped(vector, t);
-			base.transform.rotation = Quaternion.Slerp(this.interpStartRot, matrix2.Rotation(), t);
-			base.transform.localScale = rhs2.lossyScale;
+			transform3.position = this.interpStartPos.LerpToUnclamped(vector, num);
+			base.transform.rotation = Quaternion.Slerp(this.interpStartRot, matrix2.Rotation(), num);
+			base.transform.localScale = matrix4x3.lossyScale;
 			this.interpDt -= Time.deltaTime;
 			if (this.interpDt <= 0f)
 			{
@@ -974,9 +973,9 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 				{
 					transform.localScale = new Vector3(1f, -1f, 1f);
 				}
-				matrix2 = transform.localToWorldMatrix * rhs2;
+				matrix2 = transform.localToWorldMatrix * matrix4x3;
 				base.transform.SetLocalToWorldMatrixNoScale(matrix2);
-				base.transform.localScale = rhs2.lossyScale;
+				base.transform.localScale = matrix4x3.lossyScale;
 			}
 		}
 	}
@@ -1072,7 +1071,7 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 			{
 				this.ResetToHome();
 			}
-			this.transferrableItemSlotTransformOverrideCachedMatrix = null;
+			this.transferrableItemSlotTransformOverrideCachedMatrix = default(Matrix4x4?);
 			if (this.interpState == TransferrableObject.InterpolateState.Interpolating)
 			{
 				this.interpState = TransferrableObject.InterpolateState.None;
@@ -1210,13 +1209,13 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 				{
 					Transform transform2 = this.GetAnchor(this.currentState);
 					Transform targetDock = TransferrableObject.GetTargetDock(this.currentState, this.targetDockPositions, this.anchorOverrides);
-					Matrix4x4 rhs = this.GetDefaultTransformationMatrix();
-					Matrix4x4 matrix4x;
-					if (this.transferrableItemSlotTransformOverride.GetTransformFromPositionState(this.currentState, this.advancedGrabState, targetDock, out matrix4x))
+					Matrix4x4 matrix4x = this.GetDefaultTransformationMatrix();
+					Matrix4x4 matrix4x2;
+					if (this.transferrableItemSlotTransformOverride.GetTransformFromPositionState(this.currentState, this.advancedGrabState, targetDock, out matrix4x2))
 					{
-						rhs = matrix4x;
+						matrix4x = matrix4x2;
 					}
-					Matrix4x4 matrix = transform2.localToWorldMatrix * rhs;
+					Matrix4x4 matrix = transform2.localToWorldMatrix * matrix4x;
 					base.transform.SetLocalToWorldMatrixNoScale(matrix);
 					base.transform.localScale = matrix.lossyScale;
 					return;
@@ -1325,7 +1324,7 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 		{
 			array2[i].enabled = false;
 		}
-		XRNode node = (this.currentState == TransferrableObject.PositionState.InLeftHand) ? XRNode.LeftHand : XRNode.RightHand;
+		XRNode node = (this.currentState == TransferrableObject.PositionState.InLeftHand) ? 4 : 5;
 		this.indexTrigger = ControllerInputPoller.TriggerFloat(node);
 		bool flag = !this.latched && this.indexTrigger >= this.myThreshold;
 		bool flag2 = this.latched && this.indexTrigger < this.myThreshold - this.hysterisis;
@@ -1765,7 +1764,7 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 		bool flag = this.currentState == TransferrableObject.PositionState.InLeftHand;
 		if (this.myRig.netView != null)
 		{
-			this.myRig.netView.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
+			this.myRig.netView.SendRPC("RPC_PlayHandTap", 1, new object[]
 			{
 				soundIndex,
 				flag,
@@ -2205,13 +2204,13 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 		}
 		else
 		{
-			VRRig exists = GorillaGameManager.StaticFindRigForPlayer(toPlayer);
-			if (!exists)
+			VRRig vrrig = GorillaGameManager.StaticFindRigForPlayer(toPlayer);
+			if (!vrrig)
 			{
 				Debug.LogError("failed to find target rig for ownershiptransfer");
 				return;
 			}
-			this.SetTargetRig(exists);
+			this.SetTargetRig(vrrig);
 			return;
 		}
 	}

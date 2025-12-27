@@ -55,7 +55,7 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		this.positionLerpSpeed = (this.interpolatedLocalPosition - this.NominalLocalPosition).magnitude / this.lerpIntoHandDuration;
 		float num;
 		Vector3 vector;
-		(Quaternion.Inverse(this.interpolatedLocalRotation) * this.NominalLocalRotation).ToAngleAxis(out num, out vector);
+		(Quaternion.Inverse(this.interpolatedLocalRotation) * this.NominalLocalRotation).ToAngleAxis(ref num, ref vector);
 		this.rotationLerpSpeed = num / this.lerpIntoHandDuration;
 		if (this.parentRig.isLocal)
 		{
@@ -81,7 +81,7 @@ public class HoverboardVisual : MonoBehaviour, ICallBack
 		this.positionLerpSpeed = (this.interpolatedLocalPosition - this.NominalLocalPosition).magnitude / this.lerpIntoHandDuration;
 		float num;
 		Vector3 vector;
-		(Quaternion.Inverse(this.interpolatedLocalRotation) * this.NominalLocalRotation).ToAngleAxis(out num, out vector);
+		(Quaternion.Inverse(this.interpolatedLocalRotation) * this.NominalLocalRotation).ToAngleAxis(ref num, ref vector);
 		this.rotationLerpSpeed = num / this.lerpIntoHandDuration;
 		if (!isHeld)
 		{

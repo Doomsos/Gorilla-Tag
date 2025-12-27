@@ -34,43 +34,43 @@ public class RotatingQuest
 		switch (this.questType)
 		{
 		case QuestType.gameModeObjective:
-			PlayerGameEvents.OnGameModeObjectiveTrigger += this.OnGameEventOccurence;
+			PlayerGameEvents.OnGameModeObjectiveTrigger += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.gameModeRound:
-			PlayerGameEvents.OnGameModeCompleteRound += this.OnGameEventOccurence;
+			PlayerGameEvents.OnGameModeCompleteRound += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.grabObject:
-			PlayerGameEvents.OnGrabbedObject += this.OnGameEventOccurence;
+			PlayerGameEvents.OnGrabbedObject += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.dropObject:
-			PlayerGameEvents.OnDroppedObject += this.OnGameEventOccurence;
+			PlayerGameEvents.OnDroppedObject += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.eatObject:
-			PlayerGameEvents.OnEatObject += this.OnGameEventOccurence;
+			PlayerGameEvents.OnEatObject += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.tapObject:
-			PlayerGameEvents.OnTapObject += this.OnGameEventOccurence;
+			PlayerGameEvents.OnTapObject += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.launchedProjectile:
-			PlayerGameEvents.OnLaunchedProjectile += this.OnGameEventOccurence;
+			PlayerGameEvents.OnLaunchedProjectile += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.moveDistance:
-			PlayerGameEvents.OnPlayerMoved += this.OnGameMoveEvent;
+			PlayerGameEvents.OnPlayerMoved += new Action<float, float>(this.OnGameMoveEvent);
 			return;
 		case QuestType.swimDistance:
-			PlayerGameEvents.OnPlayerSwam += this.OnGameMoveEvent;
+			PlayerGameEvents.OnPlayerSwam += new Action<float, float>(this.OnGameMoveEvent);
 			return;
 		case QuestType.triggerHandEffect:
-			PlayerGameEvents.OnTriggerHandEffect += this.OnGameEventOccurence;
+			PlayerGameEvents.OnTriggerHandEffect += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.enterLocation:
-			PlayerGameEvents.OnEnterLocation += this.OnGameEventOccurence;
+			PlayerGameEvents.OnEnterLocation += new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.misc:
-			PlayerGameEvents.OnMiscEvent += this.OnGameEventOccurence;
+			PlayerGameEvents.OnMiscEvent += new Action<string, int>(this.OnGameEventOccurence);
 			return;
 		case QuestType.critter:
-			PlayerGameEvents.OnCritterEvent += this.OnGameEventOccurence;
+			PlayerGameEvents.OnCritterEvent += new Action<string>(this.OnGameEventOccurence);
 			return;
 		default:
 			return;
@@ -82,43 +82,43 @@ public class RotatingQuest
 		switch (this.questType)
 		{
 		case QuestType.gameModeObjective:
-			PlayerGameEvents.OnGameModeObjectiveTrigger -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnGameModeObjectiveTrigger -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.gameModeRound:
-			PlayerGameEvents.OnGameModeCompleteRound -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnGameModeCompleteRound -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.grabObject:
-			PlayerGameEvents.OnGrabbedObject -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnGrabbedObject -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.dropObject:
-			PlayerGameEvents.OnDroppedObject -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnDroppedObject -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.eatObject:
-			PlayerGameEvents.OnEatObject -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnEatObject -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.tapObject:
-			PlayerGameEvents.OnTapObject -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnTapObject -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.launchedProjectile:
-			PlayerGameEvents.OnLaunchedProjectile -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnLaunchedProjectile -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.moveDistance:
-			PlayerGameEvents.OnPlayerMoved -= this.OnGameMoveEvent;
+			PlayerGameEvents.OnPlayerMoved -= new Action<float, float>(this.OnGameMoveEvent);
 			return;
 		case QuestType.swimDistance:
-			PlayerGameEvents.OnPlayerSwam -= this.OnGameMoveEvent;
+			PlayerGameEvents.OnPlayerSwam -= new Action<float, float>(this.OnGameMoveEvent);
 			return;
 		case QuestType.triggerHandEffect:
-			PlayerGameEvents.OnTriggerHandEffect -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnTriggerHandEffect -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.enterLocation:
-			PlayerGameEvents.OnEnterLocation -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnEnterLocation -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		case QuestType.misc:
-			PlayerGameEvents.OnMiscEvent -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnMiscEvent -= new Action<string, int>(this.OnGameEventOccurence);
 			return;
 		case QuestType.critter:
-			PlayerGameEvents.OnCritterEvent -= this.OnGameEventOccurence;
+			PlayerGameEvents.OnCritterEvent -= new Action<string>(this.OnGameEventOccurence);
 			return;
 		default:
 			return;

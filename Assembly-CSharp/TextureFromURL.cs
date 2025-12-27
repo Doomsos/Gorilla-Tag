@@ -45,7 +45,7 @@ public class TextureFromURL : MonoBehaviour
 	private void OnTitleDataRequestComplete(string imageUrl)
 	{
 		imageUrl = imageUrl.Replace("\\r", "\r").Replace("\\n", "\n");
-		if (imageUrl[0] == '"' && imageUrl[imageUrl.Length - 1] == '"')
+		if (imageUrl.get_Chars(0) == '"' && imageUrl.get_Chars(imageUrl.Length - 1) == '"')
 		{
 			imageUrl = imageUrl.Substring(1, imageUrl.Length - 2);
 		}

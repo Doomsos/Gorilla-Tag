@@ -35,7 +35,7 @@ public class SITouchscreen : MonoBehaviour
 			return null;
 		}
 		GorillaTriggerColliderHandIndicator componentInParent;
-		if (!this.fingerTouchDict.TryGetValue(other, out componentInParent))
+		if (!this.fingerTouchDict.TryGetValue(other, ref componentInParent))
 		{
 			componentInParent = other.GetComponentInParent<GorillaTriggerColliderHandIndicator>();
 			if (componentInParent == null)

@@ -100,10 +100,10 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 			return;
 		}
 		Transform[] boneXforms;
-		string str;
-		if (!GTHardCodedBones.TryGetBoneXforms(VRRig.LocalRig, out boneXforms, out str))
+		string text;
+		if (!GTHardCodedBones.TryGetBoneXforms(VRRig.LocalRig, out boneXforms, out text))
 		{
-			Debug.LogError("CosmeticsV2Spawner_Dirty: Error getting bone Transforms from local VRRig: " + str, VRRig.LocalRig);
+			Debug.LogError("CosmeticsV2Spawner_Dirty: Error getting bone Transforms from local VRRig: " + text, VRRig.LocalRig);
 			return;
 		}
 		CosmeticsV2Spawner_Dirty._gVRRigDatas.Add(new CosmeticsV2Spawner_Dirty.VRRigData(VRRig.LocalRig, boneXforms));
@@ -111,9 +111,9 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 		foreach (VRRig vrRig in VRRigCache.Instance.GetAllRigs())
 		{
 			Transform[] boneXforms2;
-			if (!GTHardCodedBones.TryGetBoneXforms(vrRig, out boneXforms2, out str))
+			if (!GTHardCodedBones.TryGetBoneXforms(vrRig, out boneXforms2, out text))
 			{
-				Debug.LogError("CosmeticsV2Spawner_Dirty: Error getting bone Transforms from cached VRRig: " + str, VRRig.LocalRig);
+				Debug.LogError("CosmeticsV2Spawner_Dirty: Error getting bone Transforms from cached VRRig: " + text, VRRig.LocalRig);
 				return;
 			}
 			CosmeticsV2Spawner_Dirty._gVRRigDatas.Add(new CosmeticsV2Spawner_Dirty.VRRigData(vrRig, boneXforms2));
@@ -210,8 +210,8 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 		}
 		for (int i = 0; i < part.attachAnchors.Length; i++)
 		{
-			CosmeticsV2Spawner_Dirty.LoadOpInfo item = new CosmeticsV2Spawner_Dirty.LoadOpInfo(part.attachAnchors[i], part, partIndex, cosmeticInfo, vrRigIndex);
-			CosmeticsV2Spawner_Dirty._g_loadOpInfos.Add(item);
+			CosmeticsV2Spawner_Dirty.LoadOpInfo loadOpInfo = new CosmeticsV2Spawner_Dirty.LoadOpInfo(part.attachAnchors[i], part, partIndex, cosmeticInfo, vrRigIndex);
+			CosmeticsV2Spawner_Dirty._g_loadOpInfos.Add(loadOpInfo);
 			partCount++;
 			if (part.partType == ECosmeticPartType.Holdable && i == 0)
 			{
@@ -233,7 +233,7 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 				loadOpInfo.loadOp = loadOpInfo.part.prefabAssetRef.InstantiateAsync(CosmeticsV2Spawner_Dirty._gDeactivatedSpawnParent, false);
 				loadOpInfo.isStarted = true;
 				CosmeticsV2Spawner_Dirty._g_loadOp_to_index.Add(loadOpInfo.loadOp, count);
-				loadOpInfo.loadOp.Completed += CosmeticsV2Spawner_Dirty._Step3_HandleLoadOpCompleted;
+				loadOpInfo.loadOp.Completed += new Action<AsyncOperationHandle<GameObject>>(CosmeticsV2Spawner_Dirty._Step3_HandleLoadOpCompleted);
 				CosmeticsV2Spawner_Dirty._g_loadOpInfos[count] = loadOpInfo;
 			}
 			catch (InvalidKeyException ex)
@@ -263,13 +263,13 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 		{
 			return;
 		}
-		int index;
-		if (!CosmeticsV2Spawner_Dirty._g_loadOp_to_index.TryGetValue(loadOp, out index))
+		int num;
+		if (!CosmeticsV2Spawner_Dirty._g_loadOp_to_index.TryGetValue(loadOp, ref num))
 		{
 			throw new Exception("(this should never happen) could not find LoadOpInfo in `_g_loadOpInfos`.");
 		}
-		CosmeticsV2Spawner_Dirty.LoadOpInfo loadOpInfo = CosmeticsV2Spawner_Dirty._g_loadOpInfos[index];
-		if (loadOp.Status == AsyncOperationStatus.Failed)
+		CosmeticsV2Spawner_Dirty.LoadOpInfo loadOpInfo = CosmeticsV2Spawner_Dirty._g_loadOpInfos[num];
+		if (loadOp.Status == 2)
 		{
 			Debug.LogWarning("CosmeticsV2Spawner_Dirty: Failed to load part " + string.Format("\"{0}\" (key: {1}). Skipping.", loadOpInfo.cosmeticInfoV2.displayName, loadOpInfo.part.prefabAssetRef.RuntimeKey));
 			CosmeticsV2Spawner_Dirty._g_loadOpsCountCompleted++;
@@ -282,23 +282,23 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 		if (ecosmeticSelectSide != ECosmeticSelectSide.Both)
 		{
 			string playFabID = loadOpInfo.cosmeticInfoV2.playFabID;
-			string arg;
+			string text;
 			if (ecosmeticSelectSide != ECosmeticSelectSide.Left)
 			{
 				if (ecosmeticSelectSide != ECosmeticSelectSide.Right)
 				{
-					arg = "";
+					text = "";
 				}
 				else
 				{
-					arg = " RIGHT.";
+					text = " RIGHT.";
 				}
 			}
 			else
 			{
-				arg = " LEFT.";
+				text = " LEFT.";
 			}
-			name = ZString.Concat<string, string>(playFabID, arg);
+			name = ZString.Concat<string, string>(playFabID, text);
 		}
 		loadOpInfo.resultGObj = loadOp.Result;
 		loadOpInfo.resultGObj.SetActive(false);
@@ -390,37 +390,37 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 			else
 			{
 				vrrigData.bdPositions_allObjects.Add(transferrableObject);
-				string text = loadOpInfo.cosmeticInfoV2.playFabID;
+				string text2 = loadOpInfo.cosmeticInfoV2.playFabID;
 				int[] array;
-				if (CosmeticsLegacyV1Info.TryGetBodyDockAllObjectsIndexes(text, out array))
+				if (CosmeticsLegacyV1Info.TryGetBodyDockAllObjectsIndexes(text2, out array))
 				{
 					if (loadOpInfo.partIndex < array.Length && loadOpInfo.partIndex >= 0)
 					{
 						transferrableObject.myIndex = array[loadOpInfo.partIndex];
 					}
 				}
-				else if (text.Length >= 5 && text[0] == 'L')
+				else if (text2.Length >= 5 && text2.get_Chars(0) == 'L')
 				{
-					if (text[1] != 'M')
+					if (text2.get_Chars(1) != 'M')
 					{
 						throw new Exception("(this should never happen) A TransferrableObject cosmetic added sometime after 2024-06 does not use the expected PlayFabID format where the string starts with \"LM\" and ends with \".\". Path: " + transform2.GetPathQ());
 					}
-					string text2 = text;
-					text = ((text2[text2.Length - 1] == '.') ? text : (text + "."));
-					int num = 224;
-					transferrableObject.myIndex = num + CosmeticIDUtils.PlayFabIdToIndexInCategory(text);
+					string text3 = text2;
+					text2 = ((text3.get_Chars(text3.Length - 1) == '.') ? text2 : (text2 + "."));
+					int num2 = 224;
+					transferrableObject.myIndex = num2 + CosmeticIDUtils.PlayFabIdToIndexInCategory(text2);
 				}
 				else
 				{
 					transferrableObject.myIndex = -2;
-					if (!(text == "STICKABLE TARGET"))
+					if (!(text2 == "STICKABLE TARGET"))
 					{
 						Debug.LogError(string.Concat(new string[]
 						{
 							"Cosmetic \"",
 							loadOpInfo.cosmeticInfoV2.displayName,
 							"\" cannot derive `TransferrableObject.myIndex` from playFabId \"",
-							text,
+							text2,
 							"\" and so will not be included in `BodyDockPositions.allObjects` array."
 						}));
 					}
@@ -456,7 +456,7 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 		{
 			cosmeticReferences.Register(componentsInChildren[i].id, componentsInChildren[i].gameObject);
 		}
-		CosmeticsV2Spawner_Dirty._g_loadOpInfos[index] = loadOpInfo;
+		CosmeticsV2Spawner_Dirty._g_loadOpInfos[num] = loadOpInfo;
 		if (CosmeticsV2Spawner_Dirty._g_loadOpsCountCompleted < CosmeticsV2Spawner_Dirty._g_loadOpInfos.Count)
 		{
 			return;
@@ -494,7 +494,7 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 		loadOpInfo.loadOp = loadOpInfo.part.prefabAssetRef.InstantiateAsync(CosmeticsV2Spawner_Dirty._gDeactivatedSpawnParent, false);
 		CosmeticsV2Spawner_Dirty._g_loadOpInfos[loadOpIndex] = loadOpInfo;
 		CosmeticsV2Spawner_Dirty._g_loadOp_to_index[loadOpInfo.loadOp] = loadOpIndex;
-		loadOpInfo.loadOp.Completed += CosmeticsV2Spawner_Dirty._Step3_HandleLoadOpCompleted;
+		loadOpInfo.loadOp.Completed += new Action<AsyncOperationHandle<GameObject>>(CosmeticsV2Spawner_Dirty._Step3_HandleLoadOpCompleted);
 	}
 
 	private static void AddPartToThrowableLists(CosmeticsV2Spawner_Dirty.LoadOpInfo loadOpInfo, SnowballThrowable throwable)
@@ -570,9 +570,9 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 						componentsInChildren[i].CosmeticSelectedSide = loadOpInfo.attachInfo.selectSide;
 						componentsInChildren[i].OnSpawn(CosmeticsV2Spawner_Dirty._gVRRigDatas[loadOpInfo.vrRigIndex].vrRig);
 					}
-					catch (Exception exception)
+					catch (Exception ex)
 					{
-						Debug.LogException(exception);
+						Debug.LogException(ex);
 					}
 				}
 			}
@@ -606,40 +606,40 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 			Action onPostInstantiateAllPrefabs = CosmeticsV2Spawner_Dirty.OnPostInstantiateAllPrefabs;
 			if (onPostInstantiateAllPrefabs != null)
 			{
-				onPostInstantiateAllPrefabs();
+				onPostInstantiateAllPrefabs.Invoke();
 			}
 		}
-		catch (Exception exception)
+		catch (Exception ex)
 		{
-			Debug.LogException(exception);
+			Debug.LogException(ex);
 		}
 		try
 		{
 			CosmeticsController.instance.InitializeCosmeticStands();
 		}
-		catch (Exception exception2)
+		catch (Exception ex2)
 		{
-			Debug.LogException(exception2);
+			Debug.LogException(ex2);
 		}
 		try
 		{
 			Action onPostInstantiateAllPrefabs2 = CosmeticsV2Spawner_Dirty.OnPostInstantiateAllPrefabs2;
 			if (onPostInstantiateAllPrefabs2 != null)
 			{
-				onPostInstantiateAllPrefabs2();
+				onPostInstantiateAllPrefabs2.Invoke();
 			}
 		}
-		catch (Exception exception3)
+		catch (Exception ex3)
 		{
-			Debug.LogException(exception3);
+			Debug.LogException(ex3);
 		}
 		try
 		{
 			CosmeticsController.instance.UpdateWornCosmetics();
 		}
-		catch (Exception exception4)
+		catch (Exception ex4)
 		{
-			Debug.LogException(exception4);
+			Debug.LogException(ex4);
 		}
 		foreach (CosmeticsV2Spawner_Dirty.VRRigData vrrigData in CosmeticsV2Spawner_Dirty._gVRRigDatas)
 		{
@@ -650,18 +650,18 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener, ITickSystemTick
 					vrrigData.bdPositionsComp.RefreshTransferrableItems();
 				}
 			}
-			catch (Exception exception5)
+			catch (Exception ex5)
 			{
-				Debug.LogException(exception5, vrrigData.vrRig);
+				Debug.LogException(ex5, vrrigData.vrRig);
 			}
 		}
 		try
 		{
 			StoreController.instance.InitalizeCosmeticStands();
 		}
-		catch (Exception exception6)
+		catch (Exception ex6)
 		{
-			Debug.LogException(exception6);
+			Debug.LogException(ex6);
 		}
 		CosmeticsV2Spawner_Dirty.completed = true;
 		CosmeticsV2Spawner_Dirty.k_stopwatch.Stop();

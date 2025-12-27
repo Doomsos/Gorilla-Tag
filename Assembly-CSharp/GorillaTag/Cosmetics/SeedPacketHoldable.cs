@@ -29,7 +29,7 @@ namespace GorillaTag.Cosmetics
 			}
 			if (this._events != null)
 			{
-				this._events.Activate += this.SyncTriggerEffect;
+				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.SyncTriggerEffect);
 			}
 		}
 
@@ -37,7 +37,7 @@ namespace GorillaTag.Cosmetics
 		{
 			if (this._events != null)
 			{
-				this._events.Activate -= this.SyncTriggerEffect;
+				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.SyncTriggerEffect);
 				this._events.Dispose();
 				this._events = null;
 			}
@@ -58,7 +58,7 @@ namespace GorillaTag.Cosmetics
 			{
 				this.StartPouring();
 				RaycastHit raycastHit;
-				if (Physics.Raycast(base.transform.position, Vector3.down, out raycastHit, this.pouringRaycastDistance, this.raycastLayerMask))
+				if (Physics.Raycast(base.transform.position, Vector3.down, ref raycastHit, this.pouringRaycastDistance, this.raycastLayerMask))
 				{
 					this.hitPoint = raycastHit.point;
 					base.Invoke("SpawnEffect", raycastHit.distance * this.placeEffectDelayMultiplier);
@@ -85,7 +85,7 @@ namespace GorillaTag.Cosmetics
 			GameObject gameObject = ObjectPools.instance.Instantiate(this.flowerEffectHash, true);
 			gameObject.transform.position = this.hitPoint;
 			SeedPacketTriggerHandler seedPacketTriggerHandler;
-			if (gameObject.TryGetComponent<SeedPacketTriggerHandler>(out seedPacketTriggerHandler))
+			if (gameObject.TryGetComponent<SeedPacketTriggerHandler>(ref seedPacketTriggerHandler))
 			{
 				this.pooledObjects.Add(seedPacketTriggerHandler);
 				seedPacketTriggerHandler.onTriggerEntered.AddListener(new UnityAction<SeedPacketTriggerHandler>(this.SyncTriggerEffectForOthers));

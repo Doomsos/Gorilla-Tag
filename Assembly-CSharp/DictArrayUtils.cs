@@ -5,7 +5,7 @@ public static class DictArrayUtils
 {
 	public static void TryGetOrAddList<TKey, TValue>(this Dictionary<TKey, List<TValue>> dict, TKey key, out List<TValue> list, int capacity)
 	{
-		if (dict.TryGetValue(key, out list) && list != null)
+		if (dict.TryGetValue(key, ref list) && list != null)
 		{
 			return;
 		}
@@ -15,7 +15,7 @@ public static class DictArrayUtils
 
 	public static void TryGetOrAddArray<TKey, TValue>(this Dictionary<TKey, TValue[]> dict, TKey key, out TValue[] array, int size)
 	{
-		if (dict.TryGetValue(key, out array) && array != null)
+		if (dict.TryGetValue(key, ref array) && array != null)
 		{
 			return;
 		}

@@ -1,6 +1,6 @@
 ﻿using System;
 
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+[AttributeUsage(384, AllowMultiple = false)]
 public class DragDropComponentsAttribute : Attribute
 {
 }

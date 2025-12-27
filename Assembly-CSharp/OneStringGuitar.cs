@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using GorillaExtensions;
 using GorillaLocomotion;
 using GorillaTag.CosmeticSystem;
-using Photon.Pun;
 using UnityEngine;
 
 public class OneStringGuitar : TransferrableObject
@@ -20,10 +19,10 @@ public class OneStringGuitar : TransferrableObject
 		this.chestColliderRight = this._GetChestColliderByPath(rig, "GorillaPlayerNetworkedRigAnchor/rig/body/Old Cosmetics Body/OneStringGuitarStick/Center/BaseTransformRight");
 		this.currentChestCollider = this.chestColliderLeft;
 		Transform[] array;
-		string str;
-		if (!GTHardCodedBones.TryGetBoneXforms(rig, out array, out str))
+		string text;
+		if (!GTHardCodedBones.TryGetBoneXforms(rig, out array, out text))
 		{
-			Debug.LogError("OneStringGuitar: Error getting bone Transforms: " + str, this);
+			Debug.LogError("OneStringGuitar: Error getting bone Transforms: " + text, this);
 			return;
 		}
 		this.parentHandLeft = array[9];
@@ -140,27 +139,27 @@ public class OneStringGuitar : TransferrableObject
 		}
 		else if (this.itemState == TransferrableObject.ItemStates.State2)
 		{
-			Quaternion rhs = (this.currentState == TransferrableObject.PositionState.InLeftHand) ? this.holdingOffsetRotationLeft : this.holdingOffsetRotationRight;
-			Vector3 point = (this.currentState == TransferrableObject.PositionState.InLeftHand) ? this.chestOffsetLeft : this.chestOffsetRight;
-			Quaternion quaternion = Quaternion.LookRotation(this.parentHand.position - this.currentChestCollider.transform.position) * rhs;
-			if (!this.angleSnapped && Quaternion.Angle(base.transform.rotation, quaternion) > this.angleLerpSnap)
+			Quaternion quaternion = (this.currentState == TransferrableObject.PositionState.InLeftHand) ? this.holdingOffsetRotationLeft : this.holdingOffsetRotationRight;
+			Vector3 vector = (this.currentState == TransferrableObject.PositionState.InLeftHand) ? this.chestOffsetLeft : this.chestOffsetRight;
+			Quaternion quaternion2 = Quaternion.LookRotation(this.parentHand.position - this.currentChestCollider.transform.position) * quaternion;
+			if (!this.angleSnapped && Quaternion.Angle(base.transform.rotation, quaternion2) > this.angleLerpSnap)
 			{
-				base.transform.rotation = Quaternion.Slerp(base.transform.rotation, quaternion, this.lerpValue);
+				base.transform.rotation = Quaternion.Slerp(base.transform.rotation, quaternion2, this.lerpValue);
 			}
 			else
 			{
 				this.angleSnapped = true;
-				base.transform.rotation = quaternion;
+				base.transform.rotation = quaternion2;
 			}
-			Vector3 vector = this.currentChestCollider.transform.position + base.transform.rotation * point;
-			if (!this.positionSnapped && (base.transform.position - vector).magnitude > this.vectorLerpSnap)
+			Vector3 vector2 = this.currentChestCollider.transform.position + base.transform.rotation * vector;
+			if (!this.positionSnapped && (base.transform.position - vector2).magnitude > this.vectorLerpSnap)
 			{
-				base.transform.position = Vector3.Lerp(base.transform.position, this.currentChestCollider.transform.position + base.transform.rotation * point, this.lerpValue);
+				base.transform.position = Vector3.Lerp(base.transform.position, this.currentChestCollider.transform.position + base.transform.rotation * vector, this.lerpValue);
 			}
 			else
 			{
 				this.positionSnapped = true;
-				base.transform.position = vector;
+				base.transform.position = vector2;
 			}
 			if (this.currentState == TransferrableObject.PositionState.InRightHand)
 			{
@@ -226,7 +225,7 @@ public class OneStringGuitar : TransferrableObject
 									{
 										break;
 									}
-									myVRRig.SendRPC("RPC_PlaySelfOnlyInstrument", RpcTarget.Others, new object[]
+									myVRRig.SendRPC("RPC_PlaySelfOnlyInstrument", 1, new object[]
 									{
 										this.selfInstrumentIndex,
 										this.currentFretIndex,
@@ -268,7 +267,7 @@ public class OneStringGuitar : TransferrableObject
 		{
 			this.collidersHit[i] = null;
 		}
-		this.collidersHitCount = Physics.OverlapSphereNonAlloc(finger.position, this.sphereRadius, this.collidersHit, this.interactableMask, QueryTriggerInteraction.Collide);
+		this.collidersHitCount = Physics.OverlapSphereNonAlloc(finger.position, this.sphereRadius, this.collidersHit, this.interactableMask, 2);
 		this.currentFretIndex = 5;
 		if (this.collidersHitCount > 0)
 		{

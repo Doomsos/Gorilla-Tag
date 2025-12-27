@@ -8,7 +8,7 @@ using UnityEngine;
 namespace GorillaTagScripts.ObstacleCourse
 {
 	[NetworkStructWeaved(9)]
-	[StructLayout(LayoutKind.Explicit, Size = 36)]
+	[StructLayout(2, Size = 36)]
 	public struct ObstacleCourseData : INetworkStruct
 	{
 		public int ObstacleCourseCount { readonly get; set; }

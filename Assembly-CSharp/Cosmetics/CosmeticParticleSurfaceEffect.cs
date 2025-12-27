@@ -35,8 +35,8 @@ namespace Cosmetics
 			{
 				this._events.Activate.reliable = true;
 				this._events.Deactivate.reliable = true;
-				this._events.Activate += this.OnSpawnReplicated;
-				this._events.Deactivate += this.OnTriggerEffectReplicated;
+				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnSpawnReplicated);
+				this._events.Deactivate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnTriggerEffectReplicated);
 			}
 			if (ObjectPools.instance == null || !ObjectPools.instance.initialized)
 			{
@@ -64,8 +64,8 @@ namespace Cosmetics
 			this.StopParticles();
 			if (this._events != null)
 			{
-				this._events.Activate -= this.OnSpawnReplicated;
-				this._events.Deactivate -= this.OnTriggerEffectReplicated;
+				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnSpawnReplicated);
+				this._events.Deactivate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnTriggerEffectReplicated);
 				this._events.Dispose();
 				this._events = null;
 			}
@@ -138,7 +138,7 @@ namespace Cosmetics
 			}
 			if (this.isSpawning && Time.time > this.placeEffectCooldown + this.lastHitTime)
 			{
-				int num = Physics.RaycastNonAlloc(this.rayCastOrigin.position, this.useWorldDirection ? this.worldDirection : this.rayCastOrigin.forward, this.hits, this.rayCastDistance, this.rayCastLayerMask, QueryTriggerInteraction.Ignore);
+				int num = Physics.RaycastNonAlloc(this.rayCastOrigin.position, this.useWorldDirection ? this.worldDirection : this.rayCastOrigin.forward, this.hits, this.rayCastDistance, this.rayCastLayerMask, 1);
 				if (num > 0)
 				{
 					int num2 = 0;
@@ -233,7 +233,7 @@ namespace Cosmetics
 				gameObject.transform.position = position;
 				gameObject.transform.up = up;
 				SeedPacketTriggerHandler seedPacketTriggerHandler;
-				if (gameObject.TryGetComponent<SeedPacketTriggerHandler>(out seedPacketTriggerHandler))
+				if (gameObject.TryGetComponent<SeedPacketTriggerHandler>(ref seedPacketTriggerHandler))
 				{
 					int num = this.surfaceEffects.IndexOf(seedPacketTriggerHandler);
 					if (num >= 0)
@@ -298,18 +298,18 @@ namespace Cosmetics
 				return;
 			}
 			this.ClearOldObjects();
-			int item = (int)args[0];
-			int num = this.surfaceEffectNum.IndexOf(item);
-			if (num >= 0 && num < this.surfaceEffects.Count)
+			int num = (int)args[0];
+			int num2 = this.surfaceEffectNum.IndexOf(num);
+			if (num2 >= 0 && num2 < this.surfaceEffects.Count)
 			{
-				SeedPacketTriggerHandler seedPacketTriggerHandler = this.surfaceEffects[num];
+				SeedPacketTriggerHandler seedPacketTriggerHandler = this.surfaceEffects[num2];
 				if (seedPacketTriggerHandler != null)
 				{
 					seedPacketTriggerHandler.ToggleEffects();
 					seedPacketTriggerHandler.onTriggerEntered.RemoveListener(new UnityAction<SeedPacketTriggerHandler>(this.OnTriggerEffectLocal));
 				}
-				this.surfaceEffects.RemoveAt(num);
-				this.surfaceEffectNum.RemoveAt(num);
+				this.surfaceEffects.RemoveAt(num2);
+				this.surfaceEffectNum.RemoveAt(num2);
 			}
 		}
 

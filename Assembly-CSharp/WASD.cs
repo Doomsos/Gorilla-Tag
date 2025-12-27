@@ -15,27 +15,27 @@ public class WASD : MonoBehaviour
 	{
 		Vector3 zero = Vector3.zero;
 		float num = 0f;
-		if (Input.GetKey(KeyCode.W))
+		if (Input.GetKey(119))
 		{
 			zero.z += 1f;
 		}
-		if (Input.GetKey(KeyCode.A))
+		if (Input.GetKey(97))
 		{
 			zero.x -= 1f;
 		}
-		if (Input.GetKey(KeyCode.S))
+		if (Input.GetKey(115))
 		{
 			zero.z -= 1f;
 		}
-		if (Input.GetKey(KeyCode.D))
+		if (Input.GetKey(100))
 		{
 			zero.x += 1f;
 		}
 		Vector3 vector = (zero.sqrMagnitude > 0f) ? (zero.normalized * this.Speed * Time.deltaTime) : Vector3.zero;
-		Quaternion lhs = Quaternion.AngleAxis(num * this.Omega * 57.29578f * Time.deltaTime, Vector3.up);
+		Quaternion quaternion = Quaternion.AngleAxis(num * this.Omega * 57.29578f * Time.deltaTime, Vector3.up);
 		this.m_velocity = vector / Time.deltaTime;
 		base.transform.position += vector;
-		base.transform.rotation = lhs * base.transform.rotation;
+		base.transform.rotation = quaternion * base.transform.rotation;
 	}
 
 	public float Speed = 1f;

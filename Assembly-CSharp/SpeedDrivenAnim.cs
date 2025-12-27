@@ -12,8 +12,8 @@ public class SpeedDrivenAnim : MonoBehaviour
 
 	private void Update()
 	{
-		float target = Mathf.InverseLerp(this.speed0, this.speed1, this.velocityEstimator.linearVelocity.magnitude);
-		this.currentBlend = Mathf.MoveTowards(this.currentBlend, target, this.maxChangePerSecond * Time.deltaTime);
+		float num = Mathf.InverseLerp(this.speed0, this.speed1, this.velocityEstimator.linearVelocity.magnitude);
+		this.currentBlend = Mathf.MoveTowards(this.currentBlend, num, this.maxChangePerSecond * Time.deltaTime);
 		this.animator.SetFloat(this.keyHash, this.currentBlend);
 	}
 

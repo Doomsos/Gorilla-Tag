@@ -15,10 +15,10 @@ namespace GorillaTag
 				int num = 0;
 				if (PhotonNetwork.CurrentRoom.ExpectedUsers != null && PhotonNetwork.CurrentRoom.ExpectedUsers.Length != 0)
 				{
-					foreach (string key in PhotonNetwork.CurrentRoom.ExpectedUsers)
+					foreach (string text in PhotonNetwork.CurrentRoom.ExpectedUsers)
 					{
 						float num2;
-						if (this.expectedUsers.TryGetValue(key, out num2))
+						if (this.expectedUsers.TryGetValue(text, ref num2))
 						{
 							if (num2 + this.decayTime < Time.time)
 							{
@@ -27,7 +27,7 @@ namespace GorillaTag
 						}
 						else
 						{
-							this.expectedUsers.Add(key, Time.time);
+							this.expectedUsers.Add(text, Time.time);
 						}
 					}
 					if (num >= PhotonNetwork.CurrentRoom.ExpectedUsers.Length && num != 0)

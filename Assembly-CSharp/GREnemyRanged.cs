@@ -440,7 +440,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		GREnemyRanged.tempRigs.Add(VRRig.LocalRig);
 		VRRigCache.Instance.GetAllUsedRigs(GREnemyRanged.tempRigs);
 		Vector3 position = base.transform.position;
-		Vector3 rhs = base.transform.rotation * Vector3.forward;
+		Vector3 vector = base.transform.rotation * Vector3.forward;
 		float num2 = this.sightDist * this.sightDist;
 		float num3 = Mathf.Cos(this.sightFOV * 0.017453292f);
 		for (int i = 0; i < GREnemyRanged.tempRigs.Count; i++)
@@ -450,20 +450,20 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 			if (component.State != GRPlayer.GRPlayerState.Ghost)
 			{
 				Vector3 position2 = vrrig.transform.position;
-				Vector3 a = position2 - position;
-				float sqrMagnitude = a.sqrMagnitude;
+				Vector3 vector2 = position2 - position;
+				float sqrMagnitude = vector2.sqrMagnitude;
 				if (sqrMagnitude <= num2)
 				{
 					float num4 = 0f;
 					if (sqrMagnitude > 0f)
 					{
 						num4 = Mathf.Sqrt(sqrMagnitude);
-						if (Vector3.Dot(a / num4, rhs) < num3)
+						if (Vector3.Dot(vector2 / num4, vector) < num3)
 						{
 							goto IL_16F;
 						}
 					}
-					if (num4 < num && Physics.RaycastNonAlloc(new Ray(this.headTransform.position, position2 - this.headTransform.position), GREnemyChaser.visibilityHits, num4, this.visibilityLayerMask.value, QueryTriggerInteraction.Ignore) < 1)
+					if (num4 < num && Physics.RaycastNonAlloc(new Ray(this.headTransform.position, position2 - this.headTransform.position), GREnemyChaser.visibilityHits, num4, this.visibilityLayerMask.value, 1) < 1)
 					{
 						num = num4;
 						this.bestTargetPlayer = component;
@@ -483,7 +483,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		{
 			this.targetPlayer = this.bestTargetNetPlayer;
 			this.lastSeenTargetTime = Time.timeAsDouble;
-			this.investigateLocation = null;
+			this.investigateLocation = default(Vector3?);
 			this.SetBehavior(GREnemyRanged.Behavior.SeekRangedAttackPosition, false);
 			return;
 		}
@@ -558,7 +558,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 						bool flag = false;
 						if (num < this.sightDist)
 						{
-							flag = (Physics.RaycastNonAlloc(new Ray(this.headTransform.position, position - this.headTransform.position), GREnemyChaser.visibilityHits, num, this.visibilityLayerMask.value, QueryTriggerInteraction.Ignore) < 1);
+							flag = (Physics.RaycastNonAlloc(new Ray(this.headTransform.position, position - this.headTransform.position), GREnemyChaser.visibilityHits, num, this.visibilityLayerMask.value, 1) < 1);
 						}
 						if (flag)
 						{
@@ -572,8 +572,8 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 							if (flag)
 							{
 								this.rangedTargetPosition = position;
-								Vector3 b = Vector3.up * 0.4f;
-								this.rangedTargetPosition += b;
+								Vector3 vector = Vector3.up * 0.4f;
+								this.rangedTargetPosition += vector;
 								if (magnitude < this.rangedAttackDistMax)
 								{
 									this.behaviorEndTime = Time.timeAsDouble + (double)this.rangedAttackChargeTime;
@@ -713,12 +713,13 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 	public void UpdateSearch()
 	{
 		Vector3 vector = this.searchPosition - base.transform.position;
-		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
+		Vector3 vector2;
+		vector2..ctor(vector.x, 0f, vector.z);
 		if (vector2.sqrMagnitude < 0.15f)
 		{
-			Vector3 b = this.lastSeenTargetPosition - this.searchPosition;
-			b.y = 0f;
-			this.searchPosition = this.lastSeenTargetPosition + b;
+			Vector3 vector3 = this.lastSeenTargetPosition - this.searchPosition;
+			vector3.y = 0f;
+			this.searchPosition = this.lastSeenTargetPosition + vector3;
 		}
 		if (this.IsMoving())
 		{
@@ -836,15 +837,15 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 
 	public void OnGameEntitySerialize(BinaryWriter writer)
 	{
-		byte value = (byte)this.currBehavior;
-		byte value2 = (byte)this.currBodyState;
-		byte value3 = (byte)this.abilityPatrol.nextPatrolNode;
-		int value4 = (this.targetPlayer == null) ? -1 : this.targetPlayer.ActorNumber;
-		writer.Write(value);
-		writer.Write(value2);
+		byte b = (byte)this.currBehavior;
+		byte b2 = (byte)this.currBodyState;
+		byte b3 = (byte)this.abilityPatrol.nextPatrolNode;
+		int num = (this.targetPlayer == null) ? -1 : this.targetPlayer.ActorNumber;
+		writer.Write(b);
+		writer.Write(b2);
 		writer.Write(this.hp);
-		writer.Write(value3);
-		writer.Write(value4);
+		writer.Write(b3);
+		writer.Write(num);
 	}
 
 	public void OnGameEntityDeserialize(BinaryReader reader)
@@ -918,10 +919,10 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 		this.DisableHeadInHand();
 		this.DestroyProjectile();
-		Vector3 forward;
-		if (GREnemyRanged.CalculateLaunchDirection(launchPosition, targetPosition, this.projectileSpeed, out forward))
+		Vector3 vector;
+		if (GREnemyRanged.CalculateLaunchDirection(launchPosition, targetPosition, this.projectileSpeed, out vector))
 		{
-			this.entity.manager.RequestCreateItem(this.rangedProjectilePrefab.name.GetStaticHash(), launchPosition, Quaternion.LookRotation(forward, Vector3.up), (long)this.entity.GetNetId());
+			this.entity.manager.RequestCreateItem(this.rangedProjectilePrefab.name.GetStaticHash(), launchPosition, Quaternion.LookRotation(vector, Vector3.up), (long)this.entity.GetNetId());
 		}
 	}
 
@@ -929,7 +930,8 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 	{
 		direction = Vector3.zero;
 		Vector3 vector = targetPos - startPos;
-		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
+		Vector3 vector2;
+		vector2..ctor(vector.x, 0f, vector.z);
 		float magnitude = vector2.magnitude;
 		Vector3 normalized = vector2.normalized;
 		float y = vector.y;
@@ -948,9 +950,9 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		float num9 = num2 / (num7 * num7 + 1f);
 		float num10 = (num4 != 0) ? Mathf.Min(num8, num9) : Mathf.Max(num8, num9);
 		float num11 = (num4 != 0) ? ((num8 < num9) ? Mathf.Sign(num6) : Mathf.Sign(num7)) : ((num8 > num9) ? Mathf.Sign(num6) : Mathf.Sign(num7));
-		float d = Mathf.Sqrt(num10);
-		float num12 = Mathf.Sqrt(Mathf.Abs(num2 - num10));
-		direction = (normalized * d + new Vector3(0f, num12 * num11, 0f)).normalized;
+		float num12 = Mathf.Sqrt(num10);
+		float num13 = Mathf.Sqrt(Mathf.Abs(num2 - num10));
+		direction = (normalized * num12 + new Vector3(0f, num13 * num11, 0f)).normalized;
 		return true;
 	}
 

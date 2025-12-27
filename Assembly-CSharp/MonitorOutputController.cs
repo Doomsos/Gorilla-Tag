@@ -13,13 +13,13 @@ public class MonitorOutputController : MonoBehaviour
 
 	private void OnEnable()
 	{
-		this._gtLckController.OnCameraModeChanged += this.OnCameraModeChanged;
+		this._gtLckController.OnCameraModeChanged += new GTLckController.CameraModeDelegate(this.OnCameraModeChanged);
 		LckBodyCameraSpawner.OnCameraStateChange += this.CameraStateChanged;
 	}
 
 	private void Update()
 	{
-		if (Application.platform == RuntimePlatform.Android)
+		if (Application.platform == 11)
 		{
 			Object.Destroy(this);
 		}
@@ -57,7 +57,7 @@ public class MonitorOutputController : MonoBehaviour
 
 	private void OnDisable()
 	{
-		this._gtLckController.OnCameraModeChanged -= this.OnCameraModeChanged;
+		this._gtLckController.OnCameraModeChanged -= new GTLckController.CameraModeDelegate(this.OnCameraModeChanged);
 		this._shoulderCamera.gameObject.GetComponentInChildren<CinemachineBrain>().enabled = true;
 		LckBodyCameraSpawner.OnCameraStateChange -= this.CameraStateChanged;
 	}

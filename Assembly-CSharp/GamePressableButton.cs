@@ -1,5 +1,4 @@
 ﻿using System;
-using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -69,7 +68,7 @@ public class GamePressableButton : MonoBehaviour, IClickable
 		GorillaTagger.Instance.StartVibration(isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
 		if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
 		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", 1, new object[]
 			{
 				67,
 				isLeftHand,
