@@ -155,11 +155,10 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		List<VODPlayer.VODNextStream> list = new List<VODPlayer.VODNextStream>();
 		for (int i = 0; i < this.schedule.hourly.Length; i++)
 		{
-			if (i == 0)
-			{
-				list.Add(new VODPlayer.VODNextStream(2, this.schedule.hourly[i].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour + 1, this.schedule.hourly[i].minute, 0)));
-			}
-			list.Add(new VODPlayer.VODNextStream(2, this.schedule.hourly[i].stream.name, new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour, this.schedule.hourly[i].minute, 0)));
+			DateTime dateTime;
+			dateTime..ctor(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour, this.schedule.hourly[i].minute, 0);
+			list.Add(new VODPlayer.VODNextStream(this.schedule.hourly[i].stream.name, this.schedule.hourly[i].ClampedDateTime(dateTime)));
+			list.Add(new VODPlayer.VODNextStream(this.schedule.hourly[i].stream.name, this.schedule.hourly[i].ClampedDateTime(dateTime.AddHours(1.0))));
 		}
 		list.Sort();
 		for (int j = 0; j < list.Count; j++)
@@ -244,6 +243,10 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		try
 		{
 			this.schedule = JsonConvert.DeserializeObject<VODPlayer.VODStreamSchedule>(s);
+			for (int i = 0; i < this.schedule.hourly.Length; i++)
+			{
+				this.schedule.hourly[i].ValidateDate();
+			}
 		}
 		catch (Exception)
 		{
@@ -321,19 +324,16 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	[Serializable]
 	public class VODNextStream : IComparable<VODPlayer.VODNextStream>
 	{
-		public VODNextStream(int prio, string name, DateTime startTime)
+		public VODNextStream(string name, DateTime startTime)
 		{
-			this.Prio = prio;
 			this.Title = name;
 			this.StartTime = startTime;
 		}
 
 		int IComparable<VODPlayer.VODNextStream>.CompareTo(VODPlayer.VODNextStream other)
 		{
-			return (int)(this.StartTime - other.StartTime).TotalSeconds - (this.Prio - other.Prio);
+			return (int)(this.StartTime - other.StartTime).TotalSeconds;
 		}
-
-		public int Prio;
 
 		public string Title;
 
@@ -386,8 +386,20 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 		internal bool IsDateInRange(DateTime serverTime)
 		{
-			this.ValidateDate();
 			return serverTime >= this.startDT && serverTime <= this.endDT;
+		}
+
+		internal DateTime ClampedDateTime(DateTime dateTime)
+		{
+			if (dateTime < this.startDT)
+			{
+				return this.startDT;
+			}
+			if (dateTime > this.endDT)
+			{
+				return this.endDT;
+			}
+			return dateTime;
 		}
 
 		public VODPlayer.VODStream stream;

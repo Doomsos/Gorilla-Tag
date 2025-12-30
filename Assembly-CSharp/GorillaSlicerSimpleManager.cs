@@ -124,7 +124,14 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
 				if (monoBehaviour == null || monoBehaviour.isActiveAndEnabled)
 				{
-					gorillaSliceableSimple.SliceUpdate();
+					try
+					{
+						gorillaSliceableSimple.SliceUpdate();
+					}
+					catch (Exception ex)
+					{
+						Debug.LogException(ex);
+					}
 				}
 			}
 			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
@@ -154,7 +161,14 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
 				if (monoBehaviour == null || monoBehaviour.isActiveAndEnabled)
 				{
-					gorillaSliceableSimple.SliceUpdate();
+					try
+					{
+						gorillaSliceableSimple.SliceUpdate();
+					}
+					catch (Exception ex)
+					{
+						Debug.LogException(ex);
+					}
 				}
 			}
 			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
@@ -186,7 +200,14 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 				MonoBehaviour monoBehaviour = gorillaSliceableSimple as MonoBehaviour;
 				if (monoBehaviour == null || monoBehaviour.isActiveAndEnabled)
 				{
-					gorillaSliceableSimple.SliceUpdate();
+					try
+					{
+						gorillaSliceableSimple.SliceUpdate();
+					}
+					catch (Exception ex)
+					{
+						Debug.LogException(ex);
+					}
 				}
 			}
 			this.lastRunTicks[gorillaSliceableSimple] = this.sW.ElapsedTicks - elapsedTicks;
