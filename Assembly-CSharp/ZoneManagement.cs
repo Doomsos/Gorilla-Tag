@@ -242,24 +242,36 @@ public class ZoneManagement : MonoBehaviour
 
 	private void HandleOnSceneLoadCompleted(AsyncOperation thisLoadOp)
 	{
-		using (Dictionary<string, AsyncOperation>.ValueCollection.Enumerator enumerator = this._scenes_to_loadOps.Values.GetEnumerator())
+		foreach (KeyValuePair<string, AsyncOperation> keyValuePair in this._scenes_to_loadOps)
 		{
-			while (enumerator.MoveNext())
+			string text;
+			AsyncOperation asyncOperation;
+			keyValuePair.Deconstruct(out text, out asyncOperation);
+			string str = text;
+			AsyncOperation asyncOperation2 = asyncOperation;
+			if (asyncOperation2 == null)
 			{
-				if (!enumerator.Current.isDone)
-				{
-					return;
-				}
+				Debug.LogError("ERROR!!!  HandleOnSceneLoadCompleted: Why is `loadOp` null in `_scenes_to_loadOps` for scene \"" + str + "\"?????");
+			}
+			else if (!asyncOperation2.isDone)
+			{
+				return;
 			}
 		}
-		using (Dictionary<string, AsyncOperation>.ValueCollection.Enumerator enumerator = this._scenes_to_unloadOps.Values.GetEnumerator())
+		foreach (KeyValuePair<string, AsyncOperation> keyValuePair in this._scenes_to_unloadOps)
 		{
-			while (enumerator.MoveNext())
+			string text;
+			AsyncOperation asyncOperation;
+			keyValuePair.Deconstruct(out text, out asyncOperation);
+			string str2 = text;
+			AsyncOperation asyncOperation3 = asyncOperation;
+			if (asyncOperation3 == null)
 			{
-				if (!enumerator.Current.isDone)
-				{
-					return;
-				}
+				Debug.LogError("ERROR!!!  HandleOnSceneLoadCompleted: Why is `unloadOps` null in `_scenes_to_unloadOps` for scene \"" + str2 + "\"?????");
+			}
+			else if (!asyncOperation3.isDone)
+			{
+				return;
 			}
 		}
 		Action onSceneLoadsCompleted = this.OnSceneLoadsCompleted;
@@ -286,6 +298,12 @@ public class ZoneManagement : MonoBehaviour
 	{
 		return zoneInt >= 11 && zoneInt <= 24;
 	}
+
+	private const string preLog = "[GT/ZoneManagement]  ";
+
+	private const string preErr = "ERROR!!!  ";
+
+	private const string preErrBeta = "(beta only log)  ";
 
 	public static ZoneManagement instance;
 

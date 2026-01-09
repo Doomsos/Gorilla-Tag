@@ -51,13 +51,8 @@ namespace GorillaNetworking.Store
 			Debug.Log("StoreUpdater - Starting");
 			if (this.bLoadFromJSON)
 			{
-				base.StartCoroutine(this.InitializeTitleData());
+				this.GetEventsFromTitleData();
 			}
-		}
-
-		private void ServerTimeUpdater()
-		{
-			base.StartCoroutine(this.InitializeTitleData());
 		}
 
 		public void OnDestroy()
@@ -241,15 +236,6 @@ namespace GorillaNetworking.Store
 			}
 		}
 
-		private IEnumerator InitializeTitleData()
-		{
-			yield return new WaitForSeconds(1f);
-			PlayFabTitleDataCache.Instance.UpdateData();
-			yield return new WaitForSeconds(1f);
-			this.GetEventsFromTitleData();
-			yield break;
-		}
-
 		private void GetEventsFromTitleData()
 		{
 			Debug.Log("StoreUpdater - GetEventsFromTitleData");
@@ -278,7 +264,7 @@ namespace GorillaNetworking.Store
 			if (CosmeticsController.instance.GetItemFromDict("LBAEY.").isNullItem)
 			{
 				Debug.LogWarning("StoreUpdater - CosmeticsController is not initialized.  Reinitializing TitleData");
-				base.StartCoroutine(this.InitializeTitleData());
+				this.GetEventsFromTitleData();
 				return;
 			}
 			foreach (StoreUpdateEvent storeUpdateEvent in updateEvents)

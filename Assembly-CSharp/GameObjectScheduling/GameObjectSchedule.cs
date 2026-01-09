@@ -24,18 +24,21 @@ namespace GameObjectScheduling
 			}
 		}
 
-		public int GetCurrentNodeIndex(DateTime currentDate, int startFrom = 0)
+		public int GetCurrentNodeIndex(DateTime currentDate, out DateTime startDate)
 		{
-			if (startFrom >= this.nodes.Length)
-			{
-				return int.MaxValue;
-			}
-			for (int i = -1; i < this.nodes.Length - 1; i++)
+			int i = -1;
+			startDate = default(DateTime);
+			while (i < this.nodes.Length - 1)
 			{
 				if (currentDate < this.nodes[i + 1].DateTime)
 				{
+					if (i >= 0)
+					{
+						startDate = this.nodes[i].DateTime;
+					}
 					return i;
 				}
+				i++;
 			}
 			return int.MaxValue;
 		}

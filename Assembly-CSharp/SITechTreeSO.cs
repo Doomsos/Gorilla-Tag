@@ -170,7 +170,8 @@ public class SITechTreeSO : ScriptableObject
 
 	private const string preErr = "[SITechTreeSO]  ERROR!!!  ";
 
-	[HideInInspector]
+	private const int RESOURCE_CAP = 20;
+
 	[SerializeField]
 	private SITechTreePage[] treePages;
 

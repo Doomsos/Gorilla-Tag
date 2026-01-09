@@ -13,8 +13,13 @@ public class SnowballGrabZone : HoldableObject
 
 	public override void OnGrab(InteractionPoint pointGrabbed, GameObject grabbingHand)
 	{
+		bool flag = grabbingHand == EquipmentInteractor.instance.leftHand;
+		if (flag ? EquipmentInteractor.instance.disableLeftGrab : EquipmentInteractor.instance.disableRightGrab)
+		{
+			return;
+		}
 		SnowballThrowable snowballThrowable;
-		((grabbingHand == EquipmentInteractor.instance.leftHand) ? SnowballMaker.leftHandInstance : SnowballMaker.rightHandInstance).TryCreateSnowball(this.materialIndex, out snowballThrowable);
+		(flag ? SnowballMaker.leftHandInstance : SnowballMaker.rightHandInstance).TryCreateSnowball(this.materialIndex, out snowballThrowable);
 	}
 
 	[GorillaSoundLookup]

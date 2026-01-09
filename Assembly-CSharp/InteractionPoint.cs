@@ -122,7 +122,7 @@ public class InteractionPoint : MonoBehaviour, ISpawnable, IBuildValidation
 		}
 	}
 
-	private bool OverlapCheck(Vector3 point)
+	public bool OverlapCheck(Vector3 point)
 	{
 		if (this.interactionRadius > 0f)
 		{

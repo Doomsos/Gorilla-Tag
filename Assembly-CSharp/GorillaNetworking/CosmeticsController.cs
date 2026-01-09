@@ -1117,15 +1117,13 @@ namespace GorillaNetworking
 			case CosmeticsController.PurchaseItemStages.Success:
 			{
 				this.FormattedPurchaseText("SUCCESS! ENJOY YOUR NEW ITEM!", "-", "-", true, true);
-				VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-				offlineVRRig.concatStringOfCosmeticsAllowed += this.itemToBuy.itemName;
+				GorillaTagger.Instance.offlineVRRig.AddCosmetic(this.itemToBuy.itemName);
 				CosmeticsController.CosmeticItem itemFromDict = this.GetItemFromDict(this.itemToBuy.itemName);
 				if (itemFromDict.bundledItems != null)
 				{
-					foreach (string str in itemFromDict.bundledItems)
+					foreach (string cosmeticId in itemFromDict.bundledItems)
 					{
-						VRRig offlineVRRig2 = GorillaTagger.Instance.offlineVRRig;
-						offlineVRRig2.concatStringOfCosmeticsAllowed += str;
+						GorillaTagger.Instance.offlineVRRig.AddCosmetic(cosmeticId);
 					}
 				}
 				this.tryOnSet.ClearSet(this.nullItem);
@@ -2596,8 +2594,7 @@ namespace GorillaNetworking
 		public void ProcessExternalUnlock(string itemID, bool autoEquip, bool isLeftHand)
 		{
 			this.UnlockItem(itemID, false);
-			VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-			offlineVRRig.concatStringOfCosmeticsAllowed += itemID;
+			GorillaTagger.Instance.offlineVRRig.AddCosmetic(itemID);
 			this.UpdateMyCosmetics();
 			if (autoEquip)
 			{

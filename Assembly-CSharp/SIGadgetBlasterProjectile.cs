@@ -82,6 +82,7 @@ public class SIGadgetBlasterProjectile : MonoBehaviourTick
 	public void KnockbackWithHaptics(Vector3 directionAndMagnitude, float hapticStrength, float hapticDuration, bool adjustForDirection = true)
 	{
 		SIPlayer.LocalPlayer.PlayerKnockback(directionAndMagnitude, true, true);
+		SIPlayer.LocalPlayer.NotifyBlasterHit();
 		if (adjustForDirection)
 		{
 			Vector3 from = GorillaTagger.Instance.leftHandTransform.position - GorillaTagger.Instance.bodyCollider.transform.position;

@@ -5,6 +5,14 @@ using UnityEngine.Events;
 
 public class SIGadgetListEntry : MonoBehaviour
 {
+	public SITouchscreenButtonContainer ButtonContainer
+	{
+		get
+		{
+			return this.buttonContainer;
+		}
+	}
+
 	public int Id { get; private set; } = -1;
 
 	public void Configure(ITouchScreenStation station, SITechTreePage page, Transform imageTarget, Transform textTarget, SITouchscreenButton.SITouchscreenButtonType buttonType = SITouchscreenButton.SITouchscreenButtonType.Select, int index = 0, float verticalOffset = 0f)
@@ -21,6 +29,7 @@ public class SIGadgetListEntry : MonoBehaviour
 		this.textFlattener.overrideParentTransform = textTarget;
 		this.imageFlattener.enabled = true;
 		this.textFlattener.enabled = true;
+		this.buttonContainer.SetUsable(page.IsAllowed);
 	}
 
 	[SerializeField]

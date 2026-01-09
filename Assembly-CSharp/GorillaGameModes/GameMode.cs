@@ -70,6 +70,14 @@ namespace GorillaGameModes
 
 		public static GameModeType CurrentGameModeType { get; private set; } = GameModeType.None;
 
+		public static int CurrentGameModeFlag
+		{
+			get
+			{
+				return 1 << (int)GameMode.CurrentGameModeType;
+			}
+		}
+
 		public static event Action<List<NetPlayer>, List<NetPlayer>> ParticipatingPlayersChanged;
 
 		static GameMode()
@@ -141,9 +149,13 @@ namespace GorillaGameModes
 			for (int i = 0; i < GameMode.gameModes.Count; i++)
 			{
 				string text = GameMode.gameModes[i].GameTypeName();
-				if (gmString.EndsWith(text))
+				if (gmString.Length > text.Length)
 				{
-					return text;
+					int num = text.Length + 1;
+					if (gmString[gmString.Length - num] == '|' && gmString.EndsWith(text))
+					{
+						return text;
+					}
 				}
 			}
 			return null;
@@ -226,6 +238,7 @@ namespace GorillaGameModes
 			GameMode.StopGameModeSafe(GameMode.activeGameMode);
 			GameMode.activeGameMode = null;
 			GameMode.activeNetworkHandler = null;
+			GameMode.CurrentGameModeType = GameModeType.None;
 			return GameMode.LoadGameMode(key);
 		}
 
@@ -537,7 +550,7 @@ namespace GorillaGameModes
 		public static readonly List<string> gameModeNames = new List<string>(10);
 
 		[OnEnterPlay_Clear]
-		private static readonly List<GorillaGameManager> activatedGameModes = new List<GorillaGameManager>(12);
+		private static readonly List<GorillaGameManager> activatedGameModes = new List<GorillaGameManager>(13);
 
 		[OnEnterPlay_SetNull]
 		private static GorillaGameManager activeGameMode = null;

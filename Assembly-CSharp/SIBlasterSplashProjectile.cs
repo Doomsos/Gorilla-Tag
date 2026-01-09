@@ -145,6 +145,7 @@ public class SIBlasterSplashProjectile : MonoBehaviour, SIGadgetProjectileType
 		{
 			return;
 		}
+		SIPlayer.LocalPlayer.NotifyBlasterSplashHit();
 		float num = Vector3.Angle(directionAndMagnitude.normalized, Vector3.up);
 		Vector3 a = Vector3.RotateTowards(directionAndMagnitude.normalized, Vector3.up, Mathf.Clamp(num - this.upwardsAngle, 0f, this.upwardsAngle) * 0.017453292f, 0f);
 		this.projectile.KnockbackWithHaptics(a * directionAndMagnitude.magnitude, directionAndMagnitude.magnitude / this.knockbackSpeed * this.projectile.hapticHitStrength, this.projectile.hapticHitDuration, true);

@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public class SITouchscreenButton : MonoBehaviour, IClickable
 {
-	private bool IsUsable
+	private bool IsReady
 	{
 		get
 		{
@@ -43,7 +43,7 @@ public class SITouchscreenButton : MonoBehaviour, IClickable
 
 	public void PressButton()
 	{
-		if (!this.IsUsable)
+		if (!this.IsReady || !this.isUsable)
 		{
 			return;
 		}
@@ -80,6 +80,9 @@ public class SITouchscreenButton : MonoBehaviour, IClickable
 	private const float DEBOUNCE_TIME = 0.2f;
 
 	private float _enableTime;
+
+	[NonSerialized]
+	public bool isUsable = true;
 
 	public enum SITouchscreenButtonType
 	{

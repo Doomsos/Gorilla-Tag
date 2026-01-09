@@ -5,6 +5,10 @@ public static class SIResourceHelper
 {
 	public static bool IsInOrder(this IList<SIResource.ResourceCost> cost)
 	{
+		if (cost == null)
+		{
+			return true;
+		}
 		SIResource.ResourceType resourceType = (SIResource.ResourceType)(-1);
 		foreach (SIResource.ResourceCost resourceCost in cost)
 		{
@@ -42,7 +46,7 @@ public static class SIResourceHelper
 
 	public static bool IsValid_AllowZero(this IList<SIResource.ResourceCost> cost)
 	{
-		if (cost == null)
+		if (cost == null || cost.Count == 0)
 		{
 			return false;
 		}
@@ -67,15 +71,18 @@ public static class SIResourceHelper
 	{
 		int num = 0;
 		int num2 = 0;
-		foreach (SIResource.ResourceCost resourceCost in costs)
+		if (costs != null)
 		{
-			if (resourceCost.type == SIResource.ResourceType.TechPoint)
+			foreach (SIResource.ResourceCost resourceCost in costs)
 			{
-				num += resourceCost.amount;
-			}
-			else
-			{
-				num2 += resourceCost.amount;
+				if (resourceCost.type == SIResource.ResourceType.TechPoint)
+				{
+					num += resourceCost.amount;
+				}
+				else
+				{
+					num2 += resourceCost.amount;
+				}
 			}
 		}
 		return new SIResource.ResourceCategoryCost(num, num2);

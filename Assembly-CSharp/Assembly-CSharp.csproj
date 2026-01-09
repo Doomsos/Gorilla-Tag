@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4F4783A0-24CF-4679-A807-AAAD7B3D351A}</ProjectGuid>
+    <ProjectGuid>{8392DCA3-8F48-478F-A1FD-A5DC1AEC80BD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -273,6 +273,9 @@
     <Reference Include="VoiceSDK.Runtime">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\VoiceSDK.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="XNode">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\XNode.dll</HintPath>
+    </Reference>
     <Reference Include="ZString">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\ZString.dll</HintPath>
     </Reference>
@@ -502,6 +505,8 @@
     <Compile Include="CallLimitersList.cs" />
     <Compile Include="CallLimiterWithCooldown.cs" />
     <Compile Include="CallLimitType.cs" />
+    <Compile Include="CameraShakeDispatcher.cs" />
+    <Compile Include="CameraShaker.cs" />
     <Compile Include="Campfire.cs" />
     <Compile Include="CasualData.cs" />
     <Compile Include="CasualGameMode.cs" />
@@ -836,6 +841,7 @@
     <Compile Include="EqualizerAnim.cs" />
     <Compile Include="EquipmentInteractor.cs" />
     <Compile Include="ErrorContent.cs" />
+    <Compile Include="ESuperGameModes.cs" />
     <Compile Include="ESuperInfectionGameState.cs" />
     <Compile Include="Example.cs" />
     <Compile Include="EyeScannableMono.cs" />
@@ -867,6 +873,7 @@
     <Compile Include="FlockingManager.cs" />
     <Compile Include="FlockingUpdateManager.cs" />
     <Compile Include="ForceDisableHoverboardTrigger.cs" />
+    <Compile Include="ForceRecalculateBounds.cs" />
     <Compile Include="ForceVolume.cs" />
     <Compile Include="FortuneResults.cs" />
     <Compile Include="FortuneTeller.cs" />
@@ -936,6 +943,7 @@
     <Compile Include="FXSystem.cs" />
     <Compile Include="FXSystemSettings.cs" />
     <Compile Include="FXType.cs" />
+    <Compile Include="GadgetNode.cs" />
     <Compile Include="GameAbilityEvent.cs" />
     <Compile Include="GameAbilityEvents.cs" />
     <Compile Include="GameAgent.cs" />
@@ -1628,6 +1636,16 @@
     <Compile Include="GorillaTag\ScienceExperimentManager.cs" />
     <Compile Include="GorillaTag\ScienceExperimentPlatformGenerator.cs" />
     <Compile Include="GorillaTag\Scripts\Utilities\GTStr.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\CosmeticExclusionEventGate.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\CosmeticExclusionQuery.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\CosmeticExclusionSource.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\CosmeticExclusionZone.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\CosmeticExclusionZoneRegistry.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\CosmeticExclusionZoneRegistryUtility.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\ExclusionZoneStateEvent.2.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\ExclusionZoneStateEvent.3.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\ExclusionZoneStateEvent.cs" />
+    <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\ZoneStateEventBase.cs" />
     <Compile Include="GorillaTag\Shared\Scripts\FirecrackerProjectile.cs" />
     <Compile Include="GorillaTag\Shared\Scripts\Utilities\GTBitArray.cs" />
     <Compile Include="GorillaTag\SoundBankInfoAttribute.cs" />
@@ -1748,6 +1766,7 @@
     <Compile Include="GREntityDestroyTrigger.cs" />
     <Compile Include="GREntityLifetime.cs" />
     <Compile Include="GREntitySpawnPoint.cs" />
+    <Compile Include="GreyZoneActivator.cs" />
     <Compile Include="GreyZoneManager.cs" />
     <Compile Include="GreyZoneSummoner.cs" />
     <Compile Include="GRFadeAndDestroyLight.cs" />
@@ -1916,7 +1935,6 @@
     <Compile Include="HandFXModifier.cs" />
     <Compile Include="HandHold.cs" />
     <Compile Include="HandHoldBehaviourActivation.cs" />
-    <Compile Include="HandLink.cs" />
     <Compile Include="HandLinkAuthorityStatus.cs" />
     <Compile Include="HandLinkAuthorityType.cs" />
     <Compile Include="HandRayController.cs" />
@@ -2665,6 +2683,7 @@
     <Compile Include="SimpleTeleporter.cs" />
     <Compile Include="SinglePool.cs" />
     <Compile Include="SIPlayer.cs" />
+    <Compile Include="SIPosedTentacleArm.cs" />
     <Compile Include="SIProgression.cs" />
     <Compile Include="SIPurchaseTerminal.cs" />
     <Compile Include="SIQuestBoard.cs" />
@@ -2790,6 +2809,7 @@
     <Compile Include="SubGrabPoint.cs" />
     <Compile Include="SubLineGrabPoint.cs" />
     <Compile Include="SubSplineGrabPoint.cs" />
+    <Compile Include="SuperCasualGame.cs" />
     <Compile Include="SuperInfection.cs" />
     <Compile Include="SuperInfectionGame.cs" />
     <Compile Include="SuperInfectionHandDisplay.cs" />
@@ -2820,6 +2840,7 @@
     <Compile Include="TagEffects\TagEffectTester.cs" />
     <Compile Include="TagGameModeData.cs" />
     <Compile Include="TaggedColliderTrigger.cs" />
+    <Compile Include="TakeMyHand_HandLink.cs" />
     <Compile Include="TapInnerGlow.cs" />
     <Compile Include="Tappable.cs" />
     <Compile Include="TappableBeeHive.cs" />
@@ -2828,6 +2849,8 @@
     <Compile Include="TappableSystem.cs" />
     <Compile Include="TargetPlatform.cs" />
     <Compile Include="TasselPhysics.cs" />
+    <Compile Include="TechTreeGadgetGraph.cs" />
+    <Compile Include="TechTreeNodeBase.cs" />
     <Compile Include="TelemetryData.cs" />
     <Compile Include="TeleportNode.cs" />
     <Compile Include="TeleportNodeDefinition.cs" />
@@ -3038,6 +3061,7 @@
     <Compile Include="VrrigReliableSerializer.cs" />
     <Compile Include="VRRigReliableState.cs" />
     <Compile Include="VRRigSerializer.cs" />
+    <Compile Include="WaitUtils.cs" />
     <Compile Include="WanderingGhost.cs" />
     <Compile Include="WardrobeFunctionButton.cs" />
     <Compile Include="WardrobeInstance.cs" />

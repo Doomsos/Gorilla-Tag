@@ -65,6 +65,11 @@ namespace GorillaNetworking
 			return this.startupTime + TimeSpan.FromSeconds((double)Time.realtimeSinceStartup);
 		}
 
+		public void AddSeverTime(int m)
+		{
+			this.startupTime = this.startupTime.AddMinutes((double)m);
+		}
+
 		public string[] allowedMapsToJoin
 		{
 			get
@@ -552,7 +557,7 @@ namespace GorillaNetworking
 				gameModeType = GameModeType.SuperInfect;
 				text = GameModeType.SuperInfect.ToString();
 			}
-			if (gameModeType != GameModeType.Casual && gameModeType != GameModeType.Infection && gameModeType != GameModeType.HuntDown && gameModeType != GameModeType.Paintbrawl && gameModeType != GameModeType.Ambush && gameModeType != GameModeType.PropHunt && gameModeType != GameModeType.SuperInfect)
+			if (gameModeType != GameModeType.Casual && gameModeType != GameModeType.Infection && gameModeType != GameModeType.HuntDown && gameModeType != GameModeType.Paintbrawl && gameModeType != GameModeType.Ambush && gameModeType != GameModeType.SuperInfect && gameModeType != GameModeType.SuperCasual)
 			{
 				PlayerPrefs.SetString("currentGameModePostSI", GameModeType.SuperInfect.ToString());
 				PlayerPrefs.Save();
@@ -1091,11 +1096,11 @@ namespace GorillaNetworking
 
 		private void DisconnectAfterDelay(float seconds)
 		{
-			GorillaComputer.<DisconnectAfterDelay>d__368 <DisconnectAfterDelay>d__;
+			GorillaComputer.<DisconnectAfterDelay>d__369 <DisconnectAfterDelay>d__;
 			<DisconnectAfterDelay>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<DisconnectAfterDelay>d__.seconds = seconds;
 			<DisconnectAfterDelay>d__.<>1__state = -1;
-			<DisconnectAfterDelay>d__.<>t__builder.Start<GorillaComputer.<DisconnectAfterDelay>d__368>(ref <DisconnectAfterDelay>d__);
+			<DisconnectAfterDelay>d__.<>t__builder.Start<GorillaComputer.<DisconnectAfterDelay>d__369>(ref <DisconnectAfterDelay>d__);
 		}
 
 		private void ProcessTurnState(GorillaKeyboardBindings buttonPressed)
@@ -1685,7 +1690,7 @@ namespace GorillaNetworking
 
 		private void LoadingScreen()
 		{
-			GorillaComputer.<>c__DisplayClass394_0 CS$<>8__locals1 = new GorillaComputer.<>c__DisplayClass394_0();
+			GorillaComputer.<>c__DisplayClass395_0 CS$<>8__locals1 = new GorillaComputer.<>c__DisplayClass395_0();
 			CS$<>8__locals1.<>4__this = this;
 			string defaultResult = "LOADING";
 			LocalisationManager.TryGetKeyForCurrentLocale("LOADING_SCREEN", out CS$<>8__locals1.result, defaultResult);
@@ -3282,11 +3287,11 @@ namespace GorillaNetworking
 
 		private void UpdateSession()
 		{
-			GorillaComputer.<UpdateSession>d__477 <UpdateSession>d__;
+			GorillaComputer.<UpdateSession>d__478 <UpdateSession>d__;
 			<UpdateSession>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<UpdateSession>d__.<>4__this = this;
 			<UpdateSession>d__.<>1__state = -1;
-			<UpdateSession>d__.<>t__builder.Start<GorillaComputer.<UpdateSession>d__477>(ref <UpdateSession>d__);
+			<UpdateSession>d__.<>t__builder.Start<GorillaComputer.<UpdateSession>d__478>(ref <UpdateSession>d__);
 		}
 
 		private void OnSessionUpdate_GorillaComputer()

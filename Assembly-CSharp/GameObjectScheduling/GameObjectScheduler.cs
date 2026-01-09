@@ -1,88 +1,74 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using GorillaNetworking;
 using UnityEngine;
 
 namespace GameObjectScheduling
 {
-	public class GameObjectScheduler : MonoBehaviour
+	public class GameObjectScheduler : MonoBehaviour, IGorillaSliceableSimple
 	{
 		private void Start()
 		{
-			this.schedule.Validate();
-			List<GameObject> list = new List<GameObject>();
-			for (int i = 0; i < base.transform.childCount; i++)
-			{
-				list.Add(base.transform.GetChild(i).gameObject);
-			}
-			this.scheduledGameObject = list.ToArray();
-			for (int j = 0; j < this.scheduledGameObject.Length; j++)
-			{
-				this.scheduledGameObject[j].SetActive(false);
-			}
-			this.dispatcher = base.GetComponent<GameObjectSchedulerEventDispatcher>();
-			this.monitor = base.StartCoroutine(this.MonitorTime());
+			GameObjectScheduler.<Start>d__8 <Start>d__;
+			<Start>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
+			<Start>d__.<>4__this = this;
+			<Start>d__.<>1__state = -1;
+			<Start>d__.<>t__builder.Start<GameObjectScheduler.<Start>d__8>(ref <Start>d__);
 		}
 
-		private void OnEnable()
+		private void SetInitialState()
 		{
-			if (this.monitor == null && this.scheduledGameObject != null)
-			{
-				this.monitor = base.StartCoroutine(this.MonitorTime());
-			}
-		}
-
-		private void OnDisable()
-		{
-			if (this.monitor != null)
-			{
-				base.StopCoroutine(this.monitor);
-			}
-			this.monitor = null;
-		}
-
-		private IEnumerator MonitorTime()
-		{
-			while (GorillaComputer.instance == null || GorillaComputer.instance.startupMillis == 0L)
-			{
-				yield return null;
-			}
-			bool previousState = this.getActiveState();
+			double num;
+			this.getActiveState(out this.previousState, out num);
 			for (int i = 0; i < this.scheduledGameObject.Length; i++)
 			{
-				this.scheduledGameObject[i].SetActive(previousState);
-			}
-			for (;;)
-			{
-				yield return new WaitForSeconds(60f);
-				bool activeState = this.getActiveState();
-				if (previousState != activeState)
+				this.scheduledGameObject[i].SetActive(this.previousState);
+				if (num > 0.0)
 				{
-					this.changeActiveState(activeState);
-					previousState = activeState;
+					Animator[] componentsInChildren = this.scheduledGameObject[i].GetComponentsInChildren<Animator>();
+					for (int j = 0; j < componentsInChildren.Length; j++)
+					{
+						int fullPathHash = componentsInChildren[j].GetCurrentAnimatorStateInfo(0).fullPathHash;
+						componentsInChildren[j].PlayInFixedTime(fullPathHash, 0, (float)num);
+					}
 				}
 			}
-			yield break;
+			this.lastMinuteCheck = this.getServerTime().Minute;
 		}
 
-		private bool getActiveState()
+		public void OnEnable()
 		{
-			this.currentNodeIndex = this.schedule.GetCurrentNodeIndex(this.getServerTime(), 0);
-			bool result;
+			GorillaSlicerSimpleManager.RegisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+			if (this.ready)
+			{
+				this.SetInitialState();
+			}
+		}
+
+		public void OnDisable()
+		{
+			GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
+		}
+
+		private void getActiveState(out bool state, out double totalSeconds)
+		{
+			DateTime serverTime = this.getServerTime();
+			DateTime dateTime;
+			this.currentNodeIndex = this.schedule.GetCurrentNodeIndex(serverTime, out dateTime);
 			if (this.currentNodeIndex == -1)
 			{
-				result = this.schedule.InitialState;
+				state = this.schedule.InitialState;
+				totalSeconds = 0.0;
+				return;
 			}
-			else if (this.currentNodeIndex < this.schedule.Nodes.Length)
+			if (this.currentNodeIndex < this.schedule.Nodes.Length)
 			{
-				result = this.schedule.Nodes[this.currentNodeIndex].ActiveState;
+				state = this.schedule.Nodes[this.currentNodeIndex].ActiveState;
+				totalSeconds = (serverTime - this.schedule.Nodes[this.currentNodeIndex].DateTime).TotalSeconds;
+				return;
 			}
-			else
-			{
-				result = this.schedule.Nodes[this.schedule.Nodes.Length - 1].ActiveState;
-			}
-			return result;
+			state = this.schedule.Nodes[this.schedule.Nodes.Length - 1].ActiveState;
+			totalSeconds = (serverTime - this.schedule.Nodes[this.schedule.Nodes.Length - 1].DateTime).TotalSeconds;
 		}
 
 		private DateTime getServerTime()
@@ -118,6 +104,23 @@ namespace GameObjectScheduling
 			}
 		}
 
+		public void SliceUpdate()
+		{
+			if (!this.ready || (!this.useSecondsFidelity && this.getServerTime().Minute == this.lastMinuteCheck))
+			{
+				return;
+			}
+			bool flag;
+			double num;
+			this.getActiveState(out flag, out num);
+			if (this.previousState != flag)
+			{
+				this.changeActiveState(flag);
+				this.previousState = flag;
+			}
+			this.lastMinuteCheck = this.getServerTime().Minute;
+		}
+
 		[SerializeField]
 		private GameObjectSchedule schedule;
 
@@ -127,6 +130,14 @@ namespace GameObjectScheduling
 
 		private int currentNodeIndex = -1;
 
-		private Coroutine monitor;
+		private bool ready;
+
+		private bool previousState;
+
+		private int lastMinuteCheck = -1;
+
+		public bool useSecondsFidelity;
+
+		public bool debugTime;
 	}
 }

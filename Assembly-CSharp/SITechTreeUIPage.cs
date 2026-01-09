@@ -86,6 +86,7 @@ public class SITechTreeUIPage : MonoBehaviour
 		{
 			SITechTreeUINode uinode = this.GetUINode(parent.Value.upgradeType);
 			sitechTreeUINode.Parents.Add(uinode);
+			uinode.Children.Add(sitechTreeUINode);
 		}
 		if (sitechTreeUINode.IsConfigured)
 		{
@@ -99,32 +100,31 @@ public class SITechTreeUIPage : MonoBehaviour
 				position.x = num4 / (float)sitechTreeUINode.Parents.Count;
 			}
 			position.y = Mathf.Max(sitechTreeUINode.transform.localPosition.y, position.y);
-		}
-		else
-		{
-			sitechTreeUINode.SetTechTreeNode(A_4.techTreeStation, node.Value.upgradeType);
-			this._pageNodes.Add(sitechTreeUINode);
+			sitechTreeUINode.AdjustPosition(position - sitechTreeUINode.transform.localPosition);
+			return;
 		}
 		sitechTreeUINode.transform.localPosition = position;
-		CS$<>8__locals1.childCount = node.Children.Count;
+		sitechTreeUINode.SetTechTreeNode(A_4.techTreeStation, node.Value.upgradeType);
+		this._pageNodes.Add(sitechTreeUINode);
+		int count = node.Children.Count;
 		float num5 = 0f;
-		if (CS$<>8__locals1.childCount > 1)
+		if (count > 1)
 		{
 			int index = 0;
-			for (int i = 0; i < CS$<>8__locals1.childCount; i++)
+			for (int i = 0; i < count; i++)
 			{
 				float num6 = CS$<>8__locals1.subtreeWidths[index];
-				float num7 = (i == 0 || i == CS$<>8__locals1.childCount - 1) ? (num6 / 2f) : num6;
+				float num7 = (i == 0 || i == count - 1) ? (num6 / 2f) : num6;
 				num5 -= num7 / 2f;
 			}
 		}
-		for (int j = 0; j < CS$<>8__locals1.childCount; j++)
+		for (int j = 0; j < count; j++)
 		{
 			float y = num + (float)((j + 1) % 2 * num2);
 			GraphNode<SITechTreeNode> node2 = node.Children[j];
 			Vector3 position2 = position + new Vector3(num5, y, 0f);
 			this.<Configure>g__AddNodes|5_0(node, node2, position2, ref A_4);
-			num5 += SITechTreeUIPage.<Configure>g__GetSpacing|5_3(j, ref CS$<>8__locals1);
+			num5 += SITechTreeUIPage.<Configure>g__GetSpacing|5_3(j, count, ref CS$<>8__locals1);
 		}
 		sitechTreeUINode.imageFlattener.overrideParentTransform = A_4.imageTarget;
 		sitechTreeUINode.textFlattener.overrideParentTransform = A_4.textTarget;
@@ -144,11 +144,11 @@ public class SITechTreeUIPage : MonoBehaviour
 	}
 
 	[CompilerGenerated]
-	internal static float <Configure>g__GetSpacing|5_3(int index, ref SITechTreeUIPage.<>c__DisplayClass5_1 A_1)
+	internal static float <Configure>g__GetSpacing|5_3(int index, int childCount, ref SITechTreeUIPage.<>c__DisplayClass5_1 A_2)
 	{
 		int num = index + 1;
-		float num2 = (index >= 0 && index < A_1.childCount) ? A_1.subtreeWidths[index] : 0f;
-		float num3 = (num >= 0 && num < A_1.childCount) ? A_1.subtreeWidths[num] : 0f;
+		float num2 = (index >= 0 && index < childCount) ? A_2.subtreeWidths[index] : 0f;
+		float num3 = (num >= 0 && num < childCount) ? A_2.subtreeWidths[num] : 0f;
 		return (num2 + num3) / 2f;
 	}
 

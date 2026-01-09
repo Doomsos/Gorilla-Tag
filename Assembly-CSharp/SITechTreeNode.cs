@@ -1,4 +1,5 @@
 ﻿using System;
+using GorillaGameModes;
 using UnityEngine;
 
 [Serializable]
@@ -21,7 +22,15 @@ public class SITechTreeNode
 		get
 		{
 			EAssetReleaseTier edReleaseTier = this.m_edReleaseTier;
-			return edReleaseTier != EAssetReleaseTier.Disabled && edReleaseTier <= EAssetReleaseTier.PublicRC;
+			return edReleaseTier != EAssetReleaseTier.Disabled && edReleaseTier <= EAssetReleaseTier.PublicRC && (this.excludedGameModes & (ESuperGameModes)GameMode.CurrentGameModeFlag) == (ESuperGameModes)0;
+		}
+	}
+
+	public bool IsAllowed
+	{
+		get
+		{
+			return (this.excludedGameModes & (ESuperGameModes)GameMode.CurrentGameModeFlag) == (ESuperGameModes)0;
 		}
 	}
 
@@ -29,7 +38,7 @@ public class SITechTreeNode
 	{
 		get
 		{
-			return this.IsValid && this.unlockedGadgetPrefab;
+			return this.IsValid && this.unlockedGadgetPrefab && this.IsAllowed;
 		}
 	}
 
@@ -41,6 +50,8 @@ public class SITechTreeNode
 	public string nickName;
 
 	public string description;
+
+	public ESuperGameModes excludedGameModes;
 
 	public SIUpgradeType[] parentUpgrades;
 

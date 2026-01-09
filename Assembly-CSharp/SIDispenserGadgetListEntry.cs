@@ -6,6 +6,14 @@ using UnityEngine.Events;
 
 public class SIDispenserGadgetListEntry : MonoBehaviour
 {
+	public SITouchscreenButtonContainer DispenseButton
+	{
+		get
+		{
+			return this.dispenseButton;
+		}
+	}
+
 	public void SetStation(ITouchScreenStation station, Transform imageTarget, Transform textTarget)
 	{
 		this.dispenseButton.button.buttonPressed.RemoveAllListeners();
@@ -28,12 +36,12 @@ public class SIDispenserGadgetListEntry : MonoBehaviour
 	{
 		base.name = (this.gadgetText.text = node.nickName);
 		int nodeId = node.upgradeType.GetNodeId();
-		SIDispenserGadgetListEntry.<SetTechTreeNode>g__ConfigureButton|8_0(this.dispenseButton.button, SITouchscreenButton.SITouchscreenButtonType.Dispense, nodeId);
-		SIDispenserGadgetListEntry.<SetTechTreeNode>g__ConfigureButton|8_0(this.infoButton.button, SITouchscreenButton.SITouchscreenButtonType.Select, nodeId);
+		SIDispenserGadgetListEntry.<SetTechTreeNode>g__ConfigureButton|10_0(this.dispenseButton.button, SITouchscreenButton.SITouchscreenButtonType.Dispense, nodeId);
+		SIDispenserGadgetListEntry.<SetTechTreeNode>g__ConfigureButton|10_0(this.infoButton.button, SITouchscreenButton.SITouchscreenButtonType.Select, nodeId);
 	}
 
 	[CompilerGenerated]
-	internal static void <SetTechTreeNode>g__ConfigureButton|8_0(SITouchscreenButton button, SITouchscreenButton.SITouchscreenButtonType type, int data)
+	internal static void <SetTechTreeNode>g__ConfigureButton|10_0(SITouchscreenButton button, SITouchscreenButton.SITouchscreenButtonType type, int data)
 	{
 		button.buttonType = type;
 		button.data = data;

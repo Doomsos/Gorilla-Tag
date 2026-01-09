@@ -200,6 +200,10 @@ public class SIGadgetChargeBlaster : MonoBehaviour, SIGadgetBlasterType
 		{
 			return;
 		}
+		if (this.blaster.CurrentFireRate() > 1f / this.fireCooldown * (1f + this.fireRateGracePercentage))
+		{
+			return;
+		}
 		this.FireProjectile(num, fireId, vector, rotation);
 	}
 
@@ -226,6 +230,8 @@ public class SIGadgetChargeBlaster : MonoBehaviour, SIGadgetBlasterType
 
 	[SerializeField]
 	private float chargeRatePerSecond = 20f;
+
+	public float fireRateGracePercentage = 0.25f;
 
 	public float maxChargeDiff = 5f;
 

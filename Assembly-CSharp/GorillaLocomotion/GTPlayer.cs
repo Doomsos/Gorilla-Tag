@@ -357,13 +357,33 @@ namespace GorillaLocomotion
 			}
 		}
 
+		public int TentacleActiveAtFrame { get; set; }
+
+		public bool IsTentacleActive
+		{
+			get
+			{
+				return this.TentacleActiveAtFrame >= Time.frameCount;
+			}
+		}
+
+		public int LaserZiplineActiveAtFrame { get; set; }
+
+		public bool IsLaserZiplineActive
+		{
+			get
+			{
+				return this.LaserZiplineActiveAtFrame >= Time.frameCount;
+			}
+		}
+
 		public int ThrusterActiveAtFrame { get; set; }
 
 		public bool IsThrusterActive
 		{
 			get
 			{
-				return this.ThrusterActiveAtFrame == Time.frameCount;
+				return this.ThrusterActiveAtFrame >= Time.frameCount;
 			}
 		}
 
@@ -1381,7 +1401,7 @@ namespace GorillaLocomotion
 			}
 			this.lastHeadPosition = this.headCollider.transform.position;
 			this.areBothTouching = ((!this.leftHand.isColliding && !this.leftHand.wasColliding) || (!this.rightHand.isColliding && !this.rightHand.wasColliding));
-			this.HandleHandLink();
+			this.TakeMyHand_ProcessMovement();
 			this.HandleTentacleMovement();
 			this.anyHandIsColliding = false;
 			this.anyHandIsSliding = false;
@@ -1727,12 +1747,12 @@ namespace GorillaLocomotion
 			}
 			if (PhotonNetwork.InRoom)
 			{
-				if (this.IsGroundedHand || this.IsThrusterActive)
+				if (this.IsGroundedHand || this.IsTentacleActive || this.IsThrusterActive)
 				{
 					this.LastHandTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
 					this.LastTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
 				}
-				else if (this.IsGroundedButt)
+				else if (this.IsGroundedButt || this.IsLaserZiplineActive)
 				{
 					this.LastTouchedGroundAtNetworkTime = (float)PhotonNetwork.Time;
 				}
@@ -1902,7 +1922,7 @@ namespace GorillaLocomotion
 					this.SetNativeScale(null);
 				}
 			}
-			HandLink grabbedLink = VRRig.LocalRig.leftHandLink.grabbedLink;
+			TakeMyHand_HandLink grabbedLink = VRRig.LocalRig.leftHandLink.grabbedLink;
 			if (grabbedLink != null)
 			{
 				double time2 = PhotonNetwork.Time;
@@ -2043,7 +2063,7 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		public HandLinkAuthorityStatus GetSelfHandLinkAuthority()
+		public HandLinkAuthorityStatus TakeMyHand_GetSelfHandLinkAuthority()
 		{
 			int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
 			if (this.IsGroundedHand)
@@ -2061,17 +2081,17 @@ namespace GorillaLocomotion
 			return new HandLinkAuthorityStatus(HandLinkAuthorityType.None, this.LastTouchedGroundAtNetworkTime, actorNumber);
 		}
 
-		private void HandleHandLink()
+		private void TakeMyHand_ProcessMovement()
 		{
-			HandLink leftHandLink = VRRig.LocalRig.leftHandLink;
-			HandLink rightHandLink = VRRig.LocalRig.rightHandLink;
+			TakeMyHand_HandLink leftHandLink = VRRig.LocalRig.leftHandLink;
+			TakeMyHand_HandLink rightHandLink = VRRig.LocalRig.rightHandLink;
 			bool flag = leftHandLink.grabbedLink != null;
 			bool flag2 = rightHandLink.grabbedLink != null;
 			if (!flag && !flag2)
 			{
 				return;
 			}
-			HandLinkAuthorityStatus selfHandLinkAuthority = this.GetSelfHandLinkAuthority();
+			HandLinkAuthorityStatus handLinkAuthorityStatus = this.TakeMyHand_GetSelfHandLinkAuthority();
 			int num = -1;
 			HandLinkAuthorityStatus chainAuthority = new HandLinkAuthorityStatus(HandLinkAuthorityType.None);
 			if (flag)
@@ -2088,16 +2108,16 @@ namespace GorillaLocomotion
 			{
 				if (leftHandLink.grabbedPlayer == rightHandLink.grabbedPlayer)
 				{
-					switch (selfHandLinkAuthority.CompareTo(chainAuthority))
+					switch (handLinkAuthorityStatus.CompareTo(chainAuthority))
 					{
 					case -1:
-						this.HandLink_PositionChild_LocalPlayer(leftHandLink, rightHandLink);
+						this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink, rightHandLink);
 						return;
 					case 0:
-						this.HandLink_PositionBoth_BothHands(leftHandLink, rightHandLink);
+						this.TakeMyHand_PositionBoth_BothHands(leftHandLink, rightHandLink);
 						return;
 					case 1:
-						this.HandLink_PositionChild_RemotePlayer_BothHands(leftHandLink, rightHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer_BothHands(leftHandLink, rightHandLink);
 						return;
 					default:
 						return;
@@ -2105,60 +2125,60 @@ namespace GorillaLocomotion
 				}
 				else
 				{
-					int num3 = selfHandLinkAuthority.CompareTo(chainAuthority);
-					int num4 = selfHandLinkAuthority.CompareTo(chainAuthority2);
+					int num3 = handLinkAuthorityStatus.CompareTo(chainAuthority);
+					int num4 = handLinkAuthorityStatus.CompareTo(chainAuthority2);
 					switch (num3 * 3 + num4)
 					{
 					case -3:
 					case -2:
-						this.HandLink_PositionChild_LocalPlayer(leftHandLink);
-						this.HandLink_PositionChild_RemotePlayer(rightHandLink);
+						this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
 						return;
 					case -1:
 					case 2:
-						this.HandLink_PositionChild_LocalPlayer(rightHandLink);
-						this.HandLink_PositionChild_RemotePlayer(leftHandLink);
+						this.TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
 						return;
 					case 0:
-						this.HandLink_PositionTriple(leftHandLink, rightHandLink);
+						this.TakeMyHand_PositionTriple(leftHandLink, rightHandLink);
 						return;
 					case 1:
-						this.HandLink_PositionBoth(leftHandLink);
-						this.HandLink_PositionChild_RemotePlayer(rightHandLink);
+						this.TakeMyHand_PositionBoth(leftHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
 						return;
 					case 3:
-						this.HandLink_PositionBoth(rightHandLink);
-						this.HandLink_PositionChild_RemotePlayer(leftHandLink);
+						this.TakeMyHand_PositionBoth(rightHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
 						return;
 					case 4:
-						this.HandLink_PositionChild_RemotePlayer(leftHandLink);
-						this.HandLink_PositionChild_RemotePlayer(rightHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
 						return;
 					}
 					switch (chainAuthority.CompareTo(chainAuthority2))
 					{
 					case -1:
-						this.HandLink_PositionChild_LocalPlayer(rightHandLink);
-						this.HandLink_PositionChild_RemotePlayer(leftHandLink);
+						this.TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
 						return;
 					case 0:
 						if (num > num2)
 						{
-							this.HandLink_PositionChild_LocalPlayer(rightHandLink);
-							this.HandLink_PositionChild_RemotePlayer(leftHandLink);
+							this.TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
+							this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
 							return;
 						}
 						if (num < num2)
 						{
-							this.HandLink_PositionChild_LocalPlayer(leftHandLink);
-							this.HandLink_PositionChild_RemotePlayer(rightHandLink);
+							this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
+							this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
 							return;
 						}
-						this.HandLink_PositionChild_LocalPlayer(leftHandLink, rightHandLink);
+						this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink, rightHandLink);
 						return;
 					case 1:
-						this.HandLink_PositionChild_LocalPlayer(leftHandLink);
-						this.HandLink_PositionChild_RemotePlayer(rightHandLink);
+						this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
+						this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
 						return;
 					default:
 						return;
@@ -2167,16 +2187,16 @@ namespace GorillaLocomotion
 			}
 			else if (flag)
 			{
-				switch (selfHandLinkAuthority.CompareTo(chainAuthority))
+				switch (handLinkAuthorityStatus.CompareTo(chainAuthority))
 				{
 				case -1:
-					this.HandLink_PositionChild_LocalPlayer(leftHandLink);
+					this.TakeMyHand_PositionChild_LocalPlayer(leftHandLink);
 					return;
 				case 0:
-					this.HandLink_PositionBoth(leftHandLink);
+					this.TakeMyHand_PositionBoth(leftHandLink);
 					return;
 				case 1:
-					this.HandLink_PositionChild_RemotePlayer(leftHandLink);
+					this.TakeMyHand_PositionChild_RemotePlayer(leftHandLink);
 					return;
 				default:
 					return;
@@ -2184,16 +2204,16 @@ namespace GorillaLocomotion
 			}
 			else
 			{
-				switch (selfHandLinkAuthority.CompareTo(chainAuthority2))
+				switch (handLinkAuthorityStatus.CompareTo(chainAuthority2))
 				{
 				case -1:
-					this.HandLink_PositionChild_LocalPlayer(rightHandLink);
+					this.TakeMyHand_PositionChild_LocalPlayer(rightHandLink);
 					return;
 				case 0:
-					this.HandLink_PositionBoth(rightHandLink);
+					this.TakeMyHand_PositionBoth(rightHandLink);
 					return;
 				case 1:
-					this.HandLink_PositionChild_RemotePlayer(rightHandLink);
+					this.TakeMyHand_PositionChild_RemotePlayer(rightHandLink);
 					return;
 				default:
 					return;
@@ -2201,10 +2221,10 @@ namespace GorillaLocomotion
 			}
 		}
 
-		private void HandLink_PositionTriple(HandLink linkA, HandLink linkB)
+		private void TakeMyHand_PositionTriple(TakeMyHand_HandLink linkA, TakeMyHand_HandLink linkB)
 		{
-			Vector3 a = linkA.transform.position - linkA.grabbedLink.transform.position;
-			Vector3 vector = linkB.transform.position - linkB.grabbedLink.transform.position;
+			Vector3 a = linkA.LinkPosition - linkA.grabbedLink.LinkPosition;
+			Vector3 vector = linkB.LinkPosition - linkB.grabbedLink.LinkPosition;
 			Vector3 b = (a + vector) * 0.33f;
 			bool flag;
 			bool flag2;
@@ -2216,15 +2236,15 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		private void HandLink_PositionBoth(HandLink link)
+		private void TakeMyHand_PositionBoth(TakeMyHand_HandLink link)
 		{
-			Vector3 vector = (link.grabbedLink.transform.position - link.transform.position) * 0.5f;
+			Vector3 vector = (link.grabbedLink.LinkPosition - link.LinkPosition) * 0.5f;
 			bool flag;
 			bool flag2;
 			link.grabbedLink.myRig.TrySweptOffsetMove(-vector, out flag, out flag2);
 			if (flag || flag2)
 			{
-				this.HandLink_PositionChild_LocalPlayer(link);
+				this.TakeMyHand_PositionChild_LocalPlayer(link);
 			}
 			else
 			{
@@ -2233,17 +2253,17 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		private void HandLink_PositionBoth_BothHands(HandLink link1, HandLink link2)
+		private void TakeMyHand_PositionBoth_BothHands(TakeMyHand_HandLink link1, TakeMyHand_HandLink link2)
 		{
-			Vector3 a = (link1.grabbedLink.transform.position - link1.transform.position) * 0.5f;
-			Vector3 b = (link2.grabbedLink.transform.position - link2.transform.position) * 0.5f;
+			Vector3 a = (link1.grabbedLink.LinkPosition - link1.LinkPosition) * 0.5f;
+			Vector3 b = (link2.grabbedLink.LinkPosition - link2.LinkPosition) * 0.5f;
 			Vector3 vector = (a + b) * 0.5f;
 			bool flag;
 			bool flag2;
 			link1.grabbedLink.myRig.TrySweptOffsetMove(-vector, out flag, out flag2);
 			if (flag || flag2)
 			{
-				this.HandLink_PositionChild_LocalPlayer(link1, link2);
+				this.TakeMyHand_PositionChild_LocalPlayer(link1, link2);
 			}
 			else
 			{
@@ -2252,44 +2272,44 @@ namespace GorillaLocomotion
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		private void HandLink_PositionChild_LocalPlayer(HandLink parentLink)
+		private void TakeMyHand_PositionChild_LocalPlayer(TakeMyHand_HandLink parentLink)
 		{
-			Vector3 b = parentLink.grabbedLink.transform.position - parentLink.transform.position;
+			Vector3 b = parentLink.grabbedLink.LinkPosition - parentLink.LinkPosition;
 			this.playerRigidBody.transform.position += b;
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		private void HandLink_PositionChild_LocalPlayer(HandLink linkA, HandLink linkB)
+		private void TakeMyHand_PositionChild_LocalPlayer(TakeMyHand_HandLink linkA, TakeMyHand_HandLink linkB)
 		{
-			Vector3 a = linkA.grabbedLink.transform.position - linkA.transform.position;
-			Vector3 b = linkB.grabbedLink.transform.position - linkB.transform.position;
+			Vector3 a = linkA.grabbedLink.LinkPosition - linkA.LinkPosition;
+			Vector3 b = linkB.grabbedLink.LinkPosition - linkB.LinkPosition;
 			this.playerRigidBody.transform.position += (a + b) * 0.5f;
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
-		private void HandLink_PositionChild_RemotePlayer(HandLink childLink)
+		private void TakeMyHand_PositionChild_RemotePlayer(TakeMyHand_HandLink childLink)
 		{
-			Vector3 movement = childLink.transform.position - childLink.grabbedLink.transform.position;
+			Vector3 movement = childLink.LinkPosition - childLink.grabbedLink.LinkPosition;
 			bool flag;
 			bool flag2;
 			childLink.grabbedLink.myRig.TrySweptOffsetMove(movement, out flag, out flag2);
 			if (flag || flag2)
 			{
-				this.HandLink_PositionChild_LocalPlayer(childLink);
+				this.TakeMyHand_PositionChild_LocalPlayer(childLink);
 			}
 		}
 
-		private void HandLink_PositionChild_RemotePlayer_BothHands(HandLink childLink1, HandLink childLink2)
+		private void TakeMyHand_PositionChild_RemotePlayer_BothHands(TakeMyHand_HandLink childLink1, TakeMyHand_HandLink childLink2)
 		{
-			Vector3 a = childLink1.transform.position - childLink1.grabbedLink.transform.position;
-			Vector3 b = childLink2.transform.position - childLink2.grabbedLink.transform.position;
+			Vector3 a = childLink1.LinkPosition - childLink1.grabbedLink.LinkPosition;
+			Vector3 b = childLink2.LinkPosition - childLink2.grabbedLink.LinkPosition;
 			Vector3 movement = (a + b) * 0.5f;
 			bool flag;
 			bool flag2;
 			childLink1.grabbedLink.myRig.TrySweptOffsetMove(movement, out flag, out flag2);
 			if (flag || flag2)
 			{
-				this.HandLink_PositionChild_LocalPlayer(childLink1, childLink2);
+				this.TakeMyHand_PositionChild_LocalPlayer(childLink1, childLink2);
 			}
 		}
 
@@ -2597,15 +2617,15 @@ namespace GorillaLocomotion
 			Vector3 localPosition = this.climbHelper.localPosition;
 			if (climbable.snapX)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|407_0(ref localPosition.x, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|419_0(ref localPosition.x, climbable.maxDistanceSnap);
 			}
 			if (climbable.snapY)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|407_0(ref localPosition.y, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|419_0(ref localPosition.y, climbable.maxDistanceSnap);
 			}
 			if (climbable.snapZ)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|407_0(ref localPosition.z, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|419_0(ref localPosition.z, climbable.maxDistanceSnap);
 			}
 			this.climbHelperTargetPos = localPosition;
 			climbable.isBeingClimbed = true;
@@ -3148,12 +3168,12 @@ namespace GorillaLocomotion
 
 		public void DoLaunch(Vector3 velocity)
 		{
-			GTPlayer.<DoLaunch>d__443 <DoLaunch>d__;
+			GTPlayer.<DoLaunch>d__455 <DoLaunch>d__;
 			<DoLaunch>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<DoLaunch>d__.<>4__this = this;
 			<DoLaunch>d__.velocity = velocity;
 			<DoLaunch>d__.<>1__state = -1;
-			<DoLaunch>d__.<>t__builder.Start<GTPlayer.<DoLaunch>d__443>(ref <DoLaunch>d__);
+			<DoLaunch>d__.<>t__builder.Start<GTPlayer.<DoLaunch>d__455>(ref <DoLaunch>d__);
 		}
 
 		private void OnEnable()
@@ -3313,7 +3333,7 @@ namespace GorillaLocomotion
 		}
 
 		[CompilerGenerated]
-		internal static void <BeginClimbing>g__SnapAxis|407_0(ref float val, float maxDist)
+		internal static void <BeginClimbing>g__SnapAxis|419_0(ref float val, float maxDist)
 		{
 			if (val > maxDist)
 			{

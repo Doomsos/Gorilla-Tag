@@ -131,6 +131,10 @@ public class SIGadgetCooldownBlaster : MonoBehaviour, SIGadgetBlasterType
 		{
 			return;
 		}
+		if (this.blaster.CurrentFireRate() > 1f / this.fireCooldown * (1f + this.fireRateGracePercentage))
+		{
+			return;
+		}
 		this.FireProjectile(fireId, vector, rotation);
 	}
 
@@ -141,6 +145,8 @@ public class SIGadgetCooldownBlaster : MonoBehaviour, SIGadgetBlasterType
 	public SIGadgetBlasterProjectile projectilePrefab;
 
 	public float fireCooldown = 0.5f;
+
+	public float fireRateGracePercentage = 0.25f;
 
 	public float availableToFireHapticStrength = 0.1f;
 

@@ -4,8 +4,10 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using GorillaExtensions;
 using GorillaGameModes;
+using GorillaTag;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Pool;
 
 [DefaultExecutionOrder(0)]
 public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IFactoryItemProvider
@@ -32,12 +34,45 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	private void OnEnable()
 	{
-		SuperInfectionManager.siManagerByZone.TryAdd(this.gameEntityManager.zone, this);
+		if (!SuperInfectionManager.siManagerByZone.TryAdd(this.gameEntityManager.zone, this))
+		{
+			Debug.LogError("[GT/SuperInfectionManager]  ERROR!!!  " + string.Format("Tried to add a duplicate Manager for zone `{0}`. Did you forget to change the ", this.gameEntityManager.zone) + "zone on the GameEntityManager on GameObject at path: " + base.transform.GetPathQ(), this);
+			return;
+		}
+		GameMode.OnStartGameMode += this._OnStartGameMode;
 	}
 
 	private void OnDisable()
 	{
 		SuperInfectionManager.siManagerByZone.Remove(this.gameEntityManager.zone);
+		GameMode.OnStartGameMode -= this._OnStartGameMode;
+	}
+
+	private void _OnStartGameMode(GameModeType newGameModeType)
+	{
+		if (!this.gameEntityManager.IsAuthority())
+		{
+			return;
+		}
+		List<GameEntityId> list;
+		using (CollectionPool<List<GameEntityId>, GameEntityId>.Get(out list))
+		{
+			ESuperGameModes esuperGameModes = (ESuperGameModes)(1 << (int)newGameModeType);
+			foreach (GameEntity gameEntity in this.gameEntityManager.GetGameEntities())
+			{
+				SIGadget sigadget;
+				SITechTreePage sitechTreePage;
+				if (!(gameEntity == null) && gameEntity.TryGetComponent<SIGadget>(out sigadget) && this.techTreeSO.TryGetTreePage(sigadget.PageId, out sitechTreePage) && (sitechTreePage.excludedGameModes & esuperGameModes) != (ESuperGameModes)0)
+				{
+					list.Add(gameEntity.id);
+				}
+			}
+			if (list.Count > 0)
+			{
+				this.gameEntityManager.RequestDestroyItems(list);
+				Debug.Log("[GT/SuperInfectionManager]  _OnStartGameMode: " + string.Format("Removed {0} blaster gadgets because they are only allowed in SuperInfection.", list.Count), this);
+			}
+		}
 	}
 
 	public static SuperInfectionManager GetSIManagerForZone(GTZone targetZone)
@@ -142,17 +177,28 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 
 	public bool IsZoneReady()
 	{
-		return NetworkSystem.Instance.InRoom && this.IsInSuperInfectionMode() && this.zoneSuperInfection.IsNotNull() && VRRig.LocalRig.zoneEntity.currentZone == this.gameEntityManager.zone;
+		return NetworkSystem.Instance.InRoom && SuperInfectionManager.IsSuperGameMode() && this.zoneSuperInfection.IsNotNull() && VRRig.LocalRig.zoneEntity.currentZone == this.gameEntityManager.zone;
 	}
 
 	public bool ShouldClearZone()
 	{
-		return GameMode.ActiveGameMode != null && GameMode.ActiveGameMode.GameType() != GameModeType.SuperInfect;
+		if (GameMode.ActiveGameMode != null)
+		{
+			GameModeType gameModeType = GameMode.ActiveGameMode.GameType();
+			return gameModeType != GameModeType.SuperInfect && gameModeType != GameModeType.SuperCasual;
+		}
+		return false;
 	}
 
-	public bool IsInSuperInfectionMode()
+	public static bool IsSuperGameMode()
 	{
-		return GameMode.ActiveGameMode != null && GameMode.ActiveGameMode.GameType() == GameModeType.SuperInfect;
+		GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
+		if (activeGameMode != null)
+		{
+			GameModeType gameModeType = activeGameMode.GameType();
+			return gameModeType == GameModeType.SuperInfect || gameModeType == GameModeType.SuperCasual;
+		}
+		return false;
 	}
 
 	public void OnCreateGameEntity(GameEntity entity)
@@ -174,9 +220,14 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 				this.zoneSuperInfection.AddGadget(component);
 			}
 		}
-		foreach (SuperInfectionSnapPoint snapPoint in entity.GetComponentsInChildren<SuperInfectionSnapPoint>(true))
+		List<SuperInfectionSnapPoint> list;
+		using (CollectionPool<List<SuperInfectionSnapPoint>, SuperInfectionSnapPoint>.Get(out list))
 		{
-			this.RegisterSnapPoint(snapPoint);
+			entity.GetComponentsInChildren<SuperInfectionSnapPoint>(true, list);
+			foreach (SuperInfectionSnapPoint snapPoint in list)
+			{
+				this.RegisterSnapPoint(snapPoint);
+			}
 		}
 	}
 
@@ -203,6 +254,15 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 			this.PendingZoneInit = true;
 			return;
 		}
+		string[] array = new string[5];
+		array[0] = "poop - switching super infection zone from \"";
+		int num = 1;
+		SuperInfectionManager superInfectionManager = SuperInfectionManager.activeSuperInfectionManager;
+		array[num] = ((superInfectionManager != null) ? superInfectionManager.name : null);
+		array[2] = "\" to \"";
+		array[3] = base.name;
+		array[4] = "\"";
+		Debug.Log(string.Concat(array), this);
 		SuperInfectionManager.activeSuperInfectionManager = this;
 		if (this.gameEntityManager.IsAuthority())
 		{
@@ -226,9 +286,14 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 		{
 			if (!(gameEntity == null))
 			{
-				foreach (SuperInfectionSnapPoint snapPoint in gameEntity.GetComponentsInChildren<SuperInfectionSnapPoint>(true))
+				List<SuperInfectionSnapPoint> list;
+				using (CollectionPool<List<SuperInfectionSnapPoint>, SuperInfectionSnapPoint>.Get(out list))
 				{
-					this.RegisterSnapPoint(snapPoint);
+					gameEntity.GetComponentsInChildren<SuperInfectionSnapPoint>(true, list);
+					foreach (SuperInfectionSnapPoint snapPoint in list)
+					{
+						this.RegisterSnapPoint(snapPoint);
+					}
 				}
 			}
 		}
@@ -974,9 +1039,9 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 		SIPlayer.SetAndBroadcastProgression();
 	}
 
-	private const string preLog = "[SuperInfectionManager]  ";
+	private const string preLog = "[GT/SuperInfectionManager]  ";
 
-	private const string preErr = "[SuperInfectionManager]  ERROR!!!  ";
+	private const string preErr = "[GT/SuperInfectionManager]  ERROR!!!  ";
 
 	public GameEntityManager gameEntityManager;
 
@@ -995,6 +1060,7 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	[SerializeField]
 	private SIProgression progression;
 
+	[DebugReadout]
 	public static SuperInfectionManager activeSuperInfectionManager;
 
 	public static Dictionary<GTZone, SuperInfectionManager> siManagerByZone = new Dictionary<GTZone, SuperInfectionManager>();
@@ -1008,8 +1074,6 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 	private const float rpcProximityCheckRange = 3f;
 
 	private bool PendingZoneInit;
-
-	private bool PendingTableData;
 
 	public enum ClientToAuthorityRPC
 	{

@@ -17,6 +17,7 @@ namespace GorillaGameModes
 		PropHunt,
 		InfectionCompetitive,
 		SuperInfect,
+		SuperCasual,
 		Count,
 		None = -1
 	}

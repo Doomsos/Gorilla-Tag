@@ -203,6 +203,22 @@ public class SIResource : MonoBehaviour, IGorillaSliceableSimple
 		return true;
 	}
 
+	public static SIResource.ResourceCost[] GenerateCostsFrom(Dictionary<SIResource.ResourceType, int> costDictionary)
+	{
+		List<SIResource.ResourceCost> list = new List<SIResource.ResourceCost>();
+		foreach (KeyValuePair<SIResource.ResourceType, int> keyValuePair in costDictionary)
+		{
+			list.Add(new SIResource.ResourceCost(keyValuePair.Key, keyValuePair.Value));
+		}
+		list.Sort();
+		return list.ToArray();
+	}
+
+	public static string PrintCost(IEnumerable<SIResource.ResourceCost> costs)
+	{
+		return "[" + string.Join<SIResource.ResourceCost>(", ", costs) + "]";
+	}
+
 	public SIPlayer lastPlayerHeld;
 
 	public GameEntity myGameEntity;

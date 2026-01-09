@@ -18,9 +18,9 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	void IGorillaSliceableSimple.SliceUpdate()
 	{
 		Transform transform = Camera.main.transform;
-		float num = Vector3.Distance(transform.position, base.transform.position);
-		float num2 = Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward);
-		bool flag = this.observableBehaviorRule.ObservableDistanceRange.x <= num && num <= this.observableBehaviorRule.ObservableDistanceRange.y && this.observableBehaviorRule.ObservableDotRange.x <= num2 && num2 <= this.observableBehaviorRule.ObservableDotRange.y;
+		Vector3.Distance(transform.position, base.transform.position);
+		Vector3.Dot((transform.position - base.transform.position).normalized, transform.transform.forward);
+		bool flag = true;
 		if (this.firstFrame || this.observable != flag)
 		{
 			if (flag)
@@ -57,7 +57,4 @@ public abstract class ObservableBehavior : MonoBehaviour, IGorillaSliceableSimpl
 	private bool firstFrame = true;
 
 	private bool observable = true;
-
-	[SerializeField]
-	private ObservableBehaviorRule observableBehaviorRule;
 }

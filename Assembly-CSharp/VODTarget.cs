@@ -2,7 +2,6 @@
 using TMPro;
 using UnityEngine;
 
-[RequireComponent(typeof(Renderer))]
 public class VODTarget : ObservableBehavior, IBuildValidation
 {
 	public VODTarget.VODTargetAudioSettings AudioSettings

@@ -531,11 +531,42 @@ public class SIPlayer : MonoBehaviour
 		SuperInfectionManager.activeSuperInfectionManager.ClearPlayerGadgets(this);
 	}
 
+	public event Action<Vector3> OnKnockback;
+
+	public event Action OnBlasterHit;
+
+	public event Action OnBlasterSplashHit;
+
+	public void NotifyBlasterHit()
+	{
+		Action onBlasterHit = this.OnBlasterHit;
+		if (onBlasterHit == null)
+		{
+			return;
+		}
+		onBlasterHit();
+	}
+
+	public void NotifyBlasterSplashHit()
+	{
+		Action onBlasterSplashHit = this.OnBlasterSplashHit;
+		if (onBlasterSplashHit == null)
+		{
+			return;
+		}
+		onBlasterSplashHit();
+	}
+
 	public void PlayerKnockback(Vector3 directionAndMagnitude, bool forceOffGround = true, bool applyExclusionZone = true)
 	{
 		if (applyExclusionZone && this.exclusionZoneCount > 0)
 		{
 			return;
+		}
+		Action<Vector3> onKnockback = this.OnKnockback;
+		if (onKnockback != null)
+		{
+			onKnockback(directionAndMagnitude);
 		}
 		GTPlayer.Instance.ApplyClampedKnockback(directionAndMagnitude.normalized, directionAndMagnitude.magnitude, 1.5f, forceOffGround);
 	}

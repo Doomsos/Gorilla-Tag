@@ -11,6 +11,8 @@ public class SITechTreeUINode : MonoBehaviour
 
 	public List<SITechTreeUINode> Parents { get; } = new List<SITechTreeUINode>();
 
+	public List<SITechTreeUINode> Children { get; } = new List<SITechTreeUINode>();
+
 	public bool IsConfigured
 	{
 		get
@@ -79,6 +81,15 @@ public class SITechTreeUINode : MonoBehaviour
 			}
 		}
 		return num;
+	}
+
+	public void AdjustPosition(Vector3 positionOffset)
+	{
+		base.transform.localPosition += positionOffset;
+		foreach (SITechTreeUINode sitechTreeUINode in this.Children)
+		{
+			sitechTreeUINode.AdjustPosition(positionOffset);
+		}
 	}
 
 	public SIUpgradeType upgradeType;

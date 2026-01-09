@@ -59,6 +59,10 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 	{
 		this.gtPlayer = GTPlayer.Instance;
 		this.gameEntity.OnStateChanged += this.OnEntityStateChanged;
+		GameEntity gameEntity = this.gameEntity;
+		gameEntity.OnReleased = (Action)Delegate.Combine(gameEntity.OnReleased, new Action(this.HandleStopInteraction));
+		GameEntity gameEntity2 = this.gameEntity;
+		gameEntity2.OnUnsnapped = (Action)Delegate.Combine(gameEntity2.OnUnsnapped, new Action(this.HandleStopInteraction));
 	}
 
 	protected override void OnEnable()
@@ -100,6 +104,15 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 			this.gtPlayer.AddForce(-Physics.gravity * (this.gtPlayer.scale * this.gravityNegationPercent), ForceMode.Acceleration);
 			this._ApplyClampedThrust();
 		}
+	}
+
+	private void HandleStopInteraction()
+	{
+		if (!this.gameEntity.IsAuthority())
+		{
+			return;
+		}
+		this.SetStateAuthority(SIGadgetWristJet.State.Unactive);
 	}
 
 	protected override void OnUpdateAuthority(float dt)

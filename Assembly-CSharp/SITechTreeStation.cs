@@ -78,11 +78,11 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 
 	private void CollectButtonColliders()
 	{
-		SITechTreeStation.<>c__DisplayClass77_0 CS$<>8__locals1;
+		SITechTreeStation.<>c__DisplayClass81_0 CS$<>8__locals1;
 		CS$<>8__locals1.buttons = base.GetComponentsInChildren<SITouchscreenButton>(true).ToList<SITouchscreenButton>();
-		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|77_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
+		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|81_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
 		select d.gameObject).ToArray<GameObject>(), ref CS$<>8__locals1);
-		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|77_2(new GameObject[]
+		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|81_2(new GameObject[]
 		{
 			this.techTreeHelpScreen,
 			this.nodePopupScreen
@@ -107,6 +107,7 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 		instance2.OnInventoryReady = (Action)Delegate.Combine(instance2.OnInventoryReady, new Action(this.OnProgressionUpdate));
 		SIProgression instance3 = SIProgression.Instance;
 		instance3.OnNodeUnlocked = (Action<SIUpgradeType>)Delegate.Combine(instance3.OnNodeUnlocked, new Action<SIUpgradeType>(this.OnProgressionUpdateNode));
+		this._RefreshButtonsUsableState();
 	}
 
 	private void OnDisable()
@@ -151,9 +152,10 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 		this.techTreeIconById.Add(SITechTreePageId.Dash, this.dashYoYoIcon);
 		this.techTreeIconById.Add(SITechTreePageId.Platform, this.platformsIcon);
 		this.techTreeIconById.Add(SITechTreePageId.TapTeleport, this.floppyMetalSprite);
-		this.techTreeIconById.Add(SITechTreePageId.Tentacle, this.floppyMetalSprite);
+		this.techTreeIconById.Add(SITechTreePageId.Tentacle, this.tentacleIcon);
 		this.techTreeIconById.Add(SITechTreePageId.AirGrab, this.floppyMetalSprite);
 		this.techTreeIconById.Add(SITechTreePageId.SlipMitt, this.floppyMetalSprite);
+		this.techTreeIconById.Add(SITechTreePageId.Blaster, this.blasterIcon);
 		for (int i = 0; i < this.techTreeSO.TreePages.Count; i++)
 		{
 			SITechTreePage sitechTreePage = this.techTreeSO.TreePages[i];
@@ -170,6 +172,19 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 			}
 		}
 		this.Reset();
+	}
+
+	private void _RefreshButtonsUsableState()
+	{
+		foreach (SIGadgetListEntry sigadgetListEntry in this.pageButtons)
+		{
+			SITechTreePageId id = (SITechTreePageId)sigadgetListEntry.Id;
+			SITechTreePage sitechTreePage;
+			if (this.techTreeSO.TryGetTreePage(id, out sitechTreePage))
+			{
+				sigadgetListEntry.ButtonContainer.SetUsable(sitechTreePage.IsAllowed);
+			}
+		}
 	}
 
 	public void Reset()
@@ -692,7 +707,7 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	}
 
 	[CompilerGenerated]
-	internal static void <CollectButtonColliders>g__RemoveButtonsInside|77_2(GameObject[] roots, ref SITechTreeStation.<>c__DisplayClass77_0 A_1)
+	internal static void <CollectButtonColliders>g__RemoveButtonsInside|81_2(GameObject[] roots, ref SITechTreeStation.<>c__DisplayClass81_0 A_1)
 	{
 		for (int i = 0; i < roots.Length; i++)
 		{
@@ -702,6 +717,10 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 			}
 		}
 	}
+
+	private const string preLog = "[GT/SITechTreeStation]  ";
+
+	private const string preErr = "ERROR!!!  ";
 
 	private Dictionary<SITechTreeStation.TechTreeStationTerminalState, GameObject> screenData;
 
@@ -730,6 +749,10 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	public Sprite dashYoYoIcon;
 
 	public Sprite platformsIcon;
+
+	public Sprite blasterIcon;
+
+	public Sprite tentacleIcon;
 
 	public int currentNodeId;
 
@@ -771,7 +794,7 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	[SerializeField]
 	private SIGadgetListEntry pageListEntryPrefab;
 
-	private List<SIGadgetListEntry> pageButtons;
+	private List<SIGadgetListEntry> pageButtons = new List<SIGadgetListEntry>(11);
 
 	[Header("Tree Page")]
 	[SerializeField]
@@ -780,7 +803,7 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	[SerializeField]
 	private SITechTreeUIPage pagePrefab;
 
-	private List<SITechTreeUIPage> techTreePages;
+	private List<SITechTreeUIPage> techTreePages = new List<SITechTreeUIPage>(11);
 
 	[SerializeField]
 	private SpriteRenderer techTreeIcon;

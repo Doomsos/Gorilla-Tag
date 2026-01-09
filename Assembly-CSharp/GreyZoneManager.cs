@@ -140,6 +140,27 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		}
 	}
 
+	public void LocalSimpleActivation(bool onOff, float gravityFactor)
+	{
+		GTPlayer instance = GTPlayer.Instance;
+		if (instance == null)
+		{
+			return;
+		}
+		this.simpleGravityFactor = Mathf.Clamp(gravityFactor, 0f, 5f);
+		Shader.SetGlobalInt(this._GreyZoneActive, onOff ? 1 : 0);
+		if (onOff)
+		{
+			instance.SetGravityOverride(this, new Action<GTPlayer>(this.SimpleGravityOverrideFunction));
+		}
+		else
+		{
+			instance.UnsetGravityOverride(this);
+		}
+		this.gravityOverrideSet = onOff;
+		this.greyZoneParticles.gameObject.SetActive(onOff);
+	}
+
 	public void DeactivateGreyZoneAuthority()
 	{
 		this.greyZoneActive = false;
@@ -212,6 +233,11 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		}
 		float d = Mathf.Lerp(1f, this.gravityFactorOptions[this.gravityFactorOptionSelection], this.gravityReductionAmount);
 		player.AddForce(Physics.gravity * d * player.scale, ForceMode.Acceleration);
+	}
+
+	public void SimpleGravityOverrideFunction(GTPlayer player)
+	{
+		player.AddForce(Physics.gravity * this.simpleGravityFactor * player.scale, ForceMode.Acceleration);
 	}
 
 	private IEnumerator FadeAudioIn(AudioSource source, float maxVolume, float duration)
@@ -544,6 +570,8 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 	[SerializeField]
 	[Range(0f, 1f)]
 	private float gravityReductionAmount = 1f;
+
+	private float simpleGravityFactor = 1f;
 
 	[SerializeField]
 	private ParticleSystem greyZoneParticles;

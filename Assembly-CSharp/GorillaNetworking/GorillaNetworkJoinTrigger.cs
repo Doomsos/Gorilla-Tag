@@ -135,7 +135,14 @@ namespace GorillaNetworking
 
 		public virtual string GetFullDesiredGameModeString()
 		{
-			return this.networkZone + GorillaComputer.instance.currentQueue + this.GetDesiredGameType();
+			return string.Concat(new string[]
+			{
+				this.networkZone,
+				"|",
+				GorillaComputer.instance.currentQueue,
+				"|",
+				this.GetDesiredGameType()
+			});
 		}
 
 		public virtual bool SameZoneAsOverride()

@@ -53,8 +53,30 @@ public class DebugHudStats : MonoBehaviour
 	private void LateUpdate()
 	{
 		base.transform.LookAt(Camera.main.transform.position, Vector3.up);
-		bool flag = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
-		if (this.buttonDown && !flag)
+		if (this.currentState == DebugHudStats.State.timeAdjust)
+		{
+			bool flag = ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand);
+			bool flag2 = ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand);
+			bool flag3 = ControllerInputPoller.TriggerFloat(XRNode.RightHand) > 0.5f;
+			bool flag4 = ControllerInputPoller.GripFloat(XRNode.RightHand) > 0.5f;
+			if (this.button1Down && !flag)
+			{
+				GorillaComputer.instance.AddSeverTime(flag4 ? -60 : 60);
+			}
+			if (this.button2Down && !flag2)
+			{
+				GorillaComputer.instance.AddSeverTime(flag4 ? -1 : 5);
+			}
+			if (this.button3Down && !flag3)
+			{
+				GorillaComputer.instance.AddSeverTime(flag4 ? -1440 : 1440);
+			}
+			this.button1Down = flag;
+			this.button2Down = flag2;
+			this.button3Down = flag3;
+		}
+		bool flag5 = ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand);
+		if (this.buttonDown && !flag5)
 		{
 			Application.logMessageReceived -= this.LogMessageReceived;
 			PlayerGameEvents.OnPlayerMoved -= this.OnPlayerMoved;
@@ -77,6 +99,9 @@ public class DebugHudStats : MonoBehaviour
 				this.currentState = DebugHudStats.State.ShowRBs;
 				break;
 			case DebugHudStats.State.ShowRBs:
+				this.currentState = DebugHudStats.State.timeAdjust;
+				break;
+			case DebugHudStats.State.timeAdjust:
 				this.currentState = DebugHudStats.State.Inactive;
 				break;
 			}
@@ -103,7 +128,7 @@ public class DebugHudStats : MonoBehaviour
 				RigidbodyHighlighter.Instance.Active = (this.currentState == DebugHudStats.State.ShowRBs);
 			}
 		}
-		this.buttonDown = flag;
+		this.buttonDown = flag5;
 		if (this.firstAwake == 0f)
 		{
 			this.firstAwake = Time.time;
@@ -223,6 +248,13 @@ public class DebugHudStats : MonoBehaviour
 				{
 					this.builder.AppendLine(this.logError[j]);
 				}
+			}
+			else if (this.currentState == DebugHudStats.State.timeAdjust)
+			{
+				this.builder.AppendLine();
+				this.builder.AppendLine("Press A to advance one hour [+ R Grip to go back one hour]");
+				this.builder.AppendLine("Press B to advance five minutes [+ R Grip to go back one minute]");
+				this.builder.AppendLine("Press R Trigger to advance one day [+ R Grip to go back one day]");
 			}
 			this.text.text = this.builder.ToString();
 		}
@@ -378,6 +410,12 @@ public class DebugHudStats : MonoBehaviour
 
 	private string pLog;
 
+	private bool button1Down;
+
+	private bool button2Down;
+
+	private bool button3Down;
+
 	private enum State
 	{
 		Inactive,
@@ -385,6 +423,7 @@ public class DebugHudStats : MonoBehaviour
 		ShowLog,
 		ShowError,
 		ShowStats,
-		ShowRBs
+		ShowRBs,
+		timeAdjust
 	}
 }

@@ -30,6 +30,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	{
 		base.Awake();
 		this.entities = new List<GameEntity>(64);
+		this.entitiesActiveCount = 0;
 		this.gameEntityData = new List<GameEntityData>(64);
 		this.netIdToIndex = new Dictionary<int, int>(16384);
 		this.netIds = new NativeArray<int>(16384, Unity.Collections.Allocator.Persistent, NativeArrayOptions.ClearMemory);
@@ -185,6 +186,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	{
 		int num = this.FindNewEntityIndex();
 		this.entities[num] = gameEntity;
+		this.entitiesActiveCount++;
 		GameEntityData item = default(GameEntityData);
 		this.gameEntityData.Add(item);
 		gameEntity.id = new GameEntityId
@@ -224,6 +226,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		if (this.entities[index] == entity)
 		{
 			this.entities[index] = null;
+			this.entitiesActiveCount--;
 		}
 		else
 		{
@@ -232,6 +235,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 				if (this.entities[i] == entity)
 				{
 					this.entities[i] = null;
+					this.entitiesActiveCount--;
 					break;
 				}
 			}
@@ -1322,35 +1326,34 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 			if (this.ValidateGrab(gameEntity2, actorNumber, isLeftHand))
 			{
 				float num3 = 0.75f;
-				float sqrMagnitude = (handPosition - gameEntity2.transform.position).sqrMagnitude;
-				if (sqrMagnitude <= num3 * num3)
+				float magnitude = (handPosition - gameEntity2.transform.position).magnitude;
+				if (magnitude <= num3 && (gameEntity2.snappedByActorNumber == -1 || gameEntity2.snappedByActorNumber != actorNumber || magnitude <= 0.1f))
 				{
 					Vector3 vector2 = gameEntity2.GetVelocity() - rigidbodyVelocity;
-					float magnitude = vector2.magnitude;
-					float num4 = Mathf.Clamp(magnitude * num, 0f, max);
-					Vector3 slopProjection = (magnitude > 0.2f) ? (vector2.normalized * num4) : Vector3.zero;
+					float magnitude2 = vector2.magnitude;
+					float num4 = Mathf.Clamp(magnitude2 * num, 0f, max);
+					Vector3 slopProjection = (magnitude2 > 0.2f) ? (vector2.normalized * num4) : Vector3.zero;
 					maxAdjustedGrabDistance = Mathf.Max(a, gameEntity2.pickupRangeFromSurface);
-					this.renderSearchList.Clear();
-					gameEntity2.GetComponentsInChildren<MeshFilter>(false, this.renderSearchList);
-					foreach (MeshFilter meshFilter in this.renderSearchList)
+					GameEntity.RendererSet grabbableRenderers = gameEntity2.GetGrabbableRenderers();
+					foreach (ValueTuple<MeshFilter, MeshRenderer> valueTuple in grabbableRenderers.renderers)
 					{
-						if (!(this.GetParentEntity<GameEntity>(meshFilter.transform) != gameEntity2))
+						MeshFilter item = valueTuple.Item1;
+						MeshRenderer item2 = valueTuple.Item2;
+						if (item2.gameObject.activeInHierarchy && item2.enabled)
 						{
-							GameEntityManager._TryGrabLocal_TestBounds(handPosition, meshFilter.transform, slopProjection, meshFilter.sharedMesh.bounds, num4, maxAdjustedGrabDistance, gameEntity2, ref num2, ref gameEntity, ref vector);
+							GameEntityManager._TryGrabLocal_TestBounds(handPosition, item2.transform, slopProjection, item.sharedMesh.bounds, num4, maxAdjustedGrabDistance, gameEntity2, ref num2, ref gameEntity, ref vector);
 						}
 					}
-					this.renderSearchListSkinned.Clear();
-					gameEntity2.GetComponentsInChildren<SkinnedMeshRenderer>(false, this.renderSearchListSkinned);
-					foreach (SkinnedMeshRenderer skinnedMeshRenderer in this.renderSearchListSkinned)
+					foreach (SkinnedMeshRenderer skinnedMeshRenderer in grabbableRenderers.skinnedRenderers)
 					{
-						if (!(this.GetParentEntity<GameEntity>(skinnedMeshRenderer.transform) != gameEntity2))
+						if (skinnedMeshRenderer.gameObject.activeInHierarchy && skinnedMeshRenderer.enabled)
 						{
 							GameEntityManager._TryGrabLocal_TestBounds(handPosition, skinnedMeshRenderer.transform, slopProjection, skinnedMeshRenderer.localBounds, num4, maxAdjustedGrabDistance, gameEntity2, ref num2, ref gameEntity, ref vector);
 						}
 					}
-					if (this.renderSearchList.Count == 0 && this.renderSearchListSkinned.Count == 0)
+					if (grabbableRenderers.renderers.Count == 0 && grabbableRenderers.skinnedRenderers.Count == 0)
 					{
-						float num5 = Mathf.Sqrt(sqrMagnitude);
+						float num5 = magnitude;
 						if (num5 < num2)
 						{
 							num2 = num5;
@@ -1507,7 +1510,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 		return true;
 	}
 
-	private T GetParentEntity<T>(Transform transform) where T : MonoBehaviour
+	public T GetParentEntity<T>(Transform transform) where T : MonoBehaviour
 	{
 		while (transform != null)
 		{
@@ -2870,7 +2873,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 				this.SetZoneState(GameEntityManager.ZoneState.WaitingToEnterZone);
 				return;
 			}
-			if (this.entities.Count > 0 && this.ShouldClearZone())
+			if (this.entitiesActiveCount > 0 && this.ShouldClearZone())
 			{
 				this.zoneClearReason = ZoneClearReason.LeaveZone;
 				this.ClearZone(false);
@@ -3259,6 +3262,8 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 
 	private List<GameEntity> entities;
 
+	private int entitiesActiveCount;
+
 	private List<GameEntityData> gameEntityData;
 
 	public List<GameEntity> tempFactoryItems;
@@ -3316,10 +3321,6 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	private int nextNetId = 1;
 
 	public CallLimitersList<CallLimiter, GameEntityManager.RPC> m_RpcSpamChecks = new CallLimitersList<CallLimiter, GameEntityManager.RPC>();
-
-	private List<MeshFilter> renderSearchList = new List<MeshFilter>(32);
-
-	private List<SkinnedMeshRenderer> renderSearchListSkinned = new List<SkinnedMeshRenderer>(32);
 
 	private List<Collider> _collidersList = new List<Collider>(16);
 

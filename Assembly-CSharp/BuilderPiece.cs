@@ -845,7 +845,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 		if (this.heldByPlayerActorNumber != NetworkSystem.Instance.LocalPlayer.ActorNumber && !this.listeningToHandLinks)
 		{
-			HandLink.OnHandLinkChanged = (Action)Delegate.Combine(HandLink.OnHandLinkChanged, new Action(this.UpdateGrabbedPieceCollisionLayer));
+			TakeMyHand_HandLink.OnHandLinkChanged = (Action)Delegate.Combine(TakeMyHand_HandLink.OnHandLinkChanged, new Action(this.UpdateGrabbedPieceCollisionLayer));
 			this.listeningToHandLinks = true;
 		}
 	}
@@ -858,7 +858,7 @@ public class BuilderPiece : MonoBehaviour
 		}
 		if (this.listeningToHandLinks)
 		{
-			HandLink.OnHandLinkChanged = (Action)Delegate.Remove(HandLink.OnHandLinkChanged, new Action(this.UpdateGrabbedPieceCollisionLayer));
+			TakeMyHand_HandLink.OnHandLinkChanged = (Action)Delegate.Remove(TakeMyHand_HandLink.OnHandLinkChanged, new Action(this.UpdateGrabbedPieceCollisionLayer));
 			this.listeningToHandLinks = false;
 		}
 	}

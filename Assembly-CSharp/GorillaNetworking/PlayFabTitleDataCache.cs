@@ -142,9 +142,12 @@ namespace GorillaNetworking
 				Stopwatch sw = Stopwatch.StartNew();
 				Debug.Log("[PlayFabTitleDataCache::UpdateDataCo] Starting Mothership API call");
 				StringVector stringVector = new StringVector();
-				foreach (PlayFabTitleDataCache.DataRequest dataRequest in this.requests)
+				if (!this.isFirstLoad)
 				{
-					stringVector.Add(dataRequest.Name);
+					foreach (PlayFabTitleDataCache.DataRequest dataRequest in this.requests)
+					{
+						stringVector.Add(dataRequest.Name);
+					}
 				}
 				CS$<>8__locals1.finished = false;
 				Debug.Log("[PlayFabTitleDataCache::UpdateDataCo] Keys to fetch: " + string.Join(", ", stringVector));

@@ -45,16 +45,16 @@ public class SIGadgetBlaster : SIGadget, ITickSystemTick
 
 	public void Tick()
 	{
-		if (SIGadgetBlaster.projectilesToDespawn.Count <= 0)
+		if (this.projectilesToDespawn.Count <= 0)
 		{
 			return;
 		}
-		if (Time.time < SIGadgetBlaster.projectilesToDespawnTimes.Peek() + 1f)
+		if (Time.time < this.projectilesToDespawnTimes.Peek() + 1f)
 		{
 			return;
 		}
-		SIGadgetBlasterProjectile sigadgetBlasterProjectile = SIGadgetBlaster.projectilesToDespawn.Dequeue();
-		SIGadgetBlaster.activeProjectiles.RemoveIfContains(sigadgetBlasterProjectile);
+		SIGadgetBlasterProjectile sigadgetBlasterProjectile = this.projectilesToDespawn.Dequeue();
+		this.activeProjectiles.RemoveIfContains(sigadgetBlasterProjectile);
 		if (sigadgetBlasterProjectile == null || sigadgetBlasterProjectile.gameObject == null)
 		{
 			return;
@@ -138,11 +138,11 @@ public class SIGadgetBlaster : SIGadget, ITickSystemTick
 				return;
 			}
 			SIGadgetBlasterProjectile sigadgetBlasterProjectile = null;
-			for (int i = 0; i < SIGadgetBlaster.activeProjectiles.Count; i++)
+			for (int i = 0; i < this.activeProjectiles.Count; i++)
 			{
-				if (SIGadgetBlaster.activeProjectiles[i].projectileId == num)
+				if (this.activeProjectiles[i].projectileId == num)
 				{
-					sigadgetBlasterProjectile = SIGadgetBlaster.activeProjectiles[i];
+					sigadgetBlasterProjectile = this.activeProjectiles[i];
 					break;
 				}
 			}
@@ -188,10 +188,10 @@ public class SIGadgetBlaster : SIGadget, ITickSystemTick
 	public void DespawnProjectile(SIGadgetBlasterProjectile projectile)
 	{
 		projectile.gameObject.SetActive(false);
-		if (!SIGadgetBlaster.projectilesToDespawn.Contains(projectile))
+		if (!this.projectilesToDespawn.Contains(projectile))
 		{
-			SIGadgetBlaster.projectilesToDespawn.Enqueue(projectile);
-			SIGadgetBlaster.projectilesToDespawnTimes.Enqueue(Time.time);
+			this.projectilesToDespawn.Enqueue(projectile);
+			this.projectilesToDespawnTimes.Enqueue(Time.time);
 		}
 	}
 
@@ -225,7 +225,7 @@ public class SIGadgetBlaster : SIGadget, ITickSystemTick
 		component.projectileId = thisFireId;
 		component.firedByPlayer = (this.gameEntity.IsHeld() ? SIPlayer.Get(this.gameEntity.heldByActorNumber) : SIPlayer.Get(this.gameEntity.snappedByActorNumber));
 		component.poolId = instanceID;
-		SIGadgetBlaster.activeProjectiles.Add(component);
+		this.activeProjectiles.Add(component);
 		this.lastFired = Time.time;
 		component.InitializeProjectile();
 		return gameObject;
@@ -234,6 +234,16 @@ public class SIGadgetBlaster : SIGadget, ITickSystemTick
 	public void FireProjectileHaptics(float strength, float duration)
 	{
 		GorillaTagger.Instance.StartVibration(this.gameEntity.EquippedHandedness == EHandedness.Left, strength, duration);
+	}
+
+	public float CurrentFireRate()
+	{
+		int count = this.activeProjectiles.Count;
+		if (count <= 1)
+		{
+			return 0f;
+		}
+		return (float)(count - 1) / (this.activeProjectiles[count - 1].timeSpawned - this.activeProjectiles[0].timeSpawned);
 	}
 
 	[OnEnterPlay_SetNull]
@@ -271,13 +281,13 @@ public class SIGadgetBlaster : SIGadget, ITickSystemTick
 	private int projectileId;
 
 	[NonSerialized]
-	public static List<SIGadgetBlasterProjectile> activeProjectiles = new List<SIGadgetBlasterProjectile>();
+	public List<SIGadgetBlasterProjectile> activeProjectiles = new List<SIGadgetBlasterProjectile>();
 
 	[NonSerialized]
-	public static Queue<SIGadgetBlasterProjectile> projectilesToDespawn = new Queue<SIGadgetBlasterProjectile>();
+	public Queue<SIGadgetBlasterProjectile> projectilesToDespawn = new Queue<SIGadgetBlasterProjectile>();
 
 	[NonSerialized]
-	public static Queue<float> projectilesToDespawnTimes = new Queue<float>();
+	public Queue<float> projectilesToDespawnTimes = new Queue<float>();
 
 	public Transform firingPosition;
 

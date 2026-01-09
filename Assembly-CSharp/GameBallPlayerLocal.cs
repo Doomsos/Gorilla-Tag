@@ -16,9 +16,10 @@ public class GameBallPlayerLocal : MonoBehaviour
 		{
 			this.inputData[i] = new GameBallPlayerLocal.InputData(32);
 		}
+		Application.quitting += GameBallPlayerLocal._OnApplicationQuit;
 	}
 
-	private void OnApplicationQuit()
+	private static void _OnApplicationQuit()
 	{
 		MonkeBallGame.Instance.OnPlayerDestroy();
 	}
@@ -33,6 +34,10 @@ public class GameBallPlayerLocal : MonoBehaviour
 
 	private void OnDestroy()
 	{
+		if (ApplicationQuittingState.IsQuitting)
+		{
+			return;
+		}
 		MonkeBallGame.Instance.OnPlayerDestroy();
 	}
 

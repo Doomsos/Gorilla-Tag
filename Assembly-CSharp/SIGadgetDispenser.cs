@@ -285,6 +285,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 				SIDispenserGadgetListEntry sidispenserGadgetListEntry2 = this.gadgetEntries[num++];
 				sidispenserGadgetListEntry2.SetTechTreeNode(sitechTreeNode);
 				sidispenserGadgetListEntry2.gameObject.SetActive(true);
+				sidispenserGadgetListEntry2.DispenseButton.SetUsable(sitechTreeNode.IsAllowed);
 			}
 		}
 		this.noDispensableGadgetsMessage.SetActive(num == 0);

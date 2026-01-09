@@ -498,18 +498,15 @@ public class BuilderKiosk : MonoBehaviour
 			this.ProcessPurchaseItemState(null, isLeftHand);
 			return;
 		case CosmeticsController.PurchaseItemStages.Success:
-		{
 			this.FormattedPurchaseText(7);
 			this.audioSource.GTPlayOneShot(this.purchaseSetAudioClip, 1f);
 			this.purchaseParticles.Play();
-			VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-			offlineVRRig.concatStringOfCosmeticsAllowed += this.itemToBuy.playfabID;
+			GorillaTagger.Instance.offlineVRRig.AddCosmetic(this.itemToBuy.playfabID);
 			this.leftPurchaseButton.myTmpText.text = "-";
 			this.rightPurchaseButton.myTmpText.text = "-";
 			this.leftPurchaseButton.buttonRenderer.material = this.leftPurchaseButton.pressedMaterial;
 			this.rightPurchaseButton.buttonRenderer.material = this.rightPurchaseButton.pressedMaterial;
 			break;
-		}
 		case CosmeticsController.PurchaseItemStages.Failure:
 			this.FormattedPurchaseText(6);
 			this.leftPurchaseButton.myTmpText.text = "-";

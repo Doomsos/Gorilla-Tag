@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using GorillaGameModes;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -235,6 +236,21 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 				else
 				{
 					base.StartCoroutine(this.TryClaimNewPlayerPackage());
+				}
+			}
+		}
+		GTDev.Log<string>("[SIProgression] Updating local tech tree costs from remote tree", null);
+		foreach (GraphNode<SITechTreeNode> graphNode in this.techTreeSO.AllNodes)
+		{
+			SITechTreeNode value = graphNode.Value;
+			SIProgression.SINode sinode;
+			if (this.siNodes.TryGetValue(value.upgradeType, out sinode))
+			{
+				SIResource.ResourceCost[] array = SIResource.GenerateCostsFrom(sinode.costs);
+				if (array.IsValid_AllowZero() && !SIResource.CostsAreEqual(value.nodeCost, array, true))
+				{
+					GTDev.Log<string>(string.Format("[SIProgression] Changing {0} costs from {1} to {2}", value.upgradeType, SIResource.PrintCost(value.nodeCost), SIResource.PrintCost(array)), null);
+					value.nodeCost = array;
 				}
 			}
 		}
@@ -1051,53 +1067,57 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	public void CheckTelemetry()
 	{
-		SuperInfectionGame instance = SuperInfectionGame.instance;
-		if (instance == null)
+		GorillaGameManager activeGameMode = GameMode.ActiveGameMode;
+		if (!(activeGameMode == null))
 		{
-			return;
-		}
-		if (!instance.ValidGameMode())
-		{
-			this.timeTelemetryLastChecked = Time.time;
-			return;
-		}
-		float num = Time.time - this.timeTelemetryLastChecked;
-		this.timeTelemetryLastChecked = Time.time;
-		this.totalPlayTime += num;
-		if (NetworkSystem.Instance.InRoom)
-		{
-			this.roomPlayTime += num;
-		}
-		this.intervalPlayTime += num;
-		for (int i = 0; i < 11; i++)
-		{
-			SITechTreePageId sitechTreePageId = (SITechTreePageId)i;
-			if (SIProgression.Instance.heldOrSnappedByGadgetPageType[sitechTreePageId] > 0)
+			GameModeType gameModeType = activeGameMode.GameType();
+			if (gameModeType == GameModeType.SuperInfect || gameModeType == GameModeType.SuperCasual)
 			{
-				Dictionary<SITechTreePageId, float> dictionary = this.timeUsingGadgetTypeInterval;
-				SITechTreePageId key = sitechTreePageId;
-				dictionary[key] += num;
-				dictionary = this.timeUsingGadgetTypeTotal;
-				key = sitechTreePageId;
-				dictionary[key] += num;
+				if (!activeGameMode.ValidGameMode())
+				{
+					this.timeTelemetryLastChecked = Time.time;
+					return;
+				}
+				float num = Time.time - this.timeTelemetryLastChecked;
+				this.timeTelemetryLastChecked = Time.time;
+				this.totalPlayTime += num;
+				if (NetworkSystem.Instance.InRoom)
+				{
+					this.roomPlayTime += num;
+				}
+				this.intervalPlayTime += num;
+				for (int i = 0; i < 11; i++)
+				{
+					SITechTreePageId sitechTreePageId = (SITechTreePageId)i;
+					if (SIProgression.Instance.heldOrSnappedByGadgetPageType[sitechTreePageId] > 0)
+					{
+						Dictionary<SITechTreePageId, float> dictionary = this.timeUsingGadgetTypeInterval;
+						SITechTreePageId key = sitechTreePageId;
+						dictionary[key] += num;
+						dictionary = this.timeUsingGadgetTypeTotal;
+						key = sitechTreePageId;
+						dictionary[key] += num;
+					}
+				}
+				if (SIProgression.Instance.heldOrSnappedOwnGadgets > 0)
+				{
+					this.timeUsingOwnGadgetsInterval += num;
+					this.timeUsingOwnGadgetsTotal += num;
+				}
+				if (SIProgression.Instance.heldOrSnappedOthersGadgets > 0)
+				{
+					this.timeUsingOthersGadgetsInterval += num;
+					this.timeUsingOthersGadgetsTotal += num;
+				}
+				if (this.lastTelemetrySent + this.telemetryCooldown < Time.time)
+				{
+					this.lastTelemetrySent = Time.time;
+					this.SaveTelemetryData();
+					GorillaTelemetry.SuperInfectionEvent(false, this.totalPlayTime, this.roomPlayTime, Time.time, this.intervalPlayTime, this.activeTerminalTimeTotal, this.activeTerminalTimeInterval, this.timeUsingGadgetTypeTotal, this.timeUsingGadgetTypeInterval, this.timeUsingOwnGadgetsTotal, this.timeUsingOwnGadgetsInterval, this.timeUsingOthersGadgetsTotal, this.timeUsingOthersGadgetsInterval, this.tagsUsingGadgetTypeTotal, this.tagsUsingGadgetTypeInterval, this.tagsHoldingOwnGadgetTotal, this.tagsHoldingOwnGadgetInterval, this.tagsHoldingOthersGadgetTotal, this.tagsHoldingOthersGadgetInterval, this.resourcesCollectedTotal, this.resourcesCollectedInterval, this.roundsPlayedTotal, this.roundsPlayedInterval, SIProgression.Instance.unlockedTechTreeData, NetworkSystem.Instance.RoomPlayerCount);
+					this.ResetTelemetryIntervalData();
+				}
+				return;
 			}
-		}
-		if (SIProgression.Instance.heldOrSnappedOwnGadgets > 0)
-		{
-			this.timeUsingOwnGadgetsInterval += num;
-			this.timeUsingOwnGadgetsTotal += num;
-		}
-		if (SIProgression.Instance.heldOrSnappedOthersGadgets > 0)
-		{
-			this.timeUsingOthersGadgetsInterval += num;
-			this.timeUsingOthersGadgetsTotal += num;
-		}
-		if (this.lastTelemetrySent + this.telemetryCooldown < Time.time)
-		{
-			this.lastTelemetrySent = Time.time;
-			this.SaveTelemetryData();
-			GorillaTelemetry.SuperInfectionEvent(false, this.totalPlayTime, this.roomPlayTime, Time.time, this.intervalPlayTime, this.activeTerminalTimeTotal, this.activeTerminalTimeInterval, this.timeUsingGadgetTypeTotal, this.timeUsingGadgetTypeInterval, this.timeUsingOwnGadgetsTotal, this.timeUsingOwnGadgetsInterval, this.timeUsingOthersGadgetsTotal, this.timeUsingOthersGadgetsInterval, this.tagsUsingGadgetTypeTotal, this.tagsUsingGadgetTypeInterval, this.tagsHoldingOwnGadgetTotal, this.tagsHoldingOwnGadgetInterval, this.tagsHoldingOthersGadgetTotal, this.tagsHoldingOthersGadgetInterval, this.resourcesCollectedTotal, this.resourcesCollectedInterval, this.roundsPlayedTotal, this.roundsPlayedInterval, SIProgression.Instance.unlockedTechTreeData, NetworkSystem.Instance.RoomPlayerCount);
-			this.ResetTelemetryIntervalData();
 		}
 	}
 

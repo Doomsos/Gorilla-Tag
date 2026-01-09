@@ -146,8 +146,7 @@ namespace GorillaTagScripts.GhostReactor
 				{
 					this._purchaseParticles.Play();
 				}
-				VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
-				offlineVRRig.concatStringOfCosmeticsAllowed += this._cosmeticForPurchase.itemName;
+				GorillaTagger.Instance.offlineVRRig.AddCosmetic(this._cosmeticForPurchase.itemName);
 				this.ProcessPurchaseItemState(null, null);
 			}, delegate(PlayFabError error)
 			{

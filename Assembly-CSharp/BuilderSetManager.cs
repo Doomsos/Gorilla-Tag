@@ -14,6 +14,14 @@ using UnityEngine.Events;
 
 public class BuilderSetManager : MonoBehaviour
 {
+	internal List<BuilderPieceSet> StartPieceSets
+	{
+		get
+		{
+			return this._starterPieceSets;
+		}
+	}
+
 	public static bool hasInstance { get; private set; }
 
 	public string GetStarterSetsConcat()

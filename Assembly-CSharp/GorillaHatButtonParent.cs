@@ -17,7 +17,7 @@ public class GorillaHatButtonParent : MonoBehaviour
 		if (!this.initialized && GorillaTagger.Instance.offlineVRRig.InitializedCosmetics)
 		{
 			this.initialized = true;
-			if (GorillaTagger.Instance.offlineVRRig.concatStringOfCosmeticsAllowed.Contains("AdministratorBadge"))
+			if (GorillaTagger.Instance.offlineVRRig.HasCosmetic("AdministratorBadge"))
 			{
 				foreach (GameObject gameObject in this.adminObjects)
 				{
@@ -25,7 +25,7 @@ public class GorillaHatButtonParent : MonoBehaviour
 					gameObject.SetActive(true);
 				}
 			}
-			if (GorillaTagger.Instance.offlineVRRig.concatStringOfCosmeticsAllowed.Contains("earlyaccess"))
+			if (GorillaTagger.Instance.offlineVRRig.HasCosmetic("earlyaccess"))
 			{
 				this.UpdateButtonState();
 				this.screen.UpdateText("WELCOME TO THE HAT ROOM!\nTHANK YOU FOR PURCHASING THE EARLY ACCESS SUPPORTER PACK! PLEASE ENJOY THESE VARIOUS HATS AND NOT-HATS!", true);
@@ -35,7 +35,7 @@ public class GorillaHatButtonParent : MonoBehaviour
 
 	public void PressButton(bool isOn, GorillaHatButton.HatButtonType buttonType, string buttonValue)
 	{
-		if (this.initialized && GorillaTagger.Instance.offlineVRRig.concatStringOfCosmeticsAllowed.Contains("earlyaccess"))
+		if (this.initialized && GorillaTagger.Instance.offlineVRRig.HasCosmetic("earlyaccess"))
 		{
 			switch (buttonType)
 			{
