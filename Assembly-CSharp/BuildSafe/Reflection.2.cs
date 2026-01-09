@@ -34,7 +34,9 @@ namespace BuildSafe
 			{
 				return Reflection.gAssemblyCache;
 			}
-			return Reflection.gAssemblyCache = Enumerable.ToArray<Assembly>(Enumerable.Where<Assembly>(AppDomain.CurrentDomain.GetAssemblies(), (Assembly a) => a != null));
+			return Reflection.gAssemblyCache = (from a in AppDomain.CurrentDomain.GetAssemblies()
+			where a != null
+			select a).ToArray<Assembly>();
 		}
 
 		private static Type[] PreFetchAllTypes()
@@ -43,12 +45,16 @@ namespace BuildSafe
 			{
 				return Reflection.gTypeCache;
 			}
-			return Reflection.gTypeCache = Enumerable.ToArray<Type>(Enumerable.Where<Type>(Enumerable.SelectMany<Assembly, Type>(Reflection.PreFetchAllAssemblies(), (Assembly a) => a.GetTypes()), (Type t) => t != null));
+			return Reflection.gTypeCache = (from t in Reflection.PreFetchAllAssemblies().SelectMany((Assembly a) => a.GetTypes())
+			where t != null
+			select t).ToArray<Type>();
 		}
 
 		public static MethodInfo[] GetMethodsWithAttribute<T>() where T : Attribute
 		{
-			return Enumerable.ToArray<MethodInfo>(Enumerable.Where<MethodInfo>(Enumerable.SelectMany<Type, MethodInfo>(Reflection.AllTypes, (Type t) => RuntimeReflectionExtensions.GetRuntimeMethods(t)), (MethodInfo m) => m.GetCustomAttributes(typeof(T), false).Length != 0));
+			return (from m in Reflection.AllTypes.SelectMany((Type t) => t.GetRuntimeMethods())
+			where m.GetCustomAttributes(typeof(T), false).Length != 0
+			select m).ToArray<MethodInfo>();
 		}
 
 		private static Assembly[] gAssemblyCache;

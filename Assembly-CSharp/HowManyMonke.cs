@@ -42,7 +42,7 @@ public class HowManyMonke : MonoBehaviour
 	private void onTD(string obj)
 	{
 		this.state = HowManyMonke.State.READY;
-		if (int.TryParse(obj, ref HowManyMonke.recheckDelay))
+		if (int.TryParse(obj, out HowManyMonke.recheckDelay))
 		{
 			HowManyMonke.recheckDelay *= 1000;
 			return;

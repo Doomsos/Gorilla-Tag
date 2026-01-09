@@ -34,36 +34,36 @@ public class TransferrableObjectHoldablePart_Crank : TransferrableObjectHoldable
 
 	protected override void UpdateHeld(VRRig rig, bool isHeldLeftHand)
 	{
-		Vector3 vector4;
+		Vector3 a;
 		if (rig.isOfflineVRRig)
 		{
 			Transform controllerTransform = GTPlayer.Instance.GetControllerTransform(isHeldLeftHand);
 			Vector3 vector = this.rotatingPart.InverseTransformPoint(controllerTransform.position);
-			Vector3 vector2 = (vector.xy().normalized * this.crankRadius).WithZ(Mathf.Clamp(vector.z, this.crankHandleMinZ, this.crankHandleMaxZ));
-			Vector3 vector3 = this.rotatingPart.TransformPoint(vector2);
-			if (this.maxHandSnapDistance > 0f && (controllerTransform.position - vector3).IsLongerThan(this.maxHandSnapDistance))
+			Vector3 position = (vector.xy().normalized * this.crankRadius).WithZ(Mathf.Clamp(vector.z, this.crankHandleMinZ, this.crankHandleMaxZ));
+			Vector3 vector2 = this.rotatingPart.TransformPoint(position);
+			if (this.maxHandSnapDistance > 0f && (controllerTransform.position - vector2).IsLongerThan(this.maxHandSnapDistance))
 			{
 				this.OnRelease(null, isHeldLeftHand ? EquipmentInteractor.instance.leftHand : EquipmentInteractor.instance.rightHand);
 				return;
 			}
-			controllerTransform.position = vector3;
-			vector4 = controllerTransform.position;
+			controllerTransform.position = vector2;
+			a = controllerTransform.position;
 		}
 		else
 		{
 			VRMap vrmap = isHeldLeftHand ? rig.leftHand : rig.rightHand;
-			vector4 = vrmap.GetExtrapolatedControllerPosition();
-			vector4 -= vrmap.rigTarget.rotation * GTPlayer.Instance.GetHandOffset(isHeldLeftHand) * rig.scaleFactor;
+			a = vrmap.GetExtrapolatedControllerPosition();
+			a -= vrmap.rigTarget.rotation * GTPlayer.Instance.GetHandOffset(isHeldLeftHand) * rig.scaleFactor;
 		}
-		Vector3 vector5 = this.baseLocalAngleInverse * Quaternion.Inverse(this.rotatingPart.parent.rotation) * (vector4 - this.rotatingPart.position);
-		float num = Mathf.Atan2(vector5.y, vector5.x) * 57.29578f;
+		Vector3 vector3 = this.baseLocalAngleInverse * Quaternion.Inverse(this.rotatingPart.parent.rotation) * (a - this.rotatingPart.position);
+		float num = Mathf.Atan2(vector3.y, vector3.x) * 57.29578f;
 		float num2 = Mathf.DeltaAngle(this.lastAngle, num);
 		this.lastAngle = num;
 		if (num2 != 0f)
 		{
 			if (this.onCrankedCallback != null)
 			{
-				this.onCrankedCallback.Invoke(num2);
+				this.onCrankedCallback(num2);
 			}
 			for (int i = 0; i < this.thresholds.Length; i++)
 			{

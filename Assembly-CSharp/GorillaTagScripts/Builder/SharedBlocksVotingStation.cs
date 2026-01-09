@@ -138,7 +138,7 @@ namespace GorillaTagScripts.Builder
 			else
 			{
 				int value;
-				if (int.TryParse(message, ref value))
+				if (int.TryParse(message, out value))
 				{
 					this._statusIndexVar.Value = value;
 				}

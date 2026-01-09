@@ -19,7 +19,7 @@ public class GtLckNetworkCosmeticDependantPlayerIdSupplier : MonoBehaviour, ILck
 		{
 			return;
 		}
-		playerIdUpdated.Invoke();
+		playerIdUpdated();
 	}
 
 	[SerializeField]

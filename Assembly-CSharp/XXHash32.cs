@@ -6,13 +6,13 @@ using System.Text;
 
 public static class XXHash32
 {
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(string s, uint seed = 0U)
 	{
 		return (int)XXHash32.Compute(Encoding.Unicode.GetBytes(s), seed);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public unsafe static uint Compute(ReadOnlySpan<byte> input, uint seed = 0U)
 	{
 		int length = input.Length;

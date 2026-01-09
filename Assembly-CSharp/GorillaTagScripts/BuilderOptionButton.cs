@@ -25,7 +25,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			action.Invoke(this, isLeftHand);
+			action(this, isLeftHand);
 		}
 
 		public void SetPressed(bool pressed)

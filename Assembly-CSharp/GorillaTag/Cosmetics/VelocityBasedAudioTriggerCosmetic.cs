@@ -25,9 +25,9 @@ namespace GorillaTag.Cosmetics
 			{
 				return;
 			}
-			float num = Mathf.InverseLerp(this.minVelocityThreshold, this.maxVelocity, averageVelocity.magnitude);
-			float num2 = Mathf.Lerp(this.minOutputVolume, this.maxOutputVolume, num);
-			this.audioSource.volume = num2;
+			float t = Mathf.InverseLerp(this.minVelocityThreshold, this.maxVelocity, averageVelocity.magnitude);
+			float num = Mathf.Lerp(this.minOutputVolume, this.maxOutputVolume, t);
+			this.audioSource.volume = num;
 			if (this.audioSource != null && !this.audioSource.isPlaying && this.audioClip != null)
 			{
 				this.audioSource.clip = this.audioClip;
@@ -39,7 +39,7 @@ namespace GorillaTag.Cosmetics
 			}
 			else if (this.soundBank != null && this.soundBank.soundBank != null && !this.soundBank.isPlaying)
 			{
-				this.soundBank.Play(new float?(num2), default(float?));
+				this.soundBank.Play(new float?(num), null);
 			}
 		}
 

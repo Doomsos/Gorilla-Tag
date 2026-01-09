@@ -14,7 +14,7 @@ namespace GorillaExtensions
 			{
 				return false;
 			}
-			int num = path.IndexOf("/->/", 4);
+			int num = path.IndexOf("/->/", StringComparison.Ordinal);
 			if (num < 0)
 			{
 				return GTTryFindByExactPath.WithSiblingIndex<T>(path, out out_component);
@@ -27,7 +27,7 @@ namespace GorillaExtensions
 			if (num3 >= 0)
 			{
 				text2 = text.Substring(0, num3);
-				if (!int.TryParse(text.Substring(num3 + 1), ref num2))
+				if (!int.TryParse(text.Substring(num3 + 1), out num2))
 				{
 					num2 = -1;
 				}
@@ -42,7 +42,7 @@ namespace GorillaExtensions
 				return false;
 			}
 			Type type = typeof(T);
-			if (!string.Equals(type.Name, text2, 4))
+			if (!string.Equals(type.Name, text2, StringComparison.Ordinal))
 			{
 				Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 				Type type2 = null;
@@ -102,7 +102,7 @@ namespace GorillaExtensions
 			{
 				return false;
 			}
-			string[] array = xformPath.Split('/', 1);
+			string[] array = xformPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
 			if (array.Length == 0)
 			{
 				return false;
@@ -116,10 +116,10 @@ namespace GorillaExtensions
 				{
 					return false;
 				}
-				string text2 = text.Substring(0, num);
-				string text3 = text.Substring(num + 1);
+				string s = text.Substring(0, num);
+				string b = text.Substring(num + 1);
 				int num2;
-				if (!int.TryParse(text2, ref num2))
+				if (!int.TryParse(s, out num2))
 				{
 					return false;
 				}
@@ -136,7 +136,7 @@ namespace GorillaExtensions
 							if (num2 >= 0 && num2 < rootGameObjects.Length)
 							{
 								Transform transform3 = rootGameObjects[num2].transform;
-								if (string.Equals(transform3.name, text3, 4))
+								if (string.Equals(transform3.name, b, StringComparison.Ordinal))
 								{
 									transform2 = transform3;
 								}
@@ -157,7 +157,7 @@ namespace GorillaExtensions
 						return false;
 					}
 					Transform child = transform.GetChild(num2);
-					if (!string.Equals(child.name, text3, 4))
+					if (!string.Equals(child.name, b, StringComparison.Ordinal))
 					{
 						return false;
 					}

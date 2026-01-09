@@ -41,7 +41,7 @@ public class LeafBlowerEffects : MonoBehaviour, ISpawnable
 	public void ProjectParticles()
 	{
 		RaycastHit raycastHit;
-		if (Physics.Raycast(this.gunBarrel.transform.position, this.gunBarrel.transform.forward, ref raycastHit, this.projectionRange, this.raycastLayers))
+		if (Physics.Raycast(this.gunBarrel.transform.position, this.gunBarrel.transform.forward, out raycastHit, this.projectionRange, this.raycastLayers))
 		{
 			SpawnOnEnter component = raycastHit.collider.GetComponent<SpawnOnEnter>();
 			if (component != null)
@@ -54,7 +54,7 @@ public class LeafBlowerEffects : MonoBehaviour, ISpawnable
 				this.squareHitParticleSystem.transform.rotation = Quaternion.LookRotation(raycastHit.normal, this.gunBarrel.transform.forward);
 				if (this.angledHitParticleSystem != this.squareHitParticleSystem && this.angledHitParticleSystem.isPlaying)
 				{
-					this.angledHitParticleSystem.Stop(true, 1);
+					this.angledHitParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 				}
 				if (!this.squareHitParticleSystem.isPlaying)
 				{
@@ -68,7 +68,7 @@ public class LeafBlowerEffects : MonoBehaviour, ISpawnable
 				this.angledHitParticleSystem.transform.rotation = Quaternion.LookRotation(raycastHit.normal, this.gunBarrel.transform.forward);
 				if (this.angledHitParticleSystem != this.squareHitParticleSystem && this.squareHitParticleSystem.isPlaying)
 				{
-					this.squareHitParticleSystem.Stop(true, 1);
+					this.squareHitParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 				}
 				if (!this.angledHitParticleSystem.isPlaying)
 				{
@@ -85,8 +85,8 @@ public class LeafBlowerEffects : MonoBehaviour, ISpawnable
 
 	public void StopEffects()
 	{
-		this.angledHitParticleSystem.Stop(true, 1);
-		this.squareHitParticleSystem.Stop(true, 1);
+		this.angledHitParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+		this.squareHitParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 	}
 
 	public void BlowFaces()

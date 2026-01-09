@@ -63,7 +63,7 @@ public class SIGadgetBlasterProjectile : MonoBehaviourTick
 	{
 		this.projectileType.LocalProjectileHit(null);
 		HitTargetNetworkState hitTargetNetworkState;
-		if (collision.collider.gameObject.TryGetComponent<HitTargetNetworkState>(ref hitTargetNetworkState))
+		if (collision.collider.gameObject.TryGetComponent<HitTargetNetworkState>(out hitTargetNetworkState))
 		{
 			hitTargetNetworkState.TargetHit((Time.time - this.timeSpawned) * this.startingVelocity * -base.transform.forward + base.transform.position, base.transform.position);
 		}
@@ -84,12 +84,12 @@ public class SIGadgetBlasterProjectile : MonoBehaviourTick
 		SIPlayer.LocalPlayer.PlayerKnockback(directionAndMagnitude, true, true);
 		if (adjustForDirection)
 		{
-			Vector3 vector = GorillaTagger.Instance.leftHandTransform.position - GorillaTagger.Instance.bodyCollider.transform.position;
-			Vector3 vector2 = GorillaTagger.Instance.rightHandTransform.position - GorillaTagger.Instance.bodyCollider.transform.position;
+			Vector3 from = GorillaTagger.Instance.leftHandTransform.position - GorillaTagger.Instance.bodyCollider.transform.position;
+			Vector3 from2 = GorillaTagger.Instance.rightHandTransform.position - GorillaTagger.Instance.bodyCollider.transform.position;
 			float num = 0.5f;
 			float num2 = 45f;
-			float num3 = Vector3.Angle(vector, directionAndMagnitude);
-			float num4 = Vector3.Angle(vector2, directionAndMagnitude);
+			float num3 = Vector3.Angle(from, directionAndMagnitude);
+			float num4 = Vector3.Angle(from2, directionAndMagnitude);
 			float hapticStrength2 = (1f - Mathf.Max(num3 - num2, 0f) / (180f - num2)) * num + (1f - num);
 			float hapticStrength3 = (1f - Mathf.Max(num4 - num2, 0f) / (180f - num2)) * num + (1f - num);
 			SIPlayer.LocalPlayer.PlayerHandHaptic(true, hapticStrength2, hapticDuration, true);

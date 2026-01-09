@@ -38,8 +38,7 @@ namespace BoingKit
 		{
 			Vector2 vector = Codec.UnpackSaturated(f);
 			vector = vector * 2f - Vector2.one;
-			Vector3 vector2;
-			vector2..ctor(vector.x, vector.y, 1f - Mathf.Abs(vector.x) - Mathf.Abs(vector.y));
+			Vector3 vector2 = new Vector3(vector.x, vector.y, 1f - Mathf.Abs(vector.x) - Mathf.Abs(vector.y));
 			float num = Mathf.Clamp01(-vector2.z);
 			vector2.x += ((vector2.x >= 0f) ? (-num) : num);
 			vector2.y += ((vector2.y >= 0f) ? (-num) : num);
@@ -259,7 +258,7 @@ namespace BoingKit
 
 		public static readonly int FnvPrime = 16777619;
 
-		[StructLayout(2)]
+		[StructLayout(LayoutKind.Explicit)]
 		private struct IntFloat
 		{
 			[FieldOffset(0)]

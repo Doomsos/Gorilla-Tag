@@ -15,7 +15,7 @@ public class GTFirstPersonCamera : MonoBehaviour
 			Debug.LogError("[GTFirstPersonCamera]  ERROR!!!  Could not find Camera on same GameObject!");
 			return;
 		}
-		RenderPipelineManager.beginCameraRendering += new Action<ScriptableRenderContext, Camera>(this._OnPreRender);
+		RenderPipelineManager.beginCameraRendering += this._OnPreRender;
 	}
 
 	private void _OnPreRender(ScriptableRenderContext context, Camera cam)
@@ -27,7 +27,7 @@ public class GTFirstPersonCamera : MonoBehaviour
 			{
 				return;
 			}
-			onPreRenderEvent.Invoke();
+			onPreRenderEvent();
 		}
 	}
 

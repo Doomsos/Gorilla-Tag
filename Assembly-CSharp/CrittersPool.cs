@@ -72,7 +72,7 @@ public class CrittersPool : MonoBehaviour
 	private GameObject GetInstance(GameObject prefab)
 	{
 		List<GameObject> list;
-		if (this.pools.TryGetValue(prefab, ref list))
+		if (this.pools.TryGetValue(prefab, out list))
 		{
 			for (int i = 0; i < list.Count; i++)
 			{

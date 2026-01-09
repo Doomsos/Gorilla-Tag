@@ -127,7 +127,7 @@ public class GTScene : IEquatable<GTScene>
 		{
 			return;
 		}
-		SceneManager.LoadSceneAsync(this._buildIndex, 1);
+		SceneManager.LoadSceneAsync(this._buildIndex, LoadSceneMode.Additive);
 	}
 
 	public void UnloadAsync()
@@ -136,7 +136,7 @@ public class GTScene : IEquatable<GTScene>
 		{
 			return;
 		}
-		SceneManager.UnloadSceneAsync(this._buildIndex, 1);
+		SceneManager.UnloadSceneAsync(this._buildIndex, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
 	}
 
 	public static GTScene FromAsset(object sceneAsset)

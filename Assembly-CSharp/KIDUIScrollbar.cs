@@ -20,7 +20,7 @@ public class KIDUIScrollbar : Scrollbar, IPointerEnterHandler, IEventSystemHandl
 	{
 		get
 		{
-			if (base.direction != null && base.direction != 1)
+			if (base.direction != Scrollbar.Direction.LeftToRight && base.direction != Scrollbar.Direction.RightToLeft)
 			{
 				return KIDUIScrollbar.Axis.Vertical;
 			}
@@ -74,12 +74,12 @@ public class KIDUIScrollbar : Scrollbar, IPointerEnterHandler, IEventSystemHandl
 		}
 		XRRayInteractor xrrayInteractor = this.InputModule.GetInteractor(this._currentPointerData.pointerId) as XRRayInteractor;
 		RaycastResult raycastResult;
-		if (xrrayInteractor != null && xrrayInteractor.TryGetCurrentUIRaycastResult(ref raycastResult))
+		if (xrrayInteractor != null && xrrayInteractor.TryGetCurrentUIRaycastResult(out raycastResult))
 		{
-			Vector2 vector;
-			RectTransformUtility.ScreenPointToLocalPointInRectangle(this.containerRect, raycastResult.screenPosition, this.thirdPersonCamera, ref vector);
+			Vector2 a;
+			RectTransformUtility.ScreenPointToLocalPointInRectangle(this.containerRect, raycastResult.screenPosition, this.thirdPersonCamera, out a);
 			Vector2 zero = Vector2.zero;
-			Vector2 handleCorner = vector - zero - this.containerRect.rect.position - (base.handleRect.rect.size - base.handleRect.sizeDelta) * 0.5f;
+			Vector2 handleCorner = a - zero - this.containerRect.rect.position - (base.handleRect.rect.size - base.handleRect.sizeDelta) * 0.5f;
 			float num = ((this.axis == KIDUIScrollbar.Axis.Horizontal) ? this.containerRect.rect.width : this.containerRect.rect.height) * (1f - base.size);
 			if (num <= 0f)
 			{
@@ -93,16 +93,16 @@ public class KIDUIScrollbar : Scrollbar, IPointerEnterHandler, IEventSystemHandl
 	{
 		switch (base.direction)
 		{
-		case 0:
+		case Scrollbar.Direction.LeftToRight:
 			base.value = Mathf.Clamp01(handleCorner.x / remainingSize);
 			return;
-		case 1:
+		case Scrollbar.Direction.RightToLeft:
 			base.value = Mathf.Clamp01(1f - handleCorner.x / remainingSize);
 			return;
-		case 2:
+		case Scrollbar.Direction.BottomToTop:
 			base.value = Mathf.Clamp01(handleCorner.y / remainingSize);
 			return;
-		case 3:
+		case Scrollbar.Direction.TopToBottom:
 			base.value = Mathf.Clamp01(1f - handleCorner.y / remainingSize);
 			return;
 		default:

@@ -139,11 +139,11 @@ public class KIDManager : MonoBehaviour
 	{
 		switch (KIDManager.GetActiveAccountStatus())
 		{
-		case 1:
+		case AgeStatusType.DIGITALMINOR:
 			return "Digital Minor";
-		case 2:
+		case AgeStatusType.DIGITALYOUTH:
 			return "Digital Youth";
-		case 3:
+		case AgeStatusType.LEGALADULT:
 			return "Legal Adult";
 		default:
 			return "UNKNOWN";
@@ -158,9 +158,9 @@ public class KIDManager : MonoBehaviour
 		}
 		if (!PlayFabAuthenticator.instance.GetSafety())
 		{
-			return 3;
+			return AgeStatusType.LEGALADULT;
 		}
-		return 1;
+		return AgeStatusType.DIGITALMINOR;
 	}
 
 	public static List<Permission> GetAllPermissionsData()
@@ -178,20 +178,20 @@ public class KIDManager : MonoBehaviour
 		if (KIDManager._ageGateRequirements == null)
 		{
 			Debug.LogError("[KID::MANAGER] [_ageGateRequirements] is not set - need to Get AgeGate Requirements first");
-			ageType = 1;
+			ageType = AgeStatusType.DIGITALMINOR;
 			return false;
 		}
 		if (age < KIDManager._ageGateRequirements.AgeGateRequirements.DigitalConsentAge)
 		{
-			ageType = 1;
+			ageType = AgeStatusType.DIGITALMINOR;
 			return true;
 		}
 		if (age < KIDManager._ageGateRequirements.AgeGateRequirements.CivilAge)
 		{
-			ageType = 2;
+			ageType = AgeStatusType.DIGITALYOUTH;
 			return true;
 		}
-		ageType = 3;
+		ageType = AgeStatusType.LEGALADULT;
 		return true;
 	}
 
@@ -211,24 +211,24 @@ public class KIDManager : MonoBehaviour
 				return new ValueTuple<bool, bool>(false, false);
 			}
 		}
-		if (permissionData.ManagedBy == 3)
+		if (permissionData.ManagedBy == Permission.ManagedByEnum.PROHIBITED)
 		{
 			return new ValueTuple<bool, bool>(false, false);
 		}
-		bool flag = true;
+		bool item = true;
 		if (KIDManager.CurrentSession != null)
 		{
-			flag = KIDManager.CurrentSession.HasOptedInToPermission(feature);
+			item = KIDManager.CurrentSession.HasOptedInToPermission(feature);
 		}
-		if (permissionData.ManagedBy == 2)
+		if (permissionData.ManagedBy == Permission.ManagedByEnum.GUARDIAN)
 		{
-			return new ValueTuple<bool, bool>(false, flag);
+			return new ValueTuple<bool, bool>(false, item);
 		}
-		if (permissionData.ManagedBy == 1 && permissionData.Enabled)
+		if (permissionData.ManagedBy == Permission.ManagedByEnum.PLAYER && permissionData.Enabled)
 		{
 			return new ValueTuple<bool, bool>(false, true);
 		}
-		return new ValueTuple<bool, bool>(true, flag);
+		return new ValueTuple<bool, bool>(true, item);
 	}
 
 	public static void SetFeatureOptIn(EKIDFeatures feature, bool optedIn)
@@ -246,13 +246,13 @@ public class KIDManager : MonoBehaviour
 		}
 		switch (permissionDataByFeature.ManagedBy)
 		{
-		case 1:
+		case Permission.ManagedByEnum.PLAYER:
 			KIDManager.CurrentSession.OptInToPermission(feature, optedIn);
 			return;
-		case 2:
+		case Permission.ManagedByEnum.GUARDIAN:
 			KIDManager.CurrentSession.OptInToPermission(feature, permissionDataByFeature.Enabled);
 			return;
-		case 3:
+		case Permission.ManagedByEnum.PROHIBITED:
 			KIDManager.CurrentSession.OptInToPermission(feature, false);
 			return;
 		default:
@@ -268,7 +268,7 @@ public class KIDManager : MonoBehaviour
 			Debug.LogError("[KID::MANAGER] Unable to permissions for feature [" + feature.ToStandardisedString() + "]");
 			return false;
 		}
-		if (permissionDataByFeature.ManagedBy == 3)
+		if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PROHIBITED)
 		{
 			return false;
 		}
@@ -283,7 +283,7 @@ public class KIDManager : MonoBehaviour
 		case EKIDFeatures.Voice_Chat:
 			return item && GorillaComputer.instance.CheckVoiceChatEnabled();
 		case EKIDFeatures.Groups:
-			return permissionDataByFeature.ManagedBy != 2 || permissionDataByFeature.Enabled;
+			return permissionDataByFeature.ManagedBy != Permission.ManagedByEnum.GUARDIAN || permissionDataByFeature.Enabled;
 		default:
 			Debug.LogError("[KID::MANAGER] Tried finding feature setting for [" + feature.ToStandardisedString() + "] but failed.");
 			return false;
@@ -409,7 +409,7 @@ public class KIDManager : MonoBehaviour
 		return <CheckWarningScreensOptedIn>d__.<>t__builder.Task;
 	}
 
-	[RuntimeInitializeOnLoadMethod(0)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 	public static void InitialiseBootFlow()
 	{
 		Debug.Log("[KID::MANAGER] PHASE ZERO -- START -- Checking K-ID Flag");
@@ -421,7 +421,7 @@ public class KIDManager : MonoBehaviour
 		PrivateUIRoom.ForceStartOverlay();
 	}
 
-	[RuntimeInitializeOnLoadMethod(2)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 	public static void InitialiseKID()
 	{
 		KIDManager.<InitialiseKID>d__94 <InitialiseKID>d__;
@@ -481,9 +481,9 @@ public class KIDManager : MonoBehaviour
 		{
 			if (!PlayFabAuthenticator.instance.GetSafety())
 			{
-				return new Permission(feature.ToStandardisedString(), true, 1);
+				return new Permission(feature.ToStandardisedString(), true, Permission.ManagedByEnum.PLAYER);
 			}
-			return new Permission(feature.ToStandardisedString(), false, 2);
+			return new Permission(feature.ToStandardisedString(), false, Permission.ManagedByEnum.GUARDIAN);
 		}
 		else
 		{
@@ -491,7 +491,7 @@ public class KIDManager : MonoBehaviour
 			if (!KIDManager.CurrentSession.TryGetPermission(feature, out result))
 			{
 				Debug.LogError("[KID::MANAGER] Failed to retreive permission from session for [" + feature.ToStandardisedString() + "]. Assuming disabled permission");
-				return new Permission(feature.ToStandardisedString(), false, 2);
+				return new Permission(feature.ToStandardisedString(), false, Permission.ManagedByEnum.GUARDIAN);
 			}
 			return result;
 		}
@@ -538,7 +538,7 @@ public class KIDManager : MonoBehaviour
 			return false;
 		}
 		bool result;
-		if (!bool.TryParse(kidtitleData.KIDEnabled, ref result))
+		if (!bool.TryParse(kidtitleData.KIDEnabled, out result))
 		{
 			Debug.LogError("[KID_MANAGER] Failed to parse 'KIDEnabled': [KIDEnabled] to bool.");
 			return false;
@@ -563,20 +563,20 @@ public class KIDManager : MonoBehaviour
 		if (kidtitleData == null)
 		{
 			Debug.LogError("[KID_MANAGER] Failed to parse json to [KIDTitleData]. Json: \n" + jsonTxt);
-			return default(DateTime?);
+			return null;
 		}
-		DateTime dateTime;
-		if (!DateTime.TryParse(kidtitleData.KIDNewPlayerIsoTimestamp, CultureInfo.InvariantCulture, 128, ref dateTime))
+		DateTime value;
+		if (!DateTime.TryParse(kidtitleData.KIDNewPlayerIsoTimestamp, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out value))
 		{
 			Debug.LogError("[KID_MANAGER] Failed to parse 'KIDNewPlayerIsoTimestamp': [KIDNewPlayerIsoTimestamp] to DateTime.");
-			return default(DateTime?);
+			return null;
 		}
-		return new DateTime?(dateTime);
+		return new DateTime?(value);
 	}
 
 	public static bool IsAdult()
 	{
-		return KIDManager.CurrentSession.IsValidSession && KIDManager.CurrentSession.AgeStatus == 3;
+		return KIDManager.CurrentSession.IsValidSession && KIDManager.CurrentSession.AgeStatus == AgeStatusType.LEGALADULT;
 	}
 
 	public static bool HasAllPermissions()
@@ -584,7 +584,7 @@ public class KIDManager : MonoBehaviour
 		List<Permission> allPermissions = KIDManager.CurrentSession.GetAllPermissions();
 		for (int i = 0; i < allPermissions.Count; i++)
 		{
-			if (allPermissions[i].ManagedBy == 2 || !allPermissions[i].Enabled)
+			if (allPermissions[i].ManagedBy == Permission.ManagedByEnum.GUARDIAN || !allPermissions[i].Enabled)
 			{
 				return false;
 			}
@@ -632,7 +632,7 @@ public class KIDManager : MonoBehaviour
 			return !PlayFabAuthenticator.instance.GetSafety();
 		}
 		Permission permissionDataByFeature = KIDManager.GetPermissionDataByFeature(feature);
-		return (permissionDataByFeature.Enabled || permissionDataByFeature.ManagedBy == 1) && permissionDataByFeature.ManagedBy != 3;
+		return (permissionDataByFeature.Enabled || permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.PLAYER) && permissionDataByFeature.ManagedBy != Permission.ManagedByEnum.PROHIBITED;
 	}
 
 	private static Task<bool> WaitForAuthentication()
@@ -693,7 +693,7 @@ public class KIDManager : MonoBehaviour
 		return <Server_SetConfirmedStatus>d__.<>t__builder.Task;
 	}
 
-	private static Task<UpgradeSessionData> Server_UpgradeSession(UpgradeSessionRequest request)
+	private static Task<UpgradeSessionData> Server_UpgradeSession(global::UpgradeSessionRequest request)
 	{
 		KIDManager.<Server_UpgradeSession>d__132 <Server_UpgradeSession>d__;
 		<Server_UpgradeSession>d__.<>t__builder = AsyncTaskMethodBuilder<UpgradeSessionData>.Create();
@@ -911,7 +911,7 @@ public class KIDManager : MonoBehaviour
 		Action onSessionUpdated_AnyPermission = KIDManager._onSessionUpdated_AnyPermission;
 		if (onSessionUpdated_AnyPermission != null)
 		{
-			onSessionUpdated_AnyPermission.Invoke();
+			onSessionUpdated_AnyPermission();
 		}
 		bool voiceChatEnabled = false;
 		bool joinGroupsEnabled = false;
@@ -939,7 +939,7 @@ public class KIDManager : MonoBehaviour
 								Action<bool, Permission.ManagedByEnum> onSessionUpdated_UGC = KIDManager._onSessionUpdated_UGC;
 								if (onSessionUpdated_UGC != null)
 								{
-									onSessionUpdated_UGC.Invoke(permission.Enabled, permission.ManagedBy);
+									onSessionUpdated_UGC(permission.Enabled, permission.ManagedBy);
 								}
 								KIDManager._previousPermissionSettings[permission.Name] = permission;
 							}
@@ -951,7 +951,7 @@ public class KIDManager : MonoBehaviour
 								Action<bool, Permission.ManagedByEnum> onSessionUpdated_Multiplayer = KIDManager._onSessionUpdated_Multiplayer;
 								if (onSessionUpdated_Multiplayer != null)
 								{
-									onSessionUpdated_Multiplayer.Invoke(permission.Enabled, permission.ManagedBy);
+									onSessionUpdated_Multiplayer(permission.Enabled, permission.ManagedBy);
 								}
 								KIDManager._previousPermissionSettings[permission.Name] = permission;
 							}
@@ -965,7 +965,7 @@ public class KIDManager : MonoBehaviour
 							Action<bool, Permission.ManagedByEnum> onSessionUpdated_PrivateRooms = KIDManager._onSessionUpdated_PrivateRooms;
 							if (onSessionUpdated_PrivateRooms != null)
 							{
-								onSessionUpdated_PrivateRooms.Invoke(permission.Enabled, permission.ManagedBy);
+								onSessionUpdated_PrivateRooms(permission.Enabled, permission.ManagedBy);
 							}
 							KIDManager._previousPermissionSettings[permission.Name] = permission;
 						}
@@ -979,7 +979,7 @@ public class KIDManager : MonoBehaviour
 						Action<bool, Permission.ManagedByEnum> onSessionUpdated_CustomUsernames = KIDManager._onSessionUpdated_CustomUsernames;
 						if (onSessionUpdated_CustomUsernames != null)
 						{
-							onSessionUpdated_CustomUsernames.Invoke(permission.Enabled, permission.ManagedBy);
+							onSessionUpdated_CustomUsernames(permission.Enabled, permission.ManagedBy);
 						}
 						KIDManager._previousPermissionSettings[permission.Name] = permission;
 					}
@@ -993,7 +993,7 @@ public class KIDManager : MonoBehaviour
 					Action<bool, Permission.ManagedByEnum> onSessionUpdated_VoiceChat = KIDManager._onSessionUpdated_VoiceChat;
 					if (onSessionUpdated_VoiceChat != null)
 					{
-						onSessionUpdated_VoiceChat.Invoke(permission.Enabled, permission.ManagedBy);
+						onSessionUpdated_VoiceChat(permission.Enabled, permission.ManagedBy);
 					}
 					KIDManager._previousPermissionSettings[permission.Name] = permission;
 				}
@@ -1006,7 +1006,7 @@ public class KIDManager : MonoBehaviour
 	private static bool HasPermissionChanged(Permission newValue)
 	{
 		Permission permission;
-		if (KIDManager._previousPermissionSettings.TryGetValue(newValue.Name, ref permission))
+		if (KIDManager._previousPermissionSettings.TryGetValue(newValue.Name, out permission))
 		{
 			return permission.Enabled != newValue.Enabled || permission.ManagedBy != newValue.ManagedBy;
 		}
@@ -1047,7 +1047,7 @@ public class KIDManager : MonoBehaviour
 
 	private static int _kIDPhase = 0;
 
-	private static DateTime? _kIDNewPlayerDateTime = default(DateTime?);
+	private static DateTime? _kIDNewPlayerDateTime = null;
 
 	private static string _debugKIDLocalePlayerPrefRef = "KID_SPOOF_LOCALE";
 

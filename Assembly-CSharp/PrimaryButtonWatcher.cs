@@ -22,21 +22,21 @@ public class PrimaryButtonWatcher : MonoBehaviour
 		{
 			this.InputDevices_deviceConnected(device);
 		}
-		InputDevices.deviceConnected += new Action<InputDevice>(this.InputDevices_deviceConnected);
-		InputDevices.deviceDisconnected += new Action<InputDevice>(this.InputDevices_deviceDisconnected);
+		InputDevices.deviceConnected += this.InputDevices_deviceConnected;
+		InputDevices.deviceDisconnected += this.InputDevices_deviceDisconnected;
 	}
 
 	private void OnDisable()
 	{
-		InputDevices.deviceConnected -= new Action<InputDevice>(this.InputDevices_deviceConnected);
-		InputDevices.deviceDisconnected -= new Action<InputDevice>(this.InputDevices_deviceDisconnected);
+		InputDevices.deviceConnected -= this.InputDevices_deviceConnected;
+		InputDevices.deviceDisconnected -= this.InputDevices_deviceDisconnected;
 		this.devicesWithPrimaryButton.Clear();
 	}
 
 	private void InputDevices_deviceConnected(InputDevice device)
 	{
 		bool flag;
-		if (device.TryGetFeatureValue(CommonUsages.primaryButton, ref flag))
+		if (device.TryGetFeatureValue(CommonUsages.primaryButton, out flag))
 		{
 			this.devicesWithPrimaryButton.Add(device);
 		}
@@ -56,7 +56,7 @@ public class PrimaryButtonWatcher : MonoBehaviour
 		foreach (InputDevice inputDevice in this.devicesWithPrimaryButton)
 		{
 			bool flag2 = false;
-			flag = ((inputDevice.TryGetFeatureValue(CommonUsages.primaryButton, ref flag2) && flag2) || flag);
+			flag = ((inputDevice.TryGetFeatureValue(CommonUsages.primaryButton, out flag2) && flag2) || flag);
 		}
 		if (flag != this.lastButtonState)
 		{

@@ -7,22 +7,22 @@ public class NetworkComponentCallbacks : NetworkComponent
 {
 	public override void ReadDataFusion()
 	{
-		this.ReadData.Invoke();
+		this.ReadData();
 	}
 
 	public override void WriteDataFusion()
 	{
-		this.WriteData.Invoke();
+		this.WriteData();
 	}
 
 	protected override void ReadDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
-		this.ReadPunData.Invoke(stream, info);
+		this.ReadPunData(stream, info);
 	}
 
 	protected override void WriteDataPUN(PhotonStream stream, PhotonMessageInfo info)
 	{
-		this.WritePunData.Invoke(stream, info);
+		this.WritePunData(stream, info);
 	}
 
 	[WeaverGenerated]

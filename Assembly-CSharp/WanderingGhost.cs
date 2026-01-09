@@ -61,9 +61,9 @@ public class WanderingGhost : NetworkComponent
 				this.waypoints.Add(new WanderingGhost.Waypoint(transform.name.Contains("_v_"), transform));
 			}
 		}
-		int num = Random.Range(0, this.waypoints.Count);
-		this.currentWaypoint = this.waypoints[num];
-		this.waypoints.RemoveAt(num);
+		int index = Random.Range(0, this.waypoints.Count);
+		this.currentWaypoint = this.waypoints[index];
+		this.waypoints.RemoveAt(index);
 	}
 
 	private void Patrol()
@@ -166,7 +166,7 @@ public class WanderingGhost : NetworkComponent
 				UnityAction<GameObject> triggerHauntedObjects = this.TriggerHauntedObjects;
 				if (triggerHauntedObjects != null)
 				{
-					triggerHauntedObjects.Invoke(array[i].gameObject);
+					triggerHauntedObjects(array[i].gameObject);
 				}
 			}
 		}
@@ -246,7 +246,7 @@ public class WanderingGhost : NetworkComponent
 	{
 		Vector3 position = base.transform.position + Vector3.down * 0.25f;
 		RaycastHit raycastHit;
-		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * this.flowerSpawnRadius, Vector3.down), ref raycastHit, 3f, this.flowerGroundMask))
+		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * this.flowerSpawnRadius, Vector3.down), out raycastHit, 3f, this.flowerGroundMask))
 		{
 			position = raycastHit.point;
 		}
@@ -354,7 +354,7 @@ public class WanderingGhost : NetworkComponent
 
 	[WeaverGenerated]
 	[DefaultForProperty("Data", 0, 1)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private WanderingGhost.ghostState _Data;
 
 	[Serializable]

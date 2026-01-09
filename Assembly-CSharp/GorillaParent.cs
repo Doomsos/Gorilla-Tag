@@ -36,14 +36,14 @@ public class GorillaParent : MonoBehaviour
 		{
 			return;
 		}
-		action.Invoke();
+		action();
 	}
 
 	public static void OnReplicatedClientReady(Action action)
 	{
 		if (GorillaParent.replicatedClientReady)
 		{
-			action.Invoke();
+			action();
 			return;
 		}
 		GorillaParent.onReplicatedClientReady = (Action)Delegate.Combine(GorillaParent.onReplicatedClientReady, action);

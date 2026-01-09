@@ -10,7 +10,7 @@ public class PlayableBoundaryTracker : MonoBehaviour
 
 	public float timeSinceCrossingBorder { get; private set; }
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public bool IsInsideZone()
 	{
 		return Mathf.Sign(this.signedDistanceToBoundary) < 0f;

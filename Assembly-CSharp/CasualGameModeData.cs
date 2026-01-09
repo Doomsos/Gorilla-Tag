@@ -53,6 +53,6 @@ public class CasualGameModeData : FusionGameModeData
 
 	[WeaverGenerated]
 	[DefaultForProperty("casualData", 0, 1)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private CasualData _casualData;
 }

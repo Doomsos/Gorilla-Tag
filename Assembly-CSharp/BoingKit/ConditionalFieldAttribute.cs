@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace BoingKit
 {
-	[AttributeUsage(256)]
+	[AttributeUsage(AttributeTargets.Field)]
 	public class ConditionalFieldAttribute : PropertyAttribute
 	{
 		public bool ShowRange

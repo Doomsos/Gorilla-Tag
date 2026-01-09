@@ -23,7 +23,7 @@ public class ElfLauncher : MonoBehaviour
 		}
 		if (this._events != null)
 		{
-			this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.ShootShared);
+			this._events.Activate += this.ShootShared;
 		}
 	}
 
@@ -31,7 +31,7 @@ public class ElfLauncher : MonoBehaviour
 	{
 		if (this._events != null)
 		{
-			this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.ShootShared);
+			this._events.Activate -= this.ShootShared;
 			this._events.Dispose();
 			this._events = null;
 			this.m_player = null;

@@ -79,7 +79,7 @@ public class GTDoor : NetworkSceneObject
 				else
 				{
 					this.currentState = GTDoor.DoorState.OpeningWaitingOnRPC;
-					this.photonView.RPC("ChangeDoorState", 5, new object[]
+					this.photonView.RPC("ChangeDoorState", RpcTarget.AllViaServer, new object[]
 					{
 						GTDoor.DoorState.Opening
 					});
@@ -99,7 +99,7 @@ public class GTDoor : NetworkSceneObject
 				this.currentState = GTDoor.DoorState.HeldOpenLocally;
 				if (NetworkSystem.Instance.InRoom && base.IsMine)
 				{
-					this.photonView.RPC("ChangeDoorState", 5, new object[]
+					this.photonView.RPC("ChangeDoorState", RpcTarget.AllViaServer, new object[]
 					{
 						GTDoor.DoorState.HeldOpen
 					});
@@ -115,7 +115,7 @@ public class GTDoor : NetworkSceneObject
 					this.currentState = GTDoor.DoorState.HeldOpenLocally;
 					if (NetworkSystem.Instance.InRoom && base.IsMine)
 					{
-						this.photonView.RPC("ChangeDoorState", 5, new object[]
+						this.photonView.RPC("ChangeDoorState", RpcTarget.AllViaServer, new object[]
 						{
 							GTDoor.DoorState.HeldOpen
 						});
@@ -128,7 +128,7 @@ public class GTDoor : NetworkSceneObject
 				else if (base.IsMine)
 				{
 					this.currentState = GTDoor.DoorState.ClosingWaitingOnRPC;
-					this.photonView.RPC("ChangeDoorState", 5, new object[]
+					this.photonView.RPC("ChangeDoorState", RpcTarget.AllViaServer, new object[]
 					{
 						GTDoor.DoorState.Closing
 					});
@@ -151,7 +151,7 @@ public class GTDoor : NetworkSceneObject
 				else if (base.IsMine)
 				{
 					this.currentState = GTDoor.DoorState.ClosingWaitingOnRPC;
-					this.photonView.RPC("ChangeDoorState", 5, new object[]
+					this.photonView.RPC("ChangeDoorState", RpcTarget.AllViaServer, new object[]
 					{
 						GTDoor.DoorState.Closing
 					});
@@ -278,7 +278,7 @@ public class GTDoor : NetworkSceneObject
 			{
 				throw new ArgumentNullException("runner");
 			}
-			if (runner.Stage != 4)
+			if (runner.Stage != SimulationStages.Resimulate)
 			{
 				int num = 8;
 				num += 4;
@@ -295,8 +295,8 @@ public class GTDoor : NetworkSceneObject
 						num2 += 4;
 						*(int*)(ptr2 + num2) = doorId;
 						num2 += 4;
-						ptr.Offset = num2 * 8;
-						ptr.SetStatic();
+						ptr->Offset = num2 * 8;
+						ptr->SetStatic();
 						runner.SendRpc(ptr);
 					}
 					goto IL_10;
@@ -306,7 +306,7 @@ public class GTDoor : NetworkSceneObject
 			return;
 		}
 		IL_10:
-		GTDoor[] array = Object.FindObjectsByType<GTDoor>(1, 0);
+		GTDoor[] array = UnityEngine.Object.FindObjectsByType<GTDoor>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 		if (array == null || array.Length == 0)
 		{
 			return;
@@ -394,7 +394,7 @@ public class GTDoor : NetworkSceneObject
 
 	public void SetupDoorIDs()
 	{
-		GTDoor[] array = Object.FindObjectsByType<GTDoor>(1, 0);
+		GTDoor[] array = UnityEngine.Object.FindObjectsByType<GTDoor>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 		for (int i = 0; i < array.Length; i++)
 		{
 			array[i].GTDoorID = i + 1;

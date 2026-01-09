@@ -32,13 +32,13 @@ namespace BoingKit
 			{
 				return;
 			}
-			Vector3 vector;
+			Vector3 a;
 			Vector4 v;
-			if (!component.SampleCpuGrid(base.transform.position, out vector, out v))
+			if (!component.SampleCpuGrid(base.transform.position, out a, out v))
 			{
 				return;
 			}
-			base.transform.position = this.m_objPosition + vector * this.PositionSampleMultiplier;
+			base.transform.position = this.m_objPosition + a * this.PositionSampleMultiplier;
 			base.transform.rotation = QuaternionUtil.Pow(QuaternionUtil.FromVector4(v, true), this.RotationSampleMultiplier) * this.m_objRotation;
 		}
 

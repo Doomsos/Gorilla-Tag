@@ -578,15 +578,15 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 
 	public void OnGameEntitySerialize(BinaryWriter writer)
 	{
-		byte b = (byte)this.currBehavior;
-		byte b2 = (byte)this.currBodyState;
-		byte b3 = (byte)this.abilityPatrol.nextPatrolNode;
-		int num = (this.targetPlayer == null) ? -1 : this.targetPlayer.ActorNumber;
-		writer.Write(b);
-		writer.Write(b2);
+		byte value = (byte)this.currBehavior;
+		byte value2 = (byte)this.currBodyState;
+		byte value3 = (byte)this.abilityPatrol.nextPatrolNode;
+		int value4 = (this.targetPlayer == null) ? -1 : this.targetPlayer.ActorNumber;
+		writer.Write(value);
+		writer.Write(value2);
 		writer.Write(this.hp);
-		writer.Write(b3);
-		writer.Write(num);
+		writer.Write(value3);
+		writer.Write(value4);
 	}
 
 	public void OnGameEntityDeserialize(BinaryReader reader)

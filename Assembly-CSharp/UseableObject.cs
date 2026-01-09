@@ -54,8 +54,8 @@ public class UseableObject : TransferrableObject
 			player = ((myRig != null) ? myRig.creator : null);
 		}
 		events.Init(player);
-		this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnObjectActivated);
-		this._events.Deactivate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnObjectDeactivated);
+		this._events.Activate += this.OnObjectActivated;
+		this._events.Deactivate += this.OnObjectDeactivated;
 	}
 
 	internal override void OnDisable()

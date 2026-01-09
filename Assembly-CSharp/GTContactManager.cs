@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GTContactManager : MonoBehaviour
 {
-	[RuntimeInitializeOnLoadMethod(1)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void InitializeOnLoad()
 	{
 	}

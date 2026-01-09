@@ -23,23 +23,23 @@ public class VRMap
 
 	public void MapOther(float lerpValue)
 	{
-		Vector3 vector;
-		Quaternion quaternion;
-		this.rigTarget.GetLocalPositionAndRotation(ref vector, ref quaternion);
-		this.rigTarget.SetLocalPositionAndRotation(Vector3.Lerp(vector, this.syncPos, lerpValue), Quaternion.Lerp(quaternion, this.syncRotation, lerpValue));
+		Vector3 a;
+		Quaternion a2;
+		this.rigTarget.GetLocalPositionAndRotation(out a, out a2);
+		this.rigTarget.SetLocalPositionAndRotation(Vector3.Lerp(a, this.syncPos, lerpValue), Quaternion.Lerp(a2, this.syncRotation, lerpValue));
 	}
 
 	public void MapMine(float ratio, Transform playerOffsetTransform)
 	{
-		Vector3 vector;
-		Quaternion quaternion;
-		this.rigTarget.GetPositionAndRotation(ref vector, ref quaternion);
+		Vector3 current;
+		Quaternion rotation;
+		this.rigTarget.GetPositionAndRotation(out current, out rotation);
 		if (this.overrideTarget != null)
 		{
-			Vector3 vector2;
-			Quaternion quaternion2;
-			this.overrideTarget.GetPositionAndRotation(ref vector2, ref quaternion2);
-			this.rigTarget.SetPositionAndRotation(vector2 + quaternion * this.trackingPositionOffset * ratio, quaternion2 * Quaternion.Euler(this.trackingRotationOffset));
+			Vector3 a;
+			Quaternion lhs;
+			this.overrideTarget.GetPositionAndRotation(out a, out lhs);
+			this.rigTarget.SetPositionAndRotation(a + rotation * this.trackingPositionOffset * ratio, lhs * Quaternion.Euler(this.trackingRotationOffset));
 		}
 		else
 		{
@@ -47,31 +47,31 @@ public class VRMap
 			{
 				this.myInputDevice = InputDevices.GetDeviceAtXRNode(this.vrTargetNode);
 				this.hasInputDevice = true;
-				if (this.vrTargetNode != 4 && this.vrTargetNode != 5)
+				if (this.vrTargetNode != XRNode.LeftHand && this.vrTargetNode != XRNode.RightHand)
 				{
 					this.hasInputDevice = this.myInputDevice.isValid;
 				}
 			}
-			Quaternion quaternion3;
-			Vector3 vector3;
-			if (this.hasInputDevice && this.myInputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, ref quaternion3) && this.myInputDevice.TryGetFeatureValue(CommonUsages.devicePosition, ref vector3))
+			Quaternion lhs2;
+			Vector3 a2;
+			if (this.hasInputDevice && this.myInputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out lhs2) && this.myInputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out a2))
 			{
-				this.rigTarget.SetPositionAndRotation(vector3 + quaternion * this.trackingPositionOffset * ratio + playerOffsetTransform.position, quaternion3 * Quaternion.Euler(this.trackingRotationOffset));
+				this.rigTarget.SetPositionAndRotation(a2 + rotation * this.trackingPositionOffset * ratio + playerOffsetTransform.position, lhs2 * Quaternion.Euler(this.trackingRotationOffset));
 				this.rigTarget.RotateAround(playerOffsetTransform.position, Vector3.up, playerOffsetTransform.eulerAngles.y);
 			}
 		}
 		if (this.handholdOverrideTarget != null)
 		{
-			this.rigTarget.position = Vector3.MoveTowards(vector, this.handholdOverrideTarget.position - this.handholdOverrideTargetOffset + quaternion * this.trackingPositionOffset * ratio, Time.deltaTime * 2f);
+			this.rigTarget.position = Vector3.MoveTowards(current, this.handholdOverrideTarget.position - this.handholdOverrideTargetOffset + rotation * this.trackingPositionOffset * ratio, Time.deltaTime * 2f);
 		}
 	}
 
 	public Vector3 GetExtrapolatedControllerPosition()
 	{
-		Vector3 vector;
-		Quaternion quaternion;
-		this.rigTarget.GetPositionAndRotation(ref vector, ref quaternion);
-		return vector - quaternion * this.trackingPositionOffset * this.rigTarget.lossyScale.x;
+		Vector3 a;
+		Quaternion rotation;
+		this.rigTarget.GetPositionAndRotation(out a, out rotation);
+		return a - rotation * this.trackingPositionOffset * this.rigTarget.lossyScale.x;
 	}
 
 	public virtual void MapOtherFinger(float handSync, float lerpValue)

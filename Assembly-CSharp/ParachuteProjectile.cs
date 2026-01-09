@@ -94,12 +94,12 @@ public class ParachuteProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 
 	private void ChangeUp(Vector3 newUp)
 	{
-		Vector3 vector = Vector3.Cross(this.rb.transform.right, newUp);
-		if (vector.sqrMagnitude < 1E-45f)
+		Vector3 forward = Vector3.Cross(this.rb.transform.right, newUp);
+		if (forward.sqrMagnitude < 1E-45f)
 		{
-			vector = Vector3.Cross(Vector3.Cross(newUp, this.rb.transform.forward), newUp);
+			forward = Vector3.Cross(Vector3.Cross(newUp, this.rb.transform.forward), newUp);
 		}
-		this.rb.rotation = Quaternion.LookRotation(vector, newUp);
+		this.rb.rotation = Quaternion.LookRotation(forward, newUp);
 	}
 
 	private void PlayImpactEffects(Vector3 position, Vector3 normal)

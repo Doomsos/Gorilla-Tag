@@ -200,19 +200,19 @@ namespace GorillaLocomotion.Climbing
 			int num2 = 0;
 			float num3 = Time.time - maxTimeFromPast;
 			bool flag = false;
-			Vector3 vector = Vector3.zero;
+			Vector3 b = Vector3.zero;
 			for (int i = 0; i < array.Length; i++)
 			{
 				if (array[i].time >= num3)
 				{
 					if (!flag)
 					{
-						vector = array[i].delta;
+						b = array[i].delta;
 						flag = true;
 					}
 					else
 					{
-						num += Mathf.Abs(Vector3.Dot(array[i].delta - vector, dir));
+						num += Mathf.Abs(Vector3.Dot(array[i].delta - b, dir));
 						num2++;
 					}
 				}

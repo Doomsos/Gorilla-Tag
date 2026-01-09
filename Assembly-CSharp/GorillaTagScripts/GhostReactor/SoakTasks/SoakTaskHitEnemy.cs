@@ -73,7 +73,7 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 		public void Reset()
 		{
 			this._enemy = null;
-			this._nextHitTime = default(float?);
+			this._nextHitTime = null;
 			this.Complete = false;
 		}
 

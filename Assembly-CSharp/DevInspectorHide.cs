@@ -1,6 +1,6 @@
 ﻿using System;
 
-[AttributeUsage(384)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class DevInspectorHide : Attribute
 {
 }

@@ -256,21 +256,21 @@ namespace LitJson
 		private void ProcessNumber(string number)
 		{
 			double num;
-			if ((number.IndexOf('.') != -1 || number.IndexOf('e') != -1 || number.IndexOf('E') != -1) && double.TryParse(number, ref num))
+			if ((number.IndexOf('.') != -1 || number.IndexOf('e') != -1 || number.IndexOf('E') != -1) && double.TryParse(number, out num))
 			{
 				this.token = JsonToken.Double;
 				this.token_value = num;
 				return;
 			}
 			int num2;
-			if (int.TryParse(number, ref num2))
+			if (int.TryParse(number, out num2))
 			{
 				this.token = JsonToken.Int;
 				this.token_value = num2;
 				return;
 			}
 			long num3;
-			if (long.TryParse(number, ref num3))
+			if (long.TryParse(number, out num3))
 			{
 				this.token = JsonToken.Long;
 				this.token_value = num3;

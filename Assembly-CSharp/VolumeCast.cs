@@ -12,14 +12,14 @@ public class VolumeCast : MonoBehaviourGizmos
 		Vector3 lossyScale = transform.lossyScale;
 		Quaternion rotation = transform.rotation;
 		int num = (int)this.physicsMask;
-		QueryTriggerInteraction queryTriggerInteraction = this.includeTriggers ? 2 : 1;
+		QueryTriggerInteraction queryTriggerInteraction = this.includeTriggers ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore;
 		Vector3 vector;
 		Vector3 vector2;
 		float num2;
 		VolumeCast.GetEndsAndRadius(transform, this.center, this.height, this.radius, out vector, out vector2, out num2);
 		VolumeCast.VolumeShape volumeShape = this.shape;
 		Vector3 vector3;
-		Vector3 vector4;
+		Vector3 halfExtents;
 		if (volumeShape != VolumeCast.VolumeShape.Box)
 		{
 			if (volumeShape != VolumeCast.VolumeShape.Cylinder)
@@ -27,15 +27,15 @@ public class VolumeCast : MonoBehaviourGizmos
 				return false;
 			}
 			vector3 = (vector + vector2) * 0.5f;
-			vector4..ctor(num2, Vector3.Distance(vector, vector2) * 0.5f, num2);
+			halfExtents = new Vector3(num2, Vector3.Distance(vector, vector2) * 0.5f, num2);
 		}
 		else
 		{
 			vector3 = transform.TransformPoint(this.center);
-			vector4 = Vector3.Scale(lossyScale, this.size * 0.5f).Abs();
+			halfExtents = Vector3.Scale(lossyScale, this.size * 0.5f).Abs();
 		}
 		Array.Clear(this._boxOverlaps, 0, 8);
-		this._boxHits = Physics.OverlapBoxNonAlloc(vector3, vector4, this._boxOverlaps, rotation, num, queryTriggerInteraction);
+		this._boxHits = Physics.OverlapBoxNonAlloc(vector3, halfExtents, this._boxOverlaps, rotation, num, queryTriggerInteraction);
 		if (this.shape != VolumeCast.VolumeShape.Cylinder)
 		{
 			return this._colliding = (this._boxHits > 0);
@@ -72,10 +72,10 @@ public class VolumeCast : MonoBehaviourGizmos
 
 	private static void GetEndsAndRadius(Transform t, Vector3 center, float height, float radius, out Vector3 a, out Vector3 b, out float r)
 	{
-		float num = height * 0.5f;
+		float d = height * 0.5f;
 		Vector3 lossyScale = t.lossyScale;
-		a = t.TransformPoint(center + Vector3.down * num);
-		b = t.TransformPoint(center + Vector3.up * num);
+		a = t.TransformPoint(center + Vector3.down * d);
+		b = t.TransformPoint(center + Vector3.up * d);
 		r = Math.Max(Math.Abs(lossyScale.x), Math.Abs(lossyScale.z)) * radius;
 	}
 

@@ -10,8 +10,8 @@ namespace Utilities
 			{
 				return null;
 			}
-			string[] array = string.Concat(subPaths).Split(PathUtils.kPathSeps, 1);
-			return Uri.UnescapeDataString(new Uri(string.Join("/", array)).AbsolutePath);
+			string[] value = string.Concat(subPaths).Split(PathUtils.kPathSeps, StringSplitOptions.RemoveEmptyEntries);
+			return Uri.UnescapeDataString(new Uri(string.Join("/", value)).AbsolutePath);
 		}
 
 		private static readonly char[] kPathSeps = new char[]

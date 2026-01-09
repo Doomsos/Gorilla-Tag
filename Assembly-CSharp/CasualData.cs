@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Fusion;
 
 [NetworkStructWeaved(0)]
-[StructLayout(2)]
+[StructLayout(LayoutKind.Explicit)]
 public struct CasualData : INetworkStruct
 {
 }

@@ -9,7 +9,7 @@ namespace Docking
 		protected override void OnTriggerEnter(Collider other)
 		{
 			LivCameraDock livCameraDock;
-			if (other.TryGetComponent<LivCameraDock>(ref livCameraDock))
+			if (other.TryGetComponent<LivCameraDock>(out livCameraDock))
 			{
 				this.livDock = livCameraDock;
 				this.potentialDock = other.transform;

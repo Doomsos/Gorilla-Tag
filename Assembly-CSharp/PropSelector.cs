@@ -7,7 +7,9 @@ public class PropSelector : MonoBehaviour
 {
 	private void Start()
 	{
-		foreach (GameObject gameObject in new List<GameObject>(Enumerable.Take<GameObject>(Enumerable.OrderBy<GameObject, int>(this._props, (GameObject x) => PropSelector._gRandom.Next()), this._desiredActivePropsNum)))
+		foreach (GameObject gameObject in new List<GameObject>((from x in this._props
+		orderby PropSelector._gRandom.Next()
+		select x).Take(this._desiredActivePropsNum)))
 		{
 			gameObject.SetActive(true);
 		}

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UniLabs.Time
 {
-	[JsonObject(1)]
+	[JsonObject(MemberSerialization.OptIn)]
 	[Serializable]
 	public class UDateTime : ISerializationCallbackReceiver, IComparable<UDateTime>, IComparable<DateTime>
 	{
@@ -78,7 +78,7 @@ namespace UniLabs.Time
 		public void OnAfterDeserialize()
 		{
 			DateTime dateTime;
-			this.DateTime = (DateTime.TryParse(this._DateTime, CultureInfo.InvariantCulture, 128, ref dateTime) ? dateTime : DateTime.MinValue);
+			this.DateTime = (DateTime.TryParse(this._DateTime, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out dateTime) ? dateTime : DateTime.MinValue);
 		}
 
 		public void OnBeforeSerialize()

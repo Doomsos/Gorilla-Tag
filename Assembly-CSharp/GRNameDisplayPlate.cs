@@ -6,8 +6,8 @@ public class GRNameDisplayPlate : MonoBehaviour
 {
 	public void RefreshPlayerName(VRRig vrRig)
 	{
-		GRPlayer grplayer = GRPlayer.Get(vrRig);
-		if (vrRig != null && grplayer != null)
+		GRPlayer x = GRPlayer.Get(vrRig);
+		if (vrRig != null && x != null)
 		{
 			if (!this.namePlateLabel.text.Equals(vrRig.playerNameVisible))
 			{

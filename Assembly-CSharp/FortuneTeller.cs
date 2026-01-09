@@ -37,7 +37,7 @@ public class FortuneTeller : MonoBehaviourPunCallbacks
 		this.nextAttractAnimTimestamp = Time.time + this.waitDurationBeforeAttractAnim;
 		if (this.button)
 		{
-			this.button.onPressed += new Action<GorillaPressableButton, bool>(this.HandlePressedButton);
+			this.button.onPressed += this.HandlePressedButton;
 		}
 	}
 
@@ -46,7 +46,7 @@ public class FortuneTeller : MonoBehaviourPunCallbacks
 		base.OnDisable();
 		if (this.button)
 		{
-			this.button.onPressed -= new Action<GorillaPressableButton, bool>(this.HandlePressedButton);
+			this.button.onPressed -= this.HandlePressedButton;
 		}
 	}
 
@@ -102,7 +102,7 @@ public class FortuneTeller : MonoBehaviourPunCallbacks
 		}
 		if (PhotonNetwork.InRoom)
 		{
-			base.photonView.RPC("RequestFortuneRPC", 2, Array.Empty<object>());
+			base.photonView.RPC("RequestFortuneRPC", RpcTarget.MasterClient, Array.Empty<object>());
 		}
 	}
 
@@ -131,7 +131,7 @@ public class FortuneTeller : MonoBehaviourPunCallbacks
 		this.UpdateFortune(this.latestFortune, true);
 		if (PhotonNetwork.InRoom)
 		{
-			base.photonView.RPC("TriggerNewFortuneRPC", 1, new object[]
+			base.photonView.RPC("TriggerNewFortuneRPC", RpcTarget.Others, new object[]
 			{
 				(int)this.latestFortune.fortuneType,
 				this.latestFortune.resultIndex
@@ -200,7 +200,7 @@ public class FortuneTeller : MonoBehaviourPunCallbacks
 	{
 		if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
 		{
-			base.photonView.RPC("TriggerAttractAnimRPC", 0, Array.Empty<object>());
+			base.photonView.RPC("TriggerAttractAnimRPC", RpcTarget.All, Array.Empty<object>());
 		}
 	}
 
@@ -225,7 +225,7 @@ public class FortuneTeller : MonoBehaviourPunCallbacks
 			if (resultFanfare)
 			{
 				this.playable.initialTime = (newFortune ? 0.0 : resultFanfare.duration);
-				this.playable.Play(resultFanfare, 0);
+				this.playable.Play(resultFanfare, DirectorWrapMode.Hold);
 				this.animator.SetTrigger(this.trigger_prediction);
 				this.nextAttractAnimTimestamp = Time.time + this.waitDurationBeforeAttractAnim;
 			}

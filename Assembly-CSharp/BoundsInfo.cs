@@ -28,15 +28,14 @@ public struct BoundsInfo
 			return default(BoundsInfo);
 		}
 		OrientedBoundingBox orientedBoundingBox = OrientedBoundingBox.BruteEnclosing(vertices);
-		Vector4 vector = orientedBoundingBox.Axis1;
-		Vector4 vector2 = orientedBoundingBox.Axis2;
-		Vector4 vector3 = orientedBoundingBox.Axis3;
-		Vector4 vector4;
-		vector4..ctor(0f, 0f, 0f, 1f);
+		Vector4 column = orientedBoundingBox.Axis1;
+		Vector4 column2 = orientedBoundingBox.Axis2;
+		Vector4 column3 = orientedBoundingBox.Axis3;
+		Vector4 column4 = new Vector4(0f, 0f, 0f, 1f);
 		BoundsInfo result = default(BoundsInfo);
 		result.center = orientedBoundingBox.Center;
 		result.size = orientedBoundingBox.Extent * 2f;
-		result.rotation = new Matrix4x4(vector, vector2, vector3, vector4).rotation;
+		result.rotation = new Matrix4x4(column, column2, column3, column4).rotation;
 		result.scale = Vector3.one;
 		result.inflate = 1f;
 		Bounds bounds = GeometryUtility.CalculateBounds(vertices, Matrix4x4.identity);

@@ -25,7 +25,7 @@ public class FreeHoverboardInstance : MonoBehaviour
 	private void Update()
 	{
 		RaycastHit raycastHit;
-		if (Physics.SphereCast(new Ray(base.transform.TransformPoint(this.sphereCastCenter), base.transform.TransformVector(Vector3.down)), this.sphereCastRadius, ref raycastHit, 1f, this.hoverRaycastMask.value))
+		if (Physics.SphereCast(new Ray(base.transform.TransformPoint(this.sphereCastCenter), base.transform.TransformVector(Vector3.down)), this.sphereCastRadius, out raycastHit, 1f, this.hoverRaycastMask.value))
 		{
 			this.hasHoverPoint = true;
 			this.hoverPoint = raycastHit.point;
@@ -44,10 +44,10 @@ public class FreeHoverboardInstance : MonoBehaviour
 			{
 				base.transform.position += this.hoverNormal * (this.hoverHeight - num);
 				this.Rigidbody.linearVelocity = Vector3.ProjectOnPlane(this.Rigidbody.linearVelocity, this.hoverNormal);
-				Vector3 vector = Quaternion.Inverse(base.transform.rotation) * this.Rigidbody.angularVelocity;
-				vector.x *= this.avelocityDragWhileHovering;
-				vector.z *= this.avelocityDragWhileHovering;
-				this.Rigidbody.angularVelocity = base.transform.rotation * vector;
+				Vector3 point = Quaternion.Inverse(base.transform.rotation) * this.Rigidbody.angularVelocity;
+				point.x *= this.avelocityDragWhileHovering;
+				point.z *= this.avelocityDragWhileHovering;
+				this.Rigidbody.angularVelocity = base.transform.rotation * point;
 				base.transform.rotation = Quaternion.Lerp(base.transform.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(base.transform.forward, this.hoverNormal), this.hoverNormal), this.hoverRotationLerp);
 			}
 		}

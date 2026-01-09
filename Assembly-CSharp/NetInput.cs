@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.XR;
 
 public static class NetInput
 {
@@ -30,14 +31,14 @@ public static class NetInput
 		result.handPoseData = NetInput.LocalPlayerVRRig.ReturnHandPosition();
 		result.rootPosition = NetInput.LocalPlayerVRRig.transform.position;
 		result.rootRotation = NetInput.LocalPlayerVRRig.transform.rotation;
-		result.leftThumbTouch = (ControllerInputPoller.PrimaryButtonTouch(4) || ControllerInputPoller.SecondaryButtonTouch(4));
-		result.leftThumbPress = (ControllerInputPoller.PrimaryButtonPress(4) || ControllerInputPoller.SecondaryButtonPress(4));
-		result.leftIndexValue = ControllerInputPoller.TriggerFloat(4);
-		result.leftMiddleValue = ControllerInputPoller.GripFloat(4);
-		result.rightThumbTouch = (ControllerInputPoller.PrimaryButtonTouch(5) || ControllerInputPoller.SecondaryButtonPress(5));
-		result.rightThumbPress = (ControllerInputPoller.PrimaryButtonPress(5) || ControllerInputPoller.SecondaryButtonPress(5));
-		result.rightIndexValue = ControllerInputPoller.TriggerFloat(5);
-		result.rightMiddleValue = ControllerInputPoller.GripFloat(5);
+		result.leftThumbTouch = (ControllerInputPoller.PrimaryButtonTouch(XRNode.LeftHand) || ControllerInputPoller.SecondaryButtonTouch(XRNode.LeftHand));
+		result.leftThumbPress = (ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand) || ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand));
+		result.leftIndexValue = ControllerInputPoller.TriggerFloat(XRNode.LeftHand);
+		result.leftMiddleValue = ControllerInputPoller.GripFloat(XRNode.LeftHand);
+		result.rightThumbTouch = (ControllerInputPoller.PrimaryButtonTouch(XRNode.RightHand) || ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand));
+		result.rightThumbPress = (ControllerInputPoller.PrimaryButtonPress(XRNode.RightHand) || ControllerInputPoller.SecondaryButtonPress(XRNode.RightHand));
+		result.rightIndexValue = ControllerInputPoller.TriggerFloat(XRNode.RightHand);
+		result.rightMiddleValue = ControllerInputPoller.GripFloat(XRNode.RightHand);
 		result.scale = NetInput.LocalPlayerVRRig.scaleFactor;
 		return result;
 	}

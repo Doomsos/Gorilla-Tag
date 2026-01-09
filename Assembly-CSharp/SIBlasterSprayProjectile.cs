@@ -74,12 +74,12 @@ public class SIBlasterSprayProjectile : MonoBehaviour
 			return;
 		}
 		this.projectile.DespawnProjectile();
-		SIPlayer siplayer = SIPlayer.Get(actorNumber);
-		if (siplayer == null)
+		SIPlayer x = SIPlayer.Get(actorNumber);
+		if (x == null)
 		{
 			return;
 		}
-		if (siplayer != SIPlayer.LocalPlayer)
+		if (x != SIPlayer.LocalPlayer)
 		{
 			Object.Instantiate<GameObject>(this.projectile.hitEffect, vector, this.projectile.transform.rotation);
 			return;

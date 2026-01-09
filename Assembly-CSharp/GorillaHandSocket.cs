@@ -23,7 +23,7 @@ public class GorillaHandSocket : MonoBehaviour
 
 	public static bool FetchSocket(Collider collider, out GorillaHandSocket socket)
 	{
-		return GorillaHandSocket.gColliderToSocket.TryGetValue(collider, ref socket);
+		return GorillaHandSocket.gColliderToSocket.TryGetValue(collider, out socket);
 	}
 
 	public bool CanAttach()

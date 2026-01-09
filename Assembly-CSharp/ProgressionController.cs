@@ -39,7 +39,7 @@ public class ProgressionController : MonoBehaviour
 		{
 			return;
 		}
-		onQuestSelectionChanged.Invoke();
+		onQuestSelectionChanged();
 	}
 
 	public static void ReportQuestComplete(int questId, bool isDaily)
@@ -125,10 +125,10 @@ public class ProgressionController : MonoBehaviour
 		request.downloadHandler = new DownloadHandlerBuffer();
 		request.SetRequestHeader("Content-Type", "application/json");
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			ProgressionController.GetQuestStatusResponse getQuestStatusResponse = JsonConvert.DeserializeObject<ProgressionController.GetQuestStatusResponse>(request.downloadHandler.text);
-			callback.Invoke(getQuestStatusResponse);
+			ProgressionController.GetQuestStatusResponse obj = JsonConvert.DeserializeObject<ProgressionController.GetQuestStatusResponse>(request.downloadHandler.text);
+			callback(obj);
 		}
 		else
 		{
@@ -137,7 +137,7 @@ public class ProgressionController : MonoBehaviour
 			{
 				retry = true;
 			}
-			else if (request.result == 2)
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
 			{
 				retry = true;
 			}
@@ -155,7 +155,7 @@ public class ProgressionController : MonoBehaviour
 			{
 				GTDev.LogError<string>("Maximum FetchStatus retries attempted. Please check your network connection.", null);
 				this._fetchStatusRetryCount = 0;
-				callback.Invoke(null);
+				callback(null);
 			}
 		}
 		yield break;
@@ -206,10 +206,10 @@ public class ProgressionController : MonoBehaviour
 		request.downloadHandler = new DownloadHandlerBuffer();
 		request.SetRequestHeader("Content-Type", "application/json");
 		yield return request.SendWebRequest();
-		if (request.result == 1)
+		if (request.result == UnityWebRequest.Result.Success)
 		{
-			ProgressionController.SetQuestCompleteResponse setQuestCompleteResponse = JsonConvert.DeserializeObject<ProgressionController.SetQuestCompleteResponse>(request.downloadHandler.text);
-			callback.Invoke(setQuestCompleteResponse);
+			ProgressionController.SetQuestCompleteResponse obj = JsonConvert.DeserializeObject<ProgressionController.SetQuestCompleteResponse>(request.downloadHandler.text);
+			callback(obj);
 			this.ProcessQuestSubmittedSuccess();
 		}
 		else
@@ -222,10 +222,10 @@ public class ProgressionController : MonoBehaviour
 			else if (request.responseCode == 403L)
 			{
 				GTDev.LogWarning<string>("User already reached the max number of completion points for this time period!", null);
-				callback.Invoke(null);
+				callback(null);
 				this.ClearQuestQueue();
 			}
-			else if (request.result == 2)
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
 			{
 				retry = true;
 			}
@@ -243,7 +243,7 @@ public class ProgressionController : MonoBehaviour
 			{
 				GTDev.LogError<string>("Maximum SendQuestComplete retries attempted. Please check your network connection.", null);
 				this._sendQuestCompleteRetryCount = 0;
-				callback.Invoke(null);
+				callback(null);
 				this.ProcessQuestSubmittedFail();
 			}
 		}

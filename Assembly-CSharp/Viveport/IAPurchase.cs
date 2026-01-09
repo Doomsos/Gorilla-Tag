@@ -270,7 +270,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.IsReadyHandler);
 			}
 
-			protected override void IsReadyHandler(int code, [MarshalAs(20)] string message)
+			protected override void IsReadyHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[IsReadyHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -286,9 +286,9 @@ namespace Viveport
 					}
 					catch (Exception ex)
 					{
-						string text3 = "[IsReadyHandler] statusCode, message ex=";
+						string str = "[IsReadyHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text3 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 					}
 					Logger.Log("[IsReadyHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
 					if (num == 0)
@@ -299,9 +299,9 @@ namespace Viveport
 						}
 						catch (Exception ex3)
 						{
-							string text4 = "[IsReadyHandler] currencyName ex=";
+							string str2 = "[IsReadyHandler] currencyName ex=";
 							Exception ex4 = ex3;
-							Logger.Log(text4 + ((ex4 != null) ? ex4.ToString() : null));
+							Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 						}
 						Logger.Log("[IsReadyHandler] currencyName=" + text);
 					}
@@ -330,7 +330,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.RequestHandler);
 			}
 
-			protected override void RequestHandler(int code, [MarshalAs(20)] string message)
+			protected override void RequestHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[RequestHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -346,9 +346,9 @@ namespace Viveport
 					}
 					catch (Exception ex)
 					{
-						string text3 = "[RequestHandler] statusCode, message ex=";
+						string str = "[RequestHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text3 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 					}
 					Logger.Log("[RequestHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
 					if (num == 0)
@@ -359,9 +359,9 @@ namespace Viveport
 						}
 						catch (Exception ex3)
 						{
-							string text4 = "[RequestHandler] purchase_id ex=";
+							string str2 = "[RequestHandler] purchase_id ex=";
 							Exception ex4 = ex3;
-							Logger.Log(text4 + ((ex4 != null) ? ex4.ToString() : null));
+							Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 						}
 						Logger.Log("[RequestHandler] purchaseId =" + text);
 					}
@@ -390,7 +390,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.PurchaseHandler);
 			}
 
-			protected override void PurchaseHandler(int code, [MarshalAs(20)] string message)
+			protected override void PurchaseHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[PurchaseHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -407,9 +407,9 @@ namespace Viveport
 					}
 					catch (Exception ex)
 					{
-						string text3 = "[PurchaseHandler] statusCode, message ex=";
+						string str = "[PurchaseHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text3 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 					}
 					Logger.Log("[PurchaseHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
 					if (num == 0)
@@ -421,9 +421,9 @@ namespace Viveport
 						}
 						catch (Exception ex3)
 						{
-							string text4 = "[PurchaseHandler] purchase_id,paid_timestamp ex=";
+							string str2 = "[PurchaseHandler] purchase_id,paid_timestamp ex=";
 							Exception ex4 = ex3;
-							Logger.Log(text4 + ((ex4 != null) ? ex4.ToString() : null));
+							Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 						}
 						Logger.Log("[PurchaseHandler] purchaseId =" + text + ",paid_timestamp=" + num2.ToString());
 					}
@@ -452,7 +452,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.QueryHandler);
 			}
 
-			protected override void QueryHandler(int code, [MarshalAs(20)] string message)
+			protected override void QueryHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[QueryHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -473,9 +473,9 @@ namespace Viveport
 					}
 					catch (Exception ex)
 					{
-						string text7 = "[QueryHandler] statusCode, message ex=";
+						string str = "[QueryHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text7 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 					}
 					Logger.Log("[QueryHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
 					if (num == 0)
@@ -491,9 +491,9 @@ namespace Viveport
 						}
 						catch (Exception ex3)
 						{
-							string text8 = "[QueryHandler] purchase_id, order_id ex=";
+							string str2 = "[QueryHandler] purchase_id, order_id ex=";
 							Exception ex4 = ex3;
-							Logger.Log(text8 + ((ex4 != null) ? ex4.ToString() : null));
+							Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 						}
 						Logger.Log(string.Concat(new string[]
 						{
@@ -546,7 +546,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.QueryListHandler);
 			}
 
-			protected override void QueryListHandler(int code, [MarshalAs(20)] string message)
+			protected override void QueryListHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[QueryListHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -565,9 +565,9 @@ namespace Viveport
 					}
 					catch (Exception ex)
 					{
-						string text2 = "[QueryListHandler] statusCode, message ex=";
+						string str = "[QueryListHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text2 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 					}
 					Logger.Log("[QueryListHandler] statusCode =" + num.ToString() + ",errMessage=" + text);
 					if (num == 0)
@@ -580,7 +580,7 @@ namespace Viveport
 							to = (int)jsonData2["to"];
 							JsonData jsonData3 = jsonData2["purchases"];
 							bool isArray = jsonData3.IsArray;
-							foreach (object obj in jsonData3)
+							foreach (object obj in ((IEnumerable)jsonData3))
 							{
 								JsonData jsonData4 = (JsonData)obj;
 								IAPurchase.QueryResponse2 queryResponse = new IAPurchase.QueryResponse2();
@@ -607,9 +607,9 @@ namespace Viveport
 						}
 						catch (Exception ex3)
 						{
-							string text3 = "[QueryListHandler] purchase_id, order_id ex=";
+							string str2 = "[QueryListHandler] purchase_id, order_id ex=";
 							Exception ex4 = ex3;
-							Logger.Log(text3 + ((ex4 != null) ? ex4.ToString() : null));
+							Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 						}
 					}
 				}
@@ -642,42 +642,42 @@ namespace Viveport
 				return new IAPurchaseCallback(this.BalanceHandler);
 			}
 
-			protected override void BalanceHandler(int code, [MarshalAs(20)] string message)
+			protected override void BalanceHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[BalanceHandler] code=" + code.ToString() + ",message= " + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
 				int num = -1;
+				string str = "";
 				string text = "";
 				string text2 = "";
-				string text3 = "";
 				if (code == 0)
 				{
 					try
 					{
 						num = (int)jsonData["statusCode"];
-						text3 = (string)jsonData["message"];
+						text2 = (string)jsonData["message"];
 					}
 					catch (Exception ex)
 					{
-						string text4 = "[BalanceHandler] statusCode, message ex=";
+						string str2 = "[BalanceHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text4 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str2 + ((ex2 != null) ? ex2.ToString() : null));
 					}
-					Logger.Log("[BalanceHandler] statusCode =" + num.ToString() + ",errMessage=" + text3);
+					Logger.Log("[BalanceHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
 					if (num == 0)
 					{
 						try
 						{
-							text = (string)jsonData["currencyName"];
-							text2 = (string)jsonData["balance"];
+							str = (string)jsonData["currencyName"];
+							text = (string)jsonData["balance"];
 						}
 						catch (Exception ex3)
 						{
-							string text5 = "[BalanceHandler] currencyName, balance ex=";
+							string str3 = "[BalanceHandler] currencyName, balance ex=";
 							Exception ex4 = ex3;
-							Logger.Log(text5 + ((ex4 != null) ? ex4.ToString() : null));
+							Logger.Log(str3 + ((ex4 != null) ? ex4.ToString() : null));
 						}
-						Logger.Log("[BalanceHandler] currencyName=" + text + ",balance=" + text2);
+						Logger.Log("[BalanceHandler] currencyName=" + str + ",balance=" + text);
 					}
 				}
 				if (IAPurchase.IAPHandler.listener != null)
@@ -686,10 +686,10 @@ namespace Viveport
 					{
 						if (num == 0)
 						{
-							IAPurchase.IAPHandler.listener.OnBalanceSuccess(text2);
+							IAPurchase.IAPHandler.listener.OnBalanceSuccess(text);
 							return;
 						}
-						IAPurchase.IAPHandler.listener.OnFailure(num, text3);
+						IAPurchase.IAPHandler.listener.OnFailure(num, text2);
 						return;
 					}
 					else
@@ -704,7 +704,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.RequestSubscriptionHandler);
 			}
 
-			protected override void RequestSubscriptionHandler(int code, [MarshalAs(20)] string message)
+			protected override void RequestSubscriptionHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[RequestSubscriptionHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -718,9 +718,9 @@ namespace Viveport
 				}
 				catch (Exception ex)
 				{
-					string text3 = "[RequestSubscriptionHandler] statusCode, message ex=";
+					string str = "[RequestSubscriptionHandler] statusCode, message ex=";
 					Exception ex2 = ex;
-					Logger.Log(text3 + ((ex2 != null) ? ex2.ToString() : null));
+					Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 				}
 				Logger.Log("[RequestSubscriptionHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
 				if (num == 0)
@@ -731,9 +731,9 @@ namespace Viveport
 					}
 					catch (Exception ex3)
 					{
-						string text4 = "[RequestSubscriptionHandler] subscription_id ex=";
+						string str2 = "[RequestSubscriptionHandler] subscription_id ex=";
 						Exception ex4 = ex3;
-						Logger.Log(text4 + ((ex4 != null) ? ex4.ToString() : null));
+						Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 					}
 					Logger.Log("[RequestSubscriptionHandler] subscription_id =" + text);
 				}
@@ -761,7 +761,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.RequestSubscriptionWithPlanIDHandler);
 			}
 
-			protected override void RequestSubscriptionWithPlanIDHandler(int code, [MarshalAs(20)] string message)
+			protected override void RequestSubscriptionWithPlanIDHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[RequestSubscriptionWithPlanIDHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -775,9 +775,9 @@ namespace Viveport
 				}
 				catch (Exception ex)
 				{
-					string text3 = "[RequestSubscriptionWithPlanIDHandler] statusCode, message ex=";
+					string str = "[RequestSubscriptionWithPlanIDHandler] statusCode, message ex=";
 					Exception ex2 = ex;
-					Logger.Log(text3 + ((ex2 != null) ? ex2.ToString() : null));
+					Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 				}
 				Logger.Log("[RequestSubscriptionWithPlanIDHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
 				if (num == 0)
@@ -788,9 +788,9 @@ namespace Viveport
 					}
 					catch (Exception ex3)
 					{
-						string text4 = "[RequestSubscriptionWithPlanIDHandler] subscription_id ex=";
+						string str2 = "[RequestSubscriptionWithPlanIDHandler] subscription_id ex=";
 						Exception ex4 = ex3;
-						Logger.Log(text4 + ((ex4 != null) ? ex4.ToString() : null));
+						Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 					}
 					Logger.Log("[RequestSubscriptionWithPlanIDHandler] subscription_id =" + text);
 				}
@@ -818,7 +818,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.SubscribeHandler);
 			}
 
-			protected override void SubscribeHandler(int code, [MarshalAs(20)] string message)
+			protected override void SubscribeHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[SubscribeHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -834,9 +834,9 @@ namespace Viveport
 				}
 				catch (Exception ex)
 				{
-					string text4 = "[SubscribeHandler] statusCode, message ex=";
+					string str = "[SubscribeHandler] statusCode, message ex=";
 					Exception ex2 = ex;
-					Logger.Log(text4 + ((ex2 != null) ? ex2.ToString() : null));
+					Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 				}
 				Logger.Log("[SubscribeHandler] statusCode =" + num.ToString() + ",errMessage=" + text2);
 				if (num == 0)
@@ -849,9 +849,9 @@ namespace Viveport
 					}
 					catch (Exception ex3)
 					{
-						string text5 = "[SubscribeHandler] subscription_id, plan_id ex=";
+						string str2 = "[SubscribeHandler] subscription_id, plan_id ex=";
 						Exception ex4 = ex3;
-						Logger.Log(text5 + ((ex4 != null) ? ex4.ToString() : null));
+						Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 					}
 					Logger.Log(string.Concat(new string[]
 					{
@@ -887,7 +887,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.QuerySubscriptionHandler);
 			}
 
-			protected override void QuerySubscriptionHandler(int code, [MarshalAs(20)] string message)
+			protected override void QuerySubscriptionHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[QuerySubscriptionHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -903,9 +903,9 @@ namespace Viveport
 					}
 					catch (Exception ex)
 					{
-						string text2 = "[QuerySubscriptionHandler] statusCode, message ex=";
+						string str = "[QuerySubscriptionHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text2 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 					}
 					Logger.Log("[QuerySubscriptionHandler] statusCode =" + num.ToString() + ",errMessage=" + text);
 					if (num == 0)
@@ -916,9 +916,9 @@ namespace Viveport
 						}
 						catch (Exception ex3)
 						{
-							string text3 = "[QuerySubscriptionHandler] ex =";
+							string str2 = "[QuerySubscriptionHandler] ex =";
 							Exception ex4 = ex3;
-							Logger.Log(text3 + ((ex4 != null) ? ex4.ToString() : null));
+							Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 						}
 					}
 				}
@@ -946,7 +946,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.QuerySubscriptionListHandler);
 			}
 
-			protected override void QuerySubscriptionListHandler(int code, [MarshalAs(20)] string message)
+			protected override void QuerySubscriptionListHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[QuerySubscriptionListHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -962,9 +962,9 @@ namespace Viveport
 					}
 					catch (Exception ex)
 					{
-						string text2 = "[QuerySubscriptionListHandler] statusCode, message ex=";
+						string str = "[QuerySubscriptionListHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text2 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 					}
 					Logger.Log("[QuerySubscriptionListHandler] statusCode =" + num.ToString() + ",errMessage=" + text);
 					if (num == 0)
@@ -975,9 +975,9 @@ namespace Viveport
 						}
 						catch (Exception ex3)
 						{
-							string text3 = "[QuerySubscriptionListHandler] ex =";
+							string str2 = "[QuerySubscriptionListHandler] ex =";
 							Exception ex4 = ex3;
-							Logger.Log(text3 + ((ex4 != null) ? ex4.ToString() : null));
+							Logger.Log(str2 + ((ex4 != null) ? ex4.ToString() : null));
 						}
 					}
 				}
@@ -1005,7 +1005,7 @@ namespace Viveport
 				return new IAPurchaseCallback(this.CancelSubscriptionHandler);
 			}
 
-			protected override void CancelSubscriptionHandler(int code, [MarshalAs(20)] string message)
+			protected override void CancelSubscriptionHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message)
 			{
 				Logger.Log("[CancelSubscriptionHandler] message=" + message);
 				JsonData jsonData = JsonMapper.ToObject(message);
@@ -1021,9 +1021,9 @@ namespace Viveport
 					}
 					catch (Exception ex)
 					{
-						string text2 = "[CancelSubscriptionHandler] statusCode, message ex=";
+						string str = "[CancelSubscriptionHandler] statusCode, message ex=";
 						Exception ex2 = ex;
-						Logger.Log(text2 + ((ex2 != null) ? ex2.ToString() : null));
+						Logger.Log(str + ((ex2 != null) ? ex2.ToString() : null));
 					}
 					Logger.Log("[CancelSubscriptionHandler] statusCode =" + num.ToString() + ",errMessage=" + text);
 					if (num == 0)
@@ -1056,29 +1056,29 @@ namespace Viveport
 
 		private abstract class BaseHandler
 		{
-			protected abstract void IsReadyHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void IsReadyHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void RequestHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void RequestHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void PurchaseHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void PurchaseHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void QueryHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void QueryHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void QueryListHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void QueryListHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void BalanceHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void BalanceHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void RequestSubscriptionHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void RequestSubscriptionHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void RequestSubscriptionWithPlanIDHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void RequestSubscriptionWithPlanIDHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void SubscribeHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void SubscribeHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void QuerySubscriptionHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void QuerySubscriptionHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void QuerySubscriptionListHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void QuerySubscriptionListHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-			protected abstract void CancelSubscriptionHandler(int code, [MarshalAs(20)] string message);
+			protected abstract void CancelSubscriptionHandler(int code, [MarshalAs(UnmanagedType.LPStr)] string message);
 		}
 
 		public class IAPurchaseListener

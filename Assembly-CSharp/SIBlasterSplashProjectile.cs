@@ -26,7 +26,7 @@ public class SIBlasterSplashProjectile : MonoBehaviour, SIGadgetProjectileType
 			{
 				Vector3 position2 = this.rigList[i].head.rigTarget.position;
 				Vector3 position3 = this.rigList[i].bodyTransform.position;
-				if (Physics.RaycastNonAlloc(position, position2 - position, this.hits, this.splashHitDistance, this.projectile.parentBlaster.environmentLayerMask, 1) != 0 && Physics.RaycastNonAlloc(position, position3 - position, this.hits, this.splashHitDistance, this.projectile.parentBlaster.environmentLayerMask, 1) != 0)
+				if (Physics.RaycastNonAlloc(position, position2 - position, this.hits, this.splashHitDistance, this.projectile.parentBlaster.environmentLayerMask, QueryTriggerInteraction.Ignore) != 0 && Physics.RaycastNonAlloc(position, position3 - position, this.hits, this.splashHitDistance, this.projectile.parentBlaster.environmentLayerMask, QueryTriggerInteraction.Ignore) != 0)
 				{
 					this.rigList.RemoveAt(i);
 				}
@@ -124,8 +124,8 @@ public class SIBlasterSplashProjectile : MonoBehaviour, SIGadgetProjectileType
 		bool flag = false;
 		for (int j = 0; j < array.Length; j++)
 		{
-			SIPlayer siplayer = SIPlayer.Get(array[j]);
-			if (siplayer != null && siplayer == SIPlayer.LocalPlayer)
+			SIPlayer x = SIPlayer.Get(array[j]);
+			if (x != null && x == SIPlayer.LocalPlayer)
 			{
 				flag = true;
 				this.SplashHitLocalPlayer(array2[j]);
@@ -146,8 +146,8 @@ public class SIBlasterSplashProjectile : MonoBehaviour, SIGadgetProjectileType
 			return;
 		}
 		float num = Vector3.Angle(directionAndMagnitude.normalized, Vector3.up);
-		Vector3 vector = Vector3.RotateTowards(directionAndMagnitude.normalized, Vector3.up, Mathf.Clamp(num - this.upwardsAngle, 0f, this.upwardsAngle) * 0.017453292f, 0f);
-		this.projectile.KnockbackWithHaptics(vector * directionAndMagnitude.magnitude, directionAndMagnitude.magnitude / this.knockbackSpeed * this.projectile.hapticHitStrength, this.projectile.hapticHitDuration, true);
+		Vector3 a = Vector3.RotateTowards(directionAndMagnitude.normalized, Vector3.up, Mathf.Clamp(num - this.upwardsAngle, 0f, this.upwardsAngle) * 0.017453292f, 0f);
+		this.projectile.KnockbackWithHaptics(a * directionAndMagnitude.magnitude, directionAndMagnitude.magnitude / this.knockbackSpeed * this.projectile.hapticHitStrength, this.projectile.hapticHitDuration, true);
 	}
 
 	public float knockbackSpeed;

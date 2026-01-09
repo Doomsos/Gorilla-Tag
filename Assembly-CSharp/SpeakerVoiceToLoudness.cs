@@ -23,18 +23,13 @@ public class SpeakerVoiceToLoudness : MonoBehaviour
 		return () => new SpeakerVoiceLoudnessAudioOut(this, speaker.GetComponent<AudioSource>(), pdc, speaker.Logger, string.Empty, speaker.Logger.IsDebugEnabled);
 	}
 
-	public SpeakerVoiceToLoudness()
-	{
-		PlaybackDelaySettings playbackDelaySettings = default(PlaybackDelaySettings);
-		playbackDelaySettings.MinDelaySoft = 200;
-		playbackDelaySettings.MaxDelaySoft = 400;
-		playbackDelaySettings.MaxDelayHard = 1000;
-		this.playbackDelaySettings = playbackDelaySettings;
-		base..ctor();
-	}
-
 	[SerializeField]
-	private PlaybackDelaySettings playbackDelaySettings;
+	private PlaybackDelaySettings playbackDelaySettings = new PlaybackDelaySettings
+	{
+		MinDelaySoft = 200,
+		MaxDelaySoft = 400,
+		MaxDelayHard = 1000
+	};
 
 	public float loudness;
 }

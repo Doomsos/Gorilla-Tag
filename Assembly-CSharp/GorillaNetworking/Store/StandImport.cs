@@ -9,7 +9,7 @@ namespace GorillaNetworking.Store
 	{
 		public void DecomposeFromTitleDataString(string data)
 		{
-			string[] array = data.Split("\\n", 0);
+			string[] array = data.Split("\\n", StringSplitOptions.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				this.DecomposeStandDataTitleData(array[i]);
@@ -18,7 +18,7 @@ namespace GorillaNetworking.Store
 
 		public void DecomposeStandDataTitleData(string dataString)
 		{
-			string[] array = dataString.Split("\\t", 0);
+			string[] array = dataString.Split("\\t", StringSplitOptions.None);
 			if (array.Length == 5)
 			{
 				this.standData.Add(new StandTypeData(array));
@@ -30,9 +30,9 @@ namespace GorillaNetworking.Store
 				return;
 			}
 			string text = "";
-			foreach (string text2 in array)
+			foreach (string str in array)
 			{
-				text = text + text2 + "|";
+				text = text + str + "|";
 			}
 			Debug.LogError("Store Importer Data String is not valid : " + text);
 		}
@@ -44,7 +44,7 @@ namespace GorillaNetworking.Store
 
 		public void DecomposeStandData(string dataString)
 		{
-			string[] array = dataString.Split('\t', 0);
+			string[] array = dataString.Split('\t', StringSplitOptions.None);
 			if (array.Length == 5)
 			{
 				this.standData.Add(new StandTypeData(array));
@@ -56,9 +56,9 @@ namespace GorillaNetworking.Store
 				return;
 			}
 			string text = "";
-			foreach (string text2 in array)
+			foreach (string str in array)
 			{
-				text = text + text2 + "|";
+				text = text + str + "|";
 			}
 			Debug.LogError("Store Importer Data String is not valid : " + text);
 		}

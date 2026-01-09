@@ -277,7 +277,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 	{
 		if (!GhostReactorManager.AggroDisabled && this.senseNearby.IsAnyoneNearby())
 		{
-			this.investigateLocation = default(Vector3?);
+			this.investigateLocation = null;
 			this.SetBehavior(GREnemyPest.Behavior.Chase, false);
 			return;
 		}
@@ -420,11 +420,11 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 
 	public void OnGameEntitySerialize(BinaryWriter writer)
 	{
-		byte b = (byte)this.currBehavior;
-		byte b2 = (byte)this.currBodyState;
-		writer.Write(b);
+		byte value = (byte)this.currBehavior;
+		byte value2 = (byte)this.currBodyState;
+		writer.Write(value);
 		writer.Write(this.hp);
-		writer.Write(b2);
+		writer.Write(value2);
 	}
 
 	public void OnGameEntityDeserialize(BinaryReader reader)

@@ -30,24 +30,24 @@ public class PlayerGameEvents
 
 	public static void GameModeObjectiveTriggered()
 	{
-		string text = GorillaGameManager.instance.GameModeName();
+		string obj = GorillaGameManager.instance.GameModeName();
 		Action<string> onGameModeObjectiveTrigger = PlayerGameEvents.OnGameModeObjectiveTrigger;
 		if (onGameModeObjectiveTrigger == null)
 		{
 			return;
 		}
-		onGameModeObjectiveTrigger.Invoke(text);
+		onGameModeObjectiveTrigger(obj);
 	}
 
 	public static void GameModeCompleteRound()
 	{
-		string text = GorillaGameManager.instance.GameModeName();
+		string obj = GorillaGameManager.instance.GameModeName();
 		Action<string> onGameModeCompleteRound = PlayerGameEvents.OnGameModeCompleteRound;
 		if (onGameModeCompleteRound == null)
 		{
 			return;
 		}
-		onGameModeCompleteRound.Invoke(text);
+		onGameModeCompleteRound(obj);
 	}
 
 	public static void GrabbedObject(string objectName)
@@ -57,7 +57,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onGrabbedObject.Invoke(objectName);
+		onGrabbedObject(objectName);
 	}
 
 	public static void DroppedObject(string objectName)
@@ -67,7 +67,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onDroppedObject.Invoke(objectName);
+		onDroppedObject(objectName);
 	}
 
 	public static void EatObject(string objectName)
@@ -77,7 +77,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onEatObject.Invoke(objectName);
+		onEatObject(objectName);
 	}
 
 	public static void TapObject(string objectName)
@@ -87,7 +87,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onTapObject.Invoke(objectName);
+		onTapObject(objectName);
 	}
 
 	public static void LaunchedProjectile(string objectName)
@@ -97,7 +97,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onLaunchedProjectile.Invoke(objectName);
+		onLaunchedProjectile(objectName);
 	}
 
 	public static void PlayerMoved(float distance, float speed)
@@ -107,7 +107,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onPlayerMoved.Invoke(distance, speed);
+		onPlayerMoved(distance, speed);
 	}
 
 	public static void PlayerSwam(float distance, float speed)
@@ -117,7 +117,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onPlayerSwam.Invoke(distance, speed);
+		onPlayerSwam(distance, speed);
 	}
 
 	public static void TriggerHandEffect(string effectName)
@@ -127,7 +127,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onTriggerHandEffect.Invoke(effectName);
+		onTriggerHandEffect(effectName);
 	}
 
 	public static void TriggerEnterLocation(string locationName)
@@ -137,7 +137,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onEnterLocation.Invoke(locationName);
+		onEnterLocation(locationName);
 	}
 
 	public static void MiscEvent(string eventName, int count = 1)
@@ -147,7 +147,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onMiscEvent.Invoke(eventName, count);
+		onMiscEvent(eventName, count);
 	}
 
 	public static void CritterEvent(string eventName)
@@ -157,7 +157,7 @@ public class PlayerGameEvents
 		{
 			return;
 		}
-		onCritterEvent.Invoke(eventName);
+		onCritterEvent(eventName);
 	}
 
 	public enum EventType

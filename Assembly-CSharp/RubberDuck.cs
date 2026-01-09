@@ -1,6 +1,7 @@
 ﻿using System;
 using GorillaExtensions;
 using GorillaTag;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -92,8 +93,8 @@ public class RubberDuck : TransferrableObject
 		}
 		if (this._events != null)
 		{
-			this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnSqueezeActivate);
-			this._events.Deactivate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnSqueezeDeactivate);
+			this._events.Activate += this.OnSqueezeActivate;
+			this._events.Deactivate += this.OnSqueezeDeactivate;
 		}
 	}
 
@@ -102,8 +103,8 @@ public class RubberDuck : TransferrableObject
 		base.OnDisable();
 		if (this._events != null)
 		{
-			this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnSqueezeActivate);
-			this._events.Deactivate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnSqueezeDeactivate);
+			this._events.Activate -= this.OnSqueezeActivate;
+			this._events.Deactivate -= this.OnSqueezeDeactivate;
 			this._events.Dispose();
 			this._events = null;
 		}
@@ -192,7 +193,7 @@ public class RubberDuck : TransferrableObject
 			localRig.Rig.PlayHandTapLocal(num, flag, 0.33f);
 			if (localRig.netView)
 			{
-				localRig.netView.SendRPC("RPC_PlayHandTap", 1, new object[]
+				localRig.netView.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
 				{
 					num,
 					flag,
@@ -237,7 +238,7 @@ public class RubberDuck : TransferrableObject
 			RigContainer rigContainer;
 			if (GorillaGameManager.instance && VRRigCache.Instance.TryGetVrrig(NetworkSystem.Instance.LocalPlayer, out rigContainer))
 			{
-				rigContainer.Rig.netView.SendRPC("RPC_PlayHandTap", 1, new object[]
+				rigContainer.Rig.netView.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
 				{
 					num,
 					flag,

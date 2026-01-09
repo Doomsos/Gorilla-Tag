@@ -188,7 +188,7 @@ public class PreGameMessage : MonoBehaviour
 		{
 			return;
 		}
-		confirmationAction.Invoke();
+		confirmationAction();
 	}
 
 	private void OnAlternativePressed()
@@ -200,7 +200,7 @@ public class PreGameMessage : MonoBehaviour
 		{
 			return;
 		}
-		alternativeAction.Invoke();
+		alternativeAction();
 	}
 
 	[SerializeField]

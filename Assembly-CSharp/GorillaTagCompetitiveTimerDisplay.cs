@@ -34,8 +34,8 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 
 	private void OnEnable()
 	{
-		GorillaTagCompetitiveManager.onStateChanged += new Action<GorillaTagCompetitiveManager.GameState>(this.HandleOnGameStateChanged);
-		GorillaTagCompetitiveManager.onUpdateRemainingTime += new Action<float>(this.HandleOnTimeChanged);
+		GorillaTagCompetitiveManager.onStateChanged += this.HandleOnGameStateChanged;
+		GorillaTagCompetitiveManager.onUpdateRemainingTime += this.HandleOnTimeChanged;
 		GorillaTagCompetitiveManager gorillaTagCompetitiveManager = GorillaGameManager.instance as GorillaTagCompetitiveManager;
 		if (gorillaTagCompetitiveManager != null)
 		{
@@ -47,8 +47,8 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 
 	private void OnDisable()
 	{
-		GorillaTagCompetitiveManager.onStateChanged -= new Action<GorillaTagCompetitiveManager.GameState>(this.HandleOnGameStateChanged);
-		GorillaTagCompetitiveManager.onUpdateRemainingTime -= new Action<float>(this.HandleOnTimeChanged);
+		GorillaTagCompetitiveManager.onStateChanged -= this.HandleOnGameStateChanged;
+		GorillaTagCompetitiveManager.onUpdateRemainingTime -= this.HandleOnTimeChanged;
 	}
 
 	private void HandleOnGameStateChanged(GorillaTagCompetitiveManager.GameState newState)
@@ -114,12 +114,12 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 					if (this.tintableCelebration != null)
 					{
 						Color playerColor = rigContainer.Rig.playerColor;
+						float h;
+						float s;
 						float num2;
-						float num3;
-						float num4;
-						Color.RGBToHSV(playerColor, ref num2, ref num3, ref num4);
-						Color color = Color.HSVToRGB(num2, num3, (num4 < 0.5f) ? (num4 + 0.5f) : (num4 - 0.5f));
-						this.tintableCelebration.main.startColor = new ParticleSystem.MinMaxGradient(playerColor, color);
+						Color.RGBToHSV(playerColor, out h, out s, out num2);
+						Color max = Color.HSVToRGB(h, s, (num2 < 0.5f) ? (num2 + 0.5f) : (num2 - 0.5f));
+						this.tintableCelebration.main.startColor = new ParticleSystem.MinMaxGradient(playerColor, max);
 						this.tintableCelebration.gameObject.SetActive(true);
 					}
 					if (this.goldCelebration != null && rigContainer.Rig == this.myRig)
@@ -207,12 +207,12 @@ public class GorillaTagCompetitiveTimerDisplay : MonoBehaviour
 			this.currentBackground.SetActive(false);
 		}
 		this.currentState = newState;
-		GameObject gameObject = this.SelectBackground(newState);
+		GameObject x = this.SelectBackground(newState);
 		this.GetTextColor(newState);
 		this.currentBackground = null;
-		if (gameObject != null)
+		if (x != null)
 		{
-			this.currentBackground = gameObject;
+			this.currentBackground = x;
 			this.currentBackground.SetActive(true);
 		}
 	}

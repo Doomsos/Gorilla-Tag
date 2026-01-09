@@ -13,10 +13,10 @@ namespace GorillaTagScripts.AI.States
 		public void Tick()
 		{
 			Vector3 position = this.entity.circleCenter.position;
-			float num = position.x + Mathf.Cos(this.angle) * this.entity.angularSpeed;
+			float x = position.x + Mathf.Cos(this.angle) * this.entity.angularSpeed;
 			float y = position.y;
-			float num2 = position.z + Mathf.Sin(this.angle) * this.entity.angularSpeed;
-			this.entity.transform.position = new Vector3(num, y, num2);
+			float z = position.z + Mathf.Sin(this.angle) * this.entity.angularSpeed;
+			this.entity.transform.position = new Vector3(x, y, z);
 			this.angle += this.entity.angularSpeed * Time.deltaTime;
 		}
 

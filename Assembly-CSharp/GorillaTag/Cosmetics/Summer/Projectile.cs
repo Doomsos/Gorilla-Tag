@@ -86,10 +86,10 @@ namespace GorillaTag.Cosmetics.Summer
 		private void GetColliderHitInfo(Collider other, out Vector3 position, out Vector3 normal)
 		{
 			Vector3 vector = Time.fixedDeltaTime * 2f * this.rigidbody.linearVelocity;
-			Vector3 vector2 = base.transform.position - vector;
+			Vector3 origin = base.transform.position - vector;
 			float magnitude = vector.magnitude;
 			RaycastHit raycastHit;
-			other.Raycast(new Ray(vector2, vector / magnitude), ref raycastHit, 2f * magnitude);
+			other.Raycast(new Ray(origin, vector / magnitude), out raycastHit, 2f * magnitude);
 			position = raycastHit.point;
 			normal = raycastHit.normal;
 		}

@@ -8,72 +8,71 @@ namespace BoingKit
 		public static bool SphereSphere(Vector3 centerA, float radiusA, Vector3 centerB, float radiusB, out Vector3 push)
 		{
 			push = Vector3.zero;
-			Vector3 vector = centerA - centerB;
-			float sqrMagnitude = vector.sqrMagnitude;
+			Vector3 v = centerA - centerB;
+			float sqrMagnitude = v.sqrMagnitude;
 			float num = radiusA + radiusB;
 			if (sqrMagnitude >= num * num)
 			{
 				return false;
 			}
 			float num2 = Mathf.Sqrt(sqrMagnitude);
-			push = VectorUtil.NormalizeSafe(vector, Vector3.zero) * (num - num2);
+			push = VectorUtil.NormalizeSafe(v, Vector3.zero) * (num - num2);
 			return true;
 		}
 
 		public static bool SphereSphereInverse(Vector3 centerA, float radiusA, Vector3 centerB, float radiusB, out Vector3 push)
 		{
 			push = Vector3.zero;
-			Vector3 vector = centerB - centerA;
-			float sqrMagnitude = vector.sqrMagnitude;
+			Vector3 v = centerB - centerA;
+			float sqrMagnitude = v.sqrMagnitude;
 			float num = radiusB - radiusA;
 			if (sqrMagnitude <= num * num)
 			{
 				return false;
 			}
 			float num2 = Mathf.Sqrt(sqrMagnitude);
-			push = VectorUtil.NormalizeSafe(vector, Vector3.zero) * (num2 - num);
+			push = VectorUtil.NormalizeSafe(v, Vector3.zero) * (num2 - num);
 			return true;
 		}
 
 		public static bool SphereCapsule(Vector3 centerA, float radiusA, Vector3 headB, Vector3 tailB, float radiusB, out Vector3 push)
 		{
 			push = Vector3.zero;
-			Vector3 vector = tailB - headB;
-			float sqrMagnitude = vector.sqrMagnitude;
+			Vector3 a = tailB - headB;
+			float sqrMagnitude = a.sqrMagnitude;
 			if (sqrMagnitude < MathUtil.Epsilon)
 			{
 				return Collision.SphereSphereInverse(centerA, radiusA, 0.5f * (headB + tailB), radiusB, out push);
 			}
 			float num = 1f / Mathf.Sqrt(sqrMagnitude);
-			Vector3 vector2 = vector * num;
-			float num2 = Mathf.Clamp01(Vector3.Dot(centerA - headB, vector2) * num);
-			Vector3 centerB = Vector3.Lerp(headB, tailB, num2);
+			Vector3 rhs = a * num;
+			float t = Mathf.Clamp01(Vector3.Dot(centerA - headB, rhs) * num);
+			Vector3 centerB = Vector3.Lerp(headB, tailB, t);
 			return Collision.SphereSphere(centerA, radiusA, centerB, radiusB, out push);
 		}
 
 		public static bool SphereCapsuleInverse(Vector3 centerA, float radiusA, Vector3 headB, Vector3 tailB, float radiusB, out Vector3 push)
 		{
 			push = Vector3.zero;
-			Vector3 vector = tailB - headB;
-			float sqrMagnitude = vector.sqrMagnitude;
+			Vector3 a = tailB - headB;
+			float sqrMagnitude = a.sqrMagnitude;
 			if (sqrMagnitude < MathUtil.Epsilon)
 			{
 				return Collision.SphereSphereInverse(centerA, radiusA, 0.5f * (headB + tailB), radiusB, out push);
 			}
 			float num = 1f / Mathf.Sqrt(sqrMagnitude);
-			Vector3 vector2 = vector * num;
-			float num2 = Mathf.Clamp01(Vector3.Dot(centerA - headB, vector2) * num);
-			Vector3 centerB = Vector3.Lerp(headB, tailB, num2);
+			Vector3 rhs = a * num;
+			float t = Mathf.Clamp01(Vector3.Dot(centerA - headB, rhs) * num);
+			Vector3 centerB = Vector3.Lerp(headB, tailB, t);
 			return Collision.SphereSphereInverse(centerA, radiusA, centerB, radiusB, out push);
 		}
 
 		public static bool SphereBox(Vector3 centerOffsetA, float radiusA, Vector3 halfExtentB, out Vector3 push)
 		{
 			push = Vector3.zero;
-			Vector3 vector;
-			vector..ctor(Mathf.Clamp(centerOffsetA.x, -halfExtentB.x, halfExtentB.x), Mathf.Clamp(centerOffsetA.y, -halfExtentB.y, halfExtentB.y), Mathf.Clamp(centerOffsetA.z, -halfExtentB.z, halfExtentB.z));
-			Vector3 vector2 = centerOffsetA - vector;
-			float sqrMagnitude = vector2.sqrMagnitude;
+			Vector3 b = new Vector3(Mathf.Clamp(centerOffsetA.x, -halfExtentB.x, halfExtentB.x), Mathf.Clamp(centerOffsetA.y, -halfExtentB.y, halfExtentB.y), Mathf.Clamp(centerOffsetA.z, -halfExtentB.z, halfExtentB.z));
+			Vector3 v = centerOffsetA - b;
+			float sqrMagnitude = v.sqrMagnitude;
 			if (sqrMagnitude > radiusA * radiusA)
 			{
 				return false;
@@ -83,32 +82,31 @@ namespace BoingKit
 			{
 				if (num == 3)
 				{
-					Vector3 vector3;
-					vector3..ctor(halfExtentB.x - Mathf.Abs(centerOffsetA.x) + radiusA, halfExtentB.y - Mathf.Abs(centerOffsetA.y) + radiusA, halfExtentB.z - Mathf.Abs(centerOffsetA.z) + radiusA);
-					if (vector3.x < vector3.y)
+					Vector3 vector = new Vector3(halfExtentB.x - Mathf.Abs(centerOffsetA.x) + radiusA, halfExtentB.y - Mathf.Abs(centerOffsetA.y) + radiusA, halfExtentB.z - Mathf.Abs(centerOffsetA.z) + radiusA);
+					if (vector.x < vector.y)
 					{
-						if (vector3.x < vector3.z)
+						if (vector.x < vector.z)
 						{
-							push = new Vector3(Mathf.Sign(centerOffsetA.x) * vector3.x, 0f, 0f);
+							push = new Vector3(Mathf.Sign(centerOffsetA.x) * vector.x, 0f, 0f);
 						}
 						else
 						{
-							push = new Vector3(0f, 0f, Mathf.Sign(centerOffsetA.z) * vector3.z);
+							push = new Vector3(0f, 0f, Mathf.Sign(centerOffsetA.z) * vector.z);
 						}
 					}
-					else if (vector3.y < vector3.z)
+					else if (vector.y < vector.z)
 					{
-						push = new Vector3(0f, Mathf.Sign(centerOffsetA.y) * vector3.y, 0f);
+						push = new Vector3(0f, Mathf.Sign(centerOffsetA.y) * vector.y, 0f);
 					}
 					else
 					{
-						push = new Vector3(0f, 0f, Mathf.Sign(centerOffsetA.z) * vector3.z);
+						push = new Vector3(0f, 0f, Mathf.Sign(centerOffsetA.z) * vector.z);
 					}
 				}
 			}
 			else
 			{
-				push = VectorUtil.NormalizeSafe(vector2, Vector3.right) * (radiusA - Mathf.Sqrt(sqrMagnitude));
+				push = VectorUtil.NormalizeSafe(v, Vector3.right) * (radiusA - Mathf.Sqrt(sqrMagnitude));
 			}
 			return true;
 		}

@@ -96,13 +96,12 @@ namespace GorillaTag.Cosmetics
 					if (rotationControl == HandControlledCosmetic.RotationControl.Translation)
 					{
 						Vector3 relativeHandPosition = this.GetRelativeHandPosition();
-						Vector3 vector;
-						vector..ctor(relativeHandPosition.x, 0f, relativeHandPosition.z);
-						float num = Vector3.SignedAngle(new Vector3(this.startHandRelativePosition.x, 0f, this.startHandRelativePosition.z), vector, Vector3.up);
+						Vector3 to = new Vector3(relativeHandPosition.x, 0f, relativeHandPosition.z);
+						float num = Vector3.SignedAngle(new Vector3(this.startHandRelativePosition.x, 0f, this.startHandRelativePosition.z), to, Vector3.up);
 						float num2 = 50f * (this.startHandRelativePosition.y - relativeHandPosition.y) / this.myRig.scaleFactor;
-						float num3 = Vector3.Distance(this.startHandRelativePosition, relativeHandPosition) / this.myRig.scaleFactor;
-						this.localEuler += Time.deltaTime * new Vector3(this.activeSettings.verticalSensitivity.Evaluate(num3) * num2, this.activeSettings.horizontalSensitivity.Evaluate(num3) * num, 0f);
-						this.startHandRelativePosition = Vector3.MoveTowards(this.startHandRelativePosition, relativeHandPosition, Time.deltaTime * this.activeSettings.inputDecayCurve.Evaluate(num3));
+						float time = Vector3.Distance(this.startHandRelativePosition, relativeHandPosition) / this.myRig.scaleFactor;
+						this.localEuler += Time.deltaTime * new Vector3(this.activeSettings.verticalSensitivity.Evaluate(time) * num2, this.activeSettings.horizontalSensitivity.Evaluate(time) * num, 0f);
+						this.startHandRelativePosition = Vector3.MoveTowards(this.startHandRelativePosition, relativeHandPosition, Time.deltaTime * this.activeSettings.inputDecayCurve.Evaluate(time));
 					}
 				}
 				else
@@ -110,8 +109,8 @@ namespace GorillaTag.Cosmetics
 					Quaternion quaternion = this.controllingHand.rotation * this.handRotationOffset;
 					Quaternion quaternion2 = this.startHandInverseRotation * quaternion;
 					this.localEuler += this.activeSettings.inputSensitivity * quaternion2.eulerAngles;
-					float num4 = 1f - Mathf.Exp(-this.activeSettings.inputDecaySpeed * Time.deltaTime);
-					this.startHandInverseRotation = Quaternion.Slerp(this.startHandInverseRotation, Quaternion.Inverse(quaternion), num4);
+					float t = 1f - Mathf.Exp(-this.activeSettings.inputDecaySpeed * Time.deltaTime);
+					this.startHandInverseRotation = Quaternion.Slerp(this.startHandInverseRotation, Quaternion.Inverse(quaternion), t);
 				}
 				for (int i = 0; i < 3; i++)
 				{

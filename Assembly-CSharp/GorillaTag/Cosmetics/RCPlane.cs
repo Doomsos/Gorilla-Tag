@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using GorillaLocomotion;
 using GorillaLocomotion.Climbing;
+using Photon.Pun;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace GorillaTag.Cosmetics
 {
@@ -81,8 +83,8 @@ namespace GorillaTag.Cosmetics
 					this.audioSource.volume = 0f;
 					this.audioSource.GTPlay();
 				}
-				float num = Mathf.Lerp(this.motorSoundVolumeMinMax.x, this.motorSoundVolumeMinMax.y, this.motorLevel);
-				this.audioSource.volume = Mathf.MoveTowards(this.audioSource.volume, num, this.motorSoundVolumeMinMax.y / this.motorVolumeRampTime * dt);
+				float target = Mathf.Lerp(this.motorSoundVolumeMinMax.x, this.motorSoundVolumeMinMax.y, this.motorLevel);
+				this.audioSource.volume = Mathf.MoveTowards(this.audioSource.volume, target, this.motorSoundVolumeMinMax.y / this.motorVolumeRampTime * dt);
 				this.propellerSpinRate = Mathf.MoveTowards(this.propellerSpinRate, 5f, 6.6666665f * dt);
 				this.propellerAngle += this.propellerSpinRate * 360f * dt;
 				this.propeller.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, this.propellerAngle));
@@ -105,10 +107,10 @@ namespace GorillaTag.Cosmetics
 				this.propeller.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, this.propellerAngle));
 				break;
 			}
-			float num2 = Mathf.Lerp(this.aileronAngularRange.x, this.aileronAngularRange.y, Mathf.InverseLerp(-1f, 1f, this.leftAileronLevel));
-			float num3 = Mathf.Lerp(this.aileronAngularRange.x, this.aileronAngularRange.y, Mathf.InverseLerp(-1f, 1f, this.rightAileronLevel));
-			this.leftAileronAngle = Mathf.MoveTowards(this.leftAileronAngle, num2, this.aileronAngularAcc * Time.deltaTime);
-			this.rightAileronAngle = Mathf.MoveTowards(this.rightAileronAngle, num3, this.aileronAngularAcc * Time.deltaTime);
+			float target2 = Mathf.Lerp(this.aileronAngularRange.x, this.aileronAngularRange.y, Mathf.InverseLerp(-1f, 1f, this.leftAileronLevel));
+			float target3 = Mathf.Lerp(this.aileronAngularRange.x, this.aileronAngularRange.y, Mathf.InverseLerp(-1f, 1f, this.rightAileronLevel));
+			this.leftAileronAngle = Mathf.MoveTowards(this.leftAileronAngle, target2, this.aileronAngularAcc * Time.deltaTime);
+			this.rightAileronAngle = Mathf.MoveTowards(this.rightAileronAngle, target3, this.aileronAngularAcc * Time.deltaTime);
 			Quaternion localRotation = Quaternion.Euler(0f, -90f, 90f + this.leftAileronAngle);
 			Quaternion localRotation2 = Quaternion.Euler(0f, 90f, -90f + this.rightAileronAngle);
 			this.leftAileronLower.localRotation = localRotation;
@@ -133,45 +135,45 @@ namespace GorillaTag.Cosmetics
 			float num4 = this.roll;
 			if (this.activeInput.joystick.y >= 0f)
 			{
-				float num5 = this.activeInput.joystick.y * this.pitchVelocityTargetMinMax.y;
-				this.pitchVel = Mathf.MoveTowards(this.pitchVel, num5, this.pitchAccelMinMax.y * fixedDeltaTime);
+				float target = this.activeInput.joystick.y * this.pitchVelocityTargetMinMax.y;
+				this.pitchVel = Mathf.MoveTowards(this.pitchVel, target, this.pitchAccelMinMax.y * fixedDeltaTime);
 				this.pitch += this.pitchVel * fixedDeltaTime;
 			}
 			else
 			{
-				float num6 = -this.activeInput.joystick.y * this.pitchVelocityTargetMinMax.x;
-				this.pitchVel = Mathf.MoveTowards(this.pitchVel, num6, this.pitchAccelMinMax.x * fixedDeltaTime);
+				float target2 = -this.activeInput.joystick.y * this.pitchVelocityTargetMinMax.x;
+				this.pitchVel = Mathf.MoveTowards(this.pitchVel, target2, this.pitchAccelMinMax.x * fixedDeltaTime);
 				this.pitch += this.pitchVel * fixedDeltaTime;
 			}
-			float num7 = -this.activeInput.joystick.x * this.rollVelocityTarget;
-			this.rollVel = Mathf.MoveTowards(this.rollVel, num7, this.rollAccel * fixedDeltaTime);
+			float target3 = -this.activeInput.joystick.x * this.rollVelocityTarget;
+			this.rollVel = Mathf.MoveTowards(this.rollVel, target3, this.rollAccel * fixedDeltaTime);
 			this.roll += this.rollVel * fixedDeltaTime;
-			Quaternion quaternion = Quaternion.Euler(new Vector3(this.pitch - num3, 0f, this.roll - num4));
-			base.transform.rotation = base.transform.rotation * quaternion;
+			Quaternion rhs = Quaternion.Euler(new Vector3(this.pitch - num3, 0f, this.roll - num4));
+			base.transform.rotation = base.transform.rotation * rhs;
 			this.rb.angularVelocity = Vector3.zero;
 			Vector3 linearVelocity = this.rb.linearVelocity;
 			float magnitude = linearVelocity.magnitude;
-			float num8 = Mathf.Max(Vector3.Dot(base.transform.forward, linearVelocity), 0f);
-			float num9 = this.activeInput.trigger * num;
-			float num10 = 0.1f * x;
-			if (num9 > num10 && num9 > num8)
+			float num5 = Mathf.Max(Vector3.Dot(base.transform.forward, linearVelocity), 0f);
+			float num6 = this.activeInput.trigger * num;
+			float num7 = 0.1f * x;
+			if (num6 > num7 && num6 > num5)
 			{
-				float num11 = Mathf.MoveTowards(num8, num9, num2 * fixedDeltaTime);
-				this.rb.AddForce(base.transform.forward * (num11 - num8) * this.rb.mass, 1);
+				float num8 = Mathf.MoveTowards(num5, num6, num2 * fixedDeltaTime);
+				this.rb.AddForce(base.transform.forward * (num8 - num5) * this.rb.mass, ForceMode.Impulse);
 			}
-			float num12 = 0.01f * x;
-			float num13 = Vector3.Dot(linearVelocity / Mathf.Max(magnitude, num12), base.transform.forward);
-			float num14 = this.liftVsAttackCurve.Evaluate(num13);
-			float num15 = Mathf.Lerp(this.liftVsSpeedOutput.x, this.liftVsSpeedOutput.y, Mathf.InverseLerp(this.liftVsSpeedInput.x, this.liftVsSpeedInput.y, magnitude / x));
-			float num16 = num14 * num15;
-			Vector3 vector = Vector3.RotateTowards(linearVelocity, base.transform.forward * magnitude, this.pitchVelocityFollowRateAngle * 0.017453292f * fixedDeltaTime, this.pitchVelocityFollowRateMagnitude * fixedDeltaTime) - linearVelocity;
-			this.rb.AddForce(vector * num16 * this.rb.mass, 1);
-			float num17 = Vector3.Dot(linearVelocity.normalized, base.transform.up);
-			float num18 = this.dragVsAttackCurve.Evaluate(num17);
-			this.rb.AddForce(-linearVelocity * this.maxDrag * num18 * this.rb.mass, 0);
+			float b = 0.01f * x;
+			float time = Vector3.Dot(linearVelocity / Mathf.Max(magnitude, b), base.transform.forward);
+			float num9 = this.liftVsAttackCurve.Evaluate(time);
+			float num10 = Mathf.Lerp(this.liftVsSpeedOutput.x, this.liftVsSpeedOutput.y, Mathf.InverseLerp(this.liftVsSpeedInput.x, this.liftVsSpeedInput.y, magnitude / x));
+			float d = num9 * num10;
+			Vector3 a = Vector3.RotateTowards(linearVelocity, base.transform.forward * magnitude, this.pitchVelocityFollowRateAngle * 0.017453292f * fixedDeltaTime, this.pitchVelocityFollowRateMagnitude * fixedDeltaTime) - linearVelocity;
+			this.rb.AddForce(a * d * this.rb.mass, ForceMode.Impulse);
+			float time2 = Vector3.Dot(linearVelocity.normalized, base.transform.up);
+			float d2 = this.dragVsAttackCurve.Evaluate(time2);
+			this.rb.AddForce(-linearVelocity * this.maxDrag * d2 * this.rb.mass, ForceMode.Force);
 			if (this.rb.useGravity)
 			{
-				float gravityCompensation = Mathf.Lerp(this.gravityCompensationRange.x, this.gravityCompensationRange.y, Mathf.InverseLerp(0f, num, num8 / x));
+				float gravityCompensation = Mathf.Lerp(this.gravityCompensationRange.x, this.gravityCompensationRange.y, Mathf.InverseLerp(0f, num, num5 / x));
 				RCVehicle.AddScaledGravityCompensationForce(this.rb, x, gravityCompensation);
 			}
 		}
@@ -200,7 +202,7 @@ namespace GorillaTag.Cosmetics
 					GorillaHandClimber component = collision.collider.gameObject.GetComponent<GorillaHandClimber>();
 					if (component != null)
 					{
-						vector = GTPlayer.Instance.GetHandVelocityTracker(component.xrNode == 4).GetAverageVelocity(true, 0.15f, false);
+						vector = GTPlayer.Instance.GetHandVelocityTracker(component.xrNode == XRNode.LeftHand).GetAverageVelocity(true, 0.15f, false);
 					}
 				}
 				else if (collision.rigidbody != null)
@@ -216,7 +218,7 @@ namespace GorillaTag.Cosmetics
 					}
 					if (this.networkSync != null)
 					{
-						this.networkSync.photonView.RPC("HitRCVehicleRPC", 1, new object[]
+						this.networkSync.photonView.RPC("HitRCVehicleRPC", RpcTarget.Others, new object[]
 						{
 							vector,
 							flag

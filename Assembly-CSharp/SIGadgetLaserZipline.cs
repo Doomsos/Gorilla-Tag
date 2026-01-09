@@ -81,8 +81,8 @@ public class SIGadgetLaserZipline : SIGadget, ICallBack
 				this.activatedAtRotation = Quaternion.LookRotation(this.ziplineDirection);
 			}
 			float magnitude = GTPlayer.Instance.RigidbodyVelocity.magnitude;
-			float num = Mathf.Lerp(Vector3.Dot(GTPlayer.Instance.RigidbodyVelocity, this.ziplineDirection), magnitude, 0.5f) - this.speedBoost * this.ziplineDirection.y * Time.deltaTime;
-			GTPlayer.Instance.SetVelocity(this.ziplineDirection * num);
+			float d = Mathf.Lerp(Vector3.Dot(GTPlayer.Instance.RigidbodyVelocity, this.ziplineDirection), magnitude, 0.5f) - this.speedBoost * this.ziplineDirection.y * Time.deltaTime;
+			GTPlayer.Instance.SetVelocity(this.ziplineDirection * d);
 			this.wasTriggerPressed = true;
 			return;
 		}

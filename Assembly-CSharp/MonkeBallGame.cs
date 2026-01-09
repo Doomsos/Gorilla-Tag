@@ -103,16 +103,16 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 
 	private void AssignNetworkListeners()
 	{
-		NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(this.OnPlayerJoined);
-		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeft);
-		NetworkSystem.Instance.OnMasterClientSwitchedEvent += new Action<NetPlayer>(this.OnMasterClientSwitched);
+		NetworkSystem.Instance.OnPlayerJoined += this.OnPlayerJoined;
+		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeft;
+		NetworkSystem.Instance.OnMasterClientSwitchedEvent += this.OnMasterClientSwitched;
 	}
 
 	private void UnassignNetworkListeners()
 	{
-		NetworkSystem.Instance.OnPlayerJoined -= new Action<NetPlayer>(this.OnPlayerJoined);
-		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(this.OnPlayerLeft);
-		NetworkSystem.Instance.OnMasterClientSwitchedEvent -= new Action<NetPlayer>(this.OnMasterClientSwitched);
+		NetworkSystem.Instance.OnPlayerJoined -= this.OnPlayerJoined;
+		NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerLeft;
+		NetworkSystem.Instance.OnMasterClientSwitchedEvent -= this.OnMasterClientSwitched;
 	}
 
 	public void Tick()
@@ -187,7 +187,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		{
 			return;
 		}
-		this.photonView.RPC("SetTeamRPC", 0, new object[]
+		this.photonView.RPC("SetTeamRPC", RpcTarget.All, new object[]
 		{
 			-1,
 			player.GetPlayerRef()
@@ -206,7 +206,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		long[] array4;
 		long[] array5;
 		this.GetCurrentGameState(out array, out array2, out array3, out array4, out array5);
-		this.photonView.RPC("RequestSetGameStateRPC", 1, new object[]
+		this.photonView.RPC("RequestSetGameStateRPC", RpcTarget.Others, new object[]
 		{
 			(int)this.gameState,
 			this.gameEndTime,
@@ -266,7 +266,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		{
 			return;
 		}
-		this.photonView.RPC("SetGameStateRPC", 0, new object[]
+		this.photonView.RPC("SetGameStateRPC", RpcTarget.All, new object[]
 		{
 			(int)newGameState
 		});
@@ -445,7 +445,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 
 	public void RequestResetGame()
 	{
-		this.photonView.RPC("RequestResetGameRPC", 0, Array.Empty<object>());
+		this.photonView.RPC("RequestResetGameRPC", RpcTarget.All, Array.Empty<object>());
 	}
 
 	[PunRPC]
@@ -488,7 +488,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 	public void ToggleResetButton(bool toggle, int teamId)
 	{
 		int otherTeam = this.GetOtherTeam(teamId);
-		this.photonView.RPC("SetResetButtonRPC", 0, new object[]
+		this.photonView.RPC("SetResetButtonRPC", RpcTarget.All, new object[]
 		{
 			toggle,
 			otherTeam
@@ -542,12 +542,12 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		{
 			return;
 		}
-		float num = (float)(this.gameEndTime - PhotonNetwork.Time);
+		float a = (float)(this.gameEndTime - PhotonNetwork.Time);
 		if (this.gameEndTime < 0.0)
 		{
-			num = 0f;
+			a = 0f;
 		}
-		string timeString = Mathf.Max(num, 0f).ToString("#00.00");
+		string timeString = Mathf.Max(a, 0f).ToString("#00.00");
 		for (int i = 0; i < this.scoreboards.Count; i++)
 		{
 			this.scoreboards[i].RefreshTime(timeString);
@@ -578,7 +578,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		{
 			return;
 		}
-		this.photonView.RPC("SetScoreRPC", 0, new object[]
+		this.photonView.RPC("SetScoreRPC", RpcTarget.All, new object[]
 		{
 			teamId,
 			this.team[teamId].score + 1
@@ -592,7 +592,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		{
 			return;
 		}
-		this.photonView.RPC("SetScoreRPC", 0, new object[]
+		this.photonView.RPC("SetScoreRPC", RpcTarget.All, new object[]
 		{
 			teamId,
 			score
@@ -677,7 +677,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		{
 			return;
 		}
-		this.photonView.RPC("RequestSetTeamRPC", 2, new object[]
+		this.photonView.RPC("RequestSetTeamRPC", RpcTarget.MasterClient, new object[]
 		{
 			teamId
 		});
@@ -707,7 +707,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		GorillaComputer.instance.UpdateColor(color.r, color.g, color.b);
 		if (NetworkSystem.Instance.InRoom)
 		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 			{
 				color.r,
 				color.g,
@@ -715,7 +715,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 			});
 			if (flag)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_HideAllCosmetics", 0, Array.Empty<object>());
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_HideAllCosmetics", RpcTarget.All, Array.Empty<object>());
 			}
 			else
 			{
@@ -754,7 +754,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 			this.ReportRPCCall(MonkeBallGame.RPC.RequestSetTeam, info, "teamID exceeds possible range.");
 			return;
 		}
-		this.photonView.RPC("SetTeamRPC", 0, new object[]
+		this.photonView.RPC("SetTeamRPC", RpcTarget.All, new object[]
 		{
 			teamId,
 			info.Sender
@@ -867,7 +867,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		Color storedLocalPlayerColor = this._storedLocalPlayerColor;
 		if (NetworkSystem.Instance.InRoom)
 		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 			{
 				storedLocalPlayerColor.r,
 				storedLocalPlayerColor.g,
@@ -892,7 +892,7 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		{
 			return;
 		}
-		this.photonView.RPC("SetRestrictBallToTeam", 0, new object[]
+		this.photonView.RPC("SetRestrictBallToTeam", RpcTarget.All, new object[]
 		{
 			gameBallId.index,
 			teamId,

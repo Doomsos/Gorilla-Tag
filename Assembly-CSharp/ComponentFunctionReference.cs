@@ -23,7 +23,7 @@ public sealed class ComponentFunctionReference<TResult>
 		}
 		yield return new ValueDropdownItem<ComponentFunctionReference<TResult>.MethodRef>("NONE", default(ComponentFunctionReference<TResult>.MethodRef));
 		Type type = typeof(GameObject);
-		BindingFlags flags = 52;
+		BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 		foreach (MethodInfo methodInfo in type.GetMethods(flags))
 		{
 			if (methodInfo.GetParameters().Length == 0 && methodInfo.ReturnType == typeof(TResult))
@@ -61,7 +61,7 @@ public sealed class ComponentFunctionReference<TResult>
 		{
 			return default(TResult);
 		}
-		return this._cached.Invoke();
+		return this._cached();
 	}
 
 	public void Cache()
@@ -71,7 +71,7 @@ public sealed class ComponentFunctionReference<TResult>
 		{
 			return;
 		}
-		MethodInfo method = this._selection.component.GetType().GetMethod(this._selection.methodName, 52, null, Type.EmptyTypes, null);
+		MethodInfo method = this._selection.component.GetType().GetMethod(this._selection.methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
 		if (method != null)
 		{
 			this._cached = (Func<TResult>)Delegate.CreateDelegate(typeof(Func<TResult>), this._selection.component, method);

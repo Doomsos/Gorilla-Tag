@@ -53,30 +53,30 @@ public static class CustomSerializer
 		}
 		if (obj is bool)
 		{
-			bool flag = (bool)obj;
+			bool value = (bool)obj;
 			writer.Write(2);
-			writer.Write(flag);
+			writer.Write(value);
 			return;
 		}
 		if (obj is int)
 		{
-			int num = (int)obj;
+			int value2 = (int)obj;
 			writer.Write(3);
-			writer.Write(num);
+			writer.Write(value2);
 			return;
 		}
 		if (obj is float)
 		{
-			float num2 = (float)obj;
+			float value3 = (float)obj;
 			writer.Write(4);
-			writer.Write(num2);
+			writer.Write(value3);
 			return;
 		}
 		if (obj is double)
 		{
-			double num3 = (double)obj;
+			double value4 = (double)obj;
 			writer.Write(5);
-			writer.Write(num3);
+			writer.Write(value4);
 			return;
 		}
 		if (obj is Vector2)
@@ -105,9 +105,9 @@ public static class CustomSerializer
 		}
 		if (obj is byte)
 		{
-			byte b = (byte)obj;
+			byte value5 = (byte)obj;
 			writer.Write(9);
-			writer.Write(b);
+			writer.Write(value5);
 			return;
 		}
 		Enum @enum = obj as Enum;
@@ -157,9 +157,9 @@ public static class CustomSerializer
 		else
 		{
 			writer.Write(options.TargetActors.Length);
-			foreach (int num in options.TargetActors)
+			foreach (int value in options.TargetActors)
 			{
-				writer.Write(num);
+				writer.Write(value);
 			}
 		}
 		writer.Write(options.Flags.WebhookFlags);
@@ -183,16 +183,16 @@ public static class CustomSerializer
 			return reader.ReadDouble();
 		case 6:
 		{
-			float num = reader.ReadSingle();
-			float num2 = reader.ReadSingle();
-			return new Vector2(num, num2);
+			float x = reader.ReadSingle();
+			float y = reader.ReadSingle();
+			return new Vector2(x, y);
 		}
 		case 7:
 		{
-			float num3 = reader.ReadSingle();
-			float num4 = reader.ReadSingle();
-			float num5 = reader.ReadSingle();
-			return new Vector3(num3, num4, num5);
+			float x2 = reader.ReadSingle();
+			float y2 = reader.ReadSingle();
+			float z = reader.ReadSingle();
+			return new Vector3(x2, y2, z);
 		}
 		case 8:
 			return CustomSerializer.DeserializeObjectArray(reader);
@@ -200,18 +200,18 @@ public static class CustomSerializer
 			return reader.ReadByte();
 		case 10:
 		{
-			int num6 = reader.ReadInt32();
-			return Enum.ToObject(Type.GetType(reader.ReadString()), num6);
+			int value = reader.ReadInt32();
+			return Enum.ToObject(Type.GetType(reader.ReadString()), value);
 		}
 		case 11:
 			return CustomSerializer.DeserializeNetEventOptions(reader);
 		case 12:
 		{
-			float num7 = reader.ReadSingle();
-			float num8 = reader.ReadSingle();
-			float num9 = reader.ReadSingle();
-			float num10 = reader.ReadSingle();
-			return new Quaternion(num7, num8, num9, num10);
+			float x3 = reader.ReadSingle();
+			float y3 = reader.ReadSingle();
+			float z2 = reader.ReadSingle();
+			float w = reader.ReadSingle();
+			return new Quaternion(x3, y3, z2, w);
 		}
 		default:
 			throw new InvalidOperationException("Unsupported type");

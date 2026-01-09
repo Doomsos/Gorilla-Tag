@@ -11,7 +11,7 @@ using GorillaTag;
 using GorillaTagScripts;
 using Photon.Pun;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.XR;
 
 namespace GorillaLocomotion
 {
@@ -472,7 +472,7 @@ namespace GorillaLocomotion
 			this.bodyTouchedSurfaces = new Dictionary<GameObject, PhysicsMaterial>();
 			if (Application.isPlaying)
 			{
-				Application.onBeforeRender += new UnityAction(this.OnBeforeRenderInit);
+				Application.onBeforeRender += this.OnBeforeRenderInit;
 			}
 		}
 
@@ -547,8 +547,8 @@ namespace GorillaLocomotion
 			if (center)
 			{
 				Vector3 position2 = base.transform.position;
-				Vector3 vector = this.mainCamera.transform.position - position2;
-				position -= vector;
+				Vector3 b = this.mainCamera.transform.position - position2;
+				position -= b;
 			}
 			this.ClearHandHolds();
 			if (this.playerRigidBody != null)
@@ -583,8 +583,8 @@ namespace GorillaLocomotion
 		public void TeleportTo(Transform destination, bool matchDestinationRotation = true, bool maintainVelocity = true)
 		{
 			Vector3 position = base.transform.position;
-			Vector3 vector = this.mainCamera.transform.position - position;
-			Vector3 position2 = destination.position - vector;
+			Vector3 b = this.mainCamera.transform.position - position;
+			Vector3 position2 = destination.position - b;
 			float num = destination.rotation.eulerAngles.y - this.mainCamera.transform.rotation.eulerAngles.y;
 			Vector3 playerVelocity = this.currentVelocity;
 			if (!maintainVelocity)
@@ -610,9 +610,9 @@ namespace GorillaLocomotion
 
 		public void AddForce(Vector3 force, ForceMode mode)
 		{
-			if (mode == 2)
+			if (mode == ForceMode.VelocityChange)
 			{
-				this.playerRigidBody.AddForce(force * this.playerRigidBody.mass, 1);
+				this.playerRigidBody.AddForce(force * this.playerRigidBody.mass, ForceMode.Impulse);
 				return;
 			}
 			this.playerRigidBody.AddForce(force, mode);
@@ -624,7 +624,7 @@ namespace GorillaLocomotion
 			{
 				this.velocityHistory[i] = newVelocity;
 			}
-			this.playerRigidBody.AddForce(newVelocity - this.playerRigidBody.linearVelocity, 2);
+			this.playerRigidBody.AddForce(newVelocity - this.playerRigidBody.linearVelocity, ForceMode.VelocityChange);
 		}
 
 		public void SetGravityOverride(Object caller, Action<GTPlayer> gravityFunction)
@@ -641,7 +641,7 @@ namespace GorillaLocomotion
 		{
 			foreach (KeyValuePair<Object, Action<GTPlayer>> keyValuePair in this.gravityOverrides)
 			{
-				keyValuePair.Value.Invoke(this);
+				keyValuePair.Value(this);
 			}
 		}
 
@@ -661,8 +661,8 @@ namespace GorillaLocomotion
 			if (speed > 0.01f)
 			{
 				float num = Vector3.Dot(this.averagedVelocity, direction);
-				float num2 = Mathf.InverseLerp(1.5f, 0.5f, num / speed);
-				Vector3 vector = this.averagedVelocity + direction * speed * num2;
+				float d = Mathf.InverseLerp(1.5f, 0.5f, num / speed);
+				Vector3 vector = this.averagedVelocity + direction * speed * d;
 				this.playerRigidBody.linearVelocity = vector;
 				for (int i = 0; i < this.velocityHistory.Length; i++)
 				{
@@ -691,8 +691,8 @@ namespace GorillaLocomotion
 				{
 					return;
 				}
-				float num2 = Mathf.Clamp(speed - num, 0f, speed * boostMultiplier);
-				Vector3 vector = this.playerRigidBody.linearVelocity + direction.normalized * num2;
+				float d = Mathf.Clamp(speed - num, 0f, speed * boostMultiplier);
+				Vector3 vector = this.playerRigidBody.linearVelocity + direction.normalized * d;
 				this.playerRigidBody.linearVelocity = vector;
 				for (int i = 0; i < this.velocityHistory.Length; i++)
 				{
@@ -715,24 +715,24 @@ namespace GorillaLocomotion
 			{
 				if (!this.isClimbing)
 				{
-					this.playerRigidBody.AddForce(Physics.gravity * this.scale, 5);
+					this.playerRigidBody.AddForce(Physics.gravity * this.scale, ForceMode.Acceleration);
 				}
 				if (this.halloweenLevitationBonusStrength > 0f || this.halloweenLevitationStrength > 0f)
 				{
 					float num = Time.time - this.lastTouchedGroundTimestamp;
 					if (num < this.halloweenLevitationTotalDuration)
 					{
-						this.playerRigidBody.AddForce(Vector3.up * (this.halloweenLevitationStrength * Mathf.InverseLerp(this.halloweenLevitationFullStrengthDuration, this.halloweenLevitationTotalDuration, num)), 5);
+						this.playerRigidBody.AddForce(Vector3.up * (this.halloweenLevitationStrength * Mathf.InverseLerp(this.halloweenLevitationFullStrengthDuration, this.halloweenLevitationTotalDuration, num)), ForceMode.Acceleration);
 					}
 					float y = this.playerRigidBody.linearVelocity.y;
 					if (y <= this.halloweenLevitateBonusFullAtYSpeed)
 					{
-						this.playerRigidBody.AddForce(Vector3.up * this.halloweenLevitationBonusStrength, 5);
+						this.playerRigidBody.AddForce(Vector3.up * this.halloweenLevitationBonusStrength, ForceMode.Acceleration);
 					}
 					else if (y <= this.halloweenLevitateBonusOffAtYSpeed)
 					{
 						float num2 = Mathf.InverseLerp(this.halloweenLevitateBonusOffAtYSpeed, this.halloweenLevitateBonusFullAtYSpeed, this.playerRigidBody.linearVelocity.y);
-						this.playerRigidBody.AddForce(Vector3.up * (this.halloweenLevitationBonusStrength * num2), 5);
+						this.playerRigidBody.AddForce(Vector3.up * (this.halloweenLevitationBonusStrength * num2), ForceMode.Acceleration);
 					}
 				}
 			}
@@ -746,7 +746,7 @@ namespace GorillaLocomotion
 			}
 			float fixedDeltaTime = Time.fixedDeltaTime;
 			this.bodyInWater = false;
-			Vector3 vector = this.swimmingVelocity;
+			Vector3 lhs = this.swimmingVelocity;
 			this.swimmingVelocity = Vector3.MoveTowards(this.swimmingVelocity, Vector3.zero, this.swimmingParams.swimmingVelocityOutOfWaterDrainRate * fixedDeltaTime);
 			this.leftHandNonDiveHapticsAmount = 0f;
 			this.rightHandNonDiveHapticsAmount = 0f;
@@ -754,14 +754,14 @@ namespace GorillaLocomotion
 			{
 				WaterVolume waterVolume = null;
 				float num3 = float.MinValue;
-				Vector3 vector2 = this.headCollider.transform.position + Vector3.down * this.swimmingParams.floatingWaterLevelBelowHead * this.scale;
+				Vector3 vector = this.headCollider.transform.position + Vector3.down * this.swimmingParams.floatingWaterLevelBelowHead * this.scale;
 				this.activeWaterCurrents.Clear();
 				for (int i = 0; i < this.bodyOverlappingWaterVolumes.Count; i++)
 				{
 					WaterVolume.SurfaceQuery surfaceQuery;
-					if (this.bodyOverlappingWaterVolumes[i].GetSurfaceQueryForPoint(vector2, out surfaceQuery, false))
+					if (this.bodyOverlappingWaterVolumes[i].GetSurfaceQueryForPoint(vector, out surfaceQuery, false))
 					{
-						float num4 = Vector3.Dot(surfaceQuery.surfacePoint - vector2, surfaceQuery.surfaceNormal);
+						float num4 = Vector3.Dot(surfaceQuery.surfacePoint - vector, surfaceQuery.surfaceNormal);
 						if (num4 > num3)
 						{
 							num3 = num4;
@@ -791,155 +791,155 @@ namespace GorillaLocomotion
 						this.audioSetToUnderwater = false;
 						this.audioManager.UnsetMixerSnapshot(0.1f);
 					}
-					this.bodyInWater = (vector2.y < this.waterSurfaceForHead.surfacePoint.y && vector2.y > this.waterSurfaceForHead.surfacePoint.y - this.waterSurfaceForHead.maxDepth);
+					this.bodyInWater = (vector.y < this.waterSurfaceForHead.surfacePoint.y && vector.y > this.waterSurfaceForHead.surfacePoint.y - this.waterSurfaceForHead.maxDepth);
 					if (this.bodyInWater)
 					{
 						GTPlayer.LiquidProperties liquidProperties = this.liquidPropertiesList[(int)waterVolume.LiquidType];
 						if (waterVolume != null)
 						{
-							float num8;
+							float num6;
 							if (this.swimmingParams.extendBouyancyFromSpeed)
 							{
-								float num5 = Mathf.Clamp(Vector3.Dot(linearVelocity / this.scale, this.waterSurfaceForHead.surfaceNormal), this.swimmingParams.speedToBouyancyExtensionMinMax.x, this.swimmingParams.speedToBouyancyExtensionMinMax.y);
-								float num6 = this.swimmingParams.speedToBouyancyExtension.Evaluate(num5);
-								this.buoyancyExtension = Mathf.Max(this.buoyancyExtension, num6);
-								float num7 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist + this.buoyancyExtension, num3 / this.scale + this.buoyancyExtension);
+								float time = Mathf.Clamp(Vector3.Dot(linearVelocity / this.scale, this.waterSurfaceForHead.surfaceNormal), this.swimmingParams.speedToBouyancyExtensionMinMax.x, this.swimmingParams.speedToBouyancyExtensionMinMax.y);
+								float b = this.swimmingParams.speedToBouyancyExtension.Evaluate(time);
+								this.buoyancyExtension = Mathf.Max(this.buoyancyExtension, b);
+								float num5 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist + this.buoyancyExtension, num3 / this.scale + this.buoyancyExtension);
 								this.buoyancyExtension = Spring.DamperDecayExact(this.buoyancyExtension, this.swimmingParams.buoyancyExtensionDecayHalflife, fixedDeltaTime, 1E-05f);
-								num8 = num7;
+								num6 = num5;
 							}
 							else
 							{
-								num8 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist, num3 / this.scale);
+								num6 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist, num3 / this.scale);
 							}
-							Vector3 vector3 = -(Physics.gravity * this.scale) * (liquidProperties.buoyancy * num8);
+							Vector3 vector2 = -(Physics.gravity * this.scale) * (liquidProperties.buoyancy * num6);
 							if (this.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
 							{
-								vector3 *= this.frozenBodyBuoyancyFactor;
+								vector2 *= this.frozenBodyBuoyancyFactor;
 							}
-							this.playerRigidBody.AddForce(vector3, 5);
+							this.playerRigidBody.AddForce(vector2, ForceMode.Acceleration);
 						}
+						Vector3 vector3 = Vector3.zero;
 						Vector3 vector4 = Vector3.zero;
-						Vector3 vector5 = Vector3.zero;
 						for (int j = 0; j < this.activeWaterCurrents.Count; j++)
 						{
 							WaterCurrent waterCurrent2 = this.activeWaterCurrents[j];
-							Vector3 startingVelocity = linearVelocity + vector4;
-							Vector3 vector6;
-							Vector3 vector7;
-							if (waterCurrent2.GetCurrentAtPoint(this.bodyCollider.transform.position, startingVelocity, fixedDeltaTime, out vector6, out vector7))
+							Vector3 startingVelocity = linearVelocity + vector3;
+							Vector3 b2;
+							Vector3 b3;
+							if (waterCurrent2.GetCurrentAtPoint(this.bodyCollider.transform.position, startingVelocity, fixedDeltaTime, out b2, out b3))
 							{
-								vector5 += vector6;
-								vector4 += vector7;
+								vector4 += b2;
+								vector3 += b3;
 							}
 						}
 						if (magnitude > Mathf.Epsilon)
 						{
-							float num9 = 0.01f;
-							Vector3 vector8 = linearVelocity / magnitude;
+							float num7 = 0.01f;
+							Vector3 vector5 = linearVelocity / magnitude;
 							Vector3 right = this.leftHand.handFollower.right;
 							Vector3 dir = -this.rightHand.handFollower.right;
 							Vector3 forward = this.leftHand.handFollower.forward;
 							Vector3 forward2 = this.rightHand.handFollower.forward;
-							Vector3 vector9 = vector8;
+							Vector3 a = vector5;
+							float num8 = 0f;
+							float num9 = 0f;
 							float num10 = 0f;
-							float num11 = 0f;
-							float num12 = 0f;
 							if (this.swimmingParams.applyDiveSteering && !this.disableMovement && isDefaultScale)
 							{
-								float num13 = Vector3.Dot(linearVelocity - vector5, vector8);
-								float num14 = Mathf.Clamp(num13, this.swimmingParams.swimSpeedToRedirectAmountMinMax.x, this.swimmingParams.swimSpeedToRedirectAmountMinMax.y);
-								float num15 = this.swimmingParams.swimSpeedToRedirectAmount.Evaluate(num14);
-								num14 = Mathf.Clamp(num13, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.x, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.y);
-								float num16 = this.swimmingParams.swimSpeedToMaxRedirectAngle.Evaluate(num14);
-								float num17 = Mathf.Acos(Vector3.Dot(vector8, forward)) / 3.1415927f * -2f + 1f;
-								float num18 = Mathf.Acos(Vector3.Dot(vector8, forward2)) / 3.1415927f * -2f + 1f;
-								float num19 = Mathf.Clamp(num17, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
-								float num20 = Mathf.Clamp(num18, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
-								float num21 = (!float.IsNaN(num19)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num19) : 0f;
-								float num22 = (!float.IsNaN(num20)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num20) : 0f;
-								Vector3 vector10 = Vector3.ProjectOnPlane(vector8, right);
-								Vector3 vector11 = Vector3.ProjectOnPlane(vector8, right);
-								float num23 = Mathf.Min(vector10.magnitude, 1f);
-								float num24 = Mathf.Min(vector11.magnitude, 1f);
+								float value = Vector3.Dot(linearVelocity - vector4, vector5);
+								float time2 = Mathf.Clamp(value, this.swimmingParams.swimSpeedToRedirectAmountMinMax.x, this.swimmingParams.swimSpeedToRedirectAmountMinMax.y);
+								float b4 = this.swimmingParams.swimSpeedToRedirectAmount.Evaluate(time2);
+								time2 = Mathf.Clamp(value, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.x, this.swimmingParams.swimSpeedToMaxRedirectAngleMinMax.y);
+								float num11 = this.swimmingParams.swimSpeedToMaxRedirectAngle.Evaluate(time2);
+								float value2 = Mathf.Acos(Vector3.Dot(vector5, forward)) / 3.1415927f * -2f + 1f;
+								float value3 = Mathf.Acos(Vector3.Dot(vector5, forward2)) / 3.1415927f * -2f + 1f;
+								float num12 = Mathf.Clamp(value2, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
+								float num13 = Mathf.Clamp(value3, this.swimmingParams.palmFacingToRedirectAmountMinMax.x, this.swimmingParams.palmFacingToRedirectAmountMinMax.y);
+								float a2 = (!float.IsNaN(num12)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num12) : 0f;
+								float a3 = (!float.IsNaN(num13)) ? this.swimmingParams.palmFacingToRedirectAmount.Evaluate(num13) : 0f;
+								Vector3 a4 = Vector3.ProjectOnPlane(vector5, right);
+								Vector3 a5 = Vector3.ProjectOnPlane(vector5, right);
+								float num14 = Mathf.Min(a4.magnitude, 1f);
+								float num15 = Mathf.Min(a5.magnitude, 1f);
 								float magnitude2 = this.leftHand.velocityTracker.GetAverageVelocity(false, this.swimmingParams.diveVelocityAveragingWindow, false).magnitude;
 								float magnitude3 = this.rightHand.velocityTracker.GetAverageVelocity(false, this.swimmingParams.diveVelocityAveragingWindow, false).magnitude;
-								float num25 = Mathf.Clamp(magnitude2, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
-								float num26 = Mathf.Clamp(magnitude3, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
-								float num27 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(num25);
-								float num28 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(num26);
+								float time3 = Mathf.Clamp(magnitude2, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
+								float time4 = Mathf.Clamp(magnitude3, this.swimmingParams.handSpeedToRedirectAmountMinMax.x, this.swimmingParams.handSpeedToRedirectAmountMinMax.y);
+								float a6 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(time3);
+								float a7 = this.swimmingParams.handSpeedToRedirectAmount.Evaluate(time4);
 								float averageSpeedChangeMagnitudeInDirection = this.leftHand.velocityTracker.GetAverageSpeedChangeMagnitudeInDirection(right, false, this.swimmingParams.diveVelocityAveragingWindow);
 								float averageSpeedChangeMagnitudeInDirection2 = this.rightHand.velocityTracker.GetAverageSpeedChangeMagnitudeInDirection(dir, false, this.swimmingParams.diveVelocityAveragingWindow);
-								float num29 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
-								float num30 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection2, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
-								float num31 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(num29);
-								float num32 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(num30);
-								num10 = Mathf.Min(num21, Mathf.Min(num27, num31));
-								float num33 = (Vector3.Dot(vector8, forward) > 0f) ? (Mathf.Min(num10, num15) * num23) : 0f;
-								num11 = Mathf.Min(num22, Mathf.Min(num28, num32));
-								float num34 = (Vector3.Dot(vector8, forward2) > 0f) ? (Mathf.Min(num11, num15) * num24) : 0f;
+								float time5 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
+								float time6 = Mathf.Clamp(averageSpeedChangeMagnitudeInDirection2, this.swimmingParams.handAccelToRedirectAmountMinMax.x, this.swimmingParams.handAccelToRedirectAmountMinMax.y);
+								float b5 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(time5);
+								float b6 = this.swimmingParams.handAccelToRedirectAmount.Evaluate(time6);
+								num8 = Mathf.Min(a2, Mathf.Min(a6, b5));
+								float num16 = (Vector3.Dot(vector5, forward) > 0f) ? (Mathf.Min(num8, b4) * num14) : 0f;
+								num9 = Mathf.Min(a3, Mathf.Min(a7, b6));
+								float num17 = (Vector3.Dot(vector5, forward2) > 0f) ? (Mathf.Min(num9, b4) * num15) : 0f;
 								if (this.swimmingParams.reduceDiveSteeringBelowVelocityPlane)
 								{
-									Vector3 vector12;
-									if (Vector3.Dot(this.headCollider.transform.up, vector8) > 0.95f)
+									Vector3 rhs;
+									if (Vector3.Dot(this.headCollider.transform.up, vector5) > 0.95f)
 									{
-										vector12 = -this.headCollider.transform.forward;
+										rhs = -this.headCollider.transform.forward;
 									}
 									else
 									{
-										vector12 = Vector3.Cross(Vector3.Cross(vector8, this.headCollider.transform.up), vector8).normalized;
+										rhs = Vector3.Cross(Vector3.Cross(vector5, this.headCollider.transform.up), vector5).normalized;
 									}
 									Vector3 position = this.headCollider.transform.position;
-									Vector3 vector13 = position - this.leftHand.handFollower.position;
-									Vector3 vector14 = position - this.rightHand.handFollower.position;
+									Vector3 lhs2 = position - this.leftHand.handFollower.position;
+									Vector3 lhs3 = position - this.rightHand.handFollower.position;
 									float reduceDiveSteeringBelowPlaneFadeStartDist = this.swimmingParams.reduceDiveSteeringBelowPlaneFadeStartDist;
 									float reduceDiveSteeringBelowPlaneFadeEndDist = this.swimmingParams.reduceDiveSteeringBelowPlaneFadeEndDist;
-									float num35 = Vector3.Dot(vector13, Vector3.up);
-									float num36 = Vector3.Dot(vector14, Vector3.up);
-									float num37 = Vector3.Dot(vector13, vector12);
-									float num38 = Vector3.Dot(vector14, vector12);
-									float num39 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(num35), Mathf.Abs(num37)));
-									float num40 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(num36), Mathf.Abs(num38)));
-									num33 *= num39;
-									num34 *= num40;
+									float f = Vector3.Dot(lhs2, Vector3.up);
+									float f2 = Vector3.Dot(lhs3, Vector3.up);
+									float f3 = Vector3.Dot(lhs2, rhs);
+									float f4 = Vector3.Dot(lhs3, rhs);
+									float num18 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(f), Mathf.Abs(f3)));
+									float num19 = 1f - Mathf.InverseLerp(reduceDiveSteeringBelowPlaneFadeStartDist, reduceDiveSteeringBelowPlaneFadeEndDist, Mathf.Min(Mathf.Abs(f2), Mathf.Abs(f4)));
+									num16 *= num18;
+									num17 *= num19;
 								}
-								float num41 = num34 + num33;
-								Vector3 vector15 = Vector3.zero;
-								if (this.swimmingParams.applyDiveSteering && num41 > num9)
+								float num20 = num17 + num16;
+								Vector3 vector6 = Vector3.zero;
+								if (this.swimmingParams.applyDiveSteering && num20 > num7)
 								{
-									vector15 = ((num33 * vector10 + num34 * vector11) / num41).normalized;
-									vector15 = Vector3.Lerp(vector8, vector15, num41);
-									vector9 = Vector3.RotateTowards(vector8, vector15, 0.017453292f * num16 * fixedDeltaTime, 0f);
+									vector6 = ((num16 * a4 + num17 * a5) / num20).normalized;
+									vector6 = Vector3.Lerp(vector5, vector6, num20);
+									a = Vector3.RotateTowards(vector5, vector6, 0.017453292f * num11 * fixedDeltaTime, 0f);
 								}
 								else
 								{
-									vector9 = vector8;
+									a = vector5;
 								}
-								num12 = Mathf.Clamp01((num10 + num11) * 0.5f);
+								num10 = Mathf.Clamp01((num8 + num9) * 0.5f);
 							}
-							float num42 = Mathf.Clamp(Vector3.Dot(vector, vector8), 0f, magnitude);
-							float num43 = magnitude - num42;
-							if (this.swimmingParams.applyDiveSwimVelocityConversion && !this.disableMovement && num12 > num9 && num42 < this.swimmingParams.diveMaxSwimVelocityConversion)
+							float num21 = Mathf.Clamp(Vector3.Dot(lhs, vector5), 0f, magnitude);
+							float num22 = magnitude - num21;
+							if (this.swimmingParams.applyDiveSwimVelocityConversion && !this.disableMovement && num10 > num7 && num21 < this.swimmingParams.diveMaxSwimVelocityConversion)
 							{
-								float num44 = Mathf.Min(this.swimmingParams.diveSwimVelocityConversionRate * fixedDeltaTime, num43) * num12;
-								num42 += num44;
-								num43 -= num44;
+								float num23 = Mathf.Min(this.swimmingParams.diveSwimVelocityConversionRate * fixedDeltaTime, num22) * num10;
+								num21 += num23;
+								num22 -= num23;
 							}
 							float halflife = this.swimmingParams.swimUnderWaterDampingHalfLife * liquidProperties.dampingFactor;
 							float halflife2 = this.swimmingParams.baseUnderWaterDampingHalfLife * liquidProperties.dampingFactor;
-							float num45 = Spring.DamperDecayExact(num42 / this.scale, halflife, fixedDeltaTime, 1E-05f) * this.scale;
-							float num46 = Spring.DamperDecayExact(num43 / this.scale, halflife2, fixedDeltaTime, 1E-05f) * this.scale;
+							float num24 = Spring.DamperDecayExact(num21 / this.scale, halflife, fixedDeltaTime, 1E-05f) * this.scale;
+							float num25 = Spring.DamperDecayExact(num22 / this.scale, halflife2, fixedDeltaTime, 1E-05f) * this.scale;
 							if (this.swimmingParams.applyDiveDampingMultiplier && !this.disableMovement)
 							{
-								float num47 = Mathf.Lerp(1f, this.swimmingParams.diveDampingMultiplier, num12);
-								num45 = Mathf.Lerp(num42, num45, num47);
-								num46 = Mathf.Lerp(num43, num46, num47);
-								float num48 = Mathf.Clamp((1f - num10) * (num42 + num43), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num9, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num9);
-								float num49 = Mathf.Clamp((1f - num11) * (num42 + num43), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num9, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num9);
-								this.leftHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(num48);
-								this.rightHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(num49);
+								float t = Mathf.Lerp(1f, this.swimmingParams.diveDampingMultiplier, num10);
+								num24 = Mathf.Lerp(num21, num24, t);
+								num25 = Mathf.Lerp(num22, num25, t);
+								float time7 = Mathf.Clamp((1f - num8) * (num21 + num22), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num7, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num7);
+								float time8 = Mathf.Clamp((1f - num9) * (num21 + num22), this.swimmingParams.nonDiveDampingHapticsAmountMinMax.x + num7, this.swimmingParams.nonDiveDampingHapticsAmountMinMax.y - num7);
+								this.leftHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(time7);
+								this.rightHandNonDiveHapticsAmount = this.swimmingParams.nonDiveDampingHapticsAmount.Evaluate(time8);
 							}
-							this.swimmingVelocity = num45 * vector9 + vector4 * this.scale;
-							this.playerRigidBody.linearVelocity = this.swimmingVelocity + num46 * vector9;
+							this.swimmingVelocity = num24 * a + vector3 * this.scale;
+							this.playerRigidBody.linearVelocity = this.swimmingVelocity + num25 * a;
 						}
 					}
 				}
@@ -972,11 +972,11 @@ namespace GorillaLocomotion
 			{
 				GTPlayer.HoverBoardCast hoverBoardCast = this.hoverboardCasts[i];
 				RaycastHit raycastHit;
-				hoverBoardCast.didHit = Physics.SphereCast(new Ray(this.hoverboardVisual.transform.TransformPoint(hoverBoardCast.localOrigin), this.hoverboardVisual.transform.rotation * hoverBoardCast.localDirection), hoverBoardCast.sphereRadius, ref raycastHit, hoverBoardCast.distance, this.locomotionEnabledLayers);
+				hoverBoardCast.didHit = Physics.SphereCast(new Ray(this.hoverboardVisual.transform.TransformPoint(hoverBoardCast.localOrigin), this.hoverboardVisual.transform.rotation * hoverBoardCast.localDirection), hoverBoardCast.sphereRadius, out raycastHit, hoverBoardCast.distance, this.locomotionEnabledLayers);
 				if (hoverBoardCast.didHit)
 				{
 					HoverboardCantHover hoverboardCantHover;
-					if (raycastHit.collider.TryGetComponent<HoverboardCantHover>(ref hoverboardCantHover))
+					if (raycastHit.collider.TryGetComponent<HoverboardCantHover>(out hoverboardCantHover))
 					{
 						hoverBoardCast.didHit = false;
 					}
@@ -1005,19 +1005,19 @@ namespace GorillaLocomotion
 				velocity += Vector3.up * this.hoverGeneralUpwardForce * Time.fixedDeltaTime;
 			}
 			Vector3 position = this.hoverboardVisual.transform.position;
-			Vector3 vector = position + velocity * Time.fixedDeltaTime;
-			Vector3 vector2 = this.hoverboardVisual.transform.forward;
-			Vector3 vector3 = this.hoverboardCasts[0].didHit ? this.hoverboardCasts[0].normalHit : Vector3.up;
+			Vector3 a = position + velocity * Time.fixedDeltaTime;
+			Vector3 vector = this.hoverboardVisual.transform.forward;
+			Vector3 vector2 = this.hoverboardCasts[0].didHit ? this.hoverboardCasts[0].normalHit : Vector3.up;
 			bool flag = false;
 			for (int i = 0; i < this.hoverboardCasts.Length; i++)
 			{
 				GTPlayer.HoverBoardCast hoverBoardCast = this.hoverboardCasts[i];
 				if (hoverBoardCast.didHit)
 				{
-					Vector3 vector4 = position + Vector3.Project(hoverBoardCast.pointHit - position, vector2);
-					Vector3 vector5 = vector + Vector3.Project(hoverBoardCast.pointHit - position, vector2);
-					bool flag2 = hoverBoardCast.isSolid || Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - vector5) + this.hoverIdealHeight > 0f;
-					float num = hoverBoardCast.isSolid ? (Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - this.hoverboardVisual.transform.TransformPoint(hoverBoardCast.localOrigin + hoverBoardCast.localDirection * hoverBoardCast.distance)) + hoverBoardCast.sphereRadius) : (Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - vector4) + this.hoverIdealHeight);
+					Vector3 b = position + Vector3.Project(hoverBoardCast.pointHit - position, vector);
+					Vector3 b2 = a + Vector3.Project(hoverBoardCast.pointHit - position, vector);
+					bool flag2 = hoverBoardCast.isSolid || Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - b2) + this.hoverIdealHeight > 0f;
+					float d = hoverBoardCast.isSolid ? (Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - this.hoverboardVisual.transform.TransformPoint(hoverBoardCast.localOrigin + hoverBoardCast.localDirection * hoverBoardCast.distance)) + hoverBoardCast.sphereRadius) : (Vector3.Dot(hoverBoardCast.normalHit, hoverBoardCast.pointHit - b) + this.hoverIdealHeight);
 					if (flag2)
 					{
 						flag = true;
@@ -1026,62 +1026,62 @@ namespace GorillaLocomotion
 						{
 							velocity = Vector3.ProjectOnPlane(velocity, hoverBoardCast.normalHit);
 						}
-						this.playerRigidBody.transform.position += hoverBoardCast.normalHit * num;
-						Vector3 vector6 = this.turnParent.transform.rotation * (this.hoverboardVisual.IsLeftHanded ? this.leftHand.velocityTracker : this.rightHand.velocityTracker).GetAverageVelocity(false, 0.15f, false);
-						if (Vector3.Dot(vector6, hoverBoardCast.normalHit) < 0f)
+						this.playerRigidBody.transform.position += hoverBoardCast.normalHit * d;
+						Vector3 vector3 = this.turnParent.transform.rotation * (this.hoverboardVisual.IsLeftHanded ? this.leftHand.velocityTracker : this.rightHand.velocityTracker).GetAverageVelocity(false, 0.15f, false);
+						if (Vector3.Dot(vector3, hoverBoardCast.normalHit) < 0f)
 						{
-							velocity -= Vector3.Project(vector6, hoverBoardCast.normalHit) * this.hoverSlamJumpStrengthFactor * Time.fixedDeltaTime;
+							velocity -= Vector3.Project(vector3, hoverBoardCast.normalHit) * this.hoverSlamJumpStrengthFactor * Time.fixedDeltaTime;
 						}
-						vector = position + velocity * Time.fixedDeltaTime;
+						a = position + velocity * Time.fixedDeltaTime;
 					}
 				}
 			}
-			float num2 = Mathf.Abs(Mathf.DeltaAngle(0f, Mathf.Acos(Vector3.Dot(this.hoverboardVisual.transform.up, Vector3.ProjectOnPlane(vector3, vector2).normalized)) * 57.29578f));
-			float num3 = this.hoverCarveAngleResponsiveness.Evaluate(num2);
-			vector2 = (vector2 + Vector3.ProjectOnPlane(this.hoverboardVisual.transform.up, vector3) * this.hoverTiltAdjustsForwardFactor).normalized;
+			float time = Mathf.Abs(Mathf.DeltaAngle(0f, Mathf.Acos(Vector3.Dot(this.hoverboardVisual.transform.up, Vector3.ProjectOnPlane(vector2, vector).normalized)) * 57.29578f));
+			float num = this.hoverCarveAngleResponsiveness.Evaluate(time);
+			vector = (vector + Vector3.ProjectOnPlane(this.hoverboardVisual.transform.up, vector2) * this.hoverTiltAdjustsForwardFactor).normalized;
 			if (!flag)
 			{
 				this.didHoverLastFrame = false;
-				num3 = 0f;
+				num = 0f;
 			}
-			Vector3 vector7 = velocity;
+			Vector3 b3 = velocity;
 			if (this.enableHoverMode && this.hasHoverPoint)
 			{
-				Vector3 vector8 = Vector3.ProjectOnPlane(velocity, vector3);
-				Vector3 vector9 = velocity - vector8;
-				Vector3 vector10 = Vector3.Project(vector8, vector2);
-				float num4 = vector8.magnitude;
-				if (num4 <= this.hoveringSlowSpeed)
+				Vector3 vector4 = Vector3.ProjectOnPlane(velocity, vector2);
+				Vector3 b4 = velocity - vector4;
+				Vector3 vector5 = Vector3.Project(vector4, vector);
+				float num2 = vector4.magnitude;
+				if (num2 <= this.hoveringSlowSpeed)
 				{
-					num4 *= this.hoveringSlowStoppingFactor;
+					num2 *= this.hoveringSlowStoppingFactor;
 				}
-				Vector3 vector11 = vector8 - vector10;
-				float num5 = 0f;
+				Vector3 vector6 = vector4 - vector5;
+				float num3 = 0f;
 				bool flag3 = false;
-				if (num3 > 0f)
+				if (num > 0f)
 				{
-					if (vector11.IsLongerThan(vector10))
+					if (vector6.IsLongerThan(vector5))
 					{
-						num5 = Mathf.Min((vector11.magnitude - vector10.magnitude) * this.hoverCarveSidewaysSpeedLossFactor * num3, num4);
-						if (num5 > 0f && num4 > this.hoverMinGrindSpeed)
+						num3 = Mathf.Min((vector6.magnitude - vector5.magnitude) * this.hoverCarveSidewaysSpeedLossFactor * num, num2);
+						if (num3 > 0f && num2 > this.hoverMinGrindSpeed)
 						{
 							flag3 = true;
 							this.hoverboardVisual.PlayGrindHaptic();
 						}
-						num4 -= num5;
+						num2 -= num3;
 					}
-					vector11 *= 1f - num3 * this.sidewaysDrag;
+					vector6 *= 1f - num * this.sidewaysDrag;
 					if (!this.leftHand.isColliding && !this.rightHand.isColliding)
 					{
-						velocity = (vector10 + vector11).normalized * num4 + vector9;
+						velocity = (vector5 + vector6).normalized * num2 + b4;
 					}
 				}
 				else
 				{
-					velocity = vector8.normalized * num4 + vector9;
+					velocity = vector4.normalized * num2 + b4;
 				}
-				float magnitude = (velocity - vector7).magnitude;
-				this.hoverboardAudio.UpdateAudioLoop(velocity.magnitude, this.bodyVelocityTracker.GetAverageVelocity(true, 0.15f, false).magnitude, magnitude, flag3 ? num5 : 0f);
+				float magnitude = (velocity - b3).magnitude;
+				this.hoverboardAudio.UpdateAudioLoop(velocity.magnitude, this.bodyVelocityTracker.GetAverageVelocity(true, 0.15f, false).magnitude, magnitude, flag3 ? num3 : 0f);
 				if (magnitude > 0f && !flag3)
 				{
 					this.hoverboardVisual.PlayCarveHaptic(magnitude);
@@ -1153,7 +1153,7 @@ namespace GorillaLocomotion
 				{
 					this.bodyCollider.radius = this.bodyMaxRadius / this.scale;
 				}
-				if (Physics.SphereCast(this.PositionWithOffset(this.headCollider.transform, this.bodyOffset), this.bodyMaxRadius, Vector3.down, ref this.bodyHitInfo, this.bodyInitialHeight * this.scale - this.bodyMaxRadius, this.locomotionEnabledLayers, 1))
+				if (Physics.SphereCast(this.PositionWithOffset(this.headCollider.transform, this.bodyOffset), this.bodyMaxRadius, Vector3.down, out this.bodyHitInfo, this.bodyInitialHeight * this.scale - this.bodyMaxRadius, this.locomotionEnabledLayers, QueryTriggerInteraction.Ignore))
 				{
 					this.bodyCollider.height = (this.bodyHitInfo.distance + this.bodyMaxRadius) / this.scale;
 				}
@@ -1196,8 +1196,8 @@ namespace GorillaLocomotion
 		private static Vector3 ScalePointAwayFromCenter(Vector3 point, float baseRadius, float oldScale, float newScale, Vector3 scaleCenter)
 		{
 			float magnitude = (point - scaleCenter).magnitude;
-			float num = magnitude + Mathf.Epsilon + baseRadius * (newScale - oldScale);
-			return scaleCenter + (point - scaleCenter) * num / magnitude;
+			float d = magnitude + Mathf.Epsilon + baseRadius * (newScale - oldScale);
+			return scaleCenter + (point - scaleCenter) * d / magnitude;
 		}
 
 		private void OnBeforeRenderInit()
@@ -1208,16 +1208,16 @@ namespace GorillaLocomotion
 				base.transform.position -= this.mainCamera.transform.localPosition;
 				this.hasCorrectedForTracking = true;
 			}
-			Application.onBeforeRender -= new UnityAction(this.OnBeforeRenderInit);
+			Application.onBeforeRender -= this.OnBeforeRenderInit;
 		}
 
 		private void LateUpdate()
 		{
-			Vector3 vector = this.antiDriftLastPosition.GetValueOrDefault();
+			Vector3 value = this.antiDriftLastPosition.GetValueOrDefault();
 			if (this.antiDriftLastPosition == null)
 			{
-				vector = base.transform.position;
-				this.antiDriftLastPosition = new Vector3?(vector);
+				value = base.transform.position;
+				this.antiDriftLastPosition = new Vector3?(value);
 			}
 			if ((double)(this.antiDriftLastPosition.Value - base.transform.position).sqrMagnitude < 1E-08)
 			{
@@ -1231,7 +1231,7 @@ namespace GorillaLocomotion
 			{
 				base.transform.position -= this.mainCamera.transform.localPosition;
 				this.hasCorrectedForTracking = true;
-				Application.onBeforeRender -= new UnityAction(this.OnBeforeRenderInit);
+				Application.onBeforeRender -= this.OnBeforeRenderInit;
 			}
 			if (this.playerRigidBody.isKinematic)
 			{
@@ -1273,20 +1273,20 @@ namespace GorillaLocomotion
 					this.calcDeltaTime = 0.05f;
 				}
 			}
-			Vector3 vector2;
-			if (this.lastFrameHasValidTouchPos && this.lastPlatformTouched != null && GTPlayer.ComputeWorldHitPoint(this.lastHitInfoHand, this.lastFrameTouchPosLocal, out vector2))
+			Vector3 a;
+			if (this.lastFrameHasValidTouchPos && this.lastPlatformTouched != null && GTPlayer.ComputeWorldHitPoint(this.lastHitInfoHand, this.lastFrameTouchPosLocal, out a))
 			{
-				this.refMovement = vector2 - this.lastFrameTouchPosWorld;
+				this.refMovement = a - this.lastFrameTouchPosWorld;
 			}
 			else
 			{
 				this.refMovement = Vector3.zero;
 			}
-			Vector3 vector3 = Vector3.zero;
+			Vector3 vector = Vector3.zero;
 			Quaternion quaternion = Quaternion.identity;
 			Vector3 pivot = this.headCollider.transform.position;
-			Vector3 vector4;
-			if (this.lastMovingSurfaceContact != GTPlayer.MovingSurfaceContactPoint.NONE && GTPlayer.ComputeWorldHitPoint(this.lastMovingSurfaceHit, this.lastMovingSurfaceTouchLocal, out vector4))
+			Vector3 vector2;
+			if (this.lastMovingSurfaceContact != GTPlayer.MovingSurfaceContactPoint.NONE && GTPlayer.ComputeWorldHitPoint(this.lastMovingSurfaceHit, this.lastMovingSurfaceTouchLocal, out vector2))
 			{
 				if (this.wasMovingSurfaceMonkeBlock && (this.lastMonkeBlock == null || this.lastMonkeBlock.state != BuilderPiece.State.AttachedAndPlaced))
 				{
@@ -1294,10 +1294,10 @@ namespace GorillaLocomotion
 				}
 				else
 				{
-					this.movingSurfaceOffset = vector4 - this.lastMovingSurfaceTouchWorld;
-					vector3 = this.movingSurfaceOffset / this.calcDeltaTime;
+					this.movingSurfaceOffset = vector2 - this.lastMovingSurfaceTouchWorld;
+					vector = this.movingSurfaceOffset / this.calcDeltaTime;
 					quaternion = this.lastMovingSurfaceHit.collider.transform.rotation * Quaternion.Inverse(this.lastMovingSurfaceRot);
-					pivot = vector4;
+					pivot = vector2;
 				}
 			}
 			else
@@ -1305,10 +1305,10 @@ namespace GorillaLocomotion
 				this.movingSurfaceOffset = Vector3.zero;
 			}
 			float num = 40f * this.scale;
-			if (vector3.sqrMagnitude >= num * num)
+			if (vector.sqrMagnitude >= num * num)
 			{
 				this.movingSurfaceOffset = Vector3.zero;
-				vector3 = Vector3.zero;
+				vector = Vector3.zero;
 				quaternion = Quaternion.identity;
 			}
 			if (!this.didAJump && (this.leftHand.wasColliding || this.rightHand.wasColliding))
@@ -1326,54 +1326,54 @@ namespace GorillaLocomotion
 			}
 			float paddleBoostFactor = (Time.time > this.boostEnabledUntilTimestamp) ? 0f : (Time.deltaTime * Mathf.Clamp(this.playerRigidBody.linearVelocity.magnitude * this.hoverboardPaddleBoostMultiplier, 0f, this.hoverboardPaddleBoostMax));
 			int num2 = 0;
-			Vector3 vector5 = Vector3.zero;
+			Vector3 vector3 = Vector3.zero;
 			this.anyHandIsColliding = false;
 			this.anyHandIsSliding = false;
 			this.anyHandIsSticking = false;
-			this.leftHand.FirstIteration(ref vector5, ref num2, paddleBoostFactor);
-			this.rightHand.FirstIteration(ref vector5, ref num2, paddleBoostFactor);
+			this.leftHand.FirstIteration(ref vector3, ref num2, paddleBoostFactor);
+			this.rightHand.FirstIteration(ref vector3, ref num2, paddleBoostFactor);
 			for (int i = 0; i < 12; i++)
 			{
 				if (this.stiltStates[i].isActive)
 				{
-					this.stiltStates[i].FirstIteration(ref vector5, ref num2, 0f);
+					this.stiltStates[i].FirstIteration(ref vector3, ref num2, 0f);
 				}
 			}
 			if (num2 != 0)
 			{
-				vector5 /= (float)num2;
+				vector3 /= (float)num2;
 			}
 			if (this.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.RIGHT || this.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.LEFT)
 			{
-				vector5 += this.movingSurfaceOffset;
+				vector3 += this.movingSurfaceOffset;
 			}
 			else if (this.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.BODY)
 			{
-				Vector3 vector6 = this.lastHeadPosition + this.movingSurfaceOffset - this.headCollider.transform.position;
-				vector5 += vector6;
+				Vector3 b = this.lastHeadPosition + this.movingSurfaceOffset - this.headCollider.transform.position;
+				vector3 += b;
 			}
 			if (!this.MaxSphereSizeForNoOverlap(this.headCollider.radius * 0.9f * this.scale, this.lastHeadPosition, true, out this.maxSphereSize1) && !this.CrazyCheck2(this.headCollider.radius * 0.9f * 0.75f * this.scale, this.lastHeadPosition))
 			{
 				this.lastHeadPosition = this.lastOpenHeadPosition;
 			}
-			Vector3 vector7;
+			Vector3 a2;
 			float num3;
-			if (this.IterativeCollisionSphereCast(this.lastHeadPosition, this.headCollider.radius * 0.9f * this.scale, this.headCollider.transform.position + vector5 - this.lastHeadPosition, Vector3.zero, out vector7, false, out num3, out this.junkHit, true))
+			if (this.IterativeCollisionSphereCast(this.lastHeadPosition, this.headCollider.radius * 0.9f * this.scale, this.headCollider.transform.position + vector3 - this.lastHeadPosition, Vector3.zero, out a2, false, out num3, out this.junkHit, true))
 			{
-				vector5 = vector7 - this.headCollider.transform.position;
+				vector3 = a2 - this.headCollider.transform.position;
 			}
-			if (!this.MaxSphereSizeForNoOverlap(this.headCollider.radius * 0.9f * this.scale, this.lastHeadPosition + vector5, true, out this.maxSphereSize1) || !this.CrazyCheck2(this.headCollider.radius * 0.9f * 0.75f * this.scale, this.lastHeadPosition + vector5))
+			if (!this.MaxSphereSizeForNoOverlap(this.headCollider.radius * 0.9f * this.scale, this.lastHeadPosition + vector3, true, out this.maxSphereSize1) || !this.CrazyCheck2(this.headCollider.radius * 0.9f * 0.75f * this.scale, this.lastHeadPosition + vector3))
 			{
 				this.lastHeadPosition = this.lastOpenHeadPosition;
-				vector5 = this.lastHeadPosition - this.headCollider.transform.position;
+				vector3 = this.lastHeadPosition - this.headCollider.transform.position;
 			}
 			else if (this.headCollider.radius * 0.9f * 0.825f * this.scale < this.maxSphereSize1)
 			{
-				this.lastOpenHeadPosition = this.headCollider.transform.position + vector5;
+				this.lastOpenHeadPosition = this.headCollider.transform.position + vector3;
 			}
-			if (vector5 != Vector3.zero)
+			if (vector3 != Vector3.zero)
 			{
-				base.transform.position += vector5;
+				base.transform.position += vector3;
 			}
 			if (this.lastMovingSurfaceContact != GTPlayer.MovingSurfaceContactPoint.NONE && quaternion != Quaternion.identity && !this.isClimbing && !this.rightHand.isHolding && !this.leftHand.isHolding)
 			{
@@ -1397,7 +1397,7 @@ namespace GorillaLocomotion
 					GorillaTagger.Instance.SetExtraHandPosition((StiltID)j, handState.finalPositionThisFrame, handState.canTag, handState.canStun);
 				}
 			}
-			Vector3 vector8 = this.lastPosition;
+			Vector3 b2 = this.lastPosition;
 			GTPlayer.MovingSurfaceContactPoint movingSurfaceContactPoint = GTPlayer.MovingSurfaceContactPoint.NONE;
 			int num4 = -1;
 			int num5 = -1;
@@ -1435,11 +1435,11 @@ namespace GorillaLocomotion
 			this.StoreVelocities();
 			if (this.InWater)
 			{
-				PlayerGameEvents.PlayerSwam((this.lastPosition - vector8).magnitude, this.currentVelocity.magnitude);
+				PlayerGameEvents.PlayerSwam((this.lastPosition - b2).magnitude, this.currentVelocity.magnitude);
 			}
 			else
 			{
-				PlayerGameEvents.PlayerMoved((this.lastPosition - vector8).magnitude, this.currentVelocity.magnitude);
+				PlayerGameEvents.PlayerMoved((this.lastPosition - b2).magnitude, this.currentVelocity.magnitude);
 			}
 			this.didAJump = false;
 			bool flag6 = this.exitMovingSurface;
@@ -1547,12 +1547,12 @@ namespace GorillaLocomotion
 				{
 					float num8 = (this.InWater && this.CurrentWaterVolume != null) ? this.liquidPropertiesList[(int)this.CurrentWaterVolume.LiquidType].surfaceJumpFactor : 1f;
 					float num9 = this.ApplyNativeScaleAdjustment(this.enableHoverMode ? Mathf.Min(this.hoverMaxPaddleSpeed, this.averagedVelocity.magnitude) : Mathf.Min(this.maxJumpSpeed * this.ExtraVelMaxMultiplier(), this.jumpMultiplier * this.ExtraVelMultiplier() * num8 * this.averagedVelocity.magnitude));
-					Vector3 vector9 = num9 * this.averagedVelocity.normalized;
+					Vector3 vector4 = num9 * this.averagedVelocity.normalized;
 					this.didAJump = true;
-					this.playerRigidBody.linearVelocity = vector9;
+					this.playerRigidBody.linearVelocity = vector4;
 					if (this.InWater)
 					{
-						this.swimmingVelocity += vector9 * this.swimmingParams.underwaterJumpsAsSwimVelocityFactor;
+						this.swimmingVelocity += vector4 * this.swimmingParams.underwaterJumpsAsSwimVelocityFactor;
 					}
 					if (num9 > this.velocityLimit * this.scale * this.exitMovingSurfaceThreshold)
 					{
@@ -1585,62 +1585,62 @@ namespace GorillaLocomotion
 			{
 				this.hasHoverPoint = false;
 			}
-			Vector3 vector10 = Vector3.zero;
-			float num10 = 0f;
-			float num11 = 0f;
+			Vector3 vector5 = Vector3.zero;
+			float a3 = 0f;
+			float a4 = 0f;
 			if (this.bodyInWater)
 			{
-				Vector3 vector11;
-				if (this.GetSwimmingVelocityForHand(this.leftHand.lastPosition, this.leftHand.finalPositionThisFrame, this.leftHand.controllerTransform.right, this.calcDeltaTime, ref this.leftHandWaterVolume, ref this.leftHandWaterSurface, out vector11) && !this.turnedThisFrame)
+				Vector3 b3;
+				if (this.GetSwimmingVelocityForHand(this.leftHand.lastPosition, this.leftHand.finalPositionThisFrame, this.leftHand.controllerTransform.right, this.calcDeltaTime, ref this.leftHandWaterVolume, ref this.leftHandWaterSurface, out b3) && !this.turnedThisFrame)
 				{
-					num10 = Mathf.InverseLerp(0f, 0.2f, vector11.magnitude) * this.swimmingParams.swimmingHapticsStrength;
-					vector10 += vector11;
+					a3 = Mathf.InverseLerp(0f, 0.2f, b3.magnitude) * this.swimmingParams.swimmingHapticsStrength;
+					vector5 += b3;
 				}
-				Vector3 vector12;
-				if (this.GetSwimmingVelocityForHand(this.rightHand.lastPosition, this.rightHand.finalPositionThisFrame, -this.rightHand.controllerTransform.right, this.calcDeltaTime, ref this.rightHandWaterVolume, ref this.rightHandWaterSurface, out vector12) && !this.turnedThisFrame)
+				Vector3 b4;
+				if (this.GetSwimmingVelocityForHand(this.rightHand.lastPosition, this.rightHand.finalPositionThisFrame, -this.rightHand.controllerTransform.right, this.calcDeltaTime, ref this.rightHandWaterVolume, ref this.rightHandWaterSurface, out b4) && !this.turnedThisFrame)
 				{
-					num11 = Mathf.InverseLerp(0f, 0.15f, vector12.magnitude) * this.swimmingParams.swimmingHapticsStrength;
-					vector10 += vector12;
+					a4 = Mathf.InverseLerp(0f, 0.15f, b4.magnitude) * this.swimmingParams.swimmingHapticsStrength;
+					vector5 += b4;
 				}
 			}
-			Vector3 vector13 = Vector3.zero;
-			Vector3 vector14;
-			if (this.swimmingParams.allowWaterSurfaceJumps && time - this.lastWaterSurfaceJumpTimeLeft > this.waterSurfaceJumpCooldown && this.CheckWaterSurfaceJump(this.leftHand.lastPosition, this.leftHand.finalPositionThisFrame, this.leftHand.controllerTransform.right, this.leftHand.velocityTracker.GetAverageVelocity(false, 0.1f, false) * this.scale, this.swimmingParams, this.leftHandWaterVolume, this.leftHandWaterSurface, out vector14))
+			Vector3 vector6 = Vector3.zero;
+			Vector3 b5;
+			if (this.swimmingParams.allowWaterSurfaceJumps && time - this.lastWaterSurfaceJumpTimeLeft > this.waterSurfaceJumpCooldown && this.CheckWaterSurfaceJump(this.leftHand.lastPosition, this.leftHand.finalPositionThisFrame, this.leftHand.controllerTransform.right, this.leftHand.velocityTracker.GetAverageVelocity(false, 0.1f, false) * this.scale, this.swimmingParams, this.leftHandWaterVolume, this.leftHandWaterSurface, out b5))
 			{
 				if (time - this.lastWaterSurfaceJumpTimeRight > this.waterSurfaceJumpCooldown)
 				{
-					vector13 += vector14;
+					vector6 += b5;
 				}
 				this.lastWaterSurfaceJumpTimeLeft = Time.time;
 				GorillaTagger.Instance.StartVibration(true, GorillaTagger.Instance.tapHapticStrength, GorillaTagger.Instance.tapHapticDuration);
 			}
-			Vector3 vector15;
-			if (this.swimmingParams.allowWaterSurfaceJumps && time - this.lastWaterSurfaceJumpTimeRight > this.waterSurfaceJumpCooldown && this.CheckWaterSurfaceJump(this.rightHand.lastPosition, this.rightHand.finalPositionThisFrame, -this.rightHand.controllerTransform.right, this.rightHand.velocityTracker.GetAverageVelocity(false, 0.1f, false) * this.scale, this.swimmingParams, this.rightHandWaterVolume, this.rightHandWaterSurface, out vector15))
+			Vector3 b6;
+			if (this.swimmingParams.allowWaterSurfaceJumps && time - this.lastWaterSurfaceJumpTimeRight > this.waterSurfaceJumpCooldown && this.CheckWaterSurfaceJump(this.rightHand.lastPosition, this.rightHand.finalPositionThisFrame, -this.rightHand.controllerTransform.right, this.rightHand.velocityTracker.GetAverageVelocity(false, 0.1f, false) * this.scale, this.swimmingParams, this.rightHandWaterVolume, this.rightHandWaterSurface, out b6))
 			{
 				if (time - this.lastWaterSurfaceJumpTimeLeft > this.waterSurfaceJumpCooldown)
 				{
-					vector13 += vector15;
+					vector6 += b6;
 				}
 				this.lastWaterSurfaceJumpTimeRight = Time.time;
 				GorillaTagger.Instance.StartVibration(false, GorillaTagger.Instance.tapHapticStrength, GorillaTagger.Instance.tapHapticDuration);
 			}
-			vector13 = Vector3.ClampMagnitude(vector13, this.swimmingParams.waterSurfaceJumpMaxSpeed * this.scale);
-			float num12 = Mathf.Max(num10, this.leftHandNonDiveHapticsAmount);
-			if (num12 > 0.001f && time - this.lastWaterSurfaceJumpTimeLeft > GorillaTagger.Instance.tapHapticDuration)
+			vector6 = Vector3.ClampMagnitude(vector6, this.swimmingParams.waterSurfaceJumpMaxSpeed * this.scale);
+			float num10 = Mathf.Max(a3, this.leftHandNonDiveHapticsAmount);
+			if (num10 > 0.001f && time - this.lastWaterSurfaceJumpTimeLeft > GorillaTagger.Instance.tapHapticDuration)
 			{
-				GorillaTagger.Instance.DoVibration(4, num12, this.calcDeltaTime);
+				GorillaTagger.Instance.DoVibration(XRNode.LeftHand, num10, this.calcDeltaTime);
 			}
-			float num13 = Mathf.Max(num11, this.rightHandNonDiveHapticsAmount);
-			if (num13 > 0.001f && time - this.lastWaterSurfaceJumpTimeRight > GorillaTagger.Instance.tapHapticDuration)
+			float num11 = Mathf.Max(a4, this.rightHandNonDiveHapticsAmount);
+			if (num11 > 0.001f && time - this.lastWaterSurfaceJumpTimeRight > GorillaTagger.Instance.tapHapticDuration)
 			{
-				GorillaTagger.Instance.DoVibration(5, num13, this.calcDeltaTime);
+				GorillaTagger.Instance.DoVibration(XRNode.RightHand, num11, this.calcDeltaTime);
 			}
 			if (!this.disableMovement)
 			{
-				this.swimmingVelocity += vector10;
+				this.swimmingVelocity += vector5;
 				if (!this.playerRigidBody.isKinematic)
 				{
-					this.playerRigidBody.linearVelocity += vector10 + vector13;
+					this.playerRigidBody.linearVelocity += vector5 + vector6;
 				}
 			}
 			else
@@ -1658,7 +1658,7 @@ namespace GorillaLocomotion
 						foreach (KeyValuePair<GameObject, PhysicsMaterial> keyValuePair in this.bodyTouchedSurfaces)
 						{
 							MeshCollider meshCollider;
-							if (keyValuePair.Key.TryGetComponent<MeshCollider>(ref meshCollider))
+							if (keyValuePair.Key.TryGetComponent<MeshCollider>(out meshCollider))
 							{
 								meshCollider.material = keyValuePair.Value;
 							}
@@ -1668,17 +1668,17 @@ namespace GorillaLocomotion
 				}
 				else if (this.BodyOnGround && this.primaryButtonPressed)
 				{
-					float num14 = this.bodyInitialHeight / 2f - this.bodyInitialRadius;
+					float y = this.bodyInitialHeight / 2f - this.bodyInitialRadius;
 					RaycastHit raycastHit;
-					if (Physics.SphereCast(this.bodyCollider.transform.position - new Vector3(0f, num14, 0f), this.bodyInitialRadius - 0.01f, Vector3.down, ref raycastHit, 1f, ~LayerMask.GetMask(new string[]
+					if (Physics.SphereCast(this.bodyCollider.transform.position - new Vector3(0f, y, 0f), this.bodyInitialRadius - 0.01f, Vector3.down, out raycastHit, 1f, ~LayerMask.GetMask(new string[]
 					{
 						"Gorilla Body Collider",
 						"GorillaInteractable"
-					}), 1))
+					}), QueryTriggerInteraction.Ignore))
 					{
 						this.IsBodySliding = true;
 						MeshCollider meshCollider2;
-						if (!this.bodyTouchedSurfaces.ContainsKey(raycastHit.transform.gameObject) && raycastHit.transform.gameObject.TryGetComponent<MeshCollider>(ref meshCollider2))
+						if (!this.bodyTouchedSurfaces.ContainsKey(raycastHit.transform.gameObject) && raycastHit.transform.gameObject.TryGetComponent<MeshCollider>(out meshCollider2))
 						{
 							this.bodyTouchedSurfaces.Add(raycastHit.transform.gameObject, meshCollider2.material);
 							raycastHit.transform.gameObject.GetComponent<MeshCollider>().material = this.slipperyMaterial;
@@ -1699,7 +1699,7 @@ namespace GorillaLocomotion
 					foreach (KeyValuePair<GameObject, PhysicsMaterial> keyValuePair2 in this.bodyTouchedSurfaces)
 					{
 						MeshCollider meshCollider3;
-						if (keyValuePair2.Key.TryGetComponent<MeshCollider>(ref meshCollider3))
+						if (keyValuePair2.Key.TryGetComponent<MeshCollider>(out meshCollider3))
 						{
 							meshCollider3.material = keyValuePair2.Value;
 						}
@@ -1745,12 +1745,12 @@ namespace GorillaLocomotion
 			this.degreesTurnedThisFrame = 0f;
 			this.lastPlatformTouched = this.currentPlatform;
 			this.currentPlatform = null;
-			this.lastMovingSurfaceVelocity = vector3;
-			Vector3 vector16;
-			if (GTPlayer.ComputeLocalHitPoint(this.lastHitInfoHand, out vector16))
+			this.lastMovingSurfaceVelocity = vector;
+			Vector3 vector7;
+			if (GTPlayer.ComputeLocalHitPoint(this.lastHitInfoHand, out vector7))
 			{
 				this.lastFrameHasValidTouchPos = true;
-				this.lastFrameTouchPosLocal = vector16;
+				this.lastFrameTouchPosLocal = vector7;
 				this.lastFrameTouchPosWorld = this.lastHitInfoHand.point;
 			}
 			else
@@ -1771,8 +1771,8 @@ namespace GorillaLocomotion
 			{
 				bool flag8 = false;
 				this.ClearRaycasthitBuffer(ref this.rayCastNonAllocColliders);
-				Vector3 vector17 = this.PositionWithOffset(this.headCollider.transform, this.bodyOffset) + (this.bodyInitialHeight * this.scale - this.bodyMaxRadius) * Vector3.down;
-				this.bufferCount = Physics.SphereCastNonAlloc(vector17, this.bodyMaxRadius, Vector3.down, this.rayCastNonAllocColliders, this.minimumRaycastDistance * this.scale, this.locomotionEnabledLayers.value);
+				Vector3 origin = this.PositionWithOffset(this.headCollider.transform, this.bodyOffset) + (this.bodyInitialHeight * this.scale - this.bodyMaxRadius) * Vector3.down;
+				this.bufferCount = Physics.SphereCastNonAlloc(origin, this.bodyMaxRadius, Vector3.down, this.rayCastNonAllocColliders, this.minimumRaycastDistance * this.scale, this.locomotionEnabledLayers.value);
 				if (this.bufferCount > 0)
 				{
 					this.tempHitInfo = this.rayCastNonAllocColliders[0];
@@ -1787,18 +1787,18 @@ namespace GorillaLocomotion
 				}
 				this.wasBodyOnGround = flag8;
 			}
-			int num15 = -1;
+			int num12 = -1;
 			bool flag9 = false;
 			bool flag10;
-			if (this.wasBodyOnGround && movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.NONE && this.IsTouchingMovingSurface(this.PositionWithOffset(this.headCollider.transform, this.bodyOffset), raycastHit2, out num15, out flag10, out flag9) && !flag10)
+			if (this.wasBodyOnGround && movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.NONE && this.IsTouchingMovingSurface(this.PositionWithOffset(this.headCollider.transform, this.bodyOffset), raycastHit2, out num12, out flag10, out flag9) && !flag10)
 			{
 				movingSurfaceContactPoint = GTPlayer.MovingSurfaceContactPoint.BODY;
 				this.lastMovingSurfaceHit = raycastHit2;
 			}
-			Vector3 vector18;
-			if (movingSurfaceContactPoint != GTPlayer.MovingSurfaceContactPoint.NONE && GTPlayer.ComputeLocalHitPoint(this.lastMovingSurfaceHit, out vector18))
+			Vector3 vector8;
+			if (movingSurfaceContactPoint != GTPlayer.MovingSurfaceContactPoint.NONE && GTPlayer.ComputeLocalHitPoint(this.lastMovingSurfaceHit, out vector8))
 			{
-				this.lastMovingSurfaceTouchLocal = vector18;
+				this.lastMovingSurfaceTouchLocal = vector8;
 				this.lastMovingSurfaceTouchWorld = this.lastMovingSurfaceHit.point;
 				this.lastMovingSurfaceRot = this.lastMovingSurfaceHit.collider.transform.rotation;
 				this.lastAttachedToMovingSurfaceFrame = Time.frameCount;
@@ -1811,7 +1811,7 @@ namespace GorillaLocomotion
 				this.lastMovingSurfaceRot = Quaternion.identity;
 			}
 			Vector3 position2 = this.lastMovingSurfaceTouchWorld;
-			int num16 = -1;
+			int num13 = -1;
 			bool flag11 = false;
 			switch (movingSurfaceContactPoint)
 			{
@@ -1820,20 +1820,20 @@ namespace GorillaLocomotion
 				{
 					this.exitMovingSurface = true;
 				}
-				num16 = -1;
+				num13 = -1;
 				break;
 			case GTPlayer.MovingSurfaceContactPoint.RIGHT:
-				num16 = num4;
+				num13 = num4;
 				flag11 = flag2;
 				position2 = GorillaTagger.Instance.offlineVRRig.rightHandTransform.position;
 				break;
 			case GTPlayer.MovingSurfaceContactPoint.LEFT:
-				num16 = num5;
+				num13 = num5;
 				flag11 = flag3;
 				position2 = GorillaTagger.Instance.offlineVRRig.leftHandTransform.position;
 				break;
 			case GTPlayer.MovingSurfaceContactPoint.BODY:
-				num16 = num15;
+				num13 = num12;
 				flag11 = flag9;
 				position2 = GorillaTagger.Instance.offlineVRRig.bodyTransform.position;
 				break;
@@ -1842,9 +1842,9 @@ namespace GorillaLocomotion
 			{
 				this.lastMonkeBlock = null;
 			}
-			if (num16 != this.lastMovingSurfaceID || this.lastMovingSurfaceContact != movingSurfaceContactPoint || flag11 != this.wasMovingSurfaceMonkeBlock)
+			if (num13 != this.lastMovingSurfaceID || this.lastMovingSurfaceContact != movingSurfaceContactPoint || flag11 != this.wasMovingSurfaceMonkeBlock)
 			{
-				if (num16 == -1)
+				if (num13 == -1)
 				{
 					if (Time.frameCount - this.lastAttachedToMovingSurfaceFrame > 3)
 					{
@@ -1856,8 +1856,8 @@ namespace GorillaLocomotion
 				{
 					if (this.lastMonkeBlock != null)
 					{
-						VRRig.AttachLocalPlayerToMovingSurface(num16, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.LEFT, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.BODY, this.lastMonkeBlock.transform.InverseTransformPoint(position2), flag11);
-						this.lastMovingSurfaceID = num16;
+						VRRig.AttachLocalPlayerToMovingSurface(num13, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.LEFT, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.BODY, this.lastMonkeBlock.transform.InverseTransformPoint(position2), flag11);
+						this.lastMovingSurfaceID = num13;
 					}
 					else
 					{
@@ -1868,10 +1868,10 @@ namespace GorillaLocomotion
 				else if (MovingSurfaceManager.instance != null)
 				{
 					MovingSurface movingSurface;
-					if (MovingSurfaceManager.instance.TryGetMovingSurface(num16, out movingSurface))
+					if (MovingSurfaceManager.instance.TryGetMovingSurface(num13, out movingSurface))
 					{
-						VRRig.AttachLocalPlayerToMovingSurface(num16, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.LEFT, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.BODY, movingSurface.transform.InverseTransformPoint(position2), flag11);
-						this.lastMovingSurfaceID = num16;
+						VRRig.AttachLocalPlayerToMovingSurface(num13, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.LEFT, movingSurfaceContactPoint == GTPlayer.MovingSurfaceContactPoint.BODY, movingSurface.transform.InverseTransformPoint(position2), flag11);
+						this.lastMovingSurfaceID = num13;
 					}
 					else
 					{
@@ -2016,17 +2016,17 @@ namespace GorillaLocomotion
 
 		public void HandleTentacleMovement()
 		{
-			Vector3 vector;
+			Vector3 b;
 			if (this.hasLeftHandTentacleMove)
 			{
 				if (this.hasRightHandTentacleMove)
 				{
-					vector = (this.leftHandTentacleMove + this.rightHandTentacleMove) * 0.5f;
+					b = (this.leftHandTentacleMove + this.rightHandTentacleMove) * 0.5f;
 					this.hasRightHandTentacleMove = (this.hasLeftHandTentacleMove = false);
 				}
 				else
 				{
-					vector = this.leftHandTentacleMove;
+					b = this.leftHandTentacleMove;
 					this.hasLeftHandTentacleMove = false;
 				}
 			}
@@ -2036,10 +2036,10 @@ namespace GorillaLocomotion
 				{
 					return;
 				}
-				vector = this.rightHandTentacleMove;
+				b = this.rightHandTentacleMove;
 				this.hasRightHandTentacleMove = false;
 			}
-			this.playerRigidBody.transform.position += vector;
+			this.playerRigidBody.transform.position += b;
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
@@ -2203,16 +2203,16 @@ namespace GorillaLocomotion
 
 		private void HandLink_PositionTriple(HandLink linkA, HandLink linkB)
 		{
-			Vector3 vector = linkA.transform.position - linkA.grabbedLink.transform.position;
-			Vector3 vector2 = linkB.transform.position - linkB.grabbedLink.transform.position;
-			Vector3 vector3 = (vector + vector2) * 0.33f;
+			Vector3 a = linkA.transform.position - linkA.grabbedLink.transform.position;
+			Vector3 vector = linkB.transform.position - linkB.grabbedLink.transform.position;
+			Vector3 b = (a + vector) * 0.33f;
 			bool flag;
 			bool flag2;
-			linkA.grabbedLink.myRig.TrySweptOffsetMove(vector - vector3, out flag, out flag2);
+			linkA.grabbedLink.myRig.TrySweptOffsetMove(a - b, out flag, out flag2);
 			bool flag3;
 			bool flag4;
-			linkB.grabbedLink.myRig.TrySweptOffsetMove(vector2 - vector3, out flag3, out flag4);
-			this.playerRigidBody.MovePosition(this.playerRigidBody.position - vector3);
+			linkB.grabbedLink.myRig.TrySweptOffsetMove(vector - b, out flag3, out flag4);
+			this.playerRigidBody.MovePosition(this.playerRigidBody.position - b);
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
@@ -2235,35 +2235,35 @@ namespace GorillaLocomotion
 
 		private void HandLink_PositionBoth_BothHands(HandLink link1, HandLink link2)
 		{
-			Vector3 vector = (link1.grabbedLink.transform.position - link1.transform.position) * 0.5f;
-			Vector3 vector2 = (link2.grabbedLink.transform.position - link2.transform.position) * 0.5f;
-			Vector3 vector3 = (vector + vector2) * 0.5f;
+			Vector3 a = (link1.grabbedLink.transform.position - link1.transform.position) * 0.5f;
+			Vector3 b = (link2.grabbedLink.transform.position - link2.transform.position) * 0.5f;
+			Vector3 vector = (a + b) * 0.5f;
 			bool flag;
 			bool flag2;
-			link1.grabbedLink.myRig.TrySweptOffsetMove(-vector3, out flag, out flag2);
+			link1.grabbedLink.myRig.TrySweptOffsetMove(-vector, out flag, out flag2);
 			if (flag || flag2)
 			{
 				this.HandLink_PositionChild_LocalPlayer(link1, link2);
 			}
 			else
 			{
-				this.playerRigidBody.transform.position += vector3;
+				this.playerRigidBody.transform.position += vector;
 			}
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
 		private void HandLink_PositionChild_LocalPlayer(HandLink parentLink)
 		{
-			Vector3 vector = parentLink.grabbedLink.transform.position - parentLink.transform.position;
-			this.playerRigidBody.transform.position += vector;
+			Vector3 b = parentLink.grabbedLink.transform.position - parentLink.transform.position;
+			this.playerRigidBody.transform.position += b;
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
 		private void HandLink_PositionChild_LocalPlayer(HandLink linkA, HandLink linkB)
 		{
-			Vector3 vector = linkA.grabbedLink.transform.position - linkA.transform.position;
-			Vector3 vector2 = linkB.grabbedLink.transform.position - linkB.transform.position;
-			this.playerRigidBody.transform.position += (vector + vector2) * 0.5f;
+			Vector3 a = linkA.grabbedLink.transform.position - linkA.transform.position;
+			Vector3 b = linkB.grabbedLink.transform.position - linkB.transform.position;
+			this.playerRigidBody.transform.position += (a + b) * 0.5f;
 			this.playerRigidBody.linearVelocity = Vector3.zero;
 		}
 
@@ -2281,9 +2281,9 @@ namespace GorillaLocomotion
 
 		private void HandLink_PositionChild_RemotePlayer_BothHands(HandLink childLink1, HandLink childLink2)
 		{
-			Vector3 vector = childLink1.transform.position - childLink1.grabbedLink.transform.position;
-			Vector3 vector2 = childLink2.transform.position - childLink2.grabbedLink.transform.position;
-			Vector3 movement = (vector + vector2) * 0.5f;
+			Vector3 a = childLink1.transform.position - childLink1.grabbedLink.transform.position;
+			Vector3 b = childLink2.transform.position - childLink2.grabbedLink.transform.position;
+			Vector3 movement = (a + b) * 0.5f;
 			bool flag;
 			bool flag2;
 			childLink1.grabbedLink.myRig.TrySweptOffsetMove(movement, out flag, out flag2);
@@ -2356,7 +2356,7 @@ namespace GorillaLocomotion
 				collisionsHitInfo = this.tempHitInfo;
 				finalPosition = collisionsHitInfo.point + collisionsHitInfo.normal * sphereRadius;
 				this.ClearRaycasthitBuffer(ref this.rayCastNonAllocColliders);
-				this.bufferCount = Physics.RaycastNonAlloc(startPosition, (finalPosition - startPosition).normalized, this.rayCastNonAllocColliders, (finalPosition - startPosition).magnitude, this.locomotionEnabledLayers.value, 1);
+				this.bufferCount = Physics.RaycastNonAlloc(startPosition, (finalPosition - startPosition).normalized, this.rayCastNonAllocColliders, (finalPosition - startPosition).magnitude, this.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
 				if (this.bufferCount > 0)
 				{
 					this.tempHitInfo = this.rayCastNonAllocColliders[0];
@@ -2445,7 +2445,7 @@ namespace GorillaLocomotion
 					return this.defaultSlideFactor;
 				}
 				this.collidedMesh = this.meshCollider.sharedMesh;
-				if (!this.meshTrianglesDict.TryGetValue(this.collidedMesh, ref this.sharedMeshTris))
+				if (!this.meshTrianglesDict.TryGetValue(this.collidedMesh, out this.sharedMeshTris))
 				{
 					this.sharedMeshTris = this.collidedMesh.triangles;
 					this.meshTrianglesDict.Add(this.collidedMesh, (int[])this.sharedMeshTris.Clone());
@@ -2582,15 +2582,15 @@ namespace GorillaLocomotion
 				Action<GorillaHandClimber, GorillaClimbableRef> onBeforeClimb = climbable.onBeforeClimb;
 				if (onBeforeClimb != null)
 				{
-					onBeforeClimb.Invoke(hand, climbableRef);
+					onBeforeClimb(hand, climbableRef);
 				}
 			}
-			catch (Exception ex)
+			catch (Exception message)
 			{
-				Debug.LogError(ex);
+				Debug.LogError(message);
 			}
 			Rigidbody rigidbody;
-			climbable.TryGetComponent<Rigidbody>(ref rigidbody);
+			climbable.TryGetComponent<Rigidbody>(out rigidbody);
 			this.VerifyClimbHelper();
 			this.climbHelper.SetParent(climbable.transform);
 			this.climbHelper.position = hand.transform.position;
@@ -2634,27 +2634,27 @@ namespace GorillaLocomotion
 			GorillaZipline gorillaZipline;
 			PhotonView view;
 			PhotonViewXSceneRef photonViewXSceneRef;
-			if (climbable.TryGetComponent<GorillaRopeSegment>(ref gorillaRopeSegment) && gorillaRopeSegment.swing)
+			if (climbable.TryGetComponent<GorillaRopeSegment>(out gorillaRopeSegment) && gorillaRopeSegment.swing)
 			{
 				this.currentSwing = gorillaRopeSegment.swing;
 				this.currentSwing.AttachLocalPlayer(hand.xrNode, climbable.transform, this.climbHelperTargetPos, this.averagedVelocity);
 			}
-			else if (climbable.transform.parent && climbable.transform.parent.TryGetComponent<GorillaZipline>(ref gorillaZipline))
+			else if (climbable.transform.parent && climbable.transform.parent.TryGetComponent<GorillaZipline>(out gorillaZipline))
 			{
 				this.currentZipline = gorillaZipline;
 			}
-			else if (climbable.TryGetComponent<PhotonView>(ref view))
+			else if (climbable.TryGetComponent<PhotonView>(out view))
 			{
 				VRRig.AttachLocalPlayerToPhotonView(view, hand.xrNode, this.climbHelperTargetPos, this.averagedVelocity);
 			}
-			else if (climbable.TryGetComponent<PhotonViewXSceneRef>(ref photonViewXSceneRef))
+			else if (climbable.TryGetComponent<PhotonViewXSceneRef>(out photonViewXSceneRef))
 			{
 				VRRig.AttachLocalPlayerToPhotonView(photonViewXSceneRef.photonView, hand.xrNode, this.climbHelperTargetPos, this.averagedVelocity);
 			}
-			GorillaTagger.Instance.StartVibration(this.currentClimber.xrNode == 4, 0.6f, 0.06f);
+			GorillaTagger.Instance.StartVibration(this.currentClimber.xrNode == XRNode.LeftHand, 0.6f, 0.06f);
 			if (climbable.clip)
 			{
-				GorillaTagger.Instance.offlineVRRig.PlayClimbSound(climbable.clip, hand.xrNode == 4);
+				GorillaTagger.Instance.offlineVRRig.PlayClimbSound(climbable.clip, hand.xrNode == XRNode.LeftHand);
 			}
 		}
 
@@ -2680,7 +2680,7 @@ namespace GorillaLocomotion
 			Rigidbody rigidbody = null;
 			if (this.currentClimbable)
 			{
-				this.currentClimbable.TryGetComponent<Rigidbody>(ref rigidbody);
+				this.currentClimbable.TryGetComponent<Rigidbody>(out rigidbody);
 				this.currentClimbable.isBeingClimbed = false;
 			}
 			Vector3 vector = Vector3.zero;
@@ -2699,7 +2699,7 @@ namespace GorillaLocomotion
 				this.currentClimber.lastAutoReleasePos = this.currentClimber.handRoot.localPosition;
 				if (!startingNewClimb && this.currentClimbable)
 				{
-					GorillaVelocityTracker interactPointVelocityTracker = this.GetInteractPointVelocityTracker(this.currentClimber.xrNode == 4);
+					GorillaVelocityTracker interactPointVelocityTracker = this.GetInteractPointVelocityTracker(this.currentClimber.xrNode == XRNode.LeftHand);
 					if (rigidbody)
 					{
 						this.playerRigidBody.linearVelocity = rigidbody.linearVelocity;
@@ -2718,7 +2718,7 @@ namespace GorillaLocomotion
 					}
 					vector = this.turnParent.transform.rotation * -interactPointVelocityTracker.GetAverageVelocity(false, 0.1f, true) * this.scale;
 					vector = Vector3.ClampMagnitude(vector, 5.5f * this.scale);
-					this.playerRigidBody.AddForce(vector, 2);
+					this.playerRigidBody.AddForce(vector, ForceMode.VelocityChange);
 				}
 			}
 			if (this.currentSwing)
@@ -2727,13 +2727,13 @@ namespace GorillaLocomotion
 			}
 			PhotonView photonView;
 			PhotonViewXSceneRef photonViewXSceneRef;
-			if (this.currentClimbable.TryGetComponent<PhotonView>(ref photonView) || this.currentClimbable.TryGetComponent<PhotonViewXSceneRef>(ref photonViewXSceneRef) || this.currentClimbable.IsPlayerAttached)
+			if (this.currentClimbable.TryGetComponent<PhotonView>(out photonView) || this.currentClimbable.TryGetComponent<PhotonViewXSceneRef>(out photonViewXSceneRef) || this.currentClimbable.IsPlayerAttached)
 			{
 				VRRig.DetachLocalPlayerFromPhotonView();
 			}
 			if (!startingNewClimb && vector.magnitude > 2f && this.currentClimbable && this.currentClimbable.clipOnFullRelease)
 			{
-				GorillaTagger.Instance.offlineVRRig.PlayClimbSound(this.currentClimbable.clipOnFullRelease, hand.xrNode == 4);
+				GorillaTagger.Instance.offlineVRRig.PlayClimbSound(this.currentClimbable.clipOnFullRelease, hand.xrNode == XRNode.LeftHand);
 			}
 			this.currentClimbable = null;
 			this.currentClimber = null;
@@ -2805,7 +2805,7 @@ namespace GorillaLocomotion
 			while (this.overlapAttempts < num && overlapRadiusTest > testRadius * 0.75f)
 			{
 				this.ClearColliderBuffer(ref this.overlapColliders);
-				this.bufferCount = Physics.OverlapSphereNonAlloc(checkPosition, overlapRadiusTest, this.overlapColliders, this.locomotionEnabledLayers.value, 1);
+				this.bufferCount = Physics.OverlapSphereNonAlloc(checkPosition, overlapRadiusTest, this.overlapColliders, this.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
 				if (ignoreOneWay)
 				{
 					int num2 = 0;
@@ -2846,8 +2846,8 @@ namespace GorillaLocomotion
 
 		private int NonAllocRaycast(Vector3 startPosition, Vector3 endPosition)
 		{
-			Vector3 vector = endPosition - startPosition;
-			int num = Physics.RaycastNonAlloc(startPosition, vector, this.rayCastNonAllocColliders, vector.magnitude, this.locomotionEnabledLayers.value, 1);
+			Vector3 direction = endPosition - startPosition;
+			int num = Physics.RaycastNonAlloc(startPosition, direction, this.rayCastNonAllocColliders, direction.magnitude, this.locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore);
 			int num2 = 0;
 			for (int i = 0; i < num; i++)
 			{
@@ -2998,7 +2998,7 @@ namespace GorillaLocomotion
 		private bool GetSwimmingVelocityForHand(Vector3 startingHandPosition, Vector3 endingHandPosition, Vector3 palmForwardDirection, float dt, ref WaterVolume contactingWaterVolume, ref WaterVolume.SurfaceQuery waterSurface, out Vector3 swimmingVelocityChange)
 		{
 			contactingWaterVolume = null;
-			this.bufferCount = Physics.OverlapSphereNonAlloc(endingHandPosition, this.minimumRaycastDistance, this.overlapColliders, this.waterLayer.value, 2);
+			this.bufferCount = Physics.OverlapSphereNonAlloc(endingHandPosition, this.minimumRaycastDistance, this.overlapColliders, this.waterLayer.value, QueryTriggerInteraction.Collide);
 			if (this.bufferCount > 0)
 			{
 				float num = float.MinValue;
@@ -3016,15 +3016,15 @@ namespace GorillaLocomotion
 			}
 			if (contactingWaterVolume != null)
 			{
-				Vector3 vector = endingHandPosition - startingHandPosition;
-				Vector3 vector2 = Vector3.zero;
-				Vector3 vector3 = this.playerRigidBody.transform.position - this.lastRigidbodyPosition;
+				Vector3 a = endingHandPosition - startingHandPosition;
+				Vector3 b = Vector3.zero;
+				Vector3 b2 = this.playerRigidBody.transform.position - this.lastRigidbodyPosition;
 				if (this.turnedThisFrame)
 				{
-					Vector3 vector4 = startingHandPosition - this.headCollider.transform.position;
-					vector2 = Quaternion.AngleAxis(this.degreesTurnedThisFrame, Vector3.up) * vector4 - vector4;
+					Vector3 vector = startingHandPosition - this.headCollider.transform.position;
+					b = Quaternion.AngleAxis(this.degreesTurnedThisFrame, Vector3.up) * vector - vector;
 				}
-				float num2 = Vector3.Dot(vector - vector2 - vector3, palmForwardDirection);
+				float num2 = Vector3.Dot(a - b - b2, palmForwardDirection);
 				float num3 = 0f;
 				if (num2 > 0f)
 				{
@@ -3050,14 +3050,14 @@ namespace GorillaLocomotion
 						Vector3 forward = this.mainCamera.transform.forward;
 						if (forward.y < 0f)
 						{
-							Vector3 vector5 = forward.x0z();
-							float magnitude = vector5.magnitude;
-							vector5 /= magnitude;
-							float num4 = Vector3.Dot(swimmingVelocityChange, vector5);
+							Vector3 vector2 = forward.x0z();
+							float magnitude = vector2.magnitude;
+							vector2 /= magnitude;
+							float num4 = Vector3.Dot(swimmingVelocityChange, vector2);
 							if (num4 > 0f)
 							{
-								Vector3 vector6 = vector5 * num4;
-								swimmingVelocityChange = swimmingVelocityChange - vector6 + vector6 * magnitude + Vector3.up * forward.y * num4;
+								Vector3 vector3 = vector2 * num4;
+								swimmingVelocityChange = swimmingVelocityChange - vector3 + vector3 * magnitude + Vector3.up * forward.y * num4;
 							}
 						}
 						return true;
@@ -3076,11 +3076,11 @@ namespace GorillaLocomotion
 				bool flag = handAvgVelocity.sqrMagnitude > parameters.waterSurfaceJumpHandSpeedThreshold * parameters.waterSurfaceJumpHandSpeedThreshold;
 				if (surfacePlane.GetSide(startingHandPosition) && !surfacePlane.GetSide(endingHandPosition) && flag)
 				{
-					float num = Vector3.Dot(palmForwardDirection, -waterSurface.surfaceNormal);
-					float num2 = Vector3.Dot(handAvgVelocity.normalized, -waterSurface.surfaceNormal);
-					float num3 = parameters.waterSurfaceJumpPalmFacingCurve.Evaluate(Mathf.Clamp(num, 0.01f, 0.99f));
-					float num4 = parameters.waterSurfaceJumpHandVelocityFacingCurve.Evaluate(Mathf.Clamp(num2, 0.01f, 0.99f));
-					jumpVelocity = -handAvgVelocity * parameters.waterSurfaceJumpAmount * num3 * num4;
+					float value = Vector3.Dot(palmForwardDirection, -waterSurface.surfaceNormal);
+					float value2 = Vector3.Dot(handAvgVelocity.normalized, -waterSurface.surfaceNormal);
+					float d = parameters.waterSurfaceJumpPalmFacingCurve.Evaluate(Mathf.Clamp(value, 0.01f, 0.99f));
+					float d2 = parameters.waterSurfaceJumpHandVelocityFacingCurve.Evaluate(Mathf.Clamp(value2, 0.01f, 0.99f));
+					jumpVelocity = -handAvgVelocity * parameters.waterSurfaceJumpAmount * d * d2;
 					return true;
 				}
 			}
@@ -3126,7 +3126,7 @@ namespace GorillaLocomotion
 			return this.freezeTagHandSlidePercent;
 		}
 
-		private void OnCollisionStay(Collision collision)
+		private void OnCollisionStay(UnityEngine.Collision collision)
 		{
 			this.bodyCollisionContactsCount = collision.GetContacts(this.bodyCollisionContacts);
 			float num = -1f;
@@ -3194,7 +3194,7 @@ namespace GorillaLocomotion
 			if (!this.leftHand.isHolding && !this.rightHand.isHolding)
 			{
 				grabbedVelocity = -this.bodyCollider.attachedRigidbody.linearVelocity;
-				this.playerRigidBody.AddForce(grabbedVelocity, 2);
+				this.playerRigidBody.AddForce(grabbedVelocity, ForceMode.VelocityChange);
 			}
 			else
 			{
@@ -3245,13 +3245,13 @@ namespace GorillaLocomotion
 			if (this.activeHandHold.objectHeld != null)
 			{
 				PhotonView view;
-				if (this.activeHandHold.objectHeld.TryGetComponent<PhotonView>(ref view))
+				if (this.activeHandHold.objectHeld.TryGetComponent<PhotonView>(out view))
 				{
 					VRRig.AttachLocalPlayerToPhotonView(view, this.activeHandHold.grabber.XrNode, this.activeHandHold.localPositionHeld, this.averagedVelocity);
 					return;
 				}
 				PhotonViewXSceneRef photonViewXSceneRef;
-				if (this.activeHandHold.objectHeld.TryGetComponent<PhotonViewXSceneRef>(ref photonViewXSceneRef))
+				if (this.activeHandHold.objectHeld.TryGetComponent<PhotonViewXSceneRef>(out photonViewXSceneRef))
 				{
 					PhotonView photonView = photonViewXSceneRef.photonView;
 					if (photonView != null)
@@ -3261,7 +3261,7 @@ namespace GorillaLocomotion
 					}
 				}
 				BuilderPieceHandHold builderPieceHandHold;
-				if (this.activeHandHold.objectHeld.TryGetComponent<BuilderPieceHandHold>(ref builderPieceHandHold) && builderPieceHandHold.IsHandHoldMoving())
+				if (this.activeHandHold.objectHeld.TryGetComponent<BuilderPieceHandHold>(out builderPieceHandHold) && builderPieceHandHold.IsHandHoldMoving())
 				{
 					this.isHandHoldMoving = true;
 					this.lastHandHoldRotation = builderPieceHandHold.transform.rotation;
@@ -3930,21 +3930,21 @@ namespace GorillaLocomotion
 				}
 				Vector3 vector = this.GetCurrentHandPosition() + this.gtPlayer.movingSurfaceOffset;
 				Vector3 vector2 = this.GetLastPosition();
-				Vector3 vector3 = vector - vector2;
+				Vector3 a = vector - vector2;
 				bool flag = this.gtPlayer.lastMovingSurfaceContact == GTPlayer.MovingSurfaceContactPoint.LEFT;
 				if (!this.gtPlayer.didAJump && this.wasSliding && Vector3.Dot(this.gtPlayer.slideAverageNormal, Vector3.up) > 0f)
 				{
-					vector3 += Vector3.Project(-this.gtPlayer.slideAverageNormal * this.gtPlayer.stickDepth * this.gtPlayer.scale, Vector3.down);
+					a += Vector3.Project(-this.gtPlayer.slideAverageNormal * this.gtPlayer.stickDepth * this.gtPlayer.scale, Vector3.down);
 				}
 				float num = this.gtPlayer.minimumRaycastDistance * this.gtPlayer.scale;
 				if (this.gtPlayer.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
 				{
 					num = (this.gtPlayer.minimumRaycastDistance + VRRig.LocalRig.iceCubeRight.transform.localScale.y / 2f) * this.gtPlayer.scale;
 				}
-				Vector3 vector4 = Vector3.zero;
+				Vector3 vector3 = Vector3.zero;
 				if (flag && !this.gtPlayer.exitMovingSurface)
 				{
-					vector4 = Vector3.Project(-this.gtPlayer.lastMovingSurfaceHit.normal * (this.gtPlayer.stickDepth * this.gtPlayer.scale), Vector3.down);
+					vector3 = Vector3.Project(-this.gtPlayer.lastMovingSurfaceHit.normal * (this.gtPlayer.stickDepth * this.gtPlayer.scale), Vector3.down);
 					if (this.gtPlayer.scale < 0.5f)
 					{
 						Vector3 normalized = this.gtPlayer.MovingSurfaceMovement().normalized;
@@ -3953,24 +3953,24 @@ namespace GorillaLocomotion
 							float num2 = Vector3.Dot(Vector3.up, normalized);
 							if ((double)num2 > 0.9 || (double)num2 < -0.9)
 							{
-								vector4 *= 6f;
+								vector3 *= 6f;
 								num *= 1.1f;
 							}
 						}
 					}
 				}
-				Vector3 vector5;
+				Vector3 a2;
 				RaycastHit lastHitInfoHand;
-				Vector3 vector6;
-				if (this.gtPlayer.IterativeCollisionSphereCast(vector2, num, vector3 + vector4, this.boostVectorThisFrame, out vector5, true, out this.slipPercentage, out lastHitInfoHand, this.SlipOverriddenToMax()) && !this.isHolding && !this.gtPlayer.InReportMenu)
+				Vector3 b;
+				if (this.gtPlayer.IterativeCollisionSphereCast(vector2, num, a + vector3, this.boostVectorThisFrame, out a2, true, out this.slipPercentage, out lastHitInfoHand, this.SlipOverriddenToMax()) && !this.isHolding && !this.gtPlayer.InReportMenu)
 				{
 					if (this.wasColliding && this.slipPercentage <= this.gtPlayer.defaultSlideFactor && !this.boostVectorThisFrame.IsLongerThan(0f))
 					{
-						vector6 = vector2 - vector;
+						b = vector2 - vector;
 					}
 					else
 					{
-						vector6 = vector5 - vector;
+						b = a2 - vector;
 					}
 					this.isSliding = (this.slipPercentage > this.gtPlayer.iceThreshold);
 					this.slideNormal = this.gtPlayer.tempHitInfo.normal;
@@ -3982,7 +3982,7 @@ namespace GorillaLocomotion
 				}
 				else
 				{
-					vector6 = Vector3.zero;
+					b = Vector3.zero;
 					this.slipPercentage = 0f;
 					this.isSliding = false;
 					this.slideNormal = Vector3.up;
@@ -4009,7 +4009,7 @@ namespace GorillaLocomotion
 				{
 					if (!this.surfaceOverride || !this.surfaceOverride.disablePushBackEffect)
 					{
-						totalMove += vector6;
+						totalMove += b;
 					}
 					divisor++;
 				}

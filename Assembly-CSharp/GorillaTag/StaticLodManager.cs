@@ -25,7 +25,7 @@ namespace GorillaTag
 		public static int Register(StaticLodGroup lodGroup)
 		{
 			int count;
-			if (StaticLodManager.freeSlots.TryPop(ref count))
+			if (StaticLodManager.freeSlots.TryPop(out count))
 			{
 				StaticLodManager.groupMonoBehaviours[count] = lodGroup;
 				StaticLodManager.groupInfos[count] = default(StaticLodManager.GroupInfo);
@@ -141,7 +141,7 @@ namespace GorillaTag
 							interactableColliders = array3
 						};
 						int count;
-						if (StaticLodManager.freeSlots.TryPop(ref count))
+						if (StaticLodManager.freeSlots.TryPop(out count))
 						{
 							StaticLodManager.groupMonoBehaviours[count] = lodGroup;
 							StaticLodManager.groupInfos[count] = groupInfo;
@@ -180,7 +180,7 @@ namespace GorillaTag
 				return false;
 			}
 			int groupIndex;
-			if (!StaticLodManager._groupInstId_to_index.TryGetValue(componentInParent.GetInstanceID(), ref groupIndex))
+			if (!StaticLodManager._groupInstId_to_index.TryGetValue(componentInParent.GetInstanceID(), out groupIndex))
 			{
 				return false;
 			}
@@ -199,14 +199,14 @@ namespace GorillaTag
 		{
 			bool flag = false;
 			StaticLodGroup staticLodGroup = StaticLodManager.groupMonoBehaviours[groupIndex];
-			StaticLodManager.GroupInfo groupInfo = StaticLodManager.groupInfos[groupIndex];
+			StaticLodManager.GroupInfo value = StaticLodManager.groupInfos[groupIndex];
 			StaticLodGroupExcluder componentInParent = staticLodGroup.GetComponentInParent<StaticLodGroupExcluder>();
-			bool result = flag | StaticLodManager._TryAddComponentsToGroup<Collider>(staticLodGroup, componentInParent, ref groupInfo, ref groupInfo.interactableColliders, (Collider coll) => coll.gameObject.IsOnLayer(UnityLayer.GorillaInteractable), (Collider coll) => coll.bounds) | StaticLodManager._TryAddComponentsToGroup<Renderer>(staticLodGroup, componentInParent, ref groupInfo, ref groupInfo.renderers, delegate(Renderer rend)
+			bool result = flag | StaticLodManager._TryAddComponentsToGroup<Collider>(staticLodGroup, componentInParent, ref value, ref value.interactableColliders, (Collider coll) => coll.gameObject.IsOnLayer(UnityLayer.GorillaInteractable), (Collider coll) => coll.bounds) | StaticLodManager._TryAddComponentsToGroup<Renderer>(staticLodGroup, componentInParent, ref value, ref value.renderers, delegate(Renderer rend)
 			{
 				int layer = rend.gameObject.layer;
 				return (layer == 5 || layer == 18) && rend.enabled;
-			}, (Renderer rend) => rend.bounds) | StaticLodManager._TryAddComponentsToGroup<Graphic>(staticLodGroup, componentInParent, ref groupInfo, ref groupInfo.uiGraphics, (Graphic _) => true, (Graphic gfx) => new Bounds(gfx.transform.position, Vector3.one * 0.01f));
-			StaticLodManager.groupInfos[groupIndex] = groupInfo;
+			}, (Renderer rend) => rend.bounds) | StaticLodManager._TryAddComponentsToGroup<Graphic>(staticLodGroup, componentInParent, ref value, ref value.uiGraphics, (Graphic _) => true, (Graphic gfx) => new Bounds(gfx.transform.position, Vector3.one * 0.01f));
+			StaticLodManager.groupInfos[groupIndex] = value;
 			return result;
 		}
 
@@ -218,7 +218,7 @@ namespace GorillaTag
 			{
 				for (int i = list.Count - 1; i >= 0; i--)
 				{
-					if (!includeIf.Invoke(list[i]))
+					if (!includeIf(list[i]))
 					{
 						list.RemoveAt(i);
 					}
@@ -282,9 +282,9 @@ namespace GorillaTag
 			{
 				return;
 			}
-			StaticLodManager.GroupInfo groupInfo = StaticLodManager.groupInfos[index];
-			groupInfo.componentEnabled = enable;
-			StaticLodManager.groupInfos[index] = groupInfo;
+			StaticLodManager.GroupInfo value = StaticLodManager.groupInfos[index];
+			value.componentEnabled = enable;
+			StaticLodManager.groupInfos[index] = value;
 		}
 
 		public void SliceUpdate()

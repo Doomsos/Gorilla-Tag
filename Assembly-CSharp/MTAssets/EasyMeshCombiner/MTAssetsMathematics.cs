@@ -13,10 +13,10 @@ namespace MTAssets.EasyMeshCombiner
 			int num = count - 1;
 			for (int i = 0; i < num; i++)
 			{
-				int num2 = Random.Range(i, count);
-				T t = list[i];
-				list[i] = list[num2];
-				list[num2] = t;
+				int index = Random.Range(i, count);
+				T value = list[i];
+				list[i] = list[index];
+				list[index] = value;
 			}
 			return list;
 		}

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 
 [Conditional("UNITY_EDITOR")]
-[AttributeUsage(32767)]
+[AttributeUsage(AttributeTargets.All)]
 public class InlineFoldoutAttribute : Attribute
 {
 }

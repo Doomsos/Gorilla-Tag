@@ -7,7 +7,7 @@ namespace GorillaTag
 	{
 		public static bool isQuitting { get; private set; }
 
-		[RuntimeInitializeOnLoadMethod(4)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 		private static void HandleOnSubsystemRegistration()
 		{
 			GTAppState.isQuitting = false;
@@ -25,7 +25,7 @@ namespace GorillaTag
 			}));
 		}
 
-		[RuntimeInitializeOnLoadMethod(0)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		private static void HandleOnAfterSceneLoad()
 		{
 		}

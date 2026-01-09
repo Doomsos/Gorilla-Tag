@@ -73,7 +73,7 @@ public class GorillaTagManager : GorillaGameManager
 	{
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			if (GameMode.ParticipatingPlayers.Count < 1)
+			if (GorillaGameModes.GameMode.ParticipatingPlayers.Count < 1)
 			{
 				this.isCurrentlyTag = true;
 				this.ClearInfectionState();
@@ -83,32 +83,32 @@ public class GorillaTagManager : GorillaGameManager
 			}
 			if (this.isCurrentlyTag && this.currentIt == null)
 			{
-				int num = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-				this.ChangeCurrentIt(GameMode.ParticipatingPlayers[num], false);
+				int index = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+				this.ChangeCurrentIt(GorillaGameModes.GameMode.ParticipatingPlayers[index], false);
 				return;
 			}
-			if (this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count >= this.infectedModeThreshold)
+			if (this.isCurrentlyTag && GorillaGameModes.GameMode.ParticipatingPlayers.Count >= this.infectedModeThreshold)
 			{
 				this.SetisCurrentlyTag(false);
 				this.ClearInfectionState();
-				int num2 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-				this.AddInfectedPlayer(GameMode.ParticipatingPlayers[num2], true);
-				this.lastInfectedPlayer = GameMode.ParticipatingPlayers[num2];
+				int index2 = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+				this.AddInfectedPlayer(GorillaGameModes.GameMode.ParticipatingPlayers[index2], true);
+				this.lastInfectedPlayer = GorillaGameModes.GameMode.ParticipatingPlayers[index2];
 				return;
 			}
-			if (!this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count < this.infectedModeThreshold)
+			if (!this.isCurrentlyTag && GorillaGameModes.GameMode.ParticipatingPlayers.Count < this.infectedModeThreshold)
 			{
 				this.ClearInfectionState();
 				this.lastInfectedPlayer = null;
 				this.SetisCurrentlyTag(true);
-				int num3 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-				this.ChangeCurrentIt(GameMode.ParticipatingPlayers[num3], false);
+				int index3 = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+				this.ChangeCurrentIt(GorillaGameModes.GameMode.ParticipatingPlayers[index3], false);
 				return;
 			}
 			if (!this.isCurrentlyTag && this.currentInfected.Count == 0)
 			{
-				int num4 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-				this.AddInfectedPlayer(GameMode.ParticipatingPlayers[num4], true);
+				int index4 = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+				this.AddInfectedPlayer(GorillaGameModes.GameMode.ParticipatingPlayers[index4], true);
 				return;
 			}
 			if (!this.isCurrentlyTag)
@@ -145,19 +145,19 @@ public class GorillaTagManager : GorillaGameManager
 	protected virtual void InfectionRoundStart()
 	{
 		this.ClearInfectionState();
-		GameMode.RefreshPlayers();
-		List<NetPlayer> participatingPlayers = GameMode.ParticipatingPlayers;
+		GorillaGameModes.GameMode.RefreshPlayers();
+		List<NetPlayer> participatingPlayers = GorillaGameModes.GameMode.ParticipatingPlayers;
 		if (participatingPlayers.Count > 0)
 		{
-			int num = Random.Range(0, participatingPlayers.Count);
-			int num2 = 0;
-			while (num2 < 10 && participatingPlayers[num] == this.lastInfectedPlayer)
+			int index = Random.Range(0, participatingPlayers.Count);
+			int num = 0;
+			while (num < 10 && participatingPlayers[index] == this.lastInfectedPlayer)
 			{
-				num = Random.Range(0, participatingPlayers.Count);
-				num2++;
+				index = Random.Range(0, participatingPlayers.Count);
+				num++;
 			}
-			this.AddInfectedPlayer(participatingPlayers[num], true);
-			this.lastInfectedPlayer = participatingPlayers[num];
+			this.AddInfectedPlayer(participatingPlayers[index], true);
+			this.lastInfectedPlayer = participatingPlayers[index];
 			this.lastTag = (double)Time.time;
 		}
 	}
@@ -169,9 +169,9 @@ public class GorillaTagManager : GorillaGameManager
 			return;
 		}
 		this.allInfected = true;
-		foreach (NetPlayer netPlayer in GameMode.ParticipatingPlayers)
+		foreach (NetPlayer item in GorillaGameModes.GameMode.ParticipatingPlayers)
 		{
-			if (!this.currentInfected.Contains(netPlayer))
+			if (!this.currentInfected.Contains(item))
 			{
 				this.allInfected = false;
 				break;
@@ -189,7 +189,7 @@ public class GorillaTagManager : GorillaGameManager
 		{
 			return;
 		}
-		foreach (NetPlayer netPlayer in GameMode.ParticipatingPlayers)
+		foreach (NetPlayer netPlayer in GorillaGameModes.GameMode.ParticipatingPlayers)
 		{
 			if (this.currentIt == netPlayer)
 			{
@@ -211,12 +211,12 @@ public class GorillaTagManager : GorillaGameManager
 	{
 		if (NetworkSystem.Instance.IsMasterClient)
 		{
-			foreach (NetPlayer player in GameMode.ParticipatingPlayers)
+			foreach (NetPlayer player in GorillaGameModes.GameMode.ParticipatingPlayers)
 			{
 				RoomSystem.SendSoundEffectToPlayer(2, 0.25f, player, true);
 			}
 			PlayerGameEvents.GameModeCompleteRound();
-			GameMode.BroadcastRoundComplete();
+			GorillaGameModes.GameMode.BroadcastRoundComplete();
 			this.lastTaggedActorNr.Clear();
 			this.waitingToStartNextInfectionGame = true;
 			this.timeInfectedGameEnded = (double)Time.time;
@@ -257,38 +257,38 @@ public class GorillaTagManager : GorillaGameManager
 
 	protected float InterpolatedInfectedJumpMultiplier(int infectedCount)
 	{
-		if (GameMode.ParticipatingPlayers.Count < 2)
+		if (GorillaGameModes.GameMode.ParticipatingPlayers.Count < 2)
 		{
 			return this.fastJumpMultiplier;
 		}
-		return (this.fastJumpMultiplier - this.slowJumpMultiplier) / (float)(GameMode.ParticipatingPlayers.Count - 1) * (float)(GameMode.ParticipatingPlayers.Count - infectedCount) + this.slowJumpMultiplier;
+		return (this.fastJumpMultiplier - this.slowJumpMultiplier) / (float)(GorillaGameModes.GameMode.ParticipatingPlayers.Count - 1) * (float)(GorillaGameModes.GameMode.ParticipatingPlayers.Count - infectedCount) + this.slowJumpMultiplier;
 	}
 
 	protected float InterpolatedInfectedJumpSpeed(int infectedCount)
 	{
-		if (GameMode.ParticipatingPlayers.Count < 2)
+		if (GorillaGameModes.GameMode.ParticipatingPlayers.Count < 2)
 		{
 			return this.fastJumpLimit;
 		}
-		return (this.fastJumpLimit - this.slowJumpLimit) / (float)(GameMode.ParticipatingPlayers.Count - 1) * (float)(GameMode.ParticipatingPlayers.Count - infectedCount) + this.slowJumpLimit;
+		return (this.fastJumpLimit - this.slowJumpLimit) / (float)(GorillaGameModes.GameMode.ParticipatingPlayers.Count - 1) * (float)(GorillaGameModes.GameMode.ParticipatingPlayers.Count - infectedCount) + this.slowJumpLimit;
 	}
 
 	protected float InterpolatedNoobJumpMultiplier(int infectedCount)
 	{
-		if (GameMode.ParticipatingPlayers.Count < 2)
+		if (GorillaGameModes.GameMode.ParticipatingPlayers.Count < 2)
 		{
 			return this.slowJumpMultiplier;
 		}
-		return (this.fastJumpMultiplier - this.slowJumpMultiplier) / (float)(GameMode.ParticipatingPlayers.Count - 1) * (float)(infectedCount - 1) * 0.9f + this.slowJumpMultiplier;
+		return (this.fastJumpMultiplier - this.slowJumpMultiplier) / (float)(GorillaGameModes.GameMode.ParticipatingPlayers.Count - 1) * (float)(infectedCount - 1) * 0.9f + this.slowJumpMultiplier;
 	}
 
 	protected float InterpolatedNoobJumpSpeed(int infectedCount)
 	{
-		if (GameMode.ParticipatingPlayers.Count < 2)
+		if (GorillaGameModes.GameMode.ParticipatingPlayers.Count < 2)
 		{
 			return this.slowJumpLimit;
 		}
-		return (this.fastJumpLimit - this.fastJumpLimit) / (float)(GameMode.ParticipatingPlayers.Count - 1) * (float)(infectedCount - 1) * 0.9f + this.slowJumpLimit;
+		return (this.fastJumpLimit - this.fastJumpLimit) / (float)(GorillaGameModes.GameMode.ParticipatingPlayers.Count - 1) * (float)(infectedCount - 1) * 0.9f + this.slowJumpLimit;
 	}
 
 	public override void ReportTag(NetPlayer taggedPlayer, NetPlayer taggingPlayer)
@@ -310,7 +310,7 @@ public class GorillaTagManager : GorillaGameManager
 					this.ChangeCurrentIt(taggedPlayer, true);
 					this.lastTag = (double)Time.time;
 					this.HandleTagBroadcast(taggedPlayer, taggingPlayer);
-					GameMode.BroadcastTag(taggedPlayer, taggingPlayer);
+					GorillaGameModes.GameMode.BroadcastTag(taggedPlayer, taggingPlayer);
 					return;
 				}
 			}
@@ -322,7 +322,7 @@ public class GorillaTagManager : GorillaGameManager
 					return;
 				}
 				this.HandleTagBroadcast(taggedPlayer, taggingPlayer);
-				GameMode.BroadcastTag(taggedPlayer, taggingPlayer);
+				GorillaGameModes.GameMode.BroadcastTag(taggedPlayer, taggingPlayer);
 				base.AddLastTagged(taggedPlayer, taggingPlayer);
 				this.AddInfectedPlayer(taggedPlayer, true);
 				int count = this.currentInfected.Count;
@@ -401,13 +401,13 @@ public class GorillaTagManager : GorillaGameManager
 			}
 			if (this.isCurrentlyTag && ((otherPlayer != null && otherPlayer == this.currentIt) || this.currentIt.ActorNumber == otherPlayer.ActorNumber))
 			{
-				if (GameMode.ParticipatingPlayers.Count > 0)
+				if (GorillaGameModes.GameMode.ParticipatingPlayers.Count > 0)
 				{
-					int num = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[num], false);
+					int index = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+					this.ChangeCurrentIt(GorillaGameModes.GameMode.ParticipatingPlayers[index], false);
 				}
 			}
-			else if (!this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count >= this.infectedModeThreshold)
+			else if (!this.isCurrentlyTag && GorillaGameModes.GameMode.ParticipatingPlayers.Count >= this.infectedModeThreshold)
 			{
 				this.UpdateInfectionState();
 			}

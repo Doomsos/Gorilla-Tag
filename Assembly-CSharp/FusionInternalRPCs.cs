@@ -10,7 +10,7 @@ public class FusionInternalRPCs : SimulationBehaviour
 		FusionInternalRPCs.netSys = (NetworkSystem.Instance as NetworkSystemFusion);
 	}
 
-	[Rpc(7, 7)]
+	[Rpc(RpcSources.All, RpcTargets.All)]
 	public unsafe static void RPC_SendPlayerSyncProp(NetworkRunner runner, [RpcTarget] PlayerRef player, PlayerRef playerData, string propKey, string propValue)
 	{
 		if (NetworkBehaviourUtils.InvokeRpc)
@@ -23,16 +23,16 @@ public class FusionInternalRPCs : SimulationBehaviour
 			{
 				throw new ArgumentNullException("runner");
 			}
-			if (runner.Stage != 4)
+			if (runner.Stage != SimulationStages.Resimulate)
 			{
 				RpcTargetStatus rpcTargetStatus = runner.GetRpcTargetStatus(player);
-				if (rpcTargetStatus == 0)
+				if (rpcTargetStatus == RpcTargetStatus.Unreachable)
 				{
 					NetworkBehaviourUtils.NotifyRpcTargetUnreachable(player, "System.Void FusionInternalRPCs::RPC_SendPlayerSyncProp(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.PlayerRef,System.String,System.String)");
 				}
 				else
 				{
-					if (rpcTargetStatus == 1)
+					if (rpcTargetStatus == RpcTargetStatus.Self)
 					{
 						goto IL_10;
 					}
@@ -54,9 +54,9 @@ public class FusionInternalRPCs : SimulationBehaviour
 						num2 += 4;
 						num2 = (ReadWriteUtilsForWeaver.WriteStringUtf8NoHash((void*)(ptr2 + num2), propKey) + 3 & -4) + num2;
 						num2 = (ReadWriteUtilsForWeaver.WriteStringUtf8NoHash((void*)(ptr2 + num2), propValue) + 3 & -4) + num2;
-						ptr.Offset = num2 * 8;
-						ptr.SetTarget(player);
-						ptr.SetStatic();
+						ptr->Offset = num2 * 8;
+						ptr->SetTarget(player);
+						ptr->SetStatic();
 						runner.SendRpc(ptr);
 					}
 				}
@@ -74,14 +74,14 @@ public class FusionInternalRPCs : SimulationBehaviour
 	{
 		byte* ptr = (byte*)(message + 28 / sizeof(SimulationMessage));
 		int num = 8;
-		PlayerRef target = message.Target;
+		PlayerRef target = message->Target;
 		PlayerRef playerRef = *(PlayerRef*)(ptr + num);
 		num += 4;
 		PlayerRef playerData = playerRef;
 		string propKey;
-		num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), ref propKey) + 3 & -4) + num;
+		num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), out propKey) + 3 & -4) + num;
 		string propValue;
-		num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), ref propValue) + 3 & -4) + num;
+		num = (ReadWriteUtilsForWeaver.ReadStringUtf8NoHash((void*)(ptr + num), out propValue) + 3 & -4) + num;
 		NetworkBehaviourUtils.InvokeRpc = true;
 		FusionInternalRPCs.RPC_SendPlayerSyncProp(runner, target, playerData, propKey, propValue);
 	}

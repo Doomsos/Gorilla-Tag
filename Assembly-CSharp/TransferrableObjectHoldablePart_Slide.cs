@@ -11,9 +11,9 @@ public class TransferrableObjectHoldablePart_Slide : TransferrableObjectHoldable
 		GTPlayer instance = GTPlayer.Instance;
 		if (!rig.isOfflineVRRig)
 		{
-			Vector3 vector = instance.GetHandOffset(isHeldLeftHand) * rig.scaleFactor;
+			Vector3 b = instance.GetHandOffset(isHeldLeftHand) * rig.scaleFactor;
 			VRMap vrmap = isHeldLeftHand ? rig.leftHand : rig.rightHand;
-			this._snapToLine.target.position = vrmap.GetExtrapolatedControllerPosition() - vector;
+			this._snapToLine.target.position = vrmap.GetExtrapolatedControllerPosition() - b;
 			return;
 		}
 		Transform controllerTransform = instance.GetControllerTransform(num == 0);

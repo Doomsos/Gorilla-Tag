@@ -70,7 +70,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	public void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-		this.player.loopPointReached -= new VideoPlayer.EventHandler(this.Player_loopPointReached);
+		this.player.loopPointReached -= this.Player_loopPointReached;
 		VODTarget.AlertEnabled = (Action<VODTarget>)Delegate.Remove(VODTarget.AlertEnabled, new Action<VODTarget>(this.VODTarget_AlertEnabled));
 		VODTarget.AlertDisabled = (Action<VODTarget>)Delegate.Remove(VODTarget.AlertDisabled, new Action<VODTarget>(this.VODTarget_AlertDisabled));
 	}
@@ -155,8 +155,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		List<VODPlayer.VODNextStream> list = new List<VODPlayer.VODNextStream>();
 		for (int i = 0; i < this.schedule.hourly.Length; i++)
 		{
-			DateTime dateTime;
-			dateTime..ctor(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour, this.schedule.hourly[i].minute, 0);
+			DateTime dateTime = new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, serverTime.Hour, this.schedule.hourly[i].minute, 0);
 			list.Add(new VODPlayer.VODNextStream(this.schedule.hourly[i].stream.name, this.schedule.hourly[i].ClampedDateTime(dateTime)));
 			list.Add(new VODPlayer.VODNextStream(this.schedule.hourly[i].stream.name, this.schedule.hourly[i].ClampedDateTime(dateTime.AddHours(1.0))));
 		}
@@ -205,8 +204,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		DateTime serverTime = GorillaComputer.instance.GetServerTime();
 		int hour = serverTime.Hour;
 		int minute = serverTime.Minute;
-		DateTime dateTime;
-		dateTime..ctor(serverTime.Year, serverTime.Month, serverTime.Day, hour, minute, 0);
+		DateTime dateTime = new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, hour, minute, 0);
 		int num = -1;
 		for (int i = 0; i < this.schedule.hourly.Length; i++)
 		{
@@ -266,7 +264,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		VODPlayer.state = VODPlayer.State.CRASHED;
 		if (VODPlayer.OnCrash != null)
 		{
-			VODPlayer.OnCrash.Invoke();
+			VODPlayer.OnCrash();
 		}
 		for (int i = 0; i < this.targets.Count; i++)
 		{

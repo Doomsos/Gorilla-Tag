@@ -20,7 +20,7 @@ public class MousePositionDrag : MonoBehaviour
 		}
 		Vector3 mousePosition = Input.mousePosition;
 		Vector3 prevMousePosition = this.m_prevMousePosition;
-		Vector3 vector = mousePosition - prevMousePosition;
+		Vector3 a = mousePosition - prevMousePosition;
 		this.m_prevMousePosition = mousePosition;
 		if (!prevFrameHasFocus)
 		{
@@ -28,7 +28,7 @@ public class MousePositionDrag : MonoBehaviour
 		}
 		if (Input.GetMouseButton(0))
 		{
-			base.transform.position += 0.02f * vector;
+			base.transform.position += 0.02f * a;
 		}
 	}
 

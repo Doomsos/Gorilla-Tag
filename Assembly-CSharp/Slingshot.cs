@@ -87,13 +87,13 @@ public class Slingshot : ProjectileWeapon
 			{
 				this.disableInDraw.SetActive(false);
 			}
-			float num2 = this.dummyProjectileInitialScale * num;
-			this.dummyProjectile.transform.localScale = Vector3.one * num2;
+			float d = this.dummyProjectileInitialScale * num;
+			this.dummyProjectile.transform.localScale = Vector3.one * d;
 			Vector3 position = this.drawingHand.transform.position;
 			Vector3 position2 = this.centerOrigin.position;
 			Vector3 normalized = (position2 - position).normalized;
-			float num3 = (EquipmentInteractor.instance.grabRadius - this.dummyProjectileColliderRadius) * num;
-			vector = position + normalized * num3;
+			float d2 = (EquipmentInteractor.instance.grabRadius - this.dummyProjectileColliderRadius) * num;
+			vector = position + normalized * d2;
 			this.dummyProjectile.transform.position = vector;
 			this.dummyProjectile.transform.rotation = Quaternion.LookRotation(position2 - vector, Vector3.up);
 			if (!this.wasStretching)
@@ -300,12 +300,12 @@ public class Slingshot : ProjectileWeapon
 
 	protected override Vector3 GetLaunchVelocity()
 	{
-		float num = Mathf.Abs(base.transform.lossyScale.x);
-		Vector3 vector = this.centerOrigin.position - this.center.position;
-		vector /= num;
-		Vector3 vector2 = Mathf.Min(this.springConstant * this.maxDraw, vector.magnitude * this.springConstant) * vector.normalized * num;
+		float d = Mathf.Abs(base.transform.lossyScale.x);
+		Vector3 a = this.centerOrigin.position - this.center.position;
+		a /= d;
+		Vector3 a2 = Mathf.Min(this.springConstant * this.maxDraw, a.magnitude * this.springConstant) * a.normalized * d;
 		Vector3 averagedVelocity = GTPlayer.Instance.AveragedVelocity;
-		return vector2 + averagedVelocity;
+		return a2 + averagedVelocity;
 	}
 
 	[SerializeField]

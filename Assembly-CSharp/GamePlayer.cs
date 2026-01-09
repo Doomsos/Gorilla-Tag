@@ -142,7 +142,7 @@ public class GamePlayer : MonoBehaviour
 					Action onReleased = gameEntity.OnReleased;
 					if (onReleased != null)
 					{
-						onReleased.Invoke();
+						onReleased();
 					}
 				}
 				this.ClearGrabbed(i);
@@ -155,7 +155,7 @@ public class GamePlayer : MonoBehaviour
 					Action onReleased2 = gameEntity2.OnReleased;
 					if (onReleased2 != null)
 					{
-						onReleased2.Invoke();
+						onReleased2();
 					}
 				}
 				this.ClearSnapped(i);
@@ -232,7 +232,7 @@ public class GamePlayer : MonoBehaviour
 
 	public List<GameEntityId> HeldAndSnappedItems(GameEntityManager manager)
 	{
-		return Enumerable.ToList<GameEntityId>(this.IterateHeldAndSnappedItems(manager));
+		return this.IterateHeldAndSnappedItems(manager).ToList<GameEntityId>();
 	}
 
 	public IEnumerable<GameEntityId> IterateHeldAndSnappedItems(GameEntityManager manager)
@@ -255,7 +255,7 @@ public class GamePlayer : MonoBehaviour
 
 	public List<GameEntity> HeldAndSnappedEntities(GameEntityManager ignoreEntitiesInManager = null)
 	{
-		return Enumerable.ToList<GameEntity>(this.IterateHeldAndSnappedEntities(ignoreEntitiesInManager));
+		return this.IterateHeldAndSnappedEntities(ignoreEntitiesInManager).ToList<GameEntity>();
 	}
 
 	public IEnumerable<GameEntity> IterateHeldAndSnappedEntities(GameEntityManager ignoreEntitiesInManager = null)
@@ -290,7 +290,7 @@ public class GamePlayer : MonoBehaviour
 					Action onReleased = gameEntity.OnReleased;
 					if (onReleased != null)
 					{
-						onReleased.Invoke();
+						onReleased();
 					}
 				}
 				this.hands[handIndex].grabbedEntityManager.DestroyItemLocal(this.hands[handIndex].grabbedEntityId);
@@ -534,16 +534,16 @@ public class GamePlayer : MonoBehaviour
 			{
 				int netIdFromEntityId = manager.GetNetIdFromEntityId(this.hands[i].grabbedEntityId);
 				writer.Write(netIdFromEntityId);
-				long num = 0L;
+				long value = 0L;
 				if (netIdFromEntityId != -1)
 				{
 					GameEntity gameEntity = manager.GetGameEntity(this.hands[i].grabbedEntityId);
 					if (gameEntity != null)
 					{
-						num = BitPackUtils.PackHandPosRotForNetwork(gameEntity.transform.localPosition, gameEntity.transform.localRotation);
+						value = BitPackUtils.PackHandPosRotForNetwork(gameEntity.transform.localPosition, gameEntity.transform.localRotation);
 					}
 				}
-				writer.Write(num);
+				writer.Write(value);
 			}
 			else
 			{
@@ -554,16 +554,16 @@ public class GamePlayer : MonoBehaviour
 			{
 				int netIdFromEntityId2 = manager.GetNetIdFromEntityId(this.hands[i].snappedEntityId);
 				writer.Write(netIdFromEntityId2);
-				long num2 = 0L;
+				long value2 = 0L;
 				if (netIdFromEntityId2 != -1)
 				{
 					GameEntity gameEntity2 = manager.GetGameEntity(this.hands[i].snappedEntityId);
 					if (gameEntity2 != null)
 					{
-						num2 = BitPackUtils.PackHandPosRotForNetwork(gameEntity2.transform.localPosition, gameEntity2.transform.localRotation);
+						value2 = BitPackUtils.PackHandPosRotForNetwork(gameEntity2.transform.localPosition, gameEntity2.transform.localRotation);
 					}
 				}
-				writer.Write(num2);
+				writer.Write(value2);
 			}
 			else
 			{
@@ -644,7 +644,7 @@ public class GamePlayer : MonoBehaviour
 			return;
 		}
 		List<VRRig> list;
-		using (ListPool<VRRig>.Get(ref list))
+		using (ListPool<VRRig>.Get(out list))
 		{
 			if (list.Capacity < 10)
 			{
@@ -653,9 +653,9 @@ public class GamePlayer : MonoBehaviour
 			VRRigCache.Instance.GetActiveRigs(list);
 			if (list.Count > GamePlayer.lookupCache_actorNum_to_gamePlayer.Length)
 			{
-				int num = list.Count * 2;
-				Array.Resize<ValueTuple<int, GamePlayer>>(ref GamePlayer.lookupCache_actorNum_to_gamePlayer, num);
-				Array.Resize<ValueTuple<int, GamePlayer>>(ref GamePlayer.lookupCache_rigInstanceId_to_gamePlayer, num);
+				int newSize = list.Count * 2;
+				Array.Resize<ValueTuple<int, GamePlayer>>(ref GamePlayer.lookupCache_actorNum_to_gamePlayer, newSize);
+				Array.Resize<ValueTuple<int, GamePlayer>>(ref GamePlayer.lookupCache_rigInstanceId_to_gamePlayer, newSize);
 			}
 			GamePlayer.staticLookupCachesCount = list.Count;
 			if (GamePlayer.staticLookupCachesCount >= 1)
@@ -683,8 +683,8 @@ public class GamePlayer : MonoBehaviour
 					throw new NullReferenceException("[GT/GamePlayer::_VRRigCache_OnActiveRigsChanged]  ERROR!!!  (should never happen) Could not get GamePlayer from rig which is expected to be ready at this stage.");
 				}
 				NetPlayer owningNetPlayer = vrrig2.OwningNetPlayer;
-				int num2 = (owningNetPlayer != null) ? owningNetPlayer.ActorNumber : int.MinValue;
-				GamePlayer.lookupCache_actorNum_to_gamePlayer[i] = new ValueTuple<int, GamePlayer>(num2, component);
+				int item = (owningNetPlayer != null) ? owningNetPlayer.ActorNumber : int.MinValue;
+				GamePlayer.lookupCache_actorNum_to_gamePlayer[i] = new ValueTuple<int, GamePlayer>(item, component);
 				GamePlayer.lookupCache_rigInstanceId_to_gamePlayer[i] = new ValueTuple<int, GamePlayer>(vrrig2.GetInstanceID(), component);
 			}
 			for (int j = GamePlayer.staticLookupCachesCount; j < GamePlayer.lookupCache_actorNum_to_gamePlayer.Length; j++)
@@ -706,7 +706,7 @@ public class GamePlayer : MonoBehaviour
 			{
 				return;
 			}
-			onPlayerInitialized.Invoke();
+			onPlayerInitialized();
 		}
 	}
 

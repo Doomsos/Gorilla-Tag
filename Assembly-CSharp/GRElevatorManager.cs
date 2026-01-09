@@ -61,17 +61,17 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 	protected override void Start()
 	{
 		base.Start();
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnLeftRoom);
-		NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(this.OnPlayerAdded);
-		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerRemoved);
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnLeftRoom;
+		NetworkSystem.Instance.OnPlayerJoined += this.OnPlayerAdded;
+		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerRemoved;
 	}
 
 	protected void OnDestroy()
 	{
 		NetworkBehaviourUtils.InternalOnDestroy(this);
-		NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnLeftRoom);
-		NetworkSystem.Instance.OnPlayerJoined -= new Action<NetPlayer>(this.OnPlayerAdded);
-		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(this.OnPlayerRemoved);
+		NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnLeftRoom;
+		NetworkSystem.Instance.OnPlayerJoined -= this.OnPlayerAdded;
+		NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerRemoved;
 	}
 
 	private new void OnEnable()
@@ -172,7 +172,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 	{
 		if (PhotonNetwork.InRoom)
 		{
-			this.photonView.RPC("RemoteActivateTeleport", 0, new object[]
+			this.photonView.RPC("RemoteActivateTeleport", RpcTarget.All, new object[]
 			{
 				(int)this.currentLocation,
 				(int)this.destination,
@@ -230,9 +230,10 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 			if (targetLevel >= 0)
 			{
 				int joinDepthSectionFromLevel = GhostReactor.GetJoinDepthSectionFromLevel(targetLevel);
-				List<ValueTuple<string, string>> list2 = new List<ValueTuple<string, string>>();
-				list2.Add(new ValueTuple<string, string>("ghostReactorDepth", joinDepthSectionFromLevel.ToString()));
-				list = list2;
+				list = new List<ValueTuple<string, string>>
+				{
+					new ValueTuple<string, string>("ghostReactorDepth", joinDepthSectionFromLevel.ToString())
+				};
 				Debug.LogFormat("GR Room Param Join {0} {1}", new object[]
 				{
 					list[0].Item1,
@@ -430,7 +431,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 			GRElevatorManager._instance.ElevatorButtonPressedInternal(type, location);
 			if (!GRElevatorManager._instance.IsMine && NetworkSystem.Instance.InRoom)
 			{
-				GRElevatorManager._instance.photonView.RPC("RemoteElevatorButtonPress", 2, new object[]
+				GRElevatorManager._instance.photonView.RPC("RemoteElevatorButtonPress", RpcTarget.MasterClient, new object[]
 				{
 					(int)type,
 					(int)location
@@ -540,58 +541,58 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		{
 			return;
 		}
-		double num = (double)stream.ReceiveNext();
-		if (!double.IsNaN(num) && !double.IsInfinity(num))
+		double d = (double)stream.ReceiveNext();
+		if (!double.IsNaN(d) && !double.IsInfinity(d))
 		{
-			this.doorsFullyClosedTime = num;
+			this.doorsFullyClosedTime = d;
 		}
-		num = (double)stream.ReceiveNext();
-		if (!double.IsNaN(num) && !double.IsInfinity(num))
+		d = (double)stream.ReceiveNext();
+		if (!double.IsNaN(d) && !double.IsInfinity(d))
 		{
-			this.destinationButtonLastPressedTime = num;
+			this.destinationButtonLastPressedTime = d;
 		}
-		num = (double)stream.ReceiveNext();
-		if (!double.IsNaN(num) && !double.IsInfinity(num))
+		d = (double)stream.ReceiveNext();
+		if (!double.IsNaN(d) && !double.IsInfinity(d))
 		{
-			this.maxDoorClosingTime = num;
+			this.maxDoorClosingTime = d;
 		}
 		GRElevatorManager.ElevatorLocation elevatorLocation = this.currentLocation;
-		int num2 = (int)stream.ReceiveNext();
-		if (num2 >= 0 && num2 <= 4)
+		int num = (int)stream.ReceiveNext();
+		if (num >= 0 && num <= 4)
 		{
-			this.currentLocation = (GRElevatorManager.ElevatorLocation)num2;
+			this.currentLocation = (GRElevatorManager.ElevatorLocation)num;
 		}
 		GRElevatorManager.ElevatorLocation elevatorLocation2 = this.destination;
-		num2 = (int)stream.ReceiveNext();
-		if (num2 >= 0 && num2 <= 4)
+		num = (int)stream.ReceiveNext();
+		if (num >= 0 && num <= 4)
 		{
-			this.destination = (GRElevatorManager.ElevatorLocation)num2;
+			this.destination = (GRElevatorManager.ElevatorLocation)num;
 		}
-		num2 = (int)stream.ReceiveNext();
-		if (num2 >= 0 && num2 < 5)
+		num = (int)stream.ReceiveNext();
+		if (num >= 0 && num < 5)
 		{
-			this.currentState = (GRElevatorManager.ElevatorSystemState)num2;
+			this.currentState = (GRElevatorManager.ElevatorSystemState)num;
 		}
 		this.UpdateUI();
 		for (int i = 0; i < this.allElevators.Count; i++)
 		{
-			num2 = (int)stream.ReceiveNext();
-			if (num2 >= 0 && num2 < 8)
+			num = (int)stream.ReceiveNext();
+			if (num >= 0 && num < 8)
 			{
-				this.allElevators[i].UpdateRemoteState((GRElevator.ElevatorState)num2);
+				this.allElevators[i].UpdateRemoteState((GRElevator.ElevatorState)num);
 			}
 		}
 		for (int j = 0; j < this.allShuttles.Count; j++)
 		{
 			byte b = (byte)stream.ReceiveNext();
-			int num3 = (int)stream.ReceiveNext();
+			int num2 = (int)stream.ReceiveNext();
 			if (b >= 0 && b < 7)
 			{
 				this.allShuttles[j].SetState((GRShuttleState)b, false);
 			}
-			if (this.allShuttles[j].specificDestinationShuttle == null && num3 != -1)
+			if (this.allShuttles[j].specificDestinationShuttle == null && num2 != -1)
 			{
-				NetPlayer owner = NetPlayer.Get(num3);
+				NetPlayer owner = NetPlayer.Get(num2);
 				this.allShuttles[j].SetOwner(owner);
 			}
 		}
@@ -667,24 +668,24 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		float num = grelevator2.transform.rotation.eulerAngles.y - grelevator.transform.rotation.eulerAngles.y;
 		GTPlayer instance = GTPlayer.Instance;
 		VRRig localRig = VRRig.LocalRig;
-		Vector3 vector = localRig.transform.position - instance.transform.position;
-		Vector3 vector2 = instance.headCollider.transform.position - instance.transform.position;
-		Vector3 vector3 = grelevator2.transform.TransformPoint(grelevator.transform.InverseTransformPoint(instance.transform.position));
-		Vector3 vector4 = localRig.transform.position - grelevator.transform.position;
-		vector4.x *= 0.8f;
-		vector4.z *= 0.8f;
-		vector3 = grelevator2.transform.position + (Quaternion.Euler(0f, num, 0f) * vector4 - vector) + localRig.headConstraint.rotation * localRig.head.trackingPositionOffset;
-		Vector3 vector5 = Vector3.zero;
-		Vector3 vector6 = grelevator2.transform.position + (Quaternion.Euler(0f, num, 0f) * vector4 - vector) + vector2 - grelevator2.transform.position;
-		float magnitude = vector6.magnitude;
-		vector6 = vector6.normalized;
-		if (Physics.SphereCastNonAlloc(grelevator2.transform.position, instance.headCollider.radius * 1.5f, vector6, this.correctionRaycastHit, magnitude * 1.05f, this.correctionRaycastMask) > 0)
+		Vector3 b = localRig.transform.position - instance.transform.position;
+		Vector3 b2 = instance.headCollider.transform.position - instance.transform.position;
+		Vector3 a = grelevator2.transform.TransformPoint(grelevator.transform.InverseTransformPoint(instance.transform.position));
+		Vector3 point = localRig.transform.position - grelevator.transform.position;
+		point.x *= 0.8f;
+		point.z *= 0.8f;
+		a = grelevator2.transform.position + (Quaternion.Euler(0f, num, 0f) * point - b) + localRig.headConstraint.rotation * localRig.head.trackingPositionOffset;
+		Vector3 b3 = Vector3.zero;
+		Vector3 vector = grelevator2.transform.position + (Quaternion.Euler(0f, num, 0f) * point - b) + b2 - grelevator2.transform.position;
+		float magnitude = vector.magnitude;
+		vector = vector.normalized;
+		if (Physics.SphereCastNonAlloc(grelevator2.transform.position, instance.headCollider.radius * 1.5f, vector, this.correctionRaycastHit, magnitude * 1.05f, this.correctionRaycastMask) > 0)
 		{
-			vector5 = vector6 * instance.headCollider.radius * -1.5f;
+			b3 = vector * instance.headCollider.radius * -1.5f;
 		}
-		instance.TeleportTo(vector3 + vector5, instance.transform.rotation, false, false);
+		instance.TeleportTo(a + b3, instance.transform.rotation, false, false);
 		instance.turnParent.transform.RotateAround(instance.headCollider.transform.position, base.transform.up, num);
-		localRig.transform.position = instance.transform.position + vector;
+		localRig.transform.position = instance.transform.position + b;
 		instance.InitializeValues();
 		this.justTeleported = true;
 		instance.disableMovement = true;

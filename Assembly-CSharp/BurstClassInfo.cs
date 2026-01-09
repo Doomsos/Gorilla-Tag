@@ -15,7 +15,7 @@ public static class BurstClassInfo
 	{
 		if (!BurstClassInfo.ClassList.InfoFields.Data.IsCreated)
 		{
-			*BurstClassInfo.ClassList.InfoFields.Data = new NativeHashMap<int, BurstClassInfo.ClassInfo>(20, 4);
+			*BurstClassInfo.ClassList.InfoFields.Data = new NativeHashMap<int, BurstClassInfo.ClassInfo>(20, Allocator.Persistent);
 		}
 		BurstClassInfo.ClassList.MetatableNames<T>.Name = className;
 		ReflectionMetaNames.ReflectedNames.TryAdd(typeof(T), className);
@@ -27,43 +27,43 @@ public static class BurstClassInfo
 		}
 		classInfo.Name = className;
 		classInfo.Size = sizeof(T);
-		classInfo.FieldList = new NativeHashMap<int, BurstClassInfo.BurstFieldInfo>(fieldList.Count, 4);
+		classInfo.FieldList = new NativeHashMap<int, BurstClassInfo.BurstFieldInfo>(fieldList.Count, Allocator.Persistent);
 		foreach (KeyValuePair<int, FieldInfo> keyValuePair in fieldList)
 		{
-			BurstClassInfo.BurstFieldInfo burstFieldInfo = default(BurstClassInfo.BurstFieldInfo);
-			burstFieldInfo.NameHash = keyValuePair.Key;
-			burstFieldInfo.Name = keyValuePair.Value.Name;
-			burstFieldInfo.Offset = (int)Marshal.OffsetOf<T>(keyValuePair.Value.Name);
+			BurstClassInfo.BurstFieldInfo item = default(BurstClassInfo.BurstFieldInfo);
+			item.NameHash = keyValuePair.Key;
+			item.Name = keyValuePair.Value.Name;
+			item.Offset = (int)Marshal.OffsetOf<T>(keyValuePair.Value.Name);
 			Type fieldType = keyValuePair.Value.FieldType;
 			if (fieldType == typeof(float))
 			{
-				burstFieldInfo.FieldType = BurstClassInfo.EFieldTypes.Float;
+				item.FieldType = BurstClassInfo.EFieldTypes.Float;
 			}
 			else if (fieldType == typeof(int))
 			{
-				burstFieldInfo.FieldType = BurstClassInfo.EFieldTypes.Int;
+				item.FieldType = BurstClassInfo.EFieldTypes.Int;
 			}
 			else if (fieldType == typeof(double))
 			{
-				burstFieldInfo.FieldType = BurstClassInfo.EFieldTypes.Double;
+				item.FieldType = BurstClassInfo.EFieldTypes.Double;
 			}
 			else if (fieldType == typeof(bool))
 			{
-				burstFieldInfo.FieldType = BurstClassInfo.EFieldTypes.Bool;
+				item.FieldType = BurstClassInfo.EFieldTypes.Bool;
 			}
 			else if (fieldType == typeof(FixedString32Bytes))
 			{
-				burstFieldInfo.FieldType = BurstClassInfo.EFieldTypes.String;
+				item.FieldType = BurstClassInfo.EFieldTypes.String;
 			}
 			else if (!fieldType.IsPrimitive)
 			{
-				burstFieldInfo.FieldType = BurstClassInfo.EFieldTypes.LightUserData;
-				ReflectionMetaNames.ReflectedNames.TryGetValue(fieldType, ref burstFieldInfo.MetatableName);
+				item.FieldType = BurstClassInfo.EFieldTypes.LightUserData;
+				ReflectionMetaNames.ReflectedNames.TryGetValue(fieldType, out item.MetatableName);
 			}
-			burstFieldInfo.Size = Marshal.SizeOf(fieldType);
-			classInfo.FieldList.TryAdd(keyValuePair.Key, burstFieldInfo);
+			item.Size = Marshal.SizeOf(fieldType);
+			classInfo.FieldList.TryAdd(keyValuePair.Key, item);
 		}
-		classInfo.FunctionList = new NativeHashMap<int, IntPtr>(functionList.Count + functionPtrList.Count, 4);
+		classInfo.FunctionList = new NativeHashMap<int, IntPtr>(functionList.Count + functionPtrList.Count, Allocator.Persistent);
 		foreach (KeyValuePair<int, lua_CFunction> keyValuePair2 in functionList)
 		{
 			classInfo.FunctionList.TryAdd(keyValuePair2.Key, Marshal.GetFunctionPointerForDelegate<lua_CFunction>(keyValuePair2.Value));
@@ -97,14 +97,14 @@ public static class BurstClassInfo
 	}
 
 	[BurstCompile]
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	internal unsafe static int Index$BurstManaged(lua_State* L)
 	{
 		FixedString32Bytes k_metatableLookup = BurstClassInfo._k_metatableLookup;
 		byte* k = (byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref k_metatableLookup) + 2;
 		Luau.luaL_getmetafield(L, 1, k);
 		BurstClassInfo.ClassInfo classInfo;
-		if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), ref classInfo))
+		if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), out classInfo))
 		{
 			FixedString32Bytes fixedString32Bytes = "\"Internal Class Info Error\"";
 			Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes) + 2));
@@ -112,11 +112,11 @@ public static class BurstClassInfo
 		}
 		Luau.lua_pop(L, 1);
 		byte* tname = (byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref classInfo.Name) + 2;
-		IntPtr intPtr = IntPtr.Zero;
+		IntPtr pointer = IntPtr.Zero;
 		Luau.lua_Types lua_Types = (Luau.lua_Types)Luau.lua_type(L, 1);
 		if (lua_Types == Luau.lua_Types.LUA_TUSERDATA)
 		{
-			intPtr = (IntPtr)Luau.luaL_checkudata(L, 1, tname);
+			pointer = (IntPtr)Luau.luaL_checkudata(L, 1, tname);
 		}
 		else
 		{
@@ -126,40 +126,40 @@ public static class BurstClassInfo
 				Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes2) + 2));
 				return 0;
 			}
-			intPtr = Luau.lua_light_ptr(L, 1);
+			pointer = Luau.lua_light_ptr(L, 1);
 		}
 		int len = Luau.lua_objlen(L, 2);
-		int num = LuaHashing.ByteHash(Luau.luaL_checkstring(L, 2), len);
+		int key = LuaHashing.ByteHash(Luau.luaL_checkstring(L, 2), len);
 		BurstClassInfo.BurstFieldInfo burstFieldInfo;
-		if (classInfo.FieldList.TryGetValue(num, ref burstFieldInfo))
+		if (classInfo.FieldList.TryGetValue(key, out burstFieldInfo))
 		{
-			IntPtr intPtr2 = intPtr + burstFieldInfo.Offset;
+			IntPtr intPtr = pointer + burstFieldInfo.Offset;
 			switch (burstFieldInfo.FieldType)
 			{
 			case BurstClassInfo.EFieldTypes.Float:
-				Luau.lua_pushnumber(L, (double)(*(float*)((void*)intPtr2)));
+				Luau.lua_pushnumber(L, (double)(*(float*)((void*)intPtr)));
 				return 1;
 			case BurstClassInfo.EFieldTypes.Int:
-				Luau.lua_pushnumber(L, (double)(*(int*)((void*)intPtr2)));
+				Luau.lua_pushnumber(L, (double)(*(int*)((void*)intPtr)));
 				return 1;
 			case BurstClassInfo.EFieldTypes.Double:
-				Luau.lua_pushnumber(L, *(double*)((void*)intPtr2));
+				Luau.lua_pushnumber(L, *(double*)((void*)intPtr));
 				return 1;
 			case BurstClassInfo.EFieldTypes.Bool:
-				Luau.lua_pushboolean(L, (*(byte*)((void*)intPtr2) != 0) ? 1 : 0);
+				Luau.lua_pushboolean(L, (*(byte*)((void*)intPtr) != 0) ? 1 : 0);
 				return 1;
 			case BurstClassInfo.EFieldTypes.String:
-				Luau.lua_pushstring(L, (byte*)((void*)intPtr2) + 2);
+				Luau.lua_pushstring(L, (byte*)((void*)intPtr) + 2);
 				return 1;
 			case BurstClassInfo.EFieldTypes.LightUserData:
-				Luau.lua_class_push(L, burstFieldInfo.MetatableName, intPtr2);
+				Luau.lua_class_push(L, burstFieldInfo.MetatableName, intPtr);
 				return 1;
 			}
 		}
-		IntPtr intPtr3;
-		if (classInfo.FunctionList.TryGetValue(num, ref intPtr3))
+		IntPtr ptr;
+		if (classInfo.FunctionList.TryGetValue(key, out ptr))
 		{
-			FunctionPointer<lua_CFunction> fn = new FunctionPointer<lua_CFunction>(intPtr3);
+			FunctionPointer<lua_CFunction> fn = new FunctionPointer<lua_CFunction>(ptr);
 			FixedString32Bytes fixedString32Bytes3 = "";
 			Luau.lua_pushcclosurek(L, fn, (byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes3) + 2, 0, null);
 			return 1;
@@ -170,14 +170,14 @@ public static class BurstClassInfo
 	}
 
 	[BurstCompile]
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	internal unsafe static int NewIndex$BurstManaged(lua_State* L)
 	{
 		FixedString32Bytes k_metatableLookup = BurstClassInfo._k_metatableLookup;
 		byte* k = (byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref k_metatableLookup) + 2;
 		Luau.luaL_getmetafield(L, 1, k);
 		BurstClassInfo.ClassInfo classInfo;
-		if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), ref classInfo))
+		if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), out classInfo))
 		{
 			FixedString32Bytes fixedString32Bytes = "\"Internal Class Info Error\"";
 			Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes) + 2));
@@ -185,11 +185,11 @@ public static class BurstClassInfo
 		}
 		Luau.lua_pop(L, 1);
 		byte* tname = (byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref classInfo.Name) + 2;
-		IntPtr intPtr = IntPtr.Zero;
+		IntPtr pointer = IntPtr.Zero;
 		Luau.lua_Types lua_Types = (Luau.lua_Types)Luau.lua_type(L, 1);
 		if (lua_Types == Luau.lua_Types.LUA_TUSERDATA)
 		{
-			intPtr = (IntPtr)Luau.luaL_checkudata(L, 1, tname);
+			pointer = (IntPtr)Luau.luaL_checkudata(L, 1, tname);
 		}
 		else
 		{
@@ -199,30 +199,30 @@ public static class BurstClassInfo
 				Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes2) + 2));
 				return 0;
 			}
-			intPtr = Luau.lua_light_ptr(L, 1);
+			pointer = Luau.lua_light_ptr(L, 1);
 		}
 		int len = Luau.lua_objlen(L, 2);
-		int num = LuaHashing.ByteHash(Luau.luaL_checkstring(L, 2), len);
+		int key = LuaHashing.ByteHash(Luau.luaL_checkstring(L, 2), len);
 		BurstClassInfo.BurstFieldInfo burstFieldInfo;
-		if (classInfo.FieldList.TryGetValue(num, ref burstFieldInfo))
+		if (classInfo.FieldList.TryGetValue(key, out burstFieldInfo))
 		{
-			IntPtr intPtr2 = intPtr + burstFieldInfo.Offset;
+			IntPtr value = pointer + burstFieldInfo.Offset;
 			switch (burstFieldInfo.FieldType)
 			{
 			case BurstClassInfo.EFieldTypes.Float:
-				*(float*)((void*)intPtr2) = (float)Luau.luaL_checknumber(L, 3);
+				*(float*)((void*)value) = (float)Luau.luaL_checknumber(L, 3);
 				return 0;
 			case BurstClassInfo.EFieldTypes.Int:
-				*(int*)((void*)intPtr2) = (int)Luau.luaL_checknumber(L, 3);
+				*(int*)((void*)value) = (int)Luau.luaL_checknumber(L, 3);
 				return 0;
 			case BurstClassInfo.EFieldTypes.Double:
-				*(double*)((void*)intPtr2) = Luau.luaL_checknumber(L, 3);
+				*(double*)((void*)value) = Luau.luaL_checknumber(L, 3);
 				return 0;
 			case BurstClassInfo.EFieldTypes.Bool:
-				*(byte*)((void*)intPtr2) = ((Luau.lua_toboolean(L, 3) != 0) ? 1 : 0);
+				*(byte*)((void*)value) = ((Luau.lua_toboolean(L, 3) != 0) ? 1 : 0);
 				return 0;
 			case BurstClassInfo.EFieldTypes.LightUserData:
-				Buffer.MemoryCopy((void*)((IntPtr)((void*)Luau.lua_class_get(L, 3, burstFieldInfo.MetatableName))), (void*)intPtr2, (long)burstFieldInfo.Size, (long)burstFieldInfo.Size);
+				Buffer.MemoryCopy((void*)((IntPtr)((void*)Luau.lua_class_get(L, 3, burstFieldInfo.MetatableName))), (void*)value, (long)burstFieldInfo.Size, (long)burstFieldInfo.Size);
 				return 0;
 			}
 		}
@@ -232,25 +232,25 @@ public static class BurstClassInfo
 	}
 
 	[BurstCompile]
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	internal unsafe static int NameCall$BurstManaged(lua_State* L)
 	{
 		FixedString32Bytes k_metatableLookup = BurstClassInfo._k_metatableLookup;
 		byte* k = (byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref k_metatableLookup) + 2;
 		Luau.luaL_getmetafield(L, 1, k);
 		BurstClassInfo.ClassInfo classInfo;
-		if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), ref classInfo))
+		if (!BurstClassInfo.ClassList.InfoFields.Data.TryGetValue((int)Luau.luaL_checknumber(L, -1), out classInfo))
 		{
 			FixedString32Bytes fixedString32Bytes = "\"Internal Class Info Error\"";
 			Luau.luaL_errorL(L, (sbyte*)((byte*)UnsafeUtility.AddressOf<FixedString32Bytes>(ref fixedString32Bytes) + 2));
 			return 0;
 		}
 		Luau.lua_pop(L, 1);
-		int num = LuaHashing.ByteHash(Luau.lua_namecallatom(L, null));
-		IntPtr intPtr;
-		if (classInfo.FunctionList.TryGetValue(num, ref intPtr))
+		int key = LuaHashing.ByteHash(Luau.lua_namecallatom(L, null));
+		IntPtr ptr;
+		if (classInfo.FunctionList.TryGetValue(key, out ptr))
 		{
-			FunctionPointer<lua_CFunction> functionPointer = new FunctionPointer<lua_CFunction>(intPtr);
+			FunctionPointer<lua_CFunction> functionPointer = new FunctionPointer<lua_CFunction>(ptr);
 			return functionPointer.Invoke(L);
 		}
 		FixedString32Bytes fixedString32Bytes2 = "\"Function not found in function list\"";
@@ -314,7 +314,7 @@ public static class BurstClassInfo
 		}
 	}
 
-	[UnmanagedFunctionPointer(2)]
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 	internal unsafe delegate int Index_0000472F$PostfixBurstDelegate(lua_State* L);
 
 	internal static class Index_0000472F$BurstDirectCall
@@ -352,7 +352,7 @@ public static class BurstClassInfo
 		private static IntPtr Pointer;
 	}
 
-	[UnmanagedFunctionPointer(2)]
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 	internal unsafe delegate int NewIndex_00004730$PostfixBurstDelegate(lua_State* L);
 
 	internal static class NewIndex_00004730$BurstDirectCall
@@ -390,7 +390,7 @@ public static class BurstClassInfo
 		private static IntPtr Pointer;
 	}
 
-	[UnmanagedFunctionPointer(2)]
+	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 	internal unsafe delegate int NameCall_00004731$PostfixBurstDelegate(lua_State* L);
 
 	internal static class NameCall_00004731$BurstDirectCall

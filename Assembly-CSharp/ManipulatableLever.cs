@@ -18,8 +18,8 @@ public class ManipulatableLever : ManipulatableObject
 	protected override void OnHeldUpdate(GameObject hand)
 	{
 		Vector3 position = hand.transform.position;
-		Vector3 vector = Vector3.Normalize(this.localSpace.MultiplyPoint3x4(position) - base.transform.localPosition);
-		Vector3 eulerAngles = Quaternion.LookRotation(Vector3.forward, vector).eulerAngles;
+		Vector3 upwards = Vector3.Normalize(this.localSpace.MultiplyPoint3x4(position) - base.transform.localPosition);
+		Vector3 eulerAngles = Quaternion.LookRotation(Vector3.forward, upwards).eulerAngles;
 		if (eulerAngles.z > 180f)
 		{
 			eulerAngles.z -= 360f;

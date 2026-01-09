@@ -50,19 +50,19 @@ namespace GorillaTagScripts.GhostReactor
 			}
 			if (!recentStates.Contains(this._purchaseState))
 			{
-				this.ProcessPurchaseItemState(default(GRKiosk.ButtonSide?), recentStates);
+				this.ProcessPurchaseItemState(null, recentStates);
 			}
 			this.FormattedPurchaseText();
 		}
 
 		private bool PlayerOwnsItem()
 		{
-			return Enumerable.Any<CosmeticsController.CosmeticItem>(CosmeticsController.instance.unlockedCosmetics, new Func<CosmeticsController.CosmeticItem, bool>(this.MatchesCosmeticForPurchase));
+			return CosmeticsController.instance.unlockedCosmetics.Any(new Func<CosmeticsController.CosmeticItem, bool>(this.MatchesCosmeticForPurchase));
 		}
 
 		private void OnGetCurrency()
 		{
-			this.ProcessPurchaseItemState(default(GRKiosk.ButtonSide?), null);
+			this.ProcessPurchaseItemState(null, null);
 		}
 
 		private void ResetButtons()
@@ -148,7 +148,7 @@ namespace GorillaTagScripts.GhostReactor
 				}
 				VRRig offlineVRRig = GorillaTagger.Instance.offlineVRRig;
 				offlineVRRig.concatStringOfCosmeticsAllowed += this._cosmeticForPurchase.itemName;
-				this.ProcessPurchaseItemState(default(GRKiosk.ButtonSide?), null);
+				this.ProcessPurchaseItemState(null, null);
 			}, delegate(PlayFabError error)
 			{
 				Debug.LogError(error.ToString());
@@ -185,26 +185,26 @@ namespace GorillaTagScripts.GhostReactor
 			stringBuilder.Append("\nITEM COST: ").Append(this._cosmeticForPurchase.cost);
 			stringBuilder.Append("\nYOU HAVE: ").Append(CosmeticsController.instance.currencyBalance);
 			StringBuilder stringBuilder2 = stringBuilder.Append("\n");
-			string text;
+			string value;
 			switch (this._purchaseState)
 			{
 			case GRKiosk.PurchaseState.AlreadyOwned:
-				text = "YOU ALREADY OWN THIS!";
+				value = "YOU ALREADY OWN THIS!";
 				break;
 			case GRKiosk.PurchaseState.AvailableForPurchase:
-				text = "PURCHASE?";
+				value = "PURCHASE?";
 				break;
 			case GRKiosk.PurchaseState.CheckoutPressed:
-				text = "CONFIRM PURCHASE?";
+				value = "CONFIRM PURCHASE?";
 				break;
 			case GRKiosk.PurchaseState.CheckoutConfirmation:
-				text = "CONFIRMING PURCHASE...";
+				value = "CONFIRMING PURCHASE...";
 				break;
 			default:
-				text = "ERROR";
+				value = "ERROR";
 				break;
 			}
-			stringBuilder2.Append(text);
+			stringBuilder2.Append(value);
 			this.PurchaseText.text = stringBuilder.ToString();
 		}
 

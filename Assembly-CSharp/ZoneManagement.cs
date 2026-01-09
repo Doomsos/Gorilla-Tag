@@ -45,7 +45,7 @@ public class ZoneManagement : MonoBehaviour
 		Action action = ZoneManagement.instance.onZoneChanged;
 		if (action != null)
 		{
-			action.Invoke();
+			action();
 		}
 		if (ZoneManagement.OnZoneChange != null)
 		{
@@ -149,7 +149,7 @@ public class ZoneManagement : MonoBehaviour
 				hashSet.UnionWith(list);
 			}
 		}
-		this.allObjects = Enumerable.ToArray<GameObject>(hashSet);
+		this.allObjects = hashSet.ToArray<GameObject>();
 		this.objectActivationState = new bool[this.allObjects.Length];
 	}
 
@@ -170,7 +170,7 @@ public class ZoneManagement : MonoBehaviour
 		for (int k = 0; k < this.zones.Length; k++)
 		{
 			ZoneData zoneData = this.zones[k];
-			if (zoneData == null || zoneData.rootGameObjects == null || !Enumerable.Contains<GTZone>(newActiveZones, zoneData.zone))
+			if (zoneData == null || zoneData.rootGameObjects == null || !newActiveZones.Contains(zoneData.zone))
 			{
 				zoneData.active = false;
 			}
@@ -182,13 +182,13 @@ public class ZoneManagement : MonoBehaviour
 				{
 					this.scenesRequested.Add(zoneData.sceneName);
 				}
-				foreach (GameObject gameObject in zoneData.rootGameObjects)
+				foreach (GameObject x in zoneData.rootGameObjects)
 				{
-					if (!(gameObject == null))
+					if (!(x == null))
 					{
 						for (int m = 0; m < this.allObjects.Length; m++)
 						{
-							if (gameObject == this.allObjects[m])
+							if (x == this.allObjects[m])
 							{
 								this.objectActivationState[m] = true;
 								break;
@@ -212,24 +212,24 @@ public class ZoneManagement : MonoBehaviour
 		{
 			if (this.scenesLoaded.Add(text))
 			{
-				AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(text, 1);
+				AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(text, LoadSceneMode.Additive);
 				this._scenes_to_loadOps[text] = asyncOperation;
-				asyncOperation.completed += new Action<AsyncOperation>(this.HandleOnSceneLoadCompleted);
+				asyncOperation.completed += this.HandleOnSceneLoadCompleted;
 			}
 		}
 		this.scenesToUnload.Clear();
-		foreach (string text2 in this.scenesLoaded)
+		foreach (string item in this.scenesLoaded)
 		{
-			if (!this.scenesRequested.Contains(text2) && !this.sceneForceStayLoaded.Contains(text2))
+			if (!this.scenesRequested.Contains(item) && !this.sceneForceStayLoaded.Contains(item))
 			{
-				this.scenesToUnload.Add(text2);
+				this.scenesToUnload.Add(item);
 			}
 		}
-		foreach (string text3 in this.scenesToUnload)
+		foreach (string text2 in this.scenesToUnload)
 		{
-			this.scenesLoaded.Remove(text3);
-			AsyncOperation asyncOperation2 = SceneManager.UnloadSceneAsync(text3);
-			this._scenes_to_unloadOps[text3] = asyncOperation2;
+			this.scenesLoaded.Remove(text2);
+			AsyncOperation value = SceneManager.UnloadSceneAsync(text2);
+			this._scenes_to_unloadOps[text2] = value;
 		}
 		for (int num2 = 0; num2 < this.objectActivationState.Length; num2++)
 		{
@@ -267,7 +267,7 @@ public class ZoneManagement : MonoBehaviour
 		{
 			return;
 		}
-		onSceneLoadsCompleted.Invoke();
+		onSceneLoadsCompleted();
 	}
 
 	private ZoneData GetZoneData(GTZone zone)

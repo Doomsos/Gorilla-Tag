@@ -172,10 +172,9 @@ public class GRTool : MonoBehaviour, IGameEntitySerialize, IGameEntityComponent,
 		{
 			Vector3 vector = meshFilter.transform.InverseTransformPoint(point);
 			Bounds bounds = meshFilter.sharedMesh.bounds;
-			Vector3 vector2;
-			vector2..ctor(Mathf.Clamp(vector.x, bounds.min.x, bounds.max.x), Mathf.Clamp(vector.y, bounds.min.y, bounds.max.y), Mathf.Clamp(vector.z, bounds.min.z, bounds.max.z));
-			Vector3 vector3 = vector - vector2;
-			float sqrMagnitude = meshFilter.transform.TransformVector(vector3).sqrMagnitude;
+			Vector3 b = new Vector3(Mathf.Clamp(vector.x, bounds.min.x, bounds.max.x), Mathf.Clamp(vector.y, bounds.min.y, bounds.max.y), Mathf.Clamp(vector.z, bounds.min.z, bounds.max.z));
+			Vector3 vector2 = vector - b;
+			float sqrMagnitude = meshFilter.transform.TransformVector(vector2).sqrMagnitude;
 			if (sqrMagnitude < num)
 			{
 				num = sqrMagnitude;
@@ -185,12 +184,11 @@ public class GRTool : MonoBehaviour, IGameEntitySerialize, IGameEntityComponent,
 		{
 			foreach (SkinnedMeshRenderer skinnedMeshRenderer in this.reservedMeshFilterSearchListSkinned)
 			{
-				Vector3 vector4 = skinnedMeshRenderer.transform.InverseTransformPoint(point);
+				Vector3 vector3 = skinnedMeshRenderer.transform.InverseTransformPoint(point);
 				Bounds localBounds = skinnedMeshRenderer.localBounds;
-				Vector3 vector5;
-				vector5..ctor(Mathf.Clamp(vector4.x, localBounds.min.x, localBounds.max.x), Mathf.Clamp(vector4.y, localBounds.min.y, localBounds.max.y), Mathf.Clamp(vector4.z, localBounds.min.z, localBounds.max.z));
-				Vector3 vector6 = vector4 - vector5;
-				float sqrMagnitude2 = skinnedMeshRenderer.transform.TransformVector(vector6).sqrMagnitude;
+				Vector3 b2 = new Vector3(Mathf.Clamp(vector3.x, localBounds.min.x, localBounds.max.x), Mathf.Clamp(vector3.y, localBounds.min.y, localBounds.max.y), Mathf.Clamp(vector3.z, localBounds.min.z, localBounds.max.z));
+				Vector3 vector4 = vector3 - b2;
+				float sqrMagnitude2 = skinnedMeshRenderer.transform.TransformVector(vector4).sqrMagnitude;
 				if (sqrMagnitude2 < num)
 				{
 					num = sqrMagnitude2;
@@ -307,7 +305,7 @@ public class GRTool : MonoBehaviour, IGameEntitySerialize, IGameEntityComponent,
 		for (int i = 0; i < num; i++)
 		{
 			GRToolProgressionManager.ToolParts upgradeID = GRToolProgressionManager.ToolParts.None;
-			if (Enum.TryParse<GRToolProgressionManager.ToolParts>(reader.ReadString(), ref upgradeID))
+			if (Enum.TryParse<GRToolProgressionManager.ToolParts>(reader.ReadString(), out upgradeID))
 			{
 				this.UpgradeTool(upgradeID);
 			}

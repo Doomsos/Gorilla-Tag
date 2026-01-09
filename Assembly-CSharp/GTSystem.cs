@@ -85,12 +85,12 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 
 	IEnumerator<T> IEnumerable<!0>.GetEnumerator()
 	{
-		return this._instances.GetEnumerator();
+		return ((IEnumerable<!0>)this._instances).GetEnumerator();
 	}
 
 	IEnumerator IEnumerable.GetEnumerator()
 	{
-		return this._instances.GetEnumerator();
+		return ((IEnumerable<!0>)this._instances).GetEnumerator();
 	}
 
 	int IReadOnlyCollection<!0>.Count
@@ -101,7 +101,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 		}
 	}
 
-	T IReadOnlyList<!0>.Item
+	T IReadOnlyList<!0>.this[int index]
 	{
 		get
 		{
@@ -135,8 +135,10 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 			return;
 		}
 		GTSystem<T>.gSingleton._instances.Clear();
-		T[] array = Enumerable.ToArray<T>(Enumerable.Where<T>(GTSystem<T>.gQueueRegister, (T x) => x != null));
-		GTSystem<T>.gSingleton._instances.AddRange(array);
+		T[] collection = (from x in GTSystem<T>.gQueueRegister
+		where x != null
+		select x).ToArray<T>();
+		GTSystem<T>.gSingleton._instances.AddRange(collection);
 		GTSystem<T>.gQueueRegister.Clear();
 		PhotonView component = GTSystem<T>.gSingleton.GetComponent<PhotonView>();
 		if (component != null)

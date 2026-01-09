@@ -35,13 +35,13 @@ namespace GorillaNetworking.Store
 		private void ResetMannequinSkin()
 		{
 			SkinnedMeshRenderer skinnedMeshRenderer;
-			if (this.mannequin.TryGetComponent<SkinnedMeshRenderer>(ref skinnedMeshRenderer))
+			if (this.mannequin.TryGetComponent<SkinnedMeshRenderer>(out skinnedMeshRenderer))
 			{
 				List<Material> list;
-				using (ListPool<Material>.Get(ref list))
+				using (ListPool<Material>.Get(out list))
 				{
 					list.Clear();
-					ListExtensions.EnsureCapacity<Material>(list, 3);
+					list.EnsureCapacity(3);
 					list.Add(this.defaultMannequinBody);
 					list.Add(this.defaultMannequinChest);
 					list.Add(this.defaultMannequinFace);
@@ -50,13 +50,13 @@ namespace GorillaNetworking.Store
 				}
 			}
 			MeshRenderer meshRenderer;
-			if (this.mannequin.TryGetComponent<MeshRenderer>(ref meshRenderer))
+			if (this.mannequin.TryGetComponent<MeshRenderer>(out meshRenderer))
 			{
 				List<Material> list2;
-				using (ListPool<Material>.Get(ref list2))
+				using (ListPool<Material>.Get(out list2))
 				{
 					list2.Clear();
-					ListExtensions.EnsureCapacity<Material>(list2, 3);
+					list2.EnsureCapacity(3);
 					list2.Add(this.defaultMannequinBody);
 					list2.Add(this.defaultMannequinChest);
 					list2.Add(this.defaultMannequinFace);
@@ -196,7 +196,7 @@ namespace GorillaNetworking.Store
 							loadOp = cosmeticPart.prefabAssetRef.InstantiateAsync(base.transform, false),
 							xform = null
 						};
-						cosmeticPartLoadInfo.loadOp.Completed += new Action<AsyncOperationHandle<GameObject>>(this._HandleLoadCosmeticPartsV2);
+						cosmeticPartLoadInfo.loadOp.Completed += this._HandleLoadCosmeticPartsV2;
 						this._loadOp_to_partInfoIndex[cosmeticPartLoadInfo.loadOp] = this._currentPartLoadInfos.Count;
 						this._currentPartLoadInfos.Add(cosmeticPartLoadInfo);
 					}
@@ -207,16 +207,16 @@ namespace GorillaNetworking.Store
 		private void _HandleLoadCosmeticPartsV2(AsyncOperationHandle<GameObject> loadOp)
 		{
 			int num;
-			if (!this._loadOp_to_partInfoIndex.TryGetValue(loadOp, ref num))
+			if (!this._loadOp_to_partInfoIndex.TryGetValue(loadOp, out num))
 			{
-				if (loadOp.Status == 1 && loadOp.Result)
+				if (loadOp.Status == AsyncOperationStatus.Succeeded && loadOp.Result)
 				{
 					Object.Destroy(loadOp.Result);
 				}
 				return;
 			}
 			HeadModel._CosmeticPartLoadInfo cosmeticPartLoadInfo = this._currentPartLoadInfos[num];
-			if (loadOp.Status == 2)
+			if (loadOp.Status == AsyncOperationStatus.Failed)
 			{
 				Debug.Log("HeadModel: Failed to load a part for cosmetic \"" + cosmeticPartLoadInfo.playFabId + "\"! Waiting for 10 seconds before trying again.", this);
 				GTDelayedExec.Add(this, 10f, num);
@@ -280,7 +280,7 @@ namespace GorillaNetworking.Store
 							loadOp = cosmeticPart.prefabAssetRef.InstantiateAsync(base.transform, false),
 							xform = null
 						};
-						cosmeticPartLoadInfo.loadOp.Completed += new Action<AsyncOperationHandle<GameObject>>(this._HandleLoadCosmeticPartsV2Fur);
+						cosmeticPartLoadInfo.loadOp.Completed += this._HandleLoadCosmeticPartsV2Fur;
 						this._loadOp_to_partInfoIndex[cosmeticPartLoadInfo.loadOp] = this._currentPartLoadInfos.Count;
 						this._currentPartLoadInfos.Add(cosmeticPartLoadInfo);
 					}
@@ -291,16 +291,16 @@ namespace GorillaNetworking.Store
 		private void _HandleLoadCosmeticPartsV2Fur(AsyncOperationHandle<GameObject> loadOp)
 		{
 			int num;
-			if (!this._loadOp_to_partInfoIndex.TryGetValue(loadOp, ref num))
+			if (!this._loadOp_to_partInfoIndex.TryGetValue(loadOp, out num))
 			{
-				if (loadOp.Status == 1 && loadOp.Result)
+				if (loadOp.Status == AsyncOperationStatus.Succeeded && loadOp.Result)
 				{
 					Object.Destroy(loadOp.Result);
 				}
 				return;
 			}
 			HeadModel._CosmeticPartLoadInfo cosmeticPartLoadInfo = this._currentPartLoadInfos[num];
-			if (loadOp.Status == 2)
+			if (loadOp.Status == AsyncOperationStatus.Failed)
 			{
 				Debug.Log("HeadModel: Failed to load a part for cosmetic \"" + cosmeticPartLoadInfo.playFabId + "\"! Waiting for 10 seconds before trying again.", this);
 				GTDelayedExec.Add(this, 10f, num);
@@ -318,7 +318,7 @@ namespace GorillaNetworking.Store
 
 		private void PositionWardRobeItems(GameObject instantiateEdObject, HeadModel._CosmeticPartLoadInfo partLoadInfo)
 		{
-			Transform transform = OVRExtensions.FindChildRecursive(instantiateEdObject.transform, this.mountID);
+			Transform transform = instantiateEdObject.transform.FindChildRecursive(this.mountID);
 			if (transform != null)
 			{
 				Debug.Log("Dynamic Cosmetics - Mount Found: " + this.mountID);
@@ -340,7 +340,7 @@ namespace GorillaNetworking.Store
 
 		private void PositionWardRobeItems(HeadModel._CosmeticPartLoadInfo partLoadInfo)
 		{
-			Transform transform = OVRExtensions.FindChildRecursive(partLoadInfo.xform, this.mountID);
+			Transform transform = partLoadInfo.xform.FindChildRecursive(this.mountID);
 			if (transform != null)
 			{
 				Debug.Log("Dynamic Cosmetics - Mount Found: " + this.mountID);
@@ -370,9 +370,9 @@ namespace GorillaNetworking.Store
 
 		public void ClearManuallySpawnedCosmeticParts()
 		{
-			foreach (GameObject gameObject in this._manuallySpawnedCosmeticParts)
+			foreach (GameObject obj in this._manuallySpawnedCosmeticParts)
 			{
-				Object.DestroyImmediate(gameObject);
+				Object.DestroyImmediate(obj);
 			}
 			this._manuallySpawnedCosmeticParts.Clear();
 		}

@@ -58,11 +58,11 @@ public class GreyZoneSummoner : MonoBehaviour
 		this.candlesTimeline.Evaluate();
 		if (!this.greyZoneManager.GreyZoneActive)
 		{
-			float num = (float)this.summoningTones.Count * this.greyZoneManager.SummoningProgress;
+			float value = (float)this.summoningTones.Count * this.greyZoneManager.SummoningProgress;
 			for (int i = 0; i < this.summoningTones.Count; i++)
 			{
-				float num2 = Mathf.InverseLerp((float)i, (float)i + 1f + this.summoningTonesFadeOverlap, num);
-				this.summoningTones[i].volume = num2 * this.summoningTonesMaxVolume;
+				float num = Mathf.InverseLerp((float)i, (float)i + 1f + this.summoningTonesFadeOverlap, value);
+				this.summoningTones[i].volume = num * this.summoningTonesMaxVolume;
 			}
 		}
 		this.greyZoneActivationButton.isOn = this.greyZoneManager.GreyZoneActive;

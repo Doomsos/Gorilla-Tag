@@ -249,7 +249,7 @@ public class FriendingStation : MonoBehaviour
 		}
 		if (!this.addFriendButton.isOn)
 		{
-			FriendingManager.Instance.photonView.RPC("FriendButtonPressedRPC", 2, new object[]
+			FriendingManager.Instance.photonView.RPC("FriendButtonPressedRPC", RpcTarget.MasterClient, new object[]
 			{
 				this.zone
 			});
@@ -270,7 +270,7 @@ public class FriendingStation : MonoBehaviour
 		}
 		if (this.addFriendButton.isOn)
 		{
-			FriendingManager.Instance.photonView.RPC("FriendButtonUnpressedRPC", 2, new object[]
+			FriendingManager.Instance.photonView.RPC("FriendButtonUnpressedRPC", RpcTarget.MasterClient, new object[]
 			{
 				this.zone
 			});

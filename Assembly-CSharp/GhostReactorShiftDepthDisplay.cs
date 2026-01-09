@@ -120,7 +120,7 @@ public class GhostReactorShiftDepthDisplay
 		bool flag4 = true;
 		foreach (GREnemyCount grenemyCount in this.shiftManager.killsRequiredToDelveDeeper)
 		{
-			if (CollectionExtensions.GetValueOrDefault<GREnemyType, int>(shiftStats.EnemyKills, grenemyCount.EnemyType) < grenemyCount.Count)
+			if (shiftStats.EnemyKills.GetValueOrDefault(grenemyCount.EnemyType) < grenemyCount.Count)
 			{
 				flag4 = false;
 				break;

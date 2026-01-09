@@ -129,13 +129,13 @@ public class Bubbler : TransferrableObject
 			{
 				if (!this.fanYaxisinstead)
 				{
-					float num = this.fan.transform.localEulerAngles.z + this.rotationSpeed * Time.fixedDeltaTime;
-					this.fan.transform.localEulerAngles = new Vector3(0f, 0f, num);
+					float z = this.fan.transform.localEulerAngles.z + this.rotationSpeed * Time.fixedDeltaTime;
+					this.fan.transform.localEulerAngles = new Vector3(0f, 0f, z);
 				}
 				else
 				{
-					float num2 = this.fan.transform.localEulerAngles.y + this.rotationSpeed * Time.fixedDeltaTime;
-					this.fan.transform.localEulerAngles = new Vector3(0f, num2, 0f);
+					float y = this.fan.transform.localEulerAngles.y + this.rotationSpeed * Time.fixedDeltaTime;
+					this.fan.transform.localEulerAngles = new Vector3(0f, y, 0f);
 				}
 			}
 		}
@@ -152,21 +152,21 @@ public class Bubbler : TransferrableObject
 						this.currentParticles.Remove(this.bubbleParticleArray[j].randomSeed);
 					}
 				}
-				foreach (uint num3 in this.currentParticles)
+				foreach (uint key in this.currentParticles)
 				{
-					if (this.particleInfoDict.TryGetValue(num3, ref this.outPosition))
+					if (this.particleInfoDict.TryGetValue(key, out this.outPosition))
 					{
 						if (this.hasPopBubbleAudio)
 						{
 							GTAudioSourceExtensions.GTPlayClipAtPoint(this.popBubbleAudio.clip, this.outPosition);
 						}
-						this.particleInfoDict.Remove(num3);
+						this.particleInfoDict.Remove(key);
 					}
 				}
 				this.currentParticles.Clear();
 				for (int k = 0; k < particles; k++)
 				{
-					if (this.particleInfoDict.TryGetValue(this.bubbleParticleArray[k].randomSeed, ref this.outPosition))
+					if (this.particleInfoDict.TryGetValue(this.bubbleParticleArray[k].randomSeed, out this.outPosition))
 					{
 						this.particleInfoDict[this.bubbleParticleArray[k].randomSeed] = this.bubbleParticleArray[k].position;
 					}

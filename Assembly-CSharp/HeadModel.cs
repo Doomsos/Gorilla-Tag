@@ -77,7 +77,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 							loadOp = cosmeticPart.prefabAssetRef.InstantiateAsync(base.transform, false),
 							xform = null
 						};
-						cosmeticPartLoadInfo.loadOp.Completed += new Action<AsyncOperationHandle<GameObject>>(this._HandleLoadOpOnCompleted);
+						cosmeticPartLoadInfo.loadOp.Completed += this._HandleLoadOpOnCompleted;
 						this._loadOp_to_partInfoIndex[cosmeticPartLoadInfo.loadOp] = this._currentPartLoadInfos.Count;
 						this._currentPartLoadInfos.Add(cosmeticPartLoadInfo);
 					}
@@ -89,16 +89,16 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 	private void _HandleLoadOpOnCompleted(AsyncOperationHandle<GameObject> loadOp)
 	{
 		int num;
-		if (!this._loadOp_to_partInfoIndex.TryGetValue(loadOp, ref num))
+		if (!this._loadOp_to_partInfoIndex.TryGetValue(loadOp, out num))
 		{
-			if (loadOp.Status == 1 && loadOp.Result)
+			if (loadOp.Status == AsyncOperationStatus.Succeeded && loadOp.Result)
 			{
 				Object.Destroy(loadOp.Result);
 			}
 			return;
 		}
 		HeadModel._CosmeticPartLoadInfo cosmeticPartLoadInfo = this._currentPartLoadInfos[num];
-		if (loadOp.Status == 2)
+		if (loadOp.Status == AsyncOperationStatus.Failed)
 		{
 			Debug.Log("HeadModel: Failed to load a part for cosmetic \"" + cosmeticPartLoadInfo.playFabId + "\"! Waiting for 10 seconds before trying again.", this);
 			GTDelayedExec.Add(this, 10f, num);
@@ -118,11 +118,11 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 			return;
 		}
 		HeadModel._CosmeticPartLoadInfo cosmeticPartLoadInfo = this._currentPartLoadInfos[partLoadInfosIndex];
-		if (cosmeticPartLoadInfo.loadOp.Status != 2)
+		if (cosmeticPartLoadInfo.loadOp.Status != AsyncOperationStatus.Failed)
 		{
 			return;
 		}
-		cosmeticPartLoadInfo.loadOp.Completed += new Action<AsyncOperationHandle<GameObject>>(this._HandleLoadOpOnCompleted);
+		cosmeticPartLoadInfo.loadOp.Completed += this._HandleLoadOpOnCompleted;
 		cosmeticPartLoadInfo.loadOp = cosmeticPartLoadInfo.prefabAssetRef.InstantiateAsync(base.transform, false);
 		this._loadOp_to_partInfoIndex[cosmeticPartLoadInfo.loadOp] = partLoadInfosIndex;
 	}

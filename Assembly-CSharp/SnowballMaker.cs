@@ -116,7 +116,7 @@ public class SnowballMaker : MonoBehaviourPostTick
 			else if (!flag)
 			{
 				SnowballThrowable snowballThrowable2;
-				if (!this.matSnowballLookup.TryGetValue(materialTouchIndex, ref snowballThrowable2))
+				if (!this.matSnowballLookup.TryGetValue(materialTouchIndex, out snowballThrowable2))
 				{
 					return;
 				}

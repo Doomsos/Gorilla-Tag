@@ -24,7 +24,7 @@ namespace GorillaTag.Reactions
 			{
 				this.maxEmissionRate = this.particles.emission.rateOverTime.constant;
 			}
-			Application.quitting += new Action(this.HandleApplicationQuitting);
+			Application.quitting += this.HandleApplicationQuitting;
 		}
 
 		protected void OnEnable()
@@ -73,8 +73,8 @@ namespace GorillaTag.Reactions
 			this.sampleHistoryPos[this.currentIndex] = position;
 			if (num2 > 0f)
 			{
-				Vector3 vector = position - this.sampleHistoryPos[num];
-				this.sampleHistoryVel[this.currentIndex] = vector / num2;
+				Vector3 a = position - this.sampleHistoryPos[num];
+				this.sampleHistoryVel[this.currentIndex] = a / num2;
 			}
 			else
 			{
@@ -88,10 +88,10 @@ namespace GorillaTag.Reactions
 				this.lastShakeTime = unscaledTime;
 			}
 			float num4 = unscaledTime - this.lastShakeTime;
-			float num5 = Mathf.Clamp01(num4 / this.particleDuration);
+			float time = Mathf.Clamp01(num4 / this.particleDuration);
 			if (this.hasParticleSystem)
 			{
-				this.particles.emission.rateOverTime = this.emissionCurve.Evaluate(num5) * this.maxEmissionRate;
+				this.particles.emission.rateOverTime = this.emissionCurve.Evaluate(time) * this.maxEmissionRate;
 			}
 			if (this.hasShakeSound && this.lastShakeTime - this.lastShakeSoundTime > this.shakeSoundCooldown)
 			{

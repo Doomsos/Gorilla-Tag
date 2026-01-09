@@ -20,13 +20,13 @@ public class CrittersEventEffects : MonoBehaviour
 				this.effectResponse.Add(this.eventEffects[i].eventType, this.eventEffects[i].effect);
 			}
 		}
-		this.manager.OnCritterEventReceived += new Action<CrittersManager.CritterEvent, int, Vector3, Quaternion>(this.HandleReceivedEvent);
+		this.manager.OnCritterEventReceived += this.HandleReceivedEvent;
 	}
 
 	private void HandleReceivedEvent(CrittersManager.CritterEvent eventType, int sourceActor, Vector3 position, Quaternion rotation)
 	{
 		GameObject prefab;
-		if (this.effectResponse.TryGetValue(eventType, ref prefab))
+		if (this.effectResponse.TryGetValue(eventType, out prefab))
 		{
 			GameObject pooled = CrittersPool.GetPooled(prefab);
 			if (pooled.IsNotNull())

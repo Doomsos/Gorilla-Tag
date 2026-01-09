@@ -40,7 +40,7 @@ namespace GorillaNetworking
 		public bool IsEnabledForUser(string flagName)
 		{
 			bool flag;
-			this.logSent.TryGetValue(flagName, ref flag);
+			this.logSent.TryGetValue(flagName, out flag);
 			this.logSent[flagName] = true;
 			string playFabPlayerId = PlayFabAuthenticator.instance.GetPlayFabPlayerId();
 			if (!flag)
@@ -58,19 +58,19 @@ namespace GorillaNetworking
 				}));
 			}
 			List<string> list;
-			if (this.flagValueByUser.TryGetValue(flagName, ref list) && list != null && list.Contains(playFabPlayerId))
+			if (this.flagValueByUser.TryGetValue(flagName, out list) && list != null && list.Contains(playFabPlayerId))
 			{
 				return true;
 			}
 			int num;
-			if (!this.flagValueByName.TryGetValue(flagName, ref num))
+			if (!this.flagValueByName.TryGetValue(flagName, out num))
 			{
 				if (!flag)
 				{
 					Debug.Log("GorillaServer: Returning default");
 				}
 				bool flag2;
-				return this.defaults.TryGetValue(flagName, ref flag2) && flag2;
+				return this.defaults.TryGetValue(flagName, out flag2) && flag2;
 			}
 			if (!flag)
 			{
@@ -100,28 +100,32 @@ namespace GorillaNetworking
 			return (ulong)num2 < (ulong)((long)num);
 		}
 
-		public TitleDataFeatureFlags()
-		{
-			Dictionary<string, bool> dictionary = new Dictionary<string, bool>();
-			dictionary.Add("2024-06-CosmeticsAuthenticationV2", true);
-			dictionary.Add("2025-04-CosmeticsAuthenticationV2-SetData", false);
-			dictionary.Add("2025-04-CosmeticsAuthenticationV2-ReadData", false);
-			dictionary.Add("2025-04-CosmeticsAuthenticationV2-Compat", true);
-			this.defaults = dictionary;
-			this.flagValueByName = new Dictionary<string, int>();
-			this.flagValueByUser = new Dictionary<string, List<string>>();
-			this.logSent = new Dictionary<string, bool>();
-			base..ctor();
-		}
-
 		public string TitleDataKey = "DeployFeatureFlags";
 
-		public Dictionary<string, bool> defaults;
+		public Dictionary<string, bool> defaults = new Dictionary<string, bool>
+		{
+			{
+				"2024-06-CosmeticsAuthenticationV2",
+				true
+			},
+			{
+				"2025-04-CosmeticsAuthenticationV2-SetData",
+				false
+			},
+			{
+				"2025-04-CosmeticsAuthenticationV2-ReadData",
+				false
+			},
+			{
+				"2025-04-CosmeticsAuthenticationV2-Compat",
+				true
+			}
+		};
 
-		private Dictionary<string, int> flagValueByName;
+		private Dictionary<string, int> flagValueByName = new Dictionary<string, int>();
 
-		private Dictionary<string, List<string>> flagValueByUser;
+		private Dictionary<string, List<string>> flagValueByUser = new Dictionary<string, List<string>>();
 
-		private Dictionary<string, bool> logSent;
+		private Dictionary<string, bool> logSent = new Dictionary<string, bool>();
 	}
 }

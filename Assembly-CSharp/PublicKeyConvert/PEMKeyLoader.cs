@@ -118,13 +118,14 @@ namespace PublicKeyConvert
 						}
 						else
 						{
-							int num3 = (int)binaryReader.ReadByte();
-							byte[] exponent = binaryReader.ReadBytes(num3);
+							int count = (int)binaryReader.ReadByte();
+							byte[] exponent = binaryReader.ReadBytes(count);
 							RSACryptoServiceProvider rsacryptoServiceProvider = new RSACryptoServiceProvider();
-							RSAParameters rsaparameters = default(RSAParameters);
-							rsaparameters.Modulus = modulus;
-							rsaparameters.Exponent = exponent;
-							rsacryptoServiceProvider.ImportParameters(rsaparameters);
+							rsacryptoServiceProvider.ImportParameters(new RSAParameters
+							{
+								Modulus = modulus,
+								Exponent = exponent
+							});
 							result = rsacryptoServiceProvider;
 						}
 					}

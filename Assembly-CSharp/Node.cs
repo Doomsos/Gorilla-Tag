@@ -68,9 +68,9 @@ public class Node<T>
 		{
 			Node<T> current = queue.Dequeue();
 			yield return current;
-			foreach (Node<T> node in current.Children)
+			foreach (Node<T> item in current.Children)
 			{
-				queue.Enqueue(node);
+				queue.Enqueue(item);
 			}
 			current = null;
 		}
@@ -79,13 +79,14 @@ public class Node<T>
 
 	public List<Node<T>> GetPath()
 	{
-		List<Node<T>> list = new List<Node<T>>();
-		list.Add(this);
-		List<Node<T>> list2 = list;
+		List<Node<T>> list = new List<Node<T>>
+		{
+			this
+		};
 		for (Node<T> parent = this.Parent; parent != null; parent = parent.Parent)
 		{
-			list2.Insert(0, parent);
+			list.Insert(0, parent);
 		}
-		return list2;
+		return list;
 	}
 }

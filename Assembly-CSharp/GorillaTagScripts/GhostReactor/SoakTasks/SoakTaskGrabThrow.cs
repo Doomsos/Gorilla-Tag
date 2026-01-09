@@ -51,8 +51,8 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 					{
 						Debug.Log(string.Format("Soak dropping entity {0}", this._heldEntityId.Value.index));
 						managerForZone.RequestThrowEntity(this._heldEntityId.Value, true, Vector3.zero, Vector3.zero, Vector3.zero);
-						this._heldEntityId = default(GameEntityId?);
-						this._dropEntityTime = default(float?);
+						this._heldEntityId = null;
+						this._dropEntityTime = null;
 						this.Complete = true;
 					}
 				}
@@ -62,8 +62,8 @@ namespace GorillaTagScripts.GhostReactor.SoakTasks
 
 		public void Reset()
 		{
-			this._heldEntityId = default(GameEntityId?);
-			this._dropEntityTime = default(float?);
+			this._heldEntityId = null;
+			this._dropEntityTime = null;
 			this.Complete = false;
 		}
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 {
@@ -61,19 +62,19 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 	{
 		if (this.IsHeldLocal())
 		{
-			float num = 1f;
+			float d = 1f;
 			if (this.attributes != null && this.attributes.HasValueForAttribute(GRAttributeType.KnockbackMultiplier))
 			{
-				num = this.attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.KnockbackMultiplier);
+				d = this.attributes.CalculateFinalFloatValueForAttribute(GRAttributeType.KnockbackMultiplier);
 			}
-			Vector3 hitImpulse = -enemyAttackDirection * shieldCollider.KnockbackVelocity * num;
+			Vector3 hitImpulse = -enemyAttackDirection * shieldCollider.KnockbackVelocity * d;
 			if (this.reflectsProjectiles)
 			{
 				GRRangedEnemyProjectile component = hittable.GetComponent<GRRangedEnemyProjectile>();
-				Vector3 vector;
-				if (component != null && component.owningEntity != null && GREnemyRanged.CalculateLaunchDirection(enemyPosition, component.owningEntity.transform.position + new Vector3(0f, 0.5f, 0f), component.projectileSpeed, out vector))
+				Vector3 a;
+				if (component != null && component.owningEntity != null && GREnemyRanged.CalculateLaunchDirection(enemyPosition, component.owningEntity.transform.position + new Vector3(0f, 0.5f, 0f), component.projectileSpeed, out a))
 				{
-					hitImpulse = vector * component.projectileSpeed;
+					hitImpulse = a * component.projectileSpeed;
 				}
 			}
 			GameHitData hitData = new GameHitData
@@ -103,8 +104,8 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 	{
 		this.audioSource.PlayOneShot(this.deflectAudio, this.deflectVolume);
 		this.shieldDeflectVFX.Play();
-		Vector3 vector = Vector3.ClampMagnitude(enemyPosition - this.shieldArcCenterReferencePoint.position, this.shieldArcCenterRadius);
-		Vector3 position = this.shieldArcCenterReferencePoint.position + vector;
+		Vector3 b = Vector3.ClampMagnitude(enemyPosition - this.shieldArcCenterReferencePoint.position, this.shieldArcCenterRadius);
+		Vector3 position = this.shieldArcCenterReferencePoint.position + b;
 		this.shieldDeflectImpactPointVFX.transform.position = position;
 		this.shieldDeflectImpactPointVFX.Play();
 	}
@@ -217,7 +218,7 @@ public class GRToolDirectionalShield : MonoBehaviour, IGameHitter
 			return false;
 		}
 		int num = gamePlayer.FindHandIndex(this.gameEntity.id);
-		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? 4 : 5) > 0.25f;
+		return num != -1 && ControllerInputPoller.TriggerFloat(GamePlayer.IsLeftHand(num) ? XRNode.LeftHand : XRNode.RightHand) > 0.25f;
 	}
 
 	[Header("References")]

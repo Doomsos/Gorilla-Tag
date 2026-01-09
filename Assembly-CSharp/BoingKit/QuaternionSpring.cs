@@ -58,17 +58,17 @@ namespace BoingKit
 			{
 				targetValueVec = -targetValueVec;
 			}
-			Vector4 vector = targetValueVec - this.ValueVec;
+			Vector4 a = targetValueVec - this.ValueVec;
 			float num = 1f + 2f * deltaTime * dampingRatio * angularFrequency;
 			float num2 = angularFrequency * angularFrequency;
 			float num3 = deltaTime * num2;
 			float num4 = deltaTime * num3;
-			float num5 = 1f / (num + num4);
-			Vector4 vector2 = num * this.ValueVec + deltaTime * this.VelocityVec + num4 * targetValueVec;
-			Vector4 vector3 = this.VelocityVec + num3 * vector;
-			this.VelocityVec = vector3 * num5;
-			this.ValueVec = vector2 * num5;
-			if (this.VelocityVec.magnitude < MathUtil.Epsilon && vector.magnitude < MathUtil.Epsilon)
+			float d = 1f / (num + num4);
+			Vector4 a2 = num * this.ValueVec + deltaTime * this.VelocityVec + num4 * targetValueVec;
+			Vector4 a3 = this.VelocityVec + num3 * a;
+			this.VelocityVec = a3 * d;
+			this.ValueVec = a2 * d;
+			if (this.VelocityVec.magnitude < MathUtil.Epsilon && a.magnitude < MathUtil.Epsilon)
 			{
 				this.VelocityVec = Vector4.zero;
 				this.ValueVec = targetValueVec;

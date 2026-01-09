@@ -7,7 +7,7 @@ public class PaperPlaneProjectile : MonoBehaviour
 {
 	public event PaperPlaneProjectile.PaperPlaneHit OnHit;
 
-	public Transform transform
+	public new Transform transform
 	{
 		get
 		{
@@ -183,7 +183,7 @@ public class PaperPlaneProjectile : MonoBehaviour
 		if (this._timeElapsed < this.maxFlightTime)
 		{
 			SlingshotProjectileHitNotifier slingshotProjectileHitNotifier;
-			if (this.results[0].collider.TryGetComponent<SlingshotProjectileHitNotifier>(ref slingshotProjectileHitNotifier))
+			if (this.results[0].collider.TryGetComponent<SlingshotProjectileHitNotifier>(out slingshotProjectileHitNotifier))
 			{
 				slingshotProjectileHitNotifier.InvokeHit(this, this.results[0].collider);
 			}

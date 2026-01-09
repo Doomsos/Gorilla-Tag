@@ -19,8 +19,8 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		{
 			this.lightDistanceBins[i] = new List<GameLight>();
 		}
-		this.lightDataBuffer = new GraphicsBuffer(16, 50, UnsafeUtility.SizeOf<GameLightingManager.LightData>());
-		this.lightData = new NativeArray<GameLightingManager.LightData>(50, 4, 1);
+		this.lightDataBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 50, UnsafeUtility.SizeOf<GameLightingManager.LightData>());
+		this.lightData = new NativeArray<GameLightingManager.LightData>(50, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 		this.nextLightUpdate = 0;
 		this.ClearGameLights();
 		this.SetDesaturateAndTintEnabled(false, Color.black);
@@ -150,8 +150,8 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 			float num = Mathf.Clamp(a.cachedColorAndIntensity.x + a.cachedColorAndIntensity.y + a.cachedColorAndIntensity.z, 0.01f, 6f);
 			float num2 = Mathf.Clamp(b.cachedColorAndIntensity.x + b.cachedColorAndIntensity.y + b.cachedColorAndIntensity.z, 0.01f, 6f);
 			float num3 = (this.cameraPosForSort - a.cachedPosition).sqrMagnitude / num;
-			float num4 = (this.cameraPosForSort - b.cachedPosition).sqrMagnitude / num2;
-			return num3.CompareTo(num4);
+			float value = (this.cameraPosForSort - b.cachedPosition).sqrMagnitude / num2;
+			return num3.CompareTo(value);
 		}
 	}
 
@@ -308,24 +308,24 @@ public class GameLightingManager : MonoBehaviourTick, IGorillaSliceableSimple
 		lightPos.w = 1f;
 		Vector4 cachedColorAndIntensity = gameLight.cachedColorAndIntensity;
 		Vector3 zero = Vector3.zero;
-		GameLightingManager.LightData lightData = new GameLightingManager.LightData
+		GameLightingManager.LightData value = new GameLightingManager.LightData
 		{
 			lightPos = lightPos,
 			lightColor = cachedColorAndIntensity,
 			lightDirection = zero
 		};
-		this.lightData[lightIndex] = lightData;
+		this.lightData[lightIndex] = value;
 	}
 
 	private void ResetLight(int lightIndex)
 	{
-		GameLightingManager.LightData lightData = new GameLightingManager.LightData
+		GameLightingManager.LightData value = new GameLightingManager.LightData
 		{
 			lightPos = Vector4.zero,
 			lightColor = Color.black,
 			lightDirection = Vector4.zero
 		};
-		this.lightData[lightIndex] = lightData;
+		this.lightData[lightIndex] = value;
 	}
 
 	[OnEnterPlay_SetNull]

@@ -11,7 +11,7 @@ public static class UnityTagsExt
 			return UnityTag.Invalid;
 		}
 		UnityTag result;
-		if (!UnityTags.StringToTag.TryGetValue(s, ref result))
+		if (!UnityTags.StringToTag.TryGetValue(s, out result))
 		{
 			return UnityTag.Invalid;
 		}
@@ -47,13 +47,13 @@ public static class UnityTagsExt
 	public static bool TryGetTag(this GameObject g, out UnityTag tag)
 	{
 		tag = UnityTag.Invalid;
-		return !(g == null) && UnityTags.StringToTag.TryGetValue(g.tag, ref tag);
+		return !(g == null) && UnityTags.StringToTag.TryGetValue(g.tag, out tag);
 	}
 
 	public static bool TryGetTag(this Component c, out UnityTag tag)
 	{
 		tag = UnityTag.Invalid;
-		return !(c == null) && UnityTags.StringToTag.TryGetValue(c.tag, ref tag);
+		return !(c == null) && UnityTags.StringToTag.TryGetValue(c.tag, out tag);
 	}
 
 	public static bool CompareTag(this GameObject g, UnityTag tag)

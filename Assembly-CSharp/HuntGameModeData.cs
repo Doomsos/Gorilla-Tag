@@ -54,6 +54,6 @@ public class HuntGameModeData : FusionGameModeData
 
 	[WeaverGenerated]
 	[DefaultForProperty("huntdata", 0, 23)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private HuntData _huntdata;
 }

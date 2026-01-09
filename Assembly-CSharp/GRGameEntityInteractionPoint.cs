@@ -33,7 +33,7 @@ public class GRGameEntityInteractionPoint : MonoBehaviour
 		{
 			return;
 		}
-		onGrabStart.Invoke();
+		onGrabStart();
 	}
 
 	public void OnReleased()
@@ -43,7 +43,7 @@ public class GRGameEntityInteractionPoint : MonoBehaviour
 		this.gameEntity.transform.parent = this.targetParent;
 		this.gameEntity.transform.localRotation = Quaternion.identity;
 		this.gameEntity.transform.localPosition = Vector3.zero;
-		this.OnGrabEnd.Invoke();
+		this.OnGrabEnd();
 	}
 
 	public void TickWhileHeld()
@@ -72,7 +72,7 @@ public class GRGameEntityInteractionPoint : MonoBehaviour
 		{
 			return;
 		}
-		onGrabContinue.Invoke();
+		onGrabContinue();
 	}
 
 	public GameEntity gameEntity;

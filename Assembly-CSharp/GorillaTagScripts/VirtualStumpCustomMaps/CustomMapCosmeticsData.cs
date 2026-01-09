@@ -90,12 +90,12 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 
 		private void OnGetCosmeticsDataFromTitleData(string cosmeticsData)
 		{
-			string[] array = cosmeticsData.Split("|", 0);
+			string[] array = cosmeticsData.Split("|", StringSplitOptions.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				string text = array[i];
 				string text2 = text;
-				text2 = text2.RemoveAll('\\', 5);
+				text2 = text2.RemoveAll('\\', StringComparison.OrdinalIgnoreCase);
 				text2 = text2.Trim('"');
 				CustomMapCosmeticItem itemFromJson = JsonUtility.FromJson<CustomMapCosmeticItem>(text2);
 				this.customMapCosmeticItemList.RemoveAll((CustomMapCosmeticItem item) => item.customMapItemSlot == itemFromJson.customMapItemSlot);

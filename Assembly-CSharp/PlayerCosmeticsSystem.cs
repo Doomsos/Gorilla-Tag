@@ -21,7 +21,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 			Object.DontDestroyOnLoad(this);
 			this.inventory = new List<string>();
 			this.inventory.Add("Inventory");
-			NetworkSystem.Instance.OnRaiseEvent += new Action<byte, object, int>(this.OnNetEvent);
+			NetworkSystem.Instance.OnRaiseEvent += this.OnNetEvent;
 			return;
 		}
 		Object.Destroy(this);
@@ -33,7 +33,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		PlayFabTitleDataCache.Instance.GetTitleData("EnableTempCosmeticUnlocks", delegate(string data)
 		{
 			bool tempUnlocksEnabled;
-			if (bool.TryParse(data, ref tempUnlocksEnabled))
+			if (bool.TryParse(data, out tempUnlocksEnabled))
 			{
 				PlayerCosmeticsSystem.TempUnlocksEnabled = tempUnlocksEnabled;
 				return;
@@ -89,31 +89,31 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		while (PlayerCosmeticsSystem.playersToLookUp.Count > 0)
 		{
 			NetPlayer netPlayer = PlayerCosmeticsSystem.playersToLookUp.Dequeue();
-			string text = netPlayer.ActorNumber.ToString();
-			if (netPlayer.InRoom() && !PlayerCosmeticsSystem.playerIDsList.Contains(text))
+			string item = netPlayer.ActorNumber.ToString();
+			if (netPlayer.InRoom() && !PlayerCosmeticsSystem.playerIDsList.Contains(item))
 			{
 				if (PlayerCosmeticsSystem.playerIDsList.Count == 0)
 				{
 					int actorNumber = netPlayer.ActorNumber;
 				}
-				PlayerCosmeticsSystem.playerIDsList.Add(text);
+				PlayerCosmeticsSystem.playerIDsList.Add(item);
 				PlayerCosmeticsSystem.playersWaiting.AddSortedUnique(netPlayer.ActorNumber);
 			}
 		}
 		if (PlayerCosmeticsSystem.playerIDsList.Count > 0)
 		{
-			GetSharedGroupDataRequest getSharedGroupDataRequest = new GetSharedGroupDataRequest();
+			PlayFab.ClientModels.GetSharedGroupDataRequest getSharedGroupDataRequest = new PlayFab.ClientModels.GetSharedGroupDataRequest();
 			getSharedGroupDataRequest.Keys = PlayerCosmeticsSystem.playerIDsList;
 			getSharedGroupDataRequest.SharedGroupId = NetworkSystem.Instance.RoomName + Regex.Replace(NetworkSystem.Instance.CurrentRegion, "[^a-zA-Z0-9]", "").ToUpper();
 			PlayFabClientAPI.GetSharedGroupData(getSharedGroupDataRequest, new Action<GetSharedGroupDataResult>(this.OnGetsharedGroupData), delegate(PlayFabError error)
 			{
 				Debug.Log(error.GenerateErrorReport());
-				if (error.Error == 1074)
+				if (error.Error == PlayFabErrorCode.NotAuthenticated)
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					return;
 				}
-				if (error.Error == 1002)
+				if (error.Error == PlayFabErrorCode.AccountBanned)
 				{
 					GorillaGameManager.ForceStopGame_DisconnectAndDestroy();
 				}
@@ -140,8 +140,8 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		while (PlayerCosmeticsSystem.playersToLookUp.Count > 0)
 		{
 			player = PlayerCosmeticsSystem.playersToLookUp.Dequeue();
-			string text = player.ActorNumber.ToString();
-			if (player.InRoom() && !PlayerCosmeticsSystem.playerIDsList.Contains(text))
+			string item = player.ActorNumber.ToString();
+			if (player.InRoom() && !PlayerCosmeticsSystem.playerIDsList.Contains(item))
 			{
 				PlayerCosmeticsSystem.playerIDsList.Add(player.UserId);
 				PlayerCosmeticsSystem.playerActorNumberList.Add(player.ActorNumber);
@@ -151,7 +151,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		for (int i = 0; i < PlayerCosmeticsSystem.playerIDsList.Count; i = num + 1)
 		{
 			int j = i;
-			GetSharedGroupDataRequest getSharedGroupDataRequest = new GetSharedGroupDataRequest();
+			PlayFab.ClientModels.GetSharedGroupDataRequest getSharedGroupDataRequest = new PlayFab.ClientModels.GetSharedGroupDataRequest();
 			getSharedGroupDataRequest.Keys = this.inventory;
 			getSharedGroupDataRequest.SharedGroupId = PlayerCosmeticsSystem.playerIDsList[j] + "Inventory";
 			PlayFabClientAPI.GetSharedGroupData(getSharedGroupDataRequest, delegate(GetSharedGroupDataResult result)
@@ -161,13 +161,13 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 					PlayerCosmeticsSystem.playersWaiting.Clear();
 					return;
 				}
-				foreach (KeyValuePair<string, SharedGroupDataRecord> keyValuePair in result.Data)
+				foreach (KeyValuePair<string, PlayFab.ClientModels.SharedGroupDataRecord> keyValuePair in result.Data)
 				{
 					if (!(keyValuePair.Key != "Inventory") && Utils.PlayerInRoom(PlayerCosmeticsSystem.playerActorNumberList[j]))
 					{
 						this.tempCosmetics = keyValuePair.Value.Value;
 						IUserCosmeticsCallback userCosmeticsCallback;
-						if (!PlayerCosmeticsSystem.userCosmeticCallback.TryGetValue(PlayerCosmeticsSystem.playerActorNumberList[j], ref userCosmeticsCallback))
+						if (!PlayerCosmeticsSystem.userCosmeticCallback.TryGetValue(PlayerCosmeticsSystem.playerActorNumberList[j], out userCosmeticsCallback))
 						{
 							PlayerCosmeticsSystem.userCosmeticsWaiting[PlayerCosmeticsSystem.playerActorNumberList[j]] = this.tempCosmetics;
 						}
@@ -184,12 +184,12 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 				}
 			}, delegate(PlayFabError error)
 			{
-				if (error.Error == 1074)
+				if (error.Error == PlayFabErrorCode.NotAuthenticated)
 				{
 					PlayFabAuthenticator.instance.AuthenticateWithPlayFab();
 					return;
 				}
-				if (error.Error == 1002)
+				if (error.Error == PlayFabErrorCode.AccountBanned)
 				{
 					GorillaGameManager.ForceStopGame_DisconnectAndDestroy();
 				}
@@ -233,11 +233,11 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 			return;
 		}
 		bool retrying = false;
-		foreach (KeyValuePair<string, SharedGroupDataRecord> keyValuePair in result.Data)
+		foreach (KeyValuePair<string, PlayFab.ClientModels.SharedGroupDataRecord> keyValuePair in result.Data)
 		{
 			this.playerTemp = null;
 			int num;
-			if (int.TryParse(keyValuePair.Key, ref num))
+			if (int.TryParse(keyValuePair.Key, out num))
 			{
 				if (!Utils.PlayerInRoom(num))
 				{
@@ -249,7 +249,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 					this.playerTemp = NetworkSystem.Instance.GetPlayer(num);
 					this.tempCosmetics = keyValuePair.Value.Value;
 					IUserCosmeticsCallback userCosmeticsCallback;
-					if (!PlayerCosmeticsSystem.userCosmeticCallback.TryGetValue(num, ref userCosmeticsCallback))
+					if (!PlayerCosmeticsSystem.userCosmeticCallback.TryGetValue(num, out userCosmeticsCallback))
 					{
 						PlayerCosmeticsSystem.userCosmeticsWaiting[num] = this.tempCosmetics;
 					}
@@ -297,7 +297,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 	{
 		PlayerCosmeticsSystem.userCosmeticCallback[playerID] = callback;
 		string cosmetics;
-		if (PlayerCosmeticsSystem.userCosmeticsWaiting.TryGetValue(playerID, ref cosmetics))
+		if (PlayerCosmeticsSystem.userCosmeticsWaiting.TryGetValue(playerID, out cosmetics))
 		{
 			callback.PendingUpdate = false;
 			callback.OnGetUserCosmetics(cosmetics);
@@ -321,7 +321,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		}
 		PlayerCosmeticsSystem.playersToLookUp.Enqueue(player);
 		IUserCosmeticsCallback userCosmeticsCallback;
-		if (PlayerCosmeticsSystem.userCosmeticCallback.TryGetValue(player.ActorNumber, ref userCosmeticsCallback))
+		if (PlayerCosmeticsSystem.userCosmeticCallback.TryGetValue(player.ActorNumber, out userCosmeticsCallback))
 		{
 			userCosmeticsCallback.PendingUpdate = true;
 		}
@@ -339,7 +339,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 			{
 				PlayerCosmeticsSystem.playersToLookUp.Enqueue(netPlayer);
 				IUserCosmeticsCallback userCosmeticsCallback;
-				if (PlayerCosmeticsSystem.userCosmeticCallback.TryGetValue(netPlayer.ActorNumber, ref userCosmeticsCallback))
+				if (PlayerCosmeticsSystem.userCosmeticCallback.TryGetValue(netPlayer.ActorNumber, out userCosmeticsCallback))
 				{
 					userCosmeticsCallback.PendingUpdate = true;
 				}
@@ -488,7 +488,7 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 	public static bool IsTemporaryCosmeticAllowed(VRRig rigRef, string cosmeticId)
 	{
 		int num;
-		return rigRef.TemporaryCosmetics.Contains(cosmeticId) || (PlayerCosmeticsSystem.k_tempUnlockedCosmetics.TryGetValue(cosmeticId, ref num) && num > 0);
+		return rigRef.TemporaryCosmetics.Contains(cosmeticId) || (PlayerCosmeticsSystem.k_tempUnlockedCosmetics.TryGetValue(cosmeticId, out num) && num > 0);
 	}
 
 	public static bool LocalIsTemporaryCosmetic(string cosmeticId)

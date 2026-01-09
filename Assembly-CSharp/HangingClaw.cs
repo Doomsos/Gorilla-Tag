@@ -42,20 +42,20 @@ public class HangingClaw : MonoBehaviourPostTick
 	{
 		float num = this.baseSegLen;
 		this.targetSegLenScaled = num * (1f + this.slackFraction);
-		float num2 = 0.01111f;
-		float num3 = Time.time * 0.5f;
-		Vector3 vector = this.gravity * num2 * num2;
-		Vector3 topPos = base.transform.position + new Vector3(0f, 0.012f * Mathf.Sin(num3), 0.02f * Mathf.Cos(num3));
+		float d = 0.01111f;
+		float f = Time.time * 0.5f;
+		Vector3 b = this.gravity * d * d;
+		Vector3 topPos = base.transform.position + new Vector3(0f, 0.012f * Mathf.Sin(f), 0.02f * Mathf.Cos(f));
 		for (int i = 1; i < this.segmentCount; i++)
 		{
-			Vector3 vector2 = this.ropeSegs[i].pos - this.ropeSegs[i].posOld;
+			Vector3 a = this.ropeSegs[i].pos - this.ropeSegs[i].posOld;
 			this.ropeSegs[i].posOld = this.ropeSegs[i].pos;
 			HangingClaw.RopeSegment[] array = this.ropeSegs;
-			int num4 = i;
-			array[num4].pos = array[num4].pos + (vector2 * this.velocityDamping + vector);
+			int num2 = i;
+			array[num2].pos = array[num2].pos + (a * this.velocityDamping + b);
 		}
-		int num5 = 3;
-		for (int j = 0; j < num5; j++)
+		int num3 = 3;
+		for (int j = 0; j < num3; j++)
 		{
 			this.ApplyConstraints(topPos);
 		}
@@ -74,8 +74,8 @@ public class HangingClaw : MonoBehaviourPostTick
 
 	private void ApplyConstraintSegment(ref HangingClaw.RopeSegment a, ref HangingClaw.RopeSegment b, float wA, float wB, float stiffness)
 	{
-		Vector3 vector = b.pos - a.pos;
-		float magnitude = vector.magnitude;
+		Vector3 a2 = b.pos - a.pos;
+		float magnitude = a2.magnitude;
 		if (magnitude < 1E-06f)
 		{
 			return;
@@ -85,15 +85,15 @@ public class HangingClaw : MonoBehaviourPostTick
 		{
 			return;
 		}
-		Vector3 vector2 = vector / magnitude;
+		Vector3 a3 = a2 / magnitude;
 		float num2 = wA + wB;
 		if (num2 <= 0f)
 		{
 			return;
 		}
-		Vector3 vector3 = vector2 * (num * stiffness);
-		a.pos += vector3 * (wA / num2);
-		b.pos += -vector3 * (wB / num2);
+		Vector3 a4 = a3 * (num * stiffness);
+		a.pos += a4 * (wA / num2);
+		b.pos += -a4 * (wB / num2);
 	}
 
 	private void DrawRope()

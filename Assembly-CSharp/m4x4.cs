@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 [Serializable]
-[StructLayout(2, Size = 64)]
+[StructLayout(LayoutKind.Explicit, Size = 64)]
 public struct m4x4
 {
 	public m4x4(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33)
@@ -233,19 +233,19 @@ public struct m4x4
 	[FixedBuffer(typeof(float), 16)]
 	[NonSerialized]
 	[FieldOffset(0)]
-	[MarshalAs(30, SizeConst = 16)]
+	[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
 	public m4x4.<data_f>e__FixedBuffer data_f;
 
 	[FixedBuffer(typeof(int), 16)]
 	[NonSerialized]
 	[FieldOffset(0)]
-	[MarshalAs(30, SizeConst = 16)]
+	[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
 	public m4x4.<data_i>e__FixedBuffer data_i;
 
 	[FixedBuffer(typeof(ushort), 32)]
 	[NonSerialized]
 	[FieldOffset(0)]
-	[MarshalAs(30, SizeConst = 32)]
+	[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
 	public m4x4.<data_h>e__FixedBuffer data_h;
 
 	[NonSerialized]
@@ -522,7 +522,7 @@ public struct m4x4
 
 	[CompilerGenerated]
 	[UnsafeValueType]
-	[StructLayout(0, Size = 64)]
+	[StructLayout(LayoutKind.Sequential, Size = 64)]
 	public struct <data_f>e__FixedBuffer
 	{
 		public float FixedElementField;
@@ -530,7 +530,7 @@ public struct m4x4
 
 	[CompilerGenerated]
 	[UnsafeValueType]
-	[StructLayout(0, Size = 64)]
+	[StructLayout(LayoutKind.Sequential, Size = 64)]
 	public struct <data_h>e__FixedBuffer
 	{
 		public ushort FixedElementField;
@@ -538,7 +538,7 @@ public struct m4x4
 
 	[CompilerGenerated]
 	[UnsafeValueType]
-	[StructLayout(0, Size = 64)]
+	[StructLayout(LayoutKind.Sequential, Size = 64)]
 	public struct <data_i>e__FixedBuffer
 	{
 		public int FixedElementField;

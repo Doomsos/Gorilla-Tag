@@ -3,6 +3,7 @@ using System.Collections;
 using System.Runtime.CompilerServices;
 using GorillaExtensions;
 using GorillaTag;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -64,7 +65,7 @@ public abstract class GorillaKeyButton<TBinding> : MonoBehaviour where TBinding 
 		GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(66, isLeftHand, 0.1f);
 		if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
 		{
-			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", 1, new object[]
+			GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
 			{
 				66,
 				isLeftHand,

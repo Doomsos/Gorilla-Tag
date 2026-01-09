@@ -29,8 +29,7 @@ public class MarkOneMitts : HandTapBehaviour, ITickSystemTick, IProximityEffectR
 		{
 			float speed = this.proximitySpeedCurve.Evaluate(num);
 			float num2 = this.proximitySpreadCurve.Evaluate(num);
-			ParticleSystem.MinMaxCurve xy;
-			xy..ctor(-num2, num2);
+			ParticleSystem.MinMaxCurve xy = new ParticleSystem.MinMaxCurve(-num2, num2);
 			this.StartFlame(this.leftMitt, num, speed, xy);
 			this.StartFlame(this.rightMitt, num, speed, xy);
 			if (this.vibrateController && this.vibrationStrengthMult > 0f)
@@ -39,9 +38,9 @@ public class MarkOneMitts : HandTapBehaviour, ITickSystemTick, IProximityEffectR
 				GorillaTagger.Instance.StartVibration(false, this.vibrationStrengthMult * 0.5f * num, Time.deltaTime);
 			}
 			this.SetInterferenceAudio(true);
-			float num3 = 1f - Mathf.Exp(-this.proximityAudioReactionSpeed * Time.deltaTime);
-			this.proximityAudioSource.pitch = Mathf.Lerp(this.proximityAudioSource.pitch, this.proximityAudioPitch.Evaluate(num), num3);
-			this.proximityAudioSource.volume = Mathf.Lerp(this.proximityAudioSource.volume, this.proximityAudioVolume.Evaluate(num), num3);
+			float t = 1f - Mathf.Exp(-this.proximityAudioReactionSpeed * Time.deltaTime);
+			this.proximityAudioSource.pitch = Mathf.Lerp(this.proximityAudioSource.pitch, this.proximityAudioPitch.Evaluate(num), t);
+			this.proximityAudioSource.volume = Mathf.Lerp(this.proximityAudioSource.volume, this.proximityAudioVolume.Evaluate(num), t);
 			return;
 		}
 		if (this.leftMitt.thermalSource.enabled || this.rightMitt.thermalSource.enabled)

@@ -23,22 +23,21 @@ namespace BoingKit
 
 		public static Quaternion AxisAngle(Vector3 axis, float angle)
 		{
-			float num = 0.5f * angle;
-			float num2 = Mathf.Sin(num);
-			float num3 = Mathf.Cos(num);
-			return new Quaternion(num2 * axis.x, num2 * axis.y, num2 * axis.z, num3);
+			float f = 0.5f * angle;
+			float num = Mathf.Sin(f);
+			float w = Mathf.Cos(f);
+			return new Quaternion(num * axis.x, num * axis.y, num * axis.z, w);
 		}
 
 		public static Vector3 GetAxis(Quaternion q)
 		{
-			Vector3 vector;
-			vector..ctor(q.x, q.y, q.z);
-			float magnitude = vector.magnitude;
+			Vector3 a = new Vector3(q.x, q.y, q.z);
+			float magnitude = a.magnitude;
 			if (magnitude < MathUtil.Epsilon)
 			{
 				return Vector3.left;
 			}
-			return vector / magnitude;
+			return a / magnitude;
 		}
 
 		public static float GetAngle(Quaternion q)
@@ -54,10 +53,10 @@ namespace BoingKit
 				return Quaternion.identity;
 			}
 			v /= magnitude;
-			float num = 0.5f * magnitude;
-			float num2 = Mathf.Sin(num);
-			float num3 = Mathf.Cos(num);
-			return new Quaternion(num2 * v.x, num2 * v.y, num2 * v.z, num3);
+			float f = 0.5f * magnitude;
+			float num = Mathf.Sin(f);
+			float w = Mathf.Cos(f);
+			return new Quaternion(num * v.x, num * v.y, num * v.z, w);
 		}
 
 		public static Vector3 ToAngularVector(Quaternion q)
@@ -106,16 +105,15 @@ namespace BoingKit
 
 		public static void DecomposeSwingTwist(Quaternion q, Vector3 twistAxis, out Quaternion swing, out Quaternion twist)
 		{
-			Vector3 vector;
-			vector..ctor(q.x, q.y, q.z);
+			Vector3 vector = new Vector3(q.x, q.y, q.z);
 			if (vector.sqrMagnitude < MathUtil.Epsilon)
 			{
 				Vector3 vector2 = q * twistAxis;
-				Vector3 vector3 = Vector3.Cross(twistAxis, vector2);
-				if (vector3.sqrMagnitude > MathUtil.Epsilon)
+				Vector3 axis = Vector3.Cross(twistAxis, vector2);
+				if (axis.sqrMagnitude > MathUtil.Epsilon)
 				{
-					float num = Vector3.Angle(twistAxis, vector2);
-					swing = Quaternion.AngleAxis(num, vector3);
+					float angle = Vector3.Angle(twistAxis, vector2);
+					swing = Quaternion.AngleAxis(angle, axis);
 				}
 				else
 				{
@@ -124,8 +122,8 @@ namespace BoingKit
 				twist = Quaternion.AngleAxis(180f, twistAxis);
 				return;
 			}
-			Vector3 vector4 = Vector3.Project(vector, twistAxis);
-			twist = new Quaternion(vector4.x, vector4.y, vector4.z, q.w);
+			Vector3 vector3 = Vector3.Project(vector, twistAxis);
+			twist = new Quaternion(vector3.x, vector3.y, vector3.z, q.w);
 			twist = QuaternionUtil.Normalize(twist);
 			swing = q * Quaternion.Inverse(twist);
 		}
@@ -151,18 +149,18 @@ namespace BoingKit
 
 		public static Quaternion Sterp(Quaternion a, Quaternion b, Vector3 twistAxis, float tSwing, float tTwist, out Quaternion swing, out Quaternion twist, QuaternionUtil.SterpMode mode)
 		{
-			Quaternion quaternion;
-			Quaternion quaternion2;
-			QuaternionUtil.DecomposeSwingTwist(b * Quaternion.Inverse(a), twistAxis, out quaternion, out quaternion2);
+			Quaternion b2;
+			Quaternion b3;
+			QuaternionUtil.DecomposeSwingTwist(b * Quaternion.Inverse(a), twistAxis, out b2, out b3);
 			if (mode == QuaternionUtil.SterpMode.Nlerp || mode != QuaternionUtil.SterpMode.Slerp)
 			{
-				swing = Quaternion.Lerp(Quaternion.identity, quaternion, tSwing);
-				twist = Quaternion.Lerp(Quaternion.identity, quaternion2, tTwist);
+				swing = Quaternion.Lerp(Quaternion.identity, b2, tSwing);
+				twist = Quaternion.Lerp(Quaternion.identity, b3, tTwist);
 			}
 			else
 			{
-				swing = Quaternion.Slerp(Quaternion.identity, quaternion, tSwing);
-				twist = Quaternion.Slerp(Quaternion.identity, quaternion2, tTwist);
+				swing = Quaternion.Slerp(Quaternion.identity, b2, tSwing);
+				twist = Quaternion.Slerp(Quaternion.identity, b3, tTwist);
 			}
 			return twist * swing;
 		}

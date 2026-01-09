@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Fusion;
 
 [NetworkStructWeaved(3)]
-[StructLayout(2, Size = 12)]
+[StructLayout(LayoutKind.Explicit, Size = 12)]
 public struct BeeSwarmData : INetworkStruct
 {
 	public int TargetActorNumber { readonly get; set; }

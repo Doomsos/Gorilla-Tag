@@ -9,8 +9,8 @@ public static class GTSignal
 {
 	private static void _Emit(GTSignal.EmitMode mode, int signalID, object[] data)
 	{
-		object[] array = GTSignal._ToEventContent(signalID, PhotonNetwork.Time, data);
-		PhotonNetwork.RaiseEvent(186, array, GTSignal.gTargetsToOptions[mode], GTSignal.gSendOptions);
+		object[] eventContent = GTSignal._ToEventContent(signalID, PhotonNetwork.Time, data);
+		PhotonNetwork.RaiseEvent(186, eventContent, GTSignal.gTargetsToOptions[mode], GTSignal.gSendOptions);
 	}
 
 	private static void _Emit(int[] targetActors, int signalID, object[] data)
@@ -20,8 +20,8 @@ public static class GTSignal
 			return;
 		}
 		GTSignal.gCustomTargetOptions.TargetActors = targetActors;
-		object[] array = GTSignal._ToEventContent(signalID, PhotonNetwork.Time, data);
-		PhotonNetwork.RaiseEvent(186, array, GTSignal.gCustomTargetOptions, GTSignal.gSendOptions);
+		object[] eventContent = GTSignal._ToEventContent(signalID, PhotonNetwork.Time, data);
+		PhotonNetwork.RaiseEvent(186, eventContent, GTSignal.gCustomTargetOptions, GTSignal.gSendOptions);
 	}
 
 	private static object[] _ToEventContent(int signalID, double time, object[] data)
@@ -29,7 +29,7 @@ public static class GTSignal
 		int num = data.Length;
 		int num2 = num + 2;
 		object[] array;
-		if (!GTSignal.gLengthToContentArray.TryGetValue(num2, ref array))
+		if (!GTSignal.gLengthToContentArray.TryGetValue(num2, out array))
 		{
 			array = new object[num2];
 			GTSignal.gLengthToContentArray.Add(num2, array);
@@ -52,7 +52,7 @@ public static class GTSignal
 		return 0;
 	}
 
-	[RuntimeInitializeOnLoadMethod(1)]
+	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void InitializeOnLoad()
 	{
 		GTSignal.gCustomTargetOptions = RaiseEventOptions.Default;
@@ -60,13 +60,13 @@ public static class GTSignal
 		GTSignal.gSendOptions.Encrypt = true;
 		GTSignal.gTargetsToOptions = new Dictionary<GTSignal.EmitMode, RaiseEventOptions>(3);
 		RaiseEventOptions @default = RaiseEventOptions.Default;
-		@default.Receivers = 1;
+		@default.Receivers = ReceiverGroup.All;
 		GTSignal.gTargetsToOptions.Add(GTSignal.EmitMode.All, @default);
 		RaiseEventOptions default2 = RaiseEventOptions.Default;
-		default2.Receivers = 0;
+		default2.Receivers = ReceiverGroup.Others;
 		GTSignal.gTargetsToOptions.Add(GTSignal.EmitMode.Others, default2);
 		RaiseEventOptions default3 = RaiseEventOptions.Default;
-		default3.Receivers = 2;
+		default3.Receivers = ReceiverGroup.MasterClient;
 		GTSignal.gTargetsToOptions.Add(GTSignal.EmitMode.Host, default3);
 	}
 

@@ -85,10 +85,8 @@ namespace GorillaLocomotion.Swimming
 				this.volumeMaxHeight = num;
 				this.volumeMinHeight = num2;
 			}
-			Ray ray;
-			ray..ctor(new Vector3(point.x, this.volumeMaxHeight, point.z), Vector3.down);
-			Ray ray2;
-			ray2..ctor(new Vector3(point.x, this.volumeMinHeight, point.z), Vector3.up);
+			Ray ray = new Ray(new Vector3(point.x, this.volumeMaxHeight, point.z), Vector3.down);
+			Ray ray2 = new Ray(new Vector3(point.x, this.volumeMinHeight, point.z), Vector3.up);
 			float num3 = this.volumeMaxHeight - this.volumeMinHeight;
 			float num4 = float.MinValue;
 			float num5 = float.MaxValue;
@@ -100,7 +98,7 @@ namespace GorillaLocomotion.Swimming
 				bool enabled = this.surfaceColliders[j].enabled;
 				this.surfaceColliders[j].enabled = true;
 				RaycastHit hit;
-				if (this.surfaceColliders[j].Raycast(ray, ref hit, num3) && hit.point.y > num4 && this.HitOutsideSurfaceOfMesh(ray.direction, this.surfaceColliders[j], hit))
+				if (this.surfaceColliders[j].Raycast(ray, out hit, num3) && hit.point.y > num4 && this.HitOutsideSurfaceOfMesh(ray.direction, this.surfaceColliders[j], hit))
 				{
 					num4 = hit.point.y;
 					flag = true;
@@ -108,7 +106,7 @@ namespace GorillaLocomotion.Swimming
 					result.surfaceNormal = hit.normal;
 				}
 				RaycastHit hit2;
-				if (this.surfaceColliders[j].Raycast(ray2, ref hit2, num3) && hit2.point.y < num5 && this.HitOutsideSurfaceOfMesh(ray2.direction, this.surfaceColliders[j], hit2))
+				if (this.surfaceColliders[j].Raycast(ray2, out hit2, num3) && hit2.point.y < num5 && this.HitOutsideSurfaceOfMesh(ray2.direction, this.surfaceColliders[j], hit2))
 				{
 					num5 = hit2.point.y;
 					flag2 = true;
@@ -156,25 +154,25 @@ namespace GorillaLocomotion.Swimming
 
 		private bool HitOutsideSurfaceOfMesh(Vector3 castDir, MeshCollider meshCollider, RaycastHit hit)
 		{
-			if (!WaterVolume.meshTrianglesDict.TryGetValue(meshCollider.sharedMesh, ref this.sharedMeshTris))
+			if (!WaterVolume.meshTrianglesDict.TryGetValue(meshCollider.sharedMesh, out this.sharedMeshTris))
 			{
 				this.sharedMeshTris = (int[])meshCollider.sharedMesh.triangles.Clone();
 				WaterVolume.meshTrianglesDict.Add(meshCollider.sharedMesh, this.sharedMeshTris);
 			}
-			if (!WaterVolume.meshVertsDict.TryGetValue(meshCollider.sharedMesh, ref this.sharedMeshVerts))
+			if (!WaterVolume.meshVertsDict.TryGetValue(meshCollider.sharedMesh, out this.sharedMeshVerts))
 			{
 				this.sharedMeshVerts = (Vector3[])meshCollider.sharedMesh.vertices.Clone();
 				WaterVolume.meshVertsDict.Add(meshCollider.sharedMesh, this.sharedMeshVerts);
 			}
-			Vector3 vector = this.sharedMeshVerts[this.sharedMeshTris[hit.triangleIndex * 3]];
-			Vector3 vector2 = this.sharedMeshVerts[this.sharedMeshTris[hit.triangleIndex * 3 + 1]];
-			Vector3 vector3 = this.sharedMeshVerts[this.sharedMeshTris[hit.triangleIndex * 3 + 2]];
-			Vector3 vector4 = meshCollider.transform.TransformDirection(Vector3.Cross(vector2 - vector, vector3 - vector).normalized);
-			bool flag = Vector3.Dot(castDir, vector4) < 0f;
+			Vector3 b = this.sharedMeshVerts[this.sharedMeshTris[hit.triangleIndex * 3]];
+			Vector3 a = this.sharedMeshVerts[this.sharedMeshTris[hit.triangleIndex * 3 + 1]];
+			Vector3 a2 = this.sharedMeshVerts[this.sharedMeshTris[hit.triangleIndex * 3 + 2]];
+			Vector3 vector = meshCollider.transform.TransformDirection(Vector3.Cross(a - b, a2 - b).normalized);
+			bool flag = Vector3.Dot(castDir, vector) < 0f;
 			if (this.debugDrawSurfaceCast)
 			{
 				Color color = flag ? Color.blue : Color.red;
-				DebugUtil.DrawLine(hit.point, hit.point + vector4 * 0.3f, color, false);
+				DebugUtil.DrawLine(hit.point, hit.point + vector * 0.3f, color, false);
 			}
 			return flag;
 		}
@@ -191,10 +189,10 @@ namespace GorillaLocomotion.Swimming
 				Vector3 vector2 = meshCollider.gameObject.transform.TransformPoint(vertices[triangles[hit.triangleIndex * 3 + 1]]);
 				Vector3 vector3 = meshCollider.gameObject.transform.TransformPoint(vertices[triangles[hit.triangleIndex * 3 + 2]]);
 				Vector3 normalized = Vector3.Cross(vector2 - vector, vector3 - vector).normalized;
-				float num = 0.2f;
-				DebugUtil.DrawLine(vector, vector + normalized * num, Color.blue, false);
-				DebugUtil.DrawLine(vector2, vector2 + normalized * num, Color.blue, false);
-				DebugUtil.DrawLine(vector3, vector3 + normalized * num, Color.blue, false);
+				float d = 0.2f;
+				DebugUtil.DrawLine(vector, vector + normalized * d, Color.blue, false);
+				DebugUtil.DrawLine(vector2, vector2 + normalized * d, Color.blue, false);
+				DebugUtil.DrawLine(vector3, vector3 + normalized * d, Color.blue, false);
 				DebugUtil.DrawLine(vector, vector2, Color.blue, false);
 				DebugUtil.DrawLine(vector, vector3, Color.blue, false);
 				DebugUtil.DrawLine(vector2, vector3, Color.blue, false);
@@ -205,7 +203,7 @@ namespace GorillaLocomotion.Swimming
 		{
 			if (this.triggerCollider != null)
 			{
-				return Physics.Raycast(new Ray(origin, direction), ref hit, distance, layerMask, 2);
+				return Physics.Raycast(new Ray(origin, direction), out hit, distance, layerMask, QueryTriggerInteraction.Collide);
 			}
 			hit = default(RaycastHit);
 			return false;
@@ -507,7 +505,7 @@ namespace GorillaLocomotion.Swimming
 		private void TryRegisterOwnershipOfCollider(Collider collider, bool isInWater, bool isSurfaceDetected)
 		{
 			WaterVolume waterVolume;
-			if (WaterVolume.sharedColliderRegistry.TryGetValue(collider, ref waterVolume))
+			if (WaterVolume.sharedColliderRegistry.TryGetValue(collider, out waterVolume))
 			{
 				if (waterVolume != this)
 				{
@@ -538,8 +536,8 @@ namespace GorillaLocomotion.Swimming
 
 		private bool HasOwnershipOfCollider(Collider collider)
 		{
-			WaterVolume waterVolume;
-			return WaterVolume.sharedColliderRegistry.TryGetValue(collider, ref waterVolume) && waterVolume == this;
+			WaterVolume x;
+			return WaterVolume.sharedColliderRegistry.TryGetValue(collider, out x) && x == this;
 		}
 
 		protected virtual bool CanPlayerSwim()
@@ -579,18 +577,18 @@ namespace GorillaLocomotion.Swimming
 			{
 				if (this.persistentColliders[i].collider == other)
 				{
-					WaterOverlappingCollider waterOverlappingCollider = this.persistentColliders[i];
-					waterOverlappingCollider.inVolume = true;
-					this.persistentColliders[i] = waterOverlappingCollider;
+					WaterOverlappingCollider value = this.persistentColliders[i];
+					value.inVolume = true;
+					this.persistentColliders[i] = value;
 					return;
 				}
 			}
-			WaterOverlappingCollider waterOverlappingCollider2 = new WaterOverlappingCollider
+			WaterOverlappingCollider waterOverlappingCollider = new WaterOverlappingCollider
 			{
 				collider = other
 			};
-			waterOverlappingCollider2.inVolume = true;
-			waterOverlappingCollider2.lastInWaterTime = Time.time - this.waterParams.postExitDripDuration - 10f;
+			waterOverlappingCollider.inVolume = true;
+			waterOverlappingCollider.lastInWaterTime = Time.time - this.waterParams.postExitDripDuration - 10f;
 			WaterSplashOverride component2 = other.GetComponent<WaterSplashOverride>();
 			if (component2 != null)
 			{
@@ -598,11 +596,11 @@ namespace GorillaLocomotion.Swimming
 				{
 					return;
 				}
-				waterOverlappingCollider2.playBigSplash = component2.playBigSplash;
-				waterOverlappingCollider2.playDripEffect = component2.playDrippingEffect;
-				waterOverlappingCollider2.overrideBoundingRadius = component2.overrideBoundingRadius;
-				waterOverlappingCollider2.boundingRadiusOverride = component2.boundingRadiusOverride;
-				waterOverlappingCollider2.scaleMultiplier = (component2.scaleByPlayersScale ? GTPlayer.Instance.scale : 1f);
+				waterOverlappingCollider.playBigSplash = component2.playBigSplash;
+				waterOverlappingCollider.playDripEffect = component2.playDrippingEffect;
+				waterOverlappingCollider.overrideBoundingRadius = component2.overrideBoundingRadius;
+				waterOverlappingCollider.boundingRadiusOverride = component2.boundingRadiusOverride;
+				waterOverlappingCollider.scaleMultiplier = (component2.scaleByPlayersScale ? GTPlayer.Instance.scale : 1f);
 			}
 			else
 			{
@@ -610,26 +608,26 @@ namespace GorillaLocomotion.Swimming
 				{
 					return;
 				}
-				waterOverlappingCollider2.playDripEffect = true;
-				waterOverlappingCollider2.overrideBoundingRadius = false;
-				waterOverlappingCollider2.scaleMultiplier = 1f;
-				waterOverlappingCollider2.playBigSplash = false;
+				waterOverlappingCollider.playDripEffect = true;
+				waterOverlappingCollider.overrideBoundingRadius = false;
+				waterOverlappingCollider.scaleMultiplier = 1f;
+				waterOverlappingCollider.playBigSplash = false;
 			}
 			GTPlayer instance = GTPlayer.Instance;
 			if (component != null)
 			{
-				waterOverlappingCollider2.velocityTracker = instance.GetHandVelocityTracker(component.isLeftHand);
-				waterOverlappingCollider2.scaleMultiplier = instance.scale;
+				waterOverlappingCollider.velocityTracker = instance.GetHandVelocityTracker(component.isLeftHand);
+				waterOverlappingCollider.scaleMultiplier = instance.scale;
 			}
 			else
 			{
-				waterOverlappingCollider2.velocityTracker = other.GetComponent<GorillaVelocityTracker>();
+				waterOverlappingCollider.velocityTracker = other.GetComponent<GorillaVelocityTracker>();
 			}
-			if (this.PlayerVRRig != null && this.waterParams.sendSplashEffectRPCs && (component != null || waterOverlappingCollider2.collider == instance.headCollider || waterOverlappingCollider2.collider == instance.bodyCollider))
+			if (this.PlayerVRRig != null && this.waterParams.sendSplashEffectRPCs && (component != null || waterOverlappingCollider.collider == instance.headCollider || waterOverlappingCollider.collider == instance.bodyCollider))
 			{
-				waterOverlappingCollider2.photonViewForRPC = this.PlayerVRRig.netView;
+				waterOverlappingCollider.photonViewForRPC = this.PlayerVRRig.netView;
 			}
-			this.persistentColliders.Add(waterOverlappingCollider2);
+			this.persistentColliders.Add(waterOverlappingCollider);
 		}
 
 		private void OnTriggerExit(Collider other)
@@ -652,9 +650,9 @@ namespace GorillaLocomotion.Swimming
 			{
 				if (this.persistentColliders[i].collider == other)
 				{
-					WaterOverlappingCollider waterOverlappingCollider = this.persistentColliders[i];
-					waterOverlappingCollider.inVolume = false;
-					this.persistentColliders[i] = waterOverlappingCollider;
+					WaterOverlappingCollider value = this.persistentColliders[i];
+					value.inVolume = false;
+					this.persistentColliders[i] = value;
 				}
 			}
 		}
@@ -664,7 +662,7 @@ namespace GorillaLocomotion.Swimming
 			this.surfacePlane = properties.surfacePlane;
 			this.surfaceColliders = properties.surfaceColliders;
 			this.volumeColliders = waterVolumeColliders;
-			this.liquidType = (GTPlayer.LiquidType)Math.Clamp(properties.liquidType - 1, 0, 1);
+			this.liquidType = (GTPlayer.LiquidType)Math.Clamp(properties.liquidType - CMSZoneShaderSettings.EZoneLiquidType.Water, 0, 1);
 			this.waterParams = parameters;
 		}
 

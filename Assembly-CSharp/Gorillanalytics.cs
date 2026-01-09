@@ -17,7 +17,7 @@ public class Gorillanalytics : MonoBehaviour
 		PlayFabTitleDataCache.Instance.GetTitleData("GorillanalyticsChance", delegate(string s)
 		{
 			double num;
-			if (double.TryParse(s, ref num))
+			if (double.TryParse(s, out num))
 			{
 				this.oneOverChance = num;
 			}
@@ -57,13 +57,15 @@ public class Gorillanalytics : MonoBehaviour
 			this.uploadData.vel_x = averagedVelocity.x;
 			this.uploadData.vel_y = averagedVelocity.y;
 			this.uploadData.vel_z = averagedVelocity.z;
-			this.uploadData.cosmetics_owned = string.Join(";", Enumerable.Select<CosmeticsController.CosmeticItem, string>(CosmeticsController.instance.unlockedCosmetics, (CosmeticsController.CosmeticItem c) => c.itemName));
-			this.uploadData.cosmetics_worn = string.Join(";", Enumerable.Select<CosmeticsController.CosmeticItem, string>(CosmeticsController.instance.currentWornSet.items, (CosmeticsController.CosmeticItem c) => c.itemName));
+			this.uploadData.cosmetics_owned = string.Join(";", from c in CosmeticsController.instance.unlockedCosmetics
+			select c.itemName);
+			this.uploadData.cosmetics_worn = string.Join(";", from c in CosmeticsController.instance.currentWornSet.items
+			select c.itemName);
 			GorillaServer.Instance.UploadGorillanalytics(this.uploadData);
 		}
-		catch (Exception ex)
+		catch (Exception message)
 		{
-			Debug.LogError(ex);
+			Debug.LogError(message);
 		}
 	}
 
@@ -80,7 +82,7 @@ public class Gorillanalytics : MonoBehaviour
 		Room currentRoom = PhotonNetwork.CurrentRoom;
 		if (currentRoom != null)
 		{
-			currentRoom.CustomProperties.TryGetValue("gameMode", ref obj);
+			currentRoom.CustomProperties.TryGetValue("gameMode", out obj);
 		}
 		string gameMode = ((obj != null) ? obj.ToString() : null) ?? "";
 		GTZone gtzone = GorillaTagger.Instance.offlineVRRig.zoneEntity.currentZone;
@@ -101,8 +103,8 @@ public class Gorillanalytics : MonoBehaviour
 		{
 			map += "private";
 		}
-		mode = (Enumerable.FirstOrDefault<string>(this.modes, (string s) => gameMode.Contains(s)) ?? "unknown");
-		queue = (Enumerable.FirstOrDefault<string>(this.queues, (string s) => gameMode.Contains(s)) ?? "unknown");
+		mode = (this.modes.FirstOrDefault((string s) => gameMode.Contains(s)) ?? "unknown");
+		queue = (this.queues.FirstOrDefault((string s) => gameMode.Contains(s)) ?? "unknown");
 	}
 
 	public float interval = 60f;

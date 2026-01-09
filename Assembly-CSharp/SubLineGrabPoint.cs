@@ -9,9 +9,9 @@ public class SubLineGrabPoint : SubGrabPoint
 	public override Matrix4x4 GetTransformation_GripPointLocalToAdvOriginLocal(AdvancedItemState.PreData advancedItemState, SlotTransformOverride slotTransformOverride)
 	{
 		float distAlongLine = advancedItemState.distAlongLine;
-		Vector3 vector = Vector3.Lerp(this.startPointRelativeTransformToGrabPointOrigin.Position(), this.endPointRelativeTransformToGrabPointOrigin.Position(), distAlongLine);
-		Quaternion quaternion = Quaternion.Slerp(this.startPointRelativeTransformToGrabPointOrigin.rotation, this.endPointRelativeTransformToGrabPointOrigin.rotation, distAlongLine);
-		return Matrix4x4.TRS(vector, quaternion, Vector3.one);
+		Vector3 pos = Vector3.Lerp(this.startPointRelativeTransformToGrabPointOrigin.Position(), this.endPointRelativeTransformToGrabPointOrigin.Position(), distAlongLine);
+		Quaternion q = Quaternion.Slerp(this.startPointRelativeTransformToGrabPointOrigin.rotation, this.endPointRelativeTransformToGrabPointOrigin.rotation, distAlongLine);
+		return Matrix4x4.TRS(pos, q, Vector3.one);
 	}
 
 	public override void InitializePoints(Transform anchor, Transform grabPointAnchor, Transform advancedGrabPointOrigin)
@@ -38,10 +38,10 @@ public class SubLineGrabPoint : SubGrabPoint
 
 	public override float EvaluateScore(Transform objectTransform, Transform handTransform, Transform targetDock)
 	{
-		float num = SubLineGrabPoint.<EvaluateScore>g__FindNearestFractionOnLine|9_0(objectTransform.TransformPoint(this.startPointRelativeToGrabPointOrigin), objectTransform.TransformPoint(this.endPointRelativeToGrabPointOrigin), handTransform.position);
-		Vector3 vector = Vector3.Lerp(this.startPointRelativeTransformToGrabPointOrigin.Position(), this.endPointRelativeTransformToGrabPointOrigin.Position(), num);
-		Vector3 vector2 = objectTransform.InverseTransformPoint(handTransform.position);
-		return Vector3.SqrMagnitude(vector - vector2);
+		float t = SubLineGrabPoint.<EvaluateScore>g__FindNearestFractionOnLine|9_0(objectTransform.TransformPoint(this.startPointRelativeToGrabPointOrigin), objectTransform.TransformPoint(this.endPointRelativeToGrabPointOrigin), handTransform.position);
+		Vector3 a = Vector3.Lerp(this.startPointRelativeTransformToGrabPointOrigin.Position(), this.endPointRelativeTransformToGrabPointOrigin.Position(), t);
+		Vector3 b = objectTransform.InverseTransformPoint(handTransform.position);
+		return Vector3.SqrMagnitude(a - b);
 	}
 
 	[CompilerGenerated]

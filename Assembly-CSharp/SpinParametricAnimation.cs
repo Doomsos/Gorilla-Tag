@@ -14,14 +14,14 @@ public class SpinParametricAnimation : MonoBehaviour
 		Transform transform = base.transform;
 		this._animationProgress = (this._animationProgress + Time.deltaTime * this.revolutionsPerSecond) % 1f;
 		float num = this.timeCurve.Evaluate(this._animationProgress) * 360f;
-		float num2 = num - this._oldAngle;
+		float angle = num - this._oldAngle;
 		this._oldAngle = num;
 		if (this.WorldSpaceRotation)
 		{
-			transform.rotation = Quaternion.AngleAxis(num2, this.axis) * transform.rotation;
+			transform.rotation = Quaternion.AngleAxis(angle, this.axis) * transform.rotation;
 			return;
 		}
-		transform.localRotation = Quaternion.AngleAxis(num2, this.axis) * transform.localRotation;
+		transform.localRotation = Quaternion.AngleAxis(angle, this.axis) * transform.localRotation;
 	}
 
 	[Tooltip("Axis to rotate around.")]

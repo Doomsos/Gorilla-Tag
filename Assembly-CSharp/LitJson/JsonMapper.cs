@@ -32,11 +32,11 @@ namespace LitJson
 			{
 				return;
 			}
-			ArrayMetadata arrayMetadata = default(ArrayMetadata);
-			arrayMetadata.IsArray = type.IsArray;
+			ArrayMetadata value = default(ArrayMetadata);
+			value.IsArray = type.IsArray;
 			if (type.GetInterface("System.Collections.IList") != null)
 			{
-				arrayMetadata.IsList = true;
+				value.IsList = true;
 			}
 			foreach (PropertyInfo propertyInfo in type.GetProperties())
 			{
@@ -45,7 +45,7 @@ namespace LitJson
 					ParameterInfo[] indexParameters = propertyInfo.GetIndexParameters();
 					if (indexParameters.Length == 1 && indexParameters[0].ParameterType == typeof(int))
 					{
-						arrayMetadata.ElementType = propertyInfo.PropertyType;
+						value.ElementType = propertyInfo.PropertyType;
 					}
 				}
 			}
@@ -54,7 +54,7 @@ namespace LitJson
 			{
 				try
 				{
-					JsonMapper.array_metadata.Add(type, arrayMetadata);
+					JsonMapper.array_metadata.Add(type, value);
 				}
 				catch (ArgumentException)
 				{
@@ -68,12 +68,12 @@ namespace LitJson
 			{
 				return;
 			}
-			ObjectMetadata objectMetadata = default(ObjectMetadata);
+			ObjectMetadata value = default(ObjectMetadata);
 			if (type.GetInterface("System.Collections.IDictionary") != null)
 			{
-				objectMetadata.IsDictionary = true;
+				value.IsDictionary = true;
 			}
-			objectMetadata.Properties = new Dictionary<string, PropertyMetadata>();
+			value.Properties = new Dictionary<string, PropertyMetadata>();
 			foreach (PropertyInfo propertyInfo in type.GetProperties())
 			{
 				if (propertyInfo.Name == "Item")
@@ -81,31 +81,31 @@ namespace LitJson
 					ParameterInfo[] indexParameters = propertyInfo.GetIndexParameters();
 					if (indexParameters.Length == 1 && indexParameters[0].ParameterType == typeof(string))
 					{
-						objectMetadata.ElementType = propertyInfo.PropertyType;
+						value.ElementType = propertyInfo.PropertyType;
 					}
 				}
 				else
 				{
-					PropertyMetadata propertyMetadata = default(PropertyMetadata);
-					propertyMetadata.Info = propertyInfo;
-					propertyMetadata.Type = propertyInfo.PropertyType;
-					objectMetadata.Properties.Add(propertyInfo.Name, propertyMetadata);
+					PropertyMetadata value2 = default(PropertyMetadata);
+					value2.Info = propertyInfo;
+					value2.Type = propertyInfo.PropertyType;
+					value.Properties.Add(propertyInfo.Name, value2);
 				}
 			}
 			foreach (FieldInfo fieldInfo in type.GetFields())
 			{
-				PropertyMetadata propertyMetadata2 = default(PropertyMetadata);
-				propertyMetadata2.Info = fieldInfo;
-				propertyMetadata2.IsField = true;
-				propertyMetadata2.Type = fieldInfo.FieldType;
-				objectMetadata.Properties.Add(fieldInfo.Name, propertyMetadata2);
+				PropertyMetadata value3 = default(PropertyMetadata);
+				value3.Info = fieldInfo;
+				value3.IsField = true;
+				value3.Type = fieldInfo.FieldType;
+				value.Properties.Add(fieldInfo.Name, value3);
 			}
 			object obj = JsonMapper.object_metadata_lock;
 			lock (obj)
 			{
 				try
 				{
-					JsonMapper.object_metadata.Add(type, objectMetadata);
+					JsonMapper.object_metadata.Add(type, value);
 				}
 				catch (ArgumentException)
 				{
@@ -227,12 +227,12 @@ namespace LitJson
 						}
 						for (;;)
 						{
-							object obj2 = JsonMapper.ReadValue(elementType, reader);
+							object value = JsonMapper.ReadValue(elementType, reader);
 							if (reader.Token == JsonToken.ArrayEnd)
 							{
 								break;
 							}
-							list.Add(obj2);
+							list.Add(value);
 						}
 						if (arrayMetadata.IsArray)
 						{
@@ -362,12 +362,12 @@ namespace LitJson
 				jsonWrapper.SetJsonType(JsonType.Array);
 				for (;;)
 				{
-					IJsonWrapper jsonWrapper2 = JsonMapper.ReadValue(factory, reader);
+					IJsonWrapper value = JsonMapper.ReadValue(factory, reader);
 					if (reader.Token == JsonToken.ArrayEnd)
 					{
 						break;
 					}
-					jsonWrapper.Add(jsonWrapper2);
+					jsonWrapper.Add(value);
 				}
 			}
 			else if (reader.Token == JsonToken.ObjectStart)
@@ -380,8 +380,8 @@ namespace LitJson
 					{
 						break;
 					}
-					string text = (string)reader.Value;
-					jsonWrapper[text] = JsonMapper.ReadValue(factory, reader);
+					string key = (string)reader.Value;
+					jsonWrapper[key] = JsonMapper.ReadValue(factory, reader);
 				}
 			}
 			return jsonWrapper;
@@ -661,11 +661,11 @@ namespace LitJson
 
 		public static void RegisterExporter<T>(ExporterFunc<T> exporter)
 		{
-			ExporterFunc exporterFunc = delegate(object obj, JsonWriter writer)
+			ExporterFunc value = delegate(object obj, JsonWriter writer)
 			{
 				exporter((T)((object)obj), writer);
 			};
-			JsonMapper.custom_exporters_table[typeof(T)] = exporterFunc;
+			JsonMapper.custom_exporters_table[typeof(T)] = value;
 		}
 
 		public static void RegisterImporter<TJson, TValue>(ImporterFunc<TJson, TValue> importer)

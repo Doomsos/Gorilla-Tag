@@ -53,7 +53,7 @@ namespace GorillaTag
 		private static List<Rigidbody> GetAwakeRigidbodies()
 		{
 			List<Rigidbody> list = new List<Rigidbody>();
-			Object[] array = Object.FindObjectsByType(typeof(Rigidbody), 0);
+			Object[] array = Object.FindObjectsByType(typeof(Rigidbody), FindObjectsSortMode.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				Rigidbody rigidbody = array[i] as Rigidbody;

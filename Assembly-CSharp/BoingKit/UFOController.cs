@@ -32,35 +32,35 @@ namespace BoingKit
 		private void FixedUpdate()
 		{
 			float fixedDeltaTime = Time.fixedDeltaTime;
-			Vector3 vector = Vector3.zero;
-			if (Input.GetKey(119))
+			Vector3 a = Vector3.zero;
+			if (Input.GetKey(KeyCode.W))
 			{
-				vector += Vector3.forward;
+				a += Vector3.forward;
 			}
-			if (Input.GetKey(115))
+			if (Input.GetKey(KeyCode.S))
 			{
-				vector += Vector3.back;
+				a += Vector3.back;
 			}
-			if (Input.GetKey(97))
+			if (Input.GetKey(KeyCode.A))
 			{
-				vector += Vector3.left;
+				a += Vector3.left;
 			}
-			if (Input.GetKey(100))
+			if (Input.GetKey(KeyCode.D))
 			{
-				vector += Vector3.right;
+				a += Vector3.right;
 			}
-			if (Input.GetKey(114))
+			if (Input.GetKey(KeyCode.R))
 			{
-				vector += Vector3.up;
+				a += Vector3.up;
 			}
-			if (Input.GetKey(102))
+			if (Input.GetKey(KeyCode.F))
 			{
-				vector += Vector3.down;
+				a += Vector3.down;
 			}
-			if (vector.sqrMagnitude > MathUtil.Epsilon)
+			if (a.sqrMagnitude > MathUtil.Epsilon)
 			{
-				vector = vector.normalized * this.LinearThrust;
-				this.m_linearVelocity += vector * fixedDeltaTime;
+				a = a.normalized * this.LinearThrust;
+				this.m_linearVelocity += a * fixedDeltaTime;
 				this.m_linearVelocity = VectorUtil.ClampLength(this.m_linearVelocity, 0f, this.MaxLinearSpeed);
 			}
 			else
@@ -68,58 +68,58 @@ namespace BoingKit
 				this.m_linearVelocity = VectorUtil.ClampLength(this.m_linearVelocity, 0f, Mathf.Max(0f, this.m_linearVelocity.magnitude - this.LinearDrag * fixedDeltaTime));
 			}
 			float magnitude = this.m_linearVelocity.magnitude;
-			float num = magnitude * MathUtil.InvSafe(this.MaxLinearSpeed);
-			Quaternion quaternion = Quaternion.identity;
-			float num2 = 0f;
+			float t = magnitude * MathUtil.InvSafe(this.MaxLinearSpeed);
+			Quaternion lhs = Quaternion.identity;
+			float num = 0f;
 			if (magnitude > MathUtil.Epsilon)
 			{
 				Vector3 linearVelocity = this.m_linearVelocity;
 				linearVelocity.y = 0f;
-				float num3 = (this.m_linearVelocity.magnitude > 0.01f) ? (1f - Mathf.Clamp01(Mathf.Abs(this.m_linearVelocity.y) / this.m_linearVelocity.magnitude)) : 0f;
-				num2 = Mathf.Min(1f, magnitude / Mathf.Max(MathUtil.Epsilon, this.MaxLinearSpeed)) * num3;
+				float num2 = (this.m_linearVelocity.magnitude > 0.01f) ? (1f - Mathf.Clamp01(Mathf.Abs(this.m_linearVelocity.y) / this.m_linearVelocity.magnitude)) : 0f;
+				num = Mathf.Min(1f, magnitude / Mathf.Max(MathUtil.Epsilon, this.MaxLinearSpeed)) * num2;
 				Vector3 normalized = Vector3.Cross(Vector3.up, linearVelocity).normalized;
-				float angle = this.Tilt * MathUtil.Deg2Rad * num2;
-				quaternion = QuaternionUtil.AxisAngle(normalized, angle);
+				float angle = this.Tilt * MathUtil.Deg2Rad * num;
+				lhs = QuaternionUtil.AxisAngle(normalized, angle);
 			}
-			float num4 = 0f;
-			if (Input.GetKey(113))
+			float num3 = 0f;
+			if (Input.GetKey(KeyCode.Q))
 			{
-				num4 -= 1f;
+				num3 -= 1f;
 			}
-			if (Input.GetKey(101))
+			if (Input.GetKey(KeyCode.E))
 			{
-				num4 += 1f;
+				num3 += 1f;
 			}
-			bool key = Input.GetKey(306);
-			if (Mathf.Abs(num4) > MathUtil.Epsilon)
+			bool key = Input.GetKey(KeyCode.LeftControl);
+			if (Mathf.Abs(num3) > MathUtil.Epsilon)
 			{
-				float num5 = this.MaxAngularSpeed * (key ? 2.5f : 1f);
-				num4 *= this.AngularThrust * MathUtil.Deg2Rad;
-				this.m_angularVelocity += num4 * fixedDeltaTime;
-				this.m_angularVelocity = Mathf.Clamp(this.m_angularVelocity, -num5 * MathUtil.Deg2Rad, num5 * MathUtil.Deg2Rad);
+				float num4 = this.MaxAngularSpeed * (key ? 2.5f : 1f);
+				num3 *= this.AngularThrust * MathUtil.Deg2Rad;
+				this.m_angularVelocity += num3 * fixedDeltaTime;
+				this.m_angularVelocity = Mathf.Clamp(this.m_angularVelocity, -num4 * MathUtil.Deg2Rad, num4 * MathUtil.Deg2Rad);
 			}
 			else
 			{
 				this.m_angularVelocity -= Mathf.Sign(this.m_angularVelocity) * Mathf.Min(Mathf.Abs(this.m_angularVelocity), this.AngularDrag * MathUtil.Deg2Rad * fixedDeltaTime);
 			}
 			this.m_yawAngle += this.m_angularVelocity * fixedDeltaTime;
-			Quaternion quaternion2 = QuaternionUtil.AxisAngle(Vector3.up, this.m_yawAngle);
+			Quaternion rhs = QuaternionUtil.AxisAngle(Vector3.up, this.m_yawAngle);
 			this.m_hoverCenter += this.m_linearVelocity * fixedDeltaTime;
 			this.m_hoverPhase += Time.deltaTime;
-			Vector3 vector2 = 0.05f * Mathf.Sin(1.37f * this.m_hoverPhase) * Vector3.right + 0.05f * Mathf.Sin(1.93f * this.m_hoverPhase + 1.234f) * Vector3.forward + 0.04f * Mathf.Sin(0.97f * this.m_hoverPhase + 4.321f) * Vector3.up;
-			vector2 *= this.Hover;
-			Quaternion quaternion3 = Quaternion.FromToRotation(Vector3.up, vector2 + Vector3.up);
-			base.transform.position = this.m_hoverCenter + vector2;
-			base.transform.rotation = quaternion * quaternion2 * quaternion3;
+			Vector3 vector = 0.05f * Mathf.Sin(1.37f * this.m_hoverPhase) * Vector3.right + 0.05f * Mathf.Sin(1.93f * this.m_hoverPhase + 1.234f) * Vector3.forward + 0.04f * Mathf.Sin(0.97f * this.m_hoverPhase + 4.321f) * Vector3.up;
+			vector *= this.Hover;
+			Quaternion rhs2 = Quaternion.FromToRotation(Vector3.up, vector + Vector3.up);
+			base.transform.position = this.m_hoverCenter + vector;
+			base.transform.rotation = lhs * rhs * rhs2;
 			if (this.Motor != null)
 			{
-				float num6 = Mathf.Lerp(this.MotorBaseAngularSpeed, this.MotorMaxAngularSpeed, num2);
-				this.m_motorAngle += num6 * MathUtil.Deg2Rad * fixedDeltaTime;
+				float num5 = Mathf.Lerp(this.MotorBaseAngularSpeed, this.MotorMaxAngularSpeed, num);
+				this.m_motorAngle += num5 * MathUtil.Deg2Rad * fixedDeltaTime;
 				this.Motor.localRotation = QuaternionUtil.AxisAngle(Vector3.up, this.m_motorAngle - this.m_yawAngle);
 			}
 			if (this.BubbleEmitter != null)
 			{
-				this.BubbleEmitter.emission.rateOverTime = Mathf.Lerp(this.BubbleBaseEmissionRate, this.BubbleMaxEmissionRate, num);
+				this.BubbleEmitter.emission.rateOverTime = Mathf.Lerp(this.BubbleBaseEmissionRate, this.BubbleMaxEmissionRate, t);
 			}
 			if (this.Eyes != null)
 			{

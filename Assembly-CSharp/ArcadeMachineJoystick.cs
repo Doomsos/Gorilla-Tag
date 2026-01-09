@@ -11,7 +11,7 @@ public class ArcadeMachineJoystick : HandHold, ISnapTurnOverride, IRequestableOw
 	{
 		get
 		{
-			return this.heldByLocalPlayer && this.xrNode == 4;
+			return this.heldByLocalPlayer && this.xrNode == XRNode.LeftHand;
 		}
 	}
 
@@ -29,7 +29,7 @@ public class ArcadeMachineJoystick : HandHold, ISnapTurnOverride, IRequestableOw
 
 	public void BindController(bool leftHand)
 	{
-		this.xrNode = (leftHand ? 4 : 5);
+		this.xrNode = (leftHand ? XRNode.LeftHand : XRNode.RightHand);
 		this.heldByLocalPlayer = true;
 		if (!leftHand)
 		{

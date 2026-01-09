@@ -33,8 +33,8 @@ public class BuilderKiosk : MonoBehaviour
 		BuilderSetManager.instance.OnOwnedSetsUpdated.AddListener(new UnityAction(this.OnOwnedSetsUpdated));
 		CosmeticsController instance = CosmeticsController.instance;
 		instance.OnGetCurrency = (Action)Delegate.Combine(instance.OnGetCurrency, new Action(this.OnUpdateCurrencyBalance));
-		this.leftPurchaseButton.onPressed += new Action<GorillaPressableButton, bool>(this.PressLeftPurchaseItemButton);
-		this.rightPurchaseButton.onPressed += new Action<GorillaPressableButton, bool>(this.PressRightPurchaseItemButton);
+		this.leftPurchaseButton.onPressed += this.PressLeftPurchaseItemButton;
+		this.rightPurchaseButton.onPressed += this.PressRightPurchaseItemButton;
 		BuilderTable builderTable;
 		if (BuilderTable.TryGetBuilderTableForZone(GTZone.monkeBlocks, out builderTable))
 		{
@@ -109,7 +109,7 @@ public class BuilderKiosk : MonoBehaviour
 		GorillaPressableButton[] array = this.setButtons;
 		for (int i = 0; i < array.Length; i++)
 		{
-			array[i].onPressed += new Action<GorillaPressableButton, bool>(this.OnSetButtonPressed);
+			array[i].onPressed += this.OnSetButtonPressed;
 		}
 		this.UpdateLabels();
 	}
@@ -118,11 +118,11 @@ public class BuilderKiosk : MonoBehaviour
 	{
 		if (this.leftPurchaseButton != null)
 		{
-			this.leftPurchaseButton.onPressed -= new Action<GorillaPressableButton, bool>(this.PressLeftPurchaseItemButton);
+			this.leftPurchaseButton.onPressed -= this.PressLeftPurchaseItemButton;
 		}
 		if (this.rightPurchaseButton != null)
 		{
-			this.rightPurchaseButton.onPressed -= new Action<GorillaPressableButton, bool>(this.PressRightPurchaseItemButton);
+			this.rightPurchaseButton.onPressed -= this.PressRightPurchaseItemButton;
 		}
 		if (BuilderSetManager.instance != null)
 		{
@@ -139,7 +139,7 @@ public class BuilderKiosk : MonoBehaviour
 			{
 				if (gorillaPressableButton != null)
 				{
-					gorillaPressableButton.onPressed -= new Action<GorillaPressableButton, bool>(this.OnSetButtonPressed);
+					gorillaPressableButton.onPressed -= this.OnSetButtonPressed;
 				}
 			}
 			if (this.previousPageButton != null)

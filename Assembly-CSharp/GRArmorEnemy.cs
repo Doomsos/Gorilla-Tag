@@ -116,9 +116,9 @@ public class GRArmorEnemy : MonoBehaviour
 			for (int i = 0; i < this.numFragmentsWhenShattered; i++)
 			{
 				num += 360f / (float)this.numFragmentsWhenShattered;
-				Quaternion quaternion = Quaternion.Euler(0f, num, this.fragmentLaunchPitch);
-				Vector3 vector = quaternion * this.fragmentSpawnOffset;
-				this.entity.manager.RequestCreateItem(this.armorFragmentPrefab.name.GetStaticHash(), base.transform.position + vector, quaternion, (long)this.entity.GetNetId());
+				Quaternion rotation = Quaternion.Euler(0f, num, this.fragmentLaunchPitch);
+				Vector3 b = rotation * this.fragmentSpawnOffset;
+				this.entity.manager.RequestCreateItem(this.armorFragmentPrefab.name.GetStaticHash(), base.transform.position + b, rotation, (long)this.entity.GetNetId());
 			}
 		}
 	}

@@ -10,9 +10,9 @@ namespace GorillaNetworking.Store
 		public static void SerializeItemsAsJSON(StoreItem[] items)
 		{
 			string text = "";
-			foreach (StoreItem storeItem in items)
+			foreach (StoreItem obj in items)
 			{
-				text = text + JsonUtility.ToJson(storeItem) + ";";
+				text = text + JsonUtility.ToJson(obj) + ";";
 			}
 			Debug.LogError(text);
 			File.WriteAllText(Application.dataPath + "/Resources/StoreItems/FeaturedStoreItemsList.json", text);

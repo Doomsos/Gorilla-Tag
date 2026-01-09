@@ -28,7 +28,7 @@ namespace GorillaTag
 
 		protected override void ProcessItem(in Action<T1, T2> item)
 		{
-			item.Invoke(this.m_data1, this.m_data2);
+			item(this.m_data1, this.m_data2);
 		}
 
 		private void SetData(in T1 data1, in T2 data2)

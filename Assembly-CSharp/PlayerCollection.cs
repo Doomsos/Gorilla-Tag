@@ -7,12 +7,12 @@ public class PlayerCollection : MonoBehaviour
 {
 	private void Start()
 	{
-		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeftRoom);
+		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
 	}
 
 	private void OnDestroy()
 	{
-		NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(this.OnPlayerLeftRoom);
+		NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerLeftRoom;
 	}
 
 	public void OnTriggerEnter(Collider other)
@@ -51,7 +51,7 @@ public class PlayerCollection : MonoBehaviour
 			{
 				Vector3 vector;
 				float num;
-				if (Physics.ComputePenetration(components[i], base.transform.position, base.transform.rotation, component, component.transform.position, component.transform.rotation, ref vector, ref num))
+				if (Physics.ComputePenetration(components[i], base.transform.position, base.transform.rotation, component, component.transform.position, component.transform.rotation, out vector, out num))
 				{
 					return;
 				}

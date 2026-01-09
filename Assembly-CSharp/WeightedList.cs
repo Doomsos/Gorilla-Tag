@@ -66,13 +66,13 @@ public class WeightedList<T>
 		{
 			throw new InvalidOperationException("The list is empty.");
 		}
-		float num = Random.value * this.totalWeight;
-		int num2 = this.cumulativeWeights.BinarySearch(num);
-		if (num2 < 0)
+		float item = Random.value * this.totalWeight;
+		int num = this.cumulativeWeights.BinarySearch(item);
+		if (num < 0)
 		{
-			num2 = ~num2;
+			num = ~num;
 		}
-		return num2;
+		return num;
 	}
 
 	public bool Remove(T item)

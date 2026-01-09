@@ -104,14 +104,14 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 			{
 				switch (aiAgent.agentBehaviours[i])
 				{
-				case 0:
-					this.behaviourDict[0] = new CustomMapsSearchBehaviour(this, aiAgent);
+				case AgentBehaviours.Search:
+					this.behaviourDict[AgentBehaviours.Search] = new CustomMapsSearchBehaviour(this, aiAgent);
 					break;
-				case 1:
-					this.behaviourDict[1] = new CustomMapsChaseBehaviour(this, aiAgent);
+				case AgentBehaviours.Chase:
+					this.behaviourDict[AgentBehaviours.Chase] = new CustomMapsChaseBehaviour(this, aiAgent);
 					break;
-				case 2:
-					this.behaviourDict[2] = new CustomMapsAttackBehaviour(this, aiAgent);
+				case AgentBehaviours.Attack:
+					this.behaviourDict[AgentBehaviours.Attack] = new CustomMapsAttackBehaviour(this, aiAgent);
 					break;
 				default:
 					goto IL_A1;
@@ -170,7 +170,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		{
 			this.currentBehaviourIndex = num;
 			this.currentBehaviour = this.usedBehaviours[num];
-			this.agent.RequestBehaviorChange(this.currentBehaviour);
+			this.agent.RequestBehaviorChange((byte)this.currentBehaviour);
 		}
 		this.behaviourDict[this.currentBehaviour].Execute();
 	}
@@ -181,15 +181,15 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		{
 			return;
 		}
-		if (!this.behaviourDict.ContainsKey(newstate))
+		if (!this.behaviourDict.ContainsKey((AgentBehaviours)newstate))
 		{
 			return;
 		}
-		if (this.currentBehaviour != newstate && this.behaviourDict.ContainsKey(this.currentBehaviour))
+		if (this.currentBehaviour != (AgentBehaviours)newstate && this.behaviourDict.ContainsKey(this.currentBehaviour))
 		{
 			this.behaviourDict[this.currentBehaviour].ResetBehavior();
 		}
-		this.currentBehaviour = newstate;
+		this.currentBehaviour = (AgentBehaviours)newstate;
 		this.behaviourDict[this.currentBehaviour].NetExecute();
 	}
 
@@ -201,16 +201,16 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 			return;
 		}
 		this.entity.transform.parent = (flag ? AISpawnManager.instance.transform : MapSpawnManager.instance.transform);
-		byte b;
-		AIAgent.UnpackCreateData(this.entity.createData, ref b, ref this.luaAgentID);
+		byte enemyTypeIndex;
+		AIAgent.UnpackCreateData(this.entity.createData, out enemyTypeIndex, out this.luaAgentID);
 		AIAgent newEnemy;
-		if (flag && AISpawnManager.instance.SpawnEnemy((int)b, ref newEnemy))
+		if (flag && AISpawnManager.instance.SpawnEnemy((int)enemyTypeIndex, out newEnemy))
 		{
 			this.SetupNewEnemy(newEnemy);
 			return;
 		}
 		MapEntity mapEntity;
-		if (!flag && MapSpawnManager.instance.SpawnEntity((int)b, ref mapEntity))
+		if (!flag && MapSpawnManager.instance.SpawnEntity((int)enemyTypeIndex, out mapEntity))
 		{
 			this.SetupNewEnemy((AIAgent)mapEntity);
 			return;
@@ -271,19 +271,19 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		this.tempRigs.Clear();
 		this.tempRigs.Add(VRRig.LocalRig);
 		VRRigCache.Instance.GetAllUsedRigs(this.tempRigs);
-		Vector3 vector = base.transform.rotation * Vector3.forward;
+		Vector3 rhs = base.transform.rotation * Vector3.forward;
 		for (int i = 0; i < this.tempRigs.Count; i++)
 		{
 			GRPlayer component = this.tempRigs[i].GetComponent<GRPlayer>();
-			Vector3 vector2;
-			if (this.IsTargetInRange(sourcePos, component, maxRangeSq, out vector2))
+			Vector3 vector;
+			if (this.IsTargetInRange(sourcePos, component, maxRangeSq, out vector))
 			{
 				float num2 = 0f;
-				if (vector2.sqrMagnitude > 0f)
+				if (vector.sqrMagnitude > 0f)
 				{
-					num2 = Mathf.Sqrt(vector2.magnitude);
+					num2 = Mathf.Sqrt(vector.magnitude);
 				}
-				float num3 = Vector3.Dot(vector2.normalized, vector);
+				float num3 = Vector3.Dot(vector.normalized, rhs);
 				if (num3 >= minDotVal)
 				{
 					float num4 = Mathf.Lerp(0f, 0.5f, 1f - num2 / maxRange);
@@ -305,7 +305,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		{
 			return false;
 		}
-		int num = Physics.RaycastNonAlloc(new Ray(startPos, target.transform.position - startPos), CustomMapsAIBehaviourController.visibilityHits, Mathf.Min(Vector3.Distance(target.transform.position, startPos), maxDist), this.visibilityLayerMask.value, 1);
+		int num = Physics.RaycastNonAlloc(new Ray(startPos, target.transform.position - startPos), CustomMapsAIBehaviourController.visibilityHits, Mathf.Min(Vector3.Distance(target.transform.position, startPos), maxDist), this.visibilityLayerMask.value, QueryTriggerInteraction.Ignore);
 		for (int i = 0; i < num; i++)
 		{
 			if (CustomMapsAIBehaviourController.visibilityHits[i].transform != base.transform && !CustomMapsAIBehaviourController.visibilityHits[i].transform.IsChildOf(base.transform))

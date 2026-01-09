@@ -15,25 +15,25 @@ public class MonkeVoteMachine : MonoBehaviour
 
 	private void Awake()
 	{
-		this._proximityTrigger.OnEnter += new Action(this.OnPlayerEnteredVoteProximity);
+		this._proximityTrigger.OnEnter += this.OnPlayerEnteredVoteProximity;
 	}
 
 	private void Start()
 	{
-		MonkeVoteController.instance.OnPollsUpdated += new Action(this.HandleOnPollsUpdated);
-		MonkeVoteController.instance.OnVoteAccepted += new Action(this.HandleOnVoteAccepted);
-		MonkeVoteController.instance.OnVoteFailed += new Action(this.HandleOnVoteFailed);
-		MonkeVoteController.instance.OnCurrentPollEnded += new Action(this.HandleCurrentPollEnded);
+		MonkeVoteController.instance.OnPollsUpdated += this.HandleOnPollsUpdated;
+		MonkeVoteController.instance.OnVoteAccepted += this.HandleOnVoteAccepted;
+		MonkeVoteController.instance.OnVoteFailed += this.HandleOnVoteFailed;
+		MonkeVoteController.instance.OnCurrentPollEnded += this.HandleCurrentPollEnded;
 		this.Init();
 	}
 
 	private void OnDestroy()
 	{
-		this._proximityTrigger.OnEnter -= new Action(this.OnPlayerEnteredVoteProximity);
-		MonkeVoteController.instance.OnPollsUpdated -= new Action(this.HandleOnPollsUpdated);
-		MonkeVoteController.instance.OnVoteAccepted -= new Action(this.HandleOnVoteAccepted);
-		MonkeVoteController.instance.OnVoteFailed -= new Action(this.HandleOnVoteFailed);
-		MonkeVoteController.instance.OnCurrentPollEnded -= new Action(this.HandleCurrentPollEnded);
+		this._proximityTrigger.OnEnter -= this.OnPlayerEnteredVoteProximity;
+		MonkeVoteController.instance.OnPollsUpdated -= this.HandleOnPollsUpdated;
+		MonkeVoteController.instance.OnVoteAccepted -= this.HandleOnVoteAccepted;
+		MonkeVoteController.instance.OnVoteFailed -= this.HandleOnVoteFailed;
+		MonkeVoteController.instance.OnCurrentPollEnded -= this.HandleCurrentPollEnded;
 	}
 
 	public void Init()
@@ -44,7 +44,7 @@ public class MonkeVoteMachine : MonoBehaviour
 		foreach (MonkeVoteOption monkeVoteOption in this._votingOptions)
 		{
 			monkeVoteOption.ResetState();
-			monkeVoteOption.OnVote += new Action<MonkeVoteOption, Collider>(this.OnVoteEntered);
+			monkeVoteOption.OnVote += this.OnVoteEntered;
 		}
 		this.UpdatePollDisplays();
 	}
@@ -385,19 +385,19 @@ public class MonkeVoteMachine : MonoBehaviour
 		{
 			int num7 = MonkeVoteMachine.<ConvertToPercentages>g__LargestFractionIndex|64_1(list2);
 			List<int> list3 = list;
-			int num8 = num7;
-			int num9 = list3[num8];
-			list3[num8] = num9 + 1;
+			int index = num7;
+			int num8 = list3[index];
+			list3[index] = num8 + 1;
 			list2[num7] = 0f;
 		}
 		if (list.Count == 2 && list[num3] == 50)
 		{
 			List<int> list4 = list;
-			int num9 = num3;
-			list4[num9]++;
+			int num8 = num3;
+			list4[num8]++;
 			list4 = list;
-			num9 = 1 - num3;
-			list4[num9]--;
+			num8 = 1 - num3;
+			list4[num8]--;
 		}
 		return list;
 	}

@@ -58,7 +58,7 @@ public class SIGadgetPlatformDeployerPlatform : MonoBehaviour, ISIGameDeployable
 		Action onDisabled = this.OnDisabled;
 		if (onDisabled != null)
 		{
-			onDisabled.Invoke();
+			onDisabled();
 		}
 		this.OnDisabled = null;
 	}

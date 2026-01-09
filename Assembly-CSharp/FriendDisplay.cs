@@ -24,14 +24,14 @@ public class FriendDisplay : MonoBehaviour
 		this.UpdateLocalPlayerPrivacyButtons();
 		this.triggerNotifier.TriggerEnterEvent += this.TriggerEntered;
 		this.triggerNotifier.TriggerExitEvent += this.TriggerExited;
-		NetworkSystem.Instance.OnJoinedRoomEvent += new Action(this.OnJoinedRoom);
+		NetworkSystem.Instance.OnJoinedRoomEvent += this.OnJoinedRoom;
 	}
 
 	private void OnDestroy()
 	{
 		if (NetworkSystem.Instance != null)
 		{
-			NetworkSystem.Instance.OnJoinedRoomEvent -= new Action(this.OnJoinedRoom);
+			NetworkSystem.Instance.OnJoinedRoomEvent -= this.OnJoinedRoom;
 		}
 		if (this.triggerNotifier != null)
 		{
@@ -44,7 +44,7 @@ public class FriendDisplay : MonoBehaviour
 	{
 		if (other == GTPlayer.Instance.headCollider)
 		{
-			FriendSystem.Instance.OnFriendListRefresh += new Action<List<FriendBackendController.Friend>>(this.OnGetFriendsReceived);
+			FriendSystem.Instance.OnFriendListRefresh += this.OnGetFriendsReceived;
 			FriendSystem.Instance.RefreshFriendsList();
 			this.PopulateLocalPlayerCard();
 			this.localPlayerAtDisplay = true;
@@ -59,7 +59,7 @@ public class FriendDisplay : MonoBehaviour
 	{
 		if (other == GTPlayer.Instance.headCollider)
 		{
-			FriendSystem.Instance.OnFriendListRefresh -= new Action<List<FriendBackendController.Friend>>(this.OnGetFriendsReceived);
+			FriendSystem.Instance.OnFriendListRefresh -= this.OnGetFriendsReceived;
 			this.ClearFriendCards();
 			this.ClearLocalPlayerCard();
 			this.ClearPageButtons();
@@ -252,8 +252,8 @@ public class FriendDisplay : MonoBehaviour
 		float num = this.gridWidth / (float)this.gridDimension;
 		float num2 = this.gridHeight / (float)this.gridDimension;
 		Vector3 right = this.gridRoot.right;
-		Vector3 vector = -this.gridRoot.up;
-		Vector3 vector2 = this.gridRoot.position - right * (this.gridWidth * 0.5f - num * 0.5f) - vector * (this.gridHeight * 0.5f - num2 * 0.5f);
+		Vector3 a = -this.gridRoot.up;
+		Vector3 a2 = this.gridRoot.position - right * (this.gridWidth * 0.5f - num * 0.5f) - a * (this.gridHeight * 0.5f - num2 * 0.5f);
 		int num3 = 0;
 		int num4 = 0;
 		for (int i = 0; i < this.gridDimension; i++)
@@ -263,7 +263,7 @@ public class FriendDisplay : MonoBehaviour
 				FriendCard friendCard = this.friendCards[num4];
 				friendCard.gameObject.SetActive(true);
 				friendCard.transform.localScale = Vector3.one * (num / friendCard.Width);
-				friendCard.transform.position = vector2 + right * num * (float)j + vector * num2 * (float)i;
+				friendCard.transform.position = a2 + right * num * (float)j + a * num2 * (float)i;
 				friendCard.transform.rotation = this.gridRoot.transform.rotation;
 				friendCard.Init(this);
 				friendCard.SetButton(this._friendCardButtons[num3++], this._buttonDefaultMaterials, this._buttonActiveMaterials, this._buttonAlertMaterials, this._friendCardButtonText[num4]);
@@ -343,7 +343,7 @@ public class FriendDisplay : MonoBehaviour
 			this._localPlayerCard.SetZone("");
 			return;
 		}
-		bool flag = NetworkSystem.Instance.RoomName.get_Chars(0) == '@';
+		bool flag = NetworkSystem.Instance.RoomName[0] == '@';
 		bool flag2 = !NetworkSystem.Instance.SessionIsPrivate;
 		if (FriendSystem.Instance.LocalPlayerPrivacy == FriendSystem.PlayerPrivacy.Hidden || (FriendSystem.Instance.LocalPlayerPrivacy == FriendSystem.PlayerPrivacy.PublicOnly && !flag2))
 		{
@@ -379,19 +379,19 @@ public class FriendDisplay : MonoBehaviour
 		float num2 = this.gridHeight * 0.5f;
 		float num3 = num;
 		float num4 = num2;
-		Vector3 vector = this.gridRoot.position + this.gridRoot.rotation * new Vector3(-num3, num4, 0f);
-		Vector3 vector2 = this.gridRoot.position + this.gridRoot.rotation * new Vector3(num3, num4, 0f);
-		Vector3 vector3 = this.gridRoot.position + this.gridRoot.rotation * new Vector3(-num3, -num4, 0f);
-		Vector3 vector4 = this.gridRoot.position + this.gridRoot.rotation * new Vector3(num3, -num4, 0f);
+		Vector3 a = this.gridRoot.position + this.gridRoot.rotation * new Vector3(-num3, num4, 0f);
+		Vector3 vector = this.gridRoot.position + this.gridRoot.rotation * new Vector3(num3, num4, 0f);
+		Vector3 vector2 = this.gridRoot.position + this.gridRoot.rotation * new Vector3(-num3, -num4, 0f);
+		Vector3 b = this.gridRoot.position + this.gridRoot.rotation * new Vector3(num3, -num4, 0f);
 		for (int i = 0; i <= this.gridDimension; i++)
 		{
-			float num5 = (float)i / (float)this.gridDimension;
-			Vector3 vector5 = Vector3.Lerp(vector, vector2, num5);
-			Vector3 vector6 = Vector3.Lerp(vector3, vector4, num5);
-			Gizmos.DrawLine(vector5, vector6);
-			Vector3 vector7 = Vector3.Lerp(vector, vector3, num5);
-			Vector3 vector8 = Vector3.Lerp(vector2, vector4, num5);
-			Gizmos.DrawLine(vector7, vector8);
+			float t = (float)i / (float)this.gridDimension;
+			Vector3 from = Vector3.Lerp(a, vector, t);
+			Vector3 to = Vector3.Lerp(vector2, b, t);
+			Gizmos.DrawLine(from, to);
+			Vector3 from2 = Vector3.Lerp(a, vector2, t);
+			Vector3 to2 = Vector3.Lerp(vector, b, t);
+			Gizmos.DrawLine(from2, to2);
 		}
 	}
 

@@ -2,7 +2,7 @@
 
 namespace GorillaTag
 {
-	[AttributeUsage(64)]
+	[AttributeUsage(AttributeTargets.Method)]
 	public class GTOnUnityEditorStartUpAttribute : Attribute
 	{
 	}

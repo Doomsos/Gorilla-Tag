@@ -42,22 +42,22 @@ namespace Utilities
 			this.m_total = this.Multiply(t, this.m_samples.Length);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected virtual T DefaultTypeValue()
 		{
 			return default(T);
 		}
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract T PlusEquals(T value, T sample);
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract T MinusEquals(T value, T sample);
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract T Divide(T value, int sampleCount);
 
-		[MethodImpl(256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract T Multiply(T value, int sampleCount);
 
 		private T[] m_samples;

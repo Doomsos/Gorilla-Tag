@@ -8,7 +8,7 @@ namespace GorillaTag
 	{
 		private void Awake()
 		{
-			if (!base.TryGetComponent<VRRigCollection>(ref this._vrrigCollection))
+			if (!base.TryGetComponent<VRRigCollection>(out this._vrrigCollection))
 			{
 				this._vrrigCollection = this.AddComponent<VRRigCollection>();
 			}

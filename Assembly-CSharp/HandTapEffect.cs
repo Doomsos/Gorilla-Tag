@@ -83,8 +83,8 @@ public class HandTapEffect : MonoBehaviour
 			{
 				this.handContext.UpTapOverrides = this.upTapEffect.overrides;
 			}
-			this.handContext.handTapDown += new Action<HandEffectContext>(this.downTapEffect.OnTap);
-			this.handContext.handTapUp += new Action<HandEffectContext>(this.upTapEffect.OnTap);
+			this.handContext.handTapDown += this.downTapEffect.OnTap;
+			this.handContext.handTapUp += this.upTapEffect.OnTap;
 		}
 
 		public void OnDisable()
@@ -105,8 +105,8 @@ public class HandTapEffect : MonoBehaviour
 			{
 				this.handContext.UpTapOverrides = null;
 			}
-			this.handContext.handTapDown -= new Action<HandEffectContext>(this.downTapEffect.OnTap);
-			this.handContext.handTapUp -= new Action<HandEffectContext>(this.upTapEffect.OnTap);
+			this.handContext.handTapDown -= this.downTapEffect.OnTap;
+			this.handContext.handTapUp -= this.upTapEffect.OnTap;
 		}
 
 		public bool separateUpTapCooldown;

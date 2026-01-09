@@ -27,9 +27,9 @@ namespace GorillaTagScripts
 		{
 			public override int GetHashCode()
 			{
-				int num = CrystalVisualsPreset.VisualState.<GetHashCode>g__GetColorHash|2_0(this.albedo);
-				int num2 = CrystalVisualsPreset.VisualState.<GetHashCode>g__GetColorHash|2_0(this.emission);
-				return new ValueTuple<int, int>(num, num2).GetHashCode();
+				int item = CrystalVisualsPreset.VisualState.<GetHashCode>g__GetColorHash|2_0(this.albedo);
+				int item2 = CrystalVisualsPreset.VisualState.<GetHashCode>g__GetColorHash|2_0(this.emission);
+				return new ValueTuple<int, int>(item, item2).GetHashCode();
 			}
 
 			[CompilerGenerated]

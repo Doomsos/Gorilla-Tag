@@ -365,7 +365,7 @@ public class HalloweenGhostChaser : NetworkComponent
 			this.targetPlayer = GorillaParent.instance.vrrigs[num].creator;
 			this.followTarget = GorillaParent.instance.vrrigs[num].head.rigTarget;
 			NavMeshHit navMeshHit;
-			this.targetIsOnNavMesh = NavMesh.SamplePosition(this.followTarget.position, ref navMeshHit, 5f, 1);
+			this.targetIsOnNavMesh = NavMesh.SamplePosition(this.followTarget.position, out navMeshHit, 5f, 1);
 			return;
 		}
 		this.targetPlayer = null;
@@ -451,14 +451,14 @@ public class HalloweenGhostChaser : NetworkComponent
 	{
 		this.path = new NavMeshPath();
 		NavMeshHit navMeshHit;
-		NavMesh.SamplePosition(base.transform.position, ref navMeshHit, 5f, 1);
+		NavMesh.SamplePosition(base.transform.position, out navMeshHit, 5f, 1);
 		NavMeshHit navMeshHit2;
-		this.targetIsOnNavMesh = NavMesh.SamplePosition(destination, ref navMeshHit2, 5f, 1);
+		this.targetIsOnNavMesh = NavMesh.SamplePosition(destination, out navMeshHit2, 5f, 1);
 		NavMesh.CalculatePath(navMeshHit.position, navMeshHit2.position, -1, this.path);
 		this.points = new List<Vector3>();
-		foreach (Vector3 vector in this.path.corners)
+		foreach (Vector3 a in this.path.corners)
 		{
-			this.points.Add(vector + Vector3.up * this.heightAboveNavmesh);
+			this.points.Add(a + Vector3.up * this.heightAboveNavmesh);
 		}
 		this.points.Add(destination);
 		this.currentTargetIdx = 0;
@@ -546,11 +546,11 @@ public class HalloweenGhostChaser : NetworkComponent
 		this.targetPlayer = NetworkSystem.Instance.GetPlayer(targetActorNumber);
 		this.currentState = (HalloweenGhostChaser.ChaseState)this.Data.CurrentState;
 		this.spawnIndex = this.Data.SpawnIndex;
-		float num = this.Data.CurrentSpeed;
+		float f = this.Data.CurrentSpeed;
 		this.isSummoned = this.Data.IsSummoned;
-		if (float.IsFinite(num))
+		if (float.IsFinite(f))
 		{
-			this.currentSpeed = num;
+			this.currentSpeed = f;
 		}
 	}
 
@@ -584,11 +584,11 @@ public class HalloweenGhostChaser : NetworkComponent
 		this.targetPlayer = NetworkSystem.Instance.GetPlayer(playerID);
 		this.currentState = (HalloweenGhostChaser.ChaseState)stream.ReceiveNext();
 		this.spawnIndex = (int)stream.ReceiveNext();
-		float num = (float)stream.ReceiveNext();
+		float f = (float)stream.ReceiveNext();
 		this.isSummoned = (bool)stream.ReceiveNext();
-		if (float.IsFinite(num))
+		if (float.IsFinite(f))
 		{
-			this.currentSpeed = num;
+			this.currentSpeed = f;
 		}
 	}
 
@@ -769,7 +769,7 @@ public class HalloweenGhostChaser : NetworkComponent
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("Data", 0, 5)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private HalloweenGhostChaser.GhostData _Data;
 
 	public enum ChaseState
@@ -782,7 +782,7 @@ public class HalloweenGhostChaser : NetworkComponent
 	}
 
 	[NetworkStructWeaved(5)]
-	[StructLayout(2, Size = 20)]
+	[StructLayout(LayoutKind.Explicit, Size = 20)]
 	public struct GhostData : INetworkStruct
 	{
 		[Networked]

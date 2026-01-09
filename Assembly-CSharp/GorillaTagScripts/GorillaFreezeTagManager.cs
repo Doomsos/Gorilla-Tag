@@ -43,7 +43,7 @@ namespace GorillaTagScripts
 		{
 			if (NetworkSystem.Instance.IsMasterClient)
 			{
-				foreach (KeyValuePair<NetPlayer, float> keyValuePair in Enumerable.ToList<KeyValuePair<NetPlayer, float>>(this.currentFrozen))
+				foreach (KeyValuePair<NetPlayer, float> keyValuePair in this.currentFrozen.ToList<KeyValuePair<NetPlayer, float>>())
 				{
 					if (Time.time - keyValuePair.Value >= this.freezeDuration)
 					{
@@ -60,26 +60,26 @@ namespace GorillaTagScripts
 				}
 				if (this.isCurrentlyTag && this.currentIt == null)
 				{
-					int num = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[num], false);
+					int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
 				}
 				else if (this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count >= this.infectedModeThreshold)
 				{
 					this.ResetGame();
-					int num2 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.AddInfectedPlayer(GameMode.ParticipatingPlayers[num2], true);
+					int index2 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index2], true);
 				}
 				else if (!this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count < this.infectedModeThreshold)
 				{
 					this.ResetGame();
 					base.SetisCurrentlyTag(true);
-					int num3 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[num3], false);
+					int index3 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index3], false);
 				}
 				else if (!this.isCurrentlyTag && this.currentInfected.Count == 0)
 				{
-					int num4 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.AddInfectedPlayer(GameMode.ParticipatingPlayers[num4], true);
+					int index4 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index4], true);
 				}
 				bool flag = true;
 				foreach (NetPlayer player in GameMode.ParticipatingPlayers)
@@ -272,15 +272,15 @@ namespace GorillaTagScripts
 		private void TryAddNewInfectedPlayer()
 		{
 			List<NetPlayer> participatingPlayers = GameMode.ParticipatingPlayers;
-			int num = Random.Range(0, participatingPlayers.Count);
-			int num2 = 0;
-			while (num2 < 10 && this.lastRoundInfectedPlayers.Contains(participatingPlayers[num]))
+			int index = Random.Range(0, participatingPlayers.Count);
+			int num = 0;
+			while (num < 10 && this.lastRoundInfectedPlayers.Contains(participatingPlayers[index]))
 			{
-				num = Random.Range(0, participatingPlayers.Count);
-				num2++;
+				index = Random.Range(0, participatingPlayers.Count);
+				num++;
 			}
-			this.AddInfectedPlayer(participatingPlayers[num], true);
-			this.currentRoundInfectedPlayers.Add(participatingPlayers[num]);
+			this.AddInfectedPlayer(participatingPlayers[index], true);
+			this.currentRoundInfectedPlayers.Add(participatingPlayers[index]);
 		}
 
 		public override int MyMatIndex(NetPlayer forPlayer)
@@ -382,8 +382,8 @@ namespace GorillaTagScripts
 			{
 				if (this.isCurrentlyTag && ((otherPlayer != null && otherPlayer == this.currentIt) || this.currentIt.ActorNumber == otherPlayer.ActorNumber) && GameMode.ParticipatingPlayers.Count > 0)
 				{
-					int num = Random.Range(0, GameMode.ParticipatingPlayers.Count);
-					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[num], false);
+					int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
 				}
 				if (this.currentInfected.Contains(otherPlayer))
 				{
@@ -414,9 +414,9 @@ namespace GorillaTagScripts
 			for (int i = 0; i < num; i++)
 			{
 				int playerID = (int)stream.ReceiveNext();
-				float num2 = (float)stream.ReceiveNext();
+				float value = (float)stream.ReceiveNext();
 				NetPlayer player = NetworkSystem.Instance.GetPlayer(playerID);
-				this.currentFrozen.Add(player, num2);
+				this.currentFrozen.Add(player, value);
 			}
 		}
 

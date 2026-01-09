@@ -14,8 +14,8 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 	{
 		base.OnEnable();
 		this.FindQuestManager();
-		ProgressionController.OnQuestSelectionChanged += new Action(this.OnQuestSelectionChanged);
-		ProgressionController.OnProgressEvent += new Action(this.OnProgress);
+		ProgressionController.OnQuestSelectionChanged += this.OnQuestSelectionChanged;
+		ProgressionController.OnProgressEvent += this.OnProgress;
 		ProgressionController.RequestProgressUpdate();
 		this.UpdateCountdownTimers();
 	}
@@ -23,8 +23,8 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 	public override void OnDisable()
 	{
 		base.OnDisable();
-		ProgressionController.OnQuestSelectionChanged -= new Action(this.OnQuestSelectionChanged);
-		ProgressionController.OnProgressEvent -= new Action(this.OnProgress);
+		ProgressionController.OnQuestSelectionChanged -= this.OnQuestSelectionChanged;
+		ProgressionController.OnProgressEvent -= this.OnProgress;
 	}
 
 	private void FindQuestManager()
@@ -106,7 +106,7 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 			ProgressionController.RedeemProgress();
 			if (PhotonNetwork.InRoom)
 			{
-				base.photonView.RPC("BroadcastRedeemQuestPoints", 1, new object[]
+				base.photonView.RPC("BroadcastRedeemQuestPoints", RpcTarget.Others, new object[]
 				{
 					this._tempUnclaimedPoints
 				});
@@ -150,7 +150,7 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 			}
 			redeemedPointCount = Mathf.Min(redeemedPointCount, 50);
 			Coroutine coroutine;
-			if (this.perPlayerRedemptionSequence.TryGetValue(info.Sender, ref coroutine))
+			if (this.perPlayerRedemptionSequence.TryGetValue(info.Sender, out coroutine))
 			{
 				if (coroutine != null)
 				{
@@ -160,8 +160,8 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 			}
 			if (base.gameObject.activeInHierarchy)
 			{
-				Coroutine coroutine2 = base.StartCoroutine(this.PerformRemotePointRedemptionSequence(info.Sender, redeemedPointCount));
-				this.perPlayerRedemptionSequence.Add(info.Sender, coroutine2);
+				Coroutine value = base.StartCoroutine(this.PerformRemotePointRedemptionSequence(info.Sender, redeemedPointCount));
+				this.perPlayerRedemptionSequence.Add(info.Sender, value);
 			}
 		}
 	}

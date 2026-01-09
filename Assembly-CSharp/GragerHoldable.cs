@@ -16,20 +16,20 @@ public class GragerHoldable : MonoBehaviour
 
 	private void Update()
 	{
-		Vector3 vector = base.transform.TransformPoint(this.LocalCenterOfMass);
-		Vector3 vector2 = this.lastWorldPosition + this.velocity * Time.deltaTime * this.drag;
-		Vector3 vector3 = base.transform.parent.TransformDirection(this.LocalRotationAxis);
-		Vector3 vector4 = base.transform.position + UnityVectorExtensions.ProjectOntoPlane(vector2 - base.transform.position, vector3).normalized * this.centerOfMassRadius;
-		vector4 = Vector3.MoveTowards(vector4, vector, this.localFriction * Time.deltaTime);
-		this.velocity = (vector4 - this.lastWorldPosition) / Time.deltaTime;
+		Vector3 target = base.transform.TransformPoint(this.LocalCenterOfMass);
+		Vector3 a = this.lastWorldPosition + this.velocity * Time.deltaTime * this.drag;
+		Vector3 vector = base.transform.parent.TransformDirection(this.LocalRotationAxis);
+		Vector3 vector2 = base.transform.position + (a - base.transform.position).ProjectOntoPlane(vector).normalized * this.centerOfMassRadius;
+		vector2 = Vector3.MoveTowards(vector2, target, this.localFriction * Time.deltaTime);
+		this.velocity = (vector2 - this.lastWorldPosition) / Time.deltaTime;
 		this.velocity += Vector3.down * this.gravity * Time.deltaTime;
-		this.lastWorldPosition = vector4;
-		base.transform.rotation = Quaternion.LookRotation(vector4 - base.transform.position, vector3) * this.RotationCorrection;
-		Vector3 vector5 = base.transform.parent.InverseTransformPoint(base.transform.TransformPoint(this.LocalCenterOfMass));
-		if ((vector5 - this.lastClackParentLocalPosition).IsLongerThan(this.distancePerClack))
+		this.lastWorldPosition = vector2;
+		base.transform.rotation = Quaternion.LookRotation(vector2 - base.transform.position, vector) * this.RotationCorrection;
+		Vector3 a2 = base.transform.parent.InverseTransformPoint(base.transform.TransformPoint(this.LocalCenterOfMass));
+		if ((a2 - this.lastClackParentLocalPosition).IsLongerThan(this.distancePerClack))
 		{
 			this.clackAudio.GTPlayOneShot(this.allClacks[Random.Range(0, this.allClacks.Length)], 1f);
-			this.lastClackParentLocalPosition = vector5;
+			this.lastClackParentLocalPosition = a2;
 		}
 	}
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ReparentOnAwakeWithRenderer : MonoBehaviour, IBuildValidation
 {
@@ -26,8 +27,8 @@ public class ReparentOnAwakeWithRenderer : MonoBehaviour, IBuildValidation
 		}
 		if (this.myRenderer != null)
 		{
-			this.myRenderer.reflectionProbeUsage = 0;
-			this.myRenderer.lightProbeUsage = 4;
+			this.myRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+			this.myRenderer.lightProbeUsage = LightProbeUsage.CustomProvided;
 			this.myRenderer.probeAnchor = this.newParent;
 		}
 	}

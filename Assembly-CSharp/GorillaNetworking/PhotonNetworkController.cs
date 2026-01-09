@@ -92,8 +92,8 @@ namespace GorillaNetworking
 		public void Start()
 		{
 			base.StartCoroutine(this.DisableOnStart());
-			NetworkSystem.Instance.OnJoinedRoomEvent += new Action(this.OnJoinedRoom);
-			NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnDisconnected);
+			NetworkSystem.Instance.OnJoinedRoomEvent += this.OnJoinedRoom;
+			NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnDisconnected;
 			PhotonNetwork.NetworkingClient.LoadBalancingPeer.ReuseEventInstance = true;
 		}
 
@@ -318,7 +318,7 @@ namespace GorillaNetworking
 			VRRigCache.Instance.InstantiateNetworkObject();
 			if (NetworkSystem.Instance.IsMasterClient)
 			{
-				GameMode.LoadGameModeFromProperty(this.initialGameMode);
+				GorillaGameModes.GameMode.LoadGameModeFromProperty(this.initialGameMode);
 			}
 			GorillaComputer.instance.roomFull = false;
 			GorillaComputer.instance.roomNotAllowed = false;
@@ -461,7 +461,7 @@ namespace GorillaNetworking
 			}
 			if ((DateTime.Now - (this.timeWhenApplicationPaused ?? DateTime.Now)).TotalSeconds > (double)this.disconnectTime)
 			{
-				this.timeWhenApplicationPaused = default(DateTime?);
+				this.timeWhenApplicationPaused = null;
 				NetworkSystem instance = NetworkSystem.Instance;
 				if (instance != null)
 				{

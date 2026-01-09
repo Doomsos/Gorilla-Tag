@@ -124,11 +124,11 @@ public class SnapXformToLine : MonoBehaviour
 
 	private static Vector3 GetClosestPointOnLine(Vector3 p, Vector3 a, Vector3 b)
 	{
-		Vector3 vector = p - a;
-		Vector3 vector2 = b - a;
-		float sqrMagnitude = vector2.sqrMagnitude;
-		float num = Mathf.Clamp(Vector3.Dot(vector, vector2) / sqrMagnitude, 0f, 1f);
-		return a + vector2 * num;
+		Vector3 lhs = p - a;
+		Vector3 vector = b - a;
+		float sqrMagnitude = vector.sqrMagnitude;
+		float d = Mathf.Clamp(Vector3.Dot(lhs, vector) / sqrMagnitude, 0f, 1f);
+		return a + vector * d;
 	}
 
 	public bool apply = true;

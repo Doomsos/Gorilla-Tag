@@ -71,7 +71,7 @@ public class KIDUIToggle : Slider
 		base.interactable = false;
 		base.colors.disabledColor = Color.white;
 		this.SetColors();
-		base.transition = 0;
+		base.transition = Selectable.Transition.None;
 	}
 
 	public void RegisterOnChangeEvent(Action onChange)
@@ -83,7 +83,7 @@ public class KIDUIToggle : Slider
 			{
 				return;
 			}
-			onChange2.Invoke();
+			onChange2();
 		});
 	}
 
@@ -96,7 +96,7 @@ public class KIDUIToggle : Slider
 			{
 				return;
 			}
-			onChange2.Invoke();
+			onChange2();
 		});
 	}
 
@@ -109,7 +109,7 @@ public class KIDUIToggle : Slider
 			{
 				return;
 			}
-			onToggle2.Invoke();
+			onToggle2();
 		});
 	}
 
@@ -122,7 +122,7 @@ public class KIDUIToggle : Slider
 			{
 				return;
 			}
-			onToggle2.Invoke();
+			onToggle2();
 		});
 	}
 
@@ -135,7 +135,7 @@ public class KIDUIToggle : Slider
 			{
 				return;
 			}
-			onToggle2.Invoke();
+			onToggle2();
 		});
 	}
 
@@ -148,7 +148,7 @@ public class KIDUIToggle : Slider
 			{
 				return;
 			}
-			onToggle2.Invoke();
+			onToggle2();
 		});
 	}
 
@@ -237,8 +237,8 @@ public class KIDUIToggle : Slider
 		while (time < this._animationDuration)
 		{
 			time += Time.deltaTime;
-			float num = this._toggleEase.Evaluate(time / this._animationDuration);
-			this.value = Mathf.Lerp(startValue, endValue, num);
+			float t = this._toggleEase.Evaluate(time / this._animationDuration);
+			this.value = Mathf.Lerp(startValue, endValue, t);
 			yield return null;
 		}
 		this.value = endValue;
@@ -315,7 +315,7 @@ public class KIDUIToggle : Slider
 		KIDUIToggle._triggeredThisFrame = false;
 	}
 
-	protected void OnDisable()
+	protected new void OnDisable()
 	{
 		if (ControllerBehaviour.Instance)
 		{

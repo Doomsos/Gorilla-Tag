@@ -24,7 +24,7 @@ namespace GorillaTagScripts.Builder
 				}
 				foreach (BuilderSmallMonkeTrigger builderSmallMonkeTrigger in this.bodyTriggers)
 				{
-					builderSmallMonkeTrigger.onPlayerEnteredTrigger += new Action<int>(this.OnBodyTriggerEntered);
+					builderSmallMonkeTrigger.onPlayerEnteredTrigger += this.OnBodyTriggerEntered;
 					Collider component2 = builderSmallMonkeTrigger.GetComponent<Collider>();
 					if (component2 != null)
 					{
@@ -47,7 +47,7 @@ namespace GorillaTagScripts.Builder
 			{
 				if (!(builderSmallMonkeTrigger == null))
 				{
-					builderSmallMonkeTrigger.onPlayerEnteredTrigger -= new Action<int>(this.OnBodyTriggerEntered);
+					builderSmallMonkeTrigger.onPlayerEnteredTrigger -= this.OnBodyTriggerEntered;
 				}
 			}
 		}

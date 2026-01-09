@@ -20,18 +20,18 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 
 	private void Start()
 	{
-		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeftRoom);
-		NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.ValidateState);
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.ValidateState);
+		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnMultiplayerStarted += this.ValidateState;
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.ValidateState;
 	}
 
 	private void OnDestroy()
 	{
 		if (NetworkSystem.Instance != null)
 		{
-			NetworkSystem.Instance.OnPlayerLeft -= new Action<NetPlayer>(this.OnPlayerLeftRoom);
-			NetworkSystem.Instance.OnMultiplayerStarted -= new Action(this.ValidateState);
-			NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.ValidateState);
+			NetworkSystem.Instance.OnPlayerLeft -= this.OnPlayerLeftRoom;
+			NetworkSystem.Instance.OnMultiplayerStarted -= this.ValidateState;
+			NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.ValidateState;
 		}
 	}
 
@@ -68,7 +68,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 					}
 					else
 					{
-						base.photonView.RPC("NotifyClientsFriendRequestReadyRPC", 0, new object[]
+						base.photonView.RPC("NotifyClientsFriendRequestReadyRPC", RpcTarget.All, new object[]
 						{
 							friendStationData.zone
 						});
@@ -112,7 +112,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 		for (int i = 0; i < this.activeFriendStationData.Count; i++)
 		{
 			FriendingStation friendingStation;
-			if (this.friendingStations.TryGetValue(this.activeFriendStationData[i].zone, ref friendingStation))
+			if (this.friendingStations.TryGetValue(this.activeFriendStationData[i].zone, out friendingStation))
 			{
 				friendingStation.UpdateState(this.activeFriendStationData[i]);
 			}
@@ -187,7 +187,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 					}
 					if (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnFriendStatusBoth)
 					{
-						base.photonView.RPC("CheckFriendStatusRequestRPC", 0, new object[]
+						base.photonView.RPC("CheckFriendStatusRequestRPC", RpcTarget.All, new object[]
 						{
 							this.activeFriendStationData[i].zone,
 							this.activeFriendStationData[i].actorNumberA,
@@ -232,28 +232,28 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 				{
 					if ((this.activeFriendStationData[i].actorNumberA == netPlayer.ActorNumber && this.activeFriendStationData[i].actorNumberB == -1) || (this.activeFriendStationData[i].actorNumberA == -1 && this.activeFriendStationData[i].actorNumberB == netPlayer.ActorNumber))
 					{
-						FriendingManager.FriendStationData friendStationData = this.activeFriendStationData[i];
-						friendStationData.actorNumberA = -1;
-						friendStationData.actorNumberB = -1;
-						friendStationData.state = FriendingManager.FriendStationState.WaitingForPlayers;
-						this.activeFriendStationData[i] = friendStationData;
+						FriendingManager.FriendStationData value = this.activeFriendStationData[i];
+						value.actorNumberA = -1;
+						value.actorNumberB = -1;
+						value.state = FriendingManager.FriendStationState.WaitingForPlayers;
+						this.activeFriendStationData[i] = value;
 						num = i;
 						break;
 					}
 					if (this.activeFriendStationData[i].actorNumberA != -1 && this.activeFriendStationData[i].actorNumberA != netPlayer.ActorNumber && this.activeFriendStationData[i].actorNumberB == netPlayer.ActorNumber)
 					{
-						FriendingManager.FriendStationData friendStationData2 = this.activeFriendStationData[i];
-						friendStationData2.actorNumberB = -1;
-						friendStationData2.state = FriendingManager.FriendStationState.WaitingForPlayers;
-						this.activeFriendStationData[i] = friendStationData2;
+						FriendingManager.FriendStationData value2 = this.activeFriendStationData[i];
+						value2.actorNumberB = -1;
+						value2.state = FriendingManager.FriendStationState.WaitingForPlayers;
+						this.activeFriendStationData[i] = value2;
 						break;
 					}
 					if (this.activeFriendStationData[i].actorNumberB != -1 && this.activeFriendStationData[i].actorNumberB != netPlayer.ActorNumber && this.activeFriendStationData[i].actorNumberA == netPlayer.ActorNumber)
 					{
-						FriendingManager.FriendStationData friendStationData3 = this.activeFriendStationData[i];
-						friendStationData3.actorNumberA = -1;
-						friendStationData3.state = FriendingManager.FriendStationState.WaitingForPlayers;
-						this.activeFriendStationData[i] = friendStationData3;
+						FriendingManager.FriendStationData value3 = this.activeFriendStationData[i];
+						value3.actorNumberA = -1;
+						value3.state = FriendingManager.FriendStationState.WaitingForPlayers;
+						this.activeFriendStationData[i] = value3;
 						break;
 					}
 					break;
@@ -266,7 +266,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 			this.UpdateFriendingStations();
 			if (num >= 0)
 			{
-				base.photonView.RPC("StationNoLongerActiveRPC", 1, new object[]
+				base.photonView.RPC("StationNoLongerActiveRPC", RpcTarget.Others, new object[]
 				{
 					this.activeFriendStationData[num].zone
 				});
@@ -290,24 +290,24 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 					}
 					if ((this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnButtonPlayerA && this.activeFriendStationData[i].actorNumberA == playerId) || (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnButtonPlayerB && this.activeFriendStationData[i].actorNumberB == playerId))
 					{
-						FriendingManager.FriendStationData friendStationData = this.activeFriendStationData[i];
-						friendStationData.state = FriendingManager.FriendStationState.ButtonConfirmationTimer0;
-						friendStationData.progressBarStartTime = Time.time;
-						this.activeFriendStationData[i] = friendStationData;
+						FriendingManager.FriendStationData value = this.activeFriendStationData[i];
+						value.state = FriendingManager.FriendStationState.ButtonConfirmationTimer0;
+						value.progressBarStartTime = Time.time;
+						this.activeFriendStationData[i] = value;
 						return;
 					}
 					if (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnButtonBoth && this.activeFriendStationData[i].actorNumberA == playerId)
 					{
-						FriendingManager.FriendStationData friendStationData2 = this.activeFriendStationData[i];
-						friendStationData2.state = FriendingManager.FriendStationState.WaitingOnButtonPlayerB;
-						this.activeFriendStationData[i] = friendStationData2;
+						FriendingManager.FriendStationData value2 = this.activeFriendStationData[i];
+						value2.state = FriendingManager.FriendStationState.WaitingOnButtonPlayerB;
+						this.activeFriendStationData[i] = value2;
 						return;
 					}
 					if (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnButtonBoth && this.activeFriendStationData[i].actorNumberB == playerId)
 					{
-						FriendingManager.FriendStationData friendStationData3 = this.activeFriendStationData[i];
-						friendStationData3.state = FriendingManager.FriendStationState.WaitingOnButtonPlayerA;
-						this.activeFriendStationData[i] = friendStationData3;
+						FriendingManager.FriendStationData value3 = this.activeFriendStationData[i];
+						value3.state = FriendingManager.FriendStationState.WaitingOnButtonPlayerA;
+						this.activeFriendStationData[i] = value3;
 						return;
 					}
 					break;
@@ -336,23 +336,23 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 					bool flag = this.activeFriendStationData[i].state >= FriendingManager.FriendStationState.ButtonConfirmationTimer0 && this.activeFriendStationData[i].state <= FriendingManager.FriendStationState.ButtonConfirmationTimer4;
 					if (flag && this.activeFriendStationData[i].actorNumberA == playerId)
 					{
-						FriendingManager.FriendStationData friendStationData = this.activeFriendStationData[i];
-						friendStationData.state = FriendingManager.FriendStationState.WaitingOnButtonPlayerA;
-						this.activeFriendStationData[i] = friendStationData;
+						FriendingManager.FriendStationData value = this.activeFriendStationData[i];
+						value.state = FriendingManager.FriendStationState.WaitingOnButtonPlayerA;
+						this.activeFriendStationData[i] = value;
 						return;
 					}
 					if (flag && this.activeFriendStationData[i].actorNumberB == playerId)
 					{
-						FriendingManager.FriendStationData friendStationData2 = this.activeFriendStationData[i];
-						friendStationData2.state = FriendingManager.FriendStationState.WaitingOnButtonPlayerB;
-						this.activeFriendStationData[i] = friendStationData2;
+						FriendingManager.FriendStationData value2 = this.activeFriendStationData[i];
+						value2.state = FriendingManager.FriendStationState.WaitingOnButtonPlayerB;
+						this.activeFriendStationData[i] = value2;
 						return;
 					}
 					if ((this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnButtonPlayerA && this.activeFriendStationData[i].actorNumberB == playerId) || (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnButtonPlayerB && this.activeFriendStationData[i].actorNumberA == playerId))
 					{
-						FriendingManager.FriendStationData friendStationData3 = this.activeFriendStationData[i];
-						friendStationData3.state = FriendingManager.FriendStationState.WaitingOnButtonBoth;
-						this.activeFriendStationData[i] = friendStationData3;
+						FriendingManager.FriendStationData value3 = this.activeFriendStationData[i];
+						value3.state = FriendingManager.FriendStationState.WaitingOnButtonBoth;
+						this.activeFriendStationData[i] = value3;
 						return;
 					}
 					break;
@@ -367,14 +367,14 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 
 	private void CheckFriendStatusRequest(GTZone zone, int actorNumberA, int actorNumberB)
 	{
-		FriendSystem.Instance.OnFriendListRefresh -= new Action<List<FriendBackendController.Friend>>(this.CheckFriendStatusOnFriendListRefresh);
-		FriendSystem.Instance.OnFriendListRefresh += new Action<List<FriendBackendController.Friend>>(this.CheckFriendStatusOnFriendListRefresh);
+		FriendSystem.Instance.OnFriendListRefresh -= this.CheckFriendStatusOnFriendListRefresh;
+		FriendSystem.Instance.OnFriendListRefresh += this.CheckFriendStatusOnFriendListRefresh;
 		FriendSystem.Instance.RefreshFriendsList();
 	}
 
 	private void CheckFriendStatusOnFriendListRefresh(List<FriendBackendController.Friend> friendList)
 	{
-		FriendSystem.Instance.OnFriendListRefresh -= new Action<List<FriendBackendController.Friend>>(this.CheckFriendStatusOnFriendListRefresh);
+		FriendSystem.Instance.OnFriendListRefresh -= this.CheckFriendStatusOnFriendListRefresh;
 		int i = 0;
 		while (i < this.activeFriendStationData.Count)
 		{
@@ -392,7 +392,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 				}
 				if (num != -1 && FriendSystem.Instance.CheckFriendshipWithPlayer(num))
 				{
-					base.photonView.RPC("CheckFriendStatusResponseRPC", 2, new object[]
+					base.photonView.RPC("CheckFriendStatusResponseRPC", RpcTarget.MasterClient, new object[]
 					{
 						this.localPlayerZone,
 						num,
@@ -400,7 +400,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 					});
 					return;
 				}
-				base.photonView.RPC("CheckFriendStatusResponseRPC", 2, new object[]
+				base.photonView.RPC("CheckFriendStatusResponseRPC", RpcTarget.MasterClient, new object[]
 				{
 					this.localPlayerZone,
 					num,
@@ -430,44 +430,44 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 					}
 					if ((this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnFriendStatusPlayerA && this.activeFriendStationData[i].actorNumberA == responderActorNumber) || (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnFriendStatusPlayerB && this.activeFriendStationData[i].actorNumberB == responderActorNumber))
 					{
-						FriendingManager.FriendStationData friendStationData = this.activeFriendStationData[i];
+						FriendingManager.FriendStationData value = this.activeFriendStationData[i];
 						if (friends)
 						{
-							friendStationData.state = FriendingManager.FriendStationState.AlreadyFriends;
+							value.state = FriendingManager.FriendStationState.AlreadyFriends;
 						}
 						else
 						{
-							friendStationData.state = FriendingManager.FriendStationState.WaitingOnButtonBoth;
+							value.state = FriendingManager.FriendStationState.WaitingOnButtonBoth;
 						}
-						this.activeFriendStationData[i] = friendStationData;
+						this.activeFriendStationData[i] = value;
 						return;
 					}
 					if (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnFriendStatusBoth && this.activeFriendStationData[i].actorNumberA == responderActorNumber)
 					{
-						FriendingManager.FriendStationData friendStationData2 = this.activeFriendStationData[i];
+						FriendingManager.FriendStationData value2 = this.activeFriendStationData[i];
 						if (friends)
 						{
-							friendStationData2.state = FriendingManager.FriendStationState.WaitingOnFriendStatusPlayerB;
+							value2.state = FriendingManager.FriendStationState.WaitingOnFriendStatusPlayerB;
 						}
 						else
 						{
-							friendStationData2.state = FriendingManager.FriendStationState.WaitingOnButtonBoth;
+							value2.state = FriendingManager.FriendStationState.WaitingOnButtonBoth;
 						}
-						this.activeFriendStationData[i] = friendStationData2;
+						this.activeFriendStationData[i] = value2;
 						return;
 					}
 					if (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnFriendStatusBoth && this.activeFriendStationData[i].actorNumberB == responderActorNumber)
 					{
-						FriendingManager.FriendStationData friendStationData3 = this.activeFriendStationData[i];
+						FriendingManager.FriendStationData value3 = this.activeFriendStationData[i];
 						if (friends)
 						{
-							friendStationData3.state = FriendingManager.FriendStationState.WaitingOnFriendStatusPlayerA;
+							value3.state = FriendingManager.FriendStationState.WaitingOnFriendStatusPlayerA;
 						}
 						else
 						{
-							friendStationData3.state = FriendingManager.FriendStationState.WaitingOnButtonBoth;
+							value3.state = FriendingManager.FriendStationState.WaitingOnButtonBoth;
 						}
-						this.activeFriendStationData[i] = friendStationData3;
+						this.activeFriendStationData[i] = value3;
 						return;
 					}
 					break;
@@ -503,7 +503,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 					return;
 				}
 				FriendingStation friendingStation;
-				if (this.friendingStations.TryGetValue(friendStationData.zone, ref friendingStation) && (GTPlayer.Instance.HeadCenterPosition - friendingStation.transform.position).sqrMagnitude < this.requiredProximityToStation * this.requiredProximityToStation)
+				if (this.friendingStations.TryGetValue(friendStationData.zone, out friendingStation) && (GTPlayer.Instance.HeadCenterPosition - friendingStation.transform.position).sqrMagnitude < this.requiredProximityToStation * this.requiredProximityToStation)
 				{
 					FriendSystem.Instance.SendFriendRequest(netPlayer, friendStationData.zone, new FriendSystem.FriendRequestCallback(this.FriendRequestCallback));
 				}
@@ -527,30 +527,30 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 				{
 					if (!succeeded)
 					{
-						FriendingManager.FriendStationData friendStationData = this.activeFriendStationData[i];
-						friendStationData.state = FriendingManager.FriendStationState.RequestFailed;
-						this.activeFriendStationData[i] = friendStationData;
+						FriendingManager.FriendStationData value = this.activeFriendStationData[i];
+						value.state = FriendingManager.FriendStationState.RequestFailed;
+						this.activeFriendStationData[i] = value;
 						return;
 					}
 					if ((this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnRequestPlayerA && this.activeFriendStationData[i].actorNumberA == playerId) || (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnRequestPlayerB && this.activeFriendStationData[i].actorNumberB == playerId))
 					{
-						FriendingManager.FriendStationData friendStationData2 = this.activeFriendStationData[i];
-						friendStationData2.state = FriendingManager.FriendStationState.Friends;
-						this.activeFriendStationData[i] = friendStationData2;
+						FriendingManager.FriendStationData value2 = this.activeFriendStationData[i];
+						value2.state = FriendingManager.FriendStationState.Friends;
+						this.activeFriendStationData[i] = value2;
 						return;
 					}
 					if (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnRequestBoth && this.activeFriendStationData[i].actorNumberA == playerId)
 					{
-						FriendingManager.FriendStationData friendStationData3 = this.activeFriendStationData[i];
-						friendStationData3.state = FriendingManager.FriendStationState.WaitingOnRequestPlayerB;
-						this.activeFriendStationData[i] = friendStationData3;
+						FriendingManager.FriendStationData value3 = this.activeFriendStationData[i];
+						value3.state = FriendingManager.FriendStationState.WaitingOnRequestPlayerB;
+						this.activeFriendStationData[i] = value3;
 						return;
 					}
 					if (this.activeFriendStationData[i].state == FriendingManager.FriendStationState.WaitingOnRequestBoth && this.activeFriendStationData[i].actorNumberB == playerId)
 					{
-						FriendingManager.FriendStationData friendStationData4 = this.activeFriendStationData[i];
-						friendStationData4.state = FriendingManager.FriendStationState.WaitingOnRequestPlayerA;
-						this.activeFriendStationData[i] = friendStationData4;
+						FriendingManager.FriendStationData value4 = this.activeFriendStationData[i];
+						value4.state = FriendingManager.FriendStationState.WaitingOnRequestPlayerA;
+						this.activeFriendStationData[i] = value4;
 						return;
 					}
 					break;
@@ -570,7 +570,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 			this.FriendRequestCompletedAuthority(zone, PhotonNetwork.LocalPlayer.ActorNumber, success);
 			return;
 		}
-		base.photonView.RPC("FriendRequestCompletedRPC", 2, new object[]
+		base.photonView.RPC("FriendRequestCompletedRPC", RpcTarget.MasterClient, new object[]
 		{
 			zone,
 			success
@@ -660,7 +660,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 			return;
 		}
 		FriendingStation friendingStation;
-		if (info.Sender.IsMasterClient && this.friendingStations.TryGetValue(zone, ref friendingStation))
+		if (info.Sender.IsMasterClient && this.friendingStations.TryGetValue(zone, out friendingStation))
 		{
 			friendingStation.UpdateState(new FriendingManager.FriendStationData
 			{

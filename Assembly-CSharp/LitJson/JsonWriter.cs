@@ -200,7 +200,7 @@ namespace LitJson
 			int i = 0;
 			while (i < length)
 			{
-				char c = str.get_Chars(i);
+				char c = str[i];
 				switch (c)
 				{
 				case '\b':
@@ -226,19 +226,19 @@ namespace LitJson
 						goto IL_E4;
 					}
 					this.writer.Write('\\');
-					this.writer.Write(str.get_Chars(i));
+					this.writer.Write(str[i]);
 					break;
 				}
 				IL_141:
 				i++;
 				continue;
 				IL_E4:
-				if (str.get_Chars(i) >= ' ' && str.get_Chars(i) <= '~')
+				if (str[i] >= ' ' && str[i] <= '~')
 				{
-					this.writer.Write(str.get_Chars(i));
+					this.writer.Write(str[i]);
 					goto IL_141;
 				}
-				JsonWriter.IntToHex((int)str.get_Chars(i), this.hex_seq);
+				JsonWriter.IntToHex((int)str[i], this.hex_seq);
 				this.writer.Write("\\u");
 				this.writer.Write(this.hex_seq);
 				goto IL_141;

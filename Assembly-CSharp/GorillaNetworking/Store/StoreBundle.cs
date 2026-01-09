@@ -124,7 +124,7 @@ namespace GorillaNetworking.Store
 			if (!string.IsNullOrEmpty(bundlePrice))
 			{
 				decimal num;
-				this._price = (decimal.TryParse(bundlePrice, ref num) ? (StoreBundle.defaultCurrencySymbol + bundlePrice) : bundlePrice);
+				this._price = (decimal.TryParse(bundlePrice, out num) ? (StoreBundle.defaultCurrencySymbol + bundlePrice) : bundlePrice);
 			}
 			this.UpdatePurchaseButtonText();
 		}

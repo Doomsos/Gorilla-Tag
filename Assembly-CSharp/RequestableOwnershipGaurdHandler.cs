@@ -53,9 +53,9 @@ internal class RequestableOwnershipGaurdHandler : IPunOwnershipCallbacks, IInRoo
 
 	void IPunOwnershipCallbacks.OnOwnershipTransfered(PhotonView targetView, Player previousOwner)
 	{
-		NetworkView networkView = Enumerable.FirstOrDefault<NetworkView>(RequestableOwnershipGaurdHandler.gaurdedViews, (NetworkView p) => p.GetView == targetView);
+		NetworkView networkView = RequestableOwnershipGaurdHandler.gaurdedViews.FirstOrDefault((NetworkView p) => p.GetView == targetView);
 		RequestableOwnershipGuard requestableOwnershipGuard;
-		if (networkView.IsNull() || !RequestableOwnershipGaurdHandler.guardingLookup.TryGetValue(networkView, ref requestableOwnershipGuard) || requestableOwnershipGuard.IsNull())
+		if (networkView.IsNull() || !RequestableOwnershipGaurdHandler.guardingLookup.TryGetValue(networkView, out requestableOwnershipGuard) || requestableOwnershipGuard.IsNull())
 		{
 			return;
 		}
@@ -85,7 +85,7 @@ internal class RequestableOwnershipGaurdHandler : IPunOwnershipCallbacks, IInRoo
 		foreach (NetworkView networkView in RequestableOwnershipGaurdHandler.gaurdedViews)
 		{
 			RequestableOwnershipGuard requestableOwnershipGuard;
-			if (!RequestableOwnershipGaurdHandler.guardingLookup.TryGetValue(networkView, ref requestableOwnershipGuard))
+			if (!RequestableOwnershipGaurdHandler.guardingLookup.TryGetValue(networkView, out requestableOwnershipGuard))
 			{
 				break;
 			}

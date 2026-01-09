@@ -19,8 +19,8 @@ namespace Critters.Scripts
 
 		public int GetRandomTemplate()
 		{
-			int num = Random.Range(0, this.templateCollection.Count - 1);
-			return this.templateCollection[num];
+			int index = Random.Range(0, this.templateCollection.Count - 1);
+			return this.templateCollection[index];
 		}
 
 		public List<CrittersSpawningData.CreatureSpawnParameters> SpawnParametersList;

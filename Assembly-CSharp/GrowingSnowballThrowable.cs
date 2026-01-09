@@ -38,14 +38,14 @@ public class GrowingSnowballThrowable : SnowballThrowable
 		base.Awake();
 		if (NetworkSystem.Instance != null)
 		{
-			NetworkSystem.Instance.OnMultiplayerStarted += new Action(this.StartedMultiplayerSession);
+			NetworkSystem.Instance.OnMultiplayerStarted += this.StartedMultiplayerSession;
 		}
 		else
 		{
 			Debug.LogError("NetworkSystem.Instance was null in SnowballThrowable Awake");
 		}
-		VRRigCache.OnRigActivated += new Action<RigContainer>(this.VRRigActivated);
-		VRRigCache.OnRigDeactivated += new Action<RigContainer>(this.VRRigDeactivated);
+		VRRigCache.OnRigActivated += this.VRRigActivated;
+		VRRigCache.OnRigDeactivated += this.VRRigDeactivated;
 	}
 
 	public override void OnEnable()
@@ -169,8 +169,8 @@ public class GrowingSnowballThrowable : SnowballThrowable
 
 	private int GetValidSizeLevel(int inputSizeLevel)
 	{
-		int num = Mathf.Max(this.snowballSizeLevels.Count - 1, 0);
-		return Mathf.Clamp(inputSizeLevel, 0, num);
+		int max = Mathf.Max(this.snowballSizeLevels.Count - 1, 0);
+		return Mathf.Clamp(inputSizeLevel, 0, max);
 	}
 
 	private void SetSizeLevelLocal(int sizeLevel)
@@ -323,25 +323,25 @@ public class GrowingSnowballThrowable : SnowballThrowable
 		{
 			return;
 		}
-		Vector3 vector = Vector3.zero;
+		Vector3 b = Vector3.zero;
 		Rigidbody component = GorillaTagger.Instance.GetComponent<Rigidbody>();
 		if (component != null)
 		{
-			vector = component.linearVelocity;
+			b = component.linearVelocity;
 		}
-		Vector3 vector2 = this.velocityEstimator.linearVelocity - vector;
-		float magnitude = vector2.magnitude;
+		Vector3 a = this.velocityEstimator.linearVelocity - b;
+		float magnitude = a.magnitude;
 		if (magnitude > 0.001f)
 		{
 			float num = Mathf.Clamp(magnitude * this.linSpeedMultiplier, 0f, this.maxLinSpeed);
-			vector2 *= num / magnitude;
+			a *= num / magnitude;
 		}
-		Vector3 vector3 = vector2 + vector;
+		Vector3 vector = a + b;
 		this.targetRig.GetThrowableProjectileColor(this.isLeftHanded);
 		Transform transform = this.snowballModelTransform;
 		Vector3 position = transform.position;
 		float x = transform.lossyScale.x;
-		SlingshotProjectile slingshotProjectile = this.LaunchSnowballLocal(position, vector3, x);
+		SlingshotProjectile slingshotProjectile = this.LaunchSnowballLocal(position, vector, x);
 		base.SetSnowballActiveLocal(false);
 		if (this.randModelIndex > -1 && this.randModelIndex < this.localModels.Count && this.localModels[this.randModelIndex].destroyAfterRelease)
 		{
@@ -355,7 +355,7 @@ public class GrowingSnowballThrowable : SnowballThrowable
 		photonEvent.RaiseOthers(new object[]
 		{
 			position,
-			vector3,
+			vector,
 			slingshotProjectile.myProjectileCount
 		});
 	}

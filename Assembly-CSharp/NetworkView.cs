@@ -117,12 +117,12 @@ public class NetworkView : NetworkBehaviour, IStateAuthorityChanged, IPublicFaci
 		PhotonView[] components = base.GetComponents<PhotonView>();
 		if (components.Length > 1)
 		{
-			if (components[0].Synchronization == 3)
+			if (components[0].Synchronization == ViewSynchronization.UnreliableOnChange)
 			{
 				this.punView = components[0];
 				this.reliableView = components[1];
 			}
-			else if (components[0].Synchronization == 1)
+			else if (components[0].Synchronization == ViewSynchronization.ReliableDeltaCompressed)
 			{
 				this.reliableView = components[0];
 				this.punView = components[1];

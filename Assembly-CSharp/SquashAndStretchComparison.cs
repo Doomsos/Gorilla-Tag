@@ -20,7 +20,7 @@ public class SquashAndStretchComparison : MonoBehaviour
 			this.BonesA.transform,
 			this.BonesB.transform
 		};
-		IEnumerable<BoingBones> enumerable = Enumerable.Concat<BoingBones>(components, components2);
+		IEnumerable<BoingBones> enumerable = components.Concat(components2);
 		float fixedDeltaTime = Time.fixedDeltaTime;
 		float num = 0.5f * this.Run;
 		this.m_timer += fixedDeltaTime;
@@ -39,11 +39,11 @@ public class SquashAndStretchComparison : MonoBehaviour
 			}
 		}
 		float num2 = Mathf.Min(1f, this.m_timer * MathUtil.InvSafe(this.Period));
-		float num3 = 1f - Mathf.Pow(1f - num2, 6f);
+		float t = 1f - Mathf.Pow(1f - num2, 6f);
 		foreach (Transform transform2 in array)
 		{
 			Vector3 position2 = transform2.position;
-			position2.z = Mathf.Lerp(-num, num, num3);
+			position2.z = Mathf.Lerp(-num, num, t);
 			transform2.position = position2;
 		}
 	}

@@ -183,7 +183,7 @@ namespace GorillaTag.Cosmetics
 				rotation = Quaternion.LookRotation(position - this.rig.bodyTransform.TransformPoint(this.offsetRigPosition));
 				return;
 			}
-			this.shootFromTransform.GetPositionAndRotation(ref position, ref rotation);
+			this.shootFromTransform.GetPositionAndRotation(out position, out rotation);
 		}
 
 		private void Shoot()

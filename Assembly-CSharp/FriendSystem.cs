@@ -40,7 +40,7 @@ public class FriendSystem : MonoBehaviour
 
 	public void SendFriendRequest(NetPlayer targetPlayer, GTZone stationZone, FriendSystem.FriendRequestCallback callback)
 	{
-		FriendSystem.FriendRequestData friendRequestData = new FriendSystem.FriendRequestData
+		FriendSystem.FriendRequestData item = new FriendSystem.FriendRequestData
 		{
 			completionCallback = callback,
 			sendingPlayerId = NetworkSystem.Instance.LocalPlayer.UserId.GetHashCode(),
@@ -48,7 +48,7 @@ public class FriendSystem : MonoBehaviour
 			localTimeSent = Time.time,
 			zone = stationZone
 		};
-		this.pendingFriendRequests.Add(friendRequestData);
+		this.pendingFriendRequests.Add(item);
 		FriendBackendController.Instance.AddFriend(targetPlayer);
 	}
 
@@ -105,18 +105,18 @@ public class FriendSystem : MonoBehaviour
 
 	private void Start()
 	{
-		FriendBackendController.Instance.OnGetFriendsComplete += new Action<bool>(this.OnGetFriendsReturned);
-		FriendBackendController.Instance.OnAddFriendComplete += new Action<NetPlayer, bool>(this.OnAddFriendReturned);
-		FriendBackendController.Instance.OnRemoveFriendComplete += new Action<FriendBackendController.Friend, bool>(this.OnRemoveFriendReturned);
+		FriendBackendController.Instance.OnGetFriendsComplete += this.OnGetFriendsReturned;
+		FriendBackendController.Instance.OnAddFriendComplete += this.OnAddFriendReturned;
+		FriendBackendController.Instance.OnRemoveFriendComplete += this.OnRemoveFriendReturned;
 	}
 
 	private void OnDestroy()
 	{
 		if (FriendBackendController.Instance != null)
 		{
-			FriendBackendController.Instance.OnGetFriendsComplete -= new Action<bool>(this.OnGetFriendsReturned);
-			FriendBackendController.Instance.OnAddFriendComplete -= new Action<NetPlayer, bool>(this.OnAddFriendReturned);
-			FriendBackendController.Instance.OnRemoveFriendComplete -= new Action<FriendBackendController.Friend, bool>(this.OnRemoveFriendReturned);
+			FriendBackendController.Instance.OnGetFriendsComplete -= this.OnGetFriendsReturned;
+			FriendBackendController.Instance.OnAddFriendComplete -= this.OnAddFriendReturned;
+			FriendBackendController.Instance.OnRemoveFriendComplete -= this.OnRemoveFriendReturned;
 		}
 	}
 
@@ -142,7 +142,7 @@ public class FriendSystem : MonoBehaviour
 			{
 				return;
 			}
-			onFriendListRefresh.Invoke(FriendBackendController.Instance.FriendsList);
+			onFriendListRefresh(FriendBackendController.Instance.FriendsList);
 		}
 	}
 

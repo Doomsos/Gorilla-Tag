@@ -48,8 +48,8 @@ namespace GorillaTag.Cosmetics
 			{
 				this.networkEvents.Init(netPlayer);
 				TickSystem<object>.AddTickCallback(this);
-				NetworkSystem.Instance.OnPlayerJoined += new Action<NetPlayer>(this.SendElapsedTime);
-				this.networkEvents.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.ReceiveElapsedTime);
+				NetworkSystem.Instance.OnPlayerJoined += this.SendElapsedTime;
+				this.networkEvents.Activate += this.ReceiveElapsedTime;
 				this.FirstStage();
 				return;
 			}
@@ -61,8 +61,8 @@ namespace GorillaTag.Cosmetics
 			if (this.networkEvents != null)
 			{
 				TickSystem<object>.RemoveTickCallback(this);
-				NetworkSystem.Instance.OnPlayerJoined -= new Action<NetPlayer>(this.SendElapsedTime);
-				this.networkEvents.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.ReceiveElapsedTime);
+				NetworkSystem.Instance.OnPlayerJoined -= this.SendElapsedTime;
+				this.networkEvents.Activate -= this.ReceiveElapsedTime;
 				this.FirstStage();
 			}
 			CallLimiter callLimiter = this.callLimiter;

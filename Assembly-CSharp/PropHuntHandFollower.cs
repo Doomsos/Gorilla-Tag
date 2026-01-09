@@ -68,11 +68,11 @@ public class PropHuntHandFollower : MonoBehaviour, ICallBack
 		}
 		PropHuntGrabbableProp prop;
 		PropHuntTaggableProp prop2;
-		if (this._prop.TryGetComponent<PropHuntGrabbableProp>(ref prop))
+		if (this._prop.TryGetComponent<PropHuntGrabbableProp>(out prop))
 		{
 			PropHuntPools.ReturnGrabbableProp(prop);
 		}
-		else if (this._prop.TryGetComponent<PropHuntTaggableProp>(ref prop2))
+		else if (this._prop.TryGetComponent<PropHuntTaggableProp>(out prop2))
 		{
 			PropHuntPools.ReturnTaggableProp(prop2);
 		}
@@ -274,8 +274,8 @@ public class PropHuntHandFollower : MonoBehaviour, ICallBack
 		Vector3 v = transform.transform.position - this._prop.transform.TransformPoint(this._propOffset);
 		if (v.IsLongerThan(GorillaPropHuntGameManager.instance.HandFollowDistance))
 		{
-			float num = v.magnitude - GorillaPropHuntGameManager.instance.HandFollowDistance;
-			this._prop.transform.position = this.GeoCollisionPoint(sourcePos, this._prop.transform.position + this._prop.transform.TransformVector(this._propOffset) + v.normalized * num) - this._prop.transform.TransformVector(this._propOffset);
+			float d = v.magnitude - GorillaPropHuntGameManager.instance.HandFollowDistance;
+			this._prop.transform.position = this.GeoCollisionPoint(sourcePos, this._prop.transform.position + this._prop.transform.TransformVector(this._propOffset) + v.normalized * d) - this._prop.transform.TransformVector(this._propOffset);
 		}
 		this._lastRelativePos = transform.InverseTransformPoint(this._prop.transform.position);
 		this._lastRelativeAngle = transform.InverseTransformRotation(this._prop.transform.rotation);
@@ -286,7 +286,7 @@ public class PropHuntHandFollower : MonoBehaviour, ICallBack
 	public Vector3 GeoCollisionPoint(Vector3 sourcePos, Vector3 targetPos)
 	{
 		Vector3 vector = targetPos - sourcePos;
-		int num = Physics.RaycastNonAlloc(sourcePos, vector.normalized, this.raycastHits, vector.magnitude, this.collisionLayers, 1);
+		int num = Physics.RaycastNonAlloc(sourcePos, vector.normalized, this.raycastHits, vector.magnitude, this.collisionLayers, QueryTriggerInteraction.Ignore);
 		if (num > 0)
 		{
 			float sqrMagnitude = vector.sqrMagnitude;

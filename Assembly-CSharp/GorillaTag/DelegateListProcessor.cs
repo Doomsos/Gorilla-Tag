@@ -24,7 +24,7 @@ namespace GorillaTag
 
 		protected override void ProcessItem(in Action del)
 		{
-			del.Invoke();
+			del();
 		}
 	}
 }

@@ -24,8 +24,7 @@ namespace GorillaExtensions
 				float num3 = Mathf.Acos(quaternion.w);
 				num2 = 2f * num3 / (Mathf.Sin(num3) * Time.deltaTime);
 			}
-			Vector3 zero;
-			zero..ctor(quaternion.x * num2, quaternion.y * num2, quaternion.z * num2);
+			Vector3 zero = new Vector3(quaternion.x * num2, quaternion.y * num2, quaternion.z * num2);
 			if (float.IsNaN(zero.z))
 			{
 				zero = Vector3.zero;
@@ -107,9 +106,9 @@ namespace GorillaExtensions
 		{
 			lineAPoint = a;
 			lineBPoint = b;
-			Vector3 vector = b - a;
-			float num = Vector3.Dot(vector, u);
-			float num2 = Vector3.Dot(vector, v);
+			Vector3 lhs = b - a;
+			float num = Vector3.Dot(lhs, u);
+			float num2 = Vector3.Dot(lhs, v);
 			float num3 = Vector3.Dot(u, u);
 			float num4 = Vector3.Dot(u, v);
 			float num5 = Vector3.Dot(v, v);
@@ -119,14 +118,14 @@ namespace GorillaExtensions
 				return;
 			}
 			float num7 = (num * num5 - num2 * num4) / num6;
-			float num8 = (num * num4 - num2 * num3) / num6;
+			float value = (num * num4 - num2 * num3) / num6;
 			num7 = Mathf.Clamp(num7, 0f, 1f);
-			float num9 = (Mathf.Clamp(num8, 0f, 1f) * num4 + num) / num3;
-			float num10 = (num7 * num4 - num2) / num5;
+			float num8 = (Mathf.Clamp(value, 0f, 1f) * num4 + num) / num3;
+			float num9 = (num7 * num4 - num2) / num5;
+			num8 = Mathf.Clamp(num8, 0f, 1f);
 			num9 = Mathf.Clamp(num9, 0f, 1f);
-			num10 = Mathf.Clamp(num10, 0f, 1f);
-			lineAPoint = a + num9 * u;
-			lineBPoint = b + num10 * v;
+			lineAPoint = a + num8 * u;
+			lineBPoint = b + num9 * v;
 		}
 
 		[Serializable]
@@ -171,7 +170,7 @@ namespace GorillaExtensions
 			public float toMax;
 		}
 
-		[StructLayout(2)]
+		[StructLayout(LayoutKind.Explicit)]
 		private struct FloatIntUnion
 		{
 			[FieldOffset(0)]

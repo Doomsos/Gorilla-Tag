@@ -15,9 +15,9 @@ public class GRAbilityStagger : GRAbilityBase
 		float magnitude = vel.magnitude;
 		if (magnitude > 0f)
 		{
-			Vector3 vector = vel / magnitude;
-			vector.y = 0f;
-			vel = vector * magnitude;
+			Vector3 a = vel / magnitude;
+			a.y = 0f;
+			vel = a * magnitude;
 		}
 		this.staggerMovement.InitFromVelocityAndDuration(vel, this.duration);
 	}

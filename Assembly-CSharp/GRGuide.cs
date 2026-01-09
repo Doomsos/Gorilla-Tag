@@ -27,11 +27,11 @@ public class GRGuide : MonoBehaviourTick
 		if (flag && (!this.hasPath || sqrMagnitude > 36f))
 		{
 			this.hasPath = false;
-			Vector3 vector;
+			Vector3 sourcePosition;
 			Quaternion quaternion;
 			NavMeshHit navMeshHit;
 			NavMeshHit navMeshHit2;
-			if (GhostReactor.instance.levelGenerator.GetExitFromCurrentSection(position, out vector, out quaternion, this.connectorCorners) && NavMesh.SamplePosition(position, ref navMeshHit, 5f, -1) && NavMesh.SamplePosition(vector, ref navMeshHit2, 5f, -1) && NavMesh.CalculatePath(navMeshHit.position, navMeshHit2.position, -1, this.path) && this.path.status == null)
+			if (GhostReactor.instance.levelGenerator.GetExitFromCurrentSection(position, out sourcePosition, out quaternion, this.connectorCorners) && NavMesh.SamplePosition(position, out navMeshHit, 5f, -1) && NavMesh.SamplePosition(sourcePosition, out navMeshHit2, 5f, -1) && NavMesh.CalculatePath(navMeshHit.position, navMeshHit2.position, -1, this.path) && this.path.status == NavMeshPathStatus.PathComplete)
 			{
 				this.numPathCorners = this.path.GetCornersNonAlloc(this.pathCorners);
 				for (int i = this.connectorCorners.Count - 1; i >= 0; i--)
@@ -74,20 +74,20 @@ public class GRGuide : MonoBehaviourTick
 			int num;
 			Vector3 closestPointOnPath = GRGuide.GetClosestPointOnPath(position, this.pathCorners, this.numPathCorners, out num);
 			float num2 = 2.5f;
-			Vector3 vector2 = closestPointOnPath;
+			Vector3 vector = closestPointOnPath;
 			for (int k = num; k < this.numPathCorners; k++)
 			{
-				Vector3 vector3 = this.pathCorners[k] - vector2;
-				float magnitude = vector3.magnitude;
+				Vector3 a = this.pathCorners[k] - vector;
+				float magnitude = a.magnitude;
 				if (num2 <= magnitude)
 				{
-					vector2 += vector3 * (num2 / magnitude);
+					vector += a * (num2 / magnitude);
 					break;
 				}
 				num2 -= magnitude;
-				vector2 = this.pathCorners[k];
+				vector = this.pathCorners[k];
 			}
-			base.transform.position = vector2;
+			base.transform.position = vector;
 		}
 	}
 
@@ -122,10 +122,10 @@ public class GRGuide : MonoBehaviourTick
 
 	public static Vector3 ClosestPointOnLine(Vector3 vA, Vector3 vB, Vector3 vPoint)
 	{
-		Vector3 vector = vPoint - vA;
+		Vector3 rhs = vPoint - vA;
 		Vector3 normalized = (vB - vA).normalized;
 		float num = Vector3.Distance(vA, vB);
-		float num2 = Vector3.Dot(normalized, vector);
+		float num2 = Vector3.Dot(normalized, rhs);
 		if (num2 <= 0f)
 		{
 			return vA;
@@ -134,8 +134,8 @@ public class GRGuide : MonoBehaviourTick
 		{
 			return vB;
 		}
-		Vector3 vector2 = normalized * num2;
-		return vA + vector2;
+		Vector3 b = normalized * num2;
+		return vA + b;
 	}
 
 	public Transform tempTarget;

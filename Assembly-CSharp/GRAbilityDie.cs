@@ -26,10 +26,10 @@ public class GRAbilityDie : GRAbilityBase
 		this.totalDeathDelay = this.delayDeath;
 		if (this.animData.Count > 0)
 		{
-			int num = Random.Range(0, this.animData.Count);
-			this.totalDeathDelay += this.animData[num].duration;
+			int index = Random.Range(0, this.animData.Count);
+			this.totalDeathDelay += this.animData[index].duration;
 			this.staggerMovement.InitFromVelocityAndDuration(this.staggerMovement.velocity, this.totalDeathDelay);
-			this.PlayAnim(this.animData[num].animName, 0.1f, this.animData[num].speed);
+			this.PlayAnim(this.animData[index].animName, 0.1f, this.animData[index].speed);
 		}
 		this.agent.SetIsPathing(false, true);
 		this.agent.SetDisableNetworkSync(true);
@@ -62,9 +62,9 @@ public class GRAbilityDie : GRAbilityBase
 		float magnitude = vel.magnitude;
 		if (magnitude > 0f)
 		{
-			Vector3 vector = vel / magnitude;
-			vector.y = 0f;
-			vel = vector * magnitude;
+			Vector3 a = vel / magnitude;
+			a.y = 0f;
+			vel = a * magnitude;
 		}
 		this.staggerMovement.InitFromVelocityAndDuration(vel, this.totalDeathDelay);
 	}
@@ -99,7 +99,7 @@ public class GRAbilityDie : GRAbilityBase
 				vector.y += 0.33f;
 			}
 			RaycastHit raycastHit;
-			if (this.spawnOnGround && Physics.Raycast(new Ray(vector + Vector3.up * 0.5f, -Vector3.up), ref raycastHit, 5f, this.groundLayerMask.value, 1))
+			if (this.spawnOnGround && Physics.Raycast(new Ray(vector + Vector3.up * 0.5f, -Vector3.up), out raycastHit, 5f, this.groundLayerMask.value, QueryTriggerInteraction.Ignore))
 			{
 				vector = raycastHit.point;
 			}

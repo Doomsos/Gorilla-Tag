@@ -25,7 +25,7 @@ namespace GorillaTagScripts
 			base.Awake();
 			if (DecorativeItemsManager._instance != null && DecorativeItemsManager._instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 			}
 			else
 			{
@@ -145,7 +145,7 @@ namespace GorillaTagScripts
 			DecorativeItem decorativeItem = this.itemsList[index];
 			decorativeItem.WorldShareableRequestOwnership();
 			decorativeItem.Respawn(position, rotation);
-			base.SendRPC("RespawnItemRPC", 1, new object[]
+			base.SendRPC("RespawnItemRPC", RpcTarget.Others, new object[]
 			{
 				index,
 				position,
@@ -165,7 +165,7 @@ namespace GorillaTagScripts
 			if (!this.InvokeRpc)
 			{
 				NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-				if (base.Runner.Stage != 4)
+				if (base.Runner.Stage != SimulationStages.Resimulate)
 				{
 					int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 					if ((localAuthorityMask & 7) == 0)
@@ -196,12 +196,12 @@ namespace GorillaTagScripts
 								num2 += 12;
 								*(Quaternion*)(ptr2 + num2) = _transformRot;
 								num2 += 16;
-								ptr.Offset = num2 * 8;
+								ptr->Offset = num2 * 8;
 								base.Runner.SendRpc(ptr);
 							}
 							if ((localAuthorityMask & 7) != 0)
 							{
-								info = RpcInfo.FromLocal(base.Runner, 0, 0);
+								info = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 								goto IL_12;
 							}
 						}
@@ -233,18 +233,18 @@ namespace GorillaTagScripts
 			this.lastIndex = this.currentIndex;
 			bool flag = false;
 			bool flag2 = this.zone.IsLocalPlayerInZone();
-			int num = Random.Range(0, this.respawnableHooks.Count);
+			int index = Random.Range(0, this.respawnableHooks.Count);
 			while (!flag)
 			{
-				num = Random.Range(0, this.respawnableHooks.Count);
-				if (!this.respawnableHooks[num].inForest == flag2)
+				index = Random.Range(0, this.respawnableHooks.Count);
+				if (!this.respawnableHooks[index].inForest == flag2)
 				{
 					flag = true;
 				}
 			}
-			if (!this.respawnableHooks[num].IsHooked())
+			if (!this.respawnableHooks[index].IsHooked())
 			{
-				this.currentIndex = num;
+				this.currentIndex = index;
 			}
 			else
 			{
@@ -374,7 +374,7 @@ namespace GorillaTagScripts
 			Quaternion quaternion = *(Quaternion*)(ptr + num);
 			num += 16;
 			Quaternion transformRot = quaternion;
-			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, 0);
+			RpcInfo info = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
 			behaviour.InvokeRpc = true;
 			((DecorativeItemsManager)behaviour).RPC_RespawnItem(index, transformPos, transformRot, info);
 		}
@@ -409,7 +409,7 @@ namespace GorillaTagScripts
 		[WeaverGenerated]
 		[SerializeField]
 		[DefaultForProperty("Data", 0, 1)]
-		[DrawIf("IsEditorWritable", true, 0, 0)]
+		[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 		private int _Data;
 	}
 }

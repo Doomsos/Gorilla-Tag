@@ -72,7 +72,7 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 
 	protected override void OnDisable()
 	{
-		if (this.m_warnFuelLowThreshold > 0f && this.m_warnFuelLowSound.loadState != null)
+		if (this.m_warnFuelLowThreshold > 0f && this.m_warnFuelLowSound.loadState != AudioDataLoadState.Unloaded)
 		{
 			this.m_warnFuelLowSound.UnloadAudioData();
 		}
@@ -83,9 +83,9 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 		base.Update();
 		if (this._hasThrustLoopAudioSource)
 		{
-			float num = (this.state == SIGadgetWristJet.State.Active) ? this.m_thrustLoopSoundVolume : 0f;
-			float num2 = (this.state == SIGadgetWristJet.State.Active) ? this.m_thrustLoopAudioFadeInTime : this.m_thrustLoopAudioFadeOutTime;
-			this.m_thrustLoopAudioSource.volume = Mathf.MoveTowards(this.m_thrustLoopAudioSource.volume, num, 1f / num2 * Time.unscaledDeltaTime);
+			float target = (this.state == SIGadgetWristJet.State.Active) ? this.m_thrustLoopSoundVolume : 0f;
+			float num = (this.state == SIGadgetWristJet.State.Active) ? this.m_thrustLoopAudioFadeInTime : this.m_thrustLoopAudioFadeOutTime;
+			this.m_thrustLoopAudioSource.volume = Mathf.MoveTowards(this.m_thrustLoopAudioSource.volume, target, 1f / num * Time.unscaledDeltaTime);
 		}
 	}
 
@@ -97,7 +97,7 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 		}
 		if (this.state == SIGadgetWristJet.State.Active && this.currentFuel > 0f && this.buttonActivatable.CheckInput(true, true, 0.25f, true, true))
 		{
-			this.gtPlayer.AddForce(-Physics.gravity * (this.gtPlayer.scale * this.gravityNegationPercent), 5);
+			this.gtPlayer.AddForce(-Physics.gravity * (this.gtPlayer.scale * this.gravityNegationPercent), ForceMode.Acceleration);
 			this._ApplyClampedThrust();
 		}
 	}
@@ -170,10 +170,10 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 			}
 			break;
 		}
-		float num2 = this.currentFuel / this.fuelSize;
+		float value = this.currentFuel / this.fuelSize;
 		for (int i = 0; i < this.m_gaugeMatSlots.Length; i++)
 		{
-			this._gaugeMatPropBlock.SetFloat(ShaderProps._EmissionDissolveProgress, num2);
+			this._gaugeMatPropBlock.SetFloat(ShaderProps._EmissionDissolveProgress, value);
 			this.m_gaugeMatSlots[i].renderer.SetPropertyBlock(this._gaugeMatPropBlock, this.m_gaugeMatSlots[i].slot);
 		}
 	}
@@ -182,8 +182,8 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 	{
 		for (int i = 0; i < this.throttleFlapInitialRots.Length; i++)
 		{
-			Quaternion quaternion = this.throttleFlapInitialRots[i] * this.m_throttleFlapMaxRotOffset;
-			this.m_throttleFlapXforms[i].localRotation = Quaternion.Lerp(this.throttleFlapInitialRots[i], quaternion, this._throttle);
+			Quaternion b = this.throttleFlapInitialRots[i] * this.m_throttleFlapMaxRotOffset;
+			this.m_throttleFlapXforms[i].localRotation = Quaternion.Lerp(this.throttleFlapInitialRots[i], b, this._throttle);
 		}
 	}
 
@@ -192,16 +192,15 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 		Vector3 rigidbodyVelocity = this.gtPlayer.RigidbodyVelocity;
 		float num = this.jetForce * this._currentBurnRate;
 		Vector3 vector = rigidbodyVelocity + base.transform.forward * (num * Time.fixedDeltaTime);
-		Vector3 vector2;
-		vector2..ctor(vector.x, 0f, vector.z);
+		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
 		if (vector2.sqrMagnitude > this._maxSqrHorizontalSpeed)
 		{
 			float magnitude = new Vector3(rigidbodyVelocity.x, 0f, rigidbodyVelocity.z).magnitude;
 			vector2 = Vector3.ClampMagnitude(vector2, Mathf.Max(this.maxHorizontalSpeed, magnitude));
 		}
-		Vector3 vector3 = vector2;
-		vector3.y = ((vector.y > this.maxVerticalSpeed) ? Mathf.Max(this.maxVerticalSpeed, rigidbodyVelocity.y) : vector.y);
-		this.gtPlayer.AddForce(vector3 - rigidbodyVelocity, 2);
+		Vector3 a = vector2;
+		a.y = ((vector.y > this.maxVerticalSpeed) ? Mathf.Max(this.maxVerticalSpeed, rigidbodyVelocity.y) : vector.y);
+		this.gtPlayer.AddForce(a - rigidbodyVelocity, ForceMode.VelocityChange);
 	}
 
 	private void OnEntityStateChanged(long oldState, long newState)

@@ -14,7 +14,7 @@ public class TappableManager : NetworkSceneObject
 		if (TappableManager.gManager != null && TappableManager.gManager != this)
 		{
 			GTDev.LogWarning<string>("Instance of TappableManager already exists. Destroying.", null);
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		if (TappableManager.gManager == null)
@@ -25,7 +25,7 @@ public class TappableManager : NetworkSceneObject
 		{
 			return;
 		}
-		Tappable[] array = Enumerable.ToArray<Tappable>(TappableManager.gRegistry);
+		Tappable[] array = TappableManager.gRegistry.ToArray<Tappable>();
 		for (int i = 0; i < array.Length; i++)
 		{
 			if (!(array[i] == null))
@@ -89,9 +89,9 @@ public class TappableManager : NetworkSceneObject
 	{
 		if (this.tappables.Count > 0)
 		{
-			int num = Random.Range(0, this.tappables.Count);
-			Debug.Log("Send TestTap to tappable index: " + num.ToString() + "/" + this.tappables.Count.ToString());
-			this.tappables[num].OnTap(10f);
+			int index = Random.Range(0, this.tappables.Count);
+			Debug.Log("Send TestTap to tappable index: " + index.ToString() + "/" + this.tappables.Count.ToString());
+			this.tappables[index].OnTap(10f);
 			return;
 		}
 		Debug.Log("TappableManager: tappables array is empty.");
@@ -116,7 +116,7 @@ public class TappableManager : NetworkSceneObject
 			{
 				throw new ArgumentNullException("runner");
 			}
-			if (runner.Stage != 4)
+			if (runner.Stage != SimulationStages.Resimulate)
 			{
 				int num = 8;
 				num += 4;
@@ -133,11 +133,11 @@ public class TappableManager : NetworkSceneObject
 						num2 += 4;
 						*(float*)(ptr2 + num2) = tapStrength;
 						num2 += 4;
-						ptr.Offset = num2 * 8;
-						ptr.SetStatic();
+						ptr->Offset = num2 * 8;
+						ptr->SetStatic();
 						runner.SendRpc(ptr);
 					}
-					info = RpcInfo.FromLocal(runner, 0, 0);
+					info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 					goto IL_10;
 				}
 				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void TappableManager::RPC_SendOnTap(Fusion.NetworkRunner,System.Int32,System.Single,Fusion.RpcInfo)", num);
@@ -185,7 +185,7 @@ public class TappableManager : NetworkSceneObject
 			{
 				throw new ArgumentNullException("runner");
 			}
-			if (runner.Stage != 4)
+			if (runner.Stage != SimulationStages.Resimulate)
 			{
 				int num = 8;
 				num += 4;
@@ -199,11 +199,11 @@ public class TappableManager : NetworkSceneObject
 						int num2 = 8;
 						*(int*)(ptr2 + num2) = key;
 						num2 += 4;
-						ptr.Offset = num2 * 8;
-						ptr.SetStatic();
+						ptr->Offset = num2 * 8;
+						ptr->SetStatic();
 						runner.SendRpc(ptr);
 					}
-					info = RpcInfo.FromLocal(runner, 0, 0);
+					info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 					goto IL_10;
 				}
 				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void TappableManager::RPC_SendOnGrab(Fusion.NetworkRunner,System.Int32,Fusion.RpcInfo)", num);
@@ -250,7 +250,7 @@ public class TappableManager : NetworkSceneObject
 			{
 				throw new ArgumentNullException("runner");
 			}
-			if (runner.Stage != 4)
+			if (runner.Stage != SimulationStages.Resimulate)
 			{
 				int num = 8;
 				num += 4;
@@ -264,11 +264,11 @@ public class TappableManager : NetworkSceneObject
 						int num2 = 8;
 						*(int*)(ptr2 + num2) = key;
 						num2 += 4;
-						ptr.Offset = num2 * 8;
-						ptr.SetStatic();
+						ptr->Offset = num2 * 8;
+						ptr->SetStatic();
 						runner.SendRpc(ptr);
 					}
-					info = RpcInfo.FromLocal(runner, 0, 0);
+					info = RpcInfo.FromLocal(runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 					goto IL_10;
 				}
 				NetworkBehaviourUtils.NotifyRpcPayloadSizeExceeded("System.Void TappableManager::RPC_SendOnRelease(Fusion.NetworkRunner,System.Int32,Fusion.RpcInfo)", num);
@@ -309,7 +309,7 @@ public class TappableManager : NetworkSceneObject
 		float num3 = *(float*)(ptr + num);
 		num += 4;
 		float tapStrength = num3;
-		RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+		RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 		NetworkBehaviourUtils.InvokeRpc = true;
 		TappableManager.RPC_SendOnTap(runner, key, tapStrength, info);
 	}
@@ -324,7 +324,7 @@ public class TappableManager : NetworkSceneObject
 		int num2 = *(int*)(ptr + num);
 		num += 4;
 		int key = num2;
-		RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+		RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 		NetworkBehaviourUtils.InvokeRpc = true;
 		TappableManager.RPC_SendOnGrab(runner, key, info);
 	}
@@ -339,7 +339,7 @@ public class TappableManager : NetworkSceneObject
 		int num2 = *(int*)(ptr + num);
 		num += 4;
 		int key = num2;
-		RpcInfo info = RpcInfo.FromMessage(runner, message, 0);
+		RpcInfo info = RpcInfo.FromMessage(runner, message, RpcHostMode.SourceIsServer);
 		NetworkBehaviourUtils.InvokeRpc = true;
 		TappableManager.RPC_SendOnRelease(runner, key, info);
 	}

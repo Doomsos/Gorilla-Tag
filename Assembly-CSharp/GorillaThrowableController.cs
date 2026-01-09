@@ -23,7 +23,7 @@ public class GorillaThrowableController : MonoBehaviour
 		}
 		if (this.leftHandIsGrabbing)
 		{
-			if (this.CheckIfHandHasReleased(4))
+			if (this.CheckIfHandHasReleased(XRNode.LeftHand))
 			{
 				if (this.leftHandGrabbedObject != null)
 				{
@@ -33,7 +33,7 @@ public class GorillaThrowableController : MonoBehaviour
 				this.leftHandIsGrabbing = false;
 			}
 		}
-		else if (this.CheckIfHandHasGrabbed(4))
+		else if (this.CheckIfHandHasGrabbed(XRNode.LeftHand))
 		{
 			this.leftHandIsGrabbing = true;
 			if (this.CanGrabAnObject(this.leftHandController, out this.returnCollider))
@@ -44,7 +44,7 @@ public class GorillaThrowableController : MonoBehaviour
 		}
 		if (this.rightHandIsGrabbing)
 		{
-			if (this.CheckIfHandHasReleased(5))
+			if (this.CheckIfHandHasReleased(XRNode.RightHand))
 			{
 				if (this.rightHandGrabbedObject != null)
 				{
@@ -55,7 +55,7 @@ public class GorillaThrowableController : MonoBehaviour
 				return;
 			}
 		}
-		else if (this.CheckIfHandHasGrabbed(5))
+		else if (this.CheckIfHandHasGrabbed(XRNode.RightHand))
 		{
 			this.rightHandIsGrabbing = true;
 			if (this.CanGrabAnObject(this.rightHandController, out this.returnCollider))
@@ -69,10 +69,10 @@ public class GorillaThrowableController : MonoBehaviour
 	private bool CheckIfHandHasReleased(XRNode node)
 	{
 		this.inputDevice = InputDevices.GetDeviceAtXRNode(node);
-		this.triggerValue = ((node == 4) ? SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(1) : SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(2));
+		this.triggerValue = ((node == XRNode.LeftHand) ? SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(SteamVR_Input_Sources.LeftHand) : SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(SteamVR_Input_Sources.RightHand));
 		if (this.triggerValue < 0.75f)
 		{
-			this.triggerValue = ((node == 4) ? SteamVR_Actions.gorillaTag_LeftGripFloat.GetAxis(1) : SteamVR_Actions.gorillaTag_RightGripFloat.GetAxis(2));
+			this.triggerValue = ((node == XRNode.LeftHand) ? SteamVR_Actions.gorillaTag_LeftGripFloat.GetAxis(SteamVR_Input_Sources.LeftHand) : SteamVR_Actions.gorillaTag_RightGripFloat.GetAxis(SteamVR_Input_Sources.RightHand));
 			if (this.triggerValue < 0.75f)
 			{
 				return true;
@@ -84,12 +84,12 @@ public class GorillaThrowableController : MonoBehaviour
 	private bool CheckIfHandHasGrabbed(XRNode node)
 	{
 		this.inputDevice = InputDevices.GetDeviceAtXRNode(node);
-		this.triggerValue = ((node == 4) ? SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(1) : SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(2));
+		this.triggerValue = ((node == XRNode.LeftHand) ? SteamVR_Actions.gorillaTag_LeftTriggerFloat.GetAxis(SteamVR_Input_Sources.LeftHand) : SteamVR_Actions.gorillaTag_RightTriggerFloat.GetAxis(SteamVR_Input_Sources.RightHand));
 		if (this.triggerValue > 0.75f)
 		{
 			return true;
 		}
-		this.triggerValue = ((node == 4) ? SteamVR_Actions.gorillaTag_LeftGripFloat.GetAxis(1) : SteamVR_Actions.gorillaTag_RightGripFloat.GetAxis(2));
+		this.triggerValue = ((node == XRNode.LeftHand) ? SteamVR_Actions.gorillaTag_LeftGripFloat.GetAxis(SteamVR_Input_Sources.LeftHand) : SteamVR_Actions.gorillaTag_RightGripFloat.GetAxis(SteamVR_Input_Sources.RightHand));
 		return this.triggerValue > 0.75f;
 	}
 

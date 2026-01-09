@@ -41,7 +41,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		{
 			float num = 10000f;
 			PrefabType prefabType;
-			if (position.IsValid(num) && rotation.IsValid() && this.networkPrefabs.TryGetValue(prefabName, ref prefabType) && viewIDs.Length == prefabType.photonViewCount)
+			if (position.IsValid(num) && rotation.IsValid() && this.networkPrefabs.TryGetValue(prefabName, out prefabType) && viewIDs.Length == prefabType.photonViewCount)
 			{
 				int num2 = (sender != null) ? sender.ActorNumber : 0;
 				int num3 = viewIDs[0] / PhotonNetwork.MAX_VIEW_IDS;
@@ -102,11 +102,11 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 	GameObject IPunPrefabPool.Instantiate(string prefabId, Vector3 position, Quaternion rotation)
 	{
 		PrefabType prefabType;
-		if (!this.networkPrefabs.TryGetValue(prefabId, ref prefabType))
+		if (!this.networkPrefabs.TryGetValue(prefabId, out prefabType))
 		{
 			return null;
 		}
-		return this.Instantiate(prefabType.prefab, position, rotation);
+		return ((IPunPrefabPoolVerify)this).Instantiate(prefabType.prefab, position, rotation);
 	}
 
 	void IPunPrefabPool.Destroy(GameObject netObj)
@@ -118,7 +118,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		if (this.netInstantiedObjects.Remove(netObj))
 		{
 			PhotonViewCache photonViewCache;
-			if (this.m_invalidCreatePool.Count < 200 && netObj.TryGetComponent<PhotonViewCache>(ref photonViewCache) && !photonViewCache.Initialized)
+			if (this.m_invalidCreatePool.Count < 200 && netObj.TryGetComponent<PhotonViewCache>(out photonViewCache) && !photonViewCache.Initialized)
 			{
 				if (this.m_m_invalidCreatePoolLookup.Add(netObj))
 				{
@@ -132,7 +132,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		else
 		{
 			PhotonView photonView;
-			if (!netObj.TryGetComponent<PhotonView>(ref photonView) || photonView.isRuntimeInstantiated)
+			if (!netObj.TryGetComponent<PhotonView>(out photonView) || photonView.isRuntimeInstantiated)
 			{
 				Object.Destroy(netObj);
 				return;
@@ -205,7 +205,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 			if (voiceLink.Info.UserData != null)
 			{
 				int num;
-				if (int.TryParse(voiceLink.Info.UserData.ToString(), ref num))
+				if (int.TryParse(voiceLink.Info.UserData.ToString(), out num))
 				{
 					netPlayer = NetworkSystem.Instance.GetPlayer(num / PhotonNetwork.MAX_VIEW_IDS);
 				}

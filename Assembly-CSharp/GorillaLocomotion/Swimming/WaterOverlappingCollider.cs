@@ -1,5 +1,6 @@
 ﻿using System;
 using GorillaLocomotion.Climbing;
+using Photon.Pun;
 using UnityEngine;
 
 namespace GorillaLocomotion.Swimming
@@ -35,7 +36,7 @@ namespace GorillaLocomotion.Swimming
 				if (time - 0.5f > num2)
 				{
 					WaterVolume.splashRPCSendTimes[num] = time;
-					this.photonViewForRPC.SendRPC("RPC_PlaySplashEffect", 1, new object[]
+					this.photonViewForRPC.SendRPC("RPC_PlaySplashEffect", RpcTarget.Others, new object[]
 					{
 						splashPosition,
 						quaternion,
@@ -51,9 +52,9 @@ namespace GorillaLocomotion.Swimming
 		public void PlayDripEffect(GameObject rippleEffectPrefab, Vector3 surfacePoint, Vector3 surfaceNormal, float dripScale)
 		{
 			Vector3 closestPositionOnSurface = this.GetClosestPositionOnSurface(surfacePoint, surfaceNormal);
-			float num = this.overrideBoundingRadius ? this.boundingRadiusOverride : this.lastBoundingRadius;
-			Vector3 vector = Vector3.ProjectOnPlane(Random.onUnitSphere * num * 0.5f, surfaceNormal);
-			ObjectPools.instance.Instantiate(rippleEffectPrefab, closestPositionOnSurface + vector, Quaternion.FromToRotation(Vector3.up, this.lastSurfaceQuery.surfaceNormal) * Quaternion.AngleAxis(-90f, Vector3.right), dripScale * this.scaleMultiplier, true);
+			float d = this.overrideBoundingRadius ? this.boundingRadiusOverride : this.lastBoundingRadius;
+			Vector3 b = Vector3.ProjectOnPlane(Random.onUnitSphere * d * 0.5f, surfaceNormal);
+			ObjectPools.instance.Instantiate(rippleEffectPrefab, closestPositionOnSurface + b, Quaternion.FromToRotation(Vector3.up, this.lastSurfaceQuery.surfaceNormal) * Quaternion.AngleAxis(-90f, Vector3.right), dripScale * this.scaleMultiplier, true);
 		}
 
 		public Vector3 GetClosestPositionOnSurface(Vector3 surfacePoint, Vector3 surfaceNormal)

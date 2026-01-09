@@ -10,7 +10,7 @@ public sealed class FlickerManager : MonoBehaviour
 		if (this.FlickerDurations.Length % 2 != 0)
 		{
 			Debug.LogWarning("FlickerManager should have an even number of steps; removing last entry.");
-			this.FlickerDurations = Enumerable.ToArray<float>(Enumerable.Take<float>(this.FlickerDurations, this.FlickerDurations.Length - 1));
+			this.FlickerDurations = this.FlickerDurations.Take(this.FlickerDurations.Length - 1).ToArray<float>();
 		}
 		if (this.FlickerDurations.Length == 0)
 		{

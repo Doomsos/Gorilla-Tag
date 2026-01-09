@@ -128,9 +128,9 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 					{
 						gorillaSliceableSimple.SliceUpdate();
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.LogException(ex);
+						Debug.LogException(exception);
 					}
 				}
 			}
@@ -165,9 +165,9 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 					{
 						gorillaSliceableSimple.SliceUpdate();
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.LogException(ex);
+						Debug.LogException(exception);
 					}
 				}
 			}
@@ -204,9 +204,9 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 					{
 						gorillaSliceableSimple.SliceUpdate();
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.LogException(ex);
+						Debug.LogException(exception);
 					}
 				}
 			}

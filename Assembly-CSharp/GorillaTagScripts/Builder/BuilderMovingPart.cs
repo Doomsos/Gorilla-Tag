@@ -161,10 +161,8 @@ namespace GorillaTagScripts.Builder
 				float num = this.distance / (this.velocity * this.myPiece.GetScale());
 				this.cycleDuration = num + this.cycleDelay;
 				float num2 = this.cycleDelay / this.cycleDuration;
-				Vector2 vector;
-				vector..ctor(num2 / 2f, 0f);
-				Vector2 vector2;
-				vector2..ctor(1f - num2 / 2f, 1f);
+				Vector2 vector = new Vector2(num2 / 2f, 0f);
+				Vector2 vector2 = new Vector2(1f - num2 / 2f, 1f);
 				float num3 = (vector2.y - vector.y) / (vector2.x - vector.x);
 				this.lerpAlpha = new AnimationCurve(new Keyframe[]
 				{
@@ -206,8 +204,8 @@ namespace GorillaTagScripts.Builder
 
 		private Vector3 UpdatePointToPoint(float perc)
 		{
-			float num = this.lerpAlpha.Evaluate(perc);
-			return Vector3.Lerp(this.startXf.localPosition, this.endXf.localPosition, num);
+			float t = this.lerpAlpha.Evaluate(perc);
+			return Vector3.Lerp(this.startXf.localPosition, this.endXf.localPosition, t);
 		}
 
 		private void UpdateRotation(float perc)

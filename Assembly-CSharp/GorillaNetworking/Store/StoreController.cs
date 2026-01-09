@@ -149,18 +149,17 @@ namespace GorillaNetworking.Store
 					this.StandsByPlayfabID[dynamicCosmeticStand.thisCosmeticName].Add(dynamicCosmeticStand);
 					return;
 				}
-				Dictionary<string, List<DynamicCosmeticStand>> standsByPlayfabID = this.StandsByPlayfabID;
-				string thisCosmeticName = dynamicCosmeticStand.thisCosmeticName;
-				List<DynamicCosmeticStand> list = new List<DynamicCosmeticStand>();
-				list.Add(dynamicCosmeticStand);
-				standsByPlayfabID.Add(thisCosmeticName, list);
+				this.StandsByPlayfabID.Add(dynamicCosmeticStand.thisCosmeticName, new List<DynamicCosmeticStand>
+				{
+					dynamicCosmeticStand
+				});
 			}
 		}
 
 		public void RemoveStandFromPlayFabIDDictionary(DynamicCosmeticStand dynamicCosmeticStand)
 		{
 			List<DynamicCosmeticStand> list;
-			if (this.StandsByPlayfabID.TryGetValue(dynamicCosmeticStand.thisCosmeticName, ref list))
+			if (this.StandsByPlayfabID.TryGetValue(dynamicCosmeticStand.thisCosmeticName, out list))
 			{
 				list.Remove(dynamicCosmeticStand);
 			}
@@ -195,7 +194,7 @@ namespace GorillaNetworking.Store
 			this.standImport.DecomposeFromTitleDataString(TSVData);
 			foreach (StandTypeData standTypeData in this.standImport.standData)
 			{
-				string text = string.Concat(new string[]
+				string key = string.Concat(new string[]
 				{
 					standTypeData.departmentID,
 					"|",
@@ -203,12 +202,12 @@ namespace GorillaNetworking.Store
 					"|",
 					standTypeData.standID
 				});
-				this.standImport.standKeyToDataDict.Add(text, standTypeData);
-				if (this.CosmeticStandsDict.ContainsKey(text))
+				this.standImport.standKeyToDataDict.Add(key, standTypeData);
+				if (this.CosmeticStandsDict.ContainsKey(key))
 				{
-					this.CosmeticStandsDict[text].SetStandTypeString(standTypeData.bustType);
-					this.CosmeticStandsDict[text].SpawnItemOntoStand(standTypeData.playFabID);
-					this.CosmeticStandsDict[text].InitializeCosmetic();
+					this.CosmeticStandsDict[key].SetStandTypeString(standTypeData.bustType);
+					this.CosmeticStandsDict[key].SpawnItemOntoStand(standTypeData.playFabID);
+					this.CosmeticStandsDict[key].InitializeCosmetic();
 				}
 			}
 		}
@@ -220,7 +219,7 @@ namespace GorillaNetworking.Store
 				Debug.LogError("Stand " + stand.name + " is missing important setup data somehow, please fix!", stand.gameObject);
 				return;
 			}
-			string text = string.Concat(new string[]
+			string key = string.Concat(new string[]
 			{
 				stand.parentDepartment.departmentName,
 				"|",
@@ -228,14 +227,14 @@ namespace GorillaNetworking.Store
 				"|",
 				stand.StandName
 			});
-			if (!this.CosmeticStandsDict.ContainsKey(text) || !this.standImport.standKeyToDataDict.ContainsKey(text))
+			if (!this.CosmeticStandsDict.ContainsKey(key) || !this.standImport.standKeyToDataDict.ContainsKey(key))
 			{
 				return;
 			}
-			StandTypeData standTypeData = this.standImport.standKeyToDataDict[text];
-			this.CosmeticStandsDict[text].SetStandTypeString(standTypeData.bustType);
-			this.CosmeticStandsDict[text].SpawnItemOntoStand(standTypeData.playFabID);
-			this.CosmeticStandsDict[text].InitializeCosmetic();
+			StandTypeData standTypeData = this.standImport.standKeyToDataDict[key];
+			this.CosmeticStandsDict[key].SetStandTypeString(standTypeData.bustType);
+			this.CosmeticStandsDict[key].SpawnItemOntoStand(standTypeData.playFabID);
+			this.CosmeticStandsDict[key].InitializeCosmetic();
 		}
 
 		public void InitalizeCosmeticStands()
@@ -296,7 +295,7 @@ namespace GorillaNetworking.Store
 
 		public void FindAllDepartments()
 		{
-			this.Departments = Enumerable.ToList<StoreDepartment>(Object.FindObjectsByType<StoreDepartment>(0));
+			this.Departments = Object.FindObjectsByType<StoreDepartment>(FindObjectsSortMode.None).ToList<StoreDepartment>();
 		}
 
 		public void SaveAllCosmeticsPositions()

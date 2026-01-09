@@ -2,7 +2,7 @@
 
 namespace GorillaTag
 {
-	[AttributeUsage(4, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public class GTStripGameObjectFromBuildAttribute : Attribute
 	{
 		public string Condition { get; }

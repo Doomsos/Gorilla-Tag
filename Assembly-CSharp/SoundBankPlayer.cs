@@ -104,7 +104,7 @@ public class SoundBankPlayer : MonoBehaviour
 
 	public void Play()
 	{
-		this.Play(default(float?), default(float?));
+		this.Play(null, null);
 	}
 
 	public void Play(float? volumeOverride = null, float? pitchOverride = null)

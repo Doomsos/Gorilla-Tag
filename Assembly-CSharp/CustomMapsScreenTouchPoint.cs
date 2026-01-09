@@ -32,8 +32,8 @@ public abstract class CustomMapsScreenTouchPoint : MonoBehaviour
 		}
 		if (collider.GetComponentInParent<GorillaTriggerColliderHandIndicator>() != null)
 		{
-			Vector3 vector = this.GetForwardDirection();
-			if (Vector3.Dot((collider.transform.position - base.transform.position).normalized, vector) < 0f)
+			Vector3 rhs = this.GetForwardDirection();
+			if (Vector3.Dot((collider.transform.position - base.transform.position).normalized, rhs) < 0f)
 			{
 				return;
 			}

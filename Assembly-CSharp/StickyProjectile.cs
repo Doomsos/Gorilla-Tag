@@ -8,7 +8,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 {
 	private void Awake()
 	{
-		this.stickyPart.GetLocalPositionAndRotation(ref this.stickyPartLocalPosition, ref this.stickyPartLocalRotation);
+		this.stickyPart.GetLocalPositionAndRotation(out this.stickyPartLocalPosition, out this.stickyPartLocalRotation);
 		this.stickyPartLocalScale = this.stickyPart.localScale;
 		this.headZoneInversePosition = this.INVERSE_HEAD_ROTATION * this.headZonePosition;
 		this.headZoneInverseLocalPosition = this.INVERSE_HEAD_ROTATION * this.localHeadZonePosition;
@@ -90,7 +90,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 		{
 			float magnitude = vector.magnitude;
 			RaycastHit raycastHit;
-			other.Raycast(new Ray(vector2, vector / magnitude), ref raycastHit, 2f * magnitude);
+			other.Raycast(new Ray(vector2, vector / magnitude), out raycastHit, 2f * magnitude);
 			vector3 = raycastHit.point;
 			rotation = Quaternion.LookRotation(raycastHit.normal, Random.onUnitSphere);
 		}
@@ -104,20 +104,20 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 		{
 			if (this.headZoneRadius > 0f && string.Equals(other.name, "SpeakerHeadCollider"))
 			{
-				Vector3 vector4;
+				Vector3 b;
 				Quaternion quaternion;
-				other.transform.GetPositionAndRotation(ref vector4, ref quaternion);
-				Vector3 vector5 = quaternion * this.headZoneInversePosition + vector4;
-				if ((vector3 - vector5).magnitude <= this.headZoneRadius * componentInParent.scaleFactor)
+				other.transform.GetPositionAndRotation(out b, out quaternion);
+				Vector3 vector4 = quaternion * this.headZoneInversePosition + b;
+				if ((vector3 - vector4).magnitude <= this.headZoneRadius * componentInParent.scaleFactor)
 				{
 					if (componentInParent.isOfflineVRRig)
 					{
-						this.StickTo(other.transform, quaternion * this.headZoneInverseLocalPosition + vector4, quaternion * this.INVERSE_HEAD_ROTATION);
+						this.StickTo(other.transform, quaternion * this.headZoneInverseLocalPosition + b, quaternion * this.INVERSE_HEAD_ROTATION);
 						this.stickyPart.localScale *= this.scaleOnLocalHeadZone;
 						this.stickEvents.InvokeAll(StickyProjectile.StickFlags.LocalHeadZone, false);
 						return;
 					}
-					this.StickTo(other.transform, vector5, quaternion * this.INVERSE_HEAD_ROTATION);
+					this.StickTo(other.transform, vector4, quaternion * this.INVERSE_HEAD_ROTATION);
 					this.stickEvents.InvokeAll(StickyProjectile.StickFlags.RemoteHeadZone, false);
 					return;
 				}

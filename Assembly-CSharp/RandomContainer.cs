@@ -34,7 +34,7 @@ public abstract class RandomContainer<T> : ScriptableObject
 
 	public void Reset()
 	{
-		this.ResetRandom(default(int?));
+		this.ResetRandom(null);
 		this._lastItem = default(T);
 		this._lastItemIndex = -1;
 	}

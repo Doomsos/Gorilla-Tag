@@ -24,9 +24,9 @@ internal class NetworkVector3
 
 	public Vector3 GetPredictedFuture()
 	{
-		float num = (float)(PhotonNetwork.Time - this.lastSetNetTime) * (float)PhotonNetwork.SerializationRate;
-		Vector3 vector = this.distanceTraveled * num;
-		return this._currentSyncTarget + vector;
+		float d = (float)(PhotonNetwork.Time - this.lastSetNetTime) * (float)PhotonNetwork.SerializationRate;
+		Vector3 b = this.distanceTraveled * d;
+		return this._currentSyncTarget + b;
 	}
 
 	public void Reset()

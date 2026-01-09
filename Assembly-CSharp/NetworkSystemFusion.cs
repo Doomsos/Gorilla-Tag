@@ -31,7 +31,7 @@ public class NetworkSystemFusion : NetworkSystem
 	{
 		get
 		{
-			return this.runner != null && this.runner.State != 3 && !this.runner.IsSinglePlayer && this.runner.IsConnectedToServer;
+			return this.runner != null && this.runner.State != NetworkRunner.States.Shutdown && !this.runner.IsSinglePlayer && this.runner.IsConnectedToServer;
 		}
 	}
 
@@ -90,7 +90,7 @@ public class NetworkSystemFusion : NetworkSystem
 		get
 		{
 			SessionProperty sessionProperty;
-			this.runner.SessionInfo.Properties.TryGetValue("gameMode", ref sessionProperty);
+			this.runner.SessionInfo.Properties.TryGetValue("gameMode", out sessionProperty);
 			if (sessionProperty != null)
 			{
 				return (string)sessionProperty.PropertyValue;
@@ -120,12 +120,12 @@ public class NetworkSystemFusion : NetworkSystem
 			bool? flag;
 			if (runner == null)
 			{
-				flag = default(bool?);
+				flag = null;
 			}
 			else
 			{
 				SessionInfo sessionInfo = runner.SessionInfo;
-				flag = ((sessionInfo != null) ? new bool?(!sessionInfo.IsVisible) : default(bool?));
+				flag = ((sessionInfo != null) ? new bool?(!sessionInfo.IsVisible) : null);
 			}
 			bool? flag2 = flag;
 			return flag2.GetValueOrDefault();
@@ -221,11 +221,11 @@ public class NetworkSystemFusion : NetworkSystem
 			{
 				return base.GetPlayer(this.runner.LocalPlayer);
 			}
-			if (!(GameMode.ActiveNetworkHandler != null))
+			if (!(GorillaGameModes.GameMode.ActiveNetworkHandler != null))
 			{
 				return null;
 			}
-			return base.GetPlayer(GameMode.ActiveNetworkHandler.Object.StateAuthority);
+			return base.GetPlayer(GorillaGameModes.GameMode.ActiveNetworkHandler.Object.StateAuthority);
 		}
 	}
 
@@ -277,7 +277,7 @@ public class NetworkSystemFusion : NetworkSystem
 		return <ConnectToRoom>d__.<>t__builder.Task;
 	}
 
-	private Task<bool> Connect(GameMode mode, string targetSessionName, RoomConfig opts)
+	private Task<bool> Connect(Fusion.GameMode mode, string targetSessionName, RoomConfig opts)
 	{
 		NetworkSystemFusion.<Connect>d__58 <Connect>d__;
 		<Connect>d__.<>t__builder = AsyncTaskMethodBuilder<bool>.Create();
@@ -342,7 +342,7 @@ public class NetworkSystemFusion : NetworkSystem
 		return <ReturnToSinglePlayer>d__.<>t__builder.Task;
 	}
 
-	private Task CloseRunner(ShutdownReason reason = 0)
+	private Task CloseRunner(ShutdownReason reason = ShutdownReason.Ok)
 	{
 		NetworkSystemFusion.<CloseRunner>d__64 <CloseRunner>d__;
 		<CloseRunner>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
@@ -384,7 +384,7 @@ public class NetworkSystemFusion : NetworkSystem
 		this.FusionVoice.GlobalRecordersLogLevel = this.VoiceSettings.GlobalRecordersLogLevel;
 		this.FusionVoice.GlobalSpeakersLogLevel = this.VoiceSettings.GlobalSpeakersLogLevel;
 		this.FusionVoice.AutoCreateSpeakerIfNotFound = this.VoiceSettings.CreateSpeakerIfNotFound;
-		AppSettings appSettings = new AppSettings();
+		Photon.Realtime.AppSettings appSettings = new Photon.Realtime.AppSettings();
 		appSettings.AppIdFusion = PhotonAppSettings.Global.AppSettings.AppIdFusion;
 		appSettings.AppIdVoice = PhotonAppSettings.Global.AppSettings.AppIdVoice;
 		this.FusionVoice.Settings = appSettings;
@@ -472,7 +472,7 @@ public class NetworkSystemFusion : NetworkSystem
 		}
 		this.isProcessingQueue = true;
 		List<NetworkObject> list = new List<NetworkObject>();
-		SceneRef sceneRef = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
+		SceneRef scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
 		while (this.registrationQueue.Count > 0)
 		{
 			NetworkObject networkObject = this.registrationQueue.Dequeue();
@@ -482,17 +482,17 @@ public class NetworkSystemFusion : NetworkSystem
 				{
 					list.Add(networkObject);
 				}
-				catch (Exception ex)
+				catch (Exception exception)
 				{
-					Debug.LogException(ex);
+					Debug.LogException(exception);
 					this.isProcessingQueue = false;
-					this.runner.RegisterSceneObjects(sceneRef, list.ToArray(), default(NetworkSceneLoadId));
+					this.runner.RegisterSceneObjects(scene, list.ToArray(), default(NetworkSceneLoadId));
 					this.ProcessRegistrationQueue();
 					break;
 				}
 			}
 		}
-		this.runner.RegisterSceneObjects(sceneRef, list.ToArray(), default(NetworkSceneLoadId));
+		this.runner.RegisterSceneObjects(scene, list.ToArray(), default(NetworkSceneLoadId));
 		this.isProcessingQueue = false;
 	}
 
@@ -501,23 +501,23 @@ public class NetworkSystemFusion : NetworkSystem
 		Utils.Log("Net instantiate Fusion: " + prefab.name);
 		try
 		{
-			return this.runner.Spawn(prefab, new Vector3?(position), new Quaternion?(rotation), new PlayerRef?(this.runner.LocalPlayer), null, 0).gameObject;
+			return this.runner.Spawn(prefab, new Vector3?(position), new Quaternion?(rotation), new PlayerRef?(this.runner.LocalPlayer), null, (NetworkSpawnFlags)0).gameObject;
 		}
-		catch (Exception ex)
+		catch (Exception message)
 		{
-			Debug.LogError(ex);
+			Debug.LogError(message);
 		}
 		return null;
 	}
 
 	public override GameObject NetInstantiate(GameObject prefab, Vector3 position, Quaternion rotation, int playerAuthID, bool isRoomObject = false)
 	{
-		foreach (PlayerRef playerRef in this.runner.ActivePlayers)
+		foreach (PlayerRef value in this.runner.ActivePlayers)
 		{
-			if (playerRef.PlayerId == playerAuthID)
+			if (value.PlayerId == playerAuthID)
 			{
 				Utils.Log("Net instantiate Fusion: " + prefab.name);
-				return this.runner.Spawn(prefab, new Vector3?(position), new Quaternion?(rotation), new PlayerRef?(playerRef), null, 0).gameObject;
+				return this.runner.Spawn(prefab, new Vector3?(position), new Quaternion?(rotation), new PlayerRef?(value), null, (NetworkSpawnFlags)0).gameObject;
 			}
 		}
 		Debug.LogError(string.Format("Couldn't find player with ID: {0}, cancelling requested spawn...", playerAuthID));
@@ -527,13 +527,13 @@ public class NetworkSystemFusion : NetworkSystem
 	public override GameObject NetInstantiate(GameObject prefab, Vector3 position, Quaternion rotation, bool isRoomObject, byte group = 0, object[] data = null, NetworkRunner.OnBeforeSpawned callback = null)
 	{
 		Utils.Log("Net instantiate Fusion: " + prefab.name);
-		return this.runner.Spawn(prefab, new Vector3?(position), new Quaternion?(rotation), new PlayerRef?(this.runner.LocalPlayer), callback, 0).gameObject;
+		return this.runner.Spawn(prefab, new Vector3?(position), new Quaternion?(rotation), new PlayerRef?(this.runner.LocalPlayer), callback, (NetworkSpawnFlags)0).gameObject;
 	}
 
 	public override void NetDestroy(GameObject instance)
 	{
 		NetworkObject networkObject;
-		if (instance.TryGetComponent<NetworkObject>(ref networkObject))
+		if (instance.TryGetComponent<NetworkObject>(out networkObject))
 		{
 			this.runner.Despawn(networkObject);
 			return;
@@ -543,45 +543,45 @@ public class NetworkSystemFusion : NetworkSystem
 
 	public override bool ShouldSpawnLocally(int playerID)
 	{
-		if (this.runner.GameMode == 2)
+		if (this.runner.GameMode == Fusion.GameMode.Shared)
 		{
 			return this.runner.LocalPlayer.PlayerId == playerID || (playerID == -1 && this.runner.IsSharedModeMasterClient);
 		}
-		return this.runner.GameMode != 5;
+		return this.runner.GameMode != Fusion.GameMode.Client;
 	}
 
 	public override void CallRPC(MonoBehaviour component, NetworkSystem.RPC rpcMethod, bool sendToSelf = true)
 	{
-		Utils.Log(WsaReflectionExtensions.GetDelegateName(rpcMethod) + "RPC called!");
-		foreach (PlayerRef playerRef in this.runner.ActivePlayers)
+		Utils.Log(rpcMethod.GetDelegateName() + "RPC called!");
+		foreach (PlayerRef a in this.runner.ActivePlayers)
 		{
 			if (!sendToSelf)
 			{
-				playerRef != this.runner.LocalPlayer;
+				a != this.runner.LocalPlayer;
 			}
 		}
 	}
 
 	public override void CallRPC<T>(MonoBehaviour component, NetworkSystem.RPC rpcMethod, RPCArgBuffer<T> args, bool sendToSelf = true)
 	{
-		Utils.Log(WsaReflectionExtensions.GetDelegateName(rpcMethod) + "RPC called!");
+		Utils.Log(rpcMethod.GetDelegateName() + "RPC called!");
 		ref args.SerializeToRPCData<T>();
-		foreach (PlayerRef playerRef in this.runner.ActivePlayers)
+		foreach (PlayerRef a in this.runner.ActivePlayers)
 		{
 			if (!sendToSelf)
 			{
-				playerRef != this.runner.LocalPlayer;
+				a != this.runner.LocalPlayer;
 			}
 		}
 	}
 
 	public override void CallRPC(MonoBehaviour component, NetworkSystem.StringRPC rpcMethod, string message, bool sendToSelf = true)
 	{
-		foreach (PlayerRef playerRef in this.runner.ActivePlayers)
+		foreach (PlayerRef a in this.runner.ActivePlayers)
 		{
 			if (!sendToSelf)
 			{
-				playerRef != this.runner.LocalPlayer;
+				a != this.runner.LocalPlayer;
 			}
 		}
 	}
@@ -589,12 +589,12 @@ public class NetworkSystemFusion : NetworkSystem
 	public override void CallRPC(int targetPlayerID, MonoBehaviour component, NetworkSystem.RPC rpcMethod)
 	{
 		this.GetPlayerRef(targetPlayerID);
-		Utils.Log(WsaReflectionExtensions.GetDelegateName(rpcMethod) + "RPC called!");
+		Utils.Log(rpcMethod.GetDelegateName() + "RPC called!");
 	}
 
 	public override void CallRPC<T>(int targetPlayerID, MonoBehaviour component, NetworkSystem.RPC rpcMethod, RPCArgBuffer<T> args)
 	{
-		Utils.Log(WsaReflectionExtensions.GetDelegateName(rpcMethod) + "RPC called!");
+		Utils.Log(rpcMethod.GetDelegateName() + "RPC called!");
 		this.GetPlayerRef(targetPlayerID);
 	}
 
@@ -652,10 +652,10 @@ public class NetworkSystemFusion : NetworkSystem
 	{
 		switch (reason)
 		{
-		case 1:
-		case 3:
+		case NetConnectFailedReason.Timeout:
+		case NetConnectFailedReason.ServerRefused:
 			break;
-		case 2:
+		case NetConnectFailedReason.ServerFull:
 			this.lastConnectAttempt_WasFull = true;
 			break;
 		default:
@@ -811,12 +811,12 @@ public class NetworkSystemFusion : NetworkSystem
 
 	public override void SetPlayerObject(GameObject playerInstance, int? owningPlayerID = null)
 	{
-		PlayerRef playerRef = this.runner.LocalPlayer;
+		PlayerRef player = this.runner.LocalPlayer;
 		if (owningPlayerID != null)
 		{
-			playerRef = this.GetPlayerRef(owningPlayerID.Value);
+			player = this.GetPlayerRef(owningPlayerID.Value);
 		}
-		this.runner.SetPlayerObject(playerRef, playerInstance.GetComponent<NetworkObject>());
+		this.runner.SetPlayerObject(player, playerInstance.GetComponent<NetworkObject>());
 	}
 
 	private PlayerRef GetPlayerRef(int playerID)
@@ -1005,11 +1005,11 @@ public class NetworkSystemFusion : NetworkSystem
 	public override int GetOwningPlayerID(GameObject obj)
 	{
 		NetworkObject networkObject;
-		if (!obj.TryGetComponent<NetworkObject>(ref networkObject))
+		if (!obj.TryGetComponent<NetworkObject>(out networkObject))
 		{
 			return -1;
 		}
-		if (this.runner.GameMode == 2)
+		if (this.runner.GameMode == Fusion.GameMode.Shared)
 		{
 			return networkObject.StateAuthority.PlayerId;
 		}
@@ -1019,11 +1019,11 @@ public class NetworkSystemFusion : NetworkSystem
 	public override bool IsObjectLocallyOwned(GameObject obj)
 	{
 		NetworkObject networkObject;
-		if (!obj.TryGetComponent<NetworkObject>(ref networkObject))
+		if (!obj.TryGetComponent<NetworkObject>(out networkObject))
 		{
 			return false;
 		}
-		if (this.runner.GameMode == 2)
+		if (this.runner.GameMode == Fusion.GameMode.Shared)
 		{
 			return networkObject.StateAuthority == this.runner.LocalPlayer;
 		}
@@ -1032,19 +1032,19 @@ public class NetworkSystemFusion : NetworkSystem
 
 	public override bool IsTotalAuthority()
 	{
-		return this.runner.Mode == 1 || this.runner.Mode == 2 || this.runner.GameMode == 1 || this.runner.IsSharedModeMasterClient;
+		return this.runner.Mode == SimulationModes.Server || this.runner.Mode == SimulationModes.Host || this.runner.GameMode == Fusion.GameMode.Single || this.runner.IsSharedModeMasterClient;
 	}
 
 	public override bool ShouldWriteObjectData(GameObject obj)
 	{
 		NetworkObject networkObject;
-		return obj.TryGetComponent<NetworkObject>(ref networkObject) && networkObject.HasStateAuthority;
+		return obj.TryGetComponent<NetworkObject>(out networkObject) && networkObject.HasStateAuthority;
 	}
 
 	public override bool ShouldUpdateObject(GameObject obj)
 	{
 		NetworkObject networkObject;
-		if (!obj.TryGetComponent<NetworkObject>(ref networkObject))
+		if (!obj.TryGetComponent<NetworkObject>(out networkObject))
 		{
 			return true;
 		}
@@ -1062,7 +1062,7 @@ public class NetworkSystemFusion : NetworkSystem
 	public override bool IsObjectRoomObject(GameObject obj)
 	{
 		NetworkObject networkObject;
-		if (obj.TryGetComponent<NetworkObject>(ref networkObject))
+		if (obj.TryGetComponent<NetworkObject>(out networkObject))
 		{
 			Debug.LogWarning("Fusion currently automatically passes false for roomobject check.");
 			return false;
@@ -1074,10 +1074,14 @@ public class NetworkSystemFusion : NetworkSystem
 	{
 		if (this.runner.IsSharedModeMasterClient)
 		{
-			Dictionary<string, SessionProperty> dictionary = new Dictionary<string, SessionProperty>();
-			dictionary.Add("MasterClient", base.LocalPlayer.ActorNumber);
-			Dictionary<string, SessionProperty> dictionary2 = dictionary;
-			this.runner.SessionInfo.UpdateCustomProperties(dictionary2);
+			Dictionary<string, SessionProperty> customProperties = new Dictionary<string, SessionProperty>
+			{
+				{
+					"MasterClient",
+					base.LocalPlayer.ActorNumber
+				}
+			};
+			this.runner.SessionInfo.UpdateCustomProperties(customProperties);
 		}
 	}
 
@@ -1091,7 +1095,7 @@ public class NetworkSystemFusion : NetworkSystem
 
 	private GameObject volatileNetObj;
 
-	private AuthenticationValues cachedPlayfabAuth;
+	private Fusion.Photon.Realtime.AuthenticationValues cachedPlayfabAuth;
 
 	private const string playerPropertiesPath = "P_FusionProperties";
 

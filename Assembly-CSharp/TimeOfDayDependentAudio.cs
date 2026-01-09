@@ -86,14 +86,14 @@ public class TimeOfDayDependentAudio : MonoBehaviour, IGorillaSliceableSimple, I
 		}
 		else if (this.myWeather == weatherType2)
 		{
-			float num3 = Mathf.Clamp(currentLerp * 2f - 1f, 0f, 1f);
-			this.newRate = Mathf.Lerp(0f, this.startingEmissionRate, num3);
+			float t = Mathf.Clamp(currentLerp * 2f - 1f, 0f, 1f);
+			this.newRate = Mathf.Lerp(0f, this.startingEmissionRate, t);
 			this.currentVolume = Mathf.Lerp(0f, this.volumes[num], currentLerp);
 		}
 		else
 		{
-			float num4 = Mathf.Clamp(currentLerp * 2f, 0f, 1f);
-			this.newRate = Mathf.Lerp(this.startingEmissionRate, 0f, num4);
+			float t2 = Mathf.Clamp(currentLerp * 2f, 0f, 1f);
+			this.newRate = Mathf.Lerp(this.startingEmissionRate, 0f, t2);
 			this.currentVolume = Mathf.Lerp(this.volumes[currentTimeIndex], 0f, currentLerp);
 		}
 		if (this.myParticleSystem != null)

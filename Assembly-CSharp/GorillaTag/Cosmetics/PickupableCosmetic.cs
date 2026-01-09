@@ -154,17 +154,17 @@ namespace GorillaTag.Cosmetics
 				{
 					return;
 				}
-				float num = this.RaycastCheckDist * this.scale;
+				float maxDistance = this.RaycastCheckDist * this.scale;
 				int value = this.floorLayerMask.value;
 				Vector3[] cachedDirections = this.GetCachedDirections(this.RaycastChecksMax);
-				int num2 = 0;
-				while (num2 < this.raysPerStep && this.currentRayIndex < cachedDirections.Length)
+				int num = 0;
+				while (num < this.raysPerStep && this.currentRayIndex < cachedDirections.Length)
 				{
 					Vector3 vector = cachedDirections[this.currentRayIndex];
 					this.currentRayIndex++;
-					num2++;
+					num++;
 					RaycastHit hitInfo;
-					if (Physics.Raycast(this.GetSafeRayOrigin(this.raycastOrigin.position, vector), vector, ref hitInfo, num, value, 1) && (!this.dontStickToWall || Vector3.Angle(hitInfo.normal, Vector3.up) < 40f))
+					if (Physics.Raycast(this.GetSafeRayOrigin(this.raycastOrigin.position, vector), vector, out hitInfo, maxDistance, value, QueryTriggerInteraction.Ignore) && (!this.dontStickToWall || Vector3.Angle(hitInfo.normal, Vector3.up) < 40f))
 					{
 						this.SettleBanner(hitInfo);
 						UnityEvent onPlacedShared = this.OnPlacedShared;
@@ -197,12 +197,12 @@ namespace GorillaTag.Cosmetics
 
 		private Vector3 GetFibonacciSphereDirection(int index, int total)
 		{
-			float num = Mathf.Acos(1f - 2f * ((float)index + 0.5f) / (float)total);
-			float num2 = 3.1415927f * (1f + Mathf.Sqrt(5f)) * ((float)index + 0.5f);
-			float num3 = Mathf.Sin(num) * Mathf.Cos(num2);
-			float num4 = Mathf.Sin(num) * Mathf.Sin(num2);
-			float num5 = Mathf.Cos(num);
-			return new Vector3(num3, num4, num5).normalized;
+			float f = Mathf.Acos(1f - 2f * ((float)index + 0.5f) / (float)total);
+			float f2 = 3.1415927f * (1f + Mathf.Sqrt(5f)) * ((float)index + 0.5f);
+			float x = Mathf.Sin(f) * Mathf.Cos(f2);
+			float y = Mathf.Sin(f) * Mathf.Sin(f2);
+			float z = Mathf.Cos(f);
+			return new Vector3(x, y, z).normalized;
 		}
 
 		private Vector3[] GetCachedDirections(int count)
@@ -212,7 +212,7 @@ namespace GorillaTag.Cosmetics
 				return PickupableCosmetic.tmpEmpty;
 			}
 			Vector3[] array;
-			if (PickupableCosmetic.directionCache.TryGetValue(count, ref array))
+			if (PickupableCosmetic.directionCache.TryGetValue(count, out array))
 			{
 				return array;
 			}
@@ -227,13 +227,13 @@ namespace GorillaTag.Cosmetics
 
 		private Vector3 GetSafeRayOrigin(Vector3 rawOrigin, Vector3 dir)
 		{
-			float num = this.selfSkinOffset;
+			float d = this.selfSkinOffset;
 			if (this.bodyCollider != null)
 			{
 				float magnitude = this.bodyCollider.bounds.extents.magnitude;
-				num = Mathf.Max(this.selfSkinOffset, magnitude * 0.05f);
+				d = Mathf.Max(this.selfSkinOffset, magnitude * 0.05f);
 			}
-			return rawOrigin - dir.normalized * num;
+			return rawOrigin - dir.normalized * d;
 		}
 
 		public void BreakPlaceable()

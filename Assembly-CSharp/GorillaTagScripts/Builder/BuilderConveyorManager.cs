@@ -60,8 +60,8 @@ namespace GorillaTagScripts.Builder
 				return;
 			}
 			this.table = mytable;
-			this.conveyorSplines = new NativeArray<NativeSpline>(this.table.conveyors.Count, 4, 1);
-			this.conveyorRotations = new NativeArray<Quaternion>(this.table.conveyors.Count, 4, 1);
+			this.conveyorSplines = new NativeArray<NativeSpline>(this.table.conveyors.Count, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+			this.conveyorRotations = new NativeArray<Quaternion>(this.table.conveyors.Count, Allocator.Persistent, NativeArrayOptions.ClearMemory);
 			int num = 0;
 			for (int i = 0; i < this.table.conveyors.Count; i++)
 			{
@@ -70,9 +70,9 @@ namespace GorillaTagScripts.Builder
 				num += this.table.conveyors[i].GetMaxItemsOnConveyor();
 			}
 			this.maxItemCount = num;
-			this.conveyorIndices = new NativeList<int>(this.maxItemCount, 4);
-			this.jobSplineTimes = new NativeList<float>(this.maxItemCount, 4);
-			this.jobShelfOffsets = new NativeList<Vector3>(this.maxItemCount, 4);
+			this.conveyorIndices = new NativeList<int>(this.maxItemCount, Allocator.Persistent);
+			this.jobSplineTimes = new NativeList<float>(this.maxItemCount, Allocator.Persistent);
+			this.jobShelfOffsets = new NativeList<Vector3>(this.maxItemCount, Allocator.Persistent);
 			this.pieceTransforms = new TransformAccessArray(this.maxItemCount, 3);
 			this.isSetup = true;
 		}
@@ -134,7 +134,7 @@ namespace GorillaTagScripts.Builder
 
 		public JobHandle ConstructJobHandle()
 		{
-			BuilderConveyorManager.EvaluateSplineJob evaluateSplineJob = new BuilderConveyorManager.EvaluateSplineJob
+			BuilderConveyorManager.EvaluateSplineJob jobData = new BuilderConveyorManager.EvaluateSplineJob
 			{
 				conveyorRotations = this.conveyorRotations,
 				conveyorIndices = this.conveyorIndices,
@@ -143,9 +143,9 @@ namespace GorillaTagScripts.Builder
 			};
 			for (int i = 0; i < this.conveyorSplines.Length; i++)
 			{
-				evaluateSplineJob.SetSplineAt(i, this.conveyorSplines[i]);
+				jobData.SetSplineAt(i, this.conveyorSplines[i]);
 			}
-			return IJobParallelForTransformExtensions.Schedule<BuilderConveyorManager.EvaluateSplineJob>(evaluateSplineJob, this.pieceTransforms, default(JobHandle));
+			return jobData.Schedule(this.pieceTransforms, default(JobHandle));
 		}
 
 		public void AddPieceToJob(BuilderPiece piece, float splineTime, int conveyorID)
@@ -155,9 +155,9 @@ namespace GorillaTagScripts.Builder
 				Debug.LogError("Too many pieces on conveyor!");
 			}
 			this.pieceTransforms.Add(piece.transform);
-			this.conveyorIndices.Add(ref conveyorID);
-			this.jobShelfOffsets.Add(ref piece.desiredShelfOffset);
-			this.jobSplineTimes.Add(ref splineTime);
+			this.conveyorIndices.Add(conveyorID);
+			this.jobShelfOffsets.Add(piece.desiredShelfOffset);
+			this.jobSplineTimes.Add(splineTime);
 		}
 
 		public void RemovePieceFromJobAtIndex(int index)
@@ -246,13 +246,13 @@ namespace GorillaTagScripts.Builder
 
 			public void Execute(int index, TransformAccess transform)
 			{
-				float num = this.splineTimes[index];
-				Vector3 vector = this.shelfOffsets[index];
-				int num2 = this.conveyorIndices[index];
-				NativeSpline splineAt = this.GetSplineAt(num2);
-				Quaternion quaternion = this.conveyorRotations[num2];
-				float num3;
-				Vector3 position = CurveUtility.EvaluatePosition(splineAt.GetCurve(SplineUtility.SplineToCurveT<NativeSpline>(splineAt, num, ref num3)), num3) + quaternion * vector;
+				float splineT = this.splineTimes[index];
+				Vector3 point = this.shelfOffsets[index];
+				int index2 = this.conveyorIndices[index];
+				NativeSpline splineAt = this.GetSplineAt(index2);
+				Quaternion rotation = this.conveyorRotations[index2];
+				float t;
+				Vector3 position = CurveUtility.EvaluatePosition(splineAt.GetCurve(splineAt.SplineToCurveT(splineT, out t)), t) + rotation * point;
 				transform.position = position;
 			}
 

@@ -11,7 +11,7 @@ public class FreeHoverboardManager : NetworkSceneObject
 	private FreeHoverboardManager.DataPerPlayer GetOrCreatePlayerData(int actorNumber)
 	{
 		FreeHoverboardManager.DataPerPlayer dataPerPlayer;
-		if (!this.perPlayerData.TryGetValue(actorNumber, ref dataPerPlayer))
+		if (!this.perPlayerData.TryGetValue(actorNumber, out dataPerPlayer))
 		{
 			dataPerPlayer = default(FreeHoverboardManager.DataPerPlayer);
 			dataPerPlayer.Init(actorNumber, this.freeBoardPool);
@@ -25,18 +25,18 @@ public class FreeHoverboardManager : NetworkSceneObject
 		FreeHoverboardManager.instance = this;
 		for (int i = 0; i < 20; i++)
 		{
-			FreeHoverboardInstance freeHoverboardInstance = Object.Instantiate<FreeHoverboardInstance>(this.freeHoverboardPrefab);
+			FreeHoverboardInstance freeHoverboardInstance = UnityEngine.Object.Instantiate<FreeHoverboardInstance>(this.freeHoverboardPrefab);
 			freeHoverboardInstance.gameObject.SetActive(false);
 			this.freeBoardPool.Push(freeHoverboardInstance);
 		}
-		NetworkSystem.Instance.OnPlayerLeft += new Action<NetPlayer>(this.OnPlayerLeftRoom);
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnLeftRoom);
+		NetworkSystem.Instance.OnPlayerLeft += this.OnPlayerLeftRoom;
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnLeftRoom;
 	}
 
 	private void OnPlayerLeftRoom(NetPlayer netPlayer)
 	{
 		FreeHoverboardManager.DataPerPlayer dataPerPlayer;
-		if (this.perPlayerData.TryGetValue(netPlayer.ActorNumber, ref dataPerPlayer))
+		if (this.perPlayerData.TryGetValue(netPlayer.ActorNumber, out dataPerPlayer))
 		{
 			dataPerPlayer.ReturnBoards(this.freeBoardPool);
 			this.perPlayerData.Remove(netPlayer.ActorNumber);
@@ -63,7 +63,7 @@ public class FreeHoverboardManager : NetworkSceneObject
 		freeHoverboardInstance.gameObject.SetActive(true);
 		int ownerActorNumber = freeHoverboardInstance.ownerActorNumber;
 		NetPlayer localPlayer = NetworkSystem.Instance.LocalPlayer;
-		int? num = (localPlayer != null) ? new int?(localPlayer.ActorNumber) : default(int?);
+		int? num = (localPlayer != null) ? new int?(localPlayer.ActorNumber) : null;
 		if (ownerActorNumber == num.GetValueOrDefault() & num != null)
 		{
 			this.localPlayerLastSpawnedBoardIndex = boardIndex;
@@ -81,7 +81,7 @@ public class FreeHoverboardManager : NetworkSceneObject
 			long num4 = BitPackUtils.PackWorldPosForNetwork(velocity);
 			long num5 = BitPackUtils.PackWorldPosForNetwork(avelocity);
 			short num6 = BitPackUtils.PackColorForNetwork(boardColor);
-			this.photonView.RPC("DropBoard_RPC", 0, new object[]
+			this.photonView.RPC("DropBoard_RPC", RpcTarget.All, new object[]
 			{
 				num == 1,
 				num2,
@@ -122,7 +122,7 @@ public class FreeHoverboardManager : NetworkSceneObject
 	{
 		if (PhotonNetwork.InRoom)
 		{
-			this.photonView.RPC("GrabBoard_RPC", 0, new object[]
+			this.photonView.RPC("GrabBoard_RPC", RpcTarget.All, new object[]
 			{
 				board.ownerActorNumber,
 				board.boardIndex == 1
@@ -170,7 +170,7 @@ public class FreeHoverboardManager : NetworkSceneObject
 	public void PreserveMaxHoverboardsConstraint(int actorNumber)
 	{
 		FreeHoverboardManager.DataPerPlayer dataPerPlayer;
-		if (!this.perPlayerData.TryGetValue(actorNumber, ref dataPerPlayer))
+		if (!this.perPlayerData.TryGetValue(actorNumber, out dataPerPlayer))
 		{
 			return;
 		}

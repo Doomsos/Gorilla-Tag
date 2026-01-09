@@ -50,11 +50,11 @@ public class AdvancedItemState
 	})]
 	public ValueTuple<int, float, float, float> DecodeAdvancedItemState(int encodedValue)
 	{
-		int num = encodedValue >> 21 & 255;
-		float num2 = (float)(encodedValue >> 14 & 127) / 128f * 360f;
-		float num3 = (float)(encodedValue >> 7 & 127) / 128f * 360f;
-		float num4 = (float)(encodedValue & 127) / 128f * 360f;
-		return new ValueTuple<int, float, float, float>(num, num2, num3, num4);
+		int item = encodedValue >> 21 & 255;
+		float item2 = (float)(encodedValue >> 14 & 127) / 128f * 360f;
+		float item3 = (float)(encodedValue >> 7 & 127) / 128f * 360f;
+		float item4 = (float)(encodedValue & 127) / 128f * 360f;
+		return new ValueTuple<int, float, float, float>(item, item2, item3, item4);
 	}
 
 	private float EncodedDeltaRotation
@@ -72,14 +72,14 @@ public class AdvancedItemState
 
 	public void DecodeDeltaRotation(float encodedDelta, bool isFlipped)
 	{
-		float num = encodedDelta * 3.1415927f;
+		float f = encodedDelta * 3.1415927f;
 		if (isFlipped)
 		{
-			this.angleVectorWhereUpIsStandard = new Vector2(-Mathf.Sin(num), Mathf.Cos(num));
+			this.angleVectorWhereUpIsStandard = new Vector2(-Mathf.Sin(f), Mathf.Cos(f));
 		}
 		else
 		{
-			this.angleVectorWhereUpIsStandard = new Vector2(Mathf.Sin(num), Mathf.Cos(num));
+			this.angleVectorWhereUpIsStandard = new Vector2(Mathf.Sin(f), Mathf.Cos(f));
 		}
 		switch (this.limitAxis)
 		{
@@ -89,10 +89,9 @@ public class AdvancedItemState
 			return;
 		case LimitAxis.YAxis:
 		{
-			Vector3 vector;
-			vector..ctor(this.angleVectorWhereUpIsStandard.x, 0f, this.angleVectorWhereUpIsStandard.y);
-			Vector3 vector2 = this.reverseGrip ? Vector3.down : Vector3.up;
-			this.deltaRotation = Quaternion.LookRotation(vector, vector2);
+			Vector3 forward = new Vector3(this.angleVectorWhereUpIsStandard.x, 0f, this.angleVectorWhereUpIsStandard.y);
+			Vector3 upwards = this.reverseGrip ? Vector3.down : Vector3.up;
+			this.deltaRotation = Quaternion.LookRotation(forward, upwards);
 			return;
 		}
 		default:

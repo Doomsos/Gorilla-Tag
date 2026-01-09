@@ -122,15 +122,15 @@ public class GRShuttle : MonoBehaviour, IGorillaSliceableSimple
 		}
 		GTPlayer instance = GTPlayer.Instance;
 		VRRig localRig = VRRig.LocalRig;
-		float num = destShuttle.transform.rotation.eulerAngles.y - sourceShuttle.transform.rotation.eulerAngles.y;
-		Vector3 vector = localRig.transform.position - instance.transform.position;
-		Vector3 vector2 = sourceShuttle.transform.InverseTransformPoint(instance.transform.position);
-		vector2.x *= 0.8f;
-		vector2.z *= 0.8f;
-		Vector3 position = destShuttle.transform.TransformPoint(vector2);
-		instance.TeleportTo(position, instance.transform.rotation, false, false);
-		instance.turnParent.transform.RotateAround(instance.headCollider.transform.position, sourceShuttle.transform.up, num);
-		localRig.transform.position = instance.transform.position + vector;
+		float angle = destShuttle.transform.rotation.eulerAngles.y - sourceShuttle.transform.rotation.eulerAngles.y;
+		Vector3 b = localRig.transform.position - instance.transform.position;
+		Vector3 position = sourceShuttle.transform.InverseTransformPoint(instance.transform.position);
+		position.x *= 0.8f;
+		position.z *= 0.8f;
+		Vector3 position2 = destShuttle.transform.TransformPoint(position);
+		instance.TeleportTo(position2, instance.transform.rotation, false, false);
+		instance.turnParent.transform.RotateAround(instance.headCollider.transform.position, sourceShuttle.transform.up, angle);
+		localRig.transform.position = instance.transform.position + b;
 		instance.InitializeValues();
 	}
 

@@ -66,7 +66,7 @@ public class GorillaPlayerLineButton : MonoBehaviour
 					GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
 					if (PhotonNetwork.InRoom && GorillaTagger.Instance.myVRRig != null)
 					{
-						GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", 1, new object[]
+						GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
 						{
 							67,
 							component.isLeftHand,

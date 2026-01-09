@@ -55,7 +55,7 @@ public class GorillaEnemyAI : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 
 	private void FindClosestPlayer()
 	{
-		VRRig[] array = Object.FindObjectsByType<VRRig>(0);
+		VRRig[] array = Object.FindObjectsByType<VRRig>(FindObjectsSortMode.None);
 		VRRig vrrig = null;
 		float num = 100000f;
 		foreach (VRRig vrrig2 in array)

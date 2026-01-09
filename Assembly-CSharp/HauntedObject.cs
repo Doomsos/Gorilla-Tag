@@ -11,14 +11,14 @@ public class HauntedObject : MonoBehaviour
 	{
 		this.lurkerGhost = GameObject.FindGameObjectWithTag("LurkerGhost");
 		LurkerGhost lurkerGhost;
-		if (this.lurkerGhost != null && this.lurkerGhost.TryGetComponent<LurkerGhost>(ref lurkerGhost))
+		if (this.lurkerGhost != null && this.lurkerGhost.TryGetComponent<LurkerGhost>(out lurkerGhost))
 		{
 			LurkerGhost lurkerGhost2 = lurkerGhost;
 			lurkerGhost2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Combine(lurkerGhost2.TriggerHauntedObjects, new UnityAction<GameObject>(this.TriggerEffects));
 		}
 		this.wanderingGhost = GameObject.FindGameObjectWithTag("WanderingGhost");
 		WanderingGhost wanderingGhost;
-		if (this.wanderingGhost != null && this.wanderingGhost.TryGetComponent<WanderingGhost>(ref wanderingGhost))
+		if (this.wanderingGhost != null && this.wanderingGhost.TryGetComponent<WanderingGhost>(out wanderingGhost))
 		{
 			WanderingGhost wanderingGhost2 = wanderingGhost;
 			wanderingGhost2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Combine(wanderingGhost2.TriggerHauntedObjects, new UnityAction<GameObject>(this.TriggerEffects));
@@ -29,13 +29,13 @@ public class HauntedObject : MonoBehaviour
 	private void OnDestroy()
 	{
 		LurkerGhost lurkerGhost;
-		if (this.lurkerGhost != null && this.lurkerGhost.TryGetComponent<LurkerGhost>(ref lurkerGhost))
+		if (this.lurkerGhost != null && this.lurkerGhost.TryGetComponent<LurkerGhost>(out lurkerGhost))
 		{
 			LurkerGhost lurkerGhost2 = lurkerGhost;
 			lurkerGhost2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Remove(lurkerGhost2.TriggerHauntedObjects, new UnityAction<GameObject>(this.TriggerEffects));
 		}
 		WanderingGhost wanderingGhost;
-		if (this.wanderingGhost != null && this.wanderingGhost.TryGetComponent<WanderingGhost>(ref wanderingGhost))
+		if (this.wanderingGhost != null && this.wanderingGhost.TryGetComponent<WanderingGhost>(out wanderingGhost))
 		{
 			WanderingGhost wanderingGhost2 = wanderingGhost;
 			wanderingGhost2.TriggerHauntedObjects = (UnityAction<GameObject>)Delegate.Remove(wanderingGhost2.TriggerHauntedObjects, new UnityAction<GameObject>(this.TriggerEffects));

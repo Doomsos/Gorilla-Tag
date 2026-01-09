@@ -33,8 +33,8 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 		{
 			return;
 		}
-		NetworkSystem.Instance.OnJoinedRoomEvent += new Action(this.OnNetConnect);
-		NetworkSystem.Instance.OnReturnedToSinglePlayer += new Action(this.OnNetDisconnect);
+		NetworkSystem.Instance.OnJoinedRoomEvent += this.OnNetConnect;
+		NetworkSystem.Instance.OnReturnedToSinglePlayer += this.OnNetDisconnect;
 		if (!this.hasRig)
 		{
 			this.rig = base.GetComponentInParent<VRRig>();
@@ -61,8 +61,8 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 
 	private void OnDisable()
 	{
-		NetworkSystem.Instance.OnJoinedRoomEvent -= new Action(this.OnNetConnect);
-		NetworkSystem.Instance.OnReturnedToSinglePlayer -= new Action(this.OnNetDisconnect);
+		NetworkSystem.Instance.OnJoinedRoomEvent -= this.OnNetConnect;
+		NetworkSystem.Instance.OnReturnedToSinglePlayer -= this.OnNetDisconnect;
 		if (this.detachTransform)
 		{
 			if (this.hasTransformView)
@@ -114,11 +114,11 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 				observedComponents.Add(this.rigidbodyView);
 			}
 		}
-		foreach (MonoBehaviourPun monoBehaviourPun in this.otherComponents)
+		foreach (MonoBehaviourPun item in this.otherComponents)
 		{
-			if (!observedComponents.Contains(monoBehaviourPun))
+			if (!observedComponents.Contains(item))
 			{
-				observedComponents.Add(monoBehaviourPun);
+				observedComponents.Add(item);
 			}
 		}
 	}
@@ -155,9 +155,9 @@ public class RigOwnedPhysicsBody : MonoBehaviour
 		{
 			observedComponents.Remove(this.rigidbodyView);
 		}
-		foreach (MonoBehaviourPun monoBehaviourPun in this.otherComponents)
+		foreach (MonoBehaviourPun item in this.otherComponents)
 		{
-			observedComponents.Remove(monoBehaviourPun);
+			observedComponents.Remove(item);
 		}
 	}
 

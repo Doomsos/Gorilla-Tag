@@ -171,20 +171,20 @@ namespace CjLib
 				return;
 			}
 			Vector3 vector = rotation * Vector3.up;
-			Vector3 vector2 = 0.5f * (height - radius) * vector;
-			Vector3 vector3 = center + vector2;
-			Vector3 vector4 = center - vector2;
-			Quaternion quaternion = Quaternion.AngleAxis(180f, vector) * rotation;
+			Vector3 b = 0.5f * (height - radius) * vector;
+			Vector3 position = center + b;
+			Vector3 position2 = center - b;
+			Quaternion rotation2 = Quaternion.AngleAxis(180f, vector) * rotation;
 			Gizmos.color = color;
 			if (style == GizmosUtil.Style.Wireframe)
 			{
-				Gizmos.DrawWireMesh(mesh, vector3, rotation, new Vector3(radius, radius, radius));
-				Gizmos.DrawWireMesh(mesh, vector4, quaternion, new Vector3(-radius, -radius, radius));
+				Gizmos.DrawWireMesh(mesh, position, rotation, new Vector3(radius, radius, radius));
+				Gizmos.DrawWireMesh(mesh, position2, rotation2, new Vector3(-radius, -radius, radius));
 				Gizmos.DrawWireMesh(mesh2, center, rotation, new Vector3(radius, height, radius));
 				return;
 			}
-			Gizmos.DrawMesh(mesh, vector3, rotation, new Vector3(radius, radius, radius));
-			Gizmos.DrawMesh(mesh, vector4, quaternion, new Vector3(-radius, -radius, radius));
+			Gizmos.DrawMesh(mesh, position, rotation, new Vector3(radius, radius, radius));
+			Gizmos.DrawMesh(mesh, position2, rotation2, new Vector3(-radius, -radius, radius));
 			Gizmos.DrawMesh(mesh2, center, rotation, new Vector3(radius, height, radius));
 		}
 

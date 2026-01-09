@@ -136,7 +136,7 @@ public class NewMapsDisplay : MonoBehaviour
 		if (image != null)
 		{
 			Sprite sprite;
-			if (!this.cachedTextures.TryGetValue(image, ref sprite))
+			if (!this.cachedTextures.TryGetValue(image, out sprite))
 			{
 				sprite = Sprite.Create(image, new Rect(0f, 0f, (float)image.width, (float)image.height), new Vector2(0.5f, 0.5f));
 				this.cachedTextures.Add(image, sprite);

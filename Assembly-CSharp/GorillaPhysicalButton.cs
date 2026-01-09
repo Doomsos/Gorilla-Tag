@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -129,7 +130,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 			Action<GorillaPhysicalButton, bool> action = this.onPressedOn;
 			if (action != null)
 			{
-				action.Invoke(this, component.isLeftHand);
+				action(this, component.isLeftHand);
 			}
 			this.ButtonPressedOn();
 			this.ButtonPressedOnWithHand(component.isLeftHand);
@@ -137,7 +138,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 			GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
 			if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", 1, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
 				{
 					67,
 					component.isLeftHand,
@@ -163,7 +164,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 			Action<GorillaPhysicalButton, bool> action2 = this.onToggledOff;
 			if (action2 != null)
 			{
-				action2.Invoke(this, component2.isLeftHand);
+				action2(this, component2.isLeftHand);
 			}
 			this.ButtonToggledOff();
 			this.ButtonToggledOffWithHand(component2.isLeftHand);
@@ -171,7 +172,7 @@ public class GorillaPhysicalButton : MonoBehaviour
 			GorillaTagger.Instance.StartVibration(component2.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
 			if (NetworkSystem.Instance.InRoom && GorillaTagger.Instance.myVRRig != null)
 			{
-				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", 1, new object[]
+				GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlayHandTap", RpcTarget.Others, new object[]
 				{
 					67,
 					component2.isLeftHand,

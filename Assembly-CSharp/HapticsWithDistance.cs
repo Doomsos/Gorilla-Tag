@@ -27,7 +27,7 @@ public class HapticsWithDistance : MonoBehaviour, ITickSystemTick
 	private void OnTriggerEnter(Collider other)
 	{
 		GorillaGrabber gorillaGrabber;
-		if (other.TryGetComponent<GorillaGrabber>(ref gorillaGrabber) && gorillaGrabber.enabled)
+		if (other.TryGetComponent<GorillaGrabber>(out gorillaGrabber) && gorillaGrabber.enabled)
 		{
 			if (gorillaGrabber.IsLeftHand)
 			{

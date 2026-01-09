@@ -6,7 +6,7 @@ public class MicrophoneCosmetic : MonoBehaviour
 	private void Awake()
 	{
 		this.audioSource = base.GetComponent<AudioSource>();
-		if (!Application.isEditor && Application.platform == 11 && Microphone.devices.Length != 0)
+		if (!Application.isEditor && Application.platform == RuntimePlatform.Android && Microphone.devices.Length != 0)
 		{
 			this.audioSource.clip = Microphone.Start(Microphone.devices[0], true, 10, 16000);
 		}
@@ -20,7 +20,7 @@ public class MicrophoneCosmetic : MonoBehaviour
 
 	private void OnEnable()
 	{
-		int num = (Application.platform == 11 && Microphone.devices.Length != 0) ? Microphone.GetPosition(Microphone.devices[0]) : Microphone.GetPosition(null);
+		int num = (Application.platform == RuntimePlatform.Android && Microphone.devices.Length != 0) ? Microphone.GetPosition(Microphone.devices[0]) : Microphone.GetPosition(null);
 		num -= 10;
 		if ((float)num < 0f)
 		{

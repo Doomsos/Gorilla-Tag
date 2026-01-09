@@ -22,9 +22,9 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		string titleNameAndGrade = GhostReactorProgression.GetTitleNameAndGrade(grplayer.CurrentProgression.redeemedPoints);
 		int num = 1000 + grplayer.ShiftCreditCapIncreases * 100;
 		int num2 = grplayer.CurrentProgression.points - grplayer.CurrentProgression.redeemedPoints + item2;
-		string text = (player != null) ? player.SanitizedNickName : "RANDO MONKE";
+		string str = (player != null) ? player.SanitizedNickName : "RANDO MONKE";
 		this.cachedStringBuilder.Clear();
-		this.cachedStringBuilder.Append("<color=#808080>EMPLOYEE:</color>     " + text + "\n");
+		this.cachedStringBuilder.Append("<color=#808080>EMPLOYEE:</color>     " + str + "\n");
 		this.cachedStringBuilder.Append("<color=#808080>TITLE:</color>        " + titleNameAndGrade + "\n");
 		this.cachedStringBuilder.Append(string.Format("<color=#808080>XP:</color>           {0}/{1}\n", num2, item));
 		if (grplayer == GRPlayer.GetLocal())
@@ -89,9 +89,9 @@ public class GRUIPromotionBot : MonoBehaviourTick
 
 	public bool CheckIsActivePlayer()
 	{
-		Object @object = GRPlayer.Get(VRRig.LocalRig);
-		GRPlayer grplayer = GRPlayer.Get(this.currentPlayerActorNumber);
-		return @object == grplayer;
+		Object x = GRPlayer.Get(VRRig.LocalRig);
+		GRPlayer y = GRPlayer.Get(this.currentPlayerActorNumber);
+		return x == y;
 	}
 
 	public void UpPressed()
@@ -513,11 +513,11 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		{
 			if (ProgressionManager.Instance != null)
 			{
-				ProgressionManager.Instance.OnPurchaseShiftCredit -= new Action<bool>(this.OnPurchaseCallback);
-				ProgressionManager.Instance.OnPurchaseShiftCreditCapIncrease -= new Action<bool>(this.OnPurchaseCallback);
-				ProgressionManager.Instance.OnInventoryUpdated -= new Action(this.OnJuiceUpdated);
-				ProgressionManager.Instance.OnGetShiftCredit -= new Action<string, int>(this.OnGetShiftCredit);
-				ProgressionManager.Instance.OnGetShiftCreditCapData -= new Action<string, int, int>(this.OnGetShiftCreditCapData);
+				ProgressionManager.Instance.OnPurchaseShiftCredit -= this.OnPurchaseCallback;
+				ProgressionManager.Instance.OnPurchaseShiftCreditCapIncrease -= this.OnPurchaseCallback;
+				ProgressionManager.Instance.OnInventoryUpdated -= this.OnJuiceUpdated;
+				ProgressionManager.Instance.OnGetShiftCredit -= this.OnGetShiftCredit;
+				ProgressionManager.Instance.OnGetShiftCreditCapData -= this.OnGetShiftCreditCapData;
 			}
 			if (CosmeticsController.instance != null)
 			{
@@ -529,11 +529,11 @@ public class GRUIPromotionBot : MonoBehaviourTick
 		{
 			if (ProgressionManager.Instance != null)
 			{
-				ProgressionManager.Instance.OnPurchaseShiftCredit += new Action<bool>(this.OnPurchaseCallback);
-				ProgressionManager.Instance.OnPurchaseShiftCreditCapIncrease += new Action<bool>(this.OnPurchaseCallback);
-				ProgressionManager.Instance.OnInventoryUpdated += new Action(this.OnJuiceUpdated);
-				ProgressionManager.Instance.OnGetShiftCredit += new Action<string, int>(this.OnGetShiftCredit);
-				ProgressionManager.Instance.OnGetShiftCreditCapData += new Action<string, int, int>(this.OnGetShiftCreditCapData);
+				ProgressionManager.Instance.OnPurchaseShiftCredit += this.OnPurchaseCallback;
+				ProgressionManager.Instance.OnPurchaseShiftCreditCapIncrease += this.OnPurchaseCallback;
+				ProgressionManager.Instance.OnInventoryUpdated += this.OnJuiceUpdated;
+				ProgressionManager.Instance.OnGetShiftCredit += this.OnGetShiftCredit;
+				ProgressionManager.Instance.OnGetShiftCreditCapData += this.OnGetShiftCreditCapData;
 			}
 			if (CosmeticsController.instance != null)
 			{

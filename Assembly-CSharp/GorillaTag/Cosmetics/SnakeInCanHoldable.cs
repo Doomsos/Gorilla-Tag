@@ -33,7 +33,7 @@ namespace GorillaTag.Cosmetics
 			}
 			if (this._events != null)
 			{
-				this._events.Activate += new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnEnableObject);
+				this._events.Activate += this.OnEnableObject;
 			}
 		}
 
@@ -42,7 +42,7 @@ namespace GorillaTag.Cosmetics
 			base.OnDisable();
 			if (this._events != null)
 			{
-				this._events.Activate -= new Action<int, int, object[], PhotonMessageInfoWrapped>(this.OnEnableObject);
+				this._events.Activate -= this.OnEnableObject;
 				this._events.Dispose();
 				this._events = null;
 			}

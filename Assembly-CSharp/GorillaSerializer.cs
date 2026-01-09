@@ -84,8 +84,8 @@ internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiat
 
 	public void SendRPC(string rpcName, bool targetOthers, params object[] data)
 	{
-		RpcTarget rpcTarget = targetOthers ? 1 : 2;
-		this.photonView.RPC(rpcName, rpcTarget, data);
+		RpcTarget target = targetOthers ? RpcTarget.Others : RpcTarget.MasterClient;
+		this.photonView.RPC(rpcName, target, data);
 	}
 
 	public void SendRPC(string rpcName, Player targetPlayer, params object[] data)

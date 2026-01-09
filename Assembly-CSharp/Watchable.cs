@@ -15,7 +15,7 @@ public class Watchable<T>
 			this._value = value;
 			foreach (Action<T> action in this.callbacks)
 			{
-				action.Invoke(value);
+				action(value);
 			}
 		}
 	}
@@ -36,7 +36,7 @@ public class Watchable<T>
 		{
 			foreach (Action<T> action in this.callbacks)
 			{
-				action.Invoke(this._value);
+				action(this._value);
 			}
 		}
 	}

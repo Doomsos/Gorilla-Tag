@@ -8,7 +8,7 @@ public class RigEventVolume : MonoBehaviour
 	private void OnTriggerEnter(Collider other)
 	{
 		VRRig rig;
-		if (other.gameObject.TryGetComponent<VRRig>(ref rig) && !this.gameObjects.Contains(other.gameObject))
+		if (other.gameObject.TryGetComponent<VRRig>(out rig) && !this.gameObjects.Contains(other.gameObject))
 		{
 			this.gameObjects.Add(other.gameObject);
 			this.countChanged(this.gameObjects.Count - 1, this.gameObjects.Count, rig);
@@ -18,7 +18,7 @@ public class RigEventVolume : MonoBehaviour
 	private void OnTriggerExit(Collider other)
 	{
 		VRRig rig;
-		if (other.gameObject.TryGetComponent<VRRig>(ref rig) && this.gameObjects.Contains(other.gameObject))
+		if (other.gameObject.TryGetComponent<VRRig>(out rig) && this.gameObjects.Contains(other.gameObject))
 		{
 			this.gameObjects.Remove(other.gameObject);
 			this.countChanged(this.gameObjects.Count + 1, this.gameObjects.Count, rig);

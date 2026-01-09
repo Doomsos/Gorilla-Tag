@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Photon.Pun;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -16,7 +17,7 @@ namespace GorillaLocomotion.Gameplay
 			this._progress = this._splineProgressOffset;
 			this._progressPerFixedUpdate = Time.fixedDeltaTime / this._duration;
 			this._secondsToCycles = (double)(1f / this._duration);
-			this._nativeSpline = new NativeSpline(this._unitySpline.Spline, this._unitySpline.transform.localToWorldMatrix, 4);
+			this._nativeSpline = new NativeSpline(this._unitySpline.Spline, this._unitySpline.transform.localToWorldMatrix, Allocator.Persistent);
 			if (this._approximate)
 			{
 				this.CalculateApproximationNodes();
@@ -27,12 +28,12 @@ namespace GorillaLocomotion.Gameplay
 		{
 			for (int i = 0; i < this._approximationResolution; i++)
 			{
-				float3 @float;
-				float3 float2;
-				float3 float3;
-				SplineUtility.Evaluate<NativeSpline>(this._nativeSpline, (float)i / (float)this._approximationResolution, ref @float, ref float2, ref float3);
-				SplineFollow.SplineNode splineNode = new SplineFollow.SplineNode(@float, float2, float3);
-				this._approximationNodes.Add(splineNode);
+				float3 v;
+				float3 v2;
+				float3 v3;
+				this._nativeSpline.Evaluate((float)i / (float)this._approximationResolution, out v, out v2, out v3);
+				SplineFollow.SplineNode item = new SplineFollow.SplineNode(v, v2, v3);
+				this._approximationNodes.Add(item);
 			}
 			if (this._nativeSpline.Closed)
 			{
@@ -69,8 +70,8 @@ namespace GorillaLocomotion.Gameplay
 			}
 			SplineFollow.SplineNode splineNode = this.EvaluateSpline(this._progress);
 			base.transform.position = splineNode.Position;
-			Quaternion quaternion = Quaternion.LookRotation(splineNode.Tangent) * this._rotationFix;
-			base.transform.rotation = Quaternion.Slerp(quaternion, base.transform.rotation, Mathf.Exp(-this._smoothRotationTrackingRateExp * Time.deltaTime));
+			Quaternion a = Quaternion.LookRotation(splineNode.Tangent) * this._rotationFix;
+			base.transform.rotation = Quaternion.Slerp(a, base.transform.rotation, Mathf.Exp(-this._smoothRotationTrackingRateExp * Time.deltaTime));
 		}
 
 		private SplineFollow.SplineNode EvaluateSpline(float t)
@@ -86,11 +87,11 @@ namespace GorillaLocomotion.Gameplay
 				SplineFollow.SplineNode b = this._approximationNodes[(num2 + 1) % this._approximationNodes.Count];
 				return SplineFollow.SplineNode.Lerp(a, b, t2);
 			}
-			float3 @float;
-			float3 float2;
-			float3 float3;
-			SplineUtility.Evaluate<NativeSpline>(this._nativeSpline, t, ref @float, ref float2, ref float3);
-			return new SplineFollow.SplineNode(@float, float2, float3);
+			float3 v;
+			float3 v2;
+			float3 v3;
+			this._nativeSpline.Evaluate(t, out v, out v2, out v3);
+			return new SplineFollow.SplineNode(v, v2, v3);
 		}
 
 		private void OnDestroy()

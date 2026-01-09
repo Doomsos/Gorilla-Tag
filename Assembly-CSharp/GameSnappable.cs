@@ -39,10 +39,10 @@ public class GameSnappable : MonoBehaviour
 		{
 			if (snapPoints[i].jointType != snapJointType && snapPoints[i].jointType != snapJointType2 && (snapPoints[i].jointType & this.snapLocationTypes) != SnapJointType.None && !snapPoints[i].HasSnapped())
 			{
-				Vector3 vector;
-				Quaternion quaternion;
-				this.GetSnapOffset(snapPoints[i].jointType, out vector, out quaternion);
-				float num3 = Vector3.Distance(snapPoints[i].transform.TransformPoint(quaternion * vector), base.transform.position);
+				Vector3 point;
+				Quaternion rotation;
+				this.GetSnapOffset(snapPoints[i].jointType, out point, out rotation);
+				float num3 = Vector3.Distance(snapPoints[i].transform.TransformPoint(rotation * point), base.transform.position);
 				float num4 = this.snapRadius + snapPoints[i].snapPointRadius;
 				if (num3 < num && num3 < num4)
 				{
@@ -65,10 +65,10 @@ public class GameSnappable : MonoBehaviour
 			{
 				if (!superInfectionSnapPoint2.HasSnapped())
 				{
-					Vector3 vector2;
-					Quaternion quaternion2;
-					this.GetSnapOffset(superInfectionSnapPoint2.jointType, out vector2, out quaternion2);
-					float num6 = Vector3.Distance(superInfectionSnapPoint2.transform.TransformPoint(quaternion2 * vector2), base.transform.position);
+					Vector3 point2;
+					Quaternion rotation2;
+					this.GetSnapOffset(superInfectionSnapPoint2.jointType, out point2, out rotation2);
+					float num6 = Vector3.Distance(superInfectionSnapPoint2.transform.TransformPoint(rotation2 * point2), base.transform.position);
 					if (num6 < num5)
 					{
 						superInfectionSnapPoint = superInfectionSnapPoint2;
@@ -100,10 +100,10 @@ public class GameSnappable : MonoBehaviour
 		{
 			if (snapPoints[i].jointType != snapJointType && snapPoints[i].jointType != snapJointType2 && (snapPoints[i].jointType & this.snapLocationTypes) != SnapJointType.None && snapPoints[i].HasSnapped())
 			{
-				Vector3 vector;
-				Quaternion quaternion;
-				this.GetSnapOffset(snapPoints[i].jointType, out vector, out quaternion);
-				float num3 = Vector3.Distance(snapPoints[i].transform.TransformPoint(quaternion * vector), base.transform.position);
+				Vector3 point;
+				Quaternion rotation;
+				this.GetSnapOffset(snapPoints[i].jointType, out point, out rotation);
+				float num3 = Vector3.Distance(snapPoints[i].transform.TransformPoint(rotation * point), base.transform.position);
 				float num4 = this.snapRadius + snapPoints[i].snapPointRadius;
 				if (num3 < num && num3 < num4)
 				{

@@ -29,7 +29,7 @@ public class MaterialCyclerNetworked : MonoBehaviour
 			int num2 = Mathf.CeilToInt(c.g * 9f);
 			int num3 = Mathf.CeilToInt(c.b * 9f);
 			int num4 = num | num2 << 8 | num3 << 16;
-			this.photonView.RPC("RPC_SynchronizePacked", 1, new object[]
+			this.photonView.RPC("RPC_SynchronizePacked", RpcTarget.Others, new object[]
 			{
 				materialIndex,
 				num4
@@ -52,7 +52,7 @@ public class MaterialCyclerNetworked : MonoBehaviour
 		num = Mathf.Clamp(num, 0, 9);
 		num2 = Mathf.Clamp(num2, 0, 9);
 		num3 = Mathf.Clamp(num3, 0, 9);
-		this.OnSynchronize.Invoke(index, new int3(num, num2, num3));
+		this.OnSynchronize(index, new int3(num, num2, num3));
 	}
 
 	[SerializeField]

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GorillaTag
 {
-	[AttributeUsage(384, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
 	[Conditional("UNITY_EDITOR")]
 	public class VectorLabelTextAttribute : PropertyAttribute
 	{

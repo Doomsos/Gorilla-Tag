@@ -49,7 +49,7 @@ internal abstract class TickSystem<T> : MonoBehaviour
 		TickSystem<T>.postTickWrapperTable.Clear();
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void AddPreTickCallback(ITickSystemPre callback)
 	{
 		if (callback.PreTickRunning)
@@ -63,7 +63,7 @@ internal abstract class TickSystem<T> : MonoBehaviour
 		callback.PreTickRunning = true;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void AddTickCallback(ITickSystemTick callback)
 	{
 		if (callback.TickRunning)
@@ -77,7 +77,7 @@ internal abstract class TickSystem<T> : MonoBehaviour
 		callback.TickRunning = true;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void AddPostTickCallback(ITickSystemPost callback)
 	{
 		if (callback.PostTickRunning)
@@ -123,11 +123,11 @@ internal abstract class TickSystem<T> : MonoBehaviour
 		}
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void RemovePreTickCallback(ITickSystemPre callback)
 	{
 		TickSystem<T>.TickCallbackWrapperPre instance;
-		if (!callback.PreTickRunning || !TickSystem<T>.preTickWrapperTable.TryGetValue(callback, ref instance))
+		if (!callback.PreTickRunning || !TickSystem<T>.preTickWrapperTable.TryGetValue(callback, out instance))
 		{
 			return;
 		}
@@ -136,11 +136,11 @@ internal abstract class TickSystem<T> : MonoBehaviour
 		TickSystem<T>.preTickWrapperPool.Return(instance);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void RemoveTickCallback(ITickSystemTick callback)
 	{
 		TickSystem<T>.TickCallbackWrapperTick instance;
-		if (!callback.TickRunning || !TickSystem<T>.tickWrapperTable.TryGetValue(callback, ref instance))
+		if (!callback.TickRunning || !TickSystem<T>.tickWrapperTable.TryGetValue(callback, out instance))
 		{
 			return;
 		}
@@ -149,11 +149,11 @@ internal abstract class TickSystem<T> : MonoBehaviour
 		TickSystem<T>.tickWrapperPool.Return(instance);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void RemovePostTickCallback(ITickSystemPost callback)
 	{
 		TickSystem<T>.TickCallbackWrapperPost instance;
-		if (!callback.PostTickRunning || !TickSystem<T>.postTickWrapperTable.TryGetValue(callback, ref instance))
+		if (!callback.PostTickRunning || !TickSystem<T>.postTickWrapperTable.TryGetValue(callback, out instance))
 		{
 			return;
 		}

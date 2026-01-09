@@ -130,5 +130,5 @@ public class TextTyperAnimatorMono : MonoBehaviour, IGorillaSliceableSimple
 
 	private float _timeOfLastTypedChar = -1f;
 
-	private Random _random = new Random(6746U);
+	private Unity.Mathematics.Random _random = new Unity.Mathematics.Random(6746U);
 }

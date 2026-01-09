@@ -21,9 +21,9 @@ public class GRMeterEnergy : MonoBehaviour
 			this.meter.localScale = new Vector3(1f, num, 1f);
 			return;
 		}
-		float num2 = Mathf.Lerp(this.angularRange.x, this.angularRange.y, num);
+		float value = Mathf.Lerp(this.angularRange.x, this.angularRange.y, num);
 		Vector3 zero = Vector3.zero;
-		zero[this.rotationAxis] = num2;
+		zero[this.rotationAxis] = value;
 		this.meter.localRotation = Quaternion.Euler(zero);
 	}
 

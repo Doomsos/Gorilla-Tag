@@ -76,13 +76,13 @@ public class GRAbilityAttackLaser : GRAbilityBase
 				this.targetPos = this.target.position;
 			}
 			Vector3 position = this.head.position;
-			Vector3 vector = this.targetPos - position;
-			float num2 = vector.magnitude;
+			Vector3 a = this.targetPos - position;
+			float num2 = a.magnitude;
 			if (num2 > 0f)
 			{
-				Vector3 vector2 = vector / num2;
+				Vector3 a2 = a / num2;
 				num2 = Mathf.Min(this.maxLaserRange, num2);
-				this.targetPos = position + vector2 * num2;
+				this.targetPos = position + a2 * num2;
 			}
 			GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
 			if (num > this.tellDuration)
@@ -95,7 +95,7 @@ public class GRAbilityAttackLaser : GRAbilityBase
 					this.damageCollider.direction = 2;
 					if (num2 > 0f)
 					{
-						this.damageCollider.transform.rotation = Quaternion.LookRotation(vector / num2);
+						this.damageCollider.transform.rotation = Quaternion.LookRotation(a / num2);
 					}
 				}
 				if (this.damageTrigger != null)
@@ -127,17 +127,17 @@ public class GRAbilityAttackLaser : GRAbilityBase
 		}
 		case GRAbilityAttackLaser.State.Attack:
 		{
-			float num3 = num - this.tellDuration;
-			Vector3 vector3 = this.initialPos + this.initialVel * num3;
+			float d = num - this.tellDuration;
+			Vector3 vector = this.initialPos + this.initialVel * d;
 			NavMeshHit navMeshHit;
-			if (NavMesh.SamplePosition(vector3, ref navMeshHit, 0.5f, this.walkableArea))
+			if (NavMesh.SamplePosition(vector, out navMeshHit, 0.5f, this.walkableArea))
 			{
-				vector3 = navMeshHit.position;
-				if (NavMesh.Raycast(this.initialPos, vector3, ref navMeshHit, this.walkableArea))
+				vector = navMeshHit.position;
+				if (NavMesh.Raycast(this.initialPos, vector, out navMeshHit, this.walkableArea))
 				{
-					vector3 = navMeshHit.position;
+					vector = navMeshHit.position;
 				}
-				this.root.position = vector3;
+				this.root.position = vector;
 			}
 			if (num > this.tellDuration + this.attackDuration)
 			{

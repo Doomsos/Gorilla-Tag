@@ -46,7 +46,7 @@ namespace GorillaTagScripts
 
 		public bool TryGetMovingSurface(int id, out MovingSurface result)
 		{
-			return this.movingSurfaces.TryGetValue(id, ref result) && result != null;
+			return this.movingSurfaces.TryGetValue(id, out result) && result != null;
 		}
 
 		private void FixedUpdate()

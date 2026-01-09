@@ -178,7 +178,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 			}
 			if (this.timeIndexOverrideFunc != null)
 			{
-				this.currentTimeIndex = this.timeIndexOverrideFunc.Invoke(this.currentTimeIndex);
+				this.currentTimeIndex = this.timeIndexOverrideFunc(this.currentTimeIndex);
 			}
 			if (this.currentTimeIndex != this.lastIndex)
 			{
@@ -192,9 +192,9 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		}
 		catch (Exception ex)
 		{
-			string text = "Error in BetterDayNightManager: ";
+			string str = "Error in BetterDayNightManager: ";
 			Exception ex2 = ex;
-			Debug.LogError(text + ((ex2 != null) ? ex2.ToString() : null), this);
+			Debug.LogError(str + ((ex2 != null) ? ex2.ToString() : null), this);
 		}
 		this.gameEpochDay = (long)((this.baseSeconds + (double)Time.realtimeSinceStartup * this.timeMultiplier) / this.totalSeconds + (double)this.initialDayCycles);
 		foreach (BetterDayNightManager.ScheduledEvent scheduledEvent in BetterDayNightManager.scheduledEvents.Values)
@@ -202,7 +202,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 			if (scheduledEvent.lastDayCalled != this.gameEpochDay && scheduledEvent.hour == this.currentTimeIndex)
 			{
 				scheduledEvent.lastDayCalled = this.gameEpochDay;
-				scheduledEvent.action.Invoke();
+				scheduledEvent.action();
 			}
 		}
 	}
@@ -218,7 +218,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		for (int j = 0; j < this.standardMaterialsUnlitDarker.Length; j++)
 		{
 			this.tempLerp = Mathf.Lerp(this.colorFromDarker, this.colorToDarker, newLerp);
-			Color.RGBToHSV(this.standardMaterialsUnlitDarker[j].color, ref this.h, ref this.s, ref this.v);
+			Color.RGBToHSV(this.standardMaterialsUnlitDarker[j].color, out this.h, out this.s, out this.v);
 			this.standardMaterialsUnlitDarker[j].color = Color.HSVToRGB(this.h, this.s, this.tempLerp);
 		}
 	}

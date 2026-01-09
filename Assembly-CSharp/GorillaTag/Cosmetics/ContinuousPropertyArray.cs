@@ -133,8 +133,8 @@ namespace GorillaTag.Cosmetics
 					return y.IsShaderProperty_Cached.CompareTo(x.IsShaderProperty_Cached);
 				}
 				int num = x.GetTargetInstanceID() ^ x.IntValue;
-				int num2 = y.GetTargetInstanceID() ^ y.IntValue;
-				return num.CompareTo(num2);
+				int value = y.GetTargetInstanceID() ^ y.IntValue;
+				return num.CompareTo(value);
 			}
 		}
 	}

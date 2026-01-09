@@ -208,8 +208,8 @@ public class SIGadgetAirGrab : SIGadget
 	{
 		GTPlayer instance = GTPlayer.Instance;
 		Transform transform = (this._HandIndex == 0) ? instance.LeftHand.controllerTransform : instance.RightHand.controllerTransform;
-		Vector3 vector = this.m_airGrabXform.position - transform.position;
-		instance.RigidbodyMovePosition(instance.transform.position + vector);
+		Vector3 b = this.m_airGrabXform.position - transform.position;
+		instance.RigidbodyMovePosition(instance.transform.position + b);
 		float magnitude = GamePlayerLocal.instance.GetHandVelocity(this._HandIndex).magnitude;
 	}
 
@@ -227,9 +227,9 @@ public class SIGadgetAirGrab : SIGadget
 
 	private float _CalculateDashSpeed(float currentYankSpeed)
 	{
-		float num = Mathf.InverseLerp(this.m_yankMinSpeed, this.m_yankMaxSpeed, currentYankSpeed);
-		float num2 = this.m_speedMappingCurve.Evaluate(num);
-		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, num2);
+		float time = Mathf.InverseLerp(this.m_yankMinSpeed, this.m_yankMaxSpeed, currentYankSpeed);
+		float t = this.m_speedMappingCurve.Evaluate(time);
+		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, t);
 	}
 
 	private void _PlayHaptic(float strengthMultiplier)

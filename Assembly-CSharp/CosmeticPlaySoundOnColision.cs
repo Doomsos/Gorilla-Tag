@@ -21,10 +21,10 @@ public class CosmeticPlaySoundOnColision : MonoBehaviour
 	private void OnTriggerEnter(Collider other)
 	{
 		GorillaSurfaceOverride gorillaSurfaceOverride;
-		if (this.speed >= this.minSpeed && other.TryGetComponent<GorillaSurfaceOverride>(ref gorillaSurfaceOverride))
+		if (this.speed >= this.minSpeed && other.TryGetComponent<GorillaSurfaceOverride>(out gorillaSurfaceOverride))
 		{
 			int soundIndex;
-			if (this.soundLookup.TryGetValue(gorillaSurfaceOverride.overrideIndex, ref soundIndex))
+			if (this.soundLookup.TryGetValue(gorillaSurfaceOverride.overrideIndex, out soundIndex))
 			{
 				this.playSound(soundIndex, this.invokeEventOnOverideSound);
 				return;

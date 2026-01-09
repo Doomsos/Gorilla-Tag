@@ -74,13 +74,13 @@ public class TransformOscillation : MonoBehaviour
 		float timeSeconds = this.GetTimeSeconds();
 		this.ComputeOffsets(timeSeconds);
 		Transform transform = base.transform;
-		Quaternion quaternion = Quaternion.Euler(this.offsRot);
-		Vector3 vector = transform.localPosition - this.lastPosOffs;
-		Quaternion quaternion2 = transform.localRotation * Quaternion.Inverse(this.lastRotOffs);
-		transform.localPosition = vector + this.offsPos;
-		transform.localRotation = quaternion2 * quaternion;
+		Quaternion rhs = Quaternion.Euler(this.offsRot);
+		Vector3 a = transform.localPosition - this.lastPosOffs;
+		Quaternion lhs = transform.localRotation * Quaternion.Inverse(this.lastRotOffs);
+		transform.localPosition = a + this.offsPos;
+		transform.localRotation = lhs * rhs;
 		this.lastPosOffs = this.offsPos;
-		this.lastRotOffs = quaternion;
+		this.lastRotOffs = rhs;
 	}
 
 	private void FixedUpdate()
@@ -102,14 +102,14 @@ public class TransformOscillation : MonoBehaviour
 		Transform transform = base.transform;
 		Quaternion quaternion = Quaternion.Euler(this.offsRot);
 		Transform parent = transform.parent;
-		Vector3 vector = parent ? parent.TransformVector(this.lastPosOffs) : this.lastPosOffs;
-		Quaternion quaternion2 = parent ? (parent.rotation * this.lastRotOffs * Quaternion.Inverse(parent.rotation)) : this.lastRotOffs;
-		Vector3 vector2 = transform.position - vector;
-		Quaternion quaternion3 = transform.rotation * Quaternion.Inverse(quaternion2);
-		Vector3 vector3 = parent ? parent.TransformVector(this.offsPos) : this.offsPos;
-		Quaternion quaternion4 = parent ? (parent.rotation * quaternion * Quaternion.Inverse(parent.rotation)) : quaternion;
-		this.targetRigidbody.MovePosition(vector2 + vector3);
-		this.targetRigidbody.MoveRotation(quaternion3 * quaternion4);
+		Vector3 b = parent ? parent.TransformVector(this.lastPosOffs) : this.lastPosOffs;
+		Quaternion rotation = parent ? (parent.rotation * this.lastRotOffs * Quaternion.Inverse(parent.rotation)) : this.lastRotOffs;
+		Vector3 a = transform.position - b;
+		Quaternion lhs = transform.rotation * Quaternion.Inverse(rotation);
+		Vector3 b2 = parent ? parent.TransformVector(this.offsPos) : this.offsPos;
+		Quaternion rhs = parent ? (parent.rotation * quaternion * Quaternion.Inverse(parent.rotation)) : quaternion;
+		this.targetRigidbody.MovePosition(a + b2);
+		this.targetRigidbody.MoveRotation(lhs * rhs);
 		this.lastPosOffs = this.offsPos;
 		this.lastRotOffs = quaternion;
 	}

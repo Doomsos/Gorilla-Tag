@@ -165,9 +165,9 @@ public sealed class SuperInfectionGame : GorillaTagManager
 		{
 			SIProgression.Instance.HandleTagTelemetry(taggedPlayer, taggingPlayer);
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
-			Debug.LogException(ex, this);
+			Debug.LogException(exception, this);
 		}
 		RigContainer rigContainer;
 		RigContainer rigContainer2;

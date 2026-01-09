@@ -28,7 +28,7 @@ namespace GorillaTag
 
 		protected override void ProcessItem(in Action<T> item)
 		{
-			item.Invoke(this.m_data);
+			item(this.m_data);
 		}
 
 		private T m_data;

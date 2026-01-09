@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 public static class StaticHash
 {
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(int i)
 	{
 		uint num = (uint)(i + 2127912214 + (i << 12));
@@ -15,7 +15,7 @@ public static class StaticHash
 		return (int)(num ^ 3042594569U ^ num >> 16);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(uint u)
 	{
 		uint num = u + 2127912214U + (u << 12);
@@ -26,13 +26,13 @@ public static class StaticHash
 		return (int)(num ^ 3042594569U ^ num >> 16);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public unsafe static int Compute(float f)
 	{
 		return StaticHash.Compute(*Unsafe.As<float, int>(ref f));
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(float f1, float f2)
 	{
 		int i = StaticHash.Compute(f1);
@@ -40,7 +40,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(float f1, float f2, float f3)
 	{
 		int i = StaticHash.Compute(f1);
@@ -49,7 +49,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(float f1, float f2, float f3, float f4)
 	{
 		int i = StaticHash.Compute(f1);
@@ -59,7 +59,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3, i4);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(long l)
 	{
 		ulong num = (ulong)(~(ulong)l + (l << 18));
@@ -71,7 +71,7 @@ public static class StaticHash
 		return (int)num;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(long l1, long l2)
 	{
 		int i = StaticHash.Compute(l1);
@@ -79,7 +79,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(long l1, long l2, long l3)
 	{
 		int i = StaticHash.Compute(l1);
@@ -88,7 +88,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(long l1, long l2, long l3, long l4)
 	{
 		int i = StaticHash.Compute(l1);
@@ -98,13 +98,13 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3, i4);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public unsafe static int Compute(double d)
 	{
 		return StaticHash.Compute(*Unsafe.As<double, long>(ref d));
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(double d1, double d2)
 	{
 		int i = StaticHash.Compute(d1);
@@ -112,7 +112,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(double d1, double d2, double d3)
 	{
 		int i = StaticHash.Compute(d1);
@@ -121,7 +121,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(double d1, double d2, double d3, double d4)
 	{
 		int i = StaticHash.Compute(d1);
@@ -131,7 +131,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3, i4);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(bool b)
 	{
 		if (!b)
@@ -141,7 +141,7 @@ public static class StaticHash
 		return -1266253386;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(bool b1, bool b2)
 	{
 		int i = StaticHash.Compute(b1);
@@ -149,7 +149,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(bool b1, bool b2, bool b3)
 	{
 		int i = StaticHash.Compute(b1);
@@ -158,7 +158,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(bool b1, bool b2, bool b3, bool b4)
 	{
 		int i = StaticHash.Compute(b1);
@@ -168,13 +168,13 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3, i4);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(DateTime dt)
 	{
 		return StaticHash.Compute(dt.ToBinary());
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(string s)
 	{
 		if (s == null || s.Length == 0)
@@ -188,8 +188,8 @@ public static class StaticHash
 		int num3 = 0;
 		while (i > 0)
 		{
-			num += (uint)s.get_Chars(num3);
-			uint num4 = (uint)((uint)s.get_Chars(num3 + 1) << 11) ^ num;
+			num += (uint)s[num3];
+			uint num4 = (uint)((uint)s[num3 + 1] << 11) ^ num;
 			num = (num << 16 ^ num4);
 			num3 += 2;
 			num += num >> 11;
@@ -197,7 +197,7 @@ public static class StaticHash
 		}
 		if (num2 == 1)
 		{
-			num += (uint)s.get_Chars(num3);
+			num += (uint)s[num3];
 			num ^= num << 11;
 			num += num >> 17;
 		}
@@ -209,7 +209,7 @@ public static class StaticHash
 		return (int)(num + (num >> 6));
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(string s1, string s2)
 	{
 		int i = StaticHash.Compute(s1);
@@ -217,7 +217,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(string s1, string s2, string s3)
 	{
 		int i = StaticHash.Compute(s1);
@@ -226,7 +226,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(string s1, string s2, string s3, string s4)
 	{
 		int i = StaticHash.Compute(s1);
@@ -236,7 +236,7 @@ public static class StaticHash
 		return StaticHash.Compute(i, i2, i3, i4);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(byte[] bytes)
 	{
 		if (bytes == null || bytes.Length == 0)
@@ -271,7 +271,7 @@ public static class StaticHash
 		return (int)(num + (num >> 6));
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(int i1, int i2)
 	{
 		uint num = 3735928567U;
@@ -283,7 +283,7 @@ public static class StaticHash
 		return (int)result;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(int i1, int i2, int i3)
 	{
 		uint num = 3735928571U;
@@ -296,7 +296,7 @@ public static class StaticHash
 		return (int)num3;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(int i1, int i2, int i3, int i4)
 	{
 		uint num = 3735928575U;
@@ -311,7 +311,7 @@ public static class StaticHash
 		return (int)num3;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(int[] values)
 	{
 		if (values == null || values.Length == 0)
@@ -347,7 +347,7 @@ public static class StaticHash
 		return (int)num4;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(uint[] values)
 	{
 		if (values == null || values.Length == 0)
@@ -383,7 +383,7 @@ public static class StaticHash
 		return (int)num4;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(uint u1, uint u2)
 	{
 		uint num = 3735928567U;
@@ -395,7 +395,7 @@ public static class StaticHash
 		return (int)result;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(uint u1, uint u2, uint u3)
 	{
 		uint num = 3735928571U;
@@ -408,7 +408,7 @@ public static class StaticHash
 		return (int)num3;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int Compute(uint u1, uint u2, uint u3, uint u4)
 	{
 		uint num = 3735928575U;
@@ -423,7 +423,7 @@ public static class StaticHash
 		return (int)num3;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int ComputeOrderAgnostic(int[] values)
 	{
 		if (values == null || values.Length == 0)
@@ -442,7 +442,7 @@ public static class StaticHash
 		return (int)num;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static long Compute128To64(long a, long b)
 	{
 		ulong num = (ulong)((b ^ a) * -7070675565921424023L);
@@ -451,7 +451,7 @@ public static class StaticHash
 		return (num2 ^ (long)((ulong)num2 >> 47)) * -7070675565921424023L;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static long Compute128To64(ulong a, ulong b)
 	{
 		ulong num = (b ^ a) * 11376068507788127593UL;
@@ -460,7 +460,7 @@ public static class StaticHash
 		return (long)((num2 ^ num2 >> 47) * 11376068507788127593UL);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int ComputeTriple32(int i)
 	{
 		int num = i + 1;
@@ -470,7 +470,7 @@ public static class StaticHash
 		return num4 ^ (int)((uint)num4 >> 14);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int ReverseTriple32(int i)
 	{
 		uint num = (uint)(i ^ (int)((uint)i >> 14 ^ (uint)i >> 28));
@@ -483,7 +483,7 @@ public static class StaticHash
 		return (int)(num - 1U);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static void Mix(ref uint a, ref uint b, ref uint c)
 	{
 		a -= c;
@@ -506,7 +506,7 @@ public static class StaticHash
 		b += a;
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static void Finalize(ref uint a, ref uint b, ref uint c)
 	{
 		c ^= b;
@@ -525,13 +525,13 @@ public static class StaticHash
 		c -= StaticHash.Rotate(b, 24);
 	}
 
-	[MethodImpl(256)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static uint Rotate(uint x, int k)
 	{
 		return x << k | x >> 32 - k;
 	}
 
-	[StructLayout(2)]
+	[StructLayout(LayoutKind.Explicit)]
 	private struct SingleInt32
 	{
 		[FieldOffset(0)]
@@ -541,7 +541,7 @@ public static class StaticHash
 		public int int32;
 	}
 
-	[StructLayout(2)]
+	[StructLayout(LayoutKind.Explicit)]
 	private struct DoubleInt64
 	{
 		[FieldOffset(0)]

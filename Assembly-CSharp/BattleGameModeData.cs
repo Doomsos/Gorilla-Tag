@@ -52,7 +52,7 @@ public class BattleGameModeData : FusionGameModeData
 		if (!this.InvokeRpc)
 		{
 			NetworkBehaviourUtils.ThrowIfBehaviourNotInitialized(this);
-			if (base.Runner.Stage != 4)
+			if (base.Runner.Stage != SimulationStages.Resimulate)
 			{
 				int localAuthorityMask = base.Object.GetLocalAuthorityMask();
 				if ((localAuthorityMask & 7) == 0)
@@ -83,12 +83,12 @@ public class BattleGameModeData : FusionGameModeData
 							num2 += 12;
 							*(int*)(ptr2 + num2) = projectileCount;
 							num2 += 4;
-							ptr.Offset = num2 * 8;
+							ptr->Offset = num2 * 8;
 							base.Runner.SendRpc(ptr);
 						}
 						if ((localAuthorityMask & 7) != 0)
 						{
-							rpcInfo = RpcInfo.FromLocal(base.Runner, 0, 0);
+							rpcInfo = RpcInfo.FromLocal(base.Runner, RpcChannel.Reliable, RpcHostMode.SourceIsServer);
 							goto IL_12;
 						}
 					}
@@ -138,14 +138,14 @@ public class BattleGameModeData : FusionGameModeData
 		int num3 = *(int*)(ptr + num);
 		num += 4;
 		int projectileCount = num3;
-		RpcInfo rpcInfo = RpcInfo.FromMessage(behaviour.Runner, message, 0);
+		RpcInfo rpcInfo = RpcInfo.FromMessage(behaviour.Runner, message, RpcHostMode.SourceIsServer);
 		behaviour.InvokeRpc = true;
 		((BattleGameModeData)behaviour).RPC_ReportSlinshotHit(taggedPlayerID, hitLocation, projectileCount, rpcInfo);
 	}
 
 	[WeaverGenerated]
 	[DefaultForProperty("PaintbrawlData", 0, 31)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private PaintbrawlData _PaintbrawlData;
 
 	private GorillaPaintbrawlManager battleTarget;

@@ -7,7 +7,7 @@ public class BitmapFont : ScriptableObject
 {
 	private void OnEnable()
 	{
-		this._charToSymbol = Enumerable.ToDictionary<BitmapFont.SymbolData, char, BitmapFont.SymbolData>(this.symbols, (BitmapFont.SymbolData s) => s.character, (BitmapFont.SymbolData s) => s);
+		this._charToSymbol = this.symbols.ToDictionary((BitmapFont.SymbolData s) => s.character, (BitmapFont.SymbolData s) => s);
 	}
 
 	public void RenderToTexture(Texture2D target, string text)
@@ -32,8 +32,8 @@ public class BitmapFont : ScriptableObject
 		int height = this.fontImage.height;
 		for (int j = 0; j < length; j++)
 		{
-			char c = text.get_Chars(j);
-			BitmapFont.SymbolData symbolData = this._charToSymbol[c];
+			char key = text[j];
+			BitmapFont.SymbolData symbolData = this._charToSymbol[key];
 			int width2 = symbolData.width;
 			int height2 = symbolData.height;
 			int x = symbolData.x;

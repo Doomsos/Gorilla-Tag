@@ -479,19 +479,19 @@ public class BuilderPiece : MonoBehaviour
 		this.parentPiece = newParentPiece;
 		this.parentAttachIndex = newParentAttachIndex;
 		this.AddPieceToParent(this);
-		Transform transform = null;
+		Transform parent = null;
 		if (newParentPiece != null)
 		{
 			if (newParentAttachIndex >= 0)
 			{
-				transform = newParentPiece.gridPlanes[newParentAttachIndex].transform;
+				parent = newParentPiece.gridPlanes[newParentAttachIndex].transform;
 			}
 			else
 			{
-				transform = newParentPiece.transform;
+				parent = newParentPiece.transform;
 			}
 		}
-		base.transform.SetParent(transform, true);
+		base.transform.SetParent(parent, true);
 		this.requestedParentPiece = null;
 		this.tableOwner.UpdatePieceData(this);
 	}
@@ -1341,26 +1341,25 @@ public class BuilderPiece : MonoBehaviour
 		float num3 = num - potentialParentGridPlane.widthOffset;
 		float num4 = num2 - potentialParentGridPlane.lengthOffset;
 		Quaternion quaternion = Quaternion.Euler(0f, (float)twist * 90f, 0f);
-		Quaternion quaternion2 = rotation * quaternion;
-		float num5 = (float)xOffset * gridSize + num3;
-		float num6 = (float)zOffset * gridSize + num4;
-		Vector3 vector;
-		vector..ctor(num5, 0f, num6);
-		Vector3 vector2 = position + rotation * vector;
+		Quaternion lhs = rotation * quaternion;
+		float x = (float)xOffset * gridSize + num3;
+		float z = (float)zOffset * gridSize + num4;
+		Vector3 point = new Vector3(x, 0f, z);
+		Vector3 a = position + rotation * point;
 		Transform center2 = builderAttachGridPlane.center;
-		Quaternion quaternion3 = quaternion2 * Quaternion.Inverse(center2.localRotation);
-		Vector3 vector3 = base.transform.InverseTransformPoint(center2.position);
-		Vector3 vector4 = vector2 - quaternion3 * vector3;
-		localPosition = potentialParentGridPlane.transform.InverseTransformPoint(vector4);
+		Quaternion quaternion2 = lhs * Quaternion.Inverse(center2.localRotation);
+		Vector3 point2 = base.transform.InverseTransformPoint(center2.position);
+		Vector3 vector = a - quaternion2 * point2;
+		localPosition = potentialParentGridPlane.transform.InverseTransformPoint(vector);
 		localRotation = quaternion * Quaternion.Inverse(center2.localRotation);
-		worldPosition = vector4;
-		worldRotation = quaternion3;
+		worldPosition = vector;
+		worldRotation = quaternion2;
 	}
 
 	public Quaternion TwistToLocalRotation(byte twist, int potentialAttachIndex)
 	{
-		float num = 90f * (float)twist;
-		Quaternion quaternion = Quaternion.Euler(0f, num, 0f);
+		float y = 90f * (float)twist;
+		Quaternion quaternion = Quaternion.Euler(0f, y, 0f);
 		if (potentialAttachIndex < 0 || potentialAttachIndex >= this.gridPlanes.Count)
 		{
 			return quaternion;
@@ -1387,11 +1386,11 @@ public class BuilderPiece : MonoBehaviour
 		}
 		Quaternion localRotation = base.transform.localRotation;
 		BuilderAttachGridPlane builderAttachGridPlane = this.gridPlanes[this.attachIndex];
-		Quaternion quaternion = localRotation * builderAttachGridPlane.transform.localRotation;
+		Quaternion rotation = localRotation * builderAttachGridPlane.transform.localRotation;
 		float num = 0.866f;
-		Vector3 vector = quaternion * Vector3.forward;
-		float num2 = Vector3.Dot(vector, Vector3.forward);
-		float num3 = Vector3.Dot(vector, Vector3.right);
+		Vector3 lhs = rotation * Vector3.forward;
+		float num2 = Vector3.Dot(lhs, Vector3.forward);
+		float num3 = Vector3.Dot(lhs, Vector3.right);
 		bool flag = Mathf.Abs(num2) > num;
 		bool flag2 = Mathf.Abs(num3) > num;
 		if (!flag && !flag2)

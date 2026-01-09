@@ -13,10 +13,10 @@ public class SuperInfectionSnapPoint : MonoBehaviour
 			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  Expected a VRRig to be in parent hierarchy. Path=\"" + base.transform.GetPathQ() + "\"");
 		}
 		Transform[] boneXforms;
-		string text;
-		if (!GTHardCodedBones.TryGetBoneXforms(componentInParent, out boneXforms, out text))
+		string str;
+		if (!GTHardCodedBones.TryGetBoneXforms(componentInParent, out boneXforms, out str))
 		{
-			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  Could not get bone transforms: " + text);
+			throw new NullReferenceException("[SuperInfectionSnapPoint]  ERROR!!!  Could not get bone transforms: " + str);
 		}
 		if (this.overrideParentTransform != null)
 		{
@@ -45,7 +45,7 @@ public class SuperInfectionSnapPoint : MonoBehaviour
 	{
 		this.snappedEntity = entity;
 		GameSnappable gameSnappable;
-		if (this.snappedEntity.TryGetComponent<GameSnappable>(ref gameSnappable))
+		if (this.snappedEntity.TryGetComponent<GameSnappable>(out gameSnappable))
 		{
 			gameSnappable.snappedToJoint = this;
 			return;
@@ -56,7 +56,7 @@ public class SuperInfectionSnapPoint : MonoBehaviour
 	public void Unsnapped()
 	{
 		GameSnappable gameSnappable;
-		if (this.snappedEntity.TryGetComponent<GameSnappable>(ref gameSnappable))
+		if (this.snappedEntity.TryGetComponent<GameSnappable>(out gameSnappable))
 		{
 			gameSnappable.snappedToJoint = null;
 		}

@@ -1,6 +1,7 @@
 ﻿using System;
 using GorillaTag;
 using GorillaTag.CosmeticSystem;
+using Photon.Pun;
 using UnityEngine;
 
 public class MoodRing : MonoBehaviour, ISpawnable
@@ -44,7 +45,7 @@ public class MoodRing : MonoBehaviour, ISpawnable
 				GorillaTagger.Instance.UpdateColor(this.animRedValue, this.animGreenValue, this.animBlueValue);
 				if (NetworkSystem.Instance.InRoom)
 				{
-					GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", 0, new object[]
+					GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, new object[]
 					{
 						this.animRedValue,
 						this.animGreenValue,

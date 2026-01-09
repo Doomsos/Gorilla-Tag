@@ -100,11 +100,11 @@ public static class EnumUtil
 		List<TEnum> list = new List<TEnum>(shared.Values.Length);
 		for (int i = 0; i < shared.Values.Length; i++)
 		{
-			TEnum tenum = shared.Values[i];
+			TEnum item = shared.Values[i];
 			long num = shared.LongValues[i];
 			if (num != 0L && (bitmaskLong & num) == num)
 			{
-				list.Add(tenum);
+				list.Add(item);
 			}
 		}
 		return list.ToArray();

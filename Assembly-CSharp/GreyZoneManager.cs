@@ -136,7 +136,7 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		}
 		if (this.OnGreyZoneActivated != null)
 		{
-			this.OnGreyZoneActivated.Invoke();
+			this.OnGreyZoneActivated();
 		}
 	}
 
@@ -167,7 +167,7 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		this.UpdateSummonerVisuals();
 		if (this.OnGreyZoneDeactivated != null)
 		{
-			this.OnGreyZoneDeactivated.Invoke();
+			this.OnGreyZoneDeactivated();
 		}
 	}
 
@@ -199,7 +199,7 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		this.UpdateSummonerVisuals();
 		if (this.OnGreyZoneDeactivated != null)
 		{
-			this.OnGreyZoneDeactivated.Invoke();
+			this.OnGreyZoneDeactivated();
 		}
 	}
 
@@ -210,8 +210,8 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		{
 			this.gravityReductionAmount = Mathf.InverseLerp(1f - this.skyMonsterDistGravityRampBuffer, this.skyMonsterDistGravityRampBuffer, this.moonController.Distance);
 		}
-		float num = Mathf.Lerp(1f, this.gravityFactorOptions[this.gravityFactorOptionSelection], this.gravityReductionAmount);
-		player.AddForce(Physics.gravity * num * player.scale, 5);
+		float d = Mathf.Lerp(1f, this.gravityFactorOptions[this.gravityFactorOptionSelection], this.gravityReductionAmount);
+		player.AddForce(Physics.gravity * d * player.scale, ForceMode.Acceleration);
 	}
 
 	private IEnumerator FadeAudioIn(AudioSource source, float maxVolume, float duration)
@@ -287,10 +287,10 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 				this.invalidSummoners.Add(keyValuePair.Key);
 			}
 		}
-		foreach (int num in this.invalidSummoners)
+		foreach (int key in this.invalidSummoners)
 		{
-			this.summoningPlayers.Remove(num);
-			this.summoningPlayerProgress.Remove(num);
+			this.summoningPlayers.Remove(key);
+			this.summoningPlayerProgress.Remove(key);
 		}
 	}
 
@@ -396,12 +396,12 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 				VRRig item = keyValuePair.Value.Item1;
 				GreyZoneSummoner item2 = keyValuePair.Value.Item2;
 				float num5 = this.summoningPlayerProgress[keyValuePair.Key];
-				Vector3 vector = item2.SummoningFocusPoint - item.leftHand.rigTarget.position;
-				Vector3 vector2 = -item.leftHand.rigTarget.right;
-				bool flag = Vector3.Dot(vector, vector2) > 0f;
-				Vector3 vector3 = item2.SummoningFocusPoint - item.rightHand.rigTarget.position;
+				Vector3 lhs = item2.SummoningFocusPoint - item.leftHand.rigTarget.position;
+				Vector3 rhs = -item.leftHand.rigTarget.right;
+				bool flag = Vector3.Dot(lhs, rhs) > 0f;
+				Vector3 lhs2 = item2.SummoningFocusPoint - item.rightHand.rigTarget.position;
 				Vector3 right = item.rightHand.rigTarget.right;
-				bool flag2 = Vector3.Dot(vector3, right) > 0f;
+				bool flag2 = Vector3.Dot(lhs2, right) > 0f;
 				if (flag && flag2)
 				{
 					num5 = Mathf.MoveTowards(num5, 1f, num4 * deltaTime);
@@ -428,8 +428,8 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		GTPlayer instance = GTPlayer.Instance;
 		if (this.greyZoneActive)
 		{
-			Vector3 vector = Vector3.ClampMagnitude(instance.InstantaneousVelocity * this.particlePredictiveSpawnVelocityFactor, this.particlePredictiveSpawnMaxDist);
-			this.greyZoneParticles.transform.position = instance.HeadCenterPosition + Vector3.down * 0.5f + vector;
+			Vector3 b = Vector3.ClampMagnitude(instance.InstantaneousVelocity * this.particlePredictiveSpawnVelocityFactor, this.particlePredictiveSpawnMaxDist);
+			this.greyZoneParticles.transform.position = instance.HeadCenterPosition + Vector3.down * 0.5f + b;
 		}
 		else if (this.gravityOverrideSet && this.gravityReductionAmount < 0.01f)
 		{
@@ -437,15 +437,15 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 			this.gravityOverrideSet = false;
 		}
 		float num = this.greyZoneActive ? 0f : 1f;
-		float num2 = this.greyZoneActive ? this.skyMonsterMovementEnterTime : this.skyMonsterMovementExitTime;
+		float smoothTime = this.greyZoneActive ? this.skyMonsterMovementEnterTime : this.skyMonsterMovementExitTime;
 		if (this.moonController != null && this.moonController.Distance != num)
 		{
-			float num3 = Mathf.SmoothDamp(this.moonController.Distance, num, ref this.skyMonsterMovementVelocity, num2);
-			if ((double)Mathf.Abs(num3 - num) < 0.001)
+			float num2 = Mathf.SmoothDamp(this.moonController.Distance, num, ref this.skyMonsterMovementVelocity, smoothTime);
+			if ((double)Mathf.Abs(num2 - num) < 0.001)
 			{
-				num3 = num;
+				num2 = num;
 			}
-			this.moonController.UpdateDistance(num3);
+			this.moonController.UpdateDistance(num2);
 		}
 	}
 

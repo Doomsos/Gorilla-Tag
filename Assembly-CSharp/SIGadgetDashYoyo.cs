@@ -179,7 +179,7 @@ public class SIGadgetDashYoyo : SIGadget
 				if (this._ThrowYoYoTarget())
 				{
 					this._PlayHaptic(0.5f);
-					GTPlayer.Instance.RigidbodyInterpolation = 0;
+					GTPlayer.Instance.RigidbodyInterpolation = RigidbodyInterpolation.None;
 					this.SetStateAuthority(SIGadgetDashYoyo.EState.Thrown);
 					return;
 				}
@@ -195,9 +195,9 @@ public class SIGadgetDashYoyo : SIGadget
 				GTPlayer.Instance.ResetRigidbodyInterpolation();
 				return;
 			}
-			if (GTPlayer.Instance.RigidbodyInterpolation != null)
+			if (GTPlayer.Instance.RigidbodyInterpolation != RigidbodyInterpolation.None)
 			{
-				GTPlayer.Instance.RigidbodyInterpolation = 0;
+				GTPlayer.Instance.RigidbodyInterpolation = RigidbodyInterpolation.None;
 			}
 			if (this._isActivated)
 			{
@@ -409,25 +409,25 @@ public class SIGadgetDashYoyo : SIGadget
 		this._maxEncounteredYankSpeed = Mathf.Max(this._maxEncounteredYankSpeed, handVelocity.magnitude);
 		Vector3 vector = this._yankBeginPos - this.m_yoyoDefaultPosXform.position;
 		Vector3 normalized = (-handVelocity.normalized + vector.normalized).normalized;
-		Vector3 vector2 = this.m_yoyoTarget.position - this.m_yoyoDefaultPosXform.position;
-		if (vector.magnitude < this.m_yankMinDistance || this._maxEncounteredYankSpeed < this.m_yankMinSpeed || Vector3.Angle(vector2, normalized) > this.m_yankMaxAngle)
+		Vector3 from = this.m_yoyoTarget.position - this.m_yoyoDefaultPosXform.position;
+		if (vector.magnitude < this.m_yankMinDistance || this._maxEncounteredYankSpeed < this.m_yankMinSpeed || Vector3.Angle(from, normalized) > this.m_yankMaxAngle)
 		{
 			return;
 		}
 		this._successfulYankTime = Time.unscaledTime;
-		float num = this._CalculateDashSpeed(handVelocity.magnitude);
+		float d = this._CalculateDashSpeed(handVelocity.magnitude);
 		GTPlayer instance = GTPlayer.Instance;
 		instance.SetMaximumSlipThisFrame();
-		instance.SetVelocity(Vector3.RotateTowards(vector2.normalized, normalized, this._maxInfluenceAngle * 0.017453292f, 0f) * num);
+		instance.SetVelocity(Vector3.RotateTowards(from.normalized, normalized, this._maxInfluenceAngle * 0.017453292f, 0f) * d);
 		this._PlayHaptic(2f);
 		this.SetStateAuthority(SIGadgetDashYoyo.EState.DashUsed);
 	}
 
 	private float _CalculateDashSpeed(float currentYankSpeed)
 	{
-		float num = Mathf.InverseLerp(this.m_yankMinSpeed, this.m_yankMaxSpeed, currentYankSpeed);
-		float num2 = this.m_speedMappingCurve.Evaluate(num);
-		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, num2);
+		float time = Mathf.InverseLerp(this.m_yankMinSpeed, this.m_yankMaxSpeed, currentYankSpeed);
+		float t = this.m_speedMappingCurve.Evaluate(time);
+		return Mathf.Lerp(this.m_minDashSpeed, this._maxDashSpeed, t);
 	}
 
 	private void _PlayHaptic(float strengthMultiplier)

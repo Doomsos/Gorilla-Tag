@@ -31,14 +31,14 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 	{
 		float num = this.bouyancyActualHeight + Mathf.Sin(Time.time) * this.varianceMaxheight;
 		float num2 = (num - base.transform.position.y) / num;
-		float num3 = this.bouyancyForce * num2 * this.balloonScale;
-		this.rb.AddForce(new Vector3(0f, num3, 0f) * this.rb.mass, 0);
+		float y = this.bouyancyForce * num2 * this.balloonScale;
+		this.rb.AddForce(new Vector3(0f, y, 0f) * this.rb.mass, ForceMode.Force);
 	}
 
 	private void ApplyUpRightForce()
 	{
-		Vector3 vector = Vector3.Cross(base.transform.up, Vector3.up) * this.upRightTorque * this.balloonScale;
-		this.rb.AddTorque(vector);
+		Vector3 torque = Vector3.Cross(base.transform.up, Vector3.up) * this.upRightTorque * this.balloonScale;
+		this.rb.AddTorque(torque);
 	}
 
 	private void ApplyAntiSpinForce()
@@ -66,10 +66,10 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 			float num3 = num2 / Time.fixedDeltaTime;
 			if (vector2.magnitude < num3)
 			{
-				float num4 = num3 - vector2.magnitude;
-				float num5 = Mathf.Clamp01(num2 / this.stringStretch);
-				Vector3 vector3 = Mathf.Lerp(0f, num4, num5 * num5) * normalized * this.stringStrength;
-				this.rb.AddForceAtPosition(vector3 * this.rb.mass, this.knot.transform.position, 1);
+				float b = num3 - vector2.magnitude;
+				float num4 = Mathf.Clamp01(num2 / this.stringStretch);
+				Vector3 a = Mathf.Lerp(0f, b, num4 * num4) * normalized * this.stringStrength;
+				this.rb.AddForceAtPosition(a * this.rb.mass, this.knot.transform.position, ForceMode.Impulse);
 			}
 		}
 	}
@@ -154,15 +154,15 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		{
 			return;
 		}
-		Vector3 vector = (component.transform.position - component.prevPos) / Time.deltaTime;
-		force = vector * this.bopSpeed;
+		Vector3 a = (component.transform.position - component.prevPos) / Time.deltaTime;
+		force = a * this.bopSpeed;
 		force = Mathf.Min(this.maximumVelocity, force.magnitude) * force.normalized * this.balloonScale;
 		if (this.bopSpeedCap > 0f && force.IsLongerThan(this.bopSpeedCap))
 		{
 			force = force.normalized * this.bopSpeedCap;
 		}
 		collisionPt = other.ClosestPointOnBounds(base.transform.position);
-		this.rb.AddForceAtPosition(force * this.rb.mass, collisionPt, 1);
+		this.rb.AddForceAtPosition(force * this.rb.mass, collisionPt, ForceMode.Impulse);
 		if (this.balloonBopSource != null)
 		{
 			this.balloonBopSource.GTPlay();

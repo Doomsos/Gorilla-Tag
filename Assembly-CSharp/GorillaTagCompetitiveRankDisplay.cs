@@ -6,13 +6,13 @@ public class GorillaTagCompetitiveRankDisplay : MonoBehaviour
 {
 	private void OnEnable()
 	{
-		VRRig.LocalRig.OnRankedSubtierChanged += new Action<int, int>(this.HandleRankedSubtierChanged);
+		VRRig.LocalRig.OnRankedSubtierChanged += this.HandleRankedSubtierChanged;
 		this.HandleRankedSubtierChanged(0, 0);
 	}
 
 	private void OnDisable()
 	{
-		VRRig.LocalRig.OnRankedSubtierChanged -= new Action<int, int>(this.HandleRankedSubtierChanged);
+		VRRig.LocalRig.OnRankedSubtierChanged -= this.HandleRankedSubtierChanged;
 	}
 
 	public void HandleRankedSubtierChanged(int questSubTier, int pcSubTier)

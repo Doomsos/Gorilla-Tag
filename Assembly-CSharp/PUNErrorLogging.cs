@@ -13,7 +13,7 @@ public class PUNErrorLogging : MonoBehaviour
 		PlayFabTitleDataCache.Instance.GetTitleData("PUNErrorLogging", delegate(string data)
 		{
 			int num;
-			if (!int.TryParse(data, ref num))
+			if (!int.TryParse(data, out num))
 			{
 				return;
 			}

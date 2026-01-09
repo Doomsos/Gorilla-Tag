@@ -165,8 +165,8 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 			}
 			else
 			{
-				float num = Mathf.Abs((float)(NetworkSystem.Instance.SimTime - data.SentTime));
-				this.m_NetworkPosition += this.m_Velocity * num;
+				float d = Mathf.Abs((float)(NetworkSystem.Instance.SimTime - data.SentTime));
+				this.m_NetworkPosition += this.m_Velocity * d;
 				if (this.m_UseLocal)
 				{
 					this.m_Distance = Vector3.Distance(base.transform.localPosition, this.m_NetworkPosition);
@@ -314,11 +314,11 @@ internal class GorillaNetworkTransform : NetworkComponent, ITickSystemTick
 
 	[WeaverGenerated]
 	[DefaultForProperty("data", 0, 15)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private GorillaNetworkTransform.NetTransformData _data;
 
 	[NetworkStructWeaved(15)]
-	[StructLayout(2, Size = 60)]
+	[StructLayout(LayoutKind.Explicit, Size = 60)]
 	private struct NetTransformData : INetworkStruct
 	{
 		[FieldOffset(0)]

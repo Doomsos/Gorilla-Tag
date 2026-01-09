@@ -53,7 +53,7 @@ public class AngryBeeSwarm : NetworkComponent
 			switch (chaseState)
 			{
 			case AngryBeeSwarm.ChaseState.Dormant:
-				if (Application.isEditor && Keyboard.current[1].wasPressedThisFrame)
+				if (Application.isEditor && Keyboard.current[Key.Space].wasPressedThisFrame)
 				{
 					this.currentState = AngryBeeSwarm.ChaseState.InitialEmerge;
 				}
@@ -251,7 +251,7 @@ public class AngryBeeSwarm : NetworkComponent
 			this.targetPlayer = vrrig.creator;
 			this.followTarget = vrrig.head.rigTarget;
 			NavMeshHit navMeshHit;
-			this.targetIsOnNavMesh = NavMesh.SamplePosition(this.followTarget.position, ref navMeshHit, 5f, 1);
+			this.targetIsOnNavMesh = NavMesh.SamplePosition(this.followTarget.position, out navMeshHit, 5f, 1);
 		}
 		else
 		{
@@ -325,14 +325,14 @@ public class AngryBeeSwarm : NetworkComponent
 	{
 		this.path = new NavMeshPath();
 		NavMeshHit navMeshHit;
-		NavMesh.SamplePosition(base.transform.position, ref navMeshHit, 5f, 1);
+		NavMesh.SamplePosition(base.transform.position, out navMeshHit, 5f, 1);
 		NavMeshHit navMeshHit2;
-		this.targetIsOnNavMesh = NavMesh.SamplePosition(destination, ref navMeshHit2, 5f, 1);
+		this.targetIsOnNavMesh = NavMesh.SamplePosition(destination, out navMeshHit2, 5f, 1);
 		NavMesh.CalculatePath(navMeshHit.position, navMeshHit2.position, -1, this.path);
 		this.pathPoints = new List<Vector3>();
-		foreach (Vector3 vector in this.path.corners)
+		foreach (Vector3 a in this.path.corners)
 		{
-			this.pathPoints.Add(vector + Vector3.up * this.heightAboveNavmesh);
+			this.pathPoints.Add(a + Vector3.up * this.heightAboveNavmesh);
 		}
 		this.pathPoints.Add(destination);
 		this.currentPathPointIdx = 0;
@@ -441,10 +441,10 @@ public class AngryBeeSwarm : NetworkComponent
 		int playerID = (int)stream.ReceiveNext();
 		this.targetPlayer = NetworkSystem.Instance.GetPlayer(playerID);
 		this.currentState = (AngryBeeSwarm.ChaseState)stream.ReceiveNext();
-		float num = (float)stream.ReceiveNext();
-		if (float.IsFinite(num))
+		float f = (float)stream.ReceiveNext();
+		if (float.IsFinite(f))
 		{
-			this.currentSpeed = num;
+			this.currentSpeed = f;
 		}
 	}
 
@@ -585,7 +585,7 @@ public class AngryBeeSwarm : NetworkComponent
 	[WeaverGenerated]
 	[SerializeField]
 	[DefaultForProperty("Data", 0, 3)]
-	[DrawIf("IsEditorWritable", true, 0, 0)]
+	[DrawIf("IsEditorWritable", true, CompareOperator.Equal, DrawIfMode.ReadOnly)]
 	private BeeSwarmData _Data;
 
 	public enum ChaseState

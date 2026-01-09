@@ -14,9 +14,9 @@ namespace GorillaNetworking
 			{
 				obj.SetActive(enable);
 			}
-			catch (Exception ex)
+			catch (Exception arg)
 			{
-				Debug.LogError(string.Format("Exception while enabling cosmetic: {0}", ex));
+				Debug.LogError(string.Format("Exception while enabling cosmetic: {0}", arg));
 			}
 		}
 

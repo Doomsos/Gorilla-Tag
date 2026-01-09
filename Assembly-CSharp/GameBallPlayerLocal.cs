@@ -57,10 +57,10 @@ public class GameBallPlayerLocal : MonoBehaviour
 		XRNode xrnode = this.GetXRNode(handIndex);
 		GameBallPlayerLocal.InputDataMotion data = default(GameBallPlayerLocal.InputDataMotion);
 		InputDevice deviceAtXRNode = InputDevices.GetDeviceAtXRNode(xrnode);
-		deviceAtXRNode.TryGetFeatureValue(CommonUsages.devicePosition, ref data.position);
-		deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceRotation, ref data.rotation);
-		deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceVelocity, ref data.velocity);
-		deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, ref data.angVelocity);
+		deviceAtXRNode.TryGetFeatureValue(CommonUsages.devicePosition, out data.position);
+		deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceRotation, out data.rotation);
+		deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceVelocity, out data.velocity);
+		deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out data.angVelocity);
 		data.time = Time.timeAsDouble;
 		this.inputData[handIndex].AddInput(data);
 	}
@@ -137,14 +137,14 @@ public class GameBallPlayerLocal : MonoBehaviour
 				BodyDockPositions myBodyDockPositions = GorillaTagger.Instance.offlineVRRig.myBodyDockPositions;
 				object obj = flag2 ? myBodyDockPositions.leftHandTransform : myBodyDockPositions.rightHandTransform;
 				GameBall gameBall = GameBallManager.Instance.GetGameBall(gameBallId);
-				Vector3 vector = gameBall.transform.position;
-				Vector3 vector2 = gameBall.transform.position - position;
-				if (vector2.sqrMagnitude > num2 * num2)
+				Vector3 position2 = gameBall.transform.position;
+				Vector3 vector = gameBall.transform.position - position;
+				if (vector.sqrMagnitude > num2 * num2)
 				{
-					vector = position + vector2.normalized * num2;
+					position2 = position + vector.normalized * num2;
 				}
 				object obj2 = obj;
-				Vector3 localPosition = obj2.InverseTransformPoint(vector);
+				Vector3 localPosition = obj2.InverseTransformPoint(position2);
 				Quaternion localRotation = Quaternion.Inverse(obj2.rotation) * gameBall.transform.rotation;
 				obj2.InverseTransformPoint(gameBall.transform.position);
 				GameBallManager.Instance.RequestGrabBall(gameBallId, flag2, localPosition, localRotation);
@@ -159,16 +159,16 @@ public class GameBallPlayerLocal : MonoBehaviour
 		{
 			InputDevice deviceAtXRNode = InputDevices.GetDeviceAtXRNode(xrnode);
 			Vector3 vector;
-			deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, ref vector);
-			Quaternion quaternion;
-			deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceRotation, ref quaternion);
+			deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out vector);
+			Quaternion rotation;
+			deviceAtXRNode.TryGetFeatureValue(CommonUsages.deviceRotation, out rotation);
 			Transform transform = GorillaTagger.Instance.offlineVRRig.transform;
-			Quaternion rotation = GTPlayer.Instance.turnParent.transform.rotation;
+			Quaternion rotation2 = GTPlayer.Instance.turnParent.transform.rotation;
 			GameBallPlayerLocal.InputData inputData = this.inputData[handIndex];
 			Vector3 vector2 = inputData.GetMaxSpeed(0f, 0.05f) * inputData.GetAvgVel(0f, 0.05f).normalized;
-			vector2 = rotation * vector2;
+			vector2 = rotation2 * vector2;
 			vector2 *= transform.localScale.x;
-			vector = rotation * -(Quaternion.Inverse(quaternion) * vector);
+			vector = rotation2 * -(Quaternion.Inverse(rotation) * vector);
 			GameBallId gameBallId = this.gamePlayer.GetGameBallId(handIndex);
 			GameBall gameBall = GameBallManager.Instance.GetGameBall(gameBallId);
 			if (gameBall == null)
@@ -183,8 +183,8 @@ public class GameBallPlayerLocal : MonoBehaviour
 			{
 				Vector3 vector3 = gameBall.transform.rotation * gameBall.localDiscUp;
 				vector3.Normalize();
-				float num = Vector3.Dot(vector3, vector);
-				vector = vector3 * num;
+				float d = Vector3.Dot(vector3, vector);
+				vector = vector3 * d;
 				vector *= 1.25f;
 				vector2 *= 1.25f;
 			}
@@ -202,9 +202,9 @@ public class GameBallPlayerLocal : MonoBehaviour
 	{
 		if (handIndex != 0)
 		{
-			return 5;
+			return XRNode.RightHand;
 		}
-		return 4;
+		return XRNode.LeftHand;
 	}
 
 	private Transform GetHandTransform(int handIndex)
@@ -325,7 +325,7 @@ public class GameBallPlayerLocal : MonoBehaviour
 			double timeAsDouble = Time.timeAsDouble;
 			double num = timeAsDouble - (double)ignoreRecent - (double)window;
 			double num2 = timeAsDouble - (double)ignoreRecent;
-			Vector3 vector = Vector3.zero;
+			Vector3 a = Vector3.zero;
 			int num3 = 0;
 			for (int i = this.inputMotionHistory.Count - 1; i >= 0; i--)
 			{
@@ -336,7 +336,7 @@ public class GameBallPlayerLocal : MonoBehaviour
 					{
 						break;
 					}
-					vector += inputDataMotion.velocity;
+					a += inputDataMotion.velocity;
 					num3++;
 				}
 			}
@@ -344,7 +344,7 @@ public class GameBallPlayerLocal : MonoBehaviour
 			{
 				return Vector3.zero;
 			}
-			return vector / (float)num3;
+			return a / (float)num3;
 		}
 
 		public int maxInputs;

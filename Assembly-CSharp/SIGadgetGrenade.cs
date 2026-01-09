@@ -7,16 +7,16 @@ public abstract class SIGadgetGrenade : SIGadget
 	{
 		this.rb = base.GetComponent<Rigidbody>();
 		this.activatedLocally = false;
-		this.thrownGadget.OnActivated += new Action(this.HandleActivated);
-		this.thrownGadget.OnThrown += new Action(this.HandleThrown);
-		this.thrownGadget.OnHitSurface += new Action(this.HandleHitSurface);
+		this.thrownGadget.OnActivated += this.HandleActivated;
+		this.thrownGadget.OnThrown += this.HandleThrown;
+		this.thrownGadget.OnHitSurface += this.HandleHitSurface;
 	}
 
 	protected new virtual void OnDisable()
 	{
-		this.thrownGadget.OnActivated -= new Action(this.HandleActivated);
-		this.thrownGadget.OnThrown -= new Action(this.HandleThrown);
-		this.thrownGadget.OnHitSurface -= new Action(this.HandleHitSurface);
+		this.thrownGadget.OnActivated -= this.HandleActivated;
+		this.thrownGadget.OnThrown -= this.HandleThrown;
+		this.thrownGadget.OnHitSurface -= this.HandleHitSurface;
 	}
 
 	protected abstract void HandleActivated();

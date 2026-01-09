@@ -18,12 +18,12 @@ namespace Viveport
 
 		public void Update()
 		{
-			Queue<Action> queue = MainThreadDispatcher.actions;
-			lock (queue)
+			Queue<Action> obj = MainThreadDispatcher.actions;
+			lock (obj)
 			{
 				while (MainThreadDispatcher.actions.Count > 0)
 				{
-					MainThreadDispatcher.actions.Dequeue().Invoke();
+					MainThreadDispatcher.actions.Dequeue()();
 				}
 			}
 		}
@@ -44,10 +44,10 @@ namespace Viveport
 
 		public void Enqueue(IEnumerator action)
 		{
-			Queue<Action> queue = MainThreadDispatcher.actions;
-			lock (queue)
+			Queue<Action> obj = MainThreadDispatcher.actions;
+			lock (obj)
 			{
-				MainThreadDispatcher.actions.Enqueue(delegate()
+				MainThreadDispatcher.actions.Enqueue(delegate
 				{
 					this.StartCoroutine(action);
 				});
@@ -81,35 +81,35 @@ namespace Viveport
 
 		private IEnumerator ActionWrapper(Action action)
 		{
-			action.Invoke();
+			action();
 			yield return null;
 			yield break;
 		}
 
 		private IEnumerator ActionWrapper<T1>(Action<T1> action, T1 param1)
 		{
-			action.Invoke(param1);
+			action(param1);
 			yield return null;
 			yield break;
 		}
 
 		private IEnumerator ActionWrapper<T1, T2>(Action<T1, T2> action, T1 param1, T2 param2)
 		{
-			action.Invoke(param1, param2);
+			action(param1, param2);
 			yield return null;
 			yield break;
 		}
 
 		private IEnumerator ActionWrapper<T1, T2, T3>(Action<T1, T2, T3> action, T1 param1, T2 param2, T3 param3)
 		{
-			action.Invoke(param1, param2, param3);
+			action(param1, param2, param3);
 			yield return null;
 			yield break;
 		}
 
 		private IEnumerator ActionWrapper<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action, T1 param1, T2 param2, T3 param3, T4 param4)
 		{
-			action.Invoke(param1, param2, param3, param4);
+			action(param1, param2, param3, param4);
 			yield return null;
 			yield break;
 		}

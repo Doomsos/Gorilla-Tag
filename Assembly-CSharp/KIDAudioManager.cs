@@ -32,7 +32,7 @@ public class KIDAudioManager : MonoBehaviour
 			Object.DontDestroyOnLoad(base.gameObject);
 			this.ConfigureAudioSource();
 			this.InitializeSoundClips();
-			this.mainMixer.GetFloat("Game_Volume", ref this.cachedGameVolume);
+			this.mainMixer.GetFloat("Game_Volume", out this.cachedGameVolume);
 			return;
 		}
 		if (KIDAudioManager._instance != this)
@@ -64,16 +64,41 @@ public class KIDAudioManager : MonoBehaviour
 
 	private void InitializeSoundClips()
 	{
-		Dictionary<KIDAudioManager.KIDSoundType, AudioClip> dictionary = new Dictionary<KIDAudioManager.KIDSoundType, AudioClip>();
-		dictionary.Add(KIDAudioManager.KIDSoundType.ButtonClick, this.buttonClickSound);
-		dictionary.Add(KIDAudioManager.KIDSoundType.Denied, this.deniedSound);
-		dictionary.Add(KIDAudioManager.KIDSoundType.Success, this.successSound);
-		dictionary.Add(KIDAudioManager.KIDSoundType.Hover, this.buttonHoverSound);
-		dictionary.Add(KIDAudioManager.KIDSoundType.ButtonHeld, this.buttonHeldSound);
-		dictionary.Add(KIDAudioManager.KIDSoundType.PageTransition, this.pageTransitionSound);
-		dictionary.Add(KIDAudioManager.KIDSoundType.InputBack, this.inputBackSound);
-		dictionary.Add(KIDAudioManager.KIDSoundType.TurnOffPermission, this.turnOffPermissionSound);
-		this.soundClips = dictionary;
+		this.soundClips = new Dictionary<KIDAudioManager.KIDSoundType, AudioClip>
+		{
+			{
+				KIDAudioManager.KIDSoundType.ButtonClick,
+				this.buttonClickSound
+			},
+			{
+				KIDAudioManager.KIDSoundType.Denied,
+				this.deniedSound
+			},
+			{
+				KIDAudioManager.KIDSoundType.Success,
+				this.successSound
+			},
+			{
+				KIDAudioManager.KIDSoundType.Hover,
+				this.buttonHoverSound
+			},
+			{
+				KIDAudioManager.KIDSoundType.ButtonHeld,
+				this.buttonHeldSound
+			},
+			{
+				KIDAudioManager.KIDSoundType.PageTransition,
+				this.pageTransitionSound
+			},
+			{
+				KIDAudioManager.KIDSoundType.InputBack,
+				this.inputBackSound
+			},
+			{
+				KIDAudioManager.KIDSoundType.TurnOffPermission,
+				this.turnOffPermissionSound
+			}
+		};
 	}
 
 	public void SetKIDUIAudioActive(bool active)
@@ -107,7 +132,7 @@ public class KIDAudioManager : MonoBehaviour
 			return;
 		}
 		AudioClip audioClip;
-		if (this.soundClips.TryGetValue(soundType, ref audioClip) && audioClip != null)
+		if (this.soundClips.TryGetValue(soundType, out audioClip) && audioClip != null)
 		{
 			this.audioSource.PlayOneShot(audioClip);
 			return;
