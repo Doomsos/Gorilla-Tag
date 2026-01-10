@@ -147,6 +147,10 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		{
 			return;
 		}
+		if (!(PlayerPrefs.GetString("didTutorial", "nope") == "done"))
+		{
+			return;
+		}
 		this.simpleGravityFactor = Mathf.Clamp(gravityFactor, 0f, 5f);
 		Shader.SetGlobalInt(this._GreyZoneActive, onOff ? 1 : 0);
 		if (onOff)

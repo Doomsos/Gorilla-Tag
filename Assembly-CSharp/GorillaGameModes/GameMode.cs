@@ -151,12 +151,20 @@ namespace GorillaGameModes
 				string text = GameMode.gameModes[i].GameTypeName();
 				if (gmString.Length > text.Length)
 				{
-					int num = text.Length + 1;
-					if (gmString[gmString.Length - num] == '|' && gmString.EndsWith(text))
+					if (gmString.Contains('|'))
+					{
+						int num = text.Length + 1;
+						if (gmString[gmString.Length - num] != '|')
+						{
+							goto IL_53;
+						}
+					}
+					if (gmString.EndsWith(text))
 					{
 						return text;
 					}
 				}
+				IL_53:;
 			}
 			return null;
 		}
