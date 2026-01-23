@@ -17,6 +17,9 @@ public class GameEntity : MonoBehaviour
 	public long createData { get; set; }
 
 	[DebugReadout]
+	public GameEntityId createdByEntityId { get; set; }
+
+	[DebugReadout]
 	public int heldByActorNumber { get; internal set; }
 
 	[DebugReadout]
@@ -54,20 +57,41 @@ public class GameEntity : MonoBehaviour
 		base.GetComponentsInChildren<IGameEntityComponent>(this.entityComponents);
 		this.entitySerialize = new List<IGameEntitySerialize>(1);
 		base.GetComponentsInChildren<IGameEntitySerialize>(this.entitySerialize);
+		if (this.builtInEntities != null)
+		{
+			for (int i = 0; i < this.builtInEntities.Count; i++)
+			{
+				this.builtInEntities[i].isBuiltIn = true;
+			}
+		}
 	}
 
-	public void Create(GameEntityManager manager, int typeId)
+	public void Create(GameEntityManager manager, int netId, int typeId)
 	{
 		this.manager = manager;
 		this.typeId = typeId;
+		if (this.builtInEntities != null)
+		{
+			for (int i = 0; i < this.builtInEntities.Count; i++)
+			{
+				int netId2 = netId + 1 + i;
+				manager.AddGameEntity(netId2, this.builtInEntities[i]);
+				this.builtInEntities[i].Create(manager, netId2, -1);
+			}
+		}
 	}
 
-	public void Init(long createData)
+	public void Init(long createData, int createdByEntityNetId)
 	{
 		this.createData = createData;
+		this.createdByEntityId = this.manager.GetEntityIdFromNetId(createdByEntityNetId);
 		for (int i = 0; i < this.entityComponents.Count; i++)
 		{
 			this.entityComponents[i].OnEntityInit();
+		}
+		for (int j = 0; j < this.builtInEntities.Count; j++)
+		{
+			this.builtInEntities[j].Init(0L, -1);
 		}
 	}
 
@@ -98,8 +122,8 @@ public class GameEntity : MonoBehaviour
 			base.GetComponentsInChildren<MeshFilter>(true, this._meshFilters);
 			base.GetComponentsInChildren<SkinnedMeshRenderer>(true, this._grabbableRenderers.skinnedRenderers);
 			List<SkinnedMeshRenderer> skinnedRenderers = this._grabbableRenderers.skinnedRenderers;
-			this.<GetGrabbableRenderers>g__RemoveNotOwnedComponents|83_0<MeshFilter>(this._meshFilters);
-			this.<GetGrabbableRenderers>g__RemoveNotOwnedComponents|83_0<SkinnedMeshRenderer>(skinnedRenderers);
+			this.<GetGrabbableRenderers>g__RemoveNotOwnedComponents|89_0<MeshFilter>(this._meshFilters);
+			this.<GetGrabbableRenderers>g__RemoveNotOwnedComponents|89_0<SkinnedMeshRenderer>(skinnedRenderers);
 			foreach (GameObject y in this.ignoreObjectGrabRenderers)
 			{
 				for (int j = 0; j < this._meshFilters.Count; j++)
@@ -214,7 +238,7 @@ public class GameEntity : MonoBehaviour
 		this.manager = newManager;
 		GameEntityId gameEntityId = newManager.AddGameEntity(this);
 		this.id = gameEntityId;
-		this.manager.InitItemLocal(this, this.createData);
+		this.manager.InitItemLocal(this, this.createData, -1);
 		return gameEntityId;
 	}
 
@@ -315,7 +339,7 @@ public class GameEntity : MonoBehaviour
 	}
 
 	[CompilerGenerated]
-	private void <GetGrabbableRenderers>g__RemoveNotOwnedComponents|83_0<T>(List<T> components) where T : Component
+	private void <GetGrabbableRenderers>g__RemoveNotOwnedComponents|89_0<T>(List<T> components) where T : Component
 	{
 		for (int i = 0; i < components.Count; i++)
 		{
@@ -327,6 +351,11 @@ public class GameEntity : MonoBehaviour
 	}
 
 	public const int Invalid = -1;
+
+	public List<GameEntity> builtInEntities;
+
+	[NonSerialized]
+	public bool isBuiltIn;
 
 	public bool pickupable = true;
 

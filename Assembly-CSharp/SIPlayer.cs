@@ -5,7 +5,7 @@ using GorillaLocomotion;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class SIPlayer : MonoBehaviour
+public class SIPlayer : MonoBehaviour, ITickSystemTick
 {
 	public static SIPlayer LocalPlayer
 	{
@@ -14,6 +14,8 @@ public class SIPlayer : MonoBehaviour
 			return SIPlayer.Get(NetworkSystem.Instance.LocalPlayer.ActorNumber);
 		}
 	}
+
+	public bool TickRunning { get; set; }
 
 	public int ActorNr
 	{
@@ -47,12 +49,21 @@ public class SIPlayer : MonoBehaviour
 		gamePlayer.OnPlayerLeftZone = (Action)Delegate.Combine(gamePlayer.OnPlayerLeftZone, new Action(this.ClearGadgetsOnLeaveZone));
 	}
 
+	private void OnEnable()
+	{
+		if (this == SIPlayer.LocalPlayer)
+		{
+			TickSystem<object>.AddTickCallback(this);
+		}
+	}
+
 	private void OnDisable()
 	{
 		if (ApplicationQuittingState.IsQuitting)
 		{
 			return;
 		}
+		TickSystem<object>.RemoveTickCallback(this);
 		this.Reset();
 	}
 
@@ -286,7 +297,7 @@ public class SIPlayer : MonoBehaviour
 			this.BonusProgressCelebrate();
 		}
 		bool flag = num > 0 && this.currentProgression.stashedQuests > newProgression.stashedQuests;
-		bool flag2 = this.currentProgression.bonusProgress >= 10 && this.currentProgression.stashedBonusPoints > newProgression.stashedBonusPoints;
+		bool flag2 = this.currentProgression.bonusProgress >= 4 && this.currentProgression.stashedBonusPoints > newProgression.stashedBonusPoints;
 		bool flag3 = this.currentProgression.limitedDepositTimeArray[1] == 0 && newProgression.limitedDepositTimeArray[1] == 1;
 		if ((flag || flag2 || flag3) && this.currentProgression.resourceArray[0] < newProgression.resourceArray[0])
 		{
@@ -477,7 +488,7 @@ public class SIPlayer : MonoBehaviour
 
 	public void UpdateVisualsForAvailableQuestRedemption()
 	{
-		bool flag = SuperInfectionManager.activeSuperInfectionManager != null && SuperInfectionManager.activeSuperInfectionManager.IsZoneReady() && (this.QuestsAvailableToClaim() > 0 || (this.currentProgression.bonusProgress >= 10 && this.currentProgression.stashedBonusPoints > 0));
+		bool flag = SuperInfectionManager.activeSuperInfectionManager != null && SuperInfectionManager.activeSuperInfectionManager.IsZoneReady() && (this.QuestsAvailableToClaim() > 0 || (this.currentProgression.bonusProgress >= 4 && this.currentProgression.stashedBonusPoints > 0));
 		if (this.tpParticleSystem.isPlaying && !flag)
 		{
 			this.tpParticleSystem.Stop();
@@ -578,6 +589,29 @@ public class SIPlayer : MonoBehaviour
 			return;
 		}
 		GorillaTagger.Instance.StartVibration(isLeft, hapticStrength, hapticDuration);
+	}
+
+	public void Tick()
+	{
+		this.ProcessHandRecharge(0);
+		this.ProcessHandRecharge(1);
+	}
+
+	private void ProcessHandRecharge(int handIndex)
+	{
+		GameEntity grabbedGameEntity = this.gamePlayer.GetGrabbedGameEntity(handIndex);
+		IEnergyGadget energyGadget = (grabbedGameEntity != null) ? grabbedGameEntity.GetComponent<IEnergyGadget>() : null;
+		if (energyGadget != null && energyGadget.UsesEnergy && !energyGadget.IsFull)
+		{
+			energyGadget.UpdateRecharge(Time.deltaTime);
+			return;
+		}
+		GameEntity snappedGameEntity = this.gamePlayer.GetSnappedGameEntity(handIndex);
+		IEnergyGadget energyGadget2 = (snappedGameEntity != null) ? snappedGameEntity.GetComponent<IEnergyGadget>() : null;
+		if (energyGadget2 != null && energyGadget2.UsesEnergy && !energyGadget2.IsFull)
+		{
+			energyGadget2.UpdateRecharge(Time.deltaTime);
+		}
 	}
 
 	private const string preLog = "[SIPlayer]  ";

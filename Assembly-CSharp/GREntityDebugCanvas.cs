@@ -20,6 +20,7 @@ public class GREntityDebugCanvas : MonoBehaviour
 		}
 		if (this.text != null)
 		{
+			this.text.fontSize = this.fontSize;
 			this.text.gameObject.SetActive(false);
 		}
 	}
@@ -64,6 +65,8 @@ public class GREntityDebugCanvas : MonoBehaviour
 	public GameObject textPanelPrefab;
 
 	public Vector3 prefabAttachOffset = new Vector3(0f, 0.5f, 0f);
+
+	public float fontSize = 100f;
 
 	private StringBuilder builder;
 }

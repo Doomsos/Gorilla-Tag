@@ -44,13 +44,29 @@ public class GorillaScoreBoard : MonoBehaviour
 		this.gmNames = GameMode.gameModeNames;
 		this.gmName = "ERROR";
 		int count = this.gmNames.Count;
-		for (int i = 0; i < count; i++)
+		int num = this.initialGameMode.LastIndexOf('|');
+		if (num >= 0)
 		{
-			this.tempGmName = this.gmNames[i];
-			if (this.initialGameMode.Contains(this.tempGmName))
+			this.tempGmName = this.initialGameMode.Substring(num + 1);
+			for (int i = 0; i < count; i++)
 			{
-				this.gmName = this.tempGmName;
-				break;
+				if (this.tempGmName == this.gmNames[i])
+				{
+					this.gmName = this.tempGmName;
+					break;
+				}
+			}
+		}
+		else
+		{
+			for (int j = 0; j < count; j++)
+			{
+				this.tempGmName = this.gmNames[j];
+				if (this.initialGameMode.Contains(this.tempGmName))
+				{
+					this.gmName = this.tempGmName;
+					break;
+				}
 			}
 		}
 		return this.gmName;

@@ -13,7 +13,7 @@ public class GRAbilityAttackSimple : GRAbilityBase
 
 	protected override void OnStart()
 	{
-		if ((double)this.tellDuration > 0.0)
+		if ((double)(this.tellDuration * this.timeMult) > 0.0)
 		{
 			this.PlayState(GRAbilityAttackSimple.State.Tell, this.tellAnimData, this.soundTell, false);
 		}
@@ -26,6 +26,8 @@ public class GRAbilityAttackSimple : GRAbilityBase
 			this.agent.SetIsPathing(false, true);
 			this.agent.SetDisableNetworkSync(true);
 		}
+		this.events.Reset();
+		this.events.OnAbilityStart(base.GetAbilityTime(Time.timeAsDouble), this.audioSource);
 	}
 
 	protected override void OnStop()
@@ -36,6 +38,7 @@ public class GRAbilityAttackSimple : GRAbilityBase
 			this.agent.SetDisableNetworkSync(false);
 		}
 		this.EnableList(this.damageTrigger, false);
+		this.events.OnAbilityStop(base.GetAbilityTime(Time.timeAsDouble), this.audioSource);
 	}
 
 	private void PlayState(GRAbilityAttackSimple.State newState, AnimationData animData, AbilitySound sound, bool damageEnabled)
@@ -44,6 +47,7 @@ public class GRAbilityAttackSimple : GRAbilityBase
 		{
 			this.PlayAnim(animData.animName, 0.1f, animData.speed);
 			this.animNameString = animData.animName;
+			this.timeMult = ((this.adjustByAnimationSpeed && !Mathf.Approximately(animData.speed, 0f)) ? (1f / animData.speed) : 1f);
 		}
 		sound.soundSelectMode = AbilitySound.SoundSelectMode.Random;
 		sound.Play(null);
@@ -62,28 +66,25 @@ public class GRAbilityAttackSimple : GRAbilityBase
 		switch (this.state)
 		{
 		case GRAbilityAttackSimple.State.Tell:
-			if (num > this.tellDuration)
+			if (num > this.tellDuration * this.timeMult)
 			{
 				this.PlayState(GRAbilityAttackSimple.State.Attack, this.attackAnimData, this.soundAttack, true);
-				return;
 			}
 			break;
 		case GRAbilityAttackSimple.State.Attack:
-			if (num > this.tellDuration + this.attackDuration)
+			if (num > (this.tellDuration + this.attackDuration) * this.timeMult)
 			{
 				this.PlayState(GRAbilityAttackSimple.State.FollowThrough, this.outroAnimData, this.soundOutro, false);
-				return;
 			}
 			break;
 		case GRAbilityAttackSimple.State.FollowThrough:
-			if (num >= this.duration)
+			if (num >= this.duration * this.timeMult)
 			{
 				this.state = GRAbilityAttackSimple.State.Done;
 			}
 			break;
-		default:
-			return;
 		}
+		this.events.TryPlay(num / this.timeMult, this.audioSource);
 	}
 
 	public void SetTargetPlayer(NetPlayer targetPlayer)
@@ -140,6 +141,8 @@ public class GRAbilityAttackSimple : GRAbilityBase
 
 	public AbilitySound soundOutro;
 
+	private float timeMult = 1f;
+
 	private GRAbilityAttackSimple.State state;
 
 	public float maxTurnSpeed;
@@ -147,6 +150,10 @@ public class GRAbilityAttackSimple : GRAbilityBase
 	public List<GameObject> damageTrigger;
 
 	private string animNameString;
+
+	public GameAbilityEvents events;
+
+	public bool adjustByAnimationSpeed;
 
 	private enum State
 	{

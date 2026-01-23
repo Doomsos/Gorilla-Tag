@@ -217,7 +217,7 @@ public class GrowingSnowballThrowable : SnowballThrowable
 		{
 			return;
 		}
-		if (args == null || args.Length < 3)
+		if (args == null || args.Length < 4)
 		{
 			return;
 		}
@@ -231,7 +231,7 @@ public class GrowingSnowballThrowable : SnowballThrowable
 			return;
 		}
 		GorillaNot.IncrementRPCCall(info, "SnowballThrowEventReceiver");
-		if (!this.snowballThrowCallLimit.CheckCallTime(Time.time))
+		if (!FXSystem.CheckCallSpam(this.targetRig.fxSettings, 4, info.SentServerTime))
 		{
 			return;
 		}
@@ -468,8 +468,6 @@ public class GrowingSnowballThrowable : SnowballThrowable
 	private PhotonEvent changeSizeEvent;
 
 	private PhotonEvent snowballThrowEvent;
-
-	private CallLimiterWithCooldown snowballThrowCallLimit = new CallLimiterWithCooldown(10f, 10, 2f);
 
 	[HideInInspector]
 	public static bool debugDrawAOERange = false;

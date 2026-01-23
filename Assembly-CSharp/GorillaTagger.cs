@@ -192,21 +192,11 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 
 	private void IsXRSubsystemActive()
 	{
-		this.loadedDeviceName = XRSettings.loadedDeviceName;
-		List<XRDisplaySubsystem> list = new List<XRDisplaySubsystem>();
-		SubsystemManager.GetSubsystems<XRDisplaySubsystem>(list);
-		using (List<XRDisplaySubsystem>.Enumerator enumerator = list.GetEnumerator())
-		{
-			while (enumerator.MoveNext())
-			{
-				if (enumerator.Current.running)
-				{
-					this.xrSubsystemIsActive = true;
-					return;
-				}
-			}
-		}
-		this.xrSubsystemIsActive = false;
+		GorillaTagger.<IsXRSubsystemActive>d__140 <IsXRSubsystemActive>d__;
+		<IsXRSubsystemActive>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
+		<IsXRSubsystemActive>d__.<>4__this = this;
+		<IsXRSubsystemActive>d__.<>1__state = -1;
+		<IsXRSubsystemActive>d__.<>t__builder.Start<GorillaTagger.<IsXRSubsystemActive>d__140>(ref <IsXRSubsystemActive>d__);
 	}
 
 	protected void Start()
@@ -292,7 +282,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 
 	protected void LateUpdate()
 	{
-		GorillaTagger.<>c__DisplayClass146_0 CS$<>8__locals1;
+		GorillaTagger.<>c__DisplayClass147_0 CS$<>8__locals1;
 		CS$<>8__locals1.<>4__this = this;
 		if (this.isGameOverlayActive)
 		{
@@ -312,11 +302,10 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 			}
 			GTPlayer.Instance.inOverlay = false;
 		}
-		if (this.xrSubsystemIsActive && Application.platform != RuntimePlatform.Android)
+		if (this.xrSubsystemIsActive && Application.platform != RuntimePlatform.Android && this.activeXRDisplay != null && this.activeXRDisplay.TryGetDisplayRefreshRate(out this._defaultRefreshRate))
 		{
-			this._defaultRefreshRate = XRDevice.refreshRate;
 			float num = this._forceChangeRefreshRate ? this._forcedRefreshRate : this._defaultRefreshRate;
-			float num2 = 1f / (num - 1f);
+			float num2 = 1f / num;
 			if (SteamVR.settings.lockPhysicsUpdateRateToRenderFrequency)
 			{
 				num2 = 1f / num;
@@ -356,32 +345,18 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 			{
 				num4 = this._forcedRefreshRate;
 			}
-			else
+			while (num4 > 90f)
 			{
-				if (systemDisplayFrequency != 60f)
+				num3--;
+				if (num3 < 0)
 				{
-					if (systemDisplayFrequency == 71f)
-					{
-						num4 = 72f;
-					}
+					break;
 				}
-				else
-				{
-					num4 = 60f;
-				}
-				while (num4 > 90f)
-				{
-					num3--;
-					if (num3 < 0)
-					{
-						break;
-					}
-					num4 = OVRManager.display.displayFrequenciesAvailable[num3];
-				}
-				this._defaultRefreshRate = num4;
+				num4 = OVRManager.display.displayFrequenciesAvailable[num3];
 			}
+			this._defaultRefreshRate = num4;
 			float num5 = 1f;
-			float num6 = 1f / (num4 - 1f);
+			float num6 = 1f / num4;
 			if (this._forceFramerateCheck || Mathf.Abs(Time.fixedDeltaTime - num6 * num5) > 0.0001f)
 			{
 				this._forceFramerateCheck = false;
@@ -409,13 +384,14 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 				GTPlayer.Instance.InitializeValues();
 				OVRManager.instance.gameObject.SetActive(false);
 				this._frameRateUpdated = true;
+				this.ConfirmUpdatedFrameRate();
 			}
 		}
 		else if (!this.xrSubsystemIsActive && Application.platform != RuntimePlatform.Android)
 		{
 			this._defaultRefreshRate = 144f;
 			int num8 = this._forceChangeRefreshRate ? ((int)this._forcedRefreshRate) : ((int)this._defaultRefreshRate);
-			float num9 = 1f / (float)(num8 - 1);
+			float num9 = 1f / (float)num8;
 			if (this._forceFramerateCheck || Mathf.Abs(Time.fixedDeltaTime - num9) > 0.0001f)
 			{
 				this._forceFramerateCheck = false;
@@ -453,26 +429,26 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		if (!(GorillaGameManager.instance is CasualGameMode))
 		{
 			this.nonAllocHits = Physics.OverlapCapsuleNonAlloc(this.lastLeftHandPositionForTag, position, num10, this.colliderOverlaps, this.gorillaTagColliderLayerMask, QueryTriggerInteraction.Collide);
-			this.<LateUpdate>g__TryTaggingAllHitsOverlap|146_0(true, this.maxTagDistance, true, false, ref CS$<>8__locals1);
+			this.<LateUpdate>g__TryTaggingAllHitsOverlap|147_0(true, this.maxTagDistance, true, false, ref CS$<>8__locals1);
 			this.nonAllocHits = Physics.OverlapCapsuleNonAlloc(position3, position, num10, this.colliderOverlaps, this.gorillaTagColliderLayerMask, QueryTriggerInteraction.Collide);
-			this.<LateUpdate>g__TryTaggingAllHitsOverlap|146_0(true, this.maxTagDistance, true, false, ref CS$<>8__locals1);
+			this.<LateUpdate>g__TryTaggingAllHitsOverlap|147_0(true, this.maxTagDistance, true, false, ref CS$<>8__locals1);
 			this.nonAllocHits = Physics.OverlapCapsuleNonAlloc(this.lastRightHandPositionForTag, position2, num10, this.colliderOverlaps, this.gorillaTagColliderLayerMask, QueryTriggerInteraction.Collide);
-			this.<LateUpdate>g__TryTaggingAllHitsOverlap|146_0(false, this.maxTagDistance, true, false, ref CS$<>8__locals1);
+			this.<LateUpdate>g__TryTaggingAllHitsOverlap|147_0(false, this.maxTagDistance, true, false, ref CS$<>8__locals1);
 			this.nonAllocHits = Physics.OverlapCapsuleNonAlloc(position3, position2, num10, this.colliderOverlaps, this.gorillaTagColliderLayerMask, QueryTriggerInteraction.Collide);
-			this.<LateUpdate>g__TryTaggingAllHitsOverlap|146_0(false, this.maxTagDistance, true, false, ref CS$<>8__locals1);
+			this.<LateUpdate>g__TryTaggingAllHitsOverlap|147_0(false, this.maxTagDistance, true, false, ref CS$<>8__locals1);
 			for (int i = 0; i < 12; i++)
 			{
 				GorillaTagger.StiltTagData stiltTagData = this.stiltTagData[i];
 				if (stiltTagData.hasLastPosition && stiltTagData.hasCurrentPosition && (stiltTagData.canTag || stiltTagData.canStun))
 				{
 					this.nonAllocHits = Physics.OverlapCapsuleNonAlloc(stiltTagData.currentPositionForTag, stiltTagData.lastPositionForTag, num10, this.colliderOverlaps, this.gorillaTagColliderLayerMask, QueryTriggerInteraction.Collide);
-					this.<LateUpdate>g__TryTaggingAllHitsOverlap|146_0(i == 0 || i == 2, this.maxStiltTagDistance, stiltTagData.canTag, stiltTagData.canStun, ref CS$<>8__locals1);
+					this.<LateUpdate>g__TryTaggingAllHitsOverlap|147_0(i == 0 || i == 2, this.maxStiltTagDistance, stiltTagData.canTag, stiltTagData.canStun, ref CS$<>8__locals1);
 				}
 			}
 			this.topVector = this.lastHeadPositionForTag;
 			this.bottomVector = this.lastBodyPositionForTag - this.bodyVector;
 			this.nonAllocHits = Physics.CapsuleCastNonAlloc(this.topVector, this.bottomVector, this.bodyCollider.radius * 2f * GTPlayer.Instance.scale, this.bodyRaycastSweep.normalized, this.nonAllocRaycastHits, Mathf.Max(this.bodyRaycastSweep.magnitude, num10), this.gorillaTagColliderLayerMask, QueryTriggerInteraction.Collide);
-			this.<LateUpdate>g__TryTaggingAllHitsCapsulecast|146_1(this.maxTagDistance, true, false, ref CS$<>8__locals1);
+			this.<LateUpdate>g__TryTaggingAllHitsCapsulecast|147_1(this.maxTagDistance, true, false, ref CS$<>8__locals1);
 		}
 		if (this.otherPlayer != null)
 		{
@@ -1033,7 +1009,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		Tappable tappable = null;
 		bool flag5 = gorillaSurfaceOverride != null && gorillaSurfaceOverride.TryGetComponent<Tappable>(out tappable);
 		HandEffectContext handEffect = this.offlineVRRig.GetHandEffect(isLeftHand, stiltID);
-		if ((!flag5 || !tappable.overrideTapCooldown) && (!handEffect.SeparateUpTapCooldown || !flag4 || Time.time <= lastTapUpTime + this.tapCoolDown) && Time.time <= lastTapTime + this.tapCoolDown)
+		if ((!flag5 || !tappable.overrideTapCooldown) && (!handEffect.SeparateUpTapCooldown || !flag4 || Time.time <= lastTapUpTime + this.tapCoolDown) && (!flag3 || Time.time <= lastTapTime + this.tapCoolDown))
 		{
 			return;
 		}
@@ -1138,6 +1114,15 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
+	public void ConfirmUpdatedFrameRate()
+	{
+		GorillaTagger.<ConfirmUpdatedFrameRate>d__168 <ConfirmUpdatedFrameRate>d__;
+		<ConfirmUpdatedFrameRate>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
+		<ConfirmUpdatedFrameRate>d__.<>4__this = this;
+		<ConfirmUpdatedFrameRate>d__.<>1__state = -1;
+		<ConfirmUpdatedFrameRate>d__.<>t__builder.Start<GorillaTagger.<ConfirmUpdatedFrameRate>d__168>(ref <ConfirmUpdatedFrameRate>d__);
+	}
+
 	public void DebugDrawTagCasts(Color color)
 	{
 		float num = this.sphereCastRadius * GTPlayer.Instance.scale;
@@ -1230,7 +1215,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	}
 
 	[CompilerGenerated]
-	private void <LateUpdate>g__TryTaggingAllHitsOverlap|146_0(bool isLeftHand, float maxTagDistance, bool canTag = true, bool canStun = false, ref GorillaTagger.<>c__DisplayClass146_0 A_5)
+	private void <LateUpdate>g__TryTaggingAllHitsOverlap|147_0(bool isLeftHand, float maxTagDistance, bool canTag = true, bool canStun = false, ref GorillaTagger.<>c__DisplayClass147_0 A_5)
 	{
 		for (int i = 0; i < this.nonAllocHits; i++)
 		{
@@ -1255,7 +1240,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	}
 
 	[CompilerGenerated]
-	private void <LateUpdate>g__TryTaggingAllHitsCapsulecast|146_1(float maxTagDistance, bool canTag = true, bool canStun = false, ref GorillaTagger.<>c__DisplayClass146_0 A_4)
+	private void <LateUpdate>g__TryTaggingAllHitsCapsulecast|147_1(float maxTagDistance, bool canTag = true, bool canStun = false, ref GorillaTagger.<>c__DisplayClass147_0 A_4)
 	{
 		for (int i = 0; i < this.nonAllocHits; i++)
 		{
@@ -1488,6 +1473,8 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 	private float? tagRadiusOverride;
 
 	private int tagRadiusOverrideFrame = -1;
+
+	public XRDisplaySubsystem activeXRDisplay;
 
 	private static Action onPlayerSpawnedRootCallback;
 

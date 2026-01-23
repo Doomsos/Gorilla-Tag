@@ -5,7 +5,7 @@ using GorillaNetworking;
 using GorillaTagScripts.VirtualStumpCustomMaps;
 using UnityEngine;
 
-public class SIGadgetTentacleArm : SIGadget, ICallBack
+public class SIGadgetTentacleArm : SIGadget, ICallBack, IEnergyGadget
 {
 	public bool isAnchored { get; private set; }
 
@@ -347,7 +347,6 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack
 		this.clawVisualRot = quaternion;
 		if (!this.isAnchored)
 		{
-			this.currentFuel = Mathf.Clamp(this.currentFuel + dt * this.FuelPerSecond_Recharging, 0f, this.fuelSize);
 			this.isLowFuel = (this.currentFuel < this.FuelCost_Grab);
 		}
 		this.wasGrabPressed = flag;
@@ -635,6 +634,30 @@ public class SIGadgetTentacleArm : SIGadget, ICallBack
 		if (this.lastHeldCallbackFrame == this.lastCallbackFrame)
 		{
 			this.CallBack();
+		}
+	}
+
+	public bool UsesEnergy
+	{
+		get
+		{
+			return true;
+		}
+	}
+
+	public bool IsFull
+	{
+		get
+		{
+			return this.currentFuel >= this.fuelSize;
+		}
+	}
+
+	public void UpdateRecharge(float dt)
+	{
+		if (!this.isAnchored)
+		{
+			this.currentFuel = Mathf.Clamp(this.currentFuel + dt * this.FuelPerSecond_Recharging, 0f, this.fuelSize);
 		}
 	}
 

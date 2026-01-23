@@ -7,13 +7,13 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(GameGrabbable))]
 [RequireComponent(typeof(GameSnappable))]
 [RequireComponent(typeof(GameButtonActivatable))]
-public class SIGadgetWristJet : SIGadget, I_SIDisruptable
+public class SIGadgetWristJet : SIGadget, I_SIDisruptable, IEnergyGadget
 {
 	private bool CanRecharge
 	{
 		get
 		{
-			return (!this.rechargeRequiresFloorTouch || this._floorTouched) && this.state != SIGadgetWristJet.State.Active;
+			return (!this.rechargeRequiresFloorTouch || this._floorTouched) && this.state == SIGadgetWristJet.State.Unactive;
 		}
 	}
 
@@ -136,10 +136,6 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 		switch (this.state)
 		{
 		case SIGadgetWristJet.State.Unactive:
-			if (this.CanRecharge)
-			{
-				this.currentFuel = Mathf.Clamp(this.currentFuel + dt * this.fuelGainRate, 0f, this.fuelSize);
-			}
 			if (flag)
 			{
 				this.SetStateAuthority(SIGadgetWristJet.State.Active);
@@ -324,6 +320,30 @@ public class SIGadgetWristJet : SIGadget, I_SIDisruptable
 		}
 		this.currentFuel = (this.fuelSize = 10f);
 		this._throttle = (this._currentBurnRate = 1f);
+	}
+
+	public bool UsesEnergy
+	{
+		get
+		{
+			return true;
+		}
+	}
+
+	public bool IsFull
+	{
+		get
+		{
+			return this.currentFuel >= this.fuelSize;
+		}
+	}
+
+	public void UpdateRecharge(float dt)
+	{
+		if (this.CanRecharge)
+		{
+			this.currentFuel = Mathf.Clamp(this.currentFuel + dt * this.fuelGainRate, 0f, this.fuelSize);
+		}
 	}
 
 	private const string preLog = "[SIGadgetWristJet]  ";

@@ -73,7 +73,7 @@ public class SIUIPlayerQuestDisplay : MonoBehaviour, IGorillaSliceableSimple
 		int bonusProgress = siplayer.CurrentProgression.bonusProgress;
 		if (this.lastBonusProgress != bonusProgress)
 		{
-			this.sharedProgress.UpdateFillPercent((float)bonusProgress / 10f);
+			this.sharedProgress.UpdateFillPercent((float)bonusProgress / 4f);
 			this.sharedProgress.progressText.text = string.Format("{0}%", Mathf.Min(100, bonusProgress * 10));
 		}
 		this.lastBonusProgress = bonusProgress;
@@ -86,7 +86,7 @@ public class SIUIPlayerQuestDisplay : MonoBehaviour, IGorillaSliceableSimple
 		{
 			this.bonusPointsCompleted.SetActive(!flag3);
 		}
-		bool flag4 = siplayer.CurrentProgression.bonusProgress >= 10;
+		bool flag4 = siplayer.CurrentProgression.bonusProgress >= 4;
 		if (this.collectBonusButton.activeSelf != flag4)
 		{
 			this.collectBonusButton.SetActive(flag4);

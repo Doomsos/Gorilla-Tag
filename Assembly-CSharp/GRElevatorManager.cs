@@ -6,6 +6,7 @@ using GorillaLocomotion;
 using GorillaNetworking;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Video;
 
 [NetworkBehaviourWeaved(0)]
 public class GRElevatorManager : NetworkComponent, ITickSystemTick
@@ -79,6 +80,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		NetworkBehaviourUtils.InternalOnEnable(this);
 		base.OnEnable();
 		TickSystem<object>.AddTickCallback(this);
+		this.DestinationVideoPlayer.loopPointReached += this.DisableVideoScreens;
 	}
 
 	private new void OnDisable()
@@ -86,6 +88,15 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		NetworkBehaviourUtils.InternalOnDisable(this);
 		base.OnDisable();
 		TickSystem<object>.RemoveTickCallback(this);
+		this.DestinationVideoPlayer.loopPointReached -= this.DisableVideoScreens;
+	}
+
+	private void DisableVideoScreens(VideoPlayer source)
+	{
+		for (int i = 0; i < this.allElevators.Count; i++)
+		{
+			this.allElevators[i].videoDisplay.SetActive(false);
+		}
 	}
 
 	public void Tick()
@@ -264,6 +275,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 				if (this.destination != this.currentLocation)
 				{
 					this.destination = location;
+					this.PlayDestinationVideo(this.destination);
 				}
 				this.elevatorByLocation[this.currentLocation].PlayElevatorMoving();
 				this.elevatorByLocation[this.destination].PlayElevatorMoving();
@@ -292,6 +304,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 					this.destination = location;
 					this.destinationButtonLastPressedTime = this.GetTime();
 					this.maxDoorClosingTime = this.GetTime();
+					this.PlayDestinationVideo(this.destination);
 				}
 				else
 				{
@@ -330,6 +343,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 				if (location != this.currentLocation)
 				{
 					this.destination = location;
+					this.PlayDestinationVideo(this.destination);
 				}
 				break;
 			case GRElevatorManager.ElevatorSystemState.WaitingToTeleport:
@@ -365,6 +379,7 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 				if (location != this.currentLocation)
 				{
 					this.destination = location;
+					this.PlayDestinationVideo(this.destination);
 				}
 				else
 				{
@@ -377,6 +392,36 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		}
 		this.currentState = newState;
 		this.UpdateUI();
+	}
+
+	private void PlayDestinationVideo(GRElevatorManager.ElevatorLocation destination)
+	{
+		VideoClip clipForDestination = this.getClipForDestination(destination);
+		if (this.DestinationVideoPlayer.isPlaying && this.DestinationVideoPlayer.clip != clipForDestination)
+		{
+			this.DestinationVideoPlayer.Stop();
+			this.DisableVideoScreens(this.DestinationVideoPlayer);
+		}
+		if (clipForDestination != null && this.currentLocation != GRElevatorManager.ElevatorLocation.None)
+		{
+			this.DestinationVideoPlayer.clip = clipForDestination;
+			this.DestinationVideoPlayer.SetTargetAudioSource(0, this.DestinationVideoPlayerAudioSource);
+			this.DestinationVideoPlayer.Play();
+			this.DestinationVideoPlayerAudioSource.transform.position = this.elevatorByLocation[this.currentLocation].videoAudio.transform.position;
+			this.elevatorByLocation[this.currentLocation].videoDisplay.SetActive(true);
+		}
+	}
+
+	private VideoClip getClipForDestination(GRElevatorManager.ElevatorLocation destination)
+	{
+		for (int i = 0; i < this.DestinationVideos.Length; i++)
+		{
+			if (this.DestinationVideos[i].Destination == destination)
+			{
+				return this.DestinationVideos[i].VideoClip;
+			}
+		}
+		return null;
 	}
 
 	public void UpdateUI()
@@ -571,6 +616,11 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		num = (int)stream.ReceiveNext();
 		if (num >= 0 && num < 5)
 		{
+			GRElevatorManager.ElevatorSystemState elevatorSystemState = (GRElevatorManager.ElevatorSystemState)num;
+			if (elevatorSystemState != this.currentState && elevatorSystemState == GRElevatorManager.ElevatorSystemState.DestinationPressed)
+			{
+				this.PlayDestinationVideo(this.destination);
+			}
 			this.currentState = (GRElevatorManager.ElevatorSystemState)num;
 		}
 		this.UpdateUI();
@@ -665,6 +715,11 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 			return;
 		}
 		this.elevatorByLocation[destination].collidersAndVisuals.SetActive(true);
+		if (this.DestinationVideoPlayer.isPlaying)
+		{
+			this.elevatorByLocation[destination].videoDisplay.SetActive(true);
+			this.DestinationVideoPlayerAudioSource.transform.position = this.elevatorByLocation[destination].videoAudio.transform.position;
+		}
 		float num = grelevator2.transform.rotation.eulerAngles.y - grelevator.transform.rotation.eulerAngles.y;
 		GTPlayer instance = GTPlayer.Instance;
 		VRRig localRig = VRRig.LocalRig;
@@ -1166,6 +1221,15 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 
 	public float waitForZoneLoadFallbackMaxTime = 5f;
 
+	[SerializeField]
+	private GRElevatorManager.DestinationVideo[] DestinationVideos;
+
+	[SerializeField]
+	private VideoPlayer DestinationVideoPlayer;
+
+	[SerializeField]
+	private AudioSource DestinationVideoPlayerAudioSource;
+
 	[Serializable]
 	public class GRShuttleGroup
 	{
@@ -1197,5 +1261,13 @@ public class GRElevatorManager : NetworkComponent, ITickSystemTick
 		GhostReactor,
 		MonkeBlocks,
 		None
+	}
+
+	[Serializable]
+	public struct DestinationVideo
+	{
+		public GRElevatorManager.ElevatorLocation Destination;
+
+		public VideoClip VideoClip;
 	}
 }

@@ -15,7 +15,7 @@ public class SIGadgetListEntry : MonoBehaviour
 
 	public int Id { get; private set; } = -1;
 
-	public void Configure(ITouchScreenStation station, SITechTreePage page, Transform imageTarget, Transform textTarget, SITouchscreenButton.SITouchscreenButtonType buttonType = SITouchscreenButton.SITouchscreenButtonType.Select, int index = 0, float verticalOffset = 0f)
+	public void Configure(ITouchScreenStation station, SITechTreePage page, Transform imageTarget, Transform textTarget, SITouchscreenButton.SITouchscreenButtonType buttonType = SITouchscreenButton.SITouchscreenButtonType.Select, int index = 0, float positionInterval = 0f, int listSize = 0)
 	{
 		base.name = (this.gadgetText.text = page.nickName);
 		SITouchscreenButton button = this.buttonContainer.button;
@@ -24,7 +24,8 @@ public class SIGadgetListEntry : MonoBehaviour
 		button.buttonPressed.RemoveAllListeners();
 		button.buttonPressed.AddListener(new UnityAction<SITouchscreenButton.SITouchscreenButtonType, int, int>(station.TouchscreenButtonPressed));
 		station.AddButton(button, false);
-		base.transform.localPosition += new Vector3(0f, (float)index * verticalOffset, 0f);
+		float num = (float)Mathf.Max(listSize - 1, 0) * -(positionInterval / 2f);
+		base.transform.localPosition += new Vector3(0f, num + (float)index * positionInterval, 0f);
 		this.imageFlattener.overrideParentTransform = imageTarget;
 		this.textFlattener.overrideParentTransform = textTarget;
 		this.imageFlattener.enabled = true;

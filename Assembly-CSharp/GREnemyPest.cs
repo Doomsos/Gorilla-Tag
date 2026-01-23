@@ -22,7 +22,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.navAgent.updateRotation = false;
 		this.behaviorStartTime = -1.0;
 		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviorStateChange;
-		this.senseNearby.Setup(this.headTransform);
+		this.senseNearby.Setup(this.headTransform, this.entity);
 		GameEntity gameEntity = this.entity;
 		gameEntity.OnGrabbed = (Action)Delegate.Combine(gameEntity.OnGrabbed, new Action(this.OnGrabbed));
 		GameEntity gameEntity2 = this.entity;
@@ -465,7 +465,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		}
 	}
 
-	public void OnHitByClub(GameHitData hit)
+	private void OnHitByClub(GameHitData hit)
 	{
 		if (this.currBodyState != GREnemyPest.BodyState.Bones)
 		{
@@ -490,7 +490,13 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.TrySetBehavior(GREnemyPest.Behavior.Stagger);
 	}
 
-	public void OnHitByFlash(GRTool tool, GameHitData hit)
+	public void InstantDeath()
+	{
+		this.hp = 0;
+		this.SetBehavior(GREnemyPest.Behavior.Destroyed, false);
+	}
+
+	private void OnHitByFlash(GRTool tool, GameHitData hit)
 	{
 		this.abilityFlashed.SetStaggerVelocity(hit.hitImpulse);
 		if (this.currBodyState == GREnemyPest.BodyState.Shell)
@@ -533,7 +539,7 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 		this.TrySetBehavior(GREnemyPest.Behavior.Flashed);
 	}
 
-	public void OnHitByShield(GameHitData hit)
+	private void OnHitByShield(GameHitData hit)
 	{
 		this.OnHitByClub(hit);
 	}
@@ -575,7 +581,8 @@ public class GREnemyPest : MonoBehaviour, IGameEntityComponent, IGameEntitySeria
 					hitByEntityId = this.entity.id,
 					hitEntityPosition = component4.transform.position,
 					hitImpulse = Vector3.zero,
-					hitPosition = component4.transform.position
+					hitPosition = component4.transform.position,
+					hittablePoint = component5.FindHittablePoint(collider)
 				};
 				component5.RequestHit(hitData);
 			}

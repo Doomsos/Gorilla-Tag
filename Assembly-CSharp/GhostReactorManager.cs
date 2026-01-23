@@ -571,7 +571,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 			float num2 = 10000f;
 			if (hitImpulse.IsValid(num2))
 			{
-				if (hitImpulse.magnitude > 20f)
+				if (hitImpulse.magnitude > 50f)
 				{
 					return;
 				}
@@ -817,13 +817,13 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		this.reactor.AddHandprint(pos, orient);
 	}
 
-	public void OnAbilityDie(GameEntity entity)
+	public void OnAbilityDie(GameEntity entity, float forcedRespawn = -1f)
 	{
 		if (this.reactor == null)
 		{
 			return;
 		}
-		this.reactor.OnAbilityDie(entity);
+		this.reactor.OnAbilityDie(entity, forcedRespawn);
 	}
 
 	public void RequestShiftStartAuthority(bool isFirstShift)
@@ -979,7 +979,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		{
 			return false;
 		}
-		if (gameEntity.GetComponent<GREnemyChaser>() != null || gameEntity.GetComponent<GREnemyRanged>() != null || gameEntity.GetComponent<GREnemyPhantom>() != null || gameEntity.GetComponent<GREnemyPest>() != null)
+		if (this.IsEnemy(gameEntity))
 		{
 			return false;
 		}
@@ -990,6 +990,127 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		Collider safeZoneLimit = this.reactor.safeZoneLimit;
 		Vector3 position = gameEntity.gameObject.transform.position;
 		return safeZoneLimit.bounds.Contains(position) || gameEntity.GetComponent<GRBadge>() != null;
+	}
+
+	private bool IsEnemy(GameEntity gameEntity)
+	{
+		return gameEntity.GetComponent<GREnemyChaser>() != null || gameEntity.GetComponent<GREnemyRanged>() != null || gameEntity.GetComponent<GREnemyPhantom>() != null || gameEntity.GetComponent<GREnemyPest>() != null || gameEntity.GetComponent<GREnemySummoner>() != null || gameEntity.GetComponent<GREnemyMonkeye>() != null || gameEntity.GetComponent<GREnemyBossMoon>() != null;
+	}
+
+	public void InstantDeathForCurrentEnemies()
+	{
+		int num = 0;
+		List<GameEntity> gameEntities = this.gameEntityManager.GetGameEntities();
+		for (int i = 0; i < gameEntities.Count; i++)
+		{
+			if (!(gameEntities[i] == null))
+			{
+				GameEntity gameEntity = gameEntities[i];
+				if (!(gameEntity.GetComponent<GREnemyBossMoon>() != null))
+				{
+					GREnemyChaser component = gameEntity.GetComponent<GREnemyChaser>();
+					if (component != null)
+					{
+						component.InstantDeath();
+						num++;
+					}
+					else
+					{
+						GREnemyRanged component2 = gameEntity.GetComponent<GREnemyRanged>();
+						if (component2 != null)
+						{
+							component2.InstantDeath();
+							num++;
+						}
+						else
+						{
+							GREnemyPest component3 = gameEntity.GetComponent<GREnemyPest>();
+							if (component3 != null)
+							{
+								component3.InstantDeath();
+								num++;
+							}
+							else
+							{
+								GREnemySummoner component4 = gameEntity.GetComponent<GREnemySummoner>();
+								if (component4 != null)
+								{
+									component4.InstantDeath();
+									num++;
+								}
+								else
+								{
+									GREnemyMonkeye component5 = gameEntity.GetComponent<GREnemyMonkeye>();
+									if (component5 != null)
+									{
+										component5.InstantDeath();
+										num++;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		Debug.Log(string.Format("Instant death for {0} enemies.", num));
+	}
+
+	private void RequestRestoreBossHP()
+	{
+	}
+
+	private void RequestHurtBossHP()
+	{
+	}
+
+	private void RequestKillBossEyes()
+	{
+	}
+
+	private void RequestKillBossSummoned()
+	{
+	}
+
+	private void RequestGoBackBossPhase()
+	{
+	}
+
+	private void RequestAdvanceBossPhase()
+	{
+	}
+
+	private void RequestBossBehavior(GREnemyBossMoon.Behavior bossBehavior)
+	{
+	}
+
+	public GameEntity GetBossEntity()
+	{
+		if (this.cachedBossEntity != null && this.cachedBossEntity.IsNotNull())
+		{
+			return this.cachedBossEntity;
+		}
+		if (this.gameEntityManager == null)
+		{
+			return null;
+		}
+		GameEntity result = null;
+		List<GameEntity> gameEntities = this.gameEntityManager.GetGameEntities();
+		for (int i = 0; i < gameEntities.Count; i++)
+		{
+			if (!(gameEntities[i] == null) && !(gameEntities[i].GetComponent<GREnemyBossMoon>() == null))
+			{
+				result = gameEntities[i];
+				break;
+			}
+		}
+		this.cachedBossEntity = result;
+		return result;
+	}
+
+	public void ClearCachedBossEntity()
+	{
+		this.cachedBossEntity = null;
 	}
 
 	public void ReportEnemyDeath()
@@ -2654,6 +2775,8 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 	private WaitForSeconds spawnSectionEntitiesWait = new WaitForSeconds(0.1f);
 
 	private static List<GameEntityId> tempEntitiesToDestroy = new List<GameEntityId>();
+
+	private GameEntity cachedBossEntity;
 
 	public GRToolUpgradeStation upgradeStation;
 

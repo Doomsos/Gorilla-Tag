@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{73DA58E6-039B-4554-B316-A7807DE291DF}</ProjectGuid>
+    <ProjectGuid>{C02A484C-65C8-4231-9BB2-2BDFDDADD0B9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -538,6 +538,7 @@
     <Compile Include="CjLib\Vector4Spring.cs" />
     <Compile Include="CjLib\VectorUtil.cs" />
     <Compile Include="ClackerCosmetic.cs" />
+    <Compile Include="Clock3x3.cs" />
     <Compile Include="ClockController.cs" />
     <Compile Include="CloudUmbrellaCloud.cs" />
     <Compile Include="CMSZoneShaderSettingsTrigger.cs" />
@@ -974,6 +975,7 @@
     <Compile Include="GameHitType.cs" />
     <Compile Include="GameLight.cs" />
     <Compile Include="GameLightingManager.cs" />
+    <Compile Include="GameLightPulse.cs" />
     <Compile Include="GameMirrorWhenEquipped.cs" />
     <Compile Include="GameModePageButton.cs" />
     <Compile Include="GameModePages.cs" />
@@ -1050,6 +1052,7 @@
     <Compile Include="GorillaBodyPhysics.cs" />
     <Compile Include="GorillaBodyRenderer.cs" />
     <Compile Include="GorillaBodyType.cs" />
+    <Compile Include="GorillaCameraClipPlaneOverrideTrigger.cs" />
     <Compile Include="GorillaCameraFollow.cs" />
     <Compile Include="GorillaCameraSceneTrigger.cs" />
     <Compile Include="GorillaCameraTriggerIndex.cs" />
@@ -1071,6 +1074,7 @@
     <Compile Include="GorillaEnemySpawner.cs" />
     <Compile Include="GorillaExtensions\CollectionExtensions.cs" />
     <Compile Include="GorillaExtensions\EnumerableExtensions.cs" />
+    <Compile Include="GorillaExtensions\GameObjectExtensions.cs" />
     <Compile Include="GorillaExtensions\GorillaMath.cs" />
     <Compile Include="GorillaExtensions\GTExt.cs" />
     <Compile Include="GorillaExtensions\GTStringBuilderExtensions.cs" />
@@ -1368,10 +1372,13 @@
     <Compile Include="GorillaTagScripts\FriendshipGroupDetection.cs" />
     <Compile Include="GorillaTagScripts\GameObjectManagerWithId.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\GRDebugActions.cs" />
+    <Compile Include="GorillaTagScripts\GhostReactor\GRDelveDeeperButton.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\GREnemyType.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\GREnemyTypeExtensions.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\GRGameObjectExtensions.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\GRKiosk.cs" />
+    <Compile Include="GorillaTagScripts\GhostReactor\GRSpherePushVolume.cs" />
+    <Compile Include="GorillaTagScripts\GhostReactor\GRSquishVolume.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\SoakTasks\IGhostReactorSoakTask.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\SoakTasks\SoakTaskBreakable.cs" />
     <Compile Include="GorillaTagScripts\GhostReactor\SoakTasks\SoakTaskDepositCollectibles.cs" />
@@ -1715,6 +1722,7 @@
     <Compile Include="GRAbilityWander.cs" />
     <Compile Include="GRAbilityWatch.cs" />
     <Compile Include="GrabPointType.cs" />
+    <Compile Include="GRAdaptiveMusicController.cs" />
     <Compile Include="GradientHelper.cs" />
     <Compile Include="GragerHoldable.cs" />
     <Compile Include="GraphicsStateCollectionManager.cs" />
@@ -1731,6 +1739,8 @@
     <Compile Include="GRBehaviorsBase.cs" />
     <Compile Include="GRBonusEntry.cs" />
     <Compile Include="GRBonusSystem.cs" />
+    <Compile Include="GRBossEyeStare.cs" />
+    <Compile Include="GRBossMoonTentacleAttack.cs" />
     <Compile Include="GRBreakable.cs" />
     <Compile Include="GRBreakableItemSpawnConfig.cs" />
     <Compile Include="GRCollectible.cs" />
@@ -1754,6 +1764,8 @@
     <Compile Include="GREmployeeLocker.cs" />
     <Compile Include="GREnemy.cs" />
     <Compile Include="GREnemyBossMoon.cs" />
+    <Compile Include="GREnemyBossMoonColliderHelper.cs" />
+    <Compile Include="GREnemyBossMoonEye.cs" />
     <Compile Include="GREnemyChaser.cs" />
     <Compile Include="GREnemyCount.cs" />
     <Compile Include="GREnemyMonkeye.cs" />
@@ -1990,12 +2002,14 @@
     <Compile Include="ICallBack.cs" />
     <Compile Include="IClickable.cs" />
     <Compile Include="ICosmeticCritterTickForEach.cs" />
+    <Compile Include="ICustomKnockbackAbility.cs" />
     <Compile Include="Id128.cs" />
     <Compile Include="Id128Ext.cs" />
     <Compile Include="Id32.cs" />
     <Compile Include="IDCardScanner.cs" />
     <Compile Include="IDebugObject.cs" />
     <Compile Include="IDelayedExecListener.cs" />
+    <Compile Include="IEnergyGadget.cs" />
     <Compile Include="IEyeScannable.cs" />
     <Compile Include="IFactoryItemProvider.cs" />
     <Compile Include="iFlagForBaking.cs" />
@@ -2562,6 +2576,7 @@
     <Compile Include="ReportTargetHit.cs" />
     <Compile Include="RequestableOwnershipGaurdHandler.cs" />
     <Compile Include="RequestableOwnershipGuard.cs" />
+    <Compile Include="ReverbTrigger.cs" />
     <Compile Include="RigContainer.cs" />
     <Compile Include="RigDuplicationZone.cs" />
     <Compile Include="RigEventVolume.cs" />
@@ -2666,7 +2681,6 @@
     <Compile Include="SIGadgetSlashDash.cs" />
     <Compile Include="SIGadgetSlashDash_EState.cs" />
     <Compile Include="SIGadgetSlipMitt.cs" />
-    <Compile Include="SIGadgetSO.cs" />
     <Compile Include="SIGadgetStilt.cs" />
     <Compile Include="SIGadgetTapTeleporter.cs" />
     <Compile Include="SIGadgetTapTeleporterDeployable.cs" />
@@ -2891,6 +2905,7 @@
     <Compile Include="TimeOfDayEvent.cs" />
     <Compile Include="TimeSettings.cs" />
     <Compile Include="TimeSince.cs" />
+    <Compile Include="TitleDataActivation.cs" />
     <Compile Include="TitleDataLocalization.cs" />
     <Compile Include="TMPPermission.cs" />
     <Compile Include="TMPSession.cs" />

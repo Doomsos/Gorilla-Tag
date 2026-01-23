@@ -365,6 +365,15 @@ public class GamePlayer : MonoBehaviour
 		return this.hands[handIndex].grabbedEntityManager.GetGameEntity(this.GetGrabbedGameEntityId(handIndex));
 	}
 
+	public GameEntity GetSnappedGameEntity(int handIndex)
+	{
+		if (handIndex < 0 || handIndex >= this.hands.Length || this.hands[handIndex].snappedEntityManager == null)
+		{
+			return null;
+		}
+		return this.hands[handIndex].snappedEntityManager.GetGameEntity(this.hands[handIndex].snappedEntityId);
+	}
+
 	public int FindHandIndex(GameEntityId gameBallId)
 	{
 		for (int i = 0; i < this.hands.Length; i++)
@@ -465,7 +474,7 @@ public class GamePlayer : MonoBehaviour
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(actorNumber);
 		RigContainer rigContainer;
-		if (player == null || !VRRigCache.Instance.TryGetVrrig(player, out rigContainer))
+		if (player == null || VRRigCache.Instance == null || !VRRigCache.Instance.TryGetVrrig(player, out rigContainer))
 		{
 			out_gamePlayer = null;
 			return false;

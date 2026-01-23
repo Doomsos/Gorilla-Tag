@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using XNode;
@@ -15,9 +16,25 @@ public class TechTreeGadgetGraph : NodeGraph
 		}
 	}
 
+	public bool IsValid
+	{
+		get
+		{
+			EAssetReleaseTier eassetReleaseTier = this.releaseTier;
+			if (eassetReleaseTier != EAssetReleaseTier.Disabled && eassetReleaseTier <= EAssetReleaseTier.PublicRC)
+			{
+				List<Node> nodes = this.nodes;
+				return nodes != null && nodes.Count > 0;
+			}
+			return false;
+		}
+	}
+
 	public string nickName;
 
 	public SITechTreePageId pageId;
+
+	public Sprite icon;
 
 	public float costMultiplier = 1f;
 

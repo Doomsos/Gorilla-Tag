@@ -9,6 +9,8 @@ public class GRAbilityIdle : GRAbilityBase
 	{
 		base.Setup(agent, anim, audioSource, root, head, lineOfSight);
 		this.animLoops = 0;
+		this.cachedDuration = this.duration;
+		this.cachedAnimSpeed = this.animSpeed;
 	}
 
 	protected override void OnStart()
@@ -17,16 +19,13 @@ public class GRAbilityIdle : GRAbilityBase
 		this.PlayAnim(this.animName, 0.3f, this.animSpeed);
 		this.animLoops = 0;
 		this.events.Reset();
+		this.events.OnAbilityStart(base.GetAbilityTime(Time.timeAsDouble), this.audioSource);
 	}
 
 	protected override void OnStop()
 	{
+		this.events.OnAbilityStop(base.GetAbilityTime(Time.timeAsDouble), this.audioSource);
 		this.agent.SetStopped(false);
-	}
-
-	public override bool IsDone()
-	{
-		return (double)this.duration > 0.0 && Time.timeAsDouble >= this.startTime + (double)this.duration;
 	}
 
 	protected override void OnUpdateShared(float dt)
@@ -44,11 +43,40 @@ public class GRAbilityIdle : GRAbilityBase
 		this.events.TryPlay(abilityTime, this.audioSource);
 	}
 
+	public override bool IsDone()
+	{
+		return (double)this.duration > 0.0 && Time.timeAsDouble >= this.startTime + (double)this.duration;
+	}
+
+	public override bool IsCoolDownOver()
+	{
+		return base.IsCoolDownOver(this.coolDown);
+	}
+
+	public override float GetRange()
+	{
+		return this.range;
+	}
+
+	public void SpeedUp(float mult)
+	{
+		this.duration = this.cachedDuration / mult;
+		this.animSpeed = this.cachedAnimSpeed * mult;
+	}
+
 	public float duration;
 
 	public string animName;
 
 	public float animSpeed;
+
+	public float coolDown;
+
+	public float range;
+
+	private float cachedDuration;
+
+	private float cachedAnimSpeed;
 
 	public GameAbilityEvents events;
 

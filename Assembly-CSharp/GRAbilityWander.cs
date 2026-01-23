@@ -46,7 +46,6 @@ public class GRAbilityWander : GRAbilityBase
 			Vector3 position2 = navMeshHit.position;
 			Vector3 forward = this.agent.transform.forward;
 			float num = 0f;
-			Vector3 sourcePosition = position2;
 			for (int i = 0; i < GRAbilityWander.rotations.Length; i++)
 			{
 				Vector3 a = GRAbilityWander.rotations[i] * forward;
@@ -56,15 +55,11 @@ public class GRAbilityWander : GRAbilityBase
 					num2 = navMeshHit.distance * 0.95f;
 				}
 				float num3 = num2 * GRAbilityWander.rotationWeight[i];
-				if (num3 > num)
+				if (num3 > num && NavMesh.SamplePosition(position2 + a * num2, out navMeshHit, 1f, this.walkableArea))
 				{
 					num = num3;
-					sourcePosition = position2 + a * num2;
+					position = navMeshHit.position;
 				}
-			}
-			if (NavMesh.SamplePosition(sourcePosition, out navMeshHit, 1f, this.walkableArea))
-			{
-				position = navMeshHit.position;
 			}
 		}
 		return position;

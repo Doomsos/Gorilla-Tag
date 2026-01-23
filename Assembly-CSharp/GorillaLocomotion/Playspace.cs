@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 
 namespace GorillaLocomotion
@@ -9,6 +10,10 @@ namespace GorillaLocomotion
 		{
 			this._sqrSphereRadius = this._sphereRadius * this._sphereRadius;
 			this._sqrSnapToThreshold = this._snapToThreshold * this._snapToThreshold;
+		}
+
+		private void Start()
+		{
 		}
 
 		private void Update()
@@ -54,5 +59,13 @@ namespace GorillaLocomotion
 		private float _snapToThreshold;
 
 		private float _sqrSnapToThreshold;
+
+		[SerializeField]
+		private GTPlayer m_gtPlayer;
+
+		[SerializeField]
+		private XROrigin m_xrOrigin;
+
+		private Transform m_xrBody;
 	}
 }

@@ -174,7 +174,7 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 		}
 		Collider collider = collision.collider;
 		GameHittable parentEnemy = this.GetParentEnemy<GameHittable>(collider);
-		if (parentEnemy != null)
+		if (parentEnemy != null && parentEnemy.IsColliderValid(collision.collider))
 		{
 			Vector3 a = parentEnemy.transform.position - base.transform.position;
 			a.Normalize();
@@ -194,7 +194,8 @@ public class GameHitter : MonoBehaviour, IGameEntityComponent
 				hitEntityPosition = position,
 				hitImpulse = a * this.knockbackMultiplier,
 				hitPosition = collision.GetContact(0).point,
-				hitAmount = this.CalcHitAmount(this.hitType, parentEnemy, this.gameEntity)
+				hitAmount = this.CalcHitAmount(this.hitType, parentEnemy, this.gameEntity),
+				hittablePoint = parentEnemy.FindHittablePoint(collider)
 			};
 			if (parentEnemy.IsHitValid(hitData))
 			{

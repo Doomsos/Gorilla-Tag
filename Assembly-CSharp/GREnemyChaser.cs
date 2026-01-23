@@ -31,11 +31,12 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.abilityAttackSwipe.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
 		this.abilityInvestigate.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
 		this.abilityPatrol.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
+		this.abilityWander.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
 		this.abilityStagger.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
 		this.abilityDie.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
 		this.abilityFlashed.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
 		this.abilityJump.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.senseNearby.Setup(this.headTransform);
+		this.senseNearby.Setup(this.headTransform, this.entity);
 		this.Setup(this.entity.createData);
 		if (this.entity && this.entity.manager && this.entity.manager.ghostReactorManager && this.entity.manager.ghostReactorManager.reactor)
 		{
@@ -62,7 +63,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.agent.onBehaviorStateChanged -= this.OnNetworkBehaviorStateChange;
 	}
 
-	public void Setup(long entityCreateData)
+	private void Setup(long entityCreateData)
 	{
 		this.SetPatrolPath(entityCreateData);
 		if (this.abilityPatrol.HasValidPatrolPath())
@@ -71,7 +72,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 		else
 		{
-			this.SetBehavior(GREnemyChaser.Behavior.Idle, true);
+			this.SetBehavior(GREnemyChaser.Behavior.Wander, true);
 		}
 		if (this.attributes.CalculateFinalValueForAttribute(GRAttributeType.ArmorMax) > 0)
 		{
@@ -87,16 +88,16 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.SetBehavior(GREnemyChaser.Behavior.Jump, false);
 	}
 
-	public void OnNetworkBehaviorStateChange(byte newState)
+	private void OnNetworkBehaviorStateChange(byte newState)
 	{
-		if (newState < 0 || newState >= 10)
+		if (newState < 0 || newState >= 11)
 		{
 			return;
 		}
 		this.SetBehavior((GREnemyChaser.Behavior)newState, false);
 	}
 
-	public void OnNetworkBodyStateChange(byte newState)
+	private void OnNetworkBodyStateChange(byte newState)
 	{
 		if (newState < 0 || newState >= 3)
 		{
@@ -105,13 +106,13 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.SetBodyState((GREnemyChaser.BodyState)newState, false);
 	}
 
-	public void SetPatrolPath(long entityCreateData)
+	private void SetPatrolPath(long entityCreateData)
 	{
 		GRPatrolPath grpatrolPath = GhostReactorManager.Get(this.entity).reactor.GetPatrolPath(entityCreateData);
 		this.abilityPatrol.SetPatrolPath(grpatrolPath);
 	}
 
-	public void SetNextPatrolNode(int nextPatrolNode)
+	private void SetNextPatrolNode(int nextPatrolNode)
 	{
 		this.abilityPatrol.SetNextPatrolNode(nextPatrolNode);
 	}
@@ -121,7 +122,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.hp = hp;
 	}
 
-	public bool TrySetBehavior(GREnemyChaser.Behavior newBehavior)
+	private bool TrySetBehavior(GREnemyChaser.Behavior newBehavior)
 	{
 		if (this.currBehavior == GREnemyChaser.Behavior.Jump && newBehavior == GREnemyChaser.Behavior.Stagger)
 		{
@@ -135,7 +136,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		return true;
 	}
 
-	public void SetBehavior(GREnemyChaser.Behavior newBehavior, bool force = false)
+	private void SetBehavior(GREnemyChaser.Behavior newBehavior, bool force = false)
 	{
 		if (this.currBehavior == newBehavior && !force)
 		{
@@ -148,6 +149,9 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 			break;
 		case GREnemyChaser.Behavior.Patrol:
 			this.abilityPatrol.Stop();
+			break;
+		case GREnemyChaser.Behavior.Wander:
+			this.abilityWander.Stop();
 			break;
 		case GREnemyChaser.Behavior.Stagger:
 			this.abilityStagger.Stop();
@@ -182,6 +186,9 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 			break;
 		case GREnemyChaser.Behavior.Patrol:
 			this.abilityPatrol.Start();
+			break;
+		case GREnemyChaser.Behavior.Wander:
+			this.abilityWander.Start();
 			break;
 		case GREnemyChaser.Behavior.Stagger:
 			this.abilityStagger.Start();
@@ -233,7 +240,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	public void SetBodyState(GREnemyChaser.BodyState newBodyState, bool force = false)
+	private void SetBodyState(GREnemyChaser.BodyState newBodyState, bool force = false)
 	{
 		if (this.currBodyState == newBodyState && !force)
 		{
@@ -317,6 +324,10 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		case GREnemyChaser.Behavior.Investigate:
 			this.ChooseNewBehavior();
 			return;
+		case GREnemyChaser.Behavior.Wander:
+			this.abilityWander.Think(dt);
+			this.ChooseNewBehavior();
+			return;
 		case GREnemyChaser.Behavior.Stagger:
 		case GREnemyChaser.Behavior.Dying:
 		case GREnemyChaser.Behavior.Attack:
@@ -378,10 +389,10 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 			this.SetBehavior(GREnemyChaser.Behavior.Patrol, false);
 			return;
 		}
-		this.SetBehavior(GREnemyChaser.Behavior.Idle, false);
+		this.SetBehavior(GREnemyChaser.Behavior.Wander, false);
 	}
 
-	public void OnUpdate(float dt)
+	private void OnUpdate(float dt)
 	{
 		if (this.entity.IsAuthority())
 		{
@@ -391,7 +402,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.OnUpdateRemote(dt);
 	}
 
-	public void OnUpdateAuthority(float dt)
+	private void OnUpdateAuthority(float dt)
 	{
 		switch (this.currBehavior)
 		{
@@ -400,6 +411,9 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 			return;
 		case GREnemyChaser.Behavior.Patrol:
 			this.abilityPatrol.UpdateAuthority(dt);
+			return;
+		case GREnemyChaser.Behavior.Wander:
+			this.abilityWander.UpdateAuthority(dt);
 			return;
 		case GREnemyChaser.Behavior.Stagger:
 			this.abilityStagger.UpdateAuthority(dt);
@@ -490,7 +504,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	public void OnUpdateRemote(float dt)
+	private void OnUpdateRemote(float dt)
 	{
 		switch (this.currBehavior)
 		{
@@ -499,6 +513,9 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 			return;
 		case GREnemyChaser.Behavior.Patrol:
 			this.abilityPatrol.UpdateRemote(dt);
+			return;
+		case GREnemyChaser.Behavior.Wander:
+			this.abilityWander.UpdateRemote(dt);
 			return;
 		case GREnemyChaser.Behavior.Stagger:
 			this.abilityStagger.UpdateRemote(dt);
@@ -564,6 +581,13 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.searchPosition = this.lastSeenTargetPosition + vector.normalized * 1.5f;
 		this.abilityStagger.SetStaggerVelocity(hit.hitImpulse);
 		this.TrySetBehavior(GREnemyChaser.Behavior.Stagger);
+	}
+
+	public void InstantDeath()
+	{
+		this.hp = 0;
+		this.SetBodyState(GREnemyChaser.BodyState.Destroyed, false);
+		this.SetBehavior(GREnemyChaser.Behavior.Dying, false);
 	}
 
 	public void OnHitByFlash(GRTool grTool, GameHitData hit)
@@ -667,7 +691,8 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 					hitByEntityId = this.entity.id,
 					hitEntityPosition = component4.transform.position,
 					hitImpulse = Vector3.zero,
-					hitPosition = component4.transform.position
+					hitPosition = component4.transform.position,
+					hittablePoint = component5.FindHittablePoint(collider)
 				};
 				component5.RequestHit(hitData);
 			}
@@ -690,6 +715,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		strings = new List<string>();
 		strings.Add(string.Format("State: <color=\"yellow\">{0}<color=\"white\"> HP: <color=\"yellow\">{1}<color=\"white\">", this.currBehavior.ToString(), this.hp));
 		strings.Add(string.Format("speed: <color=\"yellow\">{0}<color=\"white\"> patrol node:<color=\"yellow\">{1}/{2}<color=\"white\">", this.navAgent.speed, this.abilityPatrol.nextPatrolNode, (this.abilityPatrol.GetPatrolPath() != null) ? this.abilityPatrol.GetPatrolPath().patrolNodes.Count : 0));
+		strings.Add(string.Format("Dest: <color=\"yellow\">{0}<color=\"white\"> Pos: <color=\"yellow\">{1}<color=\"white\">", this.agent.navAgent.destination, this.agent.transform.position));
 	}
 
 	public void OnGameEntitySerialize(BinaryWriter writer)
@@ -782,6 +808,8 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 	public GRAbilityMoveToTarget abilityInvestigate;
 
 	public GRAbilityPatrol abilityPatrol;
+
+	public GRAbilityWander abilityWander;
 
 	public GRAbilityFlashed abilityFlashed;
 
@@ -878,6 +906,7 @@ public class GREnemyChaser : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 	{
 		Idle,
 		Patrol,
+		Wander,
 		Stagger,
 		Dying,
 		Chase,

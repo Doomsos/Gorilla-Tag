@@ -137,13 +137,17 @@ namespace GorillaTag.Cosmetics
 				Debug.LogWarning("Could not determine slot for: " + cosmeticItem.displayName);
 				return null;
 			}
-			CosmeticsController.CosmeticItem replacedItem = this.controller.currentWornSet.items[(int)cosmeticSlot];
+			CosmeticsController.CosmeticItem cosmeticItem2 = this.controller.currentWornSet.items[(int)cosmeticSlot];
+			if (!cosmeticItem2.isNullItem && cosmeticItem2.itemName == cosmeticItem.itemName)
+			{
+				return null;
+			}
 			this.controller.ApplyCosmeticItemToSet(this.controller.tempUnlockedSet, cosmeticItem, isLeftHand, false);
 			this.controller.UpdateWornCosmetics(true);
 			return new CosmeticSwapper.CosmeticState?(new CosmeticSwapper.CosmeticState
 			{
 				cosmeticId = nameOrId,
-				replacedItem = replacedItem,
+				replacedItem = cosmeticItem2,
 				slot = cosmeticSlot,
 				isLeftHand = isLeftHand
 			});

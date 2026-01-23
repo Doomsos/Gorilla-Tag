@@ -580,7 +580,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 	{
 		this.CosmeticsV2_Awake();
 		PlayFabAuthenticator instance = PlayFabAuthenticator.instance;
-		instance.OnSafetyUpdate = (Action<bool>)Delegate.Combine(instance.OnSafetyUpdate, new Action<bool>(this.UpdateName));
+		instance.OnSafetyUpdate = (Action<bool>)Delegate.Combine(instance.OnSafetyUpdate, new Action<bool>(this.UpdateNameSafeAccount));
 		if (this.isOfflineVRRig)
 		{
 			VRRig.gLocalRig = this;
@@ -1862,6 +1862,11 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		this.SetColor(color);
 		bool isNamePermissionEnabled = KIDManager.HasPermissionToUseFeature(EKIDFeatures.Custom_Nametags);
 		this.UpdateName(isNamePermissionEnabled);
+	}
+
+	public void UpdateNameSafeAccount(bool isSafeAccount)
+	{
+		this.UpdateName(!isSafeAccount);
 	}
 
 	public void UpdateName(bool isNamePermissionEnabled)

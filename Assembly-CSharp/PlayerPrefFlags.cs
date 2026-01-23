@@ -5,12 +5,12 @@ public class PlayerPrefFlags
 {
 	internal static bool Check(PlayerPrefFlags.Flag flag)
 	{
-		return (PlayerPrefs.GetInt("PlayerPrefFlags0", 1) & (int)flag) == (int)flag;
+		return (PlayerPrefs.GetInt("PlayerPrefFlags0", 5) & (int)flag) == (int)flag;
 	}
 
 	internal static void Touch(PlayerPrefFlags.Flag flag)
 	{
-		bool arg = (PlayerPrefs.GetInt("PlayerPrefFlags0", 1) & (int)flag) == (int)flag;
+		bool arg = (PlayerPrefs.GetInt("PlayerPrefFlags0", 5) & (int)flag) == (int)flag;
 		if (PlayerPrefFlags.OnFlagChange != null)
 		{
 			PlayerPrefFlags.OnFlagChange(flag, arg);
@@ -19,7 +19,7 @@ public class PlayerPrefFlags
 
 	internal static void TouchIf(PlayerPrefFlags.Flag flag, bool value)
 	{
-		int @int = PlayerPrefs.GetInt("PlayerPrefFlags0", 1);
+		int @int = PlayerPrefs.GetInt("PlayerPrefFlags0", 5);
 		if (value == ((@int & (int)flag) == (int)flag) && PlayerPrefFlags.OnFlagChange != null)
 		{
 			PlayerPrefFlags.OnFlagChange(flag, value);
@@ -28,7 +28,7 @@ public class PlayerPrefFlags
 
 	internal static void Set(PlayerPrefFlags.Flag flag, bool value)
 	{
-		int num = PlayerPrefs.GetInt("PlayerPrefFlags0", 1);
+		int num = PlayerPrefs.GetInt("PlayerPrefFlags0", 5);
 		if (value)
 		{
 			num |= (int)flag;
@@ -46,7 +46,7 @@ public class PlayerPrefFlags
 
 	internal static bool Flip(PlayerPrefFlags.Flag flag)
 	{
-		int num = PlayerPrefs.GetInt("PlayerPrefFlags0", 1);
+		int num = PlayerPrefs.GetInt("PlayerPrefFlags0", 5);
 		bool flag2 = (num & (int)flag) != (int)flag;
 		if (flag2)
 		{
@@ -66,11 +66,12 @@ public class PlayerPrefFlags
 
 	public static Action<PlayerPrefFlags.Flag, bool> OnFlagChange;
 
-	private const int defaultValue = 1;
+	private const int defaultValue = 5;
 
 	public enum Flag
 	{
 		SHOW_1P_COSMETICS = 1,
-		SWAP_HELD_COSMETICS
+		SWAP_HELD_COSMETICS,
+		GAME_MODE_SELECTOR_IS_SUPER = 4
 	}
 }

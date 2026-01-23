@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GorillaNetworking;
 using UnityEngine;
 
 public class GhostReactorLevelGenerator : MonoBehaviourTick
@@ -8,11 +9,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 	{
 		get
 		{
-			if (this.depthConfigs == null || this.depthConfigs.Count <= 0)
-			{
-				return null;
-			}
-			return this.depthConfigs[Mathf.Clamp(this.reactor.GetDepthLevel(), 0, this.depthConfigs.Count - 1)].options[this.reactor.GetDepthConfigIndex()].levelConfig.treeLevels;
+			return this.GetTreeLevels();
 		}
 	}
 
@@ -74,6 +71,44 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 				this.nextVisCheckNodeIndex++;
 			}
 		}
+	}
+
+	private List<GhostReactorLevelGeneratorV2.TreeLevelConfig> GetTreeLevels()
+	{
+		if (this.depthConfigs == null || this.depthConfigs.Count == 0)
+		{
+			return null;
+		}
+		List<GhostReactorLevelGeneratorV2.TreeLevelConfig> treeLevels = this.depthConfigs[Mathf.Clamp(this.reactor.GetDepthLevel(), 0, this.depthConfigs.Count - 1)].options[this.reactor.GetDepthConfigIndex()].levelConfig.treeLevels;
+		List<GhostReactorLevelGeneratorV2.TreeLevelConfig> list = new List<GhostReactorLevelGeneratorV2.TreeLevelConfig>();
+		foreach (GhostReactorLevelGeneratorV2.TreeLevelConfig treeLevelConfig in treeLevels)
+		{
+			if (GhostReactorLevelGenerator.TreeLevelIsEnabledNow(treeLevelConfig))
+			{
+				list.Add(treeLevelConfig);
+			}
+		}
+		return list;
+	}
+
+	private static bool TreeLevelIsEnabledNow(GhostReactorLevelGeneratorV2.TreeLevelConfig treeLevel)
+	{
+		if (string.IsNullOrEmpty(treeLevel.EnableAfterDatetime) && string.IsNullOrEmpty(treeLevel.DisableAfterDatetime))
+		{
+			return true;
+		}
+		if (!string.IsNullOrEmpty(treeLevel.EnableAfterDatetime) && !string.IsNullOrEmpty(treeLevel.DisableAfterDatetime))
+		{
+			throw new ArgumentException("Both enable and disable after datetime are set--this should never happen!");
+		}
+		DateTime t = GorillaComputer.instance.GetServerTime().ToUniversalTime();
+		if (!string.IsNullOrEmpty(treeLevel.EnableAfterDatetime))
+		{
+			DateTime t2 = DateTime.Parse(treeLevel.EnableAfterDatetime).ToUniversalTime();
+			return t > t2;
+		}
+		DateTime t3 = DateTime.Parse(treeLevel.DisableAfterDatetime).ToUniversalTime();
+		return t < t3;
 	}
 
 	private bool TestForCollision(GhostReactorLevelSection section, Vector3 position, Quaternion rotation, int selfi, int selfj, int selfk)
@@ -403,12 +438,12 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		}
 	}
 
-	public void RespawnEntity(int entityId, long entityCreateData)
+	public void RespawnEntity(int entityId, long entityCreateData, GameEntityId createdByEntityId)
 	{
 		int sectionIndex = GhostReactor.EnemyEntityCreateData.Unpack(entityCreateData).sectionIndex;
 		if (sectionIndex >= 0 && sectionIndex < this.nodeList.Count)
 		{
-			this.nodeList[sectionIndex].sectionInstance.RespawnEntity(ref this.randomGenerator, this.reactor.grManager.gameEntityManager, entityId, entityCreateData);
+			this.nodeList[sectionIndex].sectionInstance.RespawnEntity(ref this.randomGenerator, this.reactor.grManager.gameEntityManager, entityId, entityCreateData, createdByEntityId);
 		}
 	}
 

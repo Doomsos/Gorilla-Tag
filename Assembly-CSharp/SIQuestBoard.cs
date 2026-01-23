@@ -122,6 +122,33 @@ public class SIQuestBoard : MonoBehaviour, IGorillaSliceableSimple
 	{
 	}
 
+	public void CheatRoomFXDurationPlus()
+	{
+		if (this.currentDuration < SIQuestBoard.RoomFXDurationState._120seconds)
+		{
+			this.currentDuration++;
+		}
+		this.RoomFXDurationReadout.text = string.Format("{0}secs", this.roomFXDurations[this.currentDuration]);
+	}
+
+	public void CheatRoomFXDurationMinus()
+	{
+		if (this.currentDuration > SIQuestBoard.RoomFXDurationState._15seconds)
+		{
+			this.currentDuration--;
+		}
+		this.RoomFXDurationReadout.text = string.Format("{0}secs", this.roomFXDurations[this.currentDuration]);
+	}
+
+	public void CheatRoomFX_Underwater()
+	{
+		this.StartRoomFX(this.roomFXDurations[this.currentDuration]);
+	}
+
+	public void StartRoomFX(float duration)
+	{
+	}
+
 	public SuperInfection superInfection;
 
 	public List<SIUIPlayerQuestDisplay> questDisplays;
@@ -139,4 +166,42 @@ public class SIQuestBoard : MonoBehaviour, IGorillaSliceableSimple
 	private int lastMinutes;
 
 	private int lastSeconds;
+
+	private Dictionary<SIQuestBoard.RoomFXDurationState, float> roomFXDurations = new Dictionary<SIQuestBoard.RoomFXDurationState, float>
+	{
+		{
+			SIQuestBoard.RoomFXDurationState._15seconds,
+			15f
+		},
+		{
+			SIQuestBoard.RoomFXDurationState._30seconds,
+			30f
+		},
+		{
+			SIQuestBoard.RoomFXDurationState._60seconds,
+			60f
+		},
+		{
+			SIQuestBoard.RoomFXDurationState._90seconds,
+			90f
+		},
+		{
+			SIQuestBoard.RoomFXDurationState._120seconds,
+			120f
+		}
+	};
+
+	private SIQuestBoard.RoomFXDurationState currentDuration = SIQuestBoard.RoomFXDurationState._30seconds;
+
+	[SerializeField]
+	private TextMeshPro RoomFXDurationReadout;
+
+	private enum RoomFXDurationState
+	{
+		_15seconds,
+		_30seconds,
+		_60seconds,
+		_90seconds,
+		_120seconds
+	}
 }

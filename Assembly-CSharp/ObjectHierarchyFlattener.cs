@@ -28,7 +28,10 @@ public class ObjectHierarchyFlattener : MonoBehaviour
 		{
 			ObjectHierarchyFlattenerManager.UnregisterOHF(this);
 		}
-		base.Invoke("ResetTransform", 0f);
+		if (this != null)
+		{
+			base.Invoke("ResetTransform", 0f);
+		}
 	}
 
 	public void InvokeLateUpdate()
@@ -71,6 +74,11 @@ public class ObjectHierarchyFlattener : MonoBehaviour
 	{
 		ObjectHierarchyFlattenerManager.UnregisterOHF(this);
 		base.Invoke("ResetTransformIfStillDisabled", 0f);
+	}
+
+	private void OnDestroy()
+	{
+		base.CancelInvoke();
 	}
 
 	private void ResetTransformIfStillDisabled()

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
@@ -50,8 +52,44 @@ public class PlayerLoopPruning : MonoBehaviour
 				list.Add(item);
 			}
 		}
+		PlayerLoopSystem item2 = new PlayerLoopSystem
+		{
+			type = typeof(PlayerLoopPruning),
+			updateDelegate = new PlayerLoopSystem.UpdateFunction(PlayerLoopPruning.PhaseSyncDestroyer3000Start)
+		};
+		PlayerLoopSystem item3 = new PlayerLoopSystem
+		{
+			type = typeof(PlayerLoopPruning),
+			updateDelegate = new PlayerLoopSystem.UpdateFunction(PlayerLoopPruning.PhaseSyncDestroyer3000End)
+		};
+		list.Insert(0, item2);
+		list.Add(item3);
 		result.subSystemList = list.ToArray();
 		return result;
+	}
+
+	private static void PhaseSyncDestroyer3000Start()
+	{
+		PlayerLoopPruning.slop = (float)PlayerLoopPruning.sw.ElapsedTicks / 10000000f * 0.1f + PlayerLoopPruning.slop * 0.9f;
+		PlayerLoopPruning.sw.Restart();
+	}
+
+	private static void PhaseSyncDestroyer3000End()
+	{
+		long elapsedTicks = PlayerLoopPruning.sw.ElapsedTicks;
+		long num = (long)((1f / (float)Application.targetFrameRate - PlayerLoopPruning.slop) * 10000000f);
+		long num2 = num - elapsedTicks;
+		if (num2 < 0L)
+		{
+			PlayerLoopPruning.sw.Restart();
+			return;
+		}
+		Thread.Sleep((int)(num2 / 10000L));
+		while (PlayerLoopPruning.sw.ElapsedTicks < num)
+		{
+			Thread.Sleep(0);
+		}
+		PlayerLoopPruning.sw.Restart();
 	}
 
 	public List<string> removeSubsystemList;
@@ -59,4 +97,8 @@ public class PlayerLoopPruning : MonoBehaviour
 	public List<string> androidSubsystemExtras;
 
 	private bool isAndroid;
+
+	private static Stopwatch sw = new Stopwatch();
+
+	private static float slop = 0.0002f;
 }

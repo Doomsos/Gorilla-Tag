@@ -10,7 +10,7 @@ public class GameLight : MonoBehaviour
 		this.intensityMult = 1;
 	}
 
-	private void OnEnable()
+	protected void OnEnable()
 	{
 		if (this.initialized)
 		{
@@ -18,13 +18,13 @@ public class GameLight : MonoBehaviour
 		}
 	}
 
-	private void Start()
+	protected void Start()
 	{
 		this.lightId = GameLightingManager.instance.AddGameLight(this, false);
 		this.initialized = true;
 	}
 
-	private void OnDisable()
+	protected void OnDisable()
 	{
 		if (this.initialized)
 		{

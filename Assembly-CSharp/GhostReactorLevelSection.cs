@@ -186,7 +186,8 @@ public class GhostReactorLevelSection : MonoBehaviour
 										entityTypeId = staticHash,
 										position = nextSpawnPoint.transform.position,
 										rotation = nextSpawnPoint.transform.rotation,
-										createData = createData
+										createData = createData,
+										createdByEntityId = -1
 									};
 									GhostReactorLevelSection.tempCreateEntitiesList.Add(item);
 									if (GhostReactorLevelSection.tempCreateEntitiesList.Count > 25)
@@ -202,37 +203,41 @@ public class GhostReactorLevelSection : MonoBehaviour
 			}
 			for (int l = 0; l < this.prePlacedGameEntities.Count; l++)
 			{
-				int staticHash2 = this.prePlacedGameEntities[l].gameObject.name.GetStaticHash();
-				if (!gameEntityManager.FactoryHasEntity(staticHash2))
+				if (!this.prePlacedGameEntities[l].isBuiltIn)
 				{
-					Debug.LogErrorFormat("Cannot Find Entity in Factory {0} {1} Trying to spawn in {2}", new object[]
+					int staticHash2 = this.prePlacedGameEntities[l].gameObject.name.GetStaticHash();
+					if (!gameEntityManager.FactoryHasEntity(staticHash2))
 					{
-						this.prePlacedGameEntities[l].gameObject.name,
-						staticHash2,
-						base.gameObject.name
-					});
-				}
-				else
-				{
-					GameEntityCreateData item2 = new GameEntityCreateData
+						Debug.LogErrorFormat("Cannot Find Entity in Factory {0} {1} Trying to spawn in {2}", new object[]
+						{
+							this.prePlacedGameEntities[l].gameObject.name,
+							staticHash2,
+							base.gameObject.name
+						});
+					}
+					else
 					{
-						entityTypeId = staticHash2,
-						position = this.prePlacedGameEntities[l].transform.position,
-						rotation = this.prePlacedGameEntities[l].transform.rotation,
-						createData = 0L
-					};
-					GhostReactorLevelSection.tempCreateEntitiesList.Add(item2);
-					if (GhostReactorLevelSection.tempCreateEntitiesList.Count > 25)
-					{
-						gameEntityManager.RequestCreateItems(GhostReactorLevelSection.tempCreateEntitiesList);
-						GhostReactorLevelSection.tempCreateEntitiesList.Clear();
+						GameEntityCreateData item2 = new GameEntityCreateData
+						{
+							entityTypeId = staticHash2,
+							position = this.prePlacedGameEntities[l].transform.position,
+							rotation = this.prePlacedGameEntities[l].transform.rotation,
+							createData = 0L,
+							createdByEntityId = -1
+						};
+						GhostReactorLevelSection.tempCreateEntitiesList.Add(item2);
+						if (GhostReactorLevelSection.tempCreateEntitiesList.Count > 25)
+						{
+							gameEntityManager.RequestCreateItems(GhostReactorLevelSection.tempCreateEntitiesList);
+							GhostReactorLevelSection.tempCreateEntitiesList.Clear();
+						}
 					}
 				}
 			}
 		}
 	}
 
-	public void RespawnEntity(ref SRand randomGenerator, GameEntityManager gameEntityManager, int entityId, long entityCreateData)
+	public void RespawnEntity(ref SRand randomGenerator, GameEntityManager gameEntityManager, int entityId, long entityCreateData, GameEntityId createdByEntityId)
 	{
 		if (0 > this.spawnPointGroupLookup.Length)
 		{
@@ -256,7 +261,7 @@ public class GhostReactorLevelSection : MonoBehaviour
 		GhostReactor.EnemyEntityCreateData enemyEntityCreateData = GhostReactor.EnemyEntityCreateData.Unpack(entityCreateData);
 		enemyEntityCreateData.patrolIndex = ((grentitySpawnPoint.patrolPath != null) ? grentitySpawnPoint.patrolPath.index : 255);
 		long createData = enemyEntityCreateData.Pack();
-		gameEntityManager.RequestCreateItem(entityId, grentitySpawnPoint.transform.position, grentitySpawnPoint.transform.rotation, createData);
+		gameEntityManager.RequestCreateItem(entityId, grentitySpawnPoint.transform.position, grentitySpawnPoint.transform.rotation, createData, createdByEntityId);
 	}
 
 	public GRPatrolPath GetPatrolPath(int patrolPathIndex)

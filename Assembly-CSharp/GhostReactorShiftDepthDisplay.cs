@@ -60,9 +60,14 @@ public class GhostReactorShiftDepthDisplay
 			{
 				if (grenemyCount.Count > 0)
 				{
-					int num4 = this.shiftManager.shiftStats.EnemyKills.ContainsKey(grenemyCount.EnemyType) ? Math.Min(this.shiftManager.shiftStats.EnemyKills[grenemyCount.EnemyType], grenemyCount.Count) : 0;
+					int num4 = this.shiftManager.shiftStats.EnemyKills.ContainsKey(grenemyCount.GetEnemyType()) ? Math.Min(this.shiftManager.shiftStats.EnemyKills[grenemyCount.GetEnemyType()], grenemyCount.Count) : 0;
 					StringBuilder stringBuilder3 = new StringBuilder();
-					stringBuilder3.Append(string.Format("Kill {0} {1}s ", grenemyCount.Count, grenemyCount.EnemyType));
+					string text = "Kill";
+					if (grenemyCount.EnemyType == GREnemyType.MoonBoss_Phase1 || grenemyCount.EnemyType == GREnemyType.MoonBoss_Phase2)
+					{
+						text = "Repel";
+					}
+					stringBuilder3.Append((grenemyCount.Count == 1) ? (text + " 1 " + grenemyCount.GetEnemyName() + " ") : string.Format("{0} {1} {2} ", text, grenemyCount.Count, grenemyCount.GetEnemyType().Pluralize()));
 					stringBuilder3.Append(string.Format("({0}/{1})", num4, grenemyCount.Count));
 					stringBuilder3.Append("\n");
 					this.cachedStringBuilder.Append(stringBuilder3);
@@ -120,7 +125,7 @@ public class GhostReactorShiftDepthDisplay
 		bool flag4 = true;
 		foreach (GREnemyCount grenemyCount in this.shiftManager.killsRequiredToDelveDeeper)
 		{
-			if (shiftStats.EnemyKills.GetValueOrDefault(grenemyCount.EnemyType) < grenemyCount.Count)
+			if (shiftStats.EnemyKills.GetValueOrDefault(grenemyCount.GetEnemyType()) < grenemyCount.Count)
 			{
 				flag4 = false;
 				break;

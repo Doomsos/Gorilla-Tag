@@ -6,10 +6,19 @@ using UnityEngine;
 [Serializable]
 public class GRSenseNearby
 {
-	public void Setup(Transform headTransform)
+	private bool BossEntityPresent
+	{
+		get
+		{
+			return GhostReactorManager.Get(this._entity).GetBossEntity() != null;
+		}
+	}
+
+	public void Setup(Transform headTransform, GameEntity entity)
 	{
 		this.rigsNearby = new List<VRRig>();
 		this.headTransform = headTransform;
+		this._entity = entity;
 	}
 
 	public void OnHitByPlayer(int hitByActorId)
@@ -39,8 +48,12 @@ public class GRSenseNearby
 		return !GhostReactorManager.AggroDisabled && this.rigsNearby != null && this.rigsNearby.Count > 0;
 	}
 
-	public bool IsAnyoneNearby(float range)
+	public bool IsAnyoneNearby(float range, bool ignoreBossEntity = false)
 	{
+		if (!ignoreBossEntity && this.BossEntityPresent && this.rigsNearby.Count > 0)
+		{
+			return true;
+		}
 		if (!this.IsAnyoneNearby())
 		{
 			return false;
@@ -64,6 +77,17 @@ public class GRSenseNearby
 
 	public void AddNearby(Vector3 position, Vector3 forward, List<VRRig> allRigs)
 	{
+		if (this.BossEntityPresent)
+		{
+			foreach (VRRig item in allRigs)
+			{
+				if (!this.rigsNearby.Contains(item))
+				{
+					this.rigsNearby.Add(item);
+				}
+			}
+			return;
+		}
 		float num = this.range * this.range;
 		float num2 = Mathf.Cos(this.fov * 0.017453292f);
 		for (int i = 0; i < allRigs.Count; i++)
@@ -79,25 +103,29 @@ public class GRSenseNearby
 				{
 					if (sqrMagnitude >= num)
 					{
-						goto IL_C4;
+						goto IL_116;
 					}
 					if (sqrMagnitude > 0f)
 					{
 						float d = Mathf.Sqrt(sqrMagnitude);
 						if (Vector3.Dot(a / d, forward) < num2)
 						{
-							goto IL_C4;
+							goto IL_116;
 						}
 					}
 				}
 				this.rigsNearby.Add(vrrig);
 			}
-			IL_C4:;
+			IL_116:;
 		}
 	}
 
 	public void RemoveNotNearby(Vector3 position)
 	{
+		if (this.BossEntityPresent)
+		{
+			return;
+		}
 		float num = this.exitRange * this.exitRange;
 		int i = 0;
 		while (i < this.rigsNearby.Count)
@@ -105,25 +133,29 @@ public class GRSenseNearby
 			VRRig vrrig = this.rigsNearby[i];
 			if (!(vrrig != null))
 			{
-				goto IL_58;
+				goto IL_61;
 			}
 			GRPlayer component = vrrig.GetComponent<GRPlayer>();
 			if ((GRSenseNearby.GetRigTestLocation(vrrig) - position).sqrMagnitude > num || component.State == GRPlayer.GRPlayerState.Ghost || component.InStealthMode)
 			{
-				goto IL_58;
+				goto IL_61;
 			}
-			IL_68:
+			IL_71:
 			i++;
 			continue;
-			IL_58:
+			IL_61:
 			this.rigsNearby.RemoveAt(i);
 			i--;
-			goto IL_68;
+			goto IL_71;
 		}
 	}
 
 	public void RemoveNoLineOfSight(Vector3 headPos, GRSenseLineOfSight senseLineOfSight)
 	{
+		if (this.BossEntityPresent)
+		{
+			return;
+		}
 		for (int i = 0; i < this.rigsNearby.Count; i++)
 		{
 			Vector3 rigTestLocation = GRSenseNearby.GetRigTestLocation(this.rigsNearby[i]);
@@ -165,4 +197,6 @@ public class GRSenseNearby
 	public List<VRRig> rigsNearby;
 
 	private Transform headTransform;
+
+	private GameEntity _entity;
 }

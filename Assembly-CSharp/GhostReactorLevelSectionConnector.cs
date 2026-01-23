@@ -34,25 +34,29 @@ public class GhostReactorLevelSectionConnector : MonoBehaviour
 			}
 			for (int i = 0; i < this.prePlacedGameEntities.Count; i++)
 			{
-				int staticHash = this.prePlacedGameEntities[i].gameObject.name.GetStaticHash();
-				if (!grManager.gameEntityManager.FactoryHasEntity(staticHash))
+				if (!this.prePlacedGameEntities[i].isBuiltIn)
 				{
-					Debug.LogErrorFormat("Cannot Find Entity in Factory {0} {1}", new object[]
+					int staticHash = this.prePlacedGameEntities[i].gameObject.name.GetStaticHash();
+					if (!grManager.gameEntityManager.FactoryHasEntity(staticHash))
 					{
-						this.prePlacedGameEntities[i].gameObject.name,
-						staticHash
-					});
-				}
-				else
-				{
-					GameEntityCreateData item = new GameEntityCreateData
+						Debug.LogErrorFormat("Cannot Find Entity in Factory {0} {1}", new object[]
+						{
+							this.prePlacedGameEntities[i].gameObject.name,
+							staticHash
+						});
+					}
+					else
 					{
-						entityTypeId = staticHash,
-						position = this.prePlacedGameEntities[i].transform.position,
-						rotation = this.prePlacedGameEntities[i].transform.rotation,
-						createData = 0L
-					};
-					GhostReactorLevelSection.tempCreateEntitiesList.Add(item);
+						GameEntityCreateData item = new GameEntityCreateData
+						{
+							entityTypeId = staticHash,
+							position = this.prePlacedGameEntities[i].transform.position,
+							rotation = this.prePlacedGameEntities[i].transform.rotation,
+							createData = 0L,
+							createdByEntityId = -1
+						};
+						GhostReactorLevelSection.tempCreateEntitiesList.Add(item);
+					}
 				}
 			}
 			grManager.gameEntityManager.RequestCreateItems(GhostReactorLevelSection.tempCreateEntitiesList);

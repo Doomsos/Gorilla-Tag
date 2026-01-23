@@ -18,9 +18,11 @@ public struct MaterialFingerprint
 		this._GChannelColor = MaterialFingerprint._Round(material.GetColor(ShaderProps._GChannelColor), 100, used._GChannelColor);
 		this._BChannelColor = MaterialFingerprint._Round(material.GetColor(ShaderProps._BChannelColor), 100, used._BChannelColor);
 		this._AChannelColor = MaterialFingerprint._Round(material.GetColor(ShaderProps._AChannelColor), 100, used._AChannelColor);
-		this._TexMipBias = MaterialFingerprint._Round(material.GetFloat(ShaderProps._TexMipBias), 100, used._TexMipBias);
 		this._BaseMap = MaterialFingerprint._GetTexPropGuid(material, ShaderProps._BaseMap, used._BaseMap);
 		this._BaseMap_ST = MaterialFingerprint._Round(material.GetVector(ShaderProps._BaseMap_ST), 100, used._BaseMap_ST);
+		this._SettingsPreset = ((used._SettingsPreset > 0) ? material.GetInt(ShaderProps._SettingsPreset) : 0);
+		this._AdvancedOptions = MaterialFingerprint._Round(material.GetFloat(ShaderProps._AdvancedOptions), 100, used._AdvancedOptions);
+		this._TexMipBias = MaterialFingerprint._Round(material.GetFloat(ShaderProps._TexMipBias), 100, used._TexMipBias);
 		this._BaseMap_WH = MaterialFingerprint._Round(material.GetVector(ShaderProps._BaseMap_WH), 100, used._BaseMap_WH);
 		this._TexelSnapToggle = MaterialFingerprint._Round(material.GetFloat(ShaderProps._TexelSnapToggle), 100, used._TexelSnapToggle);
 		this._TexelSnap_Factor = MaterialFingerprint._Round(material.GetFloat(ShaderProps._TexelSnap_Factor), 100, used._TexelSnap_Factor);
@@ -266,11 +268,15 @@ public struct MaterialFingerprint
 
 	public int4 _AChannelColor;
 
-	public int _TexMipBias;
-
 	public string _BaseMap;
 
 	public int4 _BaseMap_ST;
+
+	public int _SettingsPreset;
+
+	public int _AdvancedOptions;
+
+	public int _TexMipBias;
 
 	public int4 _BaseMap_WH;
 

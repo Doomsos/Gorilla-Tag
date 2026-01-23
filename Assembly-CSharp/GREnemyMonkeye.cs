@@ -37,7 +37,7 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 		this.abilityStagger.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
 		this.abilityDie.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
 		this.abilityJump.Setup(this.agent, this.anim, this.audioSource, base.transform, null, null);
-		this.senseNearby.Setup(this.headTransform);
+		this.senseNearby.Setup(this.headTransform, this.entity);
 		this.Setup(this.entity.createData);
 		if (this.entity && this.entity.manager && this.entity.manager.ghostReactorManager && this.entity.manager.ghostReactorManager.reactor)
 		{
@@ -352,12 +352,12 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 			this.SetBehavior(GREnemyMonkeye.Behavior.Attack, false);
 			return true;
 		}
-		if (this.senseNearby.IsAnyoneNearby(this.abilityAttackDiscoWander.GetRange()) && this.abilityAttackDiscoWander.IsCoolDownOver())
+		if (this.senseNearby.IsAnyoneNearby(this.abilityAttackDiscoWander.GetRange(), false) && this.abilityAttackDiscoWander.IsCoolDownOver())
 		{
 			this.SetBehavior(GREnemyMonkeye.Behavior.AttackDisco, false);
 			return true;
 		}
-		if (this.senseNearby.IsAnyoneNearby(this.abilityAttackSlamdown.GetRange()) && this.abilityAttackSlamdown.IsCoolDownOver())
+		if (this.senseNearby.IsAnyoneNearby(this.abilityAttackSlamdown.GetRange(), false) && this.abilityAttackSlamdown.IsCoolDownOver())
 		{
 			this.SetBehavior(GREnemyMonkeye.Behavior.AttackSlamdown, false);
 			return true;
@@ -417,7 +417,7 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 		}
 	}
 
-	public void OnUpdate(float dt)
+	private void OnUpdate(float dt)
 	{
 		if (this.entity.IsAuthority())
 		{
@@ -427,7 +427,7 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 		this.OnUpdateRemote(dt);
 	}
 
-	public void OnUpdateAuthority(float dt)
+	private void OnUpdateAuthority(float dt)
 	{
 		switch (this.currBehavior)
 		{
@@ -526,7 +526,7 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 		}
 	}
 
-	public void OnUpdateRemote(float dt)
+	private void OnUpdateRemote(float dt)
 	{
 		switch (this.currBehavior)
 		{
@@ -568,7 +568,7 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 		}
 	}
 
-	public void OnHitByClub(GRTool tool, GameHitData hit)
+	private void OnHitByClub(GRTool tool, GameHitData hit)
 	{
 		if (this.currBodyState == GREnemyMonkeye.BodyState.Bones)
 		{
@@ -607,6 +607,13 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 		{
 			this.armor.PlayBlockFx(hit.hitEntityPosition);
 		}
+	}
+
+	public void InstantDeath()
+	{
+		this.hp = 0;
+		this.SetBodyState(GREnemyMonkeye.BodyState.Destroyed, false);
+		this.SetBehavior(GREnemyMonkeye.Behavior.Dying, false);
 	}
 
 	public void OnHitByFlash(GRTool grTool, GameHitData hit)
@@ -658,7 +665,8 @@ public class GREnemyMonkeye : MonoBehaviour, IGameEntityComponent, IGameEntitySe
 					hitByEntityId = this.entity.id,
 					hitEntityPosition = component4.transform.position,
 					hitImpulse = Vector3.zero,
-					hitPosition = component4.transform.position
+					hitPosition = component4.transform.position,
+					hittablePoint = component5.FindHittablePoint(collider)
 				};
 				component5.RequestHit(hitData);
 			}

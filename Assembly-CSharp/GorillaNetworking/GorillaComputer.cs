@@ -140,6 +140,8 @@ namespace GorillaNetworking
 			}
 		}
 
+		public DateTimeOffset? RedemptionRestrictionTime { get; set; }
+
 		private void Awake()
 		{
 			if (GorillaComputer.instance == null)
@@ -159,7 +161,7 @@ namespace GorillaNetworking
 				this.buildCode,
 				", BUILD DATE: ",
 				this.buildDate,
-				" ====\r\n\r\n               _______\r\n              /       \\\r\n             /  _____  \\\r\n            / / _   _ \\ \\\r\n           [ | (O) (O) | ]\r\n            | \\  . .  / |\r\n     _______|  | _._ |  |_______\r\n    /        \\  \\___/  /        \\\r\n\r\n\r\n"
+				" ====\r\n.\r\n.               _______\r\n.              /       \\\r\n.             /  _____  \\\r\n.            / / _   _ \\ \\\r\n.           [ | (O) (O) | ]\r\n.            | \\  . .  / |\r\n.     _______|  | _._ |  |_______\r\n.    /        \\  \\___/  /        \\\r\n.\r\n.\r\n"
 			}));
 			this._activeOrderList = this.OrderList;
 			this.defaultUpdateCooldown = this.updateCooldown;
@@ -541,11 +543,20 @@ namespace GorillaNetworking
 			{
 				GorillaComputer.sessionCount = ((text.Length == 0) ? 0 : 100);
 				PlayerPrefs.SetInt("sessionCount", GorillaComputer.sessionCount);
+				text = GameModeType.Infection.ToString();
+				PlayerPrefs.SetString("currentGameModePostSI", text);
 				PlayerPrefs.Save();
 			}
-			if (GorillaComputer.sessionCount < 4)
+			else if (GorillaComputer.sessionCount == 3)
 			{
-				text = GameModeType.Infection.ToString();
+				GorillaComputer.sessionCount++;
+				PlayerPrefs.SetInt("sessionCount", GorillaComputer.sessionCount);
+				if (!text.StartsWith("Super"))
+				{
+					text = ((text == GameModeType.Casual.ToString()) ? GameModeType.SuperCasual.ToString() : GameModeType.SuperInfect.ToString());
+					PlayerPrefs.SetString("currentGameModePostSI", text);
+				}
+				PlayerPrefs.Save();
 			}
 			GameModeType gameModeType;
 			try
@@ -557,8 +568,9 @@ namespace GorillaNetworking
 				gameModeType = GameModeType.SuperInfect;
 				text = GameModeType.SuperInfect.ToString();
 			}
-			if (gameModeType != GameModeType.Casual && gameModeType != GameModeType.Infection && gameModeType != GameModeType.HuntDown && gameModeType != GameModeType.Paintbrawl && gameModeType != GameModeType.Ambush && gameModeType != GameModeType.SuperInfect && gameModeType != GameModeType.SuperCasual)
+			if (!GameMode.GameModeZoneMapping.AllModes.Contains(gameModeType) || gameModeType == GameModeType.None || gameModeType == GameModeType.Count)
 			{
+				Debug.Log("[GT/GorillaComputer]  InitializeGameMode: Falling back to default game mode " + string.Format("\"{0}\" because stored game mode \"{1}\" is not available in any zone.", GameModeType.SuperInfect, gameModeType));
 				PlayerPrefs.SetString("currentGameModePostSI", GameModeType.SuperInfect.ToString());
 				PlayerPrefs.Save();
 				text = GameModeType.SuperInfect.ToString();
@@ -777,10 +789,8 @@ namespace GorillaNetworking
 		public void OnModeSelectButtonPress(string gameMode, bool leftHand)
 		{
 			this.lastPressedGameMode = gameMode;
-			if (GorillaComputer.sessionCount >= 4)
-			{
-				PlayerPrefs.SetString("currentGameModePostSI", gameMode);
-			}
+			this.lastPressedGameModeType = (GameModeType)GameMode.gameModeKeyByName.GetValueOrDefault(gameMode, 11);
+			PlayerPrefs.SetString("currentGameModePostSI", gameMode);
 			if (leftHand != this.leftHanded)
 			{
 				PlayerPrefs.SetInt("leftHanded", leftHand ? 1 : 0);
@@ -1096,11 +1106,11 @@ namespace GorillaNetworking
 
 		private void DisconnectAfterDelay(float seconds)
 		{
-			GorillaComputer.<DisconnectAfterDelay>d__369 <DisconnectAfterDelay>d__;
+			GorillaComputer.<DisconnectAfterDelay>d__377 <DisconnectAfterDelay>d__;
 			<DisconnectAfterDelay>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<DisconnectAfterDelay>d__.seconds = seconds;
 			<DisconnectAfterDelay>d__.<>1__state = -1;
-			<DisconnectAfterDelay>d__.<>t__builder.Start<GorillaComputer.<DisconnectAfterDelay>d__369>(ref <DisconnectAfterDelay>d__);
+			<DisconnectAfterDelay>d__.<>t__builder.Start<GorillaComputer.<DisconnectAfterDelay>d__377>(ref <DisconnectAfterDelay>d__);
 		}
 
 		private void ProcessTurnState(GorillaKeyboardBindings buttonPressed)
@@ -1690,7 +1700,7 @@ namespace GorillaNetworking
 
 		private void LoadingScreen()
 		{
-			GorillaComputer.<>c__DisplayClass395_0 CS$<>8__locals1 = new GorillaComputer.<>c__DisplayClass395_0();
+			GorillaComputer.<>c__DisplayClass403_0 CS$<>8__locals1 = new GorillaComputer.<>c__DisplayClass403_0();
 			CS$<>8__locals1.<>4__this = this;
 			string defaultResult = "LOADING";
 			LocalisationManager.TryGetKeyForCurrentLocale("LOADING_SCREEN", out CS$<>8__locals1.result, defaultResult);
@@ -1776,22 +1786,37 @@ namespace GorillaNetworking
 				string defaultResult = "SUPPORT";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INTRO", out text3, defaultResult);
 				this.screenText.Append(text3);
-				defaultResult = "\n\nPLAYERID";
+				defaultResult = "\n\nPLAYER ID";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_PLAYERID", out text3, defaultResult);
-				this.screenText.Append(text3 + "   ");
+				this.screenText.Append(text3 + "  ");
 				this.screenText.Append(PlayFabAuthenticator.instance.GetPlayFabPlayerId());
 				defaultResult = "\nVERSION";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_VERSION", out text3, defaultResult);
-				this.screenText.Append(text3 + "    ");
+				this.screenText.Append(text3 + " ");
 				this.screenText.Append(this.version.ToUpper());
 				defaultResult = "\nPLATFORM";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_PLATFORM", out text3, defaultResult);
-				this.screenText.Append(text3 + "   ");
+				this.screenText.Append(text3 + " ");
 				this.screenText.Append(text);
 				defaultResult = "\nBUILD DATE";
 				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_BUILD_DATE", out text3, defaultResult);
 				this.screenText.Append(text3 + " ");
 				this.screenText.Append(this.buildDate);
+				defaultResult = "\nSESSION ID";
+				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_DETAILS_MOTHERSHIP_SESSION_ID", out text3, defaultResult);
+				string sessionId = MothershipClientApiUnity.SessionId;
+				string str = sessionId;
+				int num = sessionId.LastIndexOf('-');
+				if (num >= 0)
+				{
+					string str2 = sessionId.Substring(0, num);
+					string str3 = "\n            ";
+					text2 = sessionId;
+					int num2 = num + 1;
+					str = str2 + str3 + text2.Substring(num2, text2.Length - num2);
+				}
+				this.screenText.Append(text3 + " ");
+				this.screenText.Append(str);
 				if (KIDManager.KidEnabled)
 				{
 					defaultResult = "\nk-ID ACCOUNT TYPE:";
@@ -1804,15 +1829,15 @@ namespace GorillaNetworking
 			else
 			{
 				string defaultResult2 = "SUPPORT";
-				string str;
-				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INTRO", out str, defaultResult2);
-				this.screenText.Append(str);
+				string str4;
+				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INTRO", out str4, defaultResult2);
+				this.screenText.Append(str4);
 				defaultResult2 = "\n\nPRESS ENTER TO DISPLAY SUPPORT AND ACCOUNT INFORMATION";
-				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INITIAL", out str, defaultResult2);
-				this.screenText.Append(str);
+				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INITIAL", out str4, defaultResult2);
+				this.screenText.Append(str4);
 				defaultResult2 = "\n\n\n\n<color=red>DO NOT SHARE ACCOUNT INFORMATION WITH ANYONE OTHER THAN ANOTHER AXIOM</color>";
-				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INITIAL_WARNING", out str, defaultResult2);
-				this.screenText.Append(str);
+				LocalisationManager.TryGetKeyForCurrentLocale("SUPPORT_SCREEN_INITIAL_WARNING", out str4, defaultResult2);
+				this.screenText.Append(str4);
 			}
 		}
 
@@ -2517,6 +2542,16 @@ namespace GorillaNetworking
 				defaultResult = "\n\nCODE ALREADY CLAIMED";
 				LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_CODE_ALREADY_USED", out text, defaultResult);
 				this.screenText.Append(text);
+				return;
+			case GorillaComputer.RedemptionResult.TooEarly:
+				defaultResult = "CODE IS NOT REDEEMABLE UNTIL";
+				LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_CODE_TOO_EARLY", out text, defaultResult);
+				this.screenText.Append((this.RedemptionRestrictionTime != null) ? ("\n\n" + text + "\n" + this.RedemptionRestrictionTime.Value.ToLocalTime().ToString("f").ToUpper()) : ("\n\n" + text + "\n[MISSING]"));
+				return;
+			case GorillaComputer.RedemptionResult.TooLate:
+				defaultResult = "CODE EXPIRED";
+				LocalisationManager.TryGetKeyForCurrentLocale("REDEMPTION_CODE_TOO_LATE", out text, defaultResult);
+				this.screenText.Append((this.RedemptionRestrictionTime != null) ? ("\n\n" + text + "\n" + this.RedemptionRestrictionTime.Value.ToLocalTime().ToString("f").ToUpper()) : ("\n\n" + text + "\n[MISSING]"));
 				return;
 			case GorillaComputer.RedemptionResult.Success:
 				defaultResult = "\n\nSUCCESSFULLY CLAIMED!";
@@ -3287,11 +3322,11 @@ namespace GorillaNetworking
 
 		private void UpdateSession()
 		{
-			GorillaComputer.<UpdateSession>d__478 <UpdateSession>d__;
+			GorillaComputer.<UpdateSession>d__486 <UpdateSession>d__;
 			<UpdateSession>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<UpdateSession>d__.<>4__this = this;
 			<UpdateSession>d__.<>1__state = -1;
-			<UpdateSession>d__.<>t__builder.Start<GorillaComputer.<UpdateSession>d__478>(ref <UpdateSession>d__);
+			<UpdateSession>d__.<>t__builder.Start<GorillaComputer.<UpdateSession>d__486>(ref <UpdateSession>d__);
 		}
 
 		private void OnSessionUpdate_GorillaComputer()
@@ -3874,13 +3909,15 @@ namespace GorillaNetworking
 
 		private const string SUPPORT_SCREEN_INTRO_KEY = "SUPPORT_SCREEN_INTRO";
 
-		private const string SUPPORT_SCREEN_DETAILS_PLAYERID_KEY = "SUPPORT_SCREEN_DETAILS_PLAYERID";
+		private const string SUPPORT_SCREEN_DETAILS_PLAYER_ID_KEY = "SUPPORT_SCREEN_DETAILS_PLAYERID";
 
 		private const string SUPPORT_SCREEN_DETAILS_VERSION_KEY = "SUPPORT_SCREEN_DETAILS_VERSION";
 
 		private const string SUPPORT_SCREEN_DETAILS_PLATFORM_KEY = "SUPPORT_SCREEN_DETAILS_PLATFORM";
 
 		private const string SUPPORT_SCREEN_DETAILS_BUILD_DATE_KEY = "SUPPORT_SCREEN_DETAILS_BUILD_DATE";
+
+		private const string SUPPORT_SCREEN_DETAILS_MOTHERSHIP_SESSION_ID_KEY = "SUPPORT_SCREEN_DETAILS_MOTHERSHIP_SESSION_ID";
 
 		private const string SUPPORT_SCREEN_INITIAL_KEY = "SUPPORT_SCREEN_INITIAL";
 
@@ -3986,6 +4023,10 @@ namespace GorillaNetworking
 
 		private const string REDEMPTION_CODE_ALREADY_USED_KEY = "REDEMPTION_CODE_ALREADY_USED";
 
+		private const string REDEMPTION_CODE_TOO_EARLY_KEY = "REDEMPTION_CODE_TOO_EARLY";
+
+		private const string REDEMPTION_CODE_TOO_LATE_KEY = "REDEMPTION_CODE_TOO_LATE";
+
 		private const string REDEMPTION_CODE_SUCCESS_KEY = "REDEMPTION_CODE_SUCCESS";
 
 		private const string LIMITED_ONLINE_FUNC_KEY = "LIMITED_ONLINE_FUNC";
@@ -4084,6 +4125,8 @@ namespace GorillaNetworking
 		public long startupMillis;
 
 		public DateTime startupTime;
+
+		public GameModeType lastPressedGameModeType;
 
 		public string lastPressedGameMode;
 
@@ -4293,9 +4336,9 @@ namespace GorillaNetworking
 
 		private const string k_sessionCountKey = "sessionCount";
 
-		private const GameModeType k_defaultGameMode = GameModeType.SuperInfect;
+		internal const GameModeType k_defaultGameMode = GameModeType.SuperInfect;
 
-		private const GameModeType k_noobGameMode = GameModeType.Infection;
+		internal const GameModeType k_noobGameMode = GameModeType.Infection;
 
 		private const int k_noobSessionCountThreshold = 4;
 
@@ -4373,6 +4416,8 @@ namespace GorillaNetworking
 			Invalid,
 			Checking,
 			AlreadyUsed,
+			TooEarly,
+			TooLate,
 			Success
 		}
 

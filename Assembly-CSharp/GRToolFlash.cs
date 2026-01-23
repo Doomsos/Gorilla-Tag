@@ -233,7 +233,8 @@ public class GRToolFlash : MonoBehaviour, IGameEntityDebugComponent, IGameEntity
 							hitEntityPosition = component.gameEntity.transform.position,
 							hitPosition = ((raycastHit.distance == 0f) ? this.shootFrom.position : raycastHit.point),
 							hitImpulse = Vector3.zero,
-							hitAmount = this.gameHitter.CalcHitAmount(GameHitType.Flash, component, this.gameEntity)
+							hitAmount = this.gameHitter.CalcHitAmount(GameHitType.Flash, component, this.gameEntity),
+							hittablePoint = component.FindHittablePoint(raycastHit.collider)
 						};
 						component.RequestHit(hitData);
 					}

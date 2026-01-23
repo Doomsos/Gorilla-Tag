@@ -96,6 +96,14 @@ public class GRAbilitySummon : GRAbilityBase
 
 	private Vector3? GetSpawnLocation()
 	{
+		if (this.summonMarkers != null && this.summonMarkers.Count > 0)
+		{
+			int index = Random.Range(0, this.summonMarkers.Count);
+			if (this.summonMarkers[index] != null)
+			{
+				return new Vector3?(this.summonMarkers[index].transform.position);
+			}
+		}
 		Vector3 position = this.root.position;
 		float num = Random.Range(-this.summonConeAngle / 2f, this.summonConeAngle / 2f);
 		int i = 0;
@@ -104,23 +112,37 @@ public class GRAbilitySummon : GRAbilityBase
 			Vector3 a = Quaternion.Euler(0f, num, 0f) * this.root.forward;
 			Vector3 vector = position + a * this.desiredSpawnDistance;
 			NavMeshHit navMeshHit;
-			if (NavMesh.Raycast(position, vector, out navMeshHit, this.walkableArea))
+			if (!NavMesh.Raycast(position, vector, out navMeshHit, this.walkableArea))
 			{
-				if (navMeshHit.distance < this.minSpawnDistance)
-				{
-					num += 15f;
-					if (num > this.summonConeAngle / 2f)
-					{
-						this.summonConeAngle = -this.summonConeAngle / 2f;
-					}
-					i++;
-					continue;
-				}
-				vector = navMeshHit.position + Vector3.up * this.spawnHeight;
+				goto IL_126;
 			}
-			return new Vector3?(vector);
+			if (navMeshHit.distance >= this.minSpawnDistance)
+			{
+				vector = navMeshHit.position + Vector3.up * this.spawnHeight;
+				goto IL_126;
+			}
+			num += 15f;
+			if (num > this.summonConeAngle / 2f)
+			{
+				this.summonConeAngle = -this.summonConeAngle / 2f;
+			}
+			IL_151:
+			i++;
+			continue;
+			IL_126:
+			RaycastHit raycastHit;
+			if (!Physics.Raycast(vector, Vector3.down, out raycastHit) || raycastHit.collider.gameObject.GetComponent<GRHazardousMaterial>() == null)
+			{
+				return new Vector3?(vector);
+			}
+			goto IL_151;
 		}
 		return null;
+	}
+
+	public bool ForceSpawn()
+	{
+		return this.DoSpawn();
 	}
 
 	private bool DoSpawn()
@@ -131,7 +153,7 @@ public class GRAbilitySummon : GRAbilityBase
 			if (this.entity.IsAuthority())
 			{
 				Quaternion identity = Quaternion.identity;
-				GhostReactorManager.Get(this.entity).gameEntityManager.RequestCreateItem(this.entityPrefabToSpawn.name.GetStaticHash(), spawnLocation.Value, identity, (long)this.entity.GetNetId());
+				GhostReactorManager.Get(this.entity).gameEntityManager.RequestCreateItem(this.entityPrefabToSpawn.name.GetStaticHash(), spawnLocation.Value, identity, 0L, this.entity.id);
 				this.spawnedCount++;
 			}
 			if (this.audioSource != null)
@@ -153,6 +175,16 @@ public class GRAbilitySummon : GRAbilityBase
 		return this.state == GRAbilitySummon.State.Done;
 	}
 
+	public override bool IsCoolDownOver()
+	{
+		return base.IsCoolDownOver(this.coolDown);
+	}
+
+	public override float GetRange()
+	{
+		return this.range;
+	}
+
 	private int lastAnimIndex = -1;
 
 	public GameEntity entityPrefabToSpawn;
@@ -160,6 +192,10 @@ public class GRAbilitySummon : GRAbilityBase
 	public List<AnimationData> animData;
 
 	private float animSpeed = 1f;
+
+	public float coolDown;
+
+	public float range;
 
 	public float chargeTime = 3f;
 
@@ -187,7 +223,15 @@ public class GRAbilitySummon : GRAbilityBase
 
 	public Transform lookAtTarget;
 
+	public List<GRAbilitySummon.SummonMarker> summonMarkers;
+
 	private GRAbilitySummon.State state;
+
+	[Serializable]
+	public class SummonMarker
+	{
+		public Transform transform;
+	}
 
 	private enum State
 	{

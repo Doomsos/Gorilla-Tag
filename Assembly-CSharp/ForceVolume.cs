@@ -117,6 +117,12 @@ public class ForceVolume : MonoBehaviour, IGorillaSliceableSimple
 			GTPlayer.Instance.SetMaximumSlipThisFrame();
 		}
 		VRRig.LocalRig.BreakHandLinks();
+		SIPlayer localPlayer = SIPlayer.LocalPlayer;
+		if (localPlayer != null)
+		{
+			Vector3 up = base.transform.up;
+			localPlayer.PlayerKnockback(up * 0.1f, false, false);
+		}
 		SizeManager sizeManager = null;
 		if (this.scaleWithSize)
 		{

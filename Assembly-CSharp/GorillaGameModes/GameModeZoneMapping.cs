@@ -161,6 +161,10 @@ namespace GorillaGameModes
 		}
 
 		[SerializeField]
+		[TextArea(4, 40)]
+		private string notes;
+
+		[SerializeField]
 		private GameModeNameOverrides[] gameModeNameOverrides;
 
 		[SerializeField]

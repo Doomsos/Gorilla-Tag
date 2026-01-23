@@ -16,20 +16,20 @@ public class HowManyMonke : MonoBehaviour
 
 	public void Start()
 	{
-		HowManyMonke.<Start>d__9 <Start>d__;
+		HowManyMonke.<Start>d__11 <Start>d__;
 		<Start>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 		<Start>d__.<>4__this = this;
 		<Start>d__.<>1__state = -1;
-		<Start>d__.<>t__builder.Start<HowManyMonke.<Start>d__9>(ref <Start>d__);
+		<Start>d__.<>t__builder.Start<HowManyMonke.<Start>d__11>(ref <Start>d__);
 	}
 
 	private Task FetchRecheckDelay()
 	{
-		HowManyMonke.<FetchRecheckDelay>d__10 <FetchRecheckDelay>d__;
+		HowManyMonke.<FetchRecheckDelay>d__12 <FetchRecheckDelay>d__;
 		<FetchRecheckDelay>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
 		<FetchRecheckDelay>d__.<>4__this = this;
 		<FetchRecheckDelay>d__.<>1__state = -1;
-		<FetchRecheckDelay>d__.<>t__builder.Start<HowManyMonke.<FetchRecheckDelay>d__10>(ref <FetchRecheckDelay>d__);
+		<FetchRecheckDelay>d__.<>t__builder.Start<HowManyMonke.<FetchRecheckDelay>d__12>(ref <FetchRecheckDelay>d__);
 		return <FetchRecheckDelay>d__.<>t__builder.Task;
 	}
 
@@ -52,13 +52,17 @@ public class HowManyMonke : MonoBehaviour
 
 	private Task<int> FetchThisMany()
 	{
-		HowManyMonke.<FetchThisMany>d__13 <FetchThisMany>d__;
+		HowManyMonke.<FetchThisMany>d__15 <FetchThisMany>d__;
 		<FetchThisMany>d__.<>t__builder = AsyncTaskMethodBuilder<int>.Create();
 		<FetchThisMany>d__.<>4__this = this;
 		<FetchThisMany>d__.<>1__state = -1;
-		<FetchThisMany>d__.<>t__builder.Start<HowManyMonke.<FetchThisMany>d__13>(ref <FetchThisMany>d__);
+		<FetchThisMany>d__.<>t__builder.Start<HowManyMonke.<FetchThisMany>d__15>(ref <FetchThisMany>d__);
 		return <FetchThisMany>d__.<>t__builder.Task;
 	}
+
+	private const string preLog = "[GT/HowManyMonke]  ";
+
+	private const string preErr = "ERROR!!!  ";
 
 	public static int ThisMany = 12549;
 

@@ -546,13 +546,13 @@ namespace GorillaGameModes
 		private static Dictionary<int, GorillaGameManager> gameModeTable = new Dictionary<int, GorillaGameManager>();
 
 		[OnEnterPlay_Clear]
-		private static Dictionary<string, int> gameModeKeyByName = new Dictionary<string, int>();
+		public static Dictionary<string, int> gameModeKeyByName = new Dictionary<string, int>();
 
 		[OnEnterPlay_Clear]
 		private static Dictionary<int, FusionGameModeData> fusionTypeTable = new Dictionary<int, FusionGameModeData>();
 
 		[OnEnterPlay_Clear]
-		private static List<GorillaGameManager> gameModes = new List<GorillaGameManager>(10);
+		public static List<GorillaGameManager> gameModes = new List<GorillaGameManager>(10);
 
 		[OnEnterPlay_Clear]
 		public static readonly List<string> gameModeNames = new List<string>(10);

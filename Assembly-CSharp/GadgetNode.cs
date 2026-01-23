@@ -211,6 +211,22 @@ public class GadgetNode : TechTreeNodeBase
 		return num;
 	}
 
+	public bool CostEquals(SIResource.ResourceCost[] cost)
+	{
+		if (cost.Length != this.nodeCost.Length)
+		{
+			return false;
+		}
+		for (int i = 0; i < cost.Length; i++)
+		{
+			if (!cost[i].Equals(this.nodeCost[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	[Node.InputAttribute(Node.ShowBackingValue.Unconnected, Node.ConnectionType.Multiple, Node.TypeConstraint.None, false)]
 	public TechTreeNodeBase.Empty input;
 

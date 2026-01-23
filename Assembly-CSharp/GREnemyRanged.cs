@@ -100,6 +100,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		{
 			"Default"
 		});
+		this.senseNearby.Setup(this.headTransform, this.entity);
 		if (this.armor != null)
 		{
 			this.armor.SetHp(0);
@@ -433,47 +434,24 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 
 	private void UpdateTarget()
 	{
-		float num = float.MaxValue;
 		this.bestTargetPlayer = null;
 		this.bestTargetNetPlayer = null;
 		GREnemyRanged.tempRigs.Clear();
 		GREnemyRanged.tempRigs.Add(VRRig.LocalRig);
 		VRRigCache.Instance.GetAllUsedRigs(GREnemyRanged.tempRigs);
-		Vector3 position = base.transform.position;
-		Vector3 rhs = base.transform.rotation * Vector3.forward;
-		float num2 = this.sightDist * this.sightDist;
-		float num3 = Mathf.Cos(this.sightFOV * 0.017453292f);
-		for (int i = 0; i < GREnemyRanged.tempRigs.Count; i++)
+		this.senseNearby.UpdateNearby(GREnemyRanged.tempRigs, this.senseLineOfSight);
+		float num;
+		VRRig vrrig = this.senseNearby.PickClosest(out num);
+		if (vrrig != null)
 		{
-			VRRig vrrig = GREnemyRanged.tempRigs[i];
 			GRPlayer component = vrrig.GetComponent<GRPlayer>();
-			if (component.State != GRPlayer.GRPlayerState.Ghost)
+			if (component != null && component.State != GRPlayer.GRPlayerState.Ghost)
 			{
-				Vector3 position2 = vrrig.transform.position;
-				Vector3 a = position2 - position;
-				float sqrMagnitude = a.sqrMagnitude;
-				if (sqrMagnitude <= num2)
-				{
-					float num4 = 0f;
-					if (sqrMagnitude > 0f)
-					{
-						num4 = Mathf.Sqrt(sqrMagnitude);
-						if (Vector3.Dot(a / num4, rhs) < num3)
-						{
-							goto IL_16F;
-						}
-					}
-					if (num4 < num && Physics.RaycastNonAlloc(new Ray(this.headTransform.position, position2 - this.headTransform.position), GREnemyChaser.visibilityHits, num4, this.visibilityLayerMask.value, QueryTriggerInteraction.Ignore) < 1)
-					{
-						num = num4;
-						this.bestTargetPlayer = component;
-						this.bestTargetNetPlayer = vrrig.OwningNetPlayer;
-						this.lastSeenTargetTime = Time.timeAsDouble;
-						this.lastSeenTargetPosition = position2;
-					}
-				}
+				this.bestTargetPlayer = component;
+				this.bestTargetNetPlayer = vrrig.OwningNetPlayer;
+				this.lastSeenTargetTime = Time.timeAsDouble;
+				this.lastSeenTargetPosition = vrrig.transform.position;
 			}
-			IL_16F:;
 		}
 	}
 
@@ -507,7 +485,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.SetBehavior(GREnemyRanged.Behavior.Idle, false);
 	}
 
-	public void OnUpdateAuthority(float dt)
+	private void OnUpdateAuthority(float dt)
 	{
 		switch (this.currBehavior)
 		{
@@ -649,7 +627,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		GameAgent.UpdateFacing(base.transform, this.navAgent, this.targetPlayer, this.turnSpeed);
 	}
 
-	public void OnUpdateRemote(float dt)
+	private void OnUpdateRemote(float dt)
 	{
 		switch (this.currBehavior)
 		{
@@ -710,7 +688,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	public void UpdateSearch()
+	private void UpdateSearch()
 	{
 		Vector3 vector = this.searchPosition - base.transform.position;
 		Vector3 vector2 = new Vector3(vector.x, 0f, vector.z);
@@ -740,7 +718,7 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		}
 	}
 
-	public void OnHitByClub(GRTool tool, GameHitData hit)
+	private void OnHitByClub(GRTool tool, GameHitData hit)
 	{
 		if (this.currBodyState != GREnemyRanged.BodyState.Bones)
 		{
@@ -773,7 +751,14 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 		this.TrySetBehavior(GREnemyRanged.Behavior.Stagger);
 	}
 
-	public void OnHitByFlash(GRTool tool, GameHitData hit)
+	public void InstantDeath()
+	{
+		this.hp = 0;
+		this.SetBodyState(GREnemyRanged.BodyState.Destroyed, false);
+		this.SetBehavior(GREnemyRanged.Behavior.Dying, false);
+	}
+
+	private void OnHitByFlash(GRTool tool, GameHitData hit)
 	{
 		if (this.currBodyState == GREnemyRanged.BodyState.Shell)
 		{
@@ -992,6 +977,10 @@ public class GREnemyRanged : MonoBehaviour, IGameEntityComponent, IGameEntitySer
 	public GRAttributes attributes;
 
 	public Animation anim;
+
+	public GRSenseNearby senseNearby;
+
+	public GRSenseLineOfSight senseLineOfSight;
 
 	public GRAbilityStagger abilityStagger;
 

@@ -39,10 +39,11 @@ public class BuilderRoomBoundary : GorillaTriggerBox
 		{
 			return;
 		}
-		if (builderTable.isTableMutable)
+		if (!ZoneManagement.instance.IsZoneActive(GTZone.monkeBlocks))
 		{
-			this.rigRef.EnableBuilderResizeWatch(true);
+			return;
 		}
+		this.rigRef.EnableBuilderResizeWatch(true);
 	}
 
 	public void OnExitedBoundary(Collider other)

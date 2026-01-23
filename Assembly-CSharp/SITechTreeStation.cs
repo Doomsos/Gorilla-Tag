@@ -78,11 +78,11 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 
 	private void CollectButtonColliders()
 	{
-		SITechTreeStation.<>c__DisplayClass81_0 CS$<>8__locals1;
+		SITechTreeStation.<>c__DisplayClass75_0 CS$<>8__locals1;
 		CS$<>8__locals1.buttons = base.GetComponentsInChildren<SITouchscreenButton>(true).ToList<SITouchscreenButton>();
-		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|81_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
+		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|75_2((from d in base.GetComponentsInChildren<DestroyIfNotBeta>()
 		select d.gameObject).ToArray<GameObject>(), ref CS$<>8__locals1);
-		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|81_2(new GameObject[]
+		SITechTreeStation.<CollectButtonColliders>g__RemoveButtonsInside|75_2(new GameObject[]
 		{
 			this.techTreeHelpScreen,
 			this.nodePopupScreen
@@ -146,24 +146,16 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 		this.spriteByType.Add(SIResource.ResourceType.VibratingSpring, this.vibratingSpringSprite);
 		this.spriteByType.Add(SIResource.ResourceType.BouncySand, this.bouncySandSprite);
 		this.spriteByType.Add(SIResource.ResourceType.FloppyMetal, this.floppyMetalSprite);
-		this.techTreeIconById.Add(SITechTreePageId.Thruster, this.thrustersIcon);
-		this.techTreeIconById.Add(SITechTreePageId.Stilt, this.longArmsIcon);
-		this.techTreeIconById.Add(SITechTreePageId.Grenades, this.floppyMetalSprite);
-		this.techTreeIconById.Add(SITechTreePageId.Dash, this.dashYoYoIcon);
-		this.techTreeIconById.Add(SITechTreePageId.Platform, this.platformsIcon);
-		this.techTreeIconById.Add(SITechTreePageId.TapTeleport, this.floppyMetalSprite);
-		this.techTreeIconById.Add(SITechTreePageId.Tentacle, this.tentacleIcon);
-		this.techTreeIconById.Add(SITechTreePageId.AirGrab, this.floppyMetalSprite);
-		this.techTreeIconById.Add(SITechTreePageId.SlipMitt, this.floppyMetalSprite);
-		this.techTreeIconById.Add(SITechTreePageId.Blaster, this.blasterIcon);
-		for (int i = 0; i < this.techTreeSO.TreePages.Count; i++)
+		int count = this.techTreeSO.TreePages.Count;
+		for (int i = 0; i < count; i++)
 		{
 			SITechTreePage sitechTreePage = this.techTreeSO.TreePages[i];
 			if (sitechTreePage.IsValid)
 			{
+				this.techTreeIconById.Add(sitechTreePage.pageId, sitechTreePage.icon);
 				SIGadgetListEntry sigadgetListEntry = Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
 				StaticLodManager.TryAddLateInstantiatedMembers(sigadgetListEntry.gameObject);
-				sigadgetListEntry.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.PageSelect, i, -0.07f);
+				sigadgetListEntry.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.PageSelect, i, -0.07f, count);
 				this.pageButtons.Add(sigadgetListEntry);
 				SITechTreeUIPage sitechTreeUIPage = Object.Instantiate<SITechTreeUIPage>(this.pagePrefab, this.pageParent);
 				StaticLodManager.TryAddLateInstantiatedMembers(sitechTreeUIPage.gameObject);
@@ -707,7 +699,7 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	}
 
 	[CompilerGenerated]
-	internal static void <CollectButtonColliders>g__RemoveButtonsInside|81_2(GameObject[] roots, ref SITechTreeStation.<>c__DisplayClass81_0 A_1)
+	internal static void <CollectButtonColliders>g__RemoveButtonsInside|75_2(GameObject[] roots, ref SITechTreeStation.<>c__DisplayClass75_0 A_1)
 	{
 		for (int i = 0; i < roots.Length; i++)
 		{
@@ -741,18 +733,6 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 	public Sprite bouncySandSprite;
 
 	public Sprite floppyMetalSprite;
-
-	public Sprite thrustersIcon;
-
-	public Sprite longArmsIcon;
-
-	public Sprite dashYoYoIcon;
-
-	public Sprite platformsIcon;
-
-	public Sprite blasterIcon;
-
-	public Sprite tentacleIcon;
 
 	public int currentNodeId;
 

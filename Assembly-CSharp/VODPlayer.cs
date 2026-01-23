@@ -14,19 +14,19 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 {
 	public void OnEnable()
 	{
-		VODPlayer.<OnEnable>d__19 <OnEnable>d__;
+		VODPlayer.<OnEnable>d__20 <OnEnable>d__;
 		<OnEnable>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 		<OnEnable>d__.<>4__this = this;
 		<OnEnable>d__.<>1__state = -1;
-		<OnEnable>d__.<>t__builder.Start<VODPlayer.<OnEnable>d__19>(ref <OnEnable>d__);
+		<OnEnable>d__.<>t__builder.Start<VODPlayer.<OnEnable>d__20>(ref <OnEnable>d__);
 	}
 
 	private void waitOnServerTime()
 	{
-		VODPlayer.<waitOnServerTime>d__20 <waitOnServerTime>d__;
+		VODPlayer.<waitOnServerTime>d__21 <waitOnServerTime>d__;
 		<waitOnServerTime>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 		<waitOnServerTime>d__.<>1__state = -1;
-		<waitOnServerTime>d__.<>t__builder.Start<VODPlayer.<waitOnServerTime>d__20>(ref <waitOnServerTime>d__);
+		<waitOnServerTime>d__.<>t__builder.Start<VODPlayer.<waitOnServerTime>d__21>(ref <waitOnServerTime>d__);
 	}
 
 	private void VODTarget_AlertEnabled(VODTarget o)
@@ -114,20 +114,28 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 			{
 				this.PositionAudio();
 			}
+			if (this.imageClearTime > 0f && this.imageClearTime < Time.time)
+			{
+				for (int i = 0; i < this.targets.Count; i++)
+				{
+					this.targets[i].Renderer.material = this.standbyMaterial;
+				}
+				this.imageClearTime = 0f;
+			}
 			DateTime serverTime = GorillaComputer.instance.GetServerTime();
 			DayOfWeek dayOfWeek = serverTime.DayOfWeek;
 			int hour = serverTime.Hour;
 			int minute = serverTime.Minute;
-			if (this.nextStream != null && !this.playerBusy && !this.player.isPlaying && this.nextStream.Title != string.Empty)
+			if (this.imageClearTime == 0f && this.nextStream != null && !this.playerBusy && !this.player.isPlaying && this.nextStream.Title != string.Empty)
 			{
 				TimeSpan timeSpan = this.nextStream.StartTime - serverTime;
 				if (timeSpan.TotalMinutes > 0.0 && timeSpan.TotalMinutes <= 60.0)
 				{
-					for (int i = 0; i < this.targets.Count; i++)
+					for (int j = 0; j < this.targets.Count; j++)
 					{
-						if (this.targets[i].UpNextText != null)
+						if (this.targets[j].UpNextText != null)
 						{
-							this.targets[i].UpNextText.text = string.Format("next: {0} - {1:00}:{2:00}", this.nextStream.Title, timeSpan.Minutes, timeSpan.Seconds);
+							this.targets[j].UpNextText.text = string.Format("next: {0} - {1:00}:{2:00}", this.nextStream.Title, timeSpan.Minutes, timeSpan.Seconds);
 						}
 					}
 				}
@@ -137,11 +145,11 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 				return;
 			}
 			this.lastCheck = minute;
-			for (int j = 0; j < this.schedule.hourly.Length; j++)
+			for (int k = 0; k < this.schedule.hourly.Length; k++)
 			{
-				if (this.schedule.hourly[j].minute - minute == 0 && this.schedule.hourly[j].IsDateInRange(serverTime))
+				if (this.schedule.hourly[k].minute - minute == 0 && this.schedule.hourly[k].IsDateInRange(serverTime))
 				{
-					this.StartPlayback(this.schedule.hourly[j].stream.url, 1.0);
+					this.StartPlayback(this.schedule.hourly[k].stream, 1.0);
 					return;
 				}
 			}
@@ -176,7 +184,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 
 	private void cacheVOD(string url)
 	{
-		string text = this.UrlToCachePath(url);
+		string text = this.UrlToCachePath(url, "mp4");
 		if (File.Exists(text) || this._cr_cacheVOD != null)
 		{
 			return;
@@ -184,9 +192,9 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		this._cr_cacheVOD = base.StartCoroutine(this.cr_cacheVOD(text, url));
 	}
 
-	private string UrlToCachePath(string url)
+	private string UrlToCachePath(string url, string extension)
 	{
-		return Application.persistentDataPath + Path.DirectorySeparatorChar.ToString() + string.Format("V{0:X}.mp4", url.GetHashCode());
+		return Application.persistentDataPath + Path.DirectorySeparatorChar.ToString() + string.Format("V{0:X}.{1}", url.GetHashCode(), extension);
 	}
 
 	private IEnumerator cr_cacheVOD(string file, string url)
@@ -254,8 +262,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		{
 			return;
 		}
-		this.audioSource.transform.parent = vodtarget.transform;
-		this.audioSource.transform.localPosition = Vector3.zero;
+		this.audioSource.transform.position = vodtarget.transform.position;
 		this.audioSource.volume = vodtarget.AudioSettings.volume;
 		this.audioSource.dopplerLevel = vodtarget.AudioSettings.dopplerLevel;
 		this.audioSource.rolloffMode = vodtarget.AudioSettings.rolloffMode;
@@ -266,6 +273,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	private void PlayPreviouStream()
 	{
 		DateTime serverTime = GorillaComputer.instance.GetServerTime();
+		Debug.Log(string.Format("VOD :: serverTime={0}", serverTime));
 		int hour = serverTime.Hour;
 		int minute = serverTime.Minute;
 		DateTime dateTime = new DateTime(serverTime.Year, serverTime.Month, serverTime.Day, hour, minute, 0);
@@ -280,19 +288,49 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		if (num >= 0)
 		{
 			int num2 = minute - this.schedule.hourly[num].minute;
-			this.StartPlayback(this.schedule.hourly[num].stream.url, serverTime.Subtract(dateTime.AddMinutes((double)(-(double)num2))).TotalSeconds);
+			this.StartPlayback(this.schedule.hourly[num].stream, serverTime.Subtract(dateTime.AddMinutes((double)(-(double)num2))).TotalSeconds);
 		}
 	}
 
-	private void StartPlayback(string url, double time = 0.0)
+	private void StartPlayback(VODPlayer.VODStream str, double time = 0.0)
 	{
-		VODPlayer.<StartPlayback>d__37 <StartPlayback>d__;
-		<StartPlayback>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
-		<StartPlayback>d__.<>4__this = this;
-		<StartPlayback>d__.url = url;
-		<StartPlayback>d__.time = time;
-		<StartPlayback>d__.<>1__state = -1;
-		<StartPlayback>d__.<>t__builder.Start<VODPlayer.<StartPlayback>d__37>(ref <StartPlayback>d__);
+		this.imageClearTime = 0f;
+		VODPlayer.VODStream.VODStreamType type = str.type;
+		if (type == VODPlayer.VODStream.VODStreamType.VIDEO)
+		{
+			Debug.Log("VOD :: StartVideoPlayback :: go");
+			this.StartVideoPlayback(str.url, time);
+			return;
+		}
+		if (type != VODPlayer.VODStream.VODStreamType.IMAGE)
+		{
+			return;
+		}
+		Debug.Log("VOD :: StartImagePlayback :: go");
+		this.StartImagePlayback(str.url, str.duration, time);
+	}
+
+	private void StartImagePlayback(string url, int duration, double time = 0.0)
+	{
+		VODPlayer.<StartImagePlayback>d__40 <StartImagePlayback>d__;
+		<StartImagePlayback>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
+		<StartImagePlayback>d__.<>4__this = this;
+		<StartImagePlayback>d__.url = url;
+		<StartImagePlayback>d__.duration = duration;
+		<StartImagePlayback>d__.time = time;
+		<StartImagePlayback>d__.<>1__state = -1;
+		<StartImagePlayback>d__.<>t__builder.Start<VODPlayer.<StartImagePlayback>d__40>(ref <StartImagePlayback>d__);
+	}
+
+	private void StartVideoPlayback(string url, double time = 0.0)
+	{
+		VODPlayer.<StartVideoPlayback>d__41 <StartVideoPlayback>d__;
+		<StartVideoPlayback>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
+		<StartVideoPlayback>d__.<>4__this = this;
+		<StartVideoPlayback>d__.url = url;
+		<StartVideoPlayback>d__.time = time;
+		<StartVideoPlayback>d__.<>1__state = -1;
+		<StartVideoPlayback>d__.<>t__builder.Start<VODPlayer.<StartVideoPlayback>d__41>(ref <StartVideoPlayback>d__);
 	}
 
 	private void onTD(string s)
@@ -330,6 +368,7 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		{
 			VODPlayer.OnCrash();
 		}
+		Debug.LogError("VOD :: CRASHED :: " + msg);
 		for (int i = 0; i < this.targets.Count; i++)
 		{
 			this.targets[i].gameObject.SetActive(false);
@@ -371,6 +410,9 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	[SerializeField]
 	private Material busyMaterial;
 
+	[SerializeField]
+	private Material imageMaterial;
+
 	private List<VODTarget> targets = new List<VODTarget>();
 
 	private int lastCheck;
@@ -380,6 +422,8 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 	private Coroutine _cr_cacheVOD;
 
 	private bool playerBusy;
+
+	private float imageClearTime;
 
 	public enum State
 	{
@@ -423,6 +467,16 @@ public class VODPlayer : MonoBehaviour, IGorillaSliceableSimple
 		public string name;
 
 		public string url;
+
+		public VODPlayer.VODStream.VODStreamType type;
+
+		public int duration;
+
+		public enum VODStreamType
+		{
+			VIDEO,
+			IMAGE
+		}
 	}
 
 	[Serializable]

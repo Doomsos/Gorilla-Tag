@@ -21,12 +21,15 @@ public class GameBallPlayerLocal : MonoBehaviour
 
 	private static void _OnApplicationQuit()
 	{
-		MonkeBallGame.Instance.OnPlayerDestroy();
+		if (MonkeBallGame.Instance != null)
+		{
+			MonkeBallGame.Instance.OnPlayerDestroy();
+		}
 	}
 
 	private void OnApplicationPause(bool pause)
 	{
-		if (pause)
+		if (pause && MonkeBallGame.Instance != null)
 		{
 			MonkeBallGame.Instance.OnPlayerDestroy();
 		}
@@ -38,7 +41,10 @@ public class GameBallPlayerLocal : MonoBehaviour
 		{
 			return;
 		}
-		MonkeBallGame.Instance.OnPlayerDestroy();
+		if (MonkeBallGame.Instance != null)
+		{
+			MonkeBallGame.Instance.OnPlayerDestroy();
+		}
 	}
 
 	public void OnUpdateInteract()

@@ -226,6 +226,11 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 		}
 	}
 
+	public void ClearLastRequestedDestination()
+	{
+		this.lastRequestedDest = Vector3.one * 10000f;
+	}
+
 	public void ApplyNetworkUpdate(Vector3 position, Quaternion rotation)
 	{
 		if (this.disableNetworkSync)
@@ -345,6 +350,8 @@ public class GameAgent : MonoBehaviour, IGameEntityComponent
 	private List<IGameAgentComponent> agentComponents;
 
 	private bool wasOnOffMeshNavLink;
+
+	public bool navAgentless;
 
 	[ReadOnly]
 	public bool pauseEntityThink;

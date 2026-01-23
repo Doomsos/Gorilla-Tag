@@ -356,6 +356,10 @@ public class GRElevator : MonoBehaviour
 
 	public GameObject collidersAndVisuals;
 
+	public GameObject videoDisplay;
+
+	public AudioSource videoAudio;
+
 	public enum ElevatorState
 	{
 		DoorBeginClosing,

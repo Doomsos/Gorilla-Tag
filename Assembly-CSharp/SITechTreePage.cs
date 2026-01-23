@@ -56,7 +56,7 @@ public class SITechTreePage
 
 	public void BuildGraph()
 	{
-		SITechTreePage.<>c__DisplayClass26_0 CS$<>8__locals1;
+		SITechTreePage.<>c__DisplayClass27_0 CS$<>8__locals1;
 		CS$<>8__locals1.<>4__this = this;
 		this.Roots = new List<GraphNode<SITechTreeNode>>();
 		this.AllNodes = new List<GraphNode<SITechTreeNode>>();
@@ -70,7 +70,7 @@ public class SITechTreePage
 		{
 			if (sitechTreeNode.IsValid && (sitechTreeNode.parentUpgrades == null || sitechTreeNode.parentUpgrades.Length == 0))
 			{
-				this.Roots.Add(this.<BuildGraph>g__PopulateGraph|26_0(sitechTreeNode, this.excludedGameModes, ref CS$<>8__locals1));
+				this.Roots.Add(this.<BuildGraph>g__PopulateGraph|27_0(sitechTreeNode, this.excludedGameModes, ref CS$<>8__locals1));
 			}
 		}
 		foreach (GraphNode<SITechTreeNode> graphNode in this.AllNodes)
@@ -93,7 +93,7 @@ public class SITechTreePage
 					"[SI] Graph node: ",
 					graphNode2.Value.nickName,
 					" [",
-					SITechTreePage.<PrintGraph>g__NodeListText|27_2(graphNode2.Parents),
+					SITechTreePage.<PrintGraph>g__NodeListText|28_2(graphNode2.Parents),
 					"]"
 				}));
 			}
@@ -101,7 +101,7 @@ public class SITechTreePage
 	}
 
 	[CompilerGenerated]
-	private GraphNode<SITechTreeNode> <BuildGraph>g__PopulateGraph|26_0(SITechTreeNode node, ESuperGameModes parentExcludedGameModes, ref SITechTreePage.<>c__DisplayClass26_0 A_3)
+	private GraphNode<SITechTreeNode> <BuildGraph>g__PopulateGraph|27_0(SITechTreeNode node, ESuperGameModes parentExcludedGameModes, ref SITechTreePage.<>c__DisplayClass27_0 A_3)
 	{
 		node.excludedGameModes |= parentExcludedGameModes;
 		GraphNode<SITechTreeNode> graphNode;
@@ -121,7 +121,7 @@ public class SITechTreePage
 				{
 					if (parentUpgrades[j] == upgradeType)
 					{
-						GraphNode<SITechTreeNode> graphNode2 = this.<BuildGraph>g__PopulateGraph|26_0(sitechTreeNode, node.excludedGameModes, ref A_3);
+						GraphNode<SITechTreeNode> graphNode2 = this.<BuildGraph>g__PopulateGraph|27_0(sitechTreeNode, node.excludedGameModes, ref A_3);
 						if (!graphNode.Children.Contains(graphNode2))
 						{
 							graphNode.AddChild(graphNode2);
@@ -134,27 +134,27 @@ public class SITechTreePage
 	}
 
 	[CompilerGenerated]
-	internal static string[] <PrintGraph>g__GetChildText|27_0(GraphNode<SITechTreeNode> root)
+	internal static string[] <PrintGraph>g__GetChildText|28_0(GraphNode<SITechTreeNode> root)
 	{
 		return (from n in root.TraversePreOrder()
-		select SITechTreePage.<PrintGraph>g__NodeText|27_1(n)).ToArray<string>();
+		select SITechTreePage.<PrintGraph>g__NodeText|28_1(n)).ToArray<string>();
 	}
 
 	[CompilerGenerated]
-	internal static string <PrintGraph>g__NodeText|27_1(GraphNode<SITechTreeNode> graphNode)
+	internal static string <PrintGraph>g__NodeText|28_1(GraphNode<SITechTreeNode> graphNode)
 	{
 		return string.Concat(new string[]
 		{
-			SITechTreePage.<PrintGraph>g__NodeListText|27_2(graphNode.Parents),
+			SITechTreePage.<PrintGraph>g__NodeListText|28_2(graphNode.Parents),
 			" >> ",
 			graphNode.Value.nickName,
 			" << ",
-			SITechTreePage.<PrintGraph>g__NodeListText|27_2(graphNode.Children)
+			SITechTreePage.<PrintGraph>g__NodeListText|28_2(graphNode.Children)
 		});
 	}
 
 	[CompilerGenerated]
-	internal static string <PrintGraph>g__NodeListText|27_2(List<GraphNode<SITechTreeNode>> nodes)
+	internal static string <PrintGraph>g__NodeListText|28_2(List<GraphNode<SITechTreeNode>> nodes)
 	{
 		return string.Join("|", from n in nodes
 		select n.Value.nickName);
@@ -166,6 +166,8 @@ public class SITechTreePage
 	public string nickName;
 
 	public SITechTreePageId pageId;
+
+	public Sprite icon;
 
 	public ESuperGameModes excludedGameModes;
 

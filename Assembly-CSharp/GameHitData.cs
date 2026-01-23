@@ -16,4 +16,6 @@ public struct GameHitData
 	public Vector3 hitImpulse;
 
 	public int hitAmount;
+
+	public int hittablePoint;
 }

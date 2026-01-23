@@ -46,6 +46,8 @@ public class GRAbilityDie : GRAbilityBase
 		{
 			this.fxDeath.SetActive(false);
 		}
+		this.events.Reset();
+		this.events.OnAbilityStart(base.GetAbilityTime(Time.timeAsDouble), this.audioSource);
 	}
 
 	protected override void OnStop()
@@ -55,6 +57,7 @@ public class GRAbilityDie : GRAbilityBase
 		this.agent.SetDisableNetworkSync(false);
 		GRAbilityDie.Hide(this.hideWhenDead, false);
 		GRAbilityDie.Disable(this.disableCollidersWhenDead, false);
+		this.events.OnAbilityStop(base.GetAbilityTime(Time.timeAsDouble), this.audioSource);
 	}
 
 	public void SetStaggerVelocity(Vector3 vel)
@@ -71,6 +74,7 @@ public class GRAbilityDie : GRAbilityBase
 
 	public void SetInstigatingPlayerIndex(int actorNumber)
 	{
+		Debug.Log(string.Format("SetInstigatingPlayerIndex {0}", actorNumber));
 		this.instigatingActorNumber = actorNumber;
 	}
 
@@ -114,6 +118,21 @@ public class GRAbilityDie : GRAbilityBase
 
 	public void DestroySelf()
 	{
+		Debug.Log("DESTROY SELF");
+		this.ReportDeathStat();
+		if (this.agent.entity.IsAuthority())
+		{
+			this.agent.entity.manager.RequestDestroyItem(this.agent.entity.id);
+		}
+	}
+
+	public void ReportDeathStat()
+	{
+		if (this.reported)
+		{
+			return;
+		}
+		this.reported = true;
 		GameEntity entity = this.agent.entity;
 		GRPlayer grplayer = GRPlayer.Get(this.instigatingActorNumber);
 		if (grplayer != null)
@@ -121,10 +140,6 @@ public class GRAbilityDie : GRAbilityBase
 			grplayer.IncrementSynchronizedSessionStat(GRPlayer.SynchronizedSessionStat.Kills, 1f);
 		}
 		GhostReactor.instance.shiftManager.shiftStats.IncrementEnemyKills(entity.GetEnemyType());
-		if (entity.IsAuthority())
-		{
-			entity.manager.RequestDestroyItem(entity.id);
-		}
 	}
 
 	public override bool IsDone()
@@ -145,14 +160,14 @@ public class GRAbilityDie : GRAbilityBase
 			{
 				this.isDead = true;
 				this.Die();
-				return;
 			}
-			if (this.isDead && num > (double)(this.totalDeathDelay + this.destroyDelay))
+			else if (this.isDead && num > (double)(this.totalDeathDelay + this.destroyDelay))
 			{
-				GhostReactorManager.Get(this.entity).OnAbilityDie(this.entity);
+				GhostReactorManager.Get(this.entity).OnAbilityDie(this.entity, this.delayRespawn);
 				this.DestroySelf();
 				this.startTime = -1.0;
 			}
+			this.events.TryPlay((float)num, this.audioSource);
 		}
 	}
 
@@ -187,6 +202,8 @@ public class GRAbilityDie : GRAbilityBase
 	}
 
 	public float delayDeath;
+
+	public float delayRespawn = -1f;
 
 	public List<Renderer> hideWhenDead;
 
@@ -223,4 +240,8 @@ public class GRAbilityDie : GRAbilityBase
 	private float totalDeathDelay;
 
 	public GRAbilityInterpolatedMovement staggerMovement;
+
+	public GameAbilityEvents events;
+
+	private bool reported;
 }

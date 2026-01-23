@@ -307,6 +307,15 @@ namespace GorillaNetworking
 						break;
 					}
 				}
+				if (flag && GorillaComputer.instance.friendJoinCollider != null && !GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(NetworkSystem.Instance.LocalPlayer.UserId))
+				{
+					GTZone gtzone = this.ParseZoneFromGameMode(NetworkSystem.Instance.GameModeString);
+					if (gtzone != GTZone.none && !ZoneManagement.IsInZone(gtzone))
+					{
+						Debug.Log(string.Format("NOT ALLOWED IN ROOM: Joined {0} room but not physically in {1} zone", gtzone, gtzone));
+						flag = false;
+					}
+				}
 				if (!flag)
 				{
 					GorillaComputer.instance.roomNotAllowed = true;
@@ -490,6 +499,23 @@ namespace GorillaNetworking
 				}
 				instance.ReturnToSinglePlayer();
 			}
+		}
+
+		private GTZone ParseZoneFromGameMode(string gameMode)
+		{
+			if (string.IsNullOrEmpty(gameMode))
+			{
+				return GTZone.none;
+			}
+			foreach (object obj in Enum.GetValues(typeof(GTZone)))
+			{
+				GTZone gtzone = (GTZone)obj;
+				if (gtzone != GTZone.none && gameMode.StartsWith(gtzone.ToString(), StringComparison.OrdinalIgnoreCase))
+				{
+					return gtzone;
+				}
+			}
+			return GTZone.none;
 		}
 
 		[OnEnterPlay_SetNull]

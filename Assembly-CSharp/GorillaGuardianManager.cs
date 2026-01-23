@@ -313,6 +313,21 @@ public sealed class GorillaGuardianManager : GorillaGameManager
 		return GameModeType.Guardian;
 	}
 
+	public override string GameModeName()
+	{
+		return "GUARDIAN";
+	}
+
+	public override string GameModeNameRoomLabel()
+	{
+		string result;
+		if (!LocalisationManager.TryGetKeyForCurrentLocale("GAME_MODE_GUARDIAN_ROOM_LABEL", out result, "(GUARDIAN GAME)"))
+		{
+			Debug.LogError("[LOCALIZATION::GORILLA_GAME_MANAGER] Failed to get key for Game Mode [GAME_MODE_GUARDIAN_ROOM_LABEL]");
+		}
+		return result;
+	}
+
 	public void PlaySlapEffect(Vector3 location, Vector3 direction)
 	{
 		this.LocalPlaySlapEffect(location, direction);

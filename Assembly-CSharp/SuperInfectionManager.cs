@@ -207,9 +207,30 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 		if (component != null)
 		{
 			SIPlayer siplayer = SIPlayer.Get((int)(entity.createData & (long)((ulong)-1)));
-			if (siplayer != null && !siplayer.activePlayerGadgets.Contains(entity.GetNetId()))
+			if (siplayer != null)
 			{
-				siplayer.activePlayerGadgets.Add(entity.GetNetId());
+				int num = 0;
+				for (int i = siplayer.activePlayerGadgets.Count - 1; i >= 0; i--)
+				{
+					GameEntity gameEntityFromNetId = this.gameEntityManager.GetGameEntityFromNetId(siplayer.activePlayerGadgets[i]);
+					if (gameEntityFromNetId == null)
+					{
+						siplayer.activePlayerGadgets.RemoveAt(i);
+					}
+					else
+					{
+						num++;
+						if (num >= siplayer.totalGadgetLimit)
+						{
+							this.gameEntityManager.DestroyItemLocal(gameEntityFromNetId.id);
+							break;
+						}
+					}
+				}
+				if (!siplayer.activePlayerGadgets.Contains(entity.GetNetId()))
+				{
+					siplayer.activePlayerGadgets.Add(entity.GetNetId());
+				}
 			}
 			SIUpgradeSet siupgradeSet = new SIUpgradeSet((int)(entity.createData >> 32));
 			siupgradeSet = component.FilterUpgradeNodes(siupgradeSet);
@@ -707,6 +728,8 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 			}
 			break;
 		}
+		case 6:
+			break;
 		default:
 			return;
 		}
@@ -1091,7 +1114,8 @@ public class SuperInfectionManager : MonoBehaviour, IGameEntityZoneComponent, IF
 		ResourceDepositTechPointRejected,
 		CallEntityRPC,
 		CallEntityRPCData,
-		TriggerMonkeIdolDepositCelebration
+		TriggerMonkeIdolDepositCelebration,
+		StartUnderwaterFX
 	}
 
 	public enum ClientToClientRPC

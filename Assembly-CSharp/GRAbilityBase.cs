@@ -64,6 +64,11 @@ public class GRAbilityBase
 		this.OnStop();
 	}
 
+	public float GetAbilityTime(double currTime)
+	{
+		return (float)(currTime - this.startTime);
+	}
+
 	public virtual bool IsDone()
 	{
 		return false;

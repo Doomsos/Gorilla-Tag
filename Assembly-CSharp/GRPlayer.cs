@@ -324,6 +324,14 @@ public class GRPlayer : MonoBehaviourTick
 					num = component2.CalculateFinalValueForAttribute(GRAttributeType.PlayerDamage);
 				}
 			}
+			Debug.Log(string.Format("GRPlayer OnPlayerHit, hit by: {0} damage: {1}, state: {2}, hp: {3}, shield hp: {4}", new object[]
+			{
+				hitByEntityId.index,
+				num,
+				this.state,
+				this.hp,
+				this.shieldHp
+			}));
 			this.PlayHitFx(hitPosition);
 			this.SetHp(this.hp - num);
 			this.RefreshDamageVignetteVisual();

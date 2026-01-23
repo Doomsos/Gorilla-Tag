@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using GorillaNetworking;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -21,7 +22,7 @@ public class CodeRedemption : MonoBehaviour
 
 	public void HandleCodeRedemption(string code)
 	{
-		string text = JsonUtility.ToJson(new CodeRedemption.CodeRedemptionRequest
+		string text = JsonConvert.SerializeObject(new CodeRedemption.CodeRedemptionRequest
 		{
 			itemGUID = code,
 			playFabID = PlayFabAuthenticator.instance.GetPlayFabPlayerId(),
@@ -45,11 +46,25 @@ public class CodeRedemption : MonoBehaviour
 		string text = string.Empty;
 		try
 		{
-			CodeRedemption.CodeRedemptionResponse codeRedemptionResponse = JsonUtility.FromJson<CodeRedemption.CodeRedemptionResponse>(completedRequest.downloadHandler.text);
+			CodeRedemption.CodeRedemptionResponse codeRedemptionResponse = JsonConvert.DeserializeObject<CodeRedemption.CodeRedemptionResponse>(completedRequest.downloadHandler.text);
 			if (codeRedemptionResponse.result.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
 			{
-				Debug.Log("[CodeRedemption] Item has already been redeemed!");
+				Debug.Log("[CodeRedemption] Code has already been redeemed!");
 				GorillaComputer.instance.RedemptionStatus = GorillaComputer.RedemptionResult.AlreadyUsed;
+				return;
+			}
+			if (codeRedemptionResponse.result.Contains("TooEarly", StringComparison.OrdinalIgnoreCase))
+			{
+				Debug.Log(string.Format("[CodeRedemption] Code is not redeemable until {0}!", codeRedemptionResponse.startTime));
+				GorillaComputer.instance.RedemptionRestrictionTime = codeRedemptionResponse.startTime;
+				GorillaComputer.instance.RedemptionStatus = GorillaComputer.RedemptionResult.TooEarly;
+				return;
+			}
+			if (codeRedemptionResponse.result.Contains("TooLate", StringComparison.OrdinalIgnoreCase))
+			{
+				Debug.Log(string.Format("[CodeRedemption] Code expired at {0}!", codeRedemptionResponse.endTime));
+				GorillaComputer.instance.RedemptionRestrictionTime = codeRedemptionResponse.endTime;
+				GorillaComputer.instance.RedemptionStatus = GorillaComputer.RedemptionResult.TooLate;
 				return;
 			}
 			text = codeRedemptionResponse.playFabItemName;
@@ -122,5 +137,9 @@ public class CodeRedemption : MonoBehaviour
 		public string itemID;
 
 		public string playFabItemName;
+
+		public DateTimeOffset? startTime;
+
+		public DateTimeOffset? endTime;
 	}
 }

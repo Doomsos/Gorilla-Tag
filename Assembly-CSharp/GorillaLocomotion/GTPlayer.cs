@@ -113,6 +113,14 @@ namespace GorillaLocomotion
 			this.rightHand.handRotOffset = handRotOffset;
 		}
 
+		public Vector3 LastPosition
+		{
+			get
+			{
+				return this.lastPosition;
+			}
+		}
+
 		public Vector3 InstantaneousVelocity
 		{
 			get
@@ -216,6 +224,8 @@ namespace GorillaLocomotion
 		}
 
 		protected bool IsFrozen { get; set; }
+
+		public bool forcedUnderwater { get; set; }
 
 		public List<WaterVolume> HeadOverlappingWaterVolumes
 		{
@@ -770,7 +780,7 @@ namespace GorillaLocomotion
 			this.swimmingVelocity = Vector3.MoveTowards(this.swimmingVelocity, Vector3.zero, this.swimmingParams.swimmingVelocityOutOfWaterDrainRate * fixedDeltaTime);
 			this.leftHandNonDiveHapticsAmount = 0f;
 			this.rightHandNonDiveHapticsAmount = 0f;
-			if (this.bodyOverlappingWaterVolumes.Count > 0)
+			if (this.bodyOverlappingWaterVolumes.Count > 0 || this.forcedUnderwater)
 			{
 				WaterVolume waterVolume = null;
 				float num3 = float.MinValue;
@@ -795,12 +805,22 @@ namespace GorillaLocomotion
 						}
 					}
 				}
-				if (waterVolume != null)
+				if (this.forcedUnderwater && waterVolume == null)
+				{
+					this.waterSurfaceForHead = new WaterVolume.SurfaceQuery
+					{
+						surfacePoint = this.headCollider.transform.position + Vector3.up * 1000f,
+						surfaceNormal = Vector3.up,
+						maxDepth = 2000f
+					};
+					num3 = 1000f;
+				}
+				if (waterVolume != null || this.forcedUnderwater)
 				{
 					Vector3 linearVelocity = this.playerRigidBody.linearVelocity;
 					float magnitude = linearVelocity.magnitude;
 					bool flag = this.headInWater;
-					this.headInWater = (this.headCollider.transform.position.y < this.waterSurfaceForHead.surfacePoint.y && this.headCollider.transform.position.y > this.waterSurfaceForHead.surfacePoint.y - this.waterSurfaceForHead.maxDepth);
+					this.headInWater = (this.forcedUnderwater || (this.headCollider.transform.position.y < this.waterSurfaceForHead.surfacePoint.y && this.headCollider.transform.position.y > this.waterSurfaceForHead.surfacePoint.y - this.waterSurfaceForHead.maxDepth));
 					if (this.headInWater && !flag)
 					{
 						this.audioSetToUnderwater = true;
@@ -811,33 +831,30 @@ namespace GorillaLocomotion
 						this.audioSetToUnderwater = false;
 						this.audioManager.UnsetMixerSnapshot(0.1f);
 					}
-					this.bodyInWater = (vector.y < this.waterSurfaceForHead.surfacePoint.y && vector.y > this.waterSurfaceForHead.surfacePoint.y - this.waterSurfaceForHead.maxDepth);
+					this.bodyInWater = (this.forcedUnderwater || (vector.y < this.waterSurfaceForHead.surfacePoint.y && vector.y > this.waterSurfaceForHead.surfacePoint.y - this.waterSurfaceForHead.maxDepth));
 					if (this.bodyInWater)
 					{
-						GTPlayer.LiquidProperties liquidProperties = this.liquidPropertiesList[(int)waterVolume.LiquidType];
-						if (waterVolume != null)
+						GTPlayer.LiquidProperties liquidProperties = this.liquidPropertiesList[(int)((waterVolume != null) ? waterVolume.LiquidType : GTPlayer.LiquidType.Water)];
+						float num6;
+						if (this.swimmingParams.extendBouyancyFromSpeed)
 						{
-							float num6;
-							if (this.swimmingParams.extendBouyancyFromSpeed)
-							{
-								float time = Mathf.Clamp(Vector3.Dot(linearVelocity / this.scale, this.waterSurfaceForHead.surfaceNormal), this.swimmingParams.speedToBouyancyExtensionMinMax.x, this.swimmingParams.speedToBouyancyExtensionMinMax.y);
-								float b = this.swimmingParams.speedToBouyancyExtension.Evaluate(time);
-								this.buoyancyExtension = Mathf.Max(this.buoyancyExtension, b);
-								float num5 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist + this.buoyancyExtension, num3 / this.scale + this.buoyancyExtension);
-								this.buoyancyExtension = Spring.DamperDecayExact(this.buoyancyExtension, this.swimmingParams.buoyancyExtensionDecayHalflife, fixedDeltaTime, 1E-05f);
-								num6 = num5;
-							}
-							else
-							{
-								num6 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist, num3 / this.scale);
-							}
-							Vector3 vector2 = -(Physics.gravity * this.scale) * (liquidProperties.buoyancy * num6);
-							if (this.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
-							{
-								vector2 *= this.frozenBodyBuoyancyFactor;
-							}
-							this.playerRigidBody.AddForce(vector2, ForceMode.Acceleration);
+							float time = Mathf.Clamp(Vector3.Dot(linearVelocity / this.scale, this.waterSurfaceForHead.surfaceNormal), this.swimmingParams.speedToBouyancyExtensionMinMax.x, this.swimmingParams.speedToBouyancyExtensionMinMax.y);
+							float b = this.swimmingParams.speedToBouyancyExtension.Evaluate(time);
+							this.buoyancyExtension = Mathf.Max(this.buoyancyExtension, b);
+							float num5 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist + this.buoyancyExtension, num3 / this.scale + this.buoyancyExtension);
+							this.buoyancyExtension = Spring.DamperDecayExact(this.buoyancyExtension, this.swimmingParams.buoyancyExtensionDecayHalflife, fixedDeltaTime, 1E-05f);
+							num6 = num5;
 						}
+						else
+						{
+							num6 = Mathf.InverseLerp(0f, this.swimmingParams.buoyancyFadeDist, num3 / this.scale);
+						}
+						Vector3 vector2 = -(Physics.gravity * this.scale) * (liquidProperties.buoyancy * num6);
+						if (this.IsFrozen && GorillaGameManager.instance is GorillaFreezeTagManager)
+						{
+							vector2 *= this.frozenBodyBuoyancyFactor;
+						}
+						this.playerRigidBody.AddForce(vector2, ForceMode.Acceleration);
 						Vector3 vector3 = Vector3.zero;
 						Vector3 vector4 = Vector3.zero;
 						for (int j = 0; j < this.activeWaterCurrents.Count; j++)
@@ -2617,15 +2634,15 @@ namespace GorillaLocomotion
 			Vector3 localPosition = this.climbHelper.localPosition;
 			if (climbable.snapX)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|419_0(ref localPosition.x, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|425_0(ref localPosition.x, climbable.maxDistanceSnap);
 			}
 			if (climbable.snapY)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|419_0(ref localPosition.y, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|425_0(ref localPosition.y, climbable.maxDistanceSnap);
 			}
 			if (climbable.snapZ)
 			{
-				GTPlayer.<BeginClimbing>g__SnapAxis|419_0(ref localPosition.z, climbable.maxDistanceSnap);
+				GTPlayer.<BeginClimbing>g__SnapAxis|425_0(ref localPosition.z, climbable.maxDistanceSnap);
 			}
 			this.climbHelperTargetPos = localPosition;
 			climbable.isBeingClimbed = true;
@@ -3034,7 +3051,7 @@ namespace GorillaLocomotion
 					}
 				}
 			}
-			if (contactingWaterVolume != null)
+			if (this.forcedUnderwater || contactingWaterVolume != null)
 			{
 				Vector3 a = endingHandPosition - startingHandPosition;
 				Vector3 b = Vector3.zero;
@@ -3048,24 +3065,29 @@ namespace GorillaLocomotion
 				float num3 = 0f;
 				if (num2 > 0f)
 				{
-					Plane surfacePlane = waterSurface.surfacePlane;
-					float distanceToPoint = surfacePlane.GetDistanceToPoint(startingHandPosition);
-					float distanceToPoint2 = surfacePlane.GetDistanceToPoint(endingHandPosition);
-					if (distanceToPoint <= 0f && distanceToPoint2 <= 0f)
+					float num4 = -1f;
+					float num5 = -1f;
+					if (!this.forcedUnderwater)
+					{
+						Plane surfacePlane = waterSurface.surfacePlane;
+						num4 = (this.forcedUnderwater ? -1f : surfacePlane.GetDistanceToPoint(startingHandPosition));
+						num5 = (this.forcedUnderwater ? -1f : surfacePlane.GetDistanceToPoint(endingHandPosition));
+					}
+					if (num4 <= 0f && num5 <= 0f)
 					{
 						num3 = 1f;
 					}
-					else if (distanceToPoint > 0f && distanceToPoint2 <= 0f)
+					else if (num4 > 0f && num5 <= 0f)
 					{
-						num3 = -distanceToPoint2 / (distanceToPoint - distanceToPoint2);
+						num3 = -num5 / (num4 - num5);
 					}
-					else if (distanceToPoint <= 0f && distanceToPoint2 > 0f)
+					else if (num4 <= 0f && num5 > 0f)
 					{
-						num3 = -distanceToPoint / (distanceToPoint2 - distanceToPoint);
+						num3 = -num4 / (num5 - num4);
 					}
 					if (num3 > Mathf.Epsilon)
 					{
-						float resistance = this.liquidPropertiesList[(int)contactingWaterVolume.LiquidType].resistance;
+						float resistance = this.liquidPropertiesList[(int)(this.forcedUnderwater ? GTPlayer.LiquidType.Water : contactingWaterVolume.LiquidType)].resistance;
 						swimmingVelocityChange = -palmForwardDirection * num2 * 2f * resistance * num3;
 						Vector3 forward = this.mainCamera.transform.forward;
 						if (forward.y < 0f)
@@ -3073,11 +3095,11 @@ namespace GorillaLocomotion
 							Vector3 vector2 = forward.x0z();
 							float magnitude = vector2.magnitude;
 							vector2 /= magnitude;
-							float num4 = Vector3.Dot(swimmingVelocityChange, vector2);
-							if (num4 > 0f)
+							float num6 = Vector3.Dot(swimmingVelocityChange, vector2);
+							if (num6 > 0f)
 							{
-								Vector3 vector3 = vector2 * num4;
-								swimmingVelocityChange = swimmingVelocityChange - vector3 + vector3 * magnitude + Vector3.up * forward.y * num4;
+								Vector3 vector3 = vector2 * num6;
+								swimmingVelocityChange = swimmingVelocityChange - vector3 + vector3 * magnitude + Vector3.up * forward.y * num6;
 							}
 						}
 						return true;
@@ -3168,12 +3190,12 @@ namespace GorillaLocomotion
 
 		public void DoLaunch(Vector3 velocity)
 		{
-			GTPlayer.<DoLaunch>d__455 <DoLaunch>d__;
+			GTPlayer.<DoLaunch>d__461 <DoLaunch>d__;
 			<DoLaunch>d__.<>t__builder = AsyncVoidMethodBuilder.Create();
 			<DoLaunch>d__.<>4__this = this;
 			<DoLaunch>d__.velocity = velocity;
 			<DoLaunch>d__.<>1__state = -1;
-			<DoLaunch>d__.<>t__builder.Start<GTPlayer.<DoLaunch>d__455>(ref <DoLaunch>d__);
+			<DoLaunch>d__.<>t__builder.Start<GTPlayer.<DoLaunch>d__461>(ref <DoLaunch>d__);
 		}
 
 		private void OnEnable()
@@ -3333,7 +3355,7 @@ namespace GorillaLocomotion
 		}
 
 		[CompilerGenerated]
-		internal static void <BeginClimbing>g__SnapAxis|419_0(ref float val, float maxDist)
+		internal static void <BeginClimbing>g__SnapAxis|425_0(ref float val, float maxDist)
 		{
 			if (val > maxDist)
 			{

@@ -84,7 +84,10 @@ public class GRAbilityAttackLaser : GRAbilityBase
 				num2 = Mathf.Min(this.maxLaserRange, num2);
 				this.targetPos = position + a2 * num2;
 			}
-			GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
+			if (!this.doNotFaceTarget)
+			{
+				GameAgent.UpdateFacingTarget(this.root, this.agent.navAgent, this.target, this.maxTurnSpeed);
+			}
 			if (num > this.tellDuration)
 			{
 				this.state = GRAbilityAttackLaser.State.Attack;
@@ -204,6 +207,8 @@ public class GRAbilityAttackLaser : GRAbilityBase
 	public float range;
 
 	public float attackMoveSpeed;
+
+	public bool doNotFaceTarget;
 
 	public List<AnimationData> animData;
 

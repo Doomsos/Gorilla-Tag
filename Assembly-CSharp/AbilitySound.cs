@@ -10,7 +10,7 @@ public class AbilitySound
 		return this.sounds != null && this.sounds.Count > 0;
 	}
 
-	private void UpdateNextSound()
+	public void UpdateNextSound()
 	{
 		AbilitySound.SoundSelectMode soundSelectMode = this.soundSelectMode;
 		if (soundSelectMode == AbilitySound.SoundSelectMode.Sequential)
