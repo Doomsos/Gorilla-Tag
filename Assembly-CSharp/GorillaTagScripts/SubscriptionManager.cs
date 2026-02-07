@@ -107,7 +107,7 @@ namespace GorillaTagScripts
 		public static bool IsLocalSubscribed()
 		{
 			SubscriptionManager.SubscriptionDetails subscriptionDetails;
-			if (SubscriptionManager.Instance == null || !SubscriptionManager.Instance.subData.TryGetValue(VRRig.LocalRig.creator, out subscriptionDetails))
+			if (SubscriptionManager.Instance == null || VRRig.LocalRig == null || VRRig.LocalRig.creator == null || !SubscriptionManager.Instance.subData.TryGetValue(VRRig.LocalRig.creator, out subscriptionDetails))
 			{
 				Debug.LogError("Failed to get local player's subscription details");
 				return false;
