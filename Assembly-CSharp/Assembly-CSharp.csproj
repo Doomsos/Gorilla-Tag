@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{66EAD948-BF7A-442E-8EE1-140F552144A7}</ProjectGuid>
+    <ProjectGuid>{A884E8EB-A272-45CF-BB94-C38AB289077F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -1273,6 +1273,7 @@
     <Compile Include="GorillaSerializerMasterOnly.cs" />
     <Compile Include="GorillaSerializerScene.cs" />
     <Compile Include="GorillaSetZoneTrigger.cs" />
+    <Compile Include="GorillaSimpleBackgroundWorkerManager.cs" />
     <Compile Include="GorillaSkin.cs" />
     <Compile Include="GorillaSkinCatalog.cs" />
     <Compile Include="GorillaSkinMaterials.cs" />
@@ -1414,6 +1415,7 @@
     <Compile Include="GorillaTagScripts\MoleTypes.cs" />
     <Compile Include="GorillaTagScripts\MovingSurface.cs" />
     <Compile Include="GorillaTagScripts\MovingSurfaceManager.cs" />
+    <Compile Include="GorillaTagScripts\NetworkedPlayerColourNotifier.cs" />
     <Compile Include="GorillaTagScripts\ObstacleCourse\ObstacleCourse.cs" />
     <Compile Include="GorillaTagScripts\ObstacleCourse\ObstacleCourseData.cs" />
     <Compile Include="GorillaTagScripts\ObstacleCourse\ObstacleCourseManager.cs" />
@@ -2053,6 +2055,7 @@
     <Compile Include="IgnoreLocalRotation.cs" />
     <Compile Include="IGorillaSerializeable.cs" />
     <Compile Include="IGorillaSerializeableScene.cs" />
+    <Compile Include="IGorillaSimpleBackgroundWorker.cs" />
     <Compile Include="IGorillaSliceableSimple.cs" />
     <Compile Include="IGRSleepableEntity.cs" />
     <Compile Include="IGRSummoningEntity.cs" />
@@ -2458,6 +2461,7 @@
     <Compile Include="PeriodicFoodTopUpper.cs" />
     <Compile Include="PeriodicNoiseGenerator.cs" />
     <Compile Include="PerSceneRenderData.cs" />
+    <Compile Include="PersistLog.cs" />
     <Compile Include="PhotonAuthenticator.cs" />
     <Compile Include="PhotonAuthenticatorSettings.cs" />
     <Compile Include="PhotonAuthenticatorSettingsScriptableObject.cs" />
@@ -2768,6 +2772,7 @@
     <Compile Include="SizeManagerManager.cs" />
     <Compile Include="SkeletonNetData.cs" />
     <Compile Include="SkeletonPathingNode.cs" />
+    <Compile Include="SkipTriggerCalls.cs" />
     <Compile Include="SkyboxController.cs" />
     <Compile Include="SkyboxSettings.cs" />
     <Compile Include="Slingshot.cs" />
