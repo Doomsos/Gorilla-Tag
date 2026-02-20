@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A884E8EB-A272-45CF-BB94-C38AB289077F}</ProjectGuid>
+    <ProjectGuid>{78908375-A968-4939-A1BD-CE6F657BAE2B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -636,7 +636,6 @@
     <Compile Include="CritterAppearance.cs" />
     <Compile Include="CritterConfiguration.cs" />
     <Compile Include="CritterDespawner.cs" />
-    <Compile Include="CritterFood.cs" />
     <Compile Include="CritterIndex.cs" />
     <Compile Include="CrittersActor.cs" />
     <Compile Include="CrittersActorDeposit.cs" />
@@ -848,6 +847,7 @@
     <Compile Include="ErrorContent.cs" />
     <Compile Include="ESuperGameModes.cs" />
     <Compile Include="ESuperInfectionGameState.cs" />
+    <Compile Include="EvolvingCosmetic.cs" />
     <Compile Include="Example.cs" />
     <Compile Include="EyeScannableMono.cs" />
     <Compile Include="EyeScannerMono.cs" />
@@ -1245,7 +1245,6 @@
     <Compile Include="GorillaNetworkPublicTestJoin2.cs" />
     <Compile Include="GorillaNetworkPublicTestsJoin.cs" />
     <Compile Include="GorillaNetworkTransform.cs" />
-    <Compile Include="GorillaNot.cs" />
     <Compile Include="GorillaPaintbrawlManager.cs" />
     <Compile Include="GorillaParent.cs" />
     <Compile Include="GorillaPawn.cs" />
@@ -2300,6 +2299,7 @@
     <Compile Include="ModIORequestResultAnd.cs" />
     <Compile Include="ModIOTermsOfUse_v1.cs" />
     <Compile Include="MonitorOutputController.cs" />
+    <Compile Include="MonkeAgent.cs" />
     <Compile Include="MonkeBall.cs" />
     <Compile Include="MonkeBallBallEjectZone.cs" />
     <Compile Include="MonkeBallBallKillZone.cs" />
@@ -2605,6 +2605,7 @@
     <Compile Include="ReportTargetHit.cs" />
     <Compile Include="RequestableOwnershipGaurdHandler.cs" />
     <Compile Include="RequestableOwnershipGuard.cs" />
+    <Compile Include="ResettableUseCounter.cs" />
     <Compile Include="ReverbTrigger.cs" />
     <Compile Include="RigContainer.cs" />
     <Compile Include="RigDuplicationZone.cs" />
@@ -2685,6 +2686,8 @@
     <Compile Include="SIExclusionZone.cs" />
     <Compile Include="SIGadget.cs" />
     <Compile Include="SIGadgetAirGrab.cs" />
+    <Compile Include="SIGadgetAirJuke.cs" />
+    <Compile Include="SIGadgetAirJuke_EState.cs" />
     <Compile Include="SIGadgetBlaster.cs" />
     <Compile Include="SIGadgetBlasterProjectile.cs" />
     <Compile Include="SIGadgetBlasterState.cs" />
@@ -2710,8 +2713,6 @@
     <Compile Include="SIGadgetProjectileStretchVisuals.cs" />
     <Compile Include="SIGadgetProjectileType.cs" />
     <Compile Include="SIGadgetPumpBlaster.cs" />
-    <Compile Include="SIGadgetSlashDash.cs" />
-    <Compile Include="SIGadgetSlashDash_EState.cs" />
     <Compile Include="SIGadgetSlipMitt.cs" />
     <Compile Include="SIGadgetStilt.cs" />
     <Compile Include="SIGadgetTapTeleporter.cs" />

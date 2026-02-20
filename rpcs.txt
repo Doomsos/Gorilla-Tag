@@ -108,6 +108,7 @@ GhostReactorManager.ApplyGrantPlayerShieldRPC(System.Int32 shieldingPlayer, Syst
 GhostReactorManager.RequestFireProjectileRPC(System.Int32 entityNetId, UnityEngine.Vector3 firingPosition, UnityEngine.Vector3 targetPosition, System.Double networkTime, Photon.Pun.PhotonMessageInfo info)
 GhostReactorManager.BroadcastHandprint(UnityEngine.Vector3 pos, UnityEngine.Quaternion orient, Photon.Pun.PhotonMessageInfo info)
 GhostReactorManager.ApplyShiftStartRPC(System.Double shiftStartTime, System.Int32 randomSeed, System.String gameIdGuid, System.Boolean isFirstShift, Photon.Pun.PhotonMessageInfo info)
+GhostReactorManager.RequestShiftEnd()
 GhostReactorManager.ApplyShiftEndRPC(System.Double networkedTime, Photon.Pun.PhotonMessageInfo info)
 GhostReactorManager.PromotionBotActivePlayerRequestRPC(System.Int32 state, Photon.Pun.PhotonMessageInfo info)
 GhostReactorManager.PromotionBotActivePlayerResponseRPC(System.Int32 actorNumber, System.Int32 state, Photon.Pun.PhotonMessageInfo info)
