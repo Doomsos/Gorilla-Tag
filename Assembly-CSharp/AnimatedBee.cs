@@ -23,7 +23,7 @@ public struct AnimatedBee
 		this.velocity = Vector3.MoveTowards(this.velocity * manager.BeeJitterDamping, target, manager.BeeAcceleration * Time.deltaTime);
 		if ((this.oldPosition - vector2).IsLongerThan(manager.BeeNearDestinationRadius))
 		{
-			this.velocity += Random.insideUnitSphere * manager.BeeJitterStrength * Time.deltaTime;
+			this.velocity += UnityEngine.Random.insideUnitSphere * manager.BeeJitterStrength * Time.deltaTime;
 		}
 		Vector3 vector3 = this.oldPosition + this.velocity * Time.deltaTime;
 		if ((vector3 - vector).IsLongerThan(manager.BeeMaxJitterRadius))
@@ -88,7 +88,7 @@ public struct AnimatedBee
 
 	public void InitVisual(MeshRenderer prefab, BeeSwarmManager manager)
 	{
-		this.visual = Object.Instantiate<MeshRenderer>(prefab, manager.transform);
+		this.visual = UnityEngine.Object.Instantiate<MeshRenderer>(prefab, manager.transform);
 	}
 
 	public void InitRouteTimestamps()

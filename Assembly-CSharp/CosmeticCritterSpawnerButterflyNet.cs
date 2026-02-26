@@ -5,7 +5,7 @@ public class CosmeticCritterSpawnerButterflyNet : CosmeticCritterSpawnerTimed
 {
 	public override void SetRandomVariables(CosmeticCritter critter)
 	{
-		Vector3 startPos = base.transform.position + Random.onUnitSphere * this.spawnRadius;
+		Vector3 startPos = base.transform.position + UnityEngine.Random.onUnitSphere * this.spawnRadius;
 		(critter as CosmeticCritterButterfly).SetStartPos(startPos);
 	}
 

@@ -112,7 +112,7 @@ public static class Utils
 	{
 	}
 
-	public static void Log(object message, Object context)
+	public static void Log(object message, UnityEngine.Object context)
 	{
 	}
 

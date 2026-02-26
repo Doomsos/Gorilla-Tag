@@ -51,7 +51,7 @@ public class SpawnPooledObject : MonoBehaviour
 
 	private bool ShouldSpawn()
 	{
-		return Random.Range(0, 100) < this.chanceToSpawn;
+		return UnityEngine.Random.Range(0, 100) < this.chanceToSpawn;
 	}
 
 	[SerializeField]

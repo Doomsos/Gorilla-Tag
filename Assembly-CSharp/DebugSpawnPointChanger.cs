@@ -12,7 +12,7 @@ public class DebugSpawnPointChanger : MonoBehaviour
 		{
 			return;
 		}
-		GTPlayer gtplayer = Object.FindAnyObjectByType<GTPlayer>();
+		GTPlayer gtplayer = UnityEngine.Object.FindAnyObjectByType<GTPlayer>();
 		if (gtplayer == null)
 		{
 			return;
@@ -48,11 +48,11 @@ public class DebugSpawnPointChanger : MonoBehaviour
 
 	private void ChangePoint(int index)
 	{
-		SpawnManager spawnManager = Object.FindAnyObjectByType<SpawnManager>();
+		SpawnManager spawnManager = UnityEngine.Object.FindAnyObjectByType<SpawnManager>();
 		if (spawnManager != null)
 		{
 			Transform[] spawnPts = spawnManager.ChildrenXfs();
-			foreach (VRRig rig in Object.FindObjectsByType<VRRig>(FindObjectsSortMode.None))
+			foreach (VRRig rig in UnityEngine.Object.FindObjectsByType<VRRig>(FindObjectsSortMode.None))
 			{
 				this.AttachSpawnPoint(rig, spawnPts, index);
 			}

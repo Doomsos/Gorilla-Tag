@@ -24,7 +24,7 @@ public class ThrowableBugBeaconActivation : MonoBehaviour
 		uint count = 0U;
 		while (this.signalCount == 0U || count < this.signalCount)
 		{
-			yield return new WaitForSeconds(Random.Range(this.minCallTime, this.maxCallTime));
+			yield return new WaitForSeconds(UnityEngine.Random.Range(this.minCallTime, this.maxCallTime));
 			switch (this.mode)
 			{
 			case ThrowableBugBeaconActivation.ActivationMode.CALL:

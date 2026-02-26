@@ -78,7 +78,7 @@ public class ProgressionController : MonoBehaviour
 		if (ProgressionController._gInstance)
 		{
 			Debug.LogError("Duplicate ProgressionController detected. Destroying self.", base.gameObject);
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		ProgressionController._gInstance = this;

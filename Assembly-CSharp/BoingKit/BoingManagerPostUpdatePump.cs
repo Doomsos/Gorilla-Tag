@@ -7,7 +7,7 @@ namespace BoingKit
 	{
 		private void Start()
 		{
-			Object.DontDestroyOnLoad(base.gameObject);
+			UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		}
 
 		private bool TryDestroyDuplicate()
@@ -16,7 +16,7 @@ namespace BoingKit
 			{
 				return false;
 			}
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return true;
 		}
 

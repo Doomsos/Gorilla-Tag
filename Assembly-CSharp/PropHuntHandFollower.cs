@@ -92,7 +92,7 @@ public class PropHuntHandFollower : MonoBehaviour, ICallBack
 		}
 		if (hasProp)
 		{
-			Object.Destroy(_prop);
+			UnityEngine.Object.Destroy(_prop);
 		}
 		_prop = null;
 		hasProp = false;

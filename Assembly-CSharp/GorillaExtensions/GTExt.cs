@@ -57,9 +57,9 @@ namespace GorillaExtensions
 			return list;
 		}
 
-		public static List<Object> GetComponentsInHierarchy(this Scene scene, Type type, bool includeInactive = true, int capacity = 64)
+		public static List<UnityEngine.Object> GetComponentsInHierarchy(this Scene scene, Type type, bool includeInactive = true, int capacity = 64)
 		{
-			List<Object> list = new List<Object>(capacity);
+			List<UnityEngine.Object> list = new List<UnityEngine.Object>(capacity);
 			GameObject[] rootGameObjects = scene.GetRootGameObjects();
 			for (int i = 0; i < rootGameObjects.Length; i++)
 			{
@@ -1151,7 +1151,7 @@ namespace GorillaExtensions
 
 		public static int GetRandomIndex<T>(this IReadOnlyList<T> self)
 		{
-			return Random.Range(0, self.Count);
+			return UnityEngine.Random.Range(0, self.Count);
 		}
 
 		public static T GetRandomItem<T>(this IReadOnlyList<T> self)
@@ -1850,12 +1850,12 @@ namespace GorillaExtensions
 			return ray.ProjectToPlane(lineStart, normalized2);
 		}
 
-		public static bool IsNull(this Object mono)
+		public static bool IsNull(this UnityEngine.Object mono)
 		{
 			return mono == null || !mono;
 		}
 
-		public static bool IsNotNull(this Object mono)
+		public static bool IsNotNull(this UnityEngine.Object mono)
 		{
 			return !mono.IsNull();
 		}

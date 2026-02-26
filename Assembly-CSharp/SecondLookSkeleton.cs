@@ -15,7 +15,7 @@ public class SecondLookSkeleton : MonoBehaviour
 		this.localCaught = false;
 		this.audioSource = base.GetComponentInChildren<AudioSource>();
 		this.spookyGhost.SetActive(false);
-		this.angerPointIndex = Random.Range(0, this.angerPoint.Length);
+		this.angerPointIndex = UnityEngine.Random.Range(0, this.angerPoint.Length);
 		this.angerPointChangedTime = Time.time;
 		this.synchValues.angerPoint = this.angerPointIndex;
 		this.spookyGhost.transform.position = this.angerPoint[this.synchValues.angerPoint].position;
@@ -46,7 +46,7 @@ public class SecondLookSkeleton : MonoBehaviour
 			this.audioSource.loop = false;
 			if (this.IsMine())
 			{
-				this.synchValues.angerPoint = Random.Range(0, this.angerPoint.Length);
+				this.synchValues.angerPoint = UnityEngine.Random.Range(0, this.angerPoint.Length);
 				this.angerPointIndex = this.synchValues.angerPoint;
 				this.angerPointChangedTime = Time.time;
 				this.spookyGhost.transform.position = this.angerPoint[this.angerPointIndex].position;
@@ -85,8 +85,8 @@ public class SecondLookSkeleton : MonoBehaviour
 			}
 			if (this.IsMine())
 			{
-				this.currentNode = this.pathPoints[Random.Range(0, this.pathPoints.Length)];
-				this.nextNode = this.currentNode.connectedNodes[Random.Range(0, this.currentNode.connectedNodes.Length)];
+				this.currentNode = this.pathPoints[UnityEngine.Random.Range(0, this.pathPoints.Length)];
+				this.nextNode = this.currentNode.connectedNodes[UnityEngine.Random.Range(0, this.currentNode.connectedNodes.Length)];
 				this.SyncNodes();
 				this.spookyGhost.transform.position = this.currentNode.transform.position;
 			}
@@ -144,7 +144,7 @@ public class SecondLookSkeleton : MonoBehaviour
 			case SecondLookSkeleton.GhostState.Unactivated:
 				if (this.changeAngerPointOnTimeInterval && Time.time - this.angerPointChangedTime > this.changeAngerPointTimeMinutes * 60f)
 				{
-					this.synchValues.angerPoint = Random.Range(0, this.angerPoint.Length);
+					this.synchValues.angerPoint = UnityEngine.Random.Range(0, this.angerPoint.Length);
 					this.angerPointIndex = this.synchValues.angerPoint;
 					this.angerPointChangedTime = Time.time;
 				}
@@ -534,10 +534,10 @@ public class SecondLookSkeleton : MonoBehaviour
 				}
 				return;
 			}
-			SkeletonPathingNode skeletonPathingNode3 = this.nextNode.connectedNodes[Random.Range(0, this.nextNode.connectedNodes.Length)];
+			SkeletonPathingNode skeletonPathingNode3 = this.nextNode.connectedNodes[UnityEngine.Random.Range(0, this.nextNode.connectedNodes.Length)];
 			for (int l = 0; l < 10; l++)
 			{
-				skeletonPathingNode3 = this.nextNode.connectedNodes[Random.Range(0, this.nextNode.connectedNodes.Length)];
+				skeletonPathingNode3 = this.nextNode.connectedNodes[UnityEngine.Random.Range(0, this.nextNode.connectedNodes.Length)];
 				if (!skeletonPathingNode3.ejectionPoint && skeletonPathingNode3 != this.currentNode)
 				{
 					break;

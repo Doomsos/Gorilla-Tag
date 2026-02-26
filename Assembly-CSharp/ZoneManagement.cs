@@ -19,7 +19,7 @@ public class ZoneManagement : MonoBehaviour
 		}
 		if (ZoneManagement.instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 	}
 
@@ -88,7 +88,7 @@ public class ZoneManagement : MonoBehaviour
 
 	public static void FindInstance()
 	{
-		ZoneManagement zoneManagement = Object.FindAnyObjectByType<ZoneManagement>();
+		ZoneManagement zoneManagement = UnityEngine.Object.FindAnyObjectByType<ZoneManagement>();
 		if (zoneManagement == null)
 		{
 			throw new NullReferenceException("Unable to find ZoneManagement object in scene.");

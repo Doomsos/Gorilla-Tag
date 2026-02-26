@@ -14,7 +14,7 @@ namespace GorillaTagScripts
 				BuilderPool.instance = this;
 				return;
 			}
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 
 		public void Setup()
@@ -129,7 +129,7 @@ namespace GorillaTagScripts
 			List<BuilderPiece> list = this.piecePools[count2];
 			for (int i = 0; i < count; i++)
 			{
-				BuilderPiece builderPiece = Object.Instantiate<BuilderPiece>(piecePrefab);
+				BuilderPiece builderPiece = UnityEngine.Object.Instantiate<BuilderPiece>(piecePrefab);
 				builderPiece.OnCreatedByPool();
 				builderPiece.gameObject.SetActive(false);
 				list.Add(builderPiece);
@@ -188,7 +188,7 @@ namespace GorillaTagScripts
 			if (list.Count == 128)
 			{
 				piece.OnReturnToPool();
-				Object.Destroy(piece.gameObject);
+				UnityEngine.Object.Destroy(piece.gameObject);
 				return;
 			}
 			piece.gameObject.SetActive(false);
@@ -206,7 +206,7 @@ namespace GorillaTagScripts
 			}
 			for (int i = 0; i < count; i++)
 			{
-				BuilderBumpGlow builderBumpGlow = Object.Instantiate<BuilderBumpGlow>(this.bumpGlowPrefab);
+				BuilderBumpGlow builderBumpGlow = UnityEngine.Object.Instantiate<BuilderBumpGlow>(this.bumpGlowPrefab);
 				builderBumpGlow.gameObject.SetActive(false);
 				this.bumpGlowPool.Add(builderBumpGlow);
 			}
@@ -274,7 +274,7 @@ namespace GorillaTagScripts
 					{
 						if (builderPiece != null)
 						{
-							Object.Destroy(builderPiece);
+							UnityEngine.Object.Destroy(builderPiece);
 						}
 					}
 					this.piecePools[i].Clear();
@@ -283,7 +283,7 @@ namespace GorillaTagScripts
 			this.piecePoolLookup.Clear();
 			foreach (BuilderBumpGlow obj in this.bumpGlowPool)
 			{
-				Object.Destroy(obj);
+				UnityEngine.Object.Destroy(obj);
 			}
 			this.bumpGlowPool.Clear();
 		}

@@ -19,7 +19,7 @@ namespace Critters.Scripts
 
 		public int GetRandomTemplate()
 		{
-			int index = Random.Range(0, this.templateCollection.Count - 1);
+			int index = UnityEngine.Random.Range(0, this.templateCollection.Count - 1);
 			return this.templateCollection[index];
 		}
 

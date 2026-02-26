@@ -61,7 +61,7 @@ public class VirtualStumpBarrierSFX : MonoBehaviour
 		{
 			return;
 		}
-		this.barrierAudioSource.clip = this.PassThroughBarrierSoundClips[Random.Range(0, this.PassThroughBarrierSoundClips.Count)];
+		this.barrierAudioSource.clip = this.PassThroughBarrierSoundClips[UnityEngine.Random.Range(0, this.PassThroughBarrierSoundClips.Count)];
 		this.barrierAudioSource.Play();
 	}
 

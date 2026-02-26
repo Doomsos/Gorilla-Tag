@@ -7,6 +7,6 @@ public class PerfTestObjectDestroyer : MonoBehaviour
 {
 	private void Start()
 	{
-		Object.DestroyImmediate(base.gameObject, true);
+		UnityEngine.Object.DestroyImmediate(base.gameObject, true);
 	}
 }

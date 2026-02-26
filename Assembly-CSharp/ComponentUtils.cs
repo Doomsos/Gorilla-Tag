@@ -80,7 +80,7 @@ public static class ComponentUtils
 		return false;
 	}
 
-	public static bool DisableIfNull<T>(this Behaviour c, T fieldRef, string fieldName, string fieldTypeName, [CallerMemberName] string caller = "__UNKNOWN_CALLER__") where T : Object
+	public static bool DisableIfNull<T>(this Behaviour c, T fieldRef, string fieldName, string fieldTypeName, [CallerMemberName] string caller = "__UNKNOWN_CALLER__") where T : UnityEngine.Object
 	{
 		if (fieldRef != null)
 		{

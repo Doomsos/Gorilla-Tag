@@ -65,11 +65,11 @@ public class LocalisationManager : MonoBehaviour
 	{
 		if (LocalisationManager._instance != null)
 		{
-			Object.DestroyImmediate(this);
+			UnityEngine.Object.DestroyImmediate(this);
 			return;
 		}
 		LocalisationManager._instance = this;
-		Object.DontDestroyOnLoad(this);
+		UnityEngine.Object.DontDestroyOnLoad(this);
 		LocalisationManager._localisationFontDict.Clear();
 		for (int i = 0; i < this._localisationFonts.Count; i++)
 		{
@@ -392,7 +392,7 @@ public class LocalisationManager : MonoBehaviour
 		return false;
 	}
 
-	public static bool TryGetTranslationForCurrentLocaleWithLocString(LocalizedString key, out string result, string defaultResult = "", Object context = null)
+	public static bool TryGetTranslationForCurrentLocaleWithLocString(LocalizedString key, out string result, string defaultResult = "", UnityEngine.Object context = null)
 	{
 		result = defaultResult;
 		key.TableReference;

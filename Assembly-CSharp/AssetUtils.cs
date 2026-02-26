@@ -11,31 +11,31 @@ public static class AssetUtils
 	}
 
 	[Conditional("UNITY_EDITOR")]
-	public static void LoadAssetOfType<T>(ref T result, ref string resultPath) where T : Object
+	public static void LoadAssetOfType<T>(ref T result, ref string resultPath) where T : UnityEngine.Object
 	{
 		result = default(T);
 		resultPath = null;
 	}
 
 	[Conditional("UNITY_EDITOR")]
-	public static void FindAllAssetsOfType<T>(ref T[] results, ref string[] assetPaths) where T : Object
+	public static void FindAllAssetsOfType<T>(ref T[] results, ref string[] assetPaths) where T : UnityEngine.Object
 	{
 		results = Array.Empty<T>();
 	}
 
 	[HideInCallstack]
 	[Conditional("UNITY_EDITOR")]
-	public static void ForceSave<T>(this IList<T> assets, Action<T> onPreSave = null, bool unloadUnusedAfter = false) where T : Object
+	public static void ForceSave<T>(this IList<T> assets, Action<T> onPreSave = null, bool unloadUnusedAfter = false) where T : UnityEngine.Object
 	{
 	}
 
 	[HideInCallstack]
 	[Conditional("UNITY_EDITOR")]
-	public static void ForceSave(this Object asset)
+	public static void ForceSave(this UnityEngine.Object asset)
 	{
 	}
 
-	public static long ComputeAssetId(this Object asset, bool unsigned = false)
+	public static long ComputeAssetId(this UnityEngine.Object asset, bool unsigned = false)
 	{
 		return 0L;
 	}

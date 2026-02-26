@@ -980,7 +980,7 @@ public class CrittersActor : MonoBehaviour
 		this.rb.useGravity = true;
 		if (this.joint != null)
 		{
-			Object.Destroy(this.joint);
+			UnityEngine.Object.Destroy(this.joint);
 		}
 		this.joint = null;
 		if (this.parentActorId != -1)

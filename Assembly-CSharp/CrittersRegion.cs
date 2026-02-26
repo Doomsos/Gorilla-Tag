@@ -80,7 +80,7 @@ public class CrittersRegion : MonoBehaviour
 	{
 		float num = this.scale / 2f;
 		float num2 = base.transform.lossyScale.y * this.scale;
-		Vector3 vector = base.transform.TransformPoint(new Vector3(Random.Range(-num, num), num, Random.Range(-num, num)));
+		Vector3 vector = base.transform.TransformPoint(new Vector3(UnityEngine.Random.Range(-num, num), num, UnityEngine.Random.Range(-num, num)));
 		RaycastHit raycastHit;
 		if (Physics.Raycast(vector, -base.transform.up, out raycastHit, num2, -1, QueryTriggerInteraction.Ignore))
 		{

@@ -35,7 +35,7 @@ public class KIDUI_AnimatedEllipsis : MonoBehaviour
 		for (int i = 0; i < this._ellipsisStartingValues.Count; i++)
 		{
 			float num = this._ellipsisStartingValues[i];
-			this._ellipsisObjects[i].Item1 = Object.Instantiate<GameObject>(this._ellipsisPrefab, this._ellipsisRoot.transform);
+			this._ellipsisObjects[i].Item1 = UnityEngine.Object.Instantiate<GameObject>(this._ellipsisPrefab, this._ellipsisRoot.transform);
 			this._ellipsisObjects[i].Item1.transform.localScale = new Vector3(num, num, num);
 			this._ellipsisObjects[i].Item2 = (this._ellipsisObjects[i].Item3 = num);
 		}

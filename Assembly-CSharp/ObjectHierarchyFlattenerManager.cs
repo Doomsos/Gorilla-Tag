@@ -8,7 +8,7 @@ public class ObjectHierarchyFlattenerManager : MonoBehaviourPostTick
 	{
 		if (ObjectHierarchyFlattenerManager.hasInstance && ObjectHierarchyFlattenerManager.instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		ObjectHierarchyFlattenerManager.SetInstance(this);
@@ -25,7 +25,7 @@ public class ObjectHierarchyFlattenerManager : MonoBehaviourPostTick
 		ObjectHierarchyFlattenerManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			Object.DontDestroyOnLoad(manager);
+			UnityEngine.Object.DontDestroyOnLoad(manager);
 		}
 	}
 

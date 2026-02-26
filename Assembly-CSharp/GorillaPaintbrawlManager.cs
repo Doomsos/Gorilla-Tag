@@ -773,7 +773,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 		{
 			array[i] = i;
 		}
-		Random rand = new Random();
+		System.Random rand = new System.Random();
 		int[] array2 = (from x in array
 		orderby rand.Next()
 		select x).ToArray<int>();
@@ -799,7 +799,7 @@ public sealed class GorillaPaintbrawlManager : GorillaGameManager
 		}
 		if ((RoomSystem.PlayersInRoom.Count - 1) / 2 == this.rcount)
 		{
-			this.playerStatusDict[newPlayer.ActorNumber] = ((Random.Range(0, 2) == 0) ? this.SetFlag(this.playerStatusDict[newPlayer.ActorNumber], GorillaPaintbrawlManager.PaintbrawlStatus.RedTeam) : this.SetFlag(this.playerStatusDict[newPlayer.ActorNumber], GorillaPaintbrawlManager.PaintbrawlStatus.BlueTeam));
+			this.playerStatusDict[newPlayer.ActorNumber] = ((UnityEngine.Random.Range(0, 2) == 0) ? this.SetFlag(this.playerStatusDict[newPlayer.ActorNumber], GorillaPaintbrawlManager.PaintbrawlStatus.RedTeam) : this.SetFlag(this.playerStatusDict[newPlayer.ActorNumber], GorillaPaintbrawlManager.PaintbrawlStatus.BlueTeam));
 			return;
 		}
 		if (this.rcount <= (RoomSystem.PlayersInRoom.Count - 1) / 2)

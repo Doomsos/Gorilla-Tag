@@ -411,7 +411,7 @@ public class NetworkSystemPUN : NetworkSystem
 
 	public override string GetRandomWeightedRegion()
 	{
-		float value = Random.value;
+		float value = UnityEngine.Random.value;
 		int num = 0;
 		for (int i = 0; i < this.regionData.Length; i++)
 		{
@@ -560,7 +560,7 @@ public class NetworkSystemPUN : NetworkSystem
 			PhotonNetwork.Destroy(instance);
 			return;
 		}
-		Object.Destroy(instance);
+		UnityEngine.Object.Destroy(instance);
 	}
 
 	public override void SetPlayerObject(GameObject playerInstance, int? owningPlayerID = null)
@@ -719,7 +719,7 @@ public class NetworkSystemPUN : NetworkSystem
 			PlayerPrefs.SetString("didTutorial", "done");
 			PlayerPrefs.Save();
 		}
-		Hashtable hashtable = new Hashtable();
+		ExitGames.Client.Photon.Hashtable hashtable = new ExitGames.Client.Photon.Hashtable();
 		hashtable.Add("didTutorial", flag);
 		PhotonNetwork.LocalPlayer.SetCustomProperties(hashtable, null, null);
 	}
@@ -1023,7 +1023,7 @@ public class NetworkSystemPUN : NetworkSystem
 	{
 		if (this.VoiceNetworkObject)
 		{
-			Object.Destroy(this.VoiceNetworkObject);
+			UnityEngine.Object.Destroy(this.VoiceNetworkObject);
 		}
 		PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = this.regionNames[this.lowestPingRegionIndex];
 		this.currentRegionIndex = this.lowestPingRegionIndex;

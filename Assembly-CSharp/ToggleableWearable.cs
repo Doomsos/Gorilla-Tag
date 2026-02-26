@@ -55,7 +55,7 @@ public class ToggleableWearable : MonoBehaviour
 				{
 					this.LocalToggle(componentInParent.controllerNode == XRNode.LeftHand, true, true);
 				}
-				this.toggleCooldownTimer = Random.Range(this.toggleCooldownRange.x, this.toggleCooldownRange.y);
+				this.toggleCooldownTimer = UnityEngine.Random.Range(this.toggleCooldownRange.x, this.toggleCooldownRange.y);
 				this.toggleTimer = 0f;
 			}
 			if (this.resetTimer > 0f)

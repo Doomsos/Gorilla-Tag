@@ -75,7 +75,7 @@ public class GTSignalRelay : MonoBehaviourStatic<GTSignalRelay>, IOnEventCallbac
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void InitializeOnLoad()
 	{
-		Object.DontDestroyOnLoad(new GameObject("GTSignalRelay").AddComponent<GTSignalRelay>());
+		UnityEngine.Object.DontDestroyOnLoad(new GameObject("GTSignalRelay").AddComponent<GTSignalRelay>());
 	}
 
 	void IOnEventCallback.OnEvent(EventData eventData)

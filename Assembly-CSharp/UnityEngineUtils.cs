@@ -10,7 +10,7 @@ public static class UnityEngineUtils
 		return c.r == other.r && c.g == other.g && c.b == other.b && c.a == other.a;
 	}
 
-	public static Color32 IdToColor32(this Object obj, int alpha = -1, bool distinct = true)
+	public static Color32 IdToColor32(this UnityEngine.Object obj, int alpha = -1, bool distinct = true)
 	{
 		if (!(obj == null))
 		{

@@ -27,7 +27,7 @@ namespace GorillaNetworking.Store
 			}
 			if (StoreUpdater.instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace GorillaNetworking.Store
 
 		private void FindAllCosmeticItemPrefabs()
 		{
-			foreach (CosmeticItemPrefab cosmeticItemPrefab in Object.FindObjectsByType<CosmeticItemPrefab>(FindObjectsSortMode.None))
+			foreach (CosmeticItemPrefab cosmeticItemPrefab in UnityEngine.Object.FindObjectsByType<CosmeticItemPrefab>(FindObjectsSortMode.None))
 			{
 				if (this.cosmeticItemPrefabsDictionary.ContainsKey(cosmeticItemPrefab.PedestalID))
 				{

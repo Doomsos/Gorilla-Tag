@@ -22,7 +22,7 @@ public class BuilderDispenserShelf : MonoBehaviour
 		}
 		for (int i = 0; i < count; i++)
 		{
-			BuilderDispenser builderDispenser = Object.Instantiate<BuilderDispenser>(this.dispenserPrefab, this.shelfCenter);
+			BuilderDispenser builderDispenser = UnityEngine.Object.Instantiate<BuilderDispenser>(this.dispenserPrefab, this.shelfCenter);
 			builderDispenser.gameObject.SetActive(false);
 			builderDispenser.table = this.table;
 			builderDispenser.shelfID = this.shelfID;

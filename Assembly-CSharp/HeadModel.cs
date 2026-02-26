@@ -93,7 +93,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 		{
 			if (loadOp.Status == AsyncOperationStatus.Succeeded && loadOp.Result)
 			{
-				Object.Destroy(loadOp.Result);
+				UnityEngine.Object.Destroy(loadOp.Result);
 			}
 			return;
 		}
@@ -131,7 +131,7 @@ public class HeadModel : MonoBehaviour, IDelayedExecListener
 	{
 		for (int i = 0; i < this._currentPartLoadInfos.Count; i++)
 		{
-			Object.Destroy(this._currentPartLoadInfos[i].loadOp.Result);
+			UnityEngine.Object.Destroy(this._currentPartLoadInfos[i].loadOp.Result);
 		}
 		this._EnsureCapacityAndClear<AsyncOperationHandle, int>(this._loadOp_to_partInfoIndex);
 		this._EnsureCapacityAndClear<HeadModel._CosmeticPartLoadInfo>(this._currentPartLoadInfos);

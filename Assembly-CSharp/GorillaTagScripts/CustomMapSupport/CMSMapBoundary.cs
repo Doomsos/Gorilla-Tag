@@ -37,7 +37,7 @@ namespace GorillaTagScripts.CustomMapSupport
 				Transform transform = CustomMapLoader.GetCustomMapsDefaultSpawnLocation();
 				if (this.TeleportPoints.Count != 0)
 				{
-					transform = this.TeleportPoints[Random.Range(0, this.TeleportPoints.Count)];
+					transform = this.TeleportPoints[UnityEngine.Random.Range(0, this.TeleportPoints.Count)];
 				}
 				if (transform != null)
 				{

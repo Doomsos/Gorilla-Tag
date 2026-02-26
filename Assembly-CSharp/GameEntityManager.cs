@@ -1530,7 +1530,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 	{
 		for (int i = 0; i < 20; i++)
 		{
-			Debug.DrawLine(position, position + Random.onUnitSphere * radius, Color.red, 10f);
+			Debug.DrawLine(position, position + UnityEngine.Random.onUnitSphere * radius, Color.red, 10f);
 		}
 	}
 
@@ -2818,7 +2818,7 @@ public class GameEntityManager : NetworkComponent, IMatchmakingCallbacks, IInRoo
 						break;
 					}
 					num++;
-					int index = Random.Range(0, allRigs.Count);
+					int index = UnityEngine.Random.Range(0, allRigs.Count);
 					VRRig vrrig = allRigs[index];
 					GamePlayer gamePlayer;
 					if (GamePlayer.TryGetGamePlayer(vrrig, out gamePlayer) && !(gamePlayer.rig == null) && gamePlayer.rig.Creator != null && !gamePlayer.rig.isLocal)

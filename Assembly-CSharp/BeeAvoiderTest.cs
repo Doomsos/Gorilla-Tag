@@ -12,7 +12,7 @@ public class BeeAvoiderTest : MonoBehaviour
 		this.velocity = Vector3.MoveTowards(this.velocity * this.drag, target, this.acceleration);
 		if ((position2 - position).IsLongerThan(this.instabilityOffRadius))
 		{
-			this.velocity += Random.insideUnitSphere * this.instability * Time.deltaTime;
+			this.velocity += UnityEngine.Random.insideUnitSphere * this.instability * Time.deltaTime;
 		}
 		Vector3 vector = position2 + this.velocity * Time.deltaTime;
 		GameObject[] array = this.avoidancePoints;

@@ -139,7 +139,7 @@ public abstract class ProjectileWeapon : TransferrableObject
 	{
 		if (this.shootSfx != null && this.shootSfxClips != null && this.shootSfxClips.Length != 0)
 		{
-			this.shootSfx.GTPlayOneShot(this.shootSfxClips[Random.Range(0, this.shootSfxClips.Length)], 1f);
+			this.shootSfx.GTPlayOneShot(this.shootSfxClips[UnityEngine.Random.Range(0, this.shootSfxClips.Length)], 1f);
 		}
 	}
 

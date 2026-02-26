@@ -285,7 +285,7 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
-			AudioClip clip = moleType.isHazard ? this.whackHazardClips[Random.Range(0, this.whackHazardClips.Length)] : this.whackMonkeClips[Random.Range(0, this.whackMonkeClips.Length)];
+			AudioClip clip = moleType.isHazard ? this.whackHazardClips[UnityEngine.Random.Range(0, this.whackHazardClips.Length)] : this.whackMonkeClips[UnityEngine.Random.Range(0, this.whackMonkeClips.Length)];
 			if (moleType.isHazard)
 			{
 				this.audioSource.GTPlayOneShot(clip, 1f);
@@ -400,7 +400,7 @@ namespace GorillaTagScripts
 
 		private bool PickSingleMole(int randomMoleIndex, float hazardMoleChance)
 		{
-			bool flag = hazardMoleChance > 0f && Random.value <= hazardMoleChance;
+			bool flag = hazardMoleChance > 0f && UnityEngine.Random.value <= hazardMoleChance;
 			int moleTypeIndex = this.molesList[randomMoleIndex].GetMoleTypeIndex(flag);
 			this.molesList[randomMoleIndex].ShowMole(this.currentLevel.showMoleDuration, moleTypeIndex);
 			this.pickedMolesIndex.Add(randomMoleIndex, moleTypeIndex);
@@ -690,7 +690,7 @@ namespace GorillaTagScripts
 		[CompilerGenerated]
 		private void <PickMoles>g__PickMolesFrom|85_0(List<Mole> moles, ref WhackAMole.<>c__DisplayClass85_0 A_2)
 		{
-			int a = Mathf.RoundToInt(Random.Range(A_2.minMoleCount, A_2.maxMoleCount));
+			int a = Mathf.RoundToInt(UnityEngine.Random.Range(A_2.minMoleCount, A_2.maxMoleCount));
 			this.potentialMoles.Clear();
 			foreach (Mole mole in moles)
 			{
@@ -704,7 +704,7 @@ namespace GorillaTagScripts
 			int num3 = 0;
 			for (int i = 0; i < num; i++)
 			{
-				int index = Random.Range(0, this.potentialMoles.Count);
+				int index = UnityEngine.Random.Range(0, this.potentialMoles.Count);
 				if (this.PickSingleMole(this.molesList.IndexOf(this.potentialMoles[index]), (num3 < num2) ? A_2.hazardMoleChance : 0f))
 				{
 					num3++;

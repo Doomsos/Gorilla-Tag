@@ -101,7 +101,7 @@ public class MonkeAgent : MonoBehaviour, IGorillaSliceableSimple
 		}
 		else if (MonkeAgent.instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 		RoomSystem.PlayerJoinedEvent += new Action<NetPlayer>(this.OnPlayerEnteredRoom);
 		RoomSystem.PlayerLeftEvent += new Action<NetPlayer>(this.OnPlayerLeftRoom);
@@ -157,6 +157,8 @@ public class MonkeAgent : MonoBehaviour, IGorillaSliceableSimple
 
 	public void SendReport(string susReason, string susId, string susNick)
 	{
+		Debug.Log(susReason);
+		Debug.Log(susNick);
 		this.suspiciousReason = susReason;
 		this.suspiciousPlayerId = susId;
 		this.suspiciousPlayerName = susNick;
@@ -483,7 +485,7 @@ public class MonkeAgent : MonoBehaviour, IGorillaSliceableSimple
 
 	private Dictionary<string, Dictionary<string, MonkeAgent.RPCCallTracker>> userRPCCalls = new Dictionary<string, Dictionary<string, MonkeAgent.RPCCallTracker>>();
 
-	private Hashtable hashTable;
+	private ExitGames.Client.Photon.Hashtable hashTable;
 
 	private class RPCCallTracker
 	{

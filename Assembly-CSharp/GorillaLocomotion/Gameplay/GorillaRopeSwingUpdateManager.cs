@@ -10,7 +10,7 @@ namespace GorillaLocomotion.Gameplay
 		{
 			if (GorillaRopeSwingUpdateManager.hasInstance && GorillaRopeSwingUpdateManager.instance != null && GorillaRopeSwingUpdateManager.instance != this)
 			{
-				Object.Destroy(this);
+				UnityEngine.Object.Destroy(this);
 				return;
 			}
 			GorillaRopeSwingUpdateManager.SetInstance(this);
@@ -27,7 +27,7 @@ namespace GorillaLocomotion.Gameplay
 			GorillaRopeSwingUpdateManager.hasInstance = true;
 			if (Application.isPlaying)
 			{
-				Object.DontDestroyOnLoad(manager);
+				UnityEngine.Object.DontDestroyOnLoad(manager);
 			}
 		}
 

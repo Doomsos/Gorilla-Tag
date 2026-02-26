@@ -74,7 +74,7 @@ internal class VRRigCache : MonoBehaviour
 		}
 		if (VRRigCache.Instance != null && VRRigCache.Instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		VRRigCache.Instance = this;
@@ -113,7 +113,7 @@ internal class VRRigCache : MonoBehaviour
 		{
 			this.rigTemplate.SetActive(false);
 		}
-		GameObject gameObject = Object.Instantiate<GameObject>(this.rigTemplate, this.rigParent, false);
+		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.rigTemplate, this.rigParent, false);
 		if (gameObject == null)
 		{
 			return null;

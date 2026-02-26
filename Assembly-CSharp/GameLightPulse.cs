@@ -7,7 +7,7 @@ public class GameLightPulse : GameLight, IGorillaSliceableSimple
 	{
 		base.Awake();
 		this.startingIntensity = this.light.intensity;
-		this.offsetTime = Random.value / this.frequency;
+		this.offsetTime = UnityEngine.Random.value / this.frequency;
 	}
 
 	protected new void OnEnable()

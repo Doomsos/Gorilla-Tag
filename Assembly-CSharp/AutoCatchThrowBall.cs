@@ -76,7 +76,7 @@ public class AutoCatchThrowBall : MonoBehaviour
 		}
 		if (Keyboard.current.tKey.wasPressedThisFrame && this.ballPrefab != null)
 		{
-			TransferrableObject componentInChildren = Object.Instantiate<GameObject>(this.ballPrefab, vector, Quaternion.identity, null).GetComponentInChildren<TransferrableObject>();
+			TransferrableObject componentInChildren = UnityEngine.Object.Instantiate<GameObject>(this.ballPrefab, vector, Quaternion.identity, null).GetComponentInChildren<TransferrableObject>();
 			componentInChildren.OnGrab(null, null);
 			componentInChildren.currentState = TransferrableObject.PositionState.InRightHand;
 			this.Throw(componentInChildren, quaternion * Vector3.forward);

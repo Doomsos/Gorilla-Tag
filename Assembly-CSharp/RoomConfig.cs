@@ -103,7 +103,7 @@ public class RoomConfig
 
 	public byte MaxPlayers;
 
-	public Hashtable CustomProps = new Hashtable();
+	public ExitGames.Client.Photon.Hashtable CustomProps = new ExitGames.Client.Photon.Hashtable();
 
 	public bool createIfMissing;
 

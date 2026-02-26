@@ -21,7 +21,7 @@ public class HandEffectsTriggerRegistry : MonoBehaviour, ITickSystemTick, ITickS
 
 	public static void FindInstance()
 	{
-		HandEffectsTriggerRegistry.Instance = Object.FindAnyObjectByType<HandEffectsTriggerRegistry>();
+		HandEffectsTriggerRegistry.Instance = UnityEngine.Object.FindAnyObjectByType<HandEffectsTriggerRegistry>();
 		HandEffectsTriggerRegistry.HasInstance = true;
 	}
 

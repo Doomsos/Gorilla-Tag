@@ -10,7 +10,7 @@ namespace GorillaLocomotion.Swimming
 		{
 			if (RigidbodyWaterInteractionManager.hasInstance && RigidbodyWaterInteractionManager.instance != this)
 			{
-				Object.Destroy(this);
+				UnityEngine.Object.Destroy(this);
 				return;
 			}
 			RigidbodyWaterInteractionManager.SetInstance(this);
@@ -27,7 +27,7 @@ namespace GorillaLocomotion.Swimming
 			RigidbodyWaterInteractionManager.hasInstance = true;
 			if (Application.isPlaying)
 			{
-				Object.DontDestroyOnLoad(manager);
+				UnityEngine.Object.DontDestroyOnLoad(manager);
 			}
 		}
 

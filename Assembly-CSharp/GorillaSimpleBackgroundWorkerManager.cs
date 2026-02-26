@@ -9,7 +9,7 @@ public class GorillaSimpleBackgroundWorkerManager : MonoBehaviour
 	{
 		if (GorillaSimpleBackgroundWorkerManager.hasInstance && GorillaSimpleBackgroundWorkerManager._instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		GorillaSimpleBackgroundWorkerManager.SetInstance(this);
@@ -21,7 +21,7 @@ public class GorillaSimpleBackgroundWorkerManager : MonoBehaviour
 		GorillaSimpleBackgroundWorkerManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			Object.DontDestroyOnLoad(manager);
+			UnityEngine.Object.DontDestroyOnLoad(manager);
 		}
 	}
 
@@ -29,7 +29,7 @@ public class GorillaSimpleBackgroundWorkerManager : MonoBehaviour
 	{
 		GameObject gameObject = new GameObject("GorillaSimpleBackgroundWorkerManager");
 		GorillaSimpleBackgroundWorkerManager instance = gameObject.AddComponent<GorillaSimpleBackgroundWorkerManager>();
-		Object.DontDestroyOnLoad(gameObject);
+		UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		GorillaSimpleBackgroundWorkerManager.SetInstance(instance);
 	}
 

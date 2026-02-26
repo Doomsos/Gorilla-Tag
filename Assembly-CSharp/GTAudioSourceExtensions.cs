@@ -9,7 +9,7 @@ public static class GTAudioSourceExtensions
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void GTPlayOneShot(this AudioSource audioSource, IList<AudioClip> clips, float volumeScale = 1f)
 	{
-		audioSource.PlayOneShot(clips[Random.Range(0, clips.Count)], volumeScale);
+		audioSource.PlayOneShot(clips[UnityEngine.Random.Range(0, clips.Count)], volumeScale);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

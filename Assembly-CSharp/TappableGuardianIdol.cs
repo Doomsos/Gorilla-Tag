@@ -276,20 +276,20 @@ public class TappableGuardianIdol : Tappable
 	private void <DoLookingAround>g__PickLookTarget|54_0(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
 	{
 		Transform transform = this.<DoLookingAround>g__GetClosestPlayerPosition|54_2(ref A_1);
-		A_1._lookDirection = (transform ? Quaternion.LookRotation(transform.position - this._lookRoot.position) : Quaternion.Euler((float)Random.Range(-15, 15), this._lookRoot.rotation.eulerAngles.y + (float)Random.Range(-45, 45), 0f));
+		A_1._lookDirection = (transform ? Quaternion.LookRotation(transform.position - this._lookRoot.position) : Quaternion.Euler((float)UnityEngine.Random.Range(-15, 15), this._lookRoot.rotation.eulerAngles.y + (float)UnityEngine.Random.Range(-45, 45), 0f));
 		this.<DoLookingAround>g__SetLookTime|54_1(ref A_1);
 	}
 
 	[CompilerGenerated]
 	private void <DoLookingAround>g__SetLookTime|54_1(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
 	{
-		A_1.nextLookTime = Time.time + this._lookInterval / (float)this._activationState * 0.5f + Random.value;
+		A_1.nextLookTime = Time.time + this._lookInterval / (float)this._activationState * 0.5f + UnityEngine.Random.value;
 	}
 
 	[CompilerGenerated]
 	private Transform <DoLookingAround>g__GetClosestPlayerPosition|54_2(ref TappableGuardianIdol.<>c__DisplayClass54_0 A_1)
 	{
-		if (Random.value < this._randomLookChance)
+		if (UnityEngine.Random.value < this._randomLookChance)
 		{
 			return null;
 		}

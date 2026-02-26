@@ -216,7 +216,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 			return;
 		}
 		GTDev.LogError<string>("CustomMapsAIBehaviourController::OnEntityInit could not spawn enemy", null);
-		Object.Destroy(base.gameObject);
+		UnityEngine.Object.Destroy(base.gameObject);
 	}
 
 	private void SetupNewEnemy(AIAgent newEnemy)
@@ -230,7 +230,7 @@ public class CustomMapsAIBehaviourController : MonoBehaviour, IGameEntityCompone
 		if (component.IsNull())
 		{
 			GTDev.LogError<string>("nav mesh agent is null", null);
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 		component.agentTypeID = this.GetNavAgentType(newEnemy.navAgentType);

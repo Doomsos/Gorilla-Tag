@@ -50,7 +50,7 @@ public class SeedPacketTriggerHandler : MonoBehaviour
 			ObjectPools.instance.Destroy(base.gameObject);
 			return;
 		}
-		Object.Destroy(base.gameObject);
+		UnityEngine.Object.Destroy(base.gameObject);
 	}
 
 	[SerializeField]

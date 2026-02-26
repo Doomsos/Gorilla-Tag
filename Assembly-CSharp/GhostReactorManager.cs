@@ -2113,7 +2113,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		GameEntity gameEntity = this.gameEntityManager.GetGameEntity(this.gameEntityManager.GetEntityIdFromNetId(entityNetId));
 		if (gameEntity != null)
 		{
-			Object component = gameEntity.GetComponent<GRTool>();
+			UnityEngine.Object component = gameEntity.GetComponent<GRTool>();
 			GameEntity gameEntity2 = this.gameEntityManager.GetGameEntity(this.gameEntityManager.GetEntityIdFromNetId(upgradeNetID));
 			if (component != null && gameEntity2 != null && GameEntityManager.IsPlayerHandNearPosition(grplayer.gamePlayer, gameEntity2.transform.position, false, true, 16f) && GameEntityManager.IsPlayerHandNearPosition(grplayer.gamePlayer, gameEntity2.transform.position, false, true, 16f))
 			{

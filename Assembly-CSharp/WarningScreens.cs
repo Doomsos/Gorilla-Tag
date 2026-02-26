@@ -15,7 +15,7 @@ public class WarningScreens : MonoBehaviour
 			return;
 		}
 		Debug.LogError("[WARNINGS] WarningScreens already exists. Destroying this instance.");
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	private Task<WarningButtonResult> StartWarningScreenInternal(CancellationToken cancellationToken)

@@ -305,7 +305,7 @@ public class GorillaBodyRenderer : MonoBehaviour
 	{
 		if (this.myDefaultSkinMaterialInstance == null)
 		{
-			this.myDefaultSkinMaterialInstance = Object.Instantiate<Material>(this.rig.materialsToChangeTo[0]);
+			this.myDefaultSkinMaterialInstance = UnityEngine.Object.Instantiate<Material>(this.rig.materialsToChangeTo[0]);
 			this.rig.materialsToChangeTo[0] = this.myDefaultSkinMaterialInstance;
 		}
 		if (this._defaultSkinMaterials.Length == 0)

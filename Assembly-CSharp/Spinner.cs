@@ -5,7 +5,7 @@ public class Spinner : MonoBehaviour
 {
 	public void OnEnable()
 	{
-		this.m_angle = Random.Range(0f, 360f);
+		this.m_angle = UnityEngine.Random.Range(0f, 360f);
 	}
 
 	public void Update()

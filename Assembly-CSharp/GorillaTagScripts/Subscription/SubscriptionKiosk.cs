@@ -39,7 +39,7 @@ namespace GorillaTagScripts.Subscription
 		{
 			this.steamComingSoon.SetActive(true);
 			this.waitingForScanScreen.SetActive(false);
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 
 		private void OnDisable()

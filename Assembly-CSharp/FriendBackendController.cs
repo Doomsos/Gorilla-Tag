@@ -105,7 +105,7 @@ public class FriendBackendController : MonoBehaviour
 			FriendBackendController.Instance = this;
 			return;
 		}
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	private void GetFriendsInternal()

@@ -8,7 +8,7 @@ namespace GorillaTag
 		private void Awake()
 		{
 			base.gameObject.SetActive(false);
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 	}
 }

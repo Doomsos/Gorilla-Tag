@@ -213,14 +213,14 @@ namespace FXP
 
 		private void ClearCosmeticMesh()
 		{
-			Object.Destroy(this.goCosmeticItemGameObject);
+			UnityEngine.Object.Destroy(this.goCosmeticItemGameObject);
 		}
 
 		private void ClearCosmeticAtlas()
 		{
 			if (this.goCosmeticItemMeshAtlas.IsNotNull())
 			{
-				Object.Destroy(this.goCosmeticItemMeshAtlas);
+				UnityEngine.Object.Destroy(this.goCosmeticItemMeshAtlas);
 			}
 		}
 

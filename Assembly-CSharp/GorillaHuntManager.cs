@@ -169,7 +169,7 @@ public sealed class GorillaHuntManager : GorillaGameManager
 	{
 		for (int i = 0; i < listToRandomize.Count - 1; i++)
 		{
-			this.tempRandIndex = Random.Range(i, listToRandomize.Count);
+			this.tempRandIndex = UnityEngine.Random.Range(i, listToRandomize.Count);
 			this.tempRandPlayer = listToRandomize[i];
 			listToRandomize[i] = listToRandomize[this.tempRandIndex];
 			listToRandomize[this.tempRandIndex] = this.tempRandPlayer;

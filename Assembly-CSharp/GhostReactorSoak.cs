@@ -110,13 +110,13 @@ public class GhostReactorSoak
 		{
 		case GhostReactorSoak.State.Disconnected:
 			this.LeaveRoom();
-			this.reconnectTime = this.stateStartTime + (double)Random.Range(3f, 6f);
+			this.reconnectTime = this.stateStartTime + (double)UnityEngine.Random.Range(3f, 6f);
 			return;
 		case GhostReactorSoak.State.Connecting:
 			this.JoinRoom();
 			return;
 		case GhostReactorSoak.State.Active:
-			this.disconnectTime = this.stateStartTime + (double)Random.Range(5f, 60f);
+			this.disconnectTime = this.stateStartTime + (double)UnityEngine.Random.Range(5f, 60f);
 			return;
 		default:
 			return;
@@ -155,9 +155,9 @@ public class GhostReactorSoak
 				return;
 			}
 		}
-		else if (Random.value <= 0.005f)
+		else if (UnityEngine.Random.value <= 0.005f)
 		{
-			int index = Random.Range(0, this._soakTasks.Count);
+			int index = UnityEngine.Random.Range(0, this._soakTasks.Count);
 			this._activeTask = this._soakTasks[index];
 		}
 	}

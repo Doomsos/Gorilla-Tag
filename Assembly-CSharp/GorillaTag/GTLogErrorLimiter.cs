@@ -30,7 +30,7 @@ namespace GorillaTag
 			this.occurrencesJoinString = occurrencesJoinString;
 		}
 
-		public void Log(string subMessage = "", Object context = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
+		public void Log(string subMessage = "", UnityEngine.Object context = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
 		{
 			if (this.countdown < 0)
 			{
@@ -54,7 +54,7 @@ namespace GorillaTag
 			this.occurrenceCount = 0;
 		}
 
-		public void Log(Object obj, Object context = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
+		public void Log(UnityEngine.Object obj, UnityEngine.Object context = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
 		{
 			if (!obj)
 			{
@@ -90,7 +90,7 @@ namespace GorillaTag
 			this.sb.Q(gObj.GetPath());
 		}
 
-		public void LogOccurrences(Component component = null, Object obj = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
+		public void LogOccurrences(Component component = null, UnityEngine.Object obj = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
 		{
 			if (this.occurrenceCount <= 0)
 			{
@@ -100,7 +100,7 @@ namespace GorillaTag
 			this.Log("\"" + component.GetComponentPath(int.MaxValue) + "\"", obj, caller, sourceFilePath, line);
 		}
 
-		public void LogOccurrences(Utf16ValueStringBuilder subMessage, Object obj = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
+		public void LogOccurrences(Utf16ValueStringBuilder subMessage, UnityEngine.Object obj = null, [CallerMemberName] string caller = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int line = 0)
 		{
 			if (this.occurrenceCount <= 0)
 			{

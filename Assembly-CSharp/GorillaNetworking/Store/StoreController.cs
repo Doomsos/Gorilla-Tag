@@ -18,7 +18,7 @@ namespace GorillaNetworking.Store
 			}
 			else if (StoreController.instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 				return;
 			}
 			this.CosmeticStandsDict = new Dictionary<string, DynamicCosmeticStand>();
@@ -276,7 +276,7 @@ namespace GorillaNetworking.Store
 		{
 			if (StoreController.instance == null)
 			{
-				StoreController.instance = Object.FindAnyObjectByType<StoreController>();
+				StoreController.instance = UnityEngine.Object.FindAnyObjectByType<StoreController>();
 			}
 			return StoreController.instance.AllCosmeticsArraySO.SearchForCosmeticSO(playfabId);
 		}
@@ -295,7 +295,7 @@ namespace GorillaNetworking.Store
 
 		public void FindAllDepartments()
 		{
-			this.Departments = Object.FindObjectsByType<StoreDepartment>(FindObjectsSortMode.None).ToList<StoreDepartment>();
+			this.Departments = UnityEngine.Object.FindObjectsByType<StoreDepartment>(FindObjectsSortMode.None).ToList<StoreDepartment>();
 		}
 
 		public void SaveAllCosmeticsPositions()
@@ -329,7 +329,7 @@ namespace GorillaNetworking.Store
 		{
 			if (StoreController.instance == null)
 			{
-				StoreController.instance = Object.FindAnyObjectByType<StoreController>();
+				StoreController.instance = UnityEngine.Object.FindAnyObjectByType<StoreController>();
 			}
 			StoreController.instance.RefreshCosmeticStandsDictionaryFromDepartments();
 			foreach (DynamicCosmeticStand dynamicCosmeticStand in StoreController.instance.CosmeticStandsDict.Values)

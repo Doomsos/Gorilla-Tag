@@ -20,7 +20,7 @@ public class LckEntitlementsManager : MonoBehaviour
 	{
 		if (LckEntitlementsManager.Instance != null && LckEntitlementsManager.Instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 		LckEntitlementsManager.Instance = this;

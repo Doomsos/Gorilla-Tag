@@ -26,7 +26,7 @@ public class Gorillanalytics : MonoBehaviour
 		for (;;)
 		{
 			yield return new WaitForSeconds(this.interval);
-			if ((double)Random.Range(0f, 1f) < 1.0 / this.oneOverChance && PlayFabClientAPI.IsClientLoggedIn())
+			if ((double)UnityEngine.Random.Range(0f, 1f) < 1.0 / this.oneOverChance && PlayFabClientAPI.IsClientLoggedIn())
 			{
 				this.UploadGorillanalytics();
 			}

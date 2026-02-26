@@ -27,7 +27,7 @@ public class KIDMessagingController : MonoBehaviour
 		if (KIDMessagingController.instance != null)
 		{
 			Debug.LogError("[KID::MESSAGING_CONTROLLER] Trying to start a new [KIDMessagingController] but one already exists");
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		KIDMessagingController.instance = this;

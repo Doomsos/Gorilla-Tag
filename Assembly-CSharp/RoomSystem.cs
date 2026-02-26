@@ -133,7 +133,7 @@ internal class RoomSystem : MonoBehaviour
 	private void Awake()
 	{
 		base.transform.SetParent(null, true);
-		Object.DontDestroyOnLoad(this);
+		UnityEngine.Object.DontDestroyOnLoad(this);
 		RoomSystem.playerImpactEffectPrefab = this.roomSettings.PlayerImpactEffect;
 		RoomSystem.callbackInstance = this;
 		RoomSystem.disconnectTimer.Interval = (double)(this.roomSettings.PausedDCTimer * 1000);

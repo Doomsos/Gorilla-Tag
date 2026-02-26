@@ -230,7 +230,7 @@ public class GREnemyBossMoonEye : MonoBehaviour, IGameEntityComponent, IGameEnti
 		{
 			return false;
 		}
-		int index = Random.Range(0, GREnemyBossMoonEye.tempPotentialAttacks.Count);
+		int index = UnityEngine.Random.Range(0, GREnemyBossMoonEye.tempPotentialAttacks.Count);
 		this.SetBehavior(GREnemyBossMoonEye.tempPotentialAttacks[index], false);
 		return true;
 	}

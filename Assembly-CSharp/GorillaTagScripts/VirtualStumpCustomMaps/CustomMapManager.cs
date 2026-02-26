@@ -73,7 +73,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 			if (CustomMapManager.instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 			}
 		}
 
@@ -237,7 +237,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 			}
 			if (CustomMapManager.instance.virtualStumpTeleportLocations.Count > 0)
 			{
-				int index = Random.Range(0, CustomMapManager.instance.virtualStumpTeleportLocations.Count);
+				int index = UnityEngine.Random.Range(0, CustomMapManager.instance.virtualStumpTeleportLocations.Count);
 				Transform randTeleportTarget = CustomMapManager.instance.virtualStumpTeleportLocations[index];
 				CustomMapManager.instance.EnableTeleportHUD(true);
 				CustomMapManager.lastUsedTeleporter.PlayTeleportEffects(true, true, CustomMapManager.instance.localTeleportSFXSource, true);
@@ -924,7 +924,7 @@ namespace GorillaTagScripts.VirtualStumpCustomMaps
 				Camera main = Camera.main;
 				if (main != null)
 				{
-					GameObject gameObject = Object.Instantiate<GameObject>(this.teleportingHUDPrefab, main.transform);
+					GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.teleportingHUDPrefab, main.transform);
 					if (gameObject != null)
 					{
 						CustomMapManager.teleportingHUD = gameObject.GetComponent<VirtualStumpTeleportingHUD>();

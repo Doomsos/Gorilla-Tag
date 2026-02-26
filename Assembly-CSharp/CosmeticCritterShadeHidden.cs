@@ -11,8 +11,8 @@ public class CosmeticCritterShadeHidden : CosmeticCritter
 
 	public override void SetRandomVariables()
 	{
-		this.initialAngle = Random.Range(0f, 6.2831855f);
-		this.orbitDirection = ((Random.value > 0.5f) ? 1f : -1f);
+		this.initialAngle = UnityEngine.Random.Range(0f, 6.2831855f);
+		this.orbitDirection = ((UnityEngine.Random.value > 0.5f) ? 1f : -1f);
 	}
 
 	public override void Tick()

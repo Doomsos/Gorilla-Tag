@@ -40,7 +40,7 @@ public class GRSeedExtractor : MonoBehaviour
 		this.idCardScanner.OnPlayerCardSwipe += this.OnPlayerCardSwipe;
 		for (int i = 0; i < this.maxVisualChaosSeedCount; i++)
 		{
-			GameObject gameObject = Object.Instantiate<GameObject>(this.chaosSeedVisualPrefab, base.transform);
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.chaosSeedVisualPrefab, base.transform);
 			gameObject.SetActive(false);
 			this.chaosSeedVisuals.Add(gameObject);
 		}

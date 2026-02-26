@@ -24,7 +24,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 	{
 		if (GorillaScoreboardTotalUpdater.hasInstance && GorillaScoreboardTotalUpdater.instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		GorillaScoreboardTotalUpdater.SetInstance(this);
@@ -49,7 +49,7 @@ public class GorillaScoreboardTotalUpdater : MonoBehaviour, IGorillaSliceableSim
 		GorillaScoreboardTotalUpdater.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			Object.DontDestroyOnLoad(manager);
+			UnityEngine.Object.DontDestroyOnLoad(manager);
 		}
 	}
 

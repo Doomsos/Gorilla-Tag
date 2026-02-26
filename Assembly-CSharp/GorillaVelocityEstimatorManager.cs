@@ -9,7 +9,7 @@ public class GorillaVelocityEstimatorManager : MonoBehaviour
 	{
 		if (GorillaVelocityEstimatorManager.hasInstance && GorillaVelocityEstimatorManager.instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		GorillaVelocityEstimatorManager.SetInstance(this);
@@ -58,7 +58,7 @@ public class GorillaVelocityEstimatorManager : MonoBehaviour
 		GorillaVelocityEstimatorManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			Object.DontDestroyOnLoad(manager);
+			UnityEngine.Object.DontDestroyOnLoad(manager);
 		}
 	}
 

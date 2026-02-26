@@ -12,7 +12,7 @@ public class MusicManager : MonoBehaviour
 			MusicManager.Instance = this;
 			return;
 		}
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	public void RegisterMusicSource(MusicSource musicSource)

@@ -7,7 +7,7 @@ public class RotationStepper : MonoBehaviour
 	public void OnEnable()
 	{
 		this.m_phase = 0f;
-		Random.InitState(0);
+		UnityEngine.Random.InitState(0);
 	}
 
 	public void Update()
@@ -25,8 +25,8 @@ public class RotationStepper : MonoBehaviour
 		}
 		while (this.m_phase >= 1f)
 		{
-			Random.InitState(Time.frameCount);
-			base.transform.rotation = Random.rotationUniform;
+			UnityEngine.Random.InitState(Time.frameCount);
+			base.transform.rotation = UnityEngine.Random.rotationUniform;
 			this.m_phase -= 1f;
 		}
 	}

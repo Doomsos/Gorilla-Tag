@@ -518,7 +518,7 @@ public static class Bindings
 			GameObject gameObject;
 			if (Bindings.LuauGameObjectListReverse.TryGetValue((IntPtr)((void*)value), out gameObject))
 			{
-				GameObject gameObject2 = Object.Instantiate<GameObject>(gameObject, gameObject.transform.parent, false);
+				GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(gameObject, gameObject.transform.parent, false);
 				Bindings.LuauGameObject* ptr = Luau.lua_class_push<Bindings.LuauGameObject>(L);
 				ptr->Position = gameObject2.transform.position;
 				ptr->Rotation = gameObject2.transform.rotation;

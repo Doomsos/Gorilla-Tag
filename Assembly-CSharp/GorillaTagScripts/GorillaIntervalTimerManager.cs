@@ -10,7 +10,7 @@ namespace GorillaTagScripts
 		{
 			if (GorillaIntervalTimerManager.hasInstance && GorillaIntervalTimerManager.instance != null && GorillaIntervalTimerManager.instance != this)
 			{
-				Object.Destroy(this);
+				UnityEngine.Object.Destroy(this);
 				return;
 			}
 			GorillaIntervalTimerManager.SetInstance(this);
@@ -27,7 +27,7 @@ namespace GorillaTagScripts
 			GorillaIntervalTimerManager.hasInstance = true;
 			if (Application.isPlaying)
 			{
-				Object.DontDestroyOnLoad(manager);
+				UnityEngine.Object.DontDestroyOnLoad(manager);
 			}
 		}
 

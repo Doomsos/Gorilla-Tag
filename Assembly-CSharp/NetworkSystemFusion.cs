@@ -554,7 +554,7 @@ public class NetworkSystemFusion : NetworkSystem
 			this.runner.Despawn(networkObject);
 			return;
 		}
-		Object.Destroy(instance);
+		UnityEngine.Object.Destroy(instance);
 	}
 
 	public override bool ShouldSpawnLocally(int playerID)
@@ -924,7 +924,7 @@ public class NetworkSystemFusion : NetworkSystem
 
 	public override string GetMyDefaultName()
 	{
-		return "gorilla" + Random.Range(0, 9999).ToString().PadLeft(4, '0');
+		return "gorilla" + UnityEngine.Random.Range(0, 9999).ToString().PadLeft(4, '0');
 	}
 
 	public override string GetNickName(int playerID)

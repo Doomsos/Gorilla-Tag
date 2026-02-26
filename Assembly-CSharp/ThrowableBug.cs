@@ -10,7 +10,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 	protected override void Start()
 	{
 		base.Start();
-		float f = Random.Range(0f, 6.2831855f);
+		float f = UnityEngine.Random.Range(0f, 6.2831855f);
 		this.targetVelocity = new Vector3(Mathf.Sin(f) * this.maxNaturalSpeed, 0f, Mathf.Cos(f) * this.maxNaturalSpeed);
 		this.currentState = TransferrableObject.PositionState.Dropped;
 		this.rayCastNonAllocColliders = new RaycastHit[5];
@@ -296,7 +296,7 @@ public class ThrowableBug : TransferrableObject, ITickSystemTick
 
 	private float RandomizeBobingFrequency()
 	{
-		return Random.Range(this.minRandFrequency, this.maxRandFrequency);
+		return UnityEngine.Random.Range(this.minRandFrequency, this.maxRandFrequency);
 	}
 
 	public override bool OnRelease(DropZone zoneReleased, GameObject releasingHand)

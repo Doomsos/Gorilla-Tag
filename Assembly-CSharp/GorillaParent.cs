@@ -14,7 +14,7 @@ public class GorillaParent : MonoBehaviour
 		}
 		if (GorillaParent.instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 	}

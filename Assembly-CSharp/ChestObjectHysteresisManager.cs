@@ -9,7 +9,7 @@ public class ChestObjectHysteresisManager : MonoBehaviourTick
 	{
 		if (ChestObjectHysteresisManager.hasInstance && ChestObjectHysteresisManager.instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		ChestObjectHysteresisManager.SetInstance(this);
@@ -26,7 +26,7 @@ public class ChestObjectHysteresisManager : MonoBehaviourTick
 		ChestObjectHysteresisManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			Object.DontDestroyOnLoad(manager);
+			UnityEngine.Object.DontDestroyOnLoad(manager);
 		}
 	}
 

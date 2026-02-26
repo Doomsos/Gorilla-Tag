@@ -30,7 +30,7 @@ internal class ConnectedControllerHandler : MonoBehaviour
 	{
 		if (ConnectedControllerHandler.Instance != null && ConnectedControllerHandler.Instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		ConnectedControllerHandler.Instance = this;

@@ -114,7 +114,7 @@ public class KIDManager : MonoBehaviour
 		if (KIDManager._instance != null)
 		{
 			Debug.LogError("Trying to create new instance of [KIDManager], but one already exists. Destroying object [" + base.gameObject.name + "].");
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 		KIDManager._instance = this;

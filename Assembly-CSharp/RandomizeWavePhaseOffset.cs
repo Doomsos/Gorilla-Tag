@@ -6,7 +6,7 @@ public class RandomizeWavePhaseOffset : MonoBehaviour
 	private void Start()
 	{
 		Material material = base.GetComponent<MeshRenderer>().material;
-		UberShader.VertexWavePhaseOffset.SetValue<float>(material, Random.Range(this.minPhaseOffset, this.maxPhaseOffset));
+		UberShader.VertexWavePhaseOffset.SetValue<float>(material, UnityEngine.Random.Range(this.minPhaseOffset, this.maxPhaseOffset));
 	}
 
 	[SerializeField]

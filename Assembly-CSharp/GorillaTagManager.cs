@@ -83,7 +83,7 @@ public class GorillaTagManager : GorillaGameManager
 			}
 			if (this.isCurrentlyTag && this.currentIt == null)
 			{
-				int index = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+				int index = UnityEngine.Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
 				this.ChangeCurrentIt(GorillaGameModes.GameMode.ParticipatingPlayers[index], false);
 				return;
 			}
@@ -91,7 +91,7 @@ public class GorillaTagManager : GorillaGameManager
 			{
 				this.SetisCurrentlyTag(false);
 				this.ClearInfectionState();
-				int index2 = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+				int index2 = UnityEngine.Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
 				this.AddInfectedPlayer(GorillaGameModes.GameMode.ParticipatingPlayers[index2], true);
 				this.lastInfectedPlayer = GorillaGameModes.GameMode.ParticipatingPlayers[index2];
 				return;
@@ -101,13 +101,13 @@ public class GorillaTagManager : GorillaGameManager
 				this.ClearInfectionState();
 				this.lastInfectedPlayer = null;
 				this.SetisCurrentlyTag(true);
-				int index3 = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+				int index3 = UnityEngine.Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
 				this.ChangeCurrentIt(GorillaGameModes.GameMode.ParticipatingPlayers[index3], false);
 				return;
 			}
 			if (!this.isCurrentlyTag && this.currentInfected.Count == 0)
 			{
-				int index4 = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+				int index4 = UnityEngine.Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
 				this.AddInfectedPlayer(GorillaGameModes.GameMode.ParticipatingPlayers[index4], true);
 				return;
 			}
@@ -149,11 +149,11 @@ public class GorillaTagManager : GorillaGameManager
 		List<NetPlayer> participatingPlayers = GorillaGameModes.GameMode.ParticipatingPlayers;
 		if (participatingPlayers.Count > 0)
 		{
-			int index = Random.Range(0, participatingPlayers.Count);
+			int index = UnityEngine.Random.Range(0, participatingPlayers.Count);
 			int num = 0;
 			while (num < 10 && participatingPlayers[index] == this.lastInfectedPlayer)
 			{
-				index = Random.Range(0, participatingPlayers.Count);
+				index = UnityEngine.Random.Range(0, participatingPlayers.Count);
 				num++;
 			}
 			this.AddInfectedPlayer(participatingPlayers[index], true);
@@ -403,7 +403,7 @@ public class GorillaTagManager : GorillaGameManager
 			{
 				if (GorillaGameModes.GameMode.ParticipatingPlayers.Count > 0)
 				{
-					int index = Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
+					int index = UnityEngine.Random.Range(0, GorillaGameModes.GameMode.ParticipatingPlayers.Count);
 					this.ChangeCurrentIt(GorillaGameModes.GameMode.ParticipatingPlayers[index], false);
 				}
 			}

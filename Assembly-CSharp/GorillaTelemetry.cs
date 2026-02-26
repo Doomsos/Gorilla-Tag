@@ -280,7 +280,7 @@ public static class GorillaTelemetry
 		dictionary24["si_tech_points_purchased"] = null;
 		GorillaTelemetry.gSuperInfectionArgs = dictionary24;
 		GameObject gameObject = new GameObject("GorillaTelemetryBatcher");
-		Object.DontDestroyOnLoad(gameObject);
+		UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		gameObject.AddComponent<GorillaTelemetry.BatchRunner>();
 	}
 
@@ -690,7 +690,7 @@ public static class GorillaTelemetry
 
 	public static void PostKidEvent(bool joinGroupsEnabled, bool voiceChatEnabled, bool customUsernamesEnabled, AgeStatusType ageCategory, GTKidEventType kidEvent)
 	{
-		if ((double)Random.value < 0.1)
+		if ((double)UnityEngine.Random.value < 0.1)
 		{
 			return;
 		}

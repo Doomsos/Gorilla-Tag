@@ -17,8 +17,8 @@ public class AmbientSoundRandomizer : MonoBehaviour
 	{
 		if (this.timer >= this.timerTarget)
 		{
-			int num = Random.Range(0, this.audioSources.Length);
-			int num2 = Random.Range(0, this.audioClips.Length);
+			int num = UnityEngine.Random.Range(0, this.audioSources.Length);
+			int num2 = UnityEngine.Random.Range(0, this.audioClips.Length);
 			this.audioSources[num].clip = this.audioClips[num2];
 			this.audioSources[num].GTPlay();
 			this.SetTarget();
@@ -29,7 +29,7 @@ public class AmbientSoundRandomizer : MonoBehaviour
 
 	private void SetTarget()
 	{
-		this.timerTarget = this.baseTime + Random.Range(0f, this.randomModifier);
+		this.timerTarget = this.baseTime + UnityEngine.Random.Range(0f, this.randomModifier);
 		this.timer = 0f;
 	}
 

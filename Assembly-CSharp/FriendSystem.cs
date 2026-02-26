@@ -100,7 +100,7 @@ public class FriendSystem : MonoBehaviour
 			FriendSystem.Instance = this;
 			return;
 		}
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	private void Start()

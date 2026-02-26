@@ -82,7 +82,7 @@ namespace GorillaNetworking
 			}
 			else if (PhotonNetworkController.Instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 			}
 			this.updatedName = false;
 			this.playersInRegion = new int[this.serverRegions.Length];
@@ -414,7 +414,7 @@ namespace GorillaNetworking
 			string text = "";
 			for (int i = 0; i < 4; i++)
 			{
-				text += "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Substring(Random.Range(0, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Length), 1);
+				text += "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Substring(UnityEngine.Random.Range(0, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Length), 1);
 			}
 			if (GorillaComputer.instance.CheckAutoBanListForName(text))
 			{

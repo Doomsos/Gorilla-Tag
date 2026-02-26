@@ -29,7 +29,7 @@ public class SmoothLoop : MonoBehaviour, IGorillaSliceableSimple, IBuildValidati
 			{
 				this.source.GTPlay();
 			}
-			this.source.time = Random.Range(0f, this.source.clip.length);
+			this.source.time = UnityEngine.Random.Range(0f, this.source.clip.length);
 		}
 	}
 
@@ -58,7 +58,7 @@ public class SmoothLoop : MonoBehaviour, IGorillaSliceableSimple, IBuildValidati
 			{
 				this.source.GTPlay();
 			}
-			this.source.time = Random.Range(0f, this.source.clip.length);
+			this.source.time = UnityEngine.Random.Range(0f, this.source.clip.length);
 		}
 	}
 

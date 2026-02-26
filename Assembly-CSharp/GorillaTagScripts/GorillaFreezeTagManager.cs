@@ -60,25 +60,25 @@ namespace GorillaTagScripts
 				}
 				if (this.isCurrentlyTag && this.currentIt == null)
 				{
-					int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					int index = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
 					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
 				}
 				else if (this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count >= this.infectedModeThreshold)
 				{
 					this.ResetGame();
-					int index2 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					int index2 = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
 					this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index2], true);
 				}
 				else if (!this.isCurrentlyTag && GameMode.ParticipatingPlayers.Count < this.infectedModeThreshold)
 				{
 					this.ResetGame();
 					base.SetisCurrentlyTag(true);
-					int index3 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					int index3 = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
 					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index3], false);
 				}
 				else if (!this.isCurrentlyTag && this.currentInfected.Count == 0)
 				{
-					int index4 = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					int index4 = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
 					this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index4], true);
 				}
 				bool flag = true;
@@ -272,11 +272,11 @@ namespace GorillaTagScripts
 		private void TryAddNewInfectedPlayer()
 		{
 			List<NetPlayer> participatingPlayers = GameMode.ParticipatingPlayers;
-			int index = Random.Range(0, participatingPlayers.Count);
+			int index = UnityEngine.Random.Range(0, participatingPlayers.Count);
 			int num = 0;
 			while (num < 10 && this.lastRoundInfectedPlayers.Contains(participatingPlayers[index]))
 			{
-				index = Random.Range(0, participatingPlayers.Count);
+				index = UnityEngine.Random.Range(0, participatingPlayers.Count);
 				num++;
 			}
 			this.AddInfectedPlayer(participatingPlayers[index], true);
@@ -371,7 +371,7 @@ namespace GorillaTagScripts
 
 		public int GetFrozenHandTapAudioIndex()
 		{
-			int num = Random.Range(0, this.frozenHandTapIndices.Length);
+			int num = UnityEngine.Random.Range(0, this.frozenHandTapIndices.Length);
 			return this.frozenHandTapIndices[num];
 		}
 
@@ -382,7 +382,7 @@ namespace GorillaTagScripts
 			{
 				if (this.isCurrentlyTag && ((otherPlayer != null && otherPlayer == this.currentIt) || this.currentIt.ActorNumber == otherPlayer.ActorNumber) && GameMode.ParticipatingPlayers.Count > 0)
 				{
-					int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+					int index = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
 					this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
 				}
 				if (this.currentInfected.Contains(otherPlayer))

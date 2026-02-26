@@ -277,11 +277,11 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		int result;
 		if (this.currentIdol != -1 && this.idolPositions.Count > 1)
 		{
-			result = (this.currentIdol + Random.Range(1, this.idolPositions.Count)) % this.idolPositions.Count;
+			result = (this.currentIdol + UnityEngine.Random.Range(1, this.idolPositions.Count)) % this.idolPositions.Count;
 		}
 		else
 		{
-			result = Random.Range(0, this.idolPositions.Count);
+			result = UnityEngine.Random.Range(0, this.idolPositions.Count);
 		}
 		return result;
 	}
@@ -322,7 +322,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		{
 			list.Remove(this.idolPositions[this.currentIdol]);
 		}
-		int index = Random.Range(list.Count / 2, list.Count);
+		int index = UnityEngine.Random.Range(list.Count / 2, list.Count);
 		Transform item = list[index];
 		return this.idolPositions.IndexOf(item);
 	}

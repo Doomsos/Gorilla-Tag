@@ -36,7 +36,7 @@ public class GRSelectionWheel : MonoBehaviour, ITickSystemTick
 		this.shelfNames.Clear();
 		for (int i = 0; i < shelves.Count; i++)
 		{
-			TMP_Text tmp_Text = Object.Instantiate<TMP_Text>(this.templateText);
+			TMP_Text tmp_Text = UnityEngine.Object.Instantiate<TMP_Text>(this.templateText);
 			tmp_Text.text = shelves[i];
 			this.shelfNames.Add(tmp_Text);
 			tmp_Text.transform.SetParent(base.transform, false);

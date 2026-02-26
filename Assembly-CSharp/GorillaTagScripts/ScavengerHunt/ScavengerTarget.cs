@@ -27,7 +27,7 @@ namespace GorillaTagScripts.ScavengerHunt
 				yield return null;
 				num = i + 1;
 			}
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			throw new Exception(string.Format("No ScavengerManager found within {0} frames of attempts.", 30));
 			yield break;
 		}

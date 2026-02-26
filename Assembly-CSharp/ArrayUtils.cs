@@ -108,7 +108,7 @@ public static class ArrayUtils
 		return -1;
 	}
 
-	public static bool GTEnsureNoNulls<T>(ref T[] unityObjs) where T : Object
+	public static bool GTEnsureNoNulls<T>(ref T[] unityObjs) where T : UnityEngine.Object
 	{
 		if (unityObjs == null)
 		{

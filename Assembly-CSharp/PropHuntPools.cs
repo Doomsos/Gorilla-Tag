@@ -67,7 +67,7 @@ public static class PropHuntPools
 		{
 			if (t != null)
 			{
-				Object.Destroy(t);
+				UnityEngine.Object.Destroy(t);
 			}
 		}
 		cosmeticId_to_propTemplate.Clear();
@@ -77,7 +77,7 @@ public static class PropHuntPools
 			{
 				if (t2 != null)
 				{
-					Object.Destroy(t2.gameObject);
+					UnityEngine.Object.Destroy(t2.gameObject);
 				}
 			}
 		}
@@ -86,7 +86,7 @@ public static class PropHuntPools
 		{
 			if (t3 != null)
 			{
-				Object.Destroy(t3.gameObject);
+				UnityEngine.Object.Destroy(t3.gameObject);
 			}
 		}
 		activeProp_to_cosmeticId.Clear();
@@ -96,11 +96,11 @@ public static class PropHuntPools
 	{
 		if (_inactivePropsParent != null)
 		{
-			Object.Destroy(_inactivePropsParent.gameObject);
+			UnityEngine.Object.Destroy(_inactivePropsParent.gameObject);
 		}
 		_inactivePropsParent = new GameObject("__PropHunt_-_" + name + "__").transform;
 		_inactivePropsParent.gameObject.SetActive(false);
-		Object.DontDestroyOnLoad(_inactivePropsParent);
+		UnityEngine.Object.DontDestroyOnLoad(_inactivePropsParent);
 		_inactivePropsParent.gameObject.isStatic = true;
 	}
 
@@ -238,12 +238,12 @@ public static class PropHuntPools
 					}
 					else
 					{
-						Object.Destroy(meshRenderer);
+						UnityEngine.Object.Destroy(meshRenderer);
 					}
 				}
 				else
 				{
-					Object.Destroy(component);
+					UnityEngine.Object.Destroy(component);
 				}
 			}
 		}
@@ -269,18 +269,18 @@ public static class PropHuntPools
 				}
 				if (num == 0)
 				{
-					Object.Destroy(transform3.gameObject);
+					UnityEngine.Object.Destroy(transform3.gameObject);
 				}
 			}
 		}
 		if (flag && PropHuntPools._fallbackPrefabInstance == null)
 		{
-			PropHuntPools._fallbackPrefabInstance = Object.Instantiate<GameObject>(gameObject);
+			PropHuntPools._fallbackPrefabInstance = UnityEngine.Object.Instantiate<GameObject>(gameObject);
 		}
 		if (!PropHuntPools._cosmeticId_to_decoyTemplate.ContainsKey(cosmeticId))
 		{
-			PropPlacementRB propPlacementRB = Object.Instantiate<PropPlacementRB>(GorillaPropHuntGameManager.instance.PropDecoyPrefab, PropHuntPools._decoyTemplatesParent);
-			GameObject gameObject2 = Object.Instantiate<GameObject>(gameObject, PropHuntPools._decoyTemplatesParent);
+			PropPlacementRB propPlacementRB = UnityEngine.Object.Instantiate<PropPlacementRB>(GorillaPropHuntGameManager.instance.PropDecoyPrefab, PropHuntPools._decoyTemplatesParent);
+			GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(gameObject, PropHuntPools._decoyTemplatesParent);
 			propPlacementRB.name = "__PropHuntPoolProp_Decoy_TEMPLATE__" + cosmeticSO.name + "__";
 			PropPlacementRB.TryPrepPropTemplate(propPlacementRB, gameObject2, cosmeticSO);
 			propPlacementRB.gameObject.SetActive(false);
@@ -291,7 +291,7 @@ public static class PropHuntPools
 			string name = "__PropHuntPoolProp_Decoy__" + cosmeticSO.name + "__";
 			for (int l = 0; l < num3; l++)
 			{
-				PropPlacementRB propPlacementRB2 = Object.Instantiate<PropPlacementRB>(propPlacementRB, PropHuntPools._decoyInactivePropsParent);
+				PropPlacementRB propPlacementRB2 = UnityEngine.Object.Instantiate<PropPlacementRB>(propPlacementRB, PropHuntPools._decoyInactivePropsParent);
 				propPlacementRB2.name = name;
 				queue.Enqueue(propPlacementRB2);
 			}
@@ -299,7 +299,7 @@ public static class PropHuntPools
 		}
 		if (!PropHuntPools._cosmeticId_to_grabbableTemplate.ContainsKey(cosmeticId))
 		{
-			GameObject prop = Object.Instantiate<GameObject>(gameObject, PropHuntPools._grabbableTemplatesParent);
+			GameObject prop = UnityEngine.Object.Instantiate<GameObject>(gameObject, PropHuntPools._grabbableTemplatesParent);
 			List<MeshCollider> colliders = new List<MeshCollider>();
 			List<InteractionPoint> ref_interactionPoints = new List<InteractionPoint>();
 			PropHuntGrabbableProp propHuntGrabbableProp;
@@ -311,7 +311,7 @@ public static class PropHuntPools
 			string name2 = "__PropHuntPoolProp_Grabbable__" + cosmeticSO.name + "__";
 			for (int m = 0; m < 1; m++)
 			{
-				GameObject gameObject3 = Object.Instantiate<GameObject>(propHuntGrabbableProp.gameObject, PropHuntPools._grabbableInactivePropsParent);
+				GameObject gameObject3 = UnityEngine.Object.Instantiate<GameObject>(propHuntGrabbableProp.gameObject, PropHuntPools._grabbableInactivePropsParent);
 				gameObject3.name = name2;
 				queue2.Enqueue(gameObject3.GetComponent<PropHuntGrabbableProp>());
 			}
@@ -331,7 +331,7 @@ public static class PropHuntPools
 			string name3 = "__PropHuntPoolProp_Taggable__" + cosmeticSO.name + "__";
 			for (int n = 0; n < 2; n++)
 			{
-				GameObject gameObject4 = Object.Instantiate<GameObject>(propHuntTaggableProp2.gameObject, PropHuntPools._taggableInactivePropsParent);
+				GameObject gameObject4 = UnityEngine.Object.Instantiate<GameObject>(propHuntTaggableProp2.gameObject, PropHuntPools._taggableInactivePropsParent);
 				gameObject4.name = name3;
 				queue3.Enqueue(gameObject4.GetComponent<PropHuntTaggableProp>());
 			}
@@ -381,7 +381,7 @@ public static class PropHuntPools
 			cosmeticId_to_decoyInitialCount[cosmeticId] = num;
 			int b = num;
 			PropHuntPools._debug_decoyMaxCountPerProp = Mathf.Max(PropHuntPools._debug_decoyMaxCountPerProp, b);
-			out_prop = Object.Instantiate<PropPlacementRB>(original);
+			out_prop = UnityEngine.Object.Instantiate<PropPlacementRB>(original);
 			PropHuntPools._activeDecoy_to_cosmeticId[out_prop] = cosmeticId;
 			return true;
 		}
@@ -412,7 +412,7 @@ public static class PropHuntPools
 			if (PropHuntPools._cosmeticId_to_taggableTemplate.TryGetValue(cosmeticId, out original))
 			{
 				PropHuntPools._debug_decoyMaxCountPerProp = ((PropHuntPools._debug_decoyMaxCountPerProp >= queue.Count + 1) ? PropHuntPools._debug_decoyMaxCountPerProp : ((int)((double)queue.Count * 1.5)));
-				out_prop = Object.Instantiate<PropHuntTaggableProp>(original);
+				out_prop = UnityEngine.Object.Instantiate<PropHuntTaggableProp>(original);
 				PropHuntPools._activeTaggable_to_cosmeticId[out_prop] = cosmeticId;
 				return true;
 			}
@@ -442,7 +442,7 @@ public static class PropHuntPools
 		PropHuntGrabbableProp original;
 		if (PropHuntPools._cosmeticId_to_grabbableTemplate.TryGetValue(cosmeticId, out original))
 		{
-			out_prop = Object.Instantiate<PropHuntGrabbableProp>(original);
+			out_prop = UnityEngine.Object.Instantiate<PropHuntGrabbableProp>(original);
 			PropHuntPools._activeGrabbable_to_cosmeticId[out_prop] = cosmeticId;
 			return true;
 		}

@@ -451,7 +451,7 @@ public class VRRigAnchorOverrides : MonoBehaviour
 				{
 					((Transform)obj).parent = null;
 				}
-				Object.Destroy(this.clippingOffsetTransforms[i].gameObject);
+				UnityEngine.Object.Destroy(this.clippingOffsetTransforms[i].gameObject);
 			}
 		}
 	}

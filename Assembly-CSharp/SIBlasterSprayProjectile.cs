@@ -13,11 +13,11 @@ public class SIBlasterSprayProjectile : MonoBehaviour
 	{
 		if (player != null && this.projectile.hitEffectPlayer != null)
 		{
-			Object.Instantiate<GameObject>(this.projectile.hitEffectPlayer, this.projectile.transform.position, this.projectile.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.projectile.hitEffectPlayer, this.projectile.transform.position, this.projectile.transform.rotation);
 		}
 		if (player == null && this.projectile.hitEffect != null)
 		{
-			Object.Instantiate<GameObject>(this.projectile.hitEffect, this.projectile.transform.position, this.projectile.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.projectile.hitEffect, this.projectile.transform.position, this.projectile.transform.rotation);
 		}
 		if (player != null)
 		{
@@ -81,10 +81,10 @@ public class SIBlasterSprayProjectile : MonoBehaviour
 		}
 		if (x != SIPlayer.LocalPlayer)
 		{
-			Object.Instantiate<GameObject>(this.projectile.hitEffect, vector, this.projectile.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.projectile.hitEffect, vector, this.projectile.transform.rotation);
 			return;
 		}
-		Object.Instantiate<GameObject>(this.projectile.hitEffectPlayer, vector, this.projectile.transform.rotation);
+		UnityEngine.Object.Instantiate<GameObject>(this.projectile.hitEffectPlayer, vector, this.projectile.transform.rotation);
 		GTPlayer.Instance.ApplyKnockback(vector2.normalized, this.knockbackSpeed, true);
 	}
 

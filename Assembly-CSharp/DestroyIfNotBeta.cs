@@ -7,7 +7,7 @@ public class DestroyIfNotBeta : MonoBehaviour
 	{
 		bool shouldKeepIfBeta = this.m_shouldKeepIfBeta;
 		bool shouldKeepIfCreatorBuild = this.m_shouldKeepIfCreatorBuild;
-		Object.Destroy(base.gameObject);
+		UnityEngine.Object.Destroy(base.gameObject);
 	}
 
 	public bool m_shouldKeepIfBeta = true;

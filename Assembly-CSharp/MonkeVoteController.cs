@@ -31,7 +31,7 @@ public class MonkeVoteController : MonoBehaviour, IGorillaSliceableSimple
 			MonkeVoteController.instance = this;
 			return;
 		}
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	public void SliceUpdate()

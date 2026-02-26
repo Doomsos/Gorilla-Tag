@@ -18,7 +18,7 @@ public class BuilderPieceInteractor : MonoBehaviour
 		}
 		else if (BuilderPieceInteractor.instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 		this.velocityEstimator = new List<GorillaVelocityEstimator>(2)
 		{

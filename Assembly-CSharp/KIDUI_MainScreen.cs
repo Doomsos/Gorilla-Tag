@@ -90,7 +90,7 @@ public class KIDUI_MainScreen : MonoBehaviour
 		{
 			return;
 		}
-		GameObject gameObject = Object.Instantiate<GameObject>(this._featurePrefab, this._featureRootTransform);
+		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._featurePrefab, this._featureRootTransform);
 		KIDUIFeatureSetting component = gameObject.GetComponent<KIDUIFeatureSetting>();
 		if (permissionDataByFeature.ManagedBy == Permission.ManagedByEnum.GUARDIAN)
 		{

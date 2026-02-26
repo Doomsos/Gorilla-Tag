@@ -63,7 +63,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		}
 		else if (BetterDayNightManager.instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 		this.currentLerp = 0f;
 		this.totalHours = 0.0;
@@ -75,7 +75,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		this.currentTimeIndex = 0;
 		this.baseSeconds = 0.0;
 		this.computerInit = false;
-		this.randomNumberGenerator = new Random(this.mySeed);
+		this.randomNumberGenerator = new System.Random(this.mySeed);
 		this.GenerateWeatherEventTimes();
 		this.ChangeMaps(0, 1);
 		base.StartCoroutine(this.InitialUpdate());
@@ -573,7 +573,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 
 	public int mySeed;
 
-	public Random randomNumberGenerator = new Random();
+	public System.Random randomNumberGenerator = new System.Random();
 
 	public BetterDayNightManager.WeatherType[] weatherCycle;
 

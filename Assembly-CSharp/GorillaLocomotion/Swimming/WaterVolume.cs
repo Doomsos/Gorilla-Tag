@@ -444,7 +444,7 @@ namespace GorillaLocomotion.Swimming
 			{
 				colliderExitedWater(this, persistentCollider.collider);
 			}
-			persistentCollider.nextDripTime = currentTime + this.waterParams.perDripTimeDelay + Random.Range(-this.waterParams.perDripTimeRandRange * 0.5f, this.waterParams.perDripTimeRandRange * 0.5f);
+			persistentCollider.nextDripTime = currentTime + this.waterParams.perDripTimeDelay + UnityEngine.Random.Range(-this.waterParams.perDripTimeRandRange * 0.5f, this.waterParams.perDripTimeRandRange * 0.5f);
 			GTPlayer instance = GTPlayer.Instance;
 			if (persistentCollider.collider == instance.headCollider || persistentCollider.collider == instance.bodyCollider)
 			{
@@ -467,8 +467,8 @@ namespace GorillaLocomotion.Swimming
 		{
 			if (currentTime < persistentCollider.lastInWaterTime + this.waterParams.postExitDripDuration && currentTime > persistentCollider.nextDripTime && persistentCollider.playDripEffect)
 			{
-				persistentCollider.nextDripTime = currentTime + this.waterParams.perDripTimeDelay + Random.Range(-this.waterParams.perDripTimeRandRange * 0.5f, this.waterParams.perDripTimeRandRange * 0.5f);
-				float dripScale = this.waterParams.rippleEffectScale * 2f * (this.waterParams.perDripDefaultRadius + Random.Range(-this.waterParams.perDripRadiusRandRange * 0.5f, this.waterParams.perDripRadiusRandRange * 0.5f));
+				persistentCollider.nextDripTime = currentTime + this.waterParams.perDripTimeDelay + UnityEngine.Random.Range(-this.waterParams.perDripTimeRandRange * 0.5f, this.waterParams.perDripTimeRandRange * 0.5f);
+				float dripScale = this.waterParams.rippleEffectScale * 2f * (this.waterParams.perDripDefaultRadius + UnityEngine.Random.Range(-this.waterParams.perDripRadiusRandRange * 0.5f, this.waterParams.perDripRadiusRandRange * 0.5f));
 				persistentCollider.PlayDripEffect(this.waterParams.rippleEffect, persistentCollider.lastSurfaceQuery.surfacePoint, persistentCollider.lastSurfaceQuery.surfaceNormal, dripScale);
 			}
 		}
@@ -720,7 +720,7 @@ namespace GorillaLocomotion.Swimming
 
 		private GuidedRefTargetIdSO _guidedRefTargetId;
 
-		private Object _guidedRefTargetObject;
+		private UnityEngine.Object _guidedRefTargetObject;
 
 		public struct SurfaceQuery
 		{

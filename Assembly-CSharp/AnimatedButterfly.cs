@@ -37,7 +37,7 @@ public struct AnimatedButterfly
 				this.material.SetFloat(ShaderProps._VertexFlapPhaseOffset, 0f);
 				this.wasPerched = false;
 			}
-			this.velocity += Random.insideUnitSphere * manager.BeeJitterStrength * Time.deltaTime;
+			this.velocity += UnityEngine.Random.insideUnitSphere * manager.BeeJitterStrength * Time.deltaTime;
 			Vector3 vector3 = this.oldPosition + this.velocity * Time.deltaTime;
 			if ((vector3 - vector).IsLongerThan(manager.BeeMaxJitterRadius))
 			{
@@ -101,7 +101,7 @@ public struct AnimatedButterfly
 
 	public void InitVisual(MeshRenderer prefab, ButterflySwarmManager manager)
 	{
-		this.visual = Object.Instantiate<MeshRenderer>(prefab, manager.transform);
+		this.visual = UnityEngine.Object.Instantiate<MeshRenderer>(prefab, manager.transform);
 		this.material = this.visual.material;
 		this.material.SetFloat(ShaderProps._VertexFlapPhaseOffset, 0f);
 	}

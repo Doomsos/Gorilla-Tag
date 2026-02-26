@@ -37,7 +37,7 @@ namespace TagEffects
 		{
 			if (TagEffectsLibrary._instance != null)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 				return;
 			}
 			TagEffectsLibrary._instance = this;
@@ -157,7 +157,7 @@ namespace TagEffects
 			}
 			if (queue.Count == 0 || (queue.Peek().gameObject.activeInHierarchy && queue.Count < 12))
 			{
-				GameObject gameObject = Object.Instantiate<GameObject>(prefab, target.transform.position, rotation, parentEffect ? target : TagEffectsLibrary._instance.transform);
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(prefab, target.transform.position, rotation, parentEffect ? target : TagEffectsLibrary._instance.transform);
 				gameObject.name = prefab.name;
 				gameObject.transform.localScale = (flipZAxis ? new Vector3(scale, scale, -scale) : (Vector3.one * scale));
 				GameObjectOnDisableDispatcher gameObjectOnDisableDispatcher;

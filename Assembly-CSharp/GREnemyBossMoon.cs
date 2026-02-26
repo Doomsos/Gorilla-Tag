@@ -31,7 +31,7 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 		this.agent.onBodyStateChanged += this.OnNetworkBodyStateChange;
 		this.agent.onBehaviorStateChanged += this.OnNetworkBehaviorStateChange;
 		this.abilities = new GRAbilityBase[32];
-		this.adaptiveMusicController = Object.FindObjectOfType<GRAdaptiveMusicController>();
+		this.adaptiveMusicController = UnityEngine.Object.FindObjectOfType<GRAdaptiveMusicController>();
 	}
 
 	public void OnEntityInit()
@@ -515,7 +515,7 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 		{
 			return GREnemyBossMoon.Behavior.None;
 		}
-		int index = Random.Range(0, behaviors.Count);
+		int index = UnityEngine.Random.Range(0, behaviors.Count);
 		return behaviors[index];
 	}
 
@@ -647,7 +647,7 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 				}
 			}
 			List<GREnemyBossMoon.Behavior> list = currPhase.attacks;
-			if (currPhase.comboAttacks != null && currPhase.comboAttacks.Count > 0 && ((currPhase.allowConsecutiveCombos && this.consecutiveCombos < 3) || this.consecutiveCombos <= 0) && Random.value < currPhase.comboAttackChance)
+			if (currPhase.comboAttacks != null && currPhase.comboAttacks.Count > 0 && ((currPhase.allowConsecutiveCombos && this.consecutiveCombos < 3) || this.consecutiveCombos <= 0) && UnityEngine.Random.value < currPhase.comboAttackChance)
 			{
 				list = currPhase.comboAttacks;
 				this.consecutiveCombos++;
@@ -674,7 +674,7 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 				if (GREnemyBossMoon.tempPotentialAttacks.Count > 0)
 				{
 					this.attacksAfterSummon--;
-					int index = Random.Range(0, GREnemyBossMoon.tempPotentialAttacks.Count);
+					int index = UnityEngine.Random.Range(0, GREnemyBossMoon.tempPotentialAttacks.Count);
 					return GREnemyBossMoon.tempPotentialAttacks[index];
 				}
 			}
@@ -729,7 +729,7 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 				if (this.currSummon != null)
 				{
 					GREnemyBossMoon.PhaseDef currPhase2 = this.GetCurrPhase();
-					if (this.trackedEntities.Count < currPhase2.maxSimultaneousEnemies && Random.value < currPhase2.randomSummonChance)
+					if (this.trackedEntities.Count < currPhase2.maxSimultaneousEnemies && UnityEngine.Random.value < currPhase2.randomSummonChance)
 					{
 						this.currSummon.ForceSpawn();
 					}
@@ -1095,7 +1095,7 @@ public class GREnemyBossMoon : MonoBehaviour, IGameEntityComponent, IGameEntityS
 		{
 			return;
 		}
-		this.currentGravActivator = this.gravActivators[Random.Range(0, this.gravActivators.Length)];
+		this.currentGravActivator = this.gravActivators[UnityEngine.Random.Range(0, this.gravActivators.Length)];
 		this.currentGravActivator.SetActive(true);
 	}
 

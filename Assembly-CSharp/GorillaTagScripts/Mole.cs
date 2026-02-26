@@ -152,9 +152,9 @@ namespace GorillaTagScripts
 		{
 			if (!useHazardMole)
 			{
-				return this.safeMoles[Random.Range(0, this.safeMoles.Count)];
+				return this.safeMoles[UnityEngine.Random.Range(0, this.safeMoles.Count)];
 			}
-			return this.hazardMoles[Random.Range(0, this.hazardMoles.Count)];
+			return this.hazardMoles[UnityEngine.Random.Range(0, this.hazardMoles.Count)];
 		}
 
 		public float positionOffset = 0.2f;

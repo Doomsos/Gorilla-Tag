@@ -14,7 +14,7 @@ public class LightningGenerator : MonoBehaviour
 			}
 			else
 			{
-				this.strikes[i] = Object.Instantiate<LightningStrike>(this.prototype, base.transform);
+				this.strikes[i] = UnityEngine.Object.Instantiate<LightningStrike>(this.prototype, base.transform);
 			}
 			this.strikes[i].gameObject.SetActive(false);
 		}

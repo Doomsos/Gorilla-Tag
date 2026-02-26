@@ -150,7 +150,7 @@ namespace GorillaNetworking
 			}
 			else if (GorillaComputer.instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 			}
 			Debug.Log(string.Concat(new string[]
 			{
@@ -830,8 +830,8 @@ namespace GorillaNetworking
 					{
 						Debug.Log("Friend ID:" + str);
 					}
-					PhotonNetworkController.Instance.shuffler = Random.Range(0, 99).ToString().PadLeft(2, '0') + Random.Range(0, 99999999).ToString().PadLeft(8, '0');
-					PhotonNetworkController.Instance.keyStr = Random.Range(0, 99999999).ToString().PadLeft(8, '0');
+					PhotonNetworkController.Instance.shuffler = UnityEngine.Random.Range(0, 99).ToString().PadLeft(2, '0') + UnityEngine.Random.Range(0, 99999999).ToString().PadLeft(8, '0');
+					PhotonNetworkController.Instance.keyStr = UnityEngine.Random.Range(0, 99999999).ToString().PadLeft(8, '0');
 					RoomSystem.SendNearbyFollowCommand(chosenFriendJoinCollider, PhotonNetworkController.Instance.shuffler, PhotonNetworkController.Instance.keyStr);
 					PhotonNetwork.SendAllOutgoingCommands();
 					PhotonNetworkController.Instance.AttemptToJoinPublicRoom(selectedMapJoinTrigger, JoinType.JoinWithNearby, null, false);
@@ -2970,7 +2970,7 @@ namespace GorillaNetworking
 				return;
 			}
 			PlayerPrefs.SetString("playerNameBackup", this.currentName);
-			this.currentName = "gorilla" + Random.Range(0, 9999).ToString().PadLeft(4, '0');
+			this.currentName = "gorilla" + UnityEngine.Random.Range(0, 9999).ToString().PadLeft(4, '0');
 			this.savedName = this.currentName;
 			NetworkSystem.Instance.SetMyNickName(this.currentName);
 			this.SetLocalNameTagText(this.currentName);

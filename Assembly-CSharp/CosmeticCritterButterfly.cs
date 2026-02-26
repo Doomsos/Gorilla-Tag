@@ -18,8 +18,8 @@ public class CosmeticCritterButterfly : CosmeticCritter
 
 	public override void SetRandomVariables()
 	{
-		this.direction = Random.insideUnitSphere;
-		this.emitParams.startColor = Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f);
+		this.direction = UnityEngine.Random.insideUnitSphere;
+		this.emitParams.startColor = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f);
 		this.particleSystem.Emit(this.emitParams, 1);
 	}
 

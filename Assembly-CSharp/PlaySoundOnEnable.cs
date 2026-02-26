@@ -38,7 +38,7 @@ public class PlaySoundOnEnable : MonoBehaviour
 			base.StartCoroutine(this.DoLoop());
 			return;
 		}
-		this._source.clip = this._clips[Random.Range(0, this._clips.Length)];
+		this._source.clip = this._clips[UnityEngine.Random.Range(0, this._clips.Length)];
 		this._source.GTPlay();
 	}
 
@@ -46,13 +46,13 @@ public class PlaySoundOnEnable : MonoBehaviour
 	{
 		while (base.enabled)
 		{
-			this._source.clip = this._clips[Random.Range(0, this._clips.Length)];
+			this._source.clip = this._clips[UnityEngine.Random.Range(0, this._clips.Length)];
 			this._source.GTPlay();
 			while (this._source.isPlaying)
 			{
 				yield return null;
 			}
-			float num = Random.Range(this._loopDelay.x, this._loopDelay.y);
+			float num = UnityEngine.Random.Range(this._loopDelay.x, this._loopDelay.y);
 			if (num > 0f)
 			{
 				float waitEndTime = Time.time + num;

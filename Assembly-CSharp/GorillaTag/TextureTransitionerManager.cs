@@ -13,13 +13,13 @@ namespace GorillaTag
 		{
 			if (TextureTransitionerManager.instance != null)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 				return;
 			}
 			TextureTransitionerManager.instance = this;
 			if (Application.isPlaying)
 			{
-				Object.DontDestroyOnLoad(base.gameObject);
+				UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 			}
 			this.matPropBlock = new MaterialPropertyBlock();
 		}

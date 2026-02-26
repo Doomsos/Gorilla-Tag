@@ -22,7 +22,7 @@ public class CustomMapTelemetry : MonoBehaviour
 		}
 		if (CustomMapTelemetry.instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 	}
 
@@ -45,7 +45,7 @@ public class CustomMapTelemetry : MonoBehaviour
 			return;
 		}
 		CustomMapTelemetry.mapEnterTime = Time.unscaledTime;
-		float value = Random.value;
+		float value = UnityEngine.Random.value;
 		if (value <= 0.01f)
 		{
 			CustomMapTelemetry.StartMetricsCapture();

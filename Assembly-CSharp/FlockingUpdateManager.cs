@@ -8,7 +8,7 @@ public class FlockingUpdateManager : MonoBehaviour
 	{
 		if (FlockingUpdateManager.hasInstance && FlockingUpdateManager.instance != null && FlockingUpdateManager.instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		FlockingUpdateManager.SetInstance(this);
@@ -25,7 +25,7 @@ public class FlockingUpdateManager : MonoBehaviour
 		FlockingUpdateManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			Object.DontDestroyOnLoad(manager);
+			UnityEngine.Object.DontDestroyOnLoad(manager);
 		}
 	}
 

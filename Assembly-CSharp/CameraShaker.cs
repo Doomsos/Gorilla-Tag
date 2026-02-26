@@ -81,13 +81,13 @@ public class CameraShaker : MonoBehaviour
 		this.rumbling = true;
 		while (this.stopTime > Time.time)
 		{
-			Vector3 vector = Random.insideUnitSphere * this.magnitude;
+			Vector3 vector = UnityEngine.Random.insideUnitSphere * this.magnitude;
 			if (this.rollOff)
 			{
 				vector *= (this.stopTime - Time.time) / this.duration;
 			}
 			base.transform.localPosition += vector;
-			yield return new WaitForSeconds(Random.Range(this.freqRange.x, this.freqRange.y));
+			yield return new WaitForSeconds(UnityEngine.Random.Range(this.freqRange.x, this.freqRange.y));
 		}
 		this.rumbling = false;
 		yield break;

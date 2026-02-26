@@ -8,7 +8,7 @@ public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 	{
 		if (CosmeticAnchorManager.hasInstance && CosmeticAnchorManager.instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		CosmeticAnchorManager.SetInstance(this);
@@ -25,7 +25,7 @@ public class CosmeticAnchorManager : MonoBehaviour, IGorillaSliceableSimple
 		CosmeticAnchorManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			Object.DontDestroyOnLoad(manager);
+			UnityEngine.Object.DontDestroyOnLoad(manager);
 		}
 	}
 

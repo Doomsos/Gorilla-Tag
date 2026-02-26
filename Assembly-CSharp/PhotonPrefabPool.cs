@@ -90,7 +90,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		{
 			prefabInstance.SetActive(false);
 		}
-		GameObject gameObject = Object.Instantiate<GameObject>(prefabInstance, position, rotation);
+		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(prefabInstance, position, rotation);
 		this.netInstantiedObjects.Add(gameObject);
 		if (activeSelf)
 		{
@@ -126,7 +126,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 				}
 				return;
 			}
-			Object.Destroy(netObj);
+			UnityEngine.Object.Destroy(netObj);
 			return;
 		}
 		else
@@ -134,7 +134,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 			PhotonView photonView;
 			if (!netObj.TryGetComponent<PhotonView>(out photonView) || photonView.isRuntimeInstantiated)
 			{
-				Object.Destroy(netObj);
+				UnityEngine.Object.Destroy(netObj);
 				return;
 			}
 			if (!this.objectsQueued.Contains(netObj))
@@ -190,7 +190,7 @@ public class PhotonPrefabPool : MonoBehaviour, IPunPrefabPoolVerify, IPunPrefabP
 		{
 			if (!gameObject.IsNull())
 			{
-				Object.Destroy(gameObject);
+				UnityEngine.Object.Destroy(gameObject);
 			}
 		}
 		this.m_invalidCreatePool.Clear();

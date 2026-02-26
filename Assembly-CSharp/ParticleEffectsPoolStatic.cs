@@ -15,7 +15,7 @@ public class ParticleEffectsPoolStatic<T> : ParticleEffectsPool where T : Partic
 	{
 		if (ParticleEffectsPoolStatic<T>.gInstance && ParticleEffectsPoolStatic<T>.gInstance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		ParticleEffectsPoolStatic<T>.gInstance = (this as T);

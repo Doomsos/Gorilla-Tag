@@ -30,7 +30,7 @@ public class RubberDuck : TransferrableObject
 		{
 			if (this.squeezeSoundBank.Length > 1)
 			{
-				return this.squeezeSoundBank[Random.Range(0, this.squeezeSoundBank.Length)];
+				return this.squeezeSoundBank[UnityEngine.Random.Range(0, this.squeezeSoundBank.Length)];
 			}
 			if (this.squeezeSoundBank.Length == 1)
 			{
@@ -46,7 +46,7 @@ public class RubberDuck : TransferrableObject
 		{
 			if (this.squeezeReleaseSoundBank.Length > 1)
 			{
-				return this.squeezeReleaseSoundBank[Random.Range(0, this.squeezeReleaseSoundBank.Length)];
+				return this.squeezeReleaseSoundBank[UnityEngine.Random.Range(0, this.squeezeReleaseSoundBank.Length)];
 			}
 			if (this.squeezeReleaseSoundBank.Length == 1)
 			{

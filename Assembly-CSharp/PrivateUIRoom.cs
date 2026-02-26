@@ -32,7 +32,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 			this._uiRoot.parent = base.transform;
 			return;
 		}
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	private new void OnEnable()
@@ -203,7 +203,7 @@ public class PrivateUIRoom : MonoBehaviourTick
 		}
 		else
 		{
-			Object.Destroy(focus.gameObject);
+			UnityEngine.Object.Destroy(focus.gameObject);
 		}
 		if (PrivateUIRoom.instance.ui.Count > 0)
 		{

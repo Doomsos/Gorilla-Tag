@@ -59,7 +59,7 @@ public class BuilderSetManager : MonoBehaviour
 		}
 		else if (BuilderSetManager.instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 		this.Init();

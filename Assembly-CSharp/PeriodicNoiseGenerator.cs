@@ -18,7 +18,7 @@ public class PeriodicNoiseGenerator : MonoBehaviour
 		}
 		if (Time.time > this.lastTime + this.sleepDuration)
 		{
-			this.lastTime = Time.time + this.randomDuration * Random.value;
+			this.lastTime = Time.time + this.randomDuration * UnityEngine.Random.value;
 			this.noiseActor.SetTimeEnabled();
 			this.noiseActor.soundEnabled = true;
 			this.mR.sharedMaterial = this.solid;

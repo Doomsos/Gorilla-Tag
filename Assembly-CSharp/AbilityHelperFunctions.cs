@@ -16,7 +16,7 @@ public static class AbilityHelperFunctions
 		{
 			return minInclusive;
 		}
-		int num2 = Random.Range(minInclusive, maxExclusive);
+		int num2 = UnityEngine.Random.Range(minInclusive, maxExclusive);
 		if (num2 != lastValue)
 		{
 			return num2;

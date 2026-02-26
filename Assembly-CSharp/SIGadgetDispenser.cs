@@ -132,7 +132,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 		for (int i = 0; i < count; i++)
 		{
 			SITechTreePage sitechTreePage = this.parentTerminal.superInfection.techTreeSO.TreePages[i];
-			SIGadgetListEntry sigadgetListEntry = Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
+			SIGadgetListEntry sigadgetListEntry = UnityEngine.Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
 			StaticLodManager.TryAddLateInstantiatedMembers(sigadgetListEntry.gameObject);
 			sigadgetListEntry.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.Select, i, -0.07f, count);
 			this.gadgetPages.Add(sigadgetListEntry);
@@ -141,7 +141,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 		this.gadgetEntries = new List<SIDispenserGadgetListEntry>();
 		for (int j = 0; j < num; j++)
 		{
-			SIDispenserGadgetListEntry sidispenserGadgetListEntry = Object.Instantiate<SIDispenserGadgetListEntry>(this.gadgetListEntryPrefab, this.gadgetListParent);
+			SIDispenserGadgetListEntry sidispenserGadgetListEntry = UnityEngine.Object.Instantiate<SIDispenserGadgetListEntry>(this.gadgetListEntryPrefab, this.gadgetListParent);
 			sidispenserGadgetListEntry.transform.localPosition += new Vector3(0f, (float)j * -0.07f, 0f);
 			sidispenserGadgetListEntry.SetStation(this, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText);
 			this.gadgetEntries.Add(sidispenserGadgetListEntry);

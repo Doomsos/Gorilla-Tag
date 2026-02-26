@@ -8,7 +8,7 @@ namespace GorillaTag.Rendering
 	{
 		protected void Awake()
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 
 		protected void OnEnable()

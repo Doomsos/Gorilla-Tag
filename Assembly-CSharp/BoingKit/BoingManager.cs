@@ -127,7 +127,7 @@ namespace BoingKit
 			BoingManager.s_managerGo = new GameObject("Boing Kit manager (don't delete)");
 			BoingManager.s_managerGo.AddComponent<BoingManagerPreUpdatePump>();
 			BoingManager.s_managerGo.AddComponent<BoingManagerPostUpdatePump>();
-			Object.DontDestroyOnLoad(BoingManager.s_managerGo);
+			UnityEngine.Object.DontDestroyOnLoad(BoingManager.s_managerGo);
 			BoingManager.s_managerGo.AddComponent<SphereCollider>().enabled = false;
 		}
 

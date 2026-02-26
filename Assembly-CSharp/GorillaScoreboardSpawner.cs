@@ -28,7 +28,7 @@ public class GorillaScoreboardSpawner : MonoBehaviour
 		if (this.IsCurrentScoreboard())
 		{
 			this.notInRoomText.SetActive(false);
-			this.currentScoreboard = Object.Instantiate<GameObject>(this.scoreboardPrefab, base.transform).GetComponent<GorillaScoreBoard>();
+			this.currentScoreboard = UnityEngine.Object.Instantiate<GameObject>(this.scoreboardPrefab, base.transform).GetComponent<GorillaScoreBoard>();
 			this.currentScoreboard.transform.rotation = base.transform.rotation;
 			if (this.includeMMR)
 			{
@@ -94,7 +94,7 @@ public class GorillaScoreboardSpawner : MonoBehaviour
 	{
 		if (this.currentScoreboard != null)
 		{
-			Object.Destroy(this.currentScoreboard.gameObject);
+			UnityEngine.Object.Destroy(this.currentScoreboard.gameObject);
 			this.currentScoreboard = null;
 		}
 	}

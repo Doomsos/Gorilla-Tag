@@ -71,7 +71,7 @@ public class EyeScannerMono : MonoBehaviour, ISpawnable, IGorillaSliceableSimple
 	{
 		if (rig != null && !rig.isOfflineVRRig)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 		if (GTPlayer.hasInstance)
 		{

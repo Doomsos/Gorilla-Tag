@@ -63,7 +63,7 @@ public class SoundBankPlayer : MonoBehaviour
 				int num = 0;
 				for (int j = 0; j < 100; j++)
 				{
-					num = Random.Range(0, this.soundBank.sounds.Length);
+					num = UnityEngine.Random.Range(0, this.soundBank.sounds.Length);
 					if (Array.IndexOf<int>(array, num) == -1)
 					{
 						break;
@@ -76,8 +76,8 @@ public class SoundBankPlayer : MonoBehaviour
 				this.playlist[i] = new SoundBankPlayer.PlaylistEntry
 				{
 					index = num,
-					volume = Random.Range(this.soundBank.volumeRange.x, this.soundBank.volumeRange.y),
-					pitch = Random.Range(this.soundBank.pitchRange.x, this.soundBank.pitchRange.y)
+					volume = UnityEngine.Random.Range(this.soundBank.volumeRange.x, this.soundBank.volumeRange.y),
+					pitch = UnityEngine.Random.Range(this.soundBank.pitchRange.x, this.soundBank.pitchRange.y)
 				};
 			}
 			return;
@@ -88,8 +88,8 @@ public class SoundBankPlayer : MonoBehaviour
 			this.playlist[k] = new SoundBankPlayer.PlaylistEntry
 			{
 				index = k % this.soundBank.sounds.Length,
-				volume = Random.Range(this.soundBank.volumeRange.x, this.soundBank.volumeRange.y),
-				pitch = Random.Range(this.soundBank.pitchRange.x, this.soundBank.pitchRange.y)
+				volume = UnityEngine.Random.Range(this.soundBank.volumeRange.x, this.soundBank.volumeRange.y),
+				pitch = UnityEngine.Random.Range(this.soundBank.pitchRange.x, this.soundBank.pitchRange.y)
 			};
 		}
 	}

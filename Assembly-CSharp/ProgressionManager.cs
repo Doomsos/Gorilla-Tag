@@ -483,7 +483,7 @@ public class ProgressionManager : MonoBehaviour
 		}
 		if (this.retryCounters[requestType] < this.maxRetriesOnFail)
 		{
-			float num = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.retryCounters[requestType] + 1)));
+			float num = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.retryCounters[requestType] + 1)));
 			Debug.LogWarning(string.Format("PM: Retrying ... attempt #{0}, waiting {1}s", this.retryCounters[requestType] + 1, num));
 			Dictionary<ProgressionManager.RequestType, int> dictionary = this.retryCounters;
 			int num2 = dictionary[requestType];

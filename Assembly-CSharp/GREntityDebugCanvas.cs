@@ -15,7 +15,7 @@ public class GREntityDebugCanvas : MonoBehaviour
 	{
 		if (this.text == null && this.textPanelPrefab != null)
 		{
-			GameObject gameObject = Object.Instantiate<GameObject>(this.textPanelPrefab, base.transform.position + this.prefabAttachOffset, Quaternion.identity, base.transform);
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.textPanelPrefab, base.transform.position + this.prefabAttachOffset, Quaternion.identity, base.transform);
 			this.text = gameObject.GetComponent<TMP_Text>();
 		}
 		if (this.text != null)

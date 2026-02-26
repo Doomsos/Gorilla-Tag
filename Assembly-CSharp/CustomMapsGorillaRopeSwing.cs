@@ -86,7 +86,7 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 		{
 			Vector3 vector = Vector3.zero;
 			float y = this.prefabRopeBit.GetComponentInChildren<Renderer>().bounds.size.y;
-			WaterVolume[] array = Object.FindObjectsByType<WaterVolume>(FindObjectsSortMode.None);
+			WaterVolume[] array = UnityEngine.Object.FindObjectsByType<WaterVolume>(FindObjectsSortMode.None);
 			List<Collider> list2 = new List<Collider>(array.Length);
 			WaterVolume[] array2 = array;
 			for (int j = 0; j < array2.Length; j++)
@@ -112,7 +112,7 @@ public class CustomMapsGorillaRopeSwing : GorillaRopeSwing
 						flag = (collider2.bounds.Contains(vector2) || collider2.bounds.Contains(point));
 					}
 				}
-				GameObject gameObject = Object.Instantiate<GameObject>(flag ? this.partiallyUnderwaterPrefab : this.prefabRopeBit, base.transform);
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(flag ? this.partiallyUnderwaterPrefab : this.prefabRopeBit, base.transform);
 				gameObject.name = string.Format("RopeBone_{0:00}", k);
 				gameObject.transform.localPosition = vector;
 				gameObject.transform.localRotation = Quaternion.identity;

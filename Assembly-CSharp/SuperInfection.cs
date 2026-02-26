@@ -249,7 +249,7 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 				return;
 			}
 			float spawnPitchVariance = siresourceRegion.resourcePrefab.spawnPitchVariance;
-			Quaternion rhs = Quaternion.Euler(Random.Range(-spawnPitchVariance, spawnPitchVariance), (float)Random.Range(0, 360), Random.Range(-spawnPitchVariance, spawnPitchVariance));
+			Quaternion rhs = Quaternion.Euler(UnityEngine.Random.Range(-spawnPitchVariance, spawnPitchVariance), (float)UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(-spawnPitchVariance, spawnPitchVariance));
 			Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * rhs;
 			GameEntity gameEntity = this.siManager.gameEntityManager.GetGameEntity(this.siManager.gameEntityManager.RequestCreateItem(siresourceRegion.resourcePrefab.gameObject.name.GetStaticHash(), spawnPointWithNormal.Item2, rotation, 0L));
 			if (gameEntity)
@@ -366,7 +366,7 @@ public class SuperInfection : MonoBehaviour, IGorillaSliceableSimple
 			for (int j = siresourceRegion.ItemCount; j < siresourceRegion.MaxItems; j++)
 			{
 				ValueTuple<bool, Vector3, Vector3> spawnPointWithNormal = siresourceRegion.GetSpawnPointWithNormal(5);
-				Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * Quaternion.Euler(0f, (float)Random.Range(0, 360), 0f);
+				Quaternion rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vector3.forward, spawnPointWithNormal.Item3), spawnPointWithNormal.Item3) * Quaternion.Euler(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
 				GameEntity gameEntity = this.siManager.gameEntityManager.GetGameEntity(this.siManager.gameEntityManager.RequestCreateItem(siresourceRegion.resourcePrefab.gameObject.name.GetStaticHash(), spawnPointWithNormal.Item2, rotation, 0L));
 				if (gameEntity)
 				{

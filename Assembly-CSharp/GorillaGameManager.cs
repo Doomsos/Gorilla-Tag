@@ -325,12 +325,12 @@ public abstract class GorillaGameManager : MonoBehaviourPunCallbacks, ITickSyste
 		{
 			instance.ReturnToSinglePlayer();
 		}
-		Object.DestroyImmediate(PhotonNetworkController.Instance);
-		Object.DestroyImmediate(GTPlayer.Instance);
-		GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+		UnityEngine.Object.DestroyImmediate(PhotonNetworkController.Instance);
+		UnityEngine.Object.DestroyImmediate(GTPlayer.Instance);
+		GameObject[] array = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 		for (int i = 0; i < array.Length; i++)
 		{
-			Object.Destroy(array[i]);
+			UnityEngine.Object.Destroy(array[i]);
 		}
 	}
 

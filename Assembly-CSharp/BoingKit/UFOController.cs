@@ -17,7 +17,7 @@ namespace BoingKit
 			{
 				this.m_eyeInitScale = this.Eyes.localScale;
 				this.m_eyeInitPositionLs = this.Eyes.localPosition;
-				this.m_blinkTimer = this.BlinkInterval + Random.Range(1f, 2f);
+				this.m_blinkTimer = this.BlinkInterval + UnityEngine.Random.Range(1f, 2f);
 				this.m_lastBlinkWasDouble = false;
 				this.m_eyeScaleSpring.Reset(this.m_eyeInitScale);
 				this.m_eyePositionLsSpring.Reset(this.m_eyeInitPositionLs);
@@ -126,8 +126,8 @@ namespace BoingKit
 				this.m_blinkTimer -= fixedDeltaTime;
 				if (this.m_blinkTimer <= 0f)
 				{
-					bool flag = !this.m_lastBlinkWasDouble && Random.Range(0f, 1f) > 0.75f;
-					this.m_blinkTimer = (flag ? 0.2f : (this.BlinkInterval + Random.Range(1f, 2f)));
+					bool flag = !this.m_lastBlinkWasDouble && UnityEngine.Random.Range(0f, 1f) > 0.75f;
+					this.m_blinkTimer = (flag ? 0.2f : (this.BlinkInterval + UnityEngine.Random.Range(1f, 2f)));
 					this.m_lastBlinkWasDouble = flag;
 					this.m_eyeScaleSpring.Value.y = 0f;
 					this.m_eyePositionLsSpring.Value.y = this.m_eyePositionLsSpring.Value.y - 0.025f;

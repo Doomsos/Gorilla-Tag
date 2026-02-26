@@ -21,7 +21,7 @@ public class ATM_Manager : MonoBehaviour, IBuildValidation
 	{
 		if (ATM_Manager.instance)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 		else
 		{

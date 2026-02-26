@@ -29,7 +29,7 @@ namespace GorillaNetworking.Store
 			}
 			if (BundleManager.instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 				return;
 			}
 		}
@@ -64,7 +64,7 @@ namespace GorillaNetworking.Store
 				{
 					if (bundleStand != null)
 					{
-						Object.DestroyImmediate(bundleStand.gameObject);
+						UnityEngine.Object.DestroyImmediate(bundleStand.gameObject);
 					}
 				}
 			}
@@ -73,10 +73,10 @@ namespace GorillaNetworking.Store
 			this.storeBundlesBySKU.Clear();
 			this._storeBundles.Clear();
 			this._bundleScriptableObjects.Clear();
-			BundleStand[] array = Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
+			BundleStand[] array = UnityEngine.Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
 			for (int i = 0; i < array.Length; i++)
 			{
-				Object.DestroyImmediate(array[i].gameObject);
+				UnityEngine.Object.DestroyImmediate(array[i].gameObject);
 			}
 			for (int j = 0; j < this.BundleStands.Count; j++)
 			{
@@ -120,7 +120,7 @@ namespace GorillaNetworking.Store
 				{
 					if (bundleStand != null)
 					{
-						Object.DestroyImmediate(bundleStand.gameObject);
+						UnityEngine.Object.DestroyImmediate(bundleStand.gameObject);
 					}
 				}
 			}
@@ -134,10 +134,10 @@ namespace GorillaNetworking.Store
 			this.tryOnBundleButton3 = this.nullBundleData;
 			this.tryOnBundleButton4 = this.nullBundleData;
 			this.tryOnBundleButton5 = this.nullBundleData;
-			BundleStand[] array = Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
+			BundleStand[] array = UnityEngine.Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
 			for (int i = 0; i < array.Length; i++)
 			{
-				Object.DestroyImmediate(array[i].gameObject);
+				UnityEngine.Object.DestroyImmediate(array[i].gameObject);
 			}
 		}
 
@@ -186,7 +186,7 @@ namespace GorillaNetworking.Store
 					this._spawnedBundleStands.RemoveAt(i);
 				}
 			}
-			BundleStand[] array = Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
+			BundleStand[] array = UnityEngine.Object.FindObjectsByType<BundleStand>(FindObjectsSortMode.None);
 			for (int j = 0; j < array.Length; j++)
 			{
 				BundleStand bundle = array[j];
@@ -195,7 +195,7 @@ namespace GorillaNetworking.Store
 					SpawnedBundle spawnedBundle = this._spawnedBundleStands.First((SpawnedBundle x) => x.spawnLocationPath == bundle.transform.parent.gameObject.GetPath(3));
 					if (spawnedBundle != null && spawnedBundle.bundleStand != bundle)
 					{
-						Object.DestroyImmediate(spawnedBundle.bundleStand.gameObject);
+						UnityEngine.Object.DestroyImmediate(spawnedBundle.bundleStand.gameObject);
 						spawnedBundle.bundleStand = bundle;
 					}
 				}
@@ -376,7 +376,7 @@ namespace GorillaNetworking.Store
 		{
 			private static IEnumerable GetEndCapSpawnPoints()
 			{
-				return from x in Object.FindObjectsByType<EndCapSpawnPoint>(FindObjectsSortMode.None)
+				return from x in UnityEngine.Object.FindObjectsByType<EndCapSpawnPoint>(FindObjectsSortMode.None)
 				select new ValueDropdownItem(string.Concat(new string[]
 				{
 					x.transform.parent.parent.name,

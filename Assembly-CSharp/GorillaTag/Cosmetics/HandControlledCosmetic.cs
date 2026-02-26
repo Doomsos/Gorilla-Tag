@@ -12,11 +12,11 @@ namespace GorillaTag.Cosmetics
 			base.enabled = false;
 			if (this.debugRelativePositionTransform1 != null)
 			{
-				Object.Destroy(this.debugRelativePositionTransform1.gameObject);
+				UnityEngine.Object.Destroy(this.debugRelativePositionTransform1.gameObject);
 			}
 			if (this.debugRelativePositionTransform2 != null)
 			{
-				Object.Destroy(this.debugRelativePositionTransform2.gameObject);
+				UnityEngine.Object.Destroy(this.debugRelativePositionTransform2.gameObject);
 			}
 		}
 

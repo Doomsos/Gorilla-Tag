@@ -73,7 +73,7 @@ namespace UnityChan
 			{
 				if (this._random)
 				{
-					float num = Random.Range(0f, 1f);
+					float num = UnityEngine.Random.Range(0f, 1f);
 					if (num < this._threshold)
 					{
 						this.UnityChanA.SetBool("Back", true);

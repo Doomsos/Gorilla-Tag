@@ -48,7 +48,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 		}
 		else
 		{
-			this.rb.angularVelocity = Random.onUnitSphere * Random.Range(this.launchRandomSpinSpeedMinMax.x, this.launchRandomSpinSpeedMinMax.y);
+			this.rb.angularVelocity = UnityEngine.Random.onUnitSphere * UnityEngine.Random.Range(this.launchRandomSpinSpeedMinMax.x, this.launchRandomSpinSpeedMinMax.y);
 		}
 		this.rbwi.enabled = true;
 		this.collider.enabled = true;
@@ -71,7 +71,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 	{
 		TickSystem<object>.RemoveTickCallback(this);
 		ContactPoint contact = collision.GetContact(0);
-		this.StickTo(collision.transform, contact.point, this.alignToHitNormal ? Quaternion.LookRotation(contact.normal, Random.onUnitSphere) : base.transform.rotation);
+		this.StickTo(collision.transform, contact.point, this.alignToHitNormal ? Quaternion.LookRotation(contact.normal, UnityEngine.Random.onUnitSphere) : base.transform.rotation);
 		this.stickEvents.InvokeAll(StickyProjectile.StickFlags.Wall, false);
 	}
 
@@ -92,7 +92,7 @@ public class StickyProjectile : MonoBehaviour, IProjectile, ITickSystemTick
 			RaycastHit raycastHit;
 			other.Raycast(new Ray(vector2, vector / magnitude), out raycastHit, 2f * magnitude);
 			vector3 = raycastHit.point;
-			rotation = Quaternion.LookRotation(raycastHit.normal, Random.onUnitSphere);
+			rotation = Quaternion.LookRotation(raycastHit.normal, UnityEngine.Random.onUnitSphere);
 		}
 		else
 		{

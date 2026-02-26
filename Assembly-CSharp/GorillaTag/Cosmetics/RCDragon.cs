@@ -86,7 +86,7 @@ namespace GorillaTag.Cosmetics
 			{
 				return;
 			}
-			this.PlaySound(clips[Random.Range(0, clips.Count)], volume);
+			this.PlaySound(clips[UnityEngine.Random.Range(0, clips.Count)], volume);
 		}
 
 		private void PlaySound(AudioClip clip, float volume)

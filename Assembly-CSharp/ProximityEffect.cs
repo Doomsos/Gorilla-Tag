@@ -13,7 +13,7 @@ public class ProximityEffect : MonoBehaviour, ITickSystemTick
 		this.enableVisualization = false;
 		if (this.visualizer)
 		{
-			Object.Destroy(this.visualizer);
+			UnityEngine.Object.Destroy(this.visualizer);
 		}
 	}
 

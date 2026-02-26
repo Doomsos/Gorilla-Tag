@@ -29,7 +29,7 @@ public class KIDAudioManager : MonoBehaviour
 		{
 			KIDAudioManager._instance = this;
 			base.transform.parent = null;
-			Object.DontDestroyOnLoad(base.gameObject);
+			UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 			this.ConfigureAudioSource();
 			this.InitializeSoundClips();
 			this.mainMixer.GetFloat("Game_Volume", out this.cachedGameVolume);
@@ -37,7 +37,7 @@ public class KIDAudioManager : MonoBehaviour
 		}
 		if (KIDAudioManager._instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 	}
 

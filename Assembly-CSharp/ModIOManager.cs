@@ -40,7 +40,7 @@ public class ModIOManager : MonoBehaviour, ISteamCredentialProvider, IOculusCred
 		}
 		if (ModIOManager.instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 	}
 

@@ -11,7 +11,7 @@ public class GorillaFriendCollider : MonoBehaviour, IGorillaSliceableSimple
 	{
 		this.thisCapsule = base.GetComponent<CapsuleCollider>();
 		this.thisBox = base.GetComponent<BoxCollider>();
-		this.jiggleAmount = Random.Range(0f, 1f);
+		this.jiggleAmount = UnityEngine.Random.Range(0f, 1f);
 		this.tagAndBodyLayerMask = (LayerMask.GetMask(new string[]
 		{
 			"Gorilla Tag Collider"

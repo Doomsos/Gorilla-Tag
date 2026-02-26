@@ -9,7 +9,7 @@ public class DevInspectorManager : MonoBehaviour
 		{
 			if (DevInspectorManager._instance == null)
 			{
-				DevInspectorManager._instance = Object.FindAnyObjectByType<DevInspectorManager>();
+				DevInspectorManager._instance = UnityEngine.Object.FindAnyObjectByType<DevInspectorManager>();
 			}
 			return DevInspectorManager._instance;
 		}

@@ -23,7 +23,7 @@ public class MockFriendServer : MonoBehaviourPun
 			NetworkSystem.Instance.OnMultiplayerStarted += this.OnMultiplayerStarted;
 			return;
 		}
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	private void OnMultiplayerStarted()
@@ -160,7 +160,7 @@ public class MockFriendServer : MonoBehaviourPun
 			if (!flag)
 			{
 				float time = Time.time;
-				float num = Random.Range(this.friendRequestCompletionDelayRange.x, this.friendRequestCompletionDelayRange.y);
+				float num = UnityEngine.Random.Range(this.friendRequestCompletionDelayRange.x, this.friendRequestCompletionDelayRange.y);
 				this.friendRequests.Add(new MockFriendServer.FriendRequest
 				{
 					requestorPublicId = localPlayerPublicId,

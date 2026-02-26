@@ -40,18 +40,18 @@ public class SIResourceDeposit : MonoBehaviour, ISIResourceDeposit
 						{
 							gameObject.SetActive(false);
 						}
-						GameObject gameObject2 = Object.Instantiate<GameObject>(gameObject, this.resourceDisplays[i].transform);
+						GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(gameObject, this.resourceDisplays[i].transform);
 						gameObject2.transform.localScale = new Vector3(0.27f, 0.27f, 0.27f);
 						this._displayResources.Add(gameObject2);
 						foreach (MonoBehaviour monoBehaviour in gameObject2.GetComponentsInChildren<MonoBehaviour>(true))
 						{
 							monoBehaviour.enabled = false;
-							Object.Destroy(monoBehaviour);
+							UnityEngine.Object.Destroy(monoBehaviour);
 						}
 						Rigidbody component = gameObject2.GetComponent<Rigidbody>();
 						if (component != null)
 						{
-							Object.Destroy(component);
+							UnityEngine.Object.Destroy(component);
 						}
 						gameObject2.SetLayerRecursively(UnityLayer.Default);
 						gameObject2.SetActive(true);

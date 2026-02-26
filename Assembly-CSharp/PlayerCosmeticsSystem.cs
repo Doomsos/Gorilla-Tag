@@ -18,14 +18,14 @@ internal class PlayerCosmeticsSystem : MonoBehaviour, ITickSystemPre
 		{
 			PlayerCosmeticsSystem.instance = this;
 			base.transform.SetParent(null, true);
-			Object.DontDestroyOnLoad(this);
+			UnityEngine.Object.DontDestroyOnLoad(this);
 			this.inventory = new List<string>();
 			this.inventory.Add("Inventory");
 			this.inventory.Add(PlayerCosmeticsSystem.subscriptionKey);
 			NetworkSystem.Instance.OnRaiseEvent += this.OnNetEvent;
 			return;
 		}
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	private void Start()

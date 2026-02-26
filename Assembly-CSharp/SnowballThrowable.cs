@@ -144,8 +144,8 @@ public class SnowballThrowable : HoldableObject
 		{
 			return -1;
 		}
-		this.randModelIndex = Random.Range(0, this.localModels.Count);
-		if ((float)Random.Range(1, 100) <= this.localModels[this.randModelIndex].spawnChance * 100f)
+		this.randModelIndex = UnityEngine.Random.Range(0, this.localModels.Count);
+		if ((float)UnityEngine.Random.Range(1, 100) <= this.localModels[this.randModelIndex].spawnChance * 100f)
 		{
 			return this.randModelIndex;
 		}

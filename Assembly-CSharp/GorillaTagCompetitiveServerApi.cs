@@ -14,7 +14,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		if (GorillaTagCompetitiveServerApi.Instance)
 		{
 			GTDev.LogError<string>("Duplicate GorillaTagCompetitiveServerApi detected. Destroying self.", base.gameObject, null);
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		GorillaTagCompetitiveServerApi.Instance = this;
@@ -93,7 +93,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		{
 			if (this.GetRankInformationRetryCount < this.MAX_SERVER_RETRIES)
 			{
-				float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.GetRankInformationRetryCount + 1)));
+				float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.GetRankInformationRetryCount + 1)));
 				this.GetRankInformationRetryCount++;
 				yield return new WaitForSeconds(seconds);
 				this.GetRankInformationInProgress = false;
@@ -213,7 +213,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		{
 			if (this.CreateMatchIdRetryCount < this.MAX_SERVER_RETRIES)
 			{
-				float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.CreateMatchIdRetryCount + 1)));
+				float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.CreateMatchIdRetryCount + 1)));
 				this.CreateMatchIdRetryCount++;
 				yield return new WaitForSeconds(seconds);
 				this.CreateMatchIdInProgress = false;
@@ -316,7 +316,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		{
 			if (this.ValidateMatchJoinRetryCount < this.MAX_SERVER_RETRIES)
 			{
-				float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.ValidateMatchJoinRetryCount + 1)));
+				float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.ValidateMatchJoinRetryCount + 1)));
 				this.ValidateMatchJoinRetryCount++;
 				yield return new WaitForSeconds(seconds);
 				this.ValidateMatchJoinInProgress = false;
@@ -435,7 +435,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		{
 			if (this.SubmitMatchScoresRetryCount < this.MAX_SERVER_RETRIES)
 			{
-				float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.SubmitMatchScoresRetryCount + 1)));
+				float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.SubmitMatchScoresRetryCount + 1)));
 				this.SubmitMatchScoresRetryCount++;
 				yield return new WaitForSeconds(seconds);
 				this.SubmitMatchScoresInProgress = false;
@@ -570,7 +570,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		{
 			if (this.PingMatchRetryCount < this.MAX_SERVER_RETRIES)
 			{
-				float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.PingMatchRetryCount + 1)));
+				float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.PingMatchRetryCount + 1)));
 				this.ValidateMatchJoinRetryCount++;
 				yield return new WaitForSeconds(seconds);
 				this.PingMatchInProgress = false;
@@ -670,7 +670,7 @@ public class GorillaTagCompetitiveServerApi : MonoBehaviour
 		{
 			if (this.UnlockCompetitiveQueueRetryCount < this.MAX_SERVER_RETRIES)
 			{
-				float seconds = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.UnlockCompetitiveQueueRetryCount + 1)));
+				float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.UnlockCompetitiveQueueRetryCount + 1)));
 				this.ValidateMatchJoinRetryCount++;
 				yield return new WaitForSeconds(seconds);
 				this.UnlockCompetitiveQueueInProgress = false;

@@ -21,7 +21,7 @@ public class LuauHud : MonoBehaviour
 	{
 		if (LuauHud._instance != null && LuauHud._instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 		else
 		{

@@ -12,7 +12,7 @@ namespace Viveport
 			if (MainThreadDispatcher.instance == null)
 			{
 				MainThreadDispatcher.instance = this;
-				Object.DontDestroyOnLoad(base.gameObject);
+				UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 			}
 		}
 

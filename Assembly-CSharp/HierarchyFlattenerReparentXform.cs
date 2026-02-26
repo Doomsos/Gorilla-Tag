@@ -27,7 +27,7 @@ public class HierarchyFlattenerReparentXform : MonoBehaviour
 		{
 			base.transform.SetParent(this.newParent, true);
 		}
-		Object.Destroy(this);
+		UnityEngine.Object.Destroy(this);
 	}
 
 	public Transform newParent;

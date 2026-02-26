@@ -25,7 +25,7 @@ public class SnowballMaker : MonoBehaviourPostTick
 				SnowballMaker.leftHandInstance = this;
 				return;
 			}
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 		else
@@ -35,7 +35,7 @@ public class SnowballMaker : MonoBehaviourPostTick
 				SnowballMaker.rightHandInstance = this;
 				return;
 			}
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 	}

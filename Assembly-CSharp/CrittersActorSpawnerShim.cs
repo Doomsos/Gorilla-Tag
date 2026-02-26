@@ -25,10 +25,10 @@ public class CrittersActorSpawnerShim : MonoBehaviour
 		CrittersActorSpawner crittersActorSpawner = this.CopySpawnerDataInPrefab();
 		if (crittersActorSpawner.spawnPoint.GetComponent<Rigidbody>() != null)
 		{
-			Object.DestroyImmediate(crittersActorSpawner.spawnPoint.GetComponent<Rigidbody>());
+			UnityEngine.Object.DestroyImmediate(crittersActorSpawner.spawnPoint.GetComponent<Rigidbody>());
 		}
-		Object.DestroyImmediate(crittersActorSpawner.spawnPoint);
-		Object.DestroyImmediate(crittersActorSpawner);
+		UnityEngine.Object.DestroyImmediate(crittersActorSpawner.spawnPoint);
+		UnityEngine.Object.DestroyImmediate(crittersActorSpawner);
 	}
 
 	public Transform spawnerPointTransform;

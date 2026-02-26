@@ -238,7 +238,7 @@ namespace GorillaNetworking
 			}
 			else if (CosmeticsController.instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 				return;
 			}
 			this.V2Awake();
@@ -1702,12 +1702,12 @@ namespace GorillaNetworking
 				{
 					Application.Quit();
 					NetworkSystem.Instance.ReturnToSinglePlayer();
-					Object.DestroyImmediate(PhotonNetworkController.Instance);
-					Object.DestroyImmediate(GTPlayer.Instance);
-					GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+					UnityEngine.Object.DestroyImmediate(PhotonNetworkController.Instance);
+					UnityEngine.Object.DestroyImmediate(GTPlayer.Instance);
+					GameObject[] array = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 					for (int i = 0; i < array.Length; i++)
 					{
-						Object.Destroy(array[i]);
+						UnityEngine.Object.Destroy(array[i]);
 					}
 				}
 			}, null, null);
@@ -1774,12 +1774,12 @@ namespace GorillaNetworking
 				{
 					Application.Quit();
 					NetworkSystem.Instance.ReturnToSinglePlayer();
-					Object.DestroyImmediate(PhotonNetworkController.Instance);
-					Object.DestroyImmediate(GTPlayer.Instance);
-					GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+					UnityEngine.Object.DestroyImmediate(PhotonNetworkController.Instance);
+					UnityEngine.Object.DestroyImmediate(GTPlayer.Instance);
+					GameObject[] array = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 					for (int i = 0; i < array.Length; i++)
 					{
-						Object.Destroy(array[i]);
+						UnityEngine.Object.Destroy(array[i]);
 					}
 				}
 			});
@@ -2079,12 +2079,12 @@ namespace GorillaNetworking
 					{
 						Application.Quit();
 						NetworkSystem.Instance.ReturnToSinglePlayer();
-						Object.DestroyImmediate(PhotonNetworkController.Instance);
-						Object.DestroyImmediate(GTPlayer.Instance);
-						GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+						UnityEngine.Object.DestroyImmediate(PhotonNetworkController.Instance);
+						UnityEngine.Object.DestroyImmediate(GTPlayer.Instance);
+						GameObject[] array = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 						for (int i = 0; i < array.Length; i++)
 						{
-							Object.Destroy(array[i]);
+							UnityEngine.Object.Destroy(array[i]);
 						}
 					}
 					if (!this.tryTwice)
@@ -2103,12 +2103,12 @@ namespace GorillaNetworking
 				{
 					Application.Quit();
 					NetworkSystem.Instance.ReturnToSinglePlayer();
-					Object.DestroyImmediate(PhotonNetworkController.Instance);
-					Object.DestroyImmediate(GTPlayer.Instance);
-					GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+					UnityEngine.Object.DestroyImmediate(PhotonNetworkController.Instance);
+					UnityEngine.Object.DestroyImmediate(GTPlayer.Instance);
+					GameObject[] array = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 					for (int i = 0; i < array.Length; i++)
 					{
-						Object.Destroy(array[i]);
+						UnityEngine.Object.Destroy(array[i]);
 					}
 				}
 				if (!this.tryTwice)
@@ -2283,12 +2283,12 @@ namespace GorillaNetworking
 					if (error2 == PlayFabErrorCode.AccountBanned)
 					{
 						PhotonNetwork.Disconnect();
-						Object.DestroyImmediate(PhotonNetworkController.Instance);
-						Object.DestroyImmediate(GTPlayer.Instance);
-						GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+						UnityEngine.Object.DestroyImmediate(PhotonNetworkController.Instance);
+						UnityEngine.Object.DestroyImmediate(GTPlayer.Instance);
+						GameObject[] array = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 						for (int i = 0; i < array.Length; i++)
 						{
-							Object.Destroy(array[i]);
+							UnityEngine.Object.Destroy(array[i]);
 						}
 						Application.Quit();
 						goto IL_1A2;
@@ -2412,12 +2412,12 @@ namespace GorillaNetworking
 				{
 					Application.Quit();
 					NetworkSystem.Instance.ReturnToSinglePlayer();
-					Object.DestroyImmediate(PhotonNetworkController.Instance);
-					Object.DestroyImmediate(GTPlayer.Instance);
-					GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+					UnityEngine.Object.DestroyImmediate(PhotonNetworkController.Instance);
+					UnityEngine.Object.DestroyImmediate(GTPlayer.Instance);
+					GameObject[] array = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 					for (int i = 0; i < array.Length; i++)
 					{
-						Object.Destroy(array[i]);
+						UnityEngine.Object.Destroy(array[i]);
 					}
 				}
 			}, null, null);
@@ -2520,12 +2520,12 @@ namespace GorillaNetworking
 			{
 				Application.Quit();
 				PhotonNetwork.Disconnect();
-				Object.DestroyImmediate(PhotonNetworkController.Instance);
-				Object.DestroyImmediate(GTPlayer.Instance);
-				GameObject[] array = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+				UnityEngine.Object.DestroyImmediate(PhotonNetworkController.Instance);
+				UnityEngine.Object.DestroyImmediate(GTPlayer.Instance);
+				GameObject[] array = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 				for (int i = 0; i < array.Length; i++)
 				{
-					Object.Destroy(array[i]);
+					UnityEngine.Object.Destroy(array[i]);
 				}
 			}
 		}

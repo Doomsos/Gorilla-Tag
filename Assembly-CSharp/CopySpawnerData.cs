@@ -11,7 +11,7 @@ public class CopySpawnerData : MonoBehaviour
 	{
 		if (this.spawnerDataParent != null)
 		{
-			Object.DestroyImmediate(this.spawnerDataParent.gameObject);
+			UnityEngine.Object.DestroyImmediate(this.spawnerDataParent.gameObject);
 		}
 		this.spawnerDataParent = new GameObject().transform;
 		this.spawnerDataParent.name = "Spawner Data Parent";
@@ -24,7 +24,7 @@ public class CopySpawnerData : MonoBehaviour
 
 	private void CopyCageDeposits()
 	{
-		List<CrittersCageDepositShim> list = Object.FindObjectsByType<CrittersCageDepositShim>(FindObjectsSortMode.None).ToList<CrittersCageDepositShim>();
+		List<CrittersCageDepositShim> list = UnityEngine.Object.FindObjectsByType<CrittersCageDepositShim>(FindObjectsSortMode.None).ToList<CrittersCageDepositShim>();
 		for (int i = 0; i < list.Count; i++)
 		{
 			CrittersCageDepositShim crittersCageDepositShim = list[i];
@@ -85,7 +85,7 @@ public class CopySpawnerData : MonoBehaviour
 
 	private void CopyEquipmentSpawner()
 	{
-		List<CrittersActorSpawnerShim> list = Object.FindObjectsByType<CrittersActorSpawnerShim>(FindObjectsSortMode.None).ToList<CrittersActorSpawnerShim>();
+		List<CrittersActorSpawnerShim> list = UnityEngine.Object.FindObjectsByType<CrittersActorSpawnerShim>(FindObjectsSortMode.None).ToList<CrittersActorSpawnerShim>();
 		for (int i = 0; i < list.Count; i++)
 		{
 			CrittersActorSpawnerShim crittersActorSpawnerShim = list[i];

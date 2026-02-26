@@ -58,7 +58,7 @@ namespace GorillaTagScripts
 					this.waypoints.Add(item);
 				}
 			}
-			int index = Random.Range(0, this.waypoints.Count);
+			int index = UnityEngine.Random.Range(0, this.waypoints.Count);
 			this.currentWaypoint = this.waypoints[index];
 			this.targetRotation = Quaternion.LookRotation(this.currentWaypoint.position - base.transform.position);
 			this.waypoints.RemoveAt(index);
@@ -105,7 +105,7 @@ namespace GorillaTagScripts
 				this.targetVRRig = null;
 				if (this.possibleTargets.Count > 0)
 				{
-					int index = Random.Range(0, this.possibleTargets.Count);
+					int index = UnityEngine.Random.Range(0, this.possibleTargets.Count);
 					this.PickPlayer(this.possibleTargets[index]);
 				}
 			}
@@ -208,7 +208,7 @@ namespace GorillaTagScripts
 			case LurkerGhost.ghostState.patrol:
 				this.PlaySound(this.patrolAudio, true);
 				this.passingPlayer = null;
-				this.cooldownTimeRemaining = Random.Range(this.cooldownDuration, this.maxCooldownDuration);
+				this.cooldownTimeRemaining = UnityEngine.Random.Range(this.cooldownDuration, this.maxCooldownDuration);
 				this.currentRepeatHuntTimes = 0;
 				break;
 			case LurkerGhost.ghostState.charge:

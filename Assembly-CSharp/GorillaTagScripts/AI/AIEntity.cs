@@ -22,11 +22,11 @@ namespace GorillaTagScripts.AI
 
 		protected void ChooseRandomTarget()
 		{
-			int randomTarget = Random.Range(0, GorillaParent.instance.vrrigs.Count);
+			int randomTarget = UnityEngine.Random.Range(0, GorillaParent.instance.vrrigs.Count);
 			int num = GorillaParent.instance.vrrigs.FindIndex((VRRig x) => x.creator != null && x.creator == GorillaParent.instance.vrrigs[randomTarget].creator);
 			if (num == -1)
 			{
-				num = Random.Range(0, GorillaParent.instance.vrrigs.Count);
+				num = UnityEngine.Random.Range(0, GorillaParent.instance.vrrigs.Count);
 			}
 			if (num < GorillaParent.instance.vrrigs.Count)
 			{

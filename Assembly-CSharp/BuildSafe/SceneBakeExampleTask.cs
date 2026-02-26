@@ -19,12 +19,12 @@ namespace BuildSafe
 
 		private static void DuplicateAndRecolor(GameObject target)
 		{
-			GameObject gameObject = Object.Instantiate<GameObject>(target);
-			gameObject.transform.position = Random.insideUnitSphere * 4f;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(target);
+			gameObject.transform.position = UnityEngine.Random.insideUnitSphere * 4f;
 			MeshRenderer component = gameObject.GetComponent<MeshRenderer>();
 			component.material = new Material(component.sharedMaterial)
 			{
-				color = Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f, 1f, 1f)
+				color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f, 1f, 1f)
 			};
 		}
 	}

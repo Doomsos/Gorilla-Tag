@@ -485,7 +485,7 @@ namespace GorillaLocomotion
 		{
 			if (GTPlayer._instance != null && GTPlayer._instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 			}
 			else
 			{
@@ -542,7 +542,7 @@ namespace GorillaLocomotion
 			}
 			if (this.climbHelper)
 			{
-				Object.Destroy(this.climbHelper.gameObject);
+				UnityEngine.Object.Destroy(this.climbHelper.gameObject);
 			}
 		}
 
@@ -671,19 +671,19 @@ namespace GorillaLocomotion
 			this.playerRigidBody.AddForce(newVelocity - this.playerRigidBody.linearVelocity, ForceMode.VelocityChange);
 		}
 
-		public void SetGravityOverride(Object caller, Action<GTPlayer> gravityFunction)
+		public void SetGravityOverride(UnityEngine.Object caller, Action<GTPlayer> gravityFunction)
 		{
 			this.gravityOverrides[caller] = gravityFunction;
 		}
 
-		public void UnsetGravityOverride(Object caller)
+		public void UnsetGravityOverride(UnityEngine.Object caller)
 		{
 			this.gravityOverrides.Remove(caller);
 		}
 
 		private void ApplyGravityOverrides()
 		{
-			foreach (KeyValuePair<Object, Action<GTPlayer>> keyValuePair in this.gravityOverrides)
+			foreach (KeyValuePair<UnityEngine.Object, Action<GTPlayer>> keyValuePair in this.gravityOverrides)
 			{
 				keyValuePair.Value(this);
 			}
@@ -3814,7 +3814,7 @@ namespace GorillaLocomotion
 
 		private Vector3 lastSlopeDirection = Vector3.zero;
 
-		private readonly Dictionary<Object, Action<GTPlayer>> gravityOverrides = new Dictionary<Object, Action<GTPlayer>>();
+		private readonly Dictionary<UnityEngine.Object, Action<GTPlayer>> gravityOverrides = new Dictionary<UnityEngine.Object, Action<GTPlayer>>();
 
 		private int hoverAllowedCount;
 

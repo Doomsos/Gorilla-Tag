@@ -12,7 +12,7 @@ public class DelayedDestroyObject : MonoBehaviour
 	{
 		if (Time.time >= this._timeToDie)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 	}
 

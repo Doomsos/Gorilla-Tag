@@ -39,7 +39,7 @@ public class EquipmentInteractor : MonoBehaviour
 		}
 		else if (EquipmentInteractor.instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 		this.autoGrabLeft = true;
 		this.autoGrabRight = true;

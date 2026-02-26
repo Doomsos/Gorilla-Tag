@@ -14,7 +14,7 @@ namespace GorillaTag.Rendering
 		{
 			if (ZoneLiquidEffectableManager.hasInstance && ZoneLiquidEffectableManager.instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 				return;
 			}
 			ZoneLiquidEffectableManager.SetInstance(this);
@@ -67,7 +67,7 @@ namespace GorillaTag.Rendering
 			ZoneLiquidEffectableManager.hasInstance = true;
 			if (Application.isPlaying)
 			{
-				Object.DontDestroyOnLoad(manager);
+				UnityEngine.Object.DontDestroyOnLoad(manager);
 			}
 		}
 

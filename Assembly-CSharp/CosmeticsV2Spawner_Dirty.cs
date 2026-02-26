@@ -45,7 +45,7 @@ public class CosmeticsV2Spawner_Dirty : IDelayedExecListener
 			CosmeticsV2Spawner_Dirty._instance = new CosmeticsV2Spawner_Dirty();
 		}
 		CosmeticsV2Spawner_Dirty.k_stopwatch.Restart();
-		CosmeticsV2Spawner_Dirty.g_gorillaPlayer = Object.FindAnyObjectByType<GTPlayer>();
+		CosmeticsV2Spawner_Dirty.g_gorillaPlayer = UnityEngine.Object.FindAnyObjectByType<GTPlayer>();
 		foreach (SnowballMaker snowballMaker in CosmeticsV2Spawner_Dirty.g_gorillaPlayer.GetComponentsInChildren<SnowballMaker>(true))
 		{
 			if (snowballMaker.isLeftHand)

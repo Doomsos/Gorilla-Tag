@@ -940,7 +940,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			RotatingQuest questById2 = this.questSourceList.GetQuestById(this.activeQuestIds[num3]);
 			if (questById2 == null || !questById2.isQuestActive)
 			{
-				int num4 = Random.Range(0, this.questSourceList.quests.Count);
+				int num4 = UnityEngine.Random.Range(0, this.questSourceList.quests.Count);
 				for (int j = 0; j < this.questSourceList.quests.Count; j++)
 				{
 					int num5 = (num4 + j) % this.questSourceList.quests.Count;

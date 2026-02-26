@@ -24,7 +24,7 @@ public class SplineDecorator : MonoBehaviour
 			int j = 0;
 			while (j < this.items.Length)
 			{
-				Transform transform = Object.Instantiate<Transform>(this.items[j]);
+				Transform transform = UnityEngine.Object.Instantiate<Transform>(this.items[j]);
 				Vector3 point = this.spline.GetPoint((float)num2 * num);
 				transform.transform.localPosition = point;
 				if (this.lookForward)

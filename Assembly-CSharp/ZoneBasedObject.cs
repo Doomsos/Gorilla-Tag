@@ -39,7 +39,7 @@ public class ZoneBasedObject : MonoBehaviour
 				{
 					if (ZoneManagement.IsInZone(array[j]))
 					{
-						if (Random.Range(0, num) == 0)
+						if (UnityEngine.Random.Range(0, num) == 0)
 						{
 							result = zoneBasedObject2;
 						}

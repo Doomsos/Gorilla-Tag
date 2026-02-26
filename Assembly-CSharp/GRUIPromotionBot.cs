@@ -89,7 +89,7 @@ public class GRUIPromotionBot : MonoBehaviourTick
 
 	public bool CheckIsActivePlayer()
 	{
-		Object x = GRPlayer.Get(VRRig.LocalRig);
+		UnityEngine.Object x = GRPlayer.Get(VRRig.LocalRig);
 		GRPlayer y = GRPlayer.Get(this.currentPlayerActorNumber);
 		return x == y;
 	}

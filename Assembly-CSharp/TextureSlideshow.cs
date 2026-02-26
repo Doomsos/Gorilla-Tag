@@ -26,7 +26,7 @@ public class TextureSlideshow : MonoBehaviour
 		int i = 0;
 		for (;;)
 		{
-			yield return new WaitForSecondsRealtime(Random.Range(this.minMaxPause.x, this.minMaxPause.y));
+			yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(this.minMaxPause.x, this.minMaxPause.y));
 			this._renderer.material.mainTexture = this.textures[i];
 			i = (i + 1) % this.textures.Length;
 		}

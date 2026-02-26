@@ -89,13 +89,13 @@ public sealed class ComponentFunctionReference<TResult>
 	[Serializable]
 	private struct MethodRef
 	{
-		public MethodRef(Object obj, MethodInfo m)
+		public MethodRef(UnityEngine.Object obj, MethodInfo m)
 		{
 			this.component = obj;
 			this.methodName = m.Name;
 		}
 
-		public Object component;
+		public UnityEngine.Object component;
 
 		public string methodName;
 	}

@@ -124,7 +124,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		this.stiltTagData[7].isLeftHand = true;
 		if (GorillaTagger._instance != null && GorillaTagger._instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 		else
 		{
@@ -136,21 +136,21 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 				action();
 			}
 		}
-		GRFirstTimeUserExperience grfirstTimeUserExperience = Object.FindAnyObjectByType<GRFirstTimeUserExperience>(FindObjectsInactive.Include);
+		GRFirstTimeUserExperience grfirstTimeUserExperience = UnityEngine.Object.FindAnyObjectByType<GRFirstTimeUserExperience>(FindObjectsInactive.Include);
 		GameObject gameObject = (grfirstTimeUserExperience != null) ? grfirstTimeUserExperience.gameObject : null;
 		if (!this.disableTutorial && (this.testTutorial || (PlayerPrefs.GetString("tutorial") != "done" && PlayerPrefs.GetString("didTutorial") != "done" && NetworkSystemConfig.AppVersion != "dev")))
 		{
 			base.transform.parent.position = new Vector3(-140f, 28f, -102f);
 			base.transform.parent.eulerAngles = new Vector3(0f, 180f, 0f);
 			GTPlayer.Instance.InitializeValues();
-			PlayerPrefs.SetFloat("redValue", Random.value);
-			PlayerPrefs.SetFloat("greenValue", Random.value);
-			PlayerPrefs.SetFloat("blueValue", Random.value);
+			PlayerPrefs.SetFloat("redValue", UnityEngine.Random.value);
+			PlayerPrefs.SetFloat("greenValue", UnityEngine.Random.value);
+			PlayerPrefs.SetFloat("blueValue", UnityEngine.Random.value);
 			PlayerPrefs.Save();
 		}
 		else
 		{
-			Hashtable hashtable = new Hashtable();
+			ExitGames.Client.Photon.Hashtable hashtable = new ExitGames.Client.Photon.Hashtable();
 			hashtable.Add("didTutorial", true);
 			PhotonNetwork.LocalPlayer.SetCustomProperties(hashtable, null, null);
 			PlayerPrefs.SetString("didTutorial", "done");
@@ -390,7 +390,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 		else if (Application.platform != RuntimePlatform.Android && OVRManager.instance != null && OVRManager.OVRManagerinitialized && OVRManager.instance.gameObject != null && OVRManager.instance.gameObject.activeSelf)
 		{
-			Object.Destroy(OVRManager.instance.gameObject);
+			UnityEngine.Object.Destroy(OVRManager.instance.gameObject);
 		}
 		else if ((this._forceFramerateCheck && OVRManager.instance != null) || (!this._framerateUpdated && Application.platform == RuntimePlatform.Android && OVRManager.instance.gameObject.activeSelf))
 		{
@@ -1202,7 +1202,7 @@ public class GorillaTagger : MonoBehaviour, IGuidedRefReceiverMono, IGuidedRefMo
 		}
 	}
 
-	private void RecoverMissingRefs_Asdf<T>(ref T objRef, string objFieldName, string recoveryPath) where T : Object
+	private void RecoverMissingRefs_Asdf<T>(ref T objRef, string objFieldName, string recoveryPath) where T : UnityEngine.Object
 	{
 		if (objRef)
 		{

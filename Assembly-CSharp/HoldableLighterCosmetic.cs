@@ -90,7 +90,7 @@ public class HoldableLighterCosmetic : MonoBehaviour
 	private HoldableLighterCosmetic.LighterResult GetResultAtTime(double photonTime, int seed)
 	{
 		int num = (int)Math.Floor(photonTime);
-		float num2 = (float)new Random(seed ^ num).NextDouble();
+		float num2 = (float)new System.Random(seed ^ num).NextDouble();
 		if (num2 < this.explodeWeight)
 		{
 			return HoldableLighterCosmetic.LighterResult.Explode;

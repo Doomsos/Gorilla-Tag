@@ -14,7 +14,7 @@ public class FortuneResults : ScriptableObject
 
 	public FortuneResults.FortuneResult GetResult()
 	{
-		float num = Random.Range(0f, this.totalChance);
+		float num = UnityEngine.Random.Range(0f, this.totalChance);
 		int i = 0;
 		while (i < this.fortuneResults.Length)
 		{
@@ -25,7 +25,7 @@ public class FortuneResults : ScriptableObject
 				{
 					return new FortuneResults.FortuneResult(FortuneResults.FortuneCategoryType.Invalid, -1);
 				}
-				int resultIndex = Random.Range(0, fortuneCategory.textResults.Length);
+				int resultIndex = UnityEngine.Random.Range(0, fortuneCategory.textResults.Length);
 				return new FortuneResults.FortuneResult(fortuneCategory.fortuneType, resultIndex);
 			}
 			else

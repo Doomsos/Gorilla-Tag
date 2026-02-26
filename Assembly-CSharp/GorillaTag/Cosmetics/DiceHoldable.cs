@@ -36,7 +36,7 @@ namespace GorillaTag.Cosmetics
 			if (this._events != null)
 			{
 				this._events.Activate -= this.OnDiceEvent;
-				Object.Destroy(this._events);
+				UnityEngine.Object.Destroy(this._events);
 				this._events = null;
 			}
 		}

@@ -25,7 +25,7 @@ public class DebugHudStats : MonoBehaviour
 	{
 		if (DebugHudStats._instance != null && DebugHudStats._instance != this)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 		else
 		{

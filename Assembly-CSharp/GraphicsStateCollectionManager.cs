@@ -24,11 +24,11 @@ public class GraphicsStateCollectionManager : MonoBehaviour
 		if (GraphicsStateCollectionManager.Instance != null && GraphicsStateCollectionManager.Instance != this)
 		{
 			Debug.LogError("Only one instance of GraphicsStateCollectionManager is allowed!");
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 		GraphicsStateCollectionManager.Instance = this;
-		Object.DontDestroyOnLoad(base.gameObject);
+		UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 	}
 
 	private void Start()

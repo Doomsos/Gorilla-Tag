@@ -125,7 +125,7 @@ public abstract class GTSystem<T> : MonoBehaviour, IReadOnlyList<T>, IEnumerable
 		}
 		if (GTSystem<T>.gSingleton != null && GTSystem<T>.gSingleton != system)
 		{
-			Object.Destroy(system);
+			UnityEngine.Object.Destroy(system);
 			GTDev.LogWarning<string>("Singleton of type " + GTSystem<T>.gSingleton.GetType().Name + " already exists.", null);
 			return;
 		}

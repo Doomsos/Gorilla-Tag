@@ -13,9 +13,9 @@ public class ImplosionExplosionMain : MonoBehaviour
 		}
 		for (int j = 0; j < this.NumDiamonds; j++)
 		{
-			float d = Random.Range(0.1f, 0.4f);
-			Vector3 pos = new Vector3(Random.Range(-3.5f, 3.5f), Random.Range(0.5f, 7f), Random.Range(-3.5f, 3.5f));
-			Quaternion q = Quaternion.Euler(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f));
+			float d = UnityEngine.Random.Range(0.1f, 0.4f);
+			Vector3 pos = new Vector3(UnityEngine.Random.Range(-3.5f, 3.5f), UnityEngine.Random.Range(0.5f, 7f), UnityEngine.Random.Range(-3.5f, 3.5f));
+			Quaternion q = Quaternion.Euler(UnityEngine.Random.Range(0f, 360f), UnityEngine.Random.Range(0f, 360f), UnityEngine.Random.Range(0f, 360f));
 			this.m_aaInstancedDiamondMatrix[j / ImplosionExplosionMain.kNumInstancedBushesPerDrawCall][j % ImplosionExplosionMain.kNumInstancedBushesPerDrawCall].SetTRS(pos, q, d * Vector3.one);
 		}
 	}

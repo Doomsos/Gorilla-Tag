@@ -32,8 +32,8 @@ public class HalloweenGhostChaser : NetworkComponent
 		if (NetworkSystem.Instance.InRoom && base.IsMine)
 		{
 			this.lastHeadAngleTime = 0f;
-			this.nextHeadAngleTime = this.lastHeadAngleTime + Random.value * this.maxTimeToNextHeadAngle;
-			this.nextTimeToChasePlayer = Time.time + Random.Range(this.minGrabCooldown, this.maxNextTimeToChasePlayer);
+			this.nextHeadAngleTime = this.lastHeadAngleTime + UnityEngine.Random.value * this.maxTimeToNextHeadAngle;
+			this.nextTimeToChasePlayer = Time.time + UnityEngine.Random.Range(this.minGrabCooldown, this.maxNextTimeToChasePlayer);
 			this.ghostBody.transform.localPosition = Vector3.zero;
 			base.transform.eulerAngles = Vector3.zero;
 			this.lastSpeedIncreased = 0f;
@@ -225,7 +225,7 @@ public class HalloweenGhostChaser : NetworkComponent
 			}
 			else
 			{
-				this.nextTimeToChasePlayer = Time.time + Random.Range(this.minGrabCooldown, this.maxNextTimeToChasePlayer);
+				this.nextTimeToChasePlayer = Time.time + UnityEngine.Random.Range(this.minGrabCooldown, this.maxNextTimeToChasePlayer);
 			}
 			this.SetInitialRotations();
 			return;
@@ -351,13 +351,13 @@ public class HalloweenGhostChaser : NetworkComponent
 		int num = -1;
 		if (this.possibleTarget.Count >= this.summonCount)
 		{
-			int randomTarget = Random.Range(0, this.possibleTarget.Count);
+			int randomTarget = UnityEngine.Random.Range(0, this.possibleTarget.Count);
 			num = GorillaParent.instance.vrrigs.FindIndex((VRRig x) => x.creator != null && x.creator == this.possibleTarget[randomTarget]);
 			this.currentSpeed = 3f;
 		}
 		if (num == -1)
 		{
-			num = Random.Range(0, GorillaParent.instance.vrrigs.Count);
+			num = UnityEngine.Random.Range(0, GorillaParent.instance.vrrigs.Count);
 		}
 		this.possibleTarget.Clear();
 		if (num < GorillaParent.instance.vrrigs.Count)
@@ -386,9 +386,9 @@ public class HalloweenGhostChaser : NetworkComponent
 	{
 		if (Time.time > this.nextHeadAngleTime)
 		{
-			this.skullTransform.localEulerAngles = this.headEulerAngles[Random.Range(0, this.headEulerAngles.Length)];
+			this.skullTransform.localEulerAngles = this.headEulerAngles[UnityEngine.Random.Range(0, this.headEulerAngles.Length)];
 			this.lastHeadAngleTime = Time.time;
-			this.nextHeadAngleTime = this.lastHeadAngleTime + Mathf.Max(Random.value * this.maxTimeToNextHeadAngle, 0.05f);
+			this.nextHeadAngleTime = this.lastHeadAngleTime + Mathf.Max(UnityEngine.Random.value * this.maxTimeToNextHeadAngle, 0.05f);
 		}
 	}
 
@@ -608,7 +608,7 @@ public class HalloweenGhostChaser : NetworkComponent
 			this.InitializeGhost();
 			return;
 		}
-		this.nextTimeToChasePlayer = Time.time + Random.Range(this.minGrabCooldown, this.maxNextTimeToChasePlayer);
+		this.nextTimeToChasePlayer = Time.time + UnityEngine.Random.Range(this.minGrabCooldown, this.maxNextTimeToChasePlayer);
 	}
 
 	[WeaverGenerated]

@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 namespace GorillaTag
 {
 	[Serializable]
-	public struct GTDirectAssetRef<T> : IEquatable<T> where T : Object
+	public struct GTDirectAssetRef<T> : IEquatable<T> where T : UnityEngine.Object
 	{
 		public T obj
 		{

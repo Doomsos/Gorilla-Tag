@@ -174,7 +174,7 @@ public abstract class NetworkSystem : MonoBehaviour
 		Debug.Log("INITIALISING NETWORKSYSTEMS");
 		if (NetworkSystem.Instance)
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			return;
 		}
 		NetworkSystem.Instance = this;
@@ -273,7 +273,7 @@ public abstract class NetworkSystem : MonoBehaviour
 		string text = "";
 		for (int i = 0; i < 4; i++)
 		{
-			text += "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Substring(Random.Range(0, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Length), 1);
+			text += "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Substring(UnityEngine.Random.Range(0, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Length), 1);
 		}
 		if (GorillaComputer.instance.IsPlayerInVirtualStump())
 		{

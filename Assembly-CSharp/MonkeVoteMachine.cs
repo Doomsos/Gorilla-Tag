@@ -174,9 +174,9 @@ public class MonkeVoteMachine : MonoBehaviour
 		{
 			pollId = this._previousPoll.PollId + 1;
 		}
-		string question = "Test Question Number: " + Random.Range(1, 101).ToString();
-		string text = "Answer " + Random.Range(1, 101).ToString();
-		string text2 = "Answer " + Random.Range(1, 101).ToString();
+		string question = "Test Question Number: " + UnityEngine.Random.Range(1, 101).ToString();
+		string text = "Answer " + UnityEngine.Random.Range(1, 101).ToString();
+		string text2 = "Answer " + UnityEngine.Random.Range(1, 101).ToString();
 		string[] voteOptions = new string[]
 		{
 			text,
@@ -767,11 +767,11 @@ public class MonkeVoteMachine : MonoBehaviour
 			this.Question = question;
 			this.VoteOptions = voteOptions;
 			this.VoteCount = new int[2];
-			this.VoteCount[0] = Random.Range(0, 50000);
-			this.VoteCount[1] = Random.Range(0, 50000);
+			this.VoteCount[0] = UnityEngine.Random.Range(0, 50000);
+			this.VoteCount[1] = UnityEngine.Random.Range(0, 50000);
 			this.PredictionCount = new int[2];
-			this.PredictionCount[0] = Random.Range(0, 50000);
-			this.PredictionCount[1] = Random.Range(0, 50000);
+			this.PredictionCount[0] = UnityEngine.Random.Range(0, 50000);
+			this.PredictionCount[1] = UnityEngine.Random.Range(0, 50000);
 			this.StartTime = DateTime.Now;
 			this.EndTime = DateTime.Now + TimeSpan.FromSeconds(20.0);
 		}

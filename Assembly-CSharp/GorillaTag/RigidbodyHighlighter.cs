@@ -24,10 +24,10 @@ namespace GorillaTag
 
 		private void Awake()
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 			if (RigidbodyHighlighter.Instance != null && RigidbodyHighlighter.Instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 			}
 			RigidbodyHighlighter.Instance = this;
 			this._lineRenderer.startWidth = this._lineWidth;
@@ -53,7 +53,7 @@ namespace GorillaTag
 		private static List<Rigidbody> GetAwakeRigidbodies()
 		{
 			List<Rigidbody> list = new List<Rigidbody>();
-			Object[] array = Object.FindObjectsByType(typeof(Rigidbody), FindObjectsSortMode.None);
+			UnityEngine.Object[] array = UnityEngine.Object.FindObjectsByType(typeof(Rigidbody), FindObjectsSortMode.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				Rigidbody rigidbody = array[i] as Rigidbody;

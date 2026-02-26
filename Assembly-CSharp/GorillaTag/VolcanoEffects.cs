@@ -284,7 +284,7 @@ namespace GorillaTag
 			}
 		}
 
-		private bool RemoveNullsFromArray<T>(ref T[] array) where T : Object
+		private bool RemoveNullsFromArray<T>(ref T[] array) where T : UnityEngine.Object
 		{
 			List<T> list = new List<T>(array.Length);
 			foreach (T t in array)

@@ -17,7 +17,7 @@ namespace GorillaTagScripts.Builder
 		{
 			if (BuilderConveyorManager.instance != null && BuilderConveyorManager.instance != this)
 			{
-				Object.Destroy(this);
+				UnityEngine.Object.Destroy(this);
 			}
 			if (BuilderConveyorManager.instance == null)
 			{

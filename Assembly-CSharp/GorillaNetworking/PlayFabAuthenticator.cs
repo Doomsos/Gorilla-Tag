@@ -39,7 +39,7 @@ namespace GorillaNetworking
 			}
 			else if (PlayFabAuthenticator.instance != this)
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 			}
 			if (PlayFabAuthenticator.instance.photonAuthenticator == null)
 			{

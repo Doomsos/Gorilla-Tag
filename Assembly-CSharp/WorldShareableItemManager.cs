@@ -9,7 +9,7 @@ public class WorldShareableItemManager : MonoBehaviour
 	{
 		if (WorldShareableItemManager.hasInstance && WorldShareableItemManager.instance != this)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 			return;
 		}
 		WorldShareableItemManager.SetInstance(this);
@@ -58,7 +58,7 @@ public class WorldShareableItemManager : MonoBehaviour
 		WorldShareableItemManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			Object.DontDestroyOnLoad(manager);
+			UnityEngine.Object.DontDestroyOnLoad(manager);
 		}
 	}
 

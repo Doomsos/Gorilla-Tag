@@ -501,7 +501,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 
 	public void BuildInitialize()
 	{
-		this.fxSettings = Object.Instantiate<FXSystemSettings>(this.sharedFXSettings);
+		this.fxSettings = UnityEngine.Object.Instantiate<FXSystemSettings>(this.sharedFXSettings);
 		this.fxSettings.forLocalRig = this.isOfflineVRRig;
 		this.lastPosition = base.transform.position;
 		if (!this.isOfflineVRRig)
@@ -565,7 +565,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 			}
 			if (Application.platform == RuntimePlatform.Android && this.spectatorSkin != null)
 			{
-				Object.Destroy(this.spectatorSkin);
+				UnityEngine.Object.Destroy(this.spectatorSkin);
 			}
 			this.initialized = true;
 		}
@@ -573,7 +573,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		{
 			if (this.spectatorSkin != null)
 			{
-				Object.Destroy(this.spectatorSkin);
+				UnityEngine.Object.Destroy(this.spectatorSkin);
 			}
 			this.head.syncPos = -this.headBodyOffset;
 		}
@@ -1207,7 +1207,7 @@ public class VRRig : MonoBehaviour, IWrappedSerializable, INetworkStruct, IPreDi
 		}
 		if (this.currentRopeSwingTarget && this.currentRopeSwingTarget.gameObject)
 		{
-			Object.Destroy(this.currentRopeSwingTarget.gameObject);
+			UnityEngine.Object.Destroy(this.currentRopeSwingTarget.gameObject);
 		}
 		this.ClearRopeData();
 	}

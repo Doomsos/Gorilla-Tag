@@ -48,7 +48,7 @@ namespace GorillaNetworking
 		{
 			if (PlayFabTitleDataCache.Instance != null)
 			{
-				Object.Destroy(this);
+				UnityEngine.Object.Destroy(this);
 				return;
 			}
 			PlayFabTitleDataCache.Instance = this;

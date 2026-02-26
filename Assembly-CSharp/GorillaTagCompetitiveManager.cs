@@ -427,7 +427,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 		}
 		if (this.isCurrentlyTag && this.currentIt == null)
 		{
-			int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			int index = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
 			this.ChangeCurrentIt(GameMode.ParticipatingPlayers[index], false);
 		}
 	}
@@ -536,7 +536,7 @@ public class GorillaTagCompetitiveManager : GorillaTagManager
 	{
 		if (this.currentInfected.Count == 0)
 		{
-			int index = Random.Range(0, GameMode.ParticipatingPlayers.Count);
+			int index = UnityEngine.Random.Range(0, GameMode.ParticipatingPlayers.Count);
 			this.AddInfectedPlayer(GameMode.ParticipatingPlayers[index], true);
 		}
 	}

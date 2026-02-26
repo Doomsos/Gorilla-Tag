@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	[Serializable]
 	public class ContinuousProperty
 	{
-		private static ContinuousProperty.Cast GetTargetCast(Object o)
+		private static ContinuousProperty.Cast GetTargetCast(UnityEngine.Object o)
 		{
 			ContinuousProperty.Cast result;
 			if (!(o is ParticleSystem))
@@ -123,7 +123,7 @@ namespace GorillaTag.Cosmetics
 			return (flags & test) > ContinuousProperty.DataFlags.None;
 		}
 
-		private static void GetAllValidObjectsNonAlloc(Transform t, List<Object> objects)
+		private static void GetAllValidObjectsNonAlloc(Transform t, List<UnityEngine.Object> objects)
 		{
 			objects.Clear();
 			objects.Add(t.gameObject);
@@ -249,7 +249,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		public Object Target
+		public UnityEngine.Object Target
 		{
 			get
 			{
@@ -292,8 +292,8 @@ namespace GorillaTag.Cosmetics
 			}
 			Stack<Transform> stack = new Stack<Transform>();
 			stack.Push(transform3);
-			List<Object> list = new List<Object>();
-			List<Object> list2 = new List<Object>();
+			List<UnityEngine.Object> list = new List<UnityEngine.Object>();
+			List<UnityEngine.Object> list2 = new List<UnityEngine.Object>();
 			Transform transform4;
 			while (stack.TryPop(out transform4))
 			{
@@ -302,7 +302,7 @@ namespace GorillaTag.Cosmetics
 					num = list.Count;
 				}
 				ContinuousProperty.GetAllValidObjectsNonAlloc(transform4, list2);
-				foreach (Object @object in list2)
+				foreach (UnityEngine.Object @object in list2)
 				{
 					if (this.mode.IsCastValid(ContinuousProperty.GetTargetCast(@object)))
 					{
@@ -974,7 +974,7 @@ namespace GorillaTag.Cosmetics
 					{
 						float num4 = this.curve.Evaluate(f);
 						float num5 = 1f - Mathf.Exp(-num4 * deltaTime);
-						if (Random.value < num5)
+						if (UnityEngine.Random.value < num5)
 						{
 							this.unityEvent.Invoke(num4);
 							return;
@@ -1030,7 +1030,7 @@ namespace GorillaTag.Cosmetics
 					return false;
 				}
 				float num = 1f - Mathf.Exp(-f * deltaTime);
-				return Random.value < num;
+				return UnityEngine.Random.value < num;
 			}
 			else
 			{
@@ -1069,7 +1069,7 @@ namespace GorillaTag.Cosmetics
 
 		[FormerlySerializedAs("component")]
 		[SerializeField]
-		protected Object target;
+		protected UnityEngine.Object target;
 
 		[SerializeField]
 		private Gradient color;

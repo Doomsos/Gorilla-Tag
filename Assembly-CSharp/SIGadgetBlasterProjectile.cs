@@ -120,7 +120,7 @@ public class SIGadgetBlasterProjectile : MonoBehaviourTick
 		GameObject gameObject;
 		if (list.Count <= 0)
 		{
-			gameObject = Object.Instantiate<GameObject>(explosionPrefab, position, rotation);
+			gameObject = UnityEngine.Object.Instantiate<GameObject>(explosionPrefab, position, rotation);
 			SIGadgetBlasterProjectile.explosionTypeKey.Add(gameObject, instanceID);
 		}
 		else

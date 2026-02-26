@@ -25,11 +25,11 @@ namespace emotitron.CompressionTests
 			}
 			for (int i = 0; i < 3000; i++)
 			{
-				num = Random.Range(0, 200);
+				num = UnityEngine.Random.Range(0, 200);
 				num2 = num;
 				int num3 = num;
-				int num4 = Random.Range(1, 64);
-				int num5 = Random.Range(-(1 << num4 - 1), (1 << num4 - 1) - 1);
+				int num4 = UnityEngine.Random.Range(1, 64);
+				int num5 = UnityEngine.Random.Range(-(1 << num4 - 1), (1 << num4 - 1) - 1);
 				BenchmarkTests.ubuffer.WriteSigned(num5, ref num, num4);
 				BenchmarkTests.ubuffer.WriteSigned(num5, ref num, num4);
 				BenchmarkTests.ubuffer.WriteSigned(num5, ref num, num4);
@@ -69,7 +69,7 @@ namespace emotitron.CompressionTests
 						num4.ToString()
 					}));
 				}
-				ulong num6 = (ulong)Random.Range(0f, (1L << num4) - 1L);
+				ulong num6 = (ulong)UnityEngine.Random.Range(0f, (1L << num4) - 1L);
 				BenchmarkTests.ubuffer.Write(num6, ref num, num4);
 				BenchmarkTests.ubuffer.Write(num6, ref num, num4);
 				BenchmarkTests.ubuffer.Write(num6, ref num, num4);

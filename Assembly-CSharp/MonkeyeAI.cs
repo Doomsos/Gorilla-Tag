@@ -78,7 +78,7 @@ public class MonkeyeAI : MonoBehaviour, IGorillaSliceableSimple
 		int num;
 		do
 		{
-			num = Random.Range(0, this.patrolPts.Count);
+			num = UnityEngine.Random.Range(0, this.patrolPts.Count);
 		}
 		while (num == this.patrolIdx);
 		this.patrolIdx = num;

@@ -86,7 +86,7 @@ namespace GorillaTagScripts.GhostReactor
 			Vector3 b = base.transform.position + base.transform.right * Vector3.Dot(lhs, base.transform.right);
 			Vector3 normalized = (position - b).normalized;
 			Vector3 normalized2 = new Vector3(normalized.x, 0f, normalized.y).normalized;
-			float maxRadiansDelta = Random.Range(this._launchDeflectionDegrees / 2f, this._launchDeflectionDegrees) * 0.017453292f;
+			float maxRadiansDelta = UnityEngine.Random.Range(this._launchDeflectionDegrees / 2f, this._launchDeflectionDegrees) * 0.017453292f;
 			Vector3 vector = Vector3.RotateTowards(normalized2, Vector3.up, maxRadiansDelta, 0f);
 			return this._launchStrength * vector.normalized;
 		}

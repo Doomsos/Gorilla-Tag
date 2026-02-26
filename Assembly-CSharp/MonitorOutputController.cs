@@ -21,7 +21,7 @@ public class MonitorOutputController : MonoBehaviour
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 		if (this._shoulderCamera == null)
 		{

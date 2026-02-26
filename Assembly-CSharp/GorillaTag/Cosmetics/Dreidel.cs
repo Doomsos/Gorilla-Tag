@@ -39,9 +39,9 @@ namespace GorillaTag.Cosmetics
 			{
 				surfacePoint = this.surfacePlanePoint;
 				surfaceNormal = this.surfacePlaneNormal;
-				randomDuration = Random.Range(this.spinTimeRange.x, this.spinTimeRange.y);
-				randomSide = (Dreidel.Side)Random.Range(0, 4);
-				randomVariation = (Dreidel.Variation)Random.Range(0, 5);
+				randomDuration = UnityEngine.Random.Range(this.spinTimeRange.x, this.spinTimeRange.y);
+				randomSide = (Dreidel.Side)UnityEngine.Random.Range(0, 4);
+				randomVariation = (Dreidel.Variation)UnityEngine.Random.Range(0, 5);
 				startTime = (PhotonNetwork.InRoom ? PhotonNetwork.Time : -1.0);
 				return true;
 			}

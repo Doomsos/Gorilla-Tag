@@ -144,9 +144,9 @@ namespace GorillaTag.Cosmetics
 			{
 				Vector3 point = raycastHit.point;
 				Vector3 normal = raycastHit.normal;
-				float num = Random.Range(7f, 10f);
-				Dreidel.Side side = (Dreidel.Side)Random.Range(0, 4);
-				Dreidel.Variation variation = (Dreidel.Variation)Random.Range(0, 5);
+				float num = UnityEngine.Random.Range(7f, 10f);
+				Dreidel.Side side = (Dreidel.Side)UnityEngine.Random.Range(0, 4);
+				Dreidel.Variation variation = (Dreidel.Variation)UnityEngine.Random.Range(0, 5);
 				bool flag = this.currentState == TransferrableObject.PositionState.InLeftHand;
 				double num2 = PhotonNetwork.InRoom ? PhotonNetwork.Time : -1.0;
 				if (PhotonNetwork.InRoom && this._events != null && this._events.Activate != null)

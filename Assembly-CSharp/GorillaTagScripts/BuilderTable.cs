@@ -406,7 +406,7 @@ namespace GorillaTagScripts
 			}
 			if (!BuilderTable.zoneToInstance.TryAdd(this.tableZone, this))
 			{
-				Object.Destroy(this);
+				UnityEngine.Object.Destroy(this);
 			}
 			this.acceptableSqrDistFromCenter = Mathf.Pow(217f * this.pieceScale, 2f);
 			if (this.buttonSnapRotation != null)
@@ -4121,9 +4121,9 @@ namespace GorillaTagScripts
 
 		public void TryPlaceRandomlyOnTable(BuilderPiece piece)
 		{
-			BuilderAttachGridPlane builderAttachGridPlane = piece.gridPlanes[Random.Range(0, piece.gridPlanes.Count)];
+			BuilderAttachGridPlane builderAttachGridPlane = piece.gridPlanes[UnityEngine.Random.Range(0, piece.gridPlanes.Count)];
 			List<BuilderAttachGridPlane> list = this.baseGridPlanes;
-			int num = Random.Range(0, list.Count);
+			int num = UnityEngine.Random.Range(0, list.Count);
 			int i = 0;
 			while (i < list.Count)
 			{
@@ -4695,7 +4695,7 @@ namespace GorillaTagScripts
 
 		private void ChooseMapFromList()
 		{
-			int index = Random.Range(0, this.startingMapList.Count);
+			int index = UnityEngine.Random.Range(0, this.startingMapList.Count);
 			this.startingMap = this.startingMapList[index];
 			if (this.startingMap == null || !SharedBlocksManager.IsMapIDValid(this.startingMap.MapID))
 			{

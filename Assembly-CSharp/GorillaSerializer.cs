@@ -54,7 +54,7 @@ internal class GorillaSerializer : MonoBehaviour, IPunObservable, IPunInstantiat
 		}
 		else
 		{
-			Object.Destroy(base.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
 		}
 		this.photonView.ObservedComponents.Remove(this);
 	}

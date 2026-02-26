@@ -248,7 +248,7 @@ namespace GorillaTagScripts.Subscription
 		{
 			if (this.tempEjectionObject != null)
 			{
-				Object.Destroy(this.tempEjectionObject);
+				UnityEngine.Object.Destroy(this.tempEjectionObject);
 			}
 		}
 

@@ -185,7 +185,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 			this.timeUntilNextAlert -= Time.deltaTime;
 			if (this.timeUntilNextAlert < 0f)
 			{
-				this.timeUntilNextAlert = Random.Range(this.timeRangeBetweenAlerts.x, this.timeRangeBetweenAlerts.y);
+				this.timeUntilNextAlert = UnityEngine.Random.Range(this.timeRangeBetweenAlerts.x, this.timeRangeBetweenAlerts.y);
 				this.SetState(GRSentientCore.SentientCoreState.HeldAlert);
 				return;
 			}
@@ -194,7 +194,7 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 			this.timeUntilNextAlert -= Time.deltaTime;
 			if (this.timeUntilNextAlert < 0f)
 			{
-				this.timeUntilNextAlert = Random.Range(this.timeRangeBetweenAlerts.x, this.timeRangeBetweenAlerts.y);
+				this.timeUntilNextAlert = UnityEngine.Random.Range(this.timeRangeBetweenAlerts.x, this.timeRangeBetweenAlerts.y);
 				this.alertEnemiesSound.Play(null);
 				GRNoiseEventManager.instance.AddNoiseEvent(base.transform.position, this.alertNoiseEventMagnitude, this.enemyAlertDuration);
 			}
@@ -393,12 +393,12 @@ public class GRSentientCore : MonoBehaviour, IGRSleepableEntity
 		{
 			return;
 		}
-		Vector3 insideUnitSphere = Random.insideUnitSphere;
+		Vector3 insideUnitSphere = UnityEngine.Random.insideUnitSphere;
 		if (Vector3.Dot(insideUnitSphere, this.surfaceNormal) > 0.99f)
 		{
 			insideUnitSphere = new Vector3(this.surfaceNormal.y, this.surfaceNormal.z, this.surfaceNormal.x);
 		}
-		float num = Random.Range(this.jumpAngleMinMax.x, this.jumpAngleMinMax.y);
+		float num = UnityEngine.Random.Range(this.jumpAngleMinMax.x, this.jumpAngleMinMax.y);
 		Vector3 direction = Quaternion.AngleAxis(90f - num, Vector3.Cross(this.surfaceNormal, insideUnitSphere)) * this.surfaceNormal;
 		direction.Normalize();
 		this.SetState(GRSentientCore.SentientCoreState.JumpInitiated);

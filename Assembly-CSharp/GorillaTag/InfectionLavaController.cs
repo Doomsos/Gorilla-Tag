@@ -69,7 +69,7 @@ namespace GorillaTag
 		{
 			if (InfectionLavaController.instance.IsNotNull())
 			{
-				Object.Destroy(base.gameObject);
+				UnityEngine.Object.Destroy(base.gameObject);
 				return;
 			}
 			InfectionLavaController.instance = this;
@@ -121,7 +121,7 @@ namespace GorillaTag
 			}
 		}
 
-		private void IfNullThenLogAndDisableSelf(Object obj, string fieldName, int index = -1)
+		private void IfNullThenLogAndDisableSelf(UnityEngine.Object obj, string fieldName, int index = -1)
 		{
 			if (obj != null)
 			{

@@ -283,9 +283,9 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 											node3.anchorCount = ghostReactorLevelSection.Anchors.Count;
 											node3.anchorOrder = new List<int>();
 											this.RandomizeIndices(ref node3.anchorOrder, node3.anchorCount);
-											GhostReactorLevelSectionConnector component = Object.Instantiate<GameObject>(ghostReactorLevelSectionConnector.gameObject, vector, quaternion, this.treeParents[j]).GetComponent<GhostReactorLevelSectionConnector>();
+											GhostReactorLevelSectionConnector component = UnityEngine.Object.Instantiate<GameObject>(ghostReactorLevelSectionConnector.gameObject, vector, quaternion, this.treeParents[j]).GetComponent<GhostReactorLevelSectionConnector>();
 											node3.connectorInstance = component;
-											GhostReactorLevelSection component2 = Object.Instantiate<GameObject>(ghostReactorLevelSection.gameObject, position2, rotation, this.treeParents[j]).GetComponent<GhostReactorLevelSection>();
+											GhostReactorLevelSection component2 = UnityEngine.Object.Instantiate<GameObject>(ghostReactorLevelSection.gameObject, position2, rotation, this.treeParents[j]).GetComponent<GhostReactorLevelSection>();
 											node3.sectionInstance = component2;
 											node2.children[node3.parentAnchorIndex] = node3;
 											this.nodeTree[j + 1].Add(node3);
@@ -340,7 +340,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 								node5.type = GhostReactorLevelGenerator.NodeType.EndCap;
 								node5.configIndex = num15;
 								node5.parentAnchorIndex = num14;
-								GhostReactorLevelSection component3 = Object.Instantiate<GameObject>(ghostReactorLevelSection2.gameObject, position4, rotation2, this.treeParents[n]).GetComponent<GhostReactorLevelSection>();
+								GhostReactorLevelSection component3 = UnityEngine.Object.Instantiate<GameObject>(ghostReactorLevelSection2.gameObject, position4, rotation2, this.treeParents[n]).GetComponent<GhostReactorLevelSection>();
 								node5.sectionInstance = component3;
 								node4.children[num14] = node5;
 								flag3 = true;
@@ -359,7 +359,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 							GhostReactorLevelSection ghostReactorLevelSection3 = blockers[node6.configIndex];
 							Quaternion rotation3 = Quaternion.Inverse(ghostReactorLevelSection3.Anchor.localRotation) * rhs4;
 							Vector3 position6 = rotation3 * -ghostReactorLevelSection3.Anchor.localPosition + position5;
-							GhostReactorLevelSection component4 = Object.Instantiate<GameObject>(ghostReactorLevelSection3.gameObject, position6, rotation3, this.treeParents[n]).GetComponent<GhostReactorLevelSection>();
+							GhostReactorLevelSection component4 = UnityEngine.Object.Instantiate<GameObject>(ghostReactorLevelSection3.gameObject, position6, rotation3, this.treeParents[n]).GetComponent<GhostReactorLevelSection>();
 							node6.sectionInstance = component4;
 							node4.children[num14] = node6;
 						}
@@ -390,9 +390,9 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 			{
 				if (this.nodeList[i].connectorInstance != null)
 				{
-					Object.Destroy(this.nodeList[i].connectorInstance.gameObject);
+					UnityEngine.Object.Destroy(this.nodeList[i].connectorInstance.gameObject);
 				}
-				Object.Destroy(this.nodeList[i].sectionInstance.gameObject);
+				UnityEngine.Object.Destroy(this.nodeList[i].sectionInstance.gameObject);
 			}
 		}
 		this.nodeList.Clear();
@@ -403,7 +403,7 @@ public class GhostReactorLevelGenerator : MonoBehaviourTick
 		this.nodeTree.Clear();
 		for (int k = 0; k < this.treeParents.Count; k++)
 		{
-			Object.Destroy(this.treeParents[k].gameObject);
+			UnityEngine.Object.Destroy(this.treeParents[k].gameObject);
 		}
 		this.treeParents.Clear();
 	}

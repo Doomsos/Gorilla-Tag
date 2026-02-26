@@ -7,7 +7,7 @@ namespace GorillaTagScripts
 	{
 		public void Awake()
 		{
-			Object.Destroy(this);
+			UnityEngine.Object.Destroy(this);
 		}
 	}
 }

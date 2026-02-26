@@ -16,10 +16,10 @@ namespace NetSynchrony
 			this.dispatchTimes = new List<float>();
 			float num = 0f;
 			float num2 = this.totalMinutes * 60f;
-			Random.InitState(StaticHash.Compute(Application.buildGUID));
+			UnityEngine.Random.InitState(StaticHash.Compute(Application.buildGUID));
 			while (num < num2)
 			{
-				float num3 = Random.Range(this.minWaitTime, this.maxWaitTime);
+				float num3 = UnityEngine.Random.Range(this.minWaitTime, this.maxWaitTime);
 				num += num3;
 				if ((double)num < seconds)
 				{
@@ -27,7 +27,7 @@ namespace NetSynchrony
 				}
 				this.dispatchTimes.Add(num);
 			}
-			Random.InitState((int)DateTime.Now.Ticks);
+			UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 		}
 
 		public void Sync(double seconds)

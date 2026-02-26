@@ -6,7 +6,7 @@ public class DevInspector : MonoBehaviour
 {
 	private void OnEnable()
 	{
-		Object.Destroy(base.gameObject);
+		UnityEngine.Object.Destroy(base.gameObject);
 	}
 
 	public GameObject pivot;

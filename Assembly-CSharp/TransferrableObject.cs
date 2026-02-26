@@ -2291,7 +2291,7 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 	public void OnMyCreatorLeft()
 	{
 		this.OnItemDestroyedOrDisabled();
-		Object.Destroy(base.gameObject);
+		UnityEngine.Object.Destroy(base.gameObject);
 	}
 
 	public bool BuildValidationCheck()
