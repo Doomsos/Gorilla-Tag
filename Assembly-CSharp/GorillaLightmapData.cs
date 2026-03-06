@@ -9,7 +9,7 @@ public class GorillaLightmapData : MonoBehaviour
 		this.dirs = new Color[this.dirTextures.Length][];
 		for (int i = 0; i < this.dirTextures.Length; i++)
 		{
-			float value = UnityEngine.Random.value;
+			float value = Random.value;
 			Debug.Log(value.ToString() + " before load " + Time.realtimeSinceStartup.ToString());
 			this.dirs[i] = this.dirTextures[i].GetPixels();
 			this.lights[i] = this.lightTextures[i].GetPixels();

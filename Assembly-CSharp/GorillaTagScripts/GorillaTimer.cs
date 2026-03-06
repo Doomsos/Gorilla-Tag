@@ -51,7 +51,7 @@ namespace GorillaTagScripts
 		{
 			if (this.useRandomDuration)
 			{
-				this.SetTimerDuration(UnityEngine.Random.Range(this.randTimeMin, this.randTimeMax));
+				this.SetTimerDuration(Random.Range(this.randTimeMin, this.randTimeMax));
 			}
 			this.ResetTimer();
 			this.StartTimer();

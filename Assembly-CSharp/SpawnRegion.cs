@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : UnityEngine.Object where TRegion : SpawnRegion<TItem, TRegion>
+public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : Object where TRegion : SpawnRegion<TItem, TRegion>
 {
 	public static List<TRegion> Regions
 	{
@@ -127,7 +127,7 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : UnityEngi
 			}
 		}
 		float num = this._scale / 2f;
-		Vector3 item = base.transform.TransformPoint(new Vector3(UnityEngine.Random.Range(-num, num), num, UnityEngine.Random.Range(-num, num)));
+		Vector3 item = base.transform.TransformPoint(new Vector3(Random.Range(-num, num), num, Random.Range(-num, num)));
 		return new ValueTuple<bool, Vector3, Vector3>(false, item, Vector3.up);
 	}
 
@@ -136,8 +136,8 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : UnityEngi
 		float num = base.transform.lossyScale.y * this._scale;
 		if (this._useSpawnOrigins)
 		{
-			Vector3 vector = this.spawnOrigins[UnityEngine.Random.Range(0, this.spawnOrigins.Length)].position;
-			if (this.TryGetSpawnPoint(vector, UnityEngine.Random.onUnitSphere, Mathf.Max(num, 100f), out spawnPoint))
+			Vector3 vector = this.spawnOrigins[Random.Range(0, this.spawnOrigins.Length)].position;
+			if (this.TryGetSpawnPoint(vector, Random.onUnitSphere, Mathf.Max(num, 100f), out spawnPoint))
 			{
 				return spawnPoint.normal.y > 0f || this.TryGetSpawnPoint(spawnPoint.point, Vector3.down, num, out spawnPoint);
 			}
@@ -147,7 +147,7 @@ public class SpawnRegion<TItem, TRegion> : MonoBehaviour where TItem : UnityEngi
 		else
 		{
 			float num2 = this._scale / 2f;
-			Vector3 vector = base.transform.TransformPoint(new Vector3(UnityEngine.Random.Range(-num2, num2), num2, UnityEngine.Random.Range(-num2, num2)));
+			Vector3 vector = base.transform.TransformPoint(new Vector3(Random.Range(-num2, num2), num2, Random.Range(-num2, num2)));
 			if (this._testAgainstGeo && this.IsInsideGeo(vector))
 			{
 				spawnPoint = default(RaycastHit);

@@ -14,7 +14,7 @@ public class AudioSourceClipRandomizer : MonoBehaviour
 
 	public void Play()
 	{
-		int num = UnityEngine.Random.Range(0, 60);
+		int num = Random.Range(0, 60);
 		if (GorillaComputer.instance != null)
 		{
 			num = GorillaComputer.instance.GetServerTime().Second;

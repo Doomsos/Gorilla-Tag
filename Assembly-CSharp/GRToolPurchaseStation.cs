@@ -135,7 +135,7 @@ public class GRToolPurchaseStation : MonoBehaviour
 			this.animationStartTime = Time.time;
 			this.animPrevToolIndex = this.displayedEntryIndex;
 			this.animNextToolIndex = this.activeEntryIndex;
-			this.toolEntryRot = Quaternion.AngleAxis(this.toolEntryRotDegrees, UnityEngine.Random.onUnitSphere);
+			this.toolEntryRot = Quaternion.AngleAxis(this.toolEntryRotDegrees, Random.onUnitSphere);
 		}
 		if (this.animatingSwap)
 		{

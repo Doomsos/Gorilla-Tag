@@ -46,10 +46,10 @@ public class GhostPal : MonoBehaviour
 			{
 				this.animator.SetTrigger(this.friendlyAnimID);
 				this.bounceCoroutine = base.StartCoroutine(this.BounceOnTrigger());
-				this.triggerAudioSource.pitch = UnityEngine.Random.Range(this.triggerAudioPitchMinMax.x, this.triggerAudioPitchMinMax.y);
+				this.triggerAudioSource.pitch = Random.Range(this.triggerAudioPitchMinMax.x, this.triggerAudioPitchMinMax.y);
 				this.triggerAudioSource.clip = this.triggerAudioClips[this.triggerAudioClipIndex];
 				this.triggerAudioSource.GTPlay();
-				this.triggerAudioClipIndex = (this.triggerAudioClipIndex + UnityEngine.Random.Range(0, this.triggerAudioClips.Length - 1)) % this.triggerAudioClips.Length;
+				this.triggerAudioClipIndex = (this.triggerAudioClipIndex + Random.Range(0, this.triggerAudioClips.Length - 1)) % this.triggerAudioClips.Length;
 				this.hasTriggered = true;
 			}
 		}

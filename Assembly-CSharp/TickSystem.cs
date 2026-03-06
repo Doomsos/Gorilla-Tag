@@ -10,7 +10,7 @@ internal abstract class TickSystem<T> : MonoBehaviour
 	private void Awake()
 	{
 		base.transform.SetParent(null, true);
-		UnityEngine.Object.DontDestroyOnLoad(this);
+		Object.DontDestroyOnLoad(this);
 	}
 
 	private void Update()

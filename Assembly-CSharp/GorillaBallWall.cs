@@ -12,7 +12,7 @@ public class GorillaBallWall : MonoBehaviour
 		}
 		if (GorillaBallWall.instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 	}
 

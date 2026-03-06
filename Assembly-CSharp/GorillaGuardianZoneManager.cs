@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GorillaExtensions;
 using GorillaGameModes;
 using Photon.Pun;
 using Photon.Realtime;
@@ -277,11 +278,11 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		int result;
 		if (this.currentIdol != -1 && this.idolPositions.Count > 1)
 		{
-			result = (this.currentIdol + UnityEngine.Random.Range(1, this.idolPositions.Count)) % this.idolPositions.Count;
+			result = (this.currentIdol + Random.Range(1, this.idolPositions.Count)) % this.idolPositions.Count;
 		}
 		else
 		{
-			result = UnityEngine.Random.Range(0, this.idolPositions.Count);
+			result = Random.Range(0, this.idolPositions.Count);
 		}
 		return result;
 	}
@@ -322,7 +323,7 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 		{
 			list.Remove(this.idolPositions[this.currentIdol]);
 		}
-		int index = UnityEngine.Random.Range(list.Count / 2, list.Count);
+		int index = Random.Range(list.Count / 2, list.Count);
 		Transform item = list[index];
 		return this.idolPositions.IndexOf(item);
 	}
@@ -331,11 +332,11 @@ public class GorillaGuardianZoneManager : MonoBehaviourPunCallbacks, IPunObserva
 	{
 		GorillaGuardianZoneManager.<>c__DisplayClass49_0 CS$<>8__locals1 = new GorillaGuardianZoneManager.<>c__DisplayClass49_0();
 		CS$<>8__locals1.playerPositions = new List<Vector3>();
-		foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+		foreach (RigContainer rigContainer in VRRigCache.ActiveRigContainers)
 		{
-			if (!(vrrig == null))
+			if (!rigContainer.IsNull())
 			{
-				CS$<>8__locals1.playerPositions.Add(vrrig.transform.position);
+				CS$<>8__locals1.playerPositions.Add(rigContainer.transform.position);
 			}
 		}
 		this._sortedIdolPositions.Clear();

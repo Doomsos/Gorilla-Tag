@@ -21,5 +21,5 @@ public class PropSelector : MonoBehaviour
 	[SerializeField]
 	private int _desiredActivePropsNum = 1;
 
-	private static readonly System.Random _gRandom = new System.Random();
+	private static readonly Random _gRandom = new Random();
 }

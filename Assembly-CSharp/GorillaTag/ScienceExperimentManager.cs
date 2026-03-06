@@ -388,8 +388,8 @@ namespace GorillaTag
 					for (int i = 0; i < this.rotatingRings.Length; i++)
 					{
 						float num2 = Mathf.Repeat(this.rotatingRings[i].resultingAngle, 360f);
-						float num3 = UnityEngine.Random.Range(this.rotatingRingRandomAngleRange.x, this.rotatingRingRandomAngleRange.y);
-						float num4 = (UnityEngine.Random.Range(0f, 1f) > 0.5f) ? 1f : -1f;
+						float num3 = Random.Range(this.rotatingRingRandomAngleRange.x, this.rotatingRingRandomAngleRange.y);
+						float num4 = (Random.Range(0f, 1f) > 0.5f) ? 1f : -1f;
 						this.rotatingRings[i].initialAngle = num2;
 						this.rotatingRings[i].resultingAngle = num2 + num4 * num3;
 					}
@@ -723,8 +723,8 @@ namespace GorillaTag
 			for (int i = 0; i < this.rotatingRings.Length; i++)
 			{
 				float num = Mathf.Repeat(this.rotatingRings[i].resultingAngle, 360f);
-				float num2 = UnityEngine.Random.Range(this.rotatingRingRandomAngleRange.x, this.rotatingRingRandomAngleRange.y);
-				float num3 = (UnityEngine.Random.Range(0f, 1f) > 0.5f) ? 1f : -1f;
+				float num2 = Random.Range(this.rotatingRingRandomAngleRange.x, this.rotatingRingRandomAngleRange.y);
+				float num3 = (Random.Range(0f, 1f) > 0.5f) ? 1f : -1f;
 				this.rotatingRings[i].initialAngle = num;
 				float num4 = num + num3 * num2;
 				if (this.rotatingRingQuantizeAngles)

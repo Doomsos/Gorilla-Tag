@@ -81,7 +81,7 @@ public class CrittersToolThrowable : CrittersActor
 		{
 			return;
 		}
-		DelayedDestroyObject delayedDestroyObject = UnityEngine.Object.Instantiate<DelayedDestroyObject>(this.debugImpactPrefab, position, Quaternion.identity);
+		DelayedDestroyObject delayedDestroyObject = Object.Instantiate<DelayedDestroyObject>(this.debugImpactPrefab, position, Quaternion.identity);
 		delayedDestroyObject.transform.localScale *= scale;
 		if (duration != 0f)
 		{

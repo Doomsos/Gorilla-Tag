@@ -7,7 +7,7 @@ namespace BuildSafe
 	public static class EditorGUIUtility
 	{
 		[Conditional("UNITY_EDITOR")]
-		public static void PingObject(UnityEngine.Object obj)
+		public static void PingObject(Object obj)
 		{
 		}
 	}

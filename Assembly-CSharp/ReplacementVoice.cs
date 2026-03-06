@@ -24,12 +24,12 @@ public class ReplacementVoice : MonoBehaviour, IGorillaSliceableSimple
 			}
 			if (this.myVRRig.SpeakingLoudness < this.loudReplacementVoiceThreshold)
 			{
-				this.replacementVoiceSource.clip = this.replacementVoiceClips[UnityEngine.Random.Range(0, this.replacementVoiceClips.Length - 1)];
+				this.replacementVoiceSource.clip = this.replacementVoiceClips[Random.Range(0, this.replacementVoiceClips.Length - 1)];
 				this.replacementVoiceSource.volume = this.normalVolume;
 			}
 			else
 			{
-				this.replacementVoiceSource.clip = this.replacementVoiceClipsLoud[UnityEngine.Random.Range(0, this.replacementVoiceClipsLoud.Length - 1)];
+				this.replacementVoiceSource.clip = this.replacementVoiceClipsLoud[Random.Range(0, this.replacementVoiceClipsLoud.Length - 1)];
 				this.replacementVoiceSource.volume = this.loudVolume;
 			}
 			this.replacementVoiceSource.GTPlay();
@@ -48,12 +48,12 @@ public class ReplacementVoice : MonoBehaviour, IGorillaSliceableSimple
 			}
 			if (this.myVRRig.SpeakingLoudness < cosmeticEffect.voiceOverrideLoudThreshold)
 			{
-				this.replacementVoiceSource.clip = cosmeticEffect.voiceOverrideNormalClips[UnityEngine.Random.Range(0, cosmeticEffect.voiceOverrideNormalClips.Length - 1)];
+				this.replacementVoiceSource.clip = cosmeticEffect.voiceOverrideNormalClips[Random.Range(0, cosmeticEffect.voiceOverrideNormalClips.Length - 1)];
 				this.replacementVoiceSource.volume = cosmeticEffect.voiceOverrideNormalVolume;
 			}
 			else
 			{
-				this.replacementVoiceSource.clip = cosmeticEffect.voiceOverrideLoudClips[UnityEngine.Random.Range(0, cosmeticEffect.voiceOverrideLoudClips.Length - 1)];
+				this.replacementVoiceSource.clip = cosmeticEffect.voiceOverrideLoudClips[Random.Range(0, cosmeticEffect.voiceOverrideLoudClips.Length - 1)];
 				this.replacementVoiceSource.volume = cosmeticEffect.voiceOverrideLoudVolume;
 			}
 			this.replacementVoiceSource.GTPlay();

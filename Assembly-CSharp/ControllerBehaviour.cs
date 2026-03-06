@@ -118,7 +118,7 @@ public class ControllerBehaviour : MonoBehaviour, IBuildValidation
 		if (ControllerBehaviour.Instance != null)
 		{
 			Debug.LogError("[CONTROLLER_BEHAVIOUR] Trying to create new singleton but one already exists", base.gameObject);
-			UnityEngine.Object.DestroyImmediate(this);
+			Object.DestroyImmediate(this);
 			return;
 		}
 		ControllerBehaviour.Instance = this;

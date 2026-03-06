@@ -97,7 +97,7 @@ public class TabletSpawnInstance : IDisposable
 	{
 		if (!this.isSpawned)
 		{
-			this._cameraGameObjectInstance = UnityEngine.Object.Instantiate<GameObject>(this._cameraSpawnPrefab, this._cameraSpawnParentTransform);
+			this._cameraGameObjectInstance = Object.Instantiate<GameObject>(this._cameraSpawnPrefab, this._cameraSpawnParentTransform);
 			this._lckSocialCameraManager = this._cameraGameObjectInstance.GetComponent<LckSocialCameraManager>();
 			this._lckSocialCameraManager.lckDirectGrabbable.onGrabbed += delegate()
 			{
@@ -170,7 +170,7 @@ public class TabletSpawnInstance : IDisposable
 	{
 		if (this._cameraGameObjectInstance != null)
 		{
-			UnityEngine.Object.Destroy(this._cameraGameObjectInstance);
+			Object.Destroy(this._cameraGameObjectInstance);
 			this._cameraGameObjectInstance = null;
 		}
 	}

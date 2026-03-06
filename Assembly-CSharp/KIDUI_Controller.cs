@@ -70,7 +70,7 @@ public class KIDUI_Controller : MonoBehaviour
 		}
 		PrivateUIRoom.RemoveUI(base.transform);
 		HandRayController.Instance.DisableHandRays();
-		UnityEngine.Object.DestroyImmediate(base.gameObject);
+		Object.DestroyImmediate(base.gameObject);
 		KIDManager.onEmailResultReceived = (KIDManager.OnEmailResultReceived)Delegate.Remove(KIDManager.onEmailResultReceived, new KIDManager.OnEmailResultReceived(this.NotifyOfEmailResult));
 	}
 

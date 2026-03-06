@@ -8,7 +8,7 @@ public class NetworkWrapper : MonoBehaviour
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	public static void AutoInstantiate()
 	{
-		UnityEngine.Object.DontDestroyOnLoad(UnityEngine.Object.Instantiate<GameObject>(Resources.Load<GameObject>("P_NetworkWrapper")));
+		Object.DontDestroyOnLoad(Object.Instantiate<GameObject>(Resources.Load<GameObject>("P_NetworkWrapper")));
 	}
 
 	private void Awake()

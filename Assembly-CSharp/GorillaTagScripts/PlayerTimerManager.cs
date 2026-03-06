@@ -20,7 +20,7 @@ namespace GorillaTagScripts
 			}
 			else if (PlayerTimerManager.instance != this)
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 				return;
 			}
 			this.callLimiters = new CallLimiter[2];

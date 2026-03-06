@@ -15,7 +15,7 @@ public class GorillaPlaySpace : MonoBehaviour
 	{
 		if (GorillaPlaySpace._instance != null && GorillaPlaySpace._instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 			return;
 		}
 		GorillaPlaySpace._instance = this;

@@ -22,7 +22,7 @@ public class RotatingQuest
 
 	public void SetRequiredZone()
 	{
-		this.RequiredZone = ((this.requiredZones.Count > 0) ? this.requiredZones[UnityEngine.Random.Range(0, this.requiredZones.Count)] : GTZone.none);
+		this.RequiredZone = ((this.requiredZones.Count > 0) ? this.requiredZones[Random.Range(0, this.requiredZones.Count)] : GTZone.none);
 	}
 
 	public void AddEventListener()

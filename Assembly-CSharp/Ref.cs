@@ -12,19 +12,19 @@ public class Ref<T> where T : class
 		}
 		set
 		{
-			this._target = (value as UnityEngine.Object);
+			this._target = (value as Object);
 		}
 	}
 
 	public static implicit operator bool(Ref<T> r)
 	{
-		UnityEngine.Object @object = (r != null) ? r._target : null;
+		Object @object = (r != null) ? r._target : null;
 		return @object != null && @object != null;
 	}
 
 	public static implicit operator T(Ref<T> r)
 	{
-		UnityEngine.Object @object = (r != null) ? r._target : null;
+		Object @object = (r != null) ? r._target : null;
 		if (@object == null)
 		{
 			return default(T);
@@ -36,9 +36,9 @@ public class Ref<T> where T : class
 		return @object as T;
 	}
 
-	public static implicit operator UnityEngine.Object(Ref<T> r)
+	public static implicit operator Object(Ref<T> r)
 	{
-		UnityEngine.Object @object = (r != null) ? r._target : null;
+		Object @object = (r != null) ? r._target : null;
 		if (@object == null)
 		{
 			return null;
@@ -51,5 +51,5 @@ public class Ref<T> where T : class
 	}
 
 	[SerializeField]
-	private UnityEngine.Object _target;
+	private Object _target;
 }

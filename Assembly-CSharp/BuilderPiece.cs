@@ -869,12 +869,12 @@ public class BuilderPiece : MonoBehaviour
 		{
 			if (destroyImmediate)
 			{
-				UnityEngine.Object.DestroyImmediate(this.rigidBody);
+				Object.DestroyImmediate(this.rigidBody);
 				this.rigidBody = null;
 			}
 			else
 			{
-				UnityEngine.Object.Destroy(this.rigidBody);
+				Object.Destroy(this.rigidBody);
 				this.rigidBody = null;
 			}
 		}

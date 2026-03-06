@@ -15,7 +15,7 @@ public class FriendingManager : MonoBehaviourPun, IPunObservable, IGorillaSlicea
 			PhotonNetwork.AddCallbackTarget(this);
 			return;
 		}
-		UnityEngine.Object.Destroy(this);
+		Object.Destroy(this);
 	}
 
 	private void Start()

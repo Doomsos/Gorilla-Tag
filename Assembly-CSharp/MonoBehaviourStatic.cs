@@ -15,7 +15,7 @@ public class MonoBehaviourStatic<T> : MonoBehaviour where T : MonoBehaviour
 	{
 		if (MonoBehaviourStatic<T>.gInstance && MonoBehaviourStatic<T>.gInstance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 		MonoBehaviourStatic<T>.gInstance = (this as T);
 		this.OnAwake();

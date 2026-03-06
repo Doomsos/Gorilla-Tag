@@ -13,7 +13,7 @@ public class DevConsole : MonoBehaviour, IDebugObject
 		{
 			if (DevConsole._instance == null)
 			{
-				DevConsole._instance = UnityEngine.Object.FindAnyObjectByType<DevConsole>();
+				DevConsole._instance = Object.FindAnyObjectByType<DevConsole>();
 			}
 			return DevConsole._instance;
 		}
@@ -32,7 +32,7 @@ public class DevConsole : MonoBehaviour, IDebugObject
 		Debug.Log("Destroying debug instances now");
 		foreach (DevConsoleInstance devConsoleInstance in this.instances)
 		{
-			UnityEngine.Object.DestroyImmediate(devConsoleInstance.gameObject);
+			Object.DestroyImmediate(devConsoleInstance.gameObject);
 		}
 	}
 

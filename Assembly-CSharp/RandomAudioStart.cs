@@ -15,7 +15,7 @@ public class RandomAudioStart : MonoBehaviour, IBuildValidation
 
 	private void OnEnable()
 	{
-		this.audioSource.time = UnityEngine.Random.value * this.audioSource.clip.length;
+		this.audioSource.time = Random.value * this.audioSource.clip.length;
 	}
 
 	[ContextMenu("Assign Audio Source")]

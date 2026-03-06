@@ -33,7 +33,7 @@ public class TextureFromURL : MonoBehaviour
 	{
 		if (this.texture != null)
 		{
-			UnityEngine.Object.Destroy(this.texture);
+			Object.Destroy(this.texture);
 			this.texture = null;
 		}
 	}

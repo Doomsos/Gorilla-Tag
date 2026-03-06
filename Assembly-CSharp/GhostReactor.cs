@@ -62,7 +62,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		{
 			this.promotionBot.Init(this);
 		}
-		this.randomGenerator = new SRand(UnityEngine.Random.Range(0, int.MaxValue));
+		this.randomGenerator = new SRand(Random.Range(0, int.MaxValue));
 		this.handPrintMPB = new MaterialPropertyBlock();
 		this.handPrintMPB.SetFloatArray("_HandPrintData", new float[1024]);
 		this.bays = new List<GRBay>(32);
@@ -184,7 +184,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		base.GetComponentsInChildren<GRReviveStation>(this.reviveStations);
 		if (searchScene)
 		{
-			this.reviveStations.AddRange(UnityEngine.Object.FindObjectsByType<GRReviveStation>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+			this.reviveStations.AddRange(Object.FindObjectsByType<GRReviveStation>(FindObjectsInactive.Include, FindObjectsSortMode.None));
 		}
 		for (int i = 0; i < this.reviveStations.Count; i++)
 		{
@@ -537,7 +537,7 @@ public class GhostReactor : MonoBehaviourTick, IBuildValidation
 		{
 			num += depthLevelConfig.options[i].weight;
 		}
-		int num2 = UnityEngine.Random.Range(0, num + 1);
+		int num2 = Random.Range(0, num + 1);
 		for (int j = 0; j < depthLevelConfig.options.Count; j++)
 		{
 			if (depthLevelConfig.options[j].weight >= num2)

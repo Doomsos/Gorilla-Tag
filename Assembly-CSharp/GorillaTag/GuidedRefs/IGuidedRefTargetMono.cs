@@ -7,6 +7,6 @@ namespace GorillaTag.GuidedRefs
 	{
 		GuidedRefBasicTargetInfo GRefTargetInfo { get; set; }
 
-		UnityEngine.Object GuidedRefTargetObject { get; }
+		Object GuidedRefTargetObject { get; }
 	}
 }

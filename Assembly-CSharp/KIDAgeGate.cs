@@ -23,7 +23,7 @@ public class KIDAgeGate : MonoBehaviour
 		if (KIDAgeGate._activeReference != null)
 		{
 			Debug.LogError("[KID::Age_Gate] Age Gate already exists, this is a duplicate, deleting the new one");
-			UnityEngine.Object.DestroyImmediate(base.gameObject);
+			Object.DestroyImmediate(base.gameObject);
 			return;
 		}
 		KIDAgeGate._activeReference = this;
@@ -118,7 +118,7 @@ public class KIDAgeGate : MonoBehaviour
 			return;
 		}
 		Debug.Log("[KID::AGE_GATE] Age gate completed");
-		UnityEngine.Object.Destroy(base.gameObject);
+		Object.Destroy(base.gameObject);
 	}
 
 	private void QuitGame()

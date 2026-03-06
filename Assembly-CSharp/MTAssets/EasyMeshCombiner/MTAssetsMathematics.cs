@@ -13,7 +13,7 @@ namespace MTAssets.EasyMeshCombiner
 			int num = count - 1;
 			for (int i = 0; i < num; i++)
 			{
-				int index = UnityEngine.Random.Range(i, count);
+				int index = Random.Range(i, count);
 				T value = list[i];
 				list[i] = list[index];
 				list[index] = value;

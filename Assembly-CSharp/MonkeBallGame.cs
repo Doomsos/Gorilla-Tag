@@ -962,10 +962,10 @@ public class MonkeBallGame : NetworkComponent, ITickSystemTick
 		}
 		gameBall.transform.position = launcher.transform.position;
 		Quaternion rotation = launcher.transform.rotation;
-		launcher.transform.Rotate(Vector3.up, UnityEngine.Random.Range(minXAngle, maxXAngle));
-		launcher.transform.Rotate(Vector3.right, UnityEngine.Random.Range(minYAngle, maxYAngle));
+		launcher.transform.Rotate(Vector3.up, Random.Range(minXAngle, maxXAngle));
+		launcher.transform.Rotate(Vector3.right, Random.Range(minYAngle, maxYAngle));
 		gameBall.transform.rotation = launcher.transform.rotation;
-		Vector3 velocity = launcher.transform.forward * UnityEngine.Random.Range(minVelocity, maxVelocity);
+		Vector3 velocity = launcher.transform.forward * Random.Range(minVelocity, maxVelocity);
 		launcher.transform.rotation = rotation;
 		GameBallManager.Instance.RequestLaunchBall(gameBallId, velocity);
 	}

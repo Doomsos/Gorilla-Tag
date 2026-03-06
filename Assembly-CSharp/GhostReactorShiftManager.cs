@@ -877,7 +877,7 @@ public class GhostReactorShiftManager : MonoBehaviourTick
 		this.shiftDurationMinutes = (float)(currLevelGenConfig.shiftDuration / 60);
 		if (this.IsSoaking())
 		{
-			this.shiftDurationMinutes = (float)UnityEngine.Random.Range(1, 3);
+			this.shiftDurationMinutes = (float)Random.Range(1, 3);
 		}
 		this.maxPlayerDeaths = currLevelGenConfig.maxPlayerDeaths;
 		if (this.depthDisplay != null)

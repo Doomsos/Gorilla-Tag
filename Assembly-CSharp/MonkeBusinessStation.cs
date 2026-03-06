@@ -31,7 +31,7 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 	{
 		if (!this._questManager)
 		{
-			this._questManager = UnityEngine.Object.FindAnyObjectByType<RotatingQuestsManager>();
+			this._questManager = Object.FindAnyObjectByType<RotatingQuestsManager>();
 		}
 	}
 
@@ -196,7 +196,7 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 			{
 				if (rotatingQuest.isQuestActive)
 				{
-					QuestDisplay questDisplay = UnityEngine.Object.Instantiate<QuestDisplay>(this._questDisplayPrefab, this._dailyQuestContainer);
+					QuestDisplay questDisplay = Object.Instantiate<QuestDisplay>(this._questDisplayPrefab, this._dailyQuestContainer);
 					questDisplay.quest = rotatingQuest;
 					this._quests.Add(questDisplay);
 				}
@@ -208,7 +208,7 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 			{
 				if (rotatingQuest2.isQuestActive)
 				{
-					QuestDisplay questDisplay2 = UnityEngine.Object.Instantiate<QuestDisplay>(this._questDisplayPrefab, this._weeklyQuestContainer);
+					QuestDisplay questDisplay2 = Object.Instantiate<QuestDisplay>(this._questDisplayPrefab, this._weeklyQuestContainer);
 					questDisplay2.quest = rotatingQuest2;
 					this._quests.Add(questDisplay2);
 				}
@@ -239,7 +239,7 @@ public class MonkeBusinessStation : MonoBehaviourPunCallbacks
 	{
 		for (int i = parent.childCount - 1; i >= 0; i--)
 		{
-			UnityEngine.Object.Destroy(parent.GetChild(i).gameObject);
+			Object.Destroy(parent.GetChild(i).gameObject);
 		}
 	}
 

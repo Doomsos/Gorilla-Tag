@@ -140,7 +140,7 @@ public class SITechTreeUIPage : MonoBehaviour
 		{
 			return uinode;
 		}
-		return UnityEngine.Object.Instantiate<SITechTreeUINode>(this.nodePrefab, this.nodeContainer);
+		return Object.Instantiate<SITechTreeUINode>(this.nodePrefab, this.nodeContainer);
 	}
 
 	[CompilerGenerated]
@@ -160,7 +160,7 @@ public class SITechTreeUIPage : MonoBehaviour
 			Vector3 localPosition = sitechTreeUINode.transform.localPosition;
 			Vector3 a = uiNode.transform.localPosition - localPosition;
 			Vector3 normalized = a.normalized;
-			Image image = UnityEngine.Object.Instantiate<Image>(this.upgradeLinePrefab, this.nodeContainer);
+			Image image = Object.Instantiate<Image>(this.upgradeLinePrefab, this.nodeContainer);
 			ObjectHierarchyFlattener component = image.GetComponent<ObjectHierarchyFlattener>();
 			image.transform.SetSiblingIndex(0);
 			uiNode.UpgradeLines.Add(image);

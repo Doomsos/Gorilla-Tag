@@ -9,7 +9,7 @@ public class TransferrableObjectManager : MonoBehaviour
 	{
 		if (TransferrableObjectManager.hasInstance && TransferrableObjectManager.instance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		TransferrableObjectManager.SetInstance(this);
@@ -47,7 +47,7 @@ public class TransferrableObjectManager : MonoBehaviour
 		TransferrableObjectManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			UnityEngine.Object.DontDestroyOnLoad(manager);
+			Object.DontDestroyOnLoad(manager);
 		}
 	}
 

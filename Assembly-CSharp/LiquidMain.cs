@@ -6,7 +6,7 @@ public class LiquidMain : MonoBehaviour
 {
 	private void ResetEffector(GameObject obj)
 	{
-		obj.transform.position = new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), -100f, UnityEngine.Random.Range(-0.3f, 0.3f)) * LiquidMain.kPlaneMeshCellSize * (float)LiquidMain.kPlaneMeshResolution;
+		obj.transform.position = new Vector3(Random.Range(-0.3f, 0.3f), -100f, Random.Range(-0.3f, 0.3f)) * LiquidMain.kPlaneMeshCellSize * (float)LiquidMain.kPlaneMeshResolution;
 	}
 
 	public void Start()
@@ -56,7 +56,7 @@ public class LiquidMain : MonoBehaviour
 		BoingEffector[] array = new BoingEffector[LiquidMain.kNumMovingEffectors];
 		for (int l = 0; l < LiquidMain.kNumMovingEffectors; l++)
 		{
-			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.Effector);
+			GameObject gameObject = Object.Instantiate<GameObject>(this.Effector);
 			this.m_aMovingEffector[l] = gameObject;
 			this.ResetEffector(gameObject);
 			this.m_aMovingEffectorPhase[l] = -MathUtil.HalfPi + (float)l / (float)LiquidMain.kNumMovingEffectors * MathUtil.Pi;

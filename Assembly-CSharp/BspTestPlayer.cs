@@ -8,7 +8,7 @@ public class BspTestPlayer : MonoBehaviour
 	{
 		if (this.bspSystem == null)
 		{
-			this.bspSystem = UnityEngine.Object.FindObjectOfType<ZoneGraphBSP>();
+			this.bspSystem = Object.FindObjectOfType<ZoneGraphBSP>();
 		}
 		if (this.zoneDisplayText == null)
 		{
@@ -151,7 +151,7 @@ public class BspTestPlayer : MonoBehaviour
 		{
 			return;
 		}
-		BoxCollider[] array = UnityEngine.Object.FindObjectsOfType<BoxCollider>();
+		BoxCollider[] array = Object.FindObjectsOfType<BoxCollider>();
 		if (array.Length == 0)
 		{
 			return;

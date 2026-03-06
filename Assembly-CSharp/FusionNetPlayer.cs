@@ -96,7 +96,7 @@ public class FusionNetPlayer : NetPlayer
 		{
 			if (string.IsNullOrEmpty(this._defaultName))
 			{
-				this._defaultName = "gorilla" + UnityEngine.Random.Range(0, 9999).ToString().PadLeft(4, '0');
+				this._defaultName = "gorilla" + Random.Range(0, 9999).ToString().PadLeft(4, '0');
 			}
 			return this._defaultName;
 		}

@@ -184,7 +184,7 @@ public class KIDUIFeatureSetting : MonoBehaviour
 		EventTrigger component = obj.GetComponent<EventTrigger>();
 		if (component != null)
 		{
-			UnityEngine.Object.DestroyImmediate(component);
+			Object.DestroyImmediate(component);
 		}
 		EventTrigger eventTrigger = obj.AddComponent<EventTrigger>();
 		EventTrigger.Entry entry = new EventTrigger.Entry();

@@ -3,8 +3,8 @@ using UnityEngine;
 
 public static class ObjectExtensions
 {
-	public static void Destroy(this UnityEngine.Object target)
+	public static void Destroy(this Object target)
 	{
-		UnityEngine.Object.Destroy(target);
+		Object.Destroy(target);
 	}
 }

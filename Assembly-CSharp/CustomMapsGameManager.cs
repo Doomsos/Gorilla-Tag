@@ -12,7 +12,7 @@ public class CustomMapsGameManager : MonoBehaviour, IGameEntityZoneComponent
 	{
 		if (CustomMapsGameManager.instance.IsNotNull())
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		CustomMapsGameManager.instance = this;

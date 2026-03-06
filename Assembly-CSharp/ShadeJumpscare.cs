@@ -12,7 +12,7 @@ public class ShadeJumpscare : MonoBehaviour
 	private void OnEnable()
 	{
 		this.startTime = Time.time;
-		this.startAngle = UnityEngine.Random.value * 360f;
+		this.startAngle = Random.value * 360f;
 		this.audioSource.clip = this.audioClips.GetRandomItem<AudioClip>();
 		this.audioSource.GTPlay();
 	}

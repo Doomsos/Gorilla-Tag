@@ -7,9 +7,9 @@ public class GRSpotlight : MonoBehaviourTick
 	{
 		this.yStart = base.transform.rotation.eulerAngles.y;
 		this.xStart = base.transform.rotation.eulerAngles.x;
-		this.timeOffset = UnityEngine.Random.value * 360f;
-		this.yFrequency += UnityEngine.Random.value / 100f;
-		this.xFrequency += UnityEngine.Random.value / 100f;
+		this.timeOffset = Random.value * 360f;
+		this.yFrequency += Random.value / 100f;
+		this.xFrequency += Random.value / 100f;
 	}
 
 	public override void Tick()

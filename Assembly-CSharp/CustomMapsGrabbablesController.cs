@@ -36,7 +36,7 @@ public class CustomMapsGrabbablesController : MonoBehaviour, IGameEntityComponen
 		if (!MapSpawnManager.instance.SpawnEntity((int)enemyTypeIndex, out mapEntity))
 		{
 			GTDev.LogError<string>("CustomMapsGrabbablesController::OnEntityInit could not spawn grabbable", null);
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 			return;
 		}
 		GrabbableEntity grabbableEntity = (GrabbableEntity)mapEntity;

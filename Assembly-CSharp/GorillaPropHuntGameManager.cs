@@ -132,7 +132,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		base.StopPlaying();
 		this._ph_gameState = GorillaPropHuntGameManager.EPropHuntGameState.StoppedGameMode;
 		GameMode.ParticipatingPlayersChanged -= this._OnParticipatingPlayersChanged;
-		foreach (VRRig rig in GorillaParent.instance.vrrigs)
+		foreach (VRRig rig in VRRigCache.ActiveRigs)
 		{
 			GorillaSkin.ApplyToRig(rig, null, GorillaSkin.SkinType.gameMode);
 			this._ResetRigAppearance(rig);
@@ -888,7 +888,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 				{
 					return;
 				}
-				gameObject = UnityEngine.Object.Instantiate<GameObject>(this.m_ph_blindfold_forAvatarPrefab, parent);
+				gameObject = Object.Instantiate<GameObject>(this.m_ph_blindfold_forAvatarPrefab, parent);
 				this._ph_vrRig_to_blindfolds[vrRig.GetInstanceID()] = gameObject;
 			}
 			gameObject.SetActive(shouldEnable);
@@ -910,7 +910,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		{
 			return;
 		}
-		this._ph_blindfold_forCamera_1p = UnityEngine.Object.Instantiate<GameObject>(this.m_ph_blindfold_forCameraPrefab, mainCamera.transform);
+		this._ph_blindfold_forCamera_1p = Object.Instantiate<GameObject>(this.m_ph_blindfold_forCameraPrefab, mainCamera.transform);
 		Camera camera = null;
 		if (GorillaTagger.Instance.thirdPersonCamera != null)
 		{
@@ -920,7 +920,7 @@ public sealed class GorillaPropHuntGameManager : GorillaTagManager
 		{
 			return;
 		}
-		this._ph_blindfold_forCamera_3p = UnityEngine.Object.Instantiate<GameObject>(this.m_ph_blindfold_forCameraPrefab, camera.transform);
+		this._ph_blindfold_forCamera_3p = Object.Instantiate<GameObject>(this.m_ph_blindfold_forCameraPrefab, camera.transform);
 		this._ph_blindfold_forCamera_isInitialized = (this._ph_blindfold_forCamera_1p != null);
 	}
 

@@ -65,7 +65,7 @@ public class FlockingManager : NetworkComponent
 
 	private void Update()
 	{
-		if (UnityEngine.Random.Range(0, 10000) < 50)
+		if (Random.Range(0, 10000) < 50)
 		{
 			foreach (FlockingManager.FishArea fishArea in this.fishAreaList)
 			{
@@ -82,10 +82,10 @@ public class FlockingManager : NetworkComponent
 
 	public Vector3 GetRandomPointInsideCollider(FlockingManager.FishArea fishArea)
 	{
-		int num = UnityEngine.Random.Range(0, fishArea.colliders.Length);
+		int num = Random.Range(0, fishArea.colliders.Length);
 		BoxCollider boxCollider = fishArea.colliders[num];
 		Vector3 vector = boxCollider.size / 2f;
-		Vector3 position = new Vector3(UnityEngine.Random.Range(-vector.x, vector.x), UnityEngine.Random.Range(-vector.y, vector.y), UnityEngine.Random.Range(-vector.z, vector.z));
+		Vector3 position = new Vector3(Random.Range(-vector.x, vector.x), Random.Range(-vector.y, vector.y), Random.Range(-vector.z, vector.z));
 		return boxCollider.transform.TransformPoint(position);
 	}
 

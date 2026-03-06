@@ -16,7 +16,7 @@ namespace GorillaTagScripts.AI.States
 		{
 			if (this.agent.remainingDistance <= this.agent.stoppingDistance)
 			{
-				Vector3 position = this.entity.waypoints[UnityEngine.Random.Range(0, this.entity.waypoints.Count - 1)].transform.position;
+				Vector3 position = this.entity.waypoints[Random.Range(0, this.entity.waypoints.Count - 1)].transform.position;
 				this.agent.SetDestination(position);
 			}
 		}

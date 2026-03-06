@@ -153,11 +153,11 @@ public class SITechTreeStation : MonoBehaviour, ITouchScreenStation
 			if (sitechTreePage.IsValid)
 			{
 				this.techTreeIconById.Add(sitechTreePage.pageId, sitechTreePage.icon);
-				SIGadgetListEntry sigadgetListEntry = UnityEngine.Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
+				SIGadgetListEntry sigadgetListEntry = Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
 				StaticLodManager.TryAddLateInstantiatedMembers(sigadgetListEntry.gameObject);
 				sigadgetListEntry.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.PageSelect, i, -0.07f, count);
 				this.pageButtons.Add(sigadgetListEntry);
-				SITechTreeUIPage sitechTreeUIPage = UnityEngine.Object.Instantiate<SITechTreeUIPage>(this.pagePrefab, this.pageParent);
+				SITechTreeUIPage sitechTreeUIPage = Object.Instantiate<SITechTreeUIPage>(this.pagePrefab, this.pageParent);
 				StaticLodManager.TryAddLateInstantiatedMembers(sitechTreeUIPage.gameObject);
 				sitechTreeUIPage.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText);
 				this.techTreePages.Add(sitechTreeUIPage);

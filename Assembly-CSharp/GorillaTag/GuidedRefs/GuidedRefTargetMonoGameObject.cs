@@ -17,7 +17,7 @@ namespace GorillaTag.GuidedRefs
 			}
 		}
 
-		public UnityEngine.Object GuidedRefTargetObject
+		public Object GuidedRefTargetObject
 		{
 			get
 			{

@@ -66,7 +66,7 @@ public class WeightedList<T>
 		{
 			throw new InvalidOperationException("The list is empty.");
 		}
-		float item = UnityEngine.Random.value * this.totalWeight;
+		float item = Random.value * this.totalWeight;
 		int num = this.cumulativeWeights.BinarySearch(item);
 		if (num < 0)
 		{

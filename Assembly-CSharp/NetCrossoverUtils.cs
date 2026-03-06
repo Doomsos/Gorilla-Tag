@@ -135,7 +135,7 @@ public static class NetCrossoverUtils
 		}
 	}
 
-	public static Dictionary<string, SessionProperty> ToPropDict(this ExitGames.Client.Photon.Hashtable hash)
+	public static Dictionary<string, SessionProperty> ToPropDict(this Hashtable hash)
 	{
 		Dictionary<string, SessionProperty> dictionary = new Dictionary<string, SessionProperty>();
 		foreach (DictionaryEntry dictionaryEntry in hash)

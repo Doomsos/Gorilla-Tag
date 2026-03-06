@@ -10,7 +10,7 @@ public class GRSummonerEgg : MonoBehaviour
 
 	private void Start()
 	{
-		this.hatchTime = UnityEngine.Random.Range(this.minHatchTime, this.maxHatchTime);
+		this.hatchTime = Random.Range(this.minHatchTime, this.maxHatchTime);
 		Rigidbody component = base.GetComponent<Rigidbody>();
 		if (component != null)
 		{

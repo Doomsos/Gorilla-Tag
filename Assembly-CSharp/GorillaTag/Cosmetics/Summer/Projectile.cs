@@ -148,7 +148,7 @@ namespace GorillaTag.Cosmetics.Summer
 				ObjectPools.instance.Destroy(base.gameObject);
 				return;
 			}
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 
 		[SerializeField]

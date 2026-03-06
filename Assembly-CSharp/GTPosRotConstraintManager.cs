@@ -11,7 +11,7 @@ public class GTPosRotConstraintManager : MonoBehaviour
 	{
 		if (GTPosRotConstraintManager.hasInstance && GTPosRotConstraintManager.instance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		GTPosRotConstraintManager.SetInstance(this);
@@ -79,7 +79,7 @@ public class GTPosRotConstraintManager : MonoBehaviour
 		if (Application.isPlaying)
 		{
 			manager.transform.SetParent(null, false);
-			UnityEngine.Object.DontDestroyOnLoad(manager);
+			Object.DontDestroyOnLoad(manager);
 		}
 	}
 

@@ -44,7 +44,7 @@ public class ParticleEffectsPool : MonoBehaviour
 		string arg = prefab.name.Trim();
 		for (int i = 0; i < this.poolSize; i++)
 		{
-			ParticleEffect particleEffect = UnityEngine.Object.Instantiate<ParticleEffect>(prefab, base.transform);
+			ParticleEffect particleEffect = Object.Instantiate<ParticleEffect>(prefab, base.transform);
 			particleEffect.gameObject.SetActive(false);
 			particleEffect.pool = this;
 			particleEffect.poolIndex = index;

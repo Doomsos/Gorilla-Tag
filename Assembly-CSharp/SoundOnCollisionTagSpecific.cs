@@ -8,7 +8,7 @@ public class SoundOnCollisionTagSpecific : MonoBehaviour
 		if (Time.time > this.nextSound && collider.gameObject.CompareTag(this.tagName))
 		{
 			this.nextSound = Time.time + this.noiseCooldown;
-			this.audioSource.GTPlayOneShot(this.collisionSounds[UnityEngine.Random.Range(0, this.collisionSounds.Length)], 0.5f);
+			this.audioSource.GTPlayOneShot(this.collisionSounds[Random.Range(0, this.collisionSounds.Length)], 0.5f);
 		}
 	}
 

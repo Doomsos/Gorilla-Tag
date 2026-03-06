@@ -17,7 +17,7 @@ public class DeepLinkHandler : MonoBehaviour
 		}
 		if (DeepLinkHandler.instance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 	}
 
@@ -37,7 +37,7 @@ public class DeepLinkHandler : MonoBehaviour
 			DeepLinkHandler.instance.HandleDeepLink();
 			return;
 		}
-		UnityEngine.Object.Destroy(DeepLinkHandler.instance);
+		Object.Destroy(DeepLinkHandler.instance);
 	}
 
 	private void RefreshLaunchDetails()
@@ -107,7 +107,7 @@ public class DeepLinkHandler : MonoBehaviour
 			return;
 		}
 		GTDev.LogError<string>("[DeepLinkHandler::HandleDeepLink] App launched via DeepLink, but from an unknown app. App ID: " + this.cachedLaunchDetails.LaunchSource, null);
-		UnityEngine.Object.Destroy(this);
+		Object.Destroy(this);
 	}
 
 	private void OnWitchbloodCollabResponse(UnityWebRequest completedRequest)
@@ -115,13 +115,13 @@ public class DeepLinkHandler : MonoBehaviour
 		if (completedRequest.result != UnityWebRequest.Result.Success)
 		{
 			GTDev.LogError<string>("[DeepLinkHandler::OnWitchbloodCollabResponse] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text, null);
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
 		{
 			GTDev.Log<string>("[DeepLinkHandler::OnWitchbloodCollabResponse] Item has already been redeemed!", null);
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		GTDev.Log<string>("[DeepLinkHandler::OnWitchbloodCollabResponse] Item successfully granted, processing external unlock...", null);
@@ -133,13 +133,13 @@ public class DeepLinkHandler : MonoBehaviour
 		if (completedRequest.result != UnityWebRequest.Result.Success)
 		{
 			GTDev.LogError<string>("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Web Request failed: " + completedRequest.error + "\nDetails: " + completedRequest.downloadHandler.text, null);
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		if (completedRequest.downloadHandler.text.Contains("AlreadyRedeemed", StringComparison.OrdinalIgnoreCase))
 		{
 			GTDev.Log<string>("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Item has already been redeemed!", null);
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		GTDev.Log<string>("[DeepLinkHandler::OnRaccoonLagoonCollabResponse] Item successfully granted, processing external unlock...", null);
@@ -155,7 +155,7 @@ public class DeepLinkHandler : MonoBehaviour
 		}
 		if (destroyOnFinish)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 		yield return null;
 		yield break;

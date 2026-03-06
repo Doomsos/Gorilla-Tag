@@ -53,7 +53,7 @@ namespace GorillaLocomotion.Swimming
 		{
 			Vector3 closestPositionOnSurface = this.GetClosestPositionOnSurface(surfacePoint, surfaceNormal);
 			float d = this.overrideBoundingRadius ? this.boundingRadiusOverride : this.lastBoundingRadius;
-			Vector3 b = Vector3.ProjectOnPlane(UnityEngine.Random.onUnitSphere * d * 0.5f, surfaceNormal);
+			Vector3 b = Vector3.ProjectOnPlane(Random.onUnitSphere * d * 0.5f, surfaceNormal);
 			ObjectPools.instance.Instantiate(rippleEffectPrefab, closestPositionOnSurface + b, Quaternion.FromToRotation(Vector3.up, this.lastSurfaceQuery.surfaceNormal) * Quaternion.AngleAxis(-90f, Vector3.right), dripScale * this.scaleMultiplier, true);
 		}
 

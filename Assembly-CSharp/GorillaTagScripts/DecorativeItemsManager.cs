@@ -233,10 +233,10 @@ namespace GorillaTagScripts
 			this.lastIndex = this.currentIndex;
 			bool flag = false;
 			bool flag2 = this.zone.IsLocalPlayerInZone();
-			int index = UnityEngine.Random.Range(0, this.respawnableHooks.Count);
+			int index = Random.Range(0, this.respawnableHooks.Count);
 			while (!flag)
 			{
-				index = UnityEngine.Random.Range(0, this.respawnableHooks.Count);
+				index = Random.Range(0, this.respawnableHooks.Count);
 				if (!this.respawnableHooks[index].inForest == flag2)
 				{
 					flag = true;

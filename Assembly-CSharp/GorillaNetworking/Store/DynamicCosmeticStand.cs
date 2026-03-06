@@ -51,7 +51,7 @@ namespace GorillaNetworking.Store
 			{
 				if (i == 29)
 				{
-					UnityEngine.Object.Destroy(this);
+					Object.Destroy(this);
 					throw new Exception("Could not connect to store controller.");
 				}
 				yield return null;

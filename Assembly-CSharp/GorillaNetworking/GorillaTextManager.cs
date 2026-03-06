@@ -22,7 +22,7 @@ namespace GorillaNetworking
 		{
 			if (GorillaTextManager.instance != null)
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 				return;
 			}
 			GorillaTextManager.instance = this;
@@ -43,7 +43,7 @@ namespace GorillaNetworking
 			GorillaTextManager.instance = gorillaTextManager;
 			if (Application.isPlaying)
 			{
-				UnityEngine.Object.DontDestroyOnLoad(gorillaTextManager);
+				Object.DontDestroyOnLoad(gorillaTextManager);
 			}
 		}
 

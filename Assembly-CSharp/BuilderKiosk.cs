@@ -153,12 +153,12 @@ public class BuilderKiosk : MonoBehaviour
 		}
 		if (this.currentDiorama != null)
 		{
-			UnityEngine.Object.Destroy(this.currentDiorama);
+			Object.Destroy(this.currentDiorama);
 			this.currentDiorama = null;
 		}
 		if (this.nextDiorama != null)
 		{
-			UnityEngine.Object.Destroy(this.nextDiorama);
+			Object.Destroy(this.nextDiorama);
 			this.nextDiorama = null;
 		}
 		BuilderTable builderTable;
@@ -333,7 +333,7 @@ public class BuilderKiosk : MonoBehaviour
 			base.StopCoroutine(this.PlaySwapAnimation());
 			if (this.currentDiorama != null)
 			{
-				UnityEngine.Object.Destroy(this.currentDiorama);
+				Object.Destroy(this.currentDiorama);
 				this.currentDiorama = null;
 			}
 			this.currentDiorama = this.nextDiorama;
@@ -342,16 +342,16 @@ public class BuilderKiosk : MonoBehaviour
 		this.animating = true;
 		if (this.nextDiorama != null)
 		{
-			UnityEngine.Object.Destroy(this.nextDiorama);
+			Object.Destroy(this.nextDiorama);
 			this.nextDiorama = null;
 		}
 		if (!this.itemToBuy.isNullItem && this.itemToBuy.displayModel != null)
 		{
-			this.nextDiorama = UnityEngine.Object.Instantiate<GameObject>(this.itemToBuy.displayModel, this.nextItemDisplayPos);
+			this.nextDiorama = Object.Instantiate<GameObject>(this.itemToBuy.displayModel, this.nextItemDisplayPos);
 		}
 		else
 		{
-			this.nextDiorama = UnityEngine.Object.Instantiate<GameObject>(this.emptyDisplay, this.nextItemDisplayPos);
+			this.nextDiorama = Object.Instantiate<GameObject>(this.emptyDisplay, this.nextItemDisplayPos);
 		}
 		this.itemDisplayAnimation.Rewind();
 		if (this.currentDiorama != null)
@@ -367,7 +367,7 @@ public class BuilderKiosk : MonoBehaviour
 		yield return new WaitForSeconds(this.itemDisplayAnimation.clip.length);
 		if (this.currentDiorama != null)
 		{
-			UnityEngine.Object.Destroy(this.currentDiorama);
+			Object.Destroy(this.currentDiorama);
 			this.currentDiorama = null;
 		}
 		this.currentDiorama = this.nextDiorama;

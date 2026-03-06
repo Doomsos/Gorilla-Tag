@@ -7,7 +7,7 @@ namespace GorillaTag
 	{
 		protected void Awake()
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 	}
 }

@@ -18,7 +18,7 @@ namespace GorillaTag.Cosmetics
 		{
 			if (CosmeticsProximityReactorManager._instance != null && CosmeticsProximityReactorManager._instance != this)
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 				return;
 			}
 			CosmeticsProximityReactorManager._instance = this;

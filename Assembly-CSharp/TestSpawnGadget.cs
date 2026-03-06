@@ -37,7 +37,7 @@ public class TestSpawnGadget : MonoBehaviour
 	{
 		for (int i = 0; i < this.spawnBatchSize; i++)
 		{
-			gameEntityManager.RequestCreateItem(entityToSpawn.gameObject.name.GetStaticHash(), base.transform.position + UnityEngine.Random.insideUnitSphere, base.transform.rotation, (long)upgrades.GetBits() << 32);
+			gameEntityManager.RequestCreateItem(entityToSpawn.gameObject.name.GetStaticHash(), base.transform.position + Random.insideUnitSphere, base.transform.rotation, (long)upgrades.GetBits() << 32);
 		}
 	}
 

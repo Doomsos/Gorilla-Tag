@@ -57,9 +57,9 @@ namespace GorillaExtensions
 			return list;
 		}
 
-		public static List<UnityEngine.Object> GetComponentsInHierarchy(this Scene scene, Type type, bool includeInactive = true, int capacity = 64)
+		public static List<Object> GetComponentsInHierarchy(this Scene scene, Type type, bool includeInactive = true, int capacity = 64)
 		{
-			List<UnityEngine.Object> list = new List<UnityEngine.Object>(capacity);
+			List<Object> list = new List<Object>(capacity);
 			GameObject[] rootGameObjects = scene.GetRootGameObjects();
 			for (int i = 0; i < rootGameObjects.Length; i++)
 			{
@@ -463,6 +463,19 @@ namespace GorillaExtensions
 		public static Vector3 ProjectOnPlane(this Vector3 point, Vector3 planeAnchorPosition, Vector3 planeNormal)
 		{
 			return planeAnchorPosition + Vector3.ProjectOnPlane(point - planeAnchorPosition, planeNormal);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int FindIndex<T>(this IReadOnlyList<T> list, Predicate<T> match)
+		{
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (match(list[i]))
+				{
+					return i;
+				}
+			}
+			return -1;
 		}
 
 		public static void ForEachBackwards<T>(this List<T> list, Action<T> action)
@@ -1151,7 +1164,7 @@ namespace GorillaExtensions
 
 		public static int GetRandomIndex<T>(this IReadOnlyList<T> self)
 		{
-			return UnityEngine.Random.Range(0, self.Count);
+			return Random.Range(0, self.Count);
 		}
 
 		public static T GetRandomItem<T>(this IReadOnlyList<T> self)
@@ -1850,12 +1863,12 @@ namespace GorillaExtensions
 			return ray.ProjectToPlane(lineStart, normalized2);
 		}
 
-		public static bool IsNull(this UnityEngine.Object mono)
+		public static bool IsNull(this Object mono)
 		{
 			return mono == null || !mono;
 		}
 
-		public static bool IsNotNull(this UnityEngine.Object mono)
+		public static bool IsNotNull(this Object mono)
 		{
 			return !mono.IsNull();
 		}

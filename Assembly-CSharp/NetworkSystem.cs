@@ -174,7 +174,7 @@ public abstract class NetworkSystem : MonoBehaviour
 		Debug.Log("INITIALISING NETWORKSYSTEMS");
 		if (NetworkSystem.Instance)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 			return;
 		}
 		NetworkSystem.Instance = this;
@@ -273,7 +273,7 @@ public abstract class NetworkSystem : MonoBehaviour
 		string text = "";
 		for (int i = 0; i < 4; i++)
 		{
-			text += "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Substring(UnityEngine.Random.Range(0, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Length), 1);
+			text += "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Substring(Random.Range(0, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Length), 1);
 		}
 		if (GorillaComputer.instance.IsPlayerInVirtualStump())
 		{
@@ -318,7 +318,7 @@ public abstract class NetworkSystem : MonoBehaviour
 
 	private IEnumerator ReGetNonce()
 	{
-		yield return new WaitForSeconds(3f);
+		yield return new WaitForSecondsRealtime(3f);
 		PlayFabAuthenticator.instance.RefreshSteamAuthTicketForPhoton(new Action<string>(this.GetSteamAuthTicketSuccessCallback), new Action<EResult>(this.GetSteamAuthTicketFailureCallback));
 		yield return null;
 		yield break;

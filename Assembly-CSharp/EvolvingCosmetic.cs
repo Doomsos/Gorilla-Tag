@@ -1,4 +1,5 @@
 ﻿using System;
+using GorillaLocomotion;
 using GorillaTagScripts;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,20 +8,28 @@ public class EvolvingCosmetic : MonoBehaviour
 {
 	private void OnEnable()
 	{
-		VRRig componentInParent = base.GetComponentInParent<VRRig>();
-		if (componentInParent == null)
+		VRRig vrrig = base.GetComponentInParent<VRRig>();
+		if (vrrig == null)
+		{
+			if (base.GetComponentInParent<GTPlayer>() == null)
+			{
+				return;
+			}
+			vrrig = VRRig.LocalRig;
+		}
+		if (vrrig == null)
 		{
 			return;
 		}
-		SubscriptionManager.SubscriptionDetails subscriptionDetails = SubscriptionManager.GetSubscriptionDetails(componentInParent);
+		SubscriptionManager.SubscriptionDetails subscriptionDetails = SubscriptionManager.GetSubscriptionDetails(vrrig);
 		int num = 0;
 		switch (this.ageRule)
 		{
 		case EvolvingCosmetic.SubscriptionAgeRule.ItemAge:
-			num = componentInParent.CheckCosmeticAge(base.name);
+			num = vrrig.CheckCosmeticAge(base.name);
 			break;
 		case EvolvingCosmetic.SubscriptionAgeRule.MinItemSubscriptionAge:
-			num = Mathf.Min(subscriptionDetails.daysAccrued, componentInParent.CheckCosmeticAge(base.name));
+			num = Mathf.Min(subscriptionDetails.daysAccrued, vrrig.CheckCosmeticAge(base.name));
 			break;
 		case EvolvingCosmetic.SubscriptionAgeRule.SubscriptionAge:
 			num = subscriptionDetails.daysAccrued;
@@ -28,7 +37,7 @@ public class EvolvingCosmetic : MonoBehaviour
 		case EvolvingCosmetic.SubscriptionAgeRule.MinItemSubscriptionAgeActive:
 			if (subscriptionDetails.active)
 			{
-				num = Mathf.Min(subscriptionDetails.daysAccrued, componentInParent.CheckCosmeticAge(base.name));
+				num = Mathf.Min(subscriptionDetails.daysAccrued, vrrig.CheckCosmeticAge(base.name));
 			}
 			break;
 		case EvolvingCosmetic.SubscriptionAgeRule.SubscriptionAgeActive:

@@ -7,7 +7,7 @@ namespace GorillaTag
 	{
 		public static Color RandomHSV(GTColor.HSVRanges ranges)
 		{
-			return Color.HSVToRGB(UnityEngine.Random.Range(ranges.h.x, ranges.h.y), UnityEngine.Random.Range(ranges.s.x, ranges.s.y), UnityEngine.Random.Range(ranges.v.x, ranges.v.y));
+			return Color.HSVToRGB(Random.Range(ranges.h.x, ranges.h.y), Random.Range(ranges.s.x, ranges.s.y), Random.Range(ranges.v.x, ranges.v.y));
 		}
 
 		[Serializable]

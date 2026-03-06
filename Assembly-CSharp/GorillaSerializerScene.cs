@@ -73,7 +73,7 @@ internal class GorillaSerializerScene : GorillaSerializer, IOnPhotonViewPreNetDe
 			PhotonNetwork.Destroy(info.photonView);
 			return;
 		}
-		UnityEngine.Object.Destroy(base.gameObject);
+		Object.Destroy(base.gameObject);
 	}
 
 	void IOnPhotonViewPreNetDestroy.OnPreNetDestroy(PhotonView rootView)

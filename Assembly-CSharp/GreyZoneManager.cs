@@ -349,7 +349,7 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 			this.greyZoneAmbienceVolume = this.greyZoneAmbience.volume;
 			return;
 		}
-		UnityEngine.Object.Destroy(this);
+		Object.Destroy(this);
 	}
 
 	private void OnEnable()
@@ -520,11 +520,11 @@ public class GreyZoneManager : MonoBehaviourPun, IPunObservable, IInRoomCallback
 		this.ValidateSummoningPlayers();
 	}
 
-	public void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
+	public void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
 	{
 	}
 
-	public void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+	public void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
 	{
 	}
 

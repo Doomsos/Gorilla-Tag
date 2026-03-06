@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace FXP
 {
+	[Obsolete("CosmeticItemPrefab is deprecated, if we want to use this we need services to re-activate a webservice that was called gt-featureditem-dev.")]
 	public class CosmeticItemPrefab : MonoBehaviour
 	{
 		private void Awake()
@@ -213,14 +214,14 @@ namespace FXP
 
 		private void ClearCosmeticMesh()
 		{
-			UnityEngine.Object.Destroy(this.goCosmeticItemGameObject);
+			Object.Destroy(this.goCosmeticItemGameObject);
 		}
 
 		private void ClearCosmeticAtlas()
 		{
 			if (this.goCosmeticItemMeshAtlas.IsNotNull())
 			{
-				UnityEngine.Object.Destroy(this.goCosmeticItemMeshAtlas);
+				Object.Destroy(this.goCosmeticItemMeshAtlas);
 			}
 		}
 

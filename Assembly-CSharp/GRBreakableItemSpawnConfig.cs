@@ -17,9 +17,9 @@ public class GRBreakableItemSpawnConfig : ScriptableObject
 		{
 			Debug.LogError("Circular override loop");
 		}
-		if (UnityEngine.Random.Range(0f, 1f) < this.spawnAnythingProbability)
+		if (Random.Range(0f, 1f) < this.spawnAnythingProbability)
 		{
-			float num = UnityEngine.Random.Range(0f, this.precomputedItemTotalWeight);
+			float num = Random.Range(0f, this.precomputedItemTotalWeight);
 			float num2 = 0f;
 			for (int i = 0; i < this.perItemProbabilities.Count; i++)
 			{

@@ -26,7 +26,7 @@ public class GRAbilityDie : GRAbilityBase
 		this.totalDeathDelay = this.delayDeath;
 		if (this.animData.Count > 0)
 		{
-			int index = UnityEngine.Random.Range(0, this.animData.Count);
+			int index = Random.Range(0, this.animData.Count);
 			this.totalDeathDelay += this.animData[index].duration;
 			this.staggerMovement.InitFromVelocityAndDuration(this.staggerMovement.velocity, this.totalDeathDelay);
 			this.PlayAnim(this.animData[index].animName, 0.1f, this.animData[index].speed);

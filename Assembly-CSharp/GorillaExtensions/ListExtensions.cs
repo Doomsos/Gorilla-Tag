@@ -14,7 +14,7 @@ namespace GorillaExtensions
 			while (i > 1)
 			{
 				i--;
-				int num = UnityEngine.Random.Range(0, i);
+				int num = Random.Range(0, i);
 				List<TVal> list3 = list2;
 				int index = i;
 				List<TVal> list4 = list2;

@@ -98,7 +98,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		}
 		if (CustomMapLoader.instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 	}
 
@@ -460,7 +460,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		{
 			if (CustomMapLoader.loadedMapPackageInfo != null && CustomMapLoader.loadedMapPackageInfo.customMapSupportVersion >= 3)
 			{
-				CustomMapLoader.maxPlayersForMap = (byte)System.Math.Clamp(CustomMapLoader.loadedMapPackageInfo.maxPlayers, 1, 20);
+				CustomMapLoader.maxPlayersForMap = (byte)Math.Clamp(CustomMapLoader.loadedMapPackageInfo.maxPlayers, 1, 20);
 				if (CustomMapLoader.loadedMapPackageInfo.customMapSupportVersion >= 5)
 				{
 					CustomMapModeSelector.SetAvailableGameModes(CustomMapLoader.loadedMapPackageInfo.availableGameModes, CustomMapLoader.loadedMapPackageInfo.defaultGameMode);
@@ -841,7 +841,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		{
 			if (component == null)
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject, true);
+				Object.DestroyImmediate(gameObject, true);
 				return false;
 			}
 			bool flag = true;
@@ -874,7 +874,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			}
 			if (flag)
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject, true);
+				Object.DestroyImmediate(gameObject, true);
 				return false;
 			}
 		}
@@ -896,7 +896,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		Collider[] array = Physics.OverlapSphere(gameObject.transform.position, radius);
 		if (array == null || array.Length == 0)
 		{
-			UnityEngine.Object.DestroyImmediate(gameObject);
+			Object.DestroyImmediate(gameObject);
 			return;
 		}
 		MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
@@ -908,10 +908,10 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			if (!(collider == null) && !(collider.gameObject == gameObject) && !(collider.gameObject.scene.name != sceneName) && Physics.ComputePenetration(meshCollider, gameObject.transform.position, gameObject.transform.rotation, collider, collider.transform.position, collider.transform.rotation, out vector2, out num) && !collider.isTrigger)
 			{
 				GTDev.Log<string>("[CustomMapLoader::ResolveVirtualStumpColliderOverlaps] Gameobject " + collider.name + " has a collider overlapping with the virtual stump. Collider will be removed", null);
-				UnityEngine.Object.DestroyImmediate(collider);
+				Object.DestroyImmediate(collider);
 			}
 		}
-		UnityEngine.Object.DestroyImmediate(gameObject);
+		Object.DestroyImmediate(gameObject);
 	}
 
 	private static IEnumerator FinalizeSceneLoad(MapDescriptor sceneDescriptor, bool useProgressCallback = false, int startingProgress = 50, int endingProgress = 90)
@@ -967,7 +967,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		}
 		if (CustomMapLoader.loadedMapPackageInfo != null && CustomMapLoader.loadedMapPackageInfo.customMapSupportVersion < 3 && sceneDescriptor.IsInitialScene)
 		{
-			CustomMapLoader.maxPlayersForMap = (byte)System.Math.Clamp(sceneDescriptor.MaxPlayers, 1, 20);
+			CustomMapLoader.maxPlayersForMap = (byte)Math.Clamp(sceneDescriptor.MaxPlayers, 1, 20);
 			CustomMapLoader.cachedLuauScript = ((sceneDescriptor.CustomGamemode != null) ? sceneDescriptor.CustomGamemode.text : "");
 			CustomMapLoader.devModeEnabled = sceneDescriptor.DevMode;
 			CustomMapLoader.disableHoldingHandsAllModes = sceneDescriptor.DisableHoldingHandsAllGameModes;
@@ -1106,7 +1106,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		{
 			return;
 		}
-		GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.reviveStationPrefab, gameObject.transform.parent);
+		GameObject gameObject2 = Object.Instantiate<GameObject>(CustomMapLoader.instance.reviveStationPrefab, gameObject.transform.parent);
 		if (gameObject2 == null)
 		{
 			return;
@@ -1185,7 +1185,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			gorillaSurfaceOverride.extraVelMaxMultiplier = component.extraVelMaxMultiplier;
 			gorillaSurfaceOverride.slidePercentageOverride = component.slidePercentage;
 			gorillaSurfaceOverride.disablePushBackEffect = component.disablePushBackEffect;
-			UnityEngine.Object.Destroy(component);
+			Object.Destroy(component);
 		}
 	}
 
@@ -1266,7 +1266,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 					if (!mapBoundarySettings.TeleportPoints[j].IsNull() && !CustomMapLoader.ValidateTeleporterDestination(mapBoundarySettings.TeleportPoints[j]))
 					{
 						flag = true;
-						UnityEngine.Object.Destroy(mapBoundarySettings);
+						Object.Destroy(mapBoundarySettings);
 						break;
 					}
 				}
@@ -1278,7 +1278,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 						cmsmapBoundary.CopyTriggerSettings(mapBoundarySettings);
 						CustomMapLoader.teleporters.Add(cmsmapBoundary);
 					}
-					UnityEngine.Object.Destroy(mapBoundarySettings);
+					Object.Destroy(mapBoundarySettings);
 				}
 			}
 		}
@@ -1292,7 +1292,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				{
 					cmstagZone.CopyTriggerSettings(tagZoneSettings);
 				}
-				UnityEngine.Object.Destroy(tagZoneSettings);
+				Object.Destroy(tagZoneSettings);
 			}
 		}
 		TeleporterSettings[] components3 = gameObject.GetComponents<TeleporterSettings>();
@@ -1306,7 +1306,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 					if (!teleporterSettings.TeleportPoints[k].IsNull() && !CustomMapLoader.ValidateTeleporterDestination(teleporterSettings.TeleportPoints[k]))
 					{
 						flag2 = true;
-						UnityEngine.Object.Destroy(teleporterSettings);
+						Object.Destroy(teleporterSettings);
 						break;
 					}
 				}
@@ -1317,7 +1317,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 					{
 						cmsteleporter.CopyTriggerSettings(teleporterSettings);
 					}
-					UnityEngine.Object.Destroy(teleporterSettings);
+					Object.Destroy(teleporterSettings);
 				}
 			}
 		}
@@ -1331,7 +1331,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				{
 					cmsobjectActivationTrigger.CopyTriggerSettings(objectActivationTriggerSettings);
 				}
-				UnityEngine.Object.Destroy(objectActivationTriggerSettings);
+				Object.Destroy(objectActivationTriggerSettings);
 			}
 		}
 		LuauTriggerSettings[] components5 = gameObject.GetComponents<LuauTriggerSettings>();
@@ -1344,7 +1344,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				{
 					cmsluau.CopyTriggerSettings(luauTriggerSettings);
 				}
-				UnityEngine.Object.Destroy(luauTriggerSettings);
+				Object.Destroy(luauTriggerSettings);
 			}
 		}
 		PlayAnimationTriggerSettings[] components6 = gameObject.GetComponents<PlayAnimationTriggerSettings>();
@@ -1357,7 +1357,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				{
 					cmsplayAnimationTrigger.CopyTriggerSettings(playAnimationTriggerSettings);
 				}
-				UnityEngine.Object.Destroy(playAnimationTriggerSettings);
+				Object.Destroy(playAnimationTriggerSettings);
 			}
 		}
 		LoadZoneSettings[] components7 = gameObject.GetComponents<LoadZoneSettings>();
@@ -1370,7 +1370,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				{
 					cmsloadingZone.SetupLoadingZone(loadZoneSettings, CustomMapLoader.assetBundleSceneFilePaths);
 				}
-				UnityEngine.Object.Destroy(loadZoneSettings);
+				Object.Destroy(loadZoneSettings);
 			}
 		}
 		ZoneShaderTriggerSettings[] components8 = gameObject.GetComponents<ZoneShaderTriggerSettings>();
@@ -1379,7 +1379,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			foreach (ZoneShaderTriggerSettings zoneShaderTriggerSettings in components8)
 			{
 				gameObject.AddComponent<CMSZoneShaderSettingsTrigger>().CopySettings(zoneShaderTriggerSettings);
-				UnityEngine.Object.Destroy(zoneShaderTriggerSettings);
+				Object.Destroy(zoneShaderTriggerSettings);
 			}
 		}
 		CMSZoneShaderSettings component = gameObject.GetComponent<CMSZoneShaderSettings>();
@@ -1392,13 +1392,13 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				CustomMapManager.SetDefaultZoneShaderSettings(zoneShaderSettings, component.GetProperties());
 			}
 			CustomMapManager.AddZoneShaderSettings(zoneShaderSettings);
-			UnityEngine.Object.Destroy(component);
+			Object.Destroy(component);
 		}
 		HandHoldSettings component2 = gameObject.GetComponent<HandHoldSettings>();
 		if (component2.IsNotNull())
 		{
 			gameObject.AddComponent<HandHold>().CopyProperties(component2);
-			UnityEngine.Object.Destroy(component2);
+			Object.Destroy(component2);
 		}
 		CustomMapEjectButtonSettings component3 = gameObject.GetComponent<CustomMapEjectButtonSettings>();
 		if (component3.IsNotNull())
@@ -1406,7 +1406,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			CustomMapEjectButton customMapEjectButton = gameObject.AddComponent<CustomMapEjectButton>();
 			customMapEjectButton.gameObject.layer = UnityLayer.GorillaInteractable.ToLayerIndex();
 			customMapEjectButton.CopySettings(component3);
-			UnityEngine.Object.Destroy(component3);
+			Object.Destroy(component3);
 		}
 		MovingSurfaceSettings component4 = gameObject.GetComponent<MovingSurfaceSettings>();
 		if (component4.IsNotNull())
@@ -1415,14 +1415,14 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			if (movingSurface.IsNotNull())
 			{
 				movingSurface.CopySettings(component4);
-				UnityEngine.Object.Destroy(component4);
+				Object.Destroy(component4);
 			}
 		}
 		SurfaceMoverSettings component5 = gameObject.GetComponent<SurfaceMoverSettings>();
 		if (component5.IsNotNull())
 		{
 			gameObject.AddComponent<SurfaceMover>().CopySettings(component5);
-			UnityEngine.Object.Destroy(component5);
+			Object.Destroy(component5);
 		}
 	}
 
@@ -1454,7 +1454,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			List<Collider> list = new List<Collider>(component.GetComponents<Collider>());
 			if (component.useDefaultPlaceholder || list.Count == 0)
 			{
-				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.gliderWindVolume, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
+				GameObject gameObject = Object.Instantiate<GameObject>(CustomMapLoader.instance.gliderWindVolume, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
 				if (gameObject != null)
 				{
 					CustomMapLoader.placeholderReplacements.Add(gameObject);
@@ -1487,7 +1487,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			List<Collider> list = new List<Collider>(component.GetComponents<Collider>());
 			if (component.useDefaultPlaceholder || list.Count == 0)
 			{
-				GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.waterVolumePrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
+				GameObject gameObject2 = Object.Instantiate<GameObject>(CustomMapLoader.instance.waterVolumePrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
 				if (gameObject2 != null)
 				{
 					CustomMapLoader.placeholderReplacements.Add(gameObject2);
@@ -1548,7 +1548,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			List<Collider> list = new List<Collider>(component.GetComponents<Collider>());
 			if (component.useDefaultPlaceholder || list.Count == 0)
 			{
-				GameObject gameObject3 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.forceVolumePrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
+				GameObject gameObject3 = Object.Instantiate<GameObject>(CustomMapLoader.instance.forceVolumePrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
 				if (gameObject3.IsNotNull())
 				{
 					CustomMapLoader.placeholderReplacements.Add(gameObject3);
@@ -1597,7 +1597,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 						}
 						else
 						{
-							UnityEngine.Object.Destroy(list[i]);
+							Object.Destroy(list[i]);
 						}
 					}
 					placeholderGameObject.layer = UnityLayer.GorillaBoundary.ToLayerIndex();
@@ -1613,12 +1613,12 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		{
 			if (CustomMapLoader.customMapATM.IsNotNull())
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
 			if (!CustomMapLoader.ValidateStorePlaceholderPosition(placeholderGameObject))
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
 			GameObject gameObject4 = CustomMapLoader.instance.atmPrefab;
@@ -1630,7 +1630,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			{
 				return;
 			}
-			GameObject gameObject5 = UnityEngine.Object.Instantiate<GameObject>(gameObject4, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
+			GameObject gameObject5 = Object.Instantiate<GameObject>(gameObject4, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
 			if (gameObject5.IsNotNull())
 			{
 				gameObject5.transform.SetParent(CustomMapLoader.instance.compositeTryOnArea.transform, true);
@@ -1665,7 +1665,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 						}
 						else
 						{
-							UnityEngine.Object.Destroy(list[j]);
+							Object.Destroy(list[j]);
 						}
 					}
 					return;
@@ -1685,7 +1685,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				Debug.LogError("[CustomMapLoader::ReplacePlaceholders] hoverboardDispenserPrefab is NULL!");
 				return;
 			}
-			GameObject gameObject6 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.hoverboardDispenserPrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
+			GameObject gameObject6 = Object.Instantiate<GameObject>(CustomMapLoader.instance.hoverboardDispenserPrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
 			if (gameObject6.IsNotNull())
 			{
 				CustomMapLoader.placeholderReplacements.Add(gameObject6);
@@ -1696,7 +1696,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		}
 		case GTObject.RopeSwing:
 		{
-			GameObject gameObject7 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.ropeSwingPrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
+			GameObject gameObject7 = Object.Instantiate<GameObject>(CustomMapLoader.instance.ropeSwingPrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
 			if (gameObject7.IsNull())
 			{
 				return;
@@ -1705,10 +1705,10 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			CustomMapsGorillaRopeSwing component6 = gameObject7.GetComponent<CustomMapsGorillaRopeSwing>();
 			if (component6.IsNull())
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject7);
+				Object.DestroyImmediate(gameObject7);
 				return;
 			}
-			component.ropeLength = System.Math.Clamp(component.ropeLength, 3, 31);
+			component.ropeLength = Math.Clamp(component.ropeLength, 3, 31);
 			if (component.useDefaultPlaceholder)
 			{
 				component6.SetRopeLength(component.ropeLength);
@@ -1722,7 +1722,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		}
 		case GTObject.ZipLine:
 		{
-			GameObject gameObject8 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.ziplinePrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
+			GameObject gameObject8 = Object.Instantiate<GameObject>(CustomMapLoader.instance.ziplinePrefab, placeholderGameObject.transform.position, placeholderGameObject.transform.rotation);
 			if (gameObject8.IsNull())
 			{
 				return;
@@ -1731,14 +1731,14 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			CustomMapsGorillaZipline component7 = gameObject8.GetComponent<CustomMapsGorillaZipline>();
 			if (component7.IsNull())
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject8);
+				Object.DestroyImmediate(gameObject8);
 				return;
 			}
 			if (component.useDefaultPlaceholder)
 			{
 				if (!component7.GenerateZipline(component.spline))
 				{
-					UnityEngine.Object.DestroyImmediate(gameObject8);
+					Object.DestroyImmediate(gameObject8);
 					return;
 				}
 			}
@@ -1757,20 +1757,20 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			}
 			if (CustomMapLoader.storeDisplayStands.Count >= Constants.storeDisplayStandLimit)
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
 			if (placeholderGameObject.transform.lossyScale != Vector3.one)
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
 			if (!CustomMapLoader.ValidateStorePlaceholderPosition(placeholderGameObject))
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
-			GameObject gameObject9 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.storeDisplayStandPrefab, placeholderGameObject.transform);
+			GameObject gameObject9 = Object.Instantiate<GameObject>(CustomMapLoader.instance.storeDisplayStandPrefab, placeholderGameObject.transform);
 			if (gameObject9.IsNull())
 			{
 				return;
@@ -1780,7 +1780,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			DynamicCosmeticStand component8 = gameObject9.GetComponent<DynamicCosmeticStand>();
 			if (component8.IsNull())
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject9);
+				Object.DestroyImmediate(gameObject9);
 				return;
 			}
 			component8.InitializeForCustomMapCosmeticItem(component.CosmeticItem, placeholderGameObject.scene);
@@ -1796,15 +1796,15 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			}
 			if (CustomMapLoader.storeTryOnAreas.Count >= Constants.storeTryOnAreaLimit)
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
-			GameObject gameObject10 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.storeTryOnAreaPrefab, placeholderGameObject.transform);
+			GameObject gameObject10 = Object.Instantiate<GameObject>(CustomMapLoader.instance.storeTryOnAreaPrefab, placeholderGameObject.transform);
 			gameObject10.transform.SetParent(CustomMapLoader.instance.compositeTryOnArea.transform);
 			CMSTryOnArea component9 = gameObject10.GetComponent<CMSTryOnArea>();
 			if (component9.IsNull() || component9.tryOnAreaCollider.IsNull())
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject10);
+				Object.DestroyImmediate(gameObject10);
 				return;
 			}
 			BoxCollider tryOnAreaCollider = component9.tryOnAreaCollider;
@@ -1812,9 +1812,9 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			zero.x = tryOnAreaCollider.size.x * tryOnAreaCollider.transform.lossyScale.x;
 			zero.y = tryOnAreaCollider.size.y * tryOnAreaCollider.transform.lossyScale.y;
 			zero.z = tryOnAreaCollider.size.z * tryOnAreaCollider.transform.lossyScale.z;
-			if (System.Math.Abs(zero.x * zero.y * zero.z) > Constants.storeTryOnAreaVolumeLimit)
+			if (Math.Abs(zero.x * zero.y * zero.z) > Constants.storeTryOnAreaVolumeLimit)
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject10);
+				Object.DestroyImmediate(gameObject10);
 				return;
 			}
 			component9.InitializeForCustomMap(CustomMapLoader.instance.compositeTryOnArea, placeholderGameObject.scene);
@@ -1830,20 +1830,20 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			}
 			if (CustomMapLoader.storeCheckouts.Count >= Constants.storeCheckoutCounterLimit)
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
 			if (placeholderGameObject.transform.lossyScale != Vector3.one)
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
 			if (!CustomMapLoader.ValidateStorePlaceholderPosition(placeholderGameObject))
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
-			GameObject gameObject11 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.storeCheckoutCounterPrefab, placeholderGameObject.transform);
+			GameObject gameObject11 = Object.Instantiate<GameObject>(CustomMapLoader.instance.storeCheckoutCounterPrefab, placeholderGameObject.transform);
 			if (gameObject11.IsNull())
 			{
 				return;
@@ -1853,7 +1853,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			ItemCheckout componentInChildren2 = gameObject11.GetComponentInChildren<ItemCheckout>();
 			if (componentInChildren2.IsNull())
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject11);
+				Object.DestroyImmediate(gameObject11);
 				return;
 			}
 			componentInChildren2.InitializeForCustomMap(CustomMapLoader.instance.compositeTryOnArea, placeholderGameObject.scene, component.useCustomMesh);
@@ -1869,10 +1869,10 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			}
 			if (CustomMapLoader.storeTryOnConsoles.Count >= Constants.storeTryOnConsoleLimit)
 			{
-				UnityEngine.Object.Destroy(component);
+				Object.Destroy(component);
 				return;
 			}
-			GameObject gameObject12 = UnityEngine.Object.Instantiate<GameObject>(CustomMapLoader.instance.storeTryOnConsolePrefab, placeholderGameObject.transform);
+			GameObject gameObject12 = Object.Instantiate<GameObject>(CustomMapLoader.instance.storeTryOnConsolePrefab, placeholderGameObject.transform);
 			if (gameObject12.IsNull())
 			{
 				return;
@@ -1880,7 +1880,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 			FittingRoom componentInChildren3 = gameObject12.GetComponentInChildren<FittingRoom>();
 			if (componentInChildren3.IsNull())
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject12);
+				Object.DestroyImmediate(gameObject12);
 				return;
 			}
 			componentInChildren3.InitializeForCustomMap(component.useCustomMesh);
@@ -2007,7 +2007,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 		}
 		if (CustomMapLoader.loadedMapPackageInfo.customMapSupportVersion <= 2 && CustomMapLoader.loadedSceneIndexes.Contains(CustomMapLoader.initialSceneIndexes[0]))
 		{
-			MapDescriptor[] array = UnityEngine.Object.FindObjectsByType<MapDescriptor>(FindObjectsSortMode.None);
+			MapDescriptor[] array = Object.FindObjectsByType<MapDescriptor>(FindObjectsSortMode.None);
 			bool flag = false;
 			int i;
 			for (i = 0; i < array.Length; i++)
@@ -2372,7 +2372,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				ATM_Manager.instance.RemoveATM(componentInChildren);
 				ATM_Manager.instance.SetTemporaryCreatorCode(null);
 			}
-			UnityEngine.Object.Destroy(CustomMapLoader.customMapATM);
+			Object.Destroy(CustomMapLoader.customMapATM);
 			CustomMapLoader.customMapATM = null;
 		}
 		for (int i = CustomMapLoader.storeDisplayStands.Count - 1; i >= 0; i--)
@@ -2390,7 +2390,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 					{
 						StoreController.instance.RemoveStandFromPlayFabIDDictionary(componentInChildren2);
 					}
-					UnityEngine.Object.Destroy(CustomMapLoader.storeDisplayStands[i]);
+					Object.Destroy(CustomMapLoader.storeDisplayStands[i]);
 					CustomMapLoader.storeDisplayStands.RemoveAt(i);
 				}
 			}
@@ -2408,7 +2408,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				{
 					componentInChildren3.RemoveFromCustomMap(CustomMapLoader.instance.compositeTryOnArea);
 					CosmeticsController.instance.RemoveItemCheckout(componentInChildren3);
-					UnityEngine.Object.Destroy(CustomMapLoader.storeCheckouts[i]);
+					Object.Destroy(CustomMapLoader.storeCheckouts[i]);
 					CustomMapLoader.storeCheckouts.RemoveAt(i);
 				}
 			}
@@ -2441,7 +2441,7 @@ public class CustomMapLoader : MonoBehaviour, IBuildValidation
 				if (component.IsNotNull() && component.IsFromScene(unloadingScene))
 				{
 					component.RemoveFromCustomMap(CustomMapLoader.instance.compositeTryOnArea);
-					UnityEngine.Object.Destroy(CustomMapLoader.storeTryOnAreas[i]);
+					Object.Destroy(CustomMapLoader.storeTryOnAreas[i]);
 					CustomMapLoader.storeTryOnAreas.RemoveAt(i);
 				}
 			}

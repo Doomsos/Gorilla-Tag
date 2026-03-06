@@ -5,8 +5,8 @@ public class CosmeticCritterSpawnerShadeHidden : CosmeticCritterSpawnerTimed
 {
 	public override void SetRandomVariables(CosmeticCritter critter)
 	{
-		float y = UnityEngine.Random.Range(this.orbitHeightOffsetMinMax.x, this.orbitHeightOffsetMinMax.y);
-		float radius = UnityEngine.Random.Range(this.orbitRadiusMinMax.x, this.orbitRadiusMinMax.y);
+		float y = Random.Range(this.orbitHeightOffsetMinMax.x, this.orbitHeightOffsetMinMax.y);
+		float radius = Random.Range(this.orbitRadiusMinMax.x, this.orbitRadiusMinMax.y);
 		(critter as CosmeticCritterShadeHidden).SetCenterAndRadius(base.transform.position + new Vector3(0f, y, 0f), radius);
 	}
 

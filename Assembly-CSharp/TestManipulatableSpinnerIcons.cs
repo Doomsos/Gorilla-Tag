@@ -22,8 +22,8 @@ public class TestManipulatableSpinnerIcons : MonoBehaviour
 		for (int i = 0; i < this.rollerElementCount; i++)
 		{
 			float x = this.rollerElementAngle * (float)i + this.rollerElementAngle * 0.5f;
-			UnityEngine.Object.Instantiate<GameObject>(this.rollerElementTemplate, base.transform).transform.localRotation = Quaternion.Euler(x, 0f, 0f);
-			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.iconElementTemplate, this.iconCanvas.transform);
+			Object.Instantiate<GameObject>(this.rollerElementTemplate, base.transform).transform.localRotation = Quaternion.Euler(x, 0f, 0f);
+			GameObject gameObject = Object.Instantiate<GameObject>(this.iconElementTemplate, this.iconCanvas.transform);
 			gameObject.transform.localRotation = Quaternion.Euler(x, 0f, 0f);
 			this.visibleIcons.Add(gameObject.GetComponentInChildren<Text>());
 		}

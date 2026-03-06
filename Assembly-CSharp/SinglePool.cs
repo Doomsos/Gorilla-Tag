@@ -12,7 +12,7 @@ public class SinglePool : IGorillaSimpleBackgroundWorker
 		{
 			return;
 		}
-		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.objectToPool, this.gameObject.transform, true);
+		GameObject gameObject = Object.Instantiate<GameObject>(this.objectToPool, this.gameObject.transform, true);
 		gameObject.name = this.objectToPool.name + "(PoolIndex=" + count.ToString() + ")";
 		gameObject.SetActive(false);
 		this.inactivePool.Push(gameObject);

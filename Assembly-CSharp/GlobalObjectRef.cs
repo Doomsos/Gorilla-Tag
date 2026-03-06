@@ -6,12 +6,12 @@ using UnityEngine;
 [StructLayout(LayoutKind.Explicit)]
 public struct GlobalObjectRef
 {
-	public static GlobalObjectRef ObjectToRefSlow(UnityEngine.Object target)
+	public static GlobalObjectRef ObjectToRefSlow(Object target)
 	{
 		return default(GlobalObjectRef);
 	}
 
-	public static UnityEngine.Object RefToObjectSlow(GlobalObjectRef @ref)
+	public static Object RefToObjectSlow(GlobalObjectRef @ref)
 	{
 		return null;
 	}

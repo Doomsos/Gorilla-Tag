@@ -38,7 +38,7 @@ public class RankedProgressionManager : MonoBehaviour
 		if (RankedProgressionManager.Instance)
 		{
 			GTDev.LogError<string>("Duplicate RankedProgressionManager detected. Destroying self.", base.gameObject, null);
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		RankedProgressionManager.Instance = this;

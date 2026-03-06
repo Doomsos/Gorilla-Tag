@@ -7,5 +7,5 @@ public class AssetContentAPI : ScriptableObject
 
 	public LazyLoadReference<TextAsset> bundleFile;
 
-	public UnityEngine.Object[] assets = new UnityEngine.Object[0];
+	public Object[] assets = new Object[0];
 }

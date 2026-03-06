@@ -210,7 +210,7 @@ public class SIGadgetBlaster : SIGadget, ITickSystemTick
 		GameObject gameObject;
 		if (list.Count <= 0)
 		{
-			gameObject = UnityEngine.Object.Instantiate<GameObject>(projectilePrefab.gameObject, position, rotation);
+			gameObject = Object.Instantiate<GameObject>(projectilePrefab.gameObject, position, rotation);
 		}
 		else
 		{

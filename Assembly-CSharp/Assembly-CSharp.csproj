@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A0870A1D-0CDA-45F8-B7AE-7DC85BD125E9}</ProjectGuid>
+    <ProjectGuid>{321A0067-C5D6-46E5-BD21-CF71FC3FCF1B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -249,6 +249,9 @@
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.TilemapModule">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
@@ -339,6 +342,7 @@
     <Compile Include="AudioMixVar.cs" />
     <Compile Include="AudioMixVarPool.cs" />
     <Compile Include="AudioSourceClipRandomizer.cs" />
+    <Compile Include="AudioSourceEventTargets.cs" />
     <Compile Include="AutoCatchThrowBall.cs" />
     <Compile Include="AutomaticAdjustIPD.cs" />
     <Compile Include="AutoSyncTransforms.cs" />
@@ -512,7 +516,6 @@
     <Compile Include="CasualGameMode.cs" />
     <Compile Include="CasualGameModeData.cs" />
     <Compile Include="CatmullRomSpline.cs" />
-    <Compile Include="CheatUpdate.cs" />
     <Compile Include="CheckoutCartButton.cs" />
     <Compile Include="ChestHeartbeat.cs" />
     <Compile Include="ChestObjectHysteresis.cs" />
@@ -577,6 +580,7 @@
     <Compile Include="CopyMaterialScript.cs" />
     <Compile Include="CopySpawnerData.cs" />
     <Compile Include="CornOnCobCosmetic.cs" />
+    <Compile Include="CosmeticAgeOveride.cs" />
     <Compile Include="CosmeticAnchorManager.cs" />
     <Compile Include="CosmeticAnchors.cs" />
     <Compile Include="CosmeticBoundaryTrigger.cs" />
@@ -720,6 +724,7 @@
     <Compile Include="CustomMapTelemetryTrigger.cs" />
     <Compile Include="CustomObjectProvider.cs" />
     <Compile Include="CustomSerializer.cs" />
+    <Compile Include="CyclicalActivator.cs" />
     <Compile Include="CylinderAxisLockedInfo.cs" />
     <Compile Include="D20_ShaderManager.cs" />
     <Compile Include="DampenVolumeSpace.cs" />
@@ -773,6 +778,7 @@
     <Compile Include="DictValueTypeUtils.cs" />
     <Compile Include="DisableGameObjectDelayed.cs" />
     <Compile Include="DisableOtherObjectsWhileActive.cs" />
+    <Compile Include="DisableScreamer.cs" />
     <Compile Include="DisconnectFromRoom.cs" />
     <Compile Include="DistanceMeasure.cs" />
     <Compile Include="DJDeckEqualizer.cs" />
@@ -782,6 +788,7 @@
     <Compile Include="Docking\Dockable.cs" />
     <Compile Include="Docking\LivCameraDock.cs" />
     <Compile Include="Docking\LivCameraDockable.cs" />
+    <Compile Include="DoNotShip.cs" />
     <Compile Include="DoorSlidingOpenAudio.cs" />
     <Compile Include="DragDropComponentsAttribute.cs" />
     <Compile Include="DragDropScenesAttribute.cs" />
@@ -964,6 +971,7 @@
     <Compile Include="GameEntity.cs" />
     <Compile Include="GameEntityCreateData.cs" />
     <Compile Include="GameEntityData.cs" />
+    <Compile Include="GameEntityDelayedDestroy.cs" />
     <Compile Include="GameEntityId.cs" />
     <Compile Include="GameEntityManager.cs" />
     <Compile Include="GameEntityZone.cs" />
@@ -1207,6 +1215,7 @@
     <Compile Include="GorillaNetworking\GorillaServer.cs" />
     <Compile Include="GorillaNetworking\GorillaText.cs" />
     <Compile Include="GorillaNetworking\GorillaTextManager.cs" />
+    <Compile Include="GorillaNetworking\ICosmeticRequestCallback.cs" />
     <Compile Include="GorillaNetworking\JoinType.cs" />
     <Compile Include="GorillaNetworking\PhotonNetworkController.cs" />
     <Compile Include="GorillaNetworking\PlayFabAuthenticator.cs" />
@@ -1237,7 +1246,6 @@
     <Compile Include="GorillaNetworking\Store\StoreUpdater.cs" />
     <Compile Include="GorillaNetworking\SubmitAcceptedAgreementsRequest.cs" />
     <Compile Include="GorillaNetworking\TitleDataFeatureFlags.cs" />
-    <Compile Include="GorillaNetworking\TitleVotingExample.cs" />
     <Compile Include="GorillaNetworkLeaveTutorialTrigger.cs" />
     <Compile Include="GorillaNetworkPublicTestJoin2.cs" />
     <Compile Include="GorillaNetworkPublicTestsJoin.cs" />
@@ -1429,6 +1437,8 @@
     <Compile Include="GorillaTagScripts\SceneBasedObject.cs" />
     <Compile Include="GorillaTagScripts\SnapOverlap.cs" />
     <Compile Include="GorillaTagScripts\SubscriptionManager.cs" />
+    <Compile Include="GorillaTagScripts\Subscription\FeatureTogglesScreen.cs" />
+    <Compile Include="GorillaTagScripts\Subscription\FeatureToggleUI.cs" />
     <Compile Include="GorillaTagScripts\Subscription\HandScanner.cs" />
     <Compile Include="GorillaTagScripts\Subscription\SubscriberExclusiveZone.cs" />
     <Compile Include="GorillaTagScripts\Subscription\SubscriberZoneTrigger.cs" />
@@ -1632,6 +1642,7 @@
     <Compile Include="GorillaTag\ListProcessor.cs" />
     <Compile Include="GorillaTag\ListProcessorAbstract.cs" />
     <Compile Include="GorillaTag\MaterialDatasSO.cs" />
+    <Compile Include="GorillaTag\MonkeAgentCleanup.cs" />
     <Compile Include="GorillaTag\MonkeFX\MonkeFX.cs" />
     <Compile Include="GorillaTag\MonkeFX\MonkeFXMono.cs" />
     <Compile Include="GorillaTag\MonkeFX\MonkeFXSettingsSO.cs" />
@@ -1774,6 +1785,7 @@
     <Compile Include="GRDistillery.cs" />
     <Compile Include="GRDistilleryDeposit.cs" />
     <Compile Include="GRDoor.cs" />
+    <Compile Include="GRDoorWrapper.cs" />
     <Compile Include="GRDropTableOverrides.cs" />
     <Compile Include="GRDropZone.cs" />
     <Compile Include="GRElevator.cs" />
@@ -1795,7 +1807,6 @@
     <Compile Include="GREnemyXRayVisionEffect.cs" />
     <Compile Include="GREntityDebugCanvas.cs" />
     <Compile Include="GREntityDestroyTrigger.cs" />
-    <Compile Include="GREntityLifetime.cs" />
     <Compile Include="GREntitySpawnPoint.cs" />
     <Compile Include="GreyZoneActivator.cs" />
     <Compile Include="GreyZoneManager.cs" />
@@ -1913,6 +1924,7 @@
     <Compile Include="GtLckServiceInitializer.cs" />
     <Compile Include="GTMaterialSettingsPreset.cs" />
     <Compile Include="GTMathUtil\CriticalSpringDamper.cs" />
+    <Compile Include="GTMathUtil\WithinBounds.cs" />
     <Compile Include="GTMeshData.cs" />
     <Compile Include="GTOption.cs" />
     <Compile Include="GTPosRotConstraintManager.cs" />
@@ -1976,9 +1988,10 @@
     <Compile Include="HandTapOverrides.cs" />
     <Compile Include="HandTapReactor.cs" />
     <Compile Include="HandTrackingFingerCurl.cs" />
-    <Compile Include="HandTransformFollowOffest.cs" />
+    <Compile Include="HandTransformFollowOffset.cs" />
     <Compile Include="HangingClaw.cs" />
     <Compile Include="HapticsWithDistance.cs" />
+    <Compile Include="HatcheryEventFlashlight.cs" />
     <Compile Include="HauntedObject.cs" />
     <Compile Include="HeadModel.cs" />
     <Compile Include="HeightVolume.cs" />
@@ -2285,7 +2298,6 @@
     <Compile Include="MicrophoneCosmetic.cs" />
     <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
     <Compile Include="MirrorCameraScript.cs" />
-    <Compile Include="MockFriendServer.cs" />
     <Compile Include="MockWarningServer.cs" />
     <Compile Include="ModeSelectButton.cs" />
     <Compile Include="ModIOAccountLinkingTerminal.cs" />
@@ -2472,7 +2484,6 @@
     <Compile Include="PhotonSignal.6.cs" />
     <Compile Include="PhotonSignal.cs" />
     <Compile Include="PhotonSignalInfo.cs" />
-    <Compile Include="PhotonUserCache.cs" />
     <Compile Include="PhotonUtils.cs" />
     <Compile Include="PhotonViewCache.cs" />
     <Compile Include="PhotonViewIDAllocator.cs" />
@@ -2515,6 +2526,7 @@
     <Compile Include="PooledList.cs" />
     <Compile Include="PoolUtils.cs" />
     <Compile Include="PoseStiffnessComparison.cs" />
+    <Compile Include="Positionable.cs" />
     <Compile Include="PositionVolumeModifier.cs" />
     <Compile Include="PostVRRigPhysicsSynch.cs" />
     <Compile Include="PredicatableRandomRotation.cs" />
@@ -2567,6 +2579,7 @@
     <Compile Include="RacingScoreboard.cs" />
     <Compile Include="RadialBounds.cs" />
     <Compile Include="RadialBoundsTrigger.cs" />
+    <Compile Include="RadialGravity.cs" />
     <Compile Include="RadioButtonGroupWearable.cs" />
     <Compile Include="RandomAnimationSelector.cs" />
     <Compile Include="RandomAudioStart.cs" />
@@ -2606,7 +2619,9 @@
     <Compile Include="ReverbTrigger.cs" />
     <Compile Include="RigContainer.cs" />
     <Compile Include="RigDuplicationZone.cs" />
+    <Compile Include="RigEventGate.cs" />
     <Compile Include="RigEventVolume.cs" />
+    <Compile Include="RigEventVolumeTrigger.cs" />
     <Compile Include="RigOwnedPhysicsBody.cs" />
     <Compile Include="RingBuffer.cs" />
     <Compile Include="RockPiles.cs" />
@@ -2722,6 +2737,7 @@
     <Compile Include="SIHandScanner.cs" />
     <Compile Include="SIHandScannerTrigger.cs" />
     <Compile Include="SimpleCountdown.cs" />
+    <Compile Include="SimpleEventSequencer.cs" />
     <Compile Include="SimpleSpeedTracker.cs" />
     <Compile Include="SimpleStateMachine.cs" />
     <Compile Include="SimpleTeleporter.cs" />
@@ -3094,7 +3110,7 @@
     <Compile Include="VoiceLoudnessReactorRendererColorTarget.cs" />
     <Compile Include="VoiceLoudnessReactorTransformRotationTarget.cs" />
     <Compile Include="VoiceLoudnessReactorTransformTarget.cs" />
-    <Compile Include="VoicePitchShiftCosmetic.cs" />
+    <Compile Include="VoiceShiftCosmetic.cs" />
     <Compile Include="VolumeCast.cs" />
     <Compile Include="VotingCard.cs" />
     <Compile Include="VRMap.cs" />

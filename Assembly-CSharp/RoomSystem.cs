@@ -133,7 +133,7 @@ internal class RoomSystem : MonoBehaviour
 	private void Awake()
 	{
 		base.transform.SetParent(null, true);
-		UnityEngine.Object.DontDestroyOnLoad(this);
+		Object.DontDestroyOnLoad(this);
 		RoomSystem.playerImpactEffectPrefab = this.roomSettings.PlayerImpactEffect;
 		RoomSystem.callbackInstance = this;
 		RoomSystem.disconnectTimer.Interval = (double)(this.roomSettings.PausedDCTimer * 1000);
@@ -718,11 +718,12 @@ internal class RoomSystem : MonoBehaviour
 		{
 			TargetActors = new int[1]
 		};
-		foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+		foreach (RigContainer rigContainer in VRRigCache.ActiveRigContainers)
 		{
-			if (vrrig.IsLocalPartyMember && vrrig.creator != NetworkSystem.Instance.LocalPlayer)
+			VRRig rig = rigContainer.Rig;
+			if (rig.IsLocalPartyMember && rig.creator != NetworkSystem.Instance.LocalPlayer)
 			{
-				netEventOptions.TargetActors[0] = vrrig.creator.ActorNumber;
+				netEventOptions.TargetActors[0] = rig.creator.ActorNumber;
 				byte b = 7;
 				object obj = RoomSystem.groupJoinSendData;
 				RoomSystem.SendEvent(b, obj, netEventOptions, false);
@@ -1053,7 +1054,7 @@ internal class RoomSystem : MonoBehaviour
 	{
 		NetPlayer player = NetworkSystem.Instance.GetPlayer(info.senderID);
 		MonkeAgent.IncrementRPCCall(info, "DeserializeSoundEffect");
-		if (!player.Equals(NetworkSystem.Instance.MasterClient))
+		if (!player.Equals(RoomSystem.GetLowestActorNumberPlayer()))
 		{
 			MonkeAgent.instance.SendReport("invalid sound effect", player.UserId, player.NickName);
 			return;

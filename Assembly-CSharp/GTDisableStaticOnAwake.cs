@@ -6,6 +6,6 @@ public class GTDisableStaticOnAwake : MonoBehaviour
 	private void Awake()
 	{
 		base.gameObject.isStatic = false;
-		UnityEngine.Object.Destroy(this);
+		Object.Destroy(this);
 	}
 }

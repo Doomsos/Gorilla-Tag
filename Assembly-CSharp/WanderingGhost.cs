@@ -35,7 +35,7 @@ public class WanderingGhost : NetworkComponent
 	{
 		this.UpdateState();
 		this.hoverVelocity -= this.mrenderer.transform.localPosition * this.hoverRectifyForce * Time.deltaTime;
-		this.hoverVelocity += UnityEngine.Random.insideUnitSphere * this.hoverRandomForce * Time.deltaTime;
+		this.hoverVelocity += Random.insideUnitSphere * this.hoverRandomForce * Time.deltaTime;
 		this.hoverVelocity = Vector3.MoveTowards(this.hoverVelocity, Vector3.zero, this.hoverDrag * Time.deltaTime);
 		this.mrenderer.transform.localPosition += this.hoverVelocity * Time.deltaTime;
 	}
@@ -61,7 +61,7 @@ public class WanderingGhost : NetworkComponent
 				this.waypoints.Add(new WanderingGhost.Waypoint(transform.name.Contains("_v_"), transform));
 			}
 		}
-		int index = UnityEngine.Random.Range(0, this.waypoints.Count);
+		int index = Random.Range(0, this.waypoints.Count);
 		this.currentWaypoint = this.waypoints[index];
 		this.waypoints.RemoveAt(index);
 	}
@@ -246,7 +246,7 @@ public class WanderingGhost : NetworkComponent
 	{
 		Vector3 position = base.transform.position + Vector3.down * 0.25f;
 		RaycastHit raycastHit;
-		if (Physics.Raycast(new Ray(base.transform.position + UnityEngine.Random.insideUnitCircle.x0y() * this.flowerSpawnRadius, Vector3.down), out raycastHit, 3f, this.flowerGroundMask))
+		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * this.flowerSpawnRadius, Vector3.down), out raycastHit, 3f, this.flowerGroundMask))
 		{
 			position = raycastHit.point;
 		}
@@ -257,7 +257,7 @@ public class WanderingGhost : NetworkComponent
 			if (!throwableSetDressing2.InHand())
 			{
 				num++;
-				if (UnityEngine.Random.Range(0, num) == 0)
+				if (Random.Range(0, num) == 0)
 				{
 					throwableSetDressing = throwableSetDressing2;
 				}

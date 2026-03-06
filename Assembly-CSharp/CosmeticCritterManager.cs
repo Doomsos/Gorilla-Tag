@@ -173,11 +173,11 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 			dictionary[key]++;
 		}
 		this.activeCrittersBySeed.Add(seed, component);
-		UnityEngine.Random.State state = UnityEngine.Random.state;
-		UnityEngine.Random.InitState(seed);
+		Random.State state = Random.state;
+		Random.InitState(seed);
 		spawner.SetRandomVariables(component);
 		component.SetRandomVariables();
-		UnityEngine.Random.state = state;
+		Random.state = state;
 		spawner.OnSpawn(component);
 		component.OnSpawn();
 	}
@@ -270,7 +270,7 @@ public class CosmeticCritterManager : NetworkSceneObject, ITickSystemTick
 			int num2;
 			if ((!this.activeCrittersPerType.TryGetValue(cosmeticCritterSpawnerIndependent.GetCritterType(), out num2) || num2 < cosmeticCritterSpawnerIndependent.GetCritter().GetGlobalMaxCritters()) && cosmeticCritterSpawnerIndependent.CanSpawnLocal())
 			{
-				int num3 = UnityEngine.Random.Range(0, int.MaxValue);
+				int num3 = Random.Range(0, int.MaxValue);
 				if (!this.activeCrittersBySeed.ContainsKey(num3))
 				{
 					this.ReuseOrSpawnNewCritter(cosmeticCritterSpawnerIndependent, num3, PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.timeAsDouble);

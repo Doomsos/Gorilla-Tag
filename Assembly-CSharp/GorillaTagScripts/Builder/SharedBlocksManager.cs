@@ -68,7 +68,7 @@ namespace GorillaTagScripts.Builder
 				}
 				return;
 			}
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 
 		public void Start()
@@ -383,9 +383,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.voteRetryCount < this.maxRetriesOnFail)
 				{
-					float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.voteRetryCount + 1)));
+					float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.voteRetryCount + 1)));
 					this.voteRetryCount++;
-					yield return new WaitForSeconds(seconds);
+					yield return new WaitForSecondsRealtime(time);
 					this.voteInProgress = false;
 					this.RequestVote(data.mapId, data.vote == 1, callback);
 				}
@@ -546,9 +546,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.postPublishMapRetryCount < this.maxRetriesOnFail)
 				{
-					float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.postPublishMapRetryCount + 1)));
+					float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.postPublishMapRetryCount + 1)));
 					this.postPublishMapRetryCount++;
-					yield return new WaitForSeconds(seconds);
+					yield return new WaitForSecondsRealtime(time);
 					this.publishRequestInProgress = false;
 					this.RequestPublishMap(data.userdataMetadataKey);
 				}
@@ -649,9 +649,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.getMapDataFromIDRetryCount < this.maxRetriesOnFail)
 				{
-					float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.getMapDataFromIDRetryCount + 1)));
+					float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.getMapDataFromIDRetryCount + 1)));
 					this.getMapDataFromIDRetryCount++;
-					yield return new WaitForSeconds(seconds);
+					yield return new WaitForSecondsRealtime(time);
 					this.getMapDataFromIDInProgress = false;
 					this.RequestMapDataFromID(data.mapId, callback);
 				}
@@ -703,7 +703,7 @@ namespace GorillaTagScripts.Builder
 				return false;
 			}
 			this.getTopMapsInProgress = true;
-			this.lastGetTopMapsTime = Time.timeAsDouble;
+			this.lastGetTopMapsTime = Time.realtimeSinceStartupAsDouble;
 			base.StartCoroutine(this.GetTopMaps(new SharedBlocksManager.GetMapsRequest
 			{
 				mothershipId = MothershipClientContext.MothershipId,
@@ -783,9 +783,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.getTopMapsRetryCount < this.maxRetriesOnFail)
 				{
-					float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.getTopMapsRetryCount + 1)));
+					float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.getTopMapsRetryCount + 1)));
 					this.getTopMapsRetryCount++;
-					yield return new WaitForSeconds(seconds);
+					yield return new WaitForSecondsRealtime(time);
 					this.getTopMapsInProgress = false;
 					this.RequestGetTopMaps(data.page, data.pageSize, data.sort);
 				}
@@ -930,9 +930,9 @@ namespace GorillaTagScripts.Builder
 			{
 				if (this.updateMapActiveRetryCount < this.maxRetriesOnFail)
 				{
-					float seconds = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.updateMapActiveRetryCount + 1)));
+					float time = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.updateMapActiveRetryCount + 1)));
 					this.updateMapActiveRetryCount++;
-					yield return new WaitForSeconds(seconds);
+					yield return new WaitForSecondsRealtime(time);
 					this.updateMapActiveInProgress = false;
 					this.RequestUpdateMapActive(data.userdataMetadataKey, data.setActive);
 				}
@@ -1008,7 +1008,7 @@ namespace GorillaTagScripts.Builder
 			GTDev.LogWarning<string>("SharedBlocksManager OnGetConfigurationFail " + error.Error.ToString(), null);
 			if (error.Error == PlayFabErrorCode.ConnectionError && this.fetchTableConfigRetryCount < this.maxRetriesOnFail)
 			{
-				float waitTime = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchTableConfigRetryCount + 1)));
+				float waitTime = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchTableConfigRetryCount + 1)));
 				this.fetchTableConfigRetryCount++;
 				base.StartCoroutine(this.RetryAfterWaitTime(waitTime, new Action(this.FetchConfigurationFromTitleData)));
 				return;
@@ -1025,7 +1025,7 @@ namespace GorillaTagScripts.Builder
 
 		private IEnumerator RetryAfterWaitTime(float waitTime, Action function)
 		{
-			yield return new WaitForSeconds(waitTime);
+			yield return new WaitForSecondsRealtime(waitTime);
 			if (function != null)
 			{
 				function();
@@ -1062,7 +1062,7 @@ namespace GorillaTagScripts.Builder
 		{
 			while (!PlayFabSettings.staticPlayer.IsClientLoggedIn())
 			{
-				yield return new WaitForSeconds(5f);
+				yield return new WaitForSecondsRealtime(5f);
 			}
 			PlayFabClientAPI.GetTitleData(request, successCallback, failCallback, null, null);
 			yield break;
@@ -1105,7 +1105,7 @@ namespace GorillaTagScripts.Builder
 			GTDev.LogWarning<string>("SharedBlocksManager FetchTitleDataBuildFail " + error.Error.ToString(), null);
 			if (error.Error == PlayFabErrorCode.ConnectionError && this.fetchTitleDataRetryCount < this.maxRetriesOnFail)
 			{
-				float waitTime = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchTitleDataRetryCount + 1)));
+				float waitTime = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchTitleDataRetryCount + 1)));
 				this.fetchTitleDataRetryCount++;
 				base.StartCoroutine(this.RetryAfterWaitTime(waitTime, new Action(this.FetchTitleDataBuild)));
 				return;
@@ -1221,7 +1221,7 @@ namespace GorillaTagScripts.Builder
 		{
 			while (!PlayFabSettings.staticPlayer.IsClientLoggedIn())
 			{
-				yield return new WaitForSeconds(5f);
+				yield return new WaitForSecondsRealtime(5f);
 			}
 			try
 			{
@@ -1275,7 +1275,7 @@ namespace GorillaTagScripts.Builder
 			GTDev.LogWarning<string>("SharedBlocksManager OnFetchBuildsFromPlayfabFail " + (((error != null) ? error.ErrorMessage : null) ?? "Null"), null);
 			if (error != null && error.Error == PlayFabErrorCode.ConnectionError && this.fetchPlayfabBuildsRetryCount < this.maxRetriesOnFail)
 			{
-				float waitTime = UnityEngine.Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchPlayfabBuildsRetryCount + 1)));
+				float waitTime = Random.Range(0.5f, Mathf.Pow(2f, (float)(this.fetchPlayfabBuildsRetryCount + 1)));
 				this.fetchPlayfabBuildsRetryCount++;
 				base.StartCoroutine(this.RetryAfterWaitTime(waitTime, new Action(this.FetchBuildFromPlayfab)));
 				return;

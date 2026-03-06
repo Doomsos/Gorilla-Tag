@@ -26,7 +26,7 @@ public class HierarchyFlattenerRemoveXform : MonoBehaviour
 		{
 			transform.GetChild(i).SetParent(transform.parent, true);
 		}
-		UnityEngine.Object.Destroy(base.gameObject);
+		Object.Destroy(base.gameObject);
 		if (componentInParent != null)
 		{
 			componentInParent._DoIt();

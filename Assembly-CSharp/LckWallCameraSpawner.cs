@@ -23,7 +23,7 @@ public class LckWallCameraSpawner : MonoBehaviour
 		LckWallCameraSpawner.AddGTag(Camera.main.gameObject, GtTagType.HMD);
 		LckWallCameraSpawner.AddGTag(instance.gameObject, GtTagType.Player);
 		Transform transform = instance.bodyCollider.transform;
-		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._lckBodySpawnerPrefab, transform.parent);
+		GameObject gameObject = Object.Instantiate<GameObject>(this._lckBodySpawnerPrefab, transform.parent);
 		Transform transform2 = gameObject.transform;
 		transform2.localPosition = Vector3.zero;
 		transform2.localRotation = Quaternion.identity;
@@ -266,7 +266,7 @@ public class LckWallCameraSpawner : MonoBehaviour
 		RenderTexture targetTexture = LckWallCameraSpawner._prewarmCamera.targetTexture;
 		LckWallCameraSpawner._prewarmCamera.targetTexture = null;
 		targetTexture.Release();
-		UnityEngine.Object.Destroy(LckWallCameraSpawner._prewarmCamera.gameObject);
+		Object.Destroy(LckWallCameraSpawner._prewarmCamera.gameObject);
 		LckWallCameraSpawner._prewarmCamera = null;
 	}
 

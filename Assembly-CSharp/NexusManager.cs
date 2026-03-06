@@ -22,7 +22,7 @@ public class NexusManager : MonoBehaviour
 			NexusManager.instance = this;
 			return;
 		}
-		UnityEngine.Object.Destroy(this);
+		Object.Destroy(this);
 	}
 
 	private void Start()

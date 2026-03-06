@@ -79,11 +79,11 @@ public class SIGadgetTapTeleporter : SIGadget
 
 	private Color GenerateColor(int seed)
 	{
-		UnityEngine.Random.InitState(seed);
-		float num = Mathf.Lerp(this.maxBrightness, this.minBrightness, UnityEngine.Random.value);
-		float num2 = Mathf.Lerp(this.maxBrightness, this.minBrightness, UnityEngine.Random.value);
+		Random.InitState(seed);
+		float num = Mathf.Lerp(this.maxBrightness, this.minBrightness, Random.value);
+		float num2 = Mathf.Lerp(this.maxBrightness, this.minBrightness, Random.value);
 		Color black = Color.black;
-		switch (UnityEngine.Random.Range(0, 3))
+		switch (Random.Range(0, 3))
 		{
 		case 0:
 			black.r = num;

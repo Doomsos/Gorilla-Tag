@@ -12,7 +12,7 @@ public class ShoppingCart : MonoBehaviour
 		}
 		if (ShoppingCart.instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 	}
 

@@ -231,7 +231,7 @@ namespace GorillaTag.Rendering
 					base.transform.GetPath(),
 					"\""
 				}), this);
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 				return false;
 			}
 			ZoneShaderSettings.defaultsInstance = this;

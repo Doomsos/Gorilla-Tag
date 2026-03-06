@@ -18,7 +18,7 @@ public class LocalisationUI : MonoBehaviour
 	{
 		if (LocalisationUI._instance != null)
 		{
-			UnityEngine.Object.DestroyImmediate(this);
+			Object.DestroyImmediate(this);
 			return;
 		}
 		LocalisationUI._instance = this;
@@ -78,7 +78,7 @@ public class LocalisationUI : MonoBehaviour
 			while (enumerator.MoveNext())
 			{
 				KeyValuePair<int, Locale> item = enumerator.Current;
-				KIDUIButton newButton = UnityEngine.Object.Instantiate<KIDUIButton>(this._languageButtonPrefab, this._languageButtonGridTransform);
+				KIDUIButton newButton = Object.Instantiate<KIDUIButton>(this._languageButtonPrefab, this._languageButtonGridTransform);
 				bool forceEnglishChars = LocalisationManager.CurrentLanguage.Identifier.Code.ToLower() != "ja";
 				newButton.SetText(LocalisationManager.LocaleToFriendlyString(item.Value, forceEnglishChars).ToUpper());
 				newButton.onClick.AddListener(delegate()

@@ -27,7 +27,7 @@ namespace GorillaTag.GuidedRefs
 			}
 		}
 
-		UnityEngine.Object IGuidedRefTargetMono.GuidedRefTargetObject
+		Object IGuidedRefTargetMono.GuidedRefTargetObject
 		{
 			get
 			{

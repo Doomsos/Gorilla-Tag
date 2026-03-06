@@ -36,7 +36,7 @@ namespace GorillaTagScripts.CustomMapSupport
 				GTPlayer instance = GTPlayer.Instance;
 				if (this.TeleportPoints.Count != 0)
 				{
-					Transform transform = this.TeleportPoints[UnityEngine.Random.Range(0, this.TeleportPoints.Count)];
+					Transform transform = this.TeleportPoints[Random.Range(0, this.TeleportPoints.Count)];
 					if (transform != null)
 					{
 						instance.TeleportTo(transform, this.matchTeleportPointRotation, this.maintainVelocity);

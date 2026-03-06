@@ -2291,7 +2291,7 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 	public void OnMyCreatorLeft()
 	{
 		this.OnItemDestroyedOrDisabled();
-		UnityEngine.Object.Destroy(base.gameObject);
+		Object.Destroy(base.gameObject);
 	}
 
 	public bool BuildValidationCheck()
@@ -2613,8 +2613,6 @@ public class TransferrableObject : HoldableObject, ISelfValidator, IRequestableO
 	public Transform InitialDockObject;
 
 	private AudioSource audioSrc;
-
-	private bool _isListeningFor_OnPostInstantiateAllPrefabs2;
 
 	protected Transform _defaultAnchor;
 

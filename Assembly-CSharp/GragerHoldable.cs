@@ -28,7 +28,7 @@ public class GragerHoldable : MonoBehaviour
 		Vector3 a2 = base.transform.parent.InverseTransformPoint(base.transform.TransformPoint(this.LocalCenterOfMass));
 		if ((a2 - this.lastClackParentLocalPosition).IsLongerThan(this.distancePerClack))
 		{
-			this.clackAudio.GTPlayOneShot(this.allClacks[UnityEngine.Random.Range(0, this.allClacks.Length)], 1f);
+			this.clackAudio.GTPlayOneShot(this.allClacks[Random.Range(0, this.allClacks.Length)], 1f);
 			this.lastClackParentLocalPosition = a2;
 		}
 	}

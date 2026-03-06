@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [Serializable]
-public class OptionalRef<T> where T : UnityEngine.Object
+public class OptionalRef<T> where T : Object
 {
 	public bool enabled
 	{
@@ -42,7 +42,7 @@ public class OptionalRef<T> where T : UnityEngine.Object
 		{
 			return false;
 		}
-		UnityEngine.Object @object = r._target;
+		Object @object = r._target;
 		return @object != null && @object;
 	}
 
@@ -56,7 +56,7 @@ public class OptionalRef<T> where T : UnityEngine.Object
 		{
 			return default(T);
 		}
-		UnityEngine.Object @object = r._target;
+		Object @object = r._target;
 		if (@object == null)
 		{
 			return default(T);
@@ -68,7 +68,7 @@ public class OptionalRef<T> where T : UnityEngine.Object
 		return @object as T;
 	}
 
-	public static implicit operator UnityEngine.Object(OptionalRef<T> r)
+	public static implicit operator Object(OptionalRef<T> r)
 	{
 		if (r == null)
 		{
@@ -78,7 +78,7 @@ public class OptionalRef<T> where T : UnityEngine.Object
 		{
 			return null;
 		}
-		UnityEngine.Object @object = r._target;
+		Object @object = r._target;
 		if (@object == null)
 		{
 			return null;

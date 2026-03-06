@@ -8,7 +8,7 @@ public class HideInQuest1AtRuntime : MonoBehaviour
 	{
 		if (PlayFabAuthenticator.instance != null && "Quest1" == PlayFabAuthenticator.instance.platform.ToString())
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 	}
 }

@@ -9,7 +9,7 @@ namespace GorillaTag.Cosmetics
 	[Serializable]
 	public class ContinuousProperty
 	{
-		private static ContinuousProperty.Cast GetTargetCast(UnityEngine.Object o)
+		private static ContinuousProperty.Cast GetTargetCast(Object o)
 		{
 			ContinuousProperty.Cast result;
 			if (!(o is ParticleSystem))
@@ -20,7 +20,7 @@ namespace GorillaTag.Cosmetics
 					{
 						if (!(o is AudioSource))
 						{
-							if (!(o is VoicePitchShiftCosmetic))
+							if (!(o is VoiceShiftCosmetic))
 							{
 								if (!(o is Rigidbody))
 								{
@@ -123,7 +123,7 @@ namespace GorillaTag.Cosmetics
 			return (flags & test) > ContinuousProperty.DataFlags.None;
 		}
 
-		private static void GetAllValidObjectsNonAlloc(Transform t, List<UnityEngine.Object> objects)
+		private static void GetAllValidObjectsNonAlloc(Transform t, List<Object> objects)
 		{
 			objects.Clear();
 			objects.Add(t.gameObject);
@@ -249,7 +249,7 @@ namespace GorillaTag.Cosmetics
 			}
 		}
 
-		public UnityEngine.Object Target
+		public Object Target
 		{
 			get
 			{
@@ -292,8 +292,8 @@ namespace GorillaTag.Cosmetics
 			}
 			Stack<Transform> stack = new Stack<Transform>();
 			stack.Push(transform3);
-			List<UnityEngine.Object> list = new List<UnityEngine.Object>();
-			List<UnityEngine.Object> list2 = new List<UnityEngine.Object>();
+			List<Object> list = new List<Object>();
+			List<Object> list2 = new List<Object>();
 			Transform transform4;
 			while (stack.TryPop(out transform4))
 			{
@@ -302,7 +302,7 @@ namespace GorillaTag.Cosmetics
 					num = list.Count;
 				}
 				ContinuousProperty.GetAllValidObjectsNonAlloc(transform4, list2);
-				foreach (UnityEngine.Object @object in list2)
+				foreach (Object @object in list2)
 				{
 					if (this.mode.IsCastValid(ContinuousProperty.GetTargetCast(@object)))
 					{
@@ -753,7 +753,7 @@ namespace GorillaTag.Cosmetics
 					{
 						if (num == 11278)
 						{
-							((VoicePitchShiftCosmetic)this.target).Pitch = this.curve.Evaluate(f);
+							((VoiceShiftCosmetic)this.target).Pitch = this.curve.Evaluate(f);
 							return;
 						}
 						if (num == 1049617)
@@ -974,7 +974,7 @@ namespace GorillaTag.Cosmetics
 					{
 						float num4 = this.curve.Evaluate(f);
 						float num5 = 1f - Mathf.Exp(-num4 * deltaTime);
-						if (UnityEngine.Random.value < num5)
+						if (Random.value < num5)
 						{
 							this.unityEvent.Invoke(num4);
 							return;
@@ -1030,7 +1030,7 @@ namespace GorillaTag.Cosmetics
 					return false;
 				}
 				float num = 1f - Mathf.Exp(-f * deltaTime);
-				return UnityEngine.Random.value < num;
+				return Random.value < num;
 			}
 			else
 			{
@@ -1069,7 +1069,7 @@ namespace GorillaTag.Cosmetics
 
 		[FormerlySerializedAs("component")]
 		[SerializeField]
-		protected UnityEngine.Object target;
+		protected Object target;
 
 		[SerializeField]
 		private Gradient color;

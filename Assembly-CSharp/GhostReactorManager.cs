@@ -920,7 +920,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		}
 		GhostReactorShiftManager shiftManager = this.reactor.shiftManager;
 		GhostReactorLevelGenerator levelGenerator = this.reactor.levelGenerator;
-		if (shiftManager == null || !shiftManager.authorizedToDelveDeeper || !shiftManager.ShiftActive)
+		if (shiftManager == null || !shiftManager.ShiftActive)
 		{
 			return;
 		}
@@ -2113,7 +2113,7 @@ public class GhostReactorManager : NetworkComponent, IGameEntityZoneComponent
 		GameEntity gameEntity = this.gameEntityManager.GetGameEntity(this.gameEntityManager.GetEntityIdFromNetId(entityNetId));
 		if (gameEntity != null)
 		{
-			UnityEngine.Object component = gameEntity.GetComponent<GRTool>();
+			Object component = gameEntity.GetComponent<GRTool>();
 			GameEntity gameEntity2 = this.gameEntityManager.GetGameEntity(this.gameEntityManager.GetEntityIdFromNetId(upgradeNetID));
 			if (component != null && gameEntity2 != null && GameEntityManager.IsPlayerHandNearPosition(grplayer.gamePlayer, gameEntity2.transform.position, false, true, 16f) && GameEntityManager.IsPlayerHandNearPosition(grplayer.gamePlayer, gameEntity2.transform.position, false, true, 16f))
 			{

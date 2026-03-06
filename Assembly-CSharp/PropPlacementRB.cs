@@ -14,7 +14,7 @@ public class PropPlacementRB : MonoBehaviour, IDelayedExecListener
 	{
 		if (this._placingProp != null)
 		{
-			UnityEngine.Object.Destroy(this._placingProp);
+			Object.Destroy(this._placingProp);
 		}
 	}
 
@@ -132,7 +132,7 @@ public class PropPlacementRB : MonoBehaviour, IDelayedExecListener
 	{
 		if (this._placingProp != null)
 		{
-			UnityEngine.Object.Destroy(this._placingProp);
+			Object.Destroy(this._placingProp);
 			this._placingProp = null;
 		}
 	}

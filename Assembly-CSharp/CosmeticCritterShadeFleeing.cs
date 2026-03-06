@@ -30,7 +30,7 @@ public class CosmeticCritterShadeFleeing : CosmeticCritter
 			num += this.modelSwaps[i].relativeProbability;
 			this.modelSwaps[i].gameObject.SetActive(false);
 		}
-		float num2 = UnityEngine.Random.value * num;
+		float num2 = Random.value * num;
 		for (int j = 0; j < this.modelSwaps.Length; j++)
 		{
 			if (num2 < this.modelSwaps[j].relativeProbability)
@@ -40,8 +40,8 @@ public class CosmeticCritterShadeFleeing : CosmeticCritter
 			}
 			num2 -= this.modelSwaps[j].relativeProbability;
 		}
-		this.fleeBobFrequencyXY = new Vector2(UnityEngine.Random.Range(-1f, 1f) * this.fleeBobFrequencyXYMax.x, UnityEngine.Random.Range(-1f, 1f) * this.fleeBobFrequencyXYMax.y);
-		this.fleeBobMagnitudeXY = new Vector2(UnityEngine.Random.Range(-1f, 1f) * this.fleeBobMagnitudeXYMax.x, UnityEngine.Random.Range(-1f, 1f) * this.fleeBobMagnitudeXYMax.y);
+		this.fleeBobFrequencyXY = new Vector2(Random.Range(-1f, 1f) * this.fleeBobFrequencyXYMax.x, Random.Range(-1f, 1f) * this.fleeBobFrequencyXYMax.y);
+		this.fleeBobMagnitudeXY = new Vector2(Random.Range(-1f, 1f) * this.fleeBobMagnitudeXYMax.x, Random.Range(-1f, 1f) * this.fleeBobMagnitudeXYMax.y);
 	}
 
 	public override void Tick()

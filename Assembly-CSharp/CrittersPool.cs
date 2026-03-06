@@ -28,7 +28,7 @@ public class CrittersPool : MonoBehaviour
 	{
 		if (CrittersPool.instance != null)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		CrittersPool.instance = this;
@@ -57,7 +57,7 @@ public class CrittersPool : MonoBehaviour
 				List<GameObject> list = new List<GameObject>();
 				for (int j = 0; j < crittersPoolSettings.poolSize; j++)
 				{
-					GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(crittersPoolSettings.poolObject);
+					GameObject gameObject = Object.Instantiate<GameObject>(crittersPoolSettings.poolObject);
 					gameObject.transform.SetParent(this.poolParent);
 					GameObject gameObject2 = gameObject;
 					gameObject2.name += j.ToString();

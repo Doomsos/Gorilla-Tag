@@ -145,7 +145,7 @@ public class GeodeItem : TransferrableObject
 
 	private int RandomPickCrackedGeode()
 	{
-		return UnityEngine.Random.Range(0, this.geodeCrackedMeshes.Length);
+		return Random.Range(0, this.geodeCrackedMeshes.Length);
 	}
 
 	[Tooltip("This GameObject will activate when the geode hits the ground with enough force.")]

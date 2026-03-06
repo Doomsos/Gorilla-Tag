@@ -278,12 +278,12 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 			particleSystem = this.teleportToVStumpVFX;
 			if (forLocalPlayer && vStumpSFXAudioSource.IsNotNull() && !this.teleportingPlayerSoundClips.IsNullOrEmpty<AudioClip>())
 			{
-				vStumpSFXAudioSource.clip = this.teleportingPlayerSoundClips[UnityEngine.Random.Range(0, this.teleportingPlayerSoundClips.Count)];
+				vStumpSFXAudioSource.clip = this.teleportingPlayerSoundClips[Random.Range(0, this.teleportingPlayerSoundClips.Count)];
 				vStumpSFXAudioSource.Play();
 			}
 			if (!forLocalPlayer && this.teleporterSFXAudioSource.IsNotNull() && !this.observerSoundClips.IsNullOrEmpty<AudioClip>())
 			{
-				this.teleporterSFXAudioSource.clip = this.observerSoundClips[UnityEngine.Random.Range(0, this.observerSoundClips.Count)];
+				this.teleporterSFXAudioSource.clip = this.observerSoundClips[Random.Range(0, this.observerSoundClips.Count)];
 				this.teleporterSFXAudioSource.Play();
 			}
 		}
@@ -294,11 +294,11 @@ public class VirtualStumpTeleporter : MonoBehaviour, IBuildValidation, IGorillaS
 			{
 				if (forLocalPlayer && !this.teleportingPlayerSoundClips.IsNullOrEmpty<AudioClip>())
 				{
-					this.teleporterSFXAudioSource.clip = this.teleportingPlayerSoundClips[UnityEngine.Random.Range(0, this.teleportingPlayerSoundClips.Count)];
+					this.teleporterSFXAudioSource.clip = this.teleportingPlayerSoundClips[Random.Range(0, this.teleportingPlayerSoundClips.Count)];
 				}
 				else if (!forLocalPlayer && !this.observerSoundClips.IsNullOrEmpty<AudioClip>())
 				{
-					this.teleporterSFXAudioSource.clip = this.observerSoundClips[UnityEngine.Random.Range(0, this.observerSoundClips.Count)];
+					this.teleporterSFXAudioSource.clip = this.observerSoundClips[Random.Range(0, this.observerSoundClips.Count)];
 				}
 				this.teleporterSFXAudioSource.Play();
 			}

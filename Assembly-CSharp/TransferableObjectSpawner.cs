@@ -71,7 +71,7 @@ public class TransferableObjectSpawner : MonoBehaviour
 	private bool SpawnOnGround()
 	{
 		RaycastHit raycastHit;
-		if (Physics.Raycast(new Ray(base.transform.position + UnityEngine.Random.insideUnitCircle.x0y() * this.spawnRadius, Vector3.down), out raycastHit, 3f, this.groundRaycastMask))
+		if (Physics.Raycast(new Ray(base.transform.position + Random.insideUnitCircle.x0y() * this.spawnRadius, Vector3.down), out raycastHit, 3f, this.groundRaycastMask))
 		{
 			this.spawnPosition = raycastHit.point;
 			this.spawnRotation = Quaternion.FromToRotation(Vector3.up, raycastHit.normal);
@@ -112,7 +112,7 @@ public class TransferableObjectSpawner : MonoBehaviour
 			if (!transferrableObject2.InHand())
 			{
 				num++;
-				if (UnityEngine.Random.Range(0, num) == 0)
+				if (Random.Range(0, num) == 0)
 				{
 					transferrableObject = transferrableObject2;
 				}

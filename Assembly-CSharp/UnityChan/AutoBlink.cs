@@ -89,7 +89,7 @@ namespace UnityChan
 		{
 			for (;;)
 			{
-				float num = UnityEngine.Random.Range(0f, 1f);
+				float num = Random.Range(0f, 1f);
 				if (!this.isBlink && num > this.threshold)
 				{
 					this.isBlink = true;

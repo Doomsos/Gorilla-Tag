@@ -206,12 +206,12 @@ namespace GorillaTagScripts
 			switch (this.distribution)
 			{
 			default:
-				b = UnityEngine.Random.Range(num, num2);
+				b = Random.Range(num, num2);
 				break;
 			case GorillaIntervalTimer.RandomDistribution.Normal:
 			{
-				float f = Mathf.Max(float.Epsilon, 1f - UnityEngine.Random.value);
-				float num9 = 1f - UnityEngine.Random.value;
+				float f = Mathf.Max(float.Epsilon, 1f - Random.value);
+				float num9 = 1f - Random.value;
 				float num10 = Mathf.Sqrt(-2f * Mathf.Log(f)) * Mathf.Sin(6.2831855f * num9);
 				float num11 = 0.5f * (num + num2);
 				float num12 = (num2 - num) / 6f;
@@ -222,7 +222,7 @@ namespace GorillaTagScripts
 			{
 				float num13 = 0.5f * (num + num2);
 				float num14 = (num13 > 0f) ? (1f / num13) : 1f;
-				b = Mathf.Clamp(-Mathf.Log(Mathf.Max(float.Epsilon, 1f - UnityEngine.Random.value)) / num14, num, num2);
+				b = Mathf.Clamp(-Mathf.Log(Mathf.Max(float.Epsilon, 1f - Random.value)) / num14, num, num2);
 				break;
 			}
 			}

@@ -89,7 +89,7 @@ public class TappableManager : NetworkSceneObject
 	{
 		if (this.tappables.Count > 0)
 		{
-			int index = UnityEngine.Random.Range(0, this.tappables.Count);
+			int index = Random.Range(0, this.tappables.Count);
 			Debug.Log("Send TestTap to tappable index: " + index.ToString() + "/" + this.tappables.Count.ToString());
 			this.tappables[index].OnTap(10f);
 			return;

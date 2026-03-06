@@ -19,7 +19,7 @@ public class RandomTimedSeedManager : NetworkComponent, ITickSystemTick
 	{
 		base.Awake();
 		RandomTimedSeedManager.instance = this;
-		this.seed = UnityEngine.Random.Range(-1000000, -1000000);
+		this.seed = Random.Range(-1000000, -1000000);
 		this.idealSyncTime = 0f;
 		this.currentSyncTime = 0f;
 		TickSystem<object>.AddTickCallback(this);

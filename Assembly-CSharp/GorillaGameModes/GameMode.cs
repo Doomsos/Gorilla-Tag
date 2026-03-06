@@ -31,7 +31,7 @@ namespace GorillaGameModes
 				}
 				return;
 			}
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 
 		private void OnDestroy()

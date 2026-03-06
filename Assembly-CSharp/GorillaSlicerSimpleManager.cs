@@ -9,7 +9,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 	{
 		if (GorillaSlicerSimpleManager.hasInstance && GorillaSlicerSimpleManager.instance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		GorillaSlicerSimpleManager.SetInstance(this);
@@ -31,7 +31,7 @@ public class GorillaSlicerSimpleManager : MonoBehaviour
 		GorillaSlicerSimpleManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			UnityEngine.Object.DontDestroyOnLoad(manager);
+			Object.DontDestroyOnLoad(manager);
 		}
 	}
 

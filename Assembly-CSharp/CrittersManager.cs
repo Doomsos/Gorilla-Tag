@@ -649,7 +649,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 			return null;
 		}
 		Vector3 position = crittersRegion ? crittersRegion.GetSpawnPoint() : this._spawnRegions[0].transform.position;
-		Quaternion rotation = Quaternion.Euler(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
+		Quaternion rotation = Quaternion.Euler(0f, (float)Random.Range(0, 360), 0f);
 		CrittersPawn crittersPawn = this.SpawnCritter(randomCritterType, position, rotation);
 		this.SetCritterRegion(crittersPawn, crittersRegion);
 		this.lastSpawnTime = (NetworkSystem.Instance.InRoom ? PhotonNetwork.Time : ((double)Time.time));
@@ -661,7 +661,7 @@ public class CrittersManager : NetworkComponent, IRequestableOwnershipGuardCallb
 		CrittersPawn crittersPawn = (CrittersPawn)this.SpawnActor(CrittersActor.CrittersActorType.Creature, -1);
 		crittersPawn.SetTemplate(critterType);
 		crittersPawn.currentState = CrittersPawn.CreatureState.Idle;
-		crittersPawn.MoveActor(position, Quaternion.Euler(0f, (float)UnityEngine.Random.Range(0, 360), 0f), false, true, true);
+		crittersPawn.MoveActor(position, Quaternion.Euler(0f, (float)Random.Range(0, 360), 0f), false, true, true);
 		crittersPawn.SetImpulseVelocity(Vector3.zero, Vector3.zero);
 		crittersPawn.SetState(CrittersPawn.CreatureState.Spawning);
 		if (NetworkSystem.Instance.InRoom && this.LocalAuthority())

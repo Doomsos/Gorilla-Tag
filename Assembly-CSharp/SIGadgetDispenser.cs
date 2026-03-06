@@ -30,7 +30,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 	{
 		get
 		{
-			return this.ActivePlayer.gamePlayer.rig.OwningNetPlayer.SanitizedNickName;
+			return this.ActivePlayer.gamePlayer.rig.Creator.SanitizedNickName;
 		}
 	}
 
@@ -132,7 +132,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 		for (int i = 0; i < count; i++)
 		{
 			SITechTreePage sitechTreePage = this.parentTerminal.superInfection.techTreeSO.TreePages[i];
-			SIGadgetListEntry sigadgetListEntry = UnityEngine.Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
+			SIGadgetListEntry sigadgetListEntry = Object.Instantiate<SIGadgetListEntry>(this.pageListEntryPrefab, this.pageListParent);
 			StaticLodManager.TryAddLateInstantiatedMembers(sigadgetListEntry.gameObject);
 			sigadgetListEntry.Configure(this, sitechTreePage, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText, SITouchscreenButton.SITouchscreenButtonType.Select, i, -0.07f, count);
 			this.gadgetPages.Add(sigadgetListEntry);
@@ -141,7 +141,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 		this.gadgetEntries = new List<SIDispenserGadgetListEntry>();
 		for (int j = 0; j < num; j++)
 		{
-			SIDispenserGadgetListEntry sidispenserGadgetListEntry = UnityEngine.Object.Instantiate<SIDispenserGadgetListEntry>(this.gadgetListEntryPrefab, this.gadgetListParent);
+			SIDispenserGadgetListEntry sidispenserGadgetListEntry = Object.Instantiate<SIDispenserGadgetListEntry>(this.gadgetListEntryPrefab, this.gadgetListParent);
 			sidispenserGadgetListEntry.transform.localPosition += new Vector3(0f, (float)j * -0.07f, 0f);
 			sidispenserGadgetListEntry.SetStation(this, this.parentTerminal.zeroZeroImage, this.parentTerminal.onePointTwoText);
 			this.gadgetEntries.Add(sidispenserGadgetListEntry);
@@ -280,6 +280,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 
 	public void UpdateGadgetListVisibility()
 	{
+		this.m_isTryOn = false;
 		foreach (SIDispenserGadgetListEntry sidispenserGadgetListEntry in this.gadgetEntries)
 		{
 			sidispenserGadgetListEntry.gameObject.SetActive(false);
@@ -287,7 +288,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 		int num = 0;
 		foreach (SITechTreeNode sitechTreeNode in this.CurrentPage.DispensableGadgets)
 		{
-			if (this.ActivePlayer.CurrentProgression.IsUnlocked(sitechTreeNode.upgradeType))
+			if (this.m_isTryOn || this.ActivePlayer.CurrentProgression.IsUnlocked(sitechTreeNode.upgradeType))
 			{
 				SIDispenserGadgetListEntry sidispenserGadgetListEntry2 = this.gadgetEntries[num++];
 				sidispenserGadgetListEntry2.SetTechTreeNode(sitechTreeNode);
@@ -438,6 +439,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 
 	public void DispenseGadgetForPlayer(SIPlayer player)
 	{
+		this.m_isTryOn = false;
 		int num = 0;
 		int staticHash = this.CurrentNode.unlockedGadgetPrefab.name.GetStaticHash();
 		for (int i = player.activePlayerGadgets.Count - 1; i >= 0; i--)
@@ -450,7 +452,7 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 			else
 			{
 				num++;
-				if (num >= player.totalGadgetLimit)
+				if (num >= player.TotalGadgetLimit)
 				{
 					this.GameEntityManager.RequestDestroyItem(gameEntityFromNetId.id);
 					break;
@@ -471,7 +473,15 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 				upgrades.Remove(sitechTreeNode.upgradeType);
 			}
 		}
-		this.GameEntityManager.RequestCreateItem(staticHash, this.gadgetDispensePosition.position, this.gadgetDispensePosition.rotation, upgrades.GetCreateData(player));
+		GameEntityId id = this.GameEntityManager.RequestCreateItem(staticHash, this.gadgetDispensePosition.position, this.gadgetDispensePosition.rotation, upgrades.GetCreateData(player));
+		if (this.m_isTryOn && id.IsValid())
+		{
+			GameEntity gameEntity = this.GameEntityManager.GetGameEntity(id);
+			if (gameEntity != null)
+			{
+				gameEntity.gameObject.AddComponent<GameEntityDelayedDestroy>().Configure(this.m_tryOnLifetime, this.m_tryOnBeepClip, this.m_tryOnExplosionClip, this.m_tryOnBeepPhases, this.m_tryOnBeepVolume, this.m_tryOnExplosionVolume);
+			}
+		}
 		this.dispenseSoundBankPlayer.Play();
 	}
 
@@ -524,6 +534,46 @@ public class SIGadgetDispenser : MonoBehaviour, ITouchScreenStation
 	public int _currentNode;
 
 	public SICombinedTerminal parentTerminal;
+
+	[Header("TryOn")]
+	[FormerlySerializedAs("isTryOn")]
+	[SerializeField]
+	private bool m_isTryOn;
+
+	[SerializeField]
+	private float m_tryOnLifetime = 30f;
+
+	[SerializeField]
+	private AudioClip m_tryOnBeepClip;
+
+	[SerializeField]
+	private AudioClip m_tryOnExplosionClip;
+
+	[SerializeField]
+	private GameEntityDelayedDestroy.BeepPhase[] m_tryOnBeepPhases = new GameEntityDelayedDestroy.BeepPhase[]
+	{
+		new GameEntityDelayedDestroy.BeepPhase
+		{
+			timeRemaining = 10f,
+			interval = 1f
+		},
+		new GameEntityDelayedDestroy.BeepPhase
+		{
+			timeRemaining = 5f,
+			interval = 0.5f
+		},
+		new GameEntityDelayedDestroy.BeepPhase
+		{
+			timeRemaining = 2f,
+			interval = 0.1f
+		}
+	};
+
+	[SerializeField]
+	private float m_tryOnBeepVolume = 1f;
+
+	[SerializeField]
+	private float m_tryOnExplosionVolume = 1f;
 
 	public GameObject waitingForScanScreen;
 

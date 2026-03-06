@@ -21,7 +21,7 @@ namespace GorillaTag.Cosmetics
 				{
 					return Mathf.Clamp(value, 1, 20);
 				}
-				return UnityEngine.Random.Range(1, 21);
+				return Random.Range(1, 21);
 			}
 			else
 			{
@@ -34,7 +34,7 @@ namespace GorillaTag.Cosmetics
 				{
 					return Mathf.Clamp(value2, 1, 6);
 				}
-				return UnityEngine.Random.Range(1, 7);
+				return Random.Range(1, 7);
 			}
 		}
 

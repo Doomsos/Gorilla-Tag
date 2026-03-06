@@ -127,7 +127,7 @@ public class GorillaSpeakerLoudness : MonoBehaviour, IGorillaSliceableSimple, ID
 		if (this.recorder != null && this.offlineMic != null)
 		{
 			Microphone.End(UnityMicrophone.devices[0]);
-			UnityEngine.Object.Destroy(this.offlineMic);
+			Object.Destroy(this.offlineMic);
 			this.offlineMic = null;
 			this.recorder.RestartRecording(true);
 		}

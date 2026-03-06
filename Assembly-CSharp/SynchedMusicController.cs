@@ -28,7 +28,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 			this.muteButtons[j].isOn = this.audioSource.mute;
 			this.muteButtons[j].UpdateColor();
 		}
-		this.randomNumberGenerator = new System.Random(this.mySeed);
+		this.randomNumberGenerator = new Random(this.mySeed);
 		this.GenerateSongStartRandomTimes();
 		if (this.twoLayer)
 		{
@@ -57,8 +57,8 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 			this.testPlay = false;
 			if (this.usingMultipleSources && this.usingMultipleSongs)
 			{
-				this.audioSource = this.audioSourceArray[UnityEngine.Random.Range(0, this.audioSourceArray.Length)];
-				this.audioSource.clip = this.songsArray[UnityEngine.Random.Range(0, this.songsArray.Length)];
+				this.audioSource = this.audioSourceArray[Random.Range(0, this.audioSourceArray.Length)];
+				this.audioSource.clip = this.songsArray[Random.Range(0, this.songsArray.Length)];
 				this.audioSource.time = 0f;
 			}
 			if (this.twoLayer)
@@ -272,7 +272,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 			}
 		}
 		this.muteButton.UpdateColor();
-		this.randomNumberGenerator = new System.Random(this.mySeed);
+		this.randomNumberGenerator = new Random(this.mySeed);
 		this.New_GeneratePlaylistArrays();
 		foreach (SynchedMusicController.SyncedSongInfo syncedSongInfo in this.syncedSongs)
 		{
@@ -509,7 +509,7 @@ public class SynchedMusicController : MonoBehaviour, IGorillaSliceableSimple
 	[Tooltip("This should be unique per sound post. Sound posts that share the same seed and the same song count will play songs a the same times.")]
 	public int mySeed;
 
-	private System.Random randomNumberGenerator = new System.Random();
+	private Random randomNumberGenerator = new Random();
 
 	[Tooltip("In milliseconds.")]
 	public long minimumWait = 900000L;

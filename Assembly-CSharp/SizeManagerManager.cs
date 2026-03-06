@@ -8,7 +8,7 @@ public class SizeManagerManager : MonoBehaviour
 	{
 		if (SizeManagerManager.hasInstance && SizeManagerManager.instance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		SizeManagerManager.SetInstance(this);
@@ -25,7 +25,7 @@ public class SizeManagerManager : MonoBehaviour
 		SizeManagerManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			UnityEngine.Object.DontDestroyOnLoad(manager);
+			Object.DontDestroyOnLoad(manager);
 		}
 	}
 

@@ -12,7 +12,7 @@ public class Menagerie : MonoBehaviour
 {
 	private void Start()
 	{
-		CrittersCageDeposit[] array = UnityEngine.Object.FindObjectsByType<CrittersCageDeposit>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+		CrittersCageDeposit[] array = Object.FindObjectsByType<CrittersCageDeposit>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 		for (int i = 0; i < array.Length; i++)
 		{
 			array[i].OnDepositCritter += this.OnDepositCritter;
@@ -123,7 +123,7 @@ public class Menagerie : MonoBehaviour
 			return;
 		}
 		this.DespawnCritterFromSlot(slot);
-		MenagerieCritter menagerieCritter = UnityEngine.Object.Instantiate<MenagerieCritter>(this.prefab, slot.critterMountPoint);
+		MenagerieCritter menagerieCritter = Object.Instantiate<MenagerieCritter>(this.prefab, slot.critterMountPoint);
 		menagerieCritter.Slot = slot;
 		menagerieCritter.ApplyCritterData(critterData);
 		this._critters.Add(menagerieCritter);
@@ -220,7 +220,7 @@ public class Menagerie : MonoBehaviour
 
 	private void GenerateNewCritters()
 	{
-		this.GenerateNewCritterCount(UnityEngine.Random.Range(Mathf.Min(1, this.newCritterPen.Length), this.newCritterPen.Length + 1));
+		this.GenerateNewCritterCount(Random.Range(Mathf.Min(1, this.newCritterPen.Length), this.newCritterPen.Length + 1));
 	}
 
 	private void GenerateLegalNewCritters()
@@ -244,7 +244,7 @@ public class Menagerie : MonoBehaviour
 		this.ClearNewCritterPen();
 		for (int i = 0; i < critterCount; i++)
 		{
-			int num = UnityEngine.Random.Range(0, this.critterIndex.critterTypes.Count);
+			int num = Random.Range(0, this.critterIndex.critterTypes.Count);
 			CritterConfiguration critterConfiguration = this.critterIndex[num];
 			Menagerie.CritterData critterData = new Menagerie.CritterData(num, critterConfiguration.GenerateAppearance());
 			this.AddCritterToNewCritterPen(critterData);
@@ -256,7 +256,7 @@ public class Menagerie : MonoBehaviour
 		this.ClearCollection();
 		for (int i = 0; i < this.critterIndex.critterTypes.Count; i++)
 		{
-			if (UnityEngine.Random.value <= spawnChance)
+			if (Random.value <= spawnChance)
 			{
 				CritterConfiguration critterConfiguration = this.critterIndex[i];
 				Menagerie.CritterData critterData = new Menagerie.CritterData(i, critterConfiguration.GenerateAppearance());
@@ -308,7 +308,7 @@ public class Menagerie : MonoBehaviour
 			return;
 		}
 		this._critters.Remove(slot.critter);
-		UnityEngine.Object.Destroy(slot.critter.gameObject);
+		Object.Destroy(slot.critter.gameObject);
 		slot.critter = null;
 		if (slot.label)
 		{

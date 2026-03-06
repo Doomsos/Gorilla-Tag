@@ -41,7 +41,7 @@ public class MaskCyclopsEye : MonoBehaviour
 
 	private void ScheduleNextBlink()
 	{
-		float num = UnityEngine.Random.Range(this.minWaitTime, this.maxWaitTime);
+		float num = Random.Range(this.minWaitTime, this.maxWaitTime);
 		this.nextBlinkTime = Time.time + num;
 	}
 

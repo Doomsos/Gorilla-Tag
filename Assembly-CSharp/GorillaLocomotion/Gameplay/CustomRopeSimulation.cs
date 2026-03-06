@@ -13,7 +13,7 @@ namespace GorillaLocomotion.Gameplay
 			Vector3 position = base.transform.position;
 			for (int i = 0; i < this.nodeCount; i++)
 			{
-				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.ropeNodePrefab);
+				GameObject gameObject = Object.Instantiate<GameObject>(this.ropeNodePrefab);
 				gameObject.transform.parent = base.transform;
 				gameObject.transform.position = position;
 				this.nodes.Add(gameObject.transform);

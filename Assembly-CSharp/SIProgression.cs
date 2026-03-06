@@ -276,7 +276,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	private IEnumerator TryClaimNewPlayerPackage()
 	{
-		yield return new WaitForSeconds(Mathf.Pow((float)this.startingPackageBackupAttempts, 2f));
+		yield return new WaitForSecondsRealtime(Mathf.Pow((float)this.startingPackageBackupAttempts, 2f));
 		if (!this._startingPackageGranted)
 		{
 			this.TryUnlock(SIUpgradeType.Initialize);
@@ -940,7 +940,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			RotatingQuest questById2 = this.questSourceList.GetQuestById(this.activeQuestIds[num3]);
 			if (questById2 == null || !questById2.isQuestActive)
 			{
-				int num4 = UnityEngine.Random.Range(0, this.questSourceList.quests.Count);
+				int num4 = Random.Range(0, this.questSourceList.quests.Count);
 				for (int j = 0; j < this.questSourceList.quests.Count; j++)
 				{
 					int num5 = (num4 + j) % this.questSourceList.quests.Count;
@@ -1075,11 +1075,11 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 			{
 				if (!activeGameMode.ValidGameMode())
 				{
-					this.timeTelemetryLastChecked = Time.time;
+					this.timeTelemetryLastChecked = Time.realtimeSinceStartup;
 					return;
 				}
-				float num = Time.time - this.timeTelemetryLastChecked;
-				this.timeTelemetryLastChecked = Time.time;
+				float num = Time.realtimeSinceStartup - this.timeTelemetryLastChecked;
+				this.timeTelemetryLastChecked = Time.realtimeSinceStartup;
 				this.totalPlayTime += num;
 				if (NetworkSystem.Instance.InRoom)
 				{
@@ -1109,11 +1109,11 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 					this.timeUsingOthersGadgetsInterval += num;
 					this.timeUsingOthersGadgetsTotal += num;
 				}
-				if (this.lastTelemetrySent + this.telemetryCooldown < Time.time)
+				if (this.lastTelemetrySent + this.telemetryCooldown < Time.realtimeSinceStartup)
 				{
-					this.lastTelemetrySent = Time.time;
+					this.lastTelemetrySent = Time.realtimeSinceStartup;
 					this.SaveTelemetryData();
-					GorillaTelemetry.SuperInfectionEvent(false, this.totalPlayTime, this.roomPlayTime, Time.time, this.intervalPlayTime, this.activeTerminalTimeTotal, this.activeTerminalTimeInterval, this.timeUsingGadgetTypeTotal, this.timeUsingGadgetTypeInterval, this.timeUsingOwnGadgetsTotal, this.timeUsingOwnGadgetsInterval, this.timeUsingOthersGadgetsTotal, this.timeUsingOthersGadgetsInterval, this.tagsUsingGadgetTypeTotal, this.tagsUsingGadgetTypeInterval, this.tagsHoldingOwnGadgetTotal, this.tagsHoldingOwnGadgetInterval, this.tagsHoldingOthersGadgetTotal, this.tagsHoldingOthersGadgetInterval, this.resourcesCollectedTotal, this.resourcesCollectedInterval, this.roundsPlayedTotal, this.roundsPlayedInterval, SIProgression.Instance.unlockedTechTreeData, NetworkSystem.Instance.RoomPlayerCount);
+					GorillaTelemetry.SuperInfectionEvent(false, this.totalPlayTime, this.roomPlayTime, Time.realtimeSinceStartup, this.intervalPlayTime, this.activeTerminalTimeTotal, this.activeTerminalTimeInterval, this.timeUsingGadgetTypeTotal, this.timeUsingGadgetTypeInterval, this.timeUsingOwnGadgetsTotal, this.timeUsingOwnGadgetsInterval, this.timeUsingOthersGadgetsTotal, this.timeUsingOthersGadgetsInterval, this.tagsUsingGadgetTypeTotal, this.tagsUsingGadgetTypeInterval, this.tagsHoldingOwnGadgetTotal, this.tagsHoldingOwnGadgetInterval, this.tagsHoldingOthersGadgetTotal, this.tagsHoldingOthersGadgetInterval, this.resourcesCollectedTotal, this.resourcesCollectedInterval, this.roundsPlayedTotal, this.roundsPlayedInterval, SIProgression.Instance.unlockedTechTreeData, NetworkSystem.Instance.RoomPlayerCount);
 					this.ResetTelemetryIntervalData();
 				}
 				return;
@@ -1123,13 +1123,13 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	public void SendTelemetryData()
 	{
-		if (Time.time < this.lastDisconnectTelemetrySent + this.minDisconnectTelemetryCooldown)
+		if (Time.realtimeSinceStartup < this.lastDisconnectTelemetrySent + this.minDisconnectTelemetryCooldown)
 		{
 			return;
 		}
-		this.lastDisconnectTelemetrySent = Time.time;
+		this.lastDisconnectTelemetrySent = Time.realtimeSinceStartup;
 		this.SaveTelemetryData();
-		GorillaTelemetry.SuperInfectionEvent(true, this.totalPlayTime, this.roomPlayTime, Time.time, this.intervalPlayTime, this.activeTerminalTimeTotal, this.activeTerminalTimeInterval, this.timeUsingGadgetTypeTotal, this.timeUsingGadgetTypeInterval, this.timeUsingOwnGadgetsTotal, this.timeUsingOwnGadgetsInterval, this.timeUsingOthersGadgetsTotal, this.timeUsingOthersGadgetsInterval, this.tagsUsingGadgetTypeTotal, this.tagsUsingGadgetTypeInterval, this.tagsHoldingOwnGadgetTotal, this.tagsHoldingOwnGadgetInterval, this.tagsHoldingOthersGadgetTotal, this.tagsHoldingOthersGadgetInterval, this.resourcesCollectedTotal, this.resourcesCollectedInterval, this.roundsPlayedTotal, this.roundsPlayedInterval, SIProgression.Instance.unlockedTechTreeData, NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.RoomPlayerCount : -1);
+		GorillaTelemetry.SuperInfectionEvent(true, this.totalPlayTime, this.roomPlayTime, Time.realtimeSinceStartup, this.intervalPlayTime, this.activeTerminalTimeTotal, this.activeTerminalTimeInterval, this.timeUsingGadgetTypeTotal, this.timeUsingGadgetTypeInterval, this.timeUsingOwnGadgetsTotal, this.timeUsingOwnGadgetsInterval, this.timeUsingOthersGadgetsTotal, this.timeUsingOthersGadgetsInterval, this.tagsUsingGadgetTypeTotal, this.tagsUsingGadgetTypeInterval, this.tagsHoldingOwnGadgetTotal, this.tagsHoldingOwnGadgetInterval, this.tagsHoldingOthersGadgetTotal, this.tagsHoldingOthersGadgetInterval, this.resourcesCollectedTotal, this.resourcesCollectedInterval, this.roundsPlayedTotal, this.roundsPlayedInterval, SIProgression.Instance.unlockedTechTreeData, NetworkSystem.Instance.InRoom ? NetworkSystem.Instance.RoomPlayerCount : -1);
 		this.ResetTelemetryIntervalData();
 		this.roomPlayTime = 0f;
 	}
@@ -1137,13 +1137,13 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 	public void SendPurchaseResourcesData()
 	{
 		this.SaveTelemetryData();
-		GorillaTelemetry.SuperInfectionEvent("si_fill_resources", 500, -1, this.totalPlayTime, this.roomPlayTime, Time.time);
+		GorillaTelemetry.SuperInfectionEvent("si_fill_resources", 500, -1, this.totalPlayTime, this.roomPlayTime, Time.realtimeSinceStartup);
 	}
 
 	public void SendPurchaseTechPointsData(int techPointsPurchased)
 	{
 		this.SaveTelemetryData();
-		GorillaTelemetry.SuperInfectionEvent("si_purchase_tech_points", techPointsPurchased * 100, techPointsPurchased, this.totalPlayTime, this.roomPlayTime, Time.time);
+		GorillaTelemetry.SuperInfectionEvent("si_purchase_tech_points", techPointsPurchased * 100, techPointsPurchased, this.totalPlayTime, this.roomPlayTime, Time.realtimeSinceStartup);
 	}
 
 	public void LoadSavedTelemetryData()
@@ -1189,7 +1189,7 @@ public class SIProgression : MonoBehaviour, IGorillaSliceableSimple, GorillaQues
 
 	public void ResetTelemetryIntervalData()
 	{
-		this.lastTelemetrySent = Time.time;
+		this.lastTelemetrySent = Time.realtimeSinceStartup;
 		this.intervalPlayTime = 0f;
 		this.activeTerminalTimeInterval = 0f;
 		for (int i = 0; i < 11; i++)

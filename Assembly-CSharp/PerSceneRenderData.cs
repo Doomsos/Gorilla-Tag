@@ -9,7 +9,7 @@ public class PerSceneRenderData : MonoBehaviour
 	{
 		int sceneIndex = this.sceneIndex;
 		new List<Renderer>();
-		foreach (Renderer renderer in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+		foreach (Renderer renderer in Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
 		{
 			if (renderer.gameObject.scene.buildIndex == sceneIndex)
 			{
@@ -258,7 +258,7 @@ public class PerSceneRenderData : MonoBehaviour
 	public static void g_StartAllScenesPopulateLightmaps(string fromLightmapName, string toLightmapName)
 	{
 		PerSceneRenderData._g_allScenesPopulateLightmaps_renderDatasHashSet.Clear();
-		PerSceneRenderData[] array = UnityEngine.Object.FindObjectsByType<PerSceneRenderData>(FindObjectsSortMode.None);
+		PerSceneRenderData[] array = Object.FindObjectsByType<PerSceneRenderData>(FindObjectsSortMode.None);
 		PerSceneRenderData._g_allScenesPopulateLightmaps_renderDatasHashSet.UnionWith(array);
 		foreach (PerSceneRenderData perSceneRenderData in array)
 		{

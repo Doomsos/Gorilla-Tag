@@ -9,7 +9,7 @@ namespace GorillaTag
 		{
 			try
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 			}
 			catch
 			{
@@ -20,7 +20,7 @@ namespace GorillaTag
 		{
 			try
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 			}
 			catch
 			{
@@ -31,7 +31,7 @@ namespace GorillaTag
 		{
 			try
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 			}
 			catch
 			{

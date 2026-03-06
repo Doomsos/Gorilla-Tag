@@ -16,7 +16,7 @@ public class CodeRedemption : MonoBehaviour
 		}
 		if (CodeRedemption.Instance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 	}
 

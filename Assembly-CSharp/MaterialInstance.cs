@@ -8,7 +8,7 @@ using UnityEngine;
 [AddComponentMenu("Scripts/MRTK/Core/MaterialInstance")]
 public class MaterialInstance : MonoBehaviour
 {
-	public Material AcquireMaterial(UnityEngine.Object owner = null, bool instance = true)
+	public Material AcquireMaterial(Object owner = null, bool instance = true)
 	{
 		if (owner != null)
 		{
@@ -26,7 +26,7 @@ public class MaterialInstance : MonoBehaviour
 		return null;
 	}
 
-	public Material[] AcquireMaterials(UnityEngine.Object owner = null, bool instance = true)
+	public Material[] AcquireMaterials(Object owner = null, bool instance = true)
 	{
 		if (owner != null)
 		{
@@ -40,7 +40,7 @@ public class MaterialInstance : MonoBehaviour
 		return this.instanceMaterials;
 	}
 
-	public void ReleaseMaterial(UnityEngine.Object owner, bool autoDestroy = true)
+	public void ReleaseMaterial(Object owner, bool autoDestroy = true)
 	{
 		this.materialOwners.Remove(owner);
 		if (autoDestroy && this.materialOwners.Count == 0)
@@ -268,11 +268,11 @@ public class MaterialInstance : MonoBehaviour
 		return false;
 	}
 
-	private static void DestroySafe(UnityEngine.Object toDestroy)
+	private static void DestroySafe(Object toDestroy)
 	{
 		if (toDestroy != null && Application.isPlaying)
 		{
-			UnityEngine.Object.Destroy(toDestroy);
+			Object.Destroy(toDestroy);
 		}
 	}
 
@@ -294,7 +294,7 @@ public class MaterialInstance : MonoBehaviour
 	[Tooltip("Whether to use a cached copy of cachedRenderer.sharedMaterials or call sharedMaterials on the Renderer directly. Enabling the option will lead to better performance but you must turn it off before modifying sharedMaterials of the Renderer.")]
 	private bool cacheSharedMaterialsFromRenderer;
 
-	private readonly HashSet<UnityEngine.Object> materialOwners = new HashSet<UnityEngine.Object>();
+	private readonly HashSet<Object> materialOwners = new HashSet<Object>();
 
 	private const string instancePostfix = " (Instance)";
 }

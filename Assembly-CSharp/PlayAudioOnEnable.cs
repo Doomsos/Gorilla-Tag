@@ -5,7 +5,7 @@ public class PlayAudioOnEnable : MonoBehaviour
 {
 	private void OnEnable()
 	{
-		this.audioSource.clip = this.audioClips[UnityEngine.Random.Range(0, this.audioClips.Length)];
+		this.audioSource.clip = this.audioClips[Random.Range(0, this.audioClips.Length)];
 		this.audioSource.GTPlay();
 	}
 

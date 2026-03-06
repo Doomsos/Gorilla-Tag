@@ -98,14 +98,14 @@ public class GRAbilitySummon : GRAbilityBase
 	{
 		if (this.summonMarkers != null && this.summonMarkers.Count > 0)
 		{
-			int index = UnityEngine.Random.Range(0, this.summonMarkers.Count);
+			int index = Random.Range(0, this.summonMarkers.Count);
 			if (this.summonMarkers[index] != null)
 			{
 				return new Vector3?(this.summonMarkers[index].transform.position);
 			}
 		}
 		Vector3 position = this.root.position;
-		float num = UnityEngine.Random.Range(-this.summonConeAngle / 2f, this.summonConeAngle / 2f);
+		float num = Random.Range(-this.summonConeAngle / 2f, this.summonConeAngle / 2f);
 		int i = 0;
 		while (i < 5)
 		{

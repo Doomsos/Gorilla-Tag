@@ -13,9 +13,9 @@ public class AudioLooper : MonoBehaviour
 	{
 		if (!this.audioSource.isPlaying)
 		{
-			if (this.audioSource.clip == this.loopClip && this.interjectionClips.Length != 0 && UnityEngine.Random.value < this.interjectionLikelyhood)
+			if (this.audioSource.clip == this.loopClip && this.interjectionClips.Length != 0 && Random.value < this.interjectionLikelyhood)
 			{
-				this.audioSource.clip = this.interjectionClips[UnityEngine.Random.Range(0, this.interjectionClips.Length)];
+				this.audioSource.clip = this.interjectionClips[Random.Range(0, this.interjectionClips.Length)];
 			}
 			else
 			{

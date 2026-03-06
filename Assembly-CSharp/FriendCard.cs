@@ -191,20 +191,20 @@ public class FriendCard : MonoBehaviour
 	public void Randomize()
 	{
 		this.SetEmpty();
-		int num = UnityEngine.Random.Range(0, this.randomNames.Length);
+		int num = Random.Range(0, this.randomNames.Length);
 		this.SetName(this.randomNames[num].ToUpper());
 		this.SetRoom(string.Format("{0}{1}{2}{3}", new object[]
 		{
-			(char)UnityEngine.Random.Range(65, 91),
-			(char)UnityEngine.Random.Range(65, 91),
-			(char)UnityEngine.Random.Range(65, 91),
-			(char)UnityEngine.Random.Range(65, 91)
+			(char)Random.Range(65, 91),
+			(char)Random.Range(65, 91),
+			(char)Random.Range(65, 91),
+			(char)Random.Range(65, 91)
 		}));
-		bool flag = UnityEngine.Random.Range(0f, 1f) > 0.5f;
-		this.joinable = (flag && UnityEngine.Random.Range(0f, 1f) > 0.5f);
+		bool flag = Random.Range(0f, 1f) > 0.5f;
+		this.joinable = (flag && Random.Range(0f, 1f) > 0.5f);
 		if (flag)
 		{
-			int num2 = UnityEngine.Random.Range(0, 17);
+			int num2 = Random.Range(0, 17);
 			GTZone gtzone = (GTZone)num2;
 			this.SetZone(gtzone.ToString().ToUpper());
 		}

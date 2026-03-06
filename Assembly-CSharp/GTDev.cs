@@ -18,7 +18,7 @@ public static class GTDev
 	}
 
 	[HideInCallstack]
-	public static void Log<T>(T msg, UnityEngine.Object context, string channel = null)
+	public static void Log<T>(T msg, Object context, string channel = null)
 	{
 	}
 
@@ -28,7 +28,7 @@ public static class GTDev
 	}
 
 	[HideInCallstack]
-	public static void LogError<T>(T msg, UnityEngine.Object context, string channel = null)
+	public static void LogError<T>(T msg, Object context, string channel = null)
 	{
 	}
 
@@ -38,7 +38,7 @@ public static class GTDev
 	}
 
 	[HideInCallstack]
-	public static void LogWarning<T>(T msg, UnityEngine.Object context, string channel = null)
+	public static void LogWarning<T>(T msg, Object context, string channel = null)
 	{
 	}
 
@@ -48,7 +48,7 @@ public static class GTDev
 	}
 
 	[HideInCallstack]
-	public static void LogSilent<T>(T msg, UnityEngine.Object context, string channel = null)
+	public static void LogSilent<T>(T msg, Object context, string channel = null)
 	{
 	}
 
@@ -60,7 +60,7 @@ public static class GTDev
 
 	[HideInCallstack]
 	[Conditional("UNITY_EDITOR")]
-	public static void LogEditorOnly<T>(T msg, UnityEngine.Object context, string channel = null)
+	public static void LogEditorOnly<T>(T msg, Object context, string channel = null)
 	{
 	}
 
@@ -74,7 +74,7 @@ public static class GTDev
 	[HideInCallstack]
 	[Conditional("BETA")]
 	[Conditional("UNITY_EDITOR")]
-	public static void LogBetaOnly<T>(T msg, UnityEngine.Object context, string channel = null)
+	public static void LogBetaOnly<T>(T msg, Object context, string channel = null)
 	{
 	}
 
@@ -86,7 +86,7 @@ public static class GTDev
 
 	[HideInCallstack]
 	[Conditional("UNITY_EDITOR")]
-	public static void LogErrorEd<T>(T msg, UnityEngine.Object context, string channel = null)
+	public static void LogErrorEd<T>(T msg, Object context, string channel = null)
 	{
 	}
 
@@ -100,7 +100,7 @@ public static class GTDev
 	[HideInCallstack]
 	[Conditional("BETA")]
 	[Conditional("UNITY_EDITOR")]
-	public static void LogErrorBeta<T>(T msg, UnityEngine.Object context, string channel = null)
+	public static void LogErrorBeta<T>(T msg, Object context, string channel = null)
 	{
 	}
 
@@ -135,7 +135,7 @@ public static class GTDev
 
 	[HideInCallstack]
 	[Conditional("_GTDEV_ON_")]
-	private static void _Log<T>(Action<object, UnityEngine.Object> log, Action<object> logNoCtx, T msg, UnityEngine.Object ctx, string channel)
+	private static void _Log<T>(Action<object, Object> log, Action<object> logNoCtx, T msg, Object ctx, string channel)
 	{
 	}
 

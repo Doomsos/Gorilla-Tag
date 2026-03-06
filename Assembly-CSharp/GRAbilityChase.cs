@@ -23,7 +23,7 @@ public class GRAbilityChase : GRAbilityBase
 				vector = Quaternion.Euler(0f, (float)i / (float)num * 360f, 0f) * vector;
 				GRAbilityChase.targetOffsets.Add(vector);
 			}
-			System.Random random = new System.Random();
+			Random random = new Random();
 			List<Vector3> collection = (from x in GRAbilityChase.targetOffsets
 			orderby random.Next()
 			select x).ToList<Vector3>();

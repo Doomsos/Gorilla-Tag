@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GorillaParent : MonoBehaviour
@@ -14,7 +13,7 @@ public class GorillaParent : MonoBehaviour
 		}
 		if (GorillaParent.instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 			return;
 		}
 	}
@@ -49,21 +48,11 @@ public class GorillaParent : MonoBehaviour
 		GorillaParent.onReplicatedClientReady = (Action)Delegate.Combine(GorillaParent.onReplicatedClientReady, action);
 	}
 
-	public GameObject tagUI;
-
-	public GameObject playerParent;
-
-	public GameObject vrrigParent;
-
 	[OnEnterPlay_SetNull]
 	public static volatile GorillaParent instance;
 
 	[OnEnterPlay_Set(false)]
 	public static bool hasInstance;
-
-	public List<VRRig> vrrigs;
-
-	public Dictionary<NetPlayer, VRRig> vrrigDict = new Dictionary<NetPlayer, VRRig>();
 
 	private int i;
 

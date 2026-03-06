@@ -74,17 +74,17 @@ public class CritterConfiguration
 	public CritterAppearance GenerateAppearance()
 	{
 		string hatName = "";
-		if (UnityEngine.Random.value <= this.behaviour.GetTemplateValue<float>("hatChance"))
+		if (Random.value <= this.behaviour.GetTemplateValue<float>("hatChance"))
 		{
 			GameObject[] templateValue = this.behaviour.GetTemplateValue<GameObject[]>("hats");
 			if (!templateValue.IsNullOrEmpty<GameObject>())
 			{
-				hatName = templateValue[UnityEngine.Random.Range(0, templateValue.Length)].name;
+				hatName = templateValue[Random.Range(0, templateValue.Length)].name;
 			}
 		}
 		float templateValue2 = this.behaviour.GetTemplateValue<float>("minSize");
 		float templateValue3 = this.behaviour.GetTemplateValue<float>("maxSize");
-		float size = UnityEngine.Random.Range(templateValue2, templateValue3);
+		float size = Random.Range(templateValue2, templateValue3);
 		return new CritterAppearance(hatName, size);
 	}
 

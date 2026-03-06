@@ -22,7 +22,7 @@ public class AbilitySound
 		{
 			return;
 		}
-		this.nextSound = UnityEngine.Random.Range(0, this.sounds.Count);
+		this.nextSound = Random.Range(0, this.sounds.Count);
 	}
 
 	public void Play(AudioSource audioSourceIn)

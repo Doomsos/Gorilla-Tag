@@ -97,7 +97,7 @@ public class GorillaCaveCrystalVisuals : MonoBehaviour
 
 	private static void InitializeCrystals()
 	{
-		foreach (GorillaCaveCrystalVisuals gorillaCaveCrystalVisuals in UnityEngine.Object.FindObjectsByType<GorillaCaveCrystalVisuals>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID))
+		foreach (GorillaCaveCrystalVisuals gorillaCaveCrystalVisuals in Object.FindObjectsByType<GorillaCaveCrystalVisuals>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID))
 		{
 			gorillaCaveCrystalVisuals.UpdateAlbedo();
 			gorillaCaveCrystalVisuals.ForceUpdate();

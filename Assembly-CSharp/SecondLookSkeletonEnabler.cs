@@ -6,7 +6,7 @@ public class SecondLookSkeletonEnabler : Tappable
 	private void Awake()
 	{
 		this.isTapped = false;
-		this.skele = UnityEngine.Object.FindFirstObjectByType<SecondLookSkeleton>();
+		this.skele = Object.FindFirstObjectByType<SecondLookSkeleton>();
 		this.skele.spookyText = this.spookyText;
 	}
 

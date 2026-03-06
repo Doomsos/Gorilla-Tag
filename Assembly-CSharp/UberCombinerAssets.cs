@@ -30,19 +30,19 @@ public class UberCombinerAssets : ScriptableObject
 	}
 
 	[SerializeField]
-	private UnityEngine.Object _rootFolder;
+	private Object _rootFolder;
 
 	[SerializeField]
-	private UnityEngine.Object _resourcesFolder;
+	private Object _resourcesFolder;
 
 	[SerializeField]
-	private UnityEngine.Object _materialsFolder;
+	private Object _materialsFolder;
 
 	[SerializeField]
-	private UnityEngine.Object _prefabsFolder;
+	private Object _prefabsFolder;
 
 	[Space]
-	public UnityEngine.Object MeshBakerDefaultCustomizer;
+	public Object MeshBakerDefaultCustomizer;
 
 	public Material ReferenceUberMaterial;
 

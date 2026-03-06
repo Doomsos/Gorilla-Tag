@@ -91,7 +91,7 @@ namespace GorillaNetworking.Store
 						CosmeticPart cosmeticPart = array2[i];
 						GameObject gameObject = this.LoadAndInstantiatePrefab(cosmeticPart.prefabAssetRef, base.transform);
 						gameObject.GetComponent<GorillaSkinToggle>().ApplyToMannequin(this.mannequin, false);
-						UnityEngine.Object.DestroyImmediate(gameObject);
+						Object.DestroyImmediate(gameObject);
 						return;
 					}
 				}
@@ -131,7 +131,7 @@ namespace GorillaNetworking.Store
 							break;
 						case HeadModel_CosmeticStand.BustType.GorillaMannequin:
 							this._manuallySpawnedCosmeticParts.Remove(gameObject2);
-							UnityEngine.Object.DestroyImmediate(gameObject2);
+							Object.DestroyImmediate(gameObject2);
 							break;
 						default:
 							this.PositionWithWardRobeOffsets(partLoadInfo);
@@ -211,7 +211,7 @@ namespace GorillaNetworking.Store
 			{
 				if (loadOp.Status == AsyncOperationStatus.Succeeded && loadOp.Result)
 				{
-					UnityEngine.Object.Destroy(loadOp.Result);
+					Object.Destroy(loadOp.Result);
 				}
 				return;
 			}
@@ -240,7 +240,7 @@ namespace GorillaNetworking.Store
 				break;
 			case HeadModel_CosmeticStand.BustType.GorillaMannequin:
 				this._manuallySpawnedCosmeticParts.Remove(cosmeticPartLoadInfo.xform.gameObject);
-				UnityEngine.Object.DestroyImmediate(cosmeticPartLoadInfo.xform.gameObject);
+				Object.DestroyImmediate(cosmeticPartLoadInfo.xform.gameObject);
 				break;
 			case HeadModel_CosmeticStand.BustType.GuitarStand:
 				this.PositionWardRobeItems(cosmeticPartLoadInfo);
@@ -295,7 +295,7 @@ namespace GorillaNetworking.Store
 			{
 				if (loadOp.Status == AsyncOperationStatus.Succeeded && loadOp.Result)
 				{
-					UnityEngine.Object.Destroy(loadOp.Result);
+					Object.Destroy(loadOp.Result);
 				}
 				return;
 			}
@@ -308,7 +308,7 @@ namespace GorillaNetworking.Store
 			}
 			cosmeticPartLoadInfo.xform = loadOp.Result.transform;
 			cosmeticPartLoadInfo.xform.GetComponent<GorillaSkinToggle>().ApplyToMannequin(this.mannequin, false);
-			UnityEngine.Object.DestroyImmediate(cosmeticPartLoadInfo.xform.gameObject);
+			Object.DestroyImmediate(cosmeticPartLoadInfo.xform.gameObject);
 		}
 
 		public void SetStandType(HeadModel_CosmeticStand.BustType newBustType)
@@ -372,7 +372,7 @@ namespace GorillaNetworking.Store
 		{
 			foreach (GameObject obj in this._manuallySpawnedCosmeticParts)
 			{
-				UnityEngine.Object.DestroyImmediate(obj);
+				Object.DestroyImmediate(obj);
 			}
 			this._manuallySpawnedCosmeticParts.Clear();
 		}
@@ -382,7 +382,7 @@ namespace GorillaNetworking.Store
 			this.ResetMannequinSkin();
 			for (int i = base.transform.childCount - 1; i >= 0; i--)
 			{
-				UnityEngine.Object.DestroyImmediate(base.transform.GetChild(i).gameObject);
+				Object.DestroyImmediate(base.transform.GetChild(i).gameObject);
 			}
 		}
 

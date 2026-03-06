@@ -39,7 +39,7 @@ public class DevWatch : MonoBehaviour
 		{
 			for (int i = this.Items.Count - 1; i >= 0; i--)
 			{
-				UnityEngine.Object.Destroy(this.Items[i]);
+				Object.Destroy(this.Items[i]);
 			}
 		}
 		this.Items.Clear();

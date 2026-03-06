@@ -50,7 +50,7 @@ public class SimpleCountdown : ObservableBehavior
 				this.date,
 				"'"
 			}));
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 	}
 

@@ -57,9 +57,9 @@ public class GorillaBodyRenderer : MonoBehaviour
 	{
 		GorillaBodyRenderer.oopsAllSkeletons = allSkeletons;
 		GorillaTagger.Instance.offlineVRRig.bodyRenderer.Refresh();
-		foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+		foreach (RigContainer rigContainer in VRRigCache.ActiveRigContainers)
 		{
-			vrrig.bodyRenderer.Refresh();
+			rigContainer.Rig.bodyRenderer.Refresh();
 		}
 	}
 
@@ -305,7 +305,7 @@ public class GorillaBodyRenderer : MonoBehaviour
 	{
 		if (this.myDefaultSkinMaterialInstance == null)
 		{
-			this.myDefaultSkinMaterialInstance = UnityEngine.Object.Instantiate<Material>(this.rig.materialsToChangeTo[0]);
+			this.myDefaultSkinMaterialInstance = Object.Instantiate<Material>(this.rig.materialsToChangeTo[0]);
 			this.rig.materialsToChangeTo[0] = this.myDefaultSkinMaterialInstance;
 		}
 		if (this._defaultSkinMaterials.Length == 0)

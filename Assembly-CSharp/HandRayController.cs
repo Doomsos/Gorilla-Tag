@@ -10,7 +10,7 @@ public class HandRayController : MonoBehaviour
 		{
 			if (HandRayController.instance == null)
 			{
-				HandRayController.instance = UnityEngine.Object.FindAnyObjectByType<HandRayController>();
+				HandRayController.instance = Object.FindAnyObjectByType<HandRayController>();
 				if (HandRayController.instance == null)
 				{
 					Debug.LogErrorFormat("[KID::UI::HAND_RAY_CONTROLLER] Not found in scene", Array.Empty<object>());
@@ -25,7 +25,7 @@ public class HandRayController : MonoBehaviour
 		if (HandRayController.instance != null && HandRayController.instance != this)
 		{
 			Debug.LogErrorFormat(base.gameObject, "[KID::UI::HAND_RAY_CONTROLLER] Duplicate instance of HandRayController", Array.Empty<object>());
-			UnityEngine.Object.DestroyImmediate(this);
+			Object.DestroyImmediate(this);
 			return;
 		}
 		HandRayController.instance = this;

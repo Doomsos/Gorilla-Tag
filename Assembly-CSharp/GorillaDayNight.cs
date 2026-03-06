@@ -13,7 +13,7 @@ public class GorillaDayNight : MonoBehaviour
 		}
 		else if (GorillaDayNight.instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 		this.test = false;
 		this.working = false;

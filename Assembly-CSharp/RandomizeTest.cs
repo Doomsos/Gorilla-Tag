@@ -34,7 +34,7 @@ public class RandomizeTest : MonoBehaviour
 		this.randomIterator = 0;
 		while (this.randomIterator < listToRandomize.Count)
 		{
-			this.tempRandIndex = UnityEngine.Random.Range(this.randomIterator, listToRandomize.Count);
+			this.tempRandIndex = Random.Range(this.randomIterator, listToRandomize.Count);
 			this.tempRandValue = listToRandomize[this.randomIterator];
 			listToRandomize[this.randomIterator] = listToRandomize[this.tempRandIndex];
 			listToRandomize[this.tempRandIndex] = this.tempRandValue;

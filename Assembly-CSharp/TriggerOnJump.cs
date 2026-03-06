@@ -41,7 +41,7 @@ public class TriggerOnJump : MonoBehaviour, ITickSystemTick
 		if (this._events != null)
 		{
 			this._events.Activate -= this.OnActivate;
-			UnityEngine.Object.Destroy(this._events);
+			Object.Destroy(this._events);
 			this._events = null;
 		}
 	}

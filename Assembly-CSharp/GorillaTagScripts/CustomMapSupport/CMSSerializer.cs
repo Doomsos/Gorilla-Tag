@@ -13,7 +13,7 @@ namespace GorillaTagScripts.CustomMapSupport
 		{
 			if (CMSSerializer.instance != null)
 			{
-				UnityEngine.Object.Destroy(this);
+				Object.Destroy(this);
 			}
 			CMSSerializer.instance = this;
 			CMSSerializer.hasInstance = true;

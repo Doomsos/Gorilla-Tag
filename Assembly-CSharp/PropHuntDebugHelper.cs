@@ -10,7 +10,7 @@ public class PropHuntDebugHelper : MonoBehaviour
 	{
 		if (PropHuntDebugHelper.instance != null)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		PropHuntDebugHelper.instance = this;
@@ -20,7 +20,7 @@ public class PropHuntDebugHelper : MonoBehaviour
 	{
 		yield return null;
 		yield return null;
-		this._propHuntManager = UnityEngine.Object.FindAnyObjectByType<GorillaPropHuntGameManager>();
+		this._propHuntManager = Object.FindAnyObjectByType<GorillaPropHuntGameManager>();
 		if (this._propHuntManager != null)
 		{
 			Debug.Log("PropHuntDebugHelper :: Found number of props " + PropHuntPools.AllPropCosmeticIds.Length.ToString());

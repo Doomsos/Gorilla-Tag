@@ -13,12 +13,12 @@ public class AngryBeeAnimator : MonoBehaviour
 		{
 			GameObject gameObject = new GameObject();
 			gameObject.transform.parent = base.transform;
-			Vector2 vector = UnityEngine.Random.insideUnitCircle * this.orbitMaxCenterDisplacement;
-			gameObject.transform.localPosition = new Vector3(vector.x, UnityEngine.Random.Range(-this.orbitMaxHeightDisplacement, this.orbitMaxHeightDisplacement), vector.y);
-			gameObject.transform.localRotation = Quaternion.Euler(UnityEngine.Random.Range(-this.orbitMaxTilt, this.orbitMaxTilt), (float)UnityEngine.Random.Range(0, 360), 0f);
+			Vector2 vector = Random.insideUnitCircle * this.orbitMaxCenterDisplacement;
+			gameObject.transform.localPosition = new Vector3(vector.x, Random.Range(-this.orbitMaxHeightDisplacement, this.orbitMaxHeightDisplacement), vector.y);
+			gameObject.transform.localRotation = Quaternion.Euler(Random.Range(-this.orbitMaxTilt, this.orbitMaxTilt), (float)Random.Range(0, 360), 0f);
 			this.beeOrbitalAxes[i] = gameObject.transform.up;
-			GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(this.beePrefab, gameObject.transform);
-			float num = UnityEngine.Random.Range(this.orbitMinRadius, this.orbitMaxRadius);
+			GameObject gameObject2 = Object.Instantiate<GameObject>(this.beePrefab, gameObject.transform);
+			float num = Random.Range(this.orbitMinRadius, this.orbitMaxRadius);
 			this.beeOrbitalRadii[i] = num;
 			gameObject2.transform.localPosition = Vector3.forward * num;
 			gameObject2.transform.localRotation = Quaternion.Euler(-90f, 90f, 0f);

@@ -122,7 +122,7 @@ public class CrittersBag : CrittersActor
 		GameObject obj;
 		if (this.attachedColliders.TryGetValue(actor.actorId, out obj))
 		{
-			UnityEngine.Object.Destroy(obj);
+			Object.Destroy(obj);
 			this.attachedColliders.Remove(actor.actorId);
 		}
 		if (playSound)

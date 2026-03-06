@@ -24,7 +24,7 @@ public class BalloonDynamics : MonoBehaviour, ITetheredObjectBehavior
 		{
 			this.grabPt.transform.parent = this.grabPtInitParent.transform;
 		}
-		this.bouyancyActualHeight = UnityEngine.Random.Range(this.bouyancyMinHeight, this.bouyancyMaxHeight);
+		this.bouyancyActualHeight = Random.Range(this.bouyancyMinHeight, this.bouyancyMaxHeight);
 	}
 
 	private void ApplyBouyancyForce()

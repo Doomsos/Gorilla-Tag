@@ -58,7 +58,7 @@ namespace GorillaTagScripts
 					this.waypoints.Add(item);
 				}
 			}
-			int index = UnityEngine.Random.Range(0, this.waypoints.Count);
+			int index = Random.Range(0, this.waypoints.Count);
 			this.currentWaypoint = this.waypoints[index];
 			this.targetRotation = Quaternion.LookRotation(this.currentWaypoint.position - base.transform.position);
 			this.waypoints.RemoveAt(index);
@@ -93,11 +93,11 @@ namespace GorillaTagScripts
 			if (base.IsMine)
 			{
 				this.possibleTargets.Clear();
-				for (int i = 0; i < GorillaParent.instance.vrrigs.Count; i++)
+				for (int i = 0; i < VRRigCache.ActiveRigContainers.Count; i++)
 				{
-					if ((GorillaParent.instance.vrrigs[i].transform.position - base.transform.position).magnitude < maxDistance && GorillaParent.instance.vrrigs[i].creator != this.targetPlayer)
+					if ((VRRigCache.ActiveRigContainers[i].transform.position - base.transform.position).magnitude < maxDistance && VRRigCache.ActiveRigContainers[i].Creator != this.targetPlayer)
 					{
-						this.possibleTargets.Add(GorillaParent.instance.vrrigs[i].creator);
+						this.possibleTargets.Add(VRRigCache.ActiveRigContainers[i].Creator);
 					}
 				}
 				this.targetPlayer = null;
@@ -105,7 +105,7 @@ namespace GorillaTagScripts
 				this.targetVRRig = null;
 				if (this.possibleTargets.Count > 0)
 				{
-					int index = UnityEngine.Random.Range(0, this.possibleTargets.Count);
+					int index = Random.Range(0, this.possibleTargets.Count);
 					this.PickPlayer(this.possibleTargets[index]);
 				}
 			}
@@ -120,18 +120,19 @@ namespace GorillaTagScripts
 
 		private void PickPlayer(NetPlayer player)
 		{
-			int num = GorillaParent.instance.vrrigs.FindIndex((VRRig x) => x.creator != null && x.creator == player);
-			if (num > -1 && num < GorillaParent.instance.vrrigs.Count)
+			int num = VRRigCache.ActiveRigContainers.FindIndex((RigContainer x) => x.Creator != null && x.Creator == player);
+			if (num > -1 && num < VRRigCache.ActiveRigContainers.Count)
 			{
-				this.targetPlayer = GorillaParent.instance.vrrigs[num].creator;
-				this.targetTransform = GorillaParent.instance.vrrigs[num].head.rigTarget;
-				this.targetVRRig = GorillaParent.instance.vrrigs[num];
+				VRRig rig = VRRigCache.ActiveRigContainers[num].Rig;
+				this.targetPlayer = rig.creator;
+				this.targetTransform = rig.head.rigTarget;
+				this.targetVRRig = rig;
 			}
 		}
 
 		private void SeekPlayer()
 		{
-			if (this.targetTransform == null)
+			if (this.targetTransform.IsNull())
 			{
 				this.ChangeState(LurkerGhost.ghostState.patrol);
 				return;
@@ -208,7 +209,7 @@ namespace GorillaTagScripts
 			case LurkerGhost.ghostState.patrol:
 				this.PlaySound(this.patrolAudio, true);
 				this.passingPlayer = null;
-				this.cooldownTimeRemaining = UnityEngine.Random.Range(this.cooldownDuration, this.maxCooldownDuration);
+				this.cooldownTimeRemaining = Random.Range(this.cooldownDuration, this.maxCooldownDuration);
 				this.currentRepeatHuntTimes = 0;
 				break;
 			case LurkerGhost.ghostState.charge:

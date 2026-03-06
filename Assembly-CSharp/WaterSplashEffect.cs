@@ -108,10 +108,10 @@ public class WaterSplashEffect : MonoBehaviour
 			int num = 0;
 			if (audioClips.Length > 1)
 			{
-				int num2 = UnityEngine.Random.Range(0, audioClips.Length);
+				int num2 = Random.Range(0, audioClips.Length);
 				if (num2 == lastPlayedAudioClipIndex)
 				{
-					num2 = ((UnityEngine.Random.Range(0f, 1f) > 0.5f) ? ((num2 + 1) % audioClips.Length) : (num2 - 1));
+					num2 = ((Random.Range(0f, 1f) > 0.5f) ? ((num2 + 1) % audioClips.Length) : (num2 - 1));
 					if (num2 < 0)
 					{
 						num2 = audioClips.Length - 1;

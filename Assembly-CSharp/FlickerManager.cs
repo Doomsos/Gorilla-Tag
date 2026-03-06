@@ -15,7 +15,7 @@ public sealed class FlickerManager : MonoBehaviour
 		if (this.FlickerDurations.Length == 0)
 		{
 			Debug.LogWarning("No flicker durations set for FlickerManager, disabling.");
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 	}

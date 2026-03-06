@@ -44,7 +44,7 @@ public class BoundsCalcs : MonoBehaviour
 			list2.AddRange(vertices);
 		}
 		this.composite = BoundsInfo.ComputeBounds(list2.ToArray());
-		list.ForEach(new Action<Mesh>(UnityEngine.Object.DestroyImmediate));
+		list.ForEach(new Action<Mesh>(Object.DestroyImmediate));
 	}
 
 	public MeshFilter[] optionalTargets = new MeshFilter[0];

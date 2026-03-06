@@ -77,7 +77,7 @@ namespace GameObjectScheduling
 			}
 			while (dateTime < endDate)
 			{
-				int num3 = UnityEngine.Random.Range(0, schedules.Length - 2);
+				int num3 = Random.Range(0, schedules.Length - 2);
 				if (num <= num3)
 				{
 					num3++;

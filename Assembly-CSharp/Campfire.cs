@@ -8,9 +8,9 @@ public class Campfire : MonoBehaviour, IGorillaSliceableSimple
 		this.lastAngleBottom = 0f;
 		this.lastAngleMiddle = 0f;
 		this.lastAngleTop = 0f;
-		this.perlinBottom = (float)UnityEngine.Random.Range(0, 100);
-		this.perlinMiddle = (float)UnityEngine.Random.Range(200, 300);
-		this.perlinTop = (float)UnityEngine.Random.Range(400, 500);
+		this.perlinBottom = (float)Random.Range(0, 100);
+		this.perlinMiddle = (float)Random.Range(200, 300);
+		this.perlinTop = (float)Random.Range(400, 500);
 		this.startingRotationBottom = this.baseFire.localEulerAngles.x;
 		this.startingRotationMiddle = this.middleFire.localEulerAngles.x;
 		this.startingRotationTop = this.topFire.localEulerAngles.x;

@@ -101,7 +101,7 @@ public class PropHuntPropZone : MonoBehaviour, IDelayedExecListener
 		}
 		else
 		{
-			propPlacementRB = UnityEngine.Object.Instantiate<PropPlacementRB>(this.propPlacementPrefab, base.transform);
+			propPlacementRB = Object.Instantiate<PropPlacementRB>(this.propPlacementPrefab, base.transform);
 			this.propPlacementRBs.Add(propPlacementRB);
 		}
 		this.nextUnusedPropPlacement++;

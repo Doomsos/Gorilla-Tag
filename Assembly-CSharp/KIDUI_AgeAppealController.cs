@@ -54,7 +54,7 @@ public class KIDUI_AgeAppealController : MonoBehaviour
 		PrivateUIRoom.RemoveUI(base.transform);
 		HandRayController.Instance.DisableHandRays();
 		this._firstAgeAppealScreen.gameObject.SetActive(false);
-		UnityEngine.Object.DestroyImmediate(base.gameObject);
+		Object.DestroyImmediate(base.gameObject);
 	}
 
 	public void StartTooYoungToPlayScreen()

@@ -485,7 +485,7 @@ namespace GorillaLocomotion
 		{
 			if (GTPlayer._instance != null && GTPlayer._instance != this)
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 			}
 			else
 			{
@@ -542,7 +542,7 @@ namespace GorillaLocomotion
 			}
 			if (this.climbHelper)
 			{
-				UnityEngine.Object.Destroy(this.climbHelper.gameObject);
+				Object.Destroy(this.climbHelper.gameObject);
 			}
 		}
 
@@ -611,6 +611,13 @@ namespace GorillaLocomotion
 			this.lastOpenHeadPosition = this.headCollider.transform.position;
 			this.leftHand.OnTeleport();
 			this.rightHand.OnTeleport();
+			for (int i = 0; i < 12; i++)
+			{
+				if (this.stiltStates[i].isActive)
+				{
+					this.stiltStates[i].OnTeleport();
+				}
+			}
 			if (!keepVelocity)
 			{
 				this.playerRigidBody.linearVelocity = Vector3.zero;
@@ -671,19 +678,19 @@ namespace GorillaLocomotion
 			this.playerRigidBody.AddForce(newVelocity - this.playerRigidBody.linearVelocity, ForceMode.VelocityChange);
 		}
 
-		public void SetGravityOverride(UnityEngine.Object caller, Action<GTPlayer> gravityFunction)
+		public void SetGravityOverride(Object caller, Action<GTPlayer> gravityFunction)
 		{
 			this.gravityOverrides[caller] = gravityFunction;
 		}
 
-		public void UnsetGravityOverride(UnityEngine.Object caller)
+		public void UnsetGravityOverride(Object caller)
 		{
 			this.gravityOverrides.Remove(caller);
 		}
 
 		private void ApplyGravityOverrides()
 		{
-			foreach (KeyValuePair<UnityEngine.Object, Action<GTPlayer>> keyValuePair in this.gravityOverrides)
+			foreach (KeyValuePair<Object, Action<GTPlayer>> keyValuePair in this.gravityOverrides)
 			{
 				keyValuePair.Value(this);
 			}
@@ -3814,7 +3821,7 @@ namespace GorillaLocomotion
 
 		private Vector3 lastSlopeDirection = Vector3.zero;
 
-		private readonly Dictionary<UnityEngine.Object, Action<GTPlayer>> gravityOverrides = new Dictionary<UnityEngine.Object, Action<GTPlayer>>();
+		private readonly Dictionary<Object, Action<GTPlayer>> gravityOverrides = new Dictionary<Object, Action<GTPlayer>>();
 
 		private int hoverAllowedCount;
 
@@ -3962,10 +3969,13 @@ namespace GorillaLocomotion
 				this.isColliding = false;
 				this.isSliding = false;
 				this.wasSliding = false;
-				this.handFollower.position = this.controllerTransform.position;
-				this.handFollower.rotation = this.controllerTransform.rotation;
-				this.lastPosition = this.handFollower.transform.position;
-				this.lastRotation = this.handFollower.transform.rotation;
+				if (this.handFollower != null)
+				{
+					this.handFollower.position = this.controllerTransform.position;
+					this.handFollower.rotation = this.controllerTransform.rotation;
+				}
+				this.lastPosition = this.controllerTransform.position;
+				this.lastRotation = this.controllerTransform.rotation;
 			}
 
 			public Vector3 GetLastPosition()

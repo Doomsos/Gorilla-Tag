@@ -354,14 +354,14 @@ namespace MTAssets.EasyMeshCombiner
 						MeshCollider component = base.GetComponent<MeshCollider>();
 						if (component != null)
 						{
-							UnityEngine.Object.Destroy(component);
+							Object.Destroy(component);
 						}
 					}
 				}
 				RuntimeMeshCombiner.AfterMerge afterMerge = this.afterMerge;
 				this.originalGameObjectsWithMeshToRestore.Clear();
-				UnityEngine.Object.Destroy(base.GetComponent<MeshRenderer>());
-				UnityEngine.Object.Destroy(base.GetComponent<MeshFilter>());
+				Object.Destroy(base.GetComponent<MeshRenderer>());
+				Object.Destroy(base.GetComponent<MeshFilter>());
 				if (this.garbageCollectorAfterUndo)
 				{
 					Resources.UnloadUnusedAssets();

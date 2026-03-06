@@ -31,10 +31,10 @@ public class CrittersCageDepositShim : MonoBehaviour
 		CrittersCageDeposit crittersCageDeposit = this.CopySpawnerDataInPrefab();
 		if (crittersCageDeposit.attachPoint.GetComponent<Rigidbody>() != null)
 		{
-			UnityEngine.Object.DestroyImmediate(crittersCageDeposit.attachPoint.GetComponent<Rigidbody>());
+			Object.DestroyImmediate(crittersCageDeposit.attachPoint.GetComponent<Rigidbody>());
 		}
-		UnityEngine.Object.DestroyImmediate(crittersCageDeposit.attachPoint);
-		UnityEngine.Object.DestroyImmediate(crittersCageDeposit);
+		Object.DestroyImmediate(crittersCageDeposit.attachPoint);
+		Object.DestroyImmediate(crittersCageDeposit);
 	}
 
 	public BoxCollider cageBoxCollider;

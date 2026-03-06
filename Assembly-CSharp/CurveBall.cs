@@ -6,7 +6,7 @@ public class CurveBall : MonoBehaviour
 {
 	public void Reset()
 	{
-		float f = UnityEngine.Random.Range(0f, MathUtil.TwoPi);
+		float f = Random.Range(0f, MathUtil.TwoPi);
 		float num = Mathf.Cos(f);
 		float num2 = Mathf.Sin(f);
 		this.m_speedX = 40f * num;

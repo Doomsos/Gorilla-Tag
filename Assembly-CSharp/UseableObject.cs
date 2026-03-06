@@ -61,7 +61,7 @@ public class UseableObject : TransferrableObject
 	internal override void OnDisable()
 	{
 		base.OnDisable();
-		UnityEngine.Object.Destroy(this._events);
+		Object.Destroy(this._events);
 	}
 
 	private void OnObjectActivated(int sender, int target, object[] args, PhotonMessageInfoWrapped info)

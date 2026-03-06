@@ -15,7 +15,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		base.Initialize();
 		this.rB = base.GetComponentInChildren<Rigidbody>();
 		this.soundsHeard = new Dictionary<int, CrittersActor>();
-		base.transform.eulerAngles = new Vector3(0f, UnityEngine.Random.value * 360f, 0f);
+		base.transform.eulerAngles = new Vector3(0f, Random.value * 360f, 0f);
 		this.raycastHits = new RaycastHit[20];
 		this.wasSomethingInTheWay = false;
 		this._spawnAnimationDuration = this.spawnInHeighMovement.keys.Last<Keyframe>().time;
@@ -26,8 +26,8 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 	{
 		this.sensoryRange *= this.sensoryRange;
 		this.autoSeeFoodDistance *= this.autoSeeFoodDistance;
-		this.currentSleepiness = UnityEngine.Random.value * this.tiredThreshold;
-		this.currentHunger = UnityEngine.Random.value * this.hungryThreshold;
+		this.currentSleepiness = Random.value * this.tiredThreshold;
+		this.currentHunger = Random.value * this.hungryThreshold;
 		this.currentFear = 0f;
 		this.currentStruggle = 0f;
 		this.currentAttraction = 0f;
@@ -64,7 +64,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		{
 			return 0f;
 		}
-		return Mathf.Max(0f, this.jumpCooldown * UnityEngine.Random.value * this.jumpVariabilityTime);
+		return Mathf.Max(0f, this.jumpCooldown * Random.value * this.jumpVariabilityTime);
 	}
 
 	public void LocalJump(float maxVel, float jumpAngle)
@@ -843,7 +843,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			base.transform.eulerAngles = new Vector3(0f, 360f * UnityEngine.Random.value, 0f);
+			base.transform.eulerAngles = new Vector3(0f, 360f * Random.value, 0f);
 			if (!this.SomethingInTheWay(default(Vector3)))
 			{
 				break;
@@ -870,7 +870,7 @@ public class CrittersPawn : CrittersActor, IEyeScannable
 		{
 			vector = base.transform.forward;
 		}
-		Vector3 vector2 = Quaternion.Euler(0f, (float)UnityEngine.Random.Range(-30, 30), 0f) * vector;
+		Vector3 vector2 = Quaternion.Euler(0f, (float)Random.Range(-30, 30), 0f) * vector;
 		if (this.SomethingInTheWay(vector2))
 		{
 			this.RandomJump();

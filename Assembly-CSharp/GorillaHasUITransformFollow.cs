@@ -17,7 +17,7 @@ public class GorillaHasUITransformFollow : MonoBehaviour
 		GorillaUITransformFollow[] array = this.transformFollowers;
 		for (int i = 0; i < array.Length; i++)
 		{
-			UnityEngine.Object.Destroy(array[i].gameObject);
+			Object.Destroy(array[i].gameObject);
 		}
 	}
 

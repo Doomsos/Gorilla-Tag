@@ -5,7 +5,7 @@ public class GhostLab : MonoBehaviourTick, IBuildValidation
 {
 	private void Awake()
 	{
-		this.relState = UnityEngine.Object.FindFirstObjectByType<GhostLabReliableState>();
+		this.relState = Object.FindFirstObjectByType<GhostLabReliableState>();
 		this.doorState = GhostLab.EntranceDoorsState.BothClosed;
 		this.doorOpen = new bool[this.relState.singleDoorCount];
 	}

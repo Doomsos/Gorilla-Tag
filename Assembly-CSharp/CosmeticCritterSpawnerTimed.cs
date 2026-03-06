@@ -12,7 +12,7 @@ public abstract class CosmeticCritterSpawnerTimed : CosmeticCritterSpawnerIndepe
 	{
 		if (Time.time >= this.nextLocalSpawnTime)
 		{
-			this.nextLocalSpawnTime = Time.time + UnityEngine.Random.Range(this.spawnIntervalMinMax.x, this.spawnIntervalMinMax.y);
+			this.nextLocalSpawnTime = Time.time + Random.Range(this.spawnIntervalMinMax.x, this.spawnIntervalMinMax.y);
 			return base.CanSpawnLocal();
 		}
 		return false;
@@ -28,7 +28,7 @@ public abstract class CosmeticCritterSpawnerTimed : CosmeticCritterSpawnerIndepe
 		base.OnEnable();
 		if (base.IsLocal)
 		{
-			this.nextLocalSpawnTime = Time.time + UnityEngine.Random.Range(this.spawnIntervalMinMax.x, this.spawnIntervalMinMax.y);
+			this.nextLocalSpawnTime = Time.time + Random.Range(this.spawnIntervalMinMax.x, this.spawnIntervalMinMax.y);
 		}
 	}
 

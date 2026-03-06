@@ -358,7 +358,7 @@ public class CrittersActorGrabber : MonoBehaviour
 		if (this.triggerCollider != null)
 		{
 			CrittersGrabberSharedData.RemoveTrigger(this.triggerCollider);
-			UnityEngine.Object.Destroy(this.triggerCollider.gameObject);
+			Object.Destroy(this.triggerCollider.gameObject);
 		}
 		this.triggerCollider = null;
 		this.rb.includeLayers = 0;

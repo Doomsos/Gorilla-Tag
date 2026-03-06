@@ -82,7 +82,7 @@ namespace GorillaNetworking
 			}
 			else if (PhotonNetworkController.Instance != this)
 			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				Object.Destroy(base.gameObject);
 			}
 			this.updatedName = false;
 			this.playersInRegion = new int[this.serverRegions.Length];
@@ -120,7 +120,7 @@ namespace GorillaNetworking
 			this.lastHeadRightHandDistance = this.headRightHandDistance;
 			this.lastHeadLeftHandDistance = this.headLeftHandDistance;
 			this.lastHeadQuat = this.headQuat;
-			if (this.deferredJoin && Time.time >= this.partyJoinDeferredUntilTimestamp)
+			if (this.deferredJoin && Time.realtimeSinceStartup >= this.partyJoinDeferredUntilTimestamp)
 			{
 				if ((this.partyJoinDeferredUntilTimestamp != 0f || NetworkSystem.Instance.netState == NetSystemState.Idle) && this.currentJoinTrigger != null)
 				{
@@ -149,7 +149,7 @@ namespace GorillaNetworking
 
 		public void DeferJoining(float duration)
 		{
-			this.partyJoinDeferredUntilTimestamp = Mathf.Max(this.partyJoinDeferredUntilTimestamp, Time.time + duration);
+			this.partyJoinDeferredUntilTimestamp = Mathf.Max(this.partyJoinDeferredUntilTimestamp, Time.realtimeSinceStartup + duration);
 		}
 
 		public void ClearDeferredJoin()
@@ -414,7 +414,7 @@ namespace GorillaNetworking
 			string text = "";
 			for (int i = 0; i < 4; i++)
 			{
-				text += "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Substring(UnityEngine.Random.Range(0, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Length), 1);
+				text += "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Substring(Random.Range(0, "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789".Length), 1);
 			}
 			if (GorillaComputer.instance.CheckAutoBanListForName(text))
 			{

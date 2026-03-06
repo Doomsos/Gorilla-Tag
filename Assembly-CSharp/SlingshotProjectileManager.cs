@@ -8,7 +8,7 @@ public class SlingshotProjectileManager : MonoBehaviourTick
 	{
 		if (SlingshotProjectileManager.hasInstance && SlingshotProjectileManager.instance != this)
 		{
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 			return;
 		}
 		SlingshotProjectileManager.SetInstance(this);
@@ -25,7 +25,7 @@ public class SlingshotProjectileManager : MonoBehaviourTick
 		SlingshotProjectileManager.hasInstance = true;
 		if (Application.isPlaying)
 		{
-			UnityEngine.Object.DontDestroyOnLoad(manager);
+			Object.DontDestroyOnLoad(manager);
 		}
 	}
 

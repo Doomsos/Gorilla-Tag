@@ -42,7 +42,7 @@ namespace GorillaNetworking
 				GorillaServer.Instance = this;
 				return;
 			}
-			UnityEngine.Object.Destroy(this);
+			Object.Destroy(this);
 		}
 
 		public void ReturnCurrentVersion(ReturnCurrentVersionRequest request, Action<ExecuteFunctionResult> successCallback, Action<PlayFabError> errorCallback)

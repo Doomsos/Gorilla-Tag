@@ -22,7 +22,7 @@ public class MothershipAuthenticator : MonoBehaviour, IGorillaSliceableSimple
 		}
 		else if (MothershipAuthenticator.Instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 		if (!MothershipClientApiUnity.IsEnabled())
 		{

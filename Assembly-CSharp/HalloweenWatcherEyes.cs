@@ -9,7 +9,7 @@ public class HalloweenWatcherEyes : MonoBehaviour
 	{
 		this.playersViewCenterCosAngle = Mathf.Cos(this.playersViewCenterAngle * 0.017453292f);
 		this.watchMinCosAngle = Mathf.Cos(this.watchMaxAngle * 0.017453292f);
-		base.StartCoroutine(this.CheckIfNearPlayer(UnityEngine.Random.Range(0f, this.timeBetweenUpdates)));
+		base.StartCoroutine(this.CheckIfNearPlayer(Random.Range(0f, this.timeBetweenUpdates)));
 		base.enabled = false;
 	}
 

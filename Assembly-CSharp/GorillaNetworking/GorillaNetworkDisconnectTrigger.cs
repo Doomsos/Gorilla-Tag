@@ -22,7 +22,7 @@ namespace GorillaNetworking
 			{
 				if (this.componentTypeToRemove != "" && this.componentTarget.GetComponent(this.componentTypeToRemove) != null)
 				{
-					UnityEngine.Object.Destroy(this.componentTarget.GetComponent(this.componentTypeToRemove));
+					Object.Destroy(this.componentTarget.GetComponent(this.componentTypeToRemove));
 				}
 				PhotonNetwork.Disconnect();
 				SkinnedMeshRenderer[] array2 = this.photonNetworkController.offlineVRRig;

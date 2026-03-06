@@ -139,7 +139,7 @@ namespace GorillaTag
 								num5 = Mathf.Max(num5, num4 + this.trailMaxTurnAngle);
 							}
 						}
-						Vector3 vector = Quaternion.AngleAxis(UnityEngine.Random.Range(num4, num5), Vector3.up) * this.trailHeads[k].direction;
+						Vector3 vector = Quaternion.AngleAxis(Random.Range(num4, num5), Vector3.up) * this.trailHeads[k].direction;
 						Vector3 vector2 = this.trailHeads[k].position + vector * this.trailDistanceBetweenSpawns * this.scaleFactor - this.liquidSurfacePlane.transform.position;
 						if (vector2.sqrMagnitude > this.surfaceRadiusSpawnRange.y * this.surfaceRadiusSpawnRange.y)
 						{
@@ -168,10 +168,10 @@ namespace GorillaTag
 			{
 				float num = this.rockLifetimeMultiplierVsLavaProgress.Evaluate(lavaProgress);
 				float num2 = this.rockMaxSizeMultiplierVsLavaProgress.Evaluate(lavaProgress);
-				float num3 = UnityEngine.Random.Range(this.lifetimeRange.x, this.lifetimeRange.y) * num;
-				float num4 = UnityEngine.Random.Range(this.sizeRange.x, this.sizeRange.y * num2);
+				float num3 = Random.Range(this.lifetimeRange.x, this.lifetimeRange.y) * num;
+				float num4 = Random.Range(this.sizeRange.x, this.sizeRange.y * num2);
 				float d = this.spawnRadiusMultiplierVsLavaProgress.Evaluate(lavaProgress);
-				Vector2 vector = UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(this.surfaceRadiusSpawnRange.x, this.surfaceRadiusSpawnRange.y) * d;
+				Vector2 vector = Random.insideUnitCircle.normalized * Random.Range(this.surfaceRadiusSpawnRange.x, this.surfaceRadiusSpawnRange.y) * d;
 				vector = this.GetSpawnPositionWithClearance(vector, num4 * this.scaleFactor, this.surfaceRadiusSpawnRange.y, this.liquidSurfacePlane.transform.position);
 				base.photonView.RPC("SpawnSodaBubbleRPC", RpcTarget.Others, new object[]
 				{
@@ -190,9 +190,9 @@ namespace GorillaTag
 			{
 				float num = this.trailBubbleLifetimeVsProgress.Evaluate(this.scienceExperimentManager.RiseProgressLinear) * this.trailBubbleLifetimeMultiplier;
 				float num2 = this.trailBubbleSize;
-				Vector2 vector = UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(this.surfaceRadiusSpawnRange.x, this.surfaceRadiusSpawnRange.y);
+				Vector2 vector = Random.insideUnitCircle.normalized * Random.Range(this.surfaceRadiusSpawnRange.x, this.surfaceRadiusSpawnRange.y);
 				vector = this.GetSpawnPositionWithClearance(vector, num2 * this.scaleFactor, this.surfaceRadiusSpawnRange.y, this.liquidSurfacePlane.transform.position);
-				Vector3 direction = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up) * Vector3.forward;
+				Vector3 direction = Quaternion.AngleAxis(Random.Range(0f, 360f), Vector3.up) * Vector3.forward;
 				base.photonView.RPC("SpawnSodaBubbleRPC", RpcTarget.Others, new object[]
 				{
 					vector,

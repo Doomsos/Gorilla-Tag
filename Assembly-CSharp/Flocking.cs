@@ -16,7 +16,7 @@ public class Flocking : MonoBehaviour
 
 	private void Start()
 	{
-		this.speed = UnityEngine.Random.Range(this.minSpeed, this.maxSpeed);
+		this.speed = Random.Range(this.minSpeed, this.maxSpeed);
 		this.fishState = Flocking.FishState.patrol;
 	}
 
@@ -44,7 +44,7 @@ public class Flocking : MonoBehaviour
 			this.SwitchState(Flocking.FishState.patrol);
 			break;
 		case Flocking.FishState.patrol:
-			if (UnityEngine.Random.Range(0, 10) < 2)
+			if (Random.Range(0, 10) < 2)
 			{
 				this.SwitchState(Flocking.FishState.flock);
 			}

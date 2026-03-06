@@ -11,7 +11,7 @@ namespace GorillaTagScripts
 			if (MovingSurfaceManager.instance != null && MovingSurfaceManager.instance != this)
 			{
 				GTDev.LogWarning<string>("Instance of MovingSurfaceManager already exists. Destroying.", null);
-				UnityEngine.Object.Destroy(this);
+				Object.Destroy(this);
 				return;
 			}
 			if (MovingSurfaceManager.instance == null)

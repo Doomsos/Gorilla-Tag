@@ -63,7 +63,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		}
 		else if (BetterDayNightManager.instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 		this.currentLerp = 0f;
 		this.totalHours = 0.0;
@@ -75,7 +75,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 		this.currentTimeIndex = 0;
 		this.baseSeconds = 0.0;
 		this.computerInit = false;
-		this.randomNumberGenerator = new System.Random(this.mySeed);
+		this.randomNumberGenerator = new Random(this.mySeed);
 		this.GenerateWeatherEventTimes();
 		this.ChangeMaps(0, 1);
 		base.StartCoroutine(this.InitialUpdate());
@@ -84,31 +84,6 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 	public void OnDisable()
 	{
 		GorillaSlicerSimpleManager.UnregisterSliceable(this, GorillaSlicerSimpleManager.UpdateStep.Update);
-	}
-
-	protected void OnDestroy()
-	{
-	}
-
-	private Vector4 MaterialColorCorrection(Vector4 color)
-	{
-		if (color.x < 0.5f)
-		{
-			color.x += 3E-08f;
-		}
-		if (color.y < 0.5f)
-		{
-			color.y += 3E-08f;
-		}
-		if (color.z < 0.5f)
-		{
-			color.z += 3E-08f;
-		}
-		if (color.w < 0.5f)
-		{
-			color.w += 3E-08f;
-		}
-		return color;
 	}
 
 	public void UpdateTimeOfDay()
@@ -186,6 +161,7 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 				this.ChangeMaps(this.currentTimeIndex, (this.currentTimeIndex + 1) % this.timeOfDayRange.Length);
 			}
 			this.currentLerp = (float)(1.0 - (this.currentIndexSeconds - this.currentTime) / (this.timeOfDayRange[this.currentTimeIndex] * 3600.0));
+			Shader.SetGlobalFloat(this._GT_DayCycleTimeProgress, this.NormalizedTimeOfDay);
 			this.ChangeLerps(this.currentLerp);
 			this.lastIndex = this.currentTimeIndex;
 			this.currentTimeOfDay = this.dayNightLightmapNames[this.currentTimeIndex];
@@ -210,17 +186,8 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 	private void ChangeLerps(float newLerp)
 	{
 		Shader.SetGlobalFloat(this._GlobalDayNightLerpValue, newLerp);
-		for (int i = 0; i < this.standardMaterialsUnlit.Length; i++)
-		{
-			this.tempLerp = Mathf.Lerp(this.colorFrom, this.colorTo, newLerp);
-			this.standardMaterialsUnlit[i].color = new Color(this.tempLerp, this.tempLerp, this.tempLerp);
-		}
-		for (int j = 0; j < this.standardMaterialsUnlitDarker.Length; j++)
-		{
-			this.tempLerp = Mathf.Lerp(this.colorFromDarker, this.colorToDarker, newLerp);
-			Color.RGBToHSV(this.standardMaterialsUnlitDarker[j].color, out this.h, out this.s, out this.v);
-			this.standardMaterialsUnlitDarker[j].color = Color.HSVToRGB(this.h, this.s, this.tempLerp);
-		}
+		Shader.SetGlobalFloat(this._GT_DayCycleBrightnessOption1_Id, Mathf.Lerp(this.colorFrom, this.colorTo, newLerp));
+		Shader.SetGlobalFloat(this._GT_DayCycleBrightnessOption2_Id, Mathf.Lerp(this.colorFromDarker, this.colorToDarker, newLerp));
 	}
 
 	private void ChangeMaps(int fromIndex, int toIndex)
@@ -499,10 +466,6 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 
 	public Shader gorillaUnlitCutout;
 
-	public Material[] standardMaterialsUnlit;
-
-	public Material[] standardMaterialsUnlitDarker;
-
 	public Material[] dayNightSupportedMaterials;
 
 	public Material[] dayNightSupportedMaterialsCutout;
@@ -559,21 +522,13 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 
 	private double currentIndexSeconds;
 
-	private float tempLerp;
-
 	private double baseSeconds;
 
 	private bool computerInit;
 
-	private float h;
-
-	private float s;
-
-	private float v;
-
 	public int mySeed;
 
-	public System.Random randomNumberGenerator = new System.Random();
+	public Random randomNumberGenerator = new Random();
 
 	public BetterDayNightManager.WeatherType[] weatherCycle;
 
@@ -626,7 +581,11 @@ public class BetterDayNightManager : MonoBehaviour, IGorillaSliceableSimple, ITi
 
 	public TimeSettings currentSetting;
 
-	private ShaderHashId _Color = "_Color";
+	private ShaderHashId _GT_DayCycleTimeProgress = "_GT_DayCycleTimeProgress";
+
+	private ShaderHashId _GT_DayCycleBrightnessOption1_Id = "_GT_DayCycleBrightnessOption1";
+
+	private ShaderHashId _GT_DayCycleBrightnessOption2_Id = "_GT_DayCycleBrightnessOption2";
 
 	private ShaderHashId _GlobalDayNightLerpValue = "_GlobalDayNightLerpValue";
 

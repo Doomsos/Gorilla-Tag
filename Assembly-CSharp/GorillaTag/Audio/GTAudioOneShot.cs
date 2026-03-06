@@ -20,9 +20,9 @@ namespace GorillaTag.Audio
 				Debug.LogError("GTAudioOneShot: Failed to load AudioSourceSingleton_Prefab from resources!!!");
 				return;
 			}
-			GTAudioOneShot.audioSource = UnityEngine.Object.Instantiate<AudioSource>(audioSource);
+			GTAudioOneShot.audioSource = Object.Instantiate<AudioSource>(audioSource);
 			GTAudioOneShot.defaultCurve = GTAudioOneShot.audioSource.GetCustomCurve(AudioSourceCurveType.CustomRolloff);
-			UnityEngine.Object.DontDestroyOnLoad(GTAudioOneShot.audioSource);
+			Object.DontDestroyOnLoad(GTAudioOneShot.audioSource);
 			GTAudioOneShot.isInitialized = true;
 		}
 

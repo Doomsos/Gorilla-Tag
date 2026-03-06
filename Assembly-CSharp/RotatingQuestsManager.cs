@@ -138,7 +138,7 @@ public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQues
 		RotatingQuestsManager.LastQuestDailyID = this.dailyQuestSetID;
 		this.DailyQuestCountdown = dateTime + TimeSpan.FromDays((double)(this.dailyQuestSetID + 1));
 		this.WeeklyQuestCountdown = dateTime + TimeSpan.FromDays((double)((this.weeklyQuestSetID + 1) * 7));
-		UnityEngine.Random.InitState(this.dailyQuestSetID);
+		Random.InitState(this.dailyQuestSetID);
 		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup in this.quests.DailyQuests)
 		{
 			int num = Math.Min(rotatingQuestGroup.selectCount, rotatingQuestGroup.quests.Count);
@@ -152,7 +152,7 @@ public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQues
 			}
 			for (int j = 0; j < num; j++)
 			{
-				float num3 = UnityEngine.Random.Range(0f, num2);
+				float num3 = Random.Range(0f, num2);
 				for (int k = 0; k < list.Count; k++)
 				{
 					float item = list[k].Item2;
@@ -169,7 +169,7 @@ public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQues
 				}
 			}
 		}
-		UnityEngine.Random.InitState(this.weeklyQuestSetID);
+		Random.InitState(this.weeklyQuestSetID);
 		foreach (RotatingQuestsManager.RotatingQuestGroup rotatingQuestGroup2 in this.quests.WeeklyQuests)
 		{
 			int num4 = Math.Min(rotatingQuestGroup2.selectCount, rotatingQuestGroup2.quests.Count);
@@ -183,7 +183,7 @@ public class RotatingQuestsManager : MonoBehaviour, ITickSystemTick, GorillaQues
 			}
 			for (int m = 0; m < num4; m++)
 			{
-				float num6 = UnityEngine.Random.Range(0f, num5);
+				float num6 = Random.Range(0f, num5);
 				for (int n = 0; n < list2.Count; n++)
 				{
 					float item3 = list2[n].Item2;

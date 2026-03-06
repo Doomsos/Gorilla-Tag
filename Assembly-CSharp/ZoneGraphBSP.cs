@@ -12,7 +12,7 @@ public class ZoneGraphBSP : MonoBehaviour
 			ZoneGraphBSP.Instance = this;
 			return;
 		}
-		UnityEngine.Object.Destroy(this);
+		Object.Destroy(this);
 	}
 
 	public void Preprocess()
@@ -24,11 +24,11 @@ public class ZoneGraphBSP : MonoBehaviour
 			{
 				if (boxCollider.transform.GetComponent<ZoneDef>() != null)
 				{
-					UnityEngine.Object.Destroy(boxCollider);
+					Object.Destroy(boxCollider);
 				}
 				else
 				{
-					UnityEngine.Object.Destroy(boxCollider.gameObject);
+					Object.Destroy(boxCollider.gameObject);
 				}
 			}
 		}

@@ -35,7 +35,7 @@ public class CustomMapsGorillaZipline : GorillaZipline
 			if (num < 1f || this.spline.Loop)
 			{
 				Vector3 point = this.spline.GetPoint(num);
-				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.segmentPrefab);
+				GameObject gameObject = Object.Instantiate<GameObject>(this.segmentPrefab);
 				gameObject.transform.SetParent(this.segmentsRoot);
 				gameObject.transform.position = point;
 				gameObject.transform.LookAt(point + this.spline.GetDirection(num));

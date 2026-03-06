@@ -12,7 +12,7 @@ public class GorillaUIParent : MonoBehaviour
 		}
 		if (GorillaUIParent.instance != this)
 		{
-			UnityEngine.Object.Destroy(base.gameObject);
+			Object.Destroy(base.gameObject);
 		}
 	}
 
