@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{321A0067-C5D6-46E5-BD21-CF71FC3FCF1B}</ProjectGuid>
+    <ProjectGuid>{25547088-183C-4A10-A61C-C9FF896D39FF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -1215,7 +1215,6 @@
     <Compile Include="GorillaNetworking\GorillaServer.cs" />
     <Compile Include="GorillaNetworking\GorillaText.cs" />
     <Compile Include="GorillaNetworking\GorillaTextManager.cs" />
-    <Compile Include="GorillaNetworking\ICosmeticRequestCallback.cs" />
     <Compile Include="GorillaNetworking\JoinType.cs" />
     <Compile Include="GorillaNetworking\PhotonNetworkController.cs" />
     <Compile Include="GorillaNetworking\PlayFabAuthenticator.cs" />
