@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{25547088-183C-4A10-A61C-C9FF896D39FF}</ProjectGuid>
+    <ProjectGuid>{2D43066A-6AF1-40DB-961A-FC93ED7C3EF7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -985,6 +985,7 @@
     <Compile Include="GameHitType.cs" />
     <Compile Include="GameLight.cs" />
     <Compile Include="GameLightingManager.cs" />
+    <Compile Include="GameLightOverride.cs" />
     <Compile Include="GameLightPulse.cs" />
     <Compile Include="GameMirrorWhenEquipped.cs" />
     <Compile Include="GameModePageButton.cs" />

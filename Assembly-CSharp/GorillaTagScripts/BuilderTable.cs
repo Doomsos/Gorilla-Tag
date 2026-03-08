@@ -1218,6 +1218,7 @@ namespace GorillaTagScripts
 			for (int j = 0; j < this.basePieces.Count; j++)
 			{
 				this.basePieces[j].SetDirectRenderersVisible(show);
+				this.basePieces[j].UpdateCollidersEnabled(show);
 			}
 		}
 
