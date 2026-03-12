@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2D43066A-6AF1-40DB-961A-FC93ED7C3EF7}</ProjectGuid>
+    <ProjectGuid>{443CAD23-83EC-4967-BB21-375B010A067F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -1685,6 +1685,7 @@
     <Compile Include="GorillaTag\Shared\Scripts\Cosmetics\ActionRestrictions\ZoneStateEventBase.cs" />
     <Compile Include="GorillaTag\Shared\Scripts\FirecrackerProjectile.cs" />
     <Compile Include="GorillaTag\Shared\Scripts\Utilities\GTBitArray.cs" />
+    <Compile Include="GorillaTag\SimpleAABB.cs" />
     <Compile Include="GorillaTag\SoundBankInfoAttribute.cs" />
     <Compile Include="GorillaTag\Sports\SportBall.cs" />
     <Compile Include="GorillaTag\Sports\SportGoalExitTrigger.cs" />

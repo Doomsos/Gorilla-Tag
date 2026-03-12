@@ -287,7 +287,6 @@ public class BuilderPiece : MonoBehaviour
 
 	private void SetCollidersEnabled<T>(List<T> components, bool enabled) where T : Collider
 	{
-		enabled &= (this.tableOwner == null || this.tableOwner.IsInBuilderZone());
 		if (components == null)
 		{
 			return;
