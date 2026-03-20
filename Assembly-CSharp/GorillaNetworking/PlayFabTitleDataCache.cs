@@ -6,6 +6,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using GorillaExtensions;
+using GorillaUtil;
 using LitJson;
 using PlayFab;
 using UnityEngine;
@@ -128,7 +129,7 @@ namespace GorillaNetworking
 		{
 			try
 			{
-				PlayFabTitleDataCache.<>c__DisplayClass24_0 CS$<>8__locals1 = new PlayFabTitleDataCache.<>c__DisplayClass24_0();
+				PlayFabTitleDataCache.<>c__DisplayClass25_0 CS$<>8__locals1 = new PlayFabTitleDataCache.<>c__DisplayClass25_0();
 				CacheImport oldCache = this.LoadDataFromFile();
 				string currentLocale = LocalisationManager.CurrentLanguage.Identifier.Code;
 				Dictionary<string, string> titleData;
@@ -213,10 +214,25 @@ namespace GorillaNetworking
 							PlayFabTitleDataCache.DataRequest dataRequest2 = this.requests[i];
 							if (dataRequest2.Name == text3)
 							{
-								Action<string> callback = dataRequest2.Callback;
-								if (callback != null)
+								try
 								{
-									callback(text4);
+									Action<string> callback = dataRequest2.Callback;
+									if (callback != null)
+									{
+										callback(text4);
+									}
+								}
+								catch (Exception ex)
+								{
+									Debug.LogError(string.Concat(new string[]
+									{
+										"[PlayFabTitleDataCache::UpdateDataCo] Error running callback for key: '",
+										text3,
+										"' value: '",
+										text4,
+										"' exception: ",
+										ex.Message
+									}));
 								}
 								this.requests.RemoveAt(i);
 								break;
@@ -302,6 +318,9 @@ namespace GorillaNetworking
 		private bool isFirstLoad = true;
 
 		private Coroutine updateDataCoroutine;
+
+		[SerializeField]
+		private StringTable betaTitleDataOveride;
 
 		[Serializable]
 		public sealed class DataUpdate : UnityEvent<string>

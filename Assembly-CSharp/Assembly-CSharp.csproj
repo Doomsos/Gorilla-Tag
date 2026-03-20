@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{443CAD23-83EC-4967-BB21-375B010A067F}</ProjectGuid>
+    <ProjectGuid>{82CF81DE-525D-43B9-A2AE-F62B2382E388}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -75,6 +75,9 @@
     <Reference Include="GT_CustomMapSupportRuntime">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\GT_CustomMapSupportRuntime.dll</HintPath>
     </Reference>
+    <Reference Include="K4os.Compression.LZ4">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\K4os.Compression.LZ4.dll</HintPath>
+    </Reference>
     <Reference Include="KID">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\KID.dll</HintPath>
     </Reference>
@@ -140,6 +143,9 @@
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="UniTask">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\UniTask.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Addressables">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Unity.Addressables.dll</HintPath>
@@ -318,6 +324,7 @@
     <Compile Include="ApplyMaterialProperty.cs" />
     <Compile Include="ApprovedAgeCollectionMethods.cs" />
     <Compile Include="AprilFools.cs" />
+    <Compile Include="AprilFoolsGravityFX.cs" />
     <Compile Include="Arc.cs" />
     <Compile Include="ArcadeButtons.cs" />
     <Compile Include="ArcadeGame.cs" />
@@ -505,6 +512,7 @@
     <Compile Include="ButterflySwarmManager.cs" />
     <Compile Include="CalibrationCube.cs" />
     <Compile Include="CallbackContainer.cs" />
+    <Compile Include="CallbackContainerUnique.cs" />
     <Compile Include="CallLimiter.cs" />
     <Compile Include="CallLimitersList.cs" />
     <Compile Include="CallLimiterWithCooldown.cs" />
@@ -733,6 +741,7 @@
     <Compile Include="DayCycleTexturesSO.cs" />
     <Compile Include="DayNightCycle.cs" />
     <Compile Include="DayNightResetForBaking.cs" />
+    <Compile Include="DebugAutoNamePlayer.cs" />
     <Compile Include="DebugExtension.cs" />
     <Compile Include="DebugHudStats.cs" />
     <Compile Include="DebugMenu.cs" />
@@ -840,6 +849,7 @@
     <Compile Include="emotitron\Compression\PrimitiveSerializeExt.cs" />
     <Compile Include="emotitron\Compression\Utilities\ByteConverter.cs" />
     <Compile Include="emotitron\Compression\ZigZagExt.cs" />
+    <Compile Include="EnableNetworkRotations.cs" />
     <Compile Include="EnclosedSpaceVolume.cs" />
     <Compile Include="EnterPlayID.cs" />
     <Compile Include="EnumData.cs" />
@@ -857,6 +867,12 @@
     <Compile Include="EyeScannerMono.cs" />
     <Compile Include="FacePlayer.cs" />
     <Compile Include="FakeWheelDriver.cs" />
+    <Compile Include="FastSurfaceNets\FillChunkJob.cs" />
+    <Compile Include="FastSurfaceNets\GenerationParameters.cs" />
+    <Compile Include="FastSurfaceNets\SurfaceNets.cs" />
+    <Compile Include="FastSurfaceNets\SurfaceNetsBuffer.cs" />
+    <Compile Include="FastSurfaceNets\SurfaceNetsChunk.cs" />
+    <Compile Include="FastSurfaceNets\SurfaceNetsWorld.cs" />
     <Compile Include="FeatherDusterHoldable.cs" />
     <Compile Include="FingerFlagTwirlTest.cs" />
     <Compile Include="FingerFlagWearable.cs" />
@@ -985,6 +1001,7 @@
     <Compile Include="GameHitType.cs" />
     <Compile Include="GameLight.cs" />
     <Compile Include="GameLightingManager.cs" />
+    <Compile Include="GameLightingManagerEventRelay.cs" />
     <Compile Include="GameLightOverride.cs" />
     <Compile Include="GameLightPulse.cs" />
     <Compile Include="GameMirrorWhenEquipped.cs" />
@@ -1164,6 +1181,7 @@
     <Compile Include="GorillaLocomotion\Gameplay\VectorizedCustomRopeSimulation.cs" />
     <Compile Include="GorillaLocomotion\Gameplay\VectorizedSolveRopeJob.cs" />
     <Compile Include="GorillaLocomotion\GTPlayer.cs" />
+    <Compile Include="GorillaLocomotion\GTPlayerTransform.cs" />
     <Compile Include="GorillaLocomotion\Playspace.cs" />
     <Compile Include="GorillaLocomotion\StiltID.cs" />
     <Compile Include="GorillaLocomotion\Surface.cs" />
@@ -1597,6 +1615,16 @@
     <Compile Include="GorillaTag\Dev\Benchmarks\VisualBenchmark.cs" />
     <Compile Include="GorillaTag\DrinkableHoldable.cs" />
     <Compile Include="GorillaTag\ExpectedUsersDecayTimer.cs" />
+    <Compile Include="GorillaTag\Gravity\BasicGravityZone.cs" />
+    <Compile Include="GorillaTag\Gravity\ChangingBasicGravityZone.cs" />
+    <Compile Include="GorillaTag\Gravity\CubicPlanetZone.cs" />
+    <Compile Include="GorillaTag\Gravity\GravityInfo.cs" />
+    <Compile Include="GorillaTag\Gravity\GravityZoneScaleFilter.cs" />
+    <Compile Include="GorillaTag\Gravity\MonkeGravityController.cs" />
+    <Compile Include="GorillaTag\Gravity\MonkeGravityManager.cs" />
+    <Compile Include="GorillaTag\Gravity\PersonalGravityZone.cs" />
+    <Compile Include="GorillaTag\Gravity\PlanetZone.cs" />
+    <Compile Include="GorillaTag\Gravity\SplinePlanetZone.cs" />
     <Compile Include="GorillaTag\GTAppState.cs" />
     <Compile Include="GorillaTag\GTAssetRef.cs" />
     <Compile Include="GorillaTag\GTColor.cs" />
@@ -1723,6 +1751,7 @@
     <Compile Include="GorillaUI.cs" />
     <Compile Include="GorillaUIParent.cs" />
     <Compile Include="GorillaUITransformFollow.cs" />
+    <Compile Include="GorillaUtil\StringTable.cs" />
     <Compile Include="GorillaVelocityEstimator.cs" />
     <Compile Include="GorillaVelocityEstimatorManager.cs" />
     <Compile Include="GorillaVRConstraint.cs" />
@@ -1918,6 +1947,7 @@
     <Compile Include="GTDoor.cs" />
     <Compile Include="GTDoorTrigger.cs" />
     <Compile Include="GTEnumValueMap.cs" />
+    <Compile Include="GTFileLog.cs" />
     <Compile Include="GTFirstPersonCamera.cs" />
     <Compile Include="GTGameModeEventType.cs" />
     <Compile Include="GTKidEventType.cs" />
@@ -2034,6 +2064,7 @@
     <Compile Include="IBuilderTappable.cs" />
     <Compile Include="IBuildValidation.cs" />
     <Compile Include="ICallBack.cs" />
+    <Compile Include="ICallbackUnique.cs" />
     <Compile Include="IClickable.cs" />
     <Compile Include="ICosmeticCritterTickForEach.cs" />
     <Compile Include="ICustomKnockbackAbility.cs" />
@@ -2099,6 +2130,7 @@
     <Compile Include="IVariable.cs" />
     <Compile Include="IWrappedSerializable.cs" />
     <Compile Include="I_SIDisruptable.cs" />
+    <Compile Include="JamUtil.cs" />
     <Compile Include="JellyfishUFOCamera.cs" />
     <Compile Include="JoinPublic.cs" />
     <Compile Include="JoinTriggerUI.cs" />
@@ -2276,6 +2308,7 @@
     <Compile Include="MaterialMapping.cs" />
     <Compile Include="MaterialUtils.cs" />
     <Compile Include="MaterialUVOffsetListSetter.cs" />
+    <Compile Include="MathHelper.cs" />
     <Compile Include="MathUtils.cs" />
     <Compile Include="MatrixBSPNode.cs" />
     <Compile Include="MatrixUtils.cs" />
@@ -2288,6 +2321,7 @@
     <Compile Include="MenagerieHoldable.cs" />
     <Compile Include="MenagerieSlot.cs" />
     <Compile Include="MeshAndMaterials.cs" />
+    <Compile Include="MeshExtensions.cs" />
     <Compile Include="MeshMaterialReplacer.cs" />
     <Compile Include="MeshUtils.cs" />
     <Compile Include="MessageBox.cs" />
@@ -2356,6 +2390,8 @@
     <Compile Include="MusicFadeArea.cs" />
     <Compile Include="MusicManager.cs" />
     <Compile Include="MusicSource.cs" />
+    <Compile Include="NamedTriggerZone.cs" />
+    <Compile Include="NativeCollectionExtensions.cs" />
     <Compile Include="NativeSizeChanger.cs" />
     <Compile Include="NativeSizeChangerButton.cs" />
     <Compile Include="NativeSizeChangerSettings.cs" />
@@ -2429,6 +2465,7 @@
     <Compile Include="OnSignalReceived.9.cs" />
     <Compile Include="OnSignalReceived.cs" />
     <Compile Include="OnSqueezeTrigger.cs" />
+    <Compile Include="OperationType.cs" />
     <Compile Include="OptionalRef.cs" />
     <Compile Include="OrbitCamera.cs" />
     <Compile Include="OrientedBounds.cs" />
@@ -2472,6 +2509,8 @@
     <Compile Include="PeriodicNoiseGenerator.cs" />
     <Compile Include="PerSceneRenderData.cs" />
     <Compile Include="PersistLog.cs" />
+    <Compile Include="PhotoBoothCamera.cs" />
+    <Compile Include="PhotoBoothImageReciever.cs" />
     <Compile Include="PhotonAuthenticator.cs" />
     <Compile Include="PhotonAuthenticatorSettings.cs" />
     <Compile Include="PhotonAuthenticatorSettingsScriptableObject.cs" />
@@ -2519,6 +2558,7 @@
     <Compile Include="PlayerPrefFlagButton.cs" />
     <Compile Include="PlayerPrefFlags.cs" />
     <Compile Include="PlayerSpeedBasedAudio.cs" />
+    <Compile Include="PlayerTrigger.cs" />
     <Compile Include="PlayFabAuthenticatorSettings.cs" />
     <Compile Include="PlayFabAuthenticatorSettingsScriptableObject.cs" />
     <Compile Include="PlayFabTitleDataTextDisplay.cs" />
@@ -2584,6 +2624,7 @@
     <Compile Include="RadioButtonGroupWearable.cs" />
     <Compile Include="RandomAnimationSelector.cs" />
     <Compile Include="RandomAudioStart.cs" />
+    <Compile Include="RandomCarveableObject.cs" />
     <Compile Include="RandomComponent.cs" />
     <Compile Include="RandomContainer.cs" />
     <Compile Include="RandomizeLabel.cs" />
@@ -2622,6 +2663,7 @@
     <Compile Include="RigDuplicationZone.cs" />
     <Compile Include="RigEventGate.cs" />
     <Compile Include="RigEventVolume.cs" />
+    <Compile Include="RigEventVolumeObserver.cs" />
     <Compile Include="RigEventVolumeTrigger.cs" />
     <Compile Include="RigOwnedPhysicsBody.cs" />
     <Compile Include="RingBuffer.cs" />
@@ -2674,6 +2716,7 @@
     <Compile Include="SerializableVector2.cs" />
     <Compile Include="SerializableVector3.cs" />
     <Compile Include="ServerTimeEvent.cs" />
+    <Compile Include="ServerTimeSyncRule.cs" />
     <Compile Include="SessionStatus.cs" />
     <Compile Include="SetAnimatorBoolCosmetic.cs" />
     <Compile Include="SetOptInPermissionsRequest.cs" />
@@ -2695,6 +2738,7 @@
     <Compile Include="SIBlasterSprayProjectile.cs" />
     <Compile Include="SIChargeDisplay.cs" />
     <Compile Include="SICombinedTerminal.cs" />
+    <Compile Include="SICreationBitMasks.cs" />
     <Compile Include="SIDispenserGadgetListEntry.cs" />
     <Compile Include="SIExclusionZone.cs" />
     <Compile Include="SIGadget.cs" />
@@ -2984,6 +3028,7 @@
     <Compile Include="TriggerEventNotifier.cs" />
     <Compile Include="TriggerOnJump.cs" />
     <Compile Include="TriggerOnSpeed.cs" />
+    <Compile Include="TriggerZoneObjectToggler.cs" />
     <Compile Include="TryOnBundleButton.cs" />
     <Compile Include="TryOnBundlesStand.cs" />
     <Compile Include="TryOnPurchaseButton.cs" />
@@ -3114,6 +3159,39 @@
     <Compile Include="VoiceShiftCosmetic.cs" />
     <Compile Include="VolumeCast.cs" />
     <Compile Include="VotingCard.cs" />
+    <Compile Include="VoxelAction.cs" />
+    <Compile Include="VoxelActions.cs" />
+    <Compile Include="VoxelExtensions.cs" />
+    <Compile Include="VoxelInteractor.cs" />
+    <Compile Include="VoxelMaterialManager.cs" />
+    <Compile Include="Voxels\AssembleVertexDataJob.cs" />
+    <Compile Include="Voxels\Chunk.cs" />
+    <Compile Include="Voxels\ChunkComponent.cs" />
+    <Compile Include="Voxels\ChunkDTO.cs" />
+    <Compile Include="Voxels\ChunkIO.cs" />
+    <Compile Include="Voxels\ChunkState.cs" />
+    <Compile Include="Voxels\ChunkTask.cs" />
+    <Compile Include="Voxels\ChunkTaskSet.cs" />
+    <Compile Include="Voxels\CollisionJob.cs" />
+    <Compile Include="Voxels\GenerateVoxelDataJob.cs" />
+    <Compile Include="Voxels\GenerationParameters.cs" />
+    <Compile Include="Voxels\MarchingCubesLookup.cs" />
+    <Compile Include="Voxels\MarchingCubesMeshingJob.cs" />
+    <Compile Include="Voxels\MeshGenerationMode.cs" />
+    <Compile Include="Voxels\MeshUtilities.cs" />
+    <Compile Include="Voxels\MeshVertexData.cs" />
+    <Compile Include="Voxels\NativeCounter.cs" />
+    <Compile Include="Voxels\SortChunksJob.cs" />
+    <Compile Include="Voxels\StayOutsideOfGeo.cs" />
+    <Compile Include="Voxels\SurfaceNets.cs" />
+    <Compile Include="Voxels\SurfaceNetsBuffer.cs" />
+    <Compile Include="Voxels\SurfaceNetsJob.cs" />
+    <Compile Include="Voxels\TextureArrayUtil.cs" />
+    <Compile Include="Voxels\TextureEntry.cs" />
+    <Compile Include="Voxels\VectorUtilities.cs" />
+    <Compile Include="Voxels\VoxelActions_Imported.cs" />
+    <Compile Include="Voxels\VoxelWorld.cs" />
+    <Compile Include="Voxel_Pickaxe.cs" />
     <Compile Include="VRMap.cs" />
     <Compile Include="VRMapIndex.cs" />
     <Compile Include="VRMapMiddle.cs" />

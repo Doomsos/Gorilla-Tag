@@ -11,8 +11,6 @@ public class GetPlayerDataResponse
 
 	public int? Age;
 
-	public AgeStatusType? AgeStatus;
-
 	public KIDDefaultSession DefaultSession;
 
 	[Nullable(new byte[]
