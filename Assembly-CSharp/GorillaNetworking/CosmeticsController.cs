@@ -1724,6 +1724,10 @@ namespace GorillaNetworking
 			{
 				yield return new WaitForSecondsRealtime(1f);
 			}
+			while (!PlayFabClientAPI.IsClientLoggedIn())
+			{
+				yield return new WaitForSecondsRealtime(1f);
+			}
 			for (;;)
 			{
 				if (GorillaComputer.instance != null && GorillaComputer.instance.startupMillis != 0L)

@@ -131,15 +131,15 @@ namespace GorillaNetworking
 			{
 				PlayFabTitleDataCache.<>c__DisplayClass25_0 CS$<>8__locals1 = new PlayFabTitleDataCache.<>c__DisplayClass25_0();
 				CacheImport oldCache = this.LoadDataFromFile();
-				string currentLocale = LocalisationManager.CurrentLanguage.Identifier.Code;
+				CS$<>8__locals1.currentLocale = LocalisationManager.CurrentLanguage.Identifier.Code;
 				Dictionary<string, string> titleData;
-				if (!this.localizedTitleData.TryGetValue(currentLocale, out titleData))
+				if (!this.localizedTitleData.TryGetValue(CS$<>8__locals1.currentLocale, out titleData))
 				{
-					this.localizedTitleData[currentLocale] = new Dictionary<string, string>();
-					titleData = this.localizedTitleData[currentLocale];
+					this.localizedTitleData[CS$<>8__locals1.currentLocale] = new Dictionary<string, string>();
+					titleData = this.localizedTitleData[CS$<>8__locals1.currentLocale];
 				}
 				Dictionary<string, string> oldLocalizedCache;
-				if (oldCache == null || oldCache.TitleData == null || !oldCache.TitleData.TryGetValue(currentLocale, out oldLocalizedCache))
+				if (oldCache == null || oldCache.TitleData == null || !oldCache.TitleData.TryGetValue(CS$<>8__locals1.currentLocale, out oldLocalizedCache))
 				{
 					oldLocalizedCache = new Dictionary<string, string>();
 				}
@@ -167,6 +167,18 @@ namespace GorillaNetworking
 							MothershipTitleDataShort mothershipTitleDataShort = response.Results[j];
 							if (!string.IsNullOrEmpty(mothershipTitleDataShort.key))
 							{
+								if (mothershipTitleDataShort.data.Contains("#EN_FALLBACK="))
+								{
+									Debug.LogWarning(string.Concat(new string[]
+									{
+										"[PlayFabTitleDataCache::UpdateDataCo] Key '",
+										mothershipTitleDataShort.key,
+										"' exists, but it doesn't have a translation for locale '",
+										CS$<>8__locals1.currentLocale,
+										"'. Falling back to English."
+									}));
+									mothershipTitleDataShort.data = mothershipTitleDataShort.data.Split("#EN_FALLBACK=", StringSplitOptions.None)[1];
+								}
 								CS$<>8__locals1.newTitleData[mothershipTitleDataShort.key] = mothershipTitleDataShort.data;
 							}
 						}
@@ -194,10 +206,10 @@ namespace GorillaNetworking
 					if (wipeOldData)
 					{
 						this.localizedTitleData.Clear();
-						this.localizedTitleData[currentLocale] = new Dictionary<string, string>();
-						titleData = this.localizedTitleData[currentLocale];
+						this.localizedTitleData[CS$<>8__locals1.currentLocale] = new Dictionary<string, string>();
+						titleData = this.localizedTitleData[CS$<>8__locals1.currentLocale];
 					}
-					if (!this.localesUpdated.ContainsKey(currentLocale))
+					if (!this.localesUpdated.ContainsKey(CS$<>8__locals1.currentLocale))
 					{
 						titleData.Clear();
 					}
@@ -248,12 +260,11 @@ namespace GorillaNetworking
 							}
 						}
 					}
-					this.localesUpdated[currentLocale] = true;
+					this.localesUpdated[CS$<>8__locals1.currentLocale] = true;
 					PlayFabTitleDataCache.SaveDataToFile(PlayFabTitleDataCache.FilePath, this.localizedTitleData);
 				}
 				CS$<>8__locals1 = null;
 				oldCache = null;
-				currentLocale = null;
 				titleData = null;
 				oldLocalizedCache = null;
 			}

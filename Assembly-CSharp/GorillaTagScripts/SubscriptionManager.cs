@@ -231,6 +231,10 @@ namespace GorillaTagScripts
 			{
 				return;
 			}
+			if (SubscriptionManager._localSubscriptionDataInitialized)
+			{
+				return;
+			}
 			bool flag = false;
 			foreach (Purchase purchase in msg.GetPurchaseList())
 			{
